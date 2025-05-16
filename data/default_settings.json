@@ -1,0 +1,29 @@
+{
+  "globalGroupingEnabled": true,
+  "globalDeduplicationEnabled": true,
+  "darkModePreference": "system",
+  "regexPresets": [
+    { "id": "preset-jira", "name": "Jira Ticket", "regex": "([A-Z]+-\\d+)" },
+    { "id": "preset-gitlab", "name": "GitLab Issue", "regex": "#(\\d+)" },
+    { "id": "preset-github", "name": "GitHub Issue", "regex": "#(\\d+)" },
+    { "id": "preset-trello", "name": "Trello Card", "regex": "\\[#(\\d+)\\]" },
+    { "id": "preset-mantis", "name": "Mantis Issue", "regex": "0*(\\d+)" },
+    { "id": "preset-asana", "name": "Asana Task ID", "regex": "\\/(\\d{16})\\/" },
+    { "id": "preset-zendesk", "name": "Zendesk Ticket ID", "regex": "\\/tickets\\/(\\d+)" },
+    { "id": "preset-servicenow", "name": "ServiceNow ID", "regex": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+)" },
+    { "id": "preset-freshdesk", "name": "Freshdesk Ticket ID", "regex": "\\/a\\/tickets\\/(\\d+)" },
+    { "id": "preset-redmine", "name": "Redmine Issue ID", "regex": "#(\\d+)" }
+  ],
+  "domainRules": [
+    { "id": "rule-jira", "enabled": true, "domainFilter": "*.atlassian.net", "titleParsingRegEx": "([A-Z]+-\\d+)", "deduplicationMatchMode": "exact" },
+    { "id": "rule-gitlab", "enabled": true, "domainFilter": "gitlab.com", "titleParsingRegEx": "#(\\d+)", "deduplicationMatchMode": "exact" },
+    { "id": "rule-github", "enabled": true, "domainFilter": "github.com", "titleParsingRegEx": "#(\\d+)", "deduplicationMatchMode": "exact" },
+    { "id": "rule-trello", "enabled": true, "domainFilter": "trello.com", "titleParsingRegEx": "\\[#(\\d+)\\]", "deduplicationMatchMode": "exact" },
+    { "id": "rule-mantis", "enabled": true, "domainFilter": "mantisbt.org", "titleParsingRegEx": "0*(\\d+)", "deduplicationMatchMode": "exact" },
+    { "id": "rule-asana", "enabled": true, "domainFilter": "app.asana.com", "titleParsingRegEx": "\\/(\\d{16})\\/", "deduplicationMatchMode": "exact" },
+    { "id": "rule-zendesk", "enabled": true, "domainFilter": "*.zendesk.com", "titleParsingRegEx": "\\/tickets\\/(\\d+)", "deduplicationMatchMode": "exact" },
+    { "id": "rule-servicenow", "enabled": true, "domainFilter": "*.service-now.com", "titleParsingRegEx": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+)", "deduplicationMatchMode": "exact" },
+    { "id": "rule-freshdesk", "enabled": true, "domainFilter": "*.freshdesk.com", "titleParsingRegEx": "\\/a\\/tickets\\/(\\d+)", "deduplicationMatchMode": "exact" },
+    { "id": "rule-redmine", "enabled": true, "domainFilter": "redmine.org", "titleParsingRegEx": "#(\\d+)", "deduplicationMatchMode": "exact" }
+  ]
+}
