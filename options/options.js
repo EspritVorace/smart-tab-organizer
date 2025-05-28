@@ -153,17 +153,28 @@ function Tabs({ currentTab, onTabChange }) {
 
 function RulesTab({ settings, updateRules, editingId, setEditingId }) {
     const { domainRules, regexPresets } = settings;
+    const [newRuleInProgress, setNewRuleInProgress] = useState(null);
 
     const handleAdd = () => {
         const newId = generateUUID();
         const newRule = { id: newId, enabled: true, domainFilter: "", titleParsingRegEx: regexPresets[0]?.regex || "", deduplicationMatchMode: "exact" };
-        updateRules([...domainRules, newRule]);
+        setNewRuleInProgress(newRule);
         setEditingId(newId); // Ouvre le formulaire pour la nouvelle règle
     };
 
     const handleSave = (updatedRule) => {
-        const newRules = domainRules.map(r => r.id === updatedRule.id ? updatedRule : r);
-        updateRules(newRules);
+        if (newRuleInProgress && updatedRule.id === newRuleInProgress.id) {
+            updateRules([...domainRules, updatedRule]);
+            setNewRuleInProgress(null);
+        } else {
+            const newRules = domainRules.map(r => r.id === updatedRule.id ? updatedRule : r);
+            updateRules(newRules);
+        }
+        setEditingId(null);
+    };
+
+    const handleCancelNew = () => {
+        setNewRuleInProgress(null);
         setEditingId(null);
     };
 
@@ -178,13 +189,16 @@ function RulesTab({ settings, updateRules, editingId, setEditingId }) {
             <h2>${getMessage('domainRulesTab')}</h2>
             ${domainRules.map(rule => html`
                 <${Fragment} key=${rule.id}>
-                    ${editingId === rule.id
+                    ${editingId === rule.id && (!newRuleInProgress || newRuleInProgress.id !== rule.id)
                         ? html`<${RuleEditForm} rule=${rule} presets=${regexPresets} onSave=${handleSave} onCancel=${() => setEditingId(null)} />`
                         : html`<${RuleView} rule=${rule} presets=${regexPresets} onEdit=${setEditingId} onDelete=${handleDelete} onToggle=${handleSave} />`
                     }
                 <//>
             `)}
-            ${!editingId && html`<button onClick=${handleAdd} class="button add-button">${getMessage('addRule')}</button>`}
+            ${newRuleInProgress && editingId === newRuleInProgress.id && html`
+                <${RuleEditForm} rule=${newRuleInProgress} presets=${regexPresets} onSave=${handleSave} onCancel=${handleCancelNew} />
+            `}
+            ${!editingId && !newRuleInProgress && html`<button onClick=${handleAdd} class="button add-button">${getMessage('addRule')}</button>`}
         </section>
     `;
 }
