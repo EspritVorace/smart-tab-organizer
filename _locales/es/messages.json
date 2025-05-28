@@ -52,7 +52,7 @@
   "importSuccess": { "message": "¡Configuración importada con éxito!" },
   "importError": { "message": "Error de importación: " },
   "exportMessage": { "message": "Configuración exportada." },
-  "domainFilterTooltip": { "message": "[TRANSLATE TO SPANISH] Enter the domain (e.g., youtube.com) or a pattern (e.g., *google*). Rules apply to matching domains." },
-  "deduplicationModeTooltip": { "message": "[TRANSLATE TO SPANISH] Exact Match: Tabs are duplicates if titles are identical. Includes Match: Tabs are duplicates if one title contains the other." },
-  "titleParsingRegExTooltip": { "message": "[TRANSLATE TO SPANISH] Select a preset or write a custom regex to extract a part of the tab title for grouping or deduplication. The first capture group (text inside parentheses) is used." }
+  "domainFilterTooltip": { "message": "Ingrese el dominio (por ejemplo, youtube.com) o un patrón (por ejemplo, _google_). Las reglas se aplican a los dominios coincidentes." },
+  "deduplicationModeTooltip": { "message": "Coincidencia exacta: Las pestañas son duplicadas si los títulos son idénticos. Coincidencia incluida: Las pestañas son duplicadas si un título contiene al otro." },
+  "titleParsingRegExTooltip": { "message": "Seleccione un valor preestablecido o escriba una expresión regular personalizada para extraer una parte del título de la pestaña para agrupar o eliminar duplicados. Se utiliza el primer grupo de captura (texto dentro de paréntesis)." }
 }
