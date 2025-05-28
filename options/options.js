@@ -323,33 +323,45 @@ function RuleEditForm({ rule, presets, onSave, onCancel }) {
 // --- Onglet Préréglages (NOUVEAU) ---
 function PresetsTab({ settings, updatePresets, editingId, setEditingId }) {
     const { regexPresets, domainRules } = settings;
+    const [newPresetInProgress, setNewPresetInProgress] = useState(null);
 
     const handleAdd = () => {
         const newId = generateUUID();
         const newPreset = { id: newId, name: "", regex: "()" }; // Start with basic group
-        updatePresets([...regexPresets, newPreset]);
+        setNewPresetInProgress(newPreset);
         setEditingId(newId);
     };
 
     const handleSave = (updatedPreset) => {
-        const originalRegex = regexPresets.find(p => p.id === updatedPreset.id)?.regex;
-        const newPresets = regexPresets.map(p => p.id === updatedPreset.id ? updatedPreset : p);
-
-        // Update rules using this preset if regex changed
-        if (originalRegex && originalRegex !== updatedPreset.regex) {
-            const newRules = domainRules.map(rule =>
-                rule.titleParsingRegEx === originalRegex
-                    ? { ...rule, titleParsingRegEx: updatedPreset.regex }
-                    : rule
-            );
-            // We need to update settings directly here or pass a function
-            // For now, let's assume we pass an updateSettings function or handle this in parent
-            // A simpler way: just update presets, rely on user to update rules manually or handle later.
-            // Let's just update presets for now. The save effect will save settings.
-            updatePresets(newPresets);
+        if (newPresetInProgress && updatedPreset.id === newPresetInProgress.id) {
+            updatePresets([...regexPresets, updatedPreset]);
+            setNewPresetInProgress(null);
         } else {
-            updatePresets(newPresets);
+            const originalRegex = regexPresets.find(p => p.id === updatedPreset.id)?.regex;
+            const newPresets = regexPresets.map(p => p.id === updatedPreset.id ? updatedPreset : p);
+
+            // Update rules using this preset if regex changed
+            if (originalRegex && originalRegex !== updatedPreset.regex) {
+                const newRules = domainRules.map(rule =>
+                    rule.titleParsingRegEx === originalRegex
+                        ? { ...rule, titleParsingRegEx: updatedPreset.regex }
+                        : rule
+                );
+                // We need to update settings directly here or pass a function
+                // For now, let's assume we pass an updateSettings function or handle this in parent
+                // A simpler way: just update presets, rely on user to update rules manually or handle later.
+                // Let's just update presets for now. The save effect will save settings.
+                // TODO: Consider updating settings.domainRules directly or via a passed callback
+                updatePresets(newPresets);
+            } else {
+                updatePresets(newPresets);
+            }
         }
+        setEditingId(null);
+    };
+
+    const handleCancelNew = () => {
+        setNewPresetInProgress(null);
         setEditingId(null);
     };
 
@@ -374,13 +386,16 @@ function PresetsTab({ settings, updatePresets, editingId, setEditingId }) {
             <h2>${getMessage('regexPresetsTab')}</h2>
             ${regexPresets.map(preset => html`
                 <${Fragment} key=${preset.id}>
-                    ${editingId === preset.id
+                    ${editingId === preset.id && (!newPresetInProgress || newPresetInProgress.id !== preset.id)
                         ? html`<${PresetEditForm} preset=${preset} onSave=${handleSave} onCancel=${() => setEditingId(null)} />`
                         : html`<${PresetView} preset=${preset} onEdit=${setEditingId} onDelete=${handleDelete} disabled=${isPresetInUse(preset.regex)} />`
                     }
                 <//>
             `)}
-            ${!editingId && html`<button onClick=${handleAdd} class="button add-button">${getMessage('addPreset')}</button>`}
+            ${newPresetInProgress && editingId === newPresetInProgress.id && html`
+                <${PresetEditForm} preset=${newPresetInProgress} onSave=${handleSave} onCancel=${handleCancelNew} />
+            `}
+            ${!editingId && !newPresetInProgress && html`<button onClick=${handleAdd} class="button add-button">${getMessage('addPreset')}</button>`}
         </section>
     `;
 }
