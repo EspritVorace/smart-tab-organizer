@@ -1,14 +1,14 @@
 /* css/common.css */
 :root {
-    --primary-color: #4A90E2;
+    --primary-color: #3575BC;
     --primary-color-light: #A8D8F0;
     --primary-color-light-trans: rgba(74, 144, 226, 0.2);
-    --primary-color-dark: #357ABD;
+    --primary-color-dark: #3478BB;
     --danger-color: #D0021B;
-    --success-color: #7ED321;
+    --success-color: #4A7B29;
     --warning-color: #F5A623;
     --bg-color: #FFFFFF;
-    --section-bg-color: #F9F9F9;
+    --section-bg-color: #949494;
     --text-color: #333333;
     --text-color-light: #666666;
     --border-color: #E0E0E0;
@@ -17,13 +17,14 @@
 }
 html.dark-mode {
     --bg-color: #1E1E1E;
-    --section-bg-color: #2A2A2A;
+    --section-bg-color: #6A6A6A;
     --text-color: #E0E0E0;
     --text-color-light: #AAAAAA;
     --border-color: #444444;
     --input-bg-color: #333333;
-    --primary-color: #5AA0F2;
+    --primary-color: #5AA0F2; /* Kept original as per analysis for text contrast */
     --primary-color-dark: #4A90E2;
+    --button-text-color-on-dm-primary: #333333; /* New variable */
 }
 body { background-color: var(--bg-color); color: var(--text-color); margin: 0; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -35,8 +36,19 @@ body { background-color: var(--bg-color); color: var(--text-color); margin: 0; }
 button:hover, .button:hover { background-color: var(--primary-color-dark); box-shadow: 0 2px 5px rgba(0,0,0,0.1); transform: translateY(-1px); }
 button:active, .button:active { transform: translateY(0); box-shadow: none; }
 button.primary { background-color: var(--success-color); }
-button.primary:hover { background-color: #69B31C; }
+button.primary:hover { background-color: #69B31C; } /* This hover color might need adjustment based on new --success-color, but not in scope of current task */
 button.danger { background-color: var(--danger-color); }
 button.danger:hover { background-color: #A00014; }
 button:disabled { background-color: #BDBDBD; color: #757575; cursor: not-allowed; transform: none; box-shadow: none; }
 html.dark-mode button:disabled { background-color: #555; color: #888; }
+
+/* Dark mode specific button text colors */
+html.dark-mode .button, html.dark-mode button {
+    /* Default buttons in dark mode use primary color bg, so they need dark text */
+    color: var(--button-text-color-on-dm-primary);
+}
+html.dark-mode button.primary, 
+html.dark-mode button.danger {
+    /* Primary (success) and Danger buttons in dark mode use the global white button text */
+    color: var(--button-text-color);
+}
