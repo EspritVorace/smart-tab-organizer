@@ -10,7 +10,7 @@ header h1 { color: var(--primary-color); margin: 0; font-size: 1.8em; font-weigh
 .tabs button.active { color: var(--primary-color); border-bottom-color: var(--primary-color); font-weight: 600; }
 h2 { font-size: 1.4em; margin-bottom: 20px; color: var(--text-color); font-weight: 500; }
 section { padding: 20px; background-color: var(--section-bg-color); border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); animation: fadeIn 0.4s ease-out; }
-.list-item { background-color: var(--bg-color); border: 1px solid var(--border-color); padding: 15px 20px; margin-bottom: 15px; border-radius: 6px; transition: box-shadow 0.2s ease, border-color 0.2s ease; overflow: hidden; }
+.list-item { background-color: var(--bg-color); border: 1px solid var(--border-color); padding: 15px 20px; margin-bottom: 15px; border-radius: 6px; transition: box-shadow 0.2s ease, border-color 0.2s ease; }
 .list-item:hover { border-color: var(--primary-color-light); box-shadow: 0 2px 6px rgba(74, 144, 226, 0.2); }
 .list-item.is-editing { border-color: var(--primary-color); box-shadow: 0 0 8px rgba(74, 144, 226, 0.3); }
 .item-view { display: flex; align-items: center; gap: 15px; }
@@ -43,10 +43,17 @@ code.item-sub { background-color: var(--input-bg-color); padding: 2px 5px; borde
 .stats-display p span { font-weight: 500; min-width: 200px; display: inline-block; }
 .stats-display button { margin-top: 15px; }
 .tooltip-container { position: relative; }
+/* Make the label the positioning context for the tooltip */
+.tooltip-container > label {
+    position: relative;
+    display: inline-block; /* Ensures 'position: relative' works as expected */
+}
 .tooltip-container label::after { content: '?'; display: inline-block; width: 16px; height: 16px; background-color: #aaa; color: white; border-radius: 50%; text-align: center; line-height: 16px; font-size: 12px; margin-left: 8px; cursor: help; transition: background-color 0.2s ease; }
 .tooltip-container label:hover::after { background-color: var(--primary-color); }
-.tooltip-text { visibility: hidden; width: 250px; background-color: #333; color: #fff; text-align: left; border-radius: 6px; padding: 8px 12px; position: absolute; z-index: 10; bottom: 115%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s, visibility 0.3s; font-size: 0.85em; pointer-events: none; }
-.tooltip-text::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #333 transparent transparent transparent; }
+/* Adjusted tooltip text positioning to be relative to the label */
+.tooltip-text { visibility: hidden; width: 250px; background-color: #333; color: #fff; text-align: left; border-radius: 6px; padding: 8px 12px; position: absolute; z-index: 10; bottom: calc(100% + 5px); left: 0; transform: translateX(0); opacity: 0; transition: opacity 0.3s, visibility 0.3s; font-size: 0.85em; pointer-events: none; }
+/* Adjust tooltip arrow to point from near the question mark icon */
+.tooltip-text::after { content: ""; position: absolute; top: 100%; left: 15px; margin-left: 0; border-width: 5px; border-style: solid; border-color: #333 transparent transparent transparent; }
 .tooltip-container:hover .tooltip-text { visibility: visible; opacity: 1; }
 .error-message { color: var(--danger-color); font-size: 0.85em; display: block; margin-top: 5px; font-weight: 500; }
 footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid var(--border-color); text-align: center; font-size: 0.8em; color: var(--text-color-light); }

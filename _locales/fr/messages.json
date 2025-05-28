@@ -51,5 +51,8 @@
   "confirmResetStats": { "message": "Réinitialiser les statistiques ?" },
   "importSuccess": { "message": "Paramètres importés avec succès !" },
   "importError": { "message": "Erreur d'importation : " },
-  "exportMessage": { "message": "Paramètres exportés." }
+  "exportMessage": { "message": "Paramètres exportés." },
+  "domainFilterTooltip": { "message": "[TRANSLATE TO FRENCH] Enter the domain (e.g., youtube.com) or a pattern (e.g., *google*). Rules apply to matching domains." },
+  "deduplicationModeTooltip": { "message": "[TRANSLATE TO FRENCH] Exact Match: Tabs are duplicates if titles are identical. Includes Match: Tabs are duplicates if one title contains the other." },
+  "titleParsingRegExTooltip": { "message": "[TRANSLATE TO FRENCH] Select a preset or write a custom regex to extract a part of the tab title for grouping or deduplication. The first capture group (text inside parentheses) is used." }
 }
