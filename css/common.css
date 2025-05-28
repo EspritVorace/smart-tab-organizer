@@ -19,7 +19,7 @@ html.dark-mode {
     --bg-color: #1E1E1E;
     --section-bg-color: #6A6A6A;
     --text-color: #E0E0E0;
-    --text-color-light: #AAAAAA;
+    --text-color-light: #C0C0C0;
     --border-color: #444444;
     --input-bg-color: #333333;
     --primary-color: #5AA0F2; /* Kept original as per analysis for text contrast */
