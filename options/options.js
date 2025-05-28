@@ -287,6 +287,7 @@ function RuleEditForm({ rule, presets, onSave, onCancel }) {
                         <div class="form-group tooltip-container">
                             <label>${getMessage('domainFilter')}</label>
                             <input type="text" name="domainFilter" value=${formData.domainFilter} onChange=${handleChange} required />
+                            <span class="tooltip-text" data-i18n="domainFilterTooltip">${getMessage('domainFilterTooltip')}</span>
                             ${errors.domainFilter && html`<span class="error-message">${errors.domainFilter}</span>`}
                         </div>
                         <div class="form-group tooltip-container">
@@ -295,6 +296,7 @@ function RuleEditForm({ rule, presets, onSave, onCancel }) {
                                  <option value="exact">${getMessage('exactMatch')}</option>
                                  <option value="includes">${getMessage('includesMatch')}</option>
                             </select>
+                            <span class="tooltip-text" data-i18n="deduplicationModeTooltip">${getMessage('deduplicationModeTooltip')}</span>
                         </div>
                         <div class="form-group tooltip-container full-width">
                             <label>${getMessage('titleRegex')}</label>
@@ -303,6 +305,7 @@ function RuleEditForm({ rule, presets, onSave, onCancel }) {
                                 <option value="custom">${getMessage('customRegex')}</option>
                             </select>
                             <input type="text" value=${customValue} onChange=${handleCustomChange} style=${{ display: isCustom ? 'block' : 'none', marginTop: '8px' }} />
+                            <span class="tooltip-text" data-i18n="titleParsingRegExTooltip">${getMessage('titleParsingRegExTooltip')}</span>
                              ${errors.titleParsingRegEx && html`<span class="error-message">${errors.titleParsingRegEx}</span>`}
                         </div>
                     </div>
