@@ -779,6 +779,59 @@ function LogicalGroupsTab({ settings, setSettings, editingId, setEditingId }) {
         setAddFormError('');
     };
 
+    // --- Delete Logic ---
+    const handleDeleteGroup = (groupId, groupLabel) => {
+        console.log(`Attempting to delete group: ${groupLabel} (ID: ${groupId})`);
+
+        // Access domainRules from settings (already destructured in component scope)
+        const associatedRules = domainRules.filter(rule => rule.groupId === groupId);
+
+        if (associatedRules.length > 0) {
+            console.log(`Associated rules for group ${groupLabel} (ID: ${groupId}):`, associatedRules);
+            const confirmMessage = getMessage('confirmDeleteGroupAssociated', [groupLabel, associatedRules.length], `The logical group "${groupLabel}" is associated with ${associatedRules.length} domain rule(s). Deleting this group will remove its association from these rules. Are you sure you want to delete it?`);
+            if (!confirm(confirmMessage)) {
+                console.log(`User cancelled deletion for group ${groupLabel} (ID: ${groupId})`);
+                return; // Stop if user cancels
+            }
+        } else {
+            console.log(`No associated rules found for group ${groupLabel} (ID: ${groupId}). Proceeding to check for group-only deletion confirmation.`);
+            // Even if no rules are associated, it's good practice to confirm deletion of the group itself.
+            const confirmMessage = getMessage('confirmDeleteGroupNoRules', [groupLabel], `Are you sure you want to delete the logical group "${groupLabel}"? This group is not currently associated with any domain rules.`);
+            if (!confirm(confirmMessage)) {
+                console.log(`User cancelled deletion for group ${groupLabel} (ID: ${groupId})`);
+                return; // Stop if user cancels
+            }
+        }
+
+        // If we reach here, user has confirmed or no confirmation was needed for rules (but was for group itself)
+        console.log(`Proceeding with deletion logic for group ${groupLabel} (ID: ${groupId})`);
+
+        // Step 1: Create newDomainRules by updating groupId for associated rules
+        const newDomainRules = domainRules.map(rule => {
+            if (rule.groupId === groupId) {
+                // Create a new rule object with groupId set to null
+                return { ...rule, groupId: null };
+            }
+            return rule; // Return original rule if no change
+        });
+
+        console.log('New domainRules (with groupId updated to null for affected rules):', newDomainRules);
+
+        // Step 2: Create newLogicalGroups by filtering out the deleted group
+        const newLogicalGroups = logicalGroups.filter(group => group.id !== groupId);
+
+        console.log('New logicalGroups (with the group removed):', newLogicalGroups);
+
+        // Step 3: Update settings
+        setSettings(prevSettings => ({
+            ...prevSettings,
+            logicalGroups: newLogicalGroups,
+            domainRules: newDomainRules
+        }));
+
+        console.log(`Group ${groupLabel} (ID: ${groupId}) deleted and domain rules updated.`);
+    };
+
     return html`
         <section id="logical-groups-section">
             <h2>${getMessage('logicalGroupsTab', 'Logical Groups')}</h2>
