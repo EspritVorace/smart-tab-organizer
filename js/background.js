@@ -84,7 +84,7 @@ chrome.tabs.onCreated.addListener(async (newTab) => {
 });
 
 async function handleGrouping(openerTab, newTab) {
-    console.log(`[GROUPING_DEBUG] handleGrouping: Called for openerTab ${openerTab.id} ("${openerTab.url}") and newTab ${newTab.id}.`);
+    console.log(`[GROUPING_DEBUG] handleGrouping: Called for openerTab ${openerTab.id} ("${openerTab.url}", title: "${openerTab.title}") and newTab ${newTab.id}.`);
     const settings = await getSettings();
     console.log(`[GROUPING_DEBUG] handleGrouping: globalGroupingEnabled = ${settings.globalGroupingEnabled}`);
     if (!settings.globalGroupingEnabled || !openerTab?.url) {
@@ -99,6 +99,26 @@ async function handleGrouping(openerTab, newTab) {
     }
     console.log(`[GROUPING_DEBUG] handleGrouping: Rule found for "${openerTab.url}": name: "${rule.name || 'N/A'}", filter: "${rule.domainFilter}"`);
 
+    // Determine groupName from openerTab's title and rule's regex immediately
+    let groupName = "SmartGroup"; // Default group name
+    if (openerTab.title && rule.titleParsingRegEx) {
+        try {
+            const extracted = extractGroupNameFromTitle(openerTab.title, rule.titleParsingRegEx);
+            console.log(`[GROUPING_DEBUG] handleGrouping: Group name from OPENER tab - Extracted name: "${extracted}" from opener title "${openerTab.title}" using regex "${rule.titleParsingRegEx}"`);
+            if (extracted && extracted.trim()) {
+                groupName = extracted.trim();
+            } else {
+                 console.log(`[GROUPING_DEBUG] handleGrouping: Group name from OPENER tab - Title parsing resulted in empty/null/undefined or whitespace-only. Using default group name "${groupName}".`);
+            }
+        } catch (e) {
+            console.warn(`[GROUPING_DEBUG] handleGrouping: Group name from OPENER tab - Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}". Using default name. Details:`, e.message);
+            groupName = "SmartGroup"; // Ensure default on error
+        }
+    } else {
+         console.log(`[GROUPING_DEBUG] handleGrouping: Group name from OPENER tab - No opener title ("${openerTab.title}") or no parsing regex ("${rule.titleParsingRegEx}"). Using default group name "${groupName}".`);
+    }
+    console.log(`[GROUPING_DEBUG] handleGrouping: Determined groupName (from opener tab): "${groupName}" for new tab ${newTab.id}.`);
+
     let hasProcessedTab = false;
 
     chrome.tabs.onUpdated.addListener(async function listener(tabId, changeInfo, tab) {
@@ -108,45 +128,29 @@ async function handleGrouping(openerTab, newTab) {
         }
 
         if (tabId === newTab.id) {
-            console.log(`[GROUPING_DEBUG] onUpdated listener: Fired for relevant tabId ${tabId}. changeInfo.status: ${changeInfo.status}, tab.url: ${tab?.url}, tab.title: "${tab?.title}"`);
+            // Log the new tab's title here as it becomes available or changes
+            console.log(`[GROUPING_DEBUG] onUpdated listener: Fired for relevant newTab ${tabId}. changeInfo.status: ${changeInfo.status}, newTab.url: ${tab?.url}, newTab.title: "${tab?.title}"`);
         }
 
         if (tabId === newTab.id && changeInfo.status === 'complete' && tab.url) {
             if (tab.url.startsWith('about:') || tab.url.startsWith('chrome:')) {
-                console.log(`[GROUPING_DEBUG] onUpdated listener: Tab ${newTab.id} is 'complete' but URL is '${tab.url}'. Listener remains active, awaiting a more definitive URL.`);
+                console.log(`[GROUPING_DEBUG] onUpdated listener: New tab ${newTab.id} is 'complete' but URL is '${tab.url}'. Listener remains active, awaiting a more definitive URL.`);
                 return;
             }
 
             hasProcessedTab = true;
             chrome.tabs.onUpdated.removeListener(listener);
-            console.log(`[GROUPING_DEBUG] onUpdated listener: Main condition met for tab ${newTab.id}. URL: "${tab.url}", Title: "${tab.title}". Listener removed.`);
+            // Note: 'tab' here is the newTab object from the onUpdated event.
+            console.log(`[GROUPING_DEBUG] onUpdated listener: Main condition met for newTab ${newTab.id}. URL: "${tab.url}", Title: "${tab.title}". Group name was already determined as "${groupName}". Listener removed.`);
 
-            let groupName = "SmartGroup";
-            if (tab.title && rule.titleParsingRegEx) {
-                try {
-                    const extracted = extractGroupNameFromTitle(tab.title, rule.titleParsingRegEx);
-                    console.log(`[GROUPING_DEBUG] handleGrouping: Title parsing - Extracted name: "${extracted}" from title "${tab.title}" using regex "${rule.titleParsingRegEx}"`);
-                    if (extracted && extracted.trim()) {
-                        groupName = extracted.trim();
-                    } else {
-                         console.log(`[GROUPING_DEBUG] handleGrouping: Title parsing resulted in empty/null/undefined or whitespace-only. Using default group name "${groupName}".`);
-                    }
-                } catch (e) {
-                    console.warn(`[GROUPING_DEBUG] handleGrouping: Error parsing title "${tab.title}" with regex "${rule.titleParsingRegEx}". Using default name. Details:`, e.message);
-                    groupName = "SmartGroup";
-                }
-            } else {
-                 console.log(`[GROUPING_DEBUG] handleGrouping: No tab title ("${tab.title}") or no parsing regex ("${rule.titleParsingRegEx}"). Using default group name "${groupName}".`);
-            }
-            console.log(`[GROUPING_DEBUG] handleGrouping: Determined groupName: "${groupName}" for new tab ${newTab.id}.`);
-
+            // GroupName is already determined from openerTab. Now proceed with grouping.
             try {
-                let currentOpenerTab = await chrome.tabs.get(openerTab.id);
+                let currentOpenerTab = await chrome.tabs.get(openerTab.id); // Refresh openerTab state, though its title for grouping is already used.
                 const openerGroupId = currentOpenerTab.groupId;
-                console.log(`[GROUPING_DEBUG] handleGrouping: Refreshed openerTab ${currentOpenerTab.id} ("${currentOpenerTab.url}"), current groupId: ${openerGroupId}`);
+                console.log(`[GROUPING_DEBUG] handleGrouping: Refreshed openerTab ${currentOpenerTab.id} ("${currentOpenerTab.url}"), current groupId: ${openerGroupId}. Using pre-calculated groupName "${groupName}".`);
 
                 if (openerGroupId === chrome.tabs.TAB_ID_NONE || typeof openerGroupId !== 'number' || openerGroupId <= 0) {
-                    console.log(`[GROUPING_DEBUG] handleGrouping: Opener tab ${currentOpenerTab.id} is not in a group. Will check for existing group or create new.`);
+                    console.log(`[GROUPING_DEBUG] handleGrouping: Opener tab ${currentOpenerTab.id} is not in a group. Will check for existing group or create new using groupName "${groupName}".`);
                     const queryParams = { windowId: currentOpenerTab.windowId, title: groupName };
                     console.log(`[GROUPING_DEBUG] handleGrouping: Querying for existing groups with params:`, queryParams);
                     const allGroupsInWindow = await chrome.tabGroups.query(queryParams);
@@ -166,7 +170,6 @@ async function handleGrouping(openerTab, newTab) {
                     } else {
                         console.log(`[GROUPING_DEBUG] handleGrouping: No group with title "${groupName}" found by query. Creating new group.`);
                         const tabsToGroup = [currentOpenerTab.id, newTab.id];
-                        // CORRECTED LINE: Removed windowId property
                         console.log(`[GROUPING_DEBUG] handleGrouping: Calling chrome.tabs.group to create new group with tabs [${tabsToGroup.join(', ')}]`);
                         const newGroupIdVal = await chrome.tabs.group({ tabIds: tabsToGroup });
                         console.log(`[GROUPING_DEBUG] handleGrouping: New group created with temp ID: ${newGroupIdVal}. Calling chrome.tabGroups.update (title: "${groupName}", collapseNew: ${rule.collapseNew})`);
@@ -174,13 +177,14 @@ async function handleGrouping(openerTab, newTab) {
                         await incrementStat('tabGroupsCreatedCount');
                     }
                 } else {
-                    console.log(`[GROUPING_DEBUG] handleGrouping: Opener tab ${currentOpenerTab.id} already in group ${openerGroupId}. Adding new tab ${newTab.id}.`);
+                    console.log(`[GROUPING_DEBUG] handleGrouping: Opener tab ${currentOpenerTab.id} already in group ${openerGroupId}. Adding new tab ${newTab.id}. Using pre-calculated groupName "${groupName}" for consistency if needed (though not for naming this existing group).`);
                     console.log(`[GROUPING_DEBUG] handleGrouping: Calling chrome.tabs.group to add tab ${newTab.id} to group ${openerGroupId}`);
                     await chrome.tabs.group({ groupId: openerGroupId, tabIds: [newTab.id] });
                     console.log(`[GROUPING_DEBUG] handleGrouping: Calling chrome.tabGroups.update for group ${openerGroupId} (collapsed: ${rule.collapseExisting})`);
+                    // Title of existing group is not changed here, only collapsed state.
                     await chrome.tabGroups.update(openerGroupId, { collapsed: rule.collapseExisting });
                 }
-                console.log(`[GROUPING_DEBUG] handleGrouping: Grouping action for new tab ${newTab.id} completed successfully.`);
+                console.log(`[GROUPING_DEBUG] handleGrouping: Grouping action for new tab ${newTab.id} completed successfully using groupName "${groupName}".`);
             } catch (error) {
                 console.error(`[GROUPING_DEBUG] handleGrouping: Error during grouping logic for new tab ${newTab.id} (opener ${openerTab.id}, groupName "${groupName}"):`, error.message, error.stack);
                 if (error.message && (error.message.toLowerCase().includes("no tab with id") ||
@@ -191,7 +195,7 @@ async function handleGrouping(openerTab, newTab) {
                 }
             }
         } else if (tabId === newTab.id && changeInfo.status !== 'loading') {
-             console.log(`[GROUPING_DEBUG] onUpdated listener: Main condition NOT met for tab ${newTab.id}. changeInfo.status: '${changeInfo.status}', tab.url: '${tab?.url}', url starts with about/chrome: ${tab?.url?.startsWith('about:') || tab?.url?.startsWith('chrome:')}`);
+             console.log(`[GROUPING_DEBUG] onUpdated listener: Main condition NOT met for newTab ${newTab.id}. changeInfo.status: '${changeInfo.status}', newTab.url: '${tab?.url}', url starts with about/chrome: ${tab?.url?.startsWith('about:') || tab?.url?.startsWith('chrome:')}`);
         }
     });
 }
@@ -231,4 +235,4 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
     } catch (queryError) { console.error("Deduplication: Error querying tabs:", queryError); }
 }, { url: [{ schemes: ['http', 'https'] }] });
 
-console.log("SmartTab Organizer Service Worker started with windowId fix for tabs.group and diagnostic logging.");
+console.log("SmartTab Organizer Service Worker: Group names now derived from opener tab. Logging active.");
