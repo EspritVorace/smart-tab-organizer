@@ -215,7 +215,7 @@ function RulesTab({ settings, updateRules, editingId, setEditingId }) {
 function RuleView({ rule, presets, onEdit, onDelete, onToggle }) {
      const presetName = presets.find(p => p.regex === rule.titleParsingRegEx)?.name || rule.titleParsingRegEx;
      const dedupMode = getMessage(rule.deduplicationMatchMode === 'exact' ? 'exactMatch' : 'includesMatch');
-     const targetText = rule.regexTarget === 'url' ? getMessage('regexTargetUrl') : getMessage('regexTargetTitle');
+     const targetText = rule.regexTarget === 'url' ? getMessage('regexTargetUrlOption') : getMessage('regexTargetTitleOption');
      const disabledClass = rule.enabled ? '' : 'disabled-text';
 
      const handleToggle = (e) => {
@@ -309,10 +309,10 @@ function RuleEditForm({ rule, presets, onSave, onCancel }) {
                             <span class="tooltip-text" data-i18n="deduplicationModeTooltip">${getMessage('deduplicationModeTooltip')}</span>
                         </div>
                         <div class="form-group tooltip-container">
-                            <label>${getMessage('regexTarget')}</label>
+                            <label>${getMessage('regexTargetLabel')}</label>
                             <select name="regexTarget" value=${formData.regexTarget} onChange=${handleChange}>
-                                <option value="title">${getMessage('regexTargetTitle')}</option>
-                                <option value="url">${getMessage('regexTargetUrl')}</option>
+                                <option value="title">${getMessage('regexTargetTitleOption')}</option>
+                                <option value="url">${getMessage('regexTargetUrlOption')}</option>
                             </select>
                             <span class="tooltip-text" data-i18n="regexTargetTooltip">${getMessage('regexTargetTooltip')}</span>
                         </div>
