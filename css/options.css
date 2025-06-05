@@ -1,5 +1,5 @@
 /* options/options.css */
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px 40px; transition: background-color 0.3s ease, color 0.3s ease; max-width: 900px; margin: 20px auto; background-color: var(--bg-color); color: var(--text-color); }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px 40px; transition: background-color 0.3s ease, color 0.3s ease; max-width: 900px; margin: 20px auto; background-color: var(--bg-color); color: var(--text-color); overflow-y: auto; /* Ensure body itself can scroll if content overflows viewport height */ }
 header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary-color); padding-bottom: 15px; margin-bottom: 25px; }
 header h1 { color: var(--primary-color); margin: 0; font-size: 1.8em; font-weight: 600; }
 .theme-selector { display: flex; align-items: center; gap: 8px; }
@@ -9,7 +9,7 @@ header h1 { color: var(--primary-color); margin: 0; font-size: 1.8em; font-weigh
 .tabs button:hover { color: var(--primary-color); }
 .tabs button.active { color: var(--primary-color); border-bottom-color: var(--primary-color); font-weight: 600; }
 h2 { font-size: 1.4em; margin-bottom: 20px; color: var(--text-color); font-weight: 500; }
-section { padding: 20px; background-color: var(--section-bg-color); border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); animation: fadeIn 0.4s ease-out; }
+section { padding: 20px; background-color: var(--section-bg-color); border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); animation: fadeIn 0.4s ease-out; padding-bottom: 30px; /* Add more padding at the bottom of sections */ }
 .list-item { background-color: var(--bg-color); border: 1px solid var(--border-color); padding: 15px 20px; margin-bottom: 15px; border-radius: 6px; transition: box-shadow 0.2s ease, border-color 0.2s ease; }
 .list-item:hover { border-color: var(--primary-color-light); box-shadow: 0 2px 6px rgba(74, 144, 226, 0.2); }
 .list-item.is-editing { border-color: var(--primary-color); box-shadow: 0 0 8px rgba(74, 144, 226, 0.3); }
@@ -122,17 +122,19 @@ footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid var(--border
 
 .rules-group-content {
   max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s ease-out, opacity 0.3s ease-out;
+  overflow: hidden; /* Keep hidden when collapsed */
+  transition: max-height 0.4s ease-out, opacity 0.3s ease-out, padding-bottom 0.4s ease-out; /* Added padding-bottom to transition */
   opacity: 0;
-  /* Add some padding/margin if rules list items don't have their own top margin */
-  /* margin-left: 20px; /* Indent rules slightly under their group */
+  padding-bottom: 0; /* No padding when collapsed */
+  /* margin-left: 20px; /* Indent rules slightly under their group - consider if needed */
 }
 
 .rules-group-content.expanded {
   max-height: 1000px; /* Adjust as needed, should be larger than any possible content */
   opacity: 1;
-  transition: max-height 0.4s ease-in, opacity 0.3s ease-in;
+  overflow-y: auto; /* Allow scrolling for content that exceeds max-height */
+  padding-bottom: 10px; /* Add some padding at the bottom when expanded */
+  transition: max-height 0.4s ease-in, opacity 0.3s ease-in, padding-bottom 0.4s ease-in; /* Added padding-bottom to transition */
 }
 
 /* Static header for Ungrouped rules */

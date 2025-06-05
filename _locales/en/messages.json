@@ -60,7 +60,7 @@
   "errorLabelUnique": { "message": "Label must be unique." },
   "labelTooltip": { "message": "A unique name for this domain rule. This label will be used as the group title if the title parsing regex fails or is not set." },
   "logicalGroupsTab": { "message": "Logical Groups" },
-  "addLogicalGroup": { "message": "Add Group" },
+  "addLogicalGroup": { "message": "Add Logical Group" },
   "addNewLogicalGroup": { "message": "Add New Logical Group" },
   "editLogicalGroup": { "message": "Edit Logical Group" },
   "groupColor": { "message": "Color" },

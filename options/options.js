@@ -430,7 +430,8 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
                             </select>
                             <span class="tooltip-text" data-i18n="deduplicationModeTooltip">${getMessage('deduplicationModeTooltip')}</span>
                         </div>
-                        <div class="form-group tooltip-container"> {/* Changed from full-width to allow group selector beside it potentially */}
+                        // The following div was changed from full-width to allow group selector beside it potentially
+                        <div class="form-group tooltip-container">
                             <label>${getMessage('logicalGroup', 'Logical Group')}</label>
                             <select name="groupId" value=${formData.groupId === null ? "" : formData.groupId} onChange=${handleChange}>
                                 <option value="">${getMessage('noGroup', '-- No Group --')}</option>
@@ -794,17 +795,17 @@ function LogicalGroupsTab({ settings, setSettings, editingId, setEditingId }) {
 
             ${!showAddForm && !editingId && !currentEditData && html`
                 <button onClick=${() => { setShowAddForm(true); setEditingId(null); }} class="button add-button">
-                    ${getMessage('addLogicalGroup', 'Add Group')}
+                    ${getMessage('addLogicalGroup', 'Add Logical Group')}
                 </button>
             `}
 
-            {/* --- ADD FORM --- */}
+            // --- ADD FORM ---
             ${showAddForm && !editingId && !currentEditData && html`
                 <div class="list-item is-editing">
                     <div class="item-edit">
                         <h3>${getMessage('addNewLogicalGroup', 'Add New Logical Group')}</h3>
                         <div class="form-group">
-                            <label for="add-group-label">${getMessage('groupLabel', 'Label')}</label>
+                            <label for="add-group-label">${getMessage('labelLabel', 'Label')}</label> {/* Changed groupLabel to labelLabel */}
                             <input
                                 type="text"
                                 id="add-group-label"
@@ -833,13 +834,13 @@ function LogicalGroupsTab({ settings, setSettings, editingId, setEditingId }) {
                 </div>
             `}
 
-            {/* --- EDIT FORM --- */}
+            // --- EDIT FORM ---
             ${editingId && currentEditData && html`
                 <div class="list-item is-editing">
                     <div class="item-edit">
                         <h3>${getMessage('editLogicalGroup', 'Edit Logical Group')}</h3>
                         <div class="form-group">
-                            <label for="edit-group-label-${currentEditData.id}">${getMessage('groupLabel', 'Label')}</label>
+                            <label for="edit-group-label-${currentEditData.id}">${getMessage('labelLabel', 'Label')}</label> {/* Changed groupLabel to labelLabel */}
                             <input
                                 type="text"
                                 id="edit-group-label-${currentEditData.id}"
