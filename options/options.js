@@ -458,7 +458,7 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
                              ${errors.titleParsingRegEx && html`<span class="error-message">${errors.titleParsingRegEx}</span>`}
                         </div>
                     </div>
-                    <div class="form-group form-actions">
+                    <div class="form-actions">
                         <button type="submit" class="primary">${getMessage('save')}</button>
                         <button type="button" onClick=${onCancel}>${getMessage('cancel')}</button>
                     </div>
@@ -602,7 +602,7 @@ function PresetEditForm({ preset, onSave, onCancel }) {
                             ${error && html`<span class="error-message">${error}</span>`}
                         </div>
                     </div>
-                     <div class="form-group form-actions">
+                     <div class="form-actions">
                          <button type="submit" class="primary">${getMessage('save')}</button>
                          <button type="button" onClick=${onCancel}>${getMessage('cancel')}</button>
                      </div>
