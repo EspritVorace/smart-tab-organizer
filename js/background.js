@@ -97,27 +97,35 @@ async function handleGrouping(openerTab, newTab) {
         console.log(`[GROUPING_DEBUG] handleGrouping: Exiting early - No matching enabled rule for opener tab URL: ${openerTab.url}`);
         return;
     }
-    console.log(`[GROUPING_DEBUG] handleGrouping: Rule found for "${openerTab.url}": name: "${rule.name || 'N/A'}", filter: "${rule.domainFilter}"`);
+    // rule.label is available from settings, rule.name was from an older version.
+    console.log(`[GROUPING_DEBUG] handleGrouping: Rule found for "${openerTab.url}": label: "${rule.label || 'N/A'}", filter: "${rule.domainFilter}"`);
 
-    // Determine groupName from openerTab's title and rule's regex immediately
-    let groupName = "SmartGroup"; // Default group name
+    // Determine groupName: 1. Regex, 2. Rule Label, 3. "SmartGroup"
+    let groupName = rule.label; // Use rule's label as the initial default
+    if (!groupName || !groupName.trim()) { // Fallback if label is empty or whitespace
+        groupName = "SmartGroup";
+        console.log(`[GROUPING_DEBUG] handleGrouping: Rule label is empty or whitespace. Initial groupName set to "${groupName}".`);
+    } else {
+        console.log(`[GROUPING_DEBUG] handleGrouping: Initial groupName set from rule.label: "${groupName}".`);
+    }
+
     if (openerTab.title && rule.titleParsingRegEx) {
         try {
             const extracted = extractGroupNameFromTitle(openerTab.title, rule.titleParsingRegEx);
-            console.log(`[GROUPING_DEBUG] handleGrouping: Group name from OPENER tab - Extracted name: "${extracted}" from opener title "${openerTab.title}" using regex "${rule.titleParsingRegEx}"`);
             if (extracted && extracted.trim()) {
-                groupName = extracted.trim();
+                groupName = extracted.trim(); // Override with extracted name if successful
+                console.log(`[GROUPING_DEBUG] handleGrouping: Group name extracted from opener title "${openerTab.title}" using regex "${rule.titleParsingRegEx}": "${groupName}".`);
             } else {
-                 console.log(`[GROUPING_DEBUG] handleGrouping: Group name from OPENER tab - Title parsing resulted in empty/null/undefined or whitespace-only. Using default group name "${groupName}".`);
+                 console.log(`[GROUPING_DEBUG] handleGrouping: Title parsing from opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}" was empty or whitespace. Group name remains: "${groupName}".`);
             }
         } catch (e) {
-            console.warn(`[GROUPING_DEBUG] handleGrouping: Group name from OPENER tab - Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}". Using default name. Details:`, e.message);
-            groupName = "SmartGroup"; // Ensure default on error
+            console.warn(`[GROUPING_DEBUG] handleGrouping: Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}". Group name remains: "${groupName}". Details:`, e.message);
+            // On error, groupName remains rule.label (or "SmartGroup" if label was also empty)
         }
     } else {
-         console.log(`[GROUPING_DEBUG] handleGrouping: Group name from OPENER tab - No opener title ("${openerTab.title}") or no parsing regex ("${rule.titleParsingRegEx}"). Using default group name "${groupName}".`);
+         console.log(`[GROUPING_DEBUG] handleGrouping: No opener title ("${openerTab.title}") or no parsing regex ("${rule.titleParsingRegEx}"). Group name remains: "${groupName}".`);
     }
-    console.log(`[GROUPING_DEBUG] handleGrouping: Determined groupName (from opener tab): "${groupName}" for new tab ${newTab.id}.`);
+    console.log(`[GROUPING_DEBUG] handleGrouping: Final determined groupName: "${groupName}" for new tab ${newTab.id}.`);
 
     let hasProcessedTab = false;
 

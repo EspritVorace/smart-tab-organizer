@@ -54,6 +54,16 @@ export async function initializeDefaults() {
         // Ensure default IDs exist
         defaults.regexPresets.forEach(dp => { if (!merged.regexPresets.some(mp => mp.id === dp.id)) merged.regexPresets.push(dp); });
         defaults.domainRules.forEach(dr => { if (!merged.domainRules.some(mr => mr.id === dr.id)) merged.domainRules.push(dr); });
+
+        // Ensure all domain rules have a label
+        if (merged.domainRules && Array.isArray(merged.domainRules)) {
+            merged.domainRules.forEach(rule => {
+                if (typeof rule.label === 'undefined') {
+                    const defaultRule = defaults.domainRules.find(dr => dr.id === rule.id);
+                    rule.label = defaultRule ? defaultRule.label : rule.domainFilter || "Untitled Rule";
+                }
+            });
+        }
         await saveSettings(merged);
     }
     const localData = await chrome.storage.local.get('statistics');

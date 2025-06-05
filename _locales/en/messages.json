@@ -54,5 +54,9 @@
   "exportMessage": { "message": "Settings exported." },
   "domainFilterTooltip": { "message": "Enter the domain (e.g., youtube.com) or a pattern (e.g., *google*). Rules apply to matching domains." },
   "deduplicationModeTooltip": { "message": "Exact Match: Tabs are duplicates if titles are identical. Includes Match: Tabs are duplicates if one title contains the other." },
-  "titleParsingRegExTooltip": { "message": "Select a preset or write a custom regex to extract a part of the tab title for grouping or deduplication. The first capture group (text inside parentheses) is used." }
+  "titleParsingRegExTooltip": { "message": "Select a preset or write a custom regex to extract a part of the tab title for grouping or deduplication. The first capture group (text inside parentheses) is used." },
+  "labelLabel": { "message": "Label" },
+  "errorLabelRequired": { "message": "Label is required." },
+  "errorLabelUnique": { "message": "Label must be unique." },
+  "labelTooltip": { "message": "A unique name for this domain rule. This label will be used as the group title if the title parsing regex fails or is not set." }
 }
