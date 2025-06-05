@@ -17,7 +17,7 @@
     * Sinon, un nouveau groupe est créé.
 * **🏷️ Nommage de Groupe via RegEx :**
     * Définissez des expressions régulières pour des domaines spécifiques.
-    * L'extension extrait du texte du titre du nouvel onglet à l'aide de votre RegEx pour nommer automatiquement le groupe d'onglets.
+    * L'extension extrait du texte du titre de l'onglet source à l'aide de votre RegEx pour nommer automatiquement le groupe d'onglets.
     * Inclut des préréglages pour les outils de tickets populaires (Jira, GitLab, GitHub, Trello, etc.).
 * **🚫 Prévention des Doublons :**
     * Empêche l'ouverture plusieurs fois de la même URL.
@@ -25,12 +25,13 @@
     * Prend en charge la correspondance d'URL exacte ou "incluse" par domaine.
 * **⚙️ Page d'Options Complète :**
     * Gérez (Ajouter, Editer, Supprimer, Activer/Désactiver) les règles de domaine.
-    * Les règles de domaine peuvent être regroupées par groupes logiques.
-    * Le nom du groupe est désormais calculé en fonction du titre de l'onglet source, et non du titre du nouvel onglet.
     * Gérez les expressions régulières personnalisées et prédéfinies.
     * Configurez les modes de déduplication.
     * Importez et exportez vos paramètres (règles et préréglages) via JSON.
     * Visualisez les statistiques et réinitialisez-les.
+* **🗂️ Gestion des Groupes Logiques :**
+    * Organisez vos règles de domaine en créant et en modifiant des groupes logiques.
+    * Personnalisez votre expérience de navigation en choisissant des couleurs spécifiques pour les groupes d'onglets associés à ces groupes logiques.
 * **🕶️ Support du Mode Sombre :**
     * Choisissez entre le Mode Clair, le Mode Sombre, ou suivez le thème de votre système.
 * **🌍 Internationalisation :**

@@ -17,7 +17,7 @@
     * Otherwise, a new group is created.
 * **🏷️ Group Naming via RegEx:**
     * Define regular expressions for specific domains.
-    * The extension extracts text from the new tab's title using your RegEx to automatically name the tab group.
+    * The extension extracts text from the source tab's title using your RegEx to automatically name the tab group.
     * Includes presets for popular ticketing tools (Jira, GitLab, GitHub, Trello, etc.).
 * **🚫 Duplicate Prevention:**
     * Prevents opening the same URL multiple times.
@@ -25,12 +25,13 @@
     * Supports exact URL matching or "includes" matching by domain.
 * **⚙️ Comprehensive Options Page:**
     * Manage (Add, Edit, Delete, Enable/Disable) domain rules.
-    * Domain rules can be grouped by logical groups.
-    * Title name for groups is now computed based on the source tab's title, not the new tab's title.
     * Manage custom and predefined regular expressions.
     * Configure deduplication modes.
     * Import and export your settings (rules and presets) via JSON.
     * View statistics and reset them.
+* **🗂️ Logical Groups Management:**
+    * Organize your domain rules by creating and editing logical groups.
+    * Customize your browsing experience by choosing specific colors for your tab groups associated with these logical groups.
 * **🕶️ Dark Mode Support:**
     * Choose between Light Mode, Dark Mode, or follow your system's theme.
 * **🌍 Internationalization:**

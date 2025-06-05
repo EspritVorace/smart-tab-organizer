@@ -17,7 +17,7 @@
     * De lo contrario, se crea un nuevo grupo.
 * **🏷️ Nombrado de Grupos mediante RegEx:**
     * Define expresiones regulares para dominios específicos.
-    * La extensión extrae texto del título de la nueva pestaña usando tu RegEx para nombrar automáticamente el grupo de pestañas.
+    * La extensión extrae texto del título de la pestaña de origen usando tu RegEx para nombrar automáticamente el grupo de pestañas.
     * Incluye preajustes para herramientas populares de gestión de tickets (Jira, GitLab, GitHub, Trello, etc.).
 * **🚫 Prevención de Duplicados:**
     * Evita abrir la misma URL varias veces.
@@ -25,12 +25,13 @@
     * Admite coincidencia exacta de URL o coincidencia "incluida" por dominio.
 * **⚙️ Página de Opciones Completa:**
     * Administra (Agregar, Editar, Eliminar, Activar/Desactivar) reglas de dominio.
-    * Las reglas de dominio se pueden agrupar por grupos lógicos.
-    * El nombre del grupo ahora se calcula en función del título de la pestaña de origen, no del título de la nueva pestaña.
     * Administra expresiones regulares personalizadas y predefinidas.
     * Configura los modos de deduplicación.
     * Importa y exporta tus configuraciones (reglas y preajustes) mediante JSON.
     * Visualiza estadísticas y reinícialas.
+* **🗂️ Gestión de Grupos Lógicos:**
+    * Organiza tus reglas de dominio creando y editando grupos lógicos.
+    * Personaliza tu experiencia de navegación eligiendo colores específicos para los grupos de pestañas asociados con estos grupos lógicos.
 * **🕶️ Soporte de Modo Oscuro:**
     * Elige entre Modo Claro, Modo Oscuro o sigue el tema de tu sistema.
 * **🌍 Internacionalización:**
