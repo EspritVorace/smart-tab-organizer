@@ -458,7 +458,7 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
                              ${errors.titleParsingRegEx && html`<span class="error-message">${errors.titleParsingRegEx}</span>`}
                         </div>
                     </div>
-                    <div class="form-group form-actions">
+                    <div class="form-actions">
                         <button type="submit" class="primary">${getMessage('save')}</button>
                         <button type="button" onClick=${onCancel}>${getMessage('cancel')}</button>
                     </div>
@@ -602,7 +602,7 @@ function PresetEditForm({ preset, onSave, onCancel }) {
                             ${error && html`<span class="error-message">${error}</span>`}
                         </div>
                     </div>
-                     <div class="form-group form-actions">
+                     <div class="form-actions">
                          <button type="submit" class="primary">${getMessage('save')}</button>
                          <button type="button" onClick=${onCancel}>${getMessage('cancel')}</button>
                      </div>
@@ -687,7 +687,62 @@ function StatsTab({ stats, onReset }) {
     `;
 }
 
-// --- Onglet Groupes Logiques (NOUVEAU Placeholder) ---
+// --- Composants pour LogicalGroupsTab ---
+function LogicalGroupView({ group, onEdit, onDelete }) {
+    return html`
+        <div class="list-item" key=${group.id}>
+            <div class="item-view">
+                <span class="group-color-swatch ${'group-color-' + group.color}"></span>
+                <div class="item-details">
+                    <span class="item-main">${group.label}</span>
+                    <code class="item-sub">ID: ${group.id}</code>
+                </div>
+                <div class="item-actions">
+                    <button onClick=${() => onEdit(group.id)}>${getMessage('edit', 'Edit')}</button>
+                    <button class="danger" onClick=${() => onDelete(group.id, group.label)}>${getMessage('delete', 'Delete')}</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function LogicalGroupEditForm({ group, onSave, onCancel, editFormError, handleEditLabelChange, handleEditColorChange, LOGICAL_GROUP_COLORS }) {
+    return html`
+        <div class="list-item is-editing">
+            <div class="item-edit">
+                <h3>${getMessage('editLogicalGroup', 'Edit Logical Group')}</h3>
+                <div class="form-group">
+                    <label for="edit-group-label-${group.id}">${getMessage('labelLabel', 'Label')}</label>
+                    <input
+                        type="text"
+                        id="edit-group-label-${group.id}"
+                        value=${group.label}
+                        onInput=${handleEditLabelChange}
+                    />
+                    ${editFormError && html`<span class="error-message">${editFormError}</span>`}
+                </div>
+                <div class="form-group">
+                    <label for="edit-group-color-${group.id}">${getMessage('groupColor', 'Color')}</label>
+                    <select
+                        id="edit-group-color-${group.id}"
+                        value=${group.color}
+                        onChange=${handleEditColorChange}
+                    >
+                        ${LOGICAL_GROUP_COLORS.map(color => html`
+                            <option value=${color}>${getMessage(`color_${color}`, color)}</option>
+                        `)}
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button onClick=${onSave} class="primary">${getMessage('save', 'Save')}</button>
+                    <button onClick=${onCancel}>${getMessage('cancel', 'Cancel')}</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// --- Onglet Groupes Logiques ---
 function LogicalGroupsTab({ settings, setSettings, editingId, setEditingId }) {
     const { logicalGroups = [], domainRules = [] } = settings; // Default to empty arrays
 
@@ -783,52 +838,34 @@ function LogicalGroupsTab({ settings, setSettings, editingId, setEditingId }) {
     const handleDeleteGroup = (groupId, groupLabel) => {
         console.log(`Attempting to delete group: ${groupLabel} (ID: ${groupId})`);
 
-        // Access domainRules from settings (already destructured in component scope)
         const associatedRules = domainRules.filter(rule => rule.groupId === groupId);
 
         if (associatedRules.length > 0) {
-            console.log(`Associated rules for group ${groupLabel} (ID: ${groupId}):`, associatedRules);
             const confirmMessage = getMessage('confirmDeleteGroupAssociated', [groupLabel, associatedRules.length], `The logical group "${groupLabel}" is associated with ${associatedRules.length} domain rule(s). Deleting this group will remove its association from these rules. Are you sure you want to delete it?`);
             if (!confirm(confirmMessage)) {
-                console.log(`User cancelled deletion for group ${groupLabel} (ID: ${groupId})`);
-                return; // Stop if user cancels
+                return;
             }
         } else {
-            console.log(`No associated rules found for group ${groupLabel} (ID: ${groupId}). Proceeding to check for group-only deletion confirmation.`);
-            // Even if no rules are associated, it's good practice to confirm deletion of the group itself.
             const confirmMessage = getMessage('confirmDeleteGroupNoRules', [groupLabel], `Are you sure you want to delete the logical group "${groupLabel}"? This group is not currently associated with any domain rules.`);
             if (!confirm(confirmMessage)) {
-                console.log(`User cancelled deletion for group ${groupLabel} (ID: ${groupId})`);
-                return; // Stop if user cancels
+                return;
             }
         }
 
-        // If we reach here, user has confirmed or no confirmation was needed for rules (but was for group itself)
-        console.log(`Proceeding with deletion logic for group ${groupLabel} (ID: ${groupId})`);
-
-        // Step 1: Create newDomainRules by updating groupId for associated rules
         const newDomainRules = domainRules.map(rule => {
             if (rule.groupId === groupId) {
-                // Create a new rule object with groupId set to null
                 return { ...rule, groupId: null };
             }
-            return rule; // Return original rule if no change
+            return rule;
         });
 
-        console.log('New domainRules (with groupId updated to null for affected rules):', newDomainRules);
-
-        // Step 2: Create newLogicalGroups by filtering out the deleted group
         const newLogicalGroups = logicalGroups.filter(group => group.id !== groupId);
 
-        console.log('New logicalGroups (with the group removed):', newLogicalGroups);
-
-        // Step 3: Update settings
         setSettings(prevSettings => ({
             ...prevSettings,
             logicalGroups: newLogicalGroups,
             domainRules: newDomainRules
         }));
-
         console.log(`Group ${groupLabel} (ID: ${groupId}) deleted and domain rules updated.`);
     };
 
@@ -836,29 +873,35 @@ function LogicalGroupsTab({ settings, setSettings, editingId, setEditingId }) {
         <section id="logical-groups-section">
             <h2>${getMessage('logicalGroupsTab', 'Logical Groups')}</h2>
 
-            ${logicalGroups.map(group => html`
-                <div class="list-item" key=${group.id}>
-                    <div class="item-view">
-                        <span class="group-color-swatch ${'group-color-' + group.color}"></span>
-                        <div class="item-details">
-                            <span class="item-main">${group.label}</span>
-                            <code class="item-sub">ID: ${group.id}</code>
-                        </div>
-                        <div class="item-actions">
-                            <button onClick=${() => { setEditingId(group.id); setShowAddForm(false); }}>${getMessage('edit', 'Edit')}</button>
-                            <button class="danger" onClick=${() => handleDeleteGroup(group.id, group.label)}>${getMessage('delete', 'Delete')}</button>
-                        </div>
-                    </div>
-                </div>
-            `)}
+            ${logicalGroups.map(group => {
+                if (editingId === group.id && currentEditData) {
+                    return html`<${LogicalGroupEditForm}
+                        key=${group.id}
+                        group=${currentEditData}
+                        onSave=${handleSaveEditGroup}
+                        onCancel=${handleCancelEdit}
+                        editFormError=${editFormError}
+                        handleEditLabelChange=${handleEditLabelChange}
+                        handleEditColorChange=${handleEditColorChange}
+                        LOGICAL_GROUP_COLORS=${LOGICAL_GROUP_COLORS}
+                    />`;
+                } else {
+                    return html`<${LogicalGroupView}
+                        key=${group.id}
+                        group=${group}
+                        onEdit=${(id) => { setEditingId(id); setShowAddForm(false); }}
+                        onDelete=${handleDeleteGroup}
+                    />`;
+                }
+            })}
 
-            ${!showAddForm && !editingId && !currentEditData && html`
+            ${!showAddForm && !editingId && html`
                 <button onClick=${() => { setShowAddForm(true); setEditingId(null); }} class="button add-button">
                     ${getMessage('addLogicalGroup', 'Add Logical Group')}
                 </button>
             `}
 
-            ${showAddForm && !editingId && !currentEditData && html`
+            ${showAddForm && !editingId && html`
                 <div class="list-item is-editing">
                     <div class="item-edit">
                         <h3>${getMessage('addNewLogicalGroup', 'Add New Logical Group')}</h3>
@@ -887,40 +930,6 @@ function LogicalGroupsTab({ settings, setSettings, editingId, setEditingId }) {
                         <div class="form-actions">
                             <button onClick=${handleAddGroup} class="primary">${getMessage('save', 'Save')}</button>
                             <button onClick=${handleCancelAdd}>${getMessage('cancel', 'Cancel')}</button>
-                        </div>
-                    </div>
-                </div>
-            `}
-
-            ${editingId && currentEditData && html`
-                <div class="list-item is-editing">
-                    <div class="item-edit">
-                        <h3>${getMessage('editLogicalGroup', 'Edit Logical Group')}</h3>
-                        <div class="form-group">
-                            <label for="edit-group-label-${currentEditData.id}">${getMessage('labelLabel', 'Label')}</label>
-                            <input
-                                type="text"
-                                id="edit-group-label-${currentEditData.id}"
-                                value=${currentEditData.label}
-                                onInput=${handleEditLabelChange}
-                            />
-                            ${editFormError && html`<span class="error-message">${editFormError}</span>`}
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-group-color-${currentEditData.id}">${getMessage('groupColor', 'Color')}</label>
-                            <select
-                                id="edit-group-color-${currentEditData.id}"
-                                value=${currentEditData.color}
-                                onChange=${handleEditColorChange}
-                            >
-                                ${LOGICAL_GROUP_COLORS.map(color => html`
-                                    <option value=${color}>${getMessage(`color_${color}`, color)}</option>
-                                `)}
-                            </select>
-                        </div>
-                        <div class="form-actions">
-                            <button onClick=${handleSaveEditGroup} class="primary">${getMessage('save', 'Save')}</button>
-                            <button onClick=${handleCancelEdit}>${getMessage('cancel', 'Cancel')}</button>
                         </div>
                     </div>
                 </div>
