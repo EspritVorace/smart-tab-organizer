@@ -99,10 +99,10 @@ async function handleGrouping(openerTab, newTab) {
     }
     console.log(`[GROUPING_DEBUG] handleGrouping: Rule found for "${openerTab.url}": name: "${rule.name || 'N/A'}", filter: "${rule.domainFilter}"`);
 
-    let hasProcessedTab = false; // Ensure we only process the tab once
+    let hasProcessedTab = false;
 
     chrome.tabs.onUpdated.addListener(async function listener(tabId, changeInfo, tab) {
-        if (hasProcessedTab) { // If already processed, remove listener if it's still around and exit
+        if (hasProcessedTab) {
             try { chrome.tabs.onUpdated.removeListener(listener); } catch (e) {}
             return;
         }
@@ -111,17 +111,14 @@ async function handleGrouping(openerTab, newTab) {
             console.log(`[GROUPING_DEBUG] onUpdated listener: Fired for relevant tabId ${tabId}. changeInfo.status: ${changeInfo.status}, tab.url: ${tab?.url}, tab.title: "${tab?.title}"`);
         }
 
-        // Check if the tab is fully loaded and has a final, valid URL
         if (tabId === newTab.id && changeInfo.status === 'complete' && tab.url) {
             if (tab.url.startsWith('about:') || tab.url.startsWith('chrome:')) {
                 console.log(`[GROUPING_DEBUG] onUpdated listener: Tab ${newTab.id} is 'complete' but URL is '${tab.url}'. Listener remains active, awaiting a more definitive URL.`);
-                // Do not remove listener, wait for potential further updates with a web URL
                 return;
             }
 
-            // At this point, status is 'complete' and URL is not 'about:' or 'chrome:'
-            hasProcessedTab = true; // Mark as processed
-            chrome.tabs.onUpdated.removeListener(listener); // Remove listener as we are processing
+            hasProcessedTab = true;
+            chrome.tabs.onUpdated.removeListener(listener);
             console.log(`[GROUPING_DEBUG] onUpdated listener: Main condition met for tab ${newTab.id}. URL: "${tab.url}", Title: "${tab.title}". Listener removed.`);
 
             let groupName = "SmartGroup";
@@ -169,8 +166,9 @@ async function handleGrouping(openerTab, newTab) {
                     } else {
                         console.log(`[GROUPING_DEBUG] handleGrouping: No group with title "${groupName}" found by query. Creating new group.`);
                         const tabsToGroup = [currentOpenerTab.id, newTab.id];
-                        console.log(`[GROUPING_DEBUG] handleGrouping: Calling chrome.tabs.group to create new group with tabs [${tabsToGroup.join(', ')}] in window ${currentOpenerTab.windowId}`);
-                        const newGroupIdVal = await chrome.tabs.group({ tabIds: tabsToGroup, windowId: currentOpenerTab.windowId });
+                        // CORRECTED LINE: Removed windowId property
+                        console.log(`[GROUPING_DEBUG] handleGrouping: Calling chrome.tabs.group to create new group with tabs [${tabsToGroup.join(', ')}]`);
+                        const newGroupIdVal = await chrome.tabs.group({ tabIds: tabsToGroup });
                         console.log(`[GROUPING_DEBUG] handleGrouping: New group created with temp ID: ${newGroupIdVal}. Calling chrome.tabGroups.update (title: "${groupName}", collapseNew: ${rule.collapseNew})`);
                         await chrome.tabGroups.update(newGroupIdVal, { title: groupName, collapsed: rule.collapseNew });
                         await incrementStat('tabGroupsCreatedCount');
@@ -192,7 +190,7 @@ async function handleGrouping(openerTab, newTab) {
                     console.warn(`[GROUPING_DEBUG] handleGrouping: The error suggests a tab/group/window was closed or ID was invalid during operation.`);
                 }
             }
-        } else if (tabId === newTab.id && changeInfo.status !== 'loading') { // Log other non-loading statuses for the tab
+        } else if (tabId === newTab.id && changeInfo.status !== 'loading') {
              console.log(`[GROUPING_DEBUG] onUpdated listener: Main condition NOT met for tab ${newTab.id}. changeInfo.status: '${changeInfo.status}', tab.url: '${tab?.url}', url starts with about/chrome: ${tab?.url?.startsWith('about:') || tab?.url?.startsWith('chrome:')}`);
         }
     });
@@ -233,4 +231,4 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
     } catch (queryError) { console.error("Deduplication: Error querying tabs:", queryError); }
 }, { url: [{ schemes: ['http', 'https'] }] });
 
-console.log("SmartTab Organizer Service Worker started with enhanced diagnostic logging and deferred listener removal for grouping.");
+console.log("SmartTab Organizer Service Worker started with windowId fix for tabs.group and diagnostic logging.");
