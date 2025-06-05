@@ -1,6 +1,6 @@
 // options/options.js
 import { h, render } from './../js/lib/preact.mjs';
-import { useState, useEffect, useCallback, Fragment } from './../js/lib/preact-hooks.mjs';
+import { useState, useEffect, useCallback } from './../js/lib/preact-hooks.mjs';
 import htm from './../js/lib/htm.mjs';
 
 import { getSettings, saveSettings, getStatistics, resetStatistics } from './../js/modules/storage.js';
@@ -120,5 +120,8 @@ function OptionsApp() {
             <footer>SmartTab Organizer v1.0.2 - Licensed under GPL-3.0-only.</footer>
         </div>
     `;
+
+}
+
 // --- Montage ---
 render(html`<${OptionsApp} />`, document.getElementById('options-app'));
