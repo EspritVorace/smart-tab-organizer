@@ -863,7 +863,7 @@ function LogicalGroupsTab({ settings, setSettings, editingId, setEditingId }) {
                     <div class="item-edit">
                         <h3>${getMessage('addNewLogicalGroup', 'Add New Logical Group')}</h3>
                         <div class="form-group">
-                            <label for="add-group-label">${getMessage('labelLabel', 'Label')}</label> {/* Changed groupLabel to labelLabel */}
+                            <label for="add-group-label">${getMessage('labelLabel', 'Label')}</label>
                             <input
                                 type="text"
                                 id="add-group-label"
