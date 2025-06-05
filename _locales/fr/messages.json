@@ -75,6 +75,14 @@
   "color_orange": { "message": "Orange" },
   "confirmDeleteGroup": { "message": "Êtes-vous sûr de vouloir supprimer le groupe '$groupName$' ?", "placeholders": { "groupName": { "content": "$1" } } },
   "confirmDeleteGroupInUse": { "message": "Le groupe '$groupName$' est utilisé par $ruleCount$ règle(s). Sa suppression enlèvera ces associations (les règles deviendront non groupées). Êtes-vous sûr ?", "placeholders": { "groupName": { "content": "$1" }, "ruleCount": { "content": "$2" } } },
+  "confirmDeleteGroupAssociated": {
+    "message": "Le groupe logique \"$1\" est associé à $2 règle(s) de domaine. La suppression de ce groupe supprimera son association de ces règles. Êtes-vous sûr de vouloir le supprimer ?",
+    "description": "Message de confirmation lors de la suppression d'un groupe logique associé à des règles de domaine. $1 est l'étiquette du groupe, $2 est le nombre de règles associées."
+  },
+  "confirmDeleteGroupNoRules": {
+    "message": "Êtes-vous sûr de vouloir supprimer le groupe logique \"$1\" ? Ce groupe n'est actuellement associé à aucune règle de domaine.",
+    "description": "Message de confirmation lors de la suppression d'un groupe logique qui n'a aucune règle de domaine associée. $1 est l'étiquette du groupe."
+  },
   "logicalGroup": { "message": "Groupe Logique" },
   "noGroup": { "message": "-- Aucun Groupe --" },
   "logicalGroupRuleTooltip": { "message": "Assigner cette règle à un groupe logique." },
