@@ -324,8 +324,15 @@ function RuleView({ rule, presets, logicalGroups, onEdit, onDelete, onToggle }) 
     const group = rule.groupId && logicalGroups ? logicalGroups.find(g => g.id === rule.groupId) : null;
     const groupColorClass = group ? `group-color-${group.color}` : '';
     // Ensure groupLabelText is derived from the potentially updated logicalGroups prop
-    const groupLabelText = group ? group.label : getMessage('noGroupAssigned', 'No group');
+    // const groupLabelText = group ? group.label : getMessage('noGroupAssigned', 'No group'); // Removed as per new logic
 
+    const subtitleParts = [];
+    if (!group) { // Rule is ungrouped
+        subtitleParts.push(getMessage('noGroupAssigned', 'No group'));
+    }
+    subtitleParts.push(rule.domainFilter);
+    subtitleParts.push(presetName);
+    subtitleParts.push(dedupMode);
 
     return html`
         <div class="list-item">
@@ -334,7 +341,7 @@ function RuleView({ rule, presets, logicalGroups, onEdit, onDelete, onToggle }) 
                 <label for="enable-${rule.id}" class="item-details">
                     <span class="item-main ${disabledClass}">${rule.label}</span>
                     <span class="item-sub ${disabledClass}">
-                        ${groupLabelText} | ${rule.domainFilter} | ${presetName} | ${dedupMode}
+                        ${subtitleParts.join(' | ')}
                     </span>
                 </label>
                 <div class="item-actions">
