@@ -1,69 +1,75 @@
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/master/README.md)
+[![fr](https://img.shields.io/badge/lang-fr-blue.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/master/README-fr.md)
+[![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/master/README-es.md)
+
 # SmartTab Organizer
 
 ![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)
 ![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)
 
-**SmartTab Organizer** est une extension Chrome conçue pour vous aider à gérer efficacement vos onglets de navigateur en regroupant automatiquement les onglets liés et en empêchant les doublons.
+**SmartTab Organizer** is a Chrome extension designed to help you efficiently manage your browser tabs by automatically grouping related tabs and preventing duplicates.
 
-## Fonctionnalités ✨
+## Features ✨
 
-* **🖱️ Regroupement Automatique (Clic Molette) :**
-    * Lorsque vous cliquez avec la molette sur un lien, si le domaine de la page source correspond à une règle configurée, le nouvel onglet s'ouvre dans un groupe.
-    * Si l'onglet source est déjà dans un groupe, le nouvel onglet le rejoint.
-    * Sinon, un nouveau groupe est créé.
-* **🏷️ Nommage de Groupe via RegEx :**
-    * Définissez des expressions régulières pour des domaines spécifiques.
-    * L'extension extrait du texte du titre du nouvel onglet à l'aide de votre RegEx pour nommer automatiquement le groupe d'onglets.
-    * Inclut des préréglages pour les outils de tickets populaires (Jira, GitLab, GitHub, Trello, etc.).
-* **🚫 Prévention des Doublons :**
-    * Empêche l'ouverture plusieurs fois de la même URL.
-    * Si vous essayez d'ouvrir une URL déjà présente, l'onglet existant est mis au premier plan et rechargé, et le nouveau est fermé.
-    * Prend en charge la correspondance d'URL exacte ou "incluse" par domaine.
-* **⚙️ Page d'Options Complète :**
-    * Gérez (Ajouter, Editer, Supprimer, Activer/Désactiver) les règles de domaine.
-    * Gérez les expressions régulières personnalisées et prédéfinies.
-    * Configurez les modes de déduplication.
-    * Importez et exportez vos paramètres (règles et préréglages) via JSON.
-    * Visualisez les statistiques et réinitialisez-les.
-* **🕶️ Support du Mode Sombre :**
-    * Choisissez entre le Mode Clair, le Mode Sombre, ou suivez le thème de votre système.
-* **🌍 Internationalisation :**
-    * Disponible en Français (Défaut), Anglais et Espagnol.
-* **📊 Popup d'Accès Rapide :**
-    * Activez/Désactivez globalement le regroupement et la déduplication.
-    * Consultez les statistiques clés en un coup d'œil.
-    * Lien rapide vers la page d'options.
+* **🖱️ Automatic Grouping (Middle Click):**
+    * When you middle-click on a link, if the source page's domain matches a configured rule, the new tab opens in a group.
+    * If the source tab is already in a group, the new tab joins it.
+    * Otherwise, a new group is created.
+* **🏷️ Group Naming via RegEx:**
+    * Define regular expressions for specific domains.
+    * The extension extracts text from the new tab's title using your RegEx to automatically name the tab group.
+    * Includes presets for popular ticketing tools (Jira, GitLab, GitHub, Trello, etc.).
+* **🚫 Duplicate Prevention:**
+    * Prevents opening the same URL multiple times.
+    * If you try to open an already present URL, the existing tab is brought to the foreground and reloaded, and the new one is closed.
+    * Supports exact URL matching or "includes" matching by domain.
+* **⚙️ Comprehensive Options Page:**
+    * Manage (Add, Edit, Delete, Enable/Disable) domain rules.
+    * Domain rules can be grouped by logical groups.
+    * Title name for groups is now computed based on the source tab's title, not the new tab's title.
+    * Manage custom and predefined regular expressions.
+    * Configure deduplication modes.
+    * Import and export your settings (rules and presets) via JSON.
+    * View statistics and reset them.
+* **🕶️ Dark Mode Support:**
+    * Choose between Light Mode, Dark Mode, or follow your system's theme.
+* **🌍 Internationalization:**
+    * Available in French (Default), English, and Spanish.
+* **📊 Quick Access Popup:**
+    * Globally enable/disable grouping and deduplication.
+    * View key statistics at a glance.
+    * Quick link to the options page.
 
 ## Installation 🚀
 
-### Manuelle (Développement / Test)
+### Manual (Development / Testing)
 
-1.  **Télécharger :** Clonez ou téléchargez ce projet.
+1.  **Download:** Clone or download this project.
     ```bash
     git clone [https://github.com/EspritVorace/smart-tab-organizer.git](https://github.com/EspritVorace/smart-tab-organizer.git) 
     ```
-2.  **Ouvrir les Extensions Chrome :** Naviguez vers `chrome://extensions/`.
-3.  **Activer le Mode Développeur :** Cochez la case "Mode développeur".
-4.  **Charger l'Extension :** Cliquez sur "Charger l'extension non empaquetée" et sélectionnez le dossier `SmartTab_Organizer` (celui contenant `manifest.json`).
-5.  L'extension est prête !
+2.  **Open Chrome Extensions:** Navigate to `chrome://extensions/`.
+3.  **Enable Developer Mode:** Check the "Developer mode" box.
+4.  **Load Extension:** Click "Load unpacked" and select the `SmartTab_Organizer` folder (the one containing `manifest.json`).
+5.  The extension is ready!
 
-## Utilisation 📖
+## Usage 📖
 
-1.  **Cliquez sur l'Icône :** Pour accéder au popup.
-2.  **Configurez :** Ouvrez les "Options" pour définir vos règles.
-    * **Règles de Domaine :** Définissez pour quels sites activer les fonctionnalités.
-    * **Préréglages RegEx :** Créez ou utilisez des RegEx pour extraire les noms de groupes (ex: `([A-Z]+-\d+)` pour Jira).
-3.  **Naviguez :** Utilisez le clic molette sur les sites configurés et voyez la magie opérer !
+1.  **Click the Icon:** To access the popup.
+2.  **Configure:** Open "Options" to set your rules.
+    * **Domain Rules:** Define for which sites to activate features.
+    * **RegEx Presets:** Create or use RegEx to extract group names (e.g., `([A-Z]+-\d+)` for Jira).
+3.  **Browse:** Use middle-click on configured sites and see the magic happen!
 
-## Technologies Utilisées 🛠️
+## Technologies Used 🛠️
 
 * JavaScript (ES Modules)
 * Chrome Extension APIs (Manifest V3)
-* preact (pour une UI réactive légère)
+* preact (for a lightweight reactive UI)
 * CSS3
 
-## Licence 📄
+## License 📄
 
-Ce projet est sous licence **GNU General Public License v3.0**.
+This project is licensed under the **GNU General Public License v3.0**.
 
 ---
