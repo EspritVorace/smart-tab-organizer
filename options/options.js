@@ -108,7 +108,7 @@ function OptionsApp() {
                 ${currentTab === 'rules' && html`<${RulesTab} settings=${settings} updateRules=${updateRules} editingId=${editingRuleId} setEditingId=${setEditingRuleId} />`}
                 ${currentTab === 'presets' && html`<${PresetsTab} settings=${settings} updatePresets=${updatePresets} editingId=${editingPresetId} setEditingId=${setEditingPresetId} />`}
                 ${currentTab === 'logicalGroups' && html`<${LogicalGroupsTab} settings=${settings} setSettings=${setSettings} editingId=${editingLogicalGroupId} setEditingId=${setEditingLogicalGroupId} />`}
-                ${currentTab === 'importexport' && html`<${ImportExportTab} settings=${settings} setSettings=${setSettings}/>`}
+                ${currentTab === 'importexport' && html`<${ImportExportTab} settings=${settings} setSettings=${setSettings} />`}
                 ${currentTab === 'stats' && html`<${StatsTab} stats=${stats} onReset=${handleResetStats} />`}
             </main>
             <footer>SmartTab Organizer v1.0.2 - Licensed under GPL-3.0-only.</footer>
@@ -405,6 +405,7 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
 
      const currentRegexValue = isCustom ? 'custom' : formData.titleParsingRegEx;
 
+    // The following div was changed from full-width to allow group selector beside it potentially
     return html`
         <div class="list-item is-editing">
             <div class="item-edit">
@@ -430,7 +431,6 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
                             </select>
                             <span class="tooltip-text" data-i18n="deduplicationModeTooltip">${getMessage('deduplicationModeTooltip')}</span>
                         </div>
-                        // The following div was changed from full-width to allow group selector beside it potentially
                         <div class="form-group tooltip-container">
                             <label>${getMessage('logicalGroup', 'Logical Group')}</label>
                             <select name="groupId" value=${formData.groupId === null ? "" : formData.groupId} onChange=${handleChange}>
@@ -799,7 +799,6 @@ function LogicalGroupsTab({ settings, setSettings, editingId, setEditingId }) {
                 </button>
             `}
 
-            // --- ADD FORM ---
             ${showAddForm && !editingId && !currentEditData && html`
                 <div class="list-item is-editing">
                     <div class="item-edit">
@@ -834,7 +833,6 @@ function LogicalGroupsTab({ settings, setSettings, editingId, setEditingId }) {
                 </div>
             `}
 
-            // --- EDIT FORM ---
             ${editingId && currentEditData && html`
                 <div class="list-item is-editing">
                     <div class="item-edit">

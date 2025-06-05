@@ -147,3 +147,28 @@ footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid var(--border
     color: var(--text-color);
     border-bottom: 1px solid var(--border-color);
 }
+
+/* Custom Scrollbar Styling (for WebKit browsers) */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: var(--section-bg-color, #f0f0f0); /* Fallback for safety */
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--text-color-light, #aaaaaa); /* Fallback for safety */
+    border-radius: 4px;
+    border: 1px solid var(--bg-color, #ffffff); /* Fallback for safety */
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--primary-color, #777777); /* Fallback for safety */
+}
+
+::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
