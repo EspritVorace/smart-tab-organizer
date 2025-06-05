@@ -157,7 +157,8 @@ function RulesTab({ settings, updateRules, editingId, setEditingId }) {
 
     const handleAdd = () => {
         const newId = generateUUID();
-        const newRule = { id: newId, enabled: true, domainFilter: "", titleParsingRegEx: regexPresets[0]?.regex || "", deduplicationMatchMode: "exact" };
+        // Initialize label for new rules
+        const newRule = { id: newId, label: "", enabled: true, domainFilter: "", titleParsingRegEx: regexPresets[0]?.regex || "", deduplicationMatchMode: "exact" };
         setNewRuleInProgress(newRule);
         setEditingId(newId); // Ouvre le formulaire pour la nouvelle règle
     };
@@ -217,8 +218,8 @@ function RuleView({ rule, presets, onEdit, onDelete, onToggle }) {
             <div class="item-view">
                 <input type="checkbox" id="enable-${rule.id}" checked=${rule.enabled} onChange=${handleToggle} />
                 <label for="enable-${rule.id}" class="item-details">
-                    <span class="item-main ${disabledClass}">${rule.domainFilter}</span>
-                    <span class="item-sub ${disabledClass}">${presetName} | ${dedupMode}</span>
+                    <span class="item-main ${disabledClass}">${rule.label}</span>
+                    <span class="item-sub ${disabledClass}">${rule.domainFilter} | ${presetName} | ${dedupMode}</span>
                 </label>
                 <div class="item-actions">
                     <button onClick=${() => onEdit(rule.id)}>${getMessage('edit')}</button>
@@ -229,7 +230,7 @@ function RuleView({ rule, presets, onEdit, onDelete, onToggle }) {
     `;
 }
 
-function RuleEditForm({ rule, presets, onSave, onCancel }) {
+function RuleEditForm({ rule, presets, onSave, onCancel, allRules }) { // Added allRules for uniqueness check
     const [formData, setFormData] = useState(rule);
     const [errors, setErrors] = useState({});
 
@@ -264,9 +265,17 @@ function RuleEditForm({ rule, presets, onSave, onCancel }) {
         e.preventDefault();
         // --- Validation ---
         let currentErrors = {};
+        // Label validation
+        if (!formData.label || formData.label.trim() === "") {
+            currentErrors.label = getMessage('errorLabelRequired', 'Label is required'); // Fallback text
+        } else if (allRules && allRules.some(r => r.id !== formData.id && r.label.toLowerCase() === formData.label.toLowerCase())) {
+            // Uniqueness check for label (case-insensitive) using the passed 'allRules' prop
+            currentErrors.label = getMessage('errorLabelUnique', 'Label must be unique'); // Fallback text
+        }
+
         if (!isValidDomain(formData.domainFilter)) {
             currentErrors.domainFilter = getMessage('errorInvalidDomain');
-        } // Add duplicate check later if needed
+        }
         if (!isValidRegex(formData.titleParsingRegEx)) {
             currentErrors.titleParsingRegEx = getMessage('errorInvalidRegex');
         }
@@ -284,6 +293,12 @@ function RuleEditForm({ rule, presets, onSave, onCancel }) {
             <div class="item-edit">
                  <form onSubmit=${handleSubmit}>
                     <div class="form-grid">
+                        <div class="form-group tooltip-container">
+                            <label data-i18n="labelLabel">${getMessage('labelLabel', 'Label')}</label>
+                            <input type="text" name="label" value=${formData.label} onChange=${handleChange} required />
+                            <span class="tooltip-text" data-i18n="labelTooltip">${getMessage('labelTooltip', 'A unique, user-friendly name for this rule.')}</span>
+                            ${errors.label && html`<span class="error-message">${errors.label}</span>`}
+                        </div>
                         <div class="form-group tooltip-container">
                             <label>${getMessage('domainFilter')}</label>
                             <input type="text" name="domainFilter" value=${formData.domainFilter} onChange=${handleChange} required />
