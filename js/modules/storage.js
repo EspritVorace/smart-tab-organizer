@@ -55,12 +55,27 @@ export async function initializeDefaults() {
         defaults.regexPresets.forEach(dp => { if (!merged.regexPresets.some(mp => mp.id === dp.id)) merged.regexPresets.push(dp); });
         defaults.domainRules.forEach(dr => { if (!merged.domainRules.some(mr => mr.id === dr.id)) merged.domainRules.push(dr); });
 
-        // Ensure all domain rules have a label
+        // Ensure logicalGroups are merged and the default "issues" group is present
+        if (!merged.logicalGroups) {
+            merged.logicalGroups = defaults.logicalGroups || [];
+        }
+        const issuesGroupExists = merged.logicalGroups.some(group => group.id === "issues");
+        if (!issuesGroupExists && defaults.logicalGroups) {
+            const defaultIssuesGroup = defaults.logicalGroups.find(group => group.id === "issues");
+            if (defaultIssuesGroup) {
+                merged.logicalGroups.push(defaultIssuesGroup);
+            }
+        }
+
+        // Ensure all domain rules have a label and groupId
         if (merged.domainRules && Array.isArray(merged.domainRules)) {
             merged.domainRules.forEach(rule => {
                 if (typeof rule.label === 'undefined') {
                     const defaultRule = defaults.domainRules.find(dr => dr.id === rule.id);
                     rule.label = defaultRule ? defaultRule.label : rule.domainFilter || "Untitled Rule";
+                }
+                if (typeof rule.groupId === 'undefined') {
+                    rule.groupId = "issues"; // Default to "issues" group
                 }
             });
         }

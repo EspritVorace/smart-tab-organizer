@@ -10,6 +10,8 @@ import { applyTheme } from './../js/modules/theme.js';
 
 const html = htm.bind(h);
 
+const LOGICAL_GROUP_COLORS = ["grey", "blue", "red", "yellow", "green", "pink", "purple", "cyan", "orange"];
+
 // --- Fonctions Utilitaires ---
 function Tooltip({ textKey, children }) {
     return html`
@@ -27,6 +29,7 @@ function OptionsApp() {
     const [currentTab, setCurrentTab] = useState('rules');
     const [editingRuleId, setEditingRuleId] = useState(null);
     const [editingPresetId, setEditingPresetId] = useState(null);
+    const [editingLogicalGroupId, setEditingLogicalGroupId] = useState(null); // For the new tab
 
     // --- Chargement initial & Écouteur Storage ---
     useEffect(() => {
@@ -75,6 +78,8 @@ function OptionsApp() {
         setSettings(prev => ({ ...prev, regexPresets: newPresets }));
     }, []);
 
+    // updateLogicalGroups is removed, setSettings will be used directly by LogicalGroupsTab
+
      const handleResetStats = useCallback(async () => {
          if (confirm(getMessage('confirmResetStats'))) {
             const newStats = await resetStatistics();
@@ -85,6 +90,7 @@ function OptionsApp() {
     const handleTabChange = useCallback((tab) => {
         setEditingRuleId(null); // Reset editing when changing tabs
         setEditingPresetId(null);
+        setEditingLogicalGroupId(null); // Reset for new tab
         setCurrentTab(tab);
     }, []);
 
@@ -101,6 +107,7 @@ function OptionsApp() {
             <main>
                 ${currentTab === 'rules' && html`<${RulesTab} settings=${settings} updateRules=${updateRules} editingId=${editingRuleId} setEditingId=${setEditingRuleId} />`}
                 ${currentTab === 'presets' && html`<${PresetsTab} settings=${settings} updatePresets=${updatePresets} editingId=${editingPresetId} setEditingId=${setEditingPresetId} />`}
+                ${currentTab === 'logicalGroups' && html`<${LogicalGroupsTab} settings=${settings} setSettings=${setSettings} editingId=${editingLogicalGroupId} setEditingId=${setEditingLogicalGroupId} />`}
                 ${currentTab === 'importexport' && html`<${ImportExportTab} settings=${settings} setSettings=${setSettings}/>`}
                 ${currentTab === 'stats' && html`<${StatsTab} stats=${stats} onReset=${handleResetStats} />`}
             </main>
@@ -130,6 +137,7 @@ function Tabs({ currentTab, onTabChange }) {
     const tabs = [
         { key: 'rules', labelKey: 'domainRulesTab' },
         { key: 'presets', labelKey: 'regexPresetsTab' },
+        { key: 'logicalGroups', labelKey: 'logicalGroupsTab' },
         { key: 'importexport', labelKey: 'importExportTab' },
         { key: 'stats', labelKey: 'statisticsTab' },
     ];
@@ -152,13 +160,55 @@ function Tabs({ currentTab, onTabChange }) {
 // Pour la brièveté, voici un exemple pour RulesTab. Les autres suivraient une logique similaire.
 
 function RulesTab({ settings, updateRules, editingId, setEditingId }) {
-    const { domainRules, regexPresets } = settings;
+    const { domainRules, regexPresets, logicalGroups = [] } = settings; // Destructure and default logicalGroups
     const [newRuleInProgress, setNewRuleInProgress] = useState(null);
+    const [collapsedGroups, setCollapsedGroups] = useState({});
+
+    // Initialize collapsed states
+    useEffect(() => {
+        const initialCollapsedState = {};
+        logicalGroups.forEach(group => {
+            initialCollapsedState[group.id] = true; // Collapse all by default
+        });
+        initialCollapsedState['_ungrouped'] = true; // Collapse ungrouped by default too
+        setCollapsedGroups(initialCollapsedState);
+    }, [logicalGroups]); // Re-run if logicalGroups array changes
+
+    const toggleGroupCollapse = (groupId) => {
+        setCollapsedGroups(prev => ({ ...prev, [groupId]: !prev[groupId] }));
+    };
+
+    // Helper function to determine text color based on background
+    // Based on common brightness perceptions.
+    const getTextContrastClass = (bgColorName) => {
+        switch (bgColorName) {
+            case 'blue':
+            case 'red':
+            case 'green':
+            case 'purple':
+                return 'group-header-text-light';
+            case 'grey':
+            case 'yellow':
+            case 'pink':
+            case 'cyan':
+            case 'orange':
+            default:
+                return 'group-header-text-dark';
+        }
+    };
 
     const handleAdd = () => {
         const newId = generateUUID();
-        // Initialize label for new rules
-        const newRule = { id: newId, label: "", enabled: true, domainFilter: "", titleParsingRegEx: regexPresets[0]?.regex || "", deduplicationMatchMode: "exact" };
+        // Initialize label and groupId for new rules
+        const newRule = {
+            id: newId,
+            label: "",
+            enabled: true,
+            domainFilter: "",
+            titleParsingRegEx: regexPresets[0]?.regex || "",
+            deduplicationMatchMode: "exact",
+            groupId: null // Default to no group
+        };
         setNewRuleInProgress(newRule);
         setEditingId(newId); // Ouvre le formulaire pour la nouvelle règle
     };
@@ -185,26 +235,84 @@ function RulesTab({ settings, updateRules, editingId, setEditingId }) {
          }
     };
 
+    // Prepare data for rendering
+    const groupedRules = {};
+    const ungroupedRules = [];
+    const groupOrder = logicalGroups.map(g => g.id); // Maintain original order of groups
+
+    logicalGroups.forEach(group => {
+        groupedRules[group.id] = [];
+    });
+
+    domainRules.forEach(rule => {
+        if (rule.groupId && groupedRules[rule.groupId]) {
+            groupedRules[rule.groupId].push(rule);
+        } else {
+            ungroupedRules.push(rule);
+        }
+    });
+
+    const renderRuleItem = (rule) => html`
+        <${Fragment} key=${rule.id}>
+            ${editingId === rule.id && (!newRuleInProgress || newRuleInProgress.id !== rule.id)
+                ? html`<${RuleEditForm} rule=${rule} presets=${regexPresets} logicalGroups=${logicalGroups || []} onSave=${handleSave} onCancel=${() => setEditingId(null)} allRules=${domainRules} />`
+                : html`<${RuleView} rule=${rule} presets=${regexPresets} logicalGroups=${logicalGroups || []} onEdit=${setEditingId} onDelete=${handleDelete} onToggle=${handleSave} />`
+            }
+        <//>
+    `;
+
     return html`
         <section id="rules-section">
             <h2>${getMessage('domainRulesTab')}</h2>
-            ${domainRules.map(rule => html`
-                <${Fragment} key=${rule.id}>
-                    ${editingId === rule.id && (!newRuleInProgress || newRuleInProgress.id !== rule.id)
-                        ? html`<${RuleEditForm} rule=${rule} presets=${regexPresets} onSave=${handleSave} onCancel=${() => setEditingId(null)} />`
-                        : html`<${RuleView} rule=${rule} presets=${regexPresets} onEdit=${setEditingId} onDelete=${handleDelete} onToggle=${handleSave} />`
-                    }
-                <//>
-            `)}
+
+            ${groupOrder.map(groupId => {
+                const group = logicalGroups.find(g => g.id === groupId);
+                const rulesInGroup = groupedRules[groupId];
+                if (!group || rulesInGroup.length === 0) return null; // Don't render group if no rules or group deleted
+
+                const isExpanded = !collapsedGroups[groupId];
+                return html`
+                    <div class="rules-group-container" key=${groupId}>
+                        <div
+                            class="rules-group-header ${group.color ? `group-color-${group.color}` : ''} ${getTextContrastClass(group.color)} ${isExpanded ? 'expanded' : ''}"
+                            onClick=${() => toggleGroupCollapse(groupId)}
+                        >
+                            <span class="group-arrow">${isExpanded ? '▼' : '▶'}</span>
+                            <span class="group-label">${group.label}</span>
+                            <span class="rule-count">(${rulesInGroup.length} ${rulesInGroup.length === 1 ? getMessage('ruleCountSingular', 'rule') : getMessage('ruleCountPlural', 'rules')})</span>
+                        </div>
+                        <div class="rules-group-content ${isExpanded ? 'expanded' : ''}">
+                            ${rulesInGroup.map(renderRuleItem)}
+                        </div>
+                    </div>
+                `;
+            })}
+
+            ${ungroupedRules.length > 0 && html`
+                <div class="rules-group-container" key="_ungrouped">
+                    <div
+                        class="rules-group-header ungrouped-rules-header ${!collapsedGroups['_ungrouped'] ? 'expanded' : ''}"
+                        onClick=${() => toggleGroupCollapse('_ungrouped')}
+                    >
+                        <span class="group-arrow">${!collapsedGroups['_ungrouped'] ? '▼' : '▶'}</span>
+                        <span class="group-label">${getMessage('ungroupedRules', 'Ungrouped Rules')}</span>
+                         <span class="rule-count">(${ungroupedRules.length} ${ungroupedRules.length === 1 ? getMessage('ruleCountSingular', 'rule') : getMessage('ruleCountPlural', 'rules')})</span>
+                    </div>
+                    <div class="rules-group-content ${!collapsedGroups['_ungrouped'] ? 'expanded' : ''}">
+                        ${ungroupedRules.map(renderRuleItem)}
+                    </div>
+                </div>
+            `}
+
             ${newRuleInProgress && editingId === newRuleInProgress.id && html`
-                <${RuleEditForm} rule=${newRuleInProgress} presets=${regexPresets} onSave=${handleSave} onCancel=${handleCancelNew} />
+                <${RuleEditForm} rule=${newRuleInProgress} presets=${regexPresets} logicalGroups=${logicalGroups || []} onSave=${handleSave} onCancel=${handleCancelNew} allRules=${domainRules} />
             `}
             ${!editingId && !newRuleInProgress && html`<button onClick=${handleAdd} class="button add-button">${getMessage('addRule')}</button>`}
         </section>
     `;
 }
 
-function RuleView({ rule, presets, onEdit, onDelete, onToggle }) {
+function RuleView({ rule, presets, logicalGroups, onEdit, onDelete, onToggle }) { // Added logicalGroups
      const presetName = presets.find(p => p.regex === rule.titleParsingRegEx)?.name || rule.titleParsingRegEx;
      const dedupMode = getMessage(rule.deduplicationMatchMode === 'exact' ? 'exactMatch' : 'includesMatch');
      const disabledClass = rule.enabled ? '' : 'disabled-text';
@@ -213,13 +321,22 @@ function RuleView({ rule, presets, onEdit, onDelete, onToggle }) {
         onToggle({ ...rule, enabled: e.target.checked });
      };
 
+    const group = rule.groupId && logicalGroups ? logicalGroups.find(g => g.id === rule.groupId) : null;
+    const groupColorClass = group ? `group-color-${group.color}` : '';
+    // Ensure groupLabelText is derived from the potentially updated logicalGroups prop
+    const groupLabelText = group ? group.label : getMessage('noGroupAssigned', 'No group');
+
+
     return html`
         <div class="list-item">
             <div class="item-view">
                 <input type="checkbox" id="enable-${rule.id}" checked=${rule.enabled} onChange=${handleToggle} />
                 <label for="enable-${rule.id}" class="item-details">
                     <span class="item-main ${disabledClass}">${rule.label}</span>
-                    <span class="item-sub ${disabledClass}">${rule.domainFilter} | ${presetName} | ${dedupMode}</span>
+                    <span class="item-sub ${disabledClass}">
+                        ${group && html`<span class="group-color-swatch ${groupColorClass}" style=${{marginRight: '4px'}}></span>`}
+                        ${groupLabelText} | ${rule.domainFilter} | ${presetName} | ${dedupMode}
+                    </span>
                 </label>
                 <div class="item-actions">
                     <button onClick=${() => onEdit(rule.id)}>${getMessage('edit')}</button>
@@ -230,8 +347,8 @@ function RuleView({ rule, presets, onEdit, onDelete, onToggle }) {
     `;
 }
 
-function RuleEditForm({ rule, presets, onSave, onCancel, allRules }) { // Added allRules for uniqueness check
-    const [formData, setFormData] = useState(rule);
+function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules }) {
+    const [formData, setFormData] = useState({...rule, groupId: rule.groupId === undefined ? null : rule.groupId });
     const [errors, setErrors] = useState({});
 
     const isPreset = presets.some(p => p.regex === formData.titleParsingRegEx);
@@ -312,6 +429,16 @@ function RuleEditForm({ rule, presets, onSave, onCancel, allRules }) { // Added 
                                  <option value="includes">${getMessage('includesMatch')}</option>
                             </select>
                             <span class="tooltip-text" data-i18n="deduplicationModeTooltip">${getMessage('deduplicationModeTooltip')}</span>
+                        </div>
+                        <div class="form-group tooltip-container"> {/* Changed from full-width to allow group selector beside it potentially */}
+                            <label>${getMessage('logicalGroup', 'Logical Group')}</label>
+                            <select name="groupId" value=${formData.groupId === null ? "" : formData.groupId} onChange=${handleChange}>
+                                <option value="">${getMessage('noGroup', '-- No Group --')}</option>
+                                ${logicalGroups.map(g => html`
+                                    <option value=${g.id}>${g.label}</option>
+                                `)}
+                            </select>
+                            <span class="tooltip-text" data-i18n="logicalGroupRuleTooltip">${getMessage('logicalGroupRuleTooltip', 'Assign this rule to a logical group.')}</span>
                         </div>
                         <div class="form-group tooltip-container full-width">
                             <label>${getMessage('titleRegex')}</label>
@@ -549,6 +676,197 @@ function StatsTab({ stats, onReset }) {
                 <p><span>${getMessage('tabsDeduplicated')}</span> ${stats.tabsDeduplicatedCount || 0}</p>
                 <button onClick=${onReset} class="button danger">${getMessage('resetStats')}</button>
             </div>
+        </section>
+    `;
+}
+
+// --- Onglet Groupes Logiques (NOUVEAU Placeholder) ---
+function LogicalGroupsTab({ settings, setSettings, editingId, setEditingId }) {
+    const { logicalGroups = [], domainRules = [] } = settings; // Default to empty arrays
+
+    const [showAddForm, setShowAddForm] = useState(false);
+    // State for Add form
+    const [newGroupLabel, setNewGroupLabel] = useState('');
+    const [newGroupColor, setNewGroupColor] = useState(LOGICAL_GROUP_COLORS[0]);
+    const [addFormError, setAddFormError] = useState('');
+    // State for Edit form
+    const [currentEditData, setCurrentEditData] = useState(null);
+    const [editFormError, setEditFormError] = useState('');
+
+
+    if (!settings.logicalGroups) { // Check specifically settings.logicalGroups for initial load
+        return html`<p>${getMessage('loadingText', 'Loading...')}</p>`;
+    }
+
+    // --- Edit Logic ---
+    useEffect(() => {
+        if (editingId && logicalGroups) {
+            const groupToEdit = logicalGroups.find(g => g.id === editingId);
+            if (groupToEdit) {
+                setCurrentEditData({ ...groupToEdit });
+                setShowAddForm(false); // Ensure add form is hidden when editing
+                setEditFormError('');
+            } else {
+                setEditingId(null); // Group not found, clear editingId
+            }
+        } else {
+            setCurrentEditData(null);
+        }
+    }, [editingId, logicalGroups]);
+
+    const handleEditLabelChange = (e) => {
+        setCurrentEditData(prev => ({ ...prev, label: e.target.value }));
+    };
+    const handleEditColorChange = (e) => {
+        setCurrentEditData(prev => ({ ...prev, color: e.target.value }));
+    };
+
+    const handleSaveEditGroup = () => {
+        setEditFormError('');
+        if (!currentEditData.label.trim()) {
+            setEditFormError(getMessage('errorLabelRequired', 'Label is required.'));
+            return;
+        }
+        // Check uniqueness only against *other* groups
+        if (logicalGroups.some(g => g.id !== editingId && g.label.toLowerCase() === currentEditData.label.trim().toLowerCase())) {
+            setEditFormError(getMessage('errorLabelUnique', 'Label must be unique.'));
+            return;
+        }
+        const updatedGroups = logicalGroups.map(g => g.id === editingId ? { ...currentEditData } : g);
+        setSettings(prev => ({ ...prev, logicalGroups: updatedGroups }));
+        setEditingId(null); // This will also clear currentEditData via useEffect
+    };
+
+    const handleCancelEdit = () => {
+        setEditingId(null); // This will also clear currentEditData via useEffect
+        setEditFormError('');
+    };
+
+    // --- Add Logic ---
+    const handleAddGroup = () => {
+        setAddFormError('');
+        if (!newGroupLabel.trim()) {
+            setAddFormError(getMessage('errorLabelRequired', 'Label is required.'));
+            return;
+        }
+        if (logicalGroups.some(g => g.label.toLowerCase() === newGroupLabel.trim().toLowerCase())) {
+            setAddFormError(getMessage('errorLabelUnique', 'Label must be unique.'));
+            return;
+        }
+
+        const newGroup = {
+            id: generateUUID(),
+            label: newGroupLabel.trim(),
+            color: newGroupColor,
+        };
+        setSettings(prev => ({ ...prev, logicalGroups: [...prev.logicalGroups, newGroup] }));
+        setNewGroupLabel('');
+        setNewGroupColor(LOGICAL_GROUP_COLORS[0]);
+        setShowAddForm(false);
+    };
+
+    const handleCancelAdd = () => {
+        setShowAddForm(false);
+        setNewGroupLabel('');
+        setNewGroupColor(LOGICAL_GROUP_COLORS[0]);
+        setAddFormError('');
+    };
+
+    return html`
+        <section id="logical-groups-section">
+            <h2>${getMessage('logicalGroupsTab', 'Logical Groups')}</h2>
+
+            ${logicalGroups.map(group => html`
+                <div class="list-item" key=${group.id}>
+                    <div class="item-view">
+                        <span class="group-color-swatch ${'group-color-' + group.color}"></span>
+                        <div class="item-details">
+                            <span class="item-main">${group.label}</span>
+                            <code class="item-sub">ID: ${group.id}</code>
+                        </div>
+                        <div class="item-actions">
+                            <button onClick=${() => { setEditingId(group.id); setShowAddForm(false); }}>${getMessage('edit', 'Edit')}</button>
+                            <button class="danger" onClick=${() => handleDeleteGroup(group.id, group.label)}>${getMessage('delete', 'Delete')}</button>
+                        </div>
+                    </div>
+                </div>
+            `)}
+
+            ${!showAddForm && !editingId && !currentEditData && html`
+                <button onClick=${() => { setShowAddForm(true); setEditingId(null); }} class="button add-button">
+                    ${getMessage('addLogicalGroup', 'Add Group')}
+                </button>
+            `}
+
+            {/* --- ADD FORM --- */}
+            ${showAddForm && !editingId && !currentEditData && html`
+                <div class="list-item is-editing">
+                    <div class="item-edit">
+                        <h3>${getMessage('addNewLogicalGroup', 'Add New Logical Group')}</h3>
+                        <div class="form-group">
+                            <label for="add-group-label">${getMessage('groupLabel', 'Label')}</label>
+                            <input
+                                type="text"
+                                id="add-group-label"
+                                value=${newGroupLabel}
+                                onInput=${(e) => setNewGroupLabel(e.target.value)}
+                            />
+                            ${addFormError && html`<span class="error-message">${addFormError}</span>`}
+                        </div>
+                        <div class="form-group">
+                            <label for="add-group-color">${getMessage('groupColor', 'Color')}</label>
+                            <select
+                                id="add-group-color"
+                                value=${newGroupColor}
+                                onChange=${(e) => setNewGroupColor(e.target.value)}
+                            >
+                                ${LOGICAL_GROUP_COLORS.map(color => html`
+                                    <option value=${color}>${getMessage(`color_${color}`, color)}</option>
+                                `)}
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button onClick=${handleAddGroup} class="primary">${getMessage('save', 'Save')}</button>
+                            <button onClick=${handleCancelAdd}>${getMessage('cancel', 'Cancel')}</button>
+                        </div>
+                    </div>
+                </div>
+            `}
+
+            {/* --- EDIT FORM --- */}
+            ${editingId && currentEditData && html`
+                <div class="list-item is-editing">
+                    <div class="item-edit">
+                        <h3>${getMessage('editLogicalGroup', 'Edit Logical Group')}</h3>
+                        <div class="form-group">
+                            <label for="edit-group-label-${currentEditData.id}">${getMessage('groupLabel', 'Label')}</label>
+                            <input
+                                type="text"
+                                id="edit-group-label-${currentEditData.id}"
+                                value=${currentEditData.label}
+                                onInput=${handleEditLabelChange}
+                            />
+                            ${editFormError && html`<span class="error-message">${editFormError}</span>`}
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-group-color-${currentEditData.id}">${getMessage('groupColor', 'Color')}</label>
+                            <select
+                                id="edit-group-color-${currentEditData.id}"
+                                value=${currentEditData.color}
+                                onChange=${handleEditColorChange}
+                            >
+                                ${LOGICAL_GROUP_COLORS.map(color => html`
+                                    <option value=${color}>${getMessage(`color_${color}`, color)}</option>
+                                `)}
+                            </select>
+                        </div>
+                        <div class="form-actions">
+                            <button onClick=${handleSaveEditGroup} class="primary">${getMessage('save', 'Save')}</button>
+                            <button onClick=${handleCancelEdit}>${getMessage('cancel', 'Cancel')}</button>
+                        </div>
+                    </div>
+                </div>
+            `}
         </section>
     `;
 }

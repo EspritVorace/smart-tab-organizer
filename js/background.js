@@ -98,7 +98,21 @@ async function handleGrouping(openerTab, newTab) {
         return;
     }
     // rule.label is available from settings, rule.name was from an older version.
-    console.log(`[GROUPING_DEBUG] handleGrouping: Rule found for "${openerTab.url}": label: "${rule.label || 'N/A'}", filter: "${rule.domainFilter}"`);
+    console.log(`[GROUPING_DEBUG] handleGrouping: Rule found for "${openerTab.url}": label: "${rule.label || 'N/A'}", filter: "${rule.domainFilter}", groupId: "${rule.groupId}"`);
+
+    // Determine groupColor from logical group
+    let groupColor = null; // Default to no color (Chrome default)
+    if (rule.groupId && settings.logicalGroups && settings.logicalGroups.length > 0) {
+        const logicalGroup = settings.logicalGroups.find(lg => lg.id === rule.groupId);
+        if (logicalGroup && logicalGroup.color) {
+            groupColor = logicalGroup.color;
+            console.log(`[GROUPING_DEBUG] handleGrouping: Logical group found: ID "${logicalGroup.id}", Label "${logicalGroup.label}", Color "${groupColor}".`);
+        } else {
+            console.log(`[GROUPING_DEBUG] handleGrouping: Rule has groupId "${rule.groupId}" but no matching logical group or color found.`);
+        }
+    } else {
+        console.log(`[GROUPING_DEBUG] handleGrouping: Rule has no groupId, or no logicalGroups in settings. No specific color will be applied.`);
+    }
 
     // Determine groupName: 1. Regex, 2. Rule Label, 3. "SmartGroup"
     let groupName = rule.label; // Use rule's label as the initial default
@@ -173,26 +187,44 @@ async function handleGrouping(openerTab, newTab) {
                         }
                         console.log(`[GROUPING_DEBUG] handleGrouping: Calling chrome.tabs.group to add tabs [${tabsToAddToExistingGroup.join(', ')}] to group ${existingGroup.id}`);
                         await chrome.tabs.group({ groupId: existingGroup.id, tabIds: tabsToAddToExistingGroup });
-                        console.log(`[GROUPING_DEBUG] handleGrouping: Calling chrome.tabGroups.update for group ${existingGroup.id} (title: "${groupName}", collapsed: ${rule.collapseExisting})`);
-                        await chrome.tabGroups.update(existingGroup.id, { title: groupName, collapsed: rule.collapseExisting });
+                        const updatePayloadExisting = { title: groupName, collapsed: rule.collapseExisting };
+                        if (groupColor) updatePayloadExisting.color = groupColor;
+                        console.log(`[GROUPING_DEBUG] handleGrouping: Calling chrome.tabGroups.update for group ${existingGroup.id} with payload:`, updatePayloadExisting);
+                        await chrome.tabGroups.update(existingGroup.id, updatePayloadExisting);
                     } else {
                         console.log(`[GROUPING_DEBUG] handleGrouping: No group with title "${groupName}" found by query. Creating new group.`);
                         const tabsToGroup = [currentOpenerTab.id, newTab.id];
                         console.log(`[GROUPING_DEBUG] handleGrouping: Calling chrome.tabs.group to create new group with tabs [${tabsToGroup.join(', ')}]`);
                         const newGroupIdVal = await chrome.tabs.group({ tabIds: tabsToGroup });
-                        console.log(`[GROUPING_DEBUG] handleGrouping: New group created with temp ID: ${newGroupIdVal}. Calling chrome.tabGroups.update (title: "${groupName}", collapseNew: ${rule.collapseNew})`);
-                        await chrome.tabGroups.update(newGroupIdVal, { title: groupName, collapsed: rule.collapseNew });
+                        const updatePayloadNew = { title: groupName, collapsed: rule.collapseNew };
+                        if (groupColor) updatePayloadNew.color = groupColor;
+                        console.log(`[GROUPING_DEBUG] handleGrouping: New group created with temp ID: ${newGroupIdVal}. Calling chrome.tabGroups.update with payload:`, updatePayloadNew);
+                        await chrome.tabGroups.update(newGroupIdVal, updatePayloadNew);
                         await incrementStat('tabGroupsCreatedCount');
                     }
                 } else {
                     console.log(`[GROUPING_DEBUG] handleGrouping: Opener tab ${currentOpenerTab.id} already in group ${openerGroupId}. Adding new tab ${newTab.id}. Using pre-calculated groupName "${groupName}" for consistency if needed (though not for naming this existing group).`);
                     console.log(`[GROUPING_DEBUG] handleGrouping: Calling chrome.tabs.group to add tab ${newTab.id} to group ${openerGroupId}`);
                     await chrome.tabs.group({ groupId: openerGroupId, tabIds: [newTab.id] });
-                    console.log(`[GROUPING_DEBUG] handleGrouping: Calling chrome.tabGroups.update for group ${openerGroupId} (collapsed: ${rule.collapseExisting})`);
-                    // Title of existing group is not changed here, only collapsed state.
-                    await chrome.tabGroups.update(openerGroupId, { collapsed: rule.collapseExisting });
+                    // For existing groups where opener was already part, we might only want to set collapsed state,
+                    // and potentially color if the group doesn't have the "right" color yet.
+                    // However, changing color of an existing group the user might have manually set could be intrusive.
+                    // For now, let's only set collapsed state and not color for groups the opener was already in.
+                    // If the group's color needs to be updated to match the rule, it should happen when the group is first formed or if it's re-evaluated.
+                    // The current logic for "existingGroup" (found by title) DOES set the color.
+                    // This path is for when openerTab is ALREADY in a group.
+                    const updatePayloadOpenerInGroup = { collapsed: rule.collapseExisting };
+                    // Re-fetch the group to check its current color, only update if different from rule's color?
+                    // Or, more simply, if the rule implies a color, and the group doesn't have it, apply it.
+                    // This could still be intrusive. For now, let's be conservative for groups opener is already in.
+                    // const existingGroupDetails = await chrome.tabGroups.get(openerGroupId);
+                    // if (groupColor && existingGroupDetails.color !== groupColor) {
+                    //    updatePayloadOpenerInGroup.color = groupColor; // This line makes it more aggressive in coloring
+                    // }
+                    console.log(`[GROUPING_DEBUG] handleGrouping: Calling chrome.tabGroups.update for group ${openerGroupId} with payload:`, updatePayloadOpenerInGroup);
+                    await chrome.tabGroups.update(openerGroupId, updatePayloadOpenerInGroup);
                 }
-                console.log(`[GROUPING_DEBUG] handleGrouping: Grouping action for new tab ${newTab.id} completed successfully using groupName "${groupName}".`);
+                console.log(`[GROUPING_DEBUG] handleGrouping: Grouping action for new tab ${newTab.id} completed successfully using groupName "${groupName}". Color applied: ${groupColor || 'Chrome default'}.`);
             } catch (error) {
                 console.error(`[GROUPING_DEBUG] handleGrouping: Error during grouping logic for new tab ${newTab.id} (opener ${openerTab.id}, groupName "${groupName}"):`, error.message, error.stack);
                 if (error.message && (error.message.toLowerCase().includes("no tab with id") ||

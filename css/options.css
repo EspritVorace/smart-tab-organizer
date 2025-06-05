@@ -57,3 +57,91 @@ code.item-sub { background-color: var(--input-bg-color); padding: 2px 5px; borde
 .tooltip-container:hover .tooltip-text { visibility: visible; opacity: 1; }
 .error-message { color: var(--danger-color); font-size: 0.85em; display: block; margin-top: 5px; font-weight: 500; }
 footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid var(--border-color); text-align: center; font-size: 0.8em; color: var(--text-color-light); }
+
+/* Logical Group Color Swatches */
+.group-color-swatch {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  margin-right: 8px;
+  border: 1px solid rgba(0,0,0,0.1); /* Slight border for lighter colors */
+  vertical-align: middle;
+}
+
+.group-color-grey { background-color: #808080; }
+.group-color-blue { background-color: #007bff; }
+.group-color-red { background-color: #dc3545; }
+.group-color-yellow { background-color: #ffc107; }
+.group-color-green { background-color: #28a745; }
+.group-color-pink { background-color: #e83e8c; }
+.group-color-purple { background-color: #6f42c1; }
+.group-color-cyan { background-color: #17a2b8; }
+.group-color-orange { background-color: #fd7e14; }
+
+/* Text contrast utility classes for group headers */
+.group-header-text-light { color: #f8f9fa; } /* Light text for dark backgrounds */
+.group-header-text-dark { color: #212529; }  /* Dark text for light backgrounds */
+
+/* Collapsible Group Headers for RulesTab */
+.rules-group-header {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  margin-bottom: 10px; /* Space before the list of rules or next header */
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  position: relative; /* For arrow positioning */
+}
+
+.rules-group-header:hover {
+  filter: brightness(95%);
+}
+
+.rules-group-header .group-arrow {
+  margin-right: 10px;
+  transition: transform 0.3s ease;
+  font-size: 1.2em;
+}
+
+.rules-group-header.expanded .group-arrow {
+  transform: rotate(90deg);
+}
+
+.rules-group-header .group-label {
+  flex-grow: 1;
+  font-weight: 600;
+}
+
+.rules-group-header .rule-count {
+  font-size: 0.9em;
+  margin-left: 8px;
+  opacity: 0.8;
+}
+
+.rules-group-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-out, opacity 0.3s ease-out;
+  opacity: 0;
+  /* Add some padding/margin if rules list items don't have their own top margin */
+  /* margin-left: 20px; /* Indent rules slightly under their group */
+}
+
+.rules-group-content.expanded {
+  max-height: 1000px; /* Adjust as needed, should be larger than any possible content */
+  opacity: 1;
+  transition: max-height 0.4s ease-in, opacity 0.3s ease-in;
+}
+
+/* Static header for Ungrouped rules */
+.ungrouped-rules-header {
+    padding: 8px 0;
+    margin-top: 20px; /* Space above the ungrouped section */
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-size: 1.1em;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+}
