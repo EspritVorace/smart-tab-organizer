@@ -334,7 +334,6 @@ function RuleView({ rule, presets, logicalGroups, onEdit, onDelete, onToggle }) 
                 <label for="enable-${rule.id}" class="item-details">
                     <span class="item-main ${disabledClass}">${rule.label}</span>
                     <span class="item-sub ${disabledClass}">
-                        ${group && html`<span class="group-color-swatch ${groupColorClass}" style=${{marginRight: '4px'}}></span>`}
                         ${groupLabelText} | ${rule.domainFilter} | ${presetName} | ${dedupMode}
                     </span>
                 </label>
