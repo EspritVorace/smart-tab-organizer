@@ -75,6 +75,14 @@
   "color_orange": { "message": "Orange" },
   "confirmDeleteGroup": { "message": "Are you sure you want to delete the group '$groupName$'?", "placeholders": { "groupName": { "content": "$1" } } },
   "confirmDeleteGroupInUse": { "message": "The group '$groupName$' is used by $ruleCount$ rule(s). Deleting it will remove these associations (rules will become ungrouped). Are you sure?", "placeholders": { "groupName": { "content": "$1" }, "ruleCount": { "content": "$2" } } },
+  "confirmDeleteGroupAssociated": {
+    "message": "The logical group \"$1\" is associated with $2 domain rule(s). Deleting this group will remove its association from these rules. Are you sure you want to delete it?",
+    "description": "Confirmation message when deleting a logical group that is associated with domain rules. $1 is the group label, $2 is the number of associated rules."
+  },
+  "confirmDeleteGroupNoRules": {
+    "message": "Are you sure you want to delete the logical group \"$1\"? This group is not currently associated with any domain rules.",
+    "description": "Confirmation message when deleting a logical group that has no associated domain rules. $1 is the group label."
+  },
   "logicalGroup": { "message": "Logical Group" },
   "noGroup": { "message": "-- No Group --" },
   "logicalGroupRuleTooltip": { "message": "Assign this rule to a logical group." },
