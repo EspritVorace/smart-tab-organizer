@@ -54,5 +54,17 @@
   "exportMessage": { "message": "Settings exported." },
   "domainFilterTooltip": { "message": "Enter the domain (e.g., youtube.com) or a pattern (e.g., *google*). Rules apply to matching domains." },
   "deduplicationModeTooltip": { "message": "Exact Match: Tabs are duplicates if titles are identical. Includes Match: Tabs are duplicates if one title contains the other." },
-  "titleParsingRegExTooltip": { "message": "Select a preset or write a custom regex to extract a part of the tab title for grouping or deduplication. The first capture group (text inside parentheses) is used." }
+  "titleParsingRegExTooltip": { "message": "Select a preset or write a custom regex to extract a part of the tab title for grouping or deduplication. The first capture group (text inside parentheses) is used." },
+  "regexTargetLabel": {
+    "message": "Regex Target"
+  },
+  "regexTargetTitleOption": {
+    "message": "Title"
+  },
+  "regexTargetUrlOption": {
+    "message": "URL"
+  },
+  "regexTargetTooltip": {
+    "message": "Choose whether the regex should match against the page title or the page URL."
+  }
 }

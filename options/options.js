@@ -31,10 +31,19 @@ function OptionsApp() {
     // --- Chargement initial & Écouteur Storage ---
     useEffect(() => {
         async function loadData() {
-            const [loadedSettings, loadedStats] = await Promise.all([getSettings(), getStatistics()]);
-            setSettings(loadedSettings);
+            const [initialSettings, loadedStats] = await Promise.all([getSettings(), getStatistics()]);
+
+            // Default regexTarget for domainRules
+            if (initialSettings && initialSettings.domainRules) {
+                initialSettings.domainRules = initialSettings.domainRules.map(rule => ({
+                    ...rule,
+                    regexTarget: rule.regexTarget || 'title'
+                }));
+            }
+
+            setSettings(initialSettings);
             setStats(loadedStats);
-            applyTheme(loadedSettings.darkModePreference || 'system');
+            applyTheme(initialSettings.darkModePreference || 'system');
         }
         loadData();
         const listener = (changes, area) => {
@@ -157,7 +166,7 @@ function RulesTab({ settings, updateRules, editingId, setEditingId }) {
 
     const handleAdd = () => {
         const newId = generateUUID();
-        const newRule = { id: newId, enabled: true, domainFilter: "", titleParsingRegEx: regexPresets[0]?.regex || "", deduplicationMatchMode: "exact" };
+        const newRule = { id: newId, enabled: true, domainFilter: "", titleParsingRegEx: regexPresets[0]?.regex || "", deduplicationMatchMode: "exact", regexTarget: "title" };
         setNewRuleInProgress(newRule);
         setEditingId(newId); // Ouvre le formulaire pour la nouvelle règle
     };
@@ -206,6 +215,7 @@ function RulesTab({ settings, updateRules, editingId, setEditingId }) {
 function RuleView({ rule, presets, onEdit, onDelete, onToggle }) {
      const presetName = presets.find(p => p.regex === rule.titleParsingRegEx)?.name || rule.titleParsingRegEx;
      const dedupMode = getMessage(rule.deduplicationMatchMode === 'exact' ? 'exactMatch' : 'includesMatch');
+     const targetText = rule.regexTarget === 'url' ? getMessage('regexTargetUrl') : getMessage('regexTargetTitle');
      const disabledClass = rule.enabled ? '' : 'disabled-text';
 
      const handleToggle = (e) => {
@@ -218,7 +228,7 @@ function RuleView({ rule, presets, onEdit, onDelete, onToggle }) {
                 <input type="checkbox" id="enable-${rule.id}" checked=${rule.enabled} onChange=${handleToggle} />
                 <label for="enable-${rule.id}" class="item-details">
                     <span class="item-main ${disabledClass}">${rule.domainFilter}</span>
-                    <span class="item-sub ${disabledClass}">${presetName} | ${dedupMode}</span>
+                    <span class="item-sub ${disabledClass}">${presetName} (${targetText}) | ${dedupMode}</span>
                 </label>
                 <div class="item-actions">
                     <button onClick=${() => onEdit(rule.id)}>${getMessage('edit')}</button>
@@ -297,6 +307,14 @@ function RuleEditForm({ rule, presets, onSave, onCancel }) {
                                  <option value="includes">${getMessage('includesMatch')}</option>
                             </select>
                             <span class="tooltip-text" data-i18n="deduplicationModeTooltip">${getMessage('deduplicationModeTooltip')}</span>
+                        </div>
+                        <div class="form-group tooltip-container">
+                            <label>${getMessage('regexTarget')}</label>
+                            <select name="regexTarget" value=${formData.regexTarget} onChange=${handleChange}>
+                                <option value="title">${getMessage('regexTargetTitle')}</option>
+                                <option value="url">${getMessage('regexTargetUrl')}</option>
+                            </select>
+                            <span class="tooltip-text" data-i18n="regexTargetTooltip">${getMessage('regexTargetTooltip')}</span>
                         </div>
                         <div class="form-group tooltip-container full-width">
                             <label>${getMessage('titleRegex')}</label>

@@ -54,5 +54,17 @@
   "exportMessage": { "message": "Paramètres exportés." },
   "domainFilterTooltip": { "message": "Entrez le domaine (par exemple, youtube.com) ou un motif (par exemple, _google_). Les règles s'appliquent aux domaines correspondants." },
   "deduplicationModeTooltip": { "message": "Correspondance exacte : Les onglets sont des doublons si les titres sont identiques. Correspondance incluse : Les onglets sont des doublons si un titre contient l'autre." },
-  "titleParsingRegExTooltip": { "message": "Sélectionnez un préréglage ou écrivez une expression régulière personnalisée pour extraire une partie du titre de l'onglet pour le regroupement ou la suppression des doublons. Le premier groupe de capture (texte entre parenthèses) est utilisé." }
+  "titleParsingRegExTooltip": { "message": "Sélectionnez un préréglage ou écrivez une expression régulière personnalisée pour extraire une partie du titre de l'onglet pour le regroupement ou la suppression des doublons. Le premier groupe de capture (texte entre parenthèses) est utilisé." },
+  "regexTargetLabel": {
+    "message": "Cible Regex"
+  },
+  "regexTargetTitleOption": {
+    "message": "Titre"
+  },
+  "regexTargetUrlOption": {
+    "message": "URL"
+  },
+  "regexTargetTooltip": {
+    "message": "Choisissez si le regex doit correspondre au titre de la page ou à l'URL de la page."
+  }
 }

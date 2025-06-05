@@ -13,3 +13,8 @@ export function extractGroupNameFromTitle(title, regexString) {
 }
 export function isValidRegex(regex) { try { new RegExp(regex); return regex.includes('(') && regex.includes(')'); } catch (e) { return false; } }
 export function isValidDomain(domain) { return domain ? /^(\*\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(domain.trim()) : false; }
+export function extractGroupNameFromUrl(url, regexString) {
+    if (!url || !regexString) return null;
+    try { const regex = new RegExp(regexString); const match = url.match(regex); return (match && match[1]) ? match[1].trim() : null; }
+    catch (e) { console.error("Err extractGroupNameFromUrl:", url, regexString, e); return null; }
+}

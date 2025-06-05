@@ -54,5 +54,17 @@
   "exportMessage": { "message": "Configuración exportada." },
   "domainFilterTooltip": { "message": "Ingrese el dominio (por ejemplo, youtube.com) o un patrón (por ejemplo, _google_). Las reglas se aplican a los dominios coincidentes." },
   "deduplicationModeTooltip": { "message": "Coincidencia exacta: Las pestañas son duplicadas si los títulos son idénticos. Coincidencia incluida: Las pestañas son duplicadas si un título contiene al otro." },
-  "titleParsingRegExTooltip": { "message": "Seleccione un valor preestablecido o escriba una expresión regular personalizada para extraer una parte del título de la pestaña para agrupar o eliminar duplicados. Se utiliza el primer grupo de captura (texto dentro de paréntesis)." }
+  "titleParsingRegExTooltip": { "message": "Seleccione un valor preestablecido o escriba una expresión regular personalizada para extraer una parte del título de la pestaña para agrupar o eliminar duplicados. Se utiliza el primer grupo de captura (texto dentro de paréntesis)." },
+  "regexTargetLabel": {
+    "message": "Objetivo del Regex"
+  },
+  "regexTargetTitleOption": {
+    "message": "Título"
+  },
+  "regexTargetUrlOption": {
+    "message": "URL"
+  },
+  "regexTargetTooltip": {
+    "message": "Elija si el regex debe coincidir con el título de la página o la URL de la página."
+  }
 }
