@@ -9,6 +9,7 @@ import { getMessage } from './../js/modules/i18n.js';
 import { applyTheme } from './../js/modules/theme.js';
 
 const html = htm.bind(h);
+const version = chrome.runtime.getManifest().version;
 
 import { Header } from './components/Header.js';
 import { Tabs } from './components/Tabs.js';
@@ -117,7 +118,7 @@ function OptionsApp() {
                 ${currentTab === 'importexport' && html`<${ImportExportTab} settings=${settings} setSettings=${setSettings} />`}
                 ${currentTab === 'stats' && html`<${StatsTab} stats=${stats} onReset=${handleResetStats} />`}
             </main>
-            <footer>SmartTab Organizer v1.0.2 - Licensed under GPL-3.0-only.</footer>
+            <footer>SmartTab Organizer v${version} - Licensed under GPL-3.0-only.</footer>
         </div>
     `;
 
