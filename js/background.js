@@ -1,6 +1,6 @@
 // js/background.js
 import { getSettings as storageGetSettings, incrementStat, initializeDefaults } from './modules/storage.js';
-import { matchesDomain, extractGroupNameFromTitle } from './modules/utils.js';
+import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from './modules/utils.js';
 
 const middleClickedTabs = new Map();
 
@@ -12,9 +12,25 @@ async function getSettings() {
         collapseNew: typeof rule.collapseNew === 'boolean' ? rule.collapseNew : false,
         collapseExisting: typeof rule.collapseExisting === 'boolean' ? rule.collapseExisting : false,
         deduplicationEnabled: typeof rule.deduplicationEnabled === 'boolean' ? rule.deduplicationEnabled : true,
-        deduplicationMatchMode: rule.deduplicationMatchMode || 'exact'
+        deduplicationMatchMode: rule.deduplicationMatchMode || 'exact',
+        groupNameSource: rule.groupNameSource || 'title',
+        urlParsingRegEx: rule.urlParsingRegEx || ''
     }));
     return settings;
+}
+
+async function promptForGroupName(defaultName, tabId) {
+    try {
+        const [{ result }] = await chrome.scripting.executeScript({
+            target: { tabId },
+            func: (msg, defName) => prompt(msg, defName),
+            args: [chrome.i18n.getMessage('promptEnterGroupName') || 'Enter group name', defaultName]
+        });
+        return result && result.trim() ? result.trim() : null;
+    } catch (e) {
+        console.error('promptForGroupName error', e);
+        return null;
+    }
 }
 
 chrome.runtime.onInstalled.addListener(async (details) => {
@@ -114,31 +130,43 @@ async function handleGrouping(openerTab, newTab) {
         console.log(`[GROUPING_DEBUG] handleGrouping: Rule has no groupId, or no logicalGroups in settings. No specific color will be applied.`);
     }
 
-    // Determine groupName: 1. Regex, 2. Rule Label, 3. "SmartGroup"
+    // Determine groupName: 1. Based on source setting, 2. Rule Label, 3. "SmartGroup"
     let groupName = rule.label; // Use rule's label as the initial default
-    if (!groupName || !groupName.trim()) { // Fallback if label is empty or whitespace
+    if (!groupName || !groupName.trim()) {
         groupName = "SmartGroup";
         console.log(`[GROUPING_DEBUG] handleGrouping: Rule label is empty or whitespace. Initial groupName set to "${groupName}".`);
     } else {
         console.log(`[GROUPING_DEBUG] handleGrouping: Initial groupName set from rule.label: "${groupName}".`);
     }
 
-    if (openerTab.title && rule.titleParsingRegEx) {
+    if (rule.groupNameSource === 'title' && openerTab.title && rule.titleParsingRegEx) {
         try {
             const extracted = extractGroupNameFromTitle(openerTab.title, rule.titleParsingRegEx);
             if (extracted && extracted.trim()) {
-                groupName = extracted.trim(); // Override with extracted name if successful
+                groupName = extracted.trim();
                 console.log(`[GROUPING_DEBUG] handleGrouping: Group name extracted from opener title "${openerTab.title}" using regex "${rule.titleParsingRegEx}": "${groupName}".`);
-            } else {
-                 console.log(`[GROUPING_DEBUG] handleGrouping: Title parsing from opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}" was empty or whitespace. Group name remains: "${groupName}".`);
             }
         } catch (e) {
-            console.warn(`[GROUPING_DEBUG] handleGrouping: Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}". Group name remains: "${groupName}". Details:`, e.message);
-            // On error, groupName remains rule.label (or "SmartGroup" if label was also empty)
+            console.warn(`[GROUPING_DEBUG] handleGrouping: Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}".`, e.message);
         }
-    } else {
-         console.log(`[GROUPING_DEBUG] handleGrouping: No opener title ("${openerTab.title}") or no parsing regex ("${rule.titleParsingRegEx}"). Group name remains: "${groupName}".`);
+    } else if (rule.groupNameSource === 'url' && openerTab.url && rule.urlParsingRegEx) {
+        try {
+            const extracted = extractGroupNameFromUrl(openerTab.url, rule.urlParsingRegEx);
+            if (extracted && extracted.trim()) {
+                groupName = extracted.trim();
+                console.log(`[GROUPING_DEBUG] handleGrouping: Group name extracted from opener URL "${openerTab.url}" using regex "${rule.urlParsingRegEx}": "${groupName}".`);
+            }
+        } catch (e) {
+            console.warn(`[GROUPING_DEBUG] handleGrouping: Error parsing opener URL "${openerTab.url}" with regex "${rule.urlParsingRegEx}".`, e.message);
+        }
+    } else if (rule.groupNameSource === 'manual') {
+        const manualName = await promptForGroupName(groupName, openerTab.id);
+        if (manualName) {
+            groupName = manualName;
+            console.log(`[GROUPING_DEBUG] handleGrouping: Group name provided manually: "${groupName}".`);
+        }
     }
+
     console.log(`[GROUPING_DEBUG] handleGrouping: Final determined groupName: "${groupName}" for new tab ${newTab.id}.`);
 
     let hasProcessedTab = false;

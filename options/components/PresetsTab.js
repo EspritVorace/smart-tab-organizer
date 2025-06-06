@@ -12,7 +12,7 @@ function PresetsTab({ settings, updatePresets, updateRules, editingId, setEditin
 
     const handleAdd = () => {
         const newId = generateUUID();
-        const newPreset = { id: newId, name: "", regex: "()" }; // Start with basic group
+        const newPreset = { id: newId, name: "", regex: "()", urlRegex: "" }; // Start with basic group
         setNewPresetInProgress(newPreset);
         setEditingId(newId);
     };
@@ -22,21 +22,30 @@ function PresetsTab({ settings, updatePresets, updateRules, editingId, setEditin
             updatePresets([...regexPresets, updatedPreset]);
             setNewPresetInProgress(null);
         } else {
-            const originalRegex = regexPresets.find(p => p.id === updatedPreset.id)?.regex;
+            const foundPreset = regexPresets.find(p => p.id === updatedPreset.id) || {};
+            const originalRegex = foundPreset.regex;
+            const originalUrlRegex = foundPreset.urlRegex;
             const newPresets = regexPresets.map(p => p.id === updatedPreset.id ? updatedPreset : p);
 
-            // Update rules using this preset if regex changed
+            let newRules = domainRules;
             if (originalRegex && originalRegex !== updatedPreset.regex) {
-                const newRules = domainRules.map(rule =>
+                newRules = newRules.map(rule =>
                     rule.titleParsingRegEx === originalRegex
                         ? { ...rule, titleParsingRegEx: updatedPreset.regex }
                         : rule
                 );
-                updateRules(newRules);
-                updatePresets(newPresets);
-            } else {
-                updatePresets(newPresets);
             }
+            if (originalUrlRegex && originalUrlRegex !== updatedPreset.urlRegex) {
+                newRules = newRules.map(rule =>
+                    rule.urlParsingRegEx === originalUrlRegex
+                        ? { ...rule, urlParsingRegEx: updatedPreset.urlRegex }
+                        : rule
+                );
+            }
+            if (newRules !== domainRules) {
+                updateRules(newRules);
+            }
+            updatePresets(newPresets);
         }
         setEditingId(null);
     };
@@ -48,7 +57,7 @@ function PresetsTab({ settings, updatePresets, updateRules, editingId, setEditin
 
     const handleDelete = (idToDelete) => {
         const preset = regexPresets.find(p => p.id === idToDelete);
-        const isInUse = domainRules.some(r => r.titleParsingRegEx === preset.regex);
+        const isInUse = domainRules.some(r => r.titleParsingRegEx === preset.regex || r.urlParsingRegEx === preset.urlRegex);
 
         if (isInUse) {
             alert(getMessage("errorPresetInUse"));
@@ -60,7 +69,7 @@ function PresetsTab({ settings, updatePresets, updateRules, editingId, setEditin
         }
     };
 
-     const isPresetInUse = (regex) => domainRules.some(r => r.titleParsingRegEx === regex);
+     const isPresetInUse = (regex, urlRegex) => domainRules.some(r => r.titleParsingRegEx === regex || r.urlParsingRegEx === urlRegex);
 
     return html`
         <section id="presets-section">
@@ -69,7 +78,7 @@ function PresetsTab({ settings, updatePresets, updateRules, editingId, setEditin
                 <${Fragment} key=${preset.id}>
                     ${editingId === preset.id && (!newPresetInProgress || newPresetInProgress.id !== preset.id)
                         ? html`<${PresetEditForm} preset=${preset} onSave=${handleSave} onCancel=${() => setEditingId(null)} />`
-                        : html`<${PresetView} preset=${preset} onEdit=${setEditingId} onDelete=${handleDelete} disabled=${isPresetInUse(preset.regex)} />`
+                        : html`<${PresetView} preset=${preset} onEdit=${setEditingId} onDelete=${handleDelete} disabled=${isPresetInUse(preset.regex, preset.urlRegex)} />`
                     }
                 <//>
             `)}
@@ -87,7 +96,7 @@ function PresetView({ preset, onEdit, onDelete, disabled }) {
             <div class="item-view">
                 <div class="item-details">
                     <span class="item-main">${preset.name}</span>
-                    <code class="item-sub">${preset.regex}</code>
+                    <code class="item-sub">${preset.regex}${preset.urlRegex ? ` | ${preset.urlRegex}` : ''}</code>
                 </div>
                 <div class="item-actions">
                     <button onClick=${() => onEdit(preset.id)}>${getMessage('edit')}</button>
@@ -99,7 +108,7 @@ function PresetView({ preset, onEdit, onDelete, disabled }) {
 }
 
 function PresetEditForm({ preset, onSave, onCancel }) {
-    const [formData, setFormData] = useState(preset);
+    const [formData, setFormData] = useState({ ...preset, urlRegex: preset.urlRegex || '' });
     const [error, setError] = useState('');
 
     const handleChange = (e) => {
@@ -110,7 +119,7 @@ function PresetEditForm({ preset, onSave, onCancel }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         setError('');
-        if (!isValidRegex(formData.regex)) {
+        if (!isValidRegex(formData.regex) || (formData.urlRegex && !isValidRegex(formData.urlRegex))) {
             setError(getMessage('errorInvalidRegex'));
             return;
         }
@@ -127,11 +136,16 @@ function PresetEditForm({ preset, onSave, onCancel }) {
                              <input type="text" name="name" value=${formData.name} onChange=${handleChange} required />
                              <span class="tooltip-text" data-i18n="presetNameTooltip">${getMessage('presetNameTooltip')}</span>
                         </div>
-                         <div class="form-group tooltip-container">
+                        <div class="form-group tooltip-container">
                             <label>${getMessage('presetRegex')}</label>
                             <input type="text" name="regex" value=${formData.regex} onChange=${handleChange} required />
                             <span class="tooltip-text" data-i18n="presetRegexTooltip">${getMessage('presetRegexTooltip')}</span>
                             ${error && html`<span class="error-message">${error}</span>`}
+                        </div>
+                        <div class="form-group tooltip-container">
+                            <label>${getMessage('urlRegex')}</label>
+                            <input type="text" name="urlRegex" value=${formData.urlRegex} onChange=${handleChange} />
+                            <span class="tooltip-text" data-i18n="urlParsingRegExTooltip">${getMessage('urlParsingRegExTooltip')}</span>
                         </div>
                     </div>
                      <div class="form-actions">
