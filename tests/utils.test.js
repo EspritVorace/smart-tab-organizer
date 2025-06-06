@@ -3,6 +3,7 @@ import {
   domainToRegex,
   matchesDomain,
   extractGroupNameFromTitle,
+  extractGroupNameFromUrl,
   isValidRegex,
   isValidDomain
 } from '../js/modules/utils.js';
@@ -39,6 +40,30 @@ test('extractGroupNameFromTitle valid regex', () => {
 
 test('extractGroupNameFromTitle invalid regex', () => {
   const result = extractGroupNameFromTitle('Test', '(');
+  assert.strictEqual(result, null);
+});
+
+test('extractGroupNameFromUrl valid path regex', () => {
+  const url = 'https://github.com/user/repo/issues/123';
+  const result = extractGroupNameFromUrl(url, 'issues/(\\d+)');
+  assert.strictEqual(result, '123');
+});
+
+test('extractGroupNameFromUrl valid query regex', () => {
+  const url = 'https://example.com/page?ticket=456';
+  const result = extractGroupNameFromUrl(url, 'ticket=(\\d+)');
+  assert.strictEqual(result, '456');
+});
+
+test('extractGroupNameFromUrl no match', () => {
+  const url = 'https://example.com/home';
+  const result = extractGroupNameFromUrl(url, 'issues/(\\d+)');
+  assert.strictEqual(result, null);
+});
+
+test('extractGroupNameFromUrl invalid regex', () => {
+  const url = 'https://example.com';
+  const result = extractGroupNameFromUrl(url, '(');
   assert.strictEqual(result, null);
 });
 
