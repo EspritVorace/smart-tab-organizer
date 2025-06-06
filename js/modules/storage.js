@@ -51,9 +51,32 @@ export async function initializeDefaults() {
     } else {
         console.log("Merging existing with JSON defaults...");
         const merged = mergeDeep(defaults, syncData.settings);
-        // Ensure default IDs exist
-        defaults.regexPresets.forEach(dp => { if (!merged.regexPresets.some(mp => mp.id === dp.id)) merged.regexPresets.push(dp); });
-        defaults.domainRules.forEach(dr => { if (!merged.domainRules.some(mr => mr.id === dr.id)) merged.domainRules.push(dr); });
+        // Ensure default IDs exist and fill missing new fields
+        defaults.regexPresets.forEach(dp => {
+            const existing = merged.regexPresets.find(mp => mp.id === dp.id);
+            if (!existing) {
+                merged.regexPresets.push(dp);
+            } else if (typeof existing.urlRegex === 'undefined' && typeof dp.urlRegex !== 'undefined') {
+                existing.urlRegex = dp.urlRegex;
+            }
+        });
+        merged.regexPresets.forEach(p => {
+            if (typeof p.urlRegex === 'undefined') p.urlRegex = '';
+        });
+
+        defaults.domainRules.forEach(dr => {
+            const existing = merged.domainRules.find(mr => mr.id === dr.id);
+            if (!existing) {
+                merged.domainRules.push(dr);
+            } else {
+                if (typeof existing.urlParsingRegEx === 'undefined' && typeof dr.urlParsingRegEx !== 'undefined') {
+                    existing.urlParsingRegEx = dr.urlParsingRegEx;
+                }
+                if (typeof existing.groupNameSource === 'undefined' && typeof dr.groupNameSource !== 'undefined') {
+                    existing.groupNameSource = dr.groupNameSource;
+                }
+            }
+        });
 
         // Ensure logicalGroups are merged and the default "issues" group is present
         if (!merged.logicalGroups) {
@@ -67,7 +90,7 @@ export async function initializeDefaults() {
             }
         }
 
-        // Ensure all domain rules have a label and groupId
+        // Ensure all domain rules have a label, groupId and new fields
         if (merged.domainRules && Array.isArray(merged.domainRules)) {
             merged.domainRules.forEach(rule => {
                 if (typeof rule.label === 'undefined') {
@@ -76,6 +99,12 @@ export async function initializeDefaults() {
                 }
                 if (typeof rule.groupId === 'undefined') {
                     rule.groupId = "issues"; // Default to "issues" group
+                }
+                if (typeof rule.urlParsingRegEx === 'undefined') {
+                    rule.urlParsingRegEx = '';
+                }
+                if (typeof rule.groupNameSource === 'undefined') {
+                    rule.groupNameSource = 'title';
                 }
             });
         }
