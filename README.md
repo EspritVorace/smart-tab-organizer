@@ -11,35 +11,33 @@
 
 ## Features ✨
 
-* **🖱️ Automatic Grouping (Middle Click):**
-    * When you middle-click on a link, if the source page's domain matches a configured rule, the new tab opens in a group.
-    * If the source tab is already in a group, the new tab joins it.
-    * Otherwise, a new group is created.
-* **🏷️ Group Naming via RegEx:**
-    * Define regular expressions for specific domains.
-    * The extension extracts text from the source tab's title using your RegEx to automatically name the tab group.
-    * Includes presets for popular ticketing tools (Jira, GitLab, GitHub, Trello, etc.).
-* **🚫 Duplicate Prevention:**
-    * Prevents opening the same URL multiple times.
-    * If you try to open an already present URL, the existing tab is brought to the foreground and reloaded, and the new one is closed.
-    * Supports exact URL matching or "includes" matching by domain.
-* **⚙️ Comprehensive Options Page:**
-    * Manage (Add, Edit, Delete, Enable/Disable) domain rules.
-    * Manage custom and predefined regular expressions.
-    * Configure deduplication modes.
-    * Import and export your settings (rules and presets) via JSON.
-    * View statistics and reset them.
-* **🗂️ Logical Groups Management:**
-    * Organize your domain rules by creating and editing logical groups.
-    * Customize your browsing experience by choosing specific colors for your tab groups associated with these logical groups.
-* **🕶️ Dark Mode Support:**
-    * Choose between Light Mode, Dark Mode, or follow your system's theme.
-* **🌍 Internationalization:**
-    * Available in French (Default), English, and Spanish.
-* **📊 Quick Access Popup:**
-    * Globally enable/disable grouping and deduplication.
-    * View key statistics at a glance.
-    * Quick link to the options page.
+### 🖱️ Automatic Grouping
+* Middle-click a link to open the tab in the proper group if its domain matches your rules.
+* Tabs join an existing group or a new one is created.
+* The group name can come from the opener tab's title, from its URL or you can be prompted manually.
+* Built-in RegEx presets for popular ticket systems (Jira, GitLab, GitHub, Trello, etc.).
+
+### 🚫 Deduplication
+* Opening the same URL twice is prevented.
+* The existing tab is re-focused and reloaded.
+* Supports several matching modes: exact URL, hostname + path, hostname or simple "includes".
+
+### ⚙️ Options & Customization
+* Add, edit, delete and enable/disable domain rules.
+* Manage custom and predefined RegEx presets.
+* Organize rules in logical groups and choose a color for each group.
+* Import/export your settings as JSON.
+* Configure deduplication modes.
+* View statistics (groups created and tabs deduplicated) and reset them.
+* Select Light, Dark or System theme.
+
+### 📊 Quick Access Popup
+* Toggle grouping and deduplication globally.
+* View key statistics at a glance.
+* Shortcut to the options page.
+
+### 🌍 Internationalization
+* Available in French (default), English and Spanish.
 
 ## Installation 🚀
 

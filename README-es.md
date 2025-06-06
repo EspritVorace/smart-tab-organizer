@@ -11,35 +11,33 @@
 
 ## Características ✨
 
-* **🖱️ Agrupación Automática (Clic Central):**
-    * Cuando haces clic central en un enlace, si el dominio de la página de origen coincide con una regla configurada, la nueva pestaña se abre en un grupo.
-    * Si la pestaña de origen ya está en un grupo, la nueva pestaña se une a él.
-    * De lo contrario, se crea un nuevo grupo.
-* **🏷️ Nombrado de Grupos mediante RegEx:**
-    * Define expresiones regulares para dominios específicos.
-    * La extensión extrae texto del título de la pestaña de origen usando tu RegEx para nombrar automáticamente el grupo de pestañas.
-    * Incluye preajustes para herramientas populares de gestión de tickets (Jira, GitLab, GitHub, Trello, etc.).
-* **🚫 Prevención de Duplicados:**
-    * Evita abrir la misma URL varias veces.
-    * Si intentas abrir una URL ya presente, la pestaña existente se trae al primer plano y se recarga, y la nueva se cierra.
-    * Admite coincidencia exacta de URL o coincidencia "incluida" por dominio.
-* **⚙️ Página de Opciones Completa:**
-    * Administra (Agregar, Editar, Eliminar, Activar/Desactivar) reglas de dominio.
-    * Administra expresiones regulares personalizadas y predefinidas.
-    * Configura los modos de deduplicación.
-    * Importa y exporta tus configuraciones (reglas y preajustes) mediante JSON.
-    * Visualiza estadísticas y reinícialas.
-* **🗂️ Gestión de Grupos Lógicos:**
-    * Organiza tus reglas de dominio creando y editando grupos lógicos.
-    * Personaliza tu experiencia de navegación eligiendo colores específicos para los grupos de pestañas asociados con estos grupos lógicos.
-* **🕶️ Soporte de Modo Oscuro:**
-    * Elige entre Modo Claro, Modo Oscuro o sigue el tema de tu sistema.
-* **🌍 Internacionalización:**
-    * Disponible en Francés (Predeterminado), Inglés y Español.
-* **📊 Popup de Acceso Rápido:**
-    * Activa/Desactiva globalmente la agrupación y la deduplicación.
-    * Consulta estadísticas clave de un vistazo.
-    * Enlace rápido a la página de opciones.
+### 🖱️ Agrupación Automática
+* Clic central en un enlace para abrir la pestaña en el grupo adecuado si el dominio coincide con tus reglas.
+* La pestaña se une a un grupo existente o se crea uno nuevo.
+* El nombre del grupo puede obtenerse del título de la pestaña de origen, de su URL o solicitarse manualmente.
+* Preajustes de expresiones regulares para herramientas populares de tickets (Jira, GitLab, GitHub, Trello, etc.).
+
+### 🚫 Deduplicación
+* Se evita abrir dos veces la misma URL.
+* La pestaña existente se vuelve a enfocar y se recarga.
+* Modos de coincidencia: URL exacta, nombre de host + ruta, solo nombre de host o coincidencia por inclusión.
+
+### ⚙️ Opciones y Personalización
+* Añadir, editar, eliminar o activar/desactivar reglas de dominio.
+* Gestionar preajustes y expresiones regulares personalizadas.
+* Organizar reglas en grupos lógicos y elegir un color para cada grupo.
+* Importar/exportar la configuración en JSON.
+* Configurar los modos de deduplicación.
+* Consultar las estadísticas (grupos creados y pestañas deduplicadas) y restablecerlas.
+* Elegir el tema Claro, Oscuro o Sistema.
+
+### 📊 Popup de Acceso Rápido
+* Activar/desactivar globalmente la agrupación y la deduplicación.
+* Ver estadísticas clave de un vistazo.
+* Acceso directo a la página de opciones.
+
+### 🌍 Internacionalización
+* Disponible en Francés (predeterminado), Inglés y Español.
 
 ## Instalación 🚀
 
