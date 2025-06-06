@@ -100,5 +100,6 @@
   "ruleCountSingular": { "message": "regla" },
   "ruleCountPlural": { "message": "reglas" },
   "noGroupAssigned": { "message": "Sin grupo" },
-  "loadingText": { "message": "Cargando..." }
+  "loadingText": { "message": "Cargando..." },
+  "disableAll": { "message": "Desactivar todo" }
 }
