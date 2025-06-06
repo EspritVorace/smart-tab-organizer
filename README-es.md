@@ -15,9 +15,9 @@
     * Cuando haces clic central en un enlace, si el dominio de la página de origen coincide con una regla configurada, la nueva pestaña se abre en un grupo.
     * Si la pestaña de origen ya está en un grupo, la nueva pestaña se une a él.
     * De lo contrario, se crea un nuevo grupo.
-* **🏷️ Nombrado de Grupos mediante RegEx:**
+* **🏷️ Nombrado Flexible mediante RegEx:**
     * Define expresiones regulares para dominios específicos.
-    * La extensión extrae texto del título de la pestaña de origen usando tu RegEx para nombrar automáticamente el grupo de pestañas.
+    * El nombre del grupo puede extraerse del título o de la URL de la pestaña, o pedirse manualmente al usuario cuando sea necesario.
     * Incluye preajustes para herramientas populares de gestión de tickets (Jira, GitLab, GitHub, Trello, etc.).
 * **🚫 Prevención de Duplicados:**
     * Evita abrir la misma URL varias veces.
@@ -53,6 +53,10 @@
 3.  **Activar Modo Desarrollador:** Marca la casilla "Modo desarrollador".
 4.  **Cargar Extensión:** Haz clic en "Cargar descomprimida" y selecciona la carpeta `SmartTab_Organizer` (la que contiene `manifest.json`).
 5.  ¡La extensión está lista!
+
+### Permisos
+
+Esta extensión solicita el permiso `scripting` para poder inyectar un pequeño script cuando sea necesario pedir al usuario el nombre del grupo.
 
 ## Uso 📖
 

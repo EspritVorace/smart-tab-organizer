@@ -15,9 +15,9 @@
     * Lorsque vous cliquez avec la molette sur un lien, si le domaine de la page source correspond à une règle configurée, le nouvel onglet s'ouvre dans un groupe.
     * Si l'onglet source est déjà dans un groupe, le nouvel onglet le rejoint.
     * Sinon, un nouveau groupe est créé.
-* **🏷️ Nommage de Groupe via RegEx :**
+* **🏷️ Nommage Flexible via RegEx :**
     * Définissez des expressions régulières pour des domaines spécifiques.
-    * L'extension extrait du texte du titre de l'onglet source à l'aide de votre RegEx pour nommer automatiquement le groupe d'onglets.
+    * Le nom de groupe peut être extrait du titre ou de l'URL de l'onglet, ou être saisi manuellement lorsque nécessaire.
     * Inclut des préréglages pour les outils de tickets populaires (Jira, GitLab, GitHub, Trello, etc.).
 * **🚫 Prévention des Doublons :**
     * Empêche l'ouverture plusieurs fois de la même URL.
@@ -53,6 +53,10 @@
 3.  **Activer le Mode Développeur :** Cochez la case "Mode développeur".
 4.  **Charger l'Extension :** Cliquez sur "Charger l'extension non empaquetée" et sélectionnez le dossier `SmartTab_Organizer` (celui contenant `manifest.json`).
 5.  L'extension est prête !
+
+### Permissions
+
+Cette extension requiert la permission `scripting` afin d'injecter un script lorsque le nom du groupe doit être saisi par l'utilisateur.
 
 ## Utilisation 📖
 

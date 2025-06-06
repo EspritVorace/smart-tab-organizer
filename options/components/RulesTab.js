@@ -293,7 +293,7 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
         if (!isValidDomain(formData.domainFilter)) {
             currentErrors.domainFilter = getMessage('errorInvalidDomain');
         }
-        if (!isValidRegex(formData.titleParsingRegEx)) {
+        if (formData.groupNameSource === 'title' && !isValidRegex(formData.titleParsingRegEx)) {
             currentErrors.titleParsingRegEx = getMessage('errorInvalidRegex');
         }
         if (formData.groupNameSource === 'url' && !isValidRegex(formData.urlParsingRegEx)) {
@@ -365,7 +365,7 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
                                 <span class="tooltip-text" data-i18n="urlParsingRegExTooltip">${getMessage('urlParsingRegExTooltip')}</span>
                                 ${errors.urlParsingRegEx && html`<span class="error-message">${errors.urlParsingRegEx}</span>`}
                             </div>
-                        ` : html`
+                        ` : formData.groupNameSource === 'prompt' ? null : html`
                             <div class="form-group tooltip-container full-width">
                                 <label>${getMessage('titleRegex')}</label>
                                 <select value=${currentRegexValue} onChange=${handleSelectChange}>

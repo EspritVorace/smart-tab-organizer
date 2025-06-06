@@ -15,9 +15,9 @@
     * When you middle-click on a link, if the source page's domain matches a configured rule, the new tab opens in a group.
     * If the source tab is already in a group, the new tab joins it.
     * Otherwise, a new group is created.
-* **🏷️ Group Naming via RegEx:**
+* **🏷️ Flexible Group Naming via RegEx:**
     * Define regular expressions for specific domains.
-    * The extension extracts text from the source tab's title using your RegEx to automatically name the tab group.
+    * The extension can extract the group name from the tab title or the tab URL, or it can prompt you for a name when needed.
     * Includes presets for popular ticketing tools (Jira, GitLab, GitHub, Trello, etc.).
 * **🚫 Duplicate Prevention:**
     * Prevents opening the same URL multiple times.
@@ -53,6 +53,10 @@
 3.  **Enable Developer Mode:** Check the "Developer mode" box.
 4.  **Load Extension:** Click "Load unpacked" and select the `SmartTab_Organizer` folder (the one containing `manifest.json`).
 5.  The extension is ready!
+
+### Permissions
+
+This extension requests the `scripting` permission so it can temporarily inject a script when it needs to prompt you for a group name.
 
 ## Usage 📖
 
