@@ -36,6 +36,7 @@
 * Voir les statistiques clés en un coup d'œil.
 * Accès direct à la page d'options.
 * Clic droit sur l'icône pour "Tout désactiver".
+* L'icône devient grise quand le regroupement et la déduplication sont désactivés.
 
 ### 🌍 Internationalisation
 * Disponible en Français (défaut), Anglais et Espagnol.

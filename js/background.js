@@ -16,6 +16,52 @@ function createContextMenus() {
 
 createContextMenus();
 
+async function generateDisabledIcon(size) {
+    const response = await fetch(chrome.runtime.getURL(`icons/icon${size}.png`));
+    const blob = await response.blob();
+    const bitmap = await createImageBitmap(blob, { resizeWidth: size, resizeHeight: size });
+    const canvas = new OffscreenCanvas(size, size);
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(bitmap, 0, 0, size, size);
+    const imageData = ctx.getImageData(0, 0, size, size);
+    for (let i = 0; i < imageData.data.length; i += 4) {
+        const avg = (imageData.data[i] + imageData.data[i + 1] + imageData.data[i + 2]) / 3;
+        imageData.data[i] = imageData.data[i + 1] = imageData.data[i + 2] = avg;
+    }
+    ctx.putImageData(imageData, 0, 0);
+    return ctx.getImageData(0, 0, size, size);
+}
+
+let disabledIconsCache = null;
+async function updateIcon(settings) {
+    const disabled = !settings.globalGroupingEnabled && !settings.globalDeduplicationEnabled;
+    if (disabled) {
+        if (!disabledIconsCache) {
+            disabledIconsCache = {
+                16: await generateDisabledIcon(16),
+                48: await generateDisabledIcon(48),
+                128: await generateDisabledIcon(128)
+            };
+        }
+        chrome.action.setIcon({ imageData: disabledIconsCache });
+    } else {
+        chrome.action.setIcon({
+            path: {
+                16: 'icons/icon16.png',
+                48: 'icons/icon48.png',
+                128: 'icons/icon128.png'
+            }
+        });
+    }
+}
+
+getSettings().then(updateIcon);
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'sync' && changes.settings) {
+        updateIcon(changes.settings.newValue);
+    }
+});
+
 async function getSettings() {
     const settings = await storageGetSettings();
     settings.domainRules = settings.domainRules || [];
@@ -71,6 +117,7 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
         settings.globalGroupingEnabled = false;
         settings.globalDeduplicationEnabled = false;
         await saveSettings(settings);
+        updateIcon(settings);
     }
 });
 

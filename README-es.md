@@ -36,6 +36,7 @@
 * Ver estadísticas clave de un vistazo.
 * Acceso directo a la página de opciones.
 * Clic derecho en el icono para "Desactivar todo".
+* El icono se vuelve gris cuando la agrupación y la deduplicación están desactivadas.
 
 ### 🌍 Internacionalización
 * Disponible en Francés (predeterminado), Inglés y Español.
