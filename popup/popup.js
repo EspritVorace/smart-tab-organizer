@@ -3,9 +3,10 @@ import { h, render } from './../js/lib/preact.mjs';
 import { useState, useEffect, useCallback } from './../js/lib/preact-hooks.mjs';
 import htm from './../js/lib/htm.mjs';
 
-import { getSettings, saveSettings, getStatistics } from './../js/modules/storage.js';
+import { getSettings, saveSettings, getStatistics, resetStatistics } from './../js/modules/storage.js';
 import { getMessage } from './../js/modules/i18n.js';
 import { applyTheme } from './../js/modules/theme.js';
+import { StatsTab } from './../components/StatsTab.js';
 
 const html = htm.bind(h);
 
@@ -59,7 +60,12 @@ function PopupApp() {
         chrome.runtime.openOptionsPage();
     }, []);
 
-    const activeRulesCount = settings.domainRules?.filter(r => r.enabled).length || 0;
+    const handleResetStats = useCallback(async () => {
+        if (confirm(getMessage('confirmResetStats'))) {
+            const newStats = await resetStatistics();
+            setStats(newStats);
+        }
+    }, []);
 
     // --- Rendu ---
     return html`
@@ -90,12 +96,7 @@ function PopupApp() {
 
             <hr />
 
-            <h2>Stats</h2>
-            <div class="stats">
-                <p><span>${getMessage('activeRules')}</span> <b>${activeRulesCount}</b></p>
-                <p><span>${getMessage('groupsCreated')}</span> <b>${stats.tabGroupsCreatedCount || 0}</b></p>
-                <p><span>${getMessage('tabsDeduplicated')}</span> <b>${stats.tabsDeduplicatedCount || 0}</b></p>
-            </div>
+            <${StatsTab} stats=${stats} onReset=${handleResetStats} />
 
             <hr />
 
