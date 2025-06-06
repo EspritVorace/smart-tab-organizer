@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -19,7 +19,7 @@ global.test = (name, fn) => {
 
 for (const file of fs.readdirSync(__dirname)) {
   if (file.endsWith('.test.js')) {
-    await import(path.join(__dirname, file));
+    await import(pathToFileURL(path.join(__dirname, file)).href);
   }
 }
 
