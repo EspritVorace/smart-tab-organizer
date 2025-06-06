@@ -126,7 +126,7 @@ footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid var(--border
   transition: max-height 0.4s ease-out, opacity 0.3s ease-out, padding-bottom 0.4s ease-out; /* Added padding-bottom to transition */
   opacity: 0;
   padding-bottom: 0; /* No padding when collapsed */
-  /* margin-left: 20px; /* Indent rules slightly under their group - consider if needed */
+  /* margin-left: 20px; Indent rules slightly under their group - consider if needed */
 }
 
 .rules-group-content.expanded {
