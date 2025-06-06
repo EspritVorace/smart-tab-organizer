@@ -11,5 +11,10 @@ export function extractGroupNameFromTitle(title, regexString) {
     try { const regex = new RegExp(regexString); const match = title.match(regex); return (match && match[1]) ? match[1].trim() : null; }
     catch (e) { console.error("Err extractGroupName:", title, regexString, e); return null; }
 }
+export function extractGroupNameFromUrl(url, regexString) {
+    if (!url || !regexString) return null;
+    try { const regex = new RegExp(regexString); const match = url.match(regex); return (match && match[1]) ? match[1].trim() : null; }
+    catch (e) { console.error("Err extractGroupNameUrl:", url, regexString, e); return null; }
+}
 export function isValidRegex(regex) { try { new RegExp(regex); return regex.includes('(') && regex.includes(')'); } catch (e) { return false; } }
 export function isValidDomain(domain) { return domain ? /^(\*\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(domain.trim()) : false; }

@@ -52,7 +52,15 @@ export async function initializeDefaults() {
         console.log("Merging existing with JSON defaults...");
         const merged = mergeDeep(defaults, syncData.settings);
         // Ensure default IDs exist
-        defaults.regexPresets.forEach(dp => { if (!merged.regexPresets.some(mp => mp.id === dp.id)) merged.regexPresets.push(dp); });
+        defaults.regexPresets.forEach(dp => {
+            const existing = merged.regexPresets.find(mp => mp.id === dp.id);
+            if (!existing) {
+                merged.regexPresets.push(dp);
+            } else {
+                if (typeof existing.urlRegex === 'undefined' && dp.urlRegex)
+                    existing.urlRegex = dp.urlRegex;
+            }
+        });
         defaults.domainRules.forEach(dr => { if (!merged.domainRules.some(mr => mr.id === dr.id)) merged.domainRules.push(dr); });
 
         // Ensure logicalGroups are merged and the default "issues" group is present
@@ -71,11 +79,18 @@ export async function initializeDefaults() {
         if (merged.domainRules && Array.isArray(merged.domainRules)) {
             merged.domainRules.forEach(rule => {
                 if (typeof rule.label === 'undefined') {
-                    const defaultRule = defaults.domainRules.find(dr => dr.id === rule.id);
-                    rule.label = defaultRule ? defaultRule.label : rule.domainFilter || "Untitled Rule";
+                    const defRule = defaults.domainRules.find(dr => dr.id === rule.id);
+                    rule.label = defRule ? defRule.label : rule.domainFilter || "Untitled Rule";
                 }
                 if (typeof rule.groupId === 'undefined') {
-                    rule.groupId = "issues"; // Default to "issues" group
+                    rule.groupId = "issues"; // Default logical group
+                }
+                if (typeof rule.groupNameSource === 'undefined') {
+                    rule.groupNameSource = 'title';
+                }
+                if (typeof rule.urlParsingRegEx === 'undefined') {
+                    const defRule = defaults.domainRules.find(dr => dr.id === rule.id) || {};
+                    rule.urlParsingRegEx = defRule.urlParsingRegEx || '';
                 }
             });
         }

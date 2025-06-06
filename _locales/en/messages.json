@@ -42,6 +42,8 @@
   "dedupTooltip": { "message": "'Exact': Identical URL. 'Includes': New URL contained within an existing one." },
   "presetNameTooltip": { "message": "Name to identify this RegEx preset." },
   "presetRegexTooltip": { "message": "The Regular Expression (must contain one capturing group)." },
+  "presetUrlRegex": { "message": "URL RegEx" },
+  "presetUrlRegexTooltip": { "message": "Regular expression to parse the URL. The first capture group will be used." },
   "errorInvalidDomain": { "message": "Invalid domain format." },
   "errorDuplicateDomain": { "message": "This domain filter already exists." },
   "errorInvalidRegex": { "message": "Invalid Regular Expression (must have capturing group ())." },
@@ -90,5 +92,13 @@
   "ruleCountSingular": { "message": "rule" },
   "ruleCountPlural": { "message": "rules" },
   "noGroupAssigned": { "message": "No group" },
-  "loadingText": { "message": "Loading..." }
+  "loadingText": { "message": "Loading..." },
+  "groupNameSource": { "message": "Group Name Source" },
+  "groupNameSourceTooltip": { "message": "How the group name should be determined for this rule." },
+  "sourceTitle": { "message": "From Title" },
+  "sourceURL": { "message": "From URL" },
+  "sourcePrompt": { "message": "Ask User" },
+  "urlRegex": { "message": "URL RegEx" },
+  "urlParsingRegExTooltip": { "message": "Regular expression to extract the group name from the tab URL. The first capture group is used." },
+  "promptGroupName": { "message": "Please enter a group name:" }
 }

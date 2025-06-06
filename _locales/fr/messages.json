@@ -42,6 +42,8 @@
   "dedupTooltip": { "message": "'Exacte': URL identique. 'Incluse': Nouvelle URL contenue dans une existante." },
   "presetNameTooltip": { "message": "Nom pour identifier ce préréglage RegEx." },
   "presetRegexTooltip": { "message": "L'Expression Régulière (doit contenir un groupe capturant)." },
+  "presetUrlRegex": { "message": "RegEx URL" },
+  "presetUrlRegexTooltip": { "message": "Expression régulière pour analyser l'URL. Le premier groupe capturant sera utilisé." },
   "errorInvalidDomain": { "message": "Format de domaine invalide." },
   "errorDuplicateDomain": { "message": "Ce filtre de domaine existe déjà." },
   "errorInvalidRegex": { "message": "Expression Régulière invalide (doit avoir un groupe capturant ())." },
@@ -90,5 +92,13 @@
   "ruleCountSingular": { "message": "règle" },
   "ruleCountPlural": { "message": "règles" },
   "noGroupAssigned": { "message": "Aucun groupe" },
-  "loadingText": { "message": "Chargement..." }
+  "loadingText": { "message": "Chargement..." },
+  "groupNameSource": { "message": "Origine du nom de groupe" },
+  "groupNameSourceTooltip": { "message": "Comment déterminer le nom de groupe pour cette règle." },
+  "sourceTitle": { "message": "Depuis le titre" },
+  "sourceURL": { "message": "Depuis l\u0027URL" },
+  "sourcePrompt": { "message": "Demander \u00e0 l\u0027utilisateur" },
+  "urlRegex": { "message": "RegEx URL" },
+  "urlParsingRegExTooltip": { "message": "Expression régulière pour extraire le nom depuis l\u0027URL de l\u0027onglet. Le premier groupe de capture est utilisé." },
+  "promptGroupName": { "message": "Veuillez saisir le nom du groupe :" }
 }

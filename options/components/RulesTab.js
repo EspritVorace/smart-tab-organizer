@@ -53,6 +53,8 @@ function RulesTab({ settings, updateRules, editingId, setEditingId }) {
             enabled: true,
             domainFilter: "",
             titleParsingRegEx: regexPresets[0]?.regex || "",
+            urlParsingRegEx: "",
+            groupNameSource: "title",
             deduplicationMatchMode: "exact",
             groupId: null // Default to no group
         };
@@ -160,8 +162,19 @@ function RulesTab({ settings, updateRules, editingId, setEditingId }) {
 }
 
 function RuleView({ rule, presets, logicalGroups, onEdit, onDelete, onToggle }) { // Added logicalGroups
-     const presetName = presets.find(p => p.regex === rule.titleParsingRegEx)?.name || rule.titleParsingRegEx;
-     const dedupMode = getMessage(rule.deduplicationMatchMode === 'exact' ? 'exactMatch' : 'includesMatch');
+    const presetName = presets.find(p => p.regex === rule.titleParsingRegEx)?.name || rule.titleParsingRegEx;
+    const dedupMode = getMessage(rule.deduplicationMatchMode === 'exact' ? 'exactMatch' : 'includesMatch');
+    const sourceLabel = getMessage(
+        rule.groupNameSource === 'url' ? 'sourceURL' :
+        rule.groupNameSource === 'prompt' ? 'sourcePrompt' : 'sourceTitle'
+    );
+    let regexInfo = '';
+    if (rule.groupNameSource === 'title') {
+        regexInfo = presetName;
+    } else if (rule.groupNameSource === 'url') {
+        const presetUrlName = presets.find(p => p.urlRegex === rule.urlParsingRegEx)?.name;
+        regexInfo = presetUrlName || rule.urlParsingRegEx;
+    }
      const disabledClass = rule.enabled ? '' : 'disabled-text';
 
      const handleToggle = (e) => {
@@ -178,7 +191,8 @@ function RuleView({ rule, presets, logicalGroups, onEdit, onDelete, onToggle }) 
         subtitleParts.push(getMessage('noGroupAssigned', 'No group'));
     }
     subtitleParts.push(rule.domainFilter);
-    subtitleParts.push(presetName);
+    if (regexInfo) subtitleParts.push(regexInfo);
+    subtitleParts.push(sourceLabel);
     subtitleParts.push(dedupMode);
 
     return html`
@@ -201,12 +215,21 @@ function RuleView({ rule, presets, logicalGroups, onEdit, onDelete, onToggle }) 
 }
 
 function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules }) {
-    const [formData, setFormData] = useState({...rule, groupId: rule.groupId === undefined ? null : rule.groupId });
+    const [formData, setFormData] = useState({
+        ...rule,
+        groupId: rule.groupId === undefined ? null : rule.groupId,
+        groupNameSource: rule.groupNameSource || 'title',
+        urlParsingRegEx: rule.urlParsingRegEx || ''
+    });
     const [errors, setErrors] = useState({});
 
     const isPreset = presets.some(p => p.regex === formData.titleParsingRegEx);
     const [isCustom, setIsCustom] = useState(!isPreset);
     const [customValue, setCustomValue] = useState(isPreset ? '' : formData.titleParsingRegEx);
+
+    const isUrlPreset = presets.some(p => p.urlRegex === formData.urlParsingRegEx);
+    const [isUrlCustom, setIsUrlCustom] = useState(!isUrlPreset);
+    const [customUrlValue, setCustomUrlValue] = useState(isUrlPreset ? '' : formData.urlParsingRegEx);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -224,12 +247,30 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
          }
     };
 
-     const handleCustomChange = (e) => {
+    const handleCustomChange = (e) => {
         setCustomValue(e.target.value);
         if (isCustom) {
             setFormData(prev => ({ ...prev, titleParsingRegEx: e.target.value }));
         }
-     };
+    };
+
+    const handleUrlSelectChange = (e) => {
+        const value = e.target.value;
+        if (value === 'custom') {
+            setIsUrlCustom(true);
+            setFormData(prev => ({ ...prev, urlParsingRegEx: customUrlValue }));
+        } else {
+            setIsUrlCustom(false);
+            setFormData(prev => ({ ...prev, urlParsingRegEx: value }));
+        }
+    };
+
+    const handleUrlCustomChange = (e) => {
+        setCustomUrlValue(e.target.value);
+        if (isUrlCustom) {
+            setFormData(prev => ({ ...prev, urlParsingRegEx: e.target.value }));
+        }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -249,6 +290,9 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
         if (!isValidRegex(formData.titleParsingRegEx)) {
             currentErrors.titleParsingRegEx = getMessage('errorInvalidRegex');
         }
+        if (formData.groupNameSource === 'url' && !isValidRegex(formData.urlParsingRegEx)) {
+            currentErrors.urlParsingRegEx = getMessage('errorInvalidRegex');
+        }
         setErrors(currentErrors);
 
         if (Object.keys(currentErrors).length === 0) {
@@ -256,7 +300,8 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
         }
     };
 
-     const currentRegexValue = isCustom ? 'custom' : formData.titleParsingRegEx;
+    const currentRegexValue = isCustom ? 'custom' : formData.titleParsingRegEx;
+    const currentUrlRegexValue = isUrlCustom ? 'custom' : formData.urlParsingRegEx;
 
     // The following div was changed from full-width to allow group selector beside it potentially
     return html`
@@ -288,22 +333,42 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
                             <label>${getMessage('logicalGroup', 'Logical Group')}</label>
                             <select name="groupId" value=${formData.groupId === null ? "" : formData.groupId} onChange=${handleChange}>
                                 <option value="">${getMessage('noGroup', '-- No Group --')}</option>
-                                ${logicalGroups.map(g => html`
-                                    <option value=${g.id}>${g.label}</option>
-                                `)}
+                                ${logicalGroups.map(g => html`<option value=${g.id}>${g.label}</option>`)}
                             </select>
                             <span class="tooltip-text" data-i18n="logicalGroupRuleTooltip">${getMessage('logicalGroupRuleTooltip', 'Assign this rule to a logical group.')}</span>
                         </div>
-                        <div class="form-group tooltip-container full-width">
-                            <label>${getMessage('titleRegex')}</label>
-                            <select value=${currentRegexValue} onChange=${handleSelectChange}>
-                                ${presets.map(p => html`<option value=${p.regex}>${p.name}</option>`)}
-                                <option value="custom">${getMessage('customRegex')}</option>
+                        <div class="form-group tooltip-container">
+                            <label>${getMessage('groupNameSource')}</label>
+                            <select name="groupNameSource" value=${formData.groupNameSource} onChange=${handleChange}>
+                                <option value="title">${getMessage('sourceTitle')}</option>
+                                <option value="url">${getMessage('sourceURL')}</option>
+                                <option value="prompt">${getMessage('sourcePrompt')}</option>
                             </select>
-                            <input type="text" value=${customValue} onChange=${handleCustomChange} style=${{ display: isCustom ? 'block' : 'none', marginTop: '8px' }} />
-                            <span class="tooltip-text" data-i18n="titleParsingRegExTooltip">${getMessage('titleParsingRegExTooltip')}</span>
-                             ${errors.titleParsingRegEx && html`<span class="error-message">${errors.titleParsingRegEx}</span>`}
+                            <span class="tooltip-text" data-i18n="groupNameSourceTooltip">${getMessage('groupNameSourceTooltip')}</span>
                         </div>
+                        ${formData.groupNameSource === 'url' ? html`
+                            <div class="form-group tooltip-container full-width">
+                                <label>${getMessage('urlRegex')}</label>
+                                <select value=${currentUrlRegexValue} onChange=${handleUrlSelectChange}>
+                                    ${presets.map(p => html`<option value=${p.urlRegex}>${p.name}</option>`)}
+                                    <option value="custom">${getMessage('customRegex')}</option>
+                                </select>
+                                <input type="text" value=${customUrlValue} onChange=${handleUrlCustomChange} style=${{ display: isUrlCustom ? 'block' : 'none', marginTop: '8px' }} />
+                                <span class="tooltip-text" data-i18n="urlParsingRegExTooltip">${getMessage('urlParsingRegExTooltip')}</span>
+                                ${errors.urlParsingRegEx && html`<span class="error-message">${errors.urlParsingRegEx}</span>`}
+                            </div>
+                        ` : html`
+                            <div class="form-group tooltip-container full-width">
+                                <label>${getMessage('titleRegex')}</label>
+                                <select value=${currentRegexValue} onChange=${handleSelectChange}>
+                                    ${presets.map(p => html`<option value=${p.regex}>${p.name}</option>`)}
+                                    <option value="custom">${getMessage('customRegex')}</option>
+                                </select>
+                                <input type="text" value=${customValue} onChange=${handleCustomChange} style=${{ display: isCustom ? 'block' : 'none', marginTop: '8px' }} />
+                                <span class="tooltip-text" data-i18n="titleParsingRegExTooltip">${getMessage('titleParsingRegExTooltip')}</span>
+                                ${errors.titleParsingRegEx && html`<span class="error-message">${errors.titleParsingRegEx}</span>`}
+                            </div>
+                        `}
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="primary">${getMessage('save')}</button>

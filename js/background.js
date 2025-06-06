@@ -1,8 +1,24 @@
 // js/background.js
 import { getSettings as storageGetSettings, incrementStat, initializeDefaults } from './modules/storage.js';
-import { matchesDomain, extractGroupNameFromTitle } from './modules/utils.js';
+import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from './modules/utils.js';
+import { getMessage } from './modules/i18n.js';
 
 const middleClickedTabs = new Map();
+
+async function promptForGroupName(tabId, defaultName) {
+    try {
+        const promptText = getMessage('promptGroupName');
+        const [{ result }] = await chrome.scripting.executeScript({
+            target: { tabId },
+            func: (text, def) => prompt(text, def),
+            args: [promptText || 'Enter group name:', defaultName]
+        });
+        return result && result.trim() ? result.trim() : defaultName;
+    } catch (e) {
+        console.warn('Prompt for group name failed:', e);
+        return defaultName;
+    }
+}
 
 async function getSettings() {
     const settings = await storageGetSettings();
@@ -123,23 +139,7 @@ async function handleGrouping(openerTab, newTab) {
         console.log(`[GROUPING_DEBUG] handleGrouping: Initial groupName set from rule.label: "${groupName}".`);
     }
 
-    if (openerTab.title && rule.titleParsingRegEx) {
-        try {
-            const extracted = extractGroupNameFromTitle(openerTab.title, rule.titleParsingRegEx);
-            if (extracted && extracted.trim()) {
-                groupName = extracted.trim(); // Override with extracted name if successful
-                console.log(`[GROUPING_DEBUG] handleGrouping: Group name extracted from opener title "${openerTab.title}" using regex "${rule.titleParsingRegEx}": "${groupName}".`);
-            } else {
-                 console.log(`[GROUPING_DEBUG] handleGrouping: Title parsing from opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}" was empty or whitespace. Group name remains: "${groupName}".`);
-            }
-        } catch (e) {
-            console.warn(`[GROUPING_DEBUG] handleGrouping: Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}". Group name remains: "${groupName}". Details:`, e.message);
-            // On error, groupName remains rule.label (or "SmartGroup" if label was also empty)
-        }
-    } else {
-         console.log(`[GROUPING_DEBUG] handleGrouping: No opener title ("${openerTab.title}") or no parsing regex ("${rule.titleParsingRegEx}"). Group name remains: "${groupName}".`);
-    }
-    console.log(`[GROUPING_DEBUG] handleGrouping: Final determined groupName: "${groupName}" for new tab ${newTab.id}.`);
+    console.log(`[GROUPING_DEBUG] handleGrouping: groupNameSource for rule is "${rule.groupNameSource}".`);
 
     let hasProcessedTab = false;
 
@@ -162,10 +162,20 @@ async function handleGrouping(openerTab, newTab) {
 
             hasProcessedTab = true;
             chrome.tabs.onUpdated.removeListener(listener);
-            // Note: 'tab' here is the newTab object from the onUpdated event.
-            console.log(`[GROUPING_DEBUG] onUpdated listener: Main condition met for newTab ${newTab.id}. URL: "${tab.url}", Title: "${tab.title}". Group name was already determined as "${groupName}". Listener removed.`);
 
-            // GroupName is already determined from openerTab. Now proceed with grouping.
+            // Determine group name now that tab URL and title are available
+            if (rule.groupNameSource === 'title' && openerTab.title && rule.titleParsingRegEx) {
+                const extracted = extractGroupNameFromTitle(openerTab.title, rule.titleParsingRegEx);
+                if (extracted && extracted.trim()) { groupName = extracted.trim(); }
+            } else if (rule.groupNameSource === 'url' && tab.url && rule.urlParsingRegEx) {
+                const extracted = extractGroupNameFromUrl(tab.url, rule.urlParsingRegEx);
+                if (extracted && extracted.trim()) { groupName = extracted.trim(); }
+            } else if (rule.groupNameSource === 'prompt') {
+                groupName = await promptForGroupName(tab.id, groupName);
+            }
+            console.log(`[GROUPING_DEBUG] onUpdated listener: Main condition met for newTab ${newTab.id}. URL: "${tab.url}", Title: "${tab.title}". Final groupName "${groupName}". Listener removed.`);
+
+            // Proceed with grouping using computed groupName
             try {
                 let currentOpenerTab = await chrome.tabs.get(openerTab.id); // Refresh openerTab state, though its title for grouping is already used.
                 const openerGroupId = currentOpenerTab.groupId;
