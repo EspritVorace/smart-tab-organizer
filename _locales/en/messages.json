@@ -20,6 +20,8 @@
   "deduplicationMode": { "message": "Deduplication Mode" },
   "exactMatch": { "message": "Exact URL" },
   "includesMatch": { "message": "URL Includes" },
+  "hostnameMatch": { "message": "Hostname" },
+  "hostnamePathMatch": { "message": "Hostname + Path" },
   "enabled": { "message": "Enabled" },
   "save": { "message": "Save" },
   "edit": { "message": "Edit" },
