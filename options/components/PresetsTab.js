@@ -6,7 +6,7 @@ import { generateUUID, isValidRegex } from './../../js/modules/utils.js';
 
 const html = htm.bind(h);
 
-function PresetsTab({ settings, updatePresets, editingId, setEditingId }) {
+function PresetsTab({ settings, updatePresets, updateRules, editingId, setEditingId }) {
     const { regexPresets, domainRules } = settings;
     const [newPresetInProgress, setNewPresetInProgress] = useState(null);
 
@@ -32,11 +32,7 @@ function PresetsTab({ settings, updatePresets, editingId, setEditingId }) {
                         ? { ...rule, titleParsingRegEx: updatedPreset.regex }
                         : rule
                 );
-                // We need to update settings directly here or pass a function
-                // For now, let's assume we pass an updateSettings function or handle this in parent
-                // A simpler way: just update presets, rely on user to update rules manually or handle later.
-                // Let's just update presets for now. The save effect will save settings.
-                // TODO: Consider updating settings.domainRules directly or via a passed callback
+                updateRules(newRules);
                 updatePresets(newPresets);
             } else {
                 updatePresets(newPresets);

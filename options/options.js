@@ -113,7 +113,7 @@ function OptionsApp() {
             <${Tabs} currentTab=${currentTab} onTabChange=${handleTabChange} />
             <main>
                 ${currentTab === 'rules' && html`<${RulesTab} settings=${settings} updateRules=${updateRules} editingId=${editingRuleId} setEditingId=${setEditingRuleId} />`}
-                ${currentTab === 'presets' && html`<${PresetsTab} settings=${settings} updatePresets=${updatePresets} editingId=${editingPresetId} setEditingId=${setEditingPresetId} />`}
+                ${currentTab === 'presets' && html`<${PresetsTab} settings=${settings} updatePresets=${updatePresets} updateRules=${updateRules} editingId=${editingPresetId} setEditingId=${setEditingPresetId} />`}
                 ${currentTab === 'logicalGroups' && html`<${LogicalGroupsTab} settings=${settings} setSettings=${setSettings} editingId=${editingLogicalGroupId} setEditingId=${setEditingLogicalGroupId} />`}
                 ${currentTab === 'importexport' && html`<${ImportExportTab} settings=${settings} setSettings=${setSettings} />`}
                 ${currentTab === 'stats' && html`<${StatsTab} stats=${stats} onReset=${handleResetStats} />`}
