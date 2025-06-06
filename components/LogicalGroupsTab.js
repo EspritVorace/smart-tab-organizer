@@ -1,8 +1,8 @@
-import { h, Fragment } from './../../js/lib/preact.mjs';
-import { useState, useEffect } from './../../js/lib/preact-hooks.mjs';
-import htm from './../../js/lib/htm.mjs';
-import { getMessage } from './../../js/modules/i18n.js';
-import { generateUUID } from './../../js/modules/utils.js';
+import { h, Fragment } from './../js/lib/preact.mjs';
+import { useState, useEffect } from './../js/lib/preact-hooks.mjs';
+import htm from './../js/lib/htm.mjs';
+import { getMessage } from './../js/modules/i18n.js';
+import { generateUUID } from './../js/modules/utils.js';
 
 const html = htm.bind(h);
 

@@ -11,13 +11,13 @@ import { applyTheme } from './../js/modules/theme.js';
 const html = htm.bind(h);
 const version = chrome.runtime.getManifest().version;
 
-import { Header } from './components/Header.js';
-import { Tabs } from './components/Tabs.js';
-import { RulesTab } from './components/RulesTab.js';
-import { PresetsTab } from './components/PresetsTab.js';
-import { ImportExportTab } from './components/ImportExportTab.js';
-import { StatsTab } from './components/StatsTab.js';
-import { LogicalGroupsTab } from './components/LogicalGroupsTab.js';
+import { Header } from '../components/Header.js';
+import { Tabs } from '../components/Tabs.js';
+import { RulesTab } from '../components/RulesTab.js';
+import { PresetsTab } from '../components/PresetsTab.js';
+import { ImportExportTab } from '../components/ImportExportTab.js';
+import { StatsTab } from '../components/StatsTab.js';
+import { LogicalGroupsTab } from '../components/LogicalGroupsTab.js';
 
 // --- Fonctions Utilitaires ---
 function Tooltip({ textKey, children }) {
