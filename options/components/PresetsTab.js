@@ -6,7 +6,7 @@ import { generateUUID, isValidRegex } from './../../js/modules/utils.js';
 
 const html = htm.bind(h);
 
-function PresetsTab({ settings, updatePresets, editingId, setEditingId }) {
+function PresetsTab({ settings, updatePresets, updateRules, editingId, setEditingId }) {
     const { regexPresets, domainRules } = settings;
     const [newPresetInProgress, setNewPresetInProgress] = useState(null);
 
@@ -22,7 +22,29 @@ function PresetsTab({ settings, updatePresets, editingId, setEditingId }) {
             updatePresets([...regexPresets, updatedPreset]);
             setNewPresetInProgress(null);
         } else {
-            const newPresets = regexPresets.map(p => p.id === updatedPreset.id ? updatedPreset : p);
+            const original = regexPresets.find(p => p.id === updatedPreset.id);
+            const newPresets = regexPresets.map(p =>
+                p.id === updatedPreset.id ? updatedPreset : p
+            );
+
+            let newRules = domainRules;
+            if (original) {
+                if (original.regex !== updatedPreset.regex) {
+                    newRules = newRules.map(rule =>
+                        rule.titleParsingRegEx === original.regex
+                            ? { ...rule, titleParsingRegEx: updatedPreset.regex }
+                            : rule
+                    );
+                }
+                if (original.urlRegex !== updatedPreset.urlRegex) {
+                    newRules = newRules.map(rule =>
+                        rule.urlParsingRegEx === original.urlRegex
+                            ? { ...rule, urlParsingRegEx: updatedPreset.urlRegex }
+                            : rule
+                    );
+                }
+            }
+            updateRules(newRules);
             updatePresets(newPresets);
         }
         setEditingId(null);

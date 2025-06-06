@@ -163,7 +163,13 @@ function RulesTab({ settings, updateRules, editingId, setEditingId }) {
 
 function RuleView({ rule, presets, logicalGroups, onEdit, onDelete, onToggle }) { // Added logicalGroups
     const presetName = presets.find(p => p.regex === rule.titleParsingRegEx)?.name || rule.titleParsingRegEx;
-    const dedupMode = getMessage(rule.deduplicationMatchMode === 'exact' ? 'exactMatch' : 'includesMatch');
+    const dedupModeKeyMap = {
+        'exact': 'exactMatch',
+        'includes': 'includesMatch',
+        'hostname': 'hostnameMatch',
+        'hostname_path': 'hostnamePathMatch'
+    };
+    const dedupMode = getMessage(dedupModeKeyMap[rule.deduplicationMatchMode] || 'exactMatch');
     const sourceLabel = getMessage(
         rule.groupNameSource === 'url' ? 'sourceURL' :
         rule.groupNameSource === 'prompt' ? 'sourcePrompt' : 'sourceTitle'
@@ -175,7 +181,7 @@ function RuleView({ rule, presets, logicalGroups, onEdit, onDelete, onToggle }) 
         const presetUrlName = presets.find(p => p.urlRegex === rule.urlParsingRegEx)?.name;
         regexInfo = presetUrlName || rule.urlParsingRegEx;
     }
-     const disabledClass = rule.enabled ? '' : 'disabled-text';
+    const disabledClass = rule.enabled ? '' : 'disabled-text';
 
      const handleToggle = (e) => {
         onToggle({ ...rule, enabled: e.target.checked });
@@ -326,6 +332,8 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
                             <select name="deduplicationMatchMode" value=${formData.deduplicationMatchMode} onChange=${handleChange}>
                                  <option value="exact">${getMessage('exactMatch')}</option>
                                  <option value="includes">${getMessage('includesMatch')}</option>
+                                 <option value="hostname">${getMessage('hostnameMatch')}</option>
+                                 <option value="hostname_path">${getMessage('hostnamePathMatch')}</option>
                             </select>
                             <span class="tooltip-text" data-i18n="deduplicationModeTooltip">${getMessage('deduplicationModeTooltip')}</span>
                         </div>
