@@ -11,35 +11,33 @@
 
 ## Fonctionnalités ✨
 
-* **🖱️ Regroupement Automatique (Clic Molette) :**
-    * Lorsque vous cliquez avec la molette sur un lien, si le domaine de la page source correspond à une règle configurée, le nouvel onglet s'ouvre dans un groupe.
-    * Si l'onglet source est déjà dans un groupe, le nouvel onglet le rejoint.
-    * Sinon, un nouveau groupe est créé.
-* **🏷️ Nommage de Groupe via RegEx :**
-    * Définissez des expressions régulières pour des domaines spécifiques.
-    * L'extension extrait du texte du titre de l'onglet source à l'aide de votre RegEx pour nommer automatiquement le groupe d'onglets.
-    * Inclut des préréglages pour les outils de tickets populaires (Jira, GitLab, GitHub, Trello, etc.).
-* **🚫 Prévention des Doublons :**
-    * Empêche l'ouverture plusieurs fois de la même URL.
-    * Si vous essayez d'ouvrir une URL déjà présente, l'onglet existant est mis au premier plan et rechargé, et le nouveau est fermé.
-    * Prend en charge la correspondance d'URL exacte ou "incluse" par domaine.
-* **⚙️ Page d'Options Complète :**
-    * Gérez (Ajouter, Editer, Supprimer, Activer/Désactiver) les règles de domaine.
-    * Gérez les expressions régulières personnalisées et prédéfinies.
-    * Configurez les modes de déduplication.
-    * Importez et exportez vos paramètres (règles et préréglages) via JSON.
-    * Visualisez les statistiques et réinitialisez-les.
-* **🗂️ Gestion des Groupes Logiques :**
-    * Organisez vos règles de domaine en créant et en modifiant des groupes logiques.
-    * Personnalisez votre expérience de navigation en choisissant des couleurs spécifiques pour les groupes d'onglets associés à ces groupes logiques.
-* **🕶️ Support du Mode Sombre :**
-    * Choisissez entre le Mode Clair, le Mode Sombre, ou suivez le thème de votre système.
-* **🌍 Internationalisation :**
-    * Disponible en Français (Défaut), Anglais et Espagnol.
-* **📊 Popup d'Accès Rapide :**
-    * Activez/Désactivez globalement le regroupement et la déduplication.
-    * Consultez les statistiques clés en un coup d'œil.
-    * Lien rapide vers la page d'options.
+### 🖱️ Regroupement Automatique
+* Clic molette sur un lien pour ouvrir l'onglet dans le groupe adéquat si le domaine correspond à vos règles.
+* L'onglet rejoint un groupe existant ou un nouveau groupe est créé.
+* Le nom du groupe peut provenir du titre de l'onglet source, de son URL ou être saisi manuellement.
+* Préréglages d'expressions régulières pour les outils de tickets populaires (Jira, GitLab, GitHub, Trello, etc.).
+
+### 🚫 Déduplication
+* L'ouverture d'une même URL est empêchée.
+* L'onglet existant est remis au premier plan et rechargé.
+* Modes de correspondance : URL exacte, nom d'hôte + chemin, nom d'hôte seul ou simple inclusion.
+
+### ⚙️ Options et Personnalisation
+* Ajouter, modifier, supprimer ou activer/désactiver les règles de domaine.
+* Gérer les expressions régulières personnalisées ou prédéfinies.
+* Organiser les règles en groupes logiques et choisir une couleur pour chaque groupe.
+* Importer/exporter votre configuration au format JSON.
+* Configurer les modes de déduplication.
+* Consulter les statistiques (groupes créés et onglets dédupliqués) et les réinitialiser.
+* Sélectionner le thème Clair, Sombre ou Système.
+
+### 📊 Popup d'Accès Rapide
+* Activer/désactiver globalement le regroupement et la déduplication.
+* Voir les statistiques clés en un coup d'œil.
+* Accès direct à la page d'options.
+
+### 🌍 Internationalisation
+* Disponible en Français (défaut), Anglais et Espagnol.
 
 ## Installation 🚀
 
