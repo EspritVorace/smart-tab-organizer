@@ -35,6 +35,7 @@
 * Activer/désactiver globalement le regroupement et la déduplication.
 * Voir les statistiques clés en un coup d'œil.
 * Accès direct à la page d'options.
+* Clic droit sur l'icône pour "Tout désactiver".
 
 ### 🌍 Internationalisation
 * Disponible en Français (défaut), Anglais et Espagnol.

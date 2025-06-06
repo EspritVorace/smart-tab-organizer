@@ -1,8 +1,20 @@
 // js/background.js
-import { getSettings as storageGetSettings, incrementStat, initializeDefaults } from './modules/storage.js';
+import { getSettings as storageGetSettings, saveSettings, incrementStat, initializeDefaults } from './modules/storage.js';
 import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from './modules/utils.js';
 
 const middleClickedTabs = new Map();
+
+function createContextMenus() {
+    chrome.contextMenus.removeAll(() => {
+        chrome.contextMenus.create({
+            id: 'disableAll',
+            title: chrome.i18n.getMessage('disableAll') || 'Disable All',
+            contexts: ['action']
+        });
+    });
+}
+
+createContextMenus();
 
 async function getSettings() {
     const settings = await storageGetSettings();
@@ -36,6 +48,7 @@ async function promptForGroupName(defaultName, tabId) {
 chrome.runtime.onInstalled.addListener(async (details) => {
   console.log("SmartTab Organizer installed/updated.", details.reason);
   await initializeDefaults();
+  createContextMenus();
 });
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -50,6 +63,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
     }
     return true;
+});
+
+chrome.contextMenus.onClicked.addListener(async (info) => {
+    if (info.menuItemId === 'disableAll') {
+        const settings = await getSettings();
+        settings.globalGroupingEnabled = false;
+        settings.globalDeduplicationEnabled = false;
+        await saveSettings(settings);
+    }
 });
 
 chrome.tabs.onCreated.addListener(async (newTab) => {

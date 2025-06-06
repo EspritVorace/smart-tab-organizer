@@ -35,6 +35,7 @@
 * Toggle grouping and deduplication globally.
 * View key statistics at a glance.
 * Shortcut to the options page.
+* Right-click the extension icon for a "Disable All" action.
 
 ### 🌍 Internationalization
 * Available in French (default), English and Spanish.

@@ -35,6 +35,7 @@
 * Activar/desactivar globalmente la agrupación y la deduplicación.
 * Ver estadísticas clave de un vistazo.
 * Acceso directo a la página de opciones.
+* Clic derecho en el icono para "Desactivar todo".
 
 ### 🌍 Internacionalización
 * Disponible en Francés (predeterminado), Inglés y Español.
