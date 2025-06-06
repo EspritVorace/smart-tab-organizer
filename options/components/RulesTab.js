@@ -187,8 +187,11 @@ function RuleView({ rule, presets, logicalGroups, onEdit, onDelete, onToggle }) 
         subtitleParts.push(getMessage('noGroupAssigned', 'No group'));
     }
     subtitleParts.push(rule.domainFilter);
-    subtitleParts.push(presetName);
-    subtitleParts.push(urlPresetName);
+    const activeRegexName = rule.groupNameSource === 'title' ? presetName :
+                            rule.groupNameSource === 'url' ? urlPresetName : '';
+    if (activeRegexName) {
+        subtitleParts.push(activeRegexName);
+    }
     subtitleParts.push(dedupMode);
     const sourceKeyMap = { 'title': 'groupNameSourceTitle', 'url': 'groupNameSourceUrl', 'manual': 'groupNameSourceManual' };
     subtitleParts.push(getMessage(sourceKeyMap[rule.groupNameSource] || 'groupNameSourceTitle'));
@@ -231,6 +234,23 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        if (name === 'groupNameSource') {
+            if (value === 'title' && !formData.titleParsingRegEx) {
+                setFormData(prev => ({
+                    ...prev,
+                    groupNameSource: value,
+                    titleParsingRegEx: presets[0]?.regex || ''
+                }));
+                return;
+            } else if (value === 'url' && !formData.urlParsingRegEx) {
+                setFormData(prev => ({
+                    ...prev,
+                    groupNameSource: value,
+                    urlParsingRegEx: presets[0]?.urlRegex || ''
+                }));
+                return;
+            }
+        }
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
@@ -356,26 +376,30 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
                             </select>
                             <span class="tooltip-text" data-i18n="logicalGroupRuleTooltip">${getMessage('logicalGroupRuleTooltip', 'Assign this rule to a logical group.')}</span>
                         </div>
-                        <div class="form-group tooltip-container full-width">
-                            <label>${getMessage('titleRegex')}</label>
-                            <select value=${currentRegexValue} onChange=${handleSelectChange}>
-                                ${presets.map(p => html`<option value=${p.regex}>${p.name}</option>`)}
-                                <option value="custom">${getMessage('customRegex')}</option>
-                            </select>
-                            <input type="text" value=${customValue} onChange=${handleCustomChange} style=${{ display: isCustom ? 'block' : 'none', marginTop: '8px' }} />
-                            <span class="tooltip-text" data-i18n="titleParsingRegExTooltip">${getMessage('titleParsingRegExTooltip')}</span>
-                             ${errors.titleParsingRegEx && html`<span class="error-message">${errors.titleParsingRegEx}</span>`}
-                        </div>
-                        <div class="form-group tooltip-container full-width">
-                            <label>${getMessage('urlRegex')}</label>
-                            <select value=${currentUrlRegexValue} onChange=${handleUrlSelectChange}>
-                                ${presets.map(p => html`<option value=${p.urlRegex}>${p.name}</option>`)}
-                                <option value="custom">${getMessage('customRegex')}</option>
-                            </select>
-                            <input type="text" name="urlParsingRegEx" value=${urlCustomValue} onChange=${handleUrlCustomChange} style=${{ display: isUrlCustom ? 'block' : 'none', marginTop: '8px' }} />
-                            <span class="tooltip-text" data-i18n="urlParsingRegExTooltip">${getMessage('urlParsingRegExTooltip')}</span>
-                            ${errors.urlParsingRegEx && html`<span class="error-message">${errors.urlParsingRegEx}</span>`}
-                        </div>
+                        ${formData.groupNameSource === 'title' && html`
+                            <div class="form-group tooltip-container full-width">
+                                <label>${getMessage('titleRegex')}</label>
+                                <select value=${currentRegexValue} onChange=${handleSelectChange}>
+                                    ${presets.map(p => html`<option value=${p.regex}>${p.name}</option>`)}
+                                    <option value="custom">${getMessage('customRegex')}</option>
+                                </select>
+                                <input type="text" value=${customValue} onChange=${handleCustomChange} style=${{ display: isCustom ? 'block' : 'none', marginTop: '8px' }} />
+                                <span class="tooltip-text" data-i18n="titleParsingRegExTooltip">${getMessage('titleParsingRegExTooltip')}</span>
+                                 ${errors.titleParsingRegEx && html`<span class="error-message">${errors.titleParsingRegEx}</span>`}
+                            </div>
+                        `}
+                        ${formData.groupNameSource === 'url' && html`
+                            <div class="form-group tooltip-container full-width">
+                                <label>${getMessage('urlRegex')}</label>
+                                <select value=${currentUrlRegexValue} onChange=${handleUrlSelectChange}>
+                                    ${presets.map(p => html`<option value=${p.urlRegex}>${p.name}</option>`)}
+                                    <option value="custom">${getMessage('customRegex')}</option>
+                                </select>
+                                <input type="text" name="urlParsingRegEx" value=${urlCustomValue} onChange=${handleUrlCustomChange} style=${{ display: isUrlCustom ? 'block' : 'none', marginTop: '8px' }} />
+                                <span class="tooltip-text" data-i18n="urlParsingRegExTooltip">${getMessage('urlParsingRegExTooltip')}</span>
+                                ${errors.urlParsingRegEx && html`<span class="error-message">${errors.urlParsingRegEx}</span>`}
+                            </div>
+                        `}
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="primary">${getMessage('save')}</button>
