@@ -294,9 +294,11 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
         });
         if (duplicateTab) {
             await incrementStat('tabsDeduplicatedCount');
-            try { await chrome.tabs.update(duplicateTab.id, { active: true });
+            try {
+                await chrome.tabs.update(duplicateTab.id, { active: true });
                 const dupTabWindow = await chrome.windows.get(duplicateTab.windowId, { populate: true });
                 if (!dupTabWindow.focused) await chrome.windows.update(duplicateTab.windowId, { focused: true });
+                try { await chrome.tabs.reload(duplicateTab.id); } catch (e) { /* Silently fail reload */ }
             } catch (e) { /* Silently fail focus/update */ }
             try { await chrome.tabs.remove(details.tabId); } catch (e) { /* Silently fail remove */ }
         }
