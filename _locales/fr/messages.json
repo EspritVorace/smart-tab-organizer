@@ -100,5 +100,6 @@
   "ruleCountSingular": { "message": "règle" },
   "ruleCountPlural": { "message": "règles" },
   "noGroupAssigned": { "message": "Aucun groupe" },
-  "loadingText": { "message": "Chargement..." }
+  "loadingText": { "message": "Chargement..." },
+  "magicGrouping": { "message": "Regroupement magique" }
 }

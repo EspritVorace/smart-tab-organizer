@@ -48,6 +48,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             console.warn("[GROUPING_DEBUG] Middle click message received without valid sender.tab.id");
             sendResponse({ status: "error", message: "Missing sender tab ID" });
         }
+    } else if (request.type === 'magicGroupTabs') {
+        performMagicGrouping();
+        sendResponse({ status: 'started' });
     }
     return true;
 });
@@ -304,5 +307,86 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
         }
     } catch (queryError) { console.error("Deduplication: Error querying tabs:", queryError); }
 }, { url: [{ schemes: ['http', 'https'] }] });
+
+async function performMagicGrouping() {
+    const settings = await getSettings();
+    const allTabs = await chrome.tabs.query({ url: '*://*/*' });
+    const groupsByWindow = {};
+    const dedupMaps = {};
+
+    function dedupKey(url, mode) {
+        try { const u = new URL(url); switch (mode) {
+            case 'hostname': return u.hostname;
+            case 'hostname_path': return u.hostname + u.pathname;
+            default: return url;
+        }} catch (e) { return url; }
+    }
+
+    for (const tab of allTabs) {
+        const rule = settings.domainRules.find(r => r.enabled && matchesDomain(tab.url, r.domainFilter));
+        if (!rule) continue;
+
+        const dedupEnabled = rule ? rule.deduplicationEnabled : settings.globalDeduplicationEnabled;
+        const matchMode = rule ? rule.deduplicationMatchMode : 'exact';
+        if (!dedupMaps[tab.windowId]) dedupMaps[tab.windowId] = {};
+        const map = dedupMaps[tab.windowId];
+        if (dedupEnabled) {
+            let key = dedupKey(tab.url, matchMode);
+            let dupId = map[key];
+            if (matchMode === 'includes') {
+                for (const [k, id] of Object.entries(map)) {
+                    if (k.includes(tab.url) || tab.url.includes(k)) { dupId = id; break; }
+                }
+            }
+            if (dupId && dupId !== tab.id) {
+                await incrementStat('tabsDeduplicatedCount');
+                try { await chrome.tabs.remove(tab.id); } catch (e) {}
+                continue;
+            }
+            map[key] = tab.id;
+        }
+
+        let groupName = rule.label && rule.label.trim() ? rule.label.trim() : 'SmartGroup';
+        if (rule.groupNameSource === 'title' && tab.title && rule.titleParsingRegEx) {
+            const extracted = extractGroupNameFromTitle(tab.title, rule.titleParsingRegEx);
+            if (extracted && extracted.trim()) groupName = extracted.trim();
+        } else if (rule.groupNameSource === 'url' && tab.url && rule.urlParsingRegEx) {
+            const extracted = extractGroupNameFromUrl(tab.url, rule.urlParsingRegEx);
+            if (extracted && extracted.trim()) groupName = extracted.trim();
+        }
+
+        const color = (rule.groupId && settings.logicalGroups)
+            ? (settings.logicalGroups.find(lg => lg.id === rule.groupId)?.color || null)
+            : null;
+
+        if (!groupsByWindow[tab.windowId]) groupsByWindow[tab.windowId] = {};
+        if (!groupsByWindow[tab.windowId][groupName]) groupsByWindow[tab.windowId][groupName] = { tabs: [], color };
+        groupsByWindow[tab.windowId][groupName].tabs.push(tab.id);
+    }
+
+    for (const [windowIdStr, groups] of Object.entries(groupsByWindow)) {
+        const windowId = parseInt(windowIdStr, 10);
+        for (const [name, info] of Object.entries(groups)) {
+            if (info.tabs.length < 2) continue;
+            const existing = await chrome.tabGroups.query({ windowId, title: name });
+            let groupId;
+            if (existing.length > 0) {
+                groupId = existing[0].id;
+            } else {
+                groupId = await chrome.tabs.group({ tabIds: info.tabs });
+                await chrome.tabGroups.update(groupId, { title: name, color: info.color || undefined });
+                await incrementStat('tabGroupsCreatedCount');
+                continue;
+            }
+            const currentTabs = await chrome.tabs.query({ windowId, groupId });
+            const currentIds = new Set(currentTabs.map(t => t.id));
+            const toAdd = info.tabs.filter(id => !currentIds.has(id));
+            if (toAdd.length) {
+                await chrome.tabs.group({ groupId, tabIds: toAdd });
+            }
+        }
+    }
+}
+
 
 console.log("SmartTab Organizer Service Worker: Group names now derived from opener tab. Logging active.");

@@ -67,6 +67,10 @@ function PopupApp() {
         }
     }, []);
 
+	const handleMagicGrouping = useCallback(async () => {
+        await chrome.runtime.sendMessage({ type: 'magicGroupTabs' });
+    }, []);
+
     // --- Rendu ---
     return html`
         <div id="popup-inner" class=${isLoaded ? 'loaded' : ''}>
@@ -93,11 +97,15 @@ function PopupApp() {
                 <label for="deduplication-toggle"></label>
                 <span>${getMessage('enableDeduplication')}</span>
             </div>
+			
+			<hr />
+
+			<button onClick=${handleMagicGrouping} class="button">🪄 ${getMessage('magicGrouping')}</button>
 
             <hr />
 
             <${StatsTab} stats=${stats} onReset=${handleResetStats} />
-
+			
             <hr />
 
             <button onClick=${openOptionsPage} class="button">${getMessage('openOptions')}</button>

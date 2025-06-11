@@ -100,5 +100,6 @@
   "ruleCountSingular": { "message": "rule" },
   "ruleCountPlural": { "message": "rules" },
   "noGroupAssigned": { "message": "No group" },
-  "loadingText": { "message": "Loading..." }
+  "loadingText": { "message": "Loading..." },
+  "magicGrouping": { "message": "Magic Group Tabs" }
 }
