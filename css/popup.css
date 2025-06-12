@@ -23,6 +23,7 @@ hr { border: none; border-top: 1px solid var(--border-color); margin: 20px 0; }
 .stats p { margin: 8px 0; font-size: 0.9em; display: flex; justify-content: space-between; }
 .stats b { color: var(--primary-color); font-weight: 600; }
 .button { display: block; width: 100%; padding: 10px; font-size: 1em; font-weight: 500; margin-top: 10px; box-sizing: border-box; }
+.button .icon { width: 16px; height: 16px; vertical-align: text-bottom; margin-right: 6px; }
 
 .stats-display p { font-size: 1.1em; margin: 10px 0; }
 .stats-display p span { font-weight: 500; min-width: 200px; display: inline-block; }

@@ -100,7 +100,7 @@ function PopupApp() {
 			
 			<hr />
 
-			<button onClick=${handleMagicGrouping} class="button">🪄 ${getMessage('magicGrouping')}</button>
+			<button onClick=${handleMagicGrouping} class="button"><img src="../icons/magic-wand.svg" alt="" class="icon" /> ${getMessage('magicGrouping')}</button>
 
             <hr />
 
