@@ -15,6 +15,12 @@ const dedupModeKeyMap = {
     hostname_path: 'hostnamePathMatch',
 };
 
+const sourceKeyMap = {
+    title: 'groupNameSourceTitle',
+    url: 'groupNameSourceUrl',
+    manual: 'groupNameSourceManual',
+};
+
 function RulesTab({ settings, updateRules, editingId, setEditingId }) {
     const { domainRules, regexPresets, logicalGroups = [] } = settings; // Destructure and default logicalGroups
     const [newRuleInProgress, setNewRuleInProgress] = useState(null);
@@ -198,7 +204,6 @@ function RuleView({ rule, presets, logicalGroups, onEdit, onDelete, onToggle }) 
         subtitleParts.push(activeRegexName);
     }
     subtitleParts.push(dedupMode);
-    const sourceKeyMap = { 'title': 'groupNameSourceTitle', 'url': 'groupNameSourceUrl', 'manual': 'groupNameSourceManual' };
     subtitleParts.push(getMessage(sourceKeyMap[rule.groupNameSource] || 'groupNameSourceTitle'));
 
     return (
