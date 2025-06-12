@@ -8,6 +8,13 @@ import Select from '@atlaskit/select';
 import Checkbox from '@atlaskit/checkbox';
 import Toggle from '@atlaskit/toggle';
 
+const dedupModeKeyMap = {
+    exact: 'exactMatch',
+    includes: 'includesMatch',
+    hostname: 'hostnameMatch',
+    hostname_path: 'hostnamePathMatch',
+};
+
 function RulesTab({ settings, updateRules, editingId, setEditingId }) {
     const { domainRules, regexPresets, logicalGroups = [] } = settings; // Destructure and default logicalGroups
     const [newRuleInProgress, setNewRuleInProgress] = useState(null);
@@ -168,12 +175,6 @@ function RulesTab({ settings, updateRules, editingId, setEditingId }) {
 function RuleView({ rule, presets, logicalGroups, onEdit, onDelete, onToggle }) { // Added logicalGroups
      const presetName = presets.find(p => p.regex === rule.titleParsingRegEx)?.name || rule.titleParsingRegEx;
      const urlPresetName = presets.find(p => p.urlRegex === rule.urlParsingRegEx)?.name || rule.urlParsingRegEx;
-     const dedupModeKeyMap = {
-        'exact': 'exactMatch',
-        'includes': 'includesMatch',
-        'hostname': 'hostnameMatch',
-        'hostname_path': 'hostnamePathMatch'
-     };
     const dedupMode = getMessage(dedupModeKeyMap[rule.deduplicationMatchMode] || 'exactMatch');
     const disabledClass = rule.enabled ? '' : 'disabled-text';
 
