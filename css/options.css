@@ -57,6 +57,12 @@ section {
     align-items: center;
     gap: 15px;
 }
+.item-view > label,
+.item-view > span {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
 .item-view .item-details {
     display: flex;
     flex-direction: column;
@@ -69,7 +75,7 @@ section {
 .item-main { display: block; font-weight: 600; font-size: 1.05em; }
 .item-sub { display: block; font-size: 0.85em; color: var(--ds-text-subtle, #5E6C84); margin-top: 3px; }
 .disabled-text { color: var(--ds-text-subtle, #5E6C84) !important; text-decoration: line-through; }
-.item-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.item-actions { display: flex; gap: 8px; flex-shrink: 0; margin-left: auto; }
 .item-actions button {
     font-size: 0.85em;
 }
