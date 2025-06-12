@@ -10,6 +10,7 @@ function Header({ settings, onThemeChange }) {
             <div class="theme-selector">
                 <label data-i18n="darkMode">{getMessage('darkMode')}</label>
                 <Select
+                    className="theme-select"
                     options={[
                         { label: getMessage('systemTheme'), value: 'system' },
                         { label: getMessage('lightMode'), value: 'disabled' },
