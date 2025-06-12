@@ -67,6 +67,12 @@
 * preact (para una interfaz de usuario reactiva y ligera)
 * CSS3
 
+## Compilación
+
+Ejecuta `npm install` para instalar todas las dependencias (incluyendo `esbuild`)
+y luego `npm run build`. Los archivos generados estarán en el directorio `dist/`
+y podrás comprimirlos directamente para la extensión de Chrome.
+
 ## Licencia 📄
 
 Este proyecto está bajo la licencia **GNU General Public License v3.0**.

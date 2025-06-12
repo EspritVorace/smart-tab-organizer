@@ -71,9 +71,9 @@
 
 ## Building
 
-Run `npm install` to fetch dependencies then `npm run build`. The compiled
-extension will be available in the `dist/` directory and can be zipped
-directly for distribution.
+Run `npm install` to fetch all dependencies (including dev dependencies like
+`esbuild`) then `npm run build`. The compiled extension will be available in the
+`dist/` directory and can be zipped directly for distribution.
 
 ## License 📄
 

@@ -1,4 +1,11 @@
-import { build } from 'esbuild';
+let build;
+try {
+  ({ build } = await import('esbuild'));
+} catch (e) {
+  console.error('esbuild is not installed. Run `npm install` before building.');
+  process.exit(1);
+}
+
 import { rmSync, mkdirSync, cpSync } from 'fs';
 import { join } from 'path';
 
@@ -6,12 +13,28 @@ const outdir = 'dist';
 rmSync(outdir, { recursive: true, force: true });
 mkdirSync(outdir, { recursive: true });
 
+const aliasPlugin = {
+  name: 'preact-alias',
+  setup(build) {
+    const map = {
+      react: 'preact/compat',
+      'react-dom': 'preact/compat',
+      'react/jsx-runtime': 'preact/jsx-runtime',
+      'react/jsx-dev-runtime': 'preact/jsx-dev-runtime'
+    };
+    for (const key in map) {
+      build.onResolve({ filter: new RegExp('^' + key + '$') }, () => ({ path: map[key] }));
+    }
+  }
+};
+
 const shared = {
   bundle: true,
   format: 'esm',
   jsxFactory: 'h',
   jsxFragment: 'Fragment',
-  loader: { '.ts': 'ts', '.tsx': 'tsx', '.jsx': 'jsx' }
+  loader: { '.ts': 'ts', '.tsx': 'tsx', '.jsx': 'jsx' },
+  plugins: [aliasPlugin]
 };
 
 await Promise.all([
