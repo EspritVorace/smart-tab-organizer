@@ -63,12 +63,19 @@ section {
     display: flex;
     align-items: center;
 }
+/* Ensure the checkbox container stretches so details start right after it */
+.item-view > *:first-child {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
 .item-view .item-details {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 2px;
     flex-grow: 1;
+    width: 100%;
     cursor: pointer;
 }
 .item-details { flex-grow: 1; }
