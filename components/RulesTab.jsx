@@ -213,13 +213,11 @@ function RuleView({ rule, presets, logicalGroups, onEdit, onDelete, onToggle }) 
                     isChecked={rule.enabled}
                     onChange={handleToggle}
                     id={`enable-${rule.id}`}
-                    label={
-                        <span class="item-details">
-                            <span class={`item-main ${disabledClass}`}>{rule.label}</span>
-                            <span class={`item-sub ${disabledClass}`}>{subtitleParts.join(' | ')}</span>
-                        </span>
-                    }
                 />
+                <label class="item-details" htmlFor={`enable-${rule.id}`}> 
+                    <span class={`item-main ${disabledClass}`}>{rule.label}</span>
+                    <span class={`item-sub ${disabledClass}`}>{subtitleParts.join(' | ')}</span>
+                </label>
                 <div class="item-actions">
                     <Button appearance="primary" onClick={() => onEdit(rule.id)}>{getMessage('edit')}</Button>
                     <Button appearance="danger" onClick={() => onDelete(rule.id)}>{getMessage('delete')}</Button>
