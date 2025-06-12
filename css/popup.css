@@ -6,20 +6,8 @@ body {
 h1 { font-size: 1.2em; margin-top: 0; margin-bottom: 20px; text-align: center; color: var(--primary-color); font-weight: 600; }
 h2 { font-size: 1em; margin-top: 15px; margin-bottom: 10px; color: var(--text-color-light); border-bottom: 1px solid var(--border-color); padding-bottom: 5px; font-weight: 500; }
 hr { border: none; border-top: 1px solid var(--border-color); margin: 20px 0; }
-.toggle-switch { display: flex; align-items: center; margin-bottom: 15px; cursor: pointer; }
-.toggle-switch input[type="checkbox"] { opacity: 0; width: 0; height: 0; position: absolute; }
-.toggle-switch label {
-    cursor: pointer; width: 40px; height: 20px; background: var(--border-color); display: block;
-    border-radius: 100px; position: relative; transition: background-color 0.3s ease; flex-shrink: 0; margin-right: 12px;
-}
-.toggle-switch label:after {
-    content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff;
-    border-radius: 50%; transition: 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-}
-.toggle-switch input:checked + label { background: var(--success-color); }
-.toggle-switch input:checked + label:after { left: calc(100% - 2px); transform: translateX(-100%); }
+.toggle-switch { display: flex; align-items: center; margin-bottom: 15px; gap: 8px; }
 .toggle-switch span { font-size: 0.95em; line-height: 20px; user-select: none; }
-.toggle-switch:hover label:after { box-shadow: 0 0 5px var(--primary-color-light); }
 .stats p { margin: 8px 0; font-size: 0.9em; display: flex; justify-content: space-between; }
 .stats b { color: var(--primary-color); font-weight: 600; }
 .button { display: block; width: 100%; padding: 10px; font-size: 1em; font-weight: 500; margin-top: 10px; box-sizing: border-box; }

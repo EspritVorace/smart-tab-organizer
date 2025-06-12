@@ -14,7 +14,6 @@ section { padding: 20px; background-color: var(--section-bg-color); border-radiu
 .list-item:hover { border-color: var(--primary-color-light); box-shadow: 0 2px 6px rgba(74, 144, 226, 0.2); }
 .list-item.is-editing { border-color: var(--primary-color); box-shadow: 0 0 8px rgba(74, 144, 226, 0.3); }
 .item-view { display: flex; align-items: center; gap: 15px; }
-.item-view input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary-color); flex-shrink: 0; }
 .item-view label.item-details { cursor: pointer; }
 .item-details { flex-grow: 1; }
 .item-main { display: block; font-weight: 600; font-size: 1.05em; }

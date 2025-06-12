@@ -78,7 +78,6 @@ function PopupApp() {
                     isChecked={settings.globalGroupingEnabled}
                     onChange={(e) => handleToggleChange('globalGroupingEnabled', e.target.checked)}
                 />
-                <label for="grouping-toggle"></label>
                 <span>{getMessage('enableGrouping')}</span>
             </div>
 
@@ -88,7 +87,6 @@ function PopupApp() {
                     isChecked={settings.globalDeduplicationEnabled}
                     onChange={(e) => handleToggleChange('globalDeduplicationEnabled', e.target.checked)}
                 />
-                <label for="deduplication-toggle"></label>
                 <span>{getMessage('enableDeduplication')}</span>
             </div>
 
