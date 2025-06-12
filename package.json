@@ -8,6 +8,8 @@
   },
   "dependencies": {
     "preact": "^10.15.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
     "@atlaskit/button": "^17.0.0",
     "@atlaskit/checkbox": "^17.1.3",
     "@atlaskit/select": "^20.7.0",
