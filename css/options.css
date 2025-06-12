@@ -74,9 +74,24 @@ code.item-sub { background-color: var(--input-bg-color); padding: 2px 5px; borde
 .full-width { grid-column: 1 / -1; }
 .form-group { display: flex; flex-direction: column; }
 .form-group label { display: inline-flex; align-items: center; margin-bottom: 6px; font-weight: 500; }
-.form-group input[type="text"], .form-group select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; box-sizing: border-box; background-color: var(--input-bg-color); color: var(--text-color); font-size: 0.95em; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-.form-group input[type="text"]:focus, .form-group select:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px var(--primary-color-light-trans); }
-.form-group input[type="text"][v-if] { margin-top: 8px; }
+.form-group input[type="text"],
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    border: 1px solid var(--ds-border-input, var(--border-color));
+    background-color: var(--ds-background-input, var(--input-bg-color));
+    color: var(--ds-text, var(--text-color));
+    font-size: 0.95em;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.form-group input[type="text"]:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--ds-border-focused, var(--primary-color));
+    box-shadow: 0 0 0 2px var(--primary-color-light-trans);
+}
 .form-actions { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
 .add-button {
     margin-top: 10px;
