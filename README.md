@@ -65,7 +65,15 @@
 * JavaScript (ES Modules)
 * Chrome Extension APIs (Manifest V3)
 * preact (for a lightweight reactive UI)
+* TypeScript
+* Atlassian Design System
 * CSS3
+
+## Building
+
+Run `npm install` to fetch dependencies then `npm run build`. The compiled
+extension will be available in the `dist/` directory and can be zipped
+directly for distribution.
 
 ## License 📄
 

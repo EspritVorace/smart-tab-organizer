@@ -1,66 +1,63 @@
-import { h, Fragment } from './../js/lib/preact.mjs';
-import { useState, useEffect } from './../js/lib/preact-hooks.mjs';
-import htm from './../js/lib/htm.mjs';
+import { h, Fragment } from 'preact';
+import { useState, useEffect } from 'preact/hooks';
 import { getMessage } from './../js/modules/i18n.js';
 import { generateUUID } from './../js/modules/utils.js';
-
-const html = htm.bind(h);
 
 const LOGICAL_GROUP_COLORS = ["grey", "blue", "red", "yellow", "green", "pink", "purple", "cyan", "orange"];
 
 // --- Composants pour LogicalGroupsTab ---
 function LogicalGroupView({ group, onEdit, onDelete }) {
-    return html`
-        <div class="list-item" key=${group.id}>
+    return (
+        <div class="list-item" key={group.id}>
             <div class="item-view">
-                <span class="group-color-swatch ${'group-color-' + group.color}"></span>
+                <span class={`group-color-swatch group-color-${group.color}`}></span>
                 <div class="item-details">
-                    <span class="item-main">${group.label}</span>
-                    <code class="item-sub">ID: ${group.id}</code>
+                    <span class="item-main">{group.label}</span>
+                    <code class="item-sub">ID: {group.id}</code>
                 </div>
                 <div class="item-actions">
-                    <button onClick=${() => onEdit(group.id)}>${getMessage('edit', 'Edit')}</button>
-                    <button class="danger" onClick=${() => onDelete(group.id, group.label)}>${getMessage('delete', 'Delete')}</button>
+                    <button onClick={() => onEdit(group.id)}>{getMessage('edit', 'Edit')}</button>
+                    <button class="danger" onClick={() => onDelete(group.id, group.label)}>{getMessage('delete', 'Delete')}</button>
                 </div>
             </div>
         </div>
-    `;
+    );
 }
 
 function LogicalGroupEditForm({ group, onSave, onCancel, editFormError, handleEditLabelChange, handleEditColorChange, LOGICAL_GROUP_COLORS }) {
-    return html`
+    return (
         <div class="list-item is-editing">
             <div class="item-edit">
-                <h3>${getMessage('editLogicalGroup', 'Edit Logical Group')}</h3>
+                <h3>{getMessage('editLogicalGroup', 'Edit Logical Group')}</h3>
                 <div class="form-group">
-                    <label for="edit-group-label-${group.id}">${getMessage('labelLabel', 'Label')}</label>
+                    <label for={`edit-group-label-${group.id}`}>{getMessage('labelLabel', 'Label')}</label>
                     <input
                         type="text"
-                        id="edit-group-label-${group.id}"
-                        value=${group.label}
-                        onInput=${handleEditLabelChange}
+                        id={`edit-group-label-${group.id}`}
+                        value={group.label}
+                        onInput={handleEditLabelChange}
                     />
-                    ${editFormError && html`<span class="error-message">${editFormError}</span>`}
+                    {editFormError && <span class="error-message">{editFormError}</span>}
                 </div>
                 <div class="form-group">
-                    <label for="edit-group-color-${group.id}">${getMessage('groupColor', 'Color')}</label>
+                    <label for={`edit-group-color-${group.id}`}>{getMessage('groupColor', 'Color')}</label>
                     <select
-                        id="edit-group-color-${group.id}"
-                        value=${group.color}
-                        onChange=${handleEditColorChange}
+                        id={`edit-group-color-${group.id}`}
+                        value={group.color}
+                        onChange={handleEditColorChange}
                     >
-                        ${LOGICAL_GROUP_COLORS.map(color => html`
-                            <option value=${color}>${getMessage(`color_${color}`, color)}</option>
-                        `)}
+                        {LOGICAL_GROUP_COLORS.map(color => (
+                            <option value={color}>{getMessage(`color_${color}`, color)}</option>
+                        ))}
                     </select>
                 </div>
                 <div class="form-actions">
-                    <button onClick=${onSave} class="primary">${getMessage('save', 'Save')}</button>
-                    <button onClick=${onCancel}>${getMessage('cancel', 'Cancel')}</button>
+                    <button onClick={onSave} class="primary">{getMessage('save', 'Save')}</button>
+                    <button onClick={onCancel}>{getMessage('cancel', 'Cancel')}</button>
                 </div>
             </div>
         </div>
-    `;
+    );
 }
 
 // --- Onglet Groupes Logiques ---
@@ -78,7 +75,7 @@ function LogicalGroupsTab({ settings, setSettings, editingId, setEditingId }) {
 
 
     if (!settings.logicalGroups) { // Check specifically settings.logicalGroups for initial load
-        return html`<p>${getMessage('loadingText', 'Loading...')}</p>`;
+        return <p>{getMessage('loadingText', 'Loading...')}</p>;
     }
 
     // --- Edit Logic ---
@@ -190,73 +187,73 @@ function LogicalGroupsTab({ settings, setSettings, editingId, setEditingId }) {
         console.log(`Group ${groupLabel} (ID: ${groupId}) deleted and domain rules updated.`);
     };
 
-    return html`
+    return (
         <section id="logical-groups-section">
-            <h2>${getMessage('logicalGroupsTab', 'Logical Groups')}</h2>
+            <h2>{getMessage('logicalGroupsTab', 'Logical Groups')}</h2>
 
-            ${logicalGroups.map(group => {
-                if (editingId === group.id && currentEditData) {
-                    return html`<${LogicalGroupEditForm}
-                        key=${group.id}
-                        group=${currentEditData}
-                        onSave=${handleSaveEditGroup}
-                        onCancel=${handleCancelEdit}
-                        editFormError=${editFormError}
-                        handleEditLabelChange=${handleEditLabelChange}
-                        handleEditColorChange=${handleEditColorChange}
-                        LOGICAL_GROUP_COLORS=${LOGICAL_GROUP_COLORS}
-                    />`;
-                } else {
-                    return html`<${LogicalGroupView}
-                        key=${group.id}
-                        group=${group}
-                        onEdit=${(id) => { setEditingId(id); setShowAddForm(false); }}
-                        onDelete=${handleDeleteGroup}
-                    />`;
-                }
-            })}
+            {logicalGroups.map(group => (
+                editingId === group.id && currentEditData ? (
+                    <LogicalGroupEditForm
+                        key={group.id}
+                        group={currentEditData}
+                        onSave={handleSaveEditGroup}
+                        onCancel={handleCancelEdit}
+                        editFormError={editFormError}
+                        handleEditLabelChange={handleEditLabelChange}
+                        handleEditColorChange={handleEditColorChange}
+                        LOGICAL_GROUP_COLORS={LOGICAL_GROUP_COLORS}
+                    />
+                ) : (
+                    <LogicalGroupView
+                        key={group.id}
+                        group={group}
+                        onEdit={(id) => { setEditingId(id); setShowAddForm(false); }}
+                        onDelete={handleDeleteGroup}
+                    />
+                )
+            ))}
 
-            ${!showAddForm && !editingId && html`
-                <button onClick=${() => { setShowAddForm(true); setEditingId(null); }} class="button add-button">
-                    ${getMessage('addLogicalGroup', 'Add Logical Group')}
+            {!showAddForm && !editingId && (
+                <button onClick={() => { setShowAddForm(true); setEditingId(null); }} class="button add-button">
+                    {getMessage('addLogicalGroup', 'Add Logical Group')}
                 </button>
-            `}
+            )}
 
-            ${showAddForm && !editingId && html`
+            {showAddForm && !editingId && (
                 <div class="list-item is-editing">
                     <div class="item-edit">
-                        <h3>${getMessage('addNewLogicalGroup', 'Add New Logical Group')}</h3>
+                        <h3>{getMessage('addNewLogicalGroup', 'Add New Logical Group')}</h3>
                         <div class="form-group">
-                            <label for="add-group-label">${getMessage('labelLabel', 'Label')}</label>
+                            <label for="add-group-label">{getMessage('labelLabel', 'Label')}</label>
                             <input
                                 type="text"
                                 id="add-group-label"
-                                value=${newGroupLabel}
-                                onInput=${(e) => setNewGroupLabel(e.target.value)}
+                                value={newGroupLabel}
+                                onInput={(e) => setNewGroupLabel(e.target.value)}
                             />
-                            ${addFormError && html`<span class="error-message">${addFormError}</span>`}
+                            {addFormError && <span class="error-message">{addFormError}</span>}
                         </div>
                         <div class="form-group">
-                            <label for="add-group-color">${getMessage('groupColor', 'Color')}</label>
+                            <label for="add-group-color">{getMessage('groupColor', 'Color')}</label>
                             <select
                                 id="add-group-color"
-                                value=${newGroupColor}
-                                onChange=${(e) => setNewGroupColor(e.target.value)}
+                                value={newGroupColor}
+                                onChange={(e) => setNewGroupColor(e.target.value)}
                             >
-                                ${LOGICAL_GROUP_COLORS.map(color => html`
-                                    <option value=${color}>${getMessage(`color_${color}`, color)}</option>
-                                `)}
+                                {LOGICAL_GROUP_COLORS.map(color => (
+                                    <option value={color}>{getMessage(`color_${color}`, color)}</option>
+                                ))}
                             </select>
                         </div>
                         <div class="form-actions">
-                            <button onClick=${handleAddGroup} class="primary">${getMessage('save', 'Save')}</button>
-                            <button onClick=${handleCancelAdd}>${getMessage('cancel', 'Cancel')}</button>
+                            <button onClick={handleAddGroup} class="primary">{getMessage('save', 'Save')}</button>
+                            <button onClick={handleCancelAdd}>{getMessage('cancel', 'Cancel')}</button>
                         </div>
                     </div>
                 </div>
-            `}
+            )}
         </section>
-    `;
+    );
 }
 
 export { LogicalGroupsTab };

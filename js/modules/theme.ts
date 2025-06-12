@@ -1,6 +1,6 @@
 // js/modules/theme.js
 let systemThemeListener = null;
-export function applyTheme(preference) {
+export function applyTheme(preference: 'enabled' | 'disabled' | 'system'): void {
     const docElement = document.documentElement;
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const update = () => {

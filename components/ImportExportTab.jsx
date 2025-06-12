@@ -1,9 +1,6 @@
-import { h } from './../js/lib/preact.mjs';
-import { useState } from './../js/lib/preact-hooks.mjs';
-import htm from './../js/lib/htm.mjs';
+import { h } from 'preact';
+import { useState } from 'preact/hooks';
 import { getMessage } from './../js/modules/i18n.js';
-
-const html = htm.bind(h);
 
 function ImportExportTab({ settings, setSettings }) {
     const [feedback, setFeedback] = useState({ message: '', status: '' });
@@ -49,18 +46,18 @@ function ImportExportTab({ settings, setSettings }) {
         document.body.removeChild(fileInput);
     };
 
-    return html`
+    return (
         <section id="importexport-section">
-            <h2>${getMessage('importExportTab')}</h2>
+            <h2>{getMessage('importExportTab')}</h2>
             <div class="import-export-section">
-                <button onClick=${handleExport} class="button">${getMessage('exportSettings')}</button>
-                <button onClick=${handleImportClick} class="button">${getMessage('importSettings')}</button>
+                <button onClick={handleExport} class="button">{getMessage('exportSettings')}</button>
+                <button onClick={handleImportClick} class="button">{getMessage('importSettings')}</button>
             </div>
-            ${feedback.message && html`
-                <p class="feedback-message ${feedback.status}">${feedback.message}</p>
-            `}
+            {feedback.message && (
+                <p class={`feedback-message ${feedback.status}`}>{feedback.message}</p>
+            )}
         </section>
-    `;
+    );
 }
 
 export { ImportExportTab };
