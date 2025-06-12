@@ -14,10 +14,10 @@ body {
     max-width: 900px;
     margin: 20px auto;
 }
-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary-color); padding-bottom: 15px; margin-bottom: 25px; }
+header { display: flex !important; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary-color); padding-bottom: 15px; margin-bottom: 25px; }
 header h1 { color: var(--primary-color); margin: 0; font-size: 1.8em; font-weight: 600; }
 .theme-selector {
-    display: flex;
+    display: flex !important;
     align-items: center;
     gap: 8px;
     margin-left: auto;
@@ -50,13 +50,13 @@ section { padding: 20px; background-color: var(--section-bg-color); border-radiu
     align-items: center;
     gap: 15px;
 }
-.item-view > label {
+.item-view label {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-grow: 1;
 }
-.item-view label.item-details {
+.item-view .item-details {
     cursor: pointer;
     flex-grow: 1;
 }
