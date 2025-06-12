@@ -8,6 +8,8 @@ try {
 
 import { rmSync, mkdirSync, cpSync } from 'fs';
 import { join } from 'path';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 const outdir = 'dist';
 rmSync(outdir, { recursive: true, force: true });
@@ -23,7 +25,9 @@ const aliasPlugin = {
       'react/jsx-dev-runtime': 'preact/jsx-dev-runtime'
     };
     for (const key in map) {
-      build.onResolve({ filter: new RegExp('^' + key + '$') }, () => ({ path: map[key] }));
+      build.onResolve({ filter: new RegExp('^' + key + '$') }, () => ({
+        path: require.resolve(map[key])
+      }));
     }
   }
 };
