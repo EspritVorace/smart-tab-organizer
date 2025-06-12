@@ -1,5 +1,6 @@
 import { h } from 'preact';
 import { getMessage } from './../js/modules/i18n.js';
+import Button from '@atlaskit/button';
 
 // --- Tabs ---
 function Tabs({ currentTab, onTabChange }) {
@@ -13,13 +14,14 @@ function Tabs({ currentTab, onTabChange }) {
     return (
         <nav class="tabs">
             {tabs.map(tab => (
-                <button
-                    class={currentTab === tab.key ? 'active' : ''}
+                <Button
+                    className={currentTab === tab.key ? 'active' : ''}
                     onClick={() => onTabChange(tab.key)}
+                    appearance="subtle"
                     data-i18n={tab.labelKey}
                 >
                     {getMessage(tab.labelKey)}
-                </button>
+                </Button>
             ))}
         </nav>
     );

@@ -2,6 +2,11 @@ import { h, Fragment } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 import { getMessage } from './../js/modules/i18n.js';
 import { generateUUID, isValidDomain, isValidRegex } from './../js/modules/utils.js';
+import Button from '@atlaskit/button';
+import Textfield from '@atlaskit/textfield';
+import Select from '@atlaskit/select';
+import Checkbox from '@atlaskit/checkbox';
+import Toggle from '@atlaskit/toggle';
 
 function RulesTab({ settings, updateRules, editingId, setEditingId }) {
     const { domainRules, regexPresets, logicalGroups = [] } = settings; // Destructure and default logicalGroups
@@ -154,7 +159,7 @@ function RulesTab({ settings, updateRules, editingId, setEditingId }) {
                 <RuleEditForm rule={newRuleInProgress} presets={regexPresets} logicalGroups={logicalGroups || []} onSave={handleSave} onCancel={handleCancelNew} allRules={domainRules} />
             )}
             {!editingId && !newRuleInProgress && (
-                <button onClick={handleAdd} class="button add-button">{getMessage('addRule')}</button>
+                <Button appearance="primary" onClick={handleAdd} className="add-button">{getMessage('addRule')}</Button>
             )}
         </section>
     );
@@ -198,14 +203,14 @@ function RuleView({ rule, presets, logicalGroups, onEdit, onDelete, onToggle }) 
     return (
         <div class="list-item">
             <div class="item-view">
-                <input type="checkbox" id={`enable-${rule.id}`} checked={rule.enabled} onChange={handleToggle} />
+                <Checkbox isChecked={rule.enabled} onChange={handleToggle} id={`enable-${rule.id}`}/>
                 <label for={`enable-${rule.id}`} class="item-details">
                     <span class={`item-main ${disabledClass}`}>{rule.label}</span>
                     <span class={`item-sub ${disabledClass}`}>{subtitleParts.join(' | ')}</span>
                 </label>
                 <div class="item-actions">
-                    <button onClick={() => onEdit(rule.id)}>{getMessage('edit')}</button>
-                    <button onClick={() => onDelete(rule.id)} class="danger">{getMessage('delete')}</button>
+                    <Button appearance="primary" onClick={() => onEdit(rule.id)}>{getMessage('edit')}</Button>
+                    <Button appearance="danger" onClick={() => onDelete(rule.id)}>{getMessage('delete')}</Button>
                 </div>
             </div>
         </div>
@@ -334,53 +339,67 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
                     <div class="form-grid">
                         <div class="form-group tooltip-container">
                             <label data-i18n="labelLabel">{getMessage('labelLabel', 'Label')}</label>
-                            <input type="text" name="label" value={formData.label} onChange={handleChange} required />
+                            <Textfield name="label" value={formData.label} onChange={handleChange} isRequired />
                             <span class="tooltip-text" data-i18n="labelTooltip">{getMessage('labelTooltip', 'A unique, user-friendly name for this rule.')}</span>
                             {errors.label && <span class="error-message">{errors.label}</span>}
                         </div>
                         <div class="form-group tooltip-container">
                             <label>{getMessage('domainFilter')}</label>
-                            <input type="text" name="domainFilter" value={formData.domainFilter} onChange={handleChange} required />
+                            <Textfield name="domainFilter" value={formData.domainFilter} onChange={handleChange} isRequired />
                             <span class="tooltip-text" data-i18n="domainFilterTooltip">{getMessage('domainFilterTooltip')}</span>
                             {errors.domainFilter && <span class="error-message">{errors.domainFilter}</span>}
                         </div>
                         <div class="form-group tooltip-container">
                             <label>{getMessage('deduplicationMode')}</label>
-                            <select name="deduplicationMatchMode" value={formData.deduplicationMatchMode} onChange={handleChange}>
-                                 <option value="exact">{getMessage('exactMatch')}</option>
-                                 <option value="includes">{getMessage('includesMatch')}</option>
-                                 <option value="hostname">{getMessage('hostnameMatch')}</option>
-                                 <option value="hostname_path">{getMessage('hostnamePathMatch')}</option>
-                            </select>
+                            <Select
+                                name="deduplicationMatchMode"
+                                value={{ label: getMessage(dedupModeKeyMap[formData.deduplicationMatchMode] || 'exactMatch'), value: formData.deduplicationMatchMode }}
+                                onChange={(opt) => handleChange({ target: { name: 'deduplicationMatchMode', value: opt.value } })}
+                                options={[
+                                    { label: getMessage('exactMatch'), value: 'exact' },
+                                    { label: getMessage('includesMatch'), value: 'includes' },
+                                    { label: getMessage('hostnameMatch'), value: 'hostname' },
+                                    { label: getMessage('hostnamePathMatch'), value: 'hostname_path' },
+                                ]}
+                            />
                             <span class="tooltip-text" data-i18n="deduplicationModeTooltip">{getMessage('deduplicationModeTooltip')}</span>
                         </div>
                         <div class="form-group tooltip-container">
                             <label>{getMessage('groupNameSource')}</label>
-                            <select name="groupNameSource" value={formData.groupNameSource} onChange={handleChange}>
-                                <option value="title">{getMessage('groupNameSourceTitle')}</option>
-                                <option value="url">{getMessage('groupNameSourceUrl')}</option>
-                                <option value="manual">{getMessage('groupNameSourceManual')}</option>
-                            </select>
+                            <Select
+                                name="groupNameSource"
+                                inputId="groupNameSource"
+                                value={{ label: getMessage(sourceKeyMap[formData.groupNameSource] || 'groupNameSourceTitle'), value: formData.groupNameSource }}
+                                options={[
+                                    { label: getMessage('groupNameSourceTitle'), value: 'title' },
+                                    { label: getMessage('groupNameSourceUrl'), value: 'url' },
+                                    { label: getMessage('groupNameSourceManual'), value: 'manual' },
+                                ]}
+                                onChange={(opt) => handleChange({ target: { name: 'groupNameSource', value: opt.value } })}
+                            />
                             <span class="tooltip-text" data-i18n="groupNameSourceTooltip">{getMessage('groupNameSourceTooltip')}</span>
                         </div>
                         <div class="form-group tooltip-container">
                             <label>{getMessage('logicalGroup', 'Logical Group')}</label>
-                            <select name="groupId" value={formData.groupId === null ? '' : formData.groupId} onChange={handleChange}>
-                                <option value="">{getMessage('noGroup', '-- No Group --')}</option>
-                                {logicalGroups.map(g => (
-                                    <option value={g.id}>{g.label}</option>
-                                ))}
-                            </select>
+                            <Select
+                                name="groupId"
+                                inputId="logicalGroupSelect"
+                                value={formData.groupId ? { label: logicalGroups.find(g => g.id === formData.groupId)?.label || '', value: formData.groupId } : { label: getMessage('noGroup', '-- No Group --'), value: '' }}
+                                options={[{ label: getMessage('noGroup', '-- No Group --'), value: '' }, ...logicalGroups.map(g => ({ label: g.label, value: g.id }))]}
+                                onChange={(opt) => handleChange({ target: { name: 'groupId', value: opt.value || null } })}
+                            />
                             <span class="tooltip-text" data-i18n="logicalGroupRuleTooltip">{getMessage('logicalGroupRuleTooltip', 'Assign this rule to a logical group.')}</span>
                         </div>
                         {formData.groupNameSource === 'title' && (
                             <div class="form-group tooltip-container full-width">
                                 <label>{getMessage('titleRegex')}</label>
-                                <select value={currentRegexValue} onChange={handleSelectChange}>
-                                    {presets.map(p => <option value={p.regex}>{p.name}</option>)}
-                                    <option value="custom">{getMessage('customRegex')}</option>
-                                </select>
-                                <input type="text" value={customValue} onChange={handleCustomChange} style={{ display: isCustom ? 'block' : 'none', marginTop: '8px' }} />
+                                <Select
+                                    inputId="titleRegexSelect"
+                                    value={currentRegexValue === 'custom' ? { label: getMessage('customRegex'), value: 'custom' } : { label: presets.find(p => p.regex === currentRegexValue)?.name || currentRegexValue, value: currentRegexValue }}
+                                    onChange={(opt) => handleSelectChange({ target: { value: opt.value } })}
+                                    options={[...presets.map(p => ({ label: p.name, value: p.regex })), { label: getMessage('customRegex'), value: 'custom' }]}
+                                />
+                                <Textfield value={customValue} onChange={handleCustomChange} style={{ display: isCustom ? 'block' : 'none', marginTop: '8px' }} />
                                 <span class="tooltip-text" data-i18n="titleParsingRegExTooltip">{getMessage('titleParsingRegExTooltip')}</span>
                                 {errors.titleParsingRegEx && <span class="error-message">{errors.titleParsingRegEx}</span>}
                             </div>
@@ -388,19 +407,21 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
                         {formData.groupNameSource === 'url' && (
                             <div class="form-group tooltip-container full-width">
                                 <label>{getMessage('urlRegex')}</label>
-                                <select value={currentUrlRegexValue} onChange={handleUrlSelectChange}>
-                                    {presets.map(p => <option value={p.urlRegex}>{p.name}</option>)}
-                                    <option value="custom">{getMessage('customRegex')}</option>
-                                </select>
-                                <input type="text" name="urlParsingRegEx" value={urlCustomValue} onChange={handleUrlCustomChange} style={{ display: isUrlCustom ? 'block' : 'none', marginTop: '8px' }} />
+                                <Select
+                                    inputId="urlRegexSelect"
+                                    value={currentUrlRegexValue === 'custom' ? { label: getMessage('customRegex'), value: 'custom' } : { label: presets.find(p => p.urlRegex === currentUrlRegexValue)?.name || currentUrlRegexValue, value: currentUrlRegexValue }}
+                                    onChange={(opt) => handleUrlSelectChange({ target: { value: opt.value } })}
+                                    options={[...presets.map(p => ({ label: p.name, value: p.urlRegex })), { label: getMessage('customRegex'), value: 'custom' }]}
+                                />
+                                <Textfield name="urlParsingRegEx" value={urlCustomValue} onChange={handleUrlCustomChange} style={{ display: isUrlCustom ? 'block' : 'none', marginTop: '8px' }} />
                                 <span class="tooltip-text" data-i18n="urlParsingRegExTooltip">{getMessage('urlParsingRegExTooltip')}</span>
                                 {errors.urlParsingRegEx && <span class="error-message">{errors.urlParsingRegEx}</span>}
                             </div>
                         )}
                     </div>
                     <div class="form-actions">
-                        <button type="submit" class="primary">{getMessage('save')}</button>
-                        <button type="button" onClick={onCancel}>{getMessage('cancel')}</button>
+                        <Button type="submit" appearance="primary">{getMessage('save')}</Button>
+                        <Button type="button" onClick={onCancel}>{getMessage('cancel')}</Button>
                     </div>
                 </form>
             </div>

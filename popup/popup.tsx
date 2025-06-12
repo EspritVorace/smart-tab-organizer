@@ -1,11 +1,14 @@
 // popup/popup.js
 import { h, render } from 'preact';
 import { useState, useEffect, useCallback } from 'preact/hooks';
+import '@atlaskit/css-reset';
 
 import { getSettings, saveSettings, getStatistics, resetStatistics } from './../js/modules/storage.js';
 import { getMessage } from './../js/modules/i18n.js';
 import { applyTheme } from './../js/modules/theme.ts';
 import { StatsTab } from './../components/StatsTab.jsx';
+import Toggle from '@atlaskit/toggle';
+import Button from '@atlaskit/button';
 
 function PopupApp() {
     const [settings, setSettings] = useState({ domainRules: [] }); // Init avec tableau vide
@@ -70,10 +73,9 @@ function PopupApp() {
             <h1>{getMessage('popupTitle')}</h1>
 
             <div class="toggle-switch">
-                <input
-                    type="checkbox"
+                <Toggle
                     id="grouping-toggle"
-                    checked={settings.globalGroupingEnabled}
+                    isChecked={settings.globalGroupingEnabled}
                     onChange={(e) => handleToggleChange('globalGroupingEnabled', e.target.checked)}
                 />
                 <label for="grouping-toggle"></label>
@@ -81,10 +83,9 @@ function PopupApp() {
             </div>
 
             <div class="toggle-switch">
-                <input
-                    type="checkbox"
+                <Toggle
                     id="deduplication-toggle"
-                    checked={settings.globalDeduplicationEnabled}
+                    isChecked={settings.globalDeduplicationEnabled}
                     onChange={(e) => handleToggleChange('globalDeduplicationEnabled', e.target.checked)}
                 />
                 <label for="deduplication-toggle"></label>
@@ -97,7 +98,7 @@ function PopupApp() {
 
             <hr />
 
-            <button onClick={openOptionsPage} class="button">{getMessage('openOptions')}</button>
+            <Button appearance="primary" onClick={openOptionsPage}>{getMessage('openOptions')}</Button>
         </div>
     );
 }

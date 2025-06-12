@@ -1,5 +1,6 @@
 import { h, render } from 'preact';
 import { useState, useEffect, useCallback } from 'preact/hooks';
+import '@atlaskit/css-reset';
 
 import { getSettings, saveSettings, getStatistics, resetStatistics } from './../js/modules/storage.js';
 import { generateUUID, isValidDomain, isValidRegex } from './../js/modules/utils.js';

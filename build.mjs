@@ -37,7 +37,7 @@ const shared = {
   format: 'esm',
   jsxFactory: 'h',
   jsxFragment: 'Fragment',
-  loader: { '.ts': 'ts', '.tsx': 'tsx', '.jsx': 'jsx' },
+  loader: { '.ts': 'ts', '.tsx': 'tsx', '.jsx': 'jsx', '.css': 'css' },
   plugins: [aliasPlugin]
 };
 

@@ -2,6 +2,9 @@ import { h, Fragment } from 'preact';
 import { useState } from 'preact/hooks';
 import { getMessage } from './../js/modules/i18n.js';
 import { generateUUID, isValidRegex } from './../js/modules/utils.js';
+import Button from '@atlaskit/button';
+import Textfield from '@atlaskit/textfield';
+import Select from '@atlaskit/select';
 
 function PresetsTab({ settings, updatePresets, updateRules, editingId, setEditingId }) {
     const { regexPresets, domainRules } = settings;
@@ -83,7 +86,7 @@ function PresetsTab({ settings, updatePresets, updateRules, editingId, setEditin
                 <PresetEditForm preset={newPresetInProgress} onSave={handleSave} onCancel={handleCancelNew} />
             )}
             {!editingId && !newPresetInProgress && (
-                <button onClick={handleAdd} class="button add-button">{getMessage('addPreset')}</button>
+                <Button appearance="primary" onClick={handleAdd} className="add-button">{getMessage('addPreset')}</Button>
             )}
         </section>
     );
@@ -98,8 +101,8 @@ function PresetView({ preset, onEdit, onDelete, disabled }) {
                     <code class="item-sub">{preset.regex}{preset.urlRegex ? ` | ${preset.urlRegex}` : ''}</code>
                 </div>
                 <div class="item-actions">
-                    <button onClick={() => onEdit(preset.id)}>{getMessage('edit')}</button>
-                    <button onClick={() => onDelete(preset.id)} class="danger" disabled={disabled}>{getMessage('delete')}</button>
+                    <Button appearance="primary" onClick={() => onEdit(preset.id)}>{getMessage('edit')}</Button>
+                    <Button appearance="danger" onClick={() => onDelete(preset.id)} isDisabled={disabled}>{getMessage('delete')}</Button>
                 </div>
             </div>
         </div>
@@ -132,24 +135,24 @@ function PresetEditForm({ preset, onSave, onCancel }) {
                     <div class="form-grid">
                         <div class="form-group tooltip-container">
                              <label>{getMessage('presetName')}</label>
-                             <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+                             <Textfield name="name" value={formData.name} onChange={handleChange} isRequired />
                              <span class="tooltip-text" data-i18n="presetNameTooltip">{getMessage('presetNameTooltip')}</span>
                         </div>
                         <div class="form-group tooltip-container">
                             <label>{getMessage('presetRegex')}</label>
-                            <input type="text" name="regex" value={formData.regex} onChange={handleChange} required />
+                            <Textfield name="regex" value={formData.regex} onChange={handleChange} isRequired />
                             <span class="tooltip-text" data-i18n="presetRegexTooltip">{getMessage('presetRegexTooltip')}</span>
                             {error && <span class="error-message">{error}</span>}
                         </div>
                         <div class="form-group tooltip-container">
                             <label>{getMessage('urlRegex')}</label>
-                            <input type="text" name="urlRegex" value={formData.urlRegex} onChange={handleChange} />
+                            <Textfield name="urlRegex" value={formData.urlRegex} onChange={handleChange} />
                             <span class="tooltip-text" data-i18n="urlParsingRegExTooltip">{getMessage('urlParsingRegExTooltip')}</span>
                         </div>
                     </div>
                      <div class="form-actions">
-                         <button type="submit" class="primary">{getMessage('save')}</button>
-                         <button type="button" onClick={onCancel}>{getMessage('cancel')}</button>
+                         <Button type="submit" appearance="primary">{getMessage('save')}</Button>
+                         <Button type="button" onClick={onCancel}>{getMessage('cancel')}</Button>
                      </div>
                  </form>
             </div>

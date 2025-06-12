@@ -2,6 +2,9 @@ import { h, Fragment } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 import { getMessage } from './../js/modules/i18n.js';
 import { generateUUID } from './../js/modules/utils.js';
+import Button from '@atlaskit/button';
+import Textfield from '@atlaskit/textfield';
+import Select from '@atlaskit/select';
 
 const LOGICAL_GROUP_COLORS = ["grey", "blue", "red", "yellow", "green", "pink", "purple", "cyan", "orange"];
 
@@ -16,8 +19,8 @@ function LogicalGroupView({ group, onEdit, onDelete }) {
                     <code class="item-sub">ID: {group.id}</code>
                 </div>
                 <div class="item-actions">
-                    <button onClick={() => onEdit(group.id)}>{getMessage('edit', 'Edit')}</button>
-                    <button class="danger" onClick={() => onDelete(group.id, group.label)}>{getMessage('delete', 'Delete')}</button>
+                    <Button appearance="primary" onClick={() => onEdit(group.id)}>{getMessage('edit', 'Edit')}</Button>
+                    <Button appearance="danger" onClick={() => onDelete(group.id, group.label)}>{getMessage('delete', 'Delete')}</Button>
                 </div>
             </div>
         </div>
@@ -31,29 +34,25 @@ function LogicalGroupEditForm({ group, onSave, onCancel, editFormError, handleEd
                 <h3>{getMessage('editLogicalGroup', 'Edit Logical Group')}</h3>
                 <div class="form-group">
                     <label for={`edit-group-label-${group.id}`}>{getMessage('labelLabel', 'Label')}</label>
-                    <input
-                        type="text"
+                    <Textfield
                         id={`edit-group-label-${group.id}`}
                         value={group.label}
-                        onInput={handleEditLabelChange}
+                        onChange={handleEditLabelChange}
                     />
                     {editFormError && <span class="error-message">{editFormError}</span>}
                 </div>
                 <div class="form-group">
                     <label for={`edit-group-color-${group.id}`}>{getMessage('groupColor', 'Color')}</label>
-                    <select
-                        id={`edit-group-color-${group.id}`}
-                        value={group.color}
-                        onChange={handleEditColorChange}
-                    >
-                        {LOGICAL_GROUP_COLORS.map(color => (
-                            <option value={color}>{getMessage(`color_${color}`, color)}</option>
-                        ))}
-                    </select>
+                    <Select
+                        inputId={`edit-group-color-${group.id}`}
+                        value={{ label: getMessage(`color_${group.color}`, group.color), value: group.color }}
+                        options={LOGICAL_GROUP_COLORS.map(color => ({ label: getMessage(`color_${color}`, color), value: color }))}
+                        onChange={(opt) => handleEditColorChange({ target: { value: opt.value } })}
+                    />
                 </div>
                 <div class="form-actions">
-                    <button onClick={onSave} class="primary">{getMessage('save', 'Save')}</button>
-                    <button onClick={onCancel}>{getMessage('cancel', 'Cancel')}</button>
+                    <Button appearance="primary" onClick={onSave}>{getMessage('save', 'Save')}</Button>
+                    <Button onClick={onCancel}>{getMessage('cancel', 'Cancel')}</Button>
                 </div>
             </div>
         </div>
@@ -214,9 +213,9 @@ function LogicalGroupsTab({ settings, setSettings, editingId, setEditingId }) {
             ))}
 
             {!showAddForm && !editingId && (
-                <button onClick={() => { setShowAddForm(true); setEditingId(null); }} class="button add-button">
+                <Button appearance="primary" onClick={() => { setShowAddForm(true); setEditingId(null); }} className="add-button">
                     {getMessage('addLogicalGroup', 'Add Logical Group')}
-                </button>
+                </Button>
             )}
 
             {showAddForm && !editingId && (
@@ -225,29 +224,25 @@ function LogicalGroupsTab({ settings, setSettings, editingId, setEditingId }) {
                         <h3>{getMessage('addNewLogicalGroup', 'Add New Logical Group')}</h3>
                         <div class="form-group">
                             <label for="add-group-label">{getMessage('labelLabel', 'Label')}</label>
-                            <input
-                                type="text"
+                            <Textfield
                                 id="add-group-label"
                                 value={newGroupLabel}
-                                onInput={(e) => setNewGroupLabel(e.target.value)}
+                                onChange={(e) => setNewGroupLabel(e.target.value)}
                             />
                             {addFormError && <span class="error-message">{addFormError}</span>}
                         </div>
                         <div class="form-group">
                             <label for="add-group-color">{getMessage('groupColor', 'Color')}</label>
-                            <select
-                                id="add-group-color"
-                                value={newGroupColor}
-                                onChange={(e) => setNewGroupColor(e.target.value)}
-                            >
-                                {LOGICAL_GROUP_COLORS.map(color => (
-                                    <option value={color}>{getMessage(`color_${color}`, color)}</option>
-                                ))}
-                            </select>
+                            <Select
+                                inputId="add-group-color"
+                                value={{ label: getMessage(`color_${newGroupColor}`, newGroupColor), value: newGroupColor }}
+                                options={LOGICAL_GROUP_COLORS.map(color => ({ label: getMessage(`color_${color}`, color), value: color }))}
+                                onChange={(opt) => setNewGroupColor(opt.value)}
+                            />
                         </div>
                         <div class="form-actions">
-                            <button onClick={handleAddGroup} class="primary">{getMessage('save', 'Save')}</button>
-                            <button onClick={handleCancelAdd}>{getMessage('cancel', 'Cancel')}</button>
+                            <Button appearance="primary" onClick={handleAddGroup}>{getMessage('save', 'Save')}</Button>
+                            <Button onClick={handleCancelAdd}>{getMessage('cancel', 'Cancel')}</Button>
                         </div>
                     </div>
                 </div>
