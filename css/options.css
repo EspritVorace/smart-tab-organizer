@@ -1,13 +1,38 @@
 /* options/options.css */
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px 40px; transition: background-color 0.3s ease, color 0.3s ease; max-width: 900px; margin: 20px auto; background-color: var(--bg-color); color: var(--text-color); overflow-y: auto; /* Ensure body itself can scroll if content overflows viewport height */ }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    overflow-y: auto; /* Ensure body itself can scroll if content overflows viewport height */
+}
+
+#options-inner {
+    padding: 20px 40px;
+    max-width: 900px;
+    margin: 20px auto;
+}
 header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--primary-color); padding-bottom: 15px; margin-bottom: 25px; }
 header h1 { color: var(--primary-color); margin: 0; font-size: 1.8em; font-weight: 600; }
 .theme-selector { display: flex; align-items: center; gap: 8px; }
 .theme-selector select { padding: 6px 10px; border-radius: 4px; border: 1px solid var(--border-color); background-color: var(--input-bg-color); color: var(--text-color); cursor: pointer; }
-.tabs { margin-bottom: 25px; border-bottom: 1px solid var(--border-color); display: flex; gap: 5px; }
-.tabs button { padding: 12px 20px; border: none; background-color: transparent; cursor: pointer; font-size: 1.05em; color: var(--text-color-light); border-bottom: 3px solid transparent; transition: color 0.2s ease, border-bottom-color 0.2s ease; margin-bottom: -1px; }
-.tabs button:hover { color: var(--primary-color); }
-.tabs button.active { color: var(--primary-color); border-bottom-color: var(--primary-color); font-weight: 600; }
+.tabs {
+    margin-bottom: 25px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    gap: 5px;
+}
+.tabs button {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    margin-bottom: -1px;
+}
+.tabs button.active {
+    border-bottom: 3px solid var(--primary-color);
+}
 h2 { font-size: 1.4em; margin-bottom: 20px; color: var(--text-color); font-weight: 500; }
 section { padding: 20px; background-color: var(--section-bg-color); border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); animation: fadeIn 0.4s ease-out; padding-bottom: 30px; /* Add more padding at the bottom of sections */ }
 .list-item { background-color: var(--bg-color); border: 1px solid var(--border-color); padding: 15px 20px; margin-bottom: 15px; border-radius: 6px; transition: box-shadow 0.2s ease, border-color 0.2s ease; }
@@ -21,7 +46,9 @@ section { padding: 20px; background-color: var(--section-bg-color); border-radiu
 code.item-sub { background-color: var(--input-bg-color); padding: 2px 5px; border-radius: 3px; }
 .disabled-text { color: var(--text-color-light) !important; text-decoration: line-through; }
 .item-actions { display: flex; gap: 8px; flex-shrink: 0; }
-.item-actions button { padding: 6px 12px; font-size: 0.85em; }
+.item-actions button {
+    font-size: 0.85em;
+}
 .item-edit { padding-top: 20px; margin-top: 15px; border-top: 1px dashed var(--border-color); }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 20px; }
 .full-width { grid-column: 1 / -1; }

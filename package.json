@@ -15,7 +15,8 @@
     "@atlaskit/select": "^20.7.0",
     "@atlaskit/textfield": "^8.0.6",
     "@atlaskit/toggle": "^15.0.6",
-    "@atlaskit/css-reset": "^7.3.2"
+    "@atlaskit/css-reset": "^7.3.2",
+    "@atlaskit/theme": "^12.5.0"
   },
   "devDependencies": {
     "esbuild": "^0.19.0"

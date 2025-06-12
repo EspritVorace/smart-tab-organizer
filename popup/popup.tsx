@@ -1,6 +1,7 @@
 // popup/popup.js
 import { h, render } from 'preact';
 import { useState, useEffect, useCallback } from 'preact/hooks';
+import { AtlaskitThemeProvider } from '@atlaskit/theme/components';
 import '@atlaskit/css-reset';
 
 import { getSettings, saveSettings, getStatistics, resetStatistics } from './../js/modules/storage.js';
@@ -68,7 +69,12 @@ function PopupApp() {
     }, []);
 
     // --- Rendu ---
+    const themeMode = (settings.darkModePreference === 'enabled' ||
+        (settings.darkModePreference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches))
+        ? 'dark' : 'light';
+
     return (
+        <AtlaskitThemeProvider mode={themeMode}>
         <div id="popup-inner" class={isLoaded ? 'loaded' : ''}>
             <h1>{getMessage('popupTitle')}</h1>
 
@@ -98,6 +104,7 @@ function PopupApp() {
 
             <Button appearance="primary" onClick={openOptionsPage}>{getMessage('openOptions')}</Button>
         </div>
+        </AtlaskitThemeProvider>
     );
 }
 
