@@ -5,6 +5,7 @@ import { generateUUID, isValidRegex } from './../js/modules/utils.js';
 import Button from '@atlaskit/button';
 import Textfield from '@atlaskit/textfield';
 import Select from '@atlaskit/select';
+import { Box, Inline } from '@atlaskit/primitives';
 
 function PresetsTab({ settings, updatePresets, updateRules, editingId, setEditingId }) {
     const { regexPresets, domainRules } = settings;
@@ -94,18 +95,18 @@ function PresetsTab({ settings, updatePresets, updateRules, editingId, setEditin
 
 function PresetView({ preset, onEdit, onDelete, disabled }) {
     return (
-        <div class="list-item">
-            <div class="item-view">
-                <div class="item-details">
+        <Box className="list-item">
+            <Inline className="item-view" alignItems="center" space="space.200">
+                <Box className="item-details" flexGrow={1}>
                     <span class="item-main">{preset.name}</span>
                     <code class="item-sub">{preset.regex}{preset.urlRegex ? ` | ${preset.urlRegex}` : ''}</code>
-                </div>
-                <div class="item-actions">
+                </Box>
+                <Inline className="item-actions" space="space.100" marginInlineStart="auto">
                     <Button appearance="primary" onClick={() => onEdit(preset.id)}>{getMessage('edit')}</Button>
                     <Button appearance="danger" onClick={() => onDelete(preset.id)} isDisabled={disabled}>{getMessage('delete')}</Button>
-                </div>
-            </div>
-        </div>
+                </Inline>
+            </Inline>
+        </Box>
     );
 }
 
@@ -150,10 +151,10 @@ function PresetEditForm({ preset, onSave, onCancel }) {
                             <span class="tooltip-text" data-i18n="urlParsingRegExTooltip">{getMessage('urlParsingRegExTooltip')}</span>
                         </div>
                     </div>
-                     <div class="form-actions">
+                     <Inline className="form-actions" justifyContent="flex-end" space="space.100">
                          <Button type="submit" appearance="primary">{getMessage('save')}</Button>
                          <Button type="button" onClick={onCancel}>{getMessage('cancel')}</Button>
-                     </div>
+                     </Inline>
                  </form>
             </div>
         </div>

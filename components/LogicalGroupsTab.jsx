@@ -5,25 +5,26 @@ import { generateUUID } from './../js/modules/utils.js';
 import Button from '@atlaskit/button';
 import Textfield from '@atlaskit/textfield';
 import Select from '@atlaskit/select';
+import { Box, Inline, Stack } from '@atlaskit/primitives';
 
 const LOGICAL_GROUP_COLORS = ["grey", "blue", "red", "yellow", "green", "pink", "purple", "cyan", "orange"];
 
 // --- Composants pour LogicalGroupsTab ---
 function LogicalGroupView({ group, onEdit, onDelete }) {
     return (
-        <div class="list-item" key={group.id}>
-            <div class="item-view">
+        <Box className="list-item" key={group.id}>
+            <Inline className="item-view" alignItems="center" space="space.200">
                 <span class={`group-color-swatch group-color-${group.color}`}></span>
-                <div class="item-details">
+                <Box className="item-details" flexGrow={1}>
                     <span class="item-main">{group.label}</span>
                     <code class="item-sub">ID: {group.id}</code>
-                </div>
-                <div class="item-actions">
+                </Box>
+                <Inline className="item-actions" space="space.100" marginInlineStart="auto">
                     <Button appearance="primary" onClick={() => onEdit(group.id)}>{getMessage('edit', 'Edit')}</Button>
                     <Button appearance="danger" onClick={() => onDelete(group.id, group.label)}>{getMessage('delete', 'Delete')}</Button>
-                </div>
-            </div>
-        </div>
+                </Inline>
+            </Inline>
+        </Box>
     );
 }
 
@@ -50,10 +51,10 @@ function LogicalGroupEditForm({ group, onSave, onCancel, editFormError, handleEd
                         onChange={(opt) => handleEditColorChange({ target: { value: opt.value } })}
                     />
                 </div>
-                <div class="form-actions">
+                <Inline className="form-actions" justifyContent="flex-end" space="space.100">
                     <Button appearance="primary" onClick={onSave}>{getMessage('save', 'Save')}</Button>
                     <Button onClick={onCancel}>{getMessage('cancel', 'Cancel')}</Button>
-                </div>
+                </Inline>
             </div>
         </div>
     );
@@ -240,10 +241,10 @@ function LogicalGroupsTab({ settings, setSettings, editingId, setEditingId }) {
                                 onChange={(opt) => setNewGroupColor(opt.value)}
                             />
                         </div>
-                        <div class="form-actions">
+                        <Inline className="form-actions" justifyContent="flex-end" space="space.100">
                             <Button appearance="primary" onClick={handleAddGroup}>{getMessage('save', 'Save')}</Button>
                             <Button onClick={handleCancelAdd}>{getMessage('cancel', 'Cancel')}</Button>
-                        </div>
+                        </Inline>
                     </div>
                 </div>
             )}

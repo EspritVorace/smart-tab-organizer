@@ -7,6 +7,7 @@ import Textfield from '@atlaskit/textfield';
 import Select from '@atlaskit/select';
 import Checkbox from '@atlaskit/checkbox';
 import Toggle from '@atlaskit/toggle';
+import { Box, Inline } from '@atlaskit/primitives';
 
 const dedupModeKeyMap = {
     exact: 'exactMatch',
@@ -207,24 +208,24 @@ function RuleView({ rule, presets, logicalGroups, onEdit, onDelete, onToggle }) 
     subtitleParts.push(getMessage(sourceKeyMap[rule.groupNameSource] || 'groupNameSourceTitle'));
 
     return (
-        <div class="list-item">
-            <div class="item-view">
+        <Box className="list-item">
+            <Inline className="item-view" alignItems="center" space="space.200">
                 <Checkbox
                     isChecked={rule.enabled}
                     onChange={handleToggle}
                     label={
-                        <div class="item-details">
+                        <Box className="item-details" flexGrow={1}>
                             <span class={`item-main ${disabledClass}`}>{rule.label}</span>
                             <span class={`item-sub ${disabledClass}`}>{subtitleParts.join(' | ')}</span>
-                        </div>
+                        </Box>
                     }
                 />
-                <div class="item-actions">
+                <Inline className="item-actions" space="space.100" marginInlineStart="auto">
                     <Button appearance="primary" onClick={() => onEdit(rule.id)}>{getMessage('edit')}</Button>
                     <Button appearance="danger" onClick={() => onDelete(rule.id)}>{getMessage('delete')}</Button>
-                </div>
-            </div>
-        </div>
+                </Inline>
+            </Inline>
+        </Box>
     );
 }
 
@@ -430,10 +431,10 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
                             </div>
                         )}
                     </div>
-                    <div class="form-actions">
+                    <Inline className="form-actions" justifyContent="flex-end" space="space.100">
                         <Button type="submit" appearance="primary">{getMessage('save')}</Button>
                         <Button type="button" onClick={onCancel}>{getMessage('cancel')}</Button>
-                    </div>
+                    </Inline>
                 </form>
             </div>
         </div>

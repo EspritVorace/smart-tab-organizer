@@ -10,6 +10,7 @@ import { applyTheme } from './../js/modules/theme.ts';
 import { StatsTab } from './../components/StatsTab.jsx';
 import Toggle from '@atlaskit/toggle';
 import Button from '@atlaskit/button';
+import { Box, Inline } from '@atlaskit/primitives';
 
 function PopupApp() {
     const [settings, setSettings] = useState({ domainRules: [] }); // Init avec tableau vide
@@ -75,26 +76,26 @@ function PopupApp() {
 
     return (
         <AtlaskitThemeProvider mode={themeMode}>
-        <div id="popup-inner" class={isLoaded ? 'loaded' : ''}>
+        <Box id="popup-inner" class={isLoaded ? 'loaded' : ''}>
             <h1>{getMessage('popupTitle')}</h1>
 
-            <div class="toggle-switch">
+            <Inline className="toggle-switch" alignItems="center" space="space.100">
                 <Toggle
                     id="grouping-toggle"
                     isChecked={settings.globalGroupingEnabled}
                     onChange={(e) => handleToggleChange('globalGroupingEnabled', e.target.checked)}
                 />
                 <span>{getMessage('enableGrouping')}</span>
-            </div>
+            </Inline>
 
-            <div class="toggle-switch">
+            <Inline className="toggle-switch" alignItems="center" space="space.100">
                 <Toggle
                     id="deduplication-toggle"
                     isChecked={settings.globalDeduplicationEnabled}
                     onChange={(e) => handleToggleChange('globalDeduplicationEnabled', e.target.checked)}
                 />
                 <span>{getMessage('enableDeduplication')}</span>
-            </div>
+            </Inline>
 
             <hr />
 
@@ -103,7 +104,7 @@ function PopupApp() {
             <hr />
 
             <Button appearance="primary" onClick={openOptionsPage}>{getMessage('openOptions')}</Button>
-        </div>
+        </Box>
         </AtlaskitThemeProvider>
     );
 }

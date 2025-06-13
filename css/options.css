@@ -13,12 +13,9 @@ body {
     max-width: 900px;
     margin: 20px auto;
 }
-header { display: flex !important; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--ds-border, #ccc); padding-bottom: 15px; margin-bottom: 25px; }
+header { border-bottom: 2px solid var(--ds-border, #ccc); padding-bottom: 15px; margin-bottom: 25px; }
 header h1 { margin: 0; font-size: 1.8em; font-weight: 600; }
 .theme-selector {
-    display: flex !important;
-    align-items: center;
-    gap: 8px;
     margin-left: auto;
 }
 .theme-selector .theme-select {
@@ -27,8 +24,6 @@ header h1 { margin: 0; font-size: 1.8em; font-weight: 600; }
 .tabs {
     margin-bottom: 25px;
     border-bottom: 1px solid var(--ds-border, #ccc);
-    display: flex;
-    gap: 5px;
 }
 .tabs button {
     border: none;
@@ -53,27 +48,15 @@ section {
 .list-item:hover { border-color: var(--ds-border-focused, #0052CC); box-shadow: 0 2px 6px rgba(0, 82, 204, 0.2); }
 .list-item.is-editing { border-color: var(--ds-border-focused, #0052CC); box-shadow: 0 0 8px rgba(0, 82, 204, 0.3); }
 .item-view {
-    display: flex;
-    align-items: center;
-    gap: 15px;
 }
 .item-view > label,
 .item-view > span {
     flex-grow: 1;
-    display: flex;
-    align-items: center;
 }
-/* Ensure the checkbox container stretches so details start right after it */
 .item-view > *:first-child {
     flex-grow: 1;
-    display: flex;
-    align-items: center;
 }
 .item-view .item-details {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
     flex-grow: 1;
     width: 100%;
     cursor: pointer;
@@ -82,14 +65,14 @@ section {
 .item-main { display: block; font-weight: 600; font-size: 1.05em; }
 .item-sub { display: block; font-size: 0.85em; color: var(--ds-text-subtle, #5E6C84); margin-top: 3px; }
 .disabled-text { color: var(--ds-text-subtle, #5E6C84) !important; text-decoration: line-through; }
-.item-actions { display: flex; gap: 8px; flex-shrink: 0; margin-left: auto; }
+.item-actions { flex-shrink: 0; margin-left: auto; }
 .item-actions button {
     font-size: 0.85em;
 }
 .item-edit { padding-top: 20px; margin-top: 15px; border-top: 1px dashed var(--ds-border, #ccc); }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px 20px; }
 .full-width { grid-column: 1 / -1; }
-.form-group { display: flex; flex-direction: column; }
+.form-group { }
 .form-group label { display: inline-flex; align-items: center; margin-bottom: 6px; font-weight: 500; }
 .form-group input[type="text"],
 .form-group select {
@@ -109,14 +92,11 @@ section {
     border-color: var(--ds-border-focused, #0052CC);
     box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2);
 }
-.form-actions { margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; }
+.form-actions { margin-top: 20px; }
 .add-button {
     margin-top: 10px;
 }
 .import-export-section {
-    display: flex;
-    gap: 15px;
-    align-items: center;
     justify-content: center;
 }
 .feedback-message { font-style: italic; }
@@ -173,8 +153,6 @@ footer { margin-top: 40px; padding-top: 15px; border-top: 1px solid var(--ds-bor
 
 /* Collapsible Group Headers for RulesTab */
 .rules-group-header {
-  display: flex;
-  align-items: center;
   padding: 10px 15px;
   margin-bottom: 10px; /* Space before the list of rules or next header */
   border-radius: 6px;

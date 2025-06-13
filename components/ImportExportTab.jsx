@@ -2,6 +2,7 @@ import { h } from 'preact';
 import { useState } from 'preact/hooks';
 import { getMessage } from './../js/modules/i18n.js';
 import Button from '@atlaskit/button';
+import { Box, Inline, Stack } from '@atlaskit/primitives';
 
 function ImportExportTab({ settings, setSettings }) {
     const [feedback, setFeedback] = useState({ message: '', status: '' });
@@ -48,16 +49,16 @@ function ImportExportTab({ settings, setSettings }) {
     };
 
     return (
-        <section id="importexport-section">
+        <Box as="section" id="importexport-section">
             <h2>{getMessage('importExportTab')}</h2>
-            <div class="import-export-section">
+            <Inline className="import-export-section" space="space.200" justifyContent="center">
                 <Button appearance="primary" onClick={handleExport}>{getMessage('exportSettings')}</Button>
                 <Button appearance="primary" onClick={handleImportClick}>{getMessage('importSettings')}</Button>
-            </div>
+            </Inline>
             {feedback.message && (
                 <p class={`feedback-message ${feedback.status}`}>{feedback.message}</p>
             )}
-        </section>
+        </Box>
     );
 }
 

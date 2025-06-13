@@ -2,6 +2,7 @@ import { h, render } from 'preact';
 import { useState, useEffect, useCallback } from 'preact/hooks';
 import { AtlaskitThemeProvider } from '@atlaskit/theme/components';
 import '@atlaskit/css-reset';
+import { Box } from '@atlaskit/primitives';
 
 import { getSettings, saveSettings, getStatistics, resetStatistics } from './../js/modules/storage.js';
 import { generateUUID, isValidDomain, isValidRegex } from './../js/modules/utils.js';
@@ -111,7 +112,7 @@ function OptionsApp() {
 
     return (
         <AtlaskitThemeProvider mode={themeMode}>
-        <div id="options-inner">
+        <Box id="options-inner">
             <Header settings={settings} onThemeChange={(val) => updateSetting('darkModePreference', val)} />
             <Tabs currentTab={currentTab} onTabChange={handleTabChange} />
             <main>
@@ -122,7 +123,7 @@ function OptionsApp() {
                 {currentTab === 'stats' && <StatsTab stats={stats} onReset={handleResetStats} />}
             </main>
             <footer>SmartTab Organizer v{version} - Licensed under GPL-3.0-only.</footer>
-        </div>
+        </Box>
         </AtlaskitThemeProvider>
     );
 

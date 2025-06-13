@@ -12,7 +12,7 @@ body {
 h1 { font-size: 1.2em; margin-top: 0; margin-bottom: 20px; text-align: center; font-weight: 600; color: var(--ds-text, #172B4D); }
 h2 { font-size: 1em; margin-top: 15px; margin-bottom: 10px; color: var(--ds-text-subtle, #5E6C84); border-bottom: 1px solid var(--ds-border, #ccc); padding-bottom: 5px; font-weight: 500; }
 hr { border: none; border-top: 1px solid var(--ds-border, #ccc); margin: 20px 0; }
-.toggle-switch { display: flex; align-items: center; margin-bottom: 15px; gap: 8px; }
+.toggle-switch { margin-bottom: 15px; }
 .toggle-switch span { font-size: 0.95em; line-height: 20px; user-select: none; }
 .stats p { margin: 8px 0; font-size: 0.9em; display: flex; justify-content: space-between; }
 .stats b { color: var(--ds-text-accent-blue, #0052CC); font-weight: 600; }
