@@ -74,6 +74,10 @@ y luego `npm run build`. Todos los archivos de la extensión se generan dentro d
 directorio `dist/`. Carga **esa** carpeta (o su archivo ZIP) en Chrome; las
 páginas HTML que hay en la raíz del repositorio ya no funcionan directamente.
 
+
+## Storybook
+Ejecuta `npm run storybook` para ver la interfaz de Storybook con el addon de Atlassian. Las historias se encuentran en la carpeta `stories/`.
+
 ## Licencia 📄
 
 Este proyecto está bajo la licencia **GNU General Public License v3.0**.

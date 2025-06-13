@@ -76,6 +76,10 @@ Run `npm install` to fetch all dependencies (including dev dependencies like
 the `dist/` directory. Load **that** folder (or a zip of it) in Chrome; the HTML
 pages in the repository root won't work directly anymore.
 
+
+## Storybook
+Run `npm run storybook` to launch the Storybook UI with the Atlassian addon. Stories live in the `stories/` folder.
+
 ## License 📄
 
 This project is licensed under the **GNU General Public License v3.0**.
