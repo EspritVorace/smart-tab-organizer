@@ -70,8 +70,9 @@
 ## Compilación
 
 Ejecuta `npm install` para instalar todas las dependencias (incluyendo `esbuild`)
-y luego `npm run build`. Los archivos generados estarán en el directorio `dist/`
-y podrás comprimirlos directamente para la extensión de Chrome.
+y luego `npm run build`. Todos los archivos de la extensión se generan dentro del
+directorio `dist/`. Carga **esa** carpeta (o su archivo ZIP) en Chrome; las
+páginas HTML que hay en la raíz del repositorio ya no funcionan directamente.
 
 ## Licencia 📄
 

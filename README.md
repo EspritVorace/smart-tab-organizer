@@ -72,8 +72,9 @@
 ## Building
 
 Run `npm install` to fetch all dependencies (including dev dependencies like
-`esbuild`) then `npm run build`. The compiled extension will be available in the
-`dist/` directory and can be zipped directly for distribution.
+`esbuild`) then `npm run build`. All files for the extension are produced inside
+the `dist/` directory. Load **that** folder (or a zip of it) in Chrome; the HTML
+pages in the repository root won't work directly anymore.
 
 ## License 📄
 
