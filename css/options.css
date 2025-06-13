@@ -96,9 +96,6 @@ section {
 .add-button {
     margin-top: 10px;
 }
-.import-export-section {
-    justify-content: center;
-}
 .feedback-message { font-style: italic; }
 .feedback-message.success { color: var(--ds-text-accent-green, #36B37E); }
 .feedback-message.error { color: var(--ds-text-danger, #DE350B); }

@@ -12,7 +12,7 @@ function Header({ settings, onThemeChange }) {
             paddingBlockEnd="space.300"
             marginBlockEnd="space.500"
         >
-            <Inline alignItems="center" justifyContent="space-between" space="space.200">
+            <Inline alignItems="center" space="space.200" spread="space-between">
                 <h1 data-i18n="optionsTitle">{getMessage('optionsTitle')}</h1>
                 <Inline alignItems="center" space="space.100">
                     <label data-i18n="darkMode">{getMessage('darkMode')}</label>

@@ -96,7 +96,7 @@ function PresetsTab({ settings, updatePresets, updateRules, editingId, setEditin
 function PresetView({ preset, onEdit, onDelete, disabled }) {
     return (
         <Box className="list-item">
-            <Inline className="item-view" alignItems="center" space="space.200">
+            <Inline className="item-view" alignItems="center" space="space.200" spread="space-between">
                 <Box className="item-details" flexGrow={1}>
                     <span class="item-main">{preset.name}</span>
                     <code class="item-sub">{preset.regex}{preset.urlRegex ? ` | ${preset.urlRegex}` : ''}</code>

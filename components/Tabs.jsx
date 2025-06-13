@@ -13,7 +13,7 @@ function Tabs({ currentTab, onTabChange }) {
         { key: 'stats', labelKey: 'statisticsTab' },
     ];
     return (
-        <Inline as="nav" className="tabs" space="space.100">
+        <Inline as="nav" className="tabs" space="space.100" spread="space-between">
             {tabs.map(tab => (
                 <Button
                     className={currentTab === tab.key ? 'active' : ''}

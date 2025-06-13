@@ -13,7 +13,7 @@ const LOGICAL_GROUP_COLORS = ["grey", "blue", "red", "yellow", "green", "pink", 
 function LogicalGroupView({ group, onEdit, onDelete }) {
     return (
         <Box className="list-item" key={group.id}>
-            <Inline className="item-view" alignItems="center" space="space.200">
+            <Inline className="item-view" alignItems="center" space="space.200" spread="space-between">
                 <span class={`group-color-swatch group-color-${group.color}`}></span>
                 <Box className="item-details" flexGrow={1}>
                     <span class="item-main">{group.label}</span>

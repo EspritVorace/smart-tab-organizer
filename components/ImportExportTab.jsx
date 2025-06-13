@@ -51,7 +51,7 @@ function ImportExportTab({ settings, setSettings }) {
     return (
         <Box as="section" id="importexport-section">
             <h2>{getMessage('importExportTab')}</h2>
-            <Inline className="import-export-section" space="space.200" justifyContent="center">
+            <Inline className="import-export-section" space="space.200" spread="space-between">
                 <Button appearance="primary" onClick={handleExport}>{getMessage('exportSettings')}</Button>
                 <Button appearance="primary" onClick={handleImportClick}>{getMessage('importSettings')}</Button>
             </Inline>

@@ -209,7 +209,7 @@ function RuleView({ rule, presets, logicalGroups, onEdit, onDelete, onToggle }) 
 
     return (
         <Box className="list-item">
-            <Inline className="item-view" alignItems="center" space="space.200">
+            <Inline className="item-view" alignItems="center" space="space.200" spread="space-between">
                 <Checkbox
                     isChecked={rule.enabled}
                     onChange={handleToggle}
