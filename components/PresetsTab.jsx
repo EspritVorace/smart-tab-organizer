@@ -1,10 +1,11 @@
-import { h, Fragment } from './../js/lib/preact.mjs';
-import { useState } from './../js/lib/preact-hooks.mjs';
-import htm from './../js/lib/htm.mjs';
+import { h, Fragment } from 'preact';
+import { useState } from 'preact/hooks';
 import { getMessage } from './../js/modules/i18n.js';
 import { generateUUID, isValidRegex } from './../js/modules/utils.js';
-
-const html = htm.bind(h);
+import Button from '@atlaskit/button';
+import Textfield from '@atlaskit/textfield';
+import Select from '@atlaskit/select';
+import { Box, Inline } from '@atlaskit/primitives';
 
 function PresetsTab({ settings, updatePresets, updateRules, editingId, setEditingId }) {
     const { regexPresets, domainRules } = settings;
@@ -71,40 +72,42 @@ function PresetsTab({ settings, updatePresets, updateRules, editingId, setEditin
 
      const isPresetInUse = (regex, urlRegex) => domainRules.some(r => r.titleParsingRegEx === regex || r.urlParsingRegEx === urlRegex);
 
-    return html`
+    return (
         <section id="presets-section">
-            <h2>${getMessage('regexPresetsTab')}</h2>
-            ${regexPresets.map(preset => html`
-                <${Fragment} key=${preset.id}>
-                    ${editingId === preset.id && (!newPresetInProgress || newPresetInProgress.id !== preset.id)
-                        ? html`<${PresetEditForm} preset=${preset} onSave=${handleSave} onCancel=${() => setEditingId(null)} />`
-                        : html`<${PresetView} preset=${preset} onEdit=${setEditingId} onDelete=${handleDelete} disabled=${isPresetInUse(preset.regex, preset.urlRegex)} />`
+            <h2>{getMessage('regexPresetsTab')}</h2>
+            {regexPresets.map(preset => (
+                <Fragment key={preset.id}>
+                    {editingId === preset.id && (!newPresetInProgress || newPresetInProgress.id !== preset.id)
+                        ? <PresetEditForm preset={preset} onSave={handleSave} onCancel={() => setEditingId(null)} />
+                        : <PresetView preset={preset} onEdit={setEditingId} onDelete={handleDelete} disabled={isPresetInUse(preset.regex, preset.urlRegex)} />
                     }
-                <//>
-            `)}
-            ${newPresetInProgress && editingId === newPresetInProgress.id && html`
-                <${PresetEditForm} preset=${newPresetInProgress} onSave=${handleSave} onCancel=${handleCancelNew} />
-            `}
-            ${!editingId && !newPresetInProgress && html`<button onClick=${handleAdd} class="button add-button">${getMessage('addPreset')}</button>`}
+                </Fragment>
+            ))}
+            {newPresetInProgress && editingId === newPresetInProgress.id && (
+                <PresetEditForm preset={newPresetInProgress} onSave={handleSave} onCancel={handleCancelNew} />
+            )}
+            {!editingId && !newPresetInProgress && (
+                <Button appearance="primary" onClick={handleAdd} className="add-button">{getMessage('addPreset')}</Button>
+            )}
         </section>
-    `;
+    );
 }
 
 function PresetView({ preset, onEdit, onDelete, disabled }) {
-    return html`
-        <div class="list-item">
-            <div class="item-view">
-                <div class="item-details">
-                    <span class="item-main">${preset.name}</span>
-                    <code class="item-sub">${preset.regex}${preset.urlRegex ? ` | ${preset.urlRegex}` : ''}</code>
-                </div>
-                <div class="item-actions">
-                    <button onClick=${() => onEdit(preset.id)}>${getMessage('edit')}</button>
-                    <button onClick=${() => onDelete(preset.id)} class="danger" disabled=${disabled}>${getMessage('delete')}</button>
-                </div>
-            </div>
-        </div>
-    `;
+    return (
+        <Box className="list-item">
+            <Inline className="item-view" alignItems="center" space="space.200" spread="space-between">
+                <Box className="item-details" flexGrow={1}>
+                    <span class="item-main">{preset.name}</span>
+                    <code class="item-sub">{preset.regex}{preset.urlRegex ? ` | ${preset.urlRegex}` : ''}</code>
+                </Box>
+                <Inline className="item-actions" space="space.100" marginInlineStart="auto">
+                    <Button appearance="primary" onClick={() => onEdit(preset.id)}>{getMessage('edit')}</Button>
+                    <Button appearance="danger" onClick={() => onDelete(preset.id)} isDisabled={disabled}>{getMessage('delete')}</Button>
+                </Inline>
+            </Inline>
+        </Box>
+    );
 }
 
 function PresetEditForm({ preset, onSave, onCancel }) {
@@ -126,36 +129,36 @@ function PresetEditForm({ preset, onSave, onCancel }) {
         onSave(formData);
     };
 
-    return html`
+    return (
         <div class="list-item is-editing">
             <div class="item-edit">
-                 <form onSubmit=${handleSubmit}>
+                 <form onSubmit={handleSubmit}>
                     <div class="form-grid">
                         <div class="form-group tooltip-container">
-                             <label>${getMessage('presetName')}</label>
-                             <input type="text" name="name" value=${formData.name} onChange=${handleChange} required />
-                             <span class="tooltip-text" data-i18n="presetNameTooltip">${getMessage('presetNameTooltip')}</span>
+                             <label>{getMessage('presetName')}</label>
+                             <Textfield name="name" value={formData.name} onChange={handleChange} isRequired />
+                             <span class="tooltip-text" data-i18n="presetNameTooltip">{getMessage('presetNameTooltip')}</span>
                         </div>
                         <div class="form-group tooltip-container">
-                            <label>${getMessage('presetRegex')}</label>
-                            <input type="text" name="regex" value=${formData.regex} onChange=${handleChange} required />
-                            <span class="tooltip-text" data-i18n="presetRegexTooltip">${getMessage('presetRegexTooltip')}</span>
-                            ${error && html`<span class="error-message">${error}</span>`}
+                            <label>{getMessage('presetRegex')}</label>
+                            <Textfield name="regex" value={formData.regex} onChange={handleChange} isRequired />
+                            <span class="tooltip-text" data-i18n="presetRegexTooltip">{getMessage('presetRegexTooltip')}</span>
+                            {error && <span class="error-message">{error}</span>}
                         </div>
                         <div class="form-group tooltip-container">
-                            <label>${getMessage('urlRegex')}</label>
-                            <input type="text" name="urlRegex" value=${formData.urlRegex} onChange=${handleChange} />
-                            <span class="tooltip-text" data-i18n="urlParsingRegExTooltip">${getMessage('urlParsingRegExTooltip')}</span>
+                            <label>{getMessage('urlRegex')}</label>
+                            <Textfield name="urlRegex" value={formData.urlRegex} onChange={handleChange} />
+                            <span class="tooltip-text" data-i18n="urlParsingRegExTooltip">{getMessage('urlParsingRegExTooltip')}</span>
                         </div>
                     </div>
-                     <div class="form-actions">
-                         <button type="submit" class="primary">${getMessage('save')}</button>
-                         <button type="button" onClick=${onCancel}>${getMessage('cancel')}</button>
-                     </div>
+                     <Inline className="form-actions" justifyContent="flex-end" space="space.100">
+                         <Button type="submit" appearance="primary">{getMessage('save')}</Button>
+                         <Button type="button" onClick={onCancel}>{getMessage('cancel')}</Button>
+                     </Inline>
                  </form>
             </div>
         </div>
-    `;
+    );
 }
 
 export { PresetsTab };

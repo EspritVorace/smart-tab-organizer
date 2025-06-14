@@ -1,9 +1,8 @@
-import { h } from './../js/lib/preact.mjs';
-import { useState } from './../js/lib/preact-hooks.mjs';
-import htm from './../js/lib/htm.mjs';
+import { h } from 'preact';
+import { useState } from 'preact/hooks';
 import { getMessage } from './../js/modules/i18n.js';
-
-const html = htm.bind(h);
+import Button from '@atlaskit/button';
+import { Box, Inline, Stack } from '@atlaskit/primitives';
 
 function ImportExportTab({ settings, setSettings }) {
     const [feedback, setFeedback] = useState({ message: '', status: '' });
@@ -49,18 +48,18 @@ function ImportExportTab({ settings, setSettings }) {
         document.body.removeChild(fileInput);
     };
 
-    return html`
-        <section id="importexport-section">
-            <h2>${getMessage('importExportTab')}</h2>
-            <div class="import-export-section">
-                <button onClick=${handleExport} class="button">${getMessage('exportSettings')}</button>
-                <button onClick=${handleImportClick} class="button">${getMessage('importSettings')}</button>
-            </div>
-            ${feedback.message && html`
-                <p class="feedback-message ${feedback.status}">${feedback.message}</p>
-            `}
-        </section>
-    `;
+    return (
+        <Box as="section" id="importexport-section">
+            <h2>{getMessage('importExportTab')}</h2>
+            <Inline className="import-export-section" space="space.200" spread="space-between">
+                <Button appearance="primary" onClick={handleExport}>{getMessage('exportSettings')}</Button>
+                <Button appearance="primary" onClick={handleImportClick}>{getMessage('importSettings')}</Button>
+            </Inline>
+            {feedback.message && (
+                <p class={`feedback-message ${feedback.status}`}>{feedback.message}</p>
+            )}
+        </Box>
+    );
 }
 
 export { ImportExportTab };

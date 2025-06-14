@@ -67,6 +67,17 @@
 * preact (pour une UI réactive légère)
 * CSS3
 
+## Compilation
+
+Exécutez `npm install` pour installer toutes les dépendances (y compris
+`esbuild`), puis `npm run build`. L'ensemble de l'extension est généré dans le
+dossier `dist/`. Chargez **ce** dossier (ou son archive) dans Chrome ; les pages
+HTML à la racine du dépôt ne fonctionnent plus directement.
+
+
+## Storybook
+Lancez `npm run storybook` pour ouvrir l'interface Storybook avec l'addon Atlassian. Les histoires se trouvent dans le dossier `stories/`.
+
 ## Licence 📄
 
 Ce projet est sous licence **GNU General Public License v3.0**.
