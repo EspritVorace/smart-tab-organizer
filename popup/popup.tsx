@@ -1,14 +1,16 @@
 // popup/popup.js
-import { h, render } from './../js/lib/preact.mjs';
-import { useState, useEffect, useCallback } from './../js/lib/preact-hooks.mjs';
-import htm from './../js/lib/htm.mjs';
+import { h, render } from 'preact';
+import { useState, useEffect, useCallback } from 'preact/hooks';
+import { AtlaskitThemeProvider } from '@atlaskit/theme/components';
+import '@atlaskit/css-reset';
 
 import { getSettings, saveSettings, getStatistics, resetStatistics } from './../js/modules/storage.js';
 import { getMessage } from './../js/modules/i18n.js';
-import { applyTheme } from './../js/modules/theme.js';
-import { StatsTab } from './../components/StatsTab.js';
-
-const html = htm.bind(h);
+import { applyTheme } from './../js/modules/theme.ts';
+import { StatsTab } from './../components/StatsTab.jsx';
+import Toggle from '@atlaskit/toggle';
+import Button from '@atlaskit/button';
+import { Box, Inline } from '@atlaskit/primitives';
 
 function PopupApp() {
     const [settings, setSettings] = useState({ domainRules: [] }); // Init avec tableau vide
@@ -68,42 +70,44 @@ function PopupApp() {
     }, []);
 
     // --- Rendu ---
-    return html`
-        <div id="popup-inner" class=${isLoaded ? 'loaded' : ''}>
-            <h1>${getMessage('popupTitle')}</h1>
+    const themeMode = (settings.darkModePreference === 'enabled' ||
+        (settings.darkModePreference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches))
+        ? 'dark' : 'light';
 
-            <div class="toggle-switch">
-                <input
-                    type="checkbox"
+    return (
+        <AtlaskitThemeProvider mode={themeMode}>
+        <Box id="popup-inner" class={isLoaded ? 'loaded' : ''}>
+            <h1>{getMessage('popupTitle')}</h1>
+
+            <Inline className="toggle-switch" alignItems="center" space="space.100">
+                <Toggle
                     id="grouping-toggle"
-                    checked=${settings.globalGroupingEnabled}
-                    onChange=${(e) => handleToggleChange('globalGroupingEnabled', e.target.checked)}
+                    isChecked={settings.globalGroupingEnabled}
+                    onChange={(e) => handleToggleChange('globalGroupingEnabled', e.target.checked)}
                 />
-                <label for="grouping-toggle"></label>
-                <span>${getMessage('enableGrouping')}</span>
-            </div>
+                <span>{getMessage('enableGrouping')}</span>
+            </Inline>
 
-            <div class="toggle-switch">
-                <input
-                    type="checkbox"
+            <Inline className="toggle-switch" alignItems="center" space="space.100">
+                <Toggle
                     id="deduplication-toggle"
-                    checked=${settings.globalDeduplicationEnabled}
-                    onChange=${(e) => handleToggleChange('globalDeduplicationEnabled', e.target.checked)}
+                    isChecked={settings.globalDeduplicationEnabled}
+                    onChange={(e) => handleToggleChange('globalDeduplicationEnabled', e.target.checked)}
                 />
-                <label for="deduplication-toggle"></label>
-                <span>${getMessage('enableDeduplication')}</span>
-            </div>
+                <span>{getMessage('enableDeduplication')}</span>
+            </Inline>
 
             <hr />
 
-            <${StatsTab} stats=${stats} onReset=${handleResetStats} />
+            <StatsTab stats={stats} onReset={handleResetStats} />
 
             <hr />
 
-            <button onClick=${openOptionsPage} class="button">${getMessage('openOptions')}</button>
-        </div>
-    `;
+            <Button appearance="primary" onClick={openOptionsPage}>{getMessage('openOptions')}</Button>
+        </Box>
+        </AtlaskitThemeProvider>
+    );
 }
 
 // Monte l'application Preact dans le div #popup-app
-render(html`<${PopupApp} />`, document.getElementById('popup-app'));
+render(h(PopupApp, {}), document.getElementById('popup-app'));

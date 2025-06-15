@@ -65,7 +65,20 @@
 * JavaScript (ES Modules)
 * Chrome Extension APIs (Manifest V3)
 * preact (for a lightweight reactive UI)
+* TypeScript
+* Atlassian Design System
 * CSS3
+
+## Building
+
+Run `npm install` to fetch all dependencies (including dev dependencies like
+`esbuild`) then `npm run build`. All files for the extension are produced inside
+the `dist/` directory. Load **that** folder (or a zip of it) in Chrome; the HTML
+pages in the repository root won't work directly anymore.
+
+
+## Storybook
+Run `npm run storybook` to launch the Storybook UI with the Atlassian addon. Stories live in the `stories/` folder.
 
 ## License 📄
 
