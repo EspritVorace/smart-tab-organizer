@@ -10,7 +10,6 @@
     "tabs",
     "tabGroups",
     "storage",
-    "webNavigation",
     "scripting"
   ],
   "host_permissions": [

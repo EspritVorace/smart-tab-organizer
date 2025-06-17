@@ -268,41 +268,113 @@ async function handleGrouping(openerTab, newTab) {
     });
 }
 
-chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
-    if (details.frameId !== 0 || !details.url || details.url.startsWith('about:')) return;
+// Remplace ta section webNavigation par ceci :
+
+// Map pour éviter de traiter plusieurs fois le même onglet
+const processedTabs = new Set();
+
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+    // On s'intéresse aux changements d'URL ou aux onglets qui finissent de charger
+    const urlToCheck = changeInfo.url || (changeInfo.status === 'complete' ? tab.url : null);
+    
+    if (!urlToCheck || 
+        urlToCheck.startsWith('about:') || 
+        urlToCheck.startsWith('chrome:') ||
+        processedTabs.has(`${tabId}-${urlToCheck}`)) {
+        return;
+    }
+
+    // Marquer comme traité pour éviter les doublons
+    processedTabs.add(`${tabId}-${urlToCheck}`);
+    
     const settings = await getSettings();
     if (!settings.globalDeduplicationEnabled) return;
-    const newUrl = details.url;
-    const rule = settings.domainRules.find(r => r.enabled && matchesDomain(newUrl, r.domainFilter));
+
+    const rule = settings.domainRules.find(r => r.enabled && matchesDomain(urlToCheck, r.domainFilter));
     const deduplicationActiveForRule = rule ? rule.deduplicationEnabled : settings.globalDeduplicationEnabled;
     if (!deduplicationActiveForRule) return;
+
     const matchMode = rule ? rule.deduplicationMatchMode : 'exact';
+    
     try {
-        const allTabsInWindow = await chrome.tabs.query({ url: "*://*/*", windowId: details.windowId });
-        const duplicateTab = allTabsInWindow.find(tab => {
-            if (!tab.url || tab.id === details.tabId) return false;
-            try {
-                const currentTabUrl = new URL(tab.url); const newNavUrl = new URL(newUrl);
-                switch (matchMode) {
-                    case 'exact': return tab.url === newUrl;
-                    case 'hostname_path': return currentTabUrl.hostname === newNavUrl.hostname && currentTabUrl.pathname === newNavUrl.pathname;
-                    case 'hostname': return currentTabUrl.hostname === newNavUrl.hostname;
-                    case 'includes': return tab.url.includes(newUrl) || newUrl.includes(tab.url);
-                    default: return false;
-                }
-            } catch (urlParseError) { return false; }
+        await checkAndDeduplicateTab(tabId, urlToCheck, matchMode, tab.windowId);
+    } catch (error) {
+        console.error("Deduplication error:", error);
+    }
+});
+
+async function checkAndDeduplicateTab(currentTabId, newUrl, matchMode, windowId) {
+    try {
+        const allTabsInWindow = await chrome.tabs.query({ 
+            url: "*://*/*", 
+            windowId: windowId 
         });
-        if (duplicateTab) {
-            await incrementStat('tabsDeduplicatedCount');
+        
+        const duplicateTab = allTabsInWindow.find(tab => {
+            if (!tab.url || tab.id === currentTabId) return false;
+            
             try {
+                const currentTabUrl = new URL(tab.url);
+                const newNavUrl = new URL(newUrl);
+                
+                switch (matchMode) {
+                    case 'exact': 
+                        return tab.url === newUrl;
+                    case 'hostname_path': 
+                        return currentTabUrl.hostname === newNavUrl.hostname && 
+                               currentTabUrl.pathname === newNavUrl.pathname;
+                    case 'hostname': 
+                        return currentTabUrl.hostname === newNavUrl.hostname;
+                    case 'includes': 
+                        return tab.url.includes(newUrl) || newUrl.includes(tab.url);
+                    default: 
+                        return false;
+                }
+            } catch (urlParseError) { 
+                return false; 
+            }
+        });
+
+        if (duplicateTab) {
+            console.log(`[DEDUPLICATION] Duplicate found: ${newUrl} (keeping tab ${duplicateTab.id}, removing ${currentTabId})`);
+            
+            await incrementStat('tabsDeduplicatedCount');
+            
+            try {
+                // Activer l'onglet existant
                 await chrome.tabs.update(duplicateTab.id, { active: true });
-                const dupTabWindow = await chrome.windows.get(duplicateTab.windowId, { populate: true });
-                if (!dupTabWindow.focused) await chrome.windows.update(duplicateTab.windowId, { focused: true });
-                try { await chrome.tabs.reload(duplicateTab.id); } catch (e) { /* Silently fail reload */ }
-            } catch (e) { /* Silently fail focus/update */ }
-            try { await chrome.tabs.remove(details.tabId); } catch (e) { /* Silently fail remove */ }
+                
+                // S'assurer que la fenêtre est focusée
+                const dupTabWindow = await chrome.windows.get(duplicateTab.windowId);
+                if (!dupTabWindow.focused) {
+                    await chrome.windows.update(duplicateTab.windowId, { focused: true });
+                }
+                
+                // Recharger l'onglet existant (optionnel)
+                try { 
+                    await chrome.tabs.reload(duplicateTab.id); 
+                } catch (e) { 
+                    // Échec silencieux si reload impossible
+                }
+            } catch (e) { 
+                console.warn("Could not focus duplicate tab:", e);
+            }
+            
+            // Supprimer l'onglet dupliqué
+            try { 
+                await chrome.tabs.remove(currentTabId); 
+            } catch (e) { 
+                console.warn("Could not remove duplicate tab:", e);
+            }
         }
-    } catch (queryError) { console.error("Deduplication: Error querying tabs:", queryError); }
-}, { url: [{ schemes: ['http', 'https'] }] });
+    } catch (queryError) { 
+        console.error("Deduplication: Error querying tabs:", queryError); 
+    }
+}
+
+// Nettoyage périodique du cache pour éviter l'accumulation
+setInterval(() => {
+    processedTabs.clear();
+}, 5 * 60 * 1000); // Nettoie toutes les 5 minutes
 
 console.log("SmartTab Organizer Service Worker: Group names now derived from opener tab. Logging active.");
