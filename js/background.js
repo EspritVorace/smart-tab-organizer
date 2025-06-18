@@ -166,6 +166,7 @@ async function handleGrouping(openerTab, newTab) {
 
     let hasProcessedTab = false;
     let targetGroupId = null;
+    let groupedTabIds = [];
 
     chrome.tabs.onUpdated.addListener(async function listener(tabId, changeInfo, tab) {
         if (hasProcessedTab) {
@@ -198,6 +199,7 @@ async function handleGrouping(openerTab, newTab) {
                 if (openerGroupId === chrome.tabs.TAB_ID_NONE || typeof openerGroupId !== 'number' || openerGroupId <= 0) {
                     console.log(`[GROUPING_DEBUG] handleGrouping: Opener tab ${currentOpenerTab.id} is not in a group. Will create new group using groupName "${groupName}".`);
                     const tabsToGroup = [currentOpenerTab.id, newTab.id];
+                    groupedTabIds = tabsToGroup.slice();
                     console.log(`[GROUPING_DEBUG] handleGrouping: Calling chrome.tabs.group to create new group with tabs [${tabsToGroup.join(', ')}]`);
                     const newGroupIdVal = await chrome.tabs.group({ tabIds: tabsToGroup });
                     targetGroupId = newGroupIdVal;
@@ -211,6 +213,7 @@ async function handleGrouping(openerTab, newTab) {
                     console.log(`[GROUPING_DEBUG] handleGrouping: Opener tab ${currentOpenerTab.id} already in group ${openerGroupId}. Adding new tab ${newTab.id}. Using groupName "${groupName}" for consistency if needed (though not for naming this existing group).`);
                     console.log(`[GROUPING_DEBUG] handleGrouping: Calling chrome.tabs.group to add tab ${newTab.id} to group ${openerGroupId}`);
                     await chrome.tabs.group({ groupId: openerGroupId, tabIds: [newTab.id] });
+                    groupedTabIds = [newTab.id];
                     // For existing groups where opener was already part, we might only want to set collapsed state,
                     // and potentially color if the group doesn't have the "right" color yet.
                     // However, changing color of an existing group the user might have manually set could be intrusive.
@@ -236,6 +239,13 @@ async function handleGrouping(openerTab, newTab) {
                     if (manualName && manualName !== groupName) {
                         await chrome.tabGroups.update(targetGroupId, { title: manualName });
                         console.log(`[GROUPING_DEBUG] handleGrouping: Group ${targetGroupId} renamed manually to "${manualName}".`);
+                    } else if (manualName === null) {
+                        try {
+                            await chrome.tabs.ungroup(groupedTabIds);
+                            console.log(`[GROUPING_DEBUG] handleGrouping: Manual prompt cancelled. Ungrouped tabs ${groupedTabIds.join(', ')} from group ${targetGroupId}.`);
+                        } catch (ungroupErr) {
+                            console.error('[GROUPING_DEBUG] handleGrouping: Failed to ungroup after manual cancel', ungroupErr);
+                        }
                     }
                 }
             } catch (error) {
