@@ -21,12 +21,11 @@ async function getSettings() {
 
 async function promptForGroupName(defaultName, tabId) {
     try {
-        const [{ result }] = await chrome.scripting.executeScript({
-            target: { tabId },
-            func: (msg, defName) => prompt(msg, defName),
-            args: [chrome.i18n.getMessage('promptEnterGroupName') || 'Enter group name', defaultName]
+        const response = await chrome.tabs.sendMessage(tabId, {
+            type: 'askGroupName',
+            defaultName
         });
-        return result && result.trim() ? result.trim() : null;
+        return response?.name && response.name.trim() ? response.name.trim() : null;
     } catch (e) {
         console.error('promptForGroupName error', e);
         return null;
