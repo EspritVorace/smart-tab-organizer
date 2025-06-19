@@ -11,3 +11,18 @@ function handleAuxClick(event) {
   }
 }
 document.addEventListener('auxclick', handleAuxClick, true);
+
+chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
+  if (req.type === 'askGroupName') {
+    if (sender.id !== chrome.runtime.id) {
+      console.warn('Ignored askGroupName from unknown sender', sender);
+      sendResponse({ name: null });
+      return;
+    }
+    const result = prompt(
+      chrome.i18n.getMessage('promptEnterGroupName') || 'Enter group name',
+      req.defaultName || ''
+    );
+    sendResponse({ name: result && result.trim() ? result.trim() : null });
+  }
+});
