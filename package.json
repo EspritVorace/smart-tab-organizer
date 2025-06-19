@@ -3,6 +3,16 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "test": "node tests/runTests.js"
+    "test": "node tests/runTests.js",
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "preact": "^10.19.2"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.7.0",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.9"
   }
 }
