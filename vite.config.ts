@@ -1,8 +1,21 @@
 import { defineConfig } from 'vite';
 import preact from '@preact/preset-vite';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 export default defineConfig({
-  plugins: [preact()],
+  plugins: [
+    preact(),
+    viteStaticCopy({
+      targets: [
+        { src: 'manifest.json', dest: '.' },
+        { src: 'js/**/*', dest: '.' },
+        { src: 'icons/*', dest: '.' },
+        { src: '_locales/**/*', dest: '.' },
+        { src: 'data/**/*', dest: '.' }
+      ],
+      structured: true
+    })
+  ],
   build: {
     rollupOptions: {
       input: {
@@ -11,6 +24,6 @@ export default defineConfig({
       }
     },
     outDir: 'dist',
-    emptyOutDir: false
+    emptyOutDir: true
   }
 });
