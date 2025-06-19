@@ -3,6 +3,7 @@ import preact from '@preact/preset-vite';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 export default defineConfig({
+  base: './',
   plugins: [
     preact(),
     viteStaticCopy({
