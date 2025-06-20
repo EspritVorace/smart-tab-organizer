@@ -1,5 +1,5 @@
-import { h, Fragment } from './../js/lib/preact.mjs';
-import { useState, useEffect } from './../js/lib/preact-hooks.mjs';
+import { h, Fragment } from 'preact';
+import { useState, useEffect } from 'preact/hooks';
 import htm from './../js/lib/htm.mjs';
 import { getMessage } from './../js/modules/i18n.js';
 import { generateUUID, isValidDomain, isValidRegex } from './../js/modules/utils.js';

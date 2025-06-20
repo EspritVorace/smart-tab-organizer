@@ -1,6 +1,7 @@
 // options/options.js
-import { h, render } from './../js/lib/preact.mjs';
-import { useState, useEffect, useCallback } from './../js/lib/preact-hooks.mjs';
+import { h, render } from 'preact';
+import { useState, useEffect, useCallback } from 'preact/hooks';
+import browser from 'webextension-polyfill';
 import htm from './../js/lib/htm.mjs';
 
 import { getSettings, saveSettings, getStatistics, resetStatistics } from './../js/modules/storage.js';
@@ -9,7 +10,7 @@ import { getMessage } from './../js/modules/i18n.js';
 import { applyTheme } from './../js/modules/theme.js';
 
 const html = htm.bind(h);
-const version = chrome.runtime.getManifest().version;
+const version = browser.runtime.getManifest().version;
 
 import { Header } from '../components/Header.js';
 import { Tabs } from '../components/Tabs.js';
@@ -58,8 +59,8 @@ function OptionsApp() {
                 setStats(changes.statistics.newValue);
             }
         };
-        chrome.storage.onChanged.addListener(listener);
-        return () => chrome.storage.onChanged.removeListener(listener);
+        browser.storage.onChanged.addListener(listener);
+        return () => browser.storage.onChanged.removeListener(listener);
     }, []);
 
     // --- Sauvegarde automatique ---

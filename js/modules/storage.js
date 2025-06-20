@@ -1,4 +1,5 @@
 // js/modules/storage.js
+import browser from 'webextension-polyfill';
 const defaultStatistics = { tabGroupsCreatedCount: 0, tabsDeduplicatedCount: 0 };
 const defaultSettingsPath = 'data/default_settings.json';
 let cachedDefaultSettings = null;
@@ -17,7 +18,7 @@ function mergeDeep(target, source) {
 async function loadDefaultSettings() {
     if (cachedDefaultSettings) return cachedDefaultSettings;
     try {
-        const url = chrome.runtime.getURL(defaultSettingsPath);
+        const url = browser.runtime.getURL(defaultSettingsPath);
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Workspace err: ${response.statusText}`);
         cachedDefaultSettings = await response.json();
@@ -26,15 +27,15 @@ async function loadDefaultSettings() {
 }
 export async function getSettings() {
     const defaults = await loadDefaultSettings();
-    const data = await chrome.storage.sync.get('settings');
+    const data = await browser.storage.sync.get('settings');
     return mergeDeep(defaults, data.settings || {});
 }
-export async function saveSettings(settings) { await chrome.storage.sync.set({ settings }); }
+export async function saveSettings(settings) { await browser.storage.sync.set({ settings }); }
 export async function getStatistics() {
-    const data = await chrome.storage.local.get('statistics');
+    const data = await browser.storage.local.get('statistics');
     return { ...defaultStatistics, ...data.statistics };
 }
-export async function saveStatistics(statistics) { await chrome.storage.local.set({ statistics }); }
+export async function saveStatistics(statistics) { await browser.storage.local.set({ statistics }); }
 export async function resetStatistics() { await saveStatistics(defaultStatistics); return defaultStatistics; }
 export async function incrementStat(key) {
     const stats = await getStatistics();
@@ -44,7 +45,7 @@ export async function incrementStat(key) {
 }
 export async function initializeDefaults() {
     const defaults = await loadDefaultSettings();
-    const syncData = await chrome.storage.sync.get('settings');
+    const syncData = await browser.storage.sync.get('settings');
     if (!syncData.settings) {
         console.log("Init defaults from JSON...");
         await saveSettings(defaults);
@@ -110,6 +111,6 @@ export async function initializeDefaults() {
         }
         await saveSettings(merged);
     }
-    const localData = await chrome.storage.local.get('statistics');
+    const localData = await browser.storage.local.get('statistics');
     if (!localData.statistics) { console.log("Init stats..."); await saveStatistics(defaultStatistics); }
 }

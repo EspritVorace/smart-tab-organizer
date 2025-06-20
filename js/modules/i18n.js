@@ -1,6 +1,7 @@
 // js/modules/i18n.js
+import browser from 'webextension-polyfill';
 export function getMessage(key, substitutions = undefined) {
-  try { return chrome.i18n.getMessage(key, substitutions); }
+  try { return browser.i18n.getMessage(key, substitutions); }
   catch (e) { console.warn(`Clé i18n ${key} introuvable.`); return key; }
 }
 export function applyTranslations(element = document.body) {
