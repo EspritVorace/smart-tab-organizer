@@ -1,8 +1,10 @@
 // js/background.js
+import { defineBackground } from 'wxt/utils/define-background';
 import browser from 'webextension-polyfill';
 import { getSettings as storageGetSettings, incrementStat, initializeDefaults } from '../modules/storage.js';
 import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from '../modules/utils.js';
 
+export default defineBackground(() => {
 const middleClickedTabs = new Map();
 
 async function getSettings() {
@@ -374,3 +376,4 @@ setInterval(() => {
 }, 5 * 60 * 1000); // Nettoie toutes les 5 minutes
 
 console.log("SmartTab Organizer Service Worker: Group names now derived from opener tab. Logging active.");
+});
