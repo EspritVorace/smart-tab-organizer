@@ -1,8 +1,21 @@
 {
   "name": "smart-tab-organizer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
-    "test": "node tests/runTests.js"
+    "test": "node tests/runTests.js",
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.1",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.4",
+    "vite-plugin-web-extension": "^4.4.4"
+  },
+  "dependencies": {
+    "htm": "^3.1.1",
+    "preact": "^10.17.1",
+    "webextension-polyfill": "^0.10.0"
   }
 }

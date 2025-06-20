@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "allowJs": true,
+    "checkJs": false,
+    "moduleResolution": "Node",
+    "isolatedModules": true,
+    "jsx": "react",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment",
+    "types": ["webextension-polyfill"],
+    "baseUrl": "."
+  },
+  "include": ["js/**/*", "options/**/*", "popup/**/*", "components/**/*"]
+}

@@ -1,4 +1,5 @@
 // js/background.js
+import browser from 'webextension-polyfill';
 import { getSettings as storageGetSettings, incrementStat, initializeDefaults } from './modules/storage.js';
 import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from './modules/utils.js';
 
@@ -21,7 +22,7 @@ async function getSettings() {
 
 async function promptForGroupName(defaultName, tabId) {
     try {
-        const response = await chrome.tabs.sendMessage(tabId, {
+        const response = await browser.tabs.sendMessage(tabId, {
             type: 'askGroupName',
             defaultName
         });
@@ -32,12 +33,12 @@ async function promptForGroupName(defaultName, tabId) {
     }
 }
 
-chrome.runtime.onInstalled.addListener(async (details) => {
+browser.runtime.onInstalled.addListener(async (details) => {
   console.log("SmartTab Organizer installed/updated.", details.reason);
   await initializeDefaults();
 });
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === "middleClickLink") {
         if (sender.tab && sender.tab.id) {
             middleClickedTabs.set(request.url, sender.tab.id);
@@ -51,7 +52,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
 });
 
-chrome.tabs.onCreated.addListener(async (newTab) => {
+browser.tabs.onCreated.addListener(async (newTab) => {
     const urlToCheck = newTab.pendingUrl || newTab.url;
     console.log(`[GROUPING_DEBUG] onCreated: New tab ${newTab.id}, Opener ID: ${newTab.openerTabId}, URL to check: "${urlToCheck}"`);
 
@@ -76,7 +77,7 @@ chrome.tabs.onCreated.addListener(async (newTab) => {
         if (openerIdFromMap) {
             console.log(`[GROUPING_DEBUG] onCreated: OpenerId ${openerIdFromMap} found for new tab ${newTab.id}. Attempting to get opener tab details.`);
             try {
-                const openerTab = await chrome.tabs.get(openerIdFromMap);
+                const openerTab = await browser.tabs.get(openerIdFromMap);
                 if (openerTab) {
                     console.log(`[GROUPING_DEBUG] onCreated: Opener tab ${openerTab.id} retrieved. Calling handleGrouping for new tab ${newTab.id}.`);
                     handleGrouping(openerTab, newTab);
@@ -168,9 +169,9 @@ async function handleGrouping(openerTab, newTab) {
     let targetGroupId = null;
     let groupedTabIds = [];
 
-    chrome.tabs.onUpdated.addListener(async function listener(tabId, changeInfo, tab) {
+    browser.tabs.onUpdated.addListener(async function listener(tabId, changeInfo, tab) {
         if (hasProcessedTab) {
-            try { chrome.tabs.onUpdated.removeListener(listener); } catch (e) {}
+            try { browser.tabs.onUpdated.removeListener(listener); } catch (e) {}
             return;
         }
 
@@ -186,33 +187,33 @@ async function handleGrouping(openerTab, newTab) {
             }
 
             hasProcessedTab = true;
-            chrome.tabs.onUpdated.removeListener(listener);
+            browser.tabs.onUpdated.removeListener(listener);
             // Note: 'tab' here is the newTab object from the onUpdated event.
             console.log(`[GROUPING_DEBUG] onUpdated listener: Main condition met for newTab ${newTab.id}. URL: "${tab.url}", Title: "${tab.title}". Placeholder group name "${groupName}". Listener removed.`);
 
             // GroupName is already determined from openerTab. Now proceed with grouping.
             try {
-                let currentOpenerTab = await chrome.tabs.get(openerTab.id); // Refresh openerTab state
+                let currentOpenerTab = await browser.tabs.get(openerTab.id); // Refresh openerTab state
                 const openerGroupId = currentOpenerTab.groupId;
                 console.log(`[GROUPING_DEBUG] handleGrouping: Refreshed openerTab ${currentOpenerTab.id} ("${currentOpenerTab.url}"), current groupId: ${openerGroupId}. Using groupName "${groupName}".`);
 
-                if (openerGroupId === chrome.tabs.TAB_ID_NONE || typeof openerGroupId !== 'number' || openerGroupId <= 0) {
+                if (openerGroupId === browser.tabs.TAB_ID_NONE || typeof openerGroupId !== 'number' || openerGroupId <= 0) {
                     console.log(`[GROUPING_DEBUG] handleGrouping: Opener tab ${currentOpenerTab.id} is not in a group. Will create new group using groupName "${groupName}".`);
                     const tabsToGroup = [currentOpenerTab.id, newTab.id];
                     groupedTabIds = tabsToGroup.slice();
-                    console.log(`[GROUPING_DEBUG] handleGrouping: Calling chrome.tabs.group to create new group with tabs [${tabsToGroup.join(', ')}]`);
-                    const newGroupIdVal = await chrome.tabs.group({ tabIds: tabsToGroup });
+                    console.log(`[GROUPING_DEBUG] handleGrouping: Calling browser.tabs.group to create new group with tabs [${tabsToGroup.join(', ')}]`);
+                    const newGroupIdVal = await browser.tabs.group({ tabIds: tabsToGroup });
                     targetGroupId = newGroupIdVal;
                     const updatePayloadNew = { title: groupName, collapsed: rule.collapseNew };
                     if (groupColor) updatePayloadNew.color = groupColor;
-                    console.log(`[GROUPING_DEBUG] handleGrouping: New group created with temp ID: ${newGroupIdVal}. Calling chrome.tabGroups.update with payload:`, updatePayloadNew);
-                    await chrome.tabGroups.update(newGroupIdVal, updatePayloadNew);
+                    console.log(`[GROUPING_DEBUG] handleGrouping: New group created with temp ID: ${newGroupIdVal}. Calling browser.tabGroups.update with payload:`, updatePayloadNew);
+                    await browser.tabGroups.update(newGroupIdVal, updatePayloadNew);
                     await incrementStat('tabGroupsCreatedCount');
                 } else {
                     targetGroupId = openerGroupId;
                     console.log(`[GROUPING_DEBUG] handleGrouping: Opener tab ${currentOpenerTab.id} already in group ${openerGroupId}. Adding new tab ${newTab.id}. Using groupName "${groupName}" for consistency if needed (though not for naming this existing group).`);
-                    console.log(`[GROUPING_DEBUG] handleGrouping: Calling chrome.tabs.group to add tab ${newTab.id} to group ${openerGroupId}`);
-                    await chrome.tabs.group({ groupId: openerGroupId, tabIds: [newTab.id] });
+                    console.log(`[GROUPING_DEBUG] handleGrouping: Calling browser.tabs.group to add tab ${newTab.id} to group ${openerGroupId}`);
+                    await browser.tabs.group({ groupId: openerGroupId, tabIds: [newTab.id] });
                     groupedTabIds = [newTab.id];
                     // For existing groups where opener was already part, we might only want to set collapsed state,
                     // and potentially color if the group doesn't have the "right" color yet.
@@ -225,23 +226,23 @@ async function handleGrouping(openerTab, newTab) {
                     // Re-fetch the group to check its current color, only update if different from rule's color?
                     // Or, more simply, if the rule implies a color, and the group doesn't have it, apply it.
                     // This could still be intrusive. For now, let's be conservative for groups opener is already in.
-                    // const existingGroupDetails = await chrome.tabGroups.get(openerGroupId);
+                    // const existingGroupDetails = await browser.tabGroups.get(openerGroupId);
                     // if (groupColor && existingGroupDetails.color !== groupColor) {
                     //    updatePayloadOpenerInGroup.color = groupColor; // This line makes it more aggressive in coloring
                     // }
-                    console.log(`[GROUPING_DEBUG] handleGrouping: Calling chrome.tabGroups.update for group ${openerGroupId} with payload:`, updatePayloadOpenerInGroup);
-                    await chrome.tabGroups.update(openerGroupId, updatePayloadOpenerInGroup);
+                    console.log(`[GROUPING_DEBUG] handleGrouping: Calling browser.tabGroups.update for group ${openerGroupId} with payload:`, updatePayloadOpenerInGroup);
+                    await browser.tabGroups.update(openerGroupId, updatePayloadOpenerInGroup);
                 }
                 console.log(`[GROUPING_DEBUG] handleGrouping: Grouping action for new tab ${newTab.id} completed successfully using groupName "${groupName}". Color applied: ${groupColor || 'Chrome default'}.`);
 
                 if (rule.groupNameSource === 'manual' && targetGroupId) {
                     const manualName = await promptForGroupName(groupName, openerTab.id);
                     if (manualName && manualName !== groupName) {
-                        await chrome.tabGroups.update(targetGroupId, { title: manualName });
+                        await browser.tabGroups.update(targetGroupId, { title: manualName });
                         console.log(`[GROUPING_DEBUG] handleGrouping: Group ${targetGroupId} renamed manually to "${manualName}".`);
                     } else if (manualName === null) {
                         try {
-                            await chrome.tabs.ungroup(groupedTabIds);
+                            await browser.tabs.ungroup(groupedTabIds);
                             console.log(`[GROUPING_DEBUG] handleGrouping: Manual prompt cancelled. Ungrouped tabs ${groupedTabIds.join(', ')} from group ${targetGroupId}.`);
                         } catch (ungroupErr) {
                             console.error('[GROUPING_DEBUG] handleGrouping: Failed to ungroup after manual cancel', ungroupErr);
@@ -268,7 +269,7 @@ async function handleGrouping(openerTab, newTab) {
 // Map pour éviter de traiter plusieurs fois le même onglet
 const processedTabs = new Set();
 
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     // On s'intéresse aux changements d'URL ou aux onglets qui finissent de charger
     const urlToCheck = changeInfo.url || (changeInfo.status === 'complete' ? tab.url : null);
     
@@ -300,7 +301,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
 async function checkAndDeduplicateTab(currentTabId, newUrl, matchMode, windowId) {
     try {
-        const allTabsInWindow = await chrome.tabs.query({ 
+        const allTabsInWindow = await browser.tabs.query({ 
             url: "*://*/*", 
             windowId: windowId 
         });
@@ -337,17 +338,17 @@ async function checkAndDeduplicateTab(currentTabId, newUrl, matchMode, windowId)
             
             try {
                 // Activer l'onglet existant
-                await chrome.tabs.update(duplicateTab.id, { active: true });
+                await browser.tabs.update(duplicateTab.id, { active: true });
                 
                 // S'assurer que la fenêtre est focusée
-                const dupTabWindow = await chrome.windows.get(duplicateTab.windowId);
+                const dupTabWindow = await browser.windows.get(duplicateTab.windowId);
                 if (!dupTabWindow.focused) {
-                    await chrome.windows.update(duplicateTab.windowId, { focused: true });
+                    await browser.windows.update(duplicateTab.windowId, { focused: true });
                 }
                 
                 // Recharger l'onglet existant (optionnel)
                 try { 
-                    await chrome.tabs.reload(duplicateTab.id); 
+                    await browser.tabs.reload(duplicateTab.id); 
                 } catch (e) { 
                     // Échec silencieux si reload impossible
                 }
@@ -357,7 +358,7 @@ async function checkAndDeduplicateTab(currentTabId, newUrl, matchMode, windowId)
             
             // Supprimer l'onglet dupliqué
             try { 
-                await chrome.tabs.remove(currentTabId); 
+                await browser.tabs.remove(currentTabId); 
             } catch (e) { 
                 console.warn("Could not remove duplicate tab:", e);
             }

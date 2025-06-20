@@ -47,9 +47,17 @@
     ```bash
     git clone [https://github.com/EspritVorace/smart-tab-organizer.git](https://github.com/EspritVorace/smart-tab-organizer.git)
     ```
-2.  **Ouvrir les Extensions Chrome :** Naviguez vers `chrome://extensions/`.
-3.  **Activer le Mode Développeur :** Cochez la case "Mode développeur".
-4.  **Charger l'Extension :** Cliquez sur "Charger l'extension non empaquetée" et sélectionnez le dossier `SmartTab_Organizer` (celui contenant `manifest.json`).
+2.  **Installer les dépendances :**
+    ```bash
+    npm install
+    ```
+3.  **Construire l'extension :**
+    ```bash
+    npm run build
+    ```
+4.  **Charger dans votre navigateur :**
+    * Chrome/Chromium : ouvrez `chrome://extensions/` puis "Charger l'extension non empaquetée" en sélectionnant le dossier `dist`.
+    * Firefox : ouvrez `about:debugging#/runtime/this-firefox` puis "Charger un module complémentaire temporaire" avec `dist/manifest.json`.
 5.  L'extension est prête !
 
 ## Utilisation 📖
@@ -62,9 +70,11 @@
 
 ## Technologies Utilisées 🛠️
 
-* JavaScript (ES Modules)
-* Chrome Extension APIs (Manifest V3)
-* preact (pour une UI réactive légère)
+* JavaScript & TypeScript
+* Vite
+* preact via npm pour une UI réactive légère
+* webextension-polyfill
+* APIs d'extensions Chrome/Firefox (Manifest V3)
 * CSS3
 
 ## Licence 📄

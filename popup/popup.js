@@ -1,6 +1,7 @@
 // popup/popup.js
-import { h, render } from './../js/lib/preact.mjs';
-import { useState, useEffect, useCallback } from './../js/lib/preact-hooks.mjs';
+import { h, render } from 'preact';
+import { useState, useEffect, useCallback } from 'preact/hooks';
+import browser from 'webextension-polyfill';
 import htm from './../js/lib/htm.mjs';
 
 import { getSettings, saveSettings, getStatistics, resetStatistics } from './../js/modules/storage.js';
@@ -36,10 +37,10 @@ function PopupApp() {
                 setStats(changes.statistics.newValue);
             }
         };
-        chrome.storage.onChanged.addListener(storageListener);
+        browser.storage.onChanged.addListener(storageListener);
 
         // Nettoyage au démontage
-        return () => chrome.storage.onChanged.removeListener(storageListener);
+        return () => browser.storage.onChanged.removeListener(storageListener);
     }, []); // [] = S'exécute une seule fois au montage
 
     // --- Effet pour sauvegarder les changements ---
@@ -57,7 +58,7 @@ function PopupApp() {
     }, []);
 
     const openOptionsPage = useCallback(() => {
-        chrome.runtime.openOptionsPage();
+        browser.runtime.openOptionsPage();
     }, []);
 
     const handleResetStats = useCallback(async () => {
