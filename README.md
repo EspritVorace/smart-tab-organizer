@@ -71,7 +71,7 @@
 ## Technologies Used 🛠️
 
 * JavaScript & TypeScript
-* Vite build system
+* WXT build system
 * preact (via npm) for a lightweight reactive UI
 * webextension-polyfill
 * Chrome/Firefox Extension APIs (Manifest V3)
