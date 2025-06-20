@@ -2,12 +2,12 @@
 import { h, render } from 'preact';
 import { useState, useEffect, useCallback } from 'preact/hooks';
 import browser from 'webextension-polyfill';
-import htm from './../js/lib/htm.mjs';
+import htm from '../utils/htm.mjs';
 
-import { getSettings, saveSettings, getStatistics, resetStatistics } from './../js/modules/storage.js';
-import { generateUUID, isValidDomain, isValidRegex } from './../js/modules/utils.js';
-import { getMessage } from './../js/modules/i18n.js';
-import { applyTheme } from './../js/modules/theme.js';
+import { getSettings, saveSettings, getStatistics, resetStatistics } from '../modules/storage.js';
+import { generateUUID, isValidDomain, isValidRegex } from '../modules/utils.js';
+import { getMessage } from '../modules/i18n.js';
+import { applyTheme } from '../modules/theme.js';
 
 const html = htm.bind(h);
 const version = browser.runtime.getManifest().version;

@@ -2,11 +2,7 @@ import { defineConfig } from 'wxt';
 import preact from '@preact/preset-vite';
 
 export default defineConfig({
-  // keep existing source layout
-  srcDir: '.',
-  entrypointsDir: 'js',
-  modulesDir: 'js/modules',
-  publicDir: 'public',
+  srcDir: 'src',
   outDir: 'dist',
   vite: () => ({
     plugins: [preact()],

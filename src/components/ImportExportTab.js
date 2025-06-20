@@ -1,7 +1,7 @@
 import { h } from 'preact';
 import { useState } from 'preact/hooks';
-import htm from './../js/lib/htm.mjs';
-import { getMessage } from './../js/modules/i18n.js';
+import htm from '../utils/htm.mjs';
+import { getMessage } from '../modules/i18n.js';
 
 const html = htm.bind(h);
 

@@ -1,7 +1,7 @@
 // js/background.js
 import browser from 'webextension-polyfill';
-import { getSettings as storageGetSettings, incrementStat, initializeDefaults } from './modules/storage.js';
-import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from './modules/utils.js';
+import { getSettings as storageGetSettings, incrementStat, initializeDefaults } from '../modules/storage.js';
+import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from '../modules/utils.js';
 
 const middleClickedTabs = new Map();
 
