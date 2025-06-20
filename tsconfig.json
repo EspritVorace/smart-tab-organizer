@@ -12,5 +12,5 @@
     "types": ["webextension-polyfill"],
     "baseUrl": "."
   },
-  "include": ["js/**/*", "options/**/*", "popup/**/*", "components/**/*"]
+  "include": ["src/**/*"]
 }

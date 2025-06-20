@@ -4,14 +4,13 @@
   "type": "module",
   "scripts": {
     "test": "node tests/runTests.js",
-    "dev": "vite",
-    "build": "vite build"
+    "dev": "wxt",
+    "build": "wxt build"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.1",
     "typescript": "^5.2.2",
-    "vite": "^5.0.4",
-    "vite-plugin-web-extension": "^4.4.4"
+    "wxt": "^0.20.7"
   },
   "dependencies": {
     "htm": "^3.1.1",
