@@ -4,7 +4,7 @@
 
 # SmartTab Organizer
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)
 ![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)
 
 **SmartTab Organizer** is a Chrome extension designed to help you efficiently manage your browser tabs by automatically grouping related tabs and preventing duplicates.
@@ -51,13 +51,37 @@
     ```bash
     npm install
     ```
+
+#### Development Mode (with auto-reload)
+3.  **Start development server:**
+    ```bash
+    # For Chrome development
+    npm run dev
+    
+    # For Firefox development
+    npm run dev:firefox
+    ```
+
+#### Production Build
 3.  **Build the extension:**
     ```bash
     npm run build
     ```
+
+#### Packaging for Distribution
+3.  **Create distribution packages:**
+    ```bash
+    # Create Chrome package
+    npm run zip
+    
+    # Create Firefox package
+    npm run zip:firefox
+    ```
+
+#### Loading in Browser
 4.  **Load in your browser:**
-    * Chrome/Chromium: open `chrome://extensions/` and use "Load unpacked" with the `dist` folder.
-    * Firefox: open `about:debugging#/runtime/this-firefox` and choose "Load Temporary Add-on" pointing to `dist/manifest.json`.
+    * Chrome/Chromium: open `chrome://extensions/` and use "Load unpacked" with the `.output/chrome-mv3` folder.
+    * Firefox: open `about:debugging#/runtime/this-firefox` and choose "Load Temporary Add-on" pointing to `.output/firefox-mv2/manifest.json`.
 5.  The extension is ready!
 
 ## Usage 📖
@@ -71,9 +95,8 @@
 ## Technologies Used 🛠️
 
 * JavaScript & TypeScript
-* Vite build system
+* WXT framework for web extension development
 * preact (via npm) for a lightweight reactive UI
-* webextension-polyfill
 * Chrome/Firefox Extension APIs (Manifest V3)
 * CSS3
 

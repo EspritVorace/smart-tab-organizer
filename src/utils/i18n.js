@@ -1,5 +1,5 @@
 // js/modules/i18n.js
-import browser from 'webextension-polyfill';
+import { browser } from 'wxt/browser';
 export function getMessage(key, substitutions = undefined) {
   try { return browser.i18n.getMessage(key, substitutions); }
   catch (e) { console.warn(`Clé i18n ${key} introuvable.`); return key; }
