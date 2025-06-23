@@ -9,8 +9,8 @@
     "jsx": "react",
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment",
-    "types": ["webextension-polyfill"],
+    "types": ["wxt/browser"],
     "baseUrl": "."
   },
-  "include": ["js/**/*", "options/**/*", "popup/**/*", "components/**/*"]
+  "include": ["src/**/*"]
 }
