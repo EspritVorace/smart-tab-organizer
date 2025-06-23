@@ -1,10 +1,7 @@
-import { h, Fragment } from 'preact';
+import { Fragment } from 'preact';
 import { useState } from 'preact/hooks';
-import htm from '../utils/lib/htm.mjs';
 import { getMessage } from '../utils/i18n.js';
 import { generateUUID, isValidRegex } from '../utils/utils.js';
-
-const html = htm.bind(h);
 
 function PresetsTab({ settings, updatePresets, updateRules, editingId, setEditingId }) {
     const { regexPresets, domainRules } = settings;
@@ -71,40 +68,40 @@ function PresetsTab({ settings, updatePresets, updateRules, editingId, setEditin
 
      const isPresetInUse = (regex, urlRegex) => domainRules.some(r => r.titleParsingRegEx === regex || r.urlParsingRegEx === urlRegex);
 
-    return html`
+    return (
         <section id="presets-section">
-            <h2>${getMessage('regexPresetsTab')}</h2>
-            ${regexPresets.map(preset => html`
-                <${Fragment} key=${preset.id}>
-                    ${editingId === preset.id && (!newPresetInProgress || newPresetInProgress.id !== preset.id)
-                        ? html`<${PresetEditForm} preset=${preset} onSave=${handleSave} onCancel=${() => setEditingId(null)} />`
-                        : html`<${PresetView} preset=${preset} onEdit=${setEditingId} onDelete=${handleDelete} disabled=${isPresetInUse(preset.regex, preset.urlRegex)} />`
+            <h2>{getMessage('regexPresetsTab')}</h2>
+            {regexPresets.map(preset => (
+                <Fragment key={preset.id}>
+                    {editingId === preset.id && (!newPresetInProgress || newPresetInProgress.id !== preset.id)
+                        ? <PresetEditForm preset={preset} onSave={handleSave} onCancel={() => setEditingId(null)} />
+                        : <PresetView preset={preset} onEdit={setEditingId} onDelete={handleDelete} disabled={isPresetInUse(preset.regex, preset.urlRegex)} />
                     }
-                <//>
-            `)}
-            ${newPresetInProgress && editingId === newPresetInProgress.id && html`
-                <${PresetEditForm} preset=${newPresetInProgress} onSave=${handleSave} onCancel=${handleCancelNew} />
-            `}
-            ${!editingId && !newPresetInProgress && html`<button onClick=${handleAdd} class="button add-button">${getMessage('addPreset')}</button>`}
+                </Fragment>
+            ))}
+            {newPresetInProgress && editingId === newPresetInProgress.id && 
+                <PresetEditForm preset={newPresetInProgress} onSave={handleSave} onCancel={handleCancelNew} />
+            }
+            {!editingId && !newPresetInProgress && <button onClick={handleAdd} className="button add-button">{getMessage('addPreset')}</button>}
         </section>
-    `;
+    );
 }
 
 function PresetView({ preset, onEdit, onDelete, disabled }) {
-    return html`
-        <div class="list-item">
-            <div class="item-view">
-                <div class="item-details">
-                    <span class="item-main">${preset.name}</span>
-                    <code class="item-sub">${preset.regex}${preset.urlRegex ? ` | ${preset.urlRegex}` : ''}</code>
+    return (
+        <div className="list-item">
+            <div className="item-view">
+                <div className="item-details">
+                    <span className="item-main">{preset.name}</span>
+                    <code className="item-sub">{preset.regex}{preset.urlRegex ? ` | ${preset.urlRegex}` : ''}</code>
                 </div>
-                <div class="item-actions">
-                    <button onClick=${() => onEdit(preset.id)}>${getMessage('edit')}</button>
-                    <button onClick=${() => onDelete(preset.id)} class="danger" disabled=${disabled}>${getMessage('delete')}</button>
+                <div className="item-actions">
+                    <button onClick={() => onEdit(preset.id)}>{getMessage('edit')}</button>
+                    <button onClick={() => onDelete(preset.id)} className="danger" disabled={disabled}>{getMessage('delete')}</button>
                 </div>
             </div>
         </div>
-    `;
+    );
 }
 
 function PresetEditForm({ preset, onSave, onCancel }) {
@@ -126,36 +123,36 @@ function PresetEditForm({ preset, onSave, onCancel }) {
         onSave(formData);
     };
 
-    return html`
-        <div class="list-item is-editing">
-            <div class="item-edit">
-                 <form onSubmit=${handleSubmit}>
-                    <div class="form-grid">
-                        <div class="form-group tooltip-container">
-                             <label>${getMessage('presetName')}</label>
-                             <input type="text" name="name" value=${formData.name} onChange=${handleChange} required />
-                             <span class="tooltip-text" data-i18n="presetNameTooltip">${getMessage('presetNameTooltip')}</span>
+    return (
+        <div className="list-item is-editing">
+            <div className="item-edit">
+                 <form onSubmit={handleSubmit}>
+                    <div className="form-grid">
+                        <div className="form-group tooltip-container">
+                             <label>{getMessage('presetName')}</label>
+                             <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+                             <span className="tooltip-text" data-i18n="presetNameTooltip">{getMessage('presetNameTooltip')}</span>
                         </div>
-                        <div class="form-group tooltip-container">
-                            <label>${getMessage('presetRegex')}</label>
-                            <input type="text" name="regex" value=${formData.regex} onChange=${handleChange} required />
-                            <span class="tooltip-text" data-i18n="presetRegexTooltip">${getMessage('presetRegexTooltip')}</span>
-                            ${error && html`<span class="error-message">${error}</span>`}
+                        <div className="form-group tooltip-container">
+                            <label>{getMessage('presetRegex')}</label>
+                            <input type="text" name="regex" value={formData.regex} onChange={handleChange} required />
+                            <span className="tooltip-text" data-i18n="presetRegexTooltip">{getMessage('presetRegexTooltip')}</span>
+                            {error && <span className="error-message">{error}</span>}
                         </div>
-                        <div class="form-group tooltip-container">
-                            <label>${getMessage('urlRegex')}</label>
-                            <input type="text" name="urlRegex" value=${formData.urlRegex} onChange=${handleChange} />
-                            <span class="tooltip-text" data-i18n="urlParsingRegExTooltip">${getMessage('urlParsingRegExTooltip')}</span>
+                        <div className="form-group tooltip-container">
+                            <label>{getMessage('urlRegex')}</label>
+                            <input type="text" name="urlRegex" value={formData.urlRegex} onChange={handleChange} />
+                            <span className="tooltip-text" data-i18n="urlParsingRegExTooltip">{getMessage('urlParsingRegExTooltip')}</span>
                         </div>
                     </div>
-                     <div class="form-actions">
-                         <button type="submit" class="primary">${getMessage('save')}</button>
-                         <button type="button" onClick=${onCancel}>${getMessage('cancel')}</button>
+                     <div className="form-actions">
+                         <button type="submit" className="primary">{getMessage('save')}</button>
+                         <button type="button" onClick={onCancel}>{getMessage('cancel')}</button>
                      </div>
                  </form>
             </div>
         </div>
-    `;
+    );
 }
 
 export { PresetsTab };

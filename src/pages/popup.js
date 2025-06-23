@@ -1,15 +1,12 @@
 // popup/popup.js
-import { h, render } from 'preact';
+import { render } from 'preact';
 import { useState, useEffect, useCallback } from 'preact/hooks';
 import { browser } from 'wxt/browser';
-import htm from '../utils/lib/htm.mjs';
 
 import { getSettings, saveSettings, getStatistics, resetStatistics } from '../utils/storage.js';
 import { getMessage } from '../utils/i18n.js';
 import { applyTheme } from '../utils/theme.js';
-import { StatsTab } from '../components/StatsTab.js';
-
-const html = htm.bind(h);
+import { StatsTab } from '../components/StatsTab.jsx';
 
 (() => {
 
@@ -71,43 +68,43 @@ function PopupApp() {
     }, []);
 
     // --- Rendu ---
-    return html`
-        <div id="popup-inner" class=${isLoaded ? 'loaded' : ''}>
-            <h1>${getMessage('popupTitle')}</h1>
+    return (
+        <div id="popup-inner" className={isLoaded ? 'loaded' : ''}>
+            <h1>{getMessage('popupTitle')}</h1>
 
-            <div class="toggle-switch">
+            <div className="toggle-switch">
                 <input
                     type="checkbox"
                     id="grouping-toggle"
-                    checked=${settings.globalGroupingEnabled}
-                    onChange=${(e) => handleToggleChange('globalGroupingEnabled', e.target.checked)}
+                    checked={settings.globalGroupingEnabled}
+                    onChange={(e) => handleToggleChange('globalGroupingEnabled', e.target.checked)}
                 />
-                <label for="grouping-toggle"></label>
-                <span>${getMessage('enableGrouping')}</span>
+                <label htmlFor="grouping-toggle"></label>
+                <span>{getMessage('enableGrouping')}</span>
             </div>
 
-            <div class="toggle-switch">
+            <div className="toggle-switch">
                 <input
                     type="checkbox"
                     id="deduplication-toggle"
-                    checked=${settings.globalDeduplicationEnabled}
-                    onChange=${(e) => handleToggleChange('globalDeduplicationEnabled', e.target.checked)}
+                    checked={settings.globalDeduplicationEnabled}
+                    onChange={(e) => handleToggleChange('globalDeduplicationEnabled', e.target.checked)}
                 />
-                <label for="deduplication-toggle"></label>
-                <span>${getMessage('enableDeduplication')}</span>
+                <label htmlFor="deduplication-toggle"></label>
+                <span>{getMessage('enableDeduplication')}</span>
             </div>
 
             <hr />
 
-            <${StatsTab} stats=${stats} onReset=${handleResetStats} />
+            <StatsTab stats={stats} onReset={handleResetStats} />
 
             <hr />
 
-            <button onClick=${openOptionsPage} class="button">${getMessage('openOptions')}</button>
+            <button onClick={openOptionsPage} className="button">{getMessage('openOptions')}</button>
         </div>
-    `;
+    );
 }
 
 // Monte l'application Preact dans le div #popup-app
-  render(html`<${PopupApp} />`, document.getElementById('popup-app'));
+  render(<PopupApp />, document.getElementById('popup-app'));
 })();

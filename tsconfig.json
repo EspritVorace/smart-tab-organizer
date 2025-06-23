@@ -10,7 +10,10 @@
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment",
     "types": ["wxt/browser"],
-    "baseUrl": "."
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src/**/*"]
 }

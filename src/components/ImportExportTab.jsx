@@ -1,9 +1,5 @@
-import { h } from 'preact';
 import { useState } from 'preact/hooks';
-import htm from '../utils/lib/htm.mjs';
 import { getMessage } from '../utils/i18n.js';
-
-const html = htm.bind(h);
 
 function ImportExportTab({ settings, setSettings }) {
     const [feedback, setFeedback] = useState({ message: '', status: '' });
@@ -49,18 +45,18 @@ function ImportExportTab({ settings, setSettings }) {
         document.body.removeChild(fileInput);
     };
 
-    return html`
+    return (
         <section id="importexport-section">
-            <h2>${getMessage('importExportTab')}</h2>
-            <div class="import-export-section">
-                <button onClick=${handleExport} class="button">${getMessage('exportSettings')}</button>
-                <button onClick=${handleImportClick} class="button">${getMessage('importSettings')}</button>
+            <h2>{getMessage('importExportTab')}</h2>
+            <div className="import-export-section">
+                <button onClick={handleExport} className="button">{getMessage('exportSettings')}</button>
+                <button onClick={handleImportClick} className="button">{getMessage('importSettings')}</button>
             </div>
-            ${feedback.message && html`
-                <p class="feedback-message ${feedback.status}">${feedback.message}</p>
-            `}
+            {feedback.message && 
+                <p className={`feedback-message ${feedback.status}`}>{feedback.message}</p>
+            }
         </section>
-    `;
+    );
 }
 
 export { ImportExportTab };
