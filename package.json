@@ -19,7 +19,14 @@
     "wxt": "^0.20.7"
   },
   "dependencies": {
-    "htm": "^3.1.1",
-    "preact": "^10.17.1"
+    "@radix-ui/react-slot": "^1.2.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.522.0",
+    "preact": "^10.17.1",
+    "react": "npm:@preact/compat@^18.3.1",
+    "react-dom": "npm:@preact/compat@^18.3.1",
+    "tailwind-merge": "^3.3.1",
+    "tw-animate-css": "^1.3.4"
   }
 }

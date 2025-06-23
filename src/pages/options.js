@@ -1,35 +1,32 @@
 // options/options.js
-import { h, render } from 'preact';
+import { render } from 'preact';
 import { useState, useEffect, useCallback } from 'preact/hooks';
 import { browser } from 'wxt/browser';
-import htm from '../utils/lib/htm.mjs';
 
 import { getSettings, saveSettings, getStatistics, resetStatistics } from '../utils/storage.js';
 import { generateUUID, isValidDomain, isValidRegex } from '../utils/utils.js';
 import { getMessage } from '../utils/i18n.js';
 import { applyTheme } from '../utils/theme.js';
-
-const html = htm.bind(h);
 const version = browser.runtime.getManifest().version;
 
-import { Header } from '../components/Header.js';
-import { Tabs } from '../components/Tabs.js';
-import { RulesTab } from '../components/RulesTab.js';
-import { PresetsTab } from '../components/PresetsTab.js';
-import { ImportExportTab } from '../components/ImportExportTab.js';
-import { StatsTab } from '../components/StatsTab.js';
-import { LogicalGroupsTab } from '../components/LogicalGroupsTab.js';
+import { Header } from '../components/Header.jsx';
+import { Tabs } from '../components/Tabs.jsx';
+import { RulesTab } from '../components/RulesTab.jsx';
+import { PresetsTab } from '../components/PresetsTab.jsx';
+import { ImportExportTab } from '../components/ImportExportTab.jsx';
+import { StatsTab } from '../components/StatsTab.jsx';
+import { LogicalGroupsTab } from '../components/LogicalGroupsTab.jsx';
 
 (() => {
 
 // --- Fonctions Utilitaires ---
 function Tooltip({ textKey, children }) {
-    return html`
-        <div class="tooltip-container">
-            ${children}
-            <span class="tooltip-text" data-i18n=${textKey}>${getMessage(textKey)}</span>
+    return (
+        <div className="tooltip-container">
+            {children}
+            <span className="tooltip-text" data-i18n={textKey}>{getMessage(textKey)}</span>
         </div>
-    `;
+    );
 }
 
 // --- Composant Principal ---
@@ -107,26 +104,26 @@ function OptionsApp() {
 
     // --- Rendu ---
     if (!settings) {
-        return html`<p>Chargement...</p>`;
+        return <p>Chargement...</p>;
     }
 
-    return html`
+    return (
         <div id="options-inner">
-            <${Header} settings=${settings} onThemeChange=${(val) => updateSetting('darkModePreference', val)} />
-            <${Tabs} currentTab=${currentTab} onTabChange=${handleTabChange} />
+            <Header settings={settings} onThemeChange={(val) => updateSetting('darkModePreference', val)} />
+            <Tabs currentTab={currentTab} onTabChange={handleTabChange} />
             <main>
-                ${currentTab === 'rules' && html`<${RulesTab} settings=${settings} updateRules=${updateRules} editingId=${editingRuleId} setEditingId=${setEditingRuleId} />`}
-                ${currentTab === 'presets' && html`<${PresetsTab} settings=${settings} updatePresets=${updatePresets} updateRules=${updateRules} editingId=${editingPresetId} setEditingId=${setEditingPresetId} />`}
-                ${currentTab === 'logicalGroups' && html`<${LogicalGroupsTab} settings=${settings} setSettings=${setSettings} editingId=${editingLogicalGroupId} setEditingId=${setEditingLogicalGroupId} />`}
-                ${currentTab === 'importexport' && html`<${ImportExportTab} settings=${settings} setSettings=${setSettings} />`}
-                ${currentTab === 'stats' && html`<${StatsTab} stats=${stats} onReset=${handleResetStats} />`}
+                {currentTab === 'rules' && <RulesTab settings={settings} updateRules={updateRules} editingId={editingRuleId} setEditingId={setEditingRuleId} />}
+                {currentTab === 'presets' && <PresetsTab settings={settings} updatePresets={updatePresets} updateRules={updateRules} editingId={editingPresetId} setEditingId={setEditingPresetId} />}
+                {currentTab === 'logicalGroups' && <LogicalGroupsTab settings={settings} setSettings={setSettings} editingId={editingLogicalGroupId} setEditingId={setEditingLogicalGroupId} />}
+                {currentTab === 'importexport' && <ImportExportTab settings={settings} setSettings={setSettings} />}
+                {currentTab === 'stats' && <StatsTab stats={stats} onReset={handleResetStats} />}
             </main>
-            <footer>SmartTab Organizer v${version} - Licensed under GPL-3.0-only.</footer>
+            <footer>SmartTab Organizer v{version} - Licensed under GPL-3.0-only.</footer>
         </div>
-    `;
+    );
 
 }
 
 // --- Montage ---
-  render(html`<${OptionsApp} />`, document.getElementById('options-app'));
+  render(<OptionsApp />, document.getElementById('options-app'));
 })();

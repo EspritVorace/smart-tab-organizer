@@ -1,8 +1,4 @@
-import { h } from 'preact';
-import htm from '../utils/lib/htm.mjs';
 import { getMessage } from '../utils/i18n.js';
-
-const html = htm.bind(h);
 
 // --- Tabs ---
 function Tabs({ currentTab, onTabChange }) {
@@ -13,19 +9,20 @@ function Tabs({ currentTab, onTabChange }) {
         { key: 'importexport', labelKey: 'importExportTab' },
         { key: 'stats', labelKey: 'statisticsTab' },
     ];
-    return html`
-        <nav class="tabs">
-            ${tabs.map(tab => html`
+    return (
+        <nav className="tabs">
+            {tabs.map(tab => (
                 <button
-                    class=${currentTab === tab.key ? 'active' : ''}
-                    onClick=${() => onTabChange(tab.key)}
-                    data-i18n=${tab.labelKey}
+                    key={tab.key}
+                    className={currentTab === tab.key ? 'active' : ''}
+                    onClick={() => onTabChange(tab.key)}
+                    data-i18n={tab.labelKey}
                 >
-                    ${getMessage(tab.labelKey)}
+                    {getMessage(tab.labelKey)}
                 </button>
-            `)}
+            ))}
         </nav>
-    `;
+    );
 }
 
 export { Tabs };
