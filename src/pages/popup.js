@@ -1,7 +1,6 @@
 // popup/popup.js
 import { h, render } from 'preact';
 import { useState, useEffect, useCallback } from 'preact/hooks';
-import { defineUnlistedScript } from 'wxt/utils/define-unlisted-script';
 import { browser } from 'wxt/browser';
 import htm from '../utils/lib/htm.mjs';
 
@@ -12,7 +11,7 @@ import { StatsTab } from '../components/StatsTab.js';
 
 const html = htm.bind(h);
 
-export default defineUnlistedScript(() => {
+(() => {
 
 function PopupApp() {
     const [settings, setSettings] = useState({ domainRules: [] }); // Init avec tableau vide
@@ -111,4 +110,4 @@ function PopupApp() {
 
 // Monte l'application Preact dans le div #popup-app
   render(html`<${PopupApp} />`, document.getElementById('popup-app'));
-});
+})();

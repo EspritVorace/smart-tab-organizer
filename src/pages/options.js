@@ -1,7 +1,6 @@
 // options/options.js
 import { h, render } from 'preact';
 import { useState, useEffect, useCallback } from 'preact/hooks';
-import { defineUnlistedScript } from 'wxt/utils/define-unlisted-script';
 import { browser } from 'wxt/browser';
 import htm from '../utils/lib/htm.mjs';
 
@@ -21,7 +20,7 @@ import { ImportExportTab } from '../components/ImportExportTab.js';
 import { StatsTab } from '../components/StatsTab.js';
 import { LogicalGroupsTab } from '../components/LogicalGroupsTab.js';
 
-export default defineUnlistedScript(() => {
+(() => {
 
 // --- Fonctions Utilitaires ---
 function Tooltip({ textKey, children }) {
@@ -130,4 +129,4 @@ function OptionsApp() {
 
 // --- Montage ---
   render(html`<${OptionsApp} />`, document.getElementById('options-app'));
-});
+})();
