@@ -3,6 +3,7 @@ import preact from '@preact/preset-vite';
 
 export default defineConfig({
   srcDir: 'src',
+  outDir: '.output',
   manifest: {
     manifest_version: 3,
     name: '__MSG_extensionName__',
@@ -29,8 +30,7 @@ export default defineConfig({
   vite: () => ({
     plugins: [preact()],
     build: {
-      emptyOutDir: true,
-      outDir: 'dist'
+      emptyOutDir: true
     }
   })
 });

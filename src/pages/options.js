@@ -3,23 +3,23 @@ import { h, render } from 'preact';
 import { useState, useEffect, useCallback } from 'preact/hooks';
 import { defineUnlistedScript } from 'wxt/utils/define-unlisted-script';
 import { browser } from 'wxt/browser';
-import htm from '../../utils/lib/htm.mjs';
+import htm from '../utils/lib/htm.mjs';
 
-import { getSettings, saveSettings, getStatistics, resetStatistics } from '../../utils/storage.js';
-import { generateUUID, isValidDomain, isValidRegex } from '../../utils/utils.js';
-import { getMessage } from '../../utils/i18n.js';
-import { applyTheme } from '../../utils/theme.js';
+import { getSettings, saveSettings, getStatistics, resetStatistics } from '../utils/storage.js';
+import { generateUUID, isValidDomain, isValidRegex } from '../utils/utils.js';
+import { getMessage } from '../utils/i18n.js';
+import { applyTheme } from '../utils/theme.js';
 
 const html = htm.bind(h);
 const version = browser.runtime.getManifest().version;
 
-import { Header } from '../../components/Header.js';
-import { Tabs } from '../../components/Tabs.js';
-import { RulesTab } from '../../components/RulesTab.js';
-import { PresetsTab } from '../../components/PresetsTab.js';
-import { ImportExportTab } from '../../components/ImportExportTab.js';
-import { StatsTab } from '../../components/StatsTab.js';
-import { LogicalGroupsTab } from '../../components/LogicalGroupsTab.js';
+import { Header } from '../components/Header.js';
+import { Tabs } from '../components/Tabs.js';
+import { RulesTab } from '../components/RulesTab.js';
+import { PresetsTab } from '../components/PresetsTab.js';
+import { ImportExportTab } from '../components/ImportExportTab.js';
+import { StatsTab } from '../components/StatsTab.js';
+import { LogicalGroupsTab } from '../components/LogicalGroupsTab.js';
 
 export default defineUnlistedScript(() => {
 
