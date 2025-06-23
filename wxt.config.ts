@@ -5,7 +5,6 @@ export default defineConfig({
   srcDir: 'src',
   outDir: '.output',
   manifest: {
-    manifest_version: 3,
     name: '__MSG_extensionName__',
     description: '__MSG_extensionDescription__',
     version: '1.0.1',
