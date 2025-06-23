@@ -4,7 +4,7 @@
 
 # SmartTab Organizer
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)
 ![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)
 
 **SmartTab Organizer** est une extension Chrome conçue pour vous aider à gérer efficacement vos onglets de navigateur en regroupant automatiquement les onglets liés et en empêchant les doublons.
@@ -51,13 +51,37 @@
     ```bash
     npm install
     ```
+
+#### Mode Développement (avec rechargement automatique)
+3.  **Démarrer le serveur de développement :**
+    ```bash
+    # Pour le développement Chrome
+    npm run dev
+    
+    # Pour le développement Firefox
+    npm run dev:firefox
+    ```
+
+#### Build de Production
 3.  **Construire l'extension :**
     ```bash
     npm run build
     ```
+
+#### Empaquetage pour Distribution
+3.  **Créer les packages de distribution :**
+    ```bash
+    # Créer le package Chrome
+    npm run zip
+    
+    # Créer le package Firefox
+    npm run zip:firefox
+    ```
+
+#### Chargement dans le Navigateur
 4.  **Charger dans votre navigateur :**
-    * Chrome/Chromium : ouvrez `chrome://extensions/` puis "Charger l'extension non empaquetée" en sélectionnant le dossier `dist`.
-    * Firefox : ouvrez `about:debugging#/runtime/this-firefox` puis "Charger un module complémentaire temporaire" avec `dist/manifest.json`.
+    * Chrome/Chromium : ouvrez `chrome://extensions/` puis "Charger l'extension non empaquetée" en sélectionnant le dossier `.output/chrome-mv3`.
+    * Firefox : ouvrez `about:debugging#/runtime/this-firefox` puis "Charger un module complémentaire temporaire" avec `.output/firefox-mv2/manifest.json`.
 5.  L'extension est prête !
 
 ## Utilisation 📖
@@ -71,9 +95,8 @@
 ## Technologies Utilisées 🛠️
 
 * JavaScript & TypeScript
-* Vite
+* WXT framework pour le développement d'extensions web
 * preact via npm pour une UI réactive légère
-* webextension-polyfill
 * APIs d'extensions Chrome/Firefox (Manifest V3)
 * CSS3
 

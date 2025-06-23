@@ -1,13 +1,13 @@
 // options/options.js
 import { h, render } from 'preact';
 import { useState, useEffect, useCallback } from 'preact/hooks';
-import browser from 'webextension-polyfill';
-import htm from './../js/lib/htm.mjs';
+import { browser } from 'wxt/browser';
+import htm from '../utils/lib/htm.mjs';
 
-import { getSettings, saveSettings, getStatistics, resetStatistics } from './../js/modules/storage.js';
-import { generateUUID, isValidDomain, isValidRegex } from './../js/modules/utils.js';
-import { getMessage } from './../js/modules/i18n.js';
-import { applyTheme } from './../js/modules/theme.js';
+import { getSettings, saveSettings, getStatistics, resetStatistics } from '../utils/storage.js';
+import { generateUUID, isValidDomain, isValidRegex } from '../utils/utils.js';
+import { getMessage } from '../utils/i18n.js';
+import { applyTheme } from '../utils/theme.js';
 
 const html = htm.bind(h);
 const version = browser.runtime.getManifest().version;
@@ -19,6 +19,8 @@ import { PresetsTab } from '../components/PresetsTab.js';
 import { ImportExportTab } from '../components/ImportExportTab.js';
 import { StatsTab } from '../components/StatsTab.js';
 import { LogicalGroupsTab } from '../components/LogicalGroupsTab.js';
+
+(() => {
 
 // --- Fonctions Utilitaires ---
 function Tooltip({ textKey, children }) {
@@ -126,4 +128,5 @@ function OptionsApp() {
 }
 
 // --- Montage ---
-render(html`<${OptionsApp} />`, document.getElementById('options-app'));
+  render(html`<${OptionsApp} />`, document.getElementById('options-app'));
+})();

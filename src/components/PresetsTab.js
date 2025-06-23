@@ -1,8 +1,8 @@
 import { h, Fragment } from 'preact';
 import { useState } from 'preact/hooks';
-import htm from './../js/lib/htm.mjs';
-import { getMessage } from './../js/modules/i18n.js';
-import { generateUUID, isValidRegex } from './../js/modules/utils.js';
+import htm from '../utils/lib/htm.mjs';
+import { getMessage } from '../utils/i18n.js';
+import { generateUUID, isValidRegex } from '../utils/utils.js';
 
 const html = htm.bind(h);
 

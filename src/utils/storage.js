@@ -1,5 +1,5 @@
 // js/modules/storage.js
-import browser from 'webextension-polyfill';
+import { browser } from 'wxt/browser';
 const defaultStatistics = { tabGroupsCreatedCount: 0, tabsDeduplicatedCount: 0 };
 const defaultSettingsPath = 'data/default_settings.json';
 let cachedDefaultSettings = null;
