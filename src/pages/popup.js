@@ -60,7 +60,7 @@ function PopupApp() {
     }, []);
 
     const openOptionsPage = useCallback(() => {
-        browser.tabs.create({ url: browser.runtime.getURL('options.html') });
+        browser.runtime.openOptionsPage();
     }, []);
 
     const handleResetStats = useCallback(async () => {
