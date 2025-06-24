@@ -3,7 +3,10 @@
   "version": "1.0.1",
   "type": "module",
   "scripts": {
-    "test": "node tests/runTests.js",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:ui": "vitest --ui",
+    "test:legacy": "node tests/runTests.js",
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",
     "build": "wxt build",
@@ -14,8 +17,11 @@
     "postinstall": "wxt prepare"
   },
   "devDependencies": {
+    "@testing-library/react": "^14.3.1",
     "@vitejs/plugin-react": "^4.3.1",
+    "happy-dom": "^15.11.7",
     "typescript": "^5.2.2",
+    "vitest": "^2.1.8",
     "wxt": "^0.20.7"
   },
   "dependencies": {
@@ -31,5 +37,8 @@
     "tailwind-merge": "^3.3.1",
     "tw-animate-css": "^1.3.4",
     "zod": "^3.25.67"
+  },
+  "overrides": {
+    "rollup": "npm:@rollup/wasm-node@^4.0.0"
   }
 }
