@@ -32,3 +32,13 @@ export interface SyncSettings {
   logicalGroups: LogicalGroupSettings;
   domainRules: DomainRuleSettings;
 }
+
+// Valeurs par défaut pour SyncSettings
+export const defaultSyncSettings: SyncSettings = {
+  globalGroupingEnabled: true,
+  globalDeduplicationEnabled: true,
+  darkModePreference: 'system',
+  regexPresets: [],
+  logicalGroups: [],
+  domainRules: []
+};
