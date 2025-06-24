@@ -100,5 +100,9 @@
   "ruleCountSingular": { "message": "regla" },
   "ruleCountPlural": { "message": "reglas" },
   "noGroupAssigned": { "message": "Sin grupo" },
-  "loadingText": { "message": "Cargando..." }
+  "loadingText": { "message": "Cargando..." },
+  "errorZodRequired": { "message": "Este campo es requerido" },
+  "errorZodMaxLength": { "message": "No debe exceder 100 caracteres" },
+  "errorZodInvalid": { "message": "Valor inválido" },
+  "errorZodInvalidValue": { "message": "Opción seleccionada inválida" }
 }
