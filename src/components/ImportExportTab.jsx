@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks';
+import React, { useState } from 'react';
 import { getMessage } from '../utils/i18n.js';
 
 function ImportExportTab({ settings, setSettings }) {

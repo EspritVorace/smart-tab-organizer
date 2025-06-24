@@ -1,6 +1,6 @@
 // popup/popup.js
-import { render } from 'preact';
-import { useState, useEffect, useCallback } from 'preact/hooks';
+import React, { useState, useEffect, useCallback } from 'react';
+import { createRoot } from 'react-dom/client';
 import { browser } from 'wxt/browser';
 
 import { getSettings, saveSettings, getStatistics, resetStatistics } from '../utils/storage.js';
@@ -105,6 +105,7 @@ function PopupApp() {
     );
 }
 
-// Monte l'application Preact dans le div #popup-app
-  render(<PopupApp />, document.getElementById('popup-app'));
+// Monte l'application React dans le div #popup-app
+  const root = createRoot(document.getElementById('popup-app'));
+  root.render(<PopupApp />);
 })();

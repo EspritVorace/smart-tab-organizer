@@ -1,5 +1,4 @@
-import { Fragment } from 'preact';
-import { useState, useEffect } from 'preact/hooks';
+import React, { Fragment, useState, useEffect } from 'react';
 import { getMessage } from '../utils/i18n.js';
 import { generateUUID } from '../utils/utils.js';
 
