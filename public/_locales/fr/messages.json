@@ -100,5 +100,9 @@
   "ruleCountSingular": { "message": "règle" },
   "ruleCountPlural": { "message": "règles" },
   "noGroupAssigned": { "message": "Aucun groupe" },
-  "loadingText": { "message": "Chargement..." }
+  "loadingText": { "message": "Chargement..." },
+  "errorZodRequired": { "message": "Ce champ est requis" },
+  "errorZodMaxLength": { "message": "Ne doit pas dépasser 100 caractères" },
+  "errorZodInvalid": { "message": "Valeur invalide" },
+  "errorZodInvalidValue": { "message": "Option sélectionnée invalide" }
 }
