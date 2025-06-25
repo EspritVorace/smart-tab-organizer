@@ -3,15 +3,15 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import { browser } from 'wxt/browser';
 import { Theme } from '@radix-ui/themes';
+import { ThemeProvider } from 'next-themes';
 
 import { getSettings, saveSettings, getStatistics, resetStatistics } from '../utils/storage.js';
 import { getMessage } from '../utils/i18n.js';
-import { applyTheme } from '../utils/theme.js';
 import { StatsTab } from '../components/StatsTab.jsx';
 
 (() => {
 
-function PopupApp() {
+function PopupContent() {
     const [settings, setSettings] = useState({ domainRules: [] }); // Init avec tableau vide
     const [stats, setStats] = useState({});
     const [isLoaded, setIsLoaded] = useState(false);
@@ -22,7 +22,6 @@ function PopupApp() {
             const [loadedSettings, loadedStats] = await Promise.all([getSettings(), getStatistics()]);
             setSettings(loadedSettings);
             setStats(loadedStats);
-            applyTheme(loadedSettings.darkModePreference || 'system');
             setIsLoaded(true);
         }
         loadData();
@@ -31,7 +30,6 @@ function PopupApp() {
         const storageListener = (changes, areaName) => {
             if (areaName === 'sync' && changes.settings) {
                 setSettings(changes.settings.newValue);
-                applyTheme(changes.settings.newValue.darkModePreference || 'system');
             }
             if (areaName === 'local' && changes.statistics) {
                 setStats(changes.statistics.newValue);
@@ -70,41 +68,54 @@ function PopupApp() {
 
     // --- Rendu ---
     return (
-        <Theme appearance={settings.darkModePreference === 'dark' ? 'dark' : 'light'}>
-            <div id="popup-inner" className={isLoaded ? 'loaded' : ''}>
-                <h1>{getMessage('popupTitle')}</h1>
+        <div id="popup-inner" className={isLoaded ? 'loaded' : ''}>
+            <h1>{getMessage('popupTitle')}</h1>
 
-                <div className="toggle-switch">
-                    <input
-                        type="checkbox"
-                        id="grouping-toggle"
-                        checked={settings.globalGroupingEnabled}
-                        onChange={(e) => handleToggleChange('globalGroupingEnabled', e.target.checked)}
-                    />
-                    <label htmlFor="grouping-toggle"></label>
-                    <span>{getMessage('enableGrouping')}</span>
-                </div>
-
-                <div className="toggle-switch">
-                    <input
-                        type="checkbox"
-                        id="deduplication-toggle"
-                        checked={settings.globalDeduplicationEnabled}
-                        onChange={(e) => handleToggleChange('globalDeduplicationEnabled', e.target.checked)}
-                    />
-                    <label htmlFor="deduplication-toggle"></label>
-                    <span>{getMessage('enableDeduplication')}</span>
-                </div>
-
-                <hr />
-
-                <StatsTab stats={stats} onReset={handleResetStats} />
-
-                <hr />
-
-                <button onClick={openOptionsPage} className="button">{getMessage('openOptions')}</button>
+            <div className="toggle-switch">
+                <input
+                    type="checkbox"
+                    id="grouping-toggle"
+                    checked={settings.globalGroupingEnabled}
+                    onChange={(e) => handleToggleChange('globalGroupingEnabled', e.target.checked)}
+                />
+                <label htmlFor="grouping-toggle"></label>
+                <span>{getMessage('enableGrouping')}</span>
             </div>
-        </Theme>
+
+            <div className="toggle-switch">
+                <input
+                    type="checkbox"
+                    id="deduplication-toggle"
+                    checked={settings.globalDeduplicationEnabled}
+                    onChange={(e) => handleToggleChange('globalDeduplicationEnabled', e.target.checked)}
+                />
+                <label htmlFor="deduplication-toggle"></label>
+                <span>{getMessage('enableDeduplication')}</span>
+            </div>
+
+            <hr />
+
+            <StatsTab stats={stats} onReset={handleResetStats} />
+
+            <hr />
+
+            <button onClick={openOptionsPage} className="button">{getMessage('openOptions')}</button>
+        </div>
+    );
+}
+
+function PopupApp() {
+    return (
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+            <Theme>
+                <PopupContent />
+            </Theme>
+        </ThemeProvider>
     );
 }
 

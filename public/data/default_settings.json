@@ -1,7 +1,6 @@
 {
   "globalGroupingEnabled": true,
   "globalDeduplicationEnabled": true,
-  "darkModePreference": "system",
   "regexPresets": [
     { "id": "preset-jira", "name": "Jira Ticket", "regex": "([A-Z]+-\\d+)", "urlRegex": "([A-Z]+-\\d+)" },
     { "id": "preset-gitlab", "name": "GitLab Issue", "regex": "#(\\d+)", "urlRegex": "issues\\/(\\d+)" },

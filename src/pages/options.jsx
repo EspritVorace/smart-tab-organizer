@@ -3,11 +3,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import { browser } from 'wxt/browser';
 import { Theme } from '@radix-ui/themes';
+import { ThemeProvider } from 'next-themes';
 
 import { getSettings, saveSettings, getStatistics, resetStatistics } from '../utils/storage.js';
 import { generateUUID, isValidDomain, isValidRegex } from '../utils/utils.js';
 import { getMessage } from '../utils/i18n.js';
-import { applyTheme } from '../utils/theme.js';
 const version = browser.runtime.getManifest().version;
 
 import { Header } from '../components/Header.jsx';
@@ -31,7 +31,7 @@ function Tooltip({ textKey, children }) {
 }
 
 // --- Composant Principal ---
-function OptionsApp() {
+function OptionsContent() {
     const [settings, setSettings] = useState(null);
     const [stats, setStats] = useState({});
     const [currentTab, setCurrentTab] = useState('rules');
@@ -45,14 +45,12 @@ function OptionsApp() {
             const [loadedSettings, loadedStats] = await Promise.all([getSettings(), getStatistics()]);
             setSettings(loadedSettings);
             setStats(loadedStats);
-            applyTheme(loadedSettings.darkModePreference || 'system');
         }
         loadData();
         const listener = (changes, area) => {
             if (area === 'sync' && changes.settings) {
                 console.log("Settings updated from storage.");
                 setSettings(changes.settings.newValue);
-                applyTheme(changes.settings.newValue.darkModePreference || 'system');
             }
             if (area === 'local' && changes.statistics) {
                 console.log("Stats updated from storage.");
@@ -109,22 +107,35 @@ function OptionsApp() {
     }
 
     return (
-        <Theme appearance={settings.darkModePreference === 'dark' ? 'dark' : 'light'}>
-            <div id="options-inner">
-                <Header settings={settings} onThemeChange={(val) => updateSetting('darkModePreference', val)} />
-                <Tabs currentTab={currentTab} onTabChange={handleTabChange} />
-                <main>
-                    {currentTab === 'rules' && <RulesTab settings={settings} updateRules={updateRules} editingId={editingRuleId} setEditingId={setEditingRuleId} />}
-                    {currentTab === 'presets' && <PresetsTab settings={settings} updatePresets={updatePresets} updateRules={updateRules} editingId={editingPresetId} setEditingId={setEditingPresetId} />}
-                    {currentTab === 'logicalGroups' && <LogicalGroupsTab settings={settings} setSettings={setSettings} editingId={editingLogicalGroupId} setEditingId={setEditingLogicalGroupId} />}
-                    {currentTab === 'importexport' && <ImportExportTab settings={settings} setSettings={setSettings} />}
-                    {currentTab === 'stats' && <StatsTab stats={stats} onReset={handleResetStats} />}
-                </main>
-                <footer>SmartTab Organizer v{version} - Licensed under GPL-3.0-only.</footer>
-            </div>
-        </Theme>
+        <div id="options-inner">
+            <Header settings={settings} />
+            <Tabs currentTab={currentTab} onTabChange={handleTabChange} />
+            <main>
+                {currentTab === 'rules' && <RulesTab settings={settings} updateRules={updateRules} editingId={editingRuleId} setEditingId={setEditingRuleId} />}
+                {currentTab === 'presets' && <PresetsTab settings={settings} updatePresets={updatePresets} updateRules={updateRules} editingId={editingPresetId} setEditingId={setEditingPresetId} />}
+                {currentTab === 'logicalGroups' && <LogicalGroupsTab settings={settings} setSettings={setSettings} editingId={editingLogicalGroupId} setEditingId={setEditingLogicalGroupId} />}
+                {currentTab === 'importexport' && <ImportExportTab settings={settings} setSettings={setSettings} />}
+                {currentTab === 'stats' && <StatsTab stats={stats} onReset={handleResetStats} />}
+            </main>
+            <footer>SmartTab Organizer v{version} - Licensed under GPL-3.0-only.</footer>
+        </div>
     );
 
+}
+
+function OptionsApp() {
+    return (
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+            <Theme>
+                <OptionsContent />
+            </Theme>
+        </ThemeProvider>
+    );
 }
 
 // --- Montage ---

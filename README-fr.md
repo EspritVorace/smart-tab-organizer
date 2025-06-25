@@ -94,11 +94,20 @@
 
 ## Technologies Utilisées 🛠️
 
+### Core
 * JavaScript & TypeScript
 * WXT framework pour le développement d'extensions web
-* preact via npm pour une UI réactive légère
+* React pour l'interface utilisateur réactive
 * APIs d'extensions Chrome/Firefox (Manifest V3)
-* CSS3
+
+### Librairies UI
+* **@radix-ui/themes** - Système de design et composants UI
+* **next-themes** - Gestion des thèmes (mode sombre/clair)
+* **lucide-react** - Icônes SVG
+* **react-hook-form** - Gestion des formulaires
+
+### Utilitaires
+* **Zod** - Validation de schémas
 
 ## Licence 📄
 
