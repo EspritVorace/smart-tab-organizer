@@ -1,6 +1,6 @@
 // options/options.js
-import { render } from 'preact';
-import { useState, useEffect, useCallback } from 'preact/hooks';
+import React, { useState, useEffect, useCallback } from 'react';
+import { createRoot } from 'react-dom/client';
 import { browser } from 'wxt/browser';
 
 import { getSettings, saveSettings, getStatistics, resetStatistics } from '../utils/storage.js';
@@ -125,5 +125,6 @@ function OptionsApp() {
 }
 
 // --- Montage ---
-  render(<OptionsApp />, document.getElementById('options-app'));
+  const root = createRoot(document.getElementById('options-app'));
+  root.render(<OptionsApp />);
 })();

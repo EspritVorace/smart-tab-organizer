@@ -4,12 +4,9 @@
     "module": "ESNext",
     "allowJs": true,
     "checkJs": false,
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "isolatedModules": true,
-    "jsx": "react",
-    "jsxFactory": "h",
-    "jsxFragmentFactory": "Fragment",
-    "types": ["wxt/browser"],
+    "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]

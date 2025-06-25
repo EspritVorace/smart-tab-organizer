@@ -1,3 +1,4 @@
+import React from 'react';
 import { getMessage } from '../utils/i18n.js';
 
 function StatsTab({ stats, onReset }) {
