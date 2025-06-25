@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import { browser } from 'wxt/browser';
+import { Theme } from '@radix-ui/themes';
 
 import { getSettings, saveSettings, getStatistics, resetStatistics } from '../utils/storage.js';
 import { generateUUID, isValidDomain, isValidRegex } from '../utils/utils.js';
@@ -108,18 +109,20 @@ function OptionsApp() {
     }
 
     return (
-        <div id="options-inner">
-            <Header settings={settings} onThemeChange={(val) => updateSetting('darkModePreference', val)} />
-            <Tabs currentTab={currentTab} onTabChange={handleTabChange} />
-            <main>
-                {currentTab === 'rules' && <RulesTab settings={settings} updateRules={updateRules} editingId={editingRuleId} setEditingId={setEditingRuleId} />}
-                {currentTab === 'presets' && <PresetsTab settings={settings} updatePresets={updatePresets} updateRules={updateRules} editingId={editingPresetId} setEditingId={setEditingPresetId} />}
-                {currentTab === 'logicalGroups' && <LogicalGroupsTab settings={settings} setSettings={setSettings} editingId={editingLogicalGroupId} setEditingId={setEditingLogicalGroupId} />}
-                {currentTab === 'importexport' && <ImportExportTab settings={settings} setSettings={setSettings} />}
-                {currentTab === 'stats' && <StatsTab stats={stats} onReset={handleResetStats} />}
-            </main>
-            <footer>SmartTab Organizer v{version} - Licensed under GPL-3.0-only.</footer>
-        </div>
+        <Theme appearance={settings.darkModePreference === 'dark' ? 'dark' : 'light'}>
+            <div id="options-inner">
+                <Header settings={settings} onThemeChange={(val) => updateSetting('darkModePreference', val)} />
+                <Tabs currentTab={currentTab} onTabChange={handleTabChange} />
+                <main>
+                    {currentTab === 'rules' && <RulesTab settings={settings} updateRules={updateRules} editingId={editingRuleId} setEditingId={setEditingRuleId} />}
+                    {currentTab === 'presets' && <PresetsTab settings={settings} updatePresets={updatePresets} updateRules={updateRules} editingId={editingPresetId} setEditingId={setEditingPresetId} />}
+                    {currentTab === 'logicalGroups' && <LogicalGroupsTab settings={settings} setSettings={setSettings} editingId={editingLogicalGroupId} setEditingId={setEditingLogicalGroupId} />}
+                    {currentTab === 'importexport' && <ImportExportTab settings={settings} setSettings={setSettings} />}
+                    {currentTab === 'stats' && <StatsTab stats={stats} onReset={handleResetStats} />}
+                </main>
+                <footer>SmartTab Organizer v{version} - Licensed under GPL-3.0-only.</footer>
+            </div>
+        </Theme>
     );
 
 }
