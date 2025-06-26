@@ -1,25 +1,2 @@
 @import '@radix-ui/themes/styles.css';
 
-/* Custom CSS variables for better integration */
-:root {
-  --popup-width: 350px;
-  --popup-padding: 16px;
-}
-
-/* Popup specific styles */
-#popup-inner {
-  width: var(--popup-width);
-  padding: var(--popup-padding);
-}
-
-/* Options page specific styles */
-#options-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
-}
-
-/* Custom component overrides if needed */
-.rt-Button {
-  cursor: pointer;
-}

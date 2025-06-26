@@ -11,7 +11,8 @@ export default {
   },
 };
 
-export const Default = {
+export const HeaderDefault = {
+  name: 'System Theme',
   args: {
     settings: {
       darkModePreference: 'system'
@@ -19,7 +20,8 @@ export const Default = {
   },
 };
 
-export const LightMode = {
+export const HeaderLight = {
+  name: 'Light Mode',
   args: {
     settings: {
       darkModePreference: 'disabled'
@@ -27,7 +29,8 @@ export const LightMode = {
   },
 };
 
-export const DarkMode = {
+export const HeaderDark = {
+  name: 'Dark Mode',
   args: {
     settings: {
       darkModePreference: 'enabled'

@@ -6,12 +6,16 @@ const config: StorybookConfig = {
     "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
   ],
   "addons": [
-    "@storybook/addon-docs",
-    "@storybook/addon-onboarding"
+    "@storybook/addon-docs"
   ],
   "framework": {
     "name": "@storybook/react-vite",
     "options": {}
-  }
+  },
+  async viteFinal(config) {
+    // Copier les fichiers _locales dans le dossier public de Storybook
+    config.publicDir = '../public';
+    return config;
+  },
 };
 export default config;

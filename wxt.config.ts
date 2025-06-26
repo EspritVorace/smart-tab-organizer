@@ -18,7 +18,8 @@ export default defineConfig({
         '16': 'icons/icon16.png',
         '48': 'icons/icon48.png',
         '128': 'icons/icon128.png'
-      }
+      },
+      default_popup: 'popup.html'
     },
     icons: {
       '16': 'icons/icon16.png',
