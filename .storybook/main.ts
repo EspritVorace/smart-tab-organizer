@@ -2,7 +2,6 @@ import type { StorybookConfig } from '@storybook/react-vite';
 
 const config: StorybookConfig = {
   "stories": [
-    "../src/**/*.mdx",
     "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
   ],
   "addons": [
@@ -12,9 +11,40 @@ const config: StorybookConfig = {
     "name": "@storybook/react-vite",
     "options": {}
   },
+  staticDirs: ['../public'],
   async viteFinal(config) {
-    // Copier les fichiers _locales dans le dossier public de Storybook
-    config.publicDir = '../public';
+    // Mock pour wxt/browser dans Storybook
+    config.resolve = config.resolve || {};
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'wxt/browser': '/virtual:wxt-browser',
+    };
+    
+    config.plugins = config.plugins || [];
+    config.plugins.push({
+      name: 'mock-wxt-browser',
+      resolveId(id) {
+        if (id === '/virtual:wxt-browser') return id;
+      },
+      load(id) {
+        if (id === '/virtual:wxt-browser') {
+          return `
+            const mockBrowser = {
+              i18n: {
+                getMessage: (key) => {
+                  const locale = globalThis.currentLocale || 'en';
+                  const messages = globalThis.messagesCache?.[locale] || {};
+                  return messages[key]?.message || key;
+                }
+              }
+            };
+            export { mockBrowser as browser };
+            export default mockBrowser;
+          `;
+        }
+      },
+    });
+    
     return config;
   },
 };

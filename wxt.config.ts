@@ -10,7 +10,7 @@ export default defineConfig({
     version: '1.0.1',
     author: 'EspritVorace',
     homepage_url: 'https://github.com/EspritVorace/smart-tab-organizer',
-    default_locale: 'fr',
+    default_locale: 'en',
     permissions: ['tabs', 'tabGroups', 'storage'],
     host_permissions: ['<all_urls>'],
     action: {
