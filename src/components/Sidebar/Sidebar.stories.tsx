@@ -22,6 +22,7 @@ const meta: Meta<typeof Sidebar> = {
   parameters: {
     layout: 'fullscreen',
   },
+  tags: ['autodocs'],
   decorators: [
     (Story) => (
       <Theme>

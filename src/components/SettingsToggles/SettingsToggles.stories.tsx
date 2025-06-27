@@ -1,8 +1,10 @@
-import { SettingsToggles } from './SettingsToggles.tsx';
+import type { Meta, StoryObj } from '@storybook/react';
+import { SettingsToggles } from './SettingsToggles';
 
-export default {
+const meta: Meta<typeof SettingsToggles> = {
   title: 'Components/SettingsToggles',
   component: SettingsToggles,
+  tags: ['autodocs'],
   argTypes: {
     globalGroupingEnabled: { control: 'boolean' },
     globalDeduplicationEnabled: { control: 'boolean' },
@@ -10,42 +12,39 @@ export default {
     onGroupingChange: { action: 'onGroupingChange' },
     onDeduplicationChange: { action: 'onDeduplicationChange' },
   },
-};
+} satisfies Meta<typeof SettingsToggles>;
 
-export const SettingsTogglesDefault = {
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const SettingsTogglesDefault: Story = {
   name: 'Default Settings',
   args: {
     globalGroupingEnabled: true,
     globalDeduplicationEnabled: false,
     isLoading: false,
-    onGroupingChange: () => {},
-    onDeduplicationChange: () => {},
   },
 };
 
-export const SettingsTogglesAllEnabled = {
+export const SettingsTogglesAllEnabled: Story = {
   name: 'All Enabled',
   args: {
     globalGroupingEnabled: true,
     globalDeduplicationEnabled: true,
     isLoading: false,
-    onGroupingChange: () => {},
-    onDeduplicationChange: () => {},
   },
 };
 
-export const SettingsTogglesAllDisabled = {
+export const SettingsTogglesAllDisabled: Story = {
   name: 'All Disabled',
   args: {
     globalGroupingEnabled: false,
     globalDeduplicationEnabled: false,
     isLoading: false,
-    onGroupingChange: () => {},
-    onDeduplicationChange: () => {},
   },
 };
 
-export const SettingsTogglesLoading = {
+export const SettingsTogglesLoading: Story = {
   name: 'Loading State',
   args: {
     isLoading: true,

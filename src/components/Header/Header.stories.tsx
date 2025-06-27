@@ -1,17 +1,22 @@
-import { Header } from './Header.jsx';
+import type { Meta, StoryObj } from '@storybook/react';
+import { Header } from './Header';
 
-export default {
+const meta: Meta<typeof Header> = {
   title: 'Components/Header',
   component: Header,
   parameters: {
     layout: 'fullscreen',
   },
+  tags: ['autodocs'],
   argTypes: {
     onThemeChange: { action: 'theme-changed' },
   },
-};
+} satisfies Meta<typeof Header>;
 
-export const HeaderDefault = {
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const HeaderDefault: Story = {
   name: 'System Theme',
   args: {
     settings: {
@@ -20,7 +25,7 @@ export const HeaderDefault = {
   },
 };
 
-export const HeaderLight = {
+export const HeaderLight: Story = {
   name: 'Light Mode',
   args: {
     settings: {
@@ -29,7 +34,7 @@ export const HeaderLight = {
   },
 };
 
-export const HeaderDark = {
+export const HeaderDark: Story = {
   name: 'Dark Mode',
   args: {
     settings: {

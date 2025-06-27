@@ -18,3 +18,18 @@ export function extractGroupNameFromUrl(url, regexString) {
 }
 export function isValidRegex(regex) { try { new RegExp(regex); return regex.includes('(') && regex.includes(')'); } catch (e) { return false; } }
 export function isValidDomain(domain) { return domain ? /^(\*\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(domain.trim()) : false; }
+export function getRadixColor(groupColor) {
+    // Mappage des couleurs de groupe vers les couleurs Radix UI
+    const colorMap = {
+        'grey': 'gray',
+        'blue': 'blue',
+        'red': 'red',
+        'yellow': 'amber',
+        'green': 'green',
+        'pink': 'pink',
+        'purple': 'purple',
+        'cyan': 'cyan',
+        'orange': 'orange'
+    };
+    return colorMap[groupColor] || 'gray';
+}

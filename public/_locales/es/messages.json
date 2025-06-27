@@ -108,5 +108,10 @@
   "errorZodRequired": { "message": "Este campo es requerido" },
   "errorZodMaxLength": { "message": "No debe exceder 100 caracteres" },
   "errorZodInvalid": { "message": "Valor inválido" },
-  "errorZodInvalidValue": { "message": "Opción seleccionada inválida" }
+  "errorZodInvalidValue": { "message": "Opción seleccionada inválida" },
+  "moreOptions": { "message": "Más opciones" },
+  "copy": { "message": "Copiar" },
+  "paste": { "message": "Pegar" },
+  "changeGroup": { "message": "Cambiar Grupo" },
+  "regex": { "message": "RegEx" }
 }

@@ -1,15 +1,20 @@
-import { Statistics } from './Statistics.tsx';
+import type { Meta, StoryObj } from '@storybook/react';
+import { Statistics } from './Statistics';
 
-export default {
+const meta: Meta<typeof Statistics> = {
   title: 'Components/Statistics',
   component: Statistics,
+  tags: ['autodocs'],
   argTypes: {
     isLoading: { control: 'boolean' },
     onReset: { action: 'onReset' },
   },
-};
+} satisfies Meta<typeof Statistics>;
 
-export const StatisticsDefault = {
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const StatisticsDefault: Story = {
   name: 'Default State',
   args: {
     stats: {
@@ -17,11 +22,10 @@ export const StatisticsDefault = {
       tabsDeduplicatedCount: 12,
     },
     isLoading: false,
-    onReset: () => {},
   },
 };
 
-export const StatisticsEmpty = {
+export const StatisticsEmpty: Story = {
   name: 'Empty Statistics',
   args: {
     stats: {
@@ -29,11 +33,10 @@ export const StatisticsEmpty = {
       tabsDeduplicatedCount: 0,
     },
     isLoading: false,
-    onReset: () => {},
   },
 };
 
-export const StatisticsSingular = {
+export const StatisticsSingular: Story = {
   name: 'Singular Values',
   args: {
     stats: {
@@ -41,11 +44,10 @@ export const StatisticsSingular = {
       tabsDeduplicatedCount: 1,
     },
     isLoading: false,
-    onReset: () => {},
   },
 };
 
-export const StatisticsOneGroupManyTabs = {
+export const StatisticsOneGroupManyTabs: Story = {
   name: 'One Group Many Tabs',
   args: {
     stats: {
@@ -53,11 +55,10 @@ export const StatisticsOneGroupManyTabs = {
       tabsDeduplicatedCount: 15,
     },
     isLoading: false,
-    onReset: () => {},
   },
 };
 
-export const StatisticsManyGroupsOneTab = {
+export const StatisticsManyGroupsOneTab: Story = {
   name: 'Many Groups One Tab',
   args: {
     stats: {
@@ -65,11 +66,10 @@ export const StatisticsManyGroupsOneTab = {
       tabsDeduplicatedCount: 1,
     },
     isLoading: false,
-    onReset: () => {},
   },
 };
 
-export const StatisticsHighNumbers = {
+export const StatisticsHighNumbers: Story = {
   name: 'High Numbers',
   args: {
     stats: {
@@ -77,31 +77,27 @@ export const StatisticsHighNumbers = {
       tabsDeduplicatedCount: 423,
     },
     isLoading: false,
-    onReset: () => {},
   },
 };
 
-export const StatisticsLoading = {
+export const StatisticsLoading: Story = {
   name: 'Loading State',
   args: {
     isLoading: true,
-    onReset: () => {},
   },
 };
 
-export const StatisticsNull = {
+export const StatisticsNull: Story = {
   name: 'Null Statistics',
   args: {
     stats: null,
     isLoading: false,
-    onReset: () => {},
   },
 };
 
-export const StatisticsUndefined = {
+export const StatisticsUndefined: Story = {
   name: 'Undefined Statistics',
   args: {
     isLoading: false,
-    onReset: () => {},
   },
 };

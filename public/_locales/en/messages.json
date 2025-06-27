@@ -108,5 +108,10 @@
   "errorZodRequired": { "message": "This field is required" },
   "errorZodMaxLength": { "message": "Must not exceed 100 characters" },
   "errorZodInvalid": { "message": "Invalid value" },
-  "errorZodInvalidValue": { "message": "Invalid option selected" }
+  "errorZodInvalidValue": { "message": "Invalid option selected" },
+  "moreOptions": { "message": "More options" },
+  "copy": { "message": "Copy" },
+  "paste": { "message": "Paste" },
+  "changeGroup": { "message": "Change Group" },
+  "regex": { "message": "RegEx" }
 }
