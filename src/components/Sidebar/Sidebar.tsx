@@ -1,6 +1,8 @@
 import React from 'react';
 import { Card, Flex } from '@radix-ui/themes';
 import { SidebarHeader } from './SidebarHeader';
+import { SidebarToolbar } from './SidebarToolbar';
+import { SidebarSearch } from './SidebarSearch';
 import { SidebarContent } from './SidebarContent';
 import { SidebarFooter } from './SidebarFooter';
 
@@ -25,6 +27,14 @@ interface SidebarProps {
   footerCollapsedContent?: React.ReactNode;
   headerContent?: React.ReactNode;
   headerCollapsedContent?: React.ReactNode;
+  showToolbar?: boolean;
+  toolbarContent?: React.ReactNode;
+  toolbarCollapsedContent?: React.ReactNode;
+  showSearch?: boolean;
+  searchPlaceholder?: string;
+  searchValue?: string;
+  onSearchValueChange?: (value: string) => void;
+  onSearch?: (query: string) => void;
 }
 
 export function Sidebar({
@@ -37,7 +47,15 @@ export function Sidebar({
   footerContent,
   footerCollapsedContent,
   headerContent,
-  headerCollapsedContent
+  headerCollapsedContent,
+  showToolbar = false,
+  toolbarContent,
+  toolbarCollapsedContent,
+  showSearch = false,
+  searchPlaceholder,
+  searchValue,
+  onSearchValueChange,
+  onSearch
 }: SidebarProps) {
   return (
     <Card
@@ -59,6 +77,25 @@ export function Sidebar({
         >
           {headerContent}
         </SidebarHeader>
+        
+        {showToolbar && (
+          <SidebarToolbar
+            isCollapsed={isCollapsed}
+            collapsedContent={toolbarCollapsedContent}
+          >
+            {toolbarContent}
+          </SidebarToolbar>
+        )}
+        
+        {showSearch && (
+          <SidebarSearch
+            isCollapsed={isCollapsed}
+            placeholder={searchPlaceholder}
+            value={searchValue}
+            onValueChange={onSearchValueChange}
+            onSearch={onSearch}
+          />
+        )}
         
         <SidebarContent
           isCollapsed={isCollapsed}

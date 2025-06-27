@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Sidebar } from './Sidebar';
-import { Theme, Card, Flex, Avatar, Text, Button, Box } from '@radix-ui/themes';
+import { Theme, Card, Flex, Avatar, Text, Button, Box, SegmentedControl } from '@radix-ui/themes';
 import { 
   Home, 
   Settings, 
@@ -83,6 +83,13 @@ const HeaderCollapsed = () => (
       <Menu size={20} />
     </Box>
   </Flex>
+);
+
+const ToolbarExpanded = () => (
+  <SegmentedControl.Root defaultValue="list" size="1">
+    <SegmentedControl.Item value="list">List</SegmentedControl.Item>
+    <SegmentedControl.Item value="grid">Grid</SegmentedControl.Item>
+  </SegmentedControl.Root>
 );
 
 const defaultItems = [
@@ -188,5 +195,53 @@ export const SidebarInteractive: Story = {
     onToggleCollapse: () => console.log('Toggle collapse'),
     headerContent: <HeaderExpanded title="Interactive Menu" />,
     headerCollapsedContent: <HeaderCollapsed />,
+  },
+};
+
+export const SidebarWithToolbar: Story = {
+  args: {
+    items: defaultItems,
+    activeItem: 'dashboard',
+    isCollapsed: false,
+    showFooter: false,
+    showToolbar: true,
+    toolbarContent: <ToolbarExpanded />,
+    headerContent: <HeaderExpanded title="Menu with Toolbar" />,
+    headerCollapsedContent: <HeaderCollapsed />,
+  },
+};
+
+export const SidebarWithSearch: Story = {
+  args: {
+    items: defaultItems,
+    activeItem: 'documents',
+    isCollapsed: false,
+    showFooter: false,
+    showSearch: true,
+    searchPlaceholder: "Rechercher...",
+    onSearch: (query: string) => console.log(`Search: ${query}`),
+    onSearchValueChange: (value: string) => console.log(`Search value: ${value}`),
+    headerContent: <HeaderExpanded title="Menu with Search" />,
+    headerCollapsedContent: <HeaderCollapsed />,
+  },
+};
+
+export const SidebarComplete: Story = {
+  args: {
+    items: defaultItems,
+    activeItem: 'analytics',
+    isCollapsed: false,
+    showFooter: true,
+    showToolbar: true,
+    showSearch: true,
+    toolbarContent: <ToolbarExpanded />,
+    searchPlaceholder: "Rechercher...",
+    footerContent: <UserFooterExpanded />,
+    footerCollapsedContent: <UserFooterCollapsed />,
+    headerContent: <HeaderExpanded title="Complete Menu" />,
+    headerCollapsedContent: <HeaderCollapsed />,
+    onToggleCollapse: () => console.log('Toggle collapse'),
+    onSearch: (query: string) => console.log(`Search: ${query}`),
+    onSearchValueChange: (value: string) => console.log(`Search value: ${value}`),
   },
 };
