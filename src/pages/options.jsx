@@ -10,8 +10,8 @@ import { generateUUID, isValidDomain, isValidRegex } from '../utils/utils.js';
 import { getMessage } from '../utils/i18n.js';
 const version = browser.runtime.getManifest().version;
 
-import { Header } from '../components/Header.jsx';
-import { Tabs } from '../components/Tabs.jsx';
+import { Header } from '../components/Header/Header.jsx';
+import { Tabs } from '../components/Tabs/Tabs.jsx';
 import { RulesTab } from '../components/RulesTab.jsx';
 import { PresetsTab } from '../components/PresetsTab.jsx';
 import { ImportExportTab } from '../components/ImportExportTab.jsx';

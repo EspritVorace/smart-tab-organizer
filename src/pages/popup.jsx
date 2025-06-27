@@ -6,9 +6,9 @@ import { Box, Container, Flex, Switch, Text, Theme, Skeleton } from '@radix-ui/t
 import { ThemeProvider } from 'next-themes';
 
 import { getMessage } from '../utils/i18n.js';
-import { Statistics } from '../components/Statistics.tsx';
-import { PopupHeader } from '../components/PopupHeader.tsx';
-import { SettingsToggles } from '../components/SettingsToggles.tsx';
+import { Statistics } from '../components/Statistics/Statistics.tsx';
+import { PopupHeader } from '../components/PopupHeader/PopupHeader.tsx';
+import { SettingsToggles } from '../components/SettingsToggles/SettingsToggles.tsx';
 import { useSyncedSettings } from '../hooks/useSyncedSettings.ts';
 import { useStatistics } from '../hooks/useStatistics.ts';
 

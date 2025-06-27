@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Heading, DataList, IconButton, Flex, Skeleton } from '@radix-ui/themes';
 import { Trash2 } from 'lucide-react';
-import { getMessage } from '../utils/i18n';
+import { getMessage } from '../../utils/i18n';
 
 interface StatisticsProps {
     stats?: {

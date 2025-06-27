@@ -1,6 +1,6 @@
 import React from 'react';
-import { getMessage } from '../utils/i18n.js';
-import { ThemeToggle } from './ThemeToggle.jsx';
+import { getMessage } from '../../utils/i18n.js';
+import { ThemeToggle } from '../ThemeToggle.jsx';
 
 function Header({ settings }) {
     return (

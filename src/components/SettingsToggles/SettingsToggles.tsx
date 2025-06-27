@@ -1,6 +1,6 @@
 import React from 'react';
 import { Flex, Switch, Text, Skeleton, Card } from '@radix-ui/themes';
-import { getMessage } from '../utils/i18n';
+import { getMessage } from '../../utils/i18n';
 
 interface SettingsTogglesProps {
     globalGroupingEnabled?: boolean;
