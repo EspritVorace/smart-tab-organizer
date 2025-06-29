@@ -34,6 +34,7 @@
   "cancel": { "message": "Annuler" },
   "addPreset": { "message": "Ajouter Préréglage" },
   "presetName": { "message": "Nom Préréglage" },
+  "presetLabel": { "message": "Préréglage" },
   "presetRegex": { "message": "RegEx" },
   "importSettings": { "message": "Importer" },
   "exportSettings": { "message": "Exporter" },
@@ -99,6 +100,7 @@
   },
   "logicalGroup": { "message": "Groupe Logique" },
   "noGroup": { "message": "-- Aucun Groupe --" },
+  "noPreset": { "message": "-- Aucun Préréglage --" },
   "logicalGroupRuleTooltip": { "message": "Assigner cette règle à un groupe logique." },
   "ungroupedRules": { "message": "Règles Non Groupées" },
   "ruleCountSingular": { "message": "règle" },
@@ -113,5 +115,13 @@
   "copy": { "message": "Copier" },
   "paste": { "message": "Coller" },
   "changeGroup": { "message": "Changer de Groupe" },
-  "regex": { "message": "RegEx" }
+  "regex": { "message": "RegEx" },
+  "editRule": { "message": "Modifier une Règle" },
+  "createRule": { "message": "Créer une Règle" },
+  "editRuleDescription": { "message": "Modifier la configuration de cette règle de domaine" },
+  "createRuleDescription": { "message": "Créer une nouvelle règle de domaine pour organiser vos onglets" },
+  "labelPlaceholder": { "message": "Entrez un nom descriptif" },
+  "collapseNew": { "message": "Réduire Nouveaux Groupes" },
+  "collapseExisting": { "message": "Réduire Groupes Existants" },
+  "create": { "message": "Créer" }
 }

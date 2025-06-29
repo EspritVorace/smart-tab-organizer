@@ -34,6 +34,7 @@
   "cancel": { "message": "Cancelar" },
   "addPreset": { "message": "Añadir Preajuste" },
   "presetName": { "message": "Nombre Preajuste" },
+  "presetLabel": { "message": "Preajuste" },
   "presetRegex": { "message": "RegEx" },
   "importSettings": { "message": "Importar" },
   "exportSettings": { "message": "Exportar" },
@@ -99,6 +100,7 @@
   },
   "logicalGroup": { "message": "Grupo Lógico" },
   "noGroup": { "message": "-- Sin Grupo --" },
+  "noPreset": { "message": "-- Sin Preajuste --" },
   "logicalGroupRuleTooltip": { "message": "Asignar esta regla a un grupo lógico." },
   "ungroupedRules": { "message": "Reglas Sin Agrupar" },
   "ruleCountSingular": { "message": "regla" },
@@ -113,5 +115,13 @@
   "copy": { "message": "Copiar" },
   "paste": { "message": "Pegar" },
   "changeGroup": { "message": "Cambiar Grupo" },
-  "regex": { "message": "RegEx" }
+  "regex": { "message": "RegEx" },
+  "editRule": { "message": "Editar Regla" },
+  "createRule": { "message": "Crear Regla" },
+  "editRuleDescription": { "message": "Modificar la configuración de esta regla de dominio" },
+  "createRuleDescription": { "message": "Crear una nueva regla de dominio para organizar tus pestañas" },
+  "labelPlaceholder": { "message": "Ingresa un nombre descriptivo" },
+  "collapseNew": { "message": "Colapsar Nuevos Grupos" },
+  "collapseExisting": { "message": "Colapsar Grupos Existentes" },
+  "create": { "message": "Crear" }
 }

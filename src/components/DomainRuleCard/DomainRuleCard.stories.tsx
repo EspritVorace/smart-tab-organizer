@@ -34,8 +34,6 @@ const mockRule: DomainRuleSetting = {
   groupNameSource: 'title',
   deduplicationMatchMode: 'exact',
   groupId: 'group1',
-  collapseNew: false,
-  collapseExisting: false,
   deduplicationEnabled: true,
   enabled: true
 };

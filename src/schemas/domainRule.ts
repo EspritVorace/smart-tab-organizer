@@ -20,32 +20,34 @@ export const domainRuleSchema = z.object({
   groupNameSource: z.enum(groupNameSourceOptions.map(opt => opt.value) as [GroupNameSourceValue, ...GroupNameSourceValue[]]),
   deduplicationMatchMode: z.enum(deduplicationMatchModeOptions.map(opt => opt.value) as [DeduplicationMatchModeValue, ...DeduplicationMatchModeValue[]]),
   groupId: z.string().nullable(),
-  collapseNew: z.boolean().default(false),
-  collapseExisting: z.boolean().default(false),
-  deduplicationEnabled: z.boolean().default(true)
+  deduplicationEnabled: z.boolean().default(true),
+  presetId: z.string().nullable()
 }).refine((data) => {
-  // titleParsingRegEx obligatoire si groupNameSource = 'title'
-  if (data.groupNameSource === 'title' && (!data.titleParsingRegEx || data.titleParsingRegEx.trim() === '')) {
-    return false;
-  }
-  // urlParsingRegEx obligatoire si groupNameSource = 'url'
-  if (data.groupNameSource === 'url' && (!data.urlParsingRegEx || data.urlParsingRegEx.trim() === '')) {
-    return false;
+  // Si presetId est null, les validations conditionnelles s'appliquent
+  if (data.presetId === null) {
+    // titleParsingRegEx obligatoire si groupNameSource = 'title'
+    if (data.groupNameSource === 'title' && (!data.titleParsingRegEx || data.titleParsingRegEx.trim() === '')) {
+      return false;
+    }
+    // urlParsingRegEx obligatoire si groupNameSource = 'url'
+    if (data.groupNameSource === 'url' && (!data.urlParsingRegEx || data.urlParsingRegEx.trim() === '')) {
+      return false;
+    }
   }
   return true;
-}, {
+}, () => ({
   message: getMessage('errorZodRequired'),
   path: ['titleParsingRegEx']
-}).refine((data) => {
-  // Validation conditionnelle pour urlParsingRegEx
-  if (data.groupNameSource === 'url' && (!data.urlParsingRegEx || data.urlParsingRegEx.trim() === '')) {
+})).refine((data) => {
+  // Validation conditionnelle pour urlParsingRegEx quand presetId est null
+  if (data.presetId === null && data.groupNameSource === 'url' && (!data.urlParsingRegEx || data.urlParsingRegEx.trim() === '')) {
     return false;
   }
   return true;
-}, {
+}, () => ({
   message: getMessage('errorZodRequired'),
   path: ['urlParsingRegEx']
-});
+}));
 
 // Type inféré
 export type DomainRule = z.infer<typeof domainRuleSchema>;

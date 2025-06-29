@@ -34,11 +34,12 @@ export const createRegexValidator = (allowEmpty = false) => {
     if (allowEmpty && val === '') return true;
     try {
       new RegExp(val);
-      return true;
+      // Vérifier que la regex contient au moins un groupe de capture
+      return val.includes('(') && val.includes(')');
     } catch {
       return false;
     }
-  }, {
+  }, () => ({
     message: getMessage('errorInvalidRegex')
-  });
+  }));
 };

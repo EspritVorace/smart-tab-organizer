@@ -19,9 +19,7 @@ export const groupNameSourceOptions = [
 
 export const deduplicationMatchModeOptions = [
   { value: 'exact', keyLabel: 'exactMatch' },
-  { value: 'includes', keyLabel: 'includesMatch' },
-  { value: 'hostname', keyLabel: 'hostnameMatch' },
-  { value: 'hostname_path', keyLabel: 'hostnamePathMatch' }
+  { value: 'includes', keyLabel: 'includesMatch' }
 ] as const;
 
 // Types pour les valeurs des enum

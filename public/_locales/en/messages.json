@@ -34,6 +34,7 @@
   "cancel": { "message": "Cancel" },
   "addPreset": { "message": "Add Preset" },
   "presetName": { "message": "Preset Name" },
+  "presetLabel": { "message": "Preset" },
   "presetRegex": { "message": "RegEx" },
   "importSettings": { "message": "Import" },
   "exportSettings": { "message": "Export" },
@@ -99,6 +100,7 @@
   },
   "logicalGroup": { "message": "Logical Group" },
   "noGroup": { "message": "-- No Group --" },
+  "noPreset": { "message": "-- No Preset --" },
   "logicalGroupRuleTooltip": { "message": "Assign this rule to a logical group." },
   "ungroupedRules": { "message": "Ungrouped Rules" },
   "ruleCountSingular": { "message": "rule" },
@@ -113,5 +115,13 @@
   "copy": { "message": "Copy" },
   "paste": { "message": "Paste" },
   "changeGroup": { "message": "Change Group" },
-  "regex": { "message": "RegEx" }
+  "regex": { "message": "RegEx" },
+  "editRule": { "message": "Edit Rule" },
+  "createRule": { "message": "Create Rule" },
+  "editRuleDescription": { "message": "Modify the configuration of this domain rule" },
+  "createRuleDescription": { "message": "Create a new domain rule to organize your tabs" },
+  "labelPlaceholder": { "message": "Enter a descriptive name" },
+  "collapseNew": { "message": "Collapse New Groups" },
+  "collapseExisting": { "message": "Collapse Existing Groups" },
+  "create": { "message": "Create" }
 }
