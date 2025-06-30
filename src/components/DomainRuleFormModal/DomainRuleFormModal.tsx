@@ -1,13 +1,12 @@
-import { Dialog, Button, Flex, Text, TextField, Switch, Select, Box, Separator, RadioGroup, Theme, Grid } from '@radix-ui/themes';
+import { Dialog, Button, Flex, Text, TextField, Switch, Select, Box, Separator, RadioGroup, Theme, Grid, Callout } from '@radix-ui/themes';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { X } from 'lucide-react';
+import { X, Info } from 'lucide-react';
 import { generateUUID, getRadixColor } from '../../utils/utils';
-import { domainRuleSchema, type DomainRule } from '../../schemas/domainRule';
+import { createDomainRuleSchemaWithUniqueness, type DomainRule } from '../../schemas/domainRule';
 import { groupNameSourceOptions, deduplicationMatchModeOptions } from '../../schemas/enums';
 import { getMessage } from '../../utils/i18n';
-import type { LogicalGroup } from '../../schemas/logicalGroup';
-import type { RegexPreset } from '../../schemas/regexPreset';
+import type { SyncSettings } from '../../types/syncSettings';
 import { FieldLabel, FieldError, FormField, RadioGroupField } from '../FormFields';
 
 interface DomainRuleFormModalProps {
@@ -15,8 +14,7 @@ interface DomainRuleFormModalProps {
   onClose: () => void;
   onSubmit: (domainRule: DomainRule) => void;
   domainRule?: DomainRule;
-  availableGroups: LogicalGroup[];
-  availablePresets: RegexPreset[];
+  syncSettings: SyncSettings;
 }
 
 export function DomainRuleFormModal({
@@ -24,8 +22,7 @@ export function DomainRuleFormModal({
   onClose,
   onSubmit,
   domainRule,
-  availableGroups,
-  availablePresets
+  syncSettings
 }: DomainRuleFormModalProps) {
   const isEditing = !!domainRule;
   
@@ -61,7 +58,7 @@ export function DomainRuleFormModal({
     watch,
     reset
   } = useForm<DomainRule>({
-    resolver: zodResolver(domainRuleSchema),
+    resolver: zodResolver(createDomainRuleSchemaWithUniqueness(syncSettings.domainRules, domainRule?.id)),
     defaultValues,
     mode: 'onChange'
   });
@@ -72,7 +69,7 @@ export function DomainRuleFormModal({
   const deduplicationEnabled = watch('deduplicationEnabled');
 
   // Trouver le groupe sélectionné pour appliquer sa couleur
-  const selectedGroup = availableGroups.find(group => group.id === groupId);
+  const selectedGroup = syncSettings.logicalGroups.find(group => group.id === groupId);
   const triggerColor = selectedGroup ? `var(--${getRadixColor(selectedGroup.color)}-11)` : undefined;
 
   const handleFormSubmit = (data: DomainRule) => {
@@ -99,6 +96,30 @@ export function DomainRuleFormModal({
             : getMessage('createRuleDescription')
           }
         </Dialog.Description>
+
+        {/* Info callout when no logical groups are defined */}
+        {syncSettings.logicalGroups.length === 0 && (
+          <Callout.Root color="blue" variant="soft" style={{ marginTop: '16px' }}>
+            <Callout.Icon>
+              <Info size={16} />
+            </Callout.Icon>
+            <Callout.Text>
+              {getMessage('noLogicalGroupsDefined')}
+            </Callout.Text>
+          </Callout.Root>
+        )}
+
+        {/* Info callout when no regex presets are defined */}
+        {syncSettings.regexPresets.length === 0 && (
+          <Callout.Root color="cyan" variant="soft" style={{ marginTop: '16px' }}>
+            <Callout.Icon>
+              <Info size={16} />
+            </Callout.Icon>
+            <Callout.Text>
+              {getMessage('noRegexPresetsDefined')}
+            </Callout.Text>
+          </Callout.Root>
+        )}
 
         <form onSubmit={handleSubmit(handleFormSubmit)}>
           <Flex direction="column" gap="4" mt="4">
@@ -153,8 +174,8 @@ export function DomainRuleFormModal({
                 control={control}
               />
 
-              {/* Preset Selection */}
-              {(groupNameSource === 'title' || groupNameSource === 'url') ? (
+              {/* Preset Selection - only show if presets exist and source is title/url */}
+              {(groupNameSource === 'title' || groupNameSource === 'url') && syncSettings.regexPresets.length > 0 ? (
                 <Theme accentColor='cyan'>
                 <Flex direction="column">
                   <Text as="label" size="2" weight="bold">
@@ -173,7 +194,7 @@ export function DomainRuleFormModal({
                           <Select.Item value="null">
                             {getMessage('noPreset')}
                           </Select.Item>
-                          {availablePresets.map((preset) => (
+                          {syncSettings.regexPresets.map((preset) => (
                             <Select.Item key={preset.id} value={preset.id}>
                               {preset.name}
                             </Select.Item>
@@ -265,45 +286,48 @@ export function DomainRuleFormModal({
               )}
             </Grid>
 
-            <Separator style={{ width: '100%' }} />
-
-            {/* Logical Group */}
-            <Theme accentColor='iris'>
-            <Flex direction="column">
-              <Text as="label" size="2" weight="bold">
-                {getMessage('logicalGroup')}
-              </Text>
-              <Controller
-                name="groupId"
-                control={control}
-                render={({ field }) => (
-                  <Select.Root 
-                    value={field.value === null ? 'null' : field.value} 
-                    onValueChange={(value) => field.onChange(value === 'null' ? null : value)}
-                  >
-                    <Select.Trigger 
-                      variant='soft'
-                      placeholder={getMessage('noGroup')} 
-                      style={{ 
-                        marginTop: '4px',
-                        color: triggerColor 
-                      }} 
-                    />
-                    <Select.Content position="popper" side="bottom">
-                      <Select.Item value="null">
-                        {getMessage('noGroup')}
-                      </Select.Item>
-                      {availableGroups.map((group) => (
-                        <Select.Item key={group.id} value={group.id} style={{ color: `var(--${getRadixColor(group.color)}-11)` }}>
-                          {group.label}
-                        </Select.Item>
-                      ))}
-                    </Select.Content>
-                  </Select.Root>
-                )}
-              />
-            </Flex>
-            </Theme>
+            {/* Logical Group - only show if groups exist */}
+            {syncSettings.logicalGroups.length > 0 && (
+              <>
+                <Separator style={{ width: '100%' }} />
+                <Theme accentColor='iris'>
+                <Flex direction="column">
+                  <Text as="label" size="2" weight="bold">
+                    {getMessage('logicalGroup')}
+                  </Text>
+                  <Controller
+                    name="groupId"
+                    control={control}
+                    render={({ field }) => (
+                      <Select.Root 
+                        value={field.value === null ? 'null' : field.value} 
+                        onValueChange={(value) => field.onChange(value === 'null' ? null : value)}
+                      >
+                        <Select.Trigger 
+                          variant='soft'
+                          placeholder={getMessage('noGroup')} 
+                          style={{ 
+                            marginTop: '4px',
+                            color: triggerColor 
+                          }} 
+                        />
+                        <Select.Content position="popper" side="bottom">
+                          <Select.Item value="null">
+                            {getMessage('noGroup')}
+                          </Select.Item>
+                          {syncSettings.logicalGroups.map((group) => (
+                            <Select.Item key={group.id} value={group.id} style={{ color: `var(--${getRadixColor(group.color)}-11)` }}>
+                              {group.label}
+                            </Select.Item>
+                          ))}
+                        </Select.Content>
+                      </Select.Root>
+                    )}
+                  />
+                </Flex>
+                </Theme>
+              </>
+            )}
 
             <Flex gap="3" justify="end" mt="4">
               <Dialog.Close>

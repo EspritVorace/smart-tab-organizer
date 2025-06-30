@@ -111,6 +111,8 @@
   "errorZodMaxLength": { "message": "No debe exceder 100 caracteres" },
   "errorZodInvalid": { "message": "Valor inválido" },
   "errorZodInvalidValue": { "message": "Opción seleccionada inválida" },
+  "noLogicalGroupsDefined": { "message": "No hay grupos lógicos definidos." },
+  "noRegexPresetsDefined": { "message": "No hay preajustes regex definidos." },
   "moreOptions": { "message": "Más opciones" },
   "copy": { "message": "Copiar" },
   "paste": { "message": "Pegar" },

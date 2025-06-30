@@ -2,47 +2,65 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { DomainRuleFormModal } from './DomainRuleFormModal';
 const action = (name: string) => (...args: any[]) => console.log(name, ...args);
 import type { DomainRule } from '../../schemas/domainRule';
-import type { LogicalGroup } from '../../schemas/logicalGroup';
-import type { RegexPreset } from '../../schemas/regexPreset';
+import type { SyncSettings } from '../../types/syncSettings';
 
-const mockAvailableGroups: LogicalGroup[] = [
-  {
-    id: 'group-1',
-    label: 'Travail',
-    color: 'blue'
-  },
-  {
-    id: 'group-2', 
-    label: 'Personnel',
-    color: 'green'
-  },
-  {
-    id: 'group-3',
-    label: 'Développement',
-    color: 'purple'
-  }
-];
-
-const mockAvailablePresets: RegexPreset[] = [
-  {
-    id: 'preset-1',
-    name: 'Jira Issue',
-    regex: '\\[([A-Z]+-\\d+)\\]',
-    urlRegex: ''
-  },
-  {
-    id: 'preset-2',
-    name: 'GitHub Repo',
-    regex: '(.+)',
-    urlRegex: '/([^/]+/[^/]+)'
-  },
-  {
-    id: 'preset-3',
-    name: 'YouTube Video',
-    regex: '(.+) - YouTube',
-    urlRegex: ''
-  }
-];
+const mockSyncSettings: SyncSettings = {
+  globalGroupingEnabled: true,
+  globalDeduplicationEnabled: true,
+  darkModePreference: 'system',
+  logicalGroups: [
+    {
+      id: 'group-1',
+      label: 'Travail',
+      color: 'blue'
+    },
+    {
+      id: 'group-2', 
+      label: 'Personnel',
+      color: 'green'
+    },
+    {
+      id: 'group-3',
+      label: 'Développement',
+      color: 'purple'
+    }
+  ],
+  regexPresets: [
+    {
+      id: 'preset-1',
+      name: 'Jira Issue',
+      regex: '\\[([A-Z]+-\\d+)\\]',
+      urlRegex: ''
+    },
+    {
+      id: 'preset-2',
+      name: 'GitHub Repo',
+      regex: '(.+)',
+      urlRegex: '/([^/]+/[^/]+)'
+    },
+    {
+      id: 'preset-3',
+      name: 'YouTube Video',
+      regex: '(.+) - YouTube',
+      urlRegex: ''
+    }
+  ],
+  domainRules: [
+    {
+      id: 'existing-rule-1',
+      domainFilter: 'existing.com',
+      label: 'Existing Rule',
+      titleParsingRegEx: '(.+)',
+      urlParsingRegEx: '',
+      groupNameSource: 'title',
+      deduplicationMatchMode: 'exact',
+      groupId: null,
+      deduplicationEnabled: true,
+      presetId: null,
+      enabled: true
+    }
+  ]
+};
 
 const mockDomainRule: DomainRule = {
   id: 'rule-1',
@@ -74,8 +92,7 @@ const meta: Meta<typeof DomainRuleFormModal> = {
   args: {
     onClose: action('onClose'),
     onSubmit: action('onSubmit'),
-    availableGroups: mockAvailableGroups,
-    availablePresets: mockAvailablePresets,
+    syncSettings: mockSyncSettings,
   },
 };
 
@@ -195,7 +212,10 @@ export const DomainRuleFormModalNoGroups: Story = {
   args: {
     isOpen: true,
     domainRule: undefined,
-    availableGroups: [],
+    syncSettings: {
+      ...mockSyncSettings,
+      logicalGroups: [],
+    },
   },
 };
 
@@ -203,7 +223,10 @@ export const DomainRuleFormModalNoPresets: Story = {
   args: {
     isOpen: true,
     domainRule: undefined,
-    availablePresets: [],
+    syncSettings: {
+      ...mockSyncSettings,
+      regexPresets: [],
+    },
   },
 };
 
@@ -211,5 +234,45 @@ export const DomainRuleFormModalClosed: Story = {
   args: {
     isOpen: false,
     domainRule: undefined,
+  },
+};
+
+// === TEST VALIDATION UNICITÉ ===
+
+export const DomainRuleFormModalLabelUniqueness: Story = {
+  args: {
+    isOpen: true,
+    domainRule: undefined,
+    syncSettings: {
+      ...mockSyncSettings,
+      domainRules: [
+        ...mockSyncSettings.domainRules,
+        {
+          id: 'test-rule',
+          domainFilter: 'test.com',
+          label: 'Test Label',
+          titleParsingRegEx: '(.+)',
+          urlParsingRegEx: '',
+          groupNameSource: 'title',
+          deduplicationMatchMode: 'exact',
+          groupId: null,
+          deduplicationEnabled: true,
+          presetId: null,
+          enabled: true
+        }
+      ]
+    },
+  },
+};
+
+export const DomainRuleFormModalBothCalloutsVisible: Story = {
+  args: {
+    isOpen: true,
+    domainRule: undefined,
+    syncSettings: {
+      ...mockSyncSettings,
+      logicalGroups: [],
+      regexPresets: [],
+    },
   },
 };
