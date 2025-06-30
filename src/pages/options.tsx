@@ -1,4 +1,4 @@
-// options/options.js
+// options/options.ts
 import React, { useState, useEffect, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import { browser } from 'wxt/browser';
@@ -11,7 +11,8 @@ import { getMessage } from '../utils/i18n.js';
 const version = browser.runtime.getManifest().version;
 
 import { Header } from '../components/Header/Header.jsx';
-import { Sidebar } from '../components/Sidebar/Sidebar.tsx';
+import { Sidebar } from '../components/Sidebar/Sidebar';
+import type { SidebarItem } from '../components/Sidebar/Sidebar';
 import { ThemeToggle } from '../components/ThemeToggle.jsx';
 import { Flex, Text } from '@radix-ui/themes';
 import { RulesTab } from '../components/RulesTab.jsx';
@@ -21,18 +22,26 @@ import { StatsTab } from '../components/StatsTab.jsx';
 import { LogicalGroupsTab } from '../components/LogicalGroupsTab.jsx';
 import { Shield, Regex, Group, FileText, BarChart3, Github } from 'lucide-react';
 import { FEATURE_BASE_COLORS } from '../utils/themeConstants';
+import type { SyncSettings } from '../types/syncSettings';
+import type { Statistics } from '../types/statistics';
+import type { DomainRuleSettings, RegexPresetSettings } from '../types/syncSettings';
 import { 
   DomainRulesTheme, 
   RegexPresetsTheme, 
   LogicalGroupsTheme, 
   ImportTheme, 
   StatisticsTheme 
-} from '../components/themes/index.tsx';
+} from '../components/themes/index';
 
 (() => {
 
 // --- Fonctions Utilitaires ---
-function Tooltip({ textKey, children }) {
+interface TooltipProps {
+    textKey: string;
+    children: React.ReactNode;
+}
+
+function Tooltip({ textKey, children }: TooltipProps) {
     return (
         <div className="tooltip-container">
             {children}
@@ -43,13 +52,13 @@ function Tooltip({ textKey, children }) {
 
 // --- Composant Principal ---
 function OptionsContent() {
-    const [settings, setSettings] = useState(null);
-    const [stats, setStats] = useState({});
-    const [currentTab, setCurrentTab] = useState('rules');
-    const [editingRuleId, setEditingRuleId] = useState(null);
-    const [editingPresetId, setEditingPresetId] = useState(null);
-    const [editingLogicalGroupId, setEditingLogicalGroupId] = useState(null); // For the new tab
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [settings, setSettings] = useState<SyncSettings | null>(null);
+    const [stats, setStats] = useState<Statistics>({} as Statistics);
+    const [currentTab, setCurrentTab] = useState<string>('rules');
+    const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
+    const [editingPresetId, setEditingPresetId] = useState<string | null>(null);
+    const [editingLogicalGroupId, setEditingLogicalGroupId] = useState<string | null>(null); // For the new tab
+    const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
 
     // --- Chargement initial & Écouteur Storage ---
     useEffect(() => {
@@ -59,7 +68,7 @@ function OptionsContent() {
             setStats(loadedStats);
         }
         loadData();
-        const listener = (changes, area) => {
+        const listener = (changes: any, area: string) => {
             if (area === 'sync' && changes.settings) {
                 console.log("Settings updated from storage.");
                 setSettings(changes.settings.newValue);
@@ -82,18 +91,18 @@ function OptionsContent() {
     }, [settings]);
 
     // --- Gestionnaires ---
-    const updateSetting = useCallback((key, value) => {
-        setSettings(prev => ({ ...prev, [key]: value }));
+    const updateSetting = useCallback((key: keyof SyncSettings, value: any) => {
+        setSettings(prev => prev ? { ...prev, [key]: value } : null);
     }, []);
 
-    const updateRules = useCallback((newRules) => {
+    const updateRules = useCallback((newRules: DomainRuleSettings) => {
         setEditingRuleId(null); // Quitte l'édition si on change la liste
-        setSettings(prev => ({ ...prev, domainRules: newRules }));
+        setSettings(prev => prev ? { ...prev, domainRules: newRules } : null);
     }, []);
 
-    const updatePresets = useCallback((newPresets) => {
+    const updatePresets = useCallback((newPresets: RegexPresetSettings) => {
         setEditingPresetId(null); // Quitte l'édition
-        setSettings(prev => ({ ...prev, regexPresets: newPresets }));
+        setSettings(prev => prev ? { ...prev, regexPresets: newPresets } : null);
     }, []);
 
     // updateLogicalGroups is removed, setSettings will be used directly by LogicalGroupsTab
@@ -105,7 +114,7 @@ function OptionsContent() {
          }
     }, []);
 
-    const handleTabChange = useCallback((tab) => {
+    const handleTabChange = useCallback((tab: string) => {
         setEditingRuleId(null); // Reset editing when changing tabs
         setEditingPresetId(null);
         setEditingLogicalGroupId(null); // Reset for new tab
@@ -113,35 +122,35 @@ function OptionsContent() {
     }, []);
 
     // Sidebar items configuration with themed accent colors
-    const sidebarItems = [
+    const sidebarItems: SidebarItem[] = [
         {
             id: 'rules',
             label: getMessage('domainRulesTab'),
-            icon: Shield,
+            icon: Shield as any,
             accentColor: FEATURE_BASE_COLORS.DOMAIN_RULES,
         },
         {
             id: 'presets',
             label: getMessage('regexPresetsTab'),
-            icon: Regex,
+            icon: Regex as any,
             accentColor: FEATURE_BASE_COLORS.REGEX_PRESETS,
         },
         {
             id: 'logicalGroups',
             label: getMessage('logicalGroupsTab'),
-            icon: Group,
+            icon: Group as any,
             accentColor: FEATURE_BASE_COLORS.LOGICAL_GROUPS,
         },
         {
             id: 'importexport',
             label: getMessage('importExportTab'),
-            icon: FileText,
+            icon: FileText as any,
             accentColor: FEATURE_BASE_COLORS.IMPORT, // Utilise la couleur Import pour l'onglet combiné
         },
         {
             id: 'stats',
             label: getMessage('statisticsTab'),
-            icon: BarChart3,
+            icon: BarChart3 as any,
             accentColor: FEATURE_BASE_COLORS.STATISTICS,
         },
     ];
