@@ -11,12 +11,13 @@ import { getMessage } from '../utils/i18n.js';
 const version = browser.runtime.getManifest().version;
 
 import { Header } from '../components/Header/Header.jsx';
-import { Tabs } from '../components/Tabs/Tabs.jsx';
+import { Sidebar } from '../components/Sidebar/Sidebar.tsx';
 import { RulesTab } from '../components/RulesTab.jsx';
 import { PresetsTab } from '../components/PresetsTab.jsx';
 import { ImportExportTab } from '../components/ImportExportTab.jsx';
 import { StatsTab } from '../components/StatsTab.jsx';
 import { LogicalGroupsTab } from '../components/LogicalGroupsTab.jsx';
+import { Shield, Regex, Group, FileText, BarChart3 } from 'lucide-react';
 
 (() => {
 
@@ -38,6 +39,7 @@ function OptionsContent() {
     const [editingRuleId, setEditingRuleId] = useState(null);
     const [editingPresetId, setEditingPresetId] = useState(null);
     const [editingLogicalGroupId, setEditingLogicalGroupId] = useState(null); // For the new tab
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
     // --- Chargement initial & Écouteur Storage ---
     useEffect(() => {
@@ -100,6 +102,35 @@ function OptionsContent() {
         setCurrentTab(tab);
     }, []);
 
+    // Sidebar items configuration
+    const sidebarItems = [
+        {
+            id: 'rules',
+            label: getMessage('domainRulesTab'),
+            icon: Shield,
+        },
+        {
+            id: 'presets',
+            label: getMessage('regexPresetsTab'),
+            icon: Regex,
+        },
+        {
+            id: 'logicalGroups',
+            label: getMessage('logicalGroupsTab'),
+            icon: Group,
+        },
+        {
+            id: 'importexport',
+            label: getMessage('importExportTab'),
+            icon: FileText,
+        },
+        {
+            id: 'stats',
+            label: getMessage('statisticsTab'),
+            icon: BarChart3,
+        },
+    ];
+
 
     // --- Rendu ---
     if (!settings) {
@@ -107,17 +138,27 @@ function OptionsContent() {
     }
 
     return (
-        <div id="options-inner">
-            <Header settings={settings} />
-            <Tabs currentTab={currentTab} onTabChange={handleTabChange} />
-            <main>
-                {currentTab === 'rules' && <RulesTab settings={settings} updateRules={updateRules} editingId={editingRuleId} setEditingId={setEditingRuleId} />}
-                {currentTab === 'presets' && <PresetsTab settings={settings} updatePresets={updatePresets} updateRules={updateRules} editingId={editingPresetId} setEditingId={setEditingPresetId} />}
-                {currentTab === 'logicalGroups' && <LogicalGroupsTab settings={settings} setSettings={setSettings} editingId={editingLogicalGroupId} setEditingId={setEditingLogicalGroupId} />}
-                {currentTab === 'importexport' && <ImportExportTab settings={settings} setSettings={setSettings} />}
-                {currentTab === 'stats' && <StatsTab stats={stats} onReset={handleResetStats} />}
-            </main>
-            <footer>SmartTab Organizer v{version} - Licensed under GPL-3.0-only.</footer>
+        <div id="options-inner" style={{ display: 'flex', height: '100vh' }}>
+            <Sidebar
+                isCollapsed={sidebarCollapsed}
+                onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+                activeItem={currentTab}
+                onItemClick={handleTabChange}
+                items={sidebarItems}
+                showFooter={true}
+                footerContent={<div style={{ padding: '16px', fontSize: '12px', color: 'var(--gray-11)' }}>SmartTab Organizer v{version}<br/>Licensed under GPL-3.0-only.</div>}
+                footerCollapsedContent={<div style={{ padding: '8px', fontSize: '10px', color: 'var(--gray-11)', textAlign: 'center' }}>v{version}</div>}
+            />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <Header settings={settings} />
+                <main style={{ flex: 1, overflow: 'auto', padding: '20px' }}>
+                    {currentTab === 'rules' && <RulesTab settings={settings} updateRules={updateRules} editingId={editingRuleId} setEditingId={setEditingRuleId} />}
+                    {currentTab === 'presets' && <PresetsTab settings={settings} updatePresets={updatePresets} updateRules={updateRules} editingId={editingPresetId} setEditingId={setEditingPresetId} />}
+                    {currentTab === 'logicalGroups' && <LogicalGroupsTab settings={settings} setSettings={setSettings} editingId={editingLogicalGroupId} setEditingId={setEditingLogicalGroupId} />}
+                    {currentTab === 'importexport' && <ImportExportTab settings={settings} setSettings={setSettings} />}
+                    {currentTab === 'stats' && <StatsTab stats={stats} onReset={handleResetStats} />}
+                </main>
+            </div>
         </div>
     );
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Flex } from '@radix-ui/themes';
+import { Box, Flex } from '@radix-ui/themes';
 import { SidebarHeader } from './SidebarHeader';
 import { SidebarToolbar } from './SidebarToolbar';
 import { SidebarSearch } from './SidebarSearch';
@@ -58,14 +58,14 @@ export function Sidebar({
   onSearch
 }: SidebarProps) {
   return (
-    <Card
+    <Box
       style={{
         height: '100vh',
         width: isCollapsed ? '80px' : '280px',
         transition: 'width 0.2s ease-in-out',
-        borderRadius: 0,
-        border: 'none',
         borderRight: '1px solid var(--gray-6)',
+        backgroundColor: 'var(--color-panel-solid)',
+        margin: 0,
         padding: 0
       }}
     >
@@ -113,6 +113,6 @@ export function Sidebar({
           </SidebarFooter>
         )}
       </Flex>
-    </Card>
+    </Box>
   );
 }
