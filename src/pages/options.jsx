@@ -19,7 +19,7 @@ import { PresetsTab } from '../components/PresetsTab.jsx';
 import { ImportExportTab } from '../components/ImportExportTab.jsx';
 import { StatsTab } from '../components/StatsTab.jsx';
 import { LogicalGroupsTab } from '../components/LogicalGroupsTab.jsx';
-import { Shield, Regex, Group, FileText, BarChart3 } from 'lucide-react';
+import { Shield, Regex, Group, FileText, BarChart3, Github } from 'lucide-react';
 import { FEATURE_BASE_COLORS } from '../utils/themeConstants';
 import { 
   DomainRulesTheme, 
@@ -196,6 +196,95 @@ function OptionsContent() {
         </Flex>
     );
 
+    // Custom SidebarFooter content
+    const customFooterContent = (
+        <Flex 
+            align="center" 
+            gap="3" 
+            style={{ 
+                padding: '12px 16px',
+                cursor: 'pointer',
+                borderRadius: '4px',
+                transition: 'background-color 0.2s ease',
+            }}
+            onClick={() => browser.tabs.create({ url: 'https://github.com/EspritVorace/smart-tab-organizer' })}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    browser.tabs.create({ url: 'https://github.com/EspritVorace/smart-tab-organizer' });
+                }
+            }}
+            tabIndex={0}
+            role="button"
+            aria-label="Visiter le profil GitHub d'EspritVorace"
+            className="custom-footer-expanded"
+        >
+            <img 
+                src="/icons/ev.png" 
+                alt="EspritVorace" 
+                style={{ 
+                    width: '24px', 
+                    height: '24px',
+                    borderRadius: '50%',
+                    flexShrink: 0
+                }} 
+            />
+            <Flex align="center" gap="2">
+                <Text 
+                    size="2" 
+                    weight="medium" 
+                    style={{ 
+                        color: 'var(--gray-11)',
+                        textDecoration: 'none'
+                    }}
+                >
+                    EspritVorace
+                </Text>
+                <Github 
+                    size={16} 
+                    style={{ 
+                        color: 'var(--gray-11)',
+                        flexShrink: 0
+                    }} 
+                />
+            </Flex>
+        </Flex>
+    );
+
+    const customFooterCollapsedContent = (
+        <Flex 
+            align="center" 
+            justify="center" 
+            style={{ 
+                padding: '12px',
+                cursor: 'pointer',
+                borderRadius: '4px',
+                transition: 'background-color 0.2s ease',
+            }}
+            onClick={() => browser.tabs.create({ url: 'https://github.com/EspritVorace/smart-tab-organizer' })}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    browser.tabs.create({ url: 'https://github.com/EspritVorace/smart-tab-organizer' });
+                }
+            }}
+            tabIndex={0}
+            role="button"
+            aria-label="Visiter le profil GitHub d'EspritVorace"
+            className="custom-footer-collapsed"
+        >
+            <img 
+                src="/icons/ev.png" 
+                alt="EspritVorace" 
+                style={{ 
+                    width: '24px', 
+                    height: '24px',
+                    borderRadius: '50%'
+                }} 
+            />
+        </Flex>
+    );
+
     return (
         <div id="options-inner" style={{ display: 'flex', height: '100vh' }}>
             <Sidebar
@@ -207,8 +296,8 @@ function OptionsContent() {
                 headerContent={headerContent}
                 headerCollapsedContent={headerCollapsedContent}
                 showFooter={true}
-                footerContent={<div style={{ padding: '16px', fontSize: '12px', color: 'var(--gray-11)' }}>Licensed under GPL-3.0-only.</div>}
-                footerCollapsedContent={<div style={{ padding: '8px', fontSize: '10px', color: 'var(--gray-11)', textAlign: 'center' }}>GPL</div>}
+                footerContent={customFooterContent}
+                footerCollapsedContent={customFooterCollapsedContent}
             />
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <Header settings={settings} />
