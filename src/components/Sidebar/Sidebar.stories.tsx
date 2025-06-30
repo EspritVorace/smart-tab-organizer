@@ -12,9 +12,13 @@ import {
   Search,
   Star,
   Archive,
-  Menu
+  Menu,
+  Shield,
+  Regex,
+  Group
 } from 'lucide-react';
 import { SidebarFooter } from './SidebarFooter';
+import { ThemeToggle } from '../ThemeToggle.jsx';
 
 const meta: Meta<typeof Sidebar> = {
   title: 'Components/Sidebar',
@@ -244,5 +248,85 @@ export const SidebarComplete: Story = {
     onToggleCollapse: () => console.log('Toggle collapse'),
     onSearch: (query: string) => console.log(`Search: ${query}`),
     onSearchValueChange: (value: string) => console.log(`Search value: ${value}`),
+  },
+};
+
+// SmartTab Organizer specific headers
+const SmartTabHeader = () => (
+  <Flex align="center" gap="3" style={{ width: '100%', paddingRight: '64px', position: 'relative' }}>
+    <img 
+      src="/icons/icon48.png" 
+      alt="SmartTab Organizer" 
+      style={{ 
+        width: '32px', 
+        height: '32px',
+        flexShrink: 0
+      }} 
+    />
+    <Flex direction="column" gap="0" style={{ lineHeight: '1.2', flex: 1 }}>
+      <Flex align="center" gap="2">
+        <Text size="3" weight="bold" style={{ color: 'var(--gray-12)' }}>
+          SmartTab
+        </Text>
+        <Text size="1" style={{ color: 'var(--gray-11)' }}>
+          (v1.0.0)
+        </Text>
+      </Flex>
+      <Text size="3" weight="bold" style={{ color: 'var(--gray-12)' }}>
+        Organizer
+      </Text>
+    </Flex>
+    <Flex align="center" style={{ position: 'absolute', right: '8px' }}>
+      <ThemeToggle />
+    </Flex>
+  </Flex>
+);
+
+const SmartTabHeaderCollapsed = () => (
+  <Flex align="center" justify="center" style={{ width: '100%' }}>
+    <img 
+      src="/icons/icon48.png" 
+      alt="SmartTab Organizer" 
+      style={{ 
+        width: '32px', 
+        height: '32px'
+      }} 
+    />
+  </Flex>
+);
+
+const smartTabItems = [
+  { id: 'rules', label: 'Domain Rules', icon: Shield, accentColor: 'blue' },
+  { id: 'presets', label: 'Regex Presets', icon: Regex, accentColor: 'green' },
+  { id: 'logicalGroups', label: 'Logical Groups', icon: Group, accentColor: 'purple' },
+  { id: 'importexport', label: 'Import/Export', icon: FileText, accentColor: 'orange' },
+  { id: 'stats', label: 'Statistics', icon: BarChart3, accentColor: 'red' },
+];
+
+export const SidebarSmartTabExpanded: Story = {
+  args: {
+    items: smartTabItems,
+    activeItem: 'rules',
+    isCollapsed: false,
+    showFooter: true,
+    footerContent: <div style={{ padding: '16px', fontSize: '12px', color: 'var(--gray-11)' }}>Licensed under GPL-3.0-only.</div>,
+    footerCollapsedContent: <div style={{ padding: '8px', fontSize: '10px', color: 'var(--gray-11)', textAlign: 'center' }}>GPL</div>,
+    headerContent: <SmartTabHeader />,
+    headerCollapsedContent: <SmartTabHeaderCollapsed />,
+    onToggleCollapse: () => console.log('Toggle collapse'),
+  },
+};
+
+export const SidebarSmartTabCollapsed: Story = {
+  args: {
+    items: smartTabItems,
+    activeItem: 'presets',
+    isCollapsed: true,
+    showFooter: true,
+    footerContent: <div style={{ padding: '16px', fontSize: '12px', color: 'var(--gray-11)' }}>Licensed under GPL-3.0-only.</div>,
+    footerCollapsedContent: <div style={{ padding: '8px', fontSize: '10px', color: 'var(--gray-11)', textAlign: 'center' }}>GPL</div>,
+    headerContent: <SmartTabHeader />,
+    headerCollapsedContent: <SmartTabHeaderCollapsed />,
+    onToggleCollapse: () => console.log('Toggle collapse'),
   },
 };

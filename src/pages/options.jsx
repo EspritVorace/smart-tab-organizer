@@ -12,6 +12,8 @@ const version = browser.runtime.getManifest().version;
 
 import { Header } from '../components/Header/Header.jsx';
 import { Sidebar } from '../components/Sidebar/Sidebar.tsx';
+import { ThemeToggle } from '../components/ThemeToggle.jsx';
+import { Flex, Text } from '@radix-ui/themes';
 import { RulesTab } from '../components/RulesTab.jsx';
 import { PresetsTab } from '../components/PresetsTab.jsx';
 import { ImportExportTab } from '../components/ImportExportTab.jsx';
@@ -150,6 +152,50 @@ function OptionsContent() {
         return <p>Chargement...</p>;
     }
 
+    // Contenu du header pour la sidebar
+    const headerContent = (
+        <Flex align="center" gap="3" style={{ width: '100%', paddingRight: '64px', position: 'relative' }}>
+            <img 
+                src="/icons/icon48.png" 
+                alt="SmartTab Organizer" 
+                style={{ 
+                    width: '32px', 
+                    height: '32px',
+                    flexShrink: 0
+                }} 
+            />
+            <Flex direction="column" gap="0" style={{ lineHeight: '1.2', flex: 1 }}>
+                <Flex align="center" gap="2">
+                    <Text size="3" weight="bold" style={{ color: 'var(--gray-12)' }}>
+                        SmartTab
+                    </Text>
+                    <Text size="1" style={{ color: 'var(--gray-11)' }}>
+                        (v{version})
+                    </Text>
+                </Flex>
+                <Text size="3" weight="bold" style={{ color: 'var(--gray-12)' }}>
+                    Organizer
+                </Text>
+            </Flex>
+            <Flex align="center" style={{ position: 'absolute', right: '8px' }}>
+                <ThemeToggle />
+            </Flex>
+        </Flex>
+    );
+
+    const headerCollapsedContent = (
+        <Flex align="center" justify="center" style={{ width: '100%' }}>
+            <img 
+                src="/icons/icon48.png" 
+                alt="SmartTab Organizer" 
+                style={{ 
+                    width: '32px', 
+                    height: '32px'
+                }} 
+            />
+        </Flex>
+    );
+
     return (
         <div id="options-inner" style={{ display: 'flex', height: '100vh' }}>
             <Sidebar
@@ -158,9 +204,11 @@ function OptionsContent() {
                 activeItem={currentTab}
                 onItemClick={handleTabChange}
                 items={sidebarItems}
+                headerContent={headerContent}
+                headerCollapsedContent={headerCollapsedContent}
                 showFooter={true}
-                footerContent={<div style={{ padding: '16px', fontSize: '12px', color: 'var(--gray-11)' }}>SmartTab Organizer v{version}<br/>Licensed under GPL-3.0-only.</div>}
-                footerCollapsedContent={<div style={{ padding: '8px', fontSize: '10px', color: 'var(--gray-11)', textAlign: 'center' }}>v{version}</div>}
+                footerContent={<div style={{ padding: '16px', fontSize: '12px', color: 'var(--gray-11)' }}>Licensed under GPL-3.0-only.</div>}
+                footerCollapsedContent={<div style={{ padding: '8px', fontSize: '10px', color: 'var(--gray-11)', textAlign: 'center' }}>GPL</div>}
             />
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <Header settings={settings} />
