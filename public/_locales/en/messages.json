@@ -35,7 +35,6 @@
   "addPreset": { "message": "Add Preset" },
   "presetName": { "message": "Preset Name" },
   "presetLabel": { "message": "Preset" },
-  "presetRegex": { "message": "RegEx" },
   "importSettings": { "message": "Import" },
   "exportSettings": { "message": "Export" },
   "statistics": { "message": "Statistics" },
@@ -125,5 +124,10 @@
   "labelPlaceholder": { "message": "Enter a descriptive name" },
   "collapseNew": { "message": "Collapse New Groups" },
   "collapseExisting": { "message": "Collapse Existing Groups" },
-  "create": { "message": "Create" }
+  "create": { "message": "Create" },
+  "editPreset": { "message": "Edit Preset" },
+  "createPreset": { "message": "Create Preset" },
+  "editPresetDescription": { "message": "Modify the configuration of this regex preset" },
+  "createPresetDescription": { "message": "Create a new regex preset for tab organization" },
+  "presetNamePlaceholder": { "message": "Enter a descriptive name for the preset" }
 }

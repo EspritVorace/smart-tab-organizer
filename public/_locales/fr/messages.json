@@ -35,7 +35,6 @@
   "addPreset": { "message": "Ajouter Préréglage" },
   "presetName": { "message": "Nom Préréglage" },
   "presetLabel": { "message": "Préréglage" },
-  "presetRegex": { "message": "RegEx" },
   "importSettings": { "message": "Importer" },
   "exportSettings": { "message": "Exporter" },
   "statistics": { "message": "Statistiques" },
@@ -125,5 +124,10 @@
   "labelPlaceholder": { "message": "Entrez un nom descriptif" },
   "collapseNew": { "message": "Réduire Nouveaux Groupes" },
   "collapseExisting": { "message": "Réduire Groupes Existants" },
-  "create": { "message": "Créer" }
+  "create": { "message": "Créer" },
+  "editPreset": { "message": "Modifier le Préréglage" },
+  "createPreset": { "message": "Créer un Préréglage" },
+  "editPresetDescription": { "message": "Modifier la configuration de ce préréglage regex" },
+  "createPresetDescription": { "message": "Créer un nouveau préréglage regex pour l'organisation des onglets" },
+  "presetNamePlaceholder": { "message": "Entrez un nom descriptif pour le préréglage" }
 }

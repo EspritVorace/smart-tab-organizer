@@ -35,7 +35,6 @@
   "addPreset": { "message": "Añadir Preajuste" },
   "presetName": { "message": "Nombre Preajuste" },
   "presetLabel": { "message": "Preajuste" },
-  "presetRegex": { "message": "RegEx" },
   "importSettings": { "message": "Importar" },
   "exportSettings": { "message": "Exportar" },
   "statistics": { "message": "Estadísticas" },
@@ -125,5 +124,10 @@
   "labelPlaceholder": { "message": "Ingresa un nombre descriptivo" },
   "collapseNew": { "message": "Colapsar Nuevos Grupos" },
   "collapseExisting": { "message": "Colapsar Grupos Existentes" },
-  "create": { "message": "Crear" }
+  "create": { "message": "Crear" },
+  "editPreset": { "message": "Editar Preset" },
+  "createPreset": { "message": "Crear Preset" },
+  "editPresetDescription": { "message": "Modificar la configuración de este preset regex" },
+  "createPresetDescription": { "message": "Crear un nuevo preset regex para organizar pestañas" },
+  "presetNamePlaceholder": { "message": "Ingresa un nombre descriptivo para el preset" }
 }

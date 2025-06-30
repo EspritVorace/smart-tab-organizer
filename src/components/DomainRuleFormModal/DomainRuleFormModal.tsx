@@ -1,13 +1,15 @@
-import { Dialog, Button, Flex, Text, TextField, Switch, Select, Box, Separator, RadioGroup, Theme, Grid, Callout } from '@radix-ui/themes';
+import { Dialog, Button, Flex, Text, TextField, Switch, Select, Box, Separator, RadioGroup, Grid } from '@radix-ui/themes';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { X, Info } from 'lucide-react';
+import { X } from 'lucide-react';
+import { DomainRulesTheme, RegexPresetsTheme, LogicalGroupsTheme } from '../themes';
+import { DomainRulesCallouts, RegexPresetsCallouts } from '../themed-callouts';
 import { generateUUID, getRadixColor } from '../../utils/utils';
 import { createDomainRuleSchemaWithUniqueness, type DomainRule } from '../../schemas/domainRule';
 import { groupNameSourceOptions, deduplicationMatchModeOptions } from '../../schemas/enums';
 import { getMessage } from '../../utils/i18n';
 import type { SyncSettings } from '../../types/syncSettings';
-import { FieldLabel, FieldError, FormField, RadioGroupField } from '../FormFields';
+import { FieldLabel, FormField, RadioGroupField } from '../FormFields';
 
 interface DomainRuleFormModalProps {
   isOpen: boolean;
@@ -86,7 +88,7 @@ export function DomainRuleFormModal({
   const title = isEditing ? getMessage('editRule') : getMessage('createRule');
 
   return (
-    <Theme accentColor='purple'>
+    <DomainRulesTheme>
     <Dialog.Root open={isOpen} onOpenChange={handleClose}>
       <Dialog.Content>
         <Dialog.Title>{title}</Dialog.Title>
@@ -99,26 +101,16 @@ export function DomainRuleFormModal({
 
         {/* Info callout when no logical groups are defined */}
         {syncSettings.logicalGroups.length === 0 && (
-          <Callout.Root color="blue" variant="soft" style={{ marginTop: '16px' }}>
-            <Callout.Icon>
-              <Info size={16} />
-            </Callout.Icon>
-            <Callout.Text>
-              {getMessage('noLogicalGroupsDefined')}
-            </Callout.Text>
-          </Callout.Root>
+          <DomainRulesCallouts.Info style={{ marginTop: '16px' }}>
+            {getMessage('noLogicalGroupsDefined')}
+          </DomainRulesCallouts.Info>
         )}
 
         {/* Info callout when no regex presets are defined */}
         {syncSettings.regexPresets.length === 0 && (
-          <Callout.Root color="cyan" variant="soft" style={{ marginTop: '16px' }}>
-            <Callout.Icon>
-              <Info size={16} />
-            </Callout.Icon>
-            <Callout.Text>
-              {getMessage('noRegexPresetsDefined')}
-            </Callout.Text>
-          </Callout.Root>
+          <RegexPresetsCallouts.Info style={{ marginTop: '16px' }}>
+            {getMessage('noRegexPresetsDefined')}
+          </RegexPresetsCallouts.Info>
         )}
 
         <form onSubmit={handleSubmit(handleFormSubmit)}>
@@ -176,7 +168,7 @@ export function DomainRuleFormModal({
 
               {/* Preset Selection - only show if presets exist and source is title/url */}
               {(groupNameSource === 'title' || groupNameSource === 'url') && syncSettings.regexPresets.length > 0 ? (
-                <Theme accentColor='cyan'>
+                <RegexPresetsTheme>
                 <Flex direction="column">
                   <Text as="label" size="2" weight="bold">
                     {getMessage('presetLabel')}
@@ -204,7 +196,7 @@ export function DomainRuleFormModal({
                     )}
                   />
                 </Flex>
-                </Theme>
+                </RegexPresetsTheme>
               ) : (
                 <Box />
               )}
@@ -290,7 +282,7 @@ export function DomainRuleFormModal({
             {syncSettings.logicalGroups.length > 0 && (
               <>
                 <Separator style={{ width: '100%' }} />
-                <Theme accentColor='iris'>
+                <LogicalGroupsTheme>
                 <Flex direction="column">
                   <Text as="label" size="2" weight="bold">
                     {getMessage('logicalGroup')}
@@ -325,7 +317,7 @@ export function DomainRuleFormModal({
                     )}
                   />
                 </Flex>
-                </Theme>
+                </LogicalGroupsTheme>
               </>
             )}
 
@@ -357,6 +349,6 @@ export function DomainRuleFormModal({
         </Dialog.Close>
       </Dialog.Content>
     </Dialog.Root>
-    </Theme>
+    </DomainRulesTheme>
   );
 }

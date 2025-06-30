@@ -18,6 +18,14 @@ import { ImportExportTab } from '../components/ImportExportTab.jsx';
 import { StatsTab } from '../components/StatsTab.jsx';
 import { LogicalGroupsTab } from '../components/LogicalGroupsTab.jsx';
 import { Shield, Regex, Group, FileText, BarChart3 } from 'lucide-react';
+import { FEATURE_BASE_COLORS } from '../utils/themeConstants';
+import { 
+  DomainRulesTheme, 
+  RegexPresetsTheme, 
+  LogicalGroupsTheme, 
+  ImportTheme, 
+  StatisticsTheme 
+} from '../components/themes/index.tsx';
 
 (() => {
 
@@ -102,32 +110,37 @@ function OptionsContent() {
         setCurrentTab(tab);
     }, []);
 
-    // Sidebar items configuration
+    // Sidebar items configuration with themed accent colors
     const sidebarItems = [
         {
             id: 'rules',
             label: getMessage('domainRulesTab'),
             icon: Shield,
+            accentColor: FEATURE_BASE_COLORS.DOMAIN_RULES,
         },
         {
             id: 'presets',
             label: getMessage('regexPresetsTab'),
             icon: Regex,
+            accentColor: FEATURE_BASE_COLORS.REGEX_PRESETS,
         },
         {
             id: 'logicalGroups',
             label: getMessage('logicalGroupsTab'),
             icon: Group,
+            accentColor: FEATURE_BASE_COLORS.LOGICAL_GROUPS,
         },
         {
             id: 'importexport',
             label: getMessage('importExportTab'),
             icon: FileText,
+            accentColor: FEATURE_BASE_COLORS.IMPORT, // Utilise la couleur Import pour l'onglet combiné
         },
         {
             id: 'stats',
             label: getMessage('statisticsTab'),
             icon: BarChart3,
+            accentColor: FEATURE_BASE_COLORS.STATISTICS,
         },
     ];
 
@@ -152,11 +165,31 @@ function OptionsContent() {
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <Header settings={settings} />
                 <main style={{ flex: 1, overflow: 'auto', padding: '20px' }}>
-                    {currentTab === 'rules' && <RulesTab settings={settings} updateRules={updateRules} editingId={editingRuleId} setEditingId={setEditingRuleId} />}
-                    {currentTab === 'presets' && <PresetsTab settings={settings} updatePresets={updatePresets} updateRules={updateRules} editingId={editingPresetId} setEditingId={setEditingPresetId} />}
-                    {currentTab === 'logicalGroups' && <LogicalGroupsTab settings={settings} setSettings={setSettings} editingId={editingLogicalGroupId} setEditingId={setEditingLogicalGroupId} />}
-                    {currentTab === 'importexport' && <ImportExportTab settings={settings} setSettings={setSettings} />}
-                    {currentTab === 'stats' && <StatsTab stats={stats} onReset={handleResetStats} />}
+                    {currentTab === 'rules' && (
+                        <DomainRulesTheme>
+                            <RulesTab settings={settings} updateRules={updateRules} editingId={editingRuleId} setEditingId={setEditingRuleId} />
+                        </DomainRulesTheme>
+                    )}
+                    {currentTab === 'presets' && (
+                        <RegexPresetsTheme>
+                            <PresetsTab settings={settings} updatePresets={updatePresets} updateRules={updateRules} editingId={editingPresetId} setEditingId={setEditingPresetId} />
+                        </RegexPresetsTheme>
+                    )}
+                    {currentTab === 'logicalGroups' && (
+                        <LogicalGroupsTheme>
+                            <LogicalGroupsTab settings={settings} setSettings={setSettings} editingId={editingLogicalGroupId} setEditingId={setEditingLogicalGroupId} />
+                        </LogicalGroupsTheme>
+                    )}
+                    {currentTab === 'importexport' && (
+                        <ImportTheme>
+                            <ImportExportTab settings={settings} setSettings={setSettings} />
+                        </ImportTheme>
+                    )}
+                    {currentTab === 'stats' && (
+                        <StatisticsTheme>
+                            <StatsTab stats={stats} onReset={handleResetStats} />
+                        </StatisticsTheme>
+                    )}
                 </main>
             </div>
         </div>
