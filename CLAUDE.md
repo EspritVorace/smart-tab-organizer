@@ -45,12 +45,13 @@ The extension provides tab organization through:
 
 ### Technology Stack
 - **Framework**: WXT for extension development
-- **Frontend**: React 18 with TypeScript
+- **Frontend**: Preact with TypeScript (optimized React alternative)
 - **UI Components**: Radix UI themes with Lucide React icons
 - **Forms**: React Hook Form with Zod validation
 - **Theming**: next-themes for dark/light mode
 - **Testing**: Vitest with Happy DOM environment
 - **Documentation**: Storybook for component documentation
+- **Optimization**: PostCSS with PurgeCSS for CSS optimization
 
 ### Schema Architecture
 The application uses a schema-driven approach with Zod validation:
@@ -59,16 +60,17 @@ The application uses a schema-driven approach with Zod validation:
 - Schemas cover domain rules, logical groups, regex presets, and settings
 
 ### Key Directories
-- `src/components/` - React components with Storybook stories
-- `src/hooks/` - Custom React hooks for settings and statistics
+- `src/components/` - Preact components with Storybook stories
+- `src/hooks/` - Custom Preact hooks for settings and statistics
 - `src/utils/` - Utility functions for storage, i18n, and theme management
 - `src/pages/` - Main page components (popup and options)
 - `tests/` - Test files using Vitest framework
 
 ### Build Configuration
-- Uses Vite as the build tool with React plugin
+- Uses Vite as the build tool with Preact plugin
 - TypeScript configuration in `tsconfig.json`
-- WXT configuration in `wxt.config.ts` handles manifest generation
+- WXT configuration in `wxt.config.ts` handles manifest generation and Preact aliases
+- PostCSS configuration in `postcss.config.cjs` with PurgeCSS optimization
 - Test configuration in `vitest.config.ts` with WxtVitest plugin
 
 ### Internationalization

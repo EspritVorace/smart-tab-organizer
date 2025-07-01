@@ -97,7 +97,7 @@
 ### Core
 * JavaScript & TypeScript
 * WXT framework pour le développement d'extensions web
-* React pour l'interface utilisateur réactive
+* Preact pour l'interface utilisateur réactive (alternative optimisée à React)
 * APIs d'extensions Chrome/Firefox (Manifest V3)
 
 ### Librairies UI

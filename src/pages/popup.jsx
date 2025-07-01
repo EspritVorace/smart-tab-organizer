@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import { browser } from 'wxt/browser';
-import { Box, Container, Flex, Switch, Text, Theme, Skeleton } from '@radix-ui/themes';
+import { Box, Flex, Theme } from '@radix-ui/themes';
 import { ThemeProvider } from 'next-themes';
 
 import { getMessage } from '../utils/i18n.js';

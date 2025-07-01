@@ -1,5 +1,5 @@
 import { defineConfig } from 'wxt';
-import react from '@vitejs/plugin-react';
+import preact from '@preact/preset-vite';
 
 export default defineConfig({
   srcDir: 'src',
@@ -28,7 +28,13 @@ export default defineConfig({
     }
   },
   vite: () => ({
-    plugins: [react()],
+    plugins: [preact()],
+    resolve: {
+      alias: {
+        'react': 'preact/compat',
+        'react-dom': 'preact/compat'
+      }
+    },
     build: {
       emptyOutDir: true
     }
