@@ -60,7 +60,10 @@ The application uses a schema-driven approach with Zod validation:
 - Schemas cover domain rules, logical groups, regex presets, and settings
 
 ### Key Directories
-- `src/components/` - Preact components with Storybook stories
+- `src/components/` - Preact components with Storybook stories, organized by category:
+  - `src/components/Core/` - Business logic components (DomainRule, RegexPreset, Statistics)
+  - `src/components/UI/` - User interface components (Header, PopupHeader, Sidebar, SettingsToggles, ThemeToggle)
+  - `src/components/Form/` - Form and utility components (FormFields, themed-callouts, themes)
 - `src/hooks/` - Custom Preact hooks for settings and statistics
 - `src/utils/` - Utility functions for storage, i18n, and theme management
 - `src/pages/` - Main page components (popup and options)
@@ -77,6 +80,32 @@ The application uses a schema-driven approach with Zod validation:
 Supports multiple languages (English, French, Spanish) with messages stored in `public/_locales/` following Chrome extension i18n standards.
 
 ## Code Conventions
+
+### Component Organization
+Components are organized into three main categories that reflect their purpose and usage:
+
+- **Core Components** (`src/components/Core/`): Business logic and domain-specific components
+  - DomainRule/ - Domain rule management (DomainRuleCard, DomainRuleFormModal)
+  - RegexPreset/ - Regex preset management (RegexPresetCard, RegexPresetDialog)
+  - Statistics/ - Application statistics display
+
+- **UI Components** (`src/components/UI/`): User interface and layout components
+  - Header/ - Page headers
+  - PopupHeader/ - Extension popup headers
+  - Sidebar/ - Navigation sidebar with multiple sub-components
+  - SettingsToggles/ - Settings control components
+  - ThemeToggle/ - Theme switching functionality
+
+- **Form Components** (`src/components/Form/`): Form fields, themes, and utility components
+  - FormFields/ - Reusable form field components (FormField, FieldLabel, FieldError, RadioGroupField)
+  - themed-callouts/ - Themed notification components
+  - themes/ - Theme provider and styling components
+
+### Storybook Organization
+Storybook stories follow the folder structure with titles like:
+- `Components/Core/DomainRule/DomainRuleCard`
+- `Components/UI/Sidebar/Sidebar`
+- `Components/Form/FormFields/FormField`
 
 ### Storybook Exports
 To avoid export name conflicts in Storybook, prefix all story exports with the component name:

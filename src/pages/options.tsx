@@ -10,9 +10,9 @@ import { generateUUID, isValidDomain, isValidRegex } from '../utils/utils.js';
 import { getMessage } from '../utils/i18n.js';
 const version = browser.runtime.getManifest().version;
 
-import { Header } from '../components/Header/Header.jsx';
-import { Sidebar } from '../components/Sidebar/Sidebar';
-import type { SidebarItem } from '../components/Sidebar/Sidebar';
+import { Header } from '../components/UI/Header/Header.jsx';
+import { Sidebar } from '../components/UI/Sidebar/Sidebar';
+import type { SidebarItem } from '../components/UI/Sidebar/Sidebar';
 import { ThemeToggle } from '../components/ThemeToggle.jsx';
 import { Flex, Text } from '@radix-ui/themes';
 import { RulesTab } from '../components/RulesTab.jsx';
@@ -31,7 +31,7 @@ import {
   LogicalGroupsTheme, 
   ImportTheme, 
   StatisticsTheme 
-} from '../components/themes/index';
+} from '../components/Form/themes/index';
 
 (() => {
 
