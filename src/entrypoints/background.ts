@@ -3,6 +3,7 @@ import { browser, Browser } from 'wxt/browser';
 import { getSettings as storageGetSettings, incrementStat, initializeDefaults } from '../utils/storage.js';
 import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from '../utils/utils.js';
 import type { SyncSettings, DomainRuleSetting } from '../types/syncSettings.js';
+import type { BackgroundMessage, MessageResponse, GroupNameResponse } from '../types/messages.js';
 
 export default defineBackground(() => {
 const middleClickedTabs = new Map<string, number>();
@@ -10,7 +11,7 @@ const middleClickedTabs = new Map<string, number>();
 async function getSettings(): Promise<SyncSettings> {
     const settings = await storageGetSettings();
     settings.domainRules = settings.domainRules || [];
-    settings.domainRules = settings.domainRules.map(rule => ({
+    settings.domainRules = settings.domainRules.map((rule: DomainRuleSetting) => ({
         ...rule,
         deduplicationEnabled: typeof rule.deduplicationEnabled === 'boolean' ? rule.deduplicationEnabled : true,
         deduplicationMatchMode: rule.deduplicationMatchMode || 'exact',
@@ -310,8 +311,7 @@ async function checkAndDeduplicateTab(currentTabId: number, newUrl: string, matc
             if (!tab.url || tab.id === currentTabId) return false;
             
             try {
-                const currentTabUrl = new URL(tab.url);
-                const newNavUrl = new URL(newUrl);
+                // URL parsing no longer needed for current match modes
                 
                 switch (matchMode) {
                     case 'exact': 
