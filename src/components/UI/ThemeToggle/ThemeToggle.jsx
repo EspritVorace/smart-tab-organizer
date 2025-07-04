@@ -2,7 +2,7 @@ import React from 'react';
 import { useTheme } from 'next-themes';
 import { IconButton, Tooltip } from '@radix-ui/themes';
 import { Sun, Moon, Monitor } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n.js';
+import { getMessage } from '../../../utils/i18n';
 
 export function ThemeToggle() {
     const { theme, setTheme } = useTheme();

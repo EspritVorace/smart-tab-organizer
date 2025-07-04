@@ -5,7 +5,7 @@ import { browser } from 'wxt/browser';
 import { Box, Flex, Theme } from '@radix-ui/themes';
 import { ThemeProvider } from 'next-themes';
 
-import { getMessage } from '../utils/i18n.js';
+import { getMessage } from '../utils/i18n';
 import { Statistics } from '../components/Core/Statistics/Statistics.tsx';
 import { PopupHeader } from '../components/UI/PopupHeader/PopupHeader.tsx';
 import { SettingsToggles } from '../components/UI/SettingsToggles/SettingsToggles.tsx';

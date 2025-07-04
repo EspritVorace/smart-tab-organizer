@@ -8,7 +8,7 @@ import { ThemeProvider } from 'next-themes';
 import { useSyncedSettings } from '../hooks/useSyncedSettings.js';
 import { useStatistics } from '../hooks/useStatistics.js';
 import { generateUUID, isValidDomain, isValidRegex } from '../utils/utils.js';
-import { getMessage } from '../utils/i18n.js';
+import { getMessage } from '../utils/i18n';
 const version = browser.runtime.getManifest().version;
 
 import { Header } from '../components/UI/Header/Header.jsx';
@@ -45,7 +45,7 @@ function Tooltip({ textKey, children }: TooltipProps) {
     return (
         <div className="tooltip-container">
             {children}
-            <span className="tooltip-text" data-i18n={textKey}>{getMessage(textKey)}</span>
+            <span className="tooltip-text">{getMessage(textKey)}</span>
         </div>
     );
 }

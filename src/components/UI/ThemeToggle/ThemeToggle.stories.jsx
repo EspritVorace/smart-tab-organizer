@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { IconButton, Tooltip } from '@radix-ui/themes';
 import { Sun, Moon, Monitor } from 'lucide-react';
 import { Theme } from '@radix-ui/themes';
-import { getMessage } from '../../../utils/i18n.js';
+import { getMessage } from '../../../utils/i18n';
 
 // Version mock du ThemeToggle pour Storybook
 function MockThemeToggle({ initialTheme = 'light' }) {

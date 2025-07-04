@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from 'react';
-import { getMessage } from '../utils/i18n.js';
+import { getMessage } from '../utils/i18n';
 import { generateUUID, isValidRegex } from '../utils/utils.js';
 
 function PresetsTab({ settings, updatePresets, updateRules, editingId, setEditingId }) {
@@ -130,18 +130,18 @@ function PresetEditForm({ preset, onSave, onCancel }) {
                         <div className="form-group tooltip-container">
                              <label>{getMessage('presetName')}</label>
                              <input type="text" name="name" value={formData.name} onChange={handleChange} required />
-                             <span className="tooltip-text" data-i18n="presetNameTooltip">{getMessage('presetNameTooltip')}</span>
+                             <span className="tooltip-text">{getMessage('presetNameTooltip')}</span>
                         </div>
                         <div className="form-group tooltip-container">
                             <label>{getMessage('presetRegex')}</label>
                             <input type="text" name="regex" value={formData.regex} onChange={handleChange} required />
-                            <span className="tooltip-text" data-i18n="presetRegexTooltip">{getMessage('presetRegexTooltip')}</span>
+                            <span className="tooltip-text">{getMessage('presetRegexTooltip')}</span>
                             {error && <span className="error-message">{error}</span>}
                         </div>
                         <div className="form-group tooltip-container">
                             <label>{getMessage('urlRegex')}</label>
                             <input type="text" name="urlRegex" value={formData.urlRegex} onChange={handleChange} />
-                            <span className="tooltip-text" data-i18n="urlParsingRegExTooltip">{getMessage('urlParsingRegExTooltip')}</span>
+                            <span className="tooltip-text">{getMessage('urlParsingRegExTooltip')}</span>
                         </div>
                     </div>
                      <div className="form-actions">

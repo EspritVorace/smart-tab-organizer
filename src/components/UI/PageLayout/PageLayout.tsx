@@ -1,6 +1,6 @@
 import React from 'react';
 import { Theme, Heading, Box } from '@radix-ui/themes';
-import { getMessage } from '../../../utils/i18n.js';
+import { getMessage } from '../../../utils/i18n';
 import { FEATURE_THEMES } from '../../../utils/themeConstants.js';
 import type { SyncSettings } from '../../../types/syncSettings.js';
 import type { FeatureTheme } from '../../../utils/themeConstants.js';

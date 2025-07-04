@@ -1,5 +1,5 @@
 import React from 'react';
-import { getMessage } from '../utils/i18n.js';
+import { getMessage } from '../utils/i18n';
 
 function StatsTab({ stats, onReset }) {
     return (

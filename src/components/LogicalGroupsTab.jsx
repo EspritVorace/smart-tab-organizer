@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useEffect } from 'react';
-import { getMessage } from '../utils/i18n.js';
+import { getMessage } from '../utils/i18n';
 import { generateUUID } from '../utils/utils.js';
 
 const LOGICAL_GROUP_COLORS = ["grey", "blue", "red", "yellow", "green", "pink", "purple", "cyan", "orange"];

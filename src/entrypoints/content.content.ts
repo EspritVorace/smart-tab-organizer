@@ -1,6 +1,6 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { browser, Browser } from 'wxt/browser';
-import { getMessage } from '../utils/i18n.js';
+import { getMessage } from '../utils/i18n';
 import type { MiddleClickMessage, AskGroupNameMessage, GroupNameResponse, ContentMessage } from '../types/messages.js';
 
 export default defineContentScript({

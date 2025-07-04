@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useEffect } from 'react';
-import { getMessage } from '../utils/i18n.js';
+import { getMessage } from '../utils/i18n';
 import { generateUUID, isValidDomain, isValidRegex } from '../utils/utils.js';
 
 function RulesTab({ settings, updateRules, editingId, setEditingId }) {
@@ -332,15 +332,15 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
                  <form onSubmit={handleSubmit}>
                     <div className="form-grid">
                         <div className="form-group tooltip-container">
-                            <label data-i18n="labelLabel">{getMessage('labelLabel', 'Label')}</label>
+                            <label>{getMessage('labelLabel', 'Label')}</label>
                             <input type="text" name="label" value={formData.label} onChange={handleChange} required />
-                            <span className="tooltip-text" data-i18n="labelTooltip">{getMessage('labelTooltip', 'A unique, user-friendly name for this rule.')}</span>
+                            <span className="tooltip-text">{getMessage('labelTooltip', 'A unique, user-friendly name for this rule.')}</span>
                             {errors.label && <span className="error-message">{errors.label}</span>}
                         </div>
                         <div className="form-group tooltip-container">
                             <label>{getMessage('domainFilter')}</label>
                             <input type="text" name="domainFilter" value={formData.domainFilter} onChange={handleChange} required />
-                            <span className="tooltip-text" data-i18n="domainFilterTooltip">{getMessage('domainFilterTooltip')}</span>
+                            <span className="tooltip-text">{getMessage('domainFilterTooltip')}</span>
                             {errors.domainFilter && <span className="error-message">{errors.domainFilter}</span>}
                         </div>
                         <div className="form-group tooltip-container">
@@ -351,7 +351,7 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
                                  <option value="hostname">{getMessage('hostnameMatch')}</option>
                                  <option value="hostname_path">{getMessage('hostnamePathMatch')}</option>
                             </select>
-                            <span className="tooltip-text" data-i18n="deduplicationModeTooltip">{getMessage('deduplicationModeTooltip')}</span>
+                            <span className="tooltip-text">{getMessage('deduplicationModeTooltip')}</span>
                         </div>
                         <div className="form-group tooltip-container">
                             <label>{getMessage('groupNameSource')}</label>
@@ -360,7 +360,7 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
                                 <option value="url">{getMessage('groupNameSourceUrl')}</option>
                                 <option value="manual">{getMessage('groupNameSourceManual')}</option>
                             </select>
-                            <span className="tooltip-text" data-i18n="groupNameSourceTooltip">{getMessage('groupNameSourceTooltip')}</span>
+                            <span className="tooltip-text">{getMessage('groupNameSourceTooltip')}</span>
                         </div>
                         <div className="form-group tooltip-container">
                             <label>{getMessage('logicalGroup', 'Logical Group')}</label>
@@ -370,7 +370,7 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
                                     <option key={g.id} value={g.id}>{g.label}</option>
                                 ))}
                             </select>
-                            <span className="tooltip-text" data-i18n="logicalGroupRuleTooltip">{getMessage('logicalGroupRuleTooltip', 'Assign this rule to a logical group.')}</span>
+                            <span className="tooltip-text">{getMessage('logicalGroupRuleTooltip', 'Assign this rule to a logical group.')}</span>
                         </div>
                         {formData.groupNameSource === 'title' && 
                             <div className="form-group tooltip-container full-width">
@@ -380,7 +380,7 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
                                     <option value="custom">{getMessage('customRegex')}</option>
                                 </select>
                                 <input type="text" value={customValue} onChange={handleCustomChange} style={{ display: isCustom ? 'block' : 'none', marginTop: '8px' }} />
-                                <span className="tooltip-text" data-i18n="titleParsingRegExTooltip">{getMessage('titleParsingRegExTooltip')}</span>
+                                <span className="tooltip-text">{getMessage('titleParsingRegExTooltip')}</span>
                                  {errors.titleParsingRegEx && <span className="error-message">{errors.titleParsingRegEx}</span>}
                             </div>
                         }
@@ -392,7 +392,7 @@ function RuleEditForm({ rule, presets, logicalGroups, onSave, onCancel, allRules
                                     <option value="custom">{getMessage('customRegex')}</option>
                                 </select>
                                 <input type="text" name="urlParsingRegEx" value={urlCustomValue} onChange={handleUrlCustomChange} style={{ display: isUrlCustom ? 'block' : 'none', marginTop: '8px' }} />
-                                <span className="tooltip-text" data-i18n="urlParsingRegExTooltip">{getMessage('urlParsingRegExTooltip')}</span>
+                                <span className="tooltip-text">{getMessage('urlParsingRegExTooltip')}</span>
                                 {errors.urlParsingRegEx && <span className="error-message">{errors.urlParsingRegEx}</span>}
                             </div>
                         }
