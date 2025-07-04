@@ -129,5 +129,10 @@
   "createPreset": { "message": "Crear Preset" },
   "editPresetDescription": { "message": "Modificar la configuración de este preset regex" },
   "createPresetDescription": { "message": "Crear un nuevo preset regex para organizar pestañas" },
-  "presetNamePlaceholder": { "message": "Ingresa un nombre descriptivo para el preset" }
+  "presetNamePlaceholder": { "message": "Ingresa un nombre descriptivo para el preset" },
+  "editGroup": { "message": "Editar Grupo" },
+  "createGroup": { "message": "Crear Grupo" },
+  "editGroupDescription": { "message": "Modificar la configuración de este grupo lógico" },
+  "createGroupDescription": { "message": "Crear un nuevo grupo lógico para organizar tus pestañas" },
+  "color": { "message": "Color" }
 }

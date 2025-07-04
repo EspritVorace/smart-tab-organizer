@@ -129,5 +129,10 @@
   "createPreset": { "message": "Create Preset" },
   "editPresetDescription": { "message": "Modify the configuration of this regex preset" },
   "createPresetDescription": { "message": "Create a new regex preset for tab organization" },
-  "presetNamePlaceholder": { "message": "Enter a descriptive name for the preset" }
+  "presetNamePlaceholder": { "message": "Enter a descriptive name for the preset" },
+  "editGroup": { "message": "Edit Group" },
+  "createGroup": { "message": "Create Group" },
+  "editGroupDescription": { "message": "Modify the configuration of this logical group" },
+  "createGroupDescription": { "message": "Create a new logical group to organize your tabs" },
+  "color": { "message": "Color" }
 }

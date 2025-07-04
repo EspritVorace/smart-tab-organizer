@@ -129,5 +129,10 @@
   "createPreset": { "message": "Créer un Préréglage" },
   "editPresetDescription": { "message": "Modifier la configuration de ce préréglage regex" },
   "createPresetDescription": { "message": "Créer un nouveau préréglage regex pour l'organisation des onglets" },
-  "presetNamePlaceholder": { "message": "Entrez un nom descriptif pour le préréglage" }
+  "presetNamePlaceholder": { "message": "Entrez un nom descriptif pour le préréglage" },
+  "editGroup": { "message": "Modifier le Groupe" },
+  "createGroup": { "message": "Créer un Groupe" },
+  "editGroupDescription": { "message": "Modifier la configuration de ce groupe logique" },
+  "createGroupDescription": { "message": "Créer un nouveau groupe logique pour organiser vos onglets" },
+  "color": { "message": "Couleur" }
 }
