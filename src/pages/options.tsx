@@ -13,7 +13,7 @@ const version = browser.runtime.getManifest().version;
 import { Header } from '../components/UI/Header/Header.jsx';
 import { Sidebar } from '../components/UI/Sidebar/Sidebar';
 import type { SidebarItem } from '../components/UI/Sidebar/Sidebar';
-import { ThemeToggle } from '../components/ThemeToggle.jsx';
+import { ThemeToggle } from '../components/UI/ThemeToggle/ThemeToggle.jsx';
 import { Flex, Text } from '@radix-ui/themes';
 import { RulesTab } from '../components/RulesTab.jsx';
 import { PresetsTab } from '../components/PresetsTab.jsx';
