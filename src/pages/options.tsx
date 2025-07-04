@@ -5,7 +5,8 @@ import { browser } from 'wxt/browser';
 import { Theme } from '@radix-ui/themes';
 import { ThemeProvider } from 'next-themes';
 
-import { getSettings, saveSettings, getStatistics, resetStatistics } from '../utils/storage.js';
+import { useSyncedSettings } from '../hooks/useSyncedSettings.js';
+import { useStatistics } from '../hooks/useStatistics.js';
 import { generateUUID, isValidDomain, isValidRegex } from '../utils/utils.js';
 import { getMessage } from '../utils/i18n.js';
 const version = browser.runtime.getManifest().version;
@@ -22,9 +23,8 @@ import { StatsTab } from '../components/StatsTab.jsx';
 import { LogicalGroupsTab } from '../components/LogicalGroupsTab.jsx';
 import { Shield, Regex, Group, FileText, BarChart3, Github } from 'lucide-react';
 import { FEATURE_BASE_COLORS } from '../utils/themeConstants';
-import type { SyncSettings } from '../types/syncSettings';
+import type { SyncSettings, DomainRuleSettings, RegexPresetSettings } from '../types/syncSettings';
 import type { Statistics } from '../types/statistics';
-import type { DomainRuleSettings, RegexPresetSettings } from '../types/syncSettings';
 import { 
   DomainRulesTheme, 
   RegexPresetsTheme, 
@@ -52,67 +52,38 @@ function Tooltip({ textKey, children }: TooltipProps) {
 
 // --- Composant Principal ---
 function OptionsContent() {
-    const [settings, setSettings] = useState<SyncSettings | null>(null);
-    const [stats, setStats] = useState<Statistics>({} as Statistics);
+    const { settings, updateSettings } = useSyncedSettings();
+    const { statistics: stats, resetStatistics } = useStatistics();
     const [currentTab, setCurrentTab] = useState<string>('rules');
     const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
     const [editingPresetId, setEditingPresetId] = useState<string | null>(null);
     const [editingLogicalGroupId, setEditingLogicalGroupId] = useState<string | null>(null); // For the new tab
     const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
 
-    // --- Chargement initial & Écouteur Storage ---
-    useEffect(() => {
-        async function loadData() {
-            const [loadedSettings, loadedStats] = await Promise.all([getSettings(), getStatistics()]);
-            setSettings(loadedSettings);
-            setStats(loadedStats);
-        }
-        loadData();
-        const listener = (changes: any, area: string) => {
-            if (area === 'sync' && changes.settings) {
-                console.log("Settings updated from storage.");
-                setSettings(changes.settings.newValue);
-            }
-            if (area === 'local' && changes.statistics) {
-                console.log("Stats updated from storage.");
-                setStats(changes.statistics.newValue);
-            }
-        };
-        browser.storage.onChanged.addListener(listener);
-        return () => browser.storage.onChanged.removeListener(listener);
-    }, []);
-
-    // --- Sauvegarde automatique ---
-    useEffect(() => {
-        if (settings) {
-            saveSettings(settings);
-            console.log("Paramètres sauvegardés.");
-        }
-    }, [settings]);
+    // Storage handled by hooks
 
     // --- Gestionnaires ---
     const updateSetting = useCallback((key: keyof SyncSettings, value: any) => {
-        setSettings(prev => prev ? { ...prev, [key]: value } : null);
-    }, []);
+        updateSettings({ [key]: value });
+    }, [updateSettings]);
 
     const updateRules = useCallback((newRules: DomainRuleSettings) => {
         setEditingRuleId(null); // Quitte l'édition si on change la liste
-        setSettings(prev => prev ? { ...prev, domainRules: newRules } : null);
-    }, []);
+        updateSettings({ domainRules: newRules });
+    }, [updateSettings]);
 
     const updatePresets = useCallback((newPresets: RegexPresetSettings) => {
         setEditingPresetId(null); // Quitte l'édition
-        setSettings(prev => prev ? { ...prev, regexPresets: newPresets } : null);
-    }, []);
+        updateSettings({ regexPresets: newPresets });
+    }, [updateSettings]);
 
-    // updateLogicalGroups is removed, setSettings will be used directly by LogicalGroupsTab
+    // updateLogicalGroups is removed, updateSettings will be used directly by LogicalGroupsTab
 
      const handleResetStats = useCallback(async () => {
          if (confirm(getMessage('confirmResetStats'))) {
-            const newStats = await resetStatistics();
-            setStats(newStats);
+            await resetStatistics();
          }
-    }, []);
+    }, [resetStatistics]);
 
     const handleTabChange = useCallback((tab: string) => {
         setEditingRuleId(null); // Reset editing when changing tabs
@@ -323,12 +294,12 @@ function OptionsContent() {
                     )}
                     {currentTab === 'logicalGroups' && (
                         <LogicalGroupsTheme>
-                            <LogicalGroupsTab settings={settings} setSettings={setSettings} editingId={editingLogicalGroupId} setEditingId={setEditingLogicalGroupId} />
+                            <LogicalGroupsTab settings={settings} setSettings={updateSettings} editingId={editingLogicalGroupId} setEditingId={setEditingLogicalGroupId} />
                         </LogicalGroupsTheme>
                     )}
                     {currentTab === 'importexport' && (
                         <ImportTheme>
-                            <ImportExportTab settings={settings} setSettings={setSettings} />
+                            <ImportExportTab settings={settings} setSettings={updateSettings} />
                         </ImportTheme>
                     )}
                     {currentTab === 'stats' && (

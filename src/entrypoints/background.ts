@@ -1,6 +1,8 @@
 import { defineBackground } from 'wxt/utils/define-background';
 import { browser, Browser } from 'wxt/browser';
-import { getSettings as storageGetSettings, incrementStat, initializeDefaults } from '../utils/storage.js';
+import { getSyncSettings } from '../utils/settingsUtils.js';
+import { incrementStat } from '../utils/statisticsUtils.js';
+import { initializeDefaults } from '../utils/migration.js';
 import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from '../utils/utils.js';
 import type { SyncSettings, DomainRuleSetting } from '../types/syncSettings.js';
 import type { BackgroundMessage, MessageResponse, GroupNameResponse } from '../types/messages.js';
@@ -9,7 +11,7 @@ export default defineBackground(() => {
 const middleClickedTabs = new Map<string, number>();
 
 async function getSettings(): Promise<SyncSettings> {
-    const settings = await storageGetSettings();
+    const settings = await getSyncSettings();
     settings.domainRules = settings.domainRules || [];
     settings.domainRules = settings.domainRules.map((rule: DomainRuleSetting) => ({
         ...rule,
