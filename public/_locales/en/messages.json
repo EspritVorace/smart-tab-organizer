@@ -143,5 +143,6 @@
   "tabGroupColor": { "message": "Tab group color" },
   "badge_new": { "message": "New" },
   "badge_warning": { "message": "Warning" },
-  "badge_deleted": { "message": "Deleted" }
+  "badge_deleted": { "message": "Deleted" },
+  "copySuffix": { "message": "copy" }
 }

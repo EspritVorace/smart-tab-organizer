@@ -69,7 +69,8 @@ export function createUniqueNamedCopy<T extends NamedEntity & { id: string }>(
   const originalName = extractName(entity);
   
   const existingNames = existingEntities.map(item => extractName(item));
-  const uniqueName = generateUniqueName(originalName, existingNames);
+  const copySuffix = getMessage('copySuffix');
+  const uniqueName = generateUniqueName(originalName, existingNames, copySuffix);
   
   return {
     ...entity,

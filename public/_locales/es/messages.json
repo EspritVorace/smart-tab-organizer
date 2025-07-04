@@ -143,5 +143,6 @@
   "tabGroupColor": { "message": "Color del grupo de pestañas" },
   "badge_new": { "message": "Nuevo" },
   "badge_warning": { "message": "Advertencia" },
-  "badge_deleted": { "message": "Eliminado" }
+  "badge_deleted": { "message": "Eliminado" },
+  "copySuffix": { "message": "copia" }
 }

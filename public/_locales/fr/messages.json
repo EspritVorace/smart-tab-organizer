@@ -143,5 +143,6 @@
   "tabGroupColor": { "message": "Couleur du groupe d'onglets" },
   "badge_new": { "message": "Nouveau" },
   "badge_warning": { "message": "Attention" },
-  "badge_deleted": { "message": "Supprimé" }
+  "badge_deleted": { "message": "Supprimé" },
+  "copySuffix": { "message": "copie" }
 }
