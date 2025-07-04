@@ -22,7 +22,14 @@ export const deduplicationMatchModeOptions = [
   { value: 'includes', keyLabel: 'includesMatch' }
 ] as const;
 
+export const badgeOptions = [
+  { value: 'NEW', color: 'green', keyLabel: 'badge_new' },
+  { value: 'WARNING', color: 'orange', keyLabel: 'badge_warning' },
+  { value: 'DELETED', color: 'red', keyLabel: 'badge_deleted' }
+] as const;
+
 // Types pour les valeurs des enum
 export type ColorValue = typeof colorOptions[number]['value'];
 export type GroupNameSourceValue = typeof groupNameSourceOptions[number]['value'];
 export type DeduplicationMatchModeValue = typeof deduplicationMatchModeOptions[number]['value'];
+export type BadgeType = typeof badgeOptions[number]['value'];

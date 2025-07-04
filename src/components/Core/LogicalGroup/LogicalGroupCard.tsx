@@ -6,6 +6,7 @@ import { getMessage } from '../../../utils/i18n';
 import { getRadixColor } from '../../../utils/utils';
 import type { LogicalGroupSetting, DomainRuleSetting } from '../../../types/syncSettings';
 import { DomainRuleCard } from '../DomainRule/DomainRuleCard';
+import { StatusBadge } from '../../UI/StatusBadge';
 
 interface LogicalGroupCardProps {
     group: LogicalGroupSetting;
@@ -22,10 +23,6 @@ interface LogicalGroupCardProps {
     onDomainRulePaste?: (ruleId: string) => void;
     onDomainRuleChangeGroup?: (ruleId: string, groupId: string | null) => void;
     isDomainRulePasteAvailable?: boolean;
-    badge?: {
-        text: string;
-        color?: 'gray' | 'gold' | 'bronze' | 'brown' | 'yellow' | 'amber' | 'orange' | 'tomato' | 'red' | 'ruby' | 'crimson' | 'pink' | 'plum' | 'purple' | 'violet' | 'iris' | 'indigo' | 'blue' | 'cyan' | 'teal' | 'jade' | 'green' | 'grass' | 'lime';
-    };
 }
 
 export function LogicalGroupCard({
@@ -41,8 +38,7 @@ export function LogicalGroupCard({
     onDomainRuleCopy,
     onDomainRulePaste,
     onDomainRuleChangeGroup,
-    isDomainRulePasteAvailable = false,
-    badge
+    isDomainRulePasteAvailable = false
 }: LogicalGroupCardProps) {
     const [isOpen, setIsOpen] = useState(false);
     const renderHoverCardContent = () => (
@@ -52,7 +48,7 @@ export function LogicalGroupCard({
                 <DataList.Value>{group.label}</DataList.Value>
             </DataList.Item>
             <DataList.Item>
-                <DataList.Label>{getMessage('color')}</DataList.Label>
+                <DataList.Label>{getMessage('tabGroupColor')}</DataList.Label>
                 <DataList.Value>
                     <Flex align="center" gap="2">
                         <Box
@@ -122,10 +118,8 @@ export function LogicalGroupCard({
                                         {renderHoverCardContent()}
                                     </HoverCard.Content>
                                 </HoverCard.Root>
-                                {badge && (
-                                    <Badge color={badge.color || 'gray'} size="1">
-                                        {badge.text}
-                                    </Badge>
+                                {group.badge && (
+                                    <StatusBadge type={group.badge} size="1" />
                                 )}
                                 {domainRulesList.length > 0 && (
                                     <Badge variant="soft" color="gray" size="1">

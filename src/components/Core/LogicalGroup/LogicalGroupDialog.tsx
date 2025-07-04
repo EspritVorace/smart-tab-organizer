@@ -101,7 +101,7 @@ export function LogicalGroupDialog({
               {/* Color */}
               <Flex direction="column">
                 <Text as="label" size="2" weight="bold">
-                  {getMessage('color')} <Text color="red">*</Text>
+                  {getMessage('tabGroupColor')} <Text color="red">*</Text>
                 </Text>
                 <Controller
                   name="color"

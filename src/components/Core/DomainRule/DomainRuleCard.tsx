@@ -6,6 +6,7 @@ import { getRadixColor } from '../../../utils/utils';
 import type { DomainRuleSetting } from '../../../types/syncSettings';
 import type { LogicalGroup } from '../../../schemas/logicalGroup';
 import { groupNameSourceOptions, deduplicationMatchModeOptions } from '../../../schemas/enums';
+import { StatusBadge } from '../../UI/StatusBadge';
 
 interface DomainRuleCardProps {
     rule: DomainRuleSetting;
@@ -17,10 +18,6 @@ interface DomainRuleCardProps {
     onPaste: () => void;
     onChangeGroup: (ruleId: string, groupId: string | null) => void;
     isPasteAvailable: boolean;
-    badge?: {
-        text: string;
-        color?: 'gray' | 'gold' | 'bronze' | 'brown' | 'yellow' | 'amber' | 'orange' | 'tomato' | 'red' | 'ruby' | 'crimson' | 'pink' | 'plum' | 'purple' | 'violet' | 'iris' | 'indigo' | 'blue' | 'cyan' | 'teal' | 'jade' | 'green' | 'grass' | 'lime';
-    };
 }
 
 export function DomainRuleCard({
@@ -32,8 +29,7 @@ export function DomainRuleCard({
     onCopy,
     onPaste,
     onChangeGroup,
-    isPasteAvailable,
-    badge
+    isPasteAvailable
 }: DomainRuleCardProps) {
     const getGroupNameSourceLabel = (value: string) => {
         const option = groupNameSourceOptions.find(opt => opt.value === value);
@@ -129,10 +125,8 @@ export function DomainRuleCard({
                                     {renderHoverCardContent()}
                                 </HoverCard.Content>
                             </HoverCard.Root>
-                            {badge && (
-                                <Badge color={badge.color || 'gray'} size="1">
-                                    {badge.text}
-                                </Badge>
+                            {rule.badge && (
+                                <StatusBadge type={rule.badge} size="1" />
                             )}
                         </Flex>
                         <Text size="2" color="gray">

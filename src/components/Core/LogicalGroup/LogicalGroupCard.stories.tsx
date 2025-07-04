@@ -109,121 +109,25 @@ export const LogicalGroupCardEmpty: Story = {
   }
 };
 
-export const LogicalGroupCardRedColor: Story = {
-  args: {
-    ...LogicalGroupCardDefault.args,
-    group: {
-      ...mockGroup,
-      label: 'Critical Issues',
-      color: 'red'
-    }
-  }
-};
 
-export const LogicalGroupCardGreenColor: Story = {
+export const LogicalGroupCardWithNewBadge: Story = {
   args: {
     ...LogicalGroupCardDefault.args,
-    group: {
-      ...mockGroup,
-      label: 'Testing',
-      color: 'green'
-    }
-  }
-};
-
-export const LogicalGroupCardPurpleColor: Story = {
-  args: {
-    ...LogicalGroupCardDefault.args,
-    group: {
-      ...mockGroup,
-      label: 'Documentation',
-      color: 'purple'
-    }
-  }
-};
-
-export const LogicalGroupCardYellowColor: Story = {
-  args: {
-    ...LogicalGroupCardDefault.args,
-    group: {
-      ...mockGroup,
-      label: 'Pending Review',
-      color: 'yellow'
-    }
-  }
-};
-
-export const LogicalGroupCardOrangeColor: Story = {
-  args: {
-    ...LogicalGroupCardDefault.args,
-    group: {
-      ...mockGroup,
-      label: 'In Progress',
-      color: 'orange'
-    }
-  }
-};
-
-export const LogicalGroupCardCyanColor: Story = {
-  args: {
-    ...LogicalGroupCardDefault.args,
-    group: {
-      ...mockGroup,
-      label: 'Research',
-      color: 'cyan'
-    }
-  }
-};
-
-export const LogicalGroupCardPinkColor: Story = {
-  args: {
-    ...LogicalGroupCardDefault.args,
-    group: {
-      ...mockGroup,
-      label: 'Design',
-      color: 'pink'
-    }
-  }
-};
-
-export const LogicalGroupCardGreyColor: Story = {
-  args: {
-    ...LogicalGroupCardDefault.args,
-    group: {
-      ...mockGroup,
-      label: 'Archived',
-      color: 'grey'
-    }
-  }
-};
-
-export const LogicalGroupCardWithBadge: Story = {
-  args: {
-    ...LogicalGroupCardDefault.args,
-    badge: {
-      text: 'New',
-      color: 'green'
-    }
+    group: { ...mockGroup, badge: 'NEW' }
   }
 };
 
 export const LogicalGroupCardWithWarningBadge: Story = {
   args: {
     ...LogicalGroupCardDefault.args,
-    badge: {
-      text: 'Deprecated',
-      color: 'orange'
-    }
+    group: { ...mockGroup, badge: 'WARNING' }
   }
 };
 
-export const LogicalGroupCardWithErrorBadge: Story = {
+export const LogicalGroupCardWithDeletedBadge: Story = {
   args: {
     ...LogicalGroupCardDefault.args,
-    badge: {
-      text: 'Error',
-      color: 'red'
-    }
+    group: { ...mockGroup, badge: 'DELETED' }
   }
 };
 

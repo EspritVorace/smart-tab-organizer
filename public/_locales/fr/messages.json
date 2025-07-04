@@ -134,5 +134,9 @@
   "createGroup": { "message": "Créer un Groupe" },
   "editGroupDescription": { "message": "Modifier la configuration de ce groupe logique" },
   "createGroupDescription": { "message": "Créer un nouveau groupe logique pour organiser vos onglets" },
-  "color": { "message": "Couleur" }
+  "color": { "message": "Couleur" },
+  "tabGroupColor": { "message": "Couleur du groupe d'onglets" },
+  "badge_new": { "message": "Nouveau" },
+  "badge_warning": { "message": "Attention" },
+  "badge_deleted": { "message": "Supprimé" }
 }

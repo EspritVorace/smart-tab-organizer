@@ -113,32 +113,23 @@ export const DomainRuleCardNoGroup: Story = {
   }
 };
 
-export const DomainRuleCardWithBadge: Story = {
+export const DomainRuleCardWithNewBadge: Story = {
   args: {
     ...DomainRuleCardDefault.args,
-    badge: {
-      text: 'New',
-      color: 'green'
-    }
+    rule: { ...mockRule, badge: 'NEW' }
   }
 };
 
 export const DomainRuleCardWithWarningBadge: Story = {
   args: {
     ...DomainRuleCardDefault.args,
-    badge: {
-      text: 'Deprecated',
-      color: 'orange'
-    }
+    rule: { ...mockRule, badge: 'WARNING' }
   }
 };
 
-export const DomainRuleCardWithErrorBadge: Story = {
+export const DomainRuleCardWithDeletedBadge: Story = {
   args: {
     ...DomainRuleCardDefault.args,
-    badge: {
-      text: 'Error',
-      color: 'red'
-    }
+    rule: { ...mockRule, badge: 'DELETED' }
   }
 };

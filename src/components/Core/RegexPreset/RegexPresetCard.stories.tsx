@@ -76,32 +76,23 @@ export const RegexPresetCardComplexPattern: Story = {
   }
 };
 
-export const RegexPresetCardWithBadge: Story = {
+export const RegexPresetCardWithNewBadge: Story = {
   args: {
     ...RegexPresetCardDefault.args,
-    badge: {
-      text: 'New',
-      color: 'green'
-    }
+    preset: { ...mockPreset, badge: 'NEW' }
   }
 };
 
 export const RegexPresetCardWithWarningBadge: Story = {
   args: {
     ...RegexPresetCardDefault.args,
-    badge: {
-      text: 'Deprecated',
-      color: 'orange'
-    }
+    preset: { ...mockPreset, badge: 'WARNING' }
   }
 };
 
-export const RegexPresetCardWithErrorBadge: Story = {
+export const RegexPresetCardWithDeletedBadge: Story = {
   args: {
     ...RegexPresetCardDefault.args,
-    badge: {
-      text: 'Invalid',
-      color: 'red'
-    }
+    preset: { ...mockPreset, badge: 'DELETED' }
   }
 };

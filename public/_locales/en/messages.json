@@ -134,5 +134,9 @@
   "createGroup": { "message": "Create Group" },
   "editGroupDescription": { "message": "Modify the configuration of this logical group" },
   "createGroupDescription": { "message": "Create a new logical group to organize your tabs" },
-  "color": { "message": "Color" }
+  "color": { "message": "Color" },
+  "tabGroupColor": { "message": "Tab group color" },
+  "badge_new": { "message": "New" },
+  "badge_warning": { "message": "Warning" },
+  "badge_deleted": { "message": "Deleted" }
 }

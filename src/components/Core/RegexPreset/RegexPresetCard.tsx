@@ -3,6 +3,7 @@ import { Card, Flex, Heading, Text, IconButton, DropdownMenu, HoverCard, Code, D
 import { Edit, MoreHorizontal, Copy, Clipboard } from 'lucide-react';
 import { getMessage } from '../../../utils/i18n';
 import type { RegexPresetSetting } from '../../../types/syncSettings';
+import { StatusBadge } from '../../UI/StatusBadge';
 
 interface RegexPresetCardProps {
     preset: RegexPresetSetting;
@@ -11,10 +12,6 @@ interface RegexPresetCardProps {
     onCopy: () => void;
     onPaste: () => void;
     isPasteAvailable: boolean;
-    badge?: {
-        text: string;
-        color?: 'gray' | 'gold' | 'bronze' | 'brown' | 'yellow' | 'amber' | 'orange' | 'tomato' | 'red' | 'ruby' | 'crimson' | 'pink' | 'plum' | 'purple' | 'violet' | 'iris' | 'indigo' | 'blue' | 'cyan' | 'teal' | 'jade' | 'green' | 'grass' | 'lime';
-    };
 }
 
 export function RegexPresetCard({
@@ -23,8 +20,7 @@ export function RegexPresetCard({
     onDelete,
     onCopy,
     onPaste,
-    isPasteAvailable,
-    badge
+    isPasteAvailable
 }: RegexPresetCardProps) {
     const renderHoverCardContent = () => (
         <DataList.Root>
@@ -60,10 +56,8 @@ export function RegexPresetCard({
                                 {renderHoverCardContent()}
                             </HoverCard.Content>
                         </HoverCard.Root>
-                        {badge && (
-                            <Badge color={badge.color || 'gray'} size="1">
-                                {badge.text}
-                            </Badge>
+                        {preset.badge && (
+                            <StatusBadge type={preset.badge} size="1" />
                         )}
                     </Flex>
                 </Flex>

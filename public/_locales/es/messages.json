@@ -134,5 +134,9 @@
   "createGroup": { "message": "Crear Grupo" },
   "editGroupDescription": { "message": "Modificar la configuración de este grupo lógico" },
   "createGroupDescription": { "message": "Crear un nuevo grupo lógico para organizar tus pestañas" },
-  "color": { "message": "Color" }
+  "color": { "message": "Color" },
+  "tabGroupColor": { "message": "Color del grupo de pestañas" },
+  "badge_new": { "message": "Nuevo" },
+  "badge_warning": { "message": "Advertencia" },
+  "badge_deleted": { "message": "Eliminado" }
 }
