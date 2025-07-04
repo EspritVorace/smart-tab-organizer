@@ -1,23 +1,19 @@
 import React from 'react';
 import { Card, Flex, Checkbox, Heading, Text, IconButton, DropdownMenu, HoverCard, Code, DataList, Badge } from '@radix-ui/themes';
-import { Edit, MoreHorizontal, Copy, Clipboard, Users } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { getMessage } from '../../../utils/i18n';
 import { getRadixColor } from '../../../utils/utils';
 import type { DomainRuleSetting } from '../../../types/syncSettings';
 import type { LogicalGroup } from '../../../schemas/logicalGroup';
 import { groupNameSourceOptions, deduplicationMatchModeOptions } from '../../../schemas/enums';
 import { StatusBadge } from '../../UI/StatusBadge';
+import { CardActions, type CardWithClipboardProps } from '../../UI/CardActions';
 
-interface DomainRuleCardProps {
+interface DomainRuleCardProps extends Omit<CardWithClipboardProps<DomainRuleSetting>, 'item'> {
     rule: DomainRuleSetting;
     availableGroups: LogicalGroup[];
     onEnabledChanged: (enabled: boolean) => void;
-    onEdit: () => void;
-    onDelete: () => void;
-    onCopy: () => void;
-    onPaste: () => void;
     onChangeGroup: (ruleId: string, groupId: string | null) => void;
-    isPasteAvailable: boolean;
 }
 
 export function DomainRuleCard({
@@ -29,7 +25,8 @@ export function DomainRuleCard({
     onCopy,
     onPaste,
     onChangeGroup,
-    isPasteAvailable
+    isPasteAvailable,
+    existingItems
 }: DomainRuleCardProps) {
     const getGroupNameSourceLabel = (value: string) => {
         const option = groupNameSourceOptions.find(opt => opt.value === value);
@@ -67,6 +64,10 @@ export function DomainRuleCard({
                 <DataList.Value><Code>{rule.domainFilter}</Code></DataList.Value>
             </DataList.Item>
             <DataList.Item>
+                <DataList.Label>{getMessage('enabled')}</DataList.Label>
+                <DataList.Value>{rule.enabled ? getMessage('enabled') : '❌'}</DataList.Value>
+            </DataList.Item>
+            <DataList.Item>
                 <DataList.Label>{getMessage('groupNameSource')}</DataList.Label>
                 <DataList.Value>{getGroupNameSourceLabel(rule.groupNameSource)}</DataList.Value>
             </DataList.Item>
@@ -95,12 +96,12 @@ export function DomainRuleCard({
                 </DataList.Value>
             </DataList.Item>
             <DataList.Item>
-                <DataList.Label>{getMessage('deduplicationMode')}</DataList.Label>
-                <DataList.Value>{getDeduplicationModeLabel(rule.deduplicationMatchMode)}</DataList.Value>
-            </DataList.Item>
-            <DataList.Item>
                 <DataList.Label>{getMessage('enableDeduplication')}</DataList.Label>
                 <DataList.Value>{rule.deduplicationEnabled ? getMessage('enabled') : '❌'}</DataList.Value>
+            </DataList.Item>
+            <DataList.Item>
+                <DataList.Label>{getMessage('deduplicationMode')}</DataList.Label>
+                <DataList.Value>{getDeduplicationModeLabel(rule.deduplicationMatchMode)}</DataList.Value>
             </DataList.Item>
         </DataList.Root>
     );
@@ -135,70 +136,45 @@ export function DomainRuleCard({
                     </Flex>
                 </Flex>
                 <Flex gap="1" align="center">
-                    <IconButton
-                        variant="ghost"
-                        size="2"
-                        onClick={onEdit}
-                        title={getMessage('edit')}
-                        aria-label={`${getMessage('edit')} ${rule.label}`}
-                        style={{ color: 'var(--gray-11)' }}
-                    >
-                        <Edit size={16} />
-                    </IconButton>
+                    <CardActions
+                        item={rule}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        onCopy={onCopy}
+                        onPaste={onPaste}
+                        isPasteAvailable={isPasteAvailable}
+                        existingItems={existingItems}
+                    />
                     <DropdownMenu.Root>
                         <DropdownMenu.Trigger>
                             <IconButton
                                 variant="ghost"
                                 size="2"
-                                title={getMessage('moreOptions')}
-                                aria-label={`${getMessage('moreOptions')} ${rule.label}`}
+                                title={getMessage('changeGroup')}
+                                aria-label={`${getMessage('changeGroup')} ${rule.label}`}
                                 style={{ color: 'var(--gray-11)' }}
                             >
-                                <MoreHorizontal size={16} />
+                                <Users size={16} />
                             </IconButton>
                         </DropdownMenu.Trigger>
-                        <DropdownMenu.Content aria-label={`${getMessage('moreOptions')} ${rule.label}`}>
-                            <DropdownMenu.Item onClick={onCopy} aria-label={`${getMessage('copy')} ${rule.label}`}>
-                                <Copy size={14} />
-                                {getMessage('copy')}
-                            </DropdownMenu.Item>
+                        <DropdownMenu.Content aria-label={`${getMessage('changeGroup')} ${rule.label}`}>
                             <DropdownMenu.Item 
-                                onClick={onPaste}
-                                disabled={!isPasteAvailable}
-                                aria-label={`${getMessage('paste')} ${rule.label}`}
+                                onClick={() => onChangeGroup(rule.id, null)}
+                                aria-label={`${getMessage('changeGroup')}: ${getMessage('noGroup')}`}
                             >
-                                <Clipboard size={14} />
-                                {getMessage('paste')}
+                                {getMessage('noGroup')}
                             </DropdownMenu.Item>
-                            <DropdownMenu.Sub>
-                                <DropdownMenu.SubTrigger aria-label={`${getMessage('changeGroup')} ${rule.label}`}>
-                                    <Users size={14} />
-                                    {getMessage('changeGroup')}
-                                </DropdownMenu.SubTrigger>
-                                <DropdownMenu.SubContent aria-label={`${getMessage('changeGroup')} ${rule.label}`}>
-                                    <DropdownMenu.Item 
-                                        onClick={() => onChangeGroup(rule.id, null)}
-                                        aria-label={`${getMessage('changeGroup')}: ${getMessage('noGroup')}`}
-                                    >
-                                        {getMessage('noGroup')}
-                                    </DropdownMenu.Item>
-                                    {filteredGroups.map(group => (
-                                        <DropdownMenu.Item 
-                                            key={group.id}
-                                            onClick={() => onChangeGroup(rule.id, group.id)}
-                                            aria-label={`${getMessage('changeGroup')}: ${group.label}`}
-                                        >
-                                            <Text color={getRadixColor(group.color)}>
-                                                {group.label}
-                                            </Text>
-                                        </DropdownMenu.Item>
-                                    ))}
-                                </DropdownMenu.SubContent>
-                            </DropdownMenu.Sub>
-                            <DropdownMenu.Separator />
-                            <DropdownMenu.Item onClick={onDelete} color="red" aria-label={`${getMessage('delete')} ${rule.label}`}>
-                                {getMessage('delete')}
-                            </DropdownMenu.Item>
+                            {filteredGroups.map(group => (
+                                <DropdownMenu.Item 
+                                    key={group.id}
+                                    onClick={() => onChangeGroup(rule.id, group.id)}
+                                    aria-label={`${getMessage('changeGroup')}: ${group.label}`}
+                                >
+                                    <Text color={getRadixColor(group.color)}>
+                                        {group.label}
+                                    </Text>
+                                </DropdownMenu.Item>
+                            ))}
                         </DropdownMenu.Content>
                     </DropdownMenu.Root>
                 </Flex>

@@ -25,6 +25,12 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const mockGroups: LogicalGroup[] = [
+  { id: 'group1', label: 'Development', color: 'blue' },
+  { id: 'group2', label: 'Testing', color: 'green' },
+  { id: 'group3', label: 'Documentation', color: 'purple' }
+];
+
 const mockRule: DomainRuleSetting = {
   id: '1',
   domainFilter: 'github.com',
@@ -35,24 +41,37 @@ const mockRule: DomainRuleSetting = {
   deduplicationMatchMode: 'exact',
   groupId: 'group1',
   deduplicationEnabled: true,
-  enabled: true
+  enabled: true,
+  presetId: 'preset1'
 };
 
-const mockGroups: LogicalGroup[] = [
-  { id: 'group1', label: 'Development', color: 'blue' },
-  { id: 'group2', label: 'Testing', color: 'green' },
-  { id: 'group3', label: 'Documentation', color: 'purple' }
+const mockExistingRules: DomainRuleSetting[] = [
+  mockRule,
+  {
+    id: '2',
+    domainFilter: 'example.com',
+    label: 'Example Rule',
+    titleParsingRegEx: '(.+)',
+    urlParsingRegEx: '',
+    groupNameSource: 'title',
+    deduplicationMatchMode: 'exact',
+    groupId: 'group2',
+    deduplicationEnabled: true,
+    enabled: true,
+    presetId: null
+  }
 ];
 
 export const DomainRuleCardDefault: Story = {
   args: {
     rule: mockRule,
     availableGroups: mockGroups,
+    existingItems: mockExistingRules,
     onEnabledChanged: (enabled: boolean) => console.log('Enabled changed:', enabled),
     onEdit: () => console.log('Edit clicked'),
     onDelete: () => console.log('Delete clicked'),
     onCopy: () => console.log('Copy clicked'),
-    onPaste: () => console.log('Paste clicked'),
+    onPaste: (existingItems) => console.log('Paste clicked', existingItems),
     onChangeGroup: (ruleId: string, groupId: string | null) => console.log('Change group:', ruleId, groupId),
     isPasteAvailable: true
   }
@@ -62,13 +81,6 @@ export const DomainRuleCardDisabled: Story = {
   args: {
     ...DomainRuleCardDefault.args,
     rule: { ...mockRule, enabled: false }
-  }
-};
-
-export const DomainRuleCardDeduplicationDisabled: Story = {
-  args: {
-    ...DomainRuleCardDefault.args,
-    rule: { ...mockRule, deduplicationEnabled: false }
   }
 };
 
@@ -106,30 +118,9 @@ export const DomainRuleCardManualGroupingSource: Story = {
   }
 };
 
-export const DomainRuleCardNoGroup: Story = {
-  args: {
-    ...DomainRuleCardDefault.args,
-    rule: { ...mockRule, groupId: null }
-  }
-};
-
-export const DomainRuleCardWithNewBadge: Story = {
+export const DomainRuleCardWithBadge: Story = {
   args: {
     ...DomainRuleCardDefault.args,
     rule: { ...mockRule, badge: 'NEW' }
-  }
-};
-
-export const DomainRuleCardWithWarningBadge: Story = {
-  args: {
-    ...DomainRuleCardDefault.args,
-    rule: { ...mockRule, badge: 'WARNING' }
-  }
-};
-
-export const DomainRuleCardWithDeletedBadge: Story = {
-  args: {
-    ...DomainRuleCardDefault.args,
-    rule: { ...mockRule, badge: 'DELETED' }
   }
 };

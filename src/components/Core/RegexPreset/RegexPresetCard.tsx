@@ -1,17 +1,12 @@
 import React from 'react';
 import { Card, Flex, Heading, Text, IconButton, DropdownMenu, HoverCard, Code, DataList, Badge } from '@radix-ui/themes';
-import { Edit, MoreHorizontal, Copy, Clipboard } from 'lucide-react';
 import { getMessage } from '../../../utils/i18n';
 import type { RegexPresetSetting } from '../../../types/syncSettings';
 import { StatusBadge } from '../../UI/StatusBadge';
+import { CardActions, type CardWithClipboardProps } from '../../UI/CardActions';
 
-interface RegexPresetCardProps {
+interface RegexPresetCardProps extends Omit<CardWithClipboardProps<RegexPresetSetting>, 'item'> {
     preset: RegexPresetSetting;
-    onEdit: () => void;
-    onDelete: () => void;
-    onCopy: () => void;
-    onPaste: () => void;
-    isPasteAvailable: boolean;
 }
 
 export function RegexPresetCard({
@@ -20,7 +15,8 @@ export function RegexPresetCard({
     onDelete,
     onCopy,
     onPaste,
-    isPasteAvailable
+    isPasteAvailable,
+    existingItems
 }: RegexPresetCardProps) {
     const renderHoverCardContent = () => (
         <DataList.Root>
@@ -62,47 +58,15 @@ export function RegexPresetCard({
                     </Flex>
                 </Flex>
                 <Flex gap="1" align="center">
-                    <IconButton
-                        variant="ghost"
-                        size="2"
-                        onClick={onEdit}
-                        title={getMessage('edit')}
-                        aria-label={`${getMessage('edit')} ${preset.name}`}
-                        style={{ color: 'var(--gray-11)' }}
-                    >
-                        <Edit size={16} />
-                    </IconButton>
-                    <DropdownMenu.Root>
-                        <DropdownMenu.Trigger>
-                            <IconButton
-                                variant="ghost"
-                                size="2"
-                                title={getMessage('moreOptions')}
-                                aria-label={`${getMessage('moreOptions')} ${preset.name}`}
-                                style={{ color: 'var(--gray-11)' }}
-                            >
-                                <MoreHorizontal size={16} />
-                            </IconButton>
-                        </DropdownMenu.Trigger>
-                        <DropdownMenu.Content aria-label={`${getMessage('moreOptions')} ${preset.name}`}>
-                            <DropdownMenu.Item onClick={onCopy} aria-label={`${getMessage('copy')} ${preset.name}`}>
-                                <Copy size={14} />
-                                {getMessage('copy')}
-                            </DropdownMenu.Item>
-                            <DropdownMenu.Item 
-                                onClick={onPaste}
-                                disabled={!isPasteAvailable}
-                                aria-label={`${getMessage('paste')} ${preset.name}`}
-                            >
-                                <Clipboard size={14} />
-                                {getMessage('paste')}
-                            </DropdownMenu.Item>
-                            <DropdownMenu.Separator />
-                            <DropdownMenu.Item onClick={onDelete} color="red" aria-label={`${getMessage('delete')} ${preset.name}`}>
-                                {getMessage('delete')}
-                            </DropdownMenu.Item>
-                        </DropdownMenu.Content>
-                    </DropdownMenu.Root>
+                    <CardActions
+                        item={preset}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        onCopy={onCopy}
+                        onPaste={onPaste}
+                        isPasteAvailable={isPasteAvailable}
+                        existingItems={existingItems}
+                    />
                 </Flex>
             </Flex>
         </Card>

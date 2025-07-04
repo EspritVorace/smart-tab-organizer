@@ -112,3 +112,8 @@ To avoid export name conflicts in Storybook, prefix all story exports with the c
 - Use `ComponentNameDefault` instead of `Default`
 - Use `ComponentNameDisabled` instead of `Disabled`
 - Example: `DomainRuleCardDefault`, `DomainRuleCardDisabled`
+
+## Development Best Practices
+
+### Type Safety
+- Avoid `any()` for types to maintain strong type checking

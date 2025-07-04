@@ -34,13 +34,24 @@ const mockPreset: RegexPresetSetting = {
   urlParsingRegEx: '/browse/([A-Z]+-\\d+)'
 };
 
+const mockExistingPresets: RegexPresetSetting[] = [
+  mockPreset,
+  {
+    id: '2',
+    name: 'Date Pattern',
+    titleParsingRegEx: '\\d{4}-\\d{2}-\\d{2}',
+    urlParsingRegEx: ''
+  }
+];
+
 export const RegexPresetCardDefault: Story = {
   args: {
     preset: mockPreset,
+    existingItems: mockExistingPresets,
     onEdit: () => console.log('Edit clicked'),
     onDelete: () => console.log('Delete clicked'),
     onCopy: () => console.log('Copy clicked'),
-    onPaste: () => console.log('Paste clicked'),
+    onPaste: (existingItems) => console.log('Paste clicked', existingItems),
     isPasteAvailable: true
   }
 };

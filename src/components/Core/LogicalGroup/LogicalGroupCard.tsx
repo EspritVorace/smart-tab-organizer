@@ -1,20 +1,19 @@
 import React, { useState } from 'react';
-import { Card, Flex, Checkbox, Heading, IconButton, DropdownMenu, HoverCard, DataList, Badge, Box, Text } from '@radix-ui/themes';
+import { Card, Flex, Checkbox, Heading, IconButton, HoverCard, DataList, Badge, Box } from '@radix-ui/themes';
 import * as Collapsible from '@radix-ui/react-collapsible';
-import { Edit, MoreHorizontal, ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { getMessage } from '../../../utils/i18n';
 import { getRadixColor } from '../../../utils/utils';
 import type { LogicalGroupSetting, DomainRuleSetting } from '../../../types/syncSettings';
 import { DomainRuleCard } from '../DomainRule/DomainRuleCard';
 import { StatusBadge } from '../../UI/StatusBadge';
+import { CardActions, type BaseCardProps } from '../../UI/CardActions';
 
-interface LogicalGroupCardProps {
+interface LogicalGroupCardProps extends Omit<BaseCardProps<LogicalGroupSetting>, 'item'> {
     group: LogicalGroupSetting;
     domainRulesList?: DomainRuleSetting[];
     availableGroups?: LogicalGroupSetting[];
     onEnabledChanged: (enabled: boolean) => void;
-    onEdit: () => void;
-    onDelete: () => void;
     // Props pour les DomainRuleCard
     onDomainRuleEnabledChanged?: (ruleId: string, enabled: boolean) => void;
     onDomainRuleEdit?: (ruleId: string) => void;
@@ -130,34 +129,11 @@ export function LogicalGroupCard({
                         </Flex>
                     </Flex>
                     <Flex gap="1" align="center">
-                        <IconButton
-                            variant="ghost"
-                            size="2"
-                            onClick={onEdit}
-                            title={getMessage('edit')}
-                            aria-label={`${getMessage('edit')} ${group.label}`}
-                            style={{ color: 'var(--gray-11)' }}
-                        >
-                            <Edit size={16} />
-                        </IconButton>
-                        <DropdownMenu.Root>
-                            <DropdownMenu.Trigger>
-                                <IconButton
-                                    variant="ghost"
-                                    size="2"
-                                    title={getMessage('moreOptions')}
-                                    aria-label={`${getMessage('moreOptions')} ${group.label}`}
-                                    style={{ color: 'var(--gray-11)' }}
-                                >
-                                    <MoreHorizontal size={16} />
-                                </IconButton>
-                            </DropdownMenu.Trigger>
-                            <DropdownMenu.Content aria-label={`${getMessage('moreOptions')} ${group.label}`}>
-                                <DropdownMenu.Item onClick={onDelete} color="red" aria-label={`${getMessage('delete')} ${group.label}`}>
-                                    {getMessage('delete')}
-                                </DropdownMenu.Item>
-                            </DropdownMenu.Content>
-                        </DropdownMenu.Root>
+                        <CardActions
+                            item={group}
+                            onEdit={onEdit}
+                            onDelete={onDelete}
+                        />
                     </Flex>
                 </Flex>
 
