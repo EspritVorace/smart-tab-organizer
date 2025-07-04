@@ -1,18 +1,17 @@
 import { defineBackground } from 'wxt/utils/define-background';
-import { browser } from 'wxt/browser';
+import { browser, Browser } from 'wxt/browser';
 import { getSettings as storageGetSettings, incrementStat, initializeDefaults } from '../utils/storage.js';
 import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from '../utils/utils.js';
+import type { SyncSettings, DomainRuleSetting } from '../types/syncSettings.js';
 
 export default defineBackground(() => {
-const middleClickedTabs = new Map();
+const middleClickedTabs = new Map<string, number>();
 
-async function getSettings() {
+async function getSettings(): Promise<SyncSettings> {
     const settings = await storageGetSettings();
     settings.domainRules = settings.domainRules || [];
     settings.domainRules = settings.domainRules.map(rule => ({
         ...rule,
-        collapseNew: typeof rule.collapseNew === 'boolean' ? rule.collapseNew : false,
-        collapseExisting: typeof rule.collapseExisting === 'boolean' ? rule.collapseExisting : false,
         deduplicationEnabled: typeof rule.deduplicationEnabled === 'boolean' ? rule.deduplicationEnabled : true,
         deduplicationMatchMode: rule.deduplicationMatchMode || 'exact',
         groupNameSource: rule.groupNameSource || 'title',
@@ -21,7 +20,7 @@ async function getSettings() {
     return settings;
 }
 
-async function promptForGroupName(defaultName, tabId) {
+async function promptForGroupName(defaultName: string, tabId: number): Promise<string | null> {
     try {
         const response = await browser.tabs.sendMessage(tabId, {
             type: 'askGroupName',
@@ -34,12 +33,12 @@ async function promptForGroupName(defaultName, tabId) {
     }
 }
 
-browser.runtime.onInstalled.addListener(async (details) => {
+browser.runtime.onInstalled.addListener(async (details: Browser.runtime.InstalledDetails) => {
   console.log("SmartTab Organizer installed/updated.", details.reason);
   await initializeDefaults();
 });
 
-browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((request: any, sender: Browser.runtime.MessageSender, sendResponse: (response?: any) => void) => {
     if (request.type === "middleClickLink") {
         if (sender.tab && sender.tab.id) {
             middleClickedTabs.set(request.url, sender.tab.id);
@@ -53,12 +52,12 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
 });
 
-browser.tabs.onCreated.addListener(async (newTab) => {
+browser.tabs.onCreated.addListener(async (newTab: Browser.tabs.Tab) => {
     const urlToCheck = newTab.pendingUrl || newTab.url;
     console.log(`[GROUPING_DEBUG] onCreated: New tab ${newTab.id}, Opener ID: ${newTab.openerTabId}, URL to check: "${urlToCheck}"`);
 
     if (newTab.openerTabId && urlToCheck) {
-        let openerIdFromMap = null;
+        let openerIdFromMap: number | null = null;
         if (middleClickedTabs.has(urlToCheck) && middleClickedTabs.get(urlToCheck) === newTab.openerTabId) {
              openerIdFromMap = middleClickedTabs.get(urlToCheck);
              middleClickedTabs.delete(urlToCheck);
@@ -100,7 +99,7 @@ browser.tabs.onCreated.addListener(async (newTab) => {
     }
 });
 
-async function handleGrouping(openerTab, newTab) {
+async function handleGrouping(openerTab: Browser.tabs.Tab, newTab: Browser.tabs.Tab): Promise<void> {
     console.log(`[GROUPING_DEBUG] handleGrouping: Called for openerTab ${openerTab.id} ("${openerTab.url}", title: "${openerTab.title}") and newTab ${newTab.id}.`);
     const settings = await getSettings();
     console.log(`[GROUPING_DEBUG] handleGrouping: globalGroupingEnabled = ${settings.globalGroupingEnabled}`);
@@ -109,7 +108,7 @@ async function handleGrouping(openerTab, newTab) {
         return;
     }
 
-    const rule = settings.domainRules.find(r => r.enabled && matchesDomain(openerTab.url, r.domainFilter));
+    const rule: DomainRuleSetting | undefined = settings.domainRules.find(r => r.enabled && matchesDomain(openerTab.url, r.domainFilter));
     if (!rule) {
         console.log(`[GROUPING_DEBUG] handleGrouping: Exiting early - No matching enabled rule for opener tab URL: ${openerTab.url}`);
         return;
@@ -118,9 +117,9 @@ async function handleGrouping(openerTab, newTab) {
     console.log(`[GROUPING_DEBUG] handleGrouping: Rule found for "${openerTab.url}": label: "${rule.label || 'N/A'}", filter: "${rule.domainFilter}", groupId: "${rule.groupId}"`);
 
     // Determine groupColor from logical group
-    let groupColor = null; // Default to no color (Chrome default)
+    let groupColor: string | null = null; // Default to no color (Chrome default)
     if (rule.groupId && settings.logicalGroups && settings.logicalGroups.length > 0) {
-        const logicalGroup = settings.logicalGroups.find(lg => lg.id === rule.groupId);
+        const logicalGroup = settings.logicalGroups?.find(lg => lg.id === rule.groupId);
         if (logicalGroup && logicalGroup.color) {
             groupColor = logicalGroup.color;
             console.log(`[GROUPING_DEBUG] handleGrouping: Logical group found: ID "${logicalGroup.id}", Label "${logicalGroup.label}", Color "${groupColor}".`);
@@ -134,7 +133,7 @@ async function handleGrouping(openerTab, newTab) {
     // Determine groupName synchronously. If groupNameSource is 'manual', we will
     // use this placeholder name for grouping and rename the group after
     // creation once the user provides a name.
-    let groupName = rule.label;
+    let groupName: string = rule.label;
     if (!groupName || !groupName.trim()) {
         groupName = "SmartGroup";
         console.log(`[GROUPING_DEBUG] handleGrouping: Rule label is empty or whitespace. Initial groupName set to "${groupName}".`);
@@ -167,10 +166,10 @@ async function handleGrouping(openerTab, newTab) {
     console.log(`[GROUPING_DEBUG] handleGrouping: Initial/fallback groupName resolved to "${groupName}" for new tab ${newTab.id}.`);
 
     let hasProcessedTab = false;
-    let targetGroupId = null;
-    let groupedTabIds = [];
+    let targetGroupId: number | null = null;
+    let groupedTabIds: number[] = [];
 
-    browser.tabs.onUpdated.addListener(async function listener(tabId, changeInfo, tab) {
+    browser.tabs.onUpdated.addListener(async function listener(tabId: number, changeInfo: Browser.tabs.TabChangeInfo, tab: Browser.tabs.Tab) {
         if (hasProcessedTab) {
             try { browser.tabs.onUpdated.removeListener(listener); } catch (e) {}
             return;
@@ -200,12 +199,12 @@ async function handleGrouping(openerTab, newTab) {
 
                 if (openerGroupId === browser.tabs.TAB_ID_NONE || typeof openerGroupId !== 'number' || openerGroupId <= 0) {
                     console.log(`[GROUPING_DEBUG] handleGrouping: Opener tab ${currentOpenerTab.id} is not in a group. Will create new group using groupName "${groupName}".`);
-                    const tabsToGroup = [currentOpenerTab.id, newTab.id];
+                    const tabsToGroup: number[] = [currentOpenerTab.id, newTab.id];
                     groupedTabIds = tabsToGroup.slice();
                     console.log(`[GROUPING_DEBUG] handleGrouping: Calling browser.tabs.group to create new group with tabs [${tabsToGroup.join(', ')}]`);
                     const newGroupIdVal = await browser.tabs.group({ tabIds: tabsToGroup });
                     targetGroupId = newGroupIdVal;
-                    const updatePayloadNew = { title: groupName, collapsed: rule.collapseNew };
+                    const updatePayloadNew: any = { title: groupName, collapsed: false };
                     if (groupColor) updatePayloadNew.color = groupColor;
                     console.log(`[GROUPING_DEBUG] handleGrouping: New group created with temp ID: ${newGroupIdVal}. Calling browser.tabGroups.update with payload:`, updatePayloadNew);
                     await browser.tabGroups.update(newGroupIdVal, updatePayloadNew);
@@ -223,7 +222,7 @@ async function handleGrouping(openerTab, newTab) {
                     // If the group's color needs to be updated to match the rule, it should happen when the group is first formed or if it's re-evaluated.
                     // The current logic for "existingGroup" (found by title) DOES set the color.
                     // This path is for when openerTab is ALREADY in a group.
-                    const updatePayloadOpenerInGroup = { collapsed: rule.collapseExisting };
+                    const updatePayloadOpenerInGroup: any = { collapsed: false };
                     // Re-fetch the group to check its current color, only update if different from rule's color?
                     // Or, more simply, if the rule implies a color, and the group doesn't have it, apply it.
                     // This could still be intrusive. For now, let's be conservative for groups opener is already in.
@@ -268,9 +267,9 @@ async function handleGrouping(openerTab, newTab) {
 // Remplace ta section webNavigation par ceci :
 
 // Map pour éviter de traiter plusieurs fois le même onglet
-const processedTabs = new Set();
+const processedTabs = new Set<string>();
 
-browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+browser.tabs.onUpdated.addListener(async (tabId: number, changeInfo: Browser.tabs.TabChangeInfo, tab: Browser.tabs.Tab) => {
     // On s'intéresse aux changements d'URL ou aux onglets qui finissent de charger
     const urlToCheck = changeInfo.url || (changeInfo.status === 'complete' ? tab.url : null);
     
@@ -287,7 +286,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     const settings = await getSettings();
     if (!settings.globalDeduplicationEnabled) return;
 
-    const rule = settings.domainRules.find(r => r.enabled && matchesDomain(urlToCheck, r.domainFilter));
+    const rule: DomainRuleSetting | undefined = settings.domainRules.find(r => r.enabled && matchesDomain(urlToCheck, r.domainFilter));
     const deduplicationActiveForRule = rule ? rule.deduplicationEnabled : settings.globalDeduplicationEnabled;
     if (!deduplicationActiveForRule) return;
 
@@ -300,14 +299,14 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     }
 });
 
-async function checkAndDeduplicateTab(currentTabId, newUrl, matchMode, windowId) {
+async function checkAndDeduplicateTab(currentTabId: number, newUrl: string, matchMode: string, windowId: number): Promise<void> {
     try {
         const allTabsInWindow = await browser.tabs.query({ 
             url: "*://*/*", 
             windowId: windowId 
         });
         
-        const duplicateTab = allTabsInWindow.find(tab => {
+        const duplicateTab: Browser.tabs.Tab | undefined = allTabsInWindow.find(tab => {
             if (!tab.url || tab.id === currentTabId) return false;
             
             try {
@@ -317,11 +316,6 @@ async function checkAndDeduplicateTab(currentTabId, newUrl, matchMode, windowId)
                 switch (matchMode) {
                     case 'exact': 
                         return tab.url === newUrl;
-                    case 'hostname_path': 
-                        return currentTabUrl.hostname === newNavUrl.hostname && 
-                               currentTabUrl.pathname === newNavUrl.pathname;
-                    case 'hostname': 
-                        return currentTabUrl.hostname === newNavUrl.hostname;
                     case 'includes': 
                         return tab.url.includes(newUrl) || newUrl.includes(tab.url);
                     default: 
