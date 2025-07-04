@@ -1,5 +1,4 @@
-import React from 'react';
-import { Card, Flex, Checkbox, Heading, Text, IconButton, DropdownMenu, HoverCard, Code, DataList, Badge } from '@radix-ui/themes';
+import { Card, Flex, Checkbox, Heading, Text, IconButton, DropdownMenu, HoverCard, Code, DataList } from '@radix-ui/themes';
 import { Users } from 'lucide-react';
 import { getMessage } from '../../../utils/i18n';
 import { getRadixColor } from '../../../utils/utils';
@@ -9,7 +8,7 @@ import { groupNameSourceOptions, deduplicationMatchModeOptions } from '../../../
 import { StatusBadge } from '../../UI/StatusBadge';
 import { CardActions, type CardWithClipboardProps } from '../../UI/CardActions';
 
-interface DomainRuleCardProps extends Omit<CardWithClipboardProps<DomainRuleSetting>, 'item'> {
+interface DomainRuleCardProps extends Omit<CardWithClipboardProps<DomainRuleSetting & { id: string }>, 'item'> {
     rule: DomainRuleSetting;
     availableGroups: LogicalGroup[];
     onEnabledChanged: (enabled: boolean) => void;
@@ -38,16 +37,6 @@ export function DomainRuleCard({
         return option ? getMessage(option.keyLabel) : value;
     };
 
-    const getRegexInfo = () => {
-        const parts: string[] = [];
-        if (rule.groupNameSource === 'title' && rule.titleParsingRegEx) {
-            parts.push(`${getMessage('regex')}: ${rule.titleParsingRegEx}`);
-        }
-        if (rule.groupNameSource === 'url' && rule.urlParsingRegEx) {
-            parts.push(`${getMessage('regex')}: ${rule.urlParsingRegEx}`);
-        }
-        return parts.join(', ');
-    };
 
     const filteredGroups = availableGroups.filter(group => group.id !== rule.groupId);
 
@@ -137,13 +126,13 @@ export function DomainRuleCard({
                 </Flex>
                 <Flex gap="1" align="center">
                     <CardActions
-                        item={rule}
+                        item={rule as DomainRuleSetting & { id: string }}
                         onEdit={onEdit}
                         onDelete={onDelete}
                         onCopy={onCopy}
                         onPaste={onPaste}
                         isPasteAvailable={isPasteAvailable}
-                        existingItems={existingItems}
+                        existingItems={existingItems as (DomainRuleSetting & { id: string })[]}
                     />
                     <DropdownMenu.Root>
                         <DropdownMenu.Trigger>
