@@ -1,5 +1,5 @@
 import React from 'react';
-import { Theme, Heading, Box } from '@radix-ui/themes';
+import { Theme, Heading, Box, Flex } from '@radix-ui/themes';
 import { getMessage } from '../../../utils/i18n';
 import { FEATURE_THEMES } from '../../../utils/themeConstants.js';
 import type { SyncSettings } from '../../../types/syncSettings.js';
@@ -10,9 +10,10 @@ interface PageLayoutProps {
   theme: FeatureTheme;
   syncSettings: SyncSettings;
   children: (settings: SyncSettings) => React.ReactNode;
+  headerActions?: React.ReactNode; // Add this line
 }
 
-export function PageLayout({ titleKey, theme, syncSettings, children }: PageLayoutProps) {
+export function PageLayout({ titleKey, theme, syncSettings, children, headerActions }: PageLayoutProps) {
   return (
     <Theme accentColor={FEATURE_THEMES[theme]}>
       <Box style={{ 
@@ -22,9 +23,12 @@ export function PageLayout({ titleKey, theme, syncSettings, children }: PageLayo
         flexDirection: 'column',
         padding: '20px'
       }}>
-        <Heading size="9" as="h1" style={{ marginBottom: '24px' }}>
-          {getMessage(titleKey)}
-        </Heading>
+        <Flex justify="between" align="center" style={{ marginBottom: '24px' }}>
+          <Heading size="9" as="h1">
+            {getMessage(titleKey)}
+          </Heading>
+          {headerActions && <Box>{headerActions}</Box>}
+        </Flex>
         <Box style={{ flex: 1 }}>
           {children(syncSettings)}
         </Box>

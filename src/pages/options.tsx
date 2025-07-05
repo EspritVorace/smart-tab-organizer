@@ -17,7 +17,7 @@ import type { SidebarItem } from '../components/UI/Sidebar/Sidebar';
 import { ThemeToggle } from '../components/UI/ThemeToggle/ThemeToggle.jsx';
 import { Flex, Text } from '@radix-ui/themes';
 import { RulesTab } from '../components/RulesTab.jsx';
-import { PresetsTab } from '../components/PresetsTab.jsx';
+import PresetsListPage from './PresetsListPage';
 import { ImportExportTab } from '../components/ImportExportTab.jsx';
 import { StatsTab } from '../components/StatsTab.jsx';
 import { LogicalGroupsTab } from '../components/LogicalGroupsTab.jsx';
@@ -56,7 +56,7 @@ function OptionsContent() {
     const { statistics: stats, resetStatistics } = useStatistics();
     const [currentTab, setCurrentTab] = useState<string>('rules');
     const [editingRuleId, setEditingRuleId] = useState<string | null>(null);
-    const [editingPresetId, setEditingPresetId] = useState<string | null>(null);
+    
     const [editingLogicalGroupId, setEditingLogicalGroupId] = useState<string | null>(null); // For the new tab
     const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
 
@@ -72,10 +72,7 @@ function OptionsContent() {
         updateSettings({ domainRules: newRules });
     }, [updateSettings]);
 
-    const updatePresets = useCallback((newPresets: RegexPresetSettings) => {
-        setEditingPresetId(null); // Quitte l'édition
-        updateSettings({ regexPresets: newPresets });
-    }, [updateSettings]);
+    
 
     // updateLogicalGroups is removed, updateSettings will be used directly by LogicalGroupsTab
 
@@ -87,7 +84,7 @@ function OptionsContent() {
 
     const handleTabChange = useCallback((tab: string) => {
         setEditingRuleId(null); // Reset editing when changing tabs
-        setEditingPresetId(null);
+        
         setEditingLogicalGroupId(null); // Reset for new tab
         setCurrentTab(tab);
     }, []);
@@ -289,7 +286,7 @@ function OptionsContent() {
                     )}
                     {currentTab === 'presets' && (
                         <RegexPresetsTheme>
-                            <PresetsTab settings={settings} updatePresets={updatePresets} updateRules={updateRules} editingId={editingPresetId} setEditingId={setEditingPresetId} />
+                            <PresetsListPage />
                         </RegexPresetsTheme>
                     )}
                     {currentTab === 'logicalGroups' && (
