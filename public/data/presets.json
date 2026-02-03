@@ -1,0 +1,549 @@
+{
+  "categories": [
+    {
+      "id": "generic",
+      "name": "🛠️ Patterns Génériques",
+      "description": "Modèles de regex réutilisables pour créer vos propres règles",
+      "presets": [
+        {
+          "id": "numeric-id",
+          "name": "ID Numérique",
+          "domainFilters": ["*"],
+          "titleRegex": "ID\\s*(\\d+)",
+          "urlRegex": "id[=/](\\d+)",
+          "groupNameSource": "smart_preset",
+          "example": "Titre: 'Ticket ID 12345' → Groupe: '12345' OU si échec → 'ID Numérique'",
+          "description": "Extrait un identifiant numérique"
+        },
+        {
+          "id": "alphanumeric-id",
+          "name": "ID Alphanumérique",
+          "domainFilters": ["*"],
+          "titleRegex": "\\[([A-Z0-9-]+)\\]",
+          "urlRegex": "([A-Z0-9-]{3,})",
+          "groupNameSource": "smart_preset",
+          "example": "Titre: '[PROJ-123]' → Groupe: 'PROJ-123' OU si échec → 'ID Alphanumérique'",
+          "description": "Extrait un code alphanumérique"
+        },
+        {
+          "id": "content-in-parentheses",
+          "name": "Contenu entre Parenthèses",
+          "domainFilters": ["*"],
+          "titleRegex": "\\(([^)]+)\\)",
+          "groupNameSource": "title",
+          "example": "Titre: 'Article (Catégorie)' → Groupe: 'Catégorie'",
+          "description": "Extrait le texte entre parenthèses"
+        },
+        {
+          "id": "content-in-brackets",
+          "name": "Contenu entre Crochets",
+          "domainFilters": ["*"],
+          "titleRegex": "\\[([^\\]]+)\\]",
+          "groupNameSource": "title",
+          "example": "Titre: 'Document [Version 2.0]' → Groupe: 'Version 2.0'",
+          "description": "Extrait le texte entre crochets"
+        },
+        {
+          "id": "date-pattern",
+          "name": "Date (YYYY-MM-DD)",
+          "domainFilters": ["*"],
+          "urlRegex": "(\\d{4}-\\d{2}-\\d{2})",
+          "groupNameSource": "url",
+          "example": "URL: '/reports/2024-03-15' → Groupe: '2024-03-15'",
+          "description": "Extrait une date au format ISO"
+        },
+        {
+          "id": "word-after-keyword",
+          "name": "Mot après Mot-clé",
+          "domainFilters": ["*"],
+          "titleRegex": "Projet:\\s*([^\\s]+)",
+          "urlRegex": "project/([^/]+)",
+          "groupNameSource": "smart_label",
+          "example": "Titre: 'Projet: WebApp' → Groupe: 'WebApp'",
+          "description": "Extrait le mot après un mot-clé"
+        },
+        {
+          "id": "first-word",
+          "name": "Premier Mot",
+          "domainFilters": ["*"],
+          "titleRegex": "^([^\\s]+)",
+          "groupNameSource": "title",
+          "example": "Titre: 'Marketing Dashboard' → Groupe: 'Marketing'",
+          "description": "Extrait le premier mot du titre"
+        },
+        {
+          "id": "version-number",
+          "name": "Numéro de Version",
+          "domainFilters": ["*"],
+          "titleRegex": "[vV](\\d+(?:\\.\\d+)*)",
+          "urlRegex": "[vV](\\d+(?:\\.\\d+)*)",
+          "groupNameSource": "smart",
+          "example": "Titre: 'API v2.1.3' → Groupe: '2.1.3'",
+          "description": "Extrait un numéro de version"
+        },
+        {
+          "id": "uuid-pattern",
+          "name": "UUID/GUID",
+          "domainFilters": ["*"],
+          "urlRegex": "([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})",
+          "groupNameSource": "url",
+          "example": "URL: '/object/550e8400...' → Groupe: '550e8400...'",
+          "description": "Extrait un identifiant UUID"
+        },
+        {
+          "id": "user-mention",
+          "name": "Mention Utilisateur",
+          "domainFilters": ["*"],
+          "urlRegex": "/@([a-zA-Z0-9_]+)",
+          "groupNameSource": "url",
+          "example": "URL: '/@username/posts' → Groupe: 'username'",
+          "description": "Extrait un nom d'utilisateur après @"
+        }
+      ]
+    },
+    {
+      "id": "development",
+      "name": "Développement & Code",
+      "description": "Sites de développement, repositories, documentation technique",
+      "presets": [
+        {
+          "id": "github-repo",
+          "name": "GitHub - Repository",
+          "domainFilters": ["github.com"],
+          "urlRegex": "github\\.com/([^/]+/[^/]+)",
+          "groupNameSource": "url",
+          "example": "URL: '/microsoft/vscode' → Groupe: 'microsoft/vscode'",
+          "description": "Regroupe par repository"
+        },
+        {
+          "id": "github-issue",
+          "name": "GitHub - Issues",
+          "domainFilters": ["github.com"],
+          "titleRegex": "(.+?)\\s*·\\s*Issue\\s*#(\\d+)",
+          "urlRegex": "issues/(\\d+)",
+          "groupNameSource": "smart_preset",
+          "example": "Titre: 'Bug fix · Issue #123' → Groupe: '123' OU si échec → 'GitHub - Issues'",
+          "description": "Regroupe par numéro d'issue"
+        },
+        {
+          "id": "stackoverflow-question",
+          "name": "Stack Overflow - Questions",
+          "domainFilters": ["stackoverflow.com", "serverfault.com", "superuser.com", "*.stackexchange.com"],
+          "urlRegex": "questions/(\\d+)",
+          "groupNameSource": "smart_preset",
+          "example": "URL: '/questions/12345' → Groupe: '12345' OU si échec → 'Stack Overflow - Questions'",
+          "description": "Regroupe par ID de question"
+        },
+        {
+          "id": "gitlab-project",
+          "name": "GitLab - Projets",
+          "domainFilters": ["gitlab.com", "*.gitlab.io"],
+          "urlRegex": "gitlab\\.com/([^/]+/[^/]+)",
+          "groupNameSource": "url",
+          "example": "URL: '/gitlab-org/gitlab' → Groupe: 'gitlab-org/gitlab'",
+          "description": "Regroupe par projet GitLab"
+        },
+        {
+          "id": "figma-file",
+          "name": "Figma - Fichiers",
+          "domainFilters": ["*.figma.com"],
+          "titleRegex": "(.+?)\\s*–\\s*Figma",
+          "urlRegex": "figma\\.com/file/[^/]+/(.+)",
+          "groupNameSource": "smart",
+          "example": "Titre: 'Design System – Figma' → Groupe: 'Design System'",
+          "description": "Regroupe par nom de fichier"
+        },
+        {
+          "id": "npm-package",
+          "name": "NPM - Packages",
+          "domainFilters": ["*.npmjs.com"],
+          "urlRegex": "npmjs\\.com/package/([^/]+)",
+          "groupNameSource": "url",
+          "example": "URL: '/package/react' → Groupe: 'react'",
+          "description": "Regroupe par nom de package"
+        }
+      ]
+    },
+    {
+      "id": "productivity",
+      "name": "Productivité & Tickets",
+      "description": "Outils de gestion de projets, tickets, tâches",
+      "presets": [
+        {
+          "id": "jira-ticket",
+          "name": "Jira - Tickets",
+          "domainFilters": ["*.atlassian.net"],
+          "titleRegex": "\\[([A-Z]+-\\d+)\\]",
+          "urlRegex": "browse/([A-Z]+-\\d+)",
+          "groupNameSource": "smart_label",
+          "example": "Titre: '[PROJ-123]' → Groupe: 'PROJ-123' OU si échec → Label de la règle",
+          "description": "Regroupe par ID de ticket Jira"
+        },
+        {
+          "id": "trello-board",
+          "name": "Trello - Boards",
+          "domainFilters": ["trello.com"],
+          "titleRegex": "(.+?)\\s*\\|\\s*Trello",
+          "urlRegex": "trello\\.com/b/[^/]+/(.+)",
+          "groupNameSource": "smart_label",
+          "example": "Titre: 'Project Board | Trello' → Groupe: 'Project Board'",
+          "description": "Regroupe par nom de board"
+        },
+        {
+          "id": "notion-page",
+          "name": "Notion - Pages",
+          "domainFilters": ["*.notion.so", "*.notion.site"],
+          "titleRegex": "(.+?)\\s*\\|\\s*Notion",
+          "groupNameSource": "smart_label",
+          "example": "Titre: 'Project Planning | Notion' → Groupe: 'Project Planning'",
+          "description": "Regroupe par titre de page"
+        },
+        {
+          "id": "asana-task",
+          "name": "Asana - Tâches",
+          "domainFilters": ["app.asana.com"],
+          "urlRegex": "app\\.asana\\.com/0/([^/]+)",
+          "groupNameSource": "smart_label",
+          "example": "URL: '/0/123456/789012' → Groupe basé sur le contexte projet",
+          "description": "Regroupe par projet Asana"
+        },
+        {
+          "id": "salesforce-org",
+          "name": "Salesforce - Organisations",
+          "domainFilters": ["*.salesforce.com", "*.force.com"],
+          "urlRegex": "([^.]+)\\.salesforce\\.com",
+          "groupNameSource": "smart_label",
+          "example": "URL: 'mycompany.salesforce.com' → Groupe: 'mycompany'",
+          "description": "Regroupe par organisation"
+        },
+        {
+          "id": "miro-board",
+          "name": "Miro - Boards",
+          "domainFilters": ["miro.com"],
+          "titleRegex": "(.+?)\\s*\\|\\s*Miro",
+          "groupNameSource": "smart_label",
+          "example": "Titre: 'Sprint Planning | Miro' → Groupe: 'Sprint Planning'",
+          "description": "Regroupe par nom de board"
+        }
+      ]
+    },
+    {
+      "id": "ecommerce",
+      "name": "E-commerce",
+      "description": "Sites marchands et comparateurs",
+      "presets": [
+        {
+          "id": "amazon-product",
+          "name": "Amazon - Produits",
+          "domainFilters": ["*.amazon.*"],
+          "urlRegex": "/dp/([A-Z0-9]{10})",
+          "groupNameSource": "url",
+          "example": "URL: '/dp/B08N5WRWNW' → Groupe: 'B08N5WRWNW'",
+          "description": "Regroupe par ASIN produit"
+        },
+        {
+          "id": "ebay-item",
+          "name": "eBay - Articles",
+          "domainFilters": ["*.ebay.*"],
+          "urlRegex": "ebay\\.[^/]+/itm/(\\d+)",
+          "groupNameSource": "url",
+          "example": "URL: '/itm/123456789' → Groupe: '123456789'",
+          "description": "Regroupe par ID d'article"
+        },
+        {
+          "id": "shopify-admin",
+          "name": "Shopify - Administration",
+          "domainFilters": ["*.myshopify.com", "admin.shopify.com"],
+          "urlRegex": "([^.]+)\\.myshopify\\.com",
+          "groupNameSource": "url",
+          "example": "URL: 'mystore.myshopify.com' → Groupe: 'mystore'",
+          "description": "Regroupe par boutique"
+        }
+      ]
+    },
+    {
+      "id": "travel",
+      "name": "Voyage & Réservations",
+      "description": "Booking, transport, hébergement",
+      "presets": [
+        {
+          "id": "airbnb-listing",
+          "name": "Airbnb - Logements",
+          "domainFilters": ["*.airbnb.*"],
+          "titleRegex": "(.+?)\\s*-\\s*(.+?)\\s*-\\s*Airbnb",
+          "urlRegex": "rooms/(\\d+)",
+          "groupNameSource": "smart_manual",
+          "example": "Titre: 'Apartment - Paris - Airbnb' → Groupe: 'Paris' OU si échec → Demande manuelle",
+          "description": "Regroupe par destination (demande si non trouvée)"
+        },
+        {
+          "id": "booking-hotel",
+          "name": "Booking.com - Hôtels",
+          "domainFilters": ["*.booking.com"],
+          "titleRegex": "(.+?)\\s*,\\s*(.+?)\\s*-",
+          "urlRegex": "city=([^&]+)",
+          "groupNameSource": "smart_manual",
+          "example": "Titre: 'Hotel, Paris -' → Groupe: 'Paris' OU si échec → Demande destination",
+          "description": "Regroupe par ville (demande si non trouvée)"
+        },
+        {
+          "id": "expedia-travel",
+          "name": "Expedia - Voyages",
+          "domainFilters": ["*.expedia.*"],
+          "urlRegex": "destination=([^&]+)",
+          "groupNameSource": "smart_manual",
+          "example": "URL: '?destination=Paris' → Groupe: 'Paris'",
+          "description": "Regroupe par destination"
+        },
+        {
+          "id": "skyscanner-flights",
+          "name": "Skyscanner - Vols",
+          "domainFilters": ["*.skyscanner.*"],
+          "titleRegex": "(.+?)\\s*to\\s*(.+?)\\s*-",
+          "urlRegex": "flights/([^/]+)/([^/]+)",
+          "groupNameSource": "smart_manual",
+          "example": "Titre: 'Paris to London' → Groupe: 'London'",
+          "description": "Regroupe par destination"
+        }
+      ]
+    },
+    {
+      "id": "search",
+      "name": "Recherche & Documentation",
+      "description": "Moteurs de recherche et documentation",
+      "presets": [
+        {
+          "id": "google-search",
+          "name": "Google - Recherches",
+          "domainFilters": ["*.google.*"],
+          "titleRegex": "(.+?)\\s*-\\s*Recherche Google",
+          "urlRegex": "search\\?.*q=([^&]+)",
+          "groupNameSource": "smart",
+          "example": "Titre: 'javascript tutorial - Recherche Google' → Groupe: 'javascript tutorial'",
+          "description": "Regroupe par termes de recherche"
+        },
+        {
+          "id": "wikipedia-article",
+          "name": "Wikipedia - Articles",
+          "domainFilters": ["*.wikipedia.org"],
+          "titleRegex": "(.+?)\\s*-\\s*Wikipedia",
+          "urlRegex": "wiki/([^#]+)",
+          "groupNameSource": "smart",
+          "example": "Titre: 'JavaScript - Wikipedia' → Groupe: 'JavaScript'",
+          "description": "Regroupe par article"
+        },
+        {
+          "id": "mdn-docs",
+          "name": "MDN - Documentation",
+          "domainFilters": ["developer.mozilla.org"],
+          "urlRegex": "docs/Web/([^/]+)",
+          "groupNameSource": "url",
+          "example": "URL: '/docs/Web/JavaScript' → Groupe: 'JavaScript'",
+          "description": "Regroupe par technologie"
+        },
+        {
+          "id": "medium-article",
+          "name": "Medium - Articles",
+          "domainFilters": ["*.medium.com", "medium.com"],
+          "urlRegex": "@([^/]+)",
+          "groupNameSource": "url",
+          "example": "URL: '/@author_name/article' → Groupe: 'author_name'",
+          "description": "Regroupe par auteur"
+        }
+      ]
+    },
+    {
+      "id": "social",
+      "name": "Réseaux Sociaux",
+      "description": "Plateformes sociales et communication",
+      "presets": [
+        {
+          "id": "linkedin-profile",
+          "name": "LinkedIn - Profils",
+          "domainFilters": ["*.linkedin.com"],
+          "urlRegex": "linkedin\\.com/in/([^/]+)",
+          "groupNameSource": "url",
+          "example": "URL: '/in/john-doe-123' → Groupe: 'john-doe-123'",
+          "description": "Regroupe par profil"
+        },
+        {
+          "id": "twitter-user",
+          "name": "Twitter/X - Profils",
+          "domainFilters": ["*.twitter.com", "*.x.com"],
+          "urlRegex": "/([^/]+)",
+          "groupNameSource": "url",
+          "example": "URL: '/elonmusk' → Groupe: 'elonmusk'",
+          "description": "Regroupe par utilisateur"
+        },
+        {
+          "id": "reddit-subreddit",
+          "name": "Reddit - Subreddits",
+          "domainFilters": ["*.reddit.com"],
+          "urlRegex": "reddit\\.com/r/([^/]+)",
+          "groupNameSource": "url",
+          "example": "URL: '/r/programming' → Groupe: 'programming'",
+          "description": "Regroupe par subreddit"
+        },
+        {
+          "id": "slack-workspace",
+          "name": "Slack - Workspaces",
+          "domainFilters": ["*.slack.com"],
+          "urlRegex": "([^.]+)\\.slack\\.com",
+          "groupNameSource": "url",
+          "example": "URL: 'myteam.slack.com' → Groupe: 'myteam'",
+          "description": "Regroupe par workspace"
+        },
+        {
+          "id": "zoom-meeting",
+          "name": "Zoom - Réunions",
+          "domainFilters": ["*.zoom.us", "zoom.us"],
+          "titleRegex": "Zoom Meeting ID: (\\d+)",
+          "urlRegex": "zoom\\.us/j/(\\d+)",
+          "groupNameSource": "smart",
+          "example": "Titre: 'Zoom Meeting ID: 123456789' → Groupe: '123456789'",
+          "description": "Regroupe par ID de meeting"
+        }
+      ]
+    },
+    {
+      "id": "media",
+      "name": "Streaming & Médias",
+      "description": "Vidéos, musique, actualités",
+      "presets": [
+        {
+          "id": "youtube-video",
+          "name": "YouTube - Vidéos",
+          "domainFilters": ["*.youtube.com", "youtu.be"],
+          "urlRegex": "(?:watch\\?v=|youtu\\.be/)([^&?]+)",
+          "groupNameSource": "url",
+          "example": "URL: '/watch?v=dQw4w9WgXcQ' → Groupe: 'dQw4w9WgXcQ'",
+          "description": "Regroupe par ID de vidéo"
+        },
+        {
+          "id": "youtube-channel",
+          "name": "YouTube - Chaînes",
+          "domainFilters": ["*.youtube.com"],
+          "titleRegex": "(.+?)\\s*-\\s*YouTube",
+          "urlRegex": "youtube\\.com/(c|channel|user|@)/([^/]+)",
+          "groupNameSource": "smart",
+          "example": "Titre: 'TechChannel - YouTube' → Groupe: 'TechChannel'",
+          "description": "Regroupe par chaîne"
+        },
+        {
+          "id": "netflix-title",
+          "name": "Netflix - Contenus",
+          "domainFilters": ["*.netflix.com"],
+          "urlRegex": "netflix\\.com/[a-z]{2}/title/(\\d+)",
+          "groupNameSource": "url",
+          "example": "URL: '/title/80018499' → Groupe: '80018499'",
+          "description": "Regroupe par ID de contenu"
+        },
+        {
+          "id": "spotify-track",
+          "name": "Spotify - Musiques",
+          "domainFilters": ["open.spotify.com"],
+          "urlRegex": "spotify\\.com/track/([^?]+)",
+          "groupNameSource": "url",
+          "example": "URL: '/track/4iV5W9u...' → Groupe: '4iV5W9u...'",
+          "description": "Regroupe par ID de piste"
+        },
+        {
+          "id": "twitch-channel",
+          "name": "Twitch - Chaînes",
+          "domainFilters": ["*.twitch.tv"],
+          "urlRegex": "twitch\\.tv/([^/]+)",
+          "groupNameSource": "url",
+          "example": "URL: '/ninja' → Groupe: 'ninja'",
+          "description": "Regroupe par chaîne"
+        }
+      ]
+    },
+    {
+      "id": "cloud",
+      "name": "Cloud & Infrastructure",
+      "description": "Services cloud et infrastructure",
+      "presets": [
+        {
+          "id": "aws-console",
+          "name": "AWS - Console",
+          "domainFilters": ["*.aws.amazon.com"],
+          "urlRegex": "console\\.aws\\.amazon\\.com/([^/]+)",
+          "groupNameSource": "url",
+          "example": "URL: '/ec2/home' → Groupe: 'EC2'",
+          "description": "Regroupe par service AWS"
+        },
+        {
+          "id": "azure-portal",
+          "name": "Azure - Portal",
+          "domainFilters": ["portal.azure.com", "*.azure.com"],
+          "urlRegex": "resourceGroups/([^/]+)",
+          "groupNameSource": "url",
+          "example": "URL: '/resourceGroups/mygroup' → Groupe: 'mygroup'",
+          "description": "Regroupe par resource group"
+        },
+        {
+          "id": "vercel-dashboard",
+          "name": "Vercel - Dashboard",
+          "domainFilters": ["vercel.com"],
+          "titleRegex": "(.+?)\\s*–\\s*Vercel",
+          "urlRegex": "vercel\\.com/[^/]+/([^/]+)",
+          "groupNameSource": "smart",
+          "example": "Titre: 'myproject – Vercel' → Groupe: 'myproject'",
+          "description": "Regroupe par projet"
+        }
+      ]
+    },
+    {
+      "id": "finance",
+      "name": "Finance & Banking",
+      "description": "Banques, trading, crypto",
+      "presets": [
+        {
+          "id": "coinbase-crypto",
+          "name": "Coinbase - Cryptomonnaies",
+          "domainFilters": ["*.coinbase.com"],
+          "urlRegex": "coinbase\\.com/price/([^/]+)",
+          "groupNameSource": "url",
+          "example": "URL: '/price/bitcoin' → Groupe: 'bitcoin'",
+          "description": "Regroupe par crypto"
+        },
+        {
+          "id": "tradingview-chart",
+          "name": "TradingView - Graphiques",
+          "domainFilters": ["*.tradingview.com"],
+          "urlRegex": "symbol=([^&]+)",
+          "groupNameSource": "url",
+          "example": "URL: '?symbol=NASDAQ:AAPL' → Groupe: 'NASDAQ:AAPL'",
+          "description": "Regroupe par symbole"
+        }
+      ]
+    },
+    {
+      "id": "education",
+      "name": "Education & Apprentissage",
+      "description": "Cours en ligne, formations",
+      "presets": [
+        {
+          "id": "udemy-course",
+          "name": "Udemy - Cours",
+          "domainFilters": ["*.udemy.com"],
+          "titleRegex": "(.+?)\\s*\\|\\s*Udemy",
+          "urlRegex": "udemy\\.com/course/([^/]+)",
+          "groupNameSource": "smart",
+          "example": "Titre: 'JavaScript Guide | Udemy' → Groupe: 'JavaScript Guide'",
+          "description": "Regroupe par cours"
+        },
+        {
+          "id": "coursera-course",
+          "name": "Coursera - Cours",
+          "domainFilters": ["*.coursera.org"],
+          "titleRegex": "(.+?)\\s*\\|\\s*Coursera",
+          "urlRegex": "coursera\\.org/learn/([^/]+)",
+          "groupNameSource": "smart",
+          "example": "Titre: 'Machine Learning | Coursera' → Groupe: 'Machine Learning'",
+          "description": "Regroupe par cours"
+        }
+      ]
+    }
+  ]
+}

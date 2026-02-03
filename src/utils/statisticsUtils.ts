@@ -62,6 +62,18 @@ export async function incrementTabsDeduplicated(): Promise<void> {
   }
 }
 
+export async function incrementStat(key: keyof Statistics): Promise<Statistics> {
+  try {
+    const current = await getStatisticsData();
+    const updated = { ...current, [key]: (current[key] || 0) + 1 };
+    await setStatisticsData(updated);
+    return updated;
+  } catch (error) {
+    console.error(`Error incrementing stat ${key}:`, error);
+    return await getStatisticsData();
+  }
+}
+
 export async function resetStatisticsData(): Promise<void> {
   try {
     await setStatisticsData(defaultStatistics);

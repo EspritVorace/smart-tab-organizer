@@ -68,29 +68,8 @@ export async function getDomainRules(): Promise<SyncSettings['domainRules']> {
   }
 }
 
-export async function getLogicalGroups(): Promise<SyncSettings['logicalGroups']> {
-  try {
-    const result = await browser.storage.sync.get({
-      logicalGroups: defaultSyncSettings.logicalGroups
-    });
-    return result.logicalGroups;
-  } catch (error) {
-    console.error('Error getting logical groups:', error);
-    return defaultSyncSettings.logicalGroups;
-  }
-}
 
-export async function getRegexPresets(): Promise<SyncSettings['regexPresets']> {
-  try {
-    const result = await browser.storage.sync.get({
-      regexPresets: defaultSyncSettings.regexPresets
-    });
-    return result.regexPresets;
-  } catch (error) {
-    console.error('Error getting regex presets:', error);
-    return defaultSyncSettings.regexPresets;
-  }
-}
+// getRegexPresets function removed - presets are now static in JSON file
 
 /**
  * Écouter les changements de settings

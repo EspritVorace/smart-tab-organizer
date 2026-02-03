@@ -25,7 +25,7 @@
 ### ⚙️ Opciones y Personalización
 * Añadir, editar, eliminar o activar/desactivar reglas de dominio.
 * Gestionar preajustes y expresiones regulares personalizadas.
-* Organizar reglas en grupos lógicos y elegir un color para cada grupo.
+* Gestionar preajustes y expresiones regulares personalizadas con una interfaz intuitiva.
 * Importar/exportar la configuración en JSON.
 * Configurar los modos de deduplicación.
 * Consultar las estadísticas (grupos creados y pestañas deduplicadas) y restablecerlas.
@@ -94,11 +94,20 @@
 
 ## Tecnologías Utilizadas 🛠️
 
+### Core
 * JavaScript y TypeScript
 * WXT framework para desarrollo de extensiones web
-* preact via npm para una interfaz ligera
+* React para interfaz de usuario reactiva
 * APIs de extensiones de Chrome/Firefox (Manifiesto V3)
-* CSS3
+
+### Librerías UI
+* **@radix-ui/themes** - Sistema de diseño y componentes UI
+* **next-themes** - Gestión de temas (modo oscuro/claro)
+* **lucide-react** - Iconos SVG
+* **react-hook-form** - Gestión de formularios
+
+### Utilidades
+* **Zod** - Validación de esquemas
 
 ## Licencia 📄
 

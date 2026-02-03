@@ -2,59 +2,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import { browser } from 'wxt/browser';
+import { Box, Flex, Theme } from '@radix-ui/themes';
+import { ThemeProvider } from 'next-themes';
 
-import { getSettings, saveSettings, getStatistics, resetStatistics } from '../utils/storage.js';
-import { getMessage } from '../utils/i18n.js';
-import { applyTheme } from '../utils/theme.js';
-import { StatsTab } from '../components/StatsTab.jsx';
+import { getMessage } from '../utils/i18n';
+import { Statistics } from '../components/Core/Statistics/Statistics.tsx';
+import { PopupHeader } from '../components/UI/PopupHeader/PopupHeader.tsx';
+import { SettingsToggles } from '../components/UI/SettingsToggles/SettingsToggles.tsx';
+import { useSyncedSettings } from '../hooks/useSyncedSettings.ts';
+import { useStatistics } from '../hooks/useStatistics.ts';
 
 (() => {
 
-function PopupApp() {
-    const [settings, setSettings] = useState({ domainRules: [] }); // Init avec tableau vide
-    const [stats, setStats] = useState({});
-    const [isLoaded, setIsLoaded] = useState(false);
-
-    // --- Effet pour charger les données et mettre à jour le thème ---
-    useEffect(() => {
-        async function loadData() {
-            const [loadedSettings, loadedStats] = await Promise.all([getSettings(), getStatistics()]);
-            setSettings(loadedSettings);
-            setStats(loadedStats);
-            applyTheme(loadedSettings.darkModePreference || 'system');
-            setIsLoaded(true);
-        }
-        loadData();
-
-        // Écouteur pour les changements
-        const storageListener = (changes, areaName) => {
-            if (areaName === 'sync' && changes.settings) {
-                setSettings(changes.settings.newValue);
-                applyTheme(changes.settings.newValue.darkModePreference || 'system');
-            }
-            if (areaName === 'local' && changes.statistics) {
-                setStats(changes.statistics.newValue);
-            }
-        };
-        browser.storage.onChanged.addListener(storageListener);
-
-        // Nettoyage au démontage
-        return () => browser.storage.onChanged.removeListener(storageListener);
-    }, []); // [] = S'exécute une seule fois au montage
-
-    // --- Effet pour sauvegarder les changements ---
-    useEffect(() => {
-        // Ne sauvegarde pas au premier chargement (quand il est vide)
-        if (isLoaded) {
-            saveSettings(settings);
-            console.log("Paramètres sauvegardés (Popup).");
-        }
-    }, [settings, isLoaded]); // Se déclenche quand 'settings' ou 'isLoaded' change
-
-    // --- Gestionnaires d'événements ---
-    const handleToggleChange = useCallback((key, value) => {
-        setSettings(prev => ({ ...prev, [key]: value }));
-    }, []);
+function PopupContent() {
+    const { settings, isLoaded, setGlobalGroupingEnabled, setGlobalDeduplicationEnabled } = useSyncedSettings();
+    const { statistics, isLoaded: statsLoaded, resetStatistics } = useStatistics();
 
     const openOptionsPage = useCallback(() => {
         browser.runtime.openOptionsPage();
@@ -62,46 +24,42 @@ function PopupApp() {
 
     const handleResetStats = useCallback(async () => {
         if (confirm(getMessage('confirmResetStats'))) {
-            const newStats = await resetStatistics();
-            setStats(newStats);
+            await resetStatistics();
         }
-    }, []);
+    }, [resetStatistics]);
 
     // --- Rendu ---
     return (
-        <div id="popup-inner" className={isLoaded ? 'loaded' : ''}>
-            <h1>{getMessage('popupTitle')}</h1>
+        <Box width="350px" p="4" style={{ background: "var(--gray-a2)", borderRadius: "var(--radius-3)" }}>
+            <Flex gap="2" direction="column" width="100%">
+                <PopupHeader title={getMessage('popupTitle')} onSettingsOpen={openOptionsPage}/>
 
-            <div className="toggle-switch">
-                <input
-                    type="checkbox"
-                    id="grouping-toggle"
-                    checked={settings.globalGroupingEnabled}
-                    onChange={(e) => handleToggleChange('globalGroupingEnabled', e.target.checked)}
+                <SettingsToggles 
+                    globalGroupingEnabled={settings?.globalGroupingEnabled}
+                    globalDeduplicationEnabled={settings?.globalDeduplicationEnabled}
+                    onGroupingChange={setGlobalGroupingEnabled}
+                    onDeduplicationChange={setGlobalDeduplicationEnabled}
+                    isLoading={!isLoaded}
                 />
-                <label htmlFor="grouping-toggle"></label>
-                <span>{getMessage('enableGrouping')}</span>
-            </div>
 
-            <div className="toggle-switch">
-                <input
-                    type="checkbox"
-                    id="deduplication-toggle"
-                    checked={settings.globalDeduplicationEnabled}
-                    onChange={(e) => handleToggleChange('globalDeduplicationEnabled', e.target.checked)}
-                />
-                <label htmlFor="deduplication-toggle"></label>
-                <span>{getMessage('enableDeduplication')}</span>
-            </div>
+                <Statistics stats={statistics} onReset={handleResetStats} isLoading={!statsLoaded} />
+            </Flex>
+        </Box>
+    );
+}
 
-            <hr />
-
-            <StatsTab stats={stats} onReset={handleResetStats} />
-
-            <hr />
-
-            <button onClick={openOptionsPage} className="button">{getMessage('openOptions')}</button>
-        </div>
+function PopupApp() {
+    return (
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+            <Theme>
+                <PopupContent />
+            </Theme>
+        </ThemeProvider>
     );
 }
 
