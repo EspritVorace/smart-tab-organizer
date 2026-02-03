@@ -1,5 +1,7 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
-import { browser } from 'wxt/browser';
+import { browser, Browser } from 'wxt/browser';
+import { getMessage } from '../utils/i18n';
+import type { MiddleClickMessage, AskGroupNameMessage, GroupNameResponse, ContentMessage } from '../types/messages.js';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -8,13 +10,13 @@ export default defineContentScript({
   main() {
     function handleAuxClick(event: MouseEvent) {
       if (event.button === 1) {
-        let target: any = event.target;
+        let target = event.target as HTMLElement | null;
         while (target && target.tagName !== 'A') {
-          target = target.parentNode;
+          target = target.parentNode as HTMLElement | null;
         }
-        if (target && target.href && /^https?:\/\//.test(target.href)) {
+        if (target && (target as HTMLAnchorElement).href && /^https?:\/\//.test((target as HTMLAnchorElement).href)) {
           browser.runtime.sendMessage(
-            { type: 'middleClickLink', url: target.href },
+            { type: 'middleClickLink', url: (target as HTMLAnchorElement).href } as MiddleClickMessage,
             () => {
               if (browser.runtime.lastError)
                 console.error('Msg err:', browser.runtime.lastError.message);
@@ -26,7 +28,7 @@ export default defineContentScript({
 
     document.addEventListener('auxclick', handleAuxClick, true);
 
-    browser.runtime.onMessage.addListener((req, sender, sendResponse) => {
+    browser.runtime.onMessage.addListener((req: ContentMessage, sender: Browser.runtime.MessageSender, sendResponse: (response: GroupNameResponse) => void) => {
       if (req.type === 'askGroupName') {
         if (sender.id !== browser.runtime.id) {
           console.warn('Ignored askGroupName from unknown sender', sender);
@@ -34,8 +36,8 @@ export default defineContentScript({
           return;
         }
         const result = prompt(
-          browser.i18n.getMessage('promptEnterGroupName') || 'Enter group name',
-          req.defaultName || ''
+          getMessage('promptEnterGroupName') || 'Enter group name',
+          (req as AskGroupNameMessage).defaultName || ''
         );
         sendResponse({ name: result && result.trim() ? result.trim() : null });
       }

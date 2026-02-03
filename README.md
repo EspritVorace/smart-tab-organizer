@@ -25,7 +25,7 @@
 ### ⚙️ Options & Customization
 * Add, edit, delete and enable/disable domain rules.
 * Manage custom and predefined RegEx presets.
-* Organize rules in logical groups and choose a color for each group.
+* Manage custom and predefined RegEx presets with an intuitive interface.
 * Import/export your settings as JSON.
 * Configure deduplication modes.
 * View statistics (groups created and tabs deduplicated) and reset them.
@@ -94,11 +94,20 @@
 
 ## Technologies Used 🛠️
 
+### Core
 * JavaScript & TypeScript
 * WXT framework for web extension development
-* preact (via npm) for a lightweight reactive UI
+* React for reactive user interface
 * Chrome/Firefox Extension APIs (Manifest V3)
-* CSS3
+
+### UI Libraries
+* **@radix-ui/themes** - Design system and UI components
+* **next-themes** - Theme management (dark/light mode)
+* **lucide-react** - SVG icons
+* **react-hook-form** - Form management
+
+### Utilities
+* **Zod** - Schema validation
 
 ## License 📄
 

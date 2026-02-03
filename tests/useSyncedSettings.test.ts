@@ -14,7 +14,6 @@ describe('useSyncedSettings', () => {
     globalDeduplicationEnabled: true,
     darkModePreference: 'system',
     regexPresets: [],
-    logicalGroups: [],
     domainRules: []
   };
 
@@ -98,28 +97,6 @@ describe('useSyncedSettings', () => {
     expect(storageData.regexPresets).toEqual(newPresets);
   });
 
-  it('devrait mettre à jour logicalGroups', async () => {
-    await browser.storage.sync.set(mockDefaultSettings);
-    
-    const { result } = renderHook(() => useSyncedSettings());
-    
-    await waitFor(() => {
-      expect(result.current.isLoaded).toBe(true);
-    });
-
-    const newGroups = [
-      { id: 'group-1', label: 'Test Group', color: 'blue' as const }
-    ];
-
-    await act(async () => {
-      await result.current.setLogicalGroups(newGroups);
-    });
-
-    expect(result.current.settings?.logicalGroups).toEqual(newGroups);
-    
-    const storageData = await browser.storage.sync.get('logicalGroups');
-    expect(storageData.logicalGroups).toEqual(newGroups);
-  });
 
   it('devrait mettre à jour domainRules', async () => {
     await browser.storage.sync.set(mockDefaultSettings);

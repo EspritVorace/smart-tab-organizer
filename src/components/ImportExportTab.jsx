@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getMessage } from '../utils/i18n.js';
+import { getMessage } from '../utils/i18n';
 
 function ImportExportTab({ settings, setSettings }) {
     const [feedback, setFeedback] = useState({ message: '', status: '' });

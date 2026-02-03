@@ -10,7 +10,7 @@ export default defineConfig({
     version: '1.0.1',
     author: 'EspritVorace',
     homepage_url: 'https://github.com/EspritVorace/smart-tab-organizer',
-    default_locale: 'fr',
+    default_locale: 'en',
     permissions: ['tabs', 'tabGroups', 'storage'],
     host_permissions: ['<all_urls>'],
     action: {
@@ -18,7 +18,8 @@ export default defineConfig({
         '16': 'icons/icon16.png',
         '48': 'icons/icon48.png',
         '128': 'icons/icon128.png'
-      }
+      },
+      default_popup: 'popup.html'
     },
     icons: {
       '16': 'icons/icon16.png',
@@ -29,7 +30,15 @@ export default defineConfig({
   vite: () => ({
     plugins: [react()],
     build: {
-      emptyOutDir: true
-    }
+      emptyOutDir: true,
+      rollupOptions: {
+        output: {
+          assetFileNames: 'assets/[name].[hash].[ext]',
+          chunkFileNames: 'chunks/[name].[hash].js',
+          entryFileNames: 'chunks/[name].[hash].js'
+        }
+      }
+    },
+    base: './'
   })
 });

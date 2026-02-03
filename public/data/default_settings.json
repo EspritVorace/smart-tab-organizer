@@ -1,32 +1,13 @@
 {
   "globalGroupingEnabled": true,
   "globalDeduplicationEnabled": true,
-  "darkModePreference": "system",
-  "regexPresets": [
-    { "id": "preset-jira", "name": "Jira Ticket", "regex": "([A-Z]+-\\d+)", "urlRegex": "([A-Z]+-\\d+)" },
-    { "id": "preset-gitlab", "name": "GitLab Issue", "regex": "#(\\d+)", "urlRegex": "issues\\/(\\d+)" },
-    { "id": "preset-github", "name": "GitHub Issue", "regex": "#(\\d+)", "urlRegex": "issues\\/(\\d+)" },
-    { "id": "preset-trello", "name": "Trello Card", "regex": "\\[#(\\d+)\\]", "urlRegex": "cards\\/(\\w+)" },
-    { "id": "preset-mantis", "name": "Mantis Issue", "regex": "0*(\\d+)", "urlRegex": "id=(\\d+)" },
-    { "id": "preset-asana", "name": "Asana Task ID", "regex": "\\/(\\d{16})\\/", "urlRegex": "\\/(\\d{16})\\/" },
-    { "id": "preset-zendesk", "name": "Zendesk Ticket ID", "regex": "\\/tickets\\/(\\d+)", "urlRegex": "tickets\\/(\\d+)" },
-    { "id": "preset-servicenow", "name": "ServiceNow ID", "regex": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+)", "urlRegex": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+)" },
-    { "id": "preset-freshdesk", "name": "Freshdesk Ticket ID", "regex": "\\/a\\/tickets\\/(\\d+)", "urlRegex": "tickets\\/(\\d+)" },
-    { "id": "preset-redmine", "name": "Redmine Issue ID", "regex": "#(\\d+)", "urlRegex": "issues\\/(\\d+)" }
-  ],
-  "logicalGroups": [
-    { "id": "issues", "label": "issues", "color": "grey" }
-  ],
   "domainRules": [
-    { "id": "rule-jira", "enabled": true, "domainFilter": "*.atlassian.net", "label": "Jira/Atlassian", "titleParsingRegEx": "([A-Z]+-\\d+)", "urlParsingRegEx": "([A-Z]+-\\d+)", "groupNameSource": "title", "deduplicationMatchMode": "exact", "groupId": "issues" },
-    { "id": "rule-gitlab", "enabled": true, "domainFilter": "gitlab.com", "label": "GitLab", "titleParsingRegEx": "#(\\d+)", "urlParsingRegEx": "issues\\/(\\d+)", "groupNameSource": "title", "deduplicationMatchMode": "exact", "groupId": "issues" },
-    { "id": "rule-github", "enabled": true, "domainFilter": "github.com", "label": "GitHub", "titleParsingRegEx": "#(\\d+)", "urlParsingRegEx": "issues\\/(\\d+)", "groupNameSource": "title", "deduplicationMatchMode": "exact", "groupId": "issues" },
-    { "id": "rule-trello", "enabled": true, "domainFilter": "trello.com", "label": "Trello", "titleParsingRegEx": "\\[#(\\d+)\\]", "urlParsingRegEx": "cards\\/(\\w+)", "groupNameSource": "title", "deduplicationMatchMode": "exact", "groupId": "issues" },
-    { "id": "rule-mantis", "enabled": true, "domainFilter": "mantisbt.org", "label": "MantisBT", "titleParsingRegEx": "0*(\\d+)", "urlParsingRegEx": "id=(\\d+)", "groupNameSource": "title", "deduplicationMatchMode": "exact", "groupId": "issues" },
-    { "id": "rule-asana", "enabled": true, "domainFilter": "app.asana.com", "label": "Asana", "titleParsingRegEx": "\\/(\\d{16})\\/", "urlParsingRegEx": "\\/(\\d{16})\\/", "groupNameSource": "title", "deduplicationMatchMode": "exact", "groupId": "issues" },
-    { "id": "rule-zendesk", "enabled": true, "domainFilter": "*.zendesk.com", "label": "Zendesk", "titleParsingRegEx": "\\/tickets\\/(\\d+)", "urlParsingRegEx": "tickets\\/(\\d+)", "groupNameSource": "title", "deduplicationMatchMode": "exact", "groupId": "issues" },
-    { "id": "rule-servicenow", "enabled": true, "domainFilter": "*.service-now.com", "label": "ServiceNow", "titleParsingRegEx": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+)", "urlParsingRegEx": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+)", "groupNameSource": "title", "deduplicationMatchMode": "exact", "groupId": "issues" },
-    { "id": "rule-freshdesk", "enabled": true, "domainFilter": "*.freshdesk.com", "label": "Freshdesk", "titleParsingRegEx": "\\/a\\/tickets\\/(\\d+)", "urlParsingRegEx": "tickets\\/(\\d+)", "groupNameSource": "title", "deduplicationMatchMode": "exact", "groupId": "issues" },
-    { "id": "rule-redmine", "enabled": true, "domainFilter": "redmine.org", "label": "Redmine", "titleParsingRegEx": "#(\\d+)", "urlParsingRegEx": "issues\\/(\\d+)", "groupNameSource": "title", "deduplicationMatchMode": "exact", "groupId": "issues" }
+    { "id": "rule-jira", "enabled": true, "domainFilter": "*.atlassian.net", "label": "Jira/Atlassian", "titleParsingRegEx": "\\[([A-Z]+-\\d+)\\]", "urlParsingRegEx": "browse/([A-Z]+-\\d+)", "groupNameSource": "smart_label", "deduplicationMatchMode": "exact", "color": "blue", "deduplicationEnabled": true, "presetId": "jira-ticket" },
+    { "id": "rule-gitlab", "enabled": true, "domainFilter": "gitlab.com", "label": "GitLab", "titleParsingRegEx": "(.+?)\\s*\\|\\s*Trello", "urlParsingRegEx": "gitlab\\.com/([^/]+/[^/]+)", "groupNameSource": "smart_label", "deduplicationMatchMode": "exact", "color": "orange", "deduplicationEnabled": true, "presetId": "gitlab-project" },
+    { "id": "rule-github", "enabled": true, "domainFilter": "github.com", "label": "GitHub", "titleParsingRegEx": "(.+?)\\s*·\\s*Issue\\s*#(\\d+)", "urlParsingRegEx": "issues/(\\d+)", "groupNameSource": "smart_preset", "deduplicationMatchMode": "exact", "color": "purple", "deduplicationEnabled": true, "presetId": "github-issue" },
+    { "id": "rule-trello", "enabled": true, "domainFilter": "trello.com", "label": "Trello", "titleParsingRegEx": "(.+?)\\s*\\|\\s*Trello", "urlParsingRegEx": "trello\\.com/b/[^/]+/(.+)", "groupNameSource": "smart_label", "deduplicationMatchMode": "exact", "color": "cyan", "deduplicationEnabled": true, "presetId": "trello-board" },
+    { "id": "rule-asana", "enabled": true, "domainFilter": "app.asana.com", "label": "Asana", "titleParsingRegEx": "", "urlParsingRegEx": "app\\.asana\\.com/0/([^/]+)", "groupNameSource": "smart_label", "deduplicationMatchMode": "exact", "color": "pink", "deduplicationEnabled": true, "presetId": "asana-task" },
+    { "id": "rule-zendesk", "enabled": true, "domainFilter": "*.zendesk.com", "label": "Zendesk", "titleParsingRegEx": "Ticket #(\\d+)", "urlParsingRegEx": "tickets/(\\d+)", "groupNameSource": "title", "deduplicationMatchMode": "exact", "color": "green", "deduplicationEnabled": true, "presetId": null },
+    { "id": "rule-servicenow", "enabled": true, "domainFilter": "*.service-now.com", "label": "ServiceNow", "titleParsingRegEx": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+)", "urlParsingRegEx": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+)", "groupNameSource": "title", "deduplicationMatchMode": "exact", "color": "yellow", "deduplicationEnabled": true, "presetId": null }
   ]
 }

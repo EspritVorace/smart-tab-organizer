@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { SyncSettings, DarkModePreference, RegexPresetSettings, LogicalGroupSettings, DomainRuleSettings } from '../types/syncSettings.js';
+import type { SyncSettings, DomainRuleSettings } from '../types/syncSettings.js';
 
 export interface UseSyncedSettingsReturn {
   // État actuel
@@ -9,17 +9,11 @@ export interface UseSyncedSettingsReturn {
   // Setters pour chaque champ
   setGlobalGroupingEnabled: (value: boolean) => Promise<void>;
   setGlobalDeduplicationEnabled: (value: boolean) => Promise<void>;
-  setDarkModePreference: (value: DarkModePreference) => Promise<void>;
-  setRegexPresets: (value: RegexPresetSettings) => Promise<void>;
-  setLogicalGroups: (value: LogicalGroupSettings) => Promise<void>;
   setDomainRules: (value: DomainRuleSettings) => Promise<void>;
   
   // Callbacks de changement pour chaque champ
   onGlobalGroupingEnabledChange: (callback: (value: boolean) => void) => () => void;
   onGlobalDeduplicationEnabledChange: (callback: (value: boolean) => void) => () => void;
-  onDarkModePreferenceChange: (callback: (value: DarkModePreference) => void) => () => void;
-  onRegexPresetsChange: (callback: (value: RegexPresetSettings) => void) => () => void;
-  onLogicalGroupsChange: (callback: (value: LogicalGroupSettings) => void) => () => void;
   onDomainRulesChange: (callback: (value: DomainRuleSettings) => void) => () => void;
   
   // Utilitaires
@@ -41,9 +35,6 @@ export function useSyncedSettings(): UseSyncedSettingsReturn {
         const result = await browser.storage.sync.get({
           globalGroupingEnabled: true,
           globalDeduplicationEnabled: true,
-          darkModePreference: 'system' as DarkModePreference,
-          regexPresets: [] as RegexPresetSettings,
-          logicalGroups: [] as LogicalGroupSettings,
           domainRules: [] as DomainRuleSettings
         });
         
@@ -138,9 +129,6 @@ export function useSyncedSettings(): UseSyncedSettingsReturn {
       const result = await browser.storage.sync.get({
         globalGroupingEnabled: true,
         globalDeduplicationEnabled: true,
-        darkModePreference: 'system' as DarkModePreference,
-        regexPresets: [] as RegexPresetSettings,
-        logicalGroups: [] as LogicalGroupSettings,
         domainRules: [] as DomainRuleSettings
       });
       
@@ -157,17 +145,11 @@ export function useSyncedSettings(): UseSyncedSettingsReturn {
     // Setters
     setGlobalGroupingEnabled: (value: boolean) => updateField('globalGroupingEnabled', value),
     setGlobalDeduplicationEnabled: (value: boolean) => updateField('globalDeduplicationEnabled', value),
-    setDarkModePreference: (value: DarkModePreference) => updateField('darkModePreference', value),
-    setRegexPresets: (value: RegexPresetSettings) => updateField('regexPresets', value),
-    setLogicalGroups: (value: LogicalGroupSettings) => updateField('logicalGroups', value),
     setDomainRules: (value: DomainRuleSettings) => updateField('domainRules', value),
     
     // Change callbacks
     onGlobalGroupingEnabledChange: (callback) => registerChangeCallback('globalGroupingEnabled', callback),
     onGlobalDeduplicationEnabledChange: (callback) => registerChangeCallback('globalDeduplicationEnabled', callback),
-    onDarkModePreferenceChange: (callback) => registerChangeCallback('darkModePreference', callback),
-    onRegexPresetsChange: (callback) => registerChangeCallback('regexPresets', callback),
-    onLogicalGroupsChange: (callback) => registerChangeCallback('logicalGroups', callback),
     onDomainRulesChange: (callback) => registerChangeCallback('domainRules', callback),
     
     // Utilitaires
