@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ImportExportPage } from './ImportExportPage';
-import { defaultSyncSettings } from '../../../utils/settingsDefaults';
+import { defaultSyncSettings } from '../../../types/syncSettings';
 
 const meta: Meta<typeof ImportExportPage> = {
   title: 'Components/UI/ImportExportPage/ImportExportPage',

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Flex, Box } from '@radix-ui/themes';
 import * as Toast from '@radix-ui/react-toast';
-import { Download, Upload } from 'lucide-react';
+import { Download, Upload, FileText } from 'lucide-react';
 import { z } from 'zod';
 import { PageLayout } from '../PageLayout/PageLayout';
 import { getMessage } from '../../../utils/i18n';
@@ -92,9 +92,10 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
   };
 
   return (
-    <PageLayout 
-      titleKey="importExportTab" 
-      theme="IMPORT" 
+    <PageLayout
+      titleKey="importExportTab"
+      theme="IMPORT"
+      icon={FileText}
       syncSettings={syncSettings}
     >
       {() => (

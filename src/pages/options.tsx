@@ -16,18 +16,11 @@ import type { SidebarItem } from '../components/UI/Sidebar/Sidebar';
 import { ThemeToggle } from '../components/UI/ThemeToggle/ThemeToggle.jsx';
 import { Flex, Text } from '@radix-ui/themes';
 import { DomainRulesPage } from './DomainRulesPage';
+import { StatisticsPage } from './StatisticsPage';
 import { ImportExportPage } from '../components/UI/ImportExportPage/ImportExportPage';
-import { StatsTab } from '../components/StatsTab.jsx';
 import { Shield, FileText, BarChart3, Github } from 'lucide-react';
 import { FEATURE_BASE_COLORS } from '../utils/themeConstants';
 import type { SyncSettings, DomainRuleSettings } from '../types/syncSettings';
-import type { Statistics } from '../types/statistics';
-import { 
-  DomainRulesTheme, 
-  RegexPresetsTheme, 
-  ImportTheme, 
-  StatisticsTheme 
-} from '../components/Form/themes/index';
 
 (() => {
 
@@ -262,9 +255,7 @@ function OptionsContent() {
                         <ImportExportPage syncSettings={settings} onSettingsUpdate={updateSettings} />
                     )}
                     {currentTab === 'stats' && (
-                        <StatisticsTheme>
-                            <StatsTab stats={stats} onReset={handleResetStats} />
-                        </StatisticsTheme>
+                        <StatisticsPage syncSettings={settings} stats={stats} onReset={handleResetStats} />
                     )}
                 </main>
             </div>

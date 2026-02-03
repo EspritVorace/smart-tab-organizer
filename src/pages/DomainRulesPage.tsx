@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { Button, Badge, Switch, Text, Flex } from '@radix-ui/themes';
-import { Edit, Trash2, Plus, Eye, EyeOff } from 'lucide-react';
+import { Edit, Trash2, Plus, Eye, EyeOff, Shield } from 'lucide-react';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { DataTable } from '../components/UI/DataTable/DataTable';
 import { DomainRuleFormModal } from '../components/Core/DomainRule/DomainRuleFormModal';
@@ -201,6 +201,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
       <PageLayout
         titleKey="domainRulesTab"
         theme="DOMAIN_RULES"
+        icon={Shield}
         syncSettings={syncSettings}
         headerActions={headerActions}
       >
