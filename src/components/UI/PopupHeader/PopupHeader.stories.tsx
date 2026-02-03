@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { Box } from '@radix-ui/themes';
 import { PopupHeader } from './PopupHeader';
 
 const meta: Meta<typeof PopupHeader> = {
@@ -11,6 +12,13 @@ const meta: Meta<typeof PopupHeader> = {
   argTypes: {
     onSettingsOpen: { action: 'settings-opened' },
   },
+  decorators: [
+    (Story) => (
+      <Box style={{ width: 350 }}>
+        <Story />
+      </Box>
+    ),
+  ],
 } satisfies Meta<typeof PopupHeader>;
 
 export default meta;
