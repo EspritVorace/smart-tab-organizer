@@ -3,9 +3,10 @@
   "version": "1.0.1",
   "type": "module",
   "scripts": {
-    "test": "vitest",
-    "test:watch": "vitest --watch",
-    "test:ui": "vitest --ui",
+    "test": "vitest run --config vitest.simple.config.ts",
+    "test:watch": "vitest --watch --config vitest.simple.config.ts",
+    "test:ui": "vitest --ui --config vitest.simple.config.ts",
+    "test:wxt": "vitest --config vitest.config.ts",
     "test:legacy": "node tests/runTests.js",
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",
