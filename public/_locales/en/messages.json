@@ -1,6 +1,8 @@
 {
   "extensionName": { "message": "SmartTab Organizer" },
   "extensionDescription": { "message": "Automatically groups and deduplicates tabs based on configurable rules." },
+  "yes": { "message": "Yes" },
+  "no": { "message": "No" },
   "popupTitle": { "message": "SmartTab Organizer" },
   "enableGrouping": { "message": "Enable Auto Grouping" },
   "enableDeduplication": { "message": "Enable Deduplication" },
@@ -28,6 +30,8 @@
   "hostnameMatch": { "message": "Hostname" },
   "hostnamePathMatch": { "message": "Hostname + Path" },
   "enabled": { "message": "Enabled" },
+  "disabled": { "message": "Disabled" },
+  "deduplicationEnabled": { "message": "Deduplication" },
   "save": { "message": "Save" },
   "edit": { "message": "Edit" },
   "delete": { "message": "Delete" },

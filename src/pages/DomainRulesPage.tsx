@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Button, Switch, Text } from '@radix-ui/themes';
+import { Button, Switch, Text, HoverCard, Box, Flex, Badge } from '@radix-ui/themes';
 import { Edit, Trash2, Plus, Eye, EyeOff, Shield } from 'lucide-react';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { DataTable } from '../components/UI/DataTable/DataTable';
@@ -78,8 +78,75 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
     {
       key: 'label',
       label: getMessage('labelLabel'),
-      render: (value: string) => (
-        <Text weight="medium">{value}</Text>
+      render: (value: string, row: DomainRuleSetting) => (
+        <HoverCard.Root>
+          <HoverCard.Trigger>
+            <Text weight="medium" style={{ cursor: 'pointer', textDecoration: 'underline dotted' }}>{value}</Text>
+          </HoverCard.Trigger>
+          <HoverCard.Content size="2" style={{ maxWidth: 400 }}>
+            <Flex direction="column" gap="3">
+              {/* Header */}
+              <Flex justify="between" align="center" pb="2" style={{ borderBottom: '1px solid var(--gray-5)' }}>
+                <Text size="3" weight="bold">{row.label}</Text>
+                <Badge color={row.enabled ? 'green' : 'gray'} variant="soft">
+                  {getMessage(row.enabled ? 'enabled' : 'disabled')}
+                </Badge>
+              </Flex>
+
+              {/* Liste des propriétés */}
+              <Box style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '8px 12px', alignItems: 'baseline' }}>
+                <Text size="1" weight="bold" color="gray">{getMessage('domainFilter')}</Text>
+                <Text size="2"><code style={{ backgroundColor: 'var(--gray-3)', padding: '2px 6px', borderRadius: '4px' }}>{row.domainFilter}</code></Text>
+
+                <Text size="1" weight="bold" color="gray">{getMessage('tabGroupColor')}</Text>
+                <Flex align="center" gap="2">
+                  <div
+                    style={{
+                      width: '16px',
+                      height: '16px',
+                      backgroundColor: `var(--${getRadixColor(row.color)}-9)`,
+                      borderRadius: '4px',
+                      border: '1px solid var(--gray-6)'
+                    }}
+                  />
+                  <Text size="2">{getMessage(`color_${row.color}`)}</Text>
+                </Flex>
+
+                <Text size="1" weight="bold" color="gray">{getMessage('groupNameSource')}</Text>
+                <Text size="2">{getMessage(`groupNameSource${row.groupNameSource.charAt(0).toUpperCase() + row.groupNameSource.slice(1)}`)}</Text>
+
+                {row.presetId && (
+                  <>
+                    <Text size="1" weight="bold" color="gray">{getMessage('presetLabel')}</Text>
+                    <Text size="2">{row.presetId}</Text>
+                  </>
+                )}
+
+                {row.titleParsingRegEx && (
+                  <>
+                    <Text size="1" weight="bold" color="gray">{getMessage('titleRegex')}</Text>
+                    <Text size="2"><code style={{ backgroundColor: 'var(--gray-3)', padding: '2px 6px', borderRadius: '4px', wordBreak: 'break-all' }}>{row.titleParsingRegEx}</code></Text>
+                  </>
+                )}
+
+                {row.urlParsingRegEx && (
+                  <>
+                    <Text size="1" weight="bold" color="gray">{getMessage('urlRegex')}</Text>
+                    <Text size="2"><code style={{ backgroundColor: 'var(--gray-3)', padding: '2px 6px', borderRadius: '4px', wordBreak: 'break-all' }}>{row.urlParsingRegEx}</code></Text>
+                  </>
+                )}
+
+                <Text size="1" weight="bold" color="gray">{getMessage('deduplicationMode')}</Text>
+                <Text size="2">{getMessage(`${row.deduplicationMatchMode}Match`)}</Text>
+
+                <Text size="1" weight="bold" color="gray">{getMessage('deduplicationEnabled')}</Text>
+                <Badge size="1" color={row.deduplicationEnabled ? 'green' : 'red'} variant="soft">
+                  {row.deduplicationEnabled ? getMessage('yes') : getMessage('no')}
+                </Badge>
+              </Box>
+            </Flex>
+          </HoverCard.Content>
+        </HoverCard.Root>
       )
     }
   ], [handleToggleEnabled]);

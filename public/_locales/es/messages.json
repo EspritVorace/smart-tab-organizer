@@ -1,6 +1,8 @@
 {
   "extensionName": { "message": "SmartTab Organizer" },
   "extensionDescription": { "message": "Agrupa y deduplica pestañas automáticamente según reglas configurables." },
+  "yes": { "message": "Sí" },
+  "no": { "message": "No" },
   "popupTitle": { "message": "SmartTab Organizer" },
   "enableGrouping": { "message": "Habilitar Agrupación Auto" },
   "enableDeduplication": { "message": "Habilitar Deduplicación" },
@@ -28,6 +30,8 @@
   "hostnameMatch": { "message": "Nombre de host" },
   "hostnamePathMatch": { "message": "Host + Ruta" },
   "enabled": { "message": "Habilitado" },
+  "disabled": { "message": "Deshabilitado" },
+  "deduplicationEnabled": { "message": "Deduplicación" },
   "save": { "message": "Guardar" },
   "edit": { "message": "Editar" },
   "delete": { "message": "Eliminar" },
