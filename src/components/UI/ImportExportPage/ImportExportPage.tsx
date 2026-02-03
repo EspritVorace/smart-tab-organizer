@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button, Flex, Box } from '@radix-ui/themes';
-import * as Toast from '@radix-ui/react-toast';
 import { Download, Upload, FileText } from 'lucide-react';
 import { z } from 'zod';
 import { PageLayout } from '../PageLayout/PageLayout';
 import { getMessage } from '../../../utils/i18n';
+import { showNotification } from '../../../utils/notifications';
 import type { SyncSettings } from '../../../types/syncSettings';
 import { domainRuleSchema } from '../../../schemas/domainRule';
 
@@ -28,16 +28,6 @@ const ExportDataSchema = z.object({
 type ExportData = z.infer<typeof ExportDataSchema>;
 
 export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExportPageProps) {
-  const [toastOpen, setToastOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error'>('success');
-
-  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
-    setToastMessage(message);
-    setToastType(type);
-    setToastOpen(true);
-  };
-
   const handleExport = () => {
     // Créer l'objet d'export avec seulement les domainRules pour l'instant
     const exportData: ExportData = {
@@ -49,7 +39,11 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
     a.href = dataStr;
     a.download = "smarttab_organizer_rules.json";
     a.click();
-    showToast(getMessage("exportMessage"), 'success');
+    showNotification({
+      title: getMessage('extensionName'),
+      message: getMessage('exportMessage'),
+      type: 'success'
+    });
   };
 
   const handleImportClick = () => {
@@ -75,13 +69,20 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
           };
           
           onSettingsUpdate(updatedSettings);
-          showToast(getMessage("importSuccess"), 'success');
+          showNotification({
+            title: getMessage('extensionName'),
+            message: getMessage('importSuccess'),
+            type: 'success'
+          });
         } catch (error) {
-          if (error instanceof z.ZodError) {
-            showToast(getMessage("importError") + " Structure de fichier invalide.", 'error');
-          } else {
-            showToast(getMessage("importError") + (error as Error).message, 'error');
-          }
+          const errorMessage = error instanceof z.ZodError
+            ? getMessage('importError') + ' Structure de fichier invalide.'
+            : getMessage('importError') + (error as Error).message;
+          showNotification({
+            title: getMessage('extensionName'),
+            message: errorMessage,
+            type: 'error'
+          });
         }
       };
       reader.readAsText(file);
@@ -110,15 +111,6 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
               {getMessage('importSettings')}
             </Button>
           </Flex>
-          
-          <Toast.Provider swipeDirection="right">
-            <Toast.Root open={toastOpen} onOpenChange={setToastOpen}>
-              <Toast.Title>
-                {toastType === 'success' ? '✓' : '✗'} {toastMessage}
-              </Toast.Title>
-            </Toast.Root>
-            <Toast.Viewport />
-          </Toast.Provider>
         </Box>
       )}
     </PageLayout>
