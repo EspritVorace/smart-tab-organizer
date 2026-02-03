@@ -17,8 +17,9 @@ import { ThemeToggle } from '../components/UI/ThemeToggle/ThemeToggle.jsx';
 import { Flex, Text } from '@radix-ui/themes';
 import { DomainRulesPage } from './DomainRulesPage';
 import { StatisticsPage } from './StatisticsPage';
+import { SettingsPage } from '../components/UI/SettingsPage/SettingsPage';
 import { ImportExportPage } from '../components/UI/ImportExportPage/ImportExportPage';
-import { Shield, FileText, BarChart3, Github } from 'lucide-react';
+import { Shield, FileText, BarChart3, Settings, Github } from 'lucide-react';
 import { FEATURE_BASE_COLORS } from '../utils/themeConstants';
 import type { SyncSettings, DomainRuleSettings } from '../types/syncSettings';
 
@@ -90,6 +91,12 @@ function OptionsContent() {
             label: getMessage('statisticsTab'),
             icon: BarChart3 as any,
             accentColor: FEATURE_BASE_COLORS.STATISTICS,
+        },
+        {
+            id: 'settings',
+            label: getMessage('settingsTab'),
+            icon: Settings as any,
+            accentColor: FEATURE_BASE_COLORS.SETTINGS,
         },
     ];
 
@@ -256,6 +263,9 @@ function OptionsContent() {
                     )}
                     {currentTab === 'stats' && (
                         <StatisticsPage syncSettings={settings} stats={stats} onReset={handleResetStats} />
+                    )}
+                    {currentTab === 'settings' && (
+                        <SettingsPage syncSettings={settings} updateSettings={updateSettings} />
                     )}
                 </main>
             </div>

@@ -15,11 +15,16 @@ export interface SyncSettings {
   globalGroupingEnabled: boolean;
   globalDeduplicationEnabled: boolean;
   domainRules: DomainRuleSettings;
+  // Notification settings
+  notifyOnGrouping: boolean;
+  notifyOnDeduplication: boolean;
 }
 
 // Valeurs par défaut pour SyncSettings
 export const defaultSyncSettings: SyncSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
-  domainRules: []
+  domainRules: [],
+  notifyOnGrouping: true,
+  notifyOnDeduplication: true
 };

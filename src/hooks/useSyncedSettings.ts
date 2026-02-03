@@ -41,7 +41,9 @@ export function useSyncedSettings(): UseSyncedSettingsReturn {
         const result = await browser.storage.sync.get({
           globalGroupingEnabled: true,
           globalDeduplicationEnabled: true,
-          domainRules: [] as DomainRuleSettings
+          domainRules: [] as DomainRuleSettings,
+          notifyOnGrouping: true,
+          notifyOnDeduplication: true
         });
 
         setSettings(result as SyncSettings);
@@ -161,9 +163,11 @@ export function useSyncedSettings(): UseSyncedSettingsReturn {
       const result = await browser.storage.sync.get({
         globalGroupingEnabled: true,
         globalDeduplicationEnabled: true,
-        domainRules: [] as DomainRuleSettings
+        domainRules: [] as DomainRuleSettings,
+        notifyOnGrouping: true,
+        notifyOnDeduplication: true
       });
-      
+
       setSettings(result as SyncSettings);
     } catch (error) {
       console.error('Error reloading settings:', error);

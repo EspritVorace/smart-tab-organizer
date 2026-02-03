@@ -3,7 +3,9 @@ import { incrementStat } from '../utils/statisticsUtils.js';
 import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from '../utils/utils.js';
 import { getSettings } from './settings.js';
 import { promptForGroupName } from './messaging.js';
-import type { DomainRuleSetting } from '../types/syncSettings.js';
+import { showNotification, type UndoAction } from '../utils/notifications.js';
+import { getMessage } from '../utils/i18n.js';
+import type { DomainRuleSetting, SyncSettings } from '../types/syncSettings.js';
 
 export interface GroupingContext {
     rule: DomainRuleSetting;
@@ -242,8 +244,22 @@ export async function processGroupingForNewTab(openerTab: Browser.tabs.Tab, newT
     try {
         const { targetGroupId, groupedTabIds } = await performGroupingOperation(context);
         console.log(`[GROUPING_DEBUG] Grouping completed for new tab ${newTab.id}. Color: ${context.groupColor || 'Chrome default'}.`);
-        
+
         await handleManualGroupNaming(rule, targetGroupId, context.groupName, groupedTabIds, openerTab.id);
+
+        // Show notification if enabled with undo action
+        if (settings.notifyOnGrouping) {
+            const undoAction: UndoAction = {
+                type: 'ungroup',
+                data: { tabIds: groupedTabIds }
+            };
+            showNotification({
+                title: getMessage('notificationGroupingTitle'),
+                message: getMessage('notificationGroupingMessage').replace('{groupName}', context.groupName),
+                type: 'success',
+                undoAction
+            });
+        }
     } catch (error) {
         console.error(`[GROUPING_DEBUG] Error during grouping for new tab ${newTab.id}:`, error);
         if (error.message && (

@@ -19,6 +19,14 @@
   "regexPresetsTab": { "message": "Regex Presets" },
   "importExportTab": { "message": "Import / Export" },
   "statisticsTab": { "message": "Statistics" },
+  "settingsTab": { "message": "Settings" },
+  "notificationsSection": { "message": "Notifications" },
+  "notifyOnGrouping": { "message": "Notify when tabs are grouped" },
+  "notifyOnDeduplication": { "message": "Notify when duplicate tabs are closed" },
+  "notificationGroupingTitle": { "message": "📁 Tabs Grouped" },
+  "notificationGroupingMessage": { "message": "Tabs grouped into \"{groupName}\"" },
+  "notificationDeduplicationTitle": { "message": "✂️ Duplicate Closed" },
+  "notificationDeduplicationMessage": { "message": "Duplicate tab closed: {title}" },
   "addRule": { "message": "Add Rule" },
   "domainFilter": { "message": "Domain Filter" },
   "domainFilterPlaceholder": { "message": "e.g., *.atlassian.net" },
@@ -148,5 +156,6 @@
   "dataTableLoading": { "message": "Loading..." },
   "dataTableSelectedCountSingular": { "message": "1 selected" },
   "dataTableSelectedCountPlural": { "message": "{count} selected" },
-  "dataTableActions": { "message": "Actions" }
+  "dataTableActions": { "message": "Actions" },
+  "undoAction": { "message": "Undo" }
 }
