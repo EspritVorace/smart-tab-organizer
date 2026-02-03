@@ -2,7 +2,10 @@ import { browser, Browser } from 'wxt/browser';
 import { incrementStat } from '../utils/statisticsUtils.js';
 import { matchesDomain } from '../utils/utils.js';
 import { getSettings } from './settings.js';
-import type { DomainRuleSetting } from '../types/syncSettings.js';
+import { showNotification, type UndoAction } from '../utils/notifications.js';
+import { getMessage } from '../utils/i18n.js';
+import { shouldSkipDeduplication } from '../utils/deduplicationSkip.js';
+import type { DomainRuleSetting, SyncSettings } from '../types/syncSettings.js';
 
 // Cache pour éviter de traiter plusieurs fois le même onglet
 const processedTabs = new Set<string>();
@@ -96,37 +99,58 @@ export async function removeDuplicateTab(tabId: number): Promise<void> {
 }
 
 export async function checkAndDeduplicateTab(
-    currentTabId: number, 
-    newUrl: string, 
-    matchMode: string, 
-    windowId: number
+    currentTabId: number,
+    newUrl: string,
+    matchMode: string,
+    windowId: number,
+    settings: SyncSettings
 ): Promise<void> {
     try {
         const duplicateTab = await findDuplicateTab(currentTabId, newUrl, matchMode, windowId);
 
         if (duplicateTab) {
             console.log(`[DEDUPLICATION] Duplicate found: ${newUrl} (keeping tab ${duplicateTab.id}, removing ${currentTabId})`);
-            
+
             await incrementStat('tabsDeduplicatedCount');
             await focusAndReloadTab(duplicateTab);
             await removeDuplicateTab(currentTabId);
+
+            // Show notification if enabled with undo action
+            if (settings.notifyOnDeduplication) {
+                const tabTitle = duplicateTab.title || newUrl;
+                const undoAction: UndoAction = {
+                    type: 'reopen_tab',
+                    data: { url: newUrl, windowId }
+                };
+                showNotification({
+                    title: getMessage('notificationDeduplicationTitle'),
+                    message: getMessage('notificationDeduplicationMessage').replace('{title}', tabTitle),
+                    type: 'info',
+                    undoAction
+                });
+            }
         }
-    } catch (queryError) { 
-        console.error("Deduplication: Error querying tabs:", queryError); 
+    } catch (queryError) {
+        console.error("Deduplication: Error querying tabs:", queryError);
     }
 }
 
 export async function processTabForDeduplication(
-    tabId: number, 
-    urlToCheck: string, 
+    tabId: number,
+    urlToCheck: string,
     windowId: number
 ): Promise<void> {
     if (!shouldProcessTab(urlToCheck, tabId)) {
         return;
     }
 
+    // Check if this URL should skip deduplication (e.g., reopened via undo)
+    if (shouldSkipDeduplication(urlToCheck)) {
+        return;
+    }
+
     markTabAsProcessed(tabId, urlToCheck);
-    
+
     const settings = await getSettings();
     if (!settings.globalDeduplicationEnabled) return;
 
@@ -136,9 +160,9 @@ export async function processTabForDeduplication(
     if (!deduplicationActiveForRule) return;
 
     const matchMode = getMatchMode(rule);
-    
+
     try {
-        await checkAndDeduplicateTab(tabId, urlToCheck, matchMode, windowId);
+        await checkAndDeduplicateTab(tabId, urlToCheck, matchMode, windowId, settings);
     } catch (error) {
         console.error("Deduplication error:", error);
     }

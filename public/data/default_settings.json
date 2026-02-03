@@ -1,6 +1,8 @@
 {
   "globalGroupingEnabled": true,
   "globalDeduplicationEnabled": true,
+  "notifyOnGrouping": true,
+  "notifyOnDeduplication": true,
   "domainRules": [
     { "id": "rule-jira", "enabled": true, "domainFilter": "*.atlassian.net", "label": "Jira/Atlassian", "titleParsingRegEx": "\\[([A-Z]+-\\d+)\\]", "urlParsingRegEx": "browse/([A-Z]+-\\d+)", "groupNameSource": "smart_label", "deduplicationMatchMode": "exact", "color": "blue", "deduplicationEnabled": true, "presetId": "jira-ticket" },
     { "id": "rule-gitlab", "enabled": true, "domainFilter": "gitlab.com", "label": "GitLab", "titleParsingRegEx": "(.+?)\\s*\\|\\s*Trello", "urlParsingRegEx": "gitlab\\.com/([^/]+/[^/]+)", "groupNameSource": "smart_label", "deduplicationMatchMode": "exact", "color": "orange", "deduplicationEnabled": true, "presetId": "gitlab-project" },

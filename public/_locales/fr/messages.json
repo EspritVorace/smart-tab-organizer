@@ -19,6 +19,14 @@
   "regexPresetsTab": { "message": "Préréglages RegEx" },
   "importExportTab": { "message": "Importer / Exporter" },
   "statisticsTab": { "message": "Statistiques" },
+  "settingsTab": { "message": "Paramètres" },
+  "notificationsSection": { "message": "Notifications" },
+  "notifyOnGrouping": { "message": "Notifier lors du regroupement d'onglets" },
+  "notifyOnDeduplication": { "message": "Notifier lors de la fermeture de doublons" },
+  "notificationGroupingTitle": { "message": "📁 Onglets Regroupés" },
+  "notificationGroupingMessage": { "message": "Onglets regroupés dans \"{groupName}\"" },
+  "notificationDeduplicationTitle": { "message": "✂️ Doublon Fermé" },
+  "notificationDeduplicationMessage": { "message": "Onglet doublon fermé : {title}" },
   "addRule": { "message": "Ajouter une Règle" },
   "domainFilter": { "message": "Filtre Domaine" },
   "domainFilterPlaceholder": { "message": "ex: *.atlassian.net" },
@@ -148,5 +156,6 @@
   "dataTableLoading": { "message": "Chargement..." },
   "dataTableSelectedCountSingular": { "message": "1 sélectionné" },
   "dataTableSelectedCountPlural": { "message": "{count} sélectionnés" },
-  "dataTableActions": { "message": "Actions" }
+  "dataTableActions": { "message": "Actions" },
+  "undoAction": { "message": "Annuler" }
 }

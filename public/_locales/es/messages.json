@@ -19,6 +19,14 @@
   "regexPresetsTab": { "message": "Preajustes RegEx" },
   "importExportTab": { "message": "Importar / Exportar" },
   "statisticsTab": { "message": "Estadísticas" },
+  "settingsTab": { "message": "Configuración" },
+  "notificationsSection": { "message": "Notificaciones" },
+  "notifyOnGrouping": { "message": "Notificar al agrupar pestañas" },
+  "notifyOnDeduplication": { "message": "Notificar al cerrar duplicados" },
+  "notificationGroupingTitle": { "message": "📁 Pestañas Agrupadas" },
+  "notificationGroupingMessage": { "message": "Pestañas agrupadas en \"{groupName}\"" },
+  "notificationDeduplicationTitle": { "message": "✂️ Duplicado Cerrado" },
+  "notificationDeduplicationMessage": { "message": "Pestaña duplicada cerrada: {title}" },
   "addRule": { "message": "Añadir Regla" },
   "domainFilter": { "message": "Filtro Dominio" },
   "domainFilterPlaceholder": { "message": "ej: *.atlassian.net" },
@@ -148,5 +156,6 @@
   "dataTableLoading": { "message": "Cargando..." },
   "dataTableSelectedCountSingular": { "message": "1 seleccionado" },
   "dataTableSelectedCountPlural": { "message": "{count} seleccionados" },
-  "dataTableActions": { "message": "Acciones" }
+  "dataTableActions": { "message": "Acciones" },
+  "undoAction": { "message": "Deshacer" }
 }
