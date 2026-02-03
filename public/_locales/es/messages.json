@@ -125,7 +125,7 @@
   "createPresetDescription": { "message": "Crear un nuevo preset regex para organizar pestañas" },
   "presetNamePlaceholder": { "message": "Ingresa un nombre descriptivo para el preset" },
   "color": { "message": "Color" },
-  "tabGroupColor": { "message": "Color del grupo de pestañas" },
+  "tabGroupColor": { "message": "Color" },
   "color_grey": { "message": "Gris" },
   "color_blue": { "message": "Azul" },
   "color_red": { "message": "Rojo" },

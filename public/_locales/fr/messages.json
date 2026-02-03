@@ -125,7 +125,7 @@
   "createPresetDescription": { "message": "Créer un nouveau préréglage regex pour l'organisation des onglets" },
   "presetNamePlaceholder": { "message": "Entrez un nom descriptif pour le préréglage" },
   "color": { "message": "Couleur" },
-  "tabGroupColor": { "message": "Couleur du groupe d'onglets" },
+  "tabGroupColor": { "message": "Couleur" },
   "color_grey": { "message": "Gris" },
   "color_blue": { "message": "Bleu" },
   "color_red": { "message": "Rouge" },
