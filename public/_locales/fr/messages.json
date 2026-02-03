@@ -1,6 +1,8 @@
 {
   "extensionName": { "message": "SmartTab Organizer" },
   "extensionDescription": { "message": "Regroupe et déduplique automatiquement les onglets selon des règles configurables." },
+  "yes": { "message": "Oui" },
+  "no": { "message": "Non" },
   "popupTitle": { "message": "SmartTab Organizer" },
   "enableGrouping": { "message": "Activer le Regroupement Auto" },
   "enableDeduplication": { "message": "Activer la Déduplication" },
@@ -28,6 +30,8 @@
   "hostnameMatch": { "message": "Nom d'hôte" },
   "hostnamePathMatch": { "message": "Hôte + Chemin" },
   "enabled": { "message": "Activé" },
+  "disabled": { "message": "Désactivé" },
+  "deduplicationEnabled": { "message": "Déduplication" },
   "save": { "message": "Enregistrer" },
   "edit": { "message": "Modifier" },
   "delete": { "message": "Supprimer" },
