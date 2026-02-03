@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { Button, Badge, Switch, Text, Flex } from '@radix-ui/themes';
+import { Button, Switch, Text } from '@radix-ui/themes';
 import { Edit, Trash2, Plus, Eye, EyeOff, Shield } from 'lucide-react';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { DataTable } from '../components/UI/DataTable/DataTable';
@@ -49,40 +49,22 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
     {
       key: 'enabled',
       label: getMessage('enabled'),
-      width: '100px',
+      width: '80px',
       align: 'center',
       render: (value: boolean, row: DomainRuleSetting) => (
-        <Switch 
-          checked={value} 
+        <Switch
+          checked={value}
           onCheckedChange={(checked) => handleToggleEnabled(row.id, checked)}
         />
       )
     },
     {
-      key: 'label',
-      label: getMessage('labelLabel'),
-      width: '200px',
-      render: (value: string) => (
-        <Text weight="medium">{value}</Text>
-      )
-    },
-    {
-      key: 'domainFilter',
-      label: getMessage('domainFilter'),
-      width: '250px',
-      render: (value: string) => (
-        <Badge variant="soft" color="gray">
-          {value}
-        </Badge>
-      )
-    },
-    {
       key: 'color',
       label: getMessage('tabGroupColor'),
-      width: '180px',
+      width: '100px',
       align: 'center',
       render: (value: string) => (
-        <div 
+        <div
           style={{
             width: '24px',
             height: '16px',
@@ -91,6 +73,13 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
             border: '1px solid var(--gray-6)'
           }}
         />
+      )
+    },
+    {
+      key: 'label',
+      label: getMessage('labelLabel'),
+      render: (value: string) => (
+        <Text weight="medium">{value}</Text>
       )
     }
   ], [handleToggleEnabled]);

@@ -125,7 +125,7 @@
   "createPresetDescription": { "message": "Create a new regex preset for tab organization" },
   "presetNamePlaceholder": { "message": "Enter a descriptive name for the preset" },
   "color": { "message": "Color" },
-  "tabGroupColor": { "message": "Tab group color" },
+  "tabGroupColor": { "message": "Color" },
   "color_grey": { "message": "Gray" },
   "color_blue": { "message": "Blue" },
   "color_red": { "message": "Red" },
