@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Table, 
   TextField, 
@@ -29,6 +29,15 @@ export function DataTable<T extends Record<string, any>>({
 }: DataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRows, setSelectedRows] = useState<T[]>([]);
+
+  // Nettoyer la sélection quand les données changent (après suppression par exemple)
+  useEffect(() => {
+    const dataKeys = new Set(data.map(row => row[keyField]));
+    const validSelectedRows = selectedRows.filter(row => dataKeys.has(row[keyField]));
+    if (validSelectedRows.length !== selectedRows.length) {
+      setSelectedRows(validSelectedRows);
+    }
+  }, [data, keyField, selectedRows]);
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
