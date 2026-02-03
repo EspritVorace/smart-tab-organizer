@@ -113,7 +113,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                 </Flex>
 
                 <Text size="1" weight="bold" color="gray">{getMessage('groupNameSource')}</Text>
-                <Text size="2">{getMessage(`groupNameSource${row.groupNameSource.charAt(0).toUpperCase() + row.groupNameSource.slice(1)}`)}</Text>
+                <Text size="2">{getMessage(`groupNameSource${row.groupNameSource.split('_').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('')}`)}</Text>
 
                 {row.presetId && (
                   <>
