@@ -31,10 +31,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a browser extension built using the WXT framework, which provides a modern development experience for creating cross-browser extensions. The extension targets both Chrome (Manifest V3) and Firefox (Manifest V2).
 
 ### Entry Points
-- `src/entrypoints/background.ts` - Background script handling extension logic
+- `src/entrypoints/background.ts` - Background script entry point (delegates to modular code)
 - `src/entrypoints/content.content.ts` - Content script for web page interaction
 - `src/entrypoints/popup.html` - Extension popup interface
 - `src/entrypoints/options.html` - Extension options/settings page
+
+### Background Script Architecture
+The background logic is modularized in `src/background/`:
+- `index.ts` - Main exports and initialization
+- `grouping.ts` - Tab grouping logic based on domain rules
+- `deduplication.ts` - Duplicate tab prevention
+- `event-handlers.ts` - Browser event listeners
+- `messaging.ts` - Communication between extension parts
+- `settings.ts` - Settings management utilities
 
 ### Core Features
 The extension provides tab organization through:
@@ -54,9 +63,19 @@ The extension provides tab organization through:
 
 ### Schema Architecture
 The application uses a schema-driven approach with Zod validation:
-- `src/schemas/` - Contains all data validation schemas
-- `src/types/` - TypeScript type definitions
-- Schemas cover domain rules, logical groups, regex presets, and settings
+- `src/schemas/` - Contains all data validation schemas (DomainRule, enums)
+- `src/types/` - TypeScript type definitions that extend Zod-inferred types
+- Pattern: Schema types (e.g., `DomainRule`) are extended with runtime fields (e.g., `DomainRuleSetting` adds `enabled` and `badge`)
+
+### Storage Pattern
+Settings are managed through `browser.storage.sync` with a React hook pattern:
+- `useSyncedSettings` hook in `src/hooks/` - Provides reactive settings with automatic sync
+- Uses refs to prevent race conditions between local updates and storage events
+- Settings include: `globalGroupingEnabled`, `globalDeduplicationEnabled`, `domainRules`
+
+### Static Data
+- Regex presets are stored in `public/data/presets.json` (not user-editable, loaded at runtime)
+- Default settings in `public/data/default_settings.json`
 
 ### Key Directories
 - `src/components/` - React components with Storybook stories, organized by category:
@@ -76,6 +95,15 @@ The application uses a schema-driven approach with Zod validation:
 
 ### Internationalization
 Supports multiple languages (English, French, Spanish) with messages stored in `public/_locales/` following Chrome extension i18n standards.
+
+### Feature Theming
+Each feature has a consistent color theme defined in `src/utils/themeConstants.ts`:
+- `DOMAIN_RULES` → purple
+- `REGEX_PRESETS` → cyan
+- `IMPORT` → jade
+- `STATISTICS` → orange
+
+Theme wrappers in `src/components/Form/themes/` apply accent colors contextually.
 
 ## Code Conventions
 
