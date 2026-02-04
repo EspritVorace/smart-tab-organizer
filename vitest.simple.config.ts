@@ -11,13 +11,12 @@ export default defineConfig({
       'tests/**/*.test.tsx'
     ],
     exclude: [
-      // Tests legacy qui utilisent le WxtVitest plugin
+      // Tests legacy (ancienne implémentation)
       'tests/useStatistics.test.ts',
-      'tests/useSyncedSettings.test.ts',
-      // Tests de hooks avec storage (problèmes de concurrence React - à exécuter séparément)
-      'tests/hooks/useStatistics.test.ts',
-      'tests/hooks/useSyncedSettings.test.ts'
+      'tests/useSyncedSettings.test.ts'
     ],
-    setupFiles: ['./tests/setup-ui.ts']
+    setupFiles: ['./tests/setup.ts', './tests/setup-ui.ts'],
+    // Désactiver le parallélisme pour éviter les conflits de state
+    fileParallelism: false
   }
 });
