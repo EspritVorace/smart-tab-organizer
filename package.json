@@ -8,6 +8,9 @@
     "test:ui": "vitest --ui --config vitest.simple.config.ts",
     "test:wxt": "vitest --config vitest.config.ts",
     "test:legacy": "node tests/runTests.js",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",
     "build": "wxt build",
@@ -21,6 +24,7 @@
     "build-storybook": "storybook build"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.1",
     "@storybook/addon-docs": "^9.0.13",
     "@storybook/react-vite": "^9.0.13",
     "@testing-library/react": "^14.3.1",
