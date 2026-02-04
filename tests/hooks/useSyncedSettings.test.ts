@@ -1,42 +1,68 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { renderHook, act, waitFor, cleanup } from '@testing-library/react';
+import { useSyncedSettings } from '../../src/hooks/useSyncedSettings';
 
 // Mock storage data
 let mockStorageData: Record<string, any> = {};
+const storageListeners: Array<(changes: Record<string, any>, areaName: string) => void> = [];
 
-// Mock browser API
-vi.mock('wxt/browser', () => ({
-  browser: {
-    storage: {
-      sync: {
-        get: vi.fn(async (defaults) => {
-          return { ...defaults, ...mockStorageData };
-        }),
-        set: vi.fn(async (data) => {
-          Object.entries(data).forEach(([key, value]) => {
-            mockStorageData[key] = value;
-          });
-        })
-      },
-      onChanged: {
-        addListener: vi.fn(),
-        removeListener: vi.fn()
-      }
+// Create mock browser object
+const mockBrowser = {
+  storage: {
+    sync: {
+      get: vi.fn(async (defaults) => {
+        if (typeof defaults === 'object' && defaults !== null) {
+          const result: Record<string, any> = {};
+          for (const key of Object.keys(defaults)) {
+            result[key] = mockStorageData[key] !== undefined ? mockStorageData[key] : defaults[key];
+          }
+          return result;
+        }
+        return mockStorageData;
+      }),
+      set: vi.fn(async (data) => {
+        const changes: Record<string, any> = {};
+        for (const key of Object.keys(data)) {
+          changes[key] = { oldValue: mockStorageData[key], newValue: data[key] };
+        }
+        Object.assign(mockStorageData, data);
+        // Notify listeners
+        storageListeners.forEach(listener => listener(changes, 'sync'));
+      }),
+      remove: vi.fn(async (keys) => {
+        if (typeof keys === 'string') {
+          delete mockStorageData[keys];
+        } else if (Array.isArray(keys)) {
+          keys.forEach(key => delete mockStorageData[key]);
+        }
+      })
+    },
+    onChanged: {
+      addListener: vi.fn((callback) => {
+        storageListeners.push(callback);
+      }),
+      removeListener: vi.fn((callback) => {
+        const index = storageListeners.indexOf(callback);
+        if (index > -1) {
+          storageListeners.splice(index, 1);
+        }
+      })
     }
   }
-}));
+};
 
-// Import after mocking
-import { useSyncedSettings } from '../../src/hooks/useSyncedSettings';
+// Set global browser
+(globalThis as any).browser = mockBrowser;
 
 describe('useSyncedSettings', () => {
   beforeEach(() => {
     mockStorageData = {};
+    storageListeners.length = 0;
     vi.clearAllMocks();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    cleanup();
   });
 
   it('devrait charger les paramètres par défaut', async () => {
@@ -131,5 +157,27 @@ describe('useSyncedSettings', () => {
 
     expect(result.current.settings?.globalGroupingEnabled).toBe(false);
     expect(result.current.settings?.globalDeduplicationEnabled).toBe(false);
+  });
+
+  it('devrait recharger les paramètres', async () => {
+    const { result } = renderHook(() => useSyncedSettings());
+
+    await waitFor(() => {
+      expect(result.current.isLoaded).toBe(true);
+    });
+
+    // Modifier directement le storage mock
+    mockStorageData = {
+      globalGroupingEnabled: false,
+      globalDeduplicationEnabled: false,
+      domainRules: [{ id: 'new', label: 'New Rule' }]
+    };
+
+    await act(async () => {
+      await result.current.reloadSettings();
+    });
+
+    expect(result.current.settings?.globalGroupingEnabled).toBe(false);
+    expect(result.current.settings?.domainRules).toHaveLength(1);
   });
 });
