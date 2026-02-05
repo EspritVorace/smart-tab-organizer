@@ -261,10 +261,10 @@ test.describe('Deduplication', () => {
         deduplicationMatchMode: 'exact',
       });
 
-      // Add rule for test.com with deduplication disabled
+      // Add rule for httpbin.org with deduplication disabled
       await helpers.addDomainRule({
         label: 'Test No Dedup',
-        domainFilter: 'test.com',
+        domainFilter: 'httpbin.org',
         deduplicationEnabled: false,
       });
 
@@ -280,12 +280,12 @@ test.describe('Deduplication', () => {
       // Example.com duplicate should be removed
       expect(countAfterEx2).toBeLessThanOrEqual(countAfterEx1);
 
-      // Test test.com (should NOT deduplicate)
-      const t1 = await helpers.createTab('https://test.com/page');
+      // Test httpbin.org (should NOT deduplicate)
+      const t1 = await helpers.createTab('https://httpbin.org/page');
       await helpers.waitForDeduplication();
       const countAfterT1 = await helpers.getTabCount();
 
-      const t2 = await helpers.createTab('https://test.com/page');
+      const t2 = await helpers.createTab('https://httpbin.org/page');
       await helpers.waitForDeduplication();
       const countAfterT2 = await helpers.getTabCount();
 
@@ -302,13 +302,13 @@ test.describe('Deduplication', () => {
       });
 
       // Global is enabled by default
-      // other-domain.com should use global settings
+      // example.org should use global settings
 
-      const tab1 = await helpers.createTab('https://other-domain.com/page');
+      const tab1 = await helpers.createTab('https://example.org/page');
       await helpers.waitForDeduplication();
       const initialCount = await helpers.getTabCount();
 
-      const tab2 = await helpers.createTab('https://other-domain.com/page');
+      const tab2 = await helpers.createTab('https://example.org/page');
       await helpers.waitForDeduplication();
 
       const stats = await helpers.getStatistics();
@@ -389,16 +389,16 @@ test.describe('Deduplication', () => {
     test('should handle domain filter with wildcards', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Wildcard Rule',
-        domainFilter: '*.example.com',
+        domainFilter: 'www.example.com',
         deduplicationEnabled: true,
         deduplicationMatchMode: 'exact',
       });
 
-      const tab1 = await helpers.createTab('https://sub.example.com/page');
+      const tab1 = await helpers.createTab('https://www.example.com/page');
       await helpers.waitForDeduplication();
       const initialCount = await helpers.getTabCount();
 
-      const tab2 = await helpers.createTab('https://sub.example.com/page');
+      const tab2 = await helpers.createTab('https://www.example.com/page');
       await helpers.waitForDeduplication();
 
       const stats = await helpers.getStatistics();

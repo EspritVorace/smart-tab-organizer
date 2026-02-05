@@ -144,7 +144,7 @@ test.describe('Combined Deduplication and Grouping', () => {
       // Rule 2: test.com - dedup only
       await helpers.addDomainRule({
         label: 'Test Dedup Only',
-        domainFilter: 'test.com',
+        domainFilter: 'httpbin.org',
         groupingEnabled: false,
         deduplicationEnabled: true,
       });
@@ -152,7 +152,7 @@ test.describe('Combined Deduplication and Grouping', () => {
       // Rule 3: other.com - both enabled
       await helpers.addDomainRule({
         label: 'Other Both',
-        domainFilter: 'other.com',
+        domainFilter: 'example.org',
         groupingEnabled: true,
         deduplicationEnabled: true,
         color: 'red',
@@ -170,18 +170,18 @@ test.describe('Combined Deduplication and Grouping', () => {
       expect(stats.tabGroupsCreatedCount).toBeGreaterThan(0);
 
       // Test test.com (dedup only)
-      const testTab1 = await helpers.createTab('https://test.com/page');
+      const testTab1 = await helpers.createTab('https://httpbin.org/page');
       await helpers.waitForDeduplication();
-      const testTab2 = await helpers.createTab('https://test.com/page');
+      const testTab2 = await helpers.createTab('https://httpbin.org/page');
       await helpers.waitForDeduplication();
 
       stats = await helpers.getStatistics();
       expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
 
       // Test other.com (both)
-      const otherOpener = await helpers.createTab('https://other.com/page');
+      const otherOpener = await helpers.createTab('https://example.org/page');
       await helpers.waitForGrouping();
-      const otherChild = await helpers.createTabFromOpener(otherOpener, 'https://other.com/child');
+      const otherChild = await helpers.createTabFromOpener(otherOpener, 'https://example.org/child');
       await helpers.waitForGrouping();
     });
   });
@@ -231,9 +231,9 @@ test.describe('Combined Deduplication and Grouping', () => {
       });
 
       // Test on unmatched domain (should use global settings)
-      const tab1 = await helpers.createTab('https://unmatched.com/page');
+      const tab1 = await helpers.createTab('https://example.net/page');
       await helpers.waitForDeduplication();
-      const tab2 = await helpers.createTab('https://unmatched.com/page');
+      const tab2 = await helpers.createTab('https://example.net/page');
       await helpers.waitForDeduplication();
 
       const stats = await helpers.getStatistics();
@@ -258,19 +258,19 @@ test.describe('Combined Deduplication and Grouping', () => {
       });
 
       // Open main repo page
-      const repoPage = await helpers.createTab('https://github.com/user/project');
+      const repoPage = await helpers.createTab('https://github.com/facebook/react');
       await helpers.waitForGrouping();
 
       // Open file from repo (should be grouped)
-      const filePage = await helpers.createTabFromOpener(repoPage, 'https://github.com/user/project/blob/main/README.md');
+      const filePage = await helpers.createTabFromOpener(repoPage, 'https://github.com/facebook/react/blob/main/README.md');
       await helpers.waitForGrouping();
 
       // Open another file (should be added to group)
-      const file2Page = await helpers.createTabFromOpener(repoPage, 'https://github.com/user/project/blob/main/src/index.ts');
+      const file2Page = await helpers.createTabFromOpener(repoPage, 'https://github.com/facebook/react/blob/main/src/index.ts');
       await helpers.waitForGrouping();
 
       // Try to open duplicate of first file (should be deduplicated)
-      const dupPage = await helpers.createTab('https://github.com/user/project/blob/main/README.md');
+      const dupPage = await helpers.createTab('https://github.com/facebook/react/blob/main/README.md');
       await helpers.waitForDeduplication();
 
       const stats = await helpers.getStatistics();

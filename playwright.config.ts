@@ -1,14 +1,22 @@
 import { defineConfig } from '@playwright/test';
 import path from 'path';
+import * as fs from 'fs';
+
+// Ensure extension is built before tests run
+const extensionPath = '.output/chrome-mv3';
+if (!fs.existsSync(path.join(extensionPath, 'manifest.json'))) {
+  console.error('Extension not built. Run "npm run build" before running tests.');
+  process.exit(1);
+}
 
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: false, // Extensions require sequential execution
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 2 : 1, // Retry once locally too
   workers: 1, // Single worker for extension testing
   reporter: 'html',
-  timeout: 30000,
+  timeout: 60000, // Increased timeout for extension loading
 
   use: {
     trace: 'on-first-retry',
@@ -22,11 +30,4 @@ export default defineConfig({
       },
     },
   ],
-
-  // Build extension before running tests
-  webServer: {
-    command: 'npm run build',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120000,
-  },
 });

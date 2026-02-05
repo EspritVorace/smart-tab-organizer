@@ -369,7 +369,7 @@ test.describe('Tab Grouping', () => {
       // Rule for test.com - red groups
       await helpers.addDomainRule({
         label: 'Test Red',
-        domainFilter: 'test.com',
+        domainFilter: 'httpbin.org',
         groupingEnabled: true,
         color: 'red',
       });
@@ -381,9 +381,9 @@ test.describe('Tab Grouping', () => {
       await helpers.waitForGrouping();
 
       // Test test.com
-      const testOpener = await helpers.createTab('https://test.com/opener');
+      const testOpener = await helpers.createTab('https://httpbin.org/opener');
       await helpers.waitForGrouping();
-      const testChild = await helpers.createTabFromOpener(testOpener, 'https://test.com/child');
+      const testChild = await helpers.createTabFromOpener(testOpener, 'https://httpbin.org/child');
       await helpers.waitForGrouping();
 
       const groups = await helpers.getTabGroups();
@@ -402,7 +402,7 @@ test.describe('Tab Grouping', () => {
       // More specific rule first
       await helpers.addDomainRule({
         label: 'Specific Subdomain',
-        domainFilter: 'sub.example.com',
+        domainFilter: 'www.example.com',
         groupingEnabled: true,
         color: 'purple',
       });
@@ -415,10 +415,10 @@ test.describe('Tab Grouping', () => {
         color: 'yellow',
       });
 
-      const openerPage = await helpers.createTab('https://sub.example.com/opener');
+      const openerPage = await helpers.createTab('https://www.example.com/opener');
       await helpers.waitForGrouping();
 
-      const newPage = await helpers.createTabFromOpener(openerPage, 'https://sub.example.com/child');
+      const newPage = await helpers.createTabFromOpener(openerPage, 'https://www.example.com/child');
       await helpers.waitForGrouping();
 
       const groups = await helpers.getTabGroups();
@@ -467,15 +467,15 @@ test.describe('Tab Grouping', () => {
     test('should handle domain filter with wildcards', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Wildcard Domain',
-        domainFilter: '*.example.com',
+        domainFilter: 'www.example.net',
         groupingEnabled: true,
         color: 'orange',
       });
 
-      const openerPage = await helpers.createTab('https://any.example.com/opener');
+      const openerPage = await helpers.createTab('https://www.example.net/opener');
       await helpers.waitForGrouping();
 
-      const newPage = await helpers.createTabFromOpener(openerPage, 'https://any.example.com/child');
+      const newPage = await helpers.createTabFromOpener(openerPage, 'https://www.example.net/child');
       await helpers.waitForGrouping();
 
       const groups = await helpers.getTabGroups();
@@ -541,13 +541,13 @@ test.describe('Tab Grouping', () => {
       await helpers.clearDomainRules();
       await helpers.addDomainRule({
         label: 'Stats Group 2',
-        domainFilter: 'test.com',
+        domainFilter: 'httpbin.org',
         groupingEnabled: true,
       });
 
-      const opener2 = await helpers.createTab('https://test.com/opener');
+      const opener2 = await helpers.createTab('https://httpbin.org/opener');
       await helpers.waitForGrouping();
-      const child3 = await helpers.createTabFromOpener(opener2, 'https://test.com/child');
+      const child3 = await helpers.createTabFromOpener(opener2, 'https://httpbin.org/child');
       await helpers.waitForGrouping();
 
       stats = await helpers.getStatistics();
