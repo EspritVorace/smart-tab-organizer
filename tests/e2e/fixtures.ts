@@ -84,8 +84,13 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       throw new Error(`Extension not found at ${EXTENSION_PATH}. Run 'npm run build' first.`);
     }
 
+    // Use custom Chrome path if available, otherwise use Playwright's bundled Chromium
+    const customChromePath = path.join(os.homedir(), '.cache/ms-playwright/chromium-custom/chrome-linux64/chrome');
+    const executablePath = fs.existsSync(customChromePath) ? customChromePath : undefined;
+
     const context = await chromium.launchPersistentContext(userDataDir, {
       headless: false, // Extensions require headed mode
+      executablePath,
       args: [
         `--disable-extensions-except=${EXTENSION_PATH}`,
         `--load-extension=${EXTENSION_PATH}`,
@@ -165,7 +170,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       setGlobalGroupingEnabled: async (enabled: boolean) => {
         const sw = getServiceWorker();
         await sw.evaluate(async (enabled) => {
-          await (globalThis as any).browser.storage.sync.set({ globalGroupingEnabled: enabled });
+          await chrome.storage.sync.set({ globalGroupingEnabled: enabled });
         }, enabled);
       },
 
@@ -173,7 +178,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       setGlobalDeduplicationEnabled: async (enabled: boolean) => {
         const sw = getServiceWorker();
         await sw.evaluate(async (enabled) => {
-          await (globalThis as any).browser.storage.sync.set({ globalDeduplicationEnabled: enabled });
+          await chrome.storage.sync.set({ globalDeduplicationEnabled: enabled });
         }, enabled);
       },
 
@@ -181,7 +186,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       addDomainRule: async (rule: DomainRuleConfig) => {
         const sw = getServiceWorker();
         await sw.evaluate(async (ruleConfig) => {
-          const browser = (globalThis as any).browser;
+          const browser = chrome;
           const result = await browser.storage.sync.get({ domainRules: [] });
           const rules = result.domainRules || [];
 
@@ -211,7 +216,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       clearDomainRules: async () => {
         const sw = getServiceWorker();
         await sw.evaluate(async () => {
-          await (globalThis as any).browser.storage.sync.set({ domainRules: [] });
+          await chrome.storage.sync.set({ domainRules: [] });
         });
         await new Promise(resolve => setTimeout(resolve, 100));
       },
@@ -220,7 +225,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       getSettings: async () => {
         const sw = getServiceWorker();
         return await sw.evaluate(async () => {
-          return await (globalThis as any).browser.storage.sync.get({
+          return await chrome.storage.sync.get({
             globalGroupingEnabled: true,
             globalDeduplicationEnabled: true,
             domainRules: [],
@@ -247,15 +252,29 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       createTabFromOpener: async (openerPage: Page, url: string) => {
         const sw = getServiceWorker();
 
-        // Get the opener tab info
-        const openerTabInfo = await sw.evaluate(async (openerUrl) => {
-          const browser = (globalThis as any).browser;
-          const tabs = await browser.tabs.query({});
-          const openerTab = tabs.find((t: any) => t.url && t.url.includes(openerUrl.replace('https://', '').split('/')[0]));
+        // Wait for opener page to have a URL
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+        // Extract domain from the opener page URL for matching
+        let openerDomain = '';
+        try {
+          const openerUrl = openerPage.url();
+          openerDomain = new URL(openerUrl).hostname;
+        } catch (e) {
+          // Fallback to simple extraction
+          openerDomain = openerPage.url().replace('https://', '').replace('http://', '').split('/')[0];
+        }
+
+        // Get the opener tab info with more robust matching
+        const openerTabInfo = await sw.evaluate(async (domain) => {
+          const tabs = await chrome.tabs.query({});
+          // Find tab that contains this domain in its URL
+          const openerTab = tabs.find((t: any) => t.url && t.url.includes(domain));
           return openerTab ? { id: openerTab.id, url: openerTab.url, title: openerTab.title, groupId: openerTab.groupId } : null;
-        }, openerPage.url());
+        }, openerDomain);
 
         if (!openerTabInfo) {
+          console.error(`[TEST] Could not find opener tab for domain: ${openerDomain}`);
           // Fallback to window.open if we can't find the tab
           const [newPage] = await Promise.all([
             context.waitForEvent('page'),
@@ -271,61 +290,54 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
           return newPage;
         }
 
-        // Create the new tab
+        // Create the new tab via Chrome API
         const newTabInfo = await sw.evaluate(async ({ url, openerTabId }) => {
-          const browser = (globalThis as any).browser;
-          const newTab = await browser.tabs.create({
+          const newTab = await chrome.tabs.create({
             url: url,
             openerTabId: openerTabId,
             active: true,
           });
-          return { id: newTab.id, url: newTab.url || url, pendingUrl: newTab.pendingUrl };
+          return { id: newTab.id, url: newTab.url || url };
         }, { url, openerTabId: openerTabInfo.id });
 
-        // Wait a moment for the tab to initialize
+        // Wait for the tab to initialize
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        // Directly call the grouping function (bypasses event-based triggering)
-        await sw.evaluate(async ({ openerTab, newTabId, newTabUrl }) => {
-          const browser = (globalThis as any).browser;
+        // Directly call the grouping function
+        await sw.evaluate(async ({ openerTab, newTabId }) => {
           const processGroupingForNewTab = (globalThis as any).processGroupingForNewTab;
 
           if (processGroupingForNewTab) {
-            // Get fresh tab info
-            const newTab = await browser.tabs.get(newTabId);
-            console.log(`[TEST] Directly calling processGroupingForNewTab for opener ${openerTab.id} and new tab ${newTabId}`);
+            const newTab = await chrome.tabs.get(newTabId);
+            console.log(`[TEST] Calling processGroupingForNewTab for opener ${openerTab.id} (${openerTab.url}) and new tab ${newTabId}`);
             await processGroupingForNewTab(openerTab, newTab);
           } else {
             console.error('[TEST] processGroupingForNewTab not available on globalThis');
           }
-        }, { openerTab: openerTabInfo, newTabId: newTabInfo.id, newTabUrl: url });
+        }, { openerTab: openerTabInfo, newTabId: newTabInfo.id });
 
         // Wait for grouping to complete
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        // Find the new page
+        // Find and return the new page
         const pages = context.pages();
         const newPage = pages.find(p => {
           try {
-            return p.url().includes(url.replace('https://', '').split('/')[0]);
+            const pageUrl = p.url();
+            return pageUrl.includes(url.split('/')[2] || url); // Match by domain
           } catch {
             return false;
           }
         });
 
-        if (!newPage) {
-          // Return the last page as fallback
-          return pages[pages.length - 1];
-        }
-
-        return newPage;
+        return newPage || pages[pages.length - 1];
       },
 
       // Get current tab count
       getTabCount: async () => {
         const sw = getServiceWorker();
         return await sw.evaluate(async () => {
-          const tabs = await (globalThis as any).browser.tabs.query({});
+          const tabs = await chrome.tabs.query({});
           return tabs.length;
         });
       },
@@ -334,7 +346,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       getTabGroups: async () => {
         const sw = getServiceWorker();
         return await sw.evaluate(async () => {
-          const browser = (globalThis as any).browser;
+          const browser = chrome;
 
           // Check if tabGroups API is available (Chrome only)
           if (!browser.tabGroups) {
@@ -373,7 +385,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       getStatistics: async () => {
         const sw = getServiceWorker();
         return await sw.evaluate(async () => {
-          const result = await (globalThis as any).browser.storage.local.get({
+          const result = await chrome.storage.local.get({
             statistics: { tabGroupsCreatedCount: 0, tabsDeduplicatedCount: 0 }
           });
           return result.statistics;
@@ -384,7 +396,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       resetStatistics: async () => {
         const sw = getServiceWorker();
         await sw.evaluate(async () => {
-          await (globalThis as any).browser.storage.local.set({
+          await chrome.storage.local.set({
             statistics: { tabGroupsCreatedCount: 0, tabsDeduplicatedCount: 0 }
           });
         });
