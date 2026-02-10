@@ -26,7 +26,7 @@ export function PageLayout({ titleKey, theme, icon: Icon, syncSettings, children
         <Box>
           <Box
             px="4"
-            py="3"
+            py="2"
             style={{
               background: 'linear-gradient(135deg, var(--accent-a8) 0%, var(--accent-a10) 100%)',
               borderRadius: 'var(--radius-3)',
@@ -59,7 +59,7 @@ export function PageLayout({ titleKey, theme, icon: Icon, syncSettings, children
                   </Box>
                 )}
                 <Heading
-                  size="6"
+                  size="5"
                   weight="bold"
                   as="h1"
                   style={{
@@ -76,7 +76,7 @@ export function PageLayout({ titleKey, theme, icon: Icon, syncSettings, children
           <Separator size="4" style={{ opacity: 0.3 }} />
         </Box>
 
-        <Box style={{ flex: 1, overflow: 'auto', marginTop: 'var(--space-3)' }}>
+        <Box style={{ flex: 1, overflow: 'auto', marginTop: 'var(--space-3)', backgroundColor: 'var(--accent-a2)', borderRadius: 'var(--radius-3)', padding: 'var(--space-4)' }}>
           {children(syncSettings)}
         </Box>
       </Box>

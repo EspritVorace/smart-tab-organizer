@@ -14,9 +14,31 @@ import { useStatistics } from '../hooks/useStatistics.ts';
 
 (() => {
 
+const STATS_COLLAPSED_KEY = 'popupStatsCollapsed';
+
 function PopupContent() {
     const { settings, isLoaded, setGlobalGroupingEnabled, setGlobalDeduplicationEnabled } = useSyncedSettings();
     const { statistics, isLoaded: statsLoaded, resetStatistics } = useStatistics();
+    const [statsCollapsed, setStatsCollapsed] = useState(false);
+    const [collapsedLoaded, setCollapsedLoaded] = useState(false);
+
+    // Load collapsed state from storage
+    useEffect(() => {
+        browser.storage.local.get(STATS_COLLAPSED_KEY).then((result) => {
+            if (result[STATS_COLLAPSED_KEY] !== undefined) {
+                setStatsCollapsed(result[STATS_COLLAPSED_KEY]);
+            }
+            setCollapsedLoaded(true);
+        });
+    }, []);
+
+    const handleToggleStatsCollapsed = useCallback(() => {
+        setStatsCollapsed((prev) => {
+            const next = !prev;
+            browser.storage.local.set({ [STATS_COLLAPSED_KEY]: next });
+            return next;
+        });
+    }, []);
 
     const openOptionsPage = useCallback(() => {
         browser.runtime.openOptionsPage();
@@ -31,10 +53,10 @@ function PopupContent() {
     // --- Rendu ---
     return (
         <Box width="350px" p="4" style={{ background: "var(--gray-a2)", borderRadius: "var(--radius-3)" }}>
-            <Flex gap="2" direction="column" width="100%">
+            <Flex gap="3" direction="column" width="100%">
                 <PopupHeader title={getMessage('popupTitle')} onSettingsOpen={openOptionsPage}/>
 
-                <SettingsToggles 
+                <SettingsToggles
                     globalGroupingEnabled={settings?.globalGroupingEnabled}
                     globalDeduplicationEnabled={settings?.globalDeduplicationEnabled}
                     onGroupingChange={setGlobalGroupingEnabled}
@@ -42,7 +64,13 @@ function PopupContent() {
                     isLoading={!isLoaded}
                 />
 
-                <Statistics stats={statistics} onReset={handleResetStats} isLoading={!statsLoaded} />
+                <Statistics
+                    stats={statistics}
+                    onReset={handleResetStats}
+                    isLoading={!statsLoaded || !collapsedLoaded}
+                    collapsed={statsCollapsed}
+                    onToggleCollapsed={handleToggleStatsCollapsed}
+                />
             </Flex>
         </Box>
     );
