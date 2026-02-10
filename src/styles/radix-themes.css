@@ -1,2 +1,8 @@
 @import '@radix-ui/themes/styles.css';
 
+/* Focus ring for keyboard-navigable card lists */
+[role="row"][tabindex]:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: -2px;
+  border-radius: var(--radius-3);
+}
