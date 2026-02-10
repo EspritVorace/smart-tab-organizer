@@ -52,7 +52,7 @@ function PopupContent() {
 
     // --- Rendu ---
     return (
-        <Box width="350px" p="4" style={{ background: "var(--gray-a2)", borderRadius: "var(--radius-3)" }}>
+        <Box as="main" width="350px" p="4" style={{ background: "var(--gray-a2)", borderRadius: "var(--radius-3)" }} aria-label={getMessage('popupTitle')}>
             <Flex gap="3" direction="column" width="100%">
                 <PopupHeader title={getMessage('popupTitle')} onSettingsOpen={openOptionsPage}/>
 
@@ -91,7 +91,12 @@ function PopupApp() {
     );
 }
 
-// Monte l'application React dans le div #popup-app
+// Set document lang to match browser locale for screen readers
+  try {
+    const uiLang = browser.i18n.getUILanguage();
+    if (uiLang) document.documentElement.lang = uiLang;
+  } catch (_) { /* fallback to HTML default */ }
+
   const root = createRoot(document.getElementById('popup-app'));
   root.render(<PopupApp />);
 })();

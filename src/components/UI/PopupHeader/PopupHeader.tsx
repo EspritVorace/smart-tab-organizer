@@ -1,5 +1,6 @@
 import { Box, Flex, Heading, IconButton } from '@radix-ui/themes';
 import { Settings } from 'lucide-react';
+import { getMessage } from '../../../utils/i18n';
 
 interface PopupHeaderProps {
   title: string;
@@ -8,7 +9,7 @@ interface PopupHeaderProps {
 
 export function PopupHeader({ title, onSettingsOpen }: PopupHeaderProps) {
   return (
-    <Box>
+    <Box role="banner">
       <Box
         px="3"
         py="2"
@@ -34,7 +35,7 @@ export function PopupHeader({ title, onSettingsOpen }: PopupHeaderProps) {
             >
               <img
                 src="/icons/icon48.png"
-                alt="Logo"
+                alt=""
                 style={{
                   width: 24,
                   height: 24,
@@ -57,13 +58,14 @@ export function PopupHeader({ title, onSettingsOpen }: PopupHeaderProps) {
             variant="ghost"
             size="2"
             onClick={onSettingsOpen}
-            aria-label="Open settings"
+            title={getMessage('openOptions')}
+            aria-label={getMessage('openOptions')}
             style={{
               color: 'white',
               background: 'rgba(255, 255, 255, 0.1)',
             }}
           >
-            <Settings size={20} />
+            <Settings size={20} aria-hidden="true" />
           </IconButton>
         </Flex>
       </Box>

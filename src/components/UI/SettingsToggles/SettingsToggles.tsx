@@ -30,12 +30,12 @@ export function SettingsToggles({
     }
 
     return (
-        <Card>
+        <Card role="group" aria-label={getMessage('settingsTab')}>
             <Flex gap="3" direction="column">
                 <Text as="label" size="2">
                     <Flex gap="3" align="center" justify="between">
                         <Flex gap="2" align="center">
-                            <Box style={{ color: 'var(--accent-9)', display: 'flex' }}>
+                            <Box aria-hidden="true" style={{ color: 'var(--accent-9)', display: 'flex' }}>
                                 <Layers size={16} />
                             </Box>
                             {getMessage('enableGrouping')}
@@ -49,7 +49,7 @@ export function SettingsToggles({
                 <Text as="label" size="2">
                     <Flex gap="3" align="center" justify="between">
                         <Flex gap="2" align="center">
-                            <Box style={{ color: 'var(--accent-9)', display: 'flex' }}>
+                            <Box aria-hidden="true" style={{ color: 'var(--accent-9)', display: 'flex' }}>
                                 <Copy size={16} />
                             </Box>
                             {getMessage('enableDeduplication')}
