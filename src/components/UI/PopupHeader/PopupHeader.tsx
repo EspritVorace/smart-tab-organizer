@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, IconButton, Separator } from '@radix-ui/themes';
+import { Box, Flex, Heading, IconButton } from '@radix-ui/themes';
 import { Settings } from 'lucide-react';
 
 interface PopupHeaderProps {
@@ -11,11 +11,10 @@ export function PopupHeader({ title, onSettingsOpen }: PopupHeaderProps) {
     <Box>
       <Box
         px="3"
-        py="3"
+        py="2"
         style={{
           background: 'linear-gradient(135deg, var(--accent-a8) 0%, var(--accent-a10) 100%)',
           borderRadius: 'var(--radius-3)',
-          marginBottom: 'var(--space-2)',
         }}
       >
         <Flex justify="between" align="center" width="100%">
@@ -44,7 +43,7 @@ export function PopupHeader({ title, onSettingsOpen }: PopupHeaderProps) {
               />
             </Box>
             <Heading
-              size="5"
+              size="4"
               weight="bold"
               style={{
                 color: 'white',
@@ -68,7 +67,6 @@ export function PopupHeader({ title, onSettingsOpen }: PopupHeaderProps) {
           </IconButton>
         </Flex>
       </Box>
-      <Separator size="4" style={{ opacity: 0.3 }} />
     </Box>
   );
 }
