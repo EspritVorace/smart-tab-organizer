@@ -289,7 +289,12 @@ function OptionsApp() {
     );
 }
 
-// --- Montage ---
+// Set document lang to match browser locale for screen readers
+  try {
+    const uiLang = browser.i18n.getUILanguage();
+    if (uiLang) document.documentElement.lang = uiLang;
+  } catch (_) { /* fallback to HTML default */ }
+
   const root = createRoot(document.getElementById('options-app'));
   root.render(<OptionsApp />);
 })();
