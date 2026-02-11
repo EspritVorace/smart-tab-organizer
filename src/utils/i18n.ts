@@ -8,7 +8,7 @@ import { browser } from 'wxt/browser';
  */
 export function getMessage(key: string, substitutions?: string | string[]): string {
   try {
-    return browser.i18n.getMessage(key, substitutions);
+    return browser.i18n.getMessage(key as 'extensionName', substitutions);
   } catch (e) {
     console.warn(`Clé i18n ${key} introuvable.`);
     return key;

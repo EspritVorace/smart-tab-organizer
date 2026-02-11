@@ -8,9 +8,6 @@ const meta: Meta<typeof Header> = {
     layout: 'fullscreen',
   },
   tags: ['autodocs'],
-  argTypes: {
-    onThemeChange: { action: 'theme-changed' },
-  },
 } satisfies Meta<typeof Header>;
 
 export default meta;

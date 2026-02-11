@@ -65,7 +65,7 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
           // Mise à jour seulement des domainRules
           const updatedSettings: SyncSettings = {
             ...syncSettings,
-            domainRules: validatedData.domainRules
+            domainRules: validatedData.domainRules as SyncSettings['domainRules']
           };
           
           onSettingsUpdate(updatedSettings);

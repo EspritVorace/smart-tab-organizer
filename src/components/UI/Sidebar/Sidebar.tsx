@@ -9,7 +9,7 @@ import { SidebarFooter } from './SidebarFooter';
 export interface SidebarItem {
   id: string;
   label: string;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: React.ComponentType<{ size?: number | string }>;
   href?: string;
   onClick?: () => void;
   badge?: string | number;

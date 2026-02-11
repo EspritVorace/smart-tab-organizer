@@ -123,7 +123,7 @@ export function DataTable<T extends Record<string, any>>({
                 <Button
                   key={index}
                   size="1"
-                  variant={action.variant || 'secondary'}
+                  variant={action.variant || 'soft'}
                   color={action.color}
                   onClick={() => action.handler(selectedRows)}
                 >

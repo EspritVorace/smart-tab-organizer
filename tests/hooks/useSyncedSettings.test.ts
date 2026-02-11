@@ -54,6 +54,11 @@ const mockBrowser = {
 // Set global browser
 (globalThis as any).browser = mockBrowser;
 
+// Mock wxt/browser module to use the global mock
+vi.mock('wxt/browser', () => ({
+  get browser() { return (globalThis as any).browser; }
+}));
+
 describe('useSyncedSettings', () => {
   beforeEach(() => {
     mockStorageData = {};

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { browser } from 'wxt/browser';
 import type { Statistics } from '../types/statistics.js';
 import { defaultStatistics } from '../types/statistics.js';
 
@@ -39,9 +40,9 @@ export function useStatistics(): UseStatisticsReturn {
         });
         
         // Assurer que les statistiques ont la bonne structure
-        const stats = { 
-          ...defaultStatistics, 
-          ...result.statistics 
+        const stats = {
+          ...defaultStatistics,
+          ...(result.statistics as Record<string, unknown>)
         };
         
         setStatistics(stats);
@@ -158,11 +159,11 @@ export function useStatistics(): UseStatisticsReturn {
         statistics: defaultStatistics
       });
       
-      const stats = { 
-        ...defaultStatistics, 
-        ...result.statistics 
+      const stats = {
+        ...defaultStatistics,
+        ...(result.statistics as Record<string, unknown>)
       };
-      
+
       setStatistics(stats);
     } catch (error) {
       console.error('Error reloading statistics:', error);

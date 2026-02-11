@@ -150,7 +150,7 @@ export async function createNewGroup(
     groupColor: string | null
 ): Promise<number> {
     console.log(`[GROUPING_DEBUG] Calling browser.tabs.group to create new group with tabs [${tabsToGroup.join(', ')}]`);
-    const newGroupId = await browser.tabs.group({ tabIds: tabsToGroup });
+    const newGroupId = await browser.tabs.group({ tabIds: tabsToGroup as [number, ...number[]] });
     
     const updatePayload: any = { title: groupName, collapsed: false };
     if (groupColor) updatePayload.color = groupColor;
@@ -191,7 +191,7 @@ export async function handleManualGroupNaming(
         console.log(`[GROUPING_DEBUG] Group ${targetGroupId} renamed manually to "${manualName}".`);
     } else if (manualName === null) {
         try {
-            await browser.tabs.ungroup(groupedTabIds);
+            await browser.tabs.ungroup(groupedTabIds as [number, ...number[]]);
             console.log(`[GROUPING_DEBUG] Manual prompt cancelled. Ungrouped tabs ${groupedTabIds.join(', ')} from group ${targetGroupId}.`);
         } catch (ungroupErr) {
             console.error('[GROUPING_DEBUG] Failed to ungroup after manual cancel', ungroupErr);

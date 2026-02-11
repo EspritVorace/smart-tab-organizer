@@ -46,7 +46,7 @@ export const FEATURE_CALLOUT_COLORS = {
   },
   SETTINGS: {
     INFO: 'gray',
-    WARNING: 'slate',  // Nuance plus foncée
+    WARNING: 'gray',   // Nuance neutre
     ERROR: 'red'       // Rouge standard pour erreur
   }
 } as const;

@@ -7,6 +7,8 @@ import type { SyncSettings } from '../../../types/syncSettings';
 const mockSyncSettings: SyncSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
+  notifyOnGrouping: true,
+  notifyOnDeduplication: true,
   domainRules: [
     {
       id: 'existing-rule-1',

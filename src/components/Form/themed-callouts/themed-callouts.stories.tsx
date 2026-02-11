@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Flex, Text, Box } from '@radix-ui/themes';
+import { Flex, Text, Box, Heading } from '@radix-ui/themes';
 import { 
   InfoCallout, 
   WarningCallout, 
@@ -26,10 +26,10 @@ export const CalloutsGenericCallouts: StoryObj = {
   name: 'Generic Callouts',
   render: () => (
     <Flex direction="column" gap="4" p="4">
-      <Text as="h2" size="6" weight="bold" mb="4">Generic Callouts with Custom Themes</Text>
+      <Heading as="h2" size="6" weight="bold" mb="4">Generic Callouts with Custom Themes</Heading>
       
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Default Colors</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Default Colors</Heading>
         <Flex direction="column" gap="3">
           <InfoCallout>
             This is an info callout with the default blue theme. It provides helpful information to users.
@@ -44,7 +44,7 @@ export const CalloutsGenericCallouts: StoryObj = {
       </Box>
 
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Custom Theme Colors</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Custom Theme Colors</Heading>
         <Flex direction="column" gap="3">
           <InfoCallout theme="purple">
             Info callout with purple theme (Domain Rules style).
@@ -62,7 +62,7 @@ export const CalloutsGenericCallouts: StoryObj = {
       </Box>
 
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Different Variants</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Different Variants</Heading>
         <Flex direction="column" gap="3">
           <InfoCallout variant="soft">Soft variant (default)</InfoCallout>
           <InfoCallout variant="surface">Surface variant</InfoCallout>
@@ -77,10 +77,10 @@ export const CalloutsFeatureCallouts: StoryObj = {
   name: 'Feature-Specific Callouts',
   render: () => (
     <Flex direction="column" gap="4" p="4">
-      <Text as="h2" size="6" weight="bold" mb="4">Feature-Specific Themed Callouts</Text>
+      <Heading as="h2" size="6" weight="bold" mb="4">Feature-Specific Themed Callouts</Heading>
       
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Domain Rules Callouts (Purple)</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Domain Rules Callouts (Purple)</Heading>
         <Flex direction="column" gap="2">
           <DomainRulesCallouts.Info>
             Domain rule configuration saved successfully. Your new rule will be applied to matching tabs.
@@ -95,7 +95,7 @@ export const CalloutsFeatureCallouts: StoryObj = {
       </Box>
 
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Regex Presets Callouts (Cyan)</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Regex Presets Callouts (Cyan)</Heading>
         <Flex direction="column" gap="2">
           <RegexPresetsCallouts.Info>
             Regex preset applied successfully. Your pattern will be used for tab title parsing.
@@ -111,7 +111,7 @@ export const CalloutsFeatureCallouts: StoryObj = {
 
 
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Import Callouts (Jade)</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Import Callouts (Jade)</Heading>
         <Flex direction="column" gap="2">
           <ImportCallouts.Info>
             Configuration file imported successfully. All settings have been applied.
@@ -126,7 +126,7 @@ export const CalloutsFeatureCallouts: StoryObj = {
       </Box>
 
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Export Callouts (Teal)</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Export Callouts (Teal)</Heading>
         <Flex direction="column" gap="2">
           <ExportCallouts.Info>
             Configuration exported successfully. Your settings have been saved to the download folder.
@@ -141,7 +141,7 @@ export const CalloutsFeatureCallouts: StoryObj = {
       </Box>
 
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Statistics Callouts (Orange)</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Statistics Callouts (Orange)</Heading>
         <Flex direction="column" gap="2">
           <StatisticsCallouts.Info>
             Statistics have been updated. Data is current as of the last browser session.
@@ -156,7 +156,7 @@ export const CalloutsFeatureCallouts: StoryObj = {
       </Box>
 
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Settings Callouts (Gray)</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Settings Callouts (Gray)</Heading>
         <Flex direction="column" gap="2">
           <SettingsCallouts.Info>
             Settings saved successfully. Changes will take effect immediately.
@@ -177,7 +177,7 @@ export const CalloutsComparison: StoryObj = {
   name: 'Theme Comparison',
   render: () => (
     <Flex direction="column" gap="4" p="4">
-      <Text as="h2" size="6" weight="bold" mb="4">Theme Color Comparison</Text>
+      <Heading as="h2" size="6" weight="bold" mb="4">Theme Color Comparison</Heading>
       
       <Text as="p" size="3" color="gray" mb="4">
         This story shows all feature themes side by side to demonstrate the visual distinction between different functional areas.
@@ -223,14 +223,14 @@ export const CalloutsNuancedColors: StoryObj = {
   name: 'Nuanced Colors by Type',
   render: () => (
     <Flex direction="column" gap="4" p="4">
-      <Text as="h2" size="6" weight="bold" mb="4">Nuanced Colors by Message Type</Text>
+      <Heading as="h2" size="6" weight="bold" mb="4">Nuanced Colors by Message Type</Heading>
       
       <Text as="p" size="3" color="gray" mb="4">
         Each feature theme now uses different color nuances for Info, Warning, and Error messages to improve readability and semantic meaning.
       </Text>
 
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Domain Rules (Purple Family)</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Domain Rules (Purple Family)</Heading>
         <Flex direction="column" gap="2">
           <DomainRulesCallouts.Info>Purple for informational messages</DomainRulesCallouts.Info>
           <DomainRulesCallouts.Warning>Violet for warnings</DomainRulesCallouts.Warning>
@@ -239,7 +239,7 @@ export const CalloutsNuancedColors: StoryObj = {
       </Box>
 
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Regex Presets (Cyan Family)</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Regex Presets (Cyan Family)</Heading>
         <Flex direction="column" gap="2">
           <RegexPresetsCallouts.Info>Cyan for informational messages</RegexPresetsCallouts.Info>
           <RegexPresetsCallouts.Warning>Sky for warnings</RegexPresetsCallouts.Warning>
@@ -249,7 +249,7 @@ export const CalloutsNuancedColors: StoryObj = {
 
 
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Import (Green Family)</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Import (Green Family)</Heading>
         <Flex direction="column" gap="2">
           <ImportCallouts.Info>Jade for informational messages</ImportCallouts.Info>
           <ImportCallouts.Warning>Teal for warnings</ImportCallouts.Warning>
@@ -258,7 +258,7 @@ export const CalloutsNuancedColors: StoryObj = {
       </Box>
 
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Export (Teal Family)</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Export (Teal Family)</Heading>
         <Flex direction="column" gap="2">
           <ExportCallouts.Info>Teal for informational messages</ExportCallouts.Info>
           <ExportCallouts.Warning>Cyan for warnings</ExportCallouts.Warning>
@@ -267,7 +267,7 @@ export const CalloutsNuancedColors: StoryObj = {
       </Box>
 
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Statistics (Orange Family)</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Statistics (Orange Family)</Heading>
         <Flex direction="column" gap="2">
           <StatisticsCallouts.Info>Orange for informational messages</StatisticsCallouts.Info>
           <StatisticsCallouts.Warning>Amber for warnings (standard warning color)</StatisticsCallouts.Warning>
@@ -276,7 +276,7 @@ export const CalloutsNuancedColors: StoryObj = {
       </Box>
 
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Settings (Gray Family)</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Settings (Gray Family)</Heading>
         <Flex direction="column" gap="2">
           <SettingsCallouts.Info>Gray for informational messages</SettingsCallouts.Info>
           <SettingsCallouts.Warning>Slate for warnings</SettingsCallouts.Warning>
@@ -291,10 +291,10 @@ export const CalloutsUsageExamples: StoryObj = {
   name: 'Usage Examples',
   render: () => (
     <Flex direction="column" gap="4" p="4">
-      <Text as="h2" size="6" weight="bold" mb="4">Real-World Usage Examples</Text>
+      <Heading as="h2" size="6" weight="bold" mb="4">Real-World Usage Examples</Heading>
       
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Form Validation Messages</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Form Validation Messages</Heading>
         <Flex direction="column" gap="2">
           <DomainRulesCallouts.Error>
             Domain filter is required. Please enter a valid domain pattern.
@@ -306,7 +306,7 @@ export const CalloutsUsageExamples: StoryObj = {
       </Box>
 
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Operation Status Messages</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Operation Status Messages</Heading>
         <Flex direction="column" gap="2">
           <ImportCallouts.Info>
             Import completed successfully. 15 domain rules and 8 regex presets were added.
@@ -318,7 +318,7 @@ export const CalloutsUsageExamples: StoryObj = {
       </Box>
 
       <Box>
-        <Text as="h3" size="4" weight="bold" mb="3">Configuration Guidance</Text>
+        <Heading as="h3" size="4" weight="bold" mb="3">Configuration Guidance</Heading>
         <Flex direction="column" gap="2">
           <RegexPresetsCallouts.Info style={{ marginTop: '16px' }}>
             No regex presets available. You can create custom presets to reuse common patterns across multiple rules.

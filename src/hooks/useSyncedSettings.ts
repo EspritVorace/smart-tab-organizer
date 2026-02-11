@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { browser } from 'wxt/browser';
 import type { SyncSettings, DomainRuleSettings } from '../types/syncSettings.js';
 
 export interface UseSyncedSettingsReturn {
@@ -46,7 +47,7 @@ export function useSyncedSettings(): UseSyncedSettingsReturn {
           notifyOnDeduplication: true
         });
 
-        setSettings(result as SyncSettings);
+        setSettings(result as unknown as SyncSettings);
         setIsLoaded(true);
       } catch (error) {
         console.error('Error loading settings:', error);
@@ -122,7 +123,7 @@ export function useSyncedSettings(): UseSyncedSettingsReturn {
   ) => {
     setChangeCallbacks(prev => ({
       ...prev,
-      [field]: new Set([...(prev[field] || []), callback])
+      [field]: new Set([...(prev[field] || []), callback as any])
     }));
 
     // Retourner une fonction de nettoyage
@@ -130,7 +131,7 @@ export function useSyncedSettings(): UseSyncedSettingsReturn {
       setChangeCallbacks(prev => {
         const newCallbacks = { ...prev };
         if (newCallbacks[field]) {
-          newCallbacks[field]!.delete(callback);
+          (newCallbacks[field] as Set<any>).delete(callback);
           if (newCallbacks[field]!.size === 0) {
             delete newCallbacks[field];
           }
@@ -168,7 +169,7 @@ export function useSyncedSettings(): UseSyncedSettingsReturn {
         notifyOnDeduplication: true
       });
 
-      setSettings(result as SyncSettings);
+      setSettings(result as unknown as SyncSettings);
     } catch (error) {
       console.error('Error reloading settings:', error);
     }
