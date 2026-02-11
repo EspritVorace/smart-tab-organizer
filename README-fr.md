@@ -4,48 +4,52 @@
 
 # SmartTab Organizer
 
-![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.3-blue.svg)
 ![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)
 
-**SmartTab Organizer** est une extension Chrome conçue pour vous aider à gérer efficacement vos onglets de navigateur en regroupant automatiquement les onglets liés et en empêchant les doublons.
+**SmartTab Organizer** est une extension multi-navigateur conçue pour vous aider à gérer efficacement vos onglets en regroupant automatiquement les onglets liés et en empêchant les doublons.
 
-## Fonctionnalités ✨
+## Fonctionnalités
 
-### 🖱️ Regroupement Automatique
+### Regroupement Automatique
 * Clic molette sur un lien pour ouvrir l'onglet dans le groupe adéquat si le domaine correspond à vos règles.
 * L'onglet rejoint un groupe existant ou un nouveau groupe est créé.
 * Le nom du groupe peut provenir du titre de l'onglet source, de son URL ou être saisi manuellement.
 * Préréglages d'expressions régulières pour les outils de tickets populaires (Jira, GitLab, GitHub, Trello, etc.).
 
-### 🚫 Déduplication
+### Déduplication
 * L'ouverture d'une même URL est empêchée.
 * L'onglet existant est remis au premier plan et rechargé.
-* Modes de correspondance : URL exacte, nom d'hôte + chemin, nom d'hôte seul ou simple inclusion.
+* Modes de correspondance : URL exacte, nom d'hôte + chemin, nom d'hôte seul ou simple inclusion.
 
-### ⚙️ Options et Personnalisation
+### Options et Personnalisation
 * Ajouter, modifier, supprimer ou activer/désactiver les règles de domaine.
-* Gérer les expressions régulières personnalisées ou prédéfinies.
-* Gérer les expressions régulières personnalisées ou prédéfinies avec une interface intuitive.
+* Gérer les expressions régulières personnalisées ou prédéfinies avec une interface intuitive en cartes.
 * Importer/exporter votre configuration au format JSON.
-* Configurer les modes de déduplication.
+* Configurer les modes de déduplication par règle.
 * Consulter les statistiques (groupes créés et onglets dédupliqués) et les réinitialiser.
 * Sélectionner le thème Clair, Sombre ou Système.
 
-### 📊 Popup d'Accès Rapide
+### Popup d'Accès Rapide
 * Activer/désactiver globalement le regroupement et la déduplication.
-* Voir les statistiques clés en un coup d'œil.
+* Voir les statistiques clés en un coup d'oeil (section repliable avec état persisté).
 * Accès direct à la page d'options.
 
-### 🌍 Internationalisation
-* Disponible en Français (défaut), Anglais et Espagnol.
+### Accessibilité
+* Navigation complète au clavier sur tous les composants.
+* Support des lecteurs d'écran avec labels ARIA et landmarks appropriés.
+* Construit sur les primitives Radix UI pour une accessibilité native.
 
-## Installation 🚀
+### Internationalisation
+* Disponible en Anglais, Français et Espagnol.
+
+## Installation
 
 ### Manuelle (Développement / Test)
 
 1.  **Télécharger :** Clonez ou téléchargez ce projet.
     ```bash
-    git clone [https://github.com/EspritVorace/smart-tab-organizer.git](https://github.com/EspritVorace/smart-tab-organizer.git)
+    git clone https://github.com/EspritVorace/smart-tab-organizer.git
     ```
 2.  **Installer les dépendances :**
     ```bash
@@ -57,7 +61,7 @@
     ```bash
     # Pour le développement Chrome
     npm run dev
-    
+
     # Pour le développement Firefox
     npm run dev:firefox
     ```
@@ -73,7 +77,7 @@
     ```bash
     # Créer le package Chrome
     npm run zip
-    
+
     # Créer le package Firefox
     npm run zip:firefox
     ```
@@ -84,7 +88,7 @@
     * Firefox : ouvrez `about:debugging#/runtime/this-firefox` puis "Charger un module complémentaire temporaire" avec `.output/firefox-mv2/manifest.json`.
 5.  L'extension est prête !
 
-## Utilisation 📖
+## Utilisation
 
 1.  **Cliquez sur l'Icône :** Pour accéder au popup.
 2.  **Configurez :** Ouvrez les "Options" pour définir vos règles.
@@ -92,24 +96,42 @@
     * **Préréglages RegEx :** Créez ou utilisez des RegEx pour extraire les noms de groupes (ex: `([A-Z]+-\d+)` pour Jira).
 3.  **Naviguez :** Utilisez le clic molette sur les sites configurés et voyez la magie opérer !
 
-## Technologies Utilisées 🛠️
+## Tests
+
+```bash
+# Tests unitaires
+npm test
+
+# Tests E2E
+npm run test:e2e
+
+# Storybook (documentation des composants)
+npm run storybook
+```
+
+## Technologies Utilisées
 
 ### Core
-* JavaScript & TypeScript
-* WXT framework pour le développement d'extensions web
-* React pour l'interface utilisateur réactive
-* APIs d'extensions Chrome/Firefox (Manifest V3)
+* TypeScript & React
+* WXT framework pour le développement d'extensions multi-navigateurs
+* APIs d'extensions Chrome/Firefox (Manifest V3 / V2)
 
-### Librairies UI
+### UI
 * **@radix-ui/themes** - Système de design et composants UI
+* **@radix-ui/react-collapsible** - Patterns accessibles de repli/dépli
 * **next-themes** - Gestion des thèmes (mode sombre/clair)
 * **lucide-react** - Icônes SVG
 * **react-hook-form** - Gestion des formulaires
 
-### Utilitaires
+### Validation
 * **Zod** - Validation de schémas
 
-## Licence 📄
+### Tests
+* **Vitest** - Tests unitaires avec Happy DOM
+* **Playwright** - Tests end-to-end
+* **Storybook** - Documentation et tests visuels des composants
+
+## Licence
 
 Ce projet est sous licence **GNU General Public License v3.0**.
 

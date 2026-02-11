@@ -12,9 +12,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run compile` - TypeScript type checking without emitting files
 
 ### Testing
-- `npm test` - Run tests using Vitest
+- `npm test` - Run unit tests using Vitest (112 tests)
 - `npm run test:watch` - Run tests in watch mode
 - `npm run test:ui` - Run tests with Vitest UI
+- `npm run test:e2e` - Run E2E tests with Playwright
+- `npm run test:e2e:headed` - Run E2E tests in headed mode
 - `npm run test:legacy` - Run legacy tests (node tests/runTests.js)
 
 ### Distribution
@@ -28,7 +30,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Architecture Overview
 
 ### Web Extension Framework
-This is a browser extension built using the WXT framework, which provides a modern development experience for creating cross-browser extensions. The extension targets both Chrome (Manifest V3) and Firefox (Manifest V2).
+This is a cross-browser extension built using the WXT framework. It targets Chrome (Manifest V3) and Firefox (Manifest V2).
 
 ### Entry Points
 - `src/entrypoints/background.ts` - Background script entry point (delegates to modular code)
@@ -55,10 +57,11 @@ The extension provides tab organization through:
 ### Technology Stack
 - **Framework**: WXT for extension development
 - **Frontend**: React with TypeScript
-- **UI Components**: Radix UI themes with Lucide React icons
+- **UI Components**: Radix UI Themes with Radix primitives and Lucide React icons
 - **Forms**: React Hook Form with Zod validation
 - **Theming**: next-themes for dark/light mode
-- **Testing**: Vitest with Happy DOM environment
+- **Unit Testing**: Vitest with Happy DOM environment
+- **E2E Testing**: Playwright
 - **Documentation**: Storybook for component documentation
 
 ### Schema Architecture
@@ -68,10 +71,11 @@ The application uses a schema-driven approach with Zod validation:
 - Pattern: Schema types (e.g., `DomainRule`) are extended with runtime fields (e.g., `DomainRuleSetting` adds `enabled` and `badge`)
 
 ### Storage Pattern
-Settings are managed through `browser.storage.sync` with a React hook pattern:
-- `useSyncedSettings` hook in `src/hooks/` - Provides reactive settings with automatic sync
-- Uses refs to prevent race conditions between local updates and storage events
-- Settings include: `globalGroupingEnabled`, `globalDeduplicationEnabled`, `domainRules`
+Two storage backends are used:
+- **`browser.storage.sync`** - Synced settings (domain rules, grouping/deduplication toggles, notification prefs). Managed via `useSyncedSettings` hook in `src/hooks/`.
+- **`browser.storage.local`** - Per-device UI preferences (e.g., `popupStatsCollapsed`). Not synced across browsers.
+
+The `useSyncedSettings` hook uses refs to prevent race conditions between local updates and storage events.
 
 ### Static Data
 - Regex presets are stored in `public/data/presets.json` (not user-editable, loaded at runtime)
@@ -80,21 +84,24 @@ Settings are managed through `browser.storage.sync` with a React hook pattern:
 ### Key Directories
 - `src/components/` - React components with Storybook stories, organized by category:
   - `src/components/Core/` - Business logic components (DomainRule, RegexPreset, Statistics)
-  - `src/components/UI/` - User interface components (Header, PopupHeader, Sidebar, SettingsToggles, ThemeToggle)
+  - `src/components/UI/` - User interface components (Header, PopupHeader, Sidebar, SettingsToggles, ThemeToggle, PageLayout)
   - `src/components/Form/` - Form and utility components (FormFields, themed-callouts, themes)
 - `src/hooks/` - Custom React hooks for settings and statistics
 - `src/utils/` - Utility functions for storage, i18n, and theme management
 - `src/pages/` - Main page components (popup and options)
-- `tests/` - Test files using Vitest framework
+- `src/styles/` - Global CSS (Radix Themes import, custom focus styles)
+- `tests/` - Unit test files using Vitest
+- `e2e/` - End-to-end tests using Playwright
 
 ### Build Configuration
 - Uses Vite as the build tool with React plugin
 - TypeScript configuration in `tsconfig.json`
 - WXT configuration in `wxt.config.ts` handles manifest generation and build settings
-- Test configuration in `vitest.config.ts` with WxtVitest plugin
+- Unit test configuration in `vitest.simple.config.ts`
+- E2E test configuration in `playwright.config.ts`
 
 ### Internationalization
-Supports multiple languages (English, French, Spanish) with messages stored in `public/_locales/` following Chrome extension i18n standards.
+Supports multiple languages (English, French, Spanish) with messages stored in `public/_locales/` following Chrome extension i18n standards. The `lang` attribute on `<html>` is set dynamically at runtime via `browser.i18n.getUILanguage()`.
 
 ### Feature Theming
 Each feature has a consistent color theme defined in `src/utils/themeConstants.ts`:
@@ -113,11 +120,12 @@ Components are organized into three main categories that reflect their purpose a
 - **Core Components** (`src/components/Core/`): Business logic and domain-specific components
   - DomainRule/ - Domain rule management (DomainRuleCard, DomainRuleFormModal)
   - RegexPreset/ - Regex preset management (RegexPresetCard, RegexPresetDialog)
-  - Statistics/ - Application statistics display
+  - Statistics/ - Application statistics display (uses Radix Collapsible)
 
 - **UI Components** (`src/components/UI/`): User interface and layout components
   - Header/ - Page headers
   - PopupHeader/ - Extension popup headers
+  - PageLayout/ - Options page layout wrapper
   - Sidebar/ - Navigation sidebar with multiple sub-components
   - SettingsToggles/ - Settings control components
   - ThemeToggle/ - Theme switching functionality
@@ -143,3 +151,15 @@ To avoid export name conflicts in Storybook, prefix all story exports with the c
 
 ### Type Safety
 - Avoid `any()` for types to maintain strong type checking
+
+### Accessibility
+- **Use Radix primitives for interactive patterns** instead of hand-rolling ARIA attributes and keyboard handlers. Key primitives available (transitive deps of `@radix-ui/themes`):
+  - `@radix-ui/react-collapsible` - For expand/collapse sections (used in Statistics)
+  - `@radix-ui/react-toolbar` - For toolbar keyboard navigation patterns
+  - `@radix-ui/react-dialog` - For modals
+- **Radix Themes components** (Switch, IconButton, Checkbox, etc.) already handle focus rings, keyboard navigation, and ARIA natively. Don't override their focus styles with custom CSS.
+- **Independent toggles** (e.g., two Switch components) use Tab navigation between them. Arrow keys are only for RadioGroup or Toolbar patterns.
+- **Decorative icons** from lucide-react should have `aria-hidden="true"`. Icons inside `IconButton` with `aria-label` are also decorative.
+- **`title` attribute** on icon-only buttons provides visible tooltip on hover. Always pair with `aria-label` for screen readers.
+- **i18n for ARIA labels**: Use `getMessage()` for all `aria-label` and `title` attributes, never hardcode English strings.
+- **Custom CSS for focus** is only needed for non-Radix markup (e.g., `[role="row"]` cards in DomainRulesPage). See `src/styles/radix-themes.css`.
