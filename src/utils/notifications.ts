@@ -1,4 +1,4 @@
-import { browser } from 'wxt/browser';
+import { browser, Browser } from 'wxt/browser';
 import { getMessage } from './i18n';
 import { markUrlToSkipDeduplication } from './deduplicationSkip';
 
@@ -36,9 +36,9 @@ const pendingUndoActions = new Map<string, UndoAction>();
 export async function showNotification({ title, message, type = 'info', undoAction }: ShowNotificationOptions): Promise<string> {
   const notificationId = `smarttab-${Date.now()}`;
 
-  const notificationOptions: browser.Notifications.CreateNotificationOptions = {
+  const notificationOptions: Browser.notifications.NotificationCreateOptions = {
     type: 'basic',
-    iconUrl: browser.runtime.getURL('icons/icon128.png'),
+    iconUrl: browser.runtime.getURL('/icons/icon128.png'),
     title,
     message
   };

@@ -1,3 +1,4 @@
+import { browser } from 'wxt/browser';
 import type { SyncSettings } from '../types/syncSettings.js';
 import { defaultSyncSettings } from '../types/syncSettings.js';
 
@@ -8,8 +9,8 @@ import { defaultSyncSettings } from '../types/syncSettings.js';
 
 export async function getSyncSettings(): Promise<SyncSettings> {
   try {
-    const result = await browser.storage.sync.get(defaultSyncSettings);
-    return result as SyncSettings;
+    const result = await browser.storage.sync.get({ ...defaultSyncSettings });
+    return result as unknown as SyncSettings;
   } catch (error) {
     console.error('Error getting sync settings:', error);
     return defaultSyncSettings;
@@ -37,7 +38,7 @@ export async function getGlobalGroupingEnabled(): Promise<boolean> {
     const result = await browser.storage.sync.get({
       globalGroupingEnabled: defaultSyncSettings.globalGroupingEnabled
     });
-    return result.globalGroupingEnabled;
+    return result.globalGroupingEnabled as boolean;
   } catch (error) {
     console.error('Error getting global grouping enabled:', error);
     return defaultSyncSettings.globalGroupingEnabled;
@@ -49,7 +50,7 @@ export async function getGlobalDeduplicationEnabled(): Promise<boolean> {
     const result = await browser.storage.sync.get({
       globalDeduplicationEnabled: defaultSyncSettings.globalDeduplicationEnabled
     });
-    return result.globalDeduplicationEnabled;
+    return result.globalDeduplicationEnabled as boolean;
   } catch (error) {
     console.error('Error getting global deduplication enabled:', error);
     return defaultSyncSettings.globalDeduplicationEnabled;
@@ -61,7 +62,7 @@ export async function getDomainRules(): Promise<SyncSettings['domainRules']> {
     const result = await browser.storage.sync.get({
       domainRules: defaultSyncSettings.domainRules
     });
-    return result.domainRules;
+    return result.domainRules as SyncSettings['domainRules'];
   } catch (error) {
     console.error('Error getting domain rules:', error);
     return defaultSyncSettings.domainRules;

@@ -10,7 +10,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "skipLibCheck": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", ".wxt/wxt.d.ts"]
 }

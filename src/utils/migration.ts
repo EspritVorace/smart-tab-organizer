@@ -5,7 +5,7 @@ import { defaultSyncSettings } from '../types/syncSettings.js';
 import { defaultStatistics } from '../types/statistics.js';
 import type { SyncSettings } from '../types/syncSettings.js';
 
-const defaultSettingsPath = 'data/default_settings.json';
+const defaultSettingsPath = '/data/default_settings.json' as const;
 let cachedDefaultSettings: SyncSettings | null = null;
 
 function isObject(item: any): item is Record<string, any> {

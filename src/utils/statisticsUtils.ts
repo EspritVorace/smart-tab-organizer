@@ -1,3 +1,4 @@
+import { browser } from 'wxt/browser';
 import type { Statistics } from '../types/statistics.js';
 import { defaultStatistics } from '../types/statistics.js';
 
@@ -12,9 +13,9 @@ export async function getStatisticsData(): Promise<Statistics> {
       statistics: defaultStatistics
     });
     
-    return { 
-      ...defaultStatistics, 
-      ...result.statistics 
+    return {
+      ...defaultStatistics,
+      ...(result.statistics as Record<string, unknown>)
     };
   } catch (error) {
     console.error('Error getting statistics:', error);

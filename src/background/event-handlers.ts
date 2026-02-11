@@ -55,7 +55,7 @@ export function setupTabCreatedHandler(): void {
 }
 
 export function setupTabUpdatedHandler(): void {
-    browser.tabs.onUpdated.addListener(async (tabId: number, changeInfo: Browser.tabs.TabChangeInfo, tab: Browser.tabs.Tab) => {
+    browser.tabs.onUpdated.addListener(async (tabId: number, changeInfo: Browser.tabs.OnUpdatedInfo, tab: Browser.tabs.Tab) => {
         const urlToCheck = changeInfo.url || (changeInfo.status === 'complete' ? tab.url : null);
         
         if (urlToCheck && tab.windowId) {
@@ -67,7 +67,7 @@ export function setupTabUpdatedHandler(): void {
 async function handleGroupingWithRetry(openerTab: Browser.tabs.Tab, newTab: Browser.tabs.Tab): Promise<void> {
     let hasProcessedTab = false;
 
-    const listener = async (tabId: number, changeInfo: Browser.tabs.TabChangeInfo, tab: Browser.tabs.Tab) => {
+    const listener = async (tabId: number, changeInfo: Browser.tabs.OnUpdatedInfo, tab: Browser.tabs.Tab) => {
         if (hasProcessedTab) {
             try { 
                 browser.tabs.onUpdated.removeListener(listener); 

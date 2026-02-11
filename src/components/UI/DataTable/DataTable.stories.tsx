@@ -60,19 +60,19 @@ const userRowActions: Action<User>[] = [
     label: 'Edit',
     icon: Edit,
     handler: (user) => alert(`Edit user: ${user.name}`),
-    variant: 'secondary'
+    variant: 'soft'
   },
   {
     label: 'View',
     icon: Eye,
     handler: (user) => alert(`View user: ${user.name}`),
-    variant: 'secondary'
+    variant: 'soft'
   },
   {
     label: 'Delete',
     icon: Trash2,
     handler: (user) => alert(`Delete user: ${user.name}`),
-    variant: 'danger',
+    variant: 'outline',
     disabled: (user) => user.role === 'admin'
   }
 ];
@@ -82,13 +82,13 @@ const userBulkActions: Action<User[]>[] = [
     label: 'Archive',
     icon: Archive,
     handler: (users) => alert(`Archive ${users.length} users`),
-    variant: 'secondary'
+    variant: 'soft'
   },
   {
     label: 'Delete',
     icon: Trash2,
     handler: (users) => alert(`Delete ${users.length} users`),
-    variant: 'danger'
+    variant: 'outline'
   }
 ];
 
@@ -189,13 +189,13 @@ const productRowActions: Action<Product>[] = [
     label: 'Edit',
     icon: Edit,
     handler: (product) => alert(`Edit product: ${product.name}`),
-    variant: 'secondary'
+    variant: 'soft'
   },
   {
     label: 'Restock Alert',
     icon: AlertTriangle,
     handler: (product) => alert(`Restock alert for: ${product.name}`),
-    variant: 'secondary',
+    variant: 'soft',
     hidden: (product) => product.status === 'in_stock'
   }
 ];
@@ -205,13 +205,13 @@ const productBulkActions: Action<Product[]>[] = [
     label: 'Export',
     icon: Download,
     handler: (products) => alert(`Export ${products.length} products`),
-    variant: 'secondary'
+    variant: 'soft'
   },
   {
     label: 'Update Prices',
     icon: Settings,
     handler: (products) => alert(`Update prices for ${products.length} products`),
-    variant: 'primary'
+    variant: 'solid'
   }
 ];
 
@@ -308,13 +308,13 @@ const taskRowActions: Action<Task>[] = [
     label: 'Edit',
     icon: Edit,
     handler: (task) => alert(`Edit task: ${task.title}`),
-    variant: 'secondary'
+    variant: 'soft'
   },
   {
     label: 'View',
     icon: Eye,
     handler: (task) => alert(`View task: ${task.title}`),
-    variant: 'secondary'
+    variant: 'soft'
   }
 ];
 
@@ -323,13 +323,13 @@ const taskBulkActions: Action<Task[]>[] = [
     label: 'Assign',
     icon: Users,
     handler: (tasks) => alert(`Assign ${tasks.length} tasks`),
-    variant: 'primary'
+    variant: 'solid'
   },
   {
     label: 'Archive',
     icon: Archive,
     handler: (tasks) => alert(`Archive ${tasks.length} tasks`),
-    variant: 'secondary'
+    variant: 'soft'
   }
 ];
 

@@ -13,7 +13,7 @@ export interface Action<T> {
   label: string;
   icon: LucideIcon;
   handler: (data: T) => void;
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  variant?: 'classic' | 'outline' | 'solid' | 'soft' | 'surface' | 'ghost';
   color?: 'red' | 'blue' | 'green' | 'yellow' | 'orange' | 'purple' | 'pink' | 'gray';
   disabled?: (data: T) => boolean;
   hidden?: (data: T) => boolean;

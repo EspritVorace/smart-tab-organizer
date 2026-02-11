@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Button, Flex, Text, TextField, Select, Switch, Box } from '@radix-ui/themes';
+import { Button, Flex, Text, Heading, TextField, Select, Switch, Box } from '@radix-ui/themes';
 import { 
   DomainRulesTheme, 
   RegexPresetsTheme, 
@@ -21,7 +21,7 @@ export default meta;
 
 const ThemeShowcase = ({ ThemeComponent, title }: { ThemeComponent: React.ComponentType<{ children: React.ReactNode }>, title: string }) => (
   <Box style={{ border: '1px solid var(--gray-6)', borderRadius: '8px', padding: '16px', margin: '8px 0' }}>
-    <Text as="h3" size="4" weight="bold" mb="3">{title}</Text>
+    <Heading as="h3" size="4" weight="bold" mb="3">{title}</Heading>
     <ThemeComponent>
       <Flex direction="column" gap="3">
         <Flex gap="2" align="center">
@@ -58,7 +58,7 @@ export const ThemesAllThemes: StoryObj = {
   name: 'All Themes Showcase',
   render: () => (
     <Flex direction="column" gap="2">
-      <Text as="h2" size="6" weight="bold" mb="4">Feature Themes Showcase</Text>
+      <Heading as="h2" size="6" weight="bold" mb="4">Feature Themes Showcase</Heading>
       <ThemeShowcase ThemeComponent={DomainRulesTheme} title="Domain Rules Theme (Purple)" />
       <ThemeShowcase ThemeComponent={RegexPresetsTheme} title="Regex Presets Theme (Cyan)" />
       <ThemeShowcase ThemeComponent={ImportTheme} title="Import Theme (Jade)" />
@@ -74,7 +74,7 @@ export const ThemesDomainRules: StoryObj = {
   render: () => (
     <DomainRulesTheme>
       <Flex direction="column" gap="4" p="4">
-        <Text as="h2" size="6" weight="bold">Domain Rules Configuration</Text>
+        <Heading as="h2" size="6" weight="bold">Domain Rules Configuration</Heading>
         <Flex direction="column" gap="3">
           <Flex gap="2" align="center">
             <Text size="2" weight="medium" style={{ minWidth: '120px' }}>Domain Filter:</Text>
@@ -101,7 +101,7 @@ export const ThemesRegexPresets: StoryObj = {
   render: () => (
     <RegexPresetsTheme>
       <Flex direction="column" gap="4" p="4">
-        <Text as="h2" size="6" weight="bold">Regex Presets Configuration</Text>
+        <Heading as="h2" size="6" weight="bold">Regex Presets Configuration</Heading>
         <Flex direction="column" gap="3">
           <Flex gap="2" align="center">
             <Text size="2" weight="medium" style={{ minWidth: '120px' }}>Preset Name:</Text>
@@ -130,7 +130,7 @@ export const ThemesImportExport: StoryObj = {
     <Flex direction="column" gap="4">
       <ImportTheme>
         <Box style={{ border: '1px solid var(--gray-6)', borderRadius: '8px', padding: '16px' }}>
-          <Text as="h3" size="5" weight="bold" mb="3">Import Configuration</Text>
+          <Heading as="h3" size="5" weight="bold" mb="3">Import Configuration</Heading>
           <Flex direction="column" gap="3">
             <Flex gap="2" align="center">
               <Text size="2" weight="medium" style={{ minWidth: '120px' }}>Import File:</Text>
@@ -147,7 +147,7 @@ export const ThemesImportExport: StoryObj = {
       
       <ExportTheme>
         <Box style={{ border: '1px solid var(--gray-6)', borderRadius: '8px', padding: '16px' }}>
-          <Text as="h3" size="5" weight="bold" mb="3">Export Configuration</Text>
+          <Heading as="h3" size="5" weight="bold" mb="3">Export Configuration</Heading>
           <Flex direction="column" gap="3">
             <Flex gap="2" align="center">
               <Text size="2" weight="medium" style={{ minWidth: '120px' }}>Export Format:</Text>
@@ -176,7 +176,7 @@ export const ThemesStatistics: StoryObj = {
   render: () => (
     <StatisticsTheme>
       <Flex direction="column" gap="4" p="4">
-        <Text as="h2" size="6" weight="bold">Statistics Dashboard</Text>
+        <Heading as="h2" size="6" weight="bold">Statistics Dashboard</Heading>
         <Flex direction="column" gap="3">
           <Flex gap="2" align="center">
             <Text size="2" weight="medium" style={{ minWidth: '120px' }}>Time Period:</Text>
@@ -206,7 +206,7 @@ export const ThemesSettings: StoryObj = {
   render: () => (
     <SettingsTheme>
       <Flex direction="column" gap="4" p="4">
-        <Text as="h2" size="6" weight="bold">Application Settings</Text>
+        <Heading as="h2" size="6" weight="bold">Application Settings</Heading>
         <Flex direction="column" gap="3">
           <Flex gap="2" align="center">
             <Text size="2" weight="medium" style={{ minWidth: '120px' }}>Theme:</Text>
