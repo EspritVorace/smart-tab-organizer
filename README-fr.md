@@ -12,7 +12,7 @@
 ## Fonctionnalités
 
 ### Regroupement Automatique
-* Clic molette sur un lien pour ouvrir l'onglet dans le groupe adéquat si le domaine correspond à vos règles.
+* Clic molette sur un lien ou clic droit > "Ouvrir le lien dans un nouvel onglet" pour ouvrir l'onglet dans le groupe adéquat si le domaine correspond à vos règles.
 * L'onglet rejoint un groupe existant ou un nouveau groupe est créé.
 * Le nom du groupe peut provenir du titre de l'onglet source, de son URL ou être saisi manuellement.
 * Préréglages d'expressions régulières pour les outils de tickets populaires (Jira, GitLab, GitHub, Trello, etc.).
@@ -98,7 +98,7 @@
 2.  **Configurez :** Ouvrez les "Options" pour définir vos règles.
     * **Règles de Domaine :** Définissez pour quels sites activer les fonctionnalités.
     * **Préréglages RegEx :** Créez ou utilisez des RegEx pour extraire les noms de groupes (ex: `([A-Z]+-\d+)` pour Jira).
-3.  **Naviguez :** Utilisez le clic molette sur les sites configurés et voyez la magie opérer !
+3.  **Naviguez :** Utilisez le clic molette ou clic droit > "Ouvrir le lien dans un nouvel onglet" sur les sites configurés et voyez la magie opérer !
 
 ## Tests
 
