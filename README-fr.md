@@ -25,7 +25,11 @@
 ### Options et Personnalisation
 * Ajouter, modifier, supprimer ou activer/désactiver les règles de domaine.
 * Gérer les expressions régulières personnalisées ou prédéfinies avec une interface intuitive en cartes.
-* Importer/exporter votre configuration au format JSON.
+* **Assistant d'Import/Export** pour les règles de domaine :
+  * Export : sélectionner les règles individuellement, sauvegarder en fichier JSON ou copier dans le presse-papiers.
+  * Import : charger depuis un fichier (glisser-déposer) ou coller du JSON, avec validation Zod.
+  * Classification automatique des règles importées (nouvelles, en conflit, identiques).
+  * Résolution des conflits : écraser, dupliquer ou ignorer, avec vue diff côte à côte.
 * Configurer les modes de déduplication par règle.
 * Consulter les statistiques (groupes créés et onglets dédupliqués) et les réinitialiser.
 * Sélectionner le thème Clair, Sombre ou Système.

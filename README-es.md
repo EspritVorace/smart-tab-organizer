@@ -25,7 +25,11 @@
 ### Opciones y Personalizaci&oacute;n
 * A&ntilde;adir, editar, eliminar o activar/desactivar reglas de dominio.
 * Gestionar preajustes y expresiones regulares personalizadas con una interfaz intuitiva basada en tarjetas.
-* Importar/exportar la configuraci&oacute;n en JSON.
+* **Asistente de Importaci&oacute;n/Exportaci&oacute;n** para reglas de dominio:
+  * Exportar: seleccionar reglas individualmente, guardar como archivo JSON o copiar al portapapeles.
+  * Importar: cargar desde archivo (arrastrar y soltar) o pegar JSON, con validaci&oacute;n Zod.
+  * Clasificaci&oacute;n autom&aacute;tica de reglas importadas (nuevas, en conflicto, id&eacute;nticas).
+  * Resoluci&oacute;n de conflictos: sobrescribir, duplicar o ignorar, con vista diff lado a lado.
 * Configurar los modos de deduplicaci&oacute;n por regla.
 * Consultar las estad&iacute;sticas (grupos creados y pesta&ntilde;as deduplicadas) y restablecerlas.
 * Elegir el tema Claro, Oscuro o Sistema.

@@ -25,7 +25,11 @@
 ### Options & Customization
 * Add, edit, delete and enable/disable domain rules.
 * Manage custom and predefined RegEx presets with an intuitive card-based interface.
-* Import/export your settings as JSON.
+* **Import/Export Wizard** for domain rules:
+  * Export: select individual rules, save as JSON file or copy to clipboard.
+  * Import: load from file (drag & drop) or paste JSON, with Zod validation.
+  * Automatic classification of imported rules (new, conflicting, identical).
+  * Conflict resolution: overwrite, duplicate or ignore, with side-by-side diff view.
 * Configure deduplication modes per rule.
 * View statistics (groups created and tabs deduplicated) and reset them.
 * Select Light, Dark or System theme.

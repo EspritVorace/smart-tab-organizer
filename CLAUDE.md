@@ -52,7 +52,8 @@ The extension provides tab organization through:
 1. **Automatic Grouping** - Groups tabs based on domain rules and regex patterns
 2. **Deduplication** - Prevents duplicate tabs using various matching modes
 3. **Rule Management** - User-defined domain rules and regex presets
-4. **Statistics Tracking** - Monitors grouping and deduplication actions
+4. **Import/Export Wizard** - Multi-step wizard for importing/exporting domain rules with rule classification (new, conflicting, identical), conflict resolution modes, and Zod-validated JSON parsing
+5. **Statistics Tracking** - Monitors grouping and deduplication actions
 
 ### Technology Stack
 - **Framework**: WXT for extension development
@@ -66,7 +67,8 @@ The extension provides tab organization through:
 
 ### Schema Architecture
 The application uses a schema-driven approach with Zod validation:
-- `src/schemas/` - Contains all data validation schemas (DomainRule, enums)
+- `src/schemas/` - Contains all data validation schemas (DomainRule, enums, importExport)
+- `src/schemas/importExport.ts` - Relaxed Zod schema for import validation (no form-level refinements)
 - `src/types/` - TypeScript type definitions that extend Zod-inferred types
 - Pattern: Schema types (e.g., `DomainRule`) are extended with runtime fields (e.g., `DomainRuleSetting` adds `enabled` and `badge`)
 
@@ -87,7 +89,7 @@ The `useSyncedSettings` hook uses refs to prevent race conditions between local 
   - `src/components/UI/` - User interface components (Header, PopupHeader, Sidebar, SettingsToggles, ThemeToggle, PageLayout)
   - `src/components/Form/` - Form and utility components (FormFields, themed-callouts, themes)
 - `src/hooks/` - Custom React hooks for settings and statistics
-- `src/utils/` - Utility functions for storage, i18n, and theme management
+- `src/utils/` - Utility functions for storage, i18n, theme management, and import classification
 - `src/pages/` - Main page components (popup and options)
 - `src/styles/` - Global CSS (Radix Themes import, custom focus styles)
 - `tests/` - Unit test files using Vitest
@@ -108,6 +110,7 @@ Each feature has a consistent color theme defined in `src/utils/themeConstants.t
 - `DOMAIN_RULES` → purple
 - `REGEX_PRESETS` → cyan
 - `IMPORT` → jade
+- `EXPORT` → teal
 - `STATISTICS` → orange
 
 Theme wrappers in `src/components/Form/themes/` apply accent colors contextually.
@@ -126,6 +129,8 @@ Components are organized into three main categories that reflect their purpose a
   - Header/ - Page headers
   - PopupHeader/ - Extension popup headers
   - PageLayout/ - Options page layout wrapper
+  - ImportExportPage/ - Import/export cards and wizard dialogs (ExportWizard, ImportWizard)
+  - WizardStepper/ - Reusable multi-step visual stepper component
   - Sidebar/ - Navigation sidebar with multiple sub-components
   - SettingsToggles/ - Settings control components
   - ThemeToggle/ - Theme switching functionality
