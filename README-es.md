@@ -12,7 +12,7 @@
 ## Caracter&iacute;sticas
 
 ### Agrupaci&oacute;n Autom&aacute;tica
-* Clic central en un enlace para abrir la pesta&ntilde;a en el grupo adecuado si el dominio coincide con tus reglas.
+* Clic central en un enlace o clic derecho > "Abrir enlace en una pesta&ntilde;a nueva" para abrir la pesta&ntilde;a en el grupo adecuado si el dominio coincide con tus reglas.
 * La pesta&ntilde;a se une a un grupo existente o se crea uno nuevo.
 * El nombre del grupo puede obtenerse del t&iacute;tulo de la pesta&ntilde;a de origen, de su URL o solicitarse manualmente.
 * Preajustes de expresiones regulares para herramientas populares de tickets (Jira, GitLab, GitHub, Trello, etc.).
@@ -98,7 +98,7 @@
 2.  **Configurar:** Abre "Opciones" para establecer tus reglas.
     * **Reglas de Dominio:** Define para qu&eacute; sitios activar las funciones.
     * **Preajustes de RegEx:** Crea o usa RegEx para extraer nombres de grupos (ej: `([A-Z]+-\d+)` para Jira).
-3.  **Navega:** Usa el clic central en los sitios configurados &iexcl;y observa la magia suceder!
+3.  **Navega:** Usa el clic central o clic derecho > "Abrir enlace en una pesta&ntilde;a nueva" en los sitios configurados &iexcl;y observa la magia suceder!
 
 ## Pruebas
 

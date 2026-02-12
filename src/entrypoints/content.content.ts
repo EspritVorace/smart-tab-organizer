@@ -26,7 +26,24 @@ export default defineContentScript({
       }
     }
 
+    function handleContextMenu(event: MouseEvent) {
+      let target = event.target as HTMLElement | null;
+      while (target && target.tagName !== 'A') {
+        target = target.parentNode as HTMLElement | null;
+      }
+      if (target && (target as HTMLAnchorElement).href && /^https?:\/\//.test((target as HTMLAnchorElement).href)) {
+        browser.runtime.sendMessage(
+          { type: 'middleClickLink', url: (target as HTMLAnchorElement).href } as MiddleClickMessage,
+          () => {
+            if (browser.runtime.lastError)
+              console.error('Msg err:', browser.runtime.lastError.message);
+          }
+        );
+      }
+    }
+
     document.addEventListener('auxclick', handleAuxClick, true);
+    document.addEventListener('contextmenu', handleContextMenu, true);
 
     browser.runtime.onMessage.addListener((req: ContentMessage, sender: Browser.runtime.MessageSender, sendResponse: (response: GroupNameResponse) => void) => {
       if (req.type === 'askGroupName') {

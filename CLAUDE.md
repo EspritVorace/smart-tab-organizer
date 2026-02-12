@@ -49,7 +49,7 @@ The background logic is modularized in `src/background/`:
 
 ### Core Features
 The extension provides tab organization through:
-1. **Automatic Grouping** - Groups tabs based on domain rules and regex patterns
+1. **Automatic Grouping** - Groups tabs based on domain rules and regex patterns (triggered by middle-click or right-click > "Open link in new tab")
 2. **Deduplication** - Prevents duplicate tabs using various matching modes
 3. **Rule Management** - User-defined domain rules and regex presets
 4. **Import/Export Wizard** - Multi-step wizard for importing/exporting domain rules with rule classification (new, conflicting, identical), conflict resolution modes, and Zod-validated JSON parsing

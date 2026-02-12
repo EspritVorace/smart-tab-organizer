@@ -12,7 +12,7 @@
 ## Features
 
 ### Automatic Grouping
-* Middle-click a link to open the tab in the proper group if its domain matches your rules.
+* Middle-click a link or right-click and choose "Open link in new tab" to open the tab in the proper group if its domain matches your rules.
 * Tabs join an existing group or a new one is created.
 * The group name can come from the opener tab's title, from its URL or you can be prompted manually.
 * Built-in RegEx presets for popular ticket systems (Jira, GitLab, GitHub, Trello, etc.).
@@ -98,7 +98,7 @@
 2.  **Configure:** Open "Options" to set your rules.
     * **Domain Rules:** Define for which sites to activate features.
     * **RegEx Presets:** Create or use RegEx to extract group names (e.g., `([A-Z]+-\d+)` for Jira).
-3.  **Browse:** Use middle-click on configured sites and see the magic happen!
+3.  **Browse:** Use middle-click or right-click > "Open link in new tab" on configured sites and see the magic happen!
 
 ## Testing
 
