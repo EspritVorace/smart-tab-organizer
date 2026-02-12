@@ -19,6 +19,7 @@ import { DomainRulesPage } from './DomainRulesPage';
 import { StatisticsPage } from './StatisticsPage';
 import { SettingsPage } from '../components/UI/SettingsPage/SettingsPage';
 import { ImportExportPage } from '../components/UI/ImportExportPage/ImportExportPage';
+import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { Shield, FileText, BarChart3, Settings, Github } from 'lucide-react';
 import { FEATURE_BASE_COLORS } from '../utils/themeConstants';
 import type { SyncSettings, DomainRuleSettings } from '../types/syncSettings';
@@ -47,6 +48,7 @@ function OptionsContent() {
     const [currentTab, setCurrentTab] = useState<string>('rules');
     
     const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+    const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
 
     // Storage handled by hooks
 
@@ -62,11 +64,9 @@ function OptionsContent() {
     
 
 
-     const handleResetStats = useCallback(async () => {
-         if (confirm(getMessage('confirmResetStats'))) {
-            await resetStatistics();
-         }
-    }, [resetStatistics]);
+     const handleResetStats = useCallback(() => {
+         setResetConfirmOpen(true);
+    }, []);
 
     const handleTabChange = useCallback((tab: string) => {
         setCurrentTab(tab);
@@ -269,6 +269,18 @@ function OptionsContent() {
                     )}
                 </main>
             </div>
+            <ConfirmDialog
+                open={resetConfirmOpen}
+                onOpenChange={setResetConfirmOpen}
+                onConfirm={async () => {
+                    await resetStatistics();
+                    setResetConfirmOpen(false);
+                }}
+                title={getMessage('confirmResetStats')}
+                description={getMessage('confirmResetStatsDescription')}
+                confirmLabel={getMessage('confirmAction')}
+                color="orange"
+            />
         </div>
     );
 

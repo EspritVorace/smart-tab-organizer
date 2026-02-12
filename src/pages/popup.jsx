@@ -18,7 +18,7 @@ const STATS_COLLAPSED_KEY = 'popupStatsCollapsed';
 
 function PopupContent() {
     const { settings, isLoaded, setGlobalGroupingEnabled, setGlobalDeduplicationEnabled } = useSyncedSettings();
-    const { statistics, isLoaded: statsLoaded, resetStatistics } = useStatistics();
+    const { statistics, isLoaded: statsLoaded } = useStatistics();
     const [statsCollapsed, setStatsCollapsed] = useState(false);
     const [collapsedLoaded, setCollapsedLoaded] = useState(false);
 
@@ -44,12 +44,6 @@ function PopupContent() {
         browser.runtime.openOptionsPage();
     }, []);
 
-    const handleResetStats = useCallback(async () => {
-        if (confirm(getMessage('confirmResetStats'))) {
-            await resetStatistics();
-        }
-    }, [resetStatistics]);
-
     // --- Rendu ---
     return (
         <Box as="main" width="350px" p="4" style={{ background: "var(--gray-a2)", borderRadius: "var(--radius-3)" }} aria-label={getMessage('popupTitle')}>
@@ -66,7 +60,6 @@ function PopupContent() {
 
                 <Statistics
                     stats={statistics}
-                    onReset={handleResetStats}
                     isLoading={!statsLoaded || !collapsedLoaded}
                     collapsed={statsCollapsed}
                     onToggleCollapsed={handleToggleStatsCollapsed}
