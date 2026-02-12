@@ -10,7 +10,7 @@ interface StatisticsProps {
         tabGroupsCreatedCount?: number;
         tabsDeduplicatedCount?: number;
     } | null;
-    onReset: () => void;
+    onReset?: () => void;
     isLoading?: boolean;
     collapsed?: boolean;
     onToggleCollapsed?: () => void;
@@ -88,7 +88,7 @@ export function Statistics({ stats, onReset, isLoading = false, collapsed = fals
                             ) : (
                                 <Heading size="3">{getMessage('statisticsTab')}</Heading>
                             )}
-                            {isOpen && (
+                            {isOpen && onReset && (
                                 <IconButton
                                     variant="ghost"
                                     color="red"

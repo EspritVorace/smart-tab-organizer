@@ -3,10 +3,15 @@ import { Button, Switch, Text, HoverCard, Box, Flex, Badge, Card, Checkbox, Icon
 import { Edit, Trash2, Plus, Eye, EyeOff, Shield, Search, AlertCircle } from 'lucide-react';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { DomainRuleFormModal } from '../components/Core/DomainRule/DomainRuleFormModal';
+import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { getMessage } from '../utils/i18n';
 import { generateUUID, getRadixColor } from '../utils/utils';
 import type { SyncSettings, DomainRuleSetting } from '../types/syncSettings';
 import type { DomainRule } from '../schemas/domainRule';
+
+type DeleteTarget =
+  | { type: 'single'; ruleId: string; focusIndex?: number }
+  | { type: 'bulk'; ruleIds: string[] };
 
 interface DomainRulesPageProps {
   syncSettings: SyncSettings;
@@ -41,6 +46,9 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
     const updatedRules = syncSettings.domainRules.filter(rule => !ruleIds.includes(rule.id));
     updateRules(updatedRules);
   }, [syncSettings.domainRules, updateRules]);
+
+  // Confirm dialog state
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
 
   // Search & selection state
   const [searchTerm, setSearchTerm] = useState('');
@@ -132,12 +140,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
         const target = e.target as HTMLElement;
         if (target.getAttribute('role') === 'row') {
           e.preventDefault();
-          if (confirm(getMessage('confirmDeleteRule'))) {
-            handleDeleteRule(rule.id);
-            // Focus next or previous card after deletion
-            const nextFocus = cards[index + 1] || cards[index - 1];
-            setTimeout(() => nextFocus?.focus(), 0);
-          }
+          setDeleteTarget({ type: 'single', ruleId: rule.id, focusIndex: index });
         }
         break;
       }
@@ -179,6 +182,25 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
     setIsModalOpen(false);
     setEditingRule(undefined);
   };
+
+  const handleConfirmDelete = useCallback(() => {
+    if (!deleteTarget) return;
+    if (deleteTarget.type === 'single') {
+      handleDeleteRule(deleteTarget.ruleId);
+      // Focus next or previous card after keyboard-initiated deletion
+      if (deleteTarget.focusIndex != null) {
+        const cards = listRef.current?.querySelectorAll<HTMLElement>('[role="row"]');
+        if (cards) {
+          const nextFocus = cards[deleteTarget.focusIndex + 1] || cards[deleteTarget.focusIndex - 1];
+          setTimeout(() => nextFocus?.focus(), 0);
+        }
+      }
+    } else {
+      handleBulkDelete(deleteTarget.ruleIds);
+      setSelectedIds(new Set());
+    }
+    setDeleteTarget(null);
+  }, [deleteTarget, handleDeleteRule, handleBulkDelete]);
 
   return (
     <>
@@ -234,10 +256,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                     {getMessage('disableSelected')}
                   </Button>
                   <Button size="1" variant="soft" color="red" onClick={() => {
-                    if (confirm(getMessage('confirmDeleteSelected'))) {
-                      handleBulkDelete(Array.from(selectedIds));
-                      setSelectedIds(new Set());
-                    }
+                    setDeleteTarget({ type: 'bulk', ruleIds: Array.from(selectedIds) });
                   }}>
                     <Trash2 size={14} />
                     {getMessage('deleteSelected')}
@@ -370,9 +389,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                           size="2"
                           title={getMessage('delete')}
                           onClick={() => {
-                            if (confirm(getMessage('confirmDeleteRule'))) {
-                              handleDeleteRule(rule.id);
-                            }
+                            setDeleteTarget({ type: 'single', ruleId: rule.id });
                           }}
                         >
                           <Trash2 size={16} />
@@ -393,6 +410,26 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
         onSubmit={handleSubmitRule}
         domainRule={editingRule}
         syncSettings={syncSettings}
+      />
+
+      <ConfirmDialog
+        open={deleteTarget != null}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
+        onConfirm={handleConfirmDelete}
+        title={
+          deleteTarget?.type === 'bulk'
+            ? getMessage('confirmDeleteSelected')
+            : getMessage('confirmDeleteRule')
+        }
+        description={
+          deleteTarget?.type === 'bulk'
+            ? getMessage('confirmDeleteSelectedDescription')
+            : getMessage('confirmDeleteDescription').replace('{item}',
+                deleteTarget?.type === 'single'
+                  ? syncSettings.domainRules.find(r => r.id === deleteTarget.ruleId)?.label ?? ''
+                  : ''
+              )
+        }
       />
     </>
   );
