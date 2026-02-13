@@ -85,17 +85,15 @@ export function Combobox({
 
   // Find selected option
   useEffect(() => {
-    if (value) {
-      const option = allOptions.find(opt => opt.value === value);
+    if (value !== undefined) {
+      const option = allOptions.find(opt => opt.value === value) || null;
       setSelectedOption(prev => {
         // Éviter les re-renders inutiles si l'option n'a pas changé
         if (prev?.value === option?.value) {
           return prev;
         }
-        return option || null;
+        return option;
       });
-    } else {
-      setSelectedOption(prev => prev === null ? null : null);
     }
   }, [value, allOptions]);
 

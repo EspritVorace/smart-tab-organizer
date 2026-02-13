@@ -25,7 +25,7 @@ async function loadMessages(locale: string) {
 const mockBrowser = {
   i18n: {
     getMessage: (key: string) => {
-      const locale = (global as any).currentLocale || 'en';
+      const locale = (globalThis as any).currentLocale || 'en';
       const messages = messagesCache[locale] || {};
       return messages[key]?.message || key;
     }
@@ -33,7 +33,7 @@ const mockBrowser = {
 };
 
 // Mock global pour wxt/browser
-(global as any).browser = mockBrowser;
+(globalThis as any).browser = mockBrowser;
 
 // Mock pour les imports ES6 de wxt/browser
 if (typeof window !== 'undefined') {

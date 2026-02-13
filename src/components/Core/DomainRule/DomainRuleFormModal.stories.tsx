@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { within, userEvent, expect, fn } from '@storybook/test';
 import { DomainRuleFormModal } from './DomainRuleFormModal';
-const action = (name: string) => (...args: any[]) => console.log(name, ...args);
 import type { DomainRule } from '../../../schemas/domainRule';
 import type { SyncSettings } from '../../../types/syncSettings';
 
@@ -54,8 +54,8 @@ const meta: Meta<typeof DomainRuleFormModal> = {
     },
   },
   args: {
-    onClose: action('onClose'),
-    onSubmit: action('onSubmit'),
+    onClose: fn(),
+    onSubmit: fn(),
     syncSettings: mockSyncSettings,
   },
 };
