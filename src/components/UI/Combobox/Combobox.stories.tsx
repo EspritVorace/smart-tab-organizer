@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { within, userEvent, expect } from '@storybook/test';
 import { Combobox, ComboboxOption, ComboboxGroup } from './Combobox';
 
 const meta: Meta<typeof Combobox> = {
@@ -159,5 +160,41 @@ export const ComboboxEmpty: Story = {
     placeholder: 'No options available',
     searchPlaceholder: 'Search...',
     noResultsText: 'No options to display',
+  },
+};
+
+export const ComboboxInteraction: Story = {
+  args: {
+    options: sampleOptions,
+    placeholder: 'Interaction Test...',
+    searchPlaceholder: 'Search fruits...',
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('button');
+
+    // Initial state
+    await expect(canvas.getByText('Interaction Test...')).toBeInTheDocument();
+
+    // Open combobox
+    await userEvent.click(trigger);
+
+    // Check if the search input is visible
+    const searchInput = canvas.getByPlaceholderText('Search fruits...');
+    await expect(searchInput).toBeInTheDocument();
+
+    // Type 'ba' to filter
+    await userEvent.type(searchInput, 'ba');
+
+    // Banana should be visible, Apple should not
+    await expect(canvas.getByText('Banana')).toBeInTheDocument();
+    await expect(canvas.queryByText('Apple')).not.toBeInTheDocument();
+
+    // Select Banana
+    await userEvent.click(canvas.getByText('Banana'));
+
+    // Combobox should now show Banana and search should be gone
+    await expect(canvas.getByText('Banana')).toBeInTheDocument();
+    await expect(canvas.queryByPlaceholderText('Search fruits...')).not.toBeInTheDocument();
   },
 };
