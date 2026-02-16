@@ -30,3 +30,7 @@ export function StatisticsTheme({ children }: ThemeWrapperProps) {
 export function SettingsTheme({ children }: ThemeWrapperProps) {
   return <Theme accentColor={FEATURE_THEMES.SETTINGS}>{children}</Theme>;
 }
+
+export function SessionsTheme({ children }: ThemeWrapperProps) {
+  return <Theme accentColor={FEATURE_THEMES.SESSIONS}>{children}</Theme>;
+}

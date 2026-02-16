@@ -222,5 +222,12 @@
   "errorImportInvalidType": { "message": "Type invalide pour le champ : {field}" },
   "noRulesToExport": { "message": "Aucune règle à exporter" },
   "conflictResolutionMode": { "message": "Mode de résolution :" },
-  "exportFileName": { "message": "Nom du fichier" }
+  "exportFileName": { "message": "Nom du fichier" },
+
+  "sessionsTab": { "message": "Sessions" },
+  "tabTreeSelectedCount": { "message": "$1 / $2 onglets sélectionnés" },
+  "tabTreeSelectTab": { "message": "Sélectionner l'onglet $1" },
+  "tabTreeSelectGroup": { "message": "Sélectionner le groupe $1" },
+  "tabTreeExpandGroup": { "message": "Développer le groupe $1" },
+  "tabTreeCollapseGroup": { "message": "Réduire le groupe $1" }
 }
