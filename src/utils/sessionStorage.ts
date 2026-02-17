@@ -1,0 +1,49 @@
+import { browser } from 'wxt/browser';
+import type { Session } from '../types/session';
+import { sessionsArraySchema } from '../schemas/session';
+
+const SESSIONS_STORAGE_KEY = 'sessions';
+
+/** Load all sessions from storage, validated with Zod */
+export async function loadSessions(): Promise<Session[]> {
+  try {
+    const result = await browser.storage.local.get({ [SESSIONS_STORAGE_KEY]: [] });
+    const raw = result[SESSIONS_STORAGE_KEY];
+    const parsed = sessionsArraySchema.safeParse(raw);
+    if (parsed.success) {
+      return parsed.data as Session[];
+    }
+    console.warn('Sessions storage validation failed:', parsed.error);
+    return [];
+  } catch (error) {
+    console.error('Error loading sessions:', error);
+    return [];
+  }
+}
+
+/** Save all sessions to storage */
+export async function saveSessions(sessions: Session[]): Promise<void> {
+  await browser.storage.local.set({ [SESSIONS_STORAGE_KEY]: sessions });
+}
+
+/** Add a new session */
+export async function addSession(session: Session): Promise<void> {
+  const sessions = await loadSessions();
+  sessions.push(session);
+  await saveSessions(sessions);
+}
+
+/** Update an existing session by ID */
+export async function updateSession(id: string, updates: Partial<Session>): Promise<void> {
+  const sessions = await loadSessions();
+  const index = sessions.findIndex(s => s.id === id);
+  if (index === -1) return;
+  sessions[index] = { ...sessions[index], ...updates, updatedAt: new Date().toISOString() };
+  await saveSessions(sessions);
+}
+
+/** Delete a session by ID */
+export async function deleteSession(id: string): Promise<void> {
+  const sessions = await loadSessions();
+  await saveSessions(sessions.filter(s => s.id !== id));
+}

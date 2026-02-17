@@ -20,8 +20,9 @@ import { StatisticsPage } from './StatisticsPage';
 import { SettingsPage } from '../components/UI/SettingsPage/SettingsPage';
 import { ImportExportPage } from '../components/UI/ImportExportPage/ImportExportPage';
 import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
-import { Shield, FileText, BarChart3, Settings, Github } from 'lucide-react';
+import { Shield, FileText, BarChart3, Settings, Github, Archive } from 'lucide-react';
 import { FEATURE_BASE_COLORS } from '../utils/themeConstants';
+import { SessionsPage } from './SessionsPage';
 import type { SyncSettings, DomainRuleSettings } from '../types/syncSettings';
 
 (() => {
@@ -85,6 +86,12 @@ function OptionsContent() {
             label: getMessage('importExportTab'),
             icon: FileText as any,
             accentColor: FEATURE_BASE_COLORS.IMPORT, // Utilise la couleur Import pour l'onglet combiné
+        },
+        {
+            id: 'sessions',
+            label: getMessage('sessionsTab'),
+            icon: Archive as any,
+            accentColor: FEATURE_BASE_COLORS.SESSIONS,
         },
         {
             id: 'stats',
@@ -260,6 +267,9 @@ function OptionsContent() {
                     )}
                     {currentTab === 'importexport' && (
                         <ImportExportPage syncSettings={settings} onSettingsUpdate={updateSettings} />
+                    )}
+                    {currentTab === 'sessions' && (
+                        <SessionsPage syncSettings={settings} />
                     )}
                     {currentTab === 'stats' && (
                         <StatisticsPage syncSettings={settings} stats={stats} onReset={handleResetStats} />
