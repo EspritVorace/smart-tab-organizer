@@ -317,5 +317,46 @@
   "tabEditorLastTabDescription": { "message": "Esta es la última pestaña de este grupo. ¿Qué quieres hacer con el grupo?" },
   "tabEditorKeepEmptyGroup": { "message": "Mantener grupo vacío" },
   "tabEditorDeleteEmptyGroup": { "message": "Eliminar grupo vacío" },
-  "colorPickerLabel": { "message": "Seleccionar color del grupo" }
+  "colorPickerLabel": { "message": "Seleccionar color del grupo" },
+
+  "sessionPinAsProfile": { "message": "Fijar como perfil" },
+  "sessionPinDescription": { "message": "Acceso rápido desde el popup" },
+  "sessionUnpin": { "message": "Desfijar" },
+  "sessionChangeIcon": { "message": "Cambiar icono" },
+  "sessionProfileBadge": { "message": "Perfil" },
+  "sessionAutoSync": { "message": "Sincronizar" },
+  "sessionAutoSyncTooltip": { "message": "Cuando está activado, el contenido del perfil se actualiza automáticamente al cerrar la ventana asociada." },
+  "sessionAutoSyncEnabled": { "message": "Sincronización automática activada" },
+  "sessionNewProfile": { "message": "Nuevo perfil" },
+
+  "profileDefaultName": { "message": "Nuevo perfil" },
+  "profileTitle": { "message": "Crear perfil" },
+  "profileDescription": { "message": "Elige qué pestañas incluir en este perfil." },
+  "profileIconLabel": { "message": "Icono del perfil" },
+  "profileAutoSyncLabel": { "message": "Sincronización automática" },
+  "profileAutoSyncDescription": { "message": "Actualiza automáticamente el perfil al cerrar la ventana asociada." },
+  "profileSaveButton": { "message": "Guardar perfil" },
+  "profileSaveSuccess": { "message": "¡Perfil \"$1\" guardado con éxito!" },
+  "profileConfirmMessage": { "message": "¿Guardar perfil \"$1\" con $2 pestaña(s)?" },
+
+  "profileIcon_briefcase": { "message": "Trabajo" },
+  "profileIcon_home": { "message": "Inicio" },
+  "profileIcon_code": { "message": "Código" },
+  "profileIcon_book": { "message": "Lectura" },
+  "profileIcon_gamepad": { "message": "Juegos" },
+  "profileIcon_music": { "message": "Música" },
+  "profileIcon_coffee": { "message": "Café" },
+  "profileIcon_globe": { "message": "Web" },
+  "profileIcon_star": { "message": "Favoritos" },
+  "profileIcon_heart": { "message": "Personal" },
+
+  "popupSave": { "message": "Guardar" },
+  "popupRestore": { "message": "Restaurar" },
+  "popupSaveSession": { "message": "Guardar sesión" },
+  "popupRestoreSession": { "message": "Restaurar sesión" },
+  "popupProfilesLabel": { "message": "Perfiles" },
+  "popupProfileRestored": { "message": "Perfil \"$1\" restaurado: $2 pestaña(s), $3 grupo(s)" },
+
+  "profileAlreadyOpenWarning": { "message": "Este perfil ya está abierto en otra ventana." },
+  "profileAlreadyOpenTooltip": { "message": "Ya abierto en otra ventana" }
 }

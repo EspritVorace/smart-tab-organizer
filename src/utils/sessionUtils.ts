@@ -1,4 +1,4 @@
-import type { Session, SavedTab, SavedTabGroup } from '../types/session';
+import type { Session, SavedTab, SavedTabGroup, ProfileIcon } from '../types/session';
 import type { TabTreeData, TabItem, TabGroupItem } from '../components/Core/TabTree/tabTreeTypes';
 import { generateUUID } from './utils';
 
@@ -62,6 +62,7 @@ export function createSessionFromSelection(
   groups: SavedTabGroup[],
   selectedSavedTabIds: Set<string>,
   sessionName: string,
+  options?: { isPinned?: boolean; autoSync?: boolean; icon?: ProfileIcon },
 ): Session {
   const now = new Date().toISOString();
 
@@ -77,6 +78,8 @@ export function createSessionFromSelection(
     updatedAt: now,
     groups: filteredGroups,
     ungroupedTabs: filteredUngrouped,
-    isPinned: false,
+    isPinned: options?.isPinned ?? false,
+    autoSync: options?.autoSync ?? false,
+    icon: options?.icon,
   };
 }

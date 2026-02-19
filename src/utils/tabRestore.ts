@@ -21,6 +21,8 @@ export interface RestoreResult {
   groupsCreated: number;
   groupsMerged: number;
   errors: string[];
+  /** ID of the newly created window when target === 'new' */
+  windowId?: number;
 }
 
 /** Restore tabs and groups in Chrome */
@@ -54,6 +56,7 @@ async function restoreInNewWindow(
     result.errors.push('Failed to create new window');
     return result;
   }
+  result.windowId = windowId;
 
   // Track the first tab created by windows.create (to avoid duplicating it)
   const firstTabId = newWindow.tabs?.[0]?.id;

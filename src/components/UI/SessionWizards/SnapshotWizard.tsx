@@ -1,22 +1,30 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Dialog, Flex, Button, Text, Separator, Box, TextField, Callout } from '@radix-ui/themes';
-import { Camera, CheckCircle, AlertCircle } from 'lucide-react';
+import {
+  Dialog, Flex, Button, Text, Separator, Box, TextField,
+  Callout, Switch,
+} from '@radix-ui/themes';
+import { Camera, CheckCircle, AlertCircle, Pin } from 'lucide-react';
 import { SessionsTheme } from '../../Form/themes';
 import { WizardStepper } from '../WizardStepper';
 import { TabTree } from '../../Core/TabTree/TabTree';
+import { ProfileIconPicker } from '../../Core/Session/ProfileIconPicker';
 import { getMessage } from '../../../utils/i18n';
 import { captureCurrentTabs } from '../../../utils/tabCapture';
 import { createSessionFromSelection, formatSessionDate } from '../../../utils/sessionUtils';
-import type { Session, SavedTab, SavedTabGroup } from '../../../types/session';
+import type { Session, SavedTab, SavedTabGroup, ProfileIcon } from '../../../types/session';
 import type { TabTreeData } from '../../Core/TabTree/tabTreeTypes';
 
 interface SnapshotWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (session: Session) => Promise<void>;
+  /** 'snapshot' (default) or 'profile' for pinned profile creation */
+  mode?: 'snapshot' | 'profile';
 }
 
-export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardProps) {
+export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }: SnapshotWizardProps) {
+  const isProfile = mode === 'profile';
+
   const [step, setStep] = useState(0);
   const [sessionName, setSessionName] = useState('');
   const [treeData, setTreeData] = useState<TabTreeData | null>(null);
@@ -31,6 +39,10 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveDone, setSaveDone] = useState(false);
 
+  // Profile-specific state
+  const [profileIcon, setProfileIcon] = useState<ProfileIcon | undefined>(undefined);
+  const [profileAutoSync, setProfileAutoSync] = useState(false);
+
   const steps = [
     { label: getMessage('snapshotStepSelection') },
     { label: getMessage('snapshotStepConfirmation') },
@@ -41,13 +53,17 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
     if (!open) return;
     setStep(0);
     setSessionName(
-      `${getMessage('snapshotDefaultName')} ${formatSessionDate(new Date().toISOString())}`,
+      isProfile
+        ? getMessage('profileDefaultName')
+        : `${getMessage('snapshotDefaultName')} ${formatSessionDate(new Date().toISOString())}`,
     );
     setTreeData(null);
     setSelectedTabIds(new Set());
     setSaveError(null);
     setSaveDone(false);
     setIsCapturing(true);
+    setProfileIcon(undefined);
+    setProfileAutoSync(false);
 
     captureCurrentTabs()
       .then(data => {
@@ -62,7 +78,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
       .catch(() => {
         setIsCapturing(false);
       });
-  }, [open]);
+  }, [open, isProfile]);
 
   // Derive selected SavedTab UUIDs from selected numeric IDs
   const selectedSavedTabIds = useMemo(() => {
@@ -84,6 +100,9 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
         groups,
         selectedSavedTabIds,
         sessionName.trim(),
+        isProfile
+          ? { isPinned: true, autoSync: profileAutoSync, icon: profileIcon }
+          : undefined,
       );
       await onSave(session);
       setSaveDone(true);
@@ -92,15 +111,22 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
     } finally {
       setIsSaving(false);
     }
-  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, onSave]);
+  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, isProfile, profileAutoSync, profileIcon, onSave]);
+
+  const titleKey = isProfile ? 'profileTitle' : 'snapshotTitle';
+  const descriptionKey = isProfile ? 'profileDescription' : 'snapshotDescription';
+  const saveButtonKey = isProfile ? 'profileSaveButton' : 'snapshotSaveButton';
+  const successKey = isProfile ? 'profileSaveSuccess' : 'snapshotSaveSuccess';
+  const confirmKey = isProfile ? 'profileConfirmMessage' : 'snapshotConfirmMessage';
+  const SaveIcon = isProfile ? Pin : Camera;
 
   return (
     <SessionsTheme>
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
         <Dialog.Content style={{ maxWidth: 580 }}>
-          <Dialog.Title>{getMessage('snapshotTitle')}</Dialog.Title>
+          <Dialog.Title>{getMessage(titleKey)}</Dialog.Title>
           <Dialog.Description size="2" color="gray">
-            {getMessage('snapshotDescription')}
+            {getMessage(descriptionKey)}
           </Dialog.Description>
 
           <WizardStepper steps={steps} currentStep={step} />
@@ -125,6 +151,16 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
                   />
                 </Flex>
 
+                {/* Profile icon picker (profiles only) */}
+                {isProfile && (
+                  <Flex direction="column" gap="1">
+                    <Text size="2" weight="medium">
+                      {getMessage('profileIconLabel')}
+                    </Text>
+                    <ProfileIconPicker value={profileIcon} onChange={setProfileIcon} />
+                  </Flex>
+                )}
+
                 <Text size="2" weight="medium">
                   {getMessage('snapshotSelectTabs')}
                 </Text>
@@ -137,7 +173,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
                     data={treeData}
                     selectedTabIds={selectedTabIds}
                     onSelectionChange={setSelectedTabIds}
-                    maxHeight={320}
+                    maxHeight={280}
                   />
                 ) : null}
               </Flex>
@@ -147,13 +183,32 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
           {/* Step 1: Confirmation */}
           {step === 1 && !saveDone && (
             <Box mt="4">
-              <Flex direction="column" gap="2">
+              <Flex direction="column" gap="3">
                 <Text size="2">
-                  {getMessage('snapshotConfirmMessage', [
+                  {getMessage(confirmKey, [
                     sessionName.trim(),
                     String(selectedSavedTabIds.size),
                   ])}
                 </Text>
+
+                {/* Auto-sync toggle (profiles only) */}
+                {isProfile && (
+                  <Flex align="center" gap="3">
+                    <Flex direction="column" gap="1" style={{ flex: 1 }}>
+                      <Text size="2" weight="medium">
+                        {getMessage('profileAutoSyncLabel')}
+                      </Text>
+                      <Text size="1" color="gray">
+                        {getMessage('profileAutoSyncDescription')}
+                      </Text>
+                    </Flex>
+                    <Switch
+                      checked={profileAutoSync}
+                      onCheckedChange={setProfileAutoSync}
+                      aria-label={getMessage('profileAutoSyncLabel')}
+                    />
+                  </Flex>
+                )}
               </Flex>
               {saveError && (
                 <Callout.Root color="red" variant="soft" mt="3">
@@ -173,7 +228,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
                   <CheckCircle size={16} />
                 </Callout.Icon>
                 <Callout.Text>
-                  {getMessage('snapshotSaveSuccess', [sessionName.trim()])}
+                  {getMessage(successKey, [sessionName.trim()])}
                 </Callout.Text>
               </Callout.Root>
             </Box>
@@ -209,8 +264,8 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
                   {getMessage('previous')}
                 </Button>
                 <Button onClick={handleSave} disabled={isSaving}>
-                  <Camera size={14} aria-hidden="true" />
-                  {getMessage('snapshotSaveButton')}
+                  <SaveIcon size={14} aria-hidden="true" />
+                  {getMessage(saveButtonKey)}
                 </Button>
               </>
             )}

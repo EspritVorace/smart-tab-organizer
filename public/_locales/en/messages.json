@@ -317,5 +317,46 @@
   "tabEditorLastTabDescription": { "message": "This is the last tab in this group. What would you like to do with the group?" },
   "tabEditorKeepEmptyGroup": { "message": "Keep empty group" },
   "tabEditorDeleteEmptyGroup": { "message": "Delete empty group" },
-  "colorPickerLabel": { "message": "Select group color" }
+  "colorPickerLabel": { "message": "Select group color" },
+
+  "sessionPinAsProfile": { "message": "Pin as Profile" },
+  "sessionPinDescription": { "message": "Quick access from the popup" },
+  "sessionUnpin": { "message": "Unpin" },
+  "sessionChangeIcon": { "message": "Change Icon" },
+  "sessionProfileBadge": { "message": "Profile" },
+  "sessionAutoSync": { "message": "Auto-sync" },
+  "sessionAutoSyncTooltip": { "message": "When enabled, the profile content is automatically updated when the associated window is closed." },
+  "sessionAutoSyncEnabled": { "message": "Auto-sync enabled" },
+  "sessionNewProfile": { "message": "New Profile" },
+
+  "profileDefaultName": { "message": "New Profile" },
+  "profileTitle": { "message": "Create Profile" },
+  "profileDescription": { "message": "Choose which tabs to save in this profile." },
+  "profileIconLabel": { "message": "Profile icon" },
+  "profileAutoSyncLabel": { "message": "Auto-sync" },
+  "profileAutoSyncDescription": { "message": "Automatically update profile when the associated window closes." },
+  "profileSaveButton": { "message": "Save Profile" },
+  "profileSaveSuccess": { "message": "Profile \"$1\" saved successfully!" },
+  "profileConfirmMessage": { "message": "Save profile \"$1\" with $2 tab(s)?" },
+
+  "profileIcon_briefcase": { "message": "Work" },
+  "profileIcon_home": { "message": "Home" },
+  "profileIcon_code": { "message": "Code" },
+  "profileIcon_book": { "message": "Reading" },
+  "profileIcon_gamepad": { "message": "Gaming" },
+  "profileIcon_music": { "message": "Music" },
+  "profileIcon_coffee": { "message": "Coffee" },
+  "profileIcon_globe": { "message": "Web" },
+  "profileIcon_star": { "message": "Favorites" },
+  "profileIcon_heart": { "message": "Personal" },
+
+  "popupSave": { "message": "Save" },
+  "popupRestore": { "message": "Restore" },
+  "popupSaveSession": { "message": "Save session" },
+  "popupRestoreSession": { "message": "Restore session" },
+  "popupProfilesLabel": { "message": "Profiles" },
+  "popupProfileRestored": { "message": "Profile \"$1\" restored: $2 tab(s), $3 group(s)" },
+
+  "profileAlreadyOpenWarning": { "message": "This profile is already open in another window." },
+  "profileAlreadyOpenTooltip": { "message": "Already open in another window" }
 }

@@ -20,6 +20,11 @@ const savedTabGroupSchema = z.object({
   tabs: z.array(savedTabSchema),
 });
 
+const profileIconSchema = z.enum([
+  'briefcase', 'home', 'code', 'book', 'gamepad',
+  'music', 'coffee', 'globe', 'star', 'heart',
+]);
+
 export const sessionSchema = z.object({
   id: idSchema,
   name: z.string().min(1),
@@ -28,6 +33,8 @@ export const sessionSchema = z.object({
   groups: z.array(savedTabGroupSchema),
   ungroupedTabs: z.array(savedTabSchema),
   isPinned: z.boolean(),
+  autoSync: z.boolean().default(false),
+  icon: profileIconSchema.optional(),
 });
 
 export const sessionsArraySchema = z.array(sessionSchema);

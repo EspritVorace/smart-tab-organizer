@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Box, Flex, Button, Text, Callout } from '@radix-ui/themes';
-import { Camera, Archive, CheckCircle } from 'lucide-react';
+import { Camera, Archive, CheckCircle, Pin } from 'lucide-react';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { SessionCard } from '../components/Core/Session/SessionCard';
 import { SessionEditDialog } from '../components/Core/Session/SessionEditDialog';
@@ -11,25 +11,49 @@ import { getMessage } from '../utils/i18n';
 import { useSessions } from '../hooks/useSessions';
 import { restoreTabs } from '../utils/tabRestore';
 import { updateSession } from '../utils/sessionStorage';
-import type { Session } from '../types/session';
+import { removeProfileWindow } from '../utils/profileWindowMap';
+import type { Session, ProfileIcon } from '../types/session';
 import type { SyncSettings } from '../types/syncSettings';
 
 interface SessionsPageProps {
   syncSettings: SyncSettings;
+  /** Controlled by options.tsx: true when a deep-link requests the snapshot wizard. */
+  snapshotWizardOpen?: boolean;
+  /** Called by SessionsPage to let options.tsx know the wizard closed (or page unmounted). */
+  onSnapshotWizardOpenChange?: (open: boolean) => void;
 }
 
-export function SessionsPage({ syncSettings }: SessionsPageProps) {
+export function SessionsPage({
+  syncSettings,
+  snapshotWizardOpen = false,
+  onSnapshotWizardOpenChange,
+}: SessionsPageProps) {
   const { sessions, isLoaded, createSession, renameSession, removeSession, reload } = useSessions();
-  const [snapshotOpen, setSnapshotOpen] = useState(false);
+  // Internal open state; initialized from external prop so the wizard opens immediately on mount.
+  const [snapshotOpen, setSnapshotOpen] = useState(snapshotWizardOpen);
+  const [profileWizardOpen, setProfileWizardOpen] = useState(false);
+
+  // Sync: if the external prop becomes true after mount (e.g. user already on sessions tab),
+  // open the wizard.
+  useEffect(() => {
+    if (snapshotWizardOpen) setSnapshotOpen(true);
+  }, [snapshotWizardOpen]);
+
+  // When this component unmounts (user navigates away), reset the external flag so a
+  // future mount doesn't re-open the wizard unexpectedly.
+  useEffect(() => {
+    return () => onSnapshotWizardOpenChange?.(false);
+  }, []);
   const [restoreSession, setRestoreSession] = useState<Session | null>(null);
   const [editTarget, setEditTarget] = useState<Session | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Session | null>(null);
   const [quickRestoreMessage, setQuickRestoreMessage] = useState<string | null>(null);
 
-  // Sessions displayed newest-first (by updatedAt)
-  const displayedSessions = [...sessions].sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-  );
+  // Sort: profiles (isPinned) first by updatedAt desc, then snapshots by updatedAt desc
+  const displayedSessions = [...sessions].sort((a, b) => {
+    if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+  });
 
   const handleSaveSession = useCallback(
     async (session: Session) => {
@@ -53,6 +77,7 @@ export function SessionsPage({ syncSettings }: SessionsPageProps) {
 
   const handleDeleteConfirm = useCallback(async () => {
     if (!deleteTarget) return;
+    await removeProfileWindow(deleteTarget.id);
     await removeSession(deleteTarget.id);
     setDeleteTarget(null);
   }, [deleteTarget, removeSession]);
@@ -93,6 +118,27 @@ export function SessionsPage({ syncSettings }: SessionsPageProps) {
     }
   }, []);
 
+  const handlePin = useCallback(async (session: Session) => {
+    await updateSession(session.id, { isPinned: true });
+    await reload();
+  }, [reload]);
+
+  const handleUnpin = useCallback(async (session: Session) => {
+    await removeProfileWindow(session.id);
+    await updateSession(session.id, { isPinned: false, autoSync: false });
+    await reload();
+  }, [reload]);
+
+  const handleChangeIcon = useCallback(async (session: Session, icon: ProfileIcon | undefined) => {
+    await updateSession(session.id, { icon });
+    await reload();
+  }, [reload]);
+
+  const handleToggleAutoSync = useCallback(async (session: Session, autoSync: boolean) => {
+    await updateSession(session.id, { autoSync });
+    await reload();
+  }, [reload]);
+
   return (
     <PageLayout
       titleKey="sessionsTab"
@@ -100,15 +146,25 @@ export function SessionsPage({ syncSettings }: SessionsPageProps) {
       icon={Archive}
       syncSettings={syncSettings}
       headerActions={
-        <Button
-          variant="solid"
-          size="2"
-          onClick={() => setSnapshotOpen(true)}
-          style={{ color: 'white' }}
-        >
-          <Camera size={16} aria-hidden="true" />
-          {getMessage('sessionSnapshotButton')}
-        </Button>
+        <Flex gap="2">
+          <Button
+            variant="soft"
+            size="2"
+            onClick={() => setProfileWizardOpen(true)}
+          >
+            <Pin size={16} aria-hidden="true" />
+            {getMessage('sessionNewProfile')}
+          </Button>
+          <Button
+            variant="solid"
+            size="2"
+            onClick={() => setSnapshotOpen(true)}
+            style={{ color: 'white' }}
+          >
+            <Camera size={16} aria-hidden="true" />
+            {getMessage('sessionSnapshotButton')}
+          </Button>
+        </Flex>
       }
     >
       {() => (
@@ -161,6 +217,10 @@ export function SessionsPage({ syncSettings }: SessionsPageProps) {
                   onRename={renameSession}
                   onEdit={s => setEditTarget(s)}
                   onDelete={s => setDeleteTarget(s)}
+                  onPin={handlePin}
+                  onUnpin={handleUnpin}
+                  onChangeIcon={handleChangeIcon}
+                  onToggleAutoSync={handleToggleAutoSync}
                 />
               ))}
             </Flex>
@@ -168,8 +228,19 @@ export function SessionsPage({ syncSettings }: SessionsPageProps) {
 
           <SnapshotWizard
             open={snapshotOpen}
-            onOpenChange={setSnapshotOpen}
+            onOpenChange={(open) => {
+              setSnapshotOpen(open);
+              if (!open) onSnapshotWizardOpenChange?.(false);
+            }}
             onSave={handleSaveSession}
+            mode="snapshot"
+          />
+
+          <SnapshotWizard
+            open={profileWizardOpen}
+            onOpenChange={setProfileWizardOpen}
+            onSave={handleSaveSession}
+            mode="profile"
           />
 
           <SessionEditDialog

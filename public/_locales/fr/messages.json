@@ -317,5 +317,46 @@
   "tabEditorLastTabDescription": { "message": "C'est le dernier onglet de ce groupe. Que souhaitez-vous faire du groupe ?" },
   "tabEditorKeepEmptyGroup": { "message": "Garder le groupe vide" },
   "tabEditorDeleteEmptyGroup": { "message": "Supprimer le groupe vide" },
-  "colorPickerLabel": { "message": "Choisir la couleur du groupe" }
+  "colorPickerLabel": { "message": "Choisir la couleur du groupe" },
+
+  "sessionPinAsProfile": { "message": "Épingler comme profil" },
+  "sessionPinDescription": { "message": "Accès rapide depuis le popup" },
+  "sessionUnpin": { "message": "Désépingler" },
+  "sessionChangeIcon": { "message": "Changer l'icône" },
+  "sessionProfileBadge": { "message": "Profil" },
+  "sessionAutoSync": { "message": "Synchro" },
+  "sessionAutoSyncTooltip": { "message": "Quand activé, le contenu du profil est mis à jour automatiquement à la fermeture de la fenêtre associée." },
+  "sessionAutoSyncEnabled": { "message": "Synchro auto activée" },
+  "sessionNewProfile": { "message": "Nouveau profil" },
+
+  "profileDefaultName": { "message": "Nouveau profil" },
+  "profileTitle": { "message": "Créer un profil" },
+  "profileDescription": { "message": "Choisissez les onglets à inclure dans ce profil." },
+  "profileIconLabel": { "message": "Icône du profil" },
+  "profileAutoSyncLabel": { "message": "Synchronisation automatique" },
+  "profileAutoSyncDescription": { "message": "Met à jour automatiquement le profil à la fermeture de la fenêtre associée." },
+  "profileSaveButton": { "message": "Sauvegarder le profil" },
+  "profileSaveSuccess": { "message": "Profil « $1 » sauvegardé avec succès !" },
+  "profileConfirmMessage": { "message": "Sauvegarder le profil « $1 » avec $2 onglet(s) ?" },
+
+  "profileIcon_briefcase": { "message": "Travail" },
+  "profileIcon_home": { "message": "Accueil" },
+  "profileIcon_code": { "message": "Code" },
+  "profileIcon_book": { "message": "Lecture" },
+  "profileIcon_gamepad": { "message": "Jeux" },
+  "profileIcon_music": { "message": "Musique" },
+  "profileIcon_coffee": { "message": "Café" },
+  "profileIcon_globe": { "message": "Web" },
+  "profileIcon_star": { "message": "Favoris" },
+  "profileIcon_heart": { "message": "Personnel" },
+
+  "popupSave": { "message": "Sauvegarder" },
+  "popupRestore": { "message": "Restaurer" },
+  "popupSaveSession": { "message": "Sauvegarder la session" },
+  "popupRestoreSession": { "message": "Restaurer une session" },
+  "popupProfilesLabel": { "message": "Profils" },
+  "popupProfileRestored": { "message": "Profil « $1 » restauré : $2 onglet(s), $3 groupe(s)" },
+
+  "profileAlreadyOpenWarning": { "message": "Ce profil est déjà ouvert dans une autre fenêtre." },
+  "profileAlreadyOpenTooltip": { "message": "Déjà ouvert dans une autre fenêtre" }
 }

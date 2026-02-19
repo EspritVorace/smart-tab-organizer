@@ -50,6 +50,31 @@ function OptionsContent() {
     
     const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
     const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+    const [openSnapshotWizard, setOpenSnapshotWizard] = useState(false);
+
+    // Deep linking: navigate to the right section on mount and on hash changes
+    // (hashchange fires when an existing tab's URL hash is updated externally)
+    useEffect(() => {
+        function handleHash() {
+            const hash = window.location.hash; // e.g. '#sessions?action=snapshot'
+            if (!hash.startsWith('#')) return;
+            const questionMark = hash.indexOf('?');
+            const section = questionMark === -1 ? hash.slice(1) : hash.slice(1, questionMark);
+            if (section === 'sessions') {
+                setCurrentTab('sessions');
+                if (questionMark !== -1) {
+                    const params = new URLSearchParams(hash.slice(questionMark + 1));
+                    if (params.get('action') === 'snapshot') {
+                        setOpenSnapshotWizard(true);
+                    }
+                }
+            }
+        }
+
+        handleHash();
+        window.addEventListener('hashchange', handleHash);
+        return () => window.removeEventListener('hashchange', handleHash);
+    }, []);
 
     // Storage handled by hooks
 
@@ -269,7 +294,11 @@ function OptionsContent() {
                         <ImportExportPage syncSettings={settings} onSettingsUpdate={updateSettings} />
                     )}
                     {currentTab === 'sessions' && (
-                        <SessionsPage syncSettings={settings} />
+                        <SessionsPage
+                            syncSettings={settings}
+                            snapshotWizardOpen={openSnapshotWizard}
+                            onSnapshotWizardOpenChange={setOpenSnapshotWizard}
+                        />
                     )}
                     {currentTab === 'stats' && (
                         <StatisticsPage syncSettings={settings} stats={stats} onReset={handleResetStats} />

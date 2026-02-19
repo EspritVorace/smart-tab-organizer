@@ -46,40 +46,58 @@ export function SplitButton({
       >
         {label}
       </Button>
-      <DropdownMenu.Root>
-        <DropdownMenu.Trigger>
-          <Button
-            variant={variant}
-            size={size}
-            disabled={disabled}
-            aria-label={getMessage('sessionRestoreOptions')}
-            style={{
-              borderTopLeftRadius: 0,
-              borderBottomLeftRadius: 0,
-              borderLeft: '1px solid rgba(255,255,255,0.2)',
-              paddingLeft: 6,
-              paddingRight: 6,
-              minWidth: 28,
-            }}
-          >
-            <ChevronDown size={14} aria-hidden="true" />
-          </Button>
-        </DropdownMenu.Trigger>
-        <DropdownMenu.Content>
-          {menuItems.map((item, idx) => (
-            <React.Fragment key={idx}>
-              {item.separator && <DropdownMenu.Separator />}
-              <DropdownMenu.Item
-                onClick={item.onClick}
-                disabled={item.disabled}
-              >
-                {item.icon}
-                {item.label}
-              </DropdownMenu.Item>
-            </React.Fragment>
-          ))}
-        </DropdownMenu.Content>
-      </DropdownMenu.Root>
+      {disabled ? (
+        <Button
+          variant={variant}
+          size={size}
+          disabled
+          aria-label={getMessage('sessionRestoreOptions')}
+          style={{
+            borderTopLeftRadius: 0,
+            borderBottomLeftRadius: 0,
+            borderLeft: '1px solid rgba(255,255,255,0.2)',
+            paddingLeft: 6,
+            paddingRight: 6,
+            minWidth: 28,
+          }}
+        >
+          <ChevronDown size={14} aria-hidden="true" />
+        </Button>
+      ) : (
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            <Button
+              variant={variant}
+              size={size}
+              aria-label={getMessage('sessionRestoreOptions')}
+              style={{
+                borderTopLeftRadius: 0,
+                borderBottomLeftRadius: 0,
+                borderLeft: '1px solid rgba(255,255,255,0.2)',
+                paddingLeft: 6,
+                paddingRight: 6,
+                minWidth: 28,
+              }}
+            >
+              <ChevronDown size={14} aria-hidden="true" />
+            </Button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content>
+            {menuItems.map((item, idx) => (
+              <React.Fragment key={idx}>
+                {item.separator && <DropdownMenu.Separator />}
+                <DropdownMenu.Item
+                  onClick={item.onClick}
+                  disabled={item.disabled}
+                >
+                  {item.icon}
+                  {item.label}
+                </DropdownMenu.Item>
+              </React.Fragment>
+            ))}
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
+      )}
     </Flex>
   );
 }
