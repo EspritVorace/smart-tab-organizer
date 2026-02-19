@@ -3,12 +3,14 @@ import { Box, Flex, Button, Text, Callout } from '@radix-ui/themes';
 import { Camera, Archive, CheckCircle } from 'lucide-react';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { SessionCard } from '../components/Core/Session/SessionCard';
+import { SessionEditDialog } from '../components/Core/Session/SessionEditDialog';
 import { SnapshotWizard } from '../components/UI/SessionWizards/SnapshotWizard';
 import { RestoreWizard } from '../components/UI/SessionWizards/RestoreWizard';
 import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { getMessage } from '../utils/i18n';
 import { useSessions } from '../hooks/useSessions';
 import { restoreTabs } from '../utils/tabRestore';
+import { updateSession } from '../utils/sessionStorage';
 import type { Session } from '../types/session';
 import type { SyncSettings } from '../types/syncSettings';
 
@@ -17,9 +19,10 @@ interface SessionsPageProps {
 }
 
 export function SessionsPage({ syncSettings }: SessionsPageProps) {
-  const { sessions, isLoaded, createSession, renameSession, removeSession } = useSessions();
+  const { sessions, isLoaded, createSession, renameSession, removeSession, reload } = useSessions();
   const [snapshotOpen, setSnapshotOpen] = useState(false);
   const [restoreSession, setRestoreSession] = useState<Session | null>(null);
+  const [editTarget, setEditTarget] = useState<Session | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Session | null>(null);
   const [quickRestoreMessage, setQuickRestoreMessage] = useState<string | null>(null);
 
@@ -33,6 +36,19 @@ export function SessionsPage({ syncSettings }: SessionsPageProps) {
       await createSession(session);
     },
     [createSession],
+  );
+
+  const handleSaveEditedSession = useCallback(
+    async (updatedSession: Session) => {
+      await updateSession(updatedSession.id, {
+        name: updatedSession.name,
+        groups: updatedSession.groups,
+        ungroupedTabs: updatedSession.ungroupedTabs,
+        updatedAt: updatedSession.updatedAt,
+      });
+      await reload();
+    },
+    [reload],
   );
 
   const handleDeleteConfirm = useCallback(async () => {
@@ -143,6 +159,7 @@ export function SessionsPage({ syncSettings }: SessionsPageProps) {
                   onRestoreCurrentWindow={handleRestoreCurrentWindow}
                   onRestoreNewWindow={handleRestoreNewWindow}
                   onRename={renameSession}
+                  onEdit={s => setEditTarget(s)}
                   onDelete={s => setDeleteTarget(s)}
                 />
               ))}
@@ -153,6 +170,15 @@ export function SessionsPage({ syncSettings }: SessionsPageProps) {
             open={snapshotOpen}
             onOpenChange={setSnapshotOpen}
             onSave={handleSaveSession}
+          />
+
+          <SessionEditDialog
+            session={editTarget}
+            open={editTarget !== null}
+            onOpenChange={(isOpen) => {
+              if (!isOpen) setEditTarget(null);
+            }}
+            onSave={handleSaveEditedSession}
           />
 
           <RestoreWizard

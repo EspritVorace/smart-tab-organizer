@@ -14,6 +14,7 @@ interface SessionCardProps {
   onRestoreCurrentWindow: (session: Session) => void;
   onRestoreNewWindow: (session: Session) => void;
   onRename: (id: string, newName: string) => Promise<void>;
+  onEdit: (session: Session) => void;
   onDelete: (session: Session) => void;
 }
 
@@ -23,6 +24,7 @@ export function SessionCard({
   onRestoreCurrentWindow,
   onRestoreNewWindow,
   onRename,
+  onEdit,
   onDelete,
 }: SessionCardProps) {
   const [isRenaming, setIsRenaming] = useState(false);
@@ -155,6 +157,10 @@ export function SessionCard({
                 </IconButton>
               </DropdownMenu.Trigger>
               <DropdownMenu.Content>
+                <DropdownMenu.Item onClick={() => onEdit(session)}>
+                  <Pencil size={14} aria-hidden="true" />
+                  {getMessage('sessionEdit')}
+                </DropdownMenu.Item>
                 <DropdownMenu.Item
                   onClick={() => {
                     setNameValue(session.name);

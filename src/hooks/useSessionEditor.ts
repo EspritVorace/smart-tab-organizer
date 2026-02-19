@@ -1,0 +1,188 @@
+import { useState, useMemo } from 'react';
+import type { Session, SavedTab } from '../types/session';
+import type { ChromeGroupColor } from '../components/Core/TabTree/tabTreeTypes';
+
+export interface UseSessionEditorReturn {
+  /** The session being edited (working copy) */
+  editedSession: Session;
+  /** True if the session has been modified from the original */
+  isDirty: boolean;
+  /** Update the session name */
+  updateSessionName: (name: string) => void;
+  /** Apply a full session update (used as TabTreeEditor's onSessionChange) */
+  applySessionUpdate: (updatedSession: Session) => void;
+  /** Remove a tab (grouped or ungrouped) by ID */
+  removeTab: (tabId: string) => void;
+  /** Update the URL of a tab */
+  updateTabUrl: (tabId: string, url: string) => void;
+  /** Move a tab up or down within its context */
+  moveTab: (tabId: string, direction: 'up' | 'down') => void;
+  /** Move a tab to another group (or ungroup it if targetGroupId is null) */
+  moveTabToGroup: (tabId: string, targetGroupId: string | null) => void;
+  /** Remove a group, either deleting or ungrouping its tabs */
+  removeGroup: (groupId: string, action: 'delete_tabs' | 'ungroup_tabs') => void;
+  /** Update a group's title and/or color */
+  updateGroup: (groupId: string, updates: { title?: string; color?: ChromeGroupColor }) => void;
+  /** Move a group up or down in the list */
+  moveGroup: (groupId: string, direction: 'up' | 'down') => void;
+  /** Reset the edited session to the original (discard all changes) */
+  reset: () => void;
+}
+
+export function useSessionEditor(initialSession: Session): UseSessionEditorReturn {
+  const [editedSession, setEditedSession] = useState<Session>(() =>
+    structuredClone(initialSession)
+  );
+
+  const isDirty = useMemo(() => {
+    return JSON.stringify(editedSession) !== JSON.stringify(initialSession);
+  }, [editedSession, initialSession]);
+
+  const now = () => new Date().toISOString();
+
+  function updateSessionName(name: string) {
+    setEditedSession((prev) => ({ ...prev, name, updatedAt: now() }));
+  }
+
+  function applySessionUpdate(updatedSession: Session) {
+    setEditedSession(updatedSession);
+  }
+
+  function removeTab(tabId: string) {
+    setEditedSession((prev) => ({
+      ...prev,
+      ungroupedTabs: prev.ungroupedTabs.filter((t) => t.id !== tabId),
+      groups: prev.groups.map((g) => ({ ...g, tabs: g.tabs.filter((t) => t.id !== tabId) })),
+      updatedAt: now(),
+    }));
+  }
+
+  function updateTabUrl(tabId: string, url: string) {
+    setEditedSession((prev) => ({
+      ...prev,
+      ungroupedTabs: prev.ungroupedTabs.map((t) => (t.id === tabId ? { ...t, url } : t)),
+      groups: prev.groups.map((g) => ({
+        ...g,
+        tabs: g.tabs.map((t) => (t.id === tabId ? { ...t, url } : t)),
+      })),
+      updatedAt: now(),
+    }));
+  }
+
+  function moveTab(tabId: string, direction: 'up' | 'down') {
+    setEditedSession((prev) => {
+      const ungroupedIdx = prev.ungroupedTabs.findIndex((t) => t.id === tabId);
+      if (ungroupedIdx !== -1) {
+        const tabs = [...prev.ungroupedTabs];
+        const newIdx = direction === 'up' ? ungroupedIdx - 1 : ungroupedIdx + 1;
+        if (newIdx < 0 || newIdx >= tabs.length) return prev;
+        [tabs[ungroupedIdx], tabs[newIdx]] = [tabs[newIdx], tabs[ungroupedIdx]];
+        return { ...prev, ungroupedTabs: tabs, updatedAt: now() };
+      }
+      const groups = prev.groups.map((g) => {
+        const idx = g.tabs.findIndex((t) => t.id === tabId);
+        if (idx === -1) return g;
+        const tabs = [...g.tabs];
+        const newIdx = direction === 'up' ? idx - 1 : idx + 1;
+        if (newIdx < 0 || newIdx >= tabs.length) return g;
+        [tabs[idx], tabs[newIdx]] = [tabs[newIdx], tabs[idx]];
+        return { ...g, tabs };
+      });
+      return { ...prev, groups, updatedAt: now() };
+    });
+  }
+
+  function moveTabToGroup(tabId: string, targetGroupId: string | null) {
+    setEditedSession((prev) => {
+      let tab: SavedTab | undefined;
+      let newUngrouped = prev.ungroupedTabs;
+      let newGroups = prev.groups;
+
+      const ungroupedIdx = prev.ungroupedTabs.findIndex((t) => t.id === tabId);
+      if (ungroupedIdx !== -1) {
+        tab = prev.ungroupedTabs[ungroupedIdx];
+        newUngrouped = prev.ungroupedTabs.filter((t) => t.id !== tabId);
+      } else {
+        for (const g of prev.groups) {
+          const found = g.tabs.find((t) => t.id === tabId);
+          if (found) {
+            tab = found;
+            break;
+          }
+        }
+        newGroups = prev.groups.map((g) => ({
+          ...g,
+          tabs: g.tabs.filter((t) => t.id !== tabId),
+        }));
+      }
+
+      if (!tab) return prev;
+
+      if (targetGroupId === null) {
+        newUngrouped = [...newUngrouped, tab];
+      } else {
+        newGroups = newGroups.map((g) =>
+          g.id === targetGroupId ? { ...g, tabs: [...g.tabs, tab!] } : g
+        );
+      }
+
+      return { ...prev, ungroupedTabs: newUngrouped, groups: newGroups, updatedAt: now() };
+    });
+  }
+
+  function removeGroup(groupId: string, action: 'delete_tabs' | 'ungroup_tabs') {
+    setEditedSession((prev) => {
+      const group = prev.groups.find((g) => g.id === groupId);
+      if (!group) return prev;
+      const newUngrouped =
+        action === 'ungroup_tabs'
+          ? [...prev.ungroupedTabs, ...group.tabs]
+          : prev.ungroupedTabs;
+      return {
+        ...prev,
+        ungroupedTabs: newUngrouped,
+        groups: prev.groups.filter((g) => g.id !== groupId),
+        updatedAt: now(),
+      };
+    });
+  }
+
+  function updateGroup(groupId: string, updates: { title?: string; color?: ChromeGroupColor }) {
+    setEditedSession((prev) => ({
+      ...prev,
+      groups: prev.groups.map((g) => (g.id === groupId ? { ...g, ...updates } : g)),
+      updatedAt: now(),
+    }));
+  }
+
+  function moveGroup(groupId: string, direction: 'up' | 'down') {
+    setEditedSession((prev) => {
+      const groups = [...prev.groups];
+      const idx = groups.findIndex((g) => g.id === groupId);
+      if (idx === -1) return prev;
+      const newIdx = direction === 'up' ? idx - 1 : idx + 1;
+      if (newIdx < 0 || newIdx >= groups.length) return prev;
+      [groups[idx], groups[newIdx]] = [groups[newIdx], groups[idx]];
+      return { ...prev, groups, updatedAt: now() };
+    });
+  }
+
+  function reset() {
+    setEditedSession(structuredClone(initialSession));
+  }
+
+  return {
+    editedSession,
+    isDirty,
+    updateSessionName,
+    applySessionUpdate,
+    removeTab,
+    updateTabUrl,
+    moveTab,
+    moveTabToGroup,
+    removeGroup,
+    updateGroup,
+    moveGroup,
+    reset,
+  };
+}
