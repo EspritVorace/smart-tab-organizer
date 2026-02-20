@@ -30,4 +30,6 @@ export default defineConfig({
       },
     },
   ],
+  reporter: [['allure-playwright']],
+  headless: false, // Extensions require headed mode
 });
