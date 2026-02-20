@@ -358,5 +358,20 @@
   "popupProfileRestored": { "message": "Perfil \"$1\" restaurado: $2 pestaña(s), $3 grupo(s)" },
 
   "profileAlreadyOpenWarning": { "message": "Este perfil ya está abierto en otra ventana." },
-  "profileAlreadyOpenTooltip": { "message": "Ya abierto en otra ventana" }
+  "profileAlreadyOpenTooltip": { "message": "Ya abierto en otra ventana" },
+
+  "sessionsIntroTitle": { "message": "Sesiones y perfiles" },
+  "sessionsIntroBody": { "message": "Las sesiones capturan tus pestañas abiertas para restaurarlas más tarde. Fija una sesión como perfil para acceder a ella con un clic desde el popup — el perfil puede actualizarse automáticamente al cerrar la ventana asociada." },
+  "sessionsEmptyStateTitle": { "message": "No hay sesiones guardadas." },
+  "sessionsEmptyStateDescription": { "message": "Crea una instantánea para capturar tus pestañas actuales, o un perfil para restaurarlas con un clic desde el popup." },
+  "sessionsOnboardingProfileTitle": { "message": "¡Tu primer perfil!" },
+  "sessionsOnboardingDescription": { "message": "Un perfil es un conjunto de pestañas que puedes restaurar con un clic." },
+  "sessionsOnboardingStep1": { "message": "Pestañas abiertas" },
+  "sessionsOnboardingStep2": { "message": "Perfil guardado" },
+  "sessionsOnboardingStep3": { "message": "Restauración" },
+  "sessionsOnboardingBullet1": { "message": "Encuentra tus perfiles en el popup de la extensión" },
+  "sessionsOnboardingBullet2": { "message": "Activa la sincronización automática para que el perfil se actualice al cerrar la ventana" },
+  "sessionsOnboardingGotIt": { "message": "¡Entendido!" },
+  "sessionProfileBadgeTooltip": { "message": "Este perfil es accesible desde el popup de la extensión." },
+  "sessionNewProfileTooltip": { "message": "Crea un perfil para guardar y restaurar tus pestañas con un clic." }
 }

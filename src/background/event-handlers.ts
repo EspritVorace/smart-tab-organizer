@@ -6,7 +6,8 @@ import { processGroupingForNewTab } from './grouping.js';
 import { loadSessions } from '../utils/sessionStorage.js';
 import { restoreTabs } from '../utils/tabRestore.js';
 import { getMessage } from '../utils/i18n.js';
-import { setProfileWindow, removeWindowAssociations } from '../utils/profileWindowMap.js';
+import { setProfileWindow, removeWindowAssociations, getProfileForWindow } from '../utils/profileWindowMap.js';
+import { persistSyncDraft } from './profileSync.js';
 
 export function setupInstallationHandler(): void {
     browser.runtime.onInstalled.addListener(async (details: Browser.runtime.InstalledDetails) => {
@@ -66,9 +67,25 @@ async function handleProfileRestore(
 
 export function setupWindowRemovedHandler(): void {
     browser.windows.onRemoved.addListener((windowId: number) => {
-        removeWindowAssociations(windowId)
-            .catch(e => console.error('[WINDOW_REMOVED] Error cleaning profile map:', e));
+        handleWindowRemoved(windowId)
+            .catch(e => console.error('[WINDOW_REMOVED] Error:', e));
     });
+}
+
+async function handleWindowRemoved(windowId: number): Promise<void> {
+    const profileId = await getProfileForWindow(windowId);
+
+    if (profileId) {
+        // Persist the in-memory draft to the profile before cleaning up the mapping
+        const sessions = await loadSessions();
+        const profile = sessions.find(s => s.id === profileId);
+
+        if (profile?.autoSync) {
+            await persistSyncDraft(profileId);
+        }
+    }
+
+    await removeWindowAssociations(windowId);
 }
 
 export function setupTabCreatedHandler(): void {

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { browser } from 'wxt/browser';
 import {
   Dialog,
   AlertDialog,
@@ -58,10 +59,24 @@ interface InnerProps {
   onSave: (updatedSession: Session) => Promise<void>;
 }
 
+const EDITING_PROFILE_KEY = 'editingProfileId';
+
 function SessionEditDialogInner({ session, open, onOpenChange, onSave }: InnerProps) {
   const editor = useSessionEditor(session);
   const [showUnsavedAlert, setShowUnsavedAlert] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Track whether this session is being edited so auto-sync won't overwrite it on window close
+  useEffect(() => {
+    if (open) {
+      (browser.storage as any).session.set({ [EDITING_PROFILE_KEY]: session.id });
+    } else {
+      (browser.storage as any).session.remove(EDITING_PROFILE_KEY);
+    }
+    return () => {
+      (browser.storage as any).session.remove(EDITING_PROFILE_KEY);
+    };
+  }, [open, session.id]);
 
   const tabCount = countSessionTabs(editor.editedSession);
   const groupCount = editor.editedSession.groups.length;

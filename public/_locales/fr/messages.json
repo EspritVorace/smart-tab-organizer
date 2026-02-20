@@ -358,5 +358,20 @@
   "popupProfileRestored": { "message": "Profil « $1 » restauré : $2 onglet(s), $3 groupe(s)" },
 
   "profileAlreadyOpenWarning": { "message": "Ce profil est déjà ouvert dans une autre fenêtre." },
-  "profileAlreadyOpenTooltip": { "message": "Déjà ouvert dans une autre fenêtre" }
+  "profileAlreadyOpenTooltip": { "message": "Déjà ouvert dans une autre fenêtre" },
+
+  "sessionsIntroTitle": { "message": "Sessions et profils" },
+  "sessionsIntroBody": { "message": "Les sessions capturent vos onglets ouverts pour les restaurer plus tard. Épinglez une session comme profil pour y accéder en un clic depuis le popup — le profil peut se mettre à jour automatiquement à la fermeture de la fenêtre associée." },
+  "sessionsEmptyStateTitle": { "message": "Aucune session sauvegardée." },
+  "sessionsEmptyStateDescription": { "message": "Créez un instantané pour capturer vos onglets actuels, ou un profil pour les restaurer en un clic depuis le popup." },
+  "sessionsOnboardingProfileTitle": { "message": "Votre premier profil !" },
+  "sessionsOnboardingDescription": { "message": "Un profil est un ensemble d'onglets que vous pouvez restaurer en un clic." },
+  "sessionsOnboardingStep1": { "message": "Onglets ouverts" },
+  "sessionsOnboardingStep2": { "message": "Profil sauvegardé" },
+  "sessionsOnboardingStep3": { "message": "Restauration" },
+  "sessionsOnboardingBullet1": { "message": "Retrouvez vos profils dans le popup de l'extension" },
+  "sessionsOnboardingBullet2": { "message": "Activez la synchro automatique pour que le profil se mette à jour à la fermeture de la fenêtre" },
+  "sessionsOnboardingGotIt": { "message": "C'est compris !" },
+  "sessionProfileBadgeTooltip": { "message": "Ce profil est accessible depuis le popup de l'extension." },
+  "sessionNewProfileTooltip": { "message": "Créez un profil pour sauvegarder et restaurer vos onglets en un clic." }
 }

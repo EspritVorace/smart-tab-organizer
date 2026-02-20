@@ -94,6 +94,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       args: [
         `--disable-extensions-except=${EXTENSION_PATH}`,
         `--load-extension=${EXTENSION_PATH}`,
+        '--lang=en-US',
         '--no-first-run',
         '--no-default-browser-check',
         '--disable-popup-blocking',

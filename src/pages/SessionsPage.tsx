@@ -1,9 +1,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Box, Flex, Button, Text, Callout } from '@radix-ui/themes';
+import { Box, Flex, Button, Text, Callout, Tooltip } from '@radix-ui/themes';
 import { Camera, Archive, CheckCircle, Pin } from 'lucide-react';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { SessionCard } from '../components/Core/Session/SessionCard';
 import { SessionEditDialog } from '../components/Core/Session/SessionEditDialog';
+import { SessionsIntroCallout } from '../components/Core/Session/SessionsIntroCallout';
+import { ProfileOnboardingDialog } from '../components/Core/Session/ProfileOnboardingDialog';
 import { SnapshotWizard } from '../components/UI/SessionWizards/SnapshotWizard';
 import { RestoreWizard } from '../components/UI/SessionWizards/RestoreWizard';
 import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
@@ -12,6 +14,7 @@ import { useSessions } from '../hooks/useSessions';
 import { restoreTabs } from '../utils/tabRestore';
 import { updateSession } from '../utils/sessionStorage';
 import { removeProfileWindow } from '../utils/profileWindowMap';
+import { getSessionsHelpPrefs, updateSessionsHelpPrefs } from '../utils/sessionsHelpPrefs';
 import type { Session, ProfileIcon } from '../types/session';
 import type { SyncSettings } from '../types/syncSettings';
 
@@ -44,10 +47,16 @@ export function SessionsPage({
   useEffect(() => {
     return () => onSnapshotWizardOpenChange?.(false);
   }, []);
+
   const [restoreSession, setRestoreSession] = useState<Session | null>(null);
   const [editTarget, setEditTarget] = useState<Session | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Session | null>(null);
   const [quickRestoreMessage, setQuickRestoreMessage] = useState<string | null>(null);
+
+  // Onboarding state
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
+  // Pending action after onboarding: 'wizard' = open profile wizard, or a Session to pin
+  const [pendingAfterOnboarding, setPendingAfterOnboarding] = useState<'wizard' | Session | null>(null);
 
   // Sort: profiles (isPinned) first by updatedAt desc, then snapshots by updatedAt desc
   const displayedSessions = [...sessions].sort((a, b) => {
@@ -118,10 +127,44 @@ export function SessionsPage({
     }
   }, []);
 
-  const handlePin = useCallback(async (session: Session) => {
+  /** Pin a session directly (after onboarding check). */
+  const doPin = useCallback(async (session: Session) => {
     await updateSession(session.id, { isPinned: true });
     await reload();
   }, [reload]);
+
+  /** Open profile wizard directly (after onboarding check). */
+  const doOpenProfileWizard = useCallback(() => {
+    setProfileWizardOpen(true);
+  }, []);
+
+  /**
+   * Show the onboarding dialog the first time the user creates a profile,
+   * then execute the pending action once they dismiss it.
+   */
+  const withOnboarding = useCallback(async (action: 'wizard' | Session) => {
+    const prefs = await getSessionsHelpPrefs();
+    if (!prefs.profileOnboardingShown) {
+      setPendingAfterOnboarding(action);
+      setOnboardingOpen(true);
+    } else {
+      if (action === 'wizard') doOpenProfileWizard();
+      else await doPin(action);
+    }
+  }, [doOpenProfileWizard, doPin]);
+
+  const handleOnboardingClose = useCallback(async () => {
+    setOnboardingOpen(false);
+    await updateSessionsHelpPrefs({ profileOnboardingShown: true });
+    const pending = pendingAfterOnboarding;
+    setPendingAfterOnboarding(null);
+    if (pending === 'wizard') doOpenProfileWizard();
+    else if (pending) await doPin(pending);
+  }, [pendingAfterOnboarding, doOpenProfileWizard, doPin]);
+
+  const handlePin = useCallback(async (session: Session) => {
+    await withOnboarding(session);
+  }, [withOnboarding]);
 
   const handleUnpin = useCallback(async (session: Session) => {
     await removeProfileWindow(session.id);
@@ -147,14 +190,16 @@ export function SessionsPage({
       syncSettings={syncSettings}
       headerActions={
         <Flex gap="2">
-          <Button
-            variant="soft"
-            size="2"
-            onClick={() => setProfileWizardOpen(true)}
-          >
-            <Pin size={16} aria-hidden="true" />
-            {getMessage('sessionNewProfile')}
-          </Button>
+          <Tooltip content={getMessage('sessionNewProfileTooltip')}>
+            <Button
+              variant="soft"
+              size="2"
+              onClick={() => withOnboarding('wizard')}
+            >
+              <Pin size={16} aria-hidden="true" />
+              {getMessage('sessionNewProfile')}
+            </Button>
+          </Tooltip>
           <Button
             variant="solid"
             size="2"
@@ -169,6 +214,9 @@ export function SessionsPage({
     >
       {() => (
         <Box>
+          {/* Intro callout (dismissable) */}
+          <SessionsIntroCallout />
+
           {/* Quick restore feedback */}
           {quickRestoreMessage && (
             <Callout.Root color="green" variant="soft" mb="3">
@@ -197,13 +245,22 @@ export function SessionsPage({
                 style={{ color: 'var(--gray-8)' }}
                 aria-hidden="true"
               />
-              <Text size="3" color="gray" align="center">
-                {getMessage('sessionsEmptyState')}
+              <Text size="3" weight="medium" color="gray" align="center">
+                {getMessage('sessionsEmptyStateTitle')}
               </Text>
-              <Button variant="soft" onClick={() => setSnapshotOpen(true)}>
-                <Camera size={14} aria-hidden="true" />
-                {getMessage('sessionSnapshotButton')}
-              </Button>
+              <Text size="2" color="gray" align="center" style={{ maxWidth: 340 }}>
+                {getMessage('sessionsEmptyStateDescription')}
+              </Text>
+              <Flex gap="2">
+                <Button variant="soft" onClick={() => setSnapshotOpen(true)}>
+                  <Camera size={14} aria-hidden="true" />
+                  {getMessage('sessionSnapshotButton')}
+                </Button>
+                <Button variant="soft" onClick={() => withOnboarding('wizard')}>
+                  <Pin size={14} aria-hidden="true" />
+                  {getMessage('sessionNewProfile')}
+                </Button>
+              </Flex>
             </Flex>
           ) : (
             <Flex direction="column" gap="3">
@@ -225,6 +282,11 @@ export function SessionsPage({
               ))}
             </Flex>
           )}
+
+          <ProfileOnboardingDialog
+            open={onboardingOpen}
+            onClose={handleOnboardingClose}
+          />
 
           <SnapshotWizard
             open={snapshotOpen}

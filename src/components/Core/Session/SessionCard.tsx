@@ -148,19 +148,37 @@ export function SessionCard({
       <Flex direction="column" gap="3">
         {/* Top row: icon + name + [profile extras] + menu */}
         <Flex align="center" gap="2">
-          <Flex
-            align="center"
-            justify="center"
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 'var(--radius-2)',
-              backgroundColor: 'var(--accent-a3)',
-              flexShrink: 0,
-            }}
-          >
-            <ProfileIconComponent size={18} style={{ color: 'var(--accent-11)' }} aria-hidden="true" />
-          </Flex>
+          {session.isPinned ? (
+            <Tooltip content={getMessage('sessionProfileBadgeTooltip')}>
+              <Flex
+                align="center"
+                justify="center"
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 'var(--radius-2)',
+                  backgroundColor: 'var(--accent-a3)',
+                  flexShrink: 0,
+                }}
+              >
+                <ProfileIconComponent size={18} style={{ color: 'var(--accent-11)' }} aria-hidden="true" />
+              </Flex>
+            </Tooltip>
+          ) : (
+            <Flex
+              align="center"
+              justify="center"
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 'var(--radius-2)',
+                backgroundColor: 'var(--accent-a3)',
+                flexShrink: 0,
+              }}
+            >
+              <ProfileIconComponent size={18} style={{ color: 'var(--accent-11)' }} aria-hidden="true" />
+            </Flex>
+          )}
 
           <Flex direction="column" gap="0" style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
             {isRenaming ? (
