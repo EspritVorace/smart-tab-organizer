@@ -22,7 +22,7 @@ test.beforeEach(async ({ context }) => {
 // Empty state
 // ---------------------------------------------------------------------------
 test.describe('Empty state', () => {
-  test('shows empty state title and description when no sessions exist', async ({
+  test('shows empty state title and description when no sessions exist [US-S007]', async ({
     context,
     extensionId,
   }) => {
@@ -36,7 +36,7 @@ test.describe('Empty state', () => {
     await page.close();
   });
 
-  test('shows Take Snapshot and New Profile buttons in empty state', async ({
+  test('shows Take Snapshot and New Profile buttons in empty state [US-S010]', async ({
     context,
     extensionId,
   }) => {
@@ -49,7 +49,7 @@ test.describe('Empty state', () => {
     await page.close();
   });
 
-  test('shows intro callout on first visit', async ({ context, extensionId }) => {
+  test('shows intro callout on first visit [US-O001]', async ({ context, extensionId }) => {
     const page = await context.newPage();
     await goToSessionsSection(page, extensionId);
 
@@ -62,7 +62,7 @@ test.describe('Empty state', () => {
 // Session list rendering
 // ---------------------------------------------------------------------------
 test.describe('Session list', () => {
-  test('displays session cards with name and tab counts', async ({ context, extensionId }) => {
+  test('displays session cards with name and tab counts [US-S002]', async ({ context, extensionId }) => {
     const session = createTestSession({ name: 'My Work Tabs' });
     await seedSessions(context, [session]);
 
@@ -75,7 +75,7 @@ test.describe('Session list', () => {
     await page.close();
   });
 
-  test('renders multiple sessions', async ({ context, extensionId }) => {
+  test('renders multiple sessions [US-S002]', async ({ context, extensionId }) => {
     const sessions = [
       createTestSession({ name: 'Session A' }),
       createTestSession({ name: 'Session B' }),
@@ -93,7 +93,7 @@ test.describe('Session list', () => {
     await page.close();
   });
 
-  test('sorts profiles (pinned) before snapshots', async ({ context, extensionId }) => {
+  test('sorts profiles (pinned) before snapshots [US-S008]', async ({ context, extensionId }) => {
     const snapshot = createTestSession({ name: 'Snapshot Session' });
     const profile = createTestProfile({ name: 'Profile Session' });
     // Seed snapshot first so ordering is deliberately wrong without sort
@@ -110,7 +110,7 @@ test.describe('Session list', () => {
     await page.close();
   });
 
-  test('profile card shows auto-sync toggle', async ({ context, extensionId }) => {
+  test('profile card shows auto-sync toggle [US-S009]', async ({ context, extensionId }) => {
     const profile = createTestProfile();
     await seedSessions(context, [profile]);
 
@@ -121,7 +121,7 @@ test.describe('Session list', () => {
     await page.close();
   });
 
-  test('snapshot card does not show auto-sync toggle', async ({ context, extensionId }) => {
+  test('snapshot card does not show auto-sync toggle [US-S009]', async ({ context, extensionId }) => {
     const session = createTestSession();
     await seedSessions(context, [session]);
 
@@ -137,7 +137,7 @@ test.describe('Session list', () => {
 // Rename
 // ---------------------------------------------------------------------------
 test.describe('Rename', () => {
-  test('double-click on session name enters rename mode', async ({ context, extensionId }) => {
+  test('double-click on session name enters rename mode [US-S003]', async ({ context, extensionId }) => {
     const session = createTestSession({ name: 'Original Name' });
     await seedSessions(context, [session]);
 
@@ -150,7 +150,7 @@ test.describe('Rename', () => {
     await page.close();
   });
 
-  test('pressing Enter confirms the new name', async ({ context, extensionId }) => {
+  test('pressing Enter confirms the new name [US-S003]', async ({ context, extensionId }) => {
     const session = createTestSession({ name: 'Old Name' });
     await seedSessions(context, [session]);
 
@@ -167,7 +167,7 @@ test.describe('Rename', () => {
     await page.close();
   });
 
-  test('pressing Escape cancels rename', async ({ context, extensionId }) => {
+  test('pressing Escape cancels rename [US-S003]', async ({ context, extensionId }) => {
     const session = createTestSession({ name: 'Stable Name' });
     await seedSessions(context, [session]);
 
@@ -189,7 +189,7 @@ test.describe('Rename', () => {
 // Delete
 // ---------------------------------------------------------------------------
 test.describe('Delete', () => {
-  test('more-actions menu contains Delete option', async ({ context, extensionId }) => {
+  test('more-actions menu contains Delete option [US-S004]', async ({ context, extensionId }) => {
     const session = createTestSession({ name: 'Deletable Session' });
     await seedSessions(context, [session]);
 
@@ -201,7 +201,7 @@ test.describe('Delete', () => {
     await page.close();
   });
 
-  test('clicking Delete opens confirmation dialog', async ({ context, extensionId }) => {
+  test('clicking Delete opens confirmation dialog [US-S004]', async ({ context, extensionId }) => {
     const session = createTestSession({ name: 'To Be Deleted' });
     await seedSessions(context, [session]);
 
@@ -216,7 +216,7 @@ test.describe('Delete', () => {
     await page.close();
   });
 
-  test('confirming Delete removes the session card', async ({ context, extensionId }) => {
+  test('confirming Delete removes the session card [US-S004]', async ({ context, extensionId }) => {
     const session = createTestSession({ name: 'To Be Deleted' });
     await seedSessions(context, [session]);
 
@@ -234,7 +234,7 @@ test.describe('Delete', () => {
     await page.close();
   });
 
-  test('cancelling Delete keeps the session', async ({ context, extensionId }) => {
+  test('cancelling Delete keeps the session [US-S004]', async ({ context, extensionId }) => {
     const session = createTestSession({ name: 'Will Survive' });
     await seedSessions(context, [session]);
 
@@ -254,7 +254,7 @@ test.describe('Delete', () => {
 // Snapshot creation
 // ---------------------------------------------------------------------------
 test.describe('Snapshot creation', () => {
-  test('Take Snapshot button opens the snapshot wizard dialog', async ({
+  test('Take Snapshot button opens the snapshot wizard dialog [US-S001]', async ({
     context,
     extensionId,
   }) => {
@@ -268,7 +268,7 @@ test.describe('Snapshot creation', () => {
     await page.close();
   });
 
-  test('wizard step 1 shows Selection step', async ({ context, extensionId }) => {
+  test('wizard step 1 shows Selection step [US-S001]', async ({ context, extensionId }) => {
     const page = await context.newPage();
     await goToSessionsSection(page, extensionId);
 
@@ -278,7 +278,7 @@ test.describe('Snapshot creation', () => {
     await page.close();
   });
 
-  test('Next button advances to Confirmation step', async ({ context, extensionId }) => {
+  test('Next button advances to Confirmation step [US-S001]', async ({ context, extensionId }) => {
     // captureCurrentTabs() filters out chrome-extension:// URLs, so open a real tab first
     const extraTab = await context.newPage();
     await extraTab.goto('data:text/html,<p>test tab for snapshot</p>');
@@ -296,7 +296,7 @@ test.describe('Snapshot creation', () => {
     await page.close();
   });
 
-  test('Save Session button on confirmation step creates session', async ({
+  test('Save Session button on confirmation step creates session [US-S001]', async ({
     context,
     extensionId,
   }) => {
@@ -329,7 +329,7 @@ test.describe('Snapshot creation', () => {
 // Restore — split button
 // ---------------------------------------------------------------------------
 test.describe('Restore split button', () => {
-  test('Restore button is visible on session card', async ({ context, extensionId }) => {
+  test('Restore button is visible on session card [US-S011]', async ({ context, extensionId }) => {
     const session = createTestSession({ name: 'Restorable' });
     await seedSessions(context, [session]);
 
@@ -341,7 +341,7 @@ test.describe('Restore split button', () => {
     await page.close();
   });
 
-  test('split button dropdown contains quick restore options', async ({ context, extensionId }) => {
+  test('split button dropdown contains quick restore options [US-S011]', async ({ context, extensionId }) => {
     const session = createTestSession({ name: 'Restorable' });
     await seedSessions(context, [session]);
 
@@ -357,7 +357,7 @@ test.describe('Restore split button', () => {
     await page.close();
   });
 
-  test('quick restore in current window shows success callout', async ({
+  test('quick restore in current window shows success callout [US-S011]', async ({
     context,
     extensionId,
   }) => {
@@ -374,7 +374,7 @@ test.describe('Restore split button', () => {
     await page.close();
   });
 
-  test('Customize opens the restore wizard dialog', async ({ context, extensionId }) => {
+  test('Customize opens the restore wizard dialog [US-S011]', async ({ context, extensionId }) => {
     const session = createTestSession({ name: 'Restorable' });
     await seedSessions(context, [session]);
 

@@ -19,7 +19,7 @@ test.describe('Combined Deduplication and Grouping', () => {
   // ── 1. Both Features Enabled ──────────────────────────────────────────────
 
   test.describe('Both Features Enabled', () => {
-    test('groups a child tab AND deduplicates a subsequent duplicate', async ({ helpers }) => {
+    test('groups a child tab AND deduplicates a subsequent duplicate [US-C001]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Combined Rule',
         domainFilter: 'example.com',
@@ -48,7 +48,7 @@ test.describe('Combined Deduplication and Grouping', () => {
       expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
     });
 
-    test('duplicate of a plain tab is removed before it can be grouped', async ({ helpers }) => {
+    test('duplicate of a plain tab is removed before it can be grouped [US-C001]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Dedup First',
         domainFilter: 'example.com',
@@ -75,7 +75,7 @@ test.describe('Combined Deduplication and Grouping', () => {
   // ── 2. Different Settings Per Feature ────────────────────────────────────
 
   test.describe('Different Settings Per Feature', () => {
-    test('grouping enabled, deduplication disabled: groups child, keeps duplicate', async ({ helpers }) => {
+    test('grouping enabled, deduplication disabled: groups child, keeps duplicate [US-C002]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Group Only',
         domainFilter: 'example.com',
@@ -100,7 +100,7 @@ test.describe('Combined Deduplication and Grouping', () => {
       expect(stats.tabsDeduplicatedCount).toBe(0);
     });
 
-    test('deduplication enabled, grouping disabled: deduplicates but creates no groups', async ({ helpers }) => {
+    test('deduplication enabled, grouping disabled: deduplicates but creates no groups [US-C002]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Dedup Only',
         domainFilter: 'example.com',
@@ -131,7 +131,7 @@ test.describe('Combined Deduplication and Grouping', () => {
   // ── 3. Multiple Rules with Mixed Settings ────────────────────────────────
 
   test.describe('Multiple Rules with Mixed Settings', () => {
-    test('each domain follows its own rule settings', async ({ helpers }) => {
+    test('each domain follows its own rule settings [US-C003]', async ({ helpers }) => {
       // example.com → group only
       await helpers.addDomainRule({
         label: 'Example Group Only',
@@ -177,7 +177,7 @@ test.describe('Combined Deduplication and Grouping', () => {
   // ── 4. Global vs Rule Settings ────────────────────────────────────────────
 
   test.describe('Global vs Rule Settings', () => {
-    test('rule settings override global: both disabled per rule → no action', async ({ helpers }) => {
+    test('rule settings override global: both disabled per rule → no action [US-C004]', async ({ helpers }) => {
       await helpers.setGlobalGroupingEnabled(true);
       await helpers.setGlobalDeduplicationEnabled(true);
 
@@ -203,7 +203,7 @@ test.describe('Combined Deduplication and Grouping', () => {
       expect(stats.tabsDeduplicatedCount).toBe(0);
     });
 
-    test('unmatched domains fall back to global settings', async ({ helpers }) => {
+    test('unmatched domains fall back to global settings [US-C004]', async ({ helpers }) => {
       await helpers.setGlobalGroupingEnabled(true);
       await helpers.setGlobalDeduplicationEnabled(true);
 
@@ -230,7 +230,7 @@ test.describe('Combined Deduplication and Grouping', () => {
   // ── 5. Complex Workflows ──────────────────────────────────────────────────
 
   test.describe('Complex Workflows', () => {
-    test('simulate browsing a GitHub repo: group files, dedup duplicate tabs', async ({ helpers }) => {
+    test('simulate browsing a GitHub repo: group files, dedup duplicate tabs [US-C005]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'GitHub Project',
         domainFilter: 'github.com',
@@ -266,7 +266,7 @@ test.describe('Combined Deduplication and Grouping', () => {
       expect(groups.length).toBe(1);
     });
 
-    test('simulate two projects each getting their own group', async ({ helpers }) => {
+    test('simulate two projects each getting their own group [US-C005]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Multi-Project',
         domainFilter: 'example.com',

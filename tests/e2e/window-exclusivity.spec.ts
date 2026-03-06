@@ -27,7 +27,7 @@ test.beforeEach(async ({ context }) => {
 // Mapping creation
 // ---------------------------------------------------------------------------
 test.describe('Profile ↔ window mapping', () => {
-  test('restoring a profile via RESTORE_PROFILE message creates a window mapping', async ({
+  test('restoring a profile via RESTORE_PROFILE message creates a window mapping [US-W001]', async ({
     context,
     extensionId,
   }) => {
@@ -59,7 +59,7 @@ test.describe('Profile ↔ window mapping', () => {
     expect(mapping[profile.id]).toBe(windowId);
   });
 
-  test('mapping is cleared from session storage after window close simulation', async ({
+  test('mapping is cleared from session storage after window close simulation [US-W001]', async ({
     context,
   }) => {
     const profile = createTestProfile({ name: 'Closing Profile' });
@@ -99,7 +99,7 @@ test.describe('Profile ↔ window mapping', () => {
 // Popup state with open profile
 // ---------------------------------------------------------------------------
 test.describe('Popup with profile window mapping', () => {
-  test('popup shows warning when profile is already open in a window', async ({
+  test('popup shows warning when profile is already open in a window [US-W002]', async ({
     context,
     extensionId,
   }) => {
@@ -130,7 +130,7 @@ test.describe('Popup with profile window mapping', () => {
 // Snapshots are not affected by window exclusivity
 // ---------------------------------------------------------------------------
 test.describe('Snapshots — no exclusivity restrictions', () => {
-  test('snapshot restore does not create a profile-window mapping', async ({
+  test('snapshot restore does not create a profile-window mapping [US-W003]', async ({
     context,
     extensionId,
   }) => {
