@@ -34,7 +34,7 @@ test.beforeEach(async ({ context }) => {
 // ---------------------------------------------------------------------------
 // Alarm lifecycle
 // ---------------------------------------------------------------------------
-test.describe('Alarm lifecycle', () => {
+test.describe('[US-P04] Alarm lifecycle', () => {
   test('enabling auto-sync on a profile creates the periodic alarm', async ({
     context,
     extensionId,
@@ -112,7 +112,7 @@ test.describe('Alarm lifecycle', () => {
 // ---------------------------------------------------------------------------
 // Draft storage
 // ---------------------------------------------------------------------------
-test.describe('Draft storage in chrome.storage.session', () => {
+test.describe('[US-P04] Draft storage in chrome.storage.session', () => {
   test('profile storage.local is NOT changed by sync draft updates', async ({
     context,
     extensionId,
@@ -214,7 +214,7 @@ test.describe('Draft storage in chrome.storage.session', () => {
 // ---------------------------------------------------------------------------
 // Edit dialog guard
 // ---------------------------------------------------------------------------
-test.describe('Edit dialog guard', () => {
+test.describe('[US-P04] Edit dialog guard', () => {
   test('editingProfileId is set in session storage when editor dialog is open', async ({
     context,
     extensionId,

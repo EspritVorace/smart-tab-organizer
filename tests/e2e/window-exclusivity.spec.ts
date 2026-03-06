@@ -26,7 +26,7 @@ test.beforeEach(async ({ context }) => {
 // ---------------------------------------------------------------------------
 // Mapping creation
 // ---------------------------------------------------------------------------
-test.describe('Profile ↔ window mapping', () => {
+test.describe('[US-W01] Profile ↔ window mapping', () => {
   test('restoring a profile via RESTORE_PROFILE message creates a window mapping', async ({
     context,
     extensionId,
@@ -98,7 +98,7 @@ test.describe('Profile ↔ window mapping', () => {
 // ---------------------------------------------------------------------------
 // Popup state with open profile
 // ---------------------------------------------------------------------------
-test.describe('Popup with profile window mapping', () => {
+test.describe('[US-W01] Popup with profile window mapping', () => {
   test('popup shows warning when profile is already open in a window', async ({
     context,
     extensionId,
@@ -127,9 +127,81 @@ test.describe('Popup with profile window mapping', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Unpin clears window mapping
+// ---------------------------------------------------------------------------
+test.describe('[US-W01] Unpin clears window mapping', () => {
+  test('unpinning a profile removes its entry from the window mapping', async ({
+    context,
+    extensionId,
+  }) => {
+    const profile = createTestProfile({ name: 'Unpin Mapping Profile' });
+    await seedSessions(context, [profile]);
+
+    const sw = context.serviceWorkers()[0];
+    const windowId = await sw.evaluate(async () => {
+      const win = await chrome.windows.getCurrent();
+      return win.id ?? 1;
+    });
+
+    // Seed a mapping for this profile
+    await seedProfileWindow(context, profile.id, windowId);
+
+    // Verify mapping exists before unpin
+    let mapping = await getProfileWindowMap(context);
+    expect(mapping[profile.id]).toBeDefined();
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    // Unpin the profile via the UI
+    await page.getByRole('button', { name: 'Unpin' }).click();
+    await page.waitForTimeout(500);
+
+    // Mapping should be cleared
+    mapping = await getProfileWindowMap(context);
+    expect(mapping[profile.id]).toBeUndefined();
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Restore wizard warning when profile is open elsewhere
+// ---------------------------------------------------------------------------
+test.describe('[US-W01] Restore wizard warning', () => {
+  test('Customize restore wizard shows warning when profile is open in another window', async ({
+    context,
+    extensionId,
+  }) => {
+    const profile = createTestProfile({ name: 'Open Elsewhere Profile' });
+    await seedSessions(context, [profile]);
+
+    const sw = context.serviceWorkers()[0];
+    const windowId = await sw.evaluate(async () => {
+      const win = await chrome.windows.getCurrent();
+      return win.id ?? 1;
+    });
+
+    // Seed profile as open in a *different* (fake) window
+    await seedProfileWindow(context, profile.id, windowId + 999);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: /restore options/i }).click();
+    await page.getByRole('menuitem', { name: /customize/i }).click();
+
+    // The amber warning callout should appear
+    await expect(
+      page.getByText('This profile is already open in another window.')
+    ).toBeVisible({ timeout: 3000 });
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Snapshots are not affected by window exclusivity
 // ---------------------------------------------------------------------------
-test.describe('Snapshots — no exclusivity restrictions', () => {
+test.describe('[US-W01] Snapshots — no exclusivity restrictions', () => {
   test('snapshot restore does not create a profile-window mapping', async ({
     context,
     extensionId,

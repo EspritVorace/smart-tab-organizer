@@ -21,7 +21,7 @@ test.beforeEach(async ({ context }) => {
 // ---------------------------------------------------------------------------
 // Pin / Unpin
 // ---------------------------------------------------------------------------
-test.describe('Pin / Unpin', () => {
+test.describe('[US-P01] Pin / Unpin', () => {
   test('Pin as Profile button appears on snapshot cards', async ({ context, extensionId }) => {
     const session = createTestSession({ name: 'Pinnable' });
     await seedSessions(context, [session]);
@@ -90,7 +90,7 @@ test.describe('Pin / Unpin', () => {
 // ---------------------------------------------------------------------------
 // Auto-sync toggle
 // ---------------------------------------------------------------------------
-test.describe('Auto-sync toggle', () => {
+test.describe('[US-P04] Auto-sync toggle', () => {
   test('toggle auto-sync on enables autoSync in storage', async ({ context, extensionId }) => {
     const profile = createTestProfile({ name: 'Sync Profile', autoSync: false });
     await seedSessions(context, [profile]);
@@ -162,7 +162,7 @@ test.describe('Auto-sync toggle', () => {
 // ---------------------------------------------------------------------------
 // Icon selection
 // ---------------------------------------------------------------------------
-test.describe('Profile icon', () => {
+test.describe('[US-P02] Profile icon', () => {
   test('Change Icon menu item is visible for profiles', async ({ context, extensionId }) => {
     const profile = createTestProfile({ name: 'Icon Profile' });
     await seedSessions(context, [profile]);
@@ -221,7 +221,7 @@ test.describe('Profile icon', () => {
 // ---------------------------------------------------------------------------
 // Direct profile creation
 // ---------------------------------------------------------------------------
-test.describe('New Profile wizard', () => {
+test.describe('[US-P03] New Profile wizard', () => {
   test('New Profile button in header opens profile wizard', async ({ context, extensionId }) => {
     const page = await context.newPage();
     await goToSessionsSection(page, extensionId);
@@ -296,6 +296,64 @@ test.describe('New Profile wizard', () => {
     const iconBox = page.getByText('Profile With Badge').locator('..').locator('..').locator('[style*="accent"]').first();
     await iconBox.hover();
     await expect(page.getByRole('tooltip')).toBeVisible({ timeout: 2000 });
+    await page.close();
+  });
+
+  test('profile wizard name field is pre-filled with "New Profile"', async ({
+    context,
+    extensionId,
+  }) => {
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'New Profile' }).first().click();
+
+    // Dismiss onboarding (always shown in beforeEach because clearHelpPrefs resets flag)
+    await page.getByText('Your First Profile!').waitFor({ timeout: 2000 });
+    await page.getByRole('button', { name: /got it/i }).click();
+
+    const nameInput = page.getByRole('textbox', { name: /session name/i });
+    await expect(nameInput).toHaveValue('New Profile');
+    await page.close();
+  });
+
+  test('profile wizard shows icon picker in Selection step', async ({
+    context,
+    extensionId,
+  }) => {
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'New Profile' }).first().click();
+    await page.getByText('Your First Profile!').waitFor({ timeout: 2000 });
+    await page.getByRole('button', { name: /got it/i }).click();
+
+    // The icon picker label should be visible in step 1
+    await expect(page.getByRole('dialog').getByText('Profile icon')).toBeVisible();
+    await page.close();
+  });
+
+  test('profile wizard shows auto-sync toggle in Confirmation step', async ({
+    context,
+    extensionId,
+  }) => {
+    // captureCurrentTabs() filters chrome-extension:// — open a real tab so Next is enabled
+    const extraTab = await context.newPage();
+    await extraTab.goto('data:text/html,<p>tab for profile wizard</p>');
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'New Profile' }).first().click();
+    await page.getByText('Your First Profile!').waitFor({ timeout: 2000 });
+    await page.getByRole('button', { name: /got it/i }).click();
+
+    // Advance to Confirmation step where the auto-sync toggle appears
+    await page.waitForTimeout(800);
+    await page.getByRole('button', { name: 'Next' }).click();
+
+    await expect(page.getByRole('dialog').getByRole('switch', { name: /auto-sync/i })).toBeVisible();
+    await extraTab.close();
     await page.close();
   });
 

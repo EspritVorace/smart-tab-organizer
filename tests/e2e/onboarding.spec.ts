@@ -20,7 +20,7 @@ test.beforeEach(async ({ context }) => {
 // ---------------------------------------------------------------------------
 // Intro callout
 // ---------------------------------------------------------------------------
-test.describe('Intro callout', () => {
+test.describe('[US-O01] Intro callout', () => {
   test('is visible on first visit (sessionsIntroHidden not set)', async ({
     context,
     extensionId,
@@ -97,7 +97,7 @@ test.describe('Intro callout', () => {
 // ---------------------------------------------------------------------------
 // First-profile onboarding dialog
 // ---------------------------------------------------------------------------
-test.describe('First-profile onboarding dialog', () => {
+test.describe('[US-O01] First-profile onboarding dialog', () => {
   test('clicking New Profile for the first time shows the onboarding dialog', async ({
     context,
     extensionId,
@@ -208,7 +208,7 @@ test.describe('First-profile onboarding dialog', () => {
 // ---------------------------------------------------------------------------
 // Tooltips
 // ---------------------------------------------------------------------------
-test.describe('Tooltips', () => {
+test.describe('[US-O01] Tooltips', () => {
   test('New Profile button has a tooltip on hover', async ({ context, extensionId }) => {
     const page = await context.newPage();
     await goToSessionsSection(page, extensionId);

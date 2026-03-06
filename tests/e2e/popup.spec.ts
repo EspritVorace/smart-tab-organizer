@@ -20,7 +20,7 @@ test.beforeEach(async ({ context }) => {
 // ---------------------------------------------------------------------------
 // Toolbar
 // ---------------------------------------------------------------------------
-test.describe('Toolbar', () => {
+test.describe('[US-PO01] Toolbar', () => {
   test('Options button navigates to the options page', async ({ context, extensionId }) => {
     const page = await context.newPage();
     await goToPopup(page, extensionId);
@@ -80,7 +80,7 @@ test.describe('Toolbar', () => {
 // ---------------------------------------------------------------------------
 // Profiles list
 // ---------------------------------------------------------------------------
-test.describe('Profiles list', () => {
+test.describe('[US-PO02] Profiles list', () => {
   test('profiles section is hidden when no profiles exist', async ({ context, extensionId }) => {
     // Only snapshots, no profiles
     const snapshot = createTestSession({ name: 'Just A Snapshot' });
@@ -149,12 +149,29 @@ test.describe('Profiles list', () => {
     await expect(page.getByRole('button', { name: 'Restore options' })).toBeVisible();
     await page.close();
   });
+
+  test('profile row dropdown offers current window and new window options', async ({
+    context,
+    extensionId,
+  }) => {
+    const profile = createTestProfile({ name: 'Dropdown Profile' });
+    await seedSessions(context, [profile]);
+
+    const page = await context.newPage();
+    await goToPopup(page, extensionId);
+
+    await page.getByRole('button', { name: 'Restore options' }).click();
+
+    await expect(page.getByRole('menuitem', { name: /current window/i })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /new window/i })).toBeVisible();
+    await page.close();
+  });
 });
 
 // ---------------------------------------------------------------------------
 // Deep linking (options page side)
 // ---------------------------------------------------------------------------
-test.describe('Deep linking', () => {
+test.describe('[US-PO01] Deep linking', () => {
   test('#sessions hash shows the Sessions section', async ({ context, extensionId }) => {
     const page = await context.newPage();
     await goToSessionsSection(page, extensionId);
