@@ -5,6 +5,7 @@ import { type BadgeType } from '../schemas/enums.js';
 export interface DomainRuleSetting extends DomainRule {
   enabled: boolean;
   badge?: BadgeType;
+  groupingEnabled?: boolean;
 }
 
 // Types pour les arrays

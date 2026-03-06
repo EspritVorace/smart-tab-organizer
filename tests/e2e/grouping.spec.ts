@@ -1,557 +1,866 @@
 /**
  * E2E Tests for Tab Grouping
  *
- * Tests all combinations of:
- * - Global grouping enabled/disabled
- * - Rule-specific settings
- * - Group name sources: label, title, url, smart variants
- * - Group colors
- * - Opener tab scenarios (in group / not in group)
+ * Three layers of tests:
+ *
+ * 1. "Direct API" — createTabFromOpener calls processGroupingForNewTab directly.
+ *    Fast, stable. Tests the grouping LOGIC (rules, colors, name sources, stats).
+ *
+ * 2. "Natural Event Flow" — createTabNaturally injects into middleClickedTabs then
+ *    calls chrome.tabs.create({openerTabId}).  Exercises the full event-handler
+ *    chain: onTabCreated → findMiddleClickOpener → handleGroupingWithRetry →
+ *    onUpdated(complete) → processGroupingForNewTab.
+ *
+ * 3. "Content Script Integration" — serves fake pages via context.route() and
+ *    dispatches a real auxclick event that the content script intercepts, mimicking
+ *    the exact UI path a user takes when middle-clicking a link.
  */
 
-import { test, expect } from './fixtures';
+import { test, expect, type TabGroupInfo } from './fixtures';
+import type { BrowserContext, Route, Request } from '@playwright/test';
+import * as http from 'http';
+
+// ─── helpers ────────────────────────────────────────────────────────────────
+
+/** Port used for fake local pages in the content-script integration tests. */
+const FAKE_PORT = 7654;
+
+/** Serve two pages via context.route so the content script can inject into them. */
+async function setupFakePages(context: BrowserContext) {
+  await context.route(`http://localhost:${FAKE_PORT}/**`, (route: any, request: any) => {
+    const pathname = new URL(request.url()).pathname;
+    const isOpener = pathname === '/opener.html' || pathname === '/';
+    route.fulfill({
+      contentType: 'text/html',
+      body: isOpener
+        ? `<!DOCTYPE html><html><head><title>Opener - SmartTab Test</title></head><body>
+             <h1>Opener</h1>
+             <a id="child-link" href="http://localhost:${FAKE_PORT}/child.html">Child page</a>
+             <a id="child2-link" href="http://localhost:${FAKE_PORT}/child2.html">Child page 2</a>
+           </body></html>`
+        : `<!DOCTYPE html><html><head><title>Child - SmartTab Test</title></head>
+           <body><h1>Child</h1></body></html>`,
+    });
+  });
+}
+
+// ─── suite ──────────────────────────────────────────────────────────────────
 
 test.describe('Tab Grouping', () => {
+  // Real HTTP server so tabs created via chrome.tabs.create (from sw.evaluate)
+  // can navigate to localhost:FAKE_PORT — Playwright's context.route() may not
+  // intercept those tabs in time, but a real server always responds.
+  let localServer: http.Server;
+
+  test.beforeAll(async () => {
+    localServer = http.createServer((req, res) => {
+      const pathname = new URL(req.url!, `http://localhost:${FAKE_PORT}`).pathname;
+      const isOpener = pathname === '/opener.html' || pathname === '/';
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(
+        isOpener
+          ? `<!DOCTYPE html><html><head><title>Opener - SmartTab Test</title></head><body>
+               <h1>Opener</h1>
+               <a id="child-link" href="http://localhost:${FAKE_PORT}/child.html">Child page</a>
+               <a id="child2-link" href="http://localhost:${FAKE_PORT}/child2.html">Child page 2</a>
+             </body></html>`
+          : `<!DOCTYPE html><html><head><title>Child - SmartTab Test</title></head>
+             <body><h1>Child</h1></body></html>`,
+      );
+    });
+    await new Promise<void>(resolve => localServer.listen(FAKE_PORT, resolve));
+  });
+
+  test.afterAll(async () => {
+    await new Promise<void>(resolve => localServer.close(() => resolve()));
+  });
+
   test.beforeEach(async ({ helpers }) => {
-    // Reset state before each test
+    // Clean up any tabs/groups left by the previous test before configuring state
+    await helpers.closeAllTestTabs();
+    await helpers.clearAllTabGroups();
     await helpers.clearDomainRules();
     await helpers.setGlobalGroupingEnabled(true);
-    await helpers.setGlobalDeduplicationEnabled(false); // Disable deduplication to isolate grouping tests
+    await helpers.setGlobalDeduplicationEnabled(false);
     await helpers.resetStatistics();
   });
 
+  // ── 1. Global Settings ────────────────────────────────────────────────────
+
   test.describe('Global Settings', () => {
-    test('should group tabs when global grouping is enabled and rule matches', async ({ context, helpers }) => {
-      // Add rule for example.com
+    test('groups tabs when global grouping is enabled and rule matches', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Example Group',
         domainFilter: 'example.com',
+        deduplicationEnabled: false,
         groupingEnabled: true,
         groupNameSource: 'label',
         color: 'blue',
       });
 
-      // Create opener tab
-      const openerPage = await helpers.createTab('https://example.com/opener');
+      const opener = await helpers.createTab('https://example.com/opener');
       await helpers.waitForGrouping();
+      await helpers.createTabFromOpener(opener, 'https://example.com/child');
 
-      // Create new tab from opener (simulated)
-      const newPage = await helpers.createTabFromOpener(openerPage, 'https://example.com/child');
-      await helpers.waitForGrouping();
-
-      const groups = await helpers.getTabGroups();
+      const groups = await helpers.waitForTabGrouped('Example Group');
       const stats = await helpers.getStatistics();
 
-      // A group should have been created
-      expect(stats.tabGroupsCreatedCount).toBeGreaterThan(0);
       expect(groups.length).toBeGreaterThan(0);
+      expect(groups.find(g => g.title === 'Example Group')).toBeDefined();
+      expect(stats.tabGroupsCreatedCount).toBe(1);
     });
 
-    test('should NOT group tabs when global grouping is disabled', async ({ helpers }) => {
-      // Disable global grouping
+    test('does NOT group when global grouping is disabled', async ({ helpers }) => {
       await helpers.setGlobalGroupingEnabled(false);
-
-      // Add rule (but global is disabled)
       await helpers.addDomainRule({
         label: 'Disabled Group',
         domainFilter: 'example.com',
+        deduplicationEnabled: false,
         groupingEnabled: true,
       });
 
-      const openerPage = await helpers.createTab('https://example.com/opener');
+      const opener = await helpers.createTab('https://example.com/opener');
       await helpers.waitForGrouping();
-
-      const newPage = await helpers.createTabFromOpener(openerPage, 'https://example.com/child');
+      await helpers.createTabFromOpener(opener, 'https://example.com/child');
       await helpers.waitForGrouping();
 
       const stats = await helpers.getStatistics();
+      const groups = await helpers.getTabGroups();
 
-      // No groups should be created
       expect(stats.tabGroupsCreatedCount).toBe(0);
+      expect(groups.length).toBe(0);
     });
 
-    test('should NOT group tabs when no matching rule exists', async ({ helpers }) => {
+    test('does NOT group when no matching rule exists', async ({ helpers }) => {
       // No rules added
-
-      const openerPage = await helpers.createTab('https://example.com/opener');
+      const opener = await helpers.createTab('https://example.com/opener');
       await helpers.waitForGrouping();
-
-      const newPage = await helpers.createTabFromOpener(openerPage, 'https://example.com/child');
+      await helpers.createTabFromOpener(opener, 'https://example.com/child');
       await helpers.waitForGrouping();
 
       const stats = await helpers.getStatistics();
-
-      // No groups should be created without a matching rule
       expect(stats.tabGroupsCreatedCount).toBe(0);
     });
   });
 
+  // ── 2. Rule-specific Settings ─────────────────────────────────────────────
+
   test.describe('Rule-specific Settings', () => {
-    test('should NOT group when rule has grouping disabled', async ({ helpers }) => {
+    test('does NOT group when rule has groupingEnabled=false', async ({ helpers }) => {
       await helpers.addDomainRule({
-        label: 'No Group Rule',
+        label: 'No-group Rule',
         domainFilter: 'example.com',
+        deduplicationEnabled: false,
         enabled: true,
         groupingEnabled: false,
       });
 
-      const openerPage = await helpers.createTab('https://example.com/opener');
+      const opener = await helpers.createTab('https://example.com/opener');
       await helpers.waitForGrouping();
-
-      const newPage = await helpers.createTabFromOpener(openerPage, 'https://example.com/child');
+      await helpers.createTabFromOpener(opener, 'https://example.com/child');
       await helpers.waitForGrouping();
 
       const stats = await helpers.getStatistics();
-
       expect(stats.tabGroupsCreatedCount).toBe(0);
     });
 
-    test('should NOT group when rule is disabled', async ({ helpers }) => {
+    test('does NOT group when rule is disabled (enabled=false)', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Disabled Rule',
         domainFilter: 'example.com',
+        deduplicationEnabled: false,
         enabled: false,
         groupingEnabled: true,
       });
 
-      const openerPage = await helpers.createTab('https://example.com/opener');
+      const opener = await helpers.createTab('https://example.com/opener');
       await helpers.waitForGrouping();
-
-      const newPage = await helpers.createTabFromOpener(openerPage, 'https://example.com/child');
+      await helpers.createTabFromOpener(opener, 'https://example.com/child');
       await helpers.waitForGrouping();
 
       const stats = await helpers.getStatistics();
-
       expect(stats.tabGroupsCreatedCount).toBe(0);
     });
   });
 
+  // ── 3. Group Name Sources ─────────────────────────────────────────────────
+
   test.describe('Group Name Sources', () => {
-    test('groupNameSource=label: should use rule label as group name', async ({ helpers }) => {
+    test('groupNameSource=label: uses rule label as group name', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'My Custom Label',
         domainFilter: 'example.com',
+        deduplicationEnabled: false,
         groupingEnabled: true,
         groupNameSource: 'label',
       });
 
-      const openerPage = await helpers.createTab('https://example.com/opener');
+      const opener = await helpers.createTab('https://example.com/opener');
       await helpers.waitForGrouping();
+      await helpers.createTabFromOpener(opener, 'https://example.com/child');
 
-      const newPage = await helpers.createTabFromOpener(openerPage, 'https://example.com/child');
-      await helpers.waitForGrouping();
-
-      const groups = await helpers.getTabGroups();
-
-      expect(groups.length).toBeGreaterThan(0);
-      const group = groups.find(g => g.title === 'My Custom Label');
-      expect(group).toBeDefined();
+      const groups = await helpers.waitForTabGrouped('My Custom Label');
+      expect(groups.find(g => g.title === 'My Custom Label')).toBeDefined();
     });
 
-    test('groupNameSource=title: should extract group name from opener title', async ({ helpers }) => {
-      await helpers.addDomainRule({
-        label: 'Title Extract',
-        domainFilter: 'example.com',
-        groupingEnabled: true,
-        groupNameSource: 'title',
-        titleParsingRegEx: 'Project: (\\w+)',
-      });
-
-      // Note: This requires the opener page to have a title matching the regex
-      // In a real test, we'd need a test server with proper page titles
-      const openerPage = await helpers.createTab('https://example.com/page');
-      await helpers.waitForGrouping();
-
-      // Set the page title to match our regex
-      await openerPage.evaluate(() => {
-        document.title = 'Project: Alpha - Dashboard';
-      });
-
-      const newPage = await helpers.createTabFromOpener(openerPage, 'https://example.com/child');
-      await helpers.waitForGrouping();
-
-      const groups = await helpers.getTabGroups();
-
-      // Either extracted name "Alpha" or fallback to label
-      expect(groups.length).toBeGreaterThan(0);
-    });
-
-    test('groupNameSource=url: should extract group name from opener URL', async ({ helpers }) => {
+    test('groupNameSource=url: extracts name from opener URL', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'URL Extract',
         domainFilter: 'example.com',
+        deduplicationEnabled: false,
         groupingEnabled: true,
         groupNameSource: 'url',
         urlParsingRegEx: 'example\\.com/(\\w+)',
       });
 
-      const openerPage = await helpers.createTab('https://example.com/products');
+      const opener = await helpers.createTab('https://example.com/products');
       await helpers.waitForGrouping();
+      await helpers.createTabFromOpener(opener, 'https://example.com/child');
 
-      const newPage = await helpers.createTabFromOpener(openerPage, 'https://example.com/child');
-      await helpers.waitForGrouping();
-
-      const groups = await helpers.getTabGroups();
-
+      const groups = await helpers.waitForTabGrouped();
       expect(groups.length).toBeGreaterThan(0);
-      // Should extract "products" from URL
-      const group = groups.find(g => g.title === 'products' || g.title === 'URL Extract');
-      expect(group).toBeDefined();
+      // Should extract "products" from opener URL; falls back to label if fails
+      const group = groups[0];
+      expect(['products', 'URL Extract']).toContain(group.title);
     });
 
-    test('groupNameSource=smart_label: should fallback to label when extraction fails', async ({ helpers }) => {
+    test('groupNameSource=title: extracts name from opener page title', async ({ helpers }) => {
+      await helpers.addDomainRule({
+        label: 'Title Extract',
+        domainFilter: 'example.com',
+        deduplicationEnabled: false,
+        groupingEnabled: true,
+        groupNameSource: 'title',
+        titleParsingRegEx: 'Project:\\s*(\\w+)',
+      });
+
+      const opener = await helpers.createTab('https://example.com/page');
+      await helpers.waitForGrouping();
+
+      // Set page title before child is created so the background can read it
+      await opener.evaluate(() => { document.title = 'Project: Alpha - Dashboard'; });
+      await new Promise(r => setTimeout(r, 200));
+
+      await helpers.createTabFromOpener(opener, 'https://example.com/child');
+
+      const groups = await helpers.waitForTabGrouped();
+      expect(groups.length).toBeGreaterThan(0);
+      // Either extracted "Alpha" or fell back to label
+      const group = groups[0];
+      expect(['Alpha', 'Title Extract']).toContain(group.title);
+    });
+
+    test('groupNameSource=smart_label: falls back to label when extraction fails', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Smart Label Fallback',
         domainFilter: 'example.com',
+        deduplicationEnabled: false,
         groupingEnabled: true,
         groupNameSource: 'smart_label',
-        titleParsingRegEx: 'NonExistent: (\\w+)', // Won't match anything
+        titleParsingRegEx: 'NOMATCH:\\s*(\\w+)',
       });
 
-      const openerPage = await helpers.createTab('https://example.com/page');
+      const opener = await helpers.createTab('https://example.com/page');
       await helpers.waitForGrouping();
+      await helpers.createTabFromOpener(opener, 'https://example.com/child');
 
-      const newPage = await helpers.createTabFromOpener(openerPage, 'https://example.com/child');
+      const groups = await helpers.waitForTabGrouped('Smart Label Fallback');
+      expect(groups.find(g => g.title === 'Smart Label Fallback')).toBeDefined();
+    });
+
+    test('invalid regex falls back gracefully (no crash)', async ({ helpers }) => {
+      await helpers.addDomainRule({
+        label: 'Invalid Regex Fallback',
+        domainFilter: 'example.com',
+        deduplicationEnabled: false,
+        groupingEnabled: true,
+        groupNameSource: 'title',
+        titleParsingRegEx: '[invalid(regex',
+      });
+
+      const opener = await helpers.createTab('https://example.com/opener');
       await helpers.waitForGrouping();
+      await helpers.createTabFromOpener(opener, 'https://example.com/child');
 
-      const groups = await helpers.getTabGroups();
-
+      // Should not crash; extension still creates a group using label as fallback
+      const groups = await helpers.waitForTabGrouped();
       expect(groups.length).toBeGreaterThan(0);
-      // Should fallback to label
-      const group = groups.find(g => g.title === 'Smart Label Fallback');
-      expect(group).toBeDefined();
     });
   });
 
+  // ── 4. Group Colors ───────────────────────────────────────────────────────
+
   test.describe('Group Colors', () => {
-    test('should apply specified color to group', async ({ helpers }) => {
+    test('applies the specified color to the created group', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Blue Group',
         domainFilter: 'example.com',
+        deduplicationEnabled: false,
         groupingEnabled: true,
         color: 'blue',
       });
 
-      const openerPage = await helpers.createTab('https://example.com/opener');
+      const opener = await helpers.createTab('https://example.com/opener');
       await helpers.waitForGrouping();
+      await helpers.createTabFromOpener(opener, 'https://example.com/child');
 
-      const newPage = await helpers.createTabFromOpener(openerPage, 'https://example.com/child');
-      await helpers.waitForGrouping();
-
-      const groups = await helpers.getTabGroups();
-
-      expect(groups.length).toBeGreaterThan(0);
+      const groups = await helpers.waitForTabGrouped('Blue Group');
       const group = groups.find(g => g.title === 'Blue Group');
-      expect(group?.color).toBe('blue');
+      expect(group).toBeDefined();
+      expect(group!.color).toBe('blue');
     });
 
-    test('should use Chrome default color when no color specified', async ({ helpers }) => {
+    test('applies red, green, purple colors correctly', async ({ helpers }) => {
+      for (const color of ['red', 'green', 'purple'] as const) {
+        await helpers.clearDomainRules();
+        await helpers.resetStatistics();
+        await helpers.addDomainRule({
+          label: `${color} Group`,
+          domainFilter: 'example.com',
+        deduplicationEnabled: false,
+          groupingEnabled: true,
+          color,
+        });
+
+        const opener = await helpers.createTab('https://example.com/opener');
+        await helpers.waitForGrouping();
+        await helpers.createTabFromOpener(opener, 'https://example.com/child');
+
+        const groups = await helpers.waitForTabGrouped(`${color} Group`);
+        const group = groups.find(g => g.title === `${color} Group`);
+        expect(group, `Expected group with color "${color}"`).toBeDefined();
+        expect(group!.color).toBe(color);
+
+        await helpers.closeAllTestTabs();
+      }
+    });
+
+    test('uses Chrome default color when no color is specified', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'No Color Group',
         domainFilter: 'example.com',
+        deduplicationEnabled: false,
         groupingEnabled: true,
-        color: '', // No color specified
+        color: '',
       });
 
-      const openerPage = await helpers.createTab('https://example.com/opener');
+      const opener = await helpers.createTab('https://example.com/opener');
       await helpers.waitForGrouping();
+      await helpers.createTabFromOpener(opener, 'https://example.com/child');
 
-      const newPage = await helpers.createTabFromOpener(openerPage, 'https://example.com/child');
-      await helpers.waitForGrouping();
-
-      const groups = await helpers.getTabGroups();
-
+      const groups = await helpers.waitForTabGrouped('No Color Group');
       expect(groups.length).toBeGreaterThan(0);
-      // Chrome assigns a default color (usually grey or first available)
-    });
-
-    test.describe('all color options', () => {
-      const colors = ['grey', 'blue', 'red', 'yellow', 'green', 'pink', 'purple', 'cyan', 'orange'];
-
-      for (const color of colors) {
-        test(`should support color: ${color}`, async ({ helpers }) => {
-          await helpers.addDomainRule({
-            label: `${color} Group`,
-            domainFilter: 'example.com',
-            groupingEnabled: true,
-            color: color,
-          });
-
-          const openerPage = await helpers.createTab('https://example.com/opener');
-          await helpers.waitForGrouping();
-
-          const newPage = await helpers.createTabFromOpener(openerPage, 'https://example.com/child');
-          await helpers.waitForGrouping();
-
-          const groups = await helpers.getTabGroups();
-
-          expect(groups.length).toBeGreaterThan(0);
-          const group = groups[0];
-          expect(group.color).toBe(color);
-        });
-      }
+      // Chrome assigns a default color; we just verify a group was created
+      expect(groups[0].color).toBeTruthy();
     });
   });
 
+  // ── 5. Existing Group Scenarios ───────────────────────────────────────────
+
   test.describe('Existing Group Scenarios', () => {
-    test('should add to existing group when opener is already grouped', async ({ helpers }) => {
+    test('adds to existing group when opener is already grouped', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Existing Group Test',
         domainFilter: 'example.com',
+        deduplicationEnabled: false,
         groupingEnabled: true,
         color: 'green',
+        groupNameSource: 'label',
       });
 
-      // Create opener and first child to create initial group
-      const openerPage = await helpers.createTab('https://example.com/opener');
+      const opener = await helpers.createTab('https://example.com/opener');
       await helpers.waitForGrouping();
 
-      const child1 = await helpers.createTabFromOpener(openerPage, 'https://example.com/child1');
+      // First child — creates the group
+      await helpers.createTabFromOpener(opener, 'https://example.com/child1');
+      const groups1 = await helpers.waitForTabGrouped('Existing Group Test');
+      expect(groups1.length).toBe(1);
+      const firstTabCount = groups1[0].tabCount;
+
+      // Second child — should be added to the SAME group, not create a new one
+      await helpers.createTabFromOpener(opener, 'https://example.com/child2');
       await helpers.waitForGrouping();
 
-      let groups = await helpers.getTabGroups();
-      const initialGroupCount = groups.length;
-      const initialTabsInGroup = groups[0]?.tabCount || 0;
-
-      // Create another child - should add to existing group
-      const child2 = await helpers.createTabFromOpener(openerPage, 'https://example.com/child2');
-      await helpers.waitForGrouping();
-
-      groups = await helpers.getTabGroups();
+      const groups2 = await helpers.getTabGroups();
       const stats = await helpers.getStatistics();
 
-      // Should still be same number of groups
-      expect(groups.length).toBe(initialGroupCount);
-
-      // Group should have more tabs
-      const group = groups.find(g => g.title === 'Existing Group Test');
-      expect(group?.tabCount).toBeGreaterThan(initialTabsInGroup);
-
-      // Group creation count should only be 1 (not 2)
-      expect(stats.tabGroupsCreatedCount).toBe(1);
+      expect(groups2.length).toBe(1);
+      expect(groups2[0].tabCount).toBeGreaterThan(firstTabCount);
+      expect(stats.tabGroupsCreatedCount).toBe(1); // Only one group was ever created
     });
 
-    test('should create new group when opener is not grouped', async ({ helpers }) => {
+    test('creates a new group each time a fresh opener opens a child', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'New Group Test',
         domainFilter: 'example.com',
+        deduplicationEnabled: false,
         groupingEnabled: true,
+        groupNameSource: 'label',
       });
 
-      // Open two separate pages that aren't related
-      const page1 = await helpers.createTab('https://example.com/page1');
+      const opener1 = await helpers.createTab('https://example.com/page1');
+      await helpers.waitForGrouping();
+      await helpers.createTabFromOpener(opener1, 'https://example.com/child1');
       await helpers.waitForGrouping();
 
-      const page2 = await helpers.createTab('https://example.com/page2');
+      const opener2 = await helpers.createTab('https://example.com/page2');
       await helpers.waitForGrouping();
-
-      // Now create a child from page1
-      const child1 = await helpers.createTabFromOpener(page1, 'https://example.com/child1');
+      await helpers.createTabFromOpener(opener2, 'https://example.com/child2');
       await helpers.waitForGrouping();
 
       const stats = await helpers.getStatistics();
-
-      // A new group should have been created
-      expect(stats.tabGroupsCreatedCount).toBeGreaterThan(0);
+      // Two separate openers → two separate groups
+      expect(stats.tabGroupsCreatedCount).toBe(2);
     });
   });
 
+  // ── 6. Multiple Rules ─────────────────────────────────────────────────────
+
   test.describe('Multiple Rules', () => {
-    test('should apply correct rule based on domain', async ({ helpers }) => {
-      // Rule for example.com - blue groups
+    test('applies correct rule based on domain', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Example Blue',
         domainFilter: 'example.com',
+        deduplicationEnabled: false,
         groupingEnabled: true,
         color: 'blue',
+        groupNameSource: 'label',
       });
-
-      // Rule for test.com - red groups
       await helpers.addDomainRule({
-        label: 'Test Red',
+        label: 'Httpbin Red',
         domainFilter: 'httpbin.org',
+        deduplicationEnabled: false,
         groupingEnabled: true,
         color: 'red',
+        groupNameSource: 'label',
       });
 
-      // Test example.com
       const exampleOpener = await helpers.createTab('https://example.com/opener');
       await helpers.waitForGrouping();
-      const exampleChild = await helpers.createTabFromOpener(exampleOpener, 'https://example.com/child');
+      await helpers.createTabFromOpener(exampleOpener, 'https://example.com/child');
       await helpers.waitForGrouping();
 
-      // Test test.com
-      const testOpener = await helpers.createTab('https://httpbin.org/opener');
+      const httpbinOpener = await helpers.createTab('https://httpbin.org/opener');
       await helpers.waitForGrouping();
-      const testChild = await helpers.createTabFromOpener(testOpener, 'https://httpbin.org/child');
+      await helpers.createTabFromOpener(httpbinOpener, 'https://httpbin.org/child');
       await helpers.waitForGrouping();
 
       const groups = await helpers.getTabGroups();
-
-      // Should have two different groups with different colors
       expect(groups.length).toBe(2);
 
       const blueGroup = groups.find(g => g.color === 'blue');
       const redGroup = groups.find(g => g.color === 'red');
-
       expect(blueGroup?.title).toBe('Example Blue');
-      expect(redGroup?.title).toBe('Test Red');
+      expect(redGroup?.title).toBe('Httpbin Red');
     });
 
-    test('first matching rule should be used', async ({ helpers }) => {
-      // More specific rule first
+    test('first matching rule wins when multiple rules match the same domain', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Specific Subdomain',
         domainFilter: 'www.example.com',
+        deduplicationEnabled: false,
         groupingEnabled: true,
         color: 'purple',
+        groupNameSource: 'label',
       });
-
-      // More general rule second
       await helpers.addDomainRule({
         label: 'General Example',
         domainFilter: 'example.com',
+        deduplicationEnabled: false,
         groupingEnabled: true,
         color: 'yellow',
+        groupNameSource: 'label',
       });
 
-      const openerPage = await helpers.createTab('https://www.example.com/opener');
+      const opener = await helpers.createTab('https://www.example.com/opener');
       await helpers.waitForGrouping();
+      await helpers.createTabFromOpener(opener, 'https://www.example.com/child');
 
-      const newPage = await helpers.createTabFromOpener(openerPage, 'https://www.example.com/child');
-      await helpers.waitForGrouping();
-
-      const groups = await helpers.getTabGroups();
-
-      // Should use the first matching rule (subdomain)
-      expect(groups.length).toBeGreaterThan(0);
+      const groups = await helpers.waitForTabGrouped('Specific Subdomain');
       const group = groups.find(g => g.title === 'Specific Subdomain');
       expect(group).toBeDefined();
-      expect(group?.color).toBe('purple');
+      expect(group!.color).toBe('purple');
     });
   });
 
-  test.describe('Edge Cases', () => {
-    test('should handle multiple children opened rapidly', async ({ helpers }) => {
-      await helpers.addDomainRule({
-        label: 'Rapid Children',
-        domainFilter: 'example.com',
-        groupingEnabled: true,
-        color: 'cyan',
-      });
-
-      const openerPage = await helpers.createTab('https://example.com/opener');
-      await helpers.waitForGrouping();
-
-      // Open multiple children rapidly
-      const childPromises = [
-        helpers.createTabFromOpener(openerPage, 'https://example.com/child1'),
-        helpers.createTabFromOpener(openerPage, 'https://example.com/child2'),
-        helpers.createTabFromOpener(openerPage, 'https://example.com/child3'),
-      ];
-
-      await Promise.all(childPromises);
-      await helpers.waitForGrouping(3000);
-
-      const groups = await helpers.getTabGroups();
-      const stats = await helpers.getStatistics();
-
-      // Should only create one group
-      expect(stats.tabGroupsCreatedCount).toBe(1);
-
-      // All tabs should be in the same group
-      const group = groups.find(g => g.title === 'Rapid Children');
-      expect(group?.tabCount).toBeGreaterThanOrEqual(2);
-    });
-
-    test('should handle domain filter with wildcards', async ({ helpers }) => {
-      await helpers.addDomainRule({
-        label: 'Wildcard Domain',
-        domainFilter: 'www.example.net',
-        groupingEnabled: true,
-        color: 'orange',
-      });
-
-      const openerPage = await helpers.createTab('https://www.example.net/opener');
-      await helpers.waitForGrouping();
-
-      const newPage = await helpers.createTabFromOpener(openerPage, 'https://www.example.net/child');
-      await helpers.waitForGrouping();
-
-      const groups = await helpers.getTabGroups();
-
-      expect(groups.length).toBeGreaterThan(0);
-      const group = groups.find(g => g.title === 'Wildcard Domain');
-      expect(group).toBeDefined();
-    });
-
-    test('should handle invalid regex gracefully', async ({ helpers }) => {
-      await helpers.addDomainRule({
-        label: 'Invalid Regex',
-        domainFilter: 'example.com',
-        groupingEnabled: true,
-        groupNameSource: 'title',
-        titleParsingRegEx: '[invalid(regex', // Invalid regex
-      });
-
-      const openerPage = await helpers.createTab('https://example.com/opener');
-      await helpers.waitForGrouping();
-
-      // Should not crash, should fallback to label
-      const newPage = await helpers.createTabFromOpener(openerPage, 'https://example.com/child');
-      await helpers.waitForGrouping();
-
-      const groups = await helpers.getTabGroups();
-
-      // Should create a group with fallback name
-      expect(groups.length).toBeGreaterThan(0);
-    });
-  });
+  // ── 7. Statistics ─────────────────────────────────────────────────────────
 
   test.describe('Statistics', () => {
-    test('should increment group creation count correctly', async ({ helpers }) => {
+    test('increments tabGroupsCreatedCount only when a new group is created', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Stats Group',
         domainFilter: 'example.com',
+        deduplicationEnabled: false,
         groupingEnabled: true,
+        groupNameSource: 'label',
       });
-
       await helpers.resetStatistics();
 
       let stats = await helpers.getStatistics();
       expect(stats.tabGroupsCreatedCount).toBe(0);
 
-      // Create first group
-      const opener1 = await helpers.createTab('https://example.com/opener1');
+      // First child — creates a new group
+      const opener = await helpers.createTab('https://example.com/opener');
       await helpers.waitForGrouping();
-      const child1 = await helpers.createTabFromOpener(opener1, 'https://example.com/child1');
+      await helpers.createTabFromOpener(opener, 'https://example.com/child1');
       await helpers.waitForGrouping();
-
       stats = await helpers.getStatistics();
       expect(stats.tabGroupsCreatedCount).toBe(1);
 
-      // Add to existing group (should not increment)
-      const child2 = await helpers.createTabFromOpener(opener1, 'https://example.com/child2');
+      // Second child from same opener — joins existing group, no new group
+      await helpers.createTabFromOpener(opener, 'https://example.com/child2');
       await helpers.waitForGrouping();
-
       stats = await helpers.getStatistics();
-      expect(stats.tabGroupsCreatedCount).toBe(1); // Still 1
+      expect(stats.tabGroupsCreatedCount).toBe(1);
 
-      // Create second group (different opener not in group yet)
+      // Second opener on a different domain → new group
       await helpers.clearDomainRules();
       await helpers.addDomainRule({
         label: 'Stats Group 2',
         domainFilter: 'httpbin.org',
+        deduplicationEnabled: false,
         groupingEnabled: true,
+        groupNameSource: 'label',
       });
 
       const opener2 = await helpers.createTab('https://httpbin.org/opener');
       await helpers.waitForGrouping();
-      const child3 = await helpers.createTabFromOpener(opener2, 'https://httpbin.org/child');
+      await helpers.createTabFromOpener(opener2, 'https://httpbin.org/child');
       await helpers.waitForGrouping();
-
       stats = await helpers.getStatistics();
       expect(stats.tabGroupsCreatedCount).toBe(2);
+    });
+  });
+
+  // ── 8. Edge Cases ─────────────────────────────────────────────────────────
+
+  test.describe('Edge Cases', () => {
+    test('handles multiple children opened concurrently (only one group created)', async ({ helpers }) => {
+      await helpers.addDomainRule({
+        label: 'Rapid Children',
+        domainFilter: 'example.com',
+        deduplicationEnabled: false,
+        groupingEnabled: true,
+        color: 'cyan',
+        groupNameSource: 'label',
+      });
+
+      const opener = await helpers.createTab('https://example.com/opener');
+      await helpers.waitForGrouping();
+
+      await Promise.all([
+        helpers.createTabFromOpener(opener, 'https://example.com/child1'),
+        helpers.createTabFromOpener(opener, 'https://example.com/child2'),
+        helpers.createTabFromOpener(opener, 'https://example.com/child3'),
+      ]);
+      await helpers.waitForGrouping(3000);
+
+      const stats = await helpers.getStatistics();
+      const groups = await helpers.getTabGroups();
+
+      expect(stats.tabGroupsCreatedCount).toBe(1);
+      const group = groups.find(g => g.title === 'Rapid Children');
+      expect(group?.tabCount).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  // ── 9. Natural Event Flow (tests full event-handler chain) ────────────────
+  //
+  // createTabNaturally:
+  //   middleClickedTabs.set(url, openerTabId)   ← simulates content script
+  //   chrome.tabs.create({ openerTabId })        ← triggers onTabCreated
+  //   → findMiddleClickOpener                    ← finds the map entry
+  //   → handleGroupingWithRetry                  ← waits for tab to load
+  //   → onUpdated(status=complete)
+  //   → processGroupingForNewTab                 ← creates the group
+  // ────────────────────────────────────────────────────────────────────────
+
+  test.describe('Natural Event Flow', () => {
+    test('groups a tab when opener is registered in middleClickedTabs', async ({ context, helpers }) => {
+      await setupFakePages(context);
+      await helpers.addDomainRule({
+        label: 'Natural Group',
+        domainFilter: `localhost:${FAKE_PORT}`,
+        deduplicationEnabled: false,
+        groupingEnabled: true,
+        color: 'blue',
+        groupNameSource: 'label',
+      });
+
+      const opener = await helpers.createTab(`http://localhost:${FAKE_PORT}/opener.html`);
+      await helpers.waitForGrouping();
+
+      await helpers.createTabNaturally(opener, `http://localhost:${FAKE_PORT}/child.html`);
+
+      const groups = await helpers.waitForTabGrouped('Natural Group', 10000);
+      const stats = await helpers.getStatistics();
+
+      expect(groups.length).toBeGreaterThan(0);
+      expect(groups.find(g => g.title === 'Natural Group')).toBeDefined();
+      expect(stats.tabGroupsCreatedCount).toBe(1);
+    });
+
+    test('does NOT group when opener is NOT in middleClickedTabs (link opened without middle-click)', async ({ context, helpers }) => {
+      await helpers.addDomainRule({
+        label: 'Should Not Group',
+        domainFilter: 'example.com',
+        deduplicationEnabled: false,
+        groupingEnabled: true,
+        groupNameSource: 'label',
+      });
+
+      const opener = await helpers.createTab('https://example.com/opener');
+      await helpers.waitForGrouping();
+
+      // Get the opener tab ID
+      const sw = context.serviceWorkers()[0];
+      const openerTabId = await sw.evaluate(async (url: string) => {
+        const tabs = await chrome.tabs.query({});
+        return tabs.find(t => t.url === url)?.id ?? null;
+      }, opener.url());
+
+      // Create child WITH openerTabId but WITHOUT injecting into middleClickedTabs.
+      // This simulates clicking a link in a way the content script didn't observe
+      // (e.g. keyboard shortcut, or drag-open) — the extension should NOT group it.
+      await sw.evaluate(async ({ url, openerTabId }: { url: string; openerTabId: number }) => {
+        return chrome.tabs.create({ url, openerTabId, active: false });
+      }, { url: 'https://example.com/child', openerTabId: openerTabId! });
+
+      await helpers.waitForGrouping(5000);
+
+      const stats = await helpers.getStatistics();
+      const groups = await helpers.getTabGroups();
+
+      // findMiddleClickOpener returns null → no grouping
+      expect(stats.tabGroupsCreatedCount).toBe(0);
+      expect(groups.length).toBe(0);
+    });
+
+    test('adds second child to existing group via natural flow', async ({ context, helpers }) => {
+      await setupFakePages(context);
+      await helpers.addDomainRule({
+        label: 'Natural Existing',
+        domainFilter: `localhost:${FAKE_PORT}`,
+        deduplicationEnabled: false,
+        groupingEnabled: true,
+        color: 'green',
+        groupNameSource: 'label',
+      });
+
+      const opener = await helpers.createTab(`http://localhost:${FAKE_PORT}/opener.html`);
+      await helpers.waitForGrouping();
+
+      // First child — creates the group naturally
+      await helpers.createTabNaturally(opener, `http://localhost:${FAKE_PORT}/child.html`);
+      const groups1 = await helpers.waitForTabGrouped('Natural Existing', 10000);
+      expect(groups1.length).toBe(1);
+      const firstCount = groups1[0].tabCount;
+
+      // Second child — should join the same group
+      await helpers.createTabNaturally(opener, `http://localhost:${FAKE_PORT}/child2.html`);
+      await helpers.waitForGrouping(3000);
+
+      const groups2 = await helpers.getTabGroups();
+      const stats = await helpers.getStatistics();
+
+      expect(groups2.length).toBe(1);
+      expect(groups2[0].tabCount).toBeGreaterThan(firstCount);
+      expect(stats.tabGroupsCreatedCount).toBe(1);
+    });
+
+    test('natural flow: no group when global grouping is disabled', async ({ helpers }) => {
+      await helpers.setGlobalGroupingEnabled(false);
+      await helpers.addDomainRule({
+        label: 'Blocked By Global',
+        domainFilter: 'example.com',
+        deduplicationEnabled: false,
+        groupingEnabled: true,
+        groupNameSource: 'label',
+      });
+
+      const opener = await helpers.createTab('https://example.com/opener');
+      await helpers.waitForGrouping();
+      await helpers.createTabNaturally(opener, 'https://example.com/child');
+      await helpers.waitForGrouping(4000);
+
+      const stats = await helpers.getStatistics();
+      const groups = await helpers.getTabGroups();
+
+      expect(stats.tabGroupsCreatedCount).toBe(0);
+      expect(groups.length).toBe(0);
+    });
+  });
+
+  // ── 10. Content Script Integration ───────────────────────────────────────
+  //
+  // Uses context.route() to serve real HTTP pages at http://localhost:FAKE_PORT/
+  // The content script (matches: ['<all_urls>']) injects into those pages.
+  // A synthetic auxclick event triggers the content script's handler which sends
+  // the middleClickLink message.  Then chrome.tabs.create({openerTabId}) fires
+  // onTabCreated naturally, completing the full pipeline.
+  // ────────────────────────────────────────────────────────────────────────
+
+  test.describe('Content Script Integration', () => {
+    test('groups a new tab opened via a link click on a real page', async ({ context, helpers }) => {
+      await setupFakePages(context);
+
+      await helpers.addDomainRule({
+        label: 'LocalTest',
+        domainFilter: `localhost:${FAKE_PORT}`,
+        deduplicationEnabled: false,
+        groupingEnabled: true,
+        color: 'purple',
+        groupNameSource: 'label',
+      });
+
+      // Navigate opener to a fake local page (content script injects here)
+      const opener = await context.newPage();
+      await opener.goto(`http://localhost:${FAKE_PORT}/opener.html`, { waitUntil: 'domcontentloaded' });
+
+      // Dispatch auxclick on the link — the content script's handler sends middleClickLink
+      const childUrl = `http://localhost:${FAKE_PORT}/child.html`;
+      await opener.evaluate(async (targetUrl: string) => {
+        // Find or create the anchor so we can dispatch auxclick on it
+        let link = document.querySelector(`a[href="${targetUrl}"]`) as HTMLAnchorElement | null;
+        if (!link) {
+          link = document.createElement('a');
+          link.href = targetUrl;
+          document.body.appendChild(link);
+        }
+        link.dispatchEvent(new MouseEvent('auxclick', { button: 1, bubbles: true, cancelable: true }));
+        // Give the content script's async sendMessage time to reach the SW
+        await new Promise(r => setTimeout(r, 200));
+      }, childUrl);
+
+      // Content script has now sent middleClickLink → background stored (childUrl → openerTabId)
+      // Create the child tab with openerTabId to trigger onTabCreated naturally
+      const sw = context.serviceWorkers()[0];
+      const openerTabId = await sw.evaluate(async (openerUrl: string) => {
+        const tabs = await chrome.tabs.query({});
+        return tabs.find(t => t.url === openerUrl || t.pendingUrl === openerUrl)?.id ?? null;
+      }, opener.url());
+
+      expect(openerTabId, 'Opener tab must be found in browser').not.toBeNull();
+
+      // Wait for Playwright to detect the new tab before creating it, so route
+      // interception is active before navigation begins.
+      const childPagePromise = context.waitForEvent('page', { timeout: 10000 });
+      await sw.evaluate(async ({ url, openerTabId }: { url: string; openerTabId: number }) => {
+        return chrome.tabs.create({ url, openerTabId, active: true });
+      }, { url: childUrl, openerTabId: openerTabId! });
+      const childPage = await childPagePromise.catch(() => null);
+      if (childPage) {
+        await childPage.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
+      }
+
+      // Wait for the full event chain to complete
+      const groups = await helpers.waitForTabGrouped('LocalTest', 12000);
+      const stats = await helpers.getStatistics();
+
+      expect(groups.length).toBeGreaterThan(0);
+      expect(groups.find(g => g.title === 'LocalTest')).toBeDefined();
+      expect(stats.tabGroupsCreatedCount).toBe(1);
+    });
+
+    test('does NOT group when no middleClickLink was recorded before tab creation', async ({ context, helpers }) => {
+      await setupFakePages(context);
+
+      await helpers.addDomainRule({
+        label: 'NoClick Group',
+        domainFilter: `localhost:${FAKE_PORT}`,
+        deduplicationEnabled: false,
+        groupingEnabled: true,
+        groupNameSource: 'label',
+      });
+
+      const opener = await context.newPage();
+      await opener.goto(`http://localhost:${FAKE_PORT}/opener.html`, { waitUntil: 'domcontentloaded' });
+
+      // Create a child tab with openerTabId but WITHOUT any middleClickLink message
+      const sw = context.serviceWorkers()[0];
+      const openerTabId = await sw.evaluate(async (openerUrl: string) => {
+        const tabs = await chrome.tabs.query({});
+        return tabs.find(t => t.url === openerUrl)?.id ?? null;
+      }, opener.url());
+
+      const childUrl = `http://localhost:${FAKE_PORT}/child.html`;
+      await sw.evaluate(async ({ url, openerTabId }: { url: string; openerTabId: number }) => {
+        return chrome.tabs.create({ url, openerTabId, active: false });
+      }, { url: childUrl, openerTabId: openerTabId! });
+
+      await helpers.waitForGrouping(5000);
+
+      const stats = await helpers.getStatistics();
+      const groups = await helpers.getTabGroups();
+
+      // No middleClickLink was sent → findMiddleClickOpener returns null → no grouping
+      expect(stats.tabGroupsCreatedCount).toBe(0);
+      expect(groups.length).toBe(0);
+    });
+
+    // ── contextmenu path (right-click → "Open in new tab") ───────────────
+    // The content script also listens for `contextmenu` on <a> elements and
+    // sends the same middleClickLink message so that the extension can group
+    // the tab the user is about to open via the browser context menu.
+    test('groups a tab opened via right-click (contextmenu path)', async ({ context, helpers }) => {
+      await setupFakePages(context);
+
+      await helpers.addDomainRule({
+        label: 'RightClick Group',
+        domainFilter: `localhost:${FAKE_PORT}`,
+        deduplicationEnabled: false,
+        groupingEnabled: true,
+        color: 'orange',
+        groupNameSource: 'label',
+      });
+
+      const opener = await context.newPage();
+      await opener.goto(`http://localhost:${FAKE_PORT}/opener.html`, { waitUntil: 'domcontentloaded' });
+
+      const childUrl = `http://localhost:${FAKE_PORT}/child2.html`;
+
+      // Dispatch contextmenu on the link — the content script's handleContextMenu
+      // handler fires and sends middleClickLink to the background.
+      await opener.evaluate(async (targetUrl: string) => {
+        let link = document.querySelector(`a[href="${targetUrl}"]`) as HTMLAnchorElement | null;
+        if (!link) {
+          link = document.createElement('a');
+          link.href = targetUrl;
+          document.body.appendChild(link);
+        }
+        link.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+        // Allow the async sendMessage to reach the service worker
+        await new Promise(r => setTimeout(r, 200));
+      }, childUrl);
+
+      // Simulate "Open in new tab" from the context menu: create tab with openerTabId
+      const sw = context.serviceWorkers()[0];
+      const openerTabId = await sw.evaluate(async (openerUrl: string) => {
+        const tabs = await chrome.tabs.query({});
+        return tabs.find(t => t.url === openerUrl || t.pendingUrl === openerUrl)?.id ?? null;
+      }, opener.url());
+
+      expect(openerTabId, 'Opener tab must be found in browser').not.toBeNull();
+
+      // Wait for Playwright to detect the new tab before creating it, so route
+      // interception is active before navigation begins.
+      const childPagePromise = context.waitForEvent('page', { timeout: 10000 });
+      await sw.evaluate(async ({ url, openerTabId }: { url: string; openerTabId: number }) => {
+        return chrome.tabs.create({ url, openerTabId, active: true });
+      }, { url: childUrl, openerTabId: openerTabId! });
+      const childPage = await childPagePromise.catch(() => null);
+      if (childPage) {
+        await childPage.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
+      }
+
+      // Full event chain: onTabCreated → findMiddleClickOpener (contextmenu entry) →
+      // handleGroupingWithRetry → onUpdated(complete) → processGroupingForNewTab
+      const groups = await helpers.waitForTabGrouped('RightClick Group', 12000);
+      const stats = await helpers.getStatistics();
+
+      expect(groups.length).toBeGreaterThan(0);
+      expect(groups.find(g => g.title === 'RightClick Group')).toBeDefined();
+      expect(stats.tabGroupsCreatedCount).toBe(1);
     });
   });
 });

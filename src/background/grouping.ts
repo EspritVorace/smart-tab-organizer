@@ -238,6 +238,11 @@ export async function processGroupingForNewTab(openerTab: Browser.tabs.Tab, newT
         return;
     }
 
+    if (!rule.groupingEnabled) {
+        console.log(`[GROUPING_DEBUG] Rule "${rule.label}" has groupingEnabled=false. No grouping.`);
+        return;
+    }
+
     const context = createGroupingContext(rule, openerTab, newTab, settings);
     console.log(`[GROUPING_DEBUG] Rule found: "${rule.label}", groupName: "${context.groupName}"`);
 
