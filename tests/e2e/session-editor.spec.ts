@@ -15,7 +15,7 @@ test.beforeEach(async ({ context }) => {
 // Opening the editor
 // ---------------------------------------------------------------------------
 test.describe('Opening', () => {
-  test('Edit item in more-actions menu opens the editor dialog', async ({
+  test('Edit item in more-actions menu opens the editor dialog [US-E001]', async ({
     context,
     extensionId,
   }) => {
@@ -33,7 +33,7 @@ test.describe('Opening', () => {
     await page.close();
   });
 
-  test('editor shows the session name in the name field', async ({ context, extensionId }) => {
+  test('editor shows the session name in the name field [US-E001]', async ({ context, extensionId }) => {
     const session = createTestSession({ name: 'My Special Session' });
     await seedSessions(context, [session]);
 
@@ -48,7 +48,7 @@ test.describe('Opening', () => {
     await page.close();
   });
 
-  test('editor shows tab and group count summary', async ({ context, extensionId }) => {
+  test('editor shows tab and group count summary [US-E003]', async ({ context, extensionId }) => {
     const session = createTestSession();
     // 2 tabs in group + 1 ungrouped = 3 tabs, 1 group
     await seedSessions(context, [session]);
@@ -71,7 +71,7 @@ test.describe('Opening', () => {
 // Editing name
 // ---------------------------------------------------------------------------
 test.describe('Name editing', () => {
-  test('changing the session name and saving persists the new name', async ({
+  test('changing the session name and saving persists the new name [US-E002]', async ({
     context,
     extensionId,
   }) => {
@@ -102,7 +102,7 @@ test.describe('Name editing', () => {
 // Cancel / unsaved changes guard
 // ---------------------------------------------------------------------------
 test.describe('Cancel and unsaved changes', () => {
-  test('Cancel without changes closes the dialog immediately', async ({
+  test('Cancel without changes closes the dialog immediately [US-E005]', async ({
     context,
     extensionId,
   }) => {
@@ -121,7 +121,7 @@ test.describe('Cancel and unsaved changes', () => {
     await page.close();
   });
 
-  test('Cancel with unsaved changes shows confirmation alert', async ({ context, extensionId }) => {
+  test('Cancel with unsaved changes shows confirmation alert [US-E005]', async ({ context, extensionId }) => {
     const session = createTestSession({ name: 'Has Changes' });
     await seedSessions(context, [session]);
 
@@ -143,7 +143,7 @@ test.describe('Cancel and unsaved changes', () => {
     await page.close();
   });
 
-  test('Leave button in unsaved-changes dialog closes without saving', async ({
+  test('Leave button in unsaved-changes dialog closes without saving [US-E005]', async ({
     context,
     extensionId,
   }) => {
@@ -175,7 +175,7 @@ test.describe('Cancel and unsaved changes', () => {
 // Tab tree interactions
 // ---------------------------------------------------------------------------
 test.describe('Tab tree', () => {
-  test('editor displays tabs from the session', async ({ context, extensionId }) => {
+  test('editor displays tabs from the session [US-E004]', async ({ context, extensionId }) => {
     const session = createTestSession();
     await seedSessions(context, [session]);
 

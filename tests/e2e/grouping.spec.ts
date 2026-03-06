@@ -88,7 +88,7 @@ test.describe('Tab Grouping', () => {
   // ── 1. Global Settings ────────────────────────────────────────────────────
 
   test.describe('Global Settings', () => {
-    test('groups tabs when global grouping is enabled and rule matches', async ({ helpers }) => {
+    test('groups tabs when global grouping is enabled and rule matches [US-G001]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Example Group',
         domainFilter: 'example.com',
@@ -110,7 +110,7 @@ test.describe('Tab Grouping', () => {
       expect(stats.tabGroupsCreatedCount).toBe(1);
     });
 
-    test('does NOT group when global grouping is disabled', async ({ helpers }) => {
+    test('does NOT group when global grouping is disabled [US-G001]', async ({ helpers }) => {
       await helpers.setGlobalGroupingEnabled(false);
       await helpers.addDomainRule({
         label: 'Disabled Group',
@@ -131,7 +131,7 @@ test.describe('Tab Grouping', () => {
       expect(groups.length).toBe(0);
     });
 
-    test('does NOT group when no matching rule exists', async ({ helpers }) => {
+    test('does NOT group when no matching rule exists [US-G001]', async ({ helpers }) => {
       // No rules added
       const opener = await helpers.createTab('https://example.com/opener');
       await helpers.waitForGrouping();
@@ -146,7 +146,7 @@ test.describe('Tab Grouping', () => {
   // ── 2. Rule-specific Settings ─────────────────────────────────────────────
 
   test.describe('Rule-specific Settings', () => {
-    test('does NOT group when rule has groupingEnabled=false', async ({ helpers }) => {
+    test('does NOT group when rule has groupingEnabled=false [US-G002]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'No-group Rule',
         domainFilter: 'example.com',
@@ -164,7 +164,7 @@ test.describe('Tab Grouping', () => {
       expect(stats.tabGroupsCreatedCount).toBe(0);
     });
 
-    test('does NOT group when rule is disabled (enabled=false)', async ({ helpers }) => {
+    test('does NOT group when rule is disabled (enabled=false) [US-G002]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Disabled Rule',
         domainFilter: 'example.com',
@@ -186,7 +186,7 @@ test.describe('Tab Grouping', () => {
   // ── 3. Group Name Sources ─────────────────────────────────────────────────
 
   test.describe('Group Name Sources', () => {
-    test('groupNameSource=label: uses rule label as group name', async ({ helpers }) => {
+    test('groupNameSource=label: uses rule label as group name [US-G003]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'My Custom Label',
         domainFilter: 'example.com',
@@ -203,7 +203,7 @@ test.describe('Tab Grouping', () => {
       expect(groups.find(g => g.title === 'My Custom Label')).toBeDefined();
     });
 
-    test('groupNameSource=url: extracts name from opener URL', async ({ helpers }) => {
+    test('groupNameSource=url: extracts name from opener URL [US-G003]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'URL Extract',
         domainFilter: 'example.com',
@@ -224,7 +224,7 @@ test.describe('Tab Grouping', () => {
       expect(['products', 'URL Extract']).toContain(group.title);
     });
 
-    test('groupNameSource=title: extracts name from opener page title', async ({ helpers }) => {
+    test('groupNameSource=title: extracts name from opener page title [US-G003]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Title Extract',
         domainFilter: 'example.com',
@@ -250,7 +250,7 @@ test.describe('Tab Grouping', () => {
       expect(['Alpha', 'Title Extract']).toContain(group.title);
     });
 
-    test('groupNameSource=smart_label: falls back to label when extraction fails', async ({ helpers }) => {
+    test('groupNameSource=smart_label: falls back to label when extraction fails [US-G003]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Smart Label Fallback',
         domainFilter: 'example.com',
@@ -268,7 +268,7 @@ test.describe('Tab Grouping', () => {
       expect(groups.find(g => g.title === 'Smart Label Fallback')).toBeDefined();
     });
 
-    test('invalid regex falls back gracefully (no crash)', async ({ helpers }) => {
+    test('invalid regex falls back gracefully (no crash) [US-G003]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Invalid Regex Fallback',
         domainFilter: 'example.com',
@@ -291,7 +291,7 @@ test.describe('Tab Grouping', () => {
   // ── 4. Group Colors ───────────────────────────────────────────────────────
 
   test.describe('Group Colors', () => {
-    test('applies the specified color to the created group', async ({ helpers }) => {
+    test('applies the specified color to the created group [US-G004]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Blue Group',
         domainFilter: 'example.com',
@@ -310,7 +310,7 @@ test.describe('Tab Grouping', () => {
       expect(group!.color).toBe('blue');
     });
 
-    test('applies red, green, purple colors correctly', async ({ helpers }) => {
+    test('applies red, green, purple colors correctly [US-G004]', async ({ helpers }) => {
       for (const color of ['red', 'green', 'purple'] as const) {
         await helpers.clearDomainRules();
         await helpers.resetStatistics();
@@ -335,7 +335,7 @@ test.describe('Tab Grouping', () => {
       }
     });
 
-    test('uses Chrome default color when no color is specified', async ({ helpers }) => {
+    test('uses Chrome default color when no color is specified [US-G004]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'No Color Group',
         domainFilter: 'example.com',
@@ -358,7 +358,7 @@ test.describe('Tab Grouping', () => {
   // ── 5. Existing Group Scenarios ───────────────────────────────────────────
 
   test.describe('Existing Group Scenarios', () => {
-    test('adds to existing group when opener is already grouped', async ({ helpers }) => {
+    test('adds to existing group when opener is already grouped [US-G005]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Existing Group Test',
         domainFilter: 'example.com',
@@ -389,7 +389,7 @@ test.describe('Tab Grouping', () => {
       expect(stats.tabGroupsCreatedCount).toBe(1); // Only one group was ever created
     });
 
-    test('creates a new group each time a fresh opener opens a child', async ({ helpers }) => {
+    test('creates a new group each time a fresh opener opens a child [US-G005]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'New Group Test',
         domainFilter: 'example.com',
@@ -417,7 +417,7 @@ test.describe('Tab Grouping', () => {
   // ── 6. Multiple Rules ─────────────────────────────────────────────────────
 
   test.describe('Multiple Rules', () => {
-    test('applies correct rule based on domain', async ({ helpers }) => {
+    test('applies correct rule based on domain [US-G006]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Example Blue',
         domainFilter: 'example.com',
@@ -454,7 +454,7 @@ test.describe('Tab Grouping', () => {
       expect(redGroup?.title).toBe('Httpbin Red');
     });
 
-    test('first matching rule wins when multiple rules match the same domain', async ({ helpers }) => {
+    test('first matching rule wins when multiple rules match the same domain [US-G006]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Specific Subdomain',
         domainFilter: 'www.example.com',
@@ -486,7 +486,7 @@ test.describe('Tab Grouping', () => {
   // ── 7. Statistics ─────────────────────────────────────────────────────────
 
   test.describe('Statistics', () => {
-    test('increments tabGroupsCreatedCount only when a new group is created', async ({ helpers }) => {
+    test('increments tabGroupsCreatedCount only when a new group is created [US-G007]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Stats Group',
         domainFilter: 'example.com',
@@ -535,7 +535,7 @@ test.describe('Tab Grouping', () => {
   // ── 8. Edge Cases ─────────────────────────────────────────────────────────
 
   test.describe('Edge Cases', () => {
-    test('handles multiple children opened concurrently (only one group created)', async ({ helpers }) => {
+    test('handles multiple children opened concurrently (only one group created) [US-G008]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Rapid Children',
         domainFilter: 'example.com',
@@ -576,7 +576,7 @@ test.describe('Tab Grouping', () => {
   // ────────────────────────────────────────────────────────────────────────
 
   test.describe('Natural Event Flow', () => {
-    test('groups a tab when opener is registered in middleClickedTabs', async ({ context, helpers }) => {
+    test('groups a tab when opener is registered in middleClickedTabs [US-G009]', async ({ context, helpers }) => {
       await setupFakePages(context);
       await helpers.addDomainRule({
         label: 'Natural Group',
@@ -600,7 +600,7 @@ test.describe('Tab Grouping', () => {
       expect(stats.tabGroupsCreatedCount).toBe(1);
     });
 
-    test('does NOT group when opener is NOT in middleClickedTabs (link opened without middle-click)', async ({ context, helpers }) => {
+    test('does NOT group when opener is NOT in middleClickedTabs (link opened without middle-click) [US-G009]', async ({ context, helpers }) => {
       await helpers.addDomainRule({
         label: 'Should Not Group',
         domainFilter: 'example.com',
@@ -636,7 +636,7 @@ test.describe('Tab Grouping', () => {
       expect(groups.length).toBe(0);
     });
 
-    test('adds second child to existing group via natural flow', async ({ context, helpers }) => {
+    test('adds second child to existing group via natural flow [US-G009]', async ({ context, helpers }) => {
       await setupFakePages(context);
       await helpers.addDomainRule({
         label: 'Natural Existing',
@@ -668,7 +668,7 @@ test.describe('Tab Grouping', () => {
       expect(stats.tabGroupsCreatedCount).toBe(1);
     });
 
-    test('natural flow: no group when global grouping is disabled', async ({ helpers }) => {
+    test('natural flow: no group when global grouping is disabled [US-G009]', async ({ helpers }) => {
       await helpers.setGlobalGroupingEnabled(false);
       await helpers.addDomainRule({
         label: 'Blocked By Global',
@@ -701,7 +701,7 @@ test.describe('Tab Grouping', () => {
   // ────────────────────────────────────────────────────────────────────────
 
   test.describe('Content Script Integration', () => {
-    test('groups a new tab opened via a link click on a real page', async ({ context, helpers }) => {
+    test('groups a new tab opened via a link click on a real page [US-G009]', async ({ context, helpers }) => {
       await setupFakePages(context);
 
       await helpers.addDomainRule({
@@ -762,7 +762,7 @@ test.describe('Tab Grouping', () => {
       expect(stats.tabGroupsCreatedCount).toBe(1);
     });
 
-    test('does NOT group when no middleClickLink was recorded before tab creation', async ({ context, helpers }) => {
+    test('does NOT group when no middleClickLink was recorded before tab creation [US-G009]', async ({ context, helpers }) => {
       await setupFakePages(context);
 
       await helpers.addDomainRule({
@@ -802,7 +802,7 @@ test.describe('Tab Grouping', () => {
     // The content script also listens for `contextmenu` on <a> elements and
     // sends the same middleClickLink message so that the extension can group
     // the tab the user is about to open via the browser context menu.
-    test('groups a tab opened via right-click (contextmenu path)', async ({ context, helpers }) => {
+    test('groups a tab opened via right-click (contextmenu path) [US-G010]', async ({ context, helpers }) => {
       await setupFakePages(context);
 
       await helpers.addDomainRule({

@@ -21,7 +21,7 @@ test.beforeEach(async ({ context }) => {
 // Intro callout
 // ---------------------------------------------------------------------------
 test.describe('Intro callout', () => {
-  test('is visible on first visit (sessionsIntroHidden not set)', async ({
+  test('is visible on first visit (sessionsIntroHidden not set) [US-O001]', async ({
     context,
     extensionId,
   }) => {
@@ -32,7 +32,7 @@ test.describe('Intro callout', () => {
     await page.close();
   });
 
-  test('is hidden when sessionsIntroHidden=true', async ({ context, extensionId }) => {
+  test('is hidden when sessionsIntroHidden=true [US-O002]', async ({ context, extensionId }) => {
     // Pre-set the pref
     const sw = context.serviceWorkers()[0];
     await sw.evaluate(async () => {
@@ -48,7 +48,7 @@ test.describe('Intro callout', () => {
     await page.close();
   });
 
-  test('clicking the dismiss (X) button hides the callout', async ({ context, extensionId }) => {
+  test('clicking the dismiss (X) button hides the callout [US-O002]', async ({ context, extensionId }) => {
     const page = await context.newPage();
     await goToSessionsSection(page, extensionId);
 
@@ -61,7 +61,7 @@ test.describe('Intro callout', () => {
     await page.close();
   });
 
-  test('dismissing persists sessionsIntroHidden=true in storage', async ({
+  test('dismissing persists sessionsIntroHidden=true in storage [US-O002]', async ({
     context,
     extensionId,
   }) => {
@@ -76,7 +76,7 @@ test.describe('Intro callout', () => {
     await page.close();
   });
 
-  test('callout stays hidden after page reload when dismissed', async ({
+  test('callout stays hidden after page reload when dismissed [US-O002]', async ({
     context,
     extensionId,
   }) => {
@@ -98,7 +98,7 @@ test.describe('Intro callout', () => {
 // First-profile onboarding dialog
 // ---------------------------------------------------------------------------
 test.describe('First-profile onboarding dialog', () => {
-  test('clicking New Profile for the first time shows the onboarding dialog', async ({
+  test('clicking New Profile for the first time shows the onboarding dialog [US-O003]', async ({
     context,
     extensionId,
   }) => {
@@ -111,7 +111,7 @@ test.describe('First-profile onboarding dialog', () => {
     await page.close();
   });
 
-  test('onboarding dialog contains the 3-step diagram labels', async ({
+  test('onboarding dialog contains the 3-step diagram labels [US-O003]', async ({
     context,
     extensionId,
   }) => {
@@ -128,7 +128,7 @@ test.describe('First-profile onboarding dialog', () => {
     await page.close();
   });
 
-  test('clicking Got it! closes the onboarding dialog and opens the profile wizard', async ({
+  test('clicking Got it! closes the onboarding dialog and opens the profile wizard [US-O003]', async ({
     context,
     extensionId,
   }) => {
@@ -147,7 +147,7 @@ test.describe('First-profile onboarding dialog', () => {
     await page.close();
   });
 
-  test('Got it! persists profileOnboardingShown=true in storage', async ({
+  test('Got it! persists profileOnboardingShown=true in storage [US-O003]', async ({
     context,
     extensionId,
   }) => {
@@ -163,7 +163,7 @@ test.describe('First-profile onboarding dialog', () => {
     await page.close();
   });
 
-  test('second profile creation does NOT show the onboarding dialog', async ({
+  test('second profile creation does NOT show the onboarding dialog [US-O003]', async ({
     context,
     extensionId,
   }) => {
@@ -187,7 +187,7 @@ test.describe('First-profile onboarding dialog', () => {
     await page.close();
   });
 
-  test('pinning a snapshot also triggers onboarding on first profile', async ({
+  test('pinning a snapshot also triggers onboarding on first profile [US-O003]', async ({
     context,
     extensionId,
   }) => {
@@ -209,7 +209,7 @@ test.describe('First-profile onboarding dialog', () => {
 // Tooltips
 // ---------------------------------------------------------------------------
 test.describe('Tooltips', () => {
-  test('New Profile button has a tooltip on hover', async ({ context, extensionId }) => {
+  test('New Profile button has a tooltip on hover [US-O004]', async ({ context, extensionId }) => {
     const page = await context.newPage();
     await goToSessionsSection(page, extensionId);
 
@@ -219,7 +219,7 @@ test.describe('Tooltips', () => {
     await page.close();
   });
 
-  test('auto-sync help icon has an accessible aria-label matching the tooltip', async ({
+  test('auto-sync help icon has an accessible aria-label matching the tooltip [US-O004]', async ({
     context,
     extensionId,
   }) => {
@@ -236,7 +236,7 @@ test.describe('Tooltips', () => {
     await page.close();
   });
 
-  test('auto-sync help icon shows tooltip on hover', async ({ context, extensionId }) => {
+  test('auto-sync help icon shows tooltip on hover [US-O004]', async ({ context, extensionId }) => {
     const profile = createTestProfile({ name: 'Profile With Tooltip' });
     await seedSessions(context, [profile]);
 
