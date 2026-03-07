@@ -20,6 +20,7 @@ declare -A ISSUES=(
   ["US-W-window.md"]="User Stories — Domaine W : Exclusivité fenêtre/profil (compléments US-W002→W003)"
   ["US-O-onboarding.md"]="User Stories — Domaine O : Onboarding et aide contextuelle (compléments US-O002→O004)"
   ["US-N-notifications.md"]="User Stories — Domaine N : Notifications avec action Annuler (US-N001→N005)"
+  ["US-G-nommage.md"]="User Stories — Domaine G : Nommage des groupes — modes et presets (US-G011→G017)"
 )
 
 # Ensure labels exist
@@ -28,7 +29,7 @@ gh label create "enhancement" --color "a2eeef" --description "New feature or req
 
 for file in US-G-grouping.md US-D-deduplication.md US-C-combined.md US-AS-autosync.md \
             US-S-sessions.md US-E-editeur.md US-P-profiles.md US-PO-popup.md \
-            US-W-window.md US-O-onboarding.md US-N-notifications.md; do
+            US-W-window.md US-O-onboarding.md US-N-notifications.md US-G-nommage.md; do
   title="${ISSUES[$file]}"
   body_file="$DIR/$file"
 
