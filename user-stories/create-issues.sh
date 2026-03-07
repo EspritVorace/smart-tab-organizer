@@ -13,7 +13,7 @@ declare -A ISSUES=(
   ["US-D-deduplication.md"]="User Stories — Domaine D : Déduplication automatique d'onglets"
   ["US-C-combined.md"]="User Stories — Domaine C : Interactions entre Regroupement et Déduplication"
   ["US-AS-autosync.md"]="User Stories — Domaine AS : Synchronisation automatique des profils (background)"
-  ["US-S-sessions.md"]="User Stories — Domaine S : Sessions (compléments US-S009→S011)"
+  ["US-S-sessions.md"]="User Stories — Domaine S : Sessions (compléments US-S009→S015)"
   ["US-E-editeur.md"]="User Stories — Domaine E : Éditeur de session (compléments US-E003→E005)"
   ["US-P-profiles.md"]="User Stories — Domaine P : Profils (compléments US-P005→P009)"
   ["US-PO-popup.md"]="User Stories — Domaine PO : Popup (compléments US-PO003→PO005)"
@@ -21,6 +21,7 @@ declare -A ISSUES=(
   ["US-O-onboarding.md"]="User Stories — Domaine O : Onboarding et aide contextuelle (compléments US-O002→O004)"
   ["US-N-notifications.md"]="User Stories — Domaine N : Notifications avec action Annuler (US-N001→N005)"
   ["US-G-nommage.md"]="User Stories — Domaine G : Nommage des groupes — modes et presets (US-G011→G017)"
+  ["US-IE-import-export.md"]="User Stories — Domaine IE : Import / Export de règles de domaine (US-IE001→IE009)"
 )
 
 # Ensure labels exist
@@ -29,7 +30,8 @@ gh label create "enhancement" --color "a2eeef" --description "New feature or req
 
 for file in US-G-grouping.md US-D-deduplication.md US-C-combined.md US-AS-autosync.md \
             US-S-sessions.md US-E-editeur.md US-P-profiles.md US-PO-popup.md \
-            US-W-window.md US-O-onboarding.md US-N-notifications.md US-G-nommage.md; do
+            US-W-window.md US-O-onboarding.md US-N-notifications.md US-G-nommage.md \
+            US-IE-import-export.md; do
   title="${ISSUES[$file]}"
   body_file="$DIR/$file"
 
