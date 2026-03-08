@@ -29,6 +29,7 @@ jobs:
       - name: Upload CTRF report
         uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: unit-ctrf-report
           path: ctrf/unit-ctrf-report.json
@@ -57,6 +58,7 @@ jobs:
       - name: Upload CTRF report
         uses: actions/upload-artifact@v4
         if: always()
+        continue-on-error: true
         with:
           name: e2e-ctrf-report
           path: ctrf/e2e-ctrf-report.json
