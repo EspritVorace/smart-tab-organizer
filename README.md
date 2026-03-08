@@ -22,6 +22,15 @@
 * The existing tab is re-focused and reloaded.
 * Supports several matching modes: exact URL, hostname + path, hostname or simple "includes".
 
+### Sessions & Profiles
+* **Session Snapshots** — Save your current open tabs (including tab groups) as a named snapshot with a guided wizard. System tabs are automatically excluded.
+* **Profiles** — Pin any snapshot as a persistent profile. Profiles appear at the top of the list and in the popup for quick access. Assign a custom icon from 10 available options.
+* **Session cards** — Each session card shows tab count, group count, color badges and last update date. Double-click the name to rename it inline (Enter to confirm, Escape to cancel).
+* **Restore** — Split button with one-click quick restore (current window or new window) or a full **Restore Wizard** to select which tabs to restore, pick a target window, and resolve conflicts (duplicate tabs, group name collisions) before applying.
+* **Session Editor** — Open any saved session in an interactive editor: rename the session, edit or delete individual tabs, edit tab URLs, rename groups, delete groups (with their tabs or by ungrouping), and move tabs between groups. A confirmation guard prevents accidental data loss when closing with unsaved changes.
+* **Auto-sync** *(profiles only)* — Enable auto-sync on a profile to automatically capture your open tabs periodically and persist them when you close the window. A background alarm manages the sync lifecycle; a guard prevents overwriting a profile while its editor is open.
+* **Profile ↔ Window exclusivity** — Each profile tracks which browser window it is open in. The restore wizard warns you if a profile is already open in another window, and the popup reflects each profile's live status (open here / open elsewhere / closed).
+
 ### Options & Customization
 * Add, edit, delete and enable/disable domain rules.
 * Manage custom and predefined RegEx presets with an intuitive card-based interface.
@@ -37,6 +46,9 @@
 ### Quick Access Popup
 * Toggle grouping and deduplication globally.
 * View key statistics at a glance (collapsible section with persisted state).
+* **Save** button to instantly open the snapshot wizard.
+* **Restore** button to navigate to the Sessions section.
+* **Profiles list** — Pinned profiles are listed in the popup with their live status and quick restore actions.
 * Shortcut to the options page.
 
 ### Accessibility
@@ -99,6 +111,7 @@
     * **Domain Rules:** Define for which sites to activate features.
     * **RegEx Presets:** Create or use RegEx to extract group names (e.g., `([A-Z]+-\d+)` for Jira).
 3.  **Browse:** Use middle-click or right-click > "Open link in new tab" on configured sites and see the magic happen!
+4.  **Sessions:** Use "Take Snapshot" to save your current tabs, or "New Profile" to create a persistent, auto-syncing profile.
 
 ## Testing
 
@@ -106,8 +119,17 @@
 # Unit tests
 npm test
 
-# E2E tests
+# Unit tests (WXT-aware environment)
+npm run test:wxt
+
+# E2E tests (requires a prior build)
 npm run test:e2e
+
+# E2E tests with Playwright UI
+npm run test:e2e:ui
+
+# Build then run E2E tests
+npm run test:e2e:build
 
 # Storybook (component documentation)
 npm run storybook
@@ -122,7 +144,8 @@ npm run storybook
 
 ### UI
 * **@radix-ui/themes** - Design system and UI components
-* **@radix-ui/react-collapsible** - Accessible collapse/expand patterns
+* **react-accessible-treeview** - Accessible tree view for tab lists in wizards and the session editor
+* **@radix-ui/react-toast** - Toast notifications
 * **next-themes** - Theme management (dark/light mode)
 * **lucide-react** - SVG icons
 * **react-hook-form** - Form management

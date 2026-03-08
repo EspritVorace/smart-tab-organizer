@@ -7,47 +7,59 @@
 ![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![Licencia](https://img.shields.io/badge/License-GPL_v3-blue.svg)
 
-**SmartTab Organizer** es una extensi&oacute;n multinavegador dise&ntilde;ada para ayudarte a administrar eficientemente tus pesta&ntilde;as agrupando autom&aacute;ticamente las pesta&ntilde;as relacionadas y evitando duplicados.
+**SmartTab Organizer** es una extensión multinavegador diseñada para ayudarte a administrar eficientemente tus pestañas agrupando automáticamente las pestañas relacionadas y evitando duplicados.
 
-## Caracter&iacute;sticas
+## Características
 
-### Agrupaci&oacute;n Autom&aacute;tica
-* Clic central en un enlace o clic derecho > "Abrir enlace en una pesta&ntilde;a nueva" para abrir la pesta&ntilde;a en el grupo adecuado si el dominio coincide con tus reglas.
-* La pesta&ntilde;a se une a un grupo existente o se crea uno nuevo.
-* El nombre del grupo puede obtenerse del t&iacute;tulo de la pesta&ntilde;a de origen, de su URL o solicitarse manualmente.
+### Agrupación Automática
+* Clic central en un enlace o clic derecho > "Abrir enlace en una pestaña nueva" para abrir la pestaña en el grupo adecuado si el dominio coincide con tus reglas.
+* La pestaña se une a un grupo existente o se crea uno nuevo.
+* El nombre del grupo puede obtenerse del título de la pestaña de origen, de su URL o solicitarse manualmente.
 * Preajustes de expresiones regulares para herramientas populares de tickets (Jira, GitLab, GitHub, Trello, etc.).
 
-### Deduplicaci&oacute;n
+### Deduplicación
 * Se evita abrir dos veces la misma URL.
-* La pesta&ntilde;a existente se vuelve a enfocar y se recarga.
-* Modos de coincidencia: URL exacta, nombre de host + ruta, solo nombre de host o coincidencia por inclusi&oacute;n.
+* La pestaña existente se vuelve a enfocar y se recarga.
+* Modos de coincidencia: URL exacta, nombre de host + ruta, solo nombre de host o coincidencia por inclusión.
 
-### Opciones y Personalizaci&oacute;n
-* A&ntilde;adir, editar, eliminar o activar/desactivar reglas de dominio.
+### Sesiones y Perfiles
+* **Snapshots de sesión** — Guarda tus pestañas abiertas (incluidos los grupos de pestañas) como un snapshot con nombre mediante un asistente guiado. Las pestañas del sistema se excluyen automáticamente.
+* **Perfiles** — Ancla cualquier snapshot como perfil persistente. Los perfiles aparecen al principio de la lista y en el popup para un acceso rápido. Asigna un icono personalizado de entre 10 opciones disponibles.
+* **Tarjetas de sesión** — Cada tarjeta muestra el número de pestañas, el número de grupos, insignias de color y la fecha de última actualización. Haz doble clic en el nombre para renombrarlo en línea (Enter para confirmar, Escape para cancelar).
+* **Restauración** — Botón dividido con restauración rápida en un clic (ventana actual o nueva ventana) o un **asistente de restauración** completo para seleccionar qué pestañas restaurar, elegir la ventana de destino y resolver conflictos (pestañas duplicadas, colisiones de nombres de grupos) antes de aplicar.
+* **Editor de sesión** — Abre cualquier sesión guardada en un editor interactivo: renombrar la sesión, editar o eliminar pestañas individuales, editar URLs de pestañas, renombrar grupos, eliminar grupos (con sus pestañas o desagruparlas), y mover pestañas entre grupos. Una confirmación protege contra la pérdida accidental de datos al cerrar con cambios no guardados.
+* **Auto-sync** *(solo perfiles)* — Activa el auto-sync en un perfil para capturar automáticamente tus pestañas abiertas de forma periódica y persistirlas al cerrar la ventana. Una alarma en segundo plano gestiona el ciclo de vida de la sincronización; una protección impide sobrescribir un perfil mientras su editor está abierto.
+* **Exclusividad perfil ↔ ventana** — Cada perfil rastrea en qué ventana del navegador está abierto. El asistente de restauración te avisa si un perfil ya está abierto en otra ventana, y el popup refleja el estado en tiempo real de cada perfil (abierto aquí / abierto en otro lugar / cerrado).
+
+### Opciones y Personalización
+* Añadir, editar, eliminar o activar/desactivar reglas de dominio.
 * Gestionar preajustes y expresiones regulares personalizadas con una interfaz intuitiva basada en tarjetas.
-* **Asistente de Importaci&oacute;n/Exportaci&oacute;n** para reglas de dominio:
+* **Asistente de Importación/Exportación** para reglas de dominio:
   * Exportar: seleccionar reglas individualmente, guardar como archivo JSON o copiar al portapapeles.
-  * Importar: cargar desde archivo (arrastrar y soltar) o pegar JSON, con validaci&oacute;n Zod.
-  * Clasificaci&oacute;n autom&aacute;tica de reglas importadas (nuevas, en conflicto, id&eacute;nticas).
-  * Resoluci&oacute;n de conflictos: sobrescribir, duplicar o ignorar, con vista diff lado a lado.
-* Configurar los modos de deduplicaci&oacute;n por regla.
-* Consultar las estad&iacute;sticas (grupos creados y pesta&ntilde;as deduplicadas) y restablecerlas.
+  * Importar: cargar desde archivo (arrastrar y soltar) o pegar JSON, con validación Zod.
+  * Clasificación automática de reglas importadas (nuevas, en conflicto, idénticas).
+  * Resolución de conflictos: sobrescribir, duplicar o ignorar, con vista diff lado a lado.
+* Configurar los modos de deduplicación por regla.
+* Consultar las estadísticas (grupos creados y pestañas deduplicadas) y restablecerlas.
 * Elegir el tema Claro, Oscuro o Sistema.
 
-### Popup de Acceso R&aacute;pido
-* Activar/desactivar globalmente la agrupaci&oacute;n y la deduplicaci&oacute;n.
-* Ver estad&iacute;sticas clave de un vistazo (secci&oacute;n plegable con estado persistido).
-* Acceso directo a la p&aacute;gina de opciones.
+### Popup de Acceso Rápido
+* Activar/desactivar globalmente la agrupación y la deduplicación.
+* Ver estadísticas clave de un vistazo (sección plegable con estado persistido).
+* Botón **Guardar** para abrir instantáneamente el asistente de snapshot.
+* Botón **Restaurar** para navegar a la sección Sesiones.
+* **Lista de perfiles** — Los perfiles anclados se listan en el popup con su estado en tiempo real y acciones de restauración rápida.
+* Acceso directo a la página de opciones.
 
 ### Accesibilidad
-* Navegaci&oacute;n completa por teclado en todos los componentes.
+* Navegación completa por teclado en todos los componentes.
 * Soporte para lectores de pantalla con etiquetas ARIA y landmarks adecuados.
 * Construido sobre primitivas Radix UI para accesibilidad nativa.
 
-### Internacionalizaci&oacute;n
-* Disponible en Ingl&eacute;s, Franc&eacute;s y Espa&ntilde;ol.
+### Internacionalización
+* Disponible en Inglés, Francés y Español.
 
-## Instalaci&oacute;n
+## Instalación
 
 ### Manual (Desarrollo / Pruebas)
 
@@ -60,7 +72,7 @@
     npm install
     ```
 
-#### Modo Desarrollo (con recarga autom&aacute;tica)
+#### Modo Desarrollo (con recarga automática)
 3.  **Iniciar servidor de desarrollo:**
     ```bash
     # Para desarrollo en Chrome
@@ -70,14 +82,14 @@
     npm run dev:firefox
     ```
 
-#### Build de Producci&oacute;n
-3.  **Construir la extensi&oacute;n:**
+#### Build de Producción
+3.  **Construir la extensión:**
     ```bash
     npm run build
     ```
 
-#### Empaquetado para Distribuci&oacute;n
-3.  **Crear paquetes de distribuci&oacute;n:**
+#### Empaquetado para Distribución
+3.  **Crear paquetes de distribución:**
     ```bash
     # Crear paquete Chrome
     npm run zip
@@ -90,15 +102,16 @@
 4.  **Cargar en tu navegador:**
     * Chrome/Chromium: abre `chrome://extensions/` y usa "Cargar descomprimida" con la carpeta `.output/chrome-mv3`.
     * Firefox: abre `about:debugging#/runtime/this-firefox` y elige "Cargar complemento temporal" apuntando a `.output/firefox-mv2/manifest.json`.
-5.  &iexcl;La extensi&oacute;n est&aacute; lista!
+5.  ¡La extensión está lista!
 
 ## Uso
 
 1.  **Haz Clic en el Icono:** Para acceder al popup.
 2.  **Configurar:** Abre "Opciones" para establecer tus reglas.
-    * **Reglas de Dominio:** Define para qu&eacute; sitios activar las funciones.
+    * **Reglas de Dominio:** Define para qué sitios activar las funciones.
     * **Preajustes de RegEx:** Crea o usa RegEx para extraer nombres de grupos (ej: `([A-Z]+-\d+)` para Jira).
-3.  **Navega:** Usa el clic central o clic derecho > "Abrir enlace en una pesta&ntilde;a nueva" en los sitios configurados &iexcl;y observa la magia suceder!
+3.  **Navega:** Usa el clic central o clic derecho > "Abrir enlace en una pestaña nueva" en los sitios configurados ¡y observa la magia suceder!
+4.  **Sesiones:** Usa "Tomar snapshot" para guardar tus pestañas actuales, o "Nuevo perfil" para crear un perfil persistente con sincronización automática.
 
 ## Pruebas
 
@@ -106,14 +119,23 @@
 # Pruebas unitarias
 npm test
 
-# Pruebas E2E
+# Pruebas unitarias (entorno WXT)
+npm run test:wxt
+
+# Pruebas E2E (requiere un build previo)
 npm run test:e2e
 
-# Storybook (documentaci&oacute;n de componentes)
+# Pruebas E2E con interfaz Playwright
+npm run test:e2e:ui
+
+# Build y luego pruebas E2E
+npm run test:e2e:build
+
+# Storybook (documentación de componentes)
 npm run storybook
 ```
 
-## Tecnolog&iacute;as Utilizadas
+## Tecnologías Utilizadas
 
 ### Core
 * TypeScript y React
@@ -121,22 +143,23 @@ npm run storybook
 * APIs de extensiones de Chrome/Firefox (Manifiesto V3 / V2)
 
 ### UI
-* **@radix-ui/themes** - Sistema de dise&ntilde;o y componentes UI
-* **@radix-ui/react-collapsible** - Patrones accesibles de plegar/desplegar
-* **next-themes** - Gesti&oacute;n de temas (modo oscuro/claro)
+* **@radix-ui/themes** - Sistema de diseño y componentes UI
+* **react-accessible-treeview** - Vista en árbol accesible para listas de pestañas en asistentes y el editor de sesión
+* **@radix-ui/react-toast** - Notificaciones toast
+* **next-themes** - Gestión de temas (modo oscuro/claro)
 * **lucide-react** - Iconos SVG
-* **react-hook-form** - Gesti&oacute;n de formularios
+* **react-hook-form** - Gestión de formularios
 
-### Validaci&oacute;n
-* **Zod** - Validaci&oacute;n de esquemas
+### Validación
+* **Zod** - Validación de esquemas
 
 ### Pruebas
 * **Vitest** - Pruebas unitarias con Happy DOM
 * **Playwright** - Pruebas end-to-end
-* **Storybook** - Documentaci&oacute;n y pruebas visuales de componentes
+* **Storybook** - Documentación y pruebas visuales de componentes
 
 ## Licencia
 
-Este proyecto est&aacute; bajo la licencia **GNU General Public License v3.0**.
+Este proyecto está bajo la licencia **GNU General Public License v3.0**.
 
 ---

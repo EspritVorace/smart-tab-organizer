@@ -22,6 +22,15 @@
 * L'onglet existant est remis au premier plan et rechargé.
 * Modes de correspondance : URL exacte, nom d'hôte + chemin, nom d'hôte seul ou simple inclusion.
 
+### Sessions & Profils
+* **Snapshots de session** — Sauvegardez vos onglets ouverts (y compris les groupes d'onglets) sous forme de snapshot nommé via un assistant guidé. Les onglets système sont automatiquement exclus.
+* **Profils** — Épinglez n'importe quel snapshot comme profil persistant. Les profils apparaissent en tête de liste et dans le popup pour un accès rapide. Attribuez une icône personnalisée parmi 10 options disponibles.
+* **Cartes de session** — Chaque carte affiche le nombre d'onglets, le nombre de groupes, les badges de couleur et la date de dernière mise à jour. Double-cliquez sur le nom pour le renommer en ligne (Entrée pour confirmer, Échap pour annuler).
+* **Restauration** — Bouton partagé avec restauration rapide en un clic (fenêtre courante ou nouvelle fenêtre) ou un **assistant de restauration** complet pour sélectionner les onglets à restaurer, choisir la fenêtre cible et résoudre les conflits (doublons d'onglets, collisions de noms de groupes) avant d'appliquer.
+* **Éditeur de session** — Ouvrez n'importe quelle session sauvegardée dans un éditeur interactif : renommer la session, modifier ou supprimer des onglets individuels, modifier les URLs, renommer des groupes, supprimer des groupes (avec leurs onglets ou en les dissociant), et déplacer des onglets entre groupes. Une confirmation protège contre la perte accidentelle de données lors de la fermeture avec des changements non sauvegardés.
+* **Auto-sync** *(profils uniquement)* — Activez l'auto-sync sur un profil pour capturer automatiquement vos onglets ouverts de manière périodique et les persister à la fermeture de la fenêtre. Une alarme en arrière-plan gère le cycle de vie de la synchronisation ; un verrou empêche l'écrasement d'un profil pendant que son éditeur est ouvert.
+* **Exclusivité profil ↔ fenêtre** — Chaque profil suit dans quelle fenêtre de navigateur il est ouvert. L'assistant de restauration vous avertit si un profil est déjà ouvert dans une autre fenêtre, et le popup reflète le statut en temps réel de chaque profil (ouvert ici / ouvert ailleurs / fermé).
+
 ### Options et Personnalisation
 * Ajouter, modifier, supprimer ou activer/désactiver les règles de domaine.
 * Gérer les expressions régulières personnalisées ou prédéfinies avec une interface intuitive en cartes.
@@ -37,6 +46,9 @@
 ### Popup d'Accès Rapide
 * Activer/désactiver globalement le regroupement et la déduplication.
 * Voir les statistiques clés en un coup d'oeil (section repliable avec état persisté).
+* Bouton **Sauvegarder** pour ouvrir instantanément l'assistant de snapshot.
+* Bouton **Restaurer** pour naviguer vers la section Sessions.
+* **Liste des profils** — Les profils épinglés sont listés dans le popup avec leur statut en temps réel et des actions de restauration rapide.
 * Accès direct à la page d'options.
 
 ### Accessibilité
@@ -99,6 +111,7 @@
     * **Règles de Domaine :** Définissez pour quels sites activer les fonctionnalités.
     * **Préréglages RegEx :** Créez ou utilisez des RegEx pour extraire les noms de groupes (ex: `([A-Z]+-\d+)` pour Jira).
 3.  **Naviguez :** Utilisez le clic molette ou clic droit > "Ouvrir le lien dans un nouvel onglet" sur les sites configurés et voyez la magie opérer !
+4.  **Sessions :** Utilisez "Prendre un snapshot" pour sauvegarder vos onglets actuels, ou "Nouveau profil" pour créer un profil persistant avec synchronisation automatique.
 
 ## Tests
 
@@ -106,8 +119,17 @@
 # Tests unitaires
 npm test
 
-# Tests E2E
+# Tests unitaires (environnement WXT)
+npm run test:wxt
+
+# Tests E2E (nécessite un build préalable)
 npm run test:e2e
+
+# Tests E2E avec l'interface Playwright
+npm run test:e2e:ui
+
+# Build puis tests E2E
+npm run test:e2e:build
 
 # Storybook (documentation des composants)
 npm run storybook
@@ -122,7 +144,8 @@ npm run storybook
 
 ### UI
 * **@radix-ui/themes** - Système de design et composants UI
-* **@radix-ui/react-collapsible** - Patterns accessibles de repli/dépli
+* **react-accessible-treeview** - Arborescence accessible pour les listes d'onglets dans les assistants et l'éditeur de session
+* **@radix-ui/react-toast** - Notifications toast
 * **next-themes** - Gestion des thèmes (mode sombre/clair)
 * **lucide-react** - Icônes SVG
 * **react-hook-form** - Gestion des formulaires
