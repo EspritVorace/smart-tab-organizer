@@ -30,6 +30,8 @@ export default defineConfig({
       },
     },
   ],
-  reporter: [['allure-playwright']],
+  reporter: [
+    ['playwright-ctrf-json-reporter', { outputDir: 'ctrf', outputFile: 'e2e-ctrf-report.json' }],
+  ],
   headless: false, // Extensions require headed mode
 });

@@ -33,7 +33,7 @@ test.describe('[US-P01] Pin / Unpin', () => {
     await page.close();
   });
 
-  test('pinning a session marks it as isPinned in storage', async ({ context, extensionId }) => {
+  test('pinning a session marks it as isPinned in storage [US-P001]', async ({ context, extensionId }) => {
     const session = createTestSession({ name: 'Will Be Pinned' });
     await seedSessions(context, [session]);
 
@@ -55,7 +55,7 @@ test.describe('[US-P01] Pin / Unpin', () => {
     await page.close();
   });
 
-  test('Unpin button appears on profile cards', async ({ context, extensionId }) => {
+  test('Unpin button appears on profile cards [US-P005]', async ({ context, extensionId }) => {
     const profile = createTestProfile({ name: 'Pinned Profile' });
     await seedSessions(context, [profile]);
 
@@ -66,7 +66,7 @@ test.describe('[US-P01] Pin / Unpin', () => {
     await page.close();
   });
 
-  test('unpinning a profile sets isPinned=false and autoSync=false in storage', async ({
+  test('unpinning a profile sets isPinned=false and autoSync=false in storage [US-P005]', async ({
     context,
     extensionId,
   }) => {
@@ -109,7 +109,7 @@ test.describe('[US-P04] Auto-sync toggle', () => {
     await page.close();
   });
 
-  test('enabling auto-sync shows "Auto-sync enabled" indicator on the card', async ({
+  test('enabling auto-sync shows "Auto-sync enabled" indicator on the card [US-P006]', async ({
     context,
     extensionId,
   }) => {
@@ -124,7 +124,7 @@ test.describe('[US-P04] Auto-sync toggle', () => {
     await page.close();
   });
 
-  test('disabling auto-sync hides "Auto-sync enabled" indicator', async ({
+  test('disabling auto-sync hides "Auto-sync enabled" indicator [US-P006]', async ({
     context,
     extensionId,
   }) => {
@@ -142,7 +142,7 @@ test.describe('[US-P04] Auto-sync toggle', () => {
     await page.close();
   });
 
-  test('help icon tooltip is accessible on the auto-sync row', async ({
+  test('help icon tooltip is accessible on the auto-sync row [US-P007]', async ({
     context,
     extensionId,
   }) => {
@@ -175,7 +175,7 @@ test.describe('[US-P02] Profile icon', () => {
     await page.close();
   });
 
-  test('Change Icon menu item can be clicked and does not error', async ({
+  test('Change Icon menu item can be clicked and does not error [US-P008]', async ({
     context,
     extensionId,
   }) => {
@@ -194,7 +194,7 @@ test.describe('[US-P02] Profile icon', () => {
     await page.close();
   });
 
-  test('icon change persists to storage', async ({ context }) => {
+  test('icon change persists to storage [US-P008]', async ({ context }) => {
     // Test icon persistence via storage API rather than through the picker UI,
     // since the Radix Popover is dismissed by the dropdown's click-outside detection
     // in the Playwright test environment.
@@ -238,7 +238,7 @@ test.describe('[US-P03] New Profile wizard', () => {
     await page.close();
   });
 
-  test('profile created via wizard has isPinned=true in storage', async ({
+  test('profile created via wizard has isPinned=true in storage [US-P004]', async ({
     context,
     extensionId,
   }) => {
@@ -271,7 +271,7 @@ test.describe('[US-P03] New Profile wizard', () => {
     await page.close();
   });
 
-  test('New Profile tooltip is visible on hover', async ({ context, extensionId }) => {
+  test('New Profile tooltip is visible on hover [US-P009]', async ({ context, extensionId }) => {
     const page = await context.newPage();
     await goToSessionsSection(page, extensionId);
 
@@ -281,7 +281,7 @@ test.describe('[US-P03] New Profile wizard', () => {
     await page.close();
   });
 
-  test('profile icon badge tooltip is visible on hover for pinned sessions', async ({
+  test('profile icon badge tooltip is visible on hover for pinned sessions [US-P009]', async ({
     context,
     extensionId,
   }) => {
@@ -357,7 +357,7 @@ test.describe('[US-P03] New Profile wizard', () => {
     await page.close();
   });
 
-  test('profiles are sorted before snapshots in the list', async ({ context, extensionId }) => {
+  test('profiles are sorted before snapshots in the list [US-S008]', async ({ context, extensionId }) => {
     const snapshot = createTestSession({ name: 'Z-Snapshot' });
     const profile = createTestProfile({ name: 'A-Profile' });
     await seedSessions(context, [snapshot, profile]);

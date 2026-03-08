@@ -23,7 +23,7 @@ test.describe('Deduplication', () => {
   // ── 1. Global Settings ─────────────────────────────────────────────────────
 
   test.describe('Global Settings', () => {
-    test('deduplicates when global deduplication is enabled (no rule)', async ({ helpers }) => {
+    test('deduplicates when global deduplication is enabled (no rule) [US-D001]', async ({ helpers }) => {
       const tab1 = await helpers.createTab('https://example.com/page');
       await helpers.waitForDeduplication();
       const initialCount = await helpers.getTabCount();
@@ -38,7 +38,7 @@ test.describe('Deduplication', () => {
       expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
     });
 
-    test('does NOT deduplicate when global deduplication is disabled', async ({ helpers }) => {
+    test('does NOT deduplicate when global deduplication is disabled [US-D001]', async ({ helpers }) => {
       await helpers.setGlobalDeduplicationEnabled(false);
 
       const tab1 = await helpers.createTab('https://example.com/page');
@@ -55,7 +55,7 @@ test.describe('Deduplication', () => {
       expect(stats.tabsDeduplicatedCount).toBe(0);
     });
 
-    test('does NOT deduplicate different URLs', async ({ helpers }) => {
+    test('does NOT deduplicate different URLs [US-D001]', async ({ helpers }) => {
       const tab1 = await helpers.createTab('https://example.com/page1');
       await helpers.waitForDeduplication();
       const initialCount = await helpers.getTabCount();
@@ -74,7 +74,7 @@ test.describe('Deduplication', () => {
   // ── 2. Rule-specific Deduplication ────────────────────────────────────────
 
   test.describe('Rule-specific Deduplication', () => {
-    test('deduplicates when rule has deduplicationEnabled=true (exact match)', async ({ helpers }) => {
+    test('deduplicates when rule has deduplicationEnabled=true (exact match) [US-D002]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Example Rule',
         domainFilter: 'example.com',
@@ -97,7 +97,7 @@ test.describe('Deduplication', () => {
       expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
     });
 
-    test('does NOT deduplicate when rule has deduplicationEnabled=false', async ({ helpers }) => {
+    test('does NOT deduplicate when rule has deduplicationEnabled=false [US-D002]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Example Rule',
         domainFilter: 'example.com',
@@ -119,7 +119,7 @@ test.describe('Deduplication', () => {
       expect(stats.tabsDeduplicatedCount).toBe(0);
     });
 
-    test('disabled rule falls through to global setting', async ({ helpers }) => {
+    test('disabled rule falls through to global setting [US-D002]', async ({ helpers }) => {
       // Rule is disabled, so the global setting (enabled) should apply
       await helpers.addDomainRule({
         label: 'Disabled Rule',
@@ -148,7 +148,7 @@ test.describe('Deduplication', () => {
   // ── 3. Match Modes ────────────────────────────────────────────────────────
 
   test.describe('Match Modes', () => {
-    test('exact mode: deduplicates identical URLs, keeps different query strings', async ({ helpers }) => {
+    test('exact mode: deduplicates identical URLs, keeps different query strings [US-D003]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Exact Match Rule',
         domainFilter: 'example.com',
@@ -174,7 +174,7 @@ test.describe('Deduplication', () => {
       expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
     });
 
-    test('includes mode: deduplicates when one URL contains the other', async ({ helpers }) => {
+    test('includes mode: deduplicates when one URL contains the other [US-D004]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Includes Match Rule',
         domainFilter: 'example.com',
@@ -195,7 +195,7 @@ test.describe('Deduplication', () => {
       expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
     });
 
-    test('includes mode: does NOT deduplicate completely different paths', async ({ helpers }) => {
+    test('includes mode: does NOT deduplicate completely different paths [US-D004]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Includes Match Rule',
         domainFilter: 'example.com',
@@ -214,7 +214,7 @@ test.describe('Deduplication', () => {
       expect(finalCount).toBe(initialCount + 1);
     });
 
-    test('exact mode: treats URLs with different fragments as distinct', async ({ helpers }) => {
+    test('exact mode: treats URLs with different fragments as distinct [US-D003]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Fragment Test',
         domainFilter: 'example.com',
@@ -244,7 +244,7 @@ test.describe('Deduplication', () => {
   // ── 4. Multiple Rules ─────────────────────────────────────────────────────
 
   test.describe('Multiple Rules', () => {
-    test('applies dedup rule for example.com, skips it for httpbin.org (rule disabled)', async ({ helpers }) => {
+    test('applies dedup rule for example.com, skips it for httpbin.org (rule disabled) [US-D005]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Example Dedup',
         domainFilter: 'example.com',
@@ -280,7 +280,7 @@ test.describe('Deduplication', () => {
       expect(countAfterT2).toBe(countAfterT1 + 1);
     });
 
-    test('domains without a matching rule use global settings', async ({ helpers }) => {
+    test('domains without a matching rule use global settings [US-D005]', async ({ helpers }) => {
       // Rule only for example.com (dedup disabled for it)
       await helpers.addDomainRule({
         label: 'Example Rule',
@@ -303,13 +303,13 @@ test.describe('Deduplication', () => {
   // ── 5. Edge Cases ─────────────────────────────────────────────────────────
 
   test.describe('Edge Cases', () => {
-    test('ignores special URL schemes (about:, chrome:) without crashing', async ({ helpers }) => {
+    test('ignores special URL schemes (about:, chrome:) without crashing [US-D006]', async ({ helpers }) => {
       // Just verify the extension is alive and hasn't crashed
       const stats = await helpers.getStatistics();
       expect(stats.tabsDeduplicatedCount).toBe(0);
     });
 
-    test('handles rapid duplicate creation (catches at least some duplicates)', async ({ helpers }) => {
+    test('handles rapid duplicate creation (catches at least some duplicates) [US-D006]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Fast Dedup',
         domainFilter: 'example.com',
@@ -331,7 +331,7 @@ test.describe('Deduplication', () => {
       expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
     });
 
-    test('wildcard domain filter matches subdomain', async ({ helpers }) => {
+    test('wildcard domain filter matches subdomain [US-D006]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Wildcard Rule',
         domainFilter: 'www.example.com',
@@ -353,7 +353,7 @@ test.describe('Deduplication', () => {
   // ── 6. Statistics ─────────────────────────────────────────────────────────
 
   test.describe('Statistics', () => {
-    test('tabsDeduplicatedCount increments exactly once per deduplication', async ({ helpers }) => {
+    test('tabsDeduplicatedCount increments exactly once per deduplication [US-D007]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Stats Test',
         domainFilter: 'example.com',

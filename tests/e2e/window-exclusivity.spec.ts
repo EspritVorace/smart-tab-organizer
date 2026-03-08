@@ -59,7 +59,7 @@ test.describe('[US-W01] Profile ↔ window mapping', () => {
     expect(mapping[profile.id]).toBe(windowId);
   });
 
-  test('mapping is cleared from session storage after window close simulation', async ({
+  test('mapping is cleared from session storage after window close simulation [US-W001]', async ({
     context,
   }) => {
     const profile = createTestProfile({ name: 'Closing Profile' });

@@ -36,7 +36,7 @@ test.describe('[US-PO01] Toolbar', () => {
     await newPage.close();
   });
 
-  test('Save button navigates to Sessions with snapshot wizard', async ({
+  test('Save button navigates to Sessions with snapshot wizard [US-PO004]', async ({
     context,
     extensionId,
   }) => {
@@ -55,7 +55,7 @@ test.describe('[US-PO01] Toolbar', () => {
     await newPage.close();
   });
 
-  test('Restore button navigates to Sessions section', async ({ context, extensionId }) => {
+  test('Restore button navigates to Sessions section [US-PO001]', async ({ context, extensionId }) => {
     // Restore button is disabled when no sessions exist — seed one to enable it
     const session = createTestSession({ name: 'Restorable' });
     await seedSessions(context, [session]);
@@ -94,7 +94,7 @@ test.describe('[US-PO02] Profiles list', () => {
     await page.close();
   });
 
-  test('profiles section shows when profiles exist', async ({ context, extensionId }) => {
+  test('profiles section shows when profiles exist [US-PO005]', async ({ context, extensionId }) => {
     const profile = createTestProfile({ name: 'My Profile' });
     await seedSessions(context, [profile]);
 
@@ -106,7 +106,7 @@ test.describe('[US-PO02] Profiles list', () => {
     await page.close();
   });
 
-  test('popup shows all pinned profiles', async ({ context, extensionId }) => {
+  test('popup shows all pinned profiles [US-PO005]', async ({ context, extensionId }) => {
     const profiles = [
       createTestProfile({ name: 'Work Profile' }),
       createTestProfile({ name: 'Personal Profile' }),
@@ -121,7 +121,7 @@ test.describe('[US-PO02] Profiles list', () => {
     await page.close();
   });
 
-  test('snapshot sessions are not shown in popup profiles list', async ({
+  test('snapshot sessions are not shown in popup profiles list [US-PO005]', async ({
     context,
     extensionId,
   }) => {
@@ -137,7 +137,7 @@ test.describe('[US-PO02] Profiles list', () => {
     await page.close();
   });
 
-  test('each profile row has a restore button', async ({ context, extensionId }) => {
+  test('each profile row has a restore button [US-PO002]', async ({ context, extensionId }) => {
     const profile = createTestProfile({ name: 'Restorable Profile' });
     await seedSessions(context, [profile]);
 
@@ -183,7 +183,7 @@ test.describe('[US-PO01] Deep linking', () => {
     await page.close();
   });
 
-  test('#sessions?action=snapshot hash auto-opens the snapshot wizard', async ({
+  test('#sessions?action=snapshot hash auto-opens the snapshot wizard [US-PO004]', async ({
     context,
     extensionId,
   }) => {

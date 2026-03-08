@@ -59,7 +59,7 @@ test.describe('[US-P04] Alarm lifecycle', () => {
     await page.close();
   });
 
-  test('disabling auto-sync on the last auto-sync profile clears the alarm', async ({
+  test('disabling auto-sync on the last auto-sync profile clears the alarm [US-AS001]', async ({
     context,
     extensionId,
   }) => {
@@ -88,7 +88,7 @@ test.describe('[US-P04] Alarm lifecycle', () => {
     await page.close();
   });
 
-  test('alarm is not created if no profile has auto-sync', async ({ context }) => {
+  test('alarm is not created if no profile has auto-sync [US-AS001]', async ({ context }) => {
     const profile = createTestProfile({ autoSync: false });
     await seedSessions(context, [profile]);
 
@@ -145,7 +145,7 @@ test.describe('[US-P04] Draft storage in chrome.storage.session', () => {
     expect(hasUrl).toBe(false);
   });
 
-  test('draft is removed from session storage after persistence', async ({ context }) => {
+  test('draft is removed from session storage after persistence [US-AS002]', async ({ context }) => {
     const profile = createTestProfile({ name: 'Persist Me', autoSync: true });
     await seedSessions(context, [profile]);
 
@@ -240,7 +240,7 @@ test.describe('[US-P04] Edit dialog guard', () => {
     await page.close();
   });
 
-  test('editingProfileId is cleared when editor dialog is closed', async ({
+  test('editingProfileId is cleared when editor dialog is closed [US-AS003]', async ({
     context,
     extensionId,
   }) => {
