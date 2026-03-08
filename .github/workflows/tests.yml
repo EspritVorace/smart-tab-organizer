@@ -32,6 +32,8 @@ jobs:
         with:
           report-path: 'ctrf/unit-ctrf-report.json'
           pull-request: true
+          summary: false
+          summary-report: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -62,5 +64,7 @@ jobs:
         with:
           report-path: 'ctrf/e2e-ctrf-report.json'
           pull-request: true
+          summary: false
+          summary-report: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
