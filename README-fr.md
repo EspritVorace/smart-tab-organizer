@@ -1,51 +1,44 @@
-[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/master/README.md)
-[![fr](https://img.shields.io/badge/lang-fr-blue.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/master/README-fr.md)
-[![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/master/README-es.md)
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/main/README.md)
+[![fr](https://img.shields.io/badge/lang-fr-blue.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/main/README-fr.md)
+[![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/main/README-es.md)
 
 # SmartTab Organizer
 
-![Version](https://img.shields.io/badge/version-1.0.3-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)
 
-**SmartTab Organizer** est une extension multi-navigateur conçue pour vous aider à gérer efficacement vos onglets en regroupant automatiquement les onglets liés et en empêchant les doublons.
+**SmartTab Organizer** est une extension multi-navigateur pour regrouper automatiquement les onglets liés et éviter les doublons.
 
 ## Fonctionnalités
 
-### Regroupement Automatique
-* Clic molette sur un lien ou clic droit > "Ouvrir le lien dans un nouvel onglet" pour ouvrir l'onglet dans le groupe adéquat si le domaine correspond à vos règles.
-* L'onglet rejoint un groupe existant ou un nouveau groupe est créé.
-* Le nom du groupe peut provenir du titre de l'onglet source, de son URL ou être saisi manuellement.
-* Préréglages d'expressions régulières pour les outils de tickets populaires (Jira, GitLab, GitHub, Trello, etc.).
+### 🗂️ Regroupement Automatique
+Clic molette ou clic droit > "Ouvrir dans un nouvel onglet" pour placer instantanément un onglet dans le bon groupe selon vos règles de domaine.
+- Nom du groupe extrait du titre de la page, de l'URL ou d'un préréglage regex
+- Préréglages intégrés pour les outils populaires : Jira, GitLab, GitHub, Trello…
 
-### Déduplication
-* L'ouverture d'une même URL est empêchée.
-* L'onglet existant est remis au premier plan et rechargé.
-* Modes de correspondance : URL exacte, nom d'hôte + chemin, nom d'hôte seul ou simple inclusion.
+### 🔁 Déduplication
+Empêche l'ouverture d'une même page deux fois — l'onglet existant est remis au premier plan et rechargé.
+- Sensibilité de correspondance configurable par règle : URL exacte, nom d'hôte + chemin, nom d'hôte ou inclusion
 
-### Options et Personnalisation
-* Ajouter, modifier, supprimer ou activer/désactiver les règles de domaine.
-* Gérer les expressions régulières personnalisées ou prédéfinies avec une interface intuitive en cartes.
-* **Assistant d'Import/Export** pour les règles de domaine :
-  * Export : sélectionner les règles individuellement, sauvegarder en fichier JSON ou copier dans le presse-papiers.
-  * Import : charger depuis un fichier (glisser-déposer) ou coller du JSON, avec validation Zod.
-  * Classification automatique des règles importées (nouvelles, en conflit, identiques).
-  * Résolution des conflits : écraser, dupliquer ou ignorer, avec vue diff côte à côte.
-* Configurer les modes de déduplication par règle.
-* Consulter les statistiques (groupes créés et onglets dédupliqués) et les réinitialiser.
-* Sélectionner le thème Clair, Sombre ou Système.
+### 📷 Sessions & Profils
+Sauvegardez des snapshots nommés de vos onglets et groupes ouverts, puis restaurez-les à tout moment.
+- **Assistant de restauration** — choisissez les onglets à récupérer, la fenêtre cible, et résolvez les conflits avant d'appliquer
+- **Profils** — épinglez un snapshot comme profil persistant avec icône personnalisée, accès depuis le popup et auto-sync
+- **Éditeur de session** — réorganisez, renommez et supprimez onglets et groupes sans avoir à restaurer au préalable
 
-### Popup d'Accès Rapide
-* Activer/désactiver globalement le regroupement et la déduplication.
-* Voir les statistiques clés en un coup d'oeil (section repliable avec état persisté).
-* Accès direct à la page d'options.
+### ⚙️ Options et Personnalisation
+Gérez les règles de domaine et les préréglages regex via une interface en cartes.
+- **Assistant d'import/export** — classement automatique des règles entrantes (nouvelles, en conflit, identiques) et résolution pas à pas
+- Configurez le mode de déduplication par règle, suivez les statistiques, basculez entre les thèmes Clair/Sombre/Système
 
-### Accessibilité
-* Navigation complète au clavier sur tous les composants.
-* Support des lecteurs d'écran avec labels ARIA et landmarks appropriés.
-* Construit sur les primitives Radix UI pour une accessibilité native.
+### ⚡ Popup d'Accès Rapide
+- Activez/désactivez globalement le regroupement et la déduplication
+- Prenez un snapshot ou accédez à la page Sessions en un clic
+- Profils épinglés listés avec leur statut en temps réel et des actions de restauration rapide
 
-### Internationalisation
-* Disponible en Anglais, Français et Espagnol.
+### ♿ Accessibilité & i18n
+- Navigation complète au clavier et support des lecteurs d'écran (primitives Radix UI)
+- Disponible en Anglais, Français et Espagnol
 
 ## Installation
 
@@ -63,11 +56,8 @@
 #### Mode Développement (avec rechargement automatique)
 3.  **Démarrer le serveur de développement :**
     ```bash
-    # Pour le développement Chrome
-    npm run dev
-
-    # Pour le développement Firefox
-    npm run dev:firefox
+    npm run dev          # Chrome
+    npm run dev:firefox  # Firefox
     ```
 
 #### Build de Production
@@ -79,61 +69,40 @@
 #### Empaquetage pour Distribution
 3.  **Créer les packages de distribution :**
     ```bash
-    # Créer le package Chrome
-    npm run zip
-
-    # Créer le package Firefox
-    npm run zip:firefox
+    npm run zip          # Chrome
+    npm run zip:firefox  # Firefox
     ```
 
 #### Chargement dans le Navigateur
 4.  **Charger dans votre navigateur :**
-    * Chrome/Chromium : ouvrez `chrome://extensions/` puis "Charger l'extension non empaquetée" en sélectionnant le dossier `.output/chrome-mv3`.
-    * Firefox : ouvrez `about:debugging#/runtime/this-firefox` puis "Charger un module complémentaire temporaire" avec `.output/firefox-mv2/manifest.json`.
-5.  L'extension est prête !
+    * Chrome/Chromium : `chrome://extensions/` → "Charger l'extension non empaquetée" → `.output/chrome-mv3`
+    * Firefox : `about:debugging#/runtime/this-firefox` → "Charger un module complémentaire temporaire" → `.output/firefox-mv2/manifest.json`
 
 ## Utilisation
 
 1.  **Cliquez sur l'Icône :** Pour accéder au popup.
 2.  **Configurez :** Ouvrez les "Options" pour définir vos règles.
     * **Règles de Domaine :** Définissez pour quels sites activer les fonctionnalités.
-    * **Préréglages RegEx :** Créez ou utilisez des RegEx pour extraire les noms de groupes (ex: `([A-Z]+-\d+)` pour Jira).
-3.  **Naviguez :** Utilisez le clic molette ou clic droit > "Ouvrir le lien dans un nouvel onglet" sur les sites configurés et voyez la magie opérer !
+    * **Préréglages RegEx :** Extrayez les noms de groupes avec des regex (ex : `([A-Z]+-\d+)` pour Jira).
+3.  **Naviguez :** Clic molette ou clic droit > "Ouvrir dans un nouvel onglet" sur les sites configurés.
+4.  **Sessions :** Sauvegardez un snapshot ou créez un profil persistant depuis le popup ou la page d'options.
 
 ## Tests
 
 ```bash
-# Tests unitaires
-npm test
-
-# Tests E2E
-npm run test:e2e
-
-# Storybook (documentation des composants)
-npm run storybook
+npm test                  # Tests unitaires
+npm run test:wxt          # Tests unitaires (environnement WXT)
+npm run test:e2e          # Tests E2E (nécessite un build préalable)
+npm run test:e2e:build    # Build puis tests E2E
+npm run test:e2e:ui       # Tests E2E avec l'interface Playwright
+npm run storybook         # Documentation des composants (port 6006)
 ```
 
-## Technologies Utilisées
+## Stack Technique
 
-### Core
-* TypeScript & React
-* WXT framework pour le développement d'extensions multi-navigateurs
-* APIs d'extensions Chrome/Firefox (Manifest V3 / V2)
-
-### UI
-* **@radix-ui/themes** - Système de design et composants UI
-* **@radix-ui/react-collapsible** - Patterns accessibles de repli/dépli
-* **next-themes** - Gestion des thèmes (mode sombre/clair)
-* **lucide-react** - Icônes SVG
-* **react-hook-form** - Gestion des formulaires
-
-### Validation
-* **Zod** - Validation de schémas
-
-### Tests
-* **Vitest** - Tests unitaires avec Happy DOM
-* **Playwright** - Tests end-to-end
-* **Storybook** - Documentation et tests visuels des composants
+* **WXT** — framework d'extension multi-navigateur (Chrome MV3 / Firefox MV2)
+* **React + TypeScript**, **Radix UI Themes**, **React Hook Form**, **Zod**
+* **Vitest** (unitaire) · **Playwright** (E2E) · **Storybook** (composants)
 
 ## Licence
 

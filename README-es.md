@@ -1,53 +1,46 @@
-[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/master/README.md)
-[![fr](https://img.shields.io/badge/lang-fr-blue.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/master/README-fr.md)
-[![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/master/README-es.md)
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/main/README.md)
+[![fr](https://img.shields.io/badge/lang-fr-blue.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/main/README-fr.md)
+[![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/main/README-es.md)
 
 # SmartTab Organizer
 
-![Version](https://img.shields.io/badge/version-1.0.3-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![Licencia](https://img.shields.io/badge/License-GPL_v3-blue.svg)
 
-**SmartTab Organizer** es una extensi&oacute;n multinavegador dise&ntilde;ada para ayudarte a administrar eficientemente tus pesta&ntilde;as agrupando autom&aacute;ticamente las pesta&ntilde;as relacionadas y evitando duplicados.
+**SmartTab Organizer** es una extensión multinavegador para agrupar automáticamente las pestañas relacionadas y evitar duplicados.
 
-## Caracter&iacute;sticas
+## Características
 
-### Agrupaci&oacute;n Autom&aacute;tica
-* Clic central en un enlace o clic derecho > "Abrir enlace en una pesta&ntilde;a nueva" para abrir la pesta&ntilde;a en el grupo adecuado si el dominio coincide con tus reglas.
-* La pesta&ntilde;a se une a un grupo existente o se crea uno nuevo.
-* El nombre del grupo puede obtenerse del t&iacute;tulo de la pesta&ntilde;a de origen, de su URL o solicitarse manualmente.
-* Preajustes de expresiones regulares para herramientas populares de tickets (Jira, GitLab, GitHub, Trello, etc.).
+### 🗂️ Agrupación Automática
+Clic central o clic derecho > "Abrir en una pestaña nueva" para colocar instantáneamente una pestaña en el grupo correcto según tus reglas de dominio.
+- Nombre del grupo extraído del título de la página, la URL o un preajuste regex
+- Preajustes integrados para herramientas populares: Jira, GitLab, GitHub, Trello…
 
-### Deduplicaci&oacute;n
-* Se evita abrir dos veces la misma URL.
-* La pesta&ntilde;a existente se vuelve a enfocar y se recarga.
-* Modos de coincidencia: URL exacta, nombre de host + ruta, solo nombre de host o coincidencia por inclusi&oacute;n.
+### 🔁 Deduplicación
+Evita que se abra la misma página dos veces — la pestaña existente se vuelve a enfocar y se recarga.
+- Sensibilidad de coincidencia configurable por regla: URL exacta, nombre de host + ruta, nombre de host o inclusión
 
-### Opciones y Personalizaci&oacute;n
-* A&ntilde;adir, editar, eliminar o activar/desactivar reglas de dominio.
-* Gestionar preajustes y expresiones regulares personalizadas con una interfaz intuitiva basada en tarjetas.
-* **Asistente de Importaci&oacute;n/Exportaci&oacute;n** para reglas de dominio:
-  * Exportar: seleccionar reglas individualmente, guardar como archivo JSON o copiar al portapapeles.
-  * Importar: cargar desde archivo (arrastrar y soltar) o pegar JSON, con validaci&oacute;n Zod.
-  * Clasificaci&oacute;n autom&aacute;tica de reglas importadas (nuevas, en conflicto, id&eacute;nticas).
-  * Resoluci&oacute;n de conflictos: sobrescribir, duplicar o ignorar, con vista diff lado a lado.
-* Configurar los modos de deduplicaci&oacute;n por regla.
-* Consultar las estad&iacute;sticas (grupos creados y pesta&ntilde;as deduplicadas) y restablecerlas.
-* Elegir el tema Claro, Oscuro o Sistema.
+### 📷 Sesiones y Perfiles
+Guarda snapshots con nombre de tus pestañas y grupos abiertos, y restáuralos en cualquier momento.
+- **Asistente de restauración** — elige qué pestañas recuperar, la ventana de destino y resuelve conflictos antes de aplicar
+- **Perfiles** — ancla cualquier snapshot como perfil persistente con icono personalizado, acceso desde el popup y auto-sync
+- **Editor de sesión** — reorganiza, renombra y elimina pestañas y grupos sin necesidad de restaurar previamente
 
-### Popup de Acceso R&aacute;pido
-* Activar/desactivar globalmente la agrupaci&oacute;n y la deduplicaci&oacute;n.
-* Ver estad&iacute;sticas clave de un vistazo (secci&oacute;n plegable con estado persistido).
-* Acceso directo a la p&aacute;gina de opciones.
+### ⚙️ Opciones y Personalización
+Gestiona reglas de dominio y preajustes regex con una interfaz de tarjetas.
+- **Asistente de importación/exportación** — clasificación automática de reglas entrantes (nuevas, en conflicto, idénticas) y resolución paso a paso
+- Configura el modo de deduplicación por regla, consulta estadísticas, cambia entre temas Claro/Oscuro/Sistema
 
-### Accesibilidad
-* Navegaci&oacute;n completa por teclado en todos los componentes.
-* Soporte para lectores de pantalla con etiquetas ARIA y landmarks adecuados.
-* Construido sobre primitivas Radix UI para accesibilidad nativa.
+### ⚡ Popup de Acceso Rápido
+- Activa/desactiva globalmente la agrupación y la deduplicación
+- Toma un snapshot o accede a la página de Sesiones con un clic
+- Perfiles anclados listados con su estado en tiempo real y acciones de restauración rápida
 
-### Internacionalizaci&oacute;n
-* Disponible en Ingl&eacute;s, Franc&eacute;s y Espa&ntilde;ol.
+### ♿ Accesibilidad e i18n
+- Navegación completa por teclado y soporte para lectores de pantalla (primitivas Radix UI)
+- Disponible en Inglés, Francés y Español
 
-## Instalaci&oacute;n
+## Instalación
 
 ### Manual (Desarrollo / Pruebas)
 
@@ -60,83 +53,59 @@
     npm install
     ```
 
-#### Modo Desarrollo (con recarga autom&aacute;tica)
+#### Modo Desarrollo (con recarga automática)
 3.  **Iniciar servidor de desarrollo:**
     ```bash
-    # Para desarrollo en Chrome
-    npm run dev
-
-    # Para desarrollo en Firefox
-    npm run dev:firefox
+    npm run dev          # Chrome
+    npm run dev:firefox  # Firefox
     ```
 
-#### Build de Producci&oacute;n
-3.  **Construir la extensi&oacute;n:**
+#### Build de Producción
+3.  **Construir la extensión:**
     ```bash
     npm run build
     ```
 
-#### Empaquetado para Distribuci&oacute;n
-3.  **Crear paquetes de distribuci&oacute;n:**
+#### Empaquetado para Distribución
+3.  **Crear paquetes de distribución:**
     ```bash
-    # Crear paquete Chrome
-    npm run zip
-
-    # Crear paquete Firefox
-    npm run zip:firefox
+    npm run zip          # Chrome
+    npm run zip:firefox  # Firefox
     ```
 
 #### Cargar en el Navegador
 4.  **Cargar en tu navegador:**
-    * Chrome/Chromium: abre `chrome://extensions/` y usa "Cargar descomprimida" con la carpeta `.output/chrome-mv3`.
-    * Firefox: abre `about:debugging#/runtime/this-firefox` y elige "Cargar complemento temporal" apuntando a `.output/firefox-mv2/manifest.json`.
-5.  &iexcl;La extensi&oacute;n est&aacute; lista!
+    * Chrome/Chromium: `chrome://extensions/` → "Cargar descomprimida" → `.output/chrome-mv3`
+    * Firefox: `about:debugging#/runtime/this-firefox` → "Cargar complemento temporal" → `.output/firefox-mv2/manifest.json`
 
 ## Uso
 
 1.  **Haz Clic en el Icono:** Para acceder al popup.
 2.  **Configurar:** Abre "Opciones" para establecer tus reglas.
-    * **Reglas de Dominio:** Define para qu&eacute; sitios activar las funciones.
-    * **Preajustes de RegEx:** Crea o usa RegEx para extraer nombres de grupos (ej: `([A-Z]+-\d+)` para Jira).
-3.  **Navega:** Usa el clic central o clic derecho > "Abrir enlace en una pesta&ntilde;a nueva" en los sitios configurados &iexcl;y observa la magia suceder!
+    * **Reglas de Dominio:** Define para qué sitios activar las funciones.
+    * **Preajustes de RegEx:** Extrae nombres de grupos con regex (ej: `([A-Z]+-\d+)` para Jira).
+3.  **Navega:** Clic central o clic derecho > "Abrir en una pestaña nueva" en los sitios configurados.
+4.  **Sesiones:** Guarda un snapshot o crea un perfil persistente desde el popup o la página de opciones.
 
 ## Pruebas
 
 ```bash
-# Pruebas unitarias
-npm test
-
-# Pruebas E2E
-npm run test:e2e
-
-# Storybook (documentaci&oacute;n de componentes)
-npm run storybook
+npm test                  # Pruebas unitarias
+npm run test:wxt          # Pruebas unitarias (entorno WXT)
+npm run test:e2e          # Pruebas E2E (requiere build previo)
+npm run test:e2e:build    # Build y luego pruebas E2E
+npm run test:e2e:ui       # Pruebas E2E con interfaz Playwright
+npm run storybook         # Documentación de componentes (puerto 6006)
 ```
 
-## Tecnolog&iacute;as Utilizadas
+## Stack Tecnológico
 
-### Core
-* TypeScript y React
-* WXT framework para desarrollo de extensiones multinavegador
-* APIs de extensiones de Chrome/Firefox (Manifiesto V3 / V2)
-
-### UI
-* **@radix-ui/themes** - Sistema de dise&ntilde;o y componentes UI
-* **@radix-ui/react-collapsible** - Patrones accesibles de plegar/desplegar
-* **next-themes** - Gesti&oacute;n de temas (modo oscuro/claro)
-* **lucide-react** - Iconos SVG
-* **react-hook-form** - Gesti&oacute;n de formularios
-
-### Validaci&oacute;n
-* **Zod** - Validaci&oacute;n de esquemas
-
-### Pruebas
-* **Vitest** - Pruebas unitarias con Happy DOM
-* **Playwright** - Pruebas end-to-end
-* **Storybook** - Documentaci&oacute;n y pruebas visuales de componentes
+* **WXT** — framework de extensiones multinavegador (Chrome MV3 / Firefox MV2)
+* **React + TypeScript**, **Radix UI Themes**, **React Hook Form**, **Zod**
+* **Vitest** (unitario) · **Playwright** (E2E) · **Storybook** (componentes)
 
 ## Licencia
 
-Este proyecto est&aacute; bajo la licencia **GNU General Public License v3.0**.
+Este proyecto está bajo la licencia **GNU General Public License v3.0**.
 
 ---

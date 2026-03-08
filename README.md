@@ -1,51 +1,44 @@
-[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/master/README.md)
-[![fr](https://img.shields.io/badge/lang-fr-blue.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/master/README-fr.md)
-[![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/master/README-es.md)
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/main/README.md)
+[![fr](https://img.shields.io/badge/lang-fr-blue.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/main/README-fr.md)
+[![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/main/README-es.md)
 
 # SmartTab Organizer
 
-![Version](https://img.shields.io/badge/version-1.0.3-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)
 
-**SmartTab Organizer** is a cross-browser extension designed to help you efficiently manage your browser tabs by automatically grouping related tabs and preventing duplicates.
+**SmartTab Organizer** is a cross-browser extension to automatically group related tabs and prevent duplicates.
 
 ## Features
 
-### Automatic Grouping
-* Middle-click a link or right-click and choose "Open link in new tab" to open the tab in the proper group if its domain matches your rules.
-* Tabs join an existing group or a new one is created.
-* The group name can come from the opener tab's title, from its URL or you can be prompted manually.
-* Built-in RegEx presets for popular ticket systems (Jira, GitLab, GitHub, Trello, etc.).
+### 🗂️ Automatic Grouping
+Middle-click or right-click > "Open link in new tab" to instantly place a tab in the right group based on your domain rules.
+- Group names extracted from the page title, URL, or a regex preset
+- Built-in presets for popular tools: Jira, GitLab, GitHub, Trello…
 
-### Deduplication
-* Opening the same URL twice is prevented.
-* The existing tab is re-focused and reloaded.
-* Supports several matching modes: exact URL, hostname + path, hostname or simple "includes".
+### 🔁 Deduplication
+Prevent the same page from being opened twice — the existing tab is re-focused and reloaded instead.
+- Matching sensitivity configurable per rule: exact URL, hostname + path, hostname, or includes
 
-### Options & Customization
-* Add, edit, delete and enable/disable domain rules.
-* Manage custom and predefined RegEx presets with an intuitive card-based interface.
-* **Import/Export Wizard** for domain rules:
-  * Export: select individual rules, save as JSON file or copy to clipboard.
-  * Import: load from file (drag & drop) or paste JSON, with Zod validation.
-  * Automatic classification of imported rules (new, conflicting, identical).
-  * Conflict resolution: overwrite, duplicate or ignore, with side-by-side diff view.
-* Configure deduplication modes per rule.
-* View statistics (groups created and tabs deduplicated) and reset them.
-* Select Light, Dark or System theme.
+### 📷 Sessions & Profiles
+Save named snapshots of your open tabs and groups, and restore them at any time.
+- **Restore wizard** — pick which tabs to bring back, choose the target window, resolve conflicts before applying
+- **Profiles** — pin any snapshot as a persistent profile with a custom icon, popup shortcut, and auto-sync
+- **Session editor** — reorganize, rename and delete tabs and groups without restoring first
 
-### Quick Access Popup
-* Toggle grouping and deduplication globally.
-* View key statistics at a glance (collapsible section with persisted state).
-* Shortcut to the options page.
+### ⚙️ Options & Customization
+Manage domain rules and regex presets through a card-based interface.
+- **Import/Export wizard** — classify incoming rules (new, conflicting, identical) and resolve conflicts step by step
+- Configure deduplication mode per rule, track grouping statistics, switch Light/Dark/System theme
 
-### Accessibility
-* Full keyboard navigation across all UI components.
-* Screen reader support with proper ARIA labels and landmarks.
-* Built on Radix UI primitives for native accessibility.
+### ⚡ Quick Access Popup
+- Toggle grouping and deduplication globally
+- Take a snapshot or jump to the Sessions page in one click
+- Pinned profiles listed with their live status and quick-restore actions
 
-### Internationalization
-* Available in English, French and Spanish.
+### ♿ Accessibility & i18n
+- Full keyboard navigation and screen-reader support (Radix UI primitives)
+- Available in English, French and Spanish
 
 ## Installation
 
@@ -63,11 +56,8 @@
 #### Development Mode (with auto-reload)
 3.  **Start development server:**
     ```bash
-    # For Chrome development
-    npm run dev
-
-    # For Firefox development
-    npm run dev:firefox
+    npm run dev          # Chrome
+    npm run dev:firefox  # Firefox
     ```
 
 #### Production Build
@@ -79,61 +69,40 @@
 #### Packaging for Distribution
 3.  **Create distribution packages:**
     ```bash
-    # Create Chrome package
-    npm run zip
-
-    # Create Firefox package
-    npm run zip:firefox
+    npm run zip          # Chrome
+    npm run zip:firefox  # Firefox
     ```
 
 #### Loading in Browser
 4.  **Load in your browser:**
-    * Chrome/Chromium: open `chrome://extensions/` and use "Load unpacked" with the `.output/chrome-mv3` folder.
-    * Firefox: open `about:debugging#/runtime/this-firefox` and choose "Load Temporary Add-on" pointing to `.output/firefox-mv2/manifest.json`.
-5.  The extension is ready!
+    * Chrome/Chromium: open `chrome://extensions/` → "Load unpacked" → `.output/chrome-mv3`
+    * Firefox: open `about:debugging#/runtime/this-firefox` → "Load Temporary Add-on" → `.output/firefox-mv2/manifest.json`
 
 ## Usage
 
 1.  **Click the Icon:** To access the popup.
 2.  **Configure:** Open "Options" to set your rules.
     * **Domain Rules:** Define for which sites to activate features.
-    * **RegEx Presets:** Create or use RegEx to extract group names (e.g., `([A-Z]+-\d+)` for Jira).
-3.  **Browse:** Use middle-click or right-click > "Open link in new tab" on configured sites and see the magic happen!
+    * **RegEx Presets:** Extract group names with regex (e.g. `([A-Z]+-\d+)` for Jira).
+3.  **Browse:** Middle-click or right-click > "Open link in new tab" on configured sites.
+4.  **Sessions:** Save a snapshot or create a persistent profile from the popup or options page.
 
 ## Testing
 
 ```bash
-# Unit tests
-npm test
-
-# E2E tests
-npm run test:e2e
-
-# Storybook (component documentation)
-npm run storybook
+npm test                  # Unit tests
+npm run test:wxt          # Unit tests (WXT-aware environment)
+npm run test:e2e          # E2E tests (requires prior build)
+npm run test:e2e:build    # Build then run E2E tests
+npm run test:e2e:ui       # E2E tests with Playwright UI
+npm run storybook         # Component documentation (port 6006)
 ```
 
-## Technologies Used
+## Tech Stack
 
-### Core
-* TypeScript & React
-* WXT framework for cross-browser extension development
-* Chrome/Firefox Extension APIs (Manifest V3 / V2)
-
-### UI
-* **@radix-ui/themes** - Design system and UI components
-* **@radix-ui/react-collapsible** - Accessible collapse/expand patterns
-* **next-themes** - Theme management (dark/light mode)
-* **lucide-react** - SVG icons
-* **react-hook-form** - Form management
-
-### Validation
-* **Zod** - Schema validation
-
-### Testing
-* **Vitest** - Unit testing with Happy DOM
-* **Playwright** - End-to-end testing
-* **Storybook** - Component documentation and visual testing
+* **WXT** — cross-browser extension framework (Chrome MV3 / Firefox MV2)
+* **React + TypeScript**, **Radix UI Themes**, **React Hook Form**, **Zod**
+* **Vitest** (unit) · **Playwright** (E2E) · **Storybook** (components)
 
 ## License
 
