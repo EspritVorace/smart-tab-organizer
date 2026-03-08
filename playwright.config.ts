@@ -31,7 +31,7 @@ export default defineConfig({
     },
   ],
   reporter: [
-    ['playwright-ctrf-json-reporter', { outputFile: 'ctrf/e2e-ctrf-report.json' }],
+    ['playwright-ctrf-json-reporter', { outputDir: 'ctrf', outputFile: 'e2e-ctrf-report.json' }],
   ],
   headless: false, // Extensions require headed mode
 });

@@ -20,7 +20,7 @@ export default defineConfig({
     fileParallelism: false,
     reporters: [
       'default',
-      ['vitest-ctrf-json-reporter', { outputFile: 'ctrf/unit-ctrf-report.json' }],
+      ['vitest-ctrf-json-reporter', { outputDir: 'ctrf', outputFile: 'unit-ctrf-report.json' }],
     ]
   }
 });
