@@ -11,32 +11,32 @@
 
 ## Features
 
-### Automatic Grouping
+### 🗂️ Automatic Grouping
 Middle-click or right-click > "Open link in new tab" to instantly place a tab in the right group based on your domain rules.
 - Group names extracted from the page title, URL, or a regex preset
 - Built-in presets for popular tools: Jira, GitLab, GitHub, Trello…
 
-### Deduplication
+### 🔁 Deduplication
 Prevent the same page from being opened twice — the existing tab is re-focused and reloaded instead.
 - Matching sensitivity configurable per rule: exact URL, hostname + path, hostname, or includes
 
-### Sessions & Profiles
+### 📷 Sessions & Profiles
 Save named snapshots of your open tabs and groups, and restore them at any time.
 - **Restore wizard** — pick which tabs to bring back, choose the target window, resolve conflicts before applying
 - **Profiles** — pin any snapshot as a persistent profile with a custom icon, popup shortcut, and auto-sync
 - **Session editor** — reorganize, rename and delete tabs and groups without restoring first
 
-### Options & Customization
+### ⚙️ Options & Customization
 Manage domain rules and regex presets through a card-based interface.
 - **Import/Export wizard** — classify incoming rules (new, conflicting, identical) and resolve conflicts step by step
 - Configure deduplication mode per rule, track grouping statistics, switch Light/Dark/System theme
 
-### Quick Access Popup
+### ⚡ Quick Access Popup
 - Toggle grouping and deduplication globally
 - Take a snapshot or jump to the Sessions page in one click
 - Pinned profiles listed with their live status and quick-restore actions
 
-### Accessibility & i18n
+### ♿ Accessibility & i18n
 - Full keyboard navigation and screen-reader support (Radix UI primitives)
 - Available in English, French and Spanish
 

@@ -11,32 +11,32 @@
 
 ## Fonctionnalités
 
-### Regroupement Automatique
+### 🗂️ Regroupement Automatique
 Clic molette ou clic droit > "Ouvrir dans un nouvel onglet" pour placer instantanément un onglet dans le bon groupe selon vos règles de domaine.
 - Nom du groupe extrait du titre de la page, de l'URL ou d'un préréglage regex
 - Préréglages intégrés pour les outils populaires : Jira, GitLab, GitHub, Trello…
 
-### Déduplication
+### 🔁 Déduplication
 Empêche l'ouverture d'une même page deux fois — l'onglet existant est remis au premier plan et rechargé.
 - Sensibilité de correspondance configurable par règle : URL exacte, nom d'hôte + chemin, nom d'hôte ou inclusion
 
-### Sessions & Profils
+### 📷 Sessions & Profils
 Sauvegardez des snapshots nommés de vos onglets et groupes ouverts, puis restaurez-les à tout moment.
 - **Assistant de restauration** — choisissez les onglets à récupérer, la fenêtre cible, et résolvez les conflits avant d'appliquer
 - **Profils** — épinglez un snapshot comme profil persistant avec icône personnalisée, accès depuis le popup et auto-sync
 - **Éditeur de session** — réorganisez, renommez et supprimez onglets et groupes sans avoir à restaurer au préalable
 
-### Options et Personnalisation
+### ⚙️ Options et Personnalisation
 Gérez les règles de domaine et les préréglages regex via une interface en cartes.
 - **Assistant d'import/export** — classement automatique des règles entrantes (nouvelles, en conflit, identiques) et résolution pas à pas
 - Configurez le mode de déduplication par règle, suivez les statistiques, basculez entre les thèmes Clair/Sombre/Système
 
-### Popup d'Accès Rapide
+### ⚡ Popup d'Accès Rapide
 - Activez/désactivez globalement le regroupement et la déduplication
 - Prenez un snapshot ou accédez à la page Sessions en un clic
 - Profils épinglés listés avec leur statut en temps réel et des actions de restauration rapide
 
-### Accessibilité & i18n
+### ♿ Accessibilité & i18n
 - Navigation complète au clavier et support des lecteurs d'écran (primitives Radix UI)
 - Disponible en Anglais, Français et Espagnol
 

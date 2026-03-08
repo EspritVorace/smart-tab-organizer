@@ -11,32 +11,32 @@
 
 ## Características
 
-### Agrupación Automática
+### 🗂️ Agrupación Automática
 Clic central o clic derecho > "Abrir en una pestaña nueva" para colocar instantáneamente una pestaña en el grupo correcto según tus reglas de dominio.
 - Nombre del grupo extraído del título de la página, la URL o un preajuste regex
 - Preajustes integrados para herramientas populares: Jira, GitLab, GitHub, Trello…
 
-### Deduplicación
+### 🔁 Deduplicación
 Evita que se abra la misma página dos veces — la pestaña existente se vuelve a enfocar y se recarga.
 - Sensibilidad de coincidencia configurable por regla: URL exacta, nombre de host + ruta, nombre de host o inclusión
 
-### Sesiones y Perfiles
+### 📷 Sesiones y Perfiles
 Guarda snapshots con nombre de tus pestañas y grupos abiertos, y restáuralos en cualquier momento.
 - **Asistente de restauración** — elige qué pestañas recuperar, la ventana de destino y resuelve conflictos antes de aplicar
 - **Perfiles** — ancla cualquier snapshot como perfil persistente con icono personalizado, acceso desde el popup y auto-sync
 - **Editor de sesión** — reorganiza, renombra y elimina pestañas y grupos sin necesidad de restaurar previamente
 
-### Opciones y Personalización
+### ⚙️ Opciones y Personalización
 Gestiona reglas de dominio y preajustes regex con una interfaz de tarjetas.
 - **Asistente de importación/exportación** — clasificación automática de reglas entrantes (nuevas, en conflicto, idénticas) y resolución paso a paso
 - Configura el modo de deduplicación por regla, consulta estadísticas, cambia entre temas Claro/Oscuro/Sistema
 
-### Popup de Acceso Rápido
+### ⚡ Popup de Acceso Rápido
 - Activa/desactiva globalmente la agrupación y la deduplicación
 - Toma un snapshot o accede a la página de Sesiones con un clic
 - Perfiles anclados listados con su estado en tiempo real y acciones de restauración rápida
 
-### Accesibilidad e i18n
+### ♿ Accesibilidad e i18n
 - Navegación completa por teclado y soporte para lectores de pantalla (primitivas Radix UI)
 - Disponible en Inglés, Francés y Español
 
