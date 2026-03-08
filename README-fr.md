@@ -4,7 +4,7 @@
 
 # SmartTab Organizer
 
-![Version](https://img.shields.io/badge/version-1.0.3-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)
 
 **SmartTab Organizer** est une extension multi-navigateur conçue pour vous aider à gérer efficacement vos onglets en regroupant automatiquement les onglets liés et en empêchant les doublons.
