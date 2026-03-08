@@ -12,22 +12,33 @@
 ## Características
 
 ### Agrupación Automática
-Clic central o clic derecho > "Abrir en una pestaña nueva" para colocar instantáneamente una pestaña en el grupo correcto según tus reglas de dominio. El nombre del grupo puede extraerse del título de la página, la URL o un preajuste regex — con preajustes integrados para herramientas populares como Jira, GitLab, GitHub y Trello.
+Clic central o clic derecho > "Abrir en una pestaña nueva" para colocar instantáneamente una pestaña en el grupo correcto según tus reglas de dominio.
+- Nombre del grupo extraído del título de la página, la URL o un preajuste regex
+- Preajustes integrados para herramientas populares: Jira, GitLab, GitHub, Trello…
 
 ### Deduplicación
-Evita que se abra la misma página dos veces. La pestaña existente se vuelve a enfocar y se recarga. La sensibilidad de coincidencia es configurable por regla (URL exacta, nombre de host + ruta, nombre de host o inclusión).
+Evita que se abra la misma página dos veces — la pestaña existente se vuelve a enfocar y se recarga.
+- Sensibilidad de coincidencia configurable por regla: URL exacta, nombre de host + ruta, nombre de host o inclusión
 
 ### Sesiones y Perfiles
-Guarda snapshots con nombre de tus pestañas y grupos abiertos, luego restáuralos en cualquier momento mediante un asistente guiado que te permite elegir qué pestañas recuperar y resolver conflictos antes de aplicar. Ancla snapshots como **perfiles** persistentes — con icono personalizado, auto-sync y acceso rápido desde el popup. Un editor de sesión completo te permite reorganizar, renombrar y eliminar pestañas y grupos sin necesidad de restaurar previamente.
+Guarda snapshots con nombre de tus pestañas y grupos abiertos, y restáuralos en cualquier momento.
+- **Asistente de restauración** — elige qué pestañas recuperar, la ventana de destino y resuelve conflictos antes de aplicar
+- **Perfiles** — ancla cualquier snapshot como perfil persistente con icono personalizado, acceso desde el popup y auto-sync
+- **Editor de sesión** — reorganiza, renombra y elimina pestañas y grupos sin necesidad de restaurar previamente
 
 ### Opciones y Personalización
-Gestiona reglas de dominio y preajustes regex con una interfaz de tarjetas. Importa y exporta reglas como JSON a través de un asistente de varios pasos que clasifica automáticamente las reglas entrantes (nuevas, en conflicto, idénticas) y ofrece opciones de resolución. Configura el modo de deduplicación por regla, realiza un seguimiento de las estadísticas de agrupación y cambia entre los temas Claro, Oscuro y Sistema.
+Gestiona reglas de dominio y preajustes regex con una interfaz de tarjetas.
+- **Asistente de importación/exportación** — clasificación automática de reglas entrantes (nuevas, en conflicto, idénticas) y resolución paso a paso
+- Configura el modo de deduplicación por regla, consulta estadísticas, cambia entre temas Claro/Oscuro/Sistema
 
 ### Popup de Acceso Rápido
-Activa/desactiva globalmente la agrupación y la deduplicación, toma un snapshot o accede a la página de Sesiones con un clic. Los perfiles anclados aparecen directamente en el popup con su estado en tiempo real y acciones de restauración rápida.
+- Activa/desactiva globalmente la agrupación y la deduplicación
+- Toma un snapshot o accede a la página de Sesiones con un clic
+- Perfiles anclados listados con su estado en tiempo real y acciones de restauración rápida
 
 ### Accesibilidad e i18n
-Navegación completa por teclado y soporte para lectores de pantalla (primitivas Radix UI). Disponible en Inglés, Francés y Español.
+- Navegación completa por teclado y soporte para lectores de pantalla (primitivas Radix UI)
+- Disponible en Inglés, Francés y Español
 
 ## Instalación
 
