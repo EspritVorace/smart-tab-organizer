@@ -9,6 +9,8 @@ import { getMessage } from '../utils/i18n';
 import { Statistics } from '../components/Core/Statistics/Statistics.tsx';
 import { PopupHeader } from '../components/UI/PopupHeader/PopupHeader.tsx';
 import { SettingsToggles } from '../components/UI/SettingsToggles/SettingsToggles.tsx';
+import { PopupToolbar } from '../components/UI/PopupToolbar/PopupToolbar.tsx';
+import { PopupProfilesList } from '../components/UI/PopupProfilesList/PopupProfilesList.tsx';
 import { useSyncedSettings } from '../hooks/useSyncedSettings.ts';
 import { useStatistics } from '../hooks/useStatistics.ts';
 
@@ -49,6 +51,10 @@ function PopupContent() {
         <Box as="main" width="350px" p="4" style={{ background: "var(--gray-a2)", borderRadius: "var(--radius-3)" }} aria-label={getMessage('popupTitle')}>
             <Flex gap="3" direction="column" width="100%">
                 <PopupHeader title={getMessage('popupTitle')} onSettingsOpen={openOptionsPage}/>
+
+                <PopupToolbar />
+
+                <PopupProfilesList />
 
                 <SettingsToggles
                     globalGroupingEnabled={settings?.globalGroupingEnabled}

@@ -1,0 +1,231 @@
+import React, { useState, useEffect } from 'react';
+import { browser } from 'wxt/browser';
+import {
+  Dialog,
+  AlertDialog,
+  Box,
+  Flex,
+  Text,
+  TextField,
+  Button,
+  Separator,
+  IconButton,
+} from '@radix-ui/themes';
+import { Pencil, X } from 'lucide-react';
+import { getMessage } from '../../../utils/i18n';
+import { SessionsTheme } from '../../Form/themes';
+import { TabTreeEditor } from '../TabTree/TabTreeEditor';
+import { useSessionEditor } from '../../../hooks/useSessionEditor';
+import { countSessionTabs } from '../../../utils/sessionUtils';
+import type { Session } from '../../../types/session';
+
+interface SessionEditDialogProps {
+  /** The session to edit, or null when the dialog is closed */
+  session: Session | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** Called with the updated session when the user clicks Save */
+  onSave: (updatedSession: Session) => Promise<void>;
+}
+
+/**
+ * Modal dialog for editing a saved session's content and name.
+ * Uses a working copy of the session — nothing is persisted until the user clicks Save.
+ */
+export function SessionEditDialog({
+  session,
+  open,
+  onOpenChange,
+  onSave,
+}: SessionEditDialogProps) {
+  if (!session) return null;
+
+  return (
+    // key ensures a clean remount (fresh state) whenever a different session is opened
+    <SessionEditDialogInner
+      key={session.id}
+      session={session}
+      open={open}
+      onOpenChange={onOpenChange}
+      onSave={onSave}
+    />
+  );
+}
+
+interface InnerProps {
+  session: Session;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: (updatedSession: Session) => Promise<void>;
+}
+
+const EDITING_PROFILE_KEY = 'editingProfileId';
+
+function SessionEditDialogInner({ session, open, onOpenChange, onSave }: InnerProps) {
+  const editor = useSessionEditor(session);
+  const [showUnsavedAlert, setShowUnsavedAlert] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Track whether this session is being edited so auto-sync won't overwrite it on window close
+  useEffect(() => {
+    if (open) {
+      (browser.storage as any).session.set({ [EDITING_PROFILE_KEY]: session.id });
+    } else {
+      (browser.storage as any).session.remove(EDITING_PROFILE_KEY);
+    }
+    return () => {
+      (browser.storage as any).session.remove(EDITING_PROFILE_KEY);
+    };
+  }, [open, session.id]);
+
+  const tabCount = countSessionTabs(editor.editedSession);
+  const groupCount = editor.editedSession.groups.length;
+
+  async function handleSave() {
+    setIsSaving(true);
+    try {
+      await onSave({
+        ...editor.editedSession,
+        updatedAt: new Date().toISOString(),
+      });
+      onOpenChange(false);
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  function handleCancel() {
+    if (editor.isDirty) {
+      setShowUnsavedAlert(true);
+    } else {
+      onOpenChange(false);
+    }
+  }
+
+  function handleConfirmLeave() {
+    setShowUnsavedAlert(false);
+    editor.reset();
+    onOpenChange(false);
+  }
+
+  function interceptClose(e: Event) {
+    if (editor.isDirty) {
+      e.preventDefault();
+      setShowUnsavedAlert(true);
+    }
+  }
+
+  return (
+    <SessionsTheme>
+      <Dialog.Root
+        open={open}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) handleCancel();
+          else onOpenChange(true);
+        }}
+      >
+        <Dialog.Content
+          maxWidth="600px"
+          onInteractOutside={interceptClose}
+          onEscapeKeyDown={interceptClose}
+        >
+          {/* Title row */}
+          <Flex justify="between" align="center" mb="4">
+            <Dialog.Title mb="0">
+              <Flex align="center" gap="2">
+                <Pencil size={16} aria-hidden="true" />
+                {getMessage('sessionEditorTitle')}
+              </Flex>
+            </Dialog.Title>
+            <Dialog.Close>
+              <IconButton
+                size="1"
+                variant="ghost"
+                color="gray"
+                aria-label={getMessage('close')}
+              >
+                <X size={16} aria-hidden="true" />
+              </IconButton>
+            </Dialog.Close>
+          </Flex>
+
+          {/* Session name */}
+          <Box mb="4">
+            <Text
+              as="label"
+              size="2"
+              weight="medium"
+              htmlFor="session-edit-name"
+              style={{ display: 'block', marginBottom: 'var(--space-1)' }}
+            >
+              {getMessage('sessionEditorNameLabel')}
+            </Text>
+            <TextField.Root
+              id="session-edit-name"
+              value={editor.editedSession.name}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                editor.updateSessionName(e.target.value)
+              }
+              size="2"
+              style={{ width: '100%' }}
+              aria-label={getMessage('sessionEditorNameLabel')}
+            />
+          </Box>
+
+          <Separator size="4" mb="3" />
+
+          {/* Editable tab tree */}
+          <TabTreeEditor
+            session={editor.editedSession}
+            onSessionChange={editor.applySessionUpdate}
+            maxHeight={360}
+          />
+
+          {/* Summary */}
+          <Box mt="3">
+            <Text size="1" color="gray">
+              {getMessage('sessionEditorSummary', [String(tabCount), String(groupCount)])}
+            </Text>
+          </Box>
+
+          {/* Footer buttons */}
+          <Flex gap="2" justify="end" mt="4">
+            <Button
+              variant="soft"
+              color="gray"
+              onClick={handleCancel}
+              disabled={isSaving}
+            >
+              {getMessage('cancel')}
+            </Button>
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving ? getMessage('loadingText') : getMessage('save')}
+            </Button>
+          </Flex>
+        </Dialog.Content>
+      </Dialog.Root>
+
+      {/* Unsaved changes confirmation */}
+      <AlertDialog.Root open={showUnsavedAlert} onOpenChange={setShowUnsavedAlert}>
+        <AlertDialog.Content maxWidth="420px">
+          <AlertDialog.Title>{getMessage('sessionEditorUnsavedTitle')}</AlertDialog.Title>
+          <AlertDialog.Description size="2">
+            {getMessage('sessionEditorUnsavedChanges')}
+          </AlertDialog.Description>
+          <Flex gap="2" mt="4" justify="end">
+            <AlertDialog.Cancel>
+              <Button variant="soft" color="gray">
+                {getMessage('cancel')}
+              </Button>
+            </AlertDialog.Cancel>
+            <AlertDialog.Action>
+              <Button color="red" onClick={handleConfirmLeave}>
+                {getMessage('sessionEditorLeave')}
+              </Button>
+            </AlertDialog.Action>
+          </Flex>
+        </AlertDialog.Content>
+      </AlertDialog.Root>
+    </SessionsTheme>
+  );
+}

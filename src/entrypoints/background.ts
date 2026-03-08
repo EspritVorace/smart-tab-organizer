@@ -4,10 +4,14 @@ import { startPeriodicCleanup } from '../background/deduplication.js';
 import { initNotificationListeners } from '../utils/notifications.js';
 import { middleClickedTabs } from '../background/messaging.js';
 import { processGroupingForNewTab } from '../background/grouping.js';
+import { initProfileSync } from '../background/profileSync.js';
 
 export default defineBackground(() => {
     // Initialize all event handlers
     setupAllEventHandlers();
+
+    // Initialize auto-sync for profiles
+    initProfileSync();
 
     // Start periodic cleanup for deduplication cache
     startPeriodicCleanup();

@@ -4,7 +4,8 @@ export const FEATURE_THEMES = {
   IMPORT: 'jade',
   EXPORT: 'teal',
   STATISTICS: 'orange',
-  SETTINGS: 'gray'
+  SETTINGS: 'gray',
+  SESSIONS: 'indigo'
 } as const;
 
 // Couleurs de base par fonctionnalité
@@ -14,7 +15,8 @@ export const FEATURE_BASE_COLORS = {
   IMPORT: 'jade',
   EXPORT: 'teal',
   STATISTICS: 'orange',
-  SETTINGS: 'gray'
+  SETTINGS: 'gray',
+  SESSIONS: 'indigo'
 } as const;
 
 // Couleurs par type de callout avec nuances appropriées
@@ -48,6 +50,11 @@ export const FEATURE_CALLOUT_COLORS = {
     INFO: 'gray',
     WARNING: 'gray',   // Nuance neutre
     ERROR: 'red'       // Rouge standard pour erreur
+  },
+  SESSIONS: {
+    INFO: 'indigo',
+    WARNING: 'iris',    // Nuance plus chaude
+    ERROR: 'violet'     // Plus intense pour erreur
   }
 } as const;
 

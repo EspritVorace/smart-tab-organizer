@@ -35,11 +35,11 @@ export async function promptForGroupName(defaultName: string, tabId: number): Pr
 export function findMiddleClickOpener(newTab: Browser.tabs.Tab): number | null {
     const urlToCheck = newTab.pendingUrl || newTab.url;
     
-    if (!urlToCheck || !newTab.openerTabId) {
+    if (!newTab.openerTabId) {
         return null;
     }
-    
-    if (middleClickedTabs.has(urlToCheck) && middleClickedTabs.get(urlToCheck) === newTab.openerTabId) {
+
+    if (urlToCheck && middleClickedTabs.has(urlToCheck) && middleClickedTabs.get(urlToCheck) === newTab.openerTabId) {
         const openerIdFromMap = middleClickedTabs.get(urlToCheck);
         middleClickedTabs.delete(urlToCheck);
         console.log(`[GROUPING_DEBUG] Direct match for openerIdFromMap: ${openerIdFromMap} (URL: "${urlToCheck}")`);

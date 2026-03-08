@@ -29,12 +29,27 @@ export interface ExtensionHelpers {
   // Tab operations
   createTab: (url: string) => Promise<Page>;
   createTabFromOpener: (openerPage: Page, url: string) => Promise<Page>;
+  /**
+   * Creates a tab that triggers the FULL natural event-handler flow:
+   * injects into middleClickedTabs (simulates content script's auxclick/contextmenu handler)
+   * → chrome.tabs.create({ openerTabId }) → onTabCreated → findMiddleClickOpener
+   * → handleGroupingWithRetry → onUpdated(complete) → processGroupingForNewTab
+   */
+  createTabNaturally: (openerPage: Page, url: string) => Promise<Page>;
   getTabCount: () => Promise<number>;
   getTabGroups: () => Promise<TabGroupInfo[]>;
+  closeAllTestTabs: () => Promise<void>;
+  /** Ungroups every tab group in the current window — prevents leftover groups bleeding between tests. */
+  clearAllTabGroups: () => Promise<void>;
 
   // Utilities
   waitForDeduplication: (timeoutMs?: number) => Promise<void>;
   waitForGrouping: (timeoutMs?: number) => Promise<void>;
+  /**
+   * Polls until at least one group exists (or the expected group title appears).
+   * More reliable than a fixed sleep for grouping assertions.
+   */
+  waitForTabGrouped: (expectedTitle?: string, timeoutMs?: number) => Promise<TabGroupInfo[]>;
   getStatistics: () => Promise<Statistics>;
   resetStatistics: () => Promise<void>;
 }
@@ -94,6 +109,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       args: [
         `--disable-extensions-except=${EXTENSION_PATH}`,
         `--load-extension=${EXTENSION_PATH}`,
+        '--lang=en-US',
         '--no-first-run',
         '--no-default-browser-check',
         '--disable-popup-blocking',
@@ -247,6 +263,52 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
         return page;
       },
 
+      // Create a tab that triggers the FULL natural event-handler chain.
+      // Simulates what the content script does on auxclick/contextmenu:
+      // 1. Injects (url → openerTabId) into globalThis.middleClickedTabs
+      // 2. Creates tab with openerTabId → triggers onTabCreated
+      // 3. findMiddleClickOpener finds the entry → handleGroupingWithRetry
+      // 4. onUpdated(complete) → processGroupingForNewTab → group created
+      //
+      // Important: The middleClickedTabs.set() and chrome.tabs.create() are combined
+      // into a single sw.evaluate() call to guarantee they run in the same SW context/instance.
+      createTabNaturally: async (openerPage: Page, url: string) => {
+        const sw = getServiceWorker();
+        const openerUrl = openerPage.url();
+
+        // Start listening for the new page before creating it so Playwright
+        // attaches to it (and enables route interception) before navigation starts.
+        const newPagePromise = context.waitForEvent('page', { timeout: 10000 });
+
+        // Single sw.evaluate: find opener, inject middleClickedTabs, create tab.
+        // All three steps in one context call to prevent any SW restart between them.
+        const result = await sw.evaluate(async ({ targetUrl, openerUrl }: { targetUrl: string; openerUrl: string }) => {
+          const tabs = await chrome.tabs.query({});
+          const opener = tabs.find((t: any) => t.url === openerUrl || t.pendingUrl === openerUrl);
+          if (!opener) return { openerFound: false, tabCreated: false };
+          (globalThis as any).middleClickedTabs.set(targetUrl, opener.id);
+          console.log(`[TEST] middleClickedTabs injected: "${targetUrl}" → tab ${opener.id}`);
+          await chrome.tabs.create({ url: targetUrl, openerTabId: opener.id, active: true });
+          return { openerFound: true, tabCreated: true, openerId: opener.id };
+        }, { targetUrl: url, openerUrl });
+
+        if (!result.openerFound) {
+          throw new Error(`createTabNaturally: cannot find opener tab for URL: ${openerUrl}`);
+        }
+
+        // Wait for Playwright to attach to the new tab (enables route interception before nav).
+        const newPage = await newPagePromise.catch(() => null);
+        if (newPage) {
+          await newPage.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
+        }
+
+        // Give the natural event chain time to complete:
+        // onTabCreated → findMiddleClickOpener → handleGroupingWithRetry → onUpdated(complete) → processGroupingForNewTab
+        await new Promise(r => setTimeout(r, 2000));
+
+        return newPage ?? context.pages()[context.pages().length - 1];
+      },
+
       // Create a tab that appears to be opened from another tab
       // Directly invokes the grouping logic for reliable testing
       createTabFromOpener: async (openerPage: Page, url: string) => {
@@ -255,26 +317,18 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
         // Wait for opener page to have a URL
         await new Promise(resolve => setTimeout(resolve, 200));
 
-        // Extract domain from the opener page URL for matching
-        let openerDomain = '';
-        try {
-          const openerUrl = openerPage.url();
-          openerDomain = new URL(openerUrl).hostname;
-        } catch (e) {
-          // Fallback to simple extraction
-          openerDomain = openerPage.url().replace('https://', '').replace('http://', '').split('/')[0];
-        }
+        const openerUrl = openerPage.url();
 
-        // Get the opener tab info with more robust matching
-        const openerTabInfo = await sw.evaluate(async (domain) => {
+        // Get the opener tab info using exact URL matching to avoid selecting the wrong tab
+        // when multiple tabs from the same domain exist
+        const openerTabInfo = await sw.evaluate(async (exactUrl: string) => {
           const tabs = await chrome.tabs.query({});
-          // Find tab that contains this domain in its URL
-          const openerTab = tabs.find((t: any) => t.url && t.url.includes(domain));
+          const openerTab = tabs.find((t: any) => t.url === exactUrl || t.pendingUrl === exactUrl);
           return openerTab ? { id: openerTab.id, url: openerTab.url, title: openerTab.title, groupId: openerTab.groupId } : null;
-        }, openerDomain);
+        }, openerUrl);
 
         if (!openerTabInfo) {
-          console.error(`[TEST] Could not find opener tab for domain: ${openerDomain}`);
+          console.error(`[TEST] Could not find opener tab for URL: ${openerUrl}`);
           // Fallback to window.open if we can't find the tab
           const [newPage] = await Promise.all([
             context.waitForEvent('page'),
@@ -333,6 +387,40 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
         return newPage || pages[pages.length - 1];
       },
 
+      // Ungroup all existing tab groups (prevents leakage between tests)
+      clearAllTabGroups: async () => {
+        const sw = getServiceWorker();
+        await sw.evaluate(async () => {
+          if (!(chrome as any).tabGroups) return;
+          const groups = await (chrome as any).tabGroups.query({});
+          for (const g of groups) {
+            const tabs = await chrome.tabs.query({ groupId: g.id });
+            if (tabs.length > 0) {
+              await chrome.tabs.ungroup(tabs.map((t: any) => t.id).filter(Boolean));
+            }
+          }
+        });
+        await new Promise(r => setTimeout(r, 200));
+      },
+
+      // Close all non-extension tabs (useful for cleanup between grouped tests)
+      closeAllTestTabs: async () => {
+        const sw = getServiceWorker();
+        await sw.evaluate(async () => {
+          const tabs = await chrome.tabs.query({});
+          const testTabs = tabs.filter(t =>
+            t.url &&
+            !t.url.startsWith('chrome-extension://') &&
+            !t.url.startsWith('chrome://') &&
+            !t.url.startsWith('about:')
+          );
+          if (testTabs.length > 0) {
+            await chrome.tabs.remove(testTabs.map(t => t.id!).filter(Boolean));
+          }
+        });
+        await new Promise(r => setTimeout(r, 300));
+      },
+
       // Get current tab count
       getTabCount: async () => {
         const sw = getServiceWorker();
@@ -379,6 +467,22 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       // Wait for grouping to complete
       waitForGrouping: async (timeoutMs = 2000) => {
         await new Promise(resolve => setTimeout(resolve, timeoutMs));
+      },
+
+      // Poll until at least one group exists (or the expected title appears).
+      // Prefer this over waitForGrouping when you need to assert on the group state.
+      waitForTabGrouped: async (expectedTitle?: string, timeoutMs = 8000) => {
+        const start = Date.now();
+        while (Date.now() - start < timeoutMs) {
+          const groups = await helpers.getTabGroups();
+          if (groups.length > 0) {
+            if (!expectedTitle || groups.some(g => g.title === expectedTitle)) {
+              return groups;
+            }
+          }
+          await new Promise(r => setTimeout(r, 300));
+        }
+        return helpers.getTabGroups(); // Return whatever exists at timeout (let caller assert)
       },
 
       // Get statistics

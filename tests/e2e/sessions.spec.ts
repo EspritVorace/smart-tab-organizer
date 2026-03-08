@@ -1,0 +1,551 @@
+/**
+ * E2E tests for the Sessions feature (Options page → Sessions section).
+ * Covers: empty state, session list, snapshot creation, rename, delete, restore.
+ */
+import { test, expect } from './fixtures';
+import { goToSessionsSection } from './helpers/navigation';
+import {
+  seedSessions,
+  clearSessions,
+  clearHelpPrefs,
+  getSessionsFromStorage,
+  createTestSession,
+  createTestProfile,
+} from './helpers/seed';
+
+test.beforeEach(async ({ context }) => {
+  await clearSessions(context);
+  await clearHelpPrefs(context);
+});
+
+// ---------------------------------------------------------------------------
+// Empty state
+// ---------------------------------------------------------------------------
+test.describe('[US-O01] Empty state', () => {
+  test('shows empty state title and description when no sessions exist', async ({
+    context,
+    extensionId,
+  }) => {
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await expect(page.getByText('No saved sessions.')).toBeVisible();
+    await expect(
+      page.getByText(/snapshot|profile/i).first(),
+    ).toBeVisible();
+    await page.close();
+  });
+
+  test('shows Take Snapshot and New Profile buttons in empty state [US-S010]', async ({
+    context,
+    extensionId,
+  }) => {
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    // Both header and empty-state render these buttons, so use first()
+    await expect(page.getByRole('button', { name: 'Take Snapshot' }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: 'New Profile' }).first()).toBeVisible();
+    await page.close();
+  });
+
+  test('shows intro callout on first visit [US-O001]', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await expect(page.getByText('Sessions & Profiles')).toBeVisible();
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Session list rendering
+// ---------------------------------------------------------------------------
+test.describe('[US-S02] Session list', () => {
+  test('displays session cards with name and tab counts', async ({ context, extensionId }) => {
+    const session = createTestSession({ name: 'My Work Tabs' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await expect(page.getByText('My Work Tabs')).toBeVisible();
+    // 2 tabs in group + 1 ungrouped = 3 tabs total
+    await expect(page.getByText(/3 tab/i)).toBeVisible();
+    await page.close();
+  });
+
+  test('renders multiple sessions [US-S002]', async ({ context, extensionId }) => {
+    const sessions = [
+      createTestSession({ name: 'Session A' }),
+      createTestSession({ name: 'Session B' }),
+      createTestSession({ name: 'Session C' }),
+    ];
+    await seedSessions(context, sessions);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    // Use exact:true to avoid matching "session as" in the intro callout body
+    await expect(page.getByText('Session A', { exact: true })).toBeVisible();
+    await expect(page.getByText('Session B', { exact: true })).toBeVisible();
+    await expect(page.getByText('Session C', { exact: true })).toBeVisible();
+    await page.close();
+  });
+
+  test('sorts profiles (pinned) before snapshots [US-S008]', async ({ context, extensionId }) => {
+    const snapshot = createTestSession({ name: 'Snapshot Session' });
+    const profile = createTestProfile({ name: 'Profile Session' });
+    // Seed snapshot first so ordering is deliberately wrong without sort
+    await seedSessions(context, [snapshot, profile]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    const cards = page.getByText(/Session/i);
+    const texts = await cards.allTextContents();
+    const profileIdx = texts.findIndex(t => t.includes('Profile Session'));
+    const snapshotIdx = texts.findIndex(t => t.includes('Snapshot Session'));
+    expect(profileIdx).toBeLessThan(snapshotIdx);
+    await page.close();
+  });
+
+  test('profile card shows auto-sync toggle [US-S009]', async ({ context, extensionId }) => {
+    const profile = createTestProfile();
+    await seedSessions(context, [profile]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await expect(page.getByRole('switch', { name: /auto-sync/i })).toBeVisible();
+    await page.close();
+  });
+
+  test('snapshot card does not show auto-sync toggle [US-S009]', async ({ context, extensionId }) => {
+    const session = createTestSession();
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await expect(page.getByRole('switch', { name: /auto-sync/i })).not.toBeVisible();
+    await page.close();
+  });
+
+  test('session card displays group count alongside tab count', async ({ context, extensionId }) => {
+    // createTestSession has 1 group with 2 tabs + 1 ungrouped = 3 tabs, 1 group
+    const session = createTestSession({ name: 'Badge Session' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await expect(page.getByText(/1 group/i)).toBeVisible();
+    await page.close();
+  });
+
+  test('session card displays formatted update date', async ({ context, extensionId }) => {
+    const session = createTestSession({ name: 'Dated Session' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    // formatSessionDate uses Intl with year:numeric — year like "2025" or "2026" must appear
+    await expect(page.getByText(/20\d{2}/)).toBeVisible();
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Rename
+// ---------------------------------------------------------------------------
+test.describe('[US-S08] Rename', () => {
+  test('double-click on session name enters rename mode', async ({ context, extensionId }) => {
+    const session = createTestSession({ name: 'Original Name' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByText('Original Name').dblclick();
+    // Rename input should be visible
+    await expect(page.getByRole('textbox', { name: /session name/i })).toBeVisible();
+    await page.close();
+  });
+
+  test('pressing Enter confirms the new name [US-S003]', async ({ context, extensionId }) => {
+    const session = createTestSession({ name: 'Old Name' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByText('Old Name').dblclick();
+    const input = page.getByRole('textbox', { name: /session name/i });
+    await input.fill('New Name');
+    await input.press('Enter');
+
+    await expect(page.getByText('New Name')).toBeVisible();
+    await expect(page.getByText('Old Name')).not.toBeVisible();
+    await page.close();
+  });
+
+  test('pressing Escape cancels rename [US-S003]', async ({ context, extensionId }) => {
+    const session = createTestSession({ name: 'Stable Name' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByText('Stable Name').dblclick();
+    const input = page.getByRole('textbox', { name: /session name/i });
+    await input.fill('Changed Name');
+    await input.press('Escape');
+
+    await expect(page.getByText('Stable Name')).toBeVisible();
+    await expect(page.getByText('Changed Name')).not.toBeVisible();
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Delete
+// ---------------------------------------------------------------------------
+test.describe('[US-S07] Delete', () => {
+  test('more-actions menu contains Delete option', async ({ context, extensionId }) => {
+    const session = createTestSession({ name: 'Deletable Session' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await expect(page.getByRole('menuitem', { name: /delete/i })).toBeVisible();
+    await page.close();
+  });
+
+  test('clicking Delete opens confirmation dialog [US-S004]', async ({ context, extensionId }) => {
+    const session = createTestSession({ name: 'To Be Deleted' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: /delete/i }).click();
+
+    // ConfirmDialog should appear
+    await expect(page.getByRole('alertdialog')).toBeVisible();
+    await page.close();
+  });
+
+  test('confirming Delete removes the session card [US-S004]', async ({ context, extensionId }) => {
+    const session = createTestSession({ name: 'To Be Deleted' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: /delete/i }).click();
+    // Click the red "Delete" confirm button
+    await page.getByRole('button', { name: /delete/i }).last().click();
+
+    await expect(page.getByText('To Be Deleted')).not.toBeVisible();
+    // Empty state should appear
+    await expect(page.getByText('No saved sessions.')).toBeVisible();
+    await page.close();
+  });
+
+  test('cancelling Delete keeps the session [US-S004]', async ({ context, extensionId }) => {
+    const session = createTestSession({ name: 'Will Survive' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: /delete/i }).click();
+    await page.getByRole('button', { name: /cancel/i }).click();
+
+    await expect(page.getByText('Will Survive')).toBeVisible();
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Snapshot creation
+// ---------------------------------------------------------------------------
+test.describe('[US-S01] Snapshot creation', () => {
+  test('Take Snapshot button opens the snapshot wizard dialog', async ({
+    context,
+    extensionId,
+  }) => {
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'Take Snapshot' }).first().click();
+
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(page.getByText('Save Session Snapshot')).toBeVisible();
+    await page.close();
+  });
+
+  test('wizard step 1 shows Selection step [US-S001]', async ({ context, extensionId }) => {
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'Take Snapshot' }).first().click();
+
+    await expect(page.getByText('Selection')).toBeVisible();
+    await page.close();
+  });
+
+  test('all capturable tabs are pre-selected by default in the wizard', async ({
+    context,
+    extensionId,
+  }) => {
+    // Open a real tab so there is something to capture
+    const realTab = await context.newPage();
+    await realTab.goto('data:text/html,<p>pre-select test</p>');
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'Take Snapshot' }).first().click();
+    await page.waitForTimeout(800);
+
+    // All checkboxes in the tab tree should be checked (aria-checked="true")
+    const unchecked = page.getByRole('dialog').locator('[aria-checked="false"]');
+    await expect(unchecked).toHaveCount(0);
+
+    await realTab.close();
+    await page.close();
+  });
+
+  test('snapshot wizard tab list excludes system tabs (chrome://, about:)', async ({
+    context,
+    extensionId,
+  }) => {
+    // captureCurrentTabs() must filter out chrome-extension://, about:, chrome:// URLs
+    const realTab = await context.newPage();
+    await realTab.goto('data:text/html,<p>real tab for snapshot</p>');
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'Take Snapshot' }).first().click();
+    await page.waitForTimeout(800);
+
+    const dialog = page.getByRole('dialog');
+    await expect(dialog.getByText(/chrome:\/\//)).not.toBeVisible();
+    await expect(dialog.getByText('about:blank')).not.toBeVisible();
+
+    await realTab.close();
+    await page.close();
+  });
+
+  test('Next button advances to Confirmation step', async ({ context, extensionId }) => {
+    // captureCurrentTabs() filters out chrome-extension:// URLs, so open a real tab first
+    const extraTab = await context.newPage();
+    await extraTab.goto('data:text/html,<p>test tab for snapshot</p>');
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'Take Snapshot' }).first().click();
+    await page.waitForTimeout(800); // wait for tab capture to complete
+
+    await page.getByRole('button', { name: 'Next' }).click();
+
+    await expect(page.getByText('Confirmation')).toBeVisible();
+    await extraTab.close();
+    await page.close();
+  });
+
+  test('Save Session button on confirmation step creates session [US-S001]', async ({
+    context,
+    extensionId,
+  }) => {
+    // captureCurrentTabs() filters out chrome-extension:// URLs, so open a real tab first
+    const extraTab = await context.newPage();
+    await extraTab.goto('data:text/html,<p>test tab for snapshot</p>');
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'Take Snapshot' }).first().click();
+    await page.waitForTimeout(800);
+
+    await page.getByRole('button', { name: 'Next' }).click();
+    await page.getByRole('button', { name: 'Save Session' }).click();
+
+    // After saving, the wizard shows a success callout; click Close to dismiss
+    await page.getByRole('button', { name: 'Close' }).click();
+    await expect(page.getByRole('dialog')).not.toBeVisible();
+
+    const sessions = await getSessionsFromStorage(context);
+    expect(sessions.length).toBe(1);
+    expect(sessions[0].isPinned).toBe(false);
+    await extraTab.close();
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Restore — split button
+// ---------------------------------------------------------------------------
+test.describe('[US-S04][US-S06] Restore — split button', () => {
+  test('Restore button is visible on session card', async ({ context, extensionId }) => {
+    const session = createTestSession({ name: 'Restorable' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    // 'Restore' may match multiple buttons; use first() to pick the main restore button
+    await expect(page.getByRole('button', { name: 'Restore' }).first()).toBeVisible();
+    await page.close();
+  });
+
+  test('split button dropdown contains quick restore options [US-S011]', async ({ context, extensionId }) => {
+    const session = createTestSession({ name: 'Restorable' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    // Click the dropdown chevron of the split button
+    await page.getByRole('button', { name: /restore options/i }).click();
+
+    await expect(page.getByRole('menuitem', { name: /current window/i })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /new window/i })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /customize/i })).toBeVisible();
+    await page.close();
+  });
+
+  test('quick restore in current window shows success callout [US-S011]', async ({
+    context,
+    extensionId,
+  }) => {
+    const session = createTestSession({ name: 'Restorable' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: /restore options/i }).click();
+    await page.getByRole('menuitem', { name: /current window/i }).click();
+
+    await expect(page.getByText(/tab.*opened/i)).toBeVisible({ timeout: 5000 });
+    await page.close();
+  });
+
+  test('Customize opens the restore wizard dialog [US-S011]', async ({ context, extensionId }) => {
+    const session = createTestSession({ name: 'Restorable' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: /restore options/i }).click();
+    await page.getByRole('menuitem', { name: /customize/i }).click();
+
+    await expect(page.getByRole('dialog')).toBeVisible();
+    // Scope the /Restore/ check to the dialog to avoid matching the session card's Restore button
+    await expect(page.getByRole('dialog').getByText(/Restore/)).toBeVisible();
+    await page.close();
+  });
+
+  // [US-S03] Restore in new window
+  test('[US-S03] restore to new window opens new tabs', async ({ context, extensionId }) => {
+    const session = createTestSession({ name: 'New Window Session' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    const pagesBefore = context.pages().length;
+
+    await page.getByRole('button', { name: /restore options/i }).click();
+    await page.getByRole('menuitem', { name: /new window/i }).click();
+
+    // Session has 3 tabs — at least one new page should be created
+    await page.waitForTimeout(3000);
+    expect(context.pages().length).toBeGreaterThan(pagesBefore);
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// [US-S05] Restore with conflict resolution — Customize wizard
+// ---------------------------------------------------------------------------
+test.describe('[US-S04] Restore in current window', () => {
+  test('Customize wizard defaults to "In the current window" target', async ({
+    context,
+    extensionId,
+  }) => {
+    const session = createTestSession({ name: 'Default Target Session' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: /restore options/i }).click();
+    await page.getByRole('menuitem', { name: /customize/i }).click();
+
+    const dialog = page.getByRole('dialog');
+    await page.waitForTimeout(300);
+    // "In the current window" radio should be checked by default
+    const currentRadio = dialog.getByRole('radio', { name: /current window/i });
+    await expect(currentRadio).toBeChecked();
+    await page.close();
+  });
+});
+
+test.describe('[US-S05] Restore with conflict resolution', () => {
+  test('Customize wizard Selection step shows current/new window target options', async ({
+    context,
+    extensionId,
+  }) => {
+    const session = createTestSession({ name: 'Conflict Test Session' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: /restore options/i }).click();
+    await page.getByRole('menuitem', { name: /customize/i }).click();
+
+    const dialog = page.getByRole('dialog');
+    await expect(dialog.getByText('Selection')).toBeVisible();
+    await expect(dialog.getByText(/current window/i)).toBeVisible();
+    await expect(dialog.getByText(/new window/i)).toBeVisible();
+    await page.close();
+  });
+
+  test('Customize wizard advances to Confirmation when no conflicts exist', async ({
+    context,
+    extensionId,
+  }) => {
+    const session = createTestSession({ name: 'No Conflict Session' });
+    await seedSessions(context, [session]);
+
+    const page = await context.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: /restore options/i }).click();
+    await page.getByRole('menuitem', { name: /customize/i }).click();
+
+    const dialog = page.getByRole('dialog');
+    // Wait for conflict analysis to complete
+    await page.waitForTimeout(500);
+    await dialog.getByRole('button', { name: 'Next' }).click();
+    await page.waitForTimeout(300);
+
+    // Without open conflicting tabs, should skip conflict step and go to Confirmation
+    await expect(dialog.getByText('Confirmation')).toBeVisible();
+    await page.close();
+  });
+});

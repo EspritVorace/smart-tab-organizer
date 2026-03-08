@@ -3,8 +3,8 @@ dist/
 .wxt/
 .output/
 .claude/
-package-lock.json
 *storybook.log
 storybook-static
 playwright-report/
 test-results/
+ctrf/
