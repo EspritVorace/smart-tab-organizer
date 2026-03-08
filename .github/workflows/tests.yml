@@ -27,7 +27,9 @@ jobs:
         uses: ctrf-io/github-actions-ctrf@v1
         if: always()
         with:
-          test-results-file: 'ctrf/unit-ctrf-report.json'
+          report-path: 'ctrf/unit-ctrf-report.json'
+          pull-request: true
+          summary: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -56,6 +58,8 @@ jobs:
         uses: ctrf-io/github-actions-ctrf@v1
         if: always()
         with:
-          test-results-file: 'ctrf/e2e-ctrf-report.json'
+          report-path: 'ctrf/e2e-ctrf-report.json'
+          pull-request: true
+          summary: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
