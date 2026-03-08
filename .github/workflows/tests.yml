@@ -1,0 +1,61 @@
+name: Tests
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+        continue-on-error: true
+
+      - name: Publish CTRF results
+        uses: ctrf-io/github-actions-ctrf@v1
+        if: always()
+        with:
+          test-results-file: 'ctrf/unit-ctrf-report.json'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install xvfb
+        run: sudo apt-get install -y xvfb
+
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+
+      - name: Run Playwright tests
+        run: xvfb-run --auto-servernum -- npx playwright test
+        continue-on-error: true
+
+      - name: Publish CTRF results
+        uses: ctrf-io/github-actions-ctrf@v1
+        if: always()
+        with:
+          test-results-file: 'ctrf/e2e-ctrf-report.json'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

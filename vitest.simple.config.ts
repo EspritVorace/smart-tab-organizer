@@ -17,6 +17,10 @@ export default defineConfig({
     ],
     setupFiles: ['./tests/setup.ts', './tests/setup-ui.ts'],
     // Désactiver le parallélisme pour éviter les conflits de state
-    fileParallelism: false
+    fileParallelism: false,
+    reporters: [
+      'default',
+      ['vitest-ctrf-json-reporter', { outputFile: 'ctrf/unit-ctrf-report.json' }],
+    ]
   }
 });
