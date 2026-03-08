@@ -35,8 +35,19 @@ function uuid(): string {
   });
 }
 
-function getServiceWorker(context: BrowserContext) {
-  const sw = context.serviceWorkers()[0];
+async function getServiceWorker(context: BrowserContext) {
+  let sw = context.serviceWorkers()[0];
+  if (sw) return sw;
+
+  // Service worker may have been terminated by Chrome (idle timeout between tests).
+  // Wait up to 5 seconds for it to restart.
+  const maxWait = 5000;
+  const start = Date.now();
+  while (!sw && Date.now() - start < maxWait) {
+    await new Promise(resolve => setTimeout(resolve, 200));
+    sw = context.serviceWorkers()[0];
+  }
+
   if (!sw) throw new Error('Service worker not found');
   return sw;
 }
@@ -46,7 +57,7 @@ export async function seedSessions(
   context: BrowserContext,
   sessions: TestSession[],
 ): Promise<void> {
-  const sw = getServiceWorker(context);
+  const sw = await getServiceWorker(context);
   await sw.evaluate(async (data) => {
     await chrome.storage.local.set({ sessions: data });
   }, sessions as any[]);
@@ -56,7 +67,7 @@ export async function seedSessions(
 
 /** Remove all sessions from storage. */
 export async function clearSessions(context: BrowserContext): Promise<void> {
-  const sw = getServiceWorker(context);
+  const sw = await getServiceWorker(context);
   await sw.evaluate(async () => {
     await chrome.storage.local.remove('sessions');
   });
@@ -65,7 +76,7 @@ export async function clearSessions(context: BrowserContext): Promise<void> {
 
 /** Reset onboarding/help preferences so each test starts fresh. */
 export async function clearHelpPrefs(context: BrowserContext): Promise<void> {
-  const sw = getServiceWorker(context);
+  const sw = await getServiceWorker(context);
   await sw.evaluate(async () => {
     await chrome.storage.local.remove('sessionsHelpPrefs');
   });
@@ -73,7 +84,7 @@ export async function clearHelpPrefs(context: BrowserContext): Promise<void> {
 
 /** Read sessions back from storage (for assertions). */
 export async function getSessionsFromStorage(context: BrowserContext): Promise<TestSession[]> {
-  const sw = getServiceWorker(context);
+  const sw = await getServiceWorker(context);
   return (await sw.evaluate(async () => {
     const result = await chrome.storage.local.get({ sessions: [] });
     return result.sessions;
@@ -84,7 +95,7 @@ export async function getSessionsFromStorage(context: BrowserContext): Promise<T
 export async function getHelpPrefsFromStorage(
   context: BrowserContext,
 ): Promise<{ sessionsIntroHidden: boolean; profileOnboardingShown: boolean }> {
-  const sw = getServiceWorker(context);
+  const sw = await getServiceWorker(context);
   return (await sw.evaluate(async () => {
     const result = await chrome.storage.local.get({
       sessionsHelpPrefs: { sessionsIntroHidden: false, profileOnboardingShown: false },
@@ -136,7 +147,7 @@ export async function seedProfileWindow(
   profileId: string,
   windowId: number,
 ): Promise<void> {
-  const sw = getServiceWorker(context);
+  const sw = await getServiceWorker(context);
   await sw.evaluate(
     async ({ pid, wid }) => {
       const data = await (chrome.storage as any).session.get('profileWindowMap');
@@ -152,7 +163,7 @@ export async function seedProfileWindow(
 export async function getProfileWindowMap(
   context: BrowserContext,
 ): Promise<Record<string, number>> {
-  const sw = getServiceWorker(context);
+  const sw = await getServiceWorker(context);
   return (await sw.evaluate(async () => {
     const data = await (chrome.storage as any).session.get('profileWindowMap');
     return data.profileWindowMap ?? {};

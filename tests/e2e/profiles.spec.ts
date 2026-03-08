@@ -187,8 +187,11 @@ test.describe('[US-P02] Profile icon', () => {
 
     // Verify the menu item exists and can be clicked without throwing
     await page.getByRole('button', { name: 'More actions' }).click();
-    await expect(page.getByRole('menuitem', { name: /change icon/i })).toBeVisible();
-    await page.getByRole('menuitem', { name: /change icon/i }).click();
+    const changeIconItem = page.getByRole('menuitem', { name: /change icon/i });
+    await expect(changeIconItem).toBeVisible();
+    // Small wait for Radix dropdown animation to complete before clicking
+    await page.waitForTimeout(150);
+    await changeIconItem.click();
     // No assertion on the Popover since Radix's click-outside detection dismisses
     // it when the DropdownMenu backdrop is removed (race condition in Playwright)
     await page.close();
