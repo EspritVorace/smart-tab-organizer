@@ -18,16 +18,19 @@
 
 ---
 
-## US-S010 — Boutons d'action dans l'état vide
+## US-S010 — Barre d'outils et champ de recherche
 
-**En tant qu'** utilisateur arrivant sur la page Sessions sans aucune session sauvegardée,
-**je veux** voir les boutons « Take Snapshot » et « New Profile » dans la zone d'état vide,
-**afin de** pouvoir démarrer immédiatement sans chercher les contrôles dans l'en-tête.
+**En tant qu'** utilisateur sur la page Sessions,
+**je veux** disposer d'un champ de recherche et des boutons d'action dans une barre d'outils en haut de la liste,
+**afin de** filtrer rapidement mes sessions et de lancer une action sans chercher les contrôles.
 
 ### Critères d'acceptation
 
+- [ ] Un champ de recherche (icône loupe) est affiché en haut de la page Sessions, à gauche de la barre d'outils.
+- [ ] Saisir du texte dans ce champ filtre la liste des sessions en temps réel par correspondance sur le nom (insensible à la casse).
+- [ ] Les boutons « New Profile » et « Take Snapshot » sont affichés à droite du champ de recherche dans la même barre d'outils.
 - [ ] En l'absence de toute session, la zone d'état vide affiche le message « No saved sessions. ».
-- [ ] Les boutons « Take Snapshot » et « New Profile » sont tous deux visibles dans la zone d'état vide (en plus des boutons présents dans l'en-tête).
+- [ ] Les boutons « Take Snapshot » et « New Profile » sont également visibles dans la zone d'état vide.
 
 ---
 
@@ -106,7 +109,7 @@
 ### Critères d'acceptation
 
 - [ ] L'étape de confirmation indique la destination (fenêtre courante ou nouvelle fenêtre) et le nombre d'onglets qui seront ouverts.
-- [ ] Si des doublons sont ignorés, le nombre d'onglets ignorés est indiqué.
-- [ ] Après la restauration, le résultat affiche les métriques suivantes : onglets ouverts, doublons ignorés, groupes créés, groupes fusionnés.
-- [ ] Si des erreurs surviennent lors de la restauration (ex. onglet impossible à créer), elles sont listées séparément.
-- [ ] Un bilan sans erreur est présenté dans un bandeau vert ; un bilan avec erreurs est présenté dans un bandeau orange.
+- [ ] Si des doublons sont ignorés, le nombre d'onglets ignorés est indiqué dans l'étape de confirmation.
+- [ ] Après la restauration, le dialogue se ferme automatiquement.
+- [ ] Une notification système apparaît avec le titre « Session restored » et un message indiquant le nombre d'onglets ouverts et de doublons ignorés (ex. « 5 tab(s) opened, 2 duplicate(s) skipped »).
+- [ ] Si des erreurs surviennent lors de la restauration, une notification d'erreur est affichée à la place.

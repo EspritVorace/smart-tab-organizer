@@ -381,8 +381,7 @@ test.describe('[US-S01] Snapshot creation', () => {
     await page.getByRole('button', { name: 'Next' }).click();
     await page.getByRole('button', { name: 'Save Session' }).click();
 
-    // After saving, the wizard shows a success callout; click Close to dismiss
-    await page.getByRole('button', { name: 'Close' }).click();
+    // Dialog auto-closes after saving
     await expect(page.getByRole('dialog')).not.toBeVisible();
 
     const sessions = await getSessionsFromStorage(context);

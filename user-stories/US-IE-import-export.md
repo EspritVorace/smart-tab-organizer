@@ -115,8 +115,8 @@
 
 - [ ] L'étape de confirmation affiche un résumé : nombre de règles ajoutées, écrasées, dupliquées ou ignorées selon les choix de l'étape précédente.
 - [ ] Si le mode **Overwrite** est sélectionné et qu'il y a des conflits, une alerte orange rappelle que des règles existantes seront remplacées.
-- [ ] Après validation, le résultat affiche : « {n} ajoutées, {m} écrasées ».
-- [ ] Le résultat est présenté dans un bandeau de succès vert (CheckCircle).
+- [ ] Après validation, le dialogue se ferme automatiquement.
+- [ ] Une notification système apparaît avec le titre « Rules imported » et un message indiquant les compteurs (ex. « 3 rule(s) added, 1 rule(s) overwritten »).
 - [ ] L'état du wizard est réinitialisé à chaque réouverture du dialogue.
 
 ---
@@ -145,9 +145,11 @@
 
 ### Critères d'acceptation
 
-- [ ] Deux boutons d'export sont proposés : « Export to File » et « Copy to Clipboard ».
+- [ ] Le pied de page de l'étape d'export contient un bouton principal « Export » et un bouton chevron (▾) ouvrant un menu déroulant.
+- [ ] Le menu déroulant propose deux options : « Export to File » (défaut) et « Copy to Clipboard ».
 - [ ] L'export vers fichier propose un nom par défaut `smarttab_organizer_rules.json`.
 - [ ] Sur les navigateurs qui supportent l'API FileSystem (ex. Chrome), la boîte de dialogue native de sauvegarde est utilisée ; sur les autres, un téléchargement automatique est déclenché.
 - [ ] Annuler la boîte de dialogue native ne produit pas d'erreur visible.
-- [ ] Après un export réussi (fichier ou presse-papiers), un message de succès vert est affiché.
+- [ ] Après un export réussi (fichier ou presse-papiers), le dialogue se ferme automatiquement.
+- [ ] Une notification système apparaît avec le titre « Rules exported ».
 - [ ] Le JSON exporté est formaté avec une indentation de 2 espaces.
