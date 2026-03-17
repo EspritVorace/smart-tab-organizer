@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
+    "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-toast": "^1.2.14",
     "@radix-ui/themes": "^3.2.1",
     "@vitejs/plugin-react": "^4.6.0",
@@ -59,6 +60,9 @@
     "rollup": "npm:@rollup/wasm-node@^4.0.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "spawn-sync"]
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "spawn-sync"
+    ]
   }
 }
