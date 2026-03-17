@@ -127,7 +127,12 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
     <SessionsTheme>
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
         <Dialog.Content style={{ maxWidth: 580 }}>
-          <Dialog.Title>{getMessage(titleKey)}</Dialog.Title>
+          <Dialog.Title>
+            <Flex align="center" gap="2">
+              <SaveIcon size={18} aria-hidden="true" />
+              {getMessage(titleKey)}
+            </Flex>
+          </Dialog.Title>
           <Dialog.Description size="2" color="gray">
             {getMessage(descriptionKey)}
           </Dialog.Description>

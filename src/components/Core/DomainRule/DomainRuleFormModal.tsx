@@ -1,7 +1,7 @@
 import { Dialog, Button, Flex, Text, TextField, Switch, Select, Box, Separator, Grid, ScrollArea } from '@radix-ui/themes';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { X } from 'lucide-react';
+import { X, Edit2, Plus } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { DomainRulesTheme, RegexPresetsTheme } from '../../Form/themes';
 import { RegexPresetsCallouts } from '../../Form/themed-callouts';
@@ -177,7 +177,12 @@ export function DomainRuleFormModal({
     <DomainRulesTheme>
     <Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
       <Dialog.Content>
-        <Dialog.Title>{title}</Dialog.Title>
+        <Dialog.Title>
+          <Flex align="center" gap="2">
+            {isEditing ? <Edit2 size={18} aria-hidden="true" /> : <Plus size={18} aria-hidden="true" />}
+            {title}
+          </Flex>
+        </Dialog.Title>
         <Dialog.Description>
           {isEditing 
             ? getMessage('editRuleDescription') 

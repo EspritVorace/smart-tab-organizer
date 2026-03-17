@@ -247,7 +247,10 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
         <Dialog.Content style={{ maxWidth: 600 }}>
           <Dialog.Title>
-            {getMessage('restoreTitle', [session.name])}
+            <Flex align="center" gap="2">
+              <RotateCcw size={18} aria-hidden="true" />
+              {getMessage('restoreTitle', [session.name])}
+            </Flex>
           </Dialog.Title>
           <Dialog.Description size="2" color="gray">
             {getMessage('restoreDescription')}

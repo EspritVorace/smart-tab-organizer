@@ -118,7 +118,12 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
     <ExportTheme>
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
         <Dialog.Content style={{ maxWidth: 550 }}>
-          <Dialog.Title>{getMessage('exportRulesTitle')}</Dialog.Title>
+          <Dialog.Title>
+            <Flex align="center" gap="2">
+              <FileDown size={18} aria-hidden="true" />
+              {getMessage('exportRulesTitle')}
+            </Flex>
+          </Dialog.Title>
           <Dialog.Description size="2" color="gray">
             {getMessage('exportRulesDescription')}
           </Dialog.Description>

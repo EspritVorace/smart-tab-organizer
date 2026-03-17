@@ -212,7 +212,12 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
     <ImportTheme>
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
         <Dialog.Content style={{ maxWidth: 600 }}>
-          <Dialog.Title>{getMessage('importRulesTitle')}</Dialog.Title>
+          <Dialog.Title>
+            <Flex align="center" gap="2">
+              <FileUp size={18} aria-hidden="true" />
+              {getMessage('importRulesTitle')}
+            </Flex>
+          </Dialog.Title>
           <Dialog.Description size="2" color="gray">
             {getMessage('importRulesDescription')}
           </Dialog.Description>
