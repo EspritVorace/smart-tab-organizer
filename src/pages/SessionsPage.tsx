@@ -198,6 +198,9 @@ export function SessionsPage({
     >
       {() => (
         <Box>
+          {/* Intro callout (dismissable) */}
+          <SessionsIntroCallout />
+
           {/* Toolbar: Search + Actions */}
           <Flex gap="3" mb="4" align="center">
             <Box style={{ flex: 1 }}>
@@ -231,9 +234,6 @@ export function SessionsPage({
               {getMessage('sessionSnapshotButton')}
             </Button>
           </Flex>
-
-          {/* Intro callout (dismissable) */}
-          <SessionsIntroCallout />
 
           {/* Quick restore feedback */}
           {quickRestoreMessage && (
