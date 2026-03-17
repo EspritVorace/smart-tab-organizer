@@ -64,6 +64,7 @@
   "confirmDeleteSelected": { "message": "¿Eliminar las reglas seleccionadas?" },
   "confirmDeleteSelectedDescription": { "message": "Las reglas seleccionadas se eliminarán permanentemente. Esta acción no se puede deshacer." },
   "searchRules": { "message": "Buscar reglas..." },
+  "searchSessions": { "message": "Buscar sesiones..." },
   "noRulesFound": { "message": "No se encontraron reglas" },
   "importSettings": { "message": "Importar" },
   "exportSettings": { "message": "Exportar" },
