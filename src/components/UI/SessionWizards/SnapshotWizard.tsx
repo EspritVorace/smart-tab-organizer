@@ -3,12 +3,13 @@ import {
   Dialog, Flex, Button, Text, Separator, Box, TextField,
   Callout, Switch,
 } from '@radix-ui/themes';
-import { Camera, CheckCircle, AlertCircle, Pin } from 'lucide-react';
+import { Camera, AlertCircle, Pin } from 'lucide-react';
 import { SessionsTheme } from '../../Form/themes';
 import { WizardStepper } from '../WizardStepper';
 import { TabTree } from '../../Core/TabTree/TabTree';
 import { ProfileIconPicker } from '../../Core/Session/ProfileIconPicker';
 import { getMessage } from '../../../utils/i18n';
+import { showSuccessNotification } from '../../../utils/notifications';
 import { captureCurrentTabs } from '../../../utils/tabCapture';
 import { createSessionFromSelection, formatSessionDate } from '../../../utils/sessionUtils';
 import type { Session, SavedTab, SavedTabGroup, ProfileIcon } from '../../../types/session';
@@ -37,7 +38,6 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
   const [isCapturing, setIsCapturing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [saveDone, setSaveDone] = useState(false);
 
   // Profile-specific state
   const [profileIcon, setProfileIcon] = useState<ProfileIcon | undefined>(undefined);
@@ -60,7 +60,6 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
     setTreeData(null);
     setSelectedTabIds(new Set());
     setSaveError(null);
-    setSaveDone(false);
     setIsCapturing(true);
     setProfileIcon(undefined);
     setProfileAutoSync(false);
@@ -105,7 +104,12 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
           : undefined,
       );
       await onSave(session);
-      setSaveDone(true);
+      onOpenChange(false);
+      const titleKey = isProfile ? 'profileNotificationTitle' : 'snapshotNotificationTitle';
+      showSuccessNotification(
+        getMessage(titleKey),
+        getMessage('sessionNotificationMessage', [sessionName.trim()]),
+      );
     } catch {
       setSaveError(getMessage('sessionSaveError'));
     } finally {
@@ -116,7 +120,6 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
   const titleKey = isProfile ? 'profileTitle' : 'snapshotTitle';
   const descriptionKey = isProfile ? 'profileDescription' : 'snapshotDescription';
   const saveButtonKey = isProfile ? 'profileSaveButton' : 'snapshotSaveButton';
-  const successKey = isProfile ? 'profileSaveSuccess' : 'snapshotSaveSuccess';
   const confirmKey = isProfile ? 'profileConfirmMessage' : 'snapshotConfirmMessage';
   const SaveIcon = isProfile ? Pin : Camera;
 
@@ -181,7 +184,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
           )}
 
           {/* Step 1: Confirmation */}
-          {step === 1 && !saveDone && (
+          {step === 1 && (
             <Box mt="4">
               <Flex direction="column" gap="3">
                 <Text size="2">
@@ -221,19 +224,6 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
             </Box>
           )}
 
-          {step === 1 && saveDone && (
-            <Box mt="4">
-              <Callout.Root color="green" variant="soft">
-                <Callout.Icon>
-                  <CheckCircle size={16} />
-                </Callout.Icon>
-                <Callout.Text>
-                  {getMessage(successKey, [sessionName.trim()])}
-                </Callout.Text>
-              </Callout.Root>
-            </Box>
-          )}
-
           <Separator size="4" mt="4" style={{ opacity: 0.3 }} />
 
           {/* Footer */}
@@ -253,7 +243,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
                 </Button>
               </>
             )}
-            {step === 1 && !saveDone && (
+            {step === 1 && (
               <>
                 <Button
                   variant="soft"
@@ -268,11 +258,6 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
                   {getMessage(saveButtonKey)}
                 </Button>
               </>
-            )}
-            {step === 1 && saveDone && (
-              <Dialog.Close>
-                <Button variant="soft">{getMessage('close')}</Button>
-              </Dialog.Close>
             )}
           </Flex>
         </Dialog.Content>

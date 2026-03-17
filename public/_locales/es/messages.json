@@ -373,5 +373,17 @@
   "sessionsOnboardingBullet2": { "message": "Activa la sincronización automática para que el perfil se actualice al cerrar la ventana" },
   "sessionsOnboardingGotIt": { "message": "¡Entendido!" },
   "sessionProfileBadgeTooltip": { "message": "Este perfil es accesible desde el popup de la extensión." },
-  "sessionNewProfileTooltip": { "message": "Crea un perfil para guardar y restaurar tus pestañas con un clic." }
+  "sessionNewProfileTooltip": { "message": "Crea un perfil para guardar y restaurar tus pestañas con un clic." },
+
+  "restoreNotificationTitle": { "message": "Sesión restaurada" },
+  "restoreNotificationMessage": { "message": "$1 pestaña(s) abierta(s), $2 duplicado(s) omitido(s)" },
+  "restoreNotificationError": { "message": "Restauración con $1 error(es)" },
+  "snapshotNotificationTitle": { "message": "Instantánea guardada" },
+  "profileNotificationTitle": { "message": "Perfil guardado" },
+  "sessionNotificationMessage": { "message": "\"$1\" ha sido guardado" },
+  "importNotificationTitle": { "message": "Reglas importadas" },
+  "importNotificationMessage": { "message": "$1 regla(s) añadida(s), $2 regla(s) sobreescrita(s)" },
+  "exportNotificationTitle": { "message": "Reglas exportadas" },
+  "exportNotificationMessage": { "message": "Reglas exportadas correctamente" },
+  "exportOptions": { "message": "Opciones de exportación" }
 }

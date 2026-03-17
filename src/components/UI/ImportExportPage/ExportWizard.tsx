@@ -1,9 +1,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Dialog, Flex, Button, Checkbox, Text, Separator, Badge, Box, ScrollArea } from '@radix-ui/themes';
-import { FileDown, ClipboardCopy, CheckCircle } from 'lucide-react';
+import { FileDown, ClipboardCopy } from 'lucide-react';
 import { ExportTheme } from '../../Form/themes';
 import { WizardStepper } from '../WizardStepper';
+import { SplitButton } from '../SplitButton/SplitButton';
 import { getMessage } from '../../../utils/i18n';
+import { showSuccessNotification } from '../../../utils/notifications';
 import type { DomainRuleSetting } from '../../../types/syncSettings';
 
 interface ExportWizardProps {
@@ -15,7 +17,6 @@ interface ExportWizardProps {
 export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
   const [step, setStep] = useState(0);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [exportDone, setExportDone] = useState(false);
 
   const steps = [
     { label: getMessage('exportStepSelection') },
@@ -27,7 +28,6 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
     if (open) {
       setStep(0);
       setSelectedIds(new Set(rules.map(r => r.id)));
-      setExportDone(false);
     }
   }, [open, rules]);
 
@@ -76,7 +76,11 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
         const writable = await handle.createWritable();
         await writable.write(json);
         await writable.close();
-        setExportDone(true);
+        onOpenChange(false);
+        showSuccessNotification(
+          getMessage('exportNotificationTitle'),
+          getMessage('exportNotificationMessage'),
+        );
       } catch (err: any) {
         // User cancelled the dialog
         if (err?.name === 'AbortError') return;
@@ -93,14 +97,22 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
     a.download = 'smarttab_organizer_rules.json';
     a.click();
     URL.revokeObjectURL(url);
-    setExportDone(true);
-  }, [getExportJson]);
+    onOpenChange(false);
+    showSuccessNotification(
+      getMessage('exportNotificationTitle'),
+      getMessage('exportNotificationMessage'),
+    );
+  }, [getExportJson, onOpenChange]);
 
   const handleExportToClipboard = useCallback(async () => {
     const json = getExportJson();
     await navigator.clipboard.writeText(json);
-    setExportDone(true);
-  }, [getExportJson]);
+    onOpenChange(false);
+    showSuccessNotification(
+      getMessage('exportNotificationTitle'),
+      getMessage('exportNotificationMessage'),
+    );
+  }, [getExportJson, onOpenChange]);
 
   return (
     <ExportTheme>
@@ -172,36 +184,9 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
 
           {step === 1 && (
             <Box mt="4">
-              <Text size="3" weight="medium" mb="3">
+              <Text size="3" weight="medium">
                 {getMessage('rulesReadyToExport').replace('{count}', String(selectedRules.length))}
               </Text>
-
-              <Text size="2" color="gray" mb="3">
-                {getMessage('exportTo')}
-              </Text>
-
-              <Flex gap="3" mb="4">
-                <Button variant="solid" onClick={handleExportToFile}>
-                  <FileDown size={16} aria-hidden="true" />
-                  {getMessage('exportToFile')}
-                </Button>
-                <Button variant="soft" onClick={handleExportToClipboard}>
-                  <ClipboardCopy size={16} aria-hidden="true" />
-                  {getMessage('exportToClipboard')}
-                </Button>
-              </Flex>
-
-              {exportDone && (
-                <Flex align="center" gap="2" p="3" style={{
-                  backgroundColor: 'var(--green-a3)',
-                  borderRadius: 'var(--radius-2)',
-                }}>
-                  <CheckCircle size={16} style={{ color: 'var(--green-11)' }} aria-hidden="true" />
-                  <Text size="2" style={{ color: 'var(--green-11)' }}>
-                    {getMessage('exportSuccess')}
-                  </Text>
-                </Flex>
-              )}
             </Box>
           )}
 
@@ -225,14 +210,31 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
             )}
             {step === 1 && (
               <>
-                <Button variant="soft" color="gray" onClick={() => { setStep(0); setExportDone(false); }}>
+                <Button variant="soft" color="gray" onClick={() => setStep(0)}>
                   {getMessage('previous')}
                 </Button>
                 <Dialog.Close>
-                  <Button variant="soft">
-                    {getMessage('close')}
+                  <Button variant="soft" color="gray">
+                    {getMessage('cancel')}
                   </Button>
                 </Dialog.Close>
+                <SplitButton
+                  label={getMessage('exportButton')}
+                  onClick={handleExportToFile}
+                  ariaLabel={getMessage('exportOptions')}
+                  menuItems={[
+                    {
+                      label: getMessage('exportToFile'),
+                      icon: <FileDown size={14} aria-hidden="true" />,
+                      onClick: handleExportToFile,
+                    },
+                    {
+                      label: getMessage('exportToClipboard'),
+                      icon: <ClipboardCopy size={14} aria-hidden="true" />,
+                      onClick: handleExportToClipboard,
+                    },
+                  ]}
+                />
               </>
             )}
           </Flex>

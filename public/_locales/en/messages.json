@@ -373,5 +373,17 @@
   "sessionsOnboardingBullet2": { "message": "Enable auto-sync to update the profile when its window is closed" },
   "sessionsOnboardingGotIt": { "message": "Got it!" },
   "sessionProfileBadgeTooltip": { "message": "This profile is accessible from the extension popup." },
-  "sessionNewProfileTooltip": { "message": "Create a profile to save and restore your tabs with one click." }
+  "sessionNewProfileTooltip": { "message": "Create a profile to save and restore your tabs with one click." },
+
+  "restoreNotificationTitle": { "message": "Session Restored" },
+  "restoreNotificationMessage": { "message": "$1 tab(s) opened, $2 duplicate(s) skipped" },
+  "restoreNotificationError": { "message": "Restored with $1 error(s)" },
+  "snapshotNotificationTitle": { "message": "Snapshot Saved" },
+  "profileNotificationTitle": { "message": "Profile Saved" },
+  "sessionNotificationMessage": { "message": "\"$1\" has been saved" },
+  "importNotificationTitle": { "message": "Rules Imported" },
+  "importNotificationMessage": { "message": "$1 rule(s) added, $2 rule(s) overwritten" },
+  "exportNotificationTitle": { "message": "Rules Exported" },
+  "exportNotificationMessage": { "message": "Rules exported successfully" },
+  "exportOptions": { "message": "Export options" }
 }

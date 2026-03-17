@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { ImportTheme } from '../../Form/themes';
 import { WizardStepper } from '../WizardStepper';
 import { getMessage } from '../../../utils/i18n';
+import { showSuccessNotification } from '../../../utils/notifications';
 import { importDataSchema } from '../../../schemas/importExport';
 import {
   classifyImportedRules,
@@ -40,9 +41,6 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
   const [newRuleSelectedIds, setNewRuleSelectedIds] = useState<Set<string>>(new Set());
   const [conflictMode, setConflictMode] = useState<ConflictMode>('overwrite');
 
-  // Step 3 state
-  const [importDone, setImportDone] = useState(false);
-  const [importResult, setImportResult] = useState<{ added: number; overwritten: number } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -64,8 +62,6 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
       setClassification(null);
       setNewRuleSelectedIds(new Set());
       setConflictMode('overwrite');
-      setImportDone(false);
-      setImportResult(null);
     }
   }, [open]);
 
@@ -205,9 +201,12 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
     }
 
     onImport(updatedRules);
-    setImportResult({ added, overwritten });
-    setImportDone(true);
-  }, [classification, existingRules, newRuleSelectedIds, conflictMode, onImport]);
+    onOpenChange(false);
+    showSuccessNotification(
+      getMessage('importNotificationTitle'),
+      getMessage('importNotificationMessage', [String(added), String(overwritten)]),
+    );
+  }, [classification, existingRules, newRuleSelectedIds, conflictMode, onImport, onOpenChange]);
 
   return (
     <ImportTheme>
@@ -407,7 +406,7 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
           )}
 
           {/* Step 3: Confirmation */}
-          {step === 2 && classification && !importDone && (
+          {step === 2 && classification && (
             <Box mt="4">
               <Flex direction="column" gap="2">
                 {classification.newRules.filter(r => newRuleSelectedIds.has(r.id)).length > 0 && (
@@ -452,22 +451,6 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
             </Box>
           )}
 
-          {step === 2 && importDone && importResult && (
-            <Box mt="4">
-              <Callout.Root color="green" variant="soft">
-                <Callout.Icon>
-                  <CheckCircle size={16} />
-                </Callout.Icon>
-                <Callout.Text>
-                  {getMessage('importResultSuccess')
-                    .replace('{added}', String(importResult.added))
-                    .replace('{overwritten}', String(importResult.overwritten))
-                  }
-                </Callout.Text>
-              </Callout.Root>
-            </Box>
-          )}
-
           <Separator size="4" mt="4" style={{ opacity: 0.3 }} />
 
           {/* Footer */}
@@ -494,7 +477,7 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
                 </Button>
               </>
             )}
-            {step === 2 && !importDone && (
+            {step === 2 && (
               <>
                 <Button variant="soft" color="gray" onClick={() => setStep(1)}>
                   {getMessage('previous')}
@@ -503,13 +486,6 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
                   {getMessage('confirmImport')}
                 </Button>
               </>
-            )}
-            {step === 2 && importDone && (
-              <Dialog.Close>
-                <Button variant="soft">
-                  {getMessage('close')}
-                </Button>
-              </Dialog.Close>
             )}
           </Flex>
         </Dialog.Content>
