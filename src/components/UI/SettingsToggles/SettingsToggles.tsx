@@ -1,6 +1,6 @@
 import React from 'react';
-import { Flex, Switch, Text, Skeleton, Card, Box } from '@radix-ui/themes';
-import { Layers, Copy } from 'lucide-react';
+import { Button, Flex, Switch, Text, Skeleton, Card, Box } from '@radix-ui/themes';
+import { Layers, Copy, Shield, ExternalLink } from 'lucide-react';
 import { getMessage } from '../../../utils/i18n';
 
 interface SettingsTogglesProps {
@@ -9,6 +9,8 @@ interface SettingsTogglesProps {
     onGroupingChange?: (checked: boolean) => void;
     onDeduplicationChange?: (checked: boolean) => void;
     isLoading?: boolean;
+    hasRules?: boolean;
+    onOpenRules?: () => void;
 }
 
 export function SettingsToggles({
@@ -16,7 +18,9 @@ export function SettingsToggles({
     globalDeduplicationEnabled,
     onGroupingChange,
     onDeduplicationChange,
-    isLoading = false
+    isLoading = false,
+    hasRules = true,
+    onOpenRules,
 }: SettingsTogglesProps) {
     if (isLoading) {
         return (
@@ -24,6 +28,23 @@ export function SettingsToggles({
                 <Flex gap="3" direction="column">
                     <Skeleton width="250px" height="24px" />
                     <Skeleton width="220px" height="24px" />
+                </Flex>
+            </Card>
+        );
+    }
+
+    if (!hasRules) {
+        return (
+            <Card role="group" aria-label={getMessage('settingsTab')}>
+                <Flex direction="column" align="center" gap="3" py="2">
+                    <Shield size={28} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
+                    <Text size="2" color="gray" align="center">
+                        {getMessage('popupNoRulesTitle')}
+                    </Text>
+                    <Button variant="soft" size="2" onClick={onOpenRules}>
+                        <ExternalLink size={14} aria-hidden="true" />
+                        {getMessage('popupGoToRules')}
+                    </Button>
                 </Flex>
             </Card>
         );
