@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { Button, Switch, Text, HoverCard, Box, Flex, Badge, Card, Checkbox, IconButton, TextField, Separator } from '@radix-ui/themes';
-import { Edit, Trash2, Plus, Eye, EyeOff, Shield, Search, AlertCircle } from 'lucide-react';
+import { Edit, Trash2, Plus, Eye, EyeOff, Shield, Search, AlertCircle, Upload } from 'lucide-react';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { DomainRuleFormModal } from '../components/Core/DomainRule/DomainRuleFormModal';
+import { ImportWizard } from '../components/UI/ImportExportPage/ImportWizard';
 import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { getMessage } from '../utils/i18n';
 import { generateUUID, getRadixColor } from '../utils/utils';
@@ -20,6 +21,7 @@ interface DomainRulesPageProps {
 
 export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPageProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<DomainRule | undefined>(undefined);
 
   // Handlers - déclarés avant les useMemo
@@ -267,10 +269,34 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
 
             {/* Card List */}
             {filteredRules.length === 0 ? (
-              <Box p="8" style={{ textAlign: 'center' }}>
-                <AlertCircle size={48} style={{ margin: '0 auto 16px', color: 'var(--gray-8)' }} />
-                <Text color="gray">{getMessage('noRulesFound')}</Text>
-              </Box>
+              syncSettings.domainRules.length === 0 && !searchTerm ? (
+                // True empty state — no rules at all
+                <Flex direction="column" align="center" justify="center" gap="3" style={{ minHeight: 200 }}>
+                  <Shield size={40} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
+                  <Text size="3" weight="medium" color="gray" align="center">
+                    {getMessage('rulesEmptyTitle')}
+                  </Text>
+                  <Text size="2" color="gray" align="center" style={{ maxWidth: 340 }}>
+                    {getMessage('rulesEmptyDescription')}
+                  </Text>
+                  <Flex gap="2">
+                    <Button variant="soft" onClick={handleAddRule}>
+                      <Plus size={14} aria-hidden="true" />
+                      {getMessage('addRule')}
+                    </Button>
+                    <Button variant="soft" onClick={() => setIsImportOpen(true)}>
+                      <Upload size={14} aria-hidden="true" />
+                      {getMessage('importRulesButton')}
+                    </Button>
+                  </Flex>
+                </Flex>
+              ) : (
+                // Search returned no results
+                <Flex direction="column" align="center" justify="center" gap="2" style={{ minHeight: 120 }}>
+                  <AlertCircle size={32} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
+                  <Text color="gray">{getMessage('noRulesFound')}</Text>
+                </Flex>
+              )
             ) : (
               <Flex direction="column" gap="3" role="grid" aria-label={getMessage('domainRulesTab')} ref={listRef}>
                 {filteredRules.map((rule, index) => (
@@ -430,6 +456,13 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                   : ''
               )
         }
+      />
+
+      <ImportWizard
+        open={isImportOpen}
+        onOpenChange={setIsImportOpen}
+        existingRules={syncSettings.domainRules}
+        onImport={updateRules}
       />
     </>
   );

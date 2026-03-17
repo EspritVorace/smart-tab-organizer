@@ -263,8 +263,7 @@ test.describe('[US-P03] New Profile wizard', () => {
     await page.getByRole('button', { name: 'Next' }).click();
     await page.getByRole('button', { name: 'Save Profile' }).click();
 
-    // After saving, wizard shows success callout; click Close to dismiss
-    await page.getByRole('button', { name: 'Close' }).click();
+    // Dialog auto-closes after saving
     await expect(page.getByRole('dialog')).not.toBeVisible();
 
     const sessions = await getSessionsFromStorage(context);

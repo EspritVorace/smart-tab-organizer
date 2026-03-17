@@ -69,4 +69,4 @@
 ### Critères d'acceptation
 
 - [ ] Survoler la zone d'icône (badge coloré en haut à gauche) d'une carte de profil affiche un tooltip.
-- [ ] Le bouton « New Profile » dans l'en-tête affiche également un tooltip au survol.
+- [ ] Le bouton « New Profile » dans la barre d'outils (à droite du champ de recherche) affiche également un tooltip au survol.
