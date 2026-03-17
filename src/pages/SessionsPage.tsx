@@ -250,36 +250,50 @@ export function SessionsPage({
               {getMessage('loadingText')}
             </Text>
           ) : displayedSessions.length === 0 ? (
-            // Empty state
-            <Flex
-              direction="column"
-              align="center"
-              justify="center"
-              gap="3"
-              style={{ minHeight: 200 }}
-            >
-              <Archive
-                size={40}
-                style={{ color: 'var(--gray-8)' }}
-                aria-hidden="true"
-              />
-              <Text size="3" weight="medium" color="gray" align="center">
-                {getMessage('sessionsEmptyStateTitle')}
-              </Text>
-              <Text size="2" color="gray" align="center" style={{ maxWidth: 340 }}>
-                {getMessage('sessionsEmptyStateDescription')}
-              </Text>
-              <Flex gap="2">
-                <Button variant="soft" onClick={() => setSnapshotOpen(true)}>
-                  <Camera size={14} aria-hidden="true" />
-                  {getMessage('sessionSnapshotButton')}
-                </Button>
-                <Button variant="soft" onClick={() => withOnboarding('wizard')}>
-                  <Pin size={14} aria-hidden="true" />
-                  {getMessage('sessionNewProfile')}
-                </Button>
+            sessions.length === 0 && !searchQuery ? (
+              // True empty state
+              <Flex
+                direction="column"
+                align="center"
+                justify="center"
+                gap="3"
+                style={{ minHeight: 200 }}
+              >
+                <Archive
+                  size={40}
+                  style={{ color: 'var(--gray-8)' }}
+                  aria-hidden="true"
+                />
+                <Text size="3" weight="medium" color="gray" align="center">
+                  {getMessage('sessionsEmptyStateTitle')}
+                </Text>
+                <Text size="2" color="gray" align="center" style={{ maxWidth: 340 }}>
+                  {getMessage('sessionsEmptyStateDescription')}
+                </Text>
+                <Flex gap="2">
+                  <Button variant="soft" onClick={() => setSnapshotOpen(true)}>
+                    <Camera size={14} aria-hidden="true" />
+                    {getMessage('sessionSnapshotButton')}
+                  </Button>
+                  <Button variant="soft" onClick={() => withOnboarding('wizard')}>
+                    <Pin size={14} aria-hidden="true" />
+                    {getMessage('sessionNewProfile')}
+                  </Button>
+                </Flex>
               </Flex>
-            </Flex>
+            ) : (
+              // Search no results
+              <Flex
+                direction="column"
+                align="center"
+                justify="center"
+                gap="2"
+                style={{ minHeight: 120 }}
+              >
+                <Archive size={32} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
+                <Text color="gray">{getMessage('noSessionsFound')}</Text>
+              </Flex>
+            )
           ) : (
             <Flex direction="column" gap="3">
               {displayedSessions.map(session => (
