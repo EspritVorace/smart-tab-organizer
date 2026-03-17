@@ -25,6 +25,8 @@ export interface SplitButtonProps {
   size?: '1' | '2' | '3';
   /** Disabled state */
   disabled?: boolean;
+  /** Aria-label for the chevron dropdown trigger */
+  ariaLabel?: string;
 }
 
 export function SplitButton({
@@ -34,6 +36,7 @@ export function SplitButton({
   variant = 'solid',
   size = '2',
   disabled = false,
+  ariaLabel,
 }: SplitButtonProps) {
   return (
     <Flex gap="0">
@@ -51,7 +54,7 @@ export function SplitButton({
           variant={variant}
           size={size}
           disabled
-          aria-label={getMessage('sessionRestoreOptions')}
+          aria-label={ariaLabel ?? getMessage('sessionRestoreOptions')}
           style={{
             borderTopLeftRadius: 0,
             borderBottomLeftRadius: 0,
@@ -69,7 +72,7 @@ export function SplitButton({
             <Button
               variant={variant}
               size={size}
-              aria-label={getMessage('sessionRestoreOptions')}
+              aria-label={ariaLabel ?? getMessage('sessionRestoreOptions')}
               style={{
                 borderTopLeftRadius: 0,
                 borderBottomLeftRadius: 0,

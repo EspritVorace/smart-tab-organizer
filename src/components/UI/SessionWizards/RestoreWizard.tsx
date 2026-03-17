@@ -6,8 +6,8 @@ import { SessionsTheme } from '../../Form/themes';
 import { WizardStepper } from '../WizardStepper';
 import { TabTree } from '../../Core/TabTree/TabTree';
 import { ConflictResolutionStep } from './ConflictResolutionStep';
-import { RestoreSummary } from './RestoreSummary';
 import { getMessage } from '../../../utils/i18n';
+import { showSuccessNotification, showNotification } from '../../../utils/notifications';
 import { sessionToTabTreeData } from '../../../utils/sessionUtils';
 import {
   analyzeConflicts,
@@ -16,7 +16,7 @@ import {
   type GroupConflictAction,
   type ConflictResolution,
 } from '../../../utils/conflictDetection';
-import { restoreTabs, type RestoreResult } from '../../../utils/tabRestore';
+import { restoreTabs } from '../../../utils/tabRestore';
 import { getProfileWindowMap, setProfileWindow } from '../../../utils/profileWindowMap';
 import type { Session } from '../../../types/session';
 import type { TabTreeData } from '../../Core/TabTree/tabTreeTypes';
@@ -49,7 +49,6 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
 
   // Restore state
   const [isRestoring, setIsRestoring] = useState(false);
-  const [restoreResult, setRestoreResult] = useState<RestoreResult | null>(null);
   const [restoreError, setRestoreError] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
@@ -82,7 +81,6 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
     setHasConflicts(false);
     setDuplicateTabAction('skip');
     setGroupActions(new Map());
-    setRestoreResult(null);
     setRestoreError(null);
 
     const { treeData: td, numericIdToSavedTabId: idMap } = sessionToTabTreeData(session);
@@ -196,7 +194,6 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
         conflictResolution: target === 'current' ? conflictResolution : undefined,
         conflictAnalysis: target === 'current' ? conflictAnalysis ?? undefined : undefined,
       });
-      setRestoreResult(result);
 
       // Update profile↔window mapping
       if (session.isPinned) {
@@ -205,6 +202,24 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
         } else if (target === 'new' && result.windowId != null) {
           await setProfileWindow(session.id, result.windowId);
         }
+      }
+
+      onOpenChange(false);
+
+      if (result.errors.length > 0) {
+        showNotification({
+          title: getMessage('restoreNotificationTitle'),
+          message: getMessage('restoreNotificationError', [String(result.errors.length)]),
+          type: 'error',
+        });
+      } else {
+        showSuccessNotification(
+          getMessage('restoreNotificationTitle'),
+          getMessage('restoreNotificationMessage', [
+            String(result.tabsCreated),
+            String(result.duplicatesSkipped),
+          ]),
+        );
       }
     } catch {
       setRestoreError(getMessage('restoreError'));
@@ -225,7 +240,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
 
   // Determine what the current step shows
   const isConflictStep = hasConflicts && step === 1;
-  const isConfirmStep = step === confirmStep && !restoreResult;
+  const isConfirmStep = step === confirmStep;
 
   return (
     <SessionsTheme>
@@ -346,13 +361,6 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
             </Box>
           )}
 
-          {/* Restore result */}
-          {restoreResult && (
-            <Box mt="4">
-              <RestoreSummary result={restoreResult} />
-            </Box>
-          )}
-
           <Separator size="4" mt="4" style={{ opacity: 0.3 }} />
 
           {/* Footer */}
@@ -373,7 +381,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
               </>
             )}
 
-            {isConflictStep && !restoreResult && (
+            {isConflictStep && (
               <>
                 <Button variant="soft" color="gray" onClick={() => setStep(0)}>
                   {getMessage('previous')}
@@ -401,11 +409,6 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
               </>
             )}
 
-            {restoreResult && (
-              <Dialog.Close>
-                <Button variant="soft">{getMessage('close')}</Button>
-              </Dialog.Close>
-            )}
           </Flex>
         </Dialog.Content>
       </Dialog.Root>

@@ -373,5 +373,17 @@
   "sessionsOnboardingBullet2": { "message": "Activez la synchro automatique pour que le profil se mette à jour à la fermeture de la fenêtre" },
   "sessionsOnboardingGotIt": { "message": "C'est compris !" },
   "sessionProfileBadgeTooltip": { "message": "Ce profil est accessible depuis le popup de l'extension." },
-  "sessionNewProfileTooltip": { "message": "Créez un profil pour sauvegarder et restaurer vos onglets en un clic." }
+  "sessionNewProfileTooltip": { "message": "Créez un profil pour sauvegarder et restaurer vos onglets en un clic." },
+
+  "restoreNotificationTitle": { "message": "Session restaurée" },
+  "restoreNotificationMessage": { "message": "$1 onglet(s) ouvert(s), $2 doublon(s) ignoré(s)" },
+  "restoreNotificationError": { "message": "Restauration avec $1 erreur(s)" },
+  "snapshotNotificationTitle": { "message": "Instantané enregistré" },
+  "profileNotificationTitle": { "message": "Profil enregistré" },
+  "sessionNotificationMessage": { "message": "« $1 » a été enregistré" },
+  "importNotificationTitle": { "message": "Règles importées" },
+  "importNotificationMessage": { "message": "$1 règle(s) ajoutée(s), $2 règle(s) écrasée(s)" },
+  "exportNotificationTitle": { "message": "Règles exportées" },
+  "exportNotificationMessage": { "message": "Règles exportées avec succès" },
+  "exportOptions": { "message": "Options d'export" }
 }

@@ -1,5 +1,13 @@
 @import '@radix-ui/themes/styles.css';
 
+/* Reset list styling for react-accessible-treeview ul/li elements */
+[role="tree"],
+[role="group"] {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
 /* Focus ring for keyboard-navigable card lists (DomainRulesPage) */
 [role="row"][tabindex]:focus-visible {
   outline: 2px solid var(--accent-9);
