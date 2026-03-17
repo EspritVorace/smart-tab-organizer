@@ -64,6 +64,7 @@
   "confirmDeleteSelected": { "message": "Delete the selected rules?" },
   "confirmDeleteSelectedDescription": { "message": "This will permanently delete the selected rules. This action cannot be undone." },
   "searchRules": { "message": "Search rules..." },
+  "searchSessions": { "message": "Search sessions..." },
   "noRulesFound": { "message": "No rules found" },
   "importSettings": { "message": "Import" },
   "exportSettings": { "message": "Export" },

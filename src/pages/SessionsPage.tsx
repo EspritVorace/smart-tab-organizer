@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Box, Flex, Button, Text, Callout, Tooltip } from '@radix-ui/themes';
-import { Camera, Archive, CheckCircle, Pin } from 'lucide-react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { Box, Flex, Button, Text, Callout, Tooltip, TextField } from '@radix-ui/themes';
+import { Camera, Archive, CheckCircle, Pin, Search } from 'lucide-react';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { SessionCard } from '../components/Core/Session/SessionCard';
 import { SessionEditDialog } from '../components/Core/Session/SessionEditDialog';
@@ -52,6 +52,7 @@ export function SessionsPage({
   const [editTarget, setEditTarget] = useState<Session | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Session | null>(null);
   const [quickRestoreMessage, setQuickRestoreMessage] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Onboarding state
   const [onboardingOpen, setOnboardingOpen] = useState(false);
@@ -59,10 +60,16 @@ export function SessionsPage({
   const [pendingAfterOnboarding, setPendingAfterOnboarding] = useState<'wizard' | Session | null>(null);
 
   // Sort: profiles (isPinned) first by updatedAt desc, then snapshots by updatedAt desc
-  const displayedSessions = [...sessions].sort((a, b) => {
+  const sortedSessions = useMemo(() => [...sessions].sort((a, b) => {
     if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
     return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-  });
+  }), [sessions]);
+
+  const displayedSessions = useMemo(() => {
+    if (!searchQuery) return sortedSessions;
+    const term = searchQuery.toLowerCase();
+    return sortedSessions.filter(s => s.name.toLowerCase().includes(term));
+  }, [sortedSessions, searchQuery]);
 
   const handleSaveSession = useCallback(
     async (session: Session) => {
@@ -188,32 +195,43 @@ export function SessionsPage({
       theme="SESSIONS"
       icon={Archive}
       syncSettings={syncSettings}
-      headerActions={
-        <Flex gap="2">
-          <Tooltip content={getMessage('sessionNewProfileTooltip')}>
-            <Button
-              variant="soft"
-              size="2"
-              onClick={() => withOnboarding('wizard')}
-            >
-              <Pin size={16} aria-hidden="true" />
-              {getMessage('sessionNewProfile')}
-            </Button>
-          </Tooltip>
-          <Button
-            variant="solid"
-            size="2"
-            onClick={() => setSnapshotOpen(true)}
-            style={{ color: 'white' }}
-          >
-            <Camera size={16} aria-hidden="true" />
-            {getMessage('sessionSnapshotButton')}
-          </Button>
-        </Flex>
-      }
     >
       {() => (
         <Box>
+          {/* Toolbar: Search + Actions */}
+          <Flex gap="3" mb="4" align="center">
+            <Box style={{ flex: 1 }}>
+              <TextField.Root
+                placeholder={getMessage('searchSessions')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              >
+                <TextField.Slot>
+                  <Search size={16} aria-hidden="true" />
+                </TextField.Slot>
+              </TextField.Root>
+            </Box>
+            <Tooltip content={getMessage('sessionNewProfileTooltip')}>
+              <Button
+                variant="soft"
+                size="2"
+                onClick={() => withOnboarding('wizard')}
+              >
+                <Pin size={16} aria-hidden="true" />
+                {getMessage('sessionNewProfile')}
+              </Button>
+            </Tooltip>
+            <Button
+              variant="solid"
+              size="2"
+              onClick={() => setSnapshotOpen(true)}
+              style={{ color: 'white' }}
+            >
+              <Camera size={16} aria-hidden="true" />
+              {getMessage('sessionSnapshotButton')}
+            </Button>
+          </Flex>
+
           {/* Intro callout (dismissable) */}
           <SessionsIntroCallout />
 
