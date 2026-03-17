@@ -1,25 +1,27 @@
 # CLAUDE.md
 
+> Ce projet utilise pnpm comme gestionnaire de paquets.
+
 ## Commands
 
 ```bash
 # Dev
-npm run dev / dev:firefox    # Chrome / Firefox with auto-reload
-npm run build / build:firefox
-npm run zip / zip:firefox    # Distribution packages
-npm run compile              # TypeScript check only
+pnpm dev / dev:firefox    # Chrome / Firefox with auto-reload
+pnpm build / build:firefox
+pnpm zip / zip:firefox    # Distribution packages
+pnpm compile              # TypeScript check only
 
 # Tests
-npm test                     # Vitest unit tests
-npm run test:watch / test:ui # Watch / Vitest UI
-npm run test:wxt             # Vitest with WXT-aware environment
-npm run test:e2e             # Playwright E2E
-npm run test:e2e:ui          # Playwright with UI
-npm run test:e2e:build       # wxt build then E2E
-npm run test:e2e:headed
+pnpm test                     # Vitest unit tests
+pnpm test:watch / test:ui # Watch / Vitest UI
+pnpm test:wxt             # Vitest with WXT-aware environment
+pnpm test:e2e             # Playwright E2E
+pnpm test:e2e:ui          # Playwright with UI
+pnpm test:e2e:build       # wxt build then E2E
+pnpm test:e2e:headed
 
 # Docs
-npm run storybook            # port 6006
+pnpm storybook            # port 6006
 ```
 
 ## Architecture

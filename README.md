@@ -48,29 +48,34 @@ Manage domain rules and regex presets through a card-based interface.
     ```bash
     git clone https://github.com/EspritVorace/smart-tab-organizer.git
     ```
-2.  **Install dependencies:**
+2.  **Install pnpm** (if not already installed):
     ```bash
-    npm install
+    npm install -g pnpm
+    # or: winget install pnpm.pnpm
+    ```
+3.  **Install dependencies:**
+    ```bash
+    pnpm install
     ```
 
 #### Development Mode (with auto-reload)
-3.  **Start development server:**
+4.  **Start development server:**
     ```bash
-    npm run dev          # Chrome
-    npm run dev:firefox  # Firefox
+    pnpm dev          # Chrome
+    pnpm dev:firefox  # Firefox
     ```
 
 #### Production Build
-3.  **Build the extension:**
+4.  **Build the extension:**
     ```bash
-    npm run build
+    pnpm build
     ```
 
 #### Packaging for Distribution
-3.  **Create distribution packages:**
+4.  **Create distribution packages:**
     ```bash
-    npm run zip          # Chrome
-    npm run zip:firefox  # Firefox
+    pnpm zip          # Chrome
+    pnpm zip:firefox  # Firefox
     ```
 
 #### Loading in Browser
@@ -90,12 +95,12 @@ Manage domain rules and regex presets through a card-based interface.
 ## Testing
 
 ```bash
-npm test                  # Unit tests
-npm run test:wxt          # Unit tests (WXT-aware environment)
-npm run test:e2e          # E2E tests (requires prior build)
-npm run test:e2e:build    # Build then run E2E tests
-npm run test:e2e:ui       # E2E tests with Playwright UI
-npm run storybook         # Component documentation (port 6006)
+pnpm test                  # Unit tests
+pnpm test:wxt          # Unit tests (WXT-aware environment)
+pnpm test:e2e          # E2E tests (requires prior build)
+pnpm test:e2e:build    # Build then run E2E tests
+pnpm test:e2e:ui       # E2E tests with Playwright UI
+pnpm storybook         # Component documentation (port 6006)
 ```
 
 ## Tech Stack
