@@ -48,29 +48,34 @@ Gérez les règles de domaine et les préréglages regex via une interface en ca
     ```bash
     git clone https://github.com/EspritVorace/smart-tab-organizer.git
     ```
-2.  **Installer les dépendances :**
+2.  **Installer pnpm** (si pas déjà installé) :
     ```bash
-    npm install
+    npm install -g pnpm
+    # ou : winget install pnpm.pnpm
+    ```
+3.  **Installer les dépendances :**
+    ```bash
+    pnpm install
     ```
 
 #### Mode Développement (avec rechargement automatique)
-3.  **Démarrer le serveur de développement :**
+4.  **Démarrer le serveur de développement :**
     ```bash
-    npm run dev          # Chrome
-    npm run dev:firefox  # Firefox
+    pnpm dev          # Chrome
+    pnpm dev:firefox  # Firefox
     ```
 
 #### Build de Production
-3.  **Construire l'extension :**
+4.  **Construire l'extension :**
     ```bash
-    npm run build
+    pnpm build
     ```
 
 #### Empaquetage pour Distribution
-3.  **Créer les packages de distribution :**
+4.  **Créer les packages de distribution :**
     ```bash
-    npm run zip          # Chrome
-    npm run zip:firefox  # Firefox
+    pnpm zip          # Chrome
+    pnpm zip:firefox  # Firefox
     ```
 
 #### Chargement dans le Navigateur
@@ -90,12 +95,12 @@ Gérez les règles de domaine et les préréglages regex via une interface en ca
 ## Tests
 
 ```bash
-npm test                  # Tests unitaires
-npm run test:wxt          # Tests unitaires (environnement WXT)
-npm run test:e2e          # Tests E2E (nécessite un build préalable)
-npm run test:e2e:build    # Build puis tests E2E
-npm run test:e2e:ui       # Tests E2E avec l'interface Playwright
-npm run storybook         # Documentation des composants (port 6006)
+pnpm test                  # Tests unitaires
+pnpm test:wxt          # Tests unitaires (environnement WXT)
+pnpm test:e2e          # Tests E2E (nécessite un build préalable)
+pnpm test:e2e:build    # Build puis tests E2E
+pnpm test:e2e:ui       # Tests E2E avec l'interface Playwright
+pnpm storybook         # Documentation des composants (port 6006)
 ```
 
 ## Stack Technique

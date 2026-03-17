@@ -48,29 +48,34 @@ Gestiona reglas de dominio y preajustes regex con una interfaz de tarjetas.
     ```bash
     git clone https://github.com/EspritVorace/smart-tab-organizer.git
     ```
-2.  **Instalar dependencias:**
+2.  **Instalar pnpm** (si no está ya instalado):
     ```bash
-    npm install
+    npm install -g pnpm
+    # o: winget install pnpm.pnpm
+    ```
+3.  **Instalar dependencias:**
+    ```bash
+    pnpm install
     ```
 
 #### Modo Desarrollo (con recarga automática)
-3.  **Iniciar servidor de desarrollo:**
+4.  **Iniciar servidor de desarrollo:**
     ```bash
-    npm run dev          # Chrome
-    npm run dev:firefox  # Firefox
+    pnpm dev          # Chrome
+    pnpm dev:firefox  # Firefox
     ```
 
 #### Build de Producción
-3.  **Construir la extensión:**
+4.  **Construir la extensión:**
     ```bash
-    npm run build
+    pnpm build
     ```
 
 #### Empaquetado para Distribución
-3.  **Crear paquetes de distribución:**
+4.  **Crear paquetes de distribución:**
     ```bash
-    npm run zip          # Chrome
-    npm run zip:firefox  # Firefox
+    pnpm zip          # Chrome
+    pnpm zip:firefox  # Firefox
     ```
 
 #### Cargar en el Navegador
@@ -90,12 +95,12 @@ Gestiona reglas de dominio y preajustes regex con una interfaz de tarjetas.
 ## Pruebas
 
 ```bash
-npm test                  # Pruebas unitarias
-npm run test:wxt          # Pruebas unitarias (entorno WXT)
-npm run test:e2e          # Pruebas E2E (requiere build previo)
-npm run test:e2e:build    # Build y luego pruebas E2E
-npm run test:e2e:ui       # Pruebas E2E con interfaz Playwright
-npm run storybook         # Documentación de componentes (puerto 6006)
+pnpm test                  # Pruebas unitarias
+pnpm test:wxt          # Pruebas unitarias (entorno WXT)
+pnpm test:e2e          # Pruebas E2E (requiere build previo)
+pnpm test:e2e:build    # Build y luego pruebas E2E
+pnpm test:e2e:ui       # Pruebas E2E con interfaz Playwright
+pnpm storybook         # Documentación de componentes (puerto 6006)
 ```
 
 ## Stack Tecnológico
