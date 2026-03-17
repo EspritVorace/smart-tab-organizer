@@ -57,5 +57,8 @@
   },
   "overrides": {
     "rollup": "npm:@rollup/wasm-node@^4.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "spawn-sync"]
   }
 }
