@@ -11,6 +11,27 @@ export const colorOptions = [
   { value: 'orange', keyLabel: 'color_orange' }
 ] as const;
 
+// Catégories de règles de domaine (chacune associe un emoji + une couleur Chrome)
+export const RULE_CATEGORIES = [
+  { id: 'development',  emoji: '💻', color: 'blue',   labelKey: 'category_development' },
+  { id: 'productivity', emoji: '📋', color: 'purple', labelKey: 'category_productivity' },
+  { id: 'commerce',     emoji: '🛍️', color: 'orange', labelKey: 'category_commerce' },
+  { id: 'travel',       emoji: '✈️',  color: 'cyan',   labelKey: 'category_travel' },
+  { id: 'search',       emoji: '🔍', color: 'yellow', labelKey: 'category_search' },
+  { id: 'social',       emoji: '💬', color: 'pink',   labelKey: 'category_social' },
+  { id: 'media',        emoji: '🎬', color: 'red',    labelKey: 'category_media' },
+  { id: 'cloud',        emoji: '☁️',  color: 'blue',   labelKey: 'category_cloud' },
+  { id: 'finance',      emoji: '💰', color: 'green',  labelKey: 'category_finance' },
+  { id: 'education',    emoji: '🎓', color: 'yellow', labelKey: 'category_education' },
+] as const;
+
+export type RuleCategoryId = typeof RULE_CATEGORIES[number]['id'];
+
+export function getRuleCategory(categoryId?: string | null) {
+  if (!categoryId) return null;
+  return RULE_CATEGORIES.find(c => c.id === categoryId) ?? null;
+}
+
 export const groupNameSourceOptions = [
   { value: 'title', keyLabel: 'groupNameSourceTitle' },
   { value: 'url', keyLabel: 'groupNameSourceUrl' },

@@ -5,10 +5,11 @@ import { X, Edit2, Plus } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { DomainRulesTheme, RegexPresetsTheme } from '../../Form/themes';
 import { RegexPresetsCallouts } from '../../Form/themed-callouts';
-import { generateUUID, getRadixColor } from '../../../utils/utils';
+import { generateUUID } from '../../../utils/utils';
 import { createDomainRuleSchemaWithUniqueness, type DomainRule } from '../../../schemas/domainRule';
-import { groupNameSourceOptions, deduplicationMatchModeOptions, colorOptions } from '../../../schemas/enums';
+import { groupNameSourceOptions, deduplicationMatchModeOptions } from '../../../schemas/enums';
 import { getMessage } from '../../../utils/i18n';
+import { CategoryPicker } from './CategoryPicker';
 import type { SyncSettings } from '../../../types/syncSettings';
 import { FieldLabel, FormField, RadioGroupField } from '../../Form/FormFields';
 import { getPresetById, loadPresets, type Preset } from '../../../utils/presetUtils';
@@ -51,6 +52,7 @@ export function DomainRuleFormModal({
       groupNameSource: rule.groupNameSource,
       deduplicationMatchMode: rule.deduplicationMatchMode,
       color: rule.color,
+      categoryId: rule.categoryId ?? null,
       deduplicationEnabled: rule.deduplicationEnabled,
       presetId: rule.presetId
     } : {
@@ -61,7 +63,7 @@ export function DomainRuleFormModal({
       urlParsingRegEx: '',
       groupNameSource: 'manual',
       deduplicationMatchMode: 'exact',
-      color: 'grey',
+      categoryId: null,
       deduplicationEnabled: true,
       presetId: null
     };
@@ -103,7 +105,6 @@ export function DomainRuleFormModal({
   });
 
   const groupNameSource = watch('groupNameSource');
-  const color = watch('color');
   const deduplicationEnabled = watch('deduplicationEnabled');
 
   // Réinitialiser le formulaire et le configMode quand domainRule change ET que le modal est ouvert
@@ -176,7 +177,11 @@ export function DomainRuleFormModal({
   return (
     <DomainRulesTheme>
     <Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
-      <Dialog.Content>
+      <Dialog.Content onOpenAutoFocus={(e) => {
+        e.preventDefault();
+        const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[name="label"]');
+        input?.focus();
+      }}>
         <Dialog.Title>
           <Flex align="center" gap="2">
             {isEditing ? <Edit2 size={18} aria-hidden="true" /> : <Plus size={18} aria-hidden="true" />}
@@ -202,23 +207,33 @@ export function DomainRuleFormModal({
           <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '60vh' }}>
             <Flex direction="column" gap="4" mt="4" pr="3">
               
-              {/* Label */}
-              <FormField 
-                label={getMessage('labelLabel')} 
-                required={true} 
+              {/* Label + Category */}
+              <FormField
+                label={getMessage('labelLabel')}
+                required={true}
                 error={errors.label}
               >
-                <Controller
-                  name="label"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField.Root
-                      {...field}
-                      placeholder={getMessage('labelPlaceholder')}
-                      style={{ marginTop: '4px' }}
+                <Flex align="center" gap="2" style={{ marginTop: '4px' }}>
+                  <Controller
+                    name="categoryId"
+                    control={control}
+                    render={({ field }) => (
+                      <CategoryPicker value={field.value as any} onChange={field.onChange} />
+                    )}
+                  />
+                  <Box style={{ flex: 1 }}>
+                    <Controller
+                      name="label"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField.Root
+                          {...field}
+                          placeholder={getMessage('labelPlaceholder')}
+                        />
+                      )}
                     />
-                  )}
-                />
+                  </Box>
+                </Flex>
               </FormField>
 
               {/* Domain Filter */}
@@ -438,42 +453,6 @@ export function DomainRuleFormModal({
                 )}
               </Grid>
 
-              {/* Color Selection */}
-              <Separator style={{ width: '100%' }} />
-              <Grid columns="2" gap="4">
-                <Flex direction="column">
-                  <Text as="label" size="2" weight="bold">
-                    {getMessage('color')}
-                  </Text>
-                  <Controller
-                    name="color"
-                    control={control}
-                    render={({ field }) => (
-                      <Select.Root 
-                        value={field.value} 
-                        onValueChange={field.onChange}
-                      >
-                        <Select.Trigger 
-                          variant='soft'
-                          placeholder={getMessage('selectColor')} 
-                          style={{ 
-                            marginTop: '4px',
-                            color: `var(--${getRadixColor(color)}-11)` 
-                          }} 
-                        />
-                        <Select.Content position="popper" side="bottom">
-                          {colorOptions.map((colorOption) => (
-                            <Select.Item key={colorOption.value} value={colorOption.value} style={{ color: `var(--${getRadixColor(colorOption.value)}-11)` }}>
-                              {getMessage(colorOption.keyLabel)}
-                            </Select.Item>
-                          ))}
-                        </Select.Content>
-                      </Select.Root>
-                    )}
-                  />
-                </Flex>
-                <Box />
-              </Grid>
             </Flex>
           </ScrollArea>
 

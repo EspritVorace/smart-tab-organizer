@@ -6,6 +6,7 @@ import { promptForGroupName } from './messaging.js';
 import { showNotification, type UndoAction } from '../utils/notifications.js';
 import { getMessage } from '../utils/i18n.js';
 import type { DomainRuleSetting, SyncSettings } from '../types/syncSettings.js';
+import { getRuleCategory } from '../schemas/enums.js';
 
 export interface GroupingContext {
     rule: DomainRuleSetting;
@@ -19,13 +20,17 @@ export function findMatchingRule(url: string, domainRules: DomainRuleSetting[]):
     return domainRules.find(r => r.enabled && matchesDomain(url, r.domainFilter));
 }
 
-export function determineGroupColor(rule: DomainRuleSetting, settings: any): string | null {
+export function determineGroupColor(rule: DomainRuleSetting, settings?: any): string | null {
+    const category = getRuleCategory(rule.categoryId);
+    if (category) {
+        console.log(`[GROUPING_DEBUG] Using category "${rule.categoryId}" color: "${category.color}".`);
+        return category.color;
+    }
     if (rule.color) {
-        console.log(`[GROUPING_DEBUG] Using rule color: "${rule.color}".`);
+        console.log(`[GROUPING_DEBUG] Using legacy rule color: "${rule.color}".`);
         return rule.color;
     }
-    
-    console.log(`[GROUPING_DEBUG] Rule has no color defined.`);
+    console.log(`[GROUPING_DEBUG] Rule has no category or color defined.`);
     return null;
 }
 
@@ -87,6 +92,9 @@ export function extractGroupNameFromRule(rule: DomainRuleSetting, openerTab: Bro
         }
     }
     
+    const category = getRuleCategory(rule.categoryId);
+    if (category) groupName = `${category.emoji} ${groupName}`;
+
     return groupName;
 }
 

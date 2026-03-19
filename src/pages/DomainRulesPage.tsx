@@ -7,6 +7,7 @@ import { ImportWizard } from '../components/UI/ImportExportPage/ImportWizard';
 import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { getMessage } from '../utils/i18n';
 import { generateUUID, getRadixColor } from '../utils/utils';
+import { getRuleCategory } from '../schemas/enums';
 import type { SyncSettings, DomainRuleSetting } from '../types/syncSettings';
 import type { DomainRule } from '../schemas/domainRule';
 
@@ -332,14 +333,19 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                       <Flex align="center" gap="3" role="gridcell" style={{ flex: 1, minWidth: 0 }}>
                         <HoverCard.Root>
                           <HoverCard.Trigger>
-                            <Badge
-                              color={getRadixColor(rule.color) as any}
-                              variant="solid"
-                              size="2"
-                              style={{ cursor: 'pointer', flexShrink: 0 }}
-                            >
-                              {rule.label}
-                            </Badge>
+                            {(() => {
+                              const category = getRuleCategory(rule.categoryId);
+                              return (
+                                <Badge
+                                  color={(category ? getRadixColor(category.color) : 'gray') as any}
+                                  variant="solid"
+                                  size="2"
+                                  style={{ cursor: 'pointer', flexShrink: 0 }}
+                                >
+                                  {category ? `${category.emoji} ` : ''}{rule.label}
+                                </Badge>
+                              );
+                            })()}
                           </HoverCard.Trigger>
                           <HoverCard.Content size="2" style={{ maxWidth: 400 }}>
                             <Flex direction="column" gap="3">
@@ -355,8 +361,18 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
 
                                 <Text size="1" weight="bold" color="gray">{getMessage('tabGroupColor')}</Text>
                                 <Flex align="center" gap="2">
-                                  <div style={{ width: '16px', height: '16px', backgroundColor: `var(--${getRadixColor(rule.color)}-9)`, borderRadius: '4px', border: '1px solid var(--gray-6)' }} />
-                                  <Text size="2">{getMessage(`color_${rule.color}`)}</Text>
+                                  {(() => {
+                                    const cat = getRuleCategory(rule.categoryId);
+                                    if (cat) {
+                                      return (
+                                        <>
+                                          <div style={{ width: '16px', height: '16px', backgroundColor: `var(--${getRadixColor(cat.color)}-9)`, borderRadius: '50%', border: '1px solid var(--gray-6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>{cat.emoji}</div>
+                                          <Text size="2">{getMessage(cat.labelKey as any)}</Text>
+                                        </>
+                                      );
+                                    }
+                                    return <Text size="2" color="gray">{getMessage('categoryNone')}</Text>;
+                                  })()}
                                 </Flex>
 
                                 <Text size="1" weight="bold" color="gray">{getMessage('groupNameSource')}</Text>

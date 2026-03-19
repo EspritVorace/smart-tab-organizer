@@ -15,7 +15,8 @@ import {
   type RuleClassification,
   type ConflictingRule
 } from '../../../utils/importClassification';
-import { generateUUID } from '../../../utils/utils';
+import { generateUUID, getRadixColor } from '../../../utils/utils';
+import { getRuleCategory } from '../../../schemas/enums';
 import type { DomainRuleSetting, SyncSettings } from '../../../types/syncSettings';
 
 type ConflictMode = 'overwrite' | 'duplicate' | 'ignore';
@@ -533,9 +534,17 @@ function RuleRow({ rule, checkbox, checked, onToggle, dimmed, statusBadge }: Rul
         <Text size="2" weight="medium">{rule.label}</Text>
         <Text size="1" color="gray">{rule.domainFilter}</Text>
       </Flex>
-      <Badge color={rule.color as any} variant="soft" size="1">
-        {getMessage(`color_${rule.color}`)}
-      </Badge>
+      {(() => {
+        const cat = getRuleCategory(rule.categoryId);
+        if (cat) {
+          return (
+            <Badge color={getRadixColor(cat.color) as any} variant="soft" size="1">
+              {cat.emoji} {getMessage(cat.labelKey as any)}
+            </Badge>
+          );
+        }
+        return null;
+      })()}
       {statusBadge && (
         <Badge color="gray" variant="outline" size="1">
           {statusBadge}
