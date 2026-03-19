@@ -1,7 +1,7 @@
 import { type Preset, type PresetsFile, presetsFileSchema } from '../types/preset.js';
 
 // Re-export types pour faciliter l'import
-export type { Preset, PresetsFile } from '../types/preset.js';
+export type { Preset, PresetsFile, PresetCategory } from '../types/preset.js';
 
 // Cache pour les presets
 let presetsCache: PresetsFile | null = null;
