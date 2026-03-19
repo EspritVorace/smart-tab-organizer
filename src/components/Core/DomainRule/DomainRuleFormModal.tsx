@@ -11,8 +11,9 @@ import { groupNameSourceOptions, deduplicationMatchModeOptions } from '../../../
 import { getMessage } from '../../../utils/i18n';
 import { CategoryPicker } from './CategoryPicker';
 import type { SyncSettings } from '../../../types/syncSettings';
-import { FieldLabel, FormField, RadioGroupField } from '../../Form/FormFields';
-import { getPresetById, loadPresets, type Preset } from '../../../utils/presetUtils';
+import { FieldLabel, FormField, RadioGroupField, SearchableSelect } from '../../Form/FormFields';
+import { getPresetById, loadPresets, type PresetCategory } from '../../../utils/presetUtils';
+import { presetsToSearchableGroups } from '../../../utils/presetsToSearchableGroups';
 
 interface DomainRuleFormModalProps {
   isOpen: boolean;
@@ -30,7 +31,7 @@ export function DomainRuleFormModal({
   syncSettings
 }: DomainRuleFormModalProps) {
   const isEditing = !!domainRule;
-  const [presetCategories, setPresetCategories] = useState<any[]>([]);
+  const [presetCategories, setPresetCategories] = useState<PresetCategory[]>([]);
   const [isLoadingPresets, setIsLoadingPresets] = useState(false);
   
   // Local state for config mode - calculated only when domainRule changes
@@ -126,7 +127,7 @@ export function DomainRuleFormModal({
 
   // Gérer la sélection d'un preset
   const handlePresetChange = useCallback(async (selectedPresetId: string) => {
-    if (selectedPresetId === 'null') {
+    if (!selectedPresetId) {
       setValue('presetId', null);
       return;
     }
@@ -301,38 +302,22 @@ export function DomainRuleFormModal({
                 {configMode === 'preset' && presetCategories.length > 0 && !isLoadingPresets ? (
                   <RegexPresetsTheme>
                   <Flex direction="column">
-                    <Text as="label" size="2" weight="bold">
+                    <Text as="label" htmlFor="presetId" size="2" weight="bold">
                       {getMessage('presetRuleLabel')}
                     </Text>
                     <Controller
                       name="presetId"
                       control={control}
                       render={({ field }) => (
-                        <Select.Root
-                          value={field.value === null ? 'null' : field.value}
+                        <SearchableSelect
+                          id="presetId"
+                          value={field.value ?? ''}
                           onValueChange={handlePresetChange}
-                        >
-                          <Select.Trigger
-                            variant="soft"
-                            placeholder={getMessage('selectPreset')}
-                            style={{ marginTop: '4px' }}
-                          />
-                          <Select.Content>
-                            <Select.Item value="null">
-                              {getMessage('noPresetSelected')}
-                            </Select.Item>
-                            {presetCategories.map((category) => (
-                              <Select.Group key={category.name}>
-                                <Select.Label>{category.name}</Select.Label>
-                                {category.presets.map((preset: Preset) => (
-                                  <Select.Item key={preset.id} value={preset.id}>
-                                    {preset.name}
-                                  </Select.Item>
-                                ))}
-                              </Select.Group>
-                            ))}
-                          </Select.Content>
-                        </Select.Root>
+                          groups={presetsToSearchableGroups(presetCategories)}
+                          placeholder={getMessage('selectPresetPlaceholder')}
+                          searchPlaceholder={getMessage('searchPresetPlaceholder')}
+                          emptyMessage={getMessage('noPresetFound')}
+                        />
                       )}
                     />
                   </Flex>

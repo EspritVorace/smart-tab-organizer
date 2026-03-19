@@ -56,6 +56,8 @@
   "noPresetSelected": { "message": "Ningún preset seleccionado" },
   "selectPreset": { "message": "Seleccionar un preset..." },
   "searchPreset": { "message": "Buscar presets..." },
+  "selectPresetPlaceholder": { "message": "Elegir un preset..." },
+  "searchPresetPlaceholder": { "message": "Buscar un preset..." },
   "noPresetFound": { "message": "Ningún preset encontrado" },
   "loadingPresets": { "message": "Cargando presets..." },
   "enableSelected": { "message": "Activar Seleccionados" },
