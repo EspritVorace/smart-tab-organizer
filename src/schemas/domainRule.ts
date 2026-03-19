@@ -21,7 +21,8 @@ export const domainRuleSchema = z.object({
   urlParsingRegEx: createRegexValidator(true),
   groupNameSource: z.enum(groupNameSourceOptions.map(opt => opt.value) as [GroupNameSourceValue, ...GroupNameSourceValue[]]),
   deduplicationMatchMode: z.enum(deduplicationMatchModeOptions.map(opt => opt.value) as [DeduplicationMatchModeValue, ...DeduplicationMatchModeValue[]]),
-  color: z.enum(colorOptions.map(opt => opt.value) as [ColorValue, ...ColorValue[]]),
+  color: z.enum(colorOptions.map(opt => opt.value) as [ColorValue, ...ColorValue[]]).optional(),
+  categoryId: z.string().optional().nullable(),
   deduplicationEnabled: z.boolean().default(true),
   presetId: z.string().nullable()
 }).refine((data) => {

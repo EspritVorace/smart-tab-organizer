@@ -6,6 +6,8 @@ import { WizardStepper } from '../WizardStepper';
 import { SplitButton } from '../SplitButton/SplitButton';
 import { getMessage } from '../../../utils/i18n';
 import { showSuccessNotification } from '../../../utils/notifications';
+import { getRuleCategory } from '../../../schemas/enums';
+import { getRadixColor } from '../../../utils/utils';
 import type { DomainRuleSetting } from '../../../types/syncSettings';
 
 interface ExportWizardProps {
@@ -164,13 +166,17 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
                         <Text size="2" weight="medium">{rule.label}</Text>
                         <Text size="1" color="gray">{rule.domainFilter}</Text>
                       </Flex>
-                      <Badge
-                        color={rule.color as any}
-                        variant="soft"
-                        size="1"
-                      >
-                        {getMessage(`color_${rule.color}`)}
-                      </Badge>
+                      {(() => {
+                        const cat = getRuleCategory(rule.categoryId);
+                        if (cat) {
+                          return (
+                            <Badge color={getRadixColor(cat.color) as any} variant="soft" size="1">
+                              {cat.emoji} {getMessage(cat.labelKey as any)}
+                            </Badge>
+                          );
+                        }
+                        return null;
+                      })()}
                       {!rule.enabled && (
                         <Badge color="gray" variant="outline" size="1">
                           {getMessage('disabled')}
