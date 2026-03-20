@@ -430,7 +430,7 @@ export function DomainRuleFormModal({
                           />
                           <Select.Content>
                             {groupNameSourceOptions
-                              .filter(option => option.value !== 'manual')
+                              .filter(option => option.value !== 'manual' && option.value !== 'smart_preset')
                               .map((option) => (
                                 <Select.Item key={option.value} value={option.value}>
                                   {getMessage(option.keyLabel)}
@@ -451,7 +451,7 @@ export function DomainRuleFormModal({
                           manual: 'groupNameSourceManualHelp',
                           smart: 'groupNameSourceSmartHelp',
                           smart_manual: 'groupNameSourceSmartManualHelp',
-                          smart_preset: 'groupNameSourceSmartPresetHelp',
+                          smart_preset: 'groupNameSourceSmartPresetHelp', // legacy only
                           smart_label: 'groupNameSourceSmartLabelHelp',
                         } as const)[groupNameSource])}
                       </Callout.Text>
