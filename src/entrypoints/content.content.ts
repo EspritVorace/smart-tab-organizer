@@ -2,6 +2,7 @@ import { defineContentScript } from 'wxt/utils/define-content-script';
 import { browser, Browser } from 'wxt/browser';
 import { getMessage } from '../utils/i18n';
 import type { MiddleClickMessage, AskGroupNameMessage, GroupNameResponse, ContentMessage } from '../types/messages.js';
+import { logger } from '../utils/logger';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -19,7 +20,7 @@ export default defineContentScript({
             { type: 'middleClickLink', url: (target as HTMLAnchorElement).href } as MiddleClickMessage,
             () => {
               if (browser.runtime.lastError)
-                console.error('Msg err:', browser.runtime.lastError.message);
+                logger.error('Msg err:', browser.runtime.lastError.message);
             }
           );
         }
@@ -36,7 +37,7 @@ export default defineContentScript({
           { type: 'middleClickLink', url: (target as HTMLAnchorElement).href } as MiddleClickMessage,
           () => {
             if (browser.runtime.lastError)
-              console.error('Msg err:', browser.runtime.lastError.message);
+              logger.error('Msg err:', browser.runtime.lastError.message);
           }
         );
       }
@@ -48,7 +49,7 @@ export default defineContentScript({
     browser.runtime.onMessage.addListener((req: ContentMessage, sender: Browser.runtime.MessageSender, sendResponse: (response: GroupNameResponse) => void) => {
       if (req.type === 'askGroupName') {
         if (sender.id !== browser.runtime.id) {
-          console.warn('Ignored askGroupName from unknown sender', sender);
+          logger.warn('Ignored askGroupName from unknown sender', sender);
           sendResponse({ name: null });
           return;
         }

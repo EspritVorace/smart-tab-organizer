@@ -46,7 +46,7 @@ export function extractGroupNameFromRule(rule: DomainRuleSetting, openerTab: Bro
                 logger.debug(`[GROUPING_DEBUG] Group name extracted from opener title "${openerTab.title}" using regex "${rule.titleParsingRegEx}": "${groupName}".`);
             }
         } catch (e) {
-            console.warn(`[GROUPING_DEBUG] Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}".`, e.message);
+            logger.warn(`[GROUPING_DEBUG] Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}".`, e.message);
         }
     } else if (rule.groupNameSource === 'url' && openerTab.url && rule.urlParsingRegEx) {
         try {
@@ -56,7 +56,7 @@ export function extractGroupNameFromRule(rule: DomainRuleSetting, openerTab: Bro
                 logger.debug(`[GROUPING_DEBUG] Group name extracted from opener URL "${openerTab.url}" using regex "${rule.urlParsingRegEx}": "${groupName}".`);
             }
         } catch (e) {
-            console.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with regex "${rule.urlParsingRegEx}".`, e.message);
+            logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with regex "${rule.urlParsingRegEx}".`, e.message);
         }
     } else if (rule.groupNameSource === 'smart_manual') {
         // smart_manual: Si on ne trouve pas de nom de groupe, le demander à l'utilisateur
@@ -114,7 +114,7 @@ function tryExtractGroupNameFromPresetOrFallback(rule: DomainRuleSetting, opener
                 return extracted.trim();
             }
         } catch (e) {
-            console.warn(`[GROUPING_DEBUG] Error parsing opener title "${openerTab.title}" with preset "${rule.presetId}" regex "${rule.titleParsingRegEx}".`, e.message);
+            logger.warn(`[GROUPING_DEBUG] Error parsing opener title "${openerTab.title}" with preset "${rule.presetId}" regex "${rule.titleParsingRegEx}".`, e.message);
         }
     }
     
@@ -127,7 +127,7 @@ function tryExtractGroupNameFromPresetOrFallback(rule: DomainRuleSetting, opener
                 return extracted.trim();
             }
         } catch (e) {
-            console.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with preset "${rule.presetId}" regex "${rule.urlParsingRegEx}".`, e.message);
+            logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with preset "${rule.presetId}" regex "${rule.urlParsingRegEx}".`, e.message);
         }
     }
     
@@ -203,7 +203,7 @@ export async function handleManualGroupNaming(
             await browser.tabs.ungroup(groupedTabIds as [number, ...number[]]);
             logger.debug(`[GROUPING_DEBUG] Manual prompt cancelled. Ungrouped tabs ${groupedTabIds.join(', ')} from group ${targetGroupId}.`);
         } catch (ungroupErr) {
-            console.error('[GROUPING_DEBUG] Failed to ungroup after manual cancel', ungroupErr);
+            logger.error('[GROUPING_DEBUG] Failed to ungroup after manual cancel', ungroupErr);
         }
     }
 }
@@ -275,14 +275,14 @@ export async function processGroupingForNewTab(openerTab: Browser.tabs.Tab, newT
             });
         }
     } catch (error) {
-        console.error(`[GROUPING_DEBUG] Error during grouping for new tab ${newTab.id}:`, error);
+        logger.error(`[GROUPING_DEBUG] Error during grouping for new tab ${newTab.id}:`, error);
         if (error.message && (
             error.message.toLowerCase().includes("no tab with id") ||
             error.message.toLowerCase().includes("no tab group with id") ||
             error.message.toLowerCase().includes("cannot group tab in a closed window") ||
             error.message.toLowerCase().includes("invalid tab id")
         )) {
-            console.warn(`[GROUPING_DEBUG] The error suggests a tab/group/window was closed or ID was invalid during operation.`);
+            logger.warn(`[GROUPING_DEBUG] The error suggests a tab/group/window was closed or ID was invalid during operation.`);
         }
     }
 }

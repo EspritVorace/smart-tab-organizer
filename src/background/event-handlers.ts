@@ -24,7 +24,7 @@ export function setupMessageHandler(): void {
                 request.profileId as string,
                 request.target as 'current' | 'new',
                 request.windowId as number | undefined,
-            ).catch(e => console.error('[RESTORE_PROFILE] Error:', e));
+            ).catch(e => logger.error('[RESTORE_PROFILE] Error:', e));
             return false;
         }
         handleMiddleClickMessage(request, sender, sendResponse);
@@ -40,7 +40,7 @@ async function handleProfileRestore(
     const sessions = await loadSessions();
     const session = sessions.find(s => s.id === profileId);
     if (!session) {
-        console.warn(`[RESTORE_PROFILE] Session ${profileId} not found`);
+        logger.warn(`[RESTORE_PROFILE] Session ${profileId} not found`);
         return;
     }
 
@@ -69,7 +69,7 @@ async function handleProfileRestore(
 export function setupWindowRemovedHandler(): void {
     browser.windows.onRemoved.addListener((windowId: number) => {
         handleWindowRemoved(windowId)
-            .catch(e => console.error('[WINDOW_REMOVED] Error:', e));
+            .catch(e => logger.error('[WINDOW_REMOVED] Error:', e));
     });
 }
 
@@ -140,7 +140,7 @@ export function setupTabCreatedHandler(): void {
             if (e.message && e.message.toLowerCase().includes("no tab with id")) {
                 logger.debug(`[GROUPING_DEBUG] onCreated: Opener tab ${openerIdFromMap} was closed.`);
             } else {
-                console.error(`[GROUPING_DEBUG] onCreated: Error getting opener tab ${openerIdFromMap}:`, e);
+                logger.error(`[GROUPING_DEBUG] onCreated: Error getting opener tab ${openerIdFromMap}:`, e);
             }
         }
     });
@@ -179,7 +179,7 @@ export function setupTabUpdatedHandler(): void {
                         logger.debug(`[GROUPING_DEBUG] onUpdated: URL-based match, registered pending grouping for tab ${tabId}.`);
                     }
                 } catch (e) {
-                    console.warn(`[GROUPING_DEBUG] onUpdated: Opener tab ${openerTabId} not found for URL-based match.`);
+                    logger.warn(`[GROUPING_DEBUG] onUpdated: Opener tab ${openerTabId} not found for URL-based match.`);
                 }
             }
         }

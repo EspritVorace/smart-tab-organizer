@@ -87,7 +87,7 @@ export async function focusAndReloadTab(duplicateTab: Browser.tabs.Tab): Promise
             // Échec silencieux si reload impossible
         }
     } catch (e) { 
-        console.warn("Could not focus duplicate tab:", e);
+        logger.warn("Could not focus duplicate tab:", e);
     }
 }
 
@@ -95,7 +95,7 @@ export async function removeDuplicateTab(tabId: number): Promise<void> {
     try { 
         await browser.tabs.remove(tabId); 
     } catch (e) { 
-        console.warn("Could not remove duplicate tab:", e);
+        logger.warn("Could not remove duplicate tab:", e);
     }
 }
 
@@ -132,7 +132,7 @@ export async function checkAndDeduplicateTab(
             }
         }
     } catch (queryError) {
-        console.error("Deduplication: Error querying tabs:", queryError);
+        logger.error("Deduplication: Error querying tabs:", queryError);
     }
 }
 
@@ -165,7 +165,7 @@ export async function processTabForDeduplication(
     try {
         await checkAndDeduplicateTab(tabId, urlToCheck, matchMode, windowId, settings);
     } catch (error) {
-        console.error("Deduplication error:", error);
+        logger.error("Deduplication error:", error);
     }
 }
 

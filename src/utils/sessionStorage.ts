@@ -1,6 +1,7 @@
 import { browser } from 'wxt/browser';
 import type { Session } from '../types/session';
 import { sessionsArraySchema } from '../schemas/session';
+import { logger } from './logger.js';
 
 const SESSIONS_STORAGE_KEY = 'sessions';
 
@@ -13,10 +14,10 @@ export async function loadSessions(): Promise<Session[]> {
     if (parsed.success) {
       return parsed.data as Session[];
     }
-    console.warn('Sessions storage validation failed:', parsed.error);
+    logger.warn('Sessions storage validation failed:', parsed.error);
     return [];
   } catch (error) {
-    console.error('Error loading sessions:', error);
+    logger.error('Error loading sessions:', error);
     return [];
   }
 }

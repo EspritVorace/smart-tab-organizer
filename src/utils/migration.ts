@@ -37,7 +37,7 @@ async function loadDefaultSettings(): Promise<SyncSettings> {
     cachedDefaultSettings = await response.json();
     return cachedDefaultSettings!;
   } catch (error) {
-    console.error("Cannot load defaults:", error);
+    logger.error("Cannot load defaults:", error);
     return defaultSyncSettings;
   }
 }

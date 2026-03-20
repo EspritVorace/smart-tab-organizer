@@ -14,7 +14,7 @@ export function handleMiddleClickMessage(
             logger.debug(`[GROUPING_DEBUG] Middle click registered: URL ${request.url} from tab ${sender.tab.id}`);
             sendResponse({ status: "received" });
         } else {
-            console.warn("[GROUPING_DEBUG] Middle click message received without valid sender.tab.id");
+            logger.warn("[GROUPING_DEBUG] Middle click message received without valid sender.tab.id");
             sendResponse({ status: "error", message: "Missing sender tab ID" });
         }
     }
@@ -28,7 +28,7 @@ export async function promptForGroupName(defaultName: string, tabId: number): Pr
         });
         return response?.name && response.name.trim() ? response.name.trim() : null;
     } catch (e) {
-        console.error('promptForGroupName error', e);
+        logger.error('promptForGroupName error', e);
         return null;
     }
 }

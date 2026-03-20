@@ -14,6 +14,7 @@ import type { SyncSettings } from '../../../types/syncSettings';
 import { FieldLabel, FormField, RadioGroupField, SearchableSelect } from '../../Form/FormFields';
 import { getPresetById, loadPresets, type PresetCategory } from '../../../utils/presetUtils';
 import { presetsToSearchableGroups } from '../../../utils/presetsToSearchableGroups';
+import { logger } from '../../../utils/logger';
 
 interface DomainRuleFormModalProps {
   isOpen: boolean;
@@ -79,7 +80,7 @@ export function DomainRuleFormModal({
         const presetsFile = await loadPresets();
         setPresetCategories(presetsFile.categories);
       } catch (error) {
-        console.error('Error loading presets:', error);
+        logger.error('Error loading presets:', error);
       } finally {
         setIsLoadingPresets(false);
       }

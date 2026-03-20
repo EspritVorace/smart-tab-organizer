@@ -1,6 +1,7 @@
 import { browser } from 'wxt/browser';
 import type { SyncSettings } from '../types/syncSettings.js';
 import { defaultSyncSettings } from '../types/syncSettings.js';
+import { logger } from './logger.js';
 
 /**
  * Utilitaires pour les settings utilisables dans tous les contextes
@@ -12,7 +13,7 @@ export async function getSyncSettings(): Promise<SyncSettings> {
     const result = await browser.storage.sync.get({ ...defaultSyncSettings });
     return result as unknown as SyncSettings;
   } catch (error) {
-    console.error('Error getting sync settings:', error);
+    logger.error('Error getting sync settings:', error);
     return defaultSyncSettings;
   }
 }
@@ -21,7 +22,7 @@ export async function setSyncSettings(settings: SyncSettings): Promise<void> {
   try {
     await browser.storage.sync.set(settings);
   } catch (error) {
-    console.error('Error setting sync settings:', error);
+    logger.error('Error setting sync settings:', error);
   }
 }
 
@@ -29,7 +30,7 @@ export async function updateSyncSettings(updates: Partial<SyncSettings>): Promis
   try {
     await browser.storage.sync.set(updates);
   } catch (error) {
-    console.error('Error updating sync settings:', error);
+    logger.error('Error updating sync settings:', error);
   }
 }
 
@@ -40,7 +41,7 @@ export async function getGlobalGroupingEnabled(): Promise<boolean> {
     });
     return result.globalGroupingEnabled as boolean;
   } catch (error) {
-    console.error('Error getting global grouping enabled:', error);
+    logger.error('Error getting global grouping enabled:', error);
     return defaultSyncSettings.globalGroupingEnabled;
   }
 }
@@ -52,7 +53,7 @@ export async function getGlobalDeduplicationEnabled(): Promise<boolean> {
     });
     return result.globalDeduplicationEnabled as boolean;
   } catch (error) {
-    console.error('Error getting global deduplication enabled:', error);
+    logger.error('Error getting global deduplication enabled:', error);
     return defaultSyncSettings.globalDeduplicationEnabled;
   }
 }
@@ -64,7 +65,7 @@ export async function getDomainRules(): Promise<SyncSettings['domainRules']> {
     });
     return result.domainRules as SyncSettings['domainRules'];
   } catch (error) {
-    console.error('Error getting domain rules:', error);
+    logger.error('Error getting domain rules:', error);
     return defaultSyncSettings.domainRules;
   }
 }
