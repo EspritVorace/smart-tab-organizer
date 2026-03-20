@@ -99,7 +99,7 @@ Always use `getMessage()` from `src/utils/i18n.ts` — for UI text, `aria-label`
 ### Browser API
 - **Always use `browser.*` from WXT** — never use the native `chrome.*` global in `src/` code.
 - Import: `import { browser } from 'wxt/browser'` (or rely on the WXT global injection).
-- `chrome.*` is only acceptable inside Playwright `serviceWorker.evaluate()` callbacks in `tests/e2e/`, where the native extension context exposes the `chrome` global directly.
+- **E2E tests (`tests/e2e/`)** currently use `chrome.*` inside `serviceWorker.evaluate()` callbacks — this is a **known limitation**: Playwright extension support for Firefox uses background pages (not service workers) and `browser.*` as the native global, so the entire E2E fixture layer would need a separate Firefox implementation to support cross-browser E2E.
 
 ### Type Safety
 - No `any` — use precise types or unknown with narrowing.
