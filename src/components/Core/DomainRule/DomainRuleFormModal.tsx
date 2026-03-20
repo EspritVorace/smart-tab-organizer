@@ -1,7 +1,7 @@
-import { Dialog, Button, Flex, Text, TextField, Switch, Select, Box, Separator, Grid, ScrollArea } from '@radix-ui/themes';
+import { Dialog, Button, Flex, Text, TextField, Switch, Select, Box, Separator, Grid, ScrollArea, SegmentedControl, Callout } from '@radix-ui/themes';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { X, Edit2, Plus } from 'lucide-react';
+import { X, Edit2, Plus, Info } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { DomainRulesTheme, RegexPresetsTheme } from '../../Form/themes';
 import { RegexPresetsCallouts } from '../../Form/themed-callouts';
@@ -259,73 +259,55 @@ export function DomainRuleFormModal({
               <Separator style={{ width: '100%' }} />
 
               {/* Configuration Mode Selection */}
-              <Grid columns="2" gap="4">
-                <Flex direction="column">
-                  <Text as="label" size="2" weight="bold">
-                    {getMessage('configurationMode')}
-                  </Text>
-                  <Flex direction="row" gap="4" wrap="wrap" style={{ marginTop: '4px' }}>
-                    <Flex align="center" gap="2">
-                      <input
-                        type="radio"
-                        name="configMode"
-                        value="preset"
-                        checked={configMode === 'preset'}
-                        onChange={() => handleConfigModeChange('preset')}
-                      />
-                      <Text size="2">{getMessage('configModePreset')}</Text>
-                    </Flex>
-                    <Flex align="center" gap="2">
-                      <input
-                        type="radio"
-                        name="configMode"
-                        value="ask"
-                        checked={configMode === 'ask'}
-                        onChange={() => handleConfigModeChange('ask')}
-                      />
-                      <Text size="2">{getMessage('configModeAsk')}</Text>
-                    </Flex>
-                    <Flex align="center" gap="2">
-                      <input
-                        type="radio"
-                        name="configMode"
-                        value="manual"
-                        checked={configMode === 'manual'}
-                        onChange={() => handleConfigModeChange('manual')}
-                      />
-                      <Text size="2">{getMessage('configModeManual')}</Text>
-                    </Flex>
-                  </Flex>
-                </Flex>
+              <Flex direction="column" gap="1">
+                <Text as="label" size="2" weight="bold">
+                  {getMessage('configurationMode')}
+                </Text>
+                <SegmentedControl.Root
+                  value={configMode}
+                  onValueChange={(v) => handleConfigModeChange(v as 'preset' | 'ask' | 'manual')}
+                  size="2"
+                >
+                  <SegmentedControl.Item value="preset">{getMessage('configModePreset')}</SegmentedControl.Item>
+                  <SegmentedControl.Item value="ask">{getMessage('configModeAsk')}</SegmentedControl.Item>
+                  <SegmentedControl.Item value="manual">{getMessage('configModeManual')}</SegmentedControl.Item>
+                </SegmentedControl.Root>
+                <Callout.Root size="1" color="gray" variant="surface">
+                  <Callout.Icon><Info size={14} aria-hidden="true" /></Callout.Icon>
+                  <Callout.Text>
+                    {getMessage(({ preset: 'configModePresetHelp', ask: 'configModeAskHelp', manual: 'configModeManualHelp' } as const)[configMode])}
+                  </Callout.Text>
+                </Callout.Root>
+              </Flex>
 
-                {/* Preset Selection - only shown when preset mode is selected */}
-                {configMode === 'preset' && presetCategories.length > 0 && !isLoadingPresets ? (
+              {/* Preset Selection - only shown when preset mode is selected */}
+              {configMode === 'preset' && presetCategories.length > 0 && !isLoadingPresets && (
+                <Grid columns="2" gap="4">
                   <RegexPresetsTheme>
-                  <Flex direction="column">
-                    <Text as="label" htmlFor="presetId" size="2" weight="bold">
-                      {getMessage('presetRuleLabel')}
-                    </Text>
-                    <Controller
-                      name="presetId"
-                      control={control}
-                      render={({ field }) => (
-                        <SearchableSelect
-                          id="presetId"
-                          value={field.value ?? ''}
-                          onValueChange={handlePresetChange}
-                          groups={presetsToSearchableGroups(presetCategories)}
-                          placeholder={getMessage('selectPresetPlaceholder')}
-                          searchPlaceholder={getMessage('searchPresetPlaceholder')}
-                          emptyMessage={getMessage('noPresetFound')}
-                        />
-                      )}
-                    />
-                  </Flex>
+                    <Flex direction="column" gap="1">
+                      <Text as="label" htmlFor="presetId" size="2" weight="bold">
+                        {getMessage('presetRuleLabel')}
+                      </Text>
+                      <Controller
+                        name="presetId"
+                        control={control}
+                        render={({ field }) => (
+                          <SearchableSelect
+                            id="presetId"
+                            value={field.value ?? ''}
+                            onValueChange={handlePresetChange}
+                            groups={presetsToSearchableGroups(presetCategories)}
+                            placeholder={getMessage('selectPresetPlaceholder')}
+                            searchPlaceholder={getMessage('searchPresetPlaceholder')}
+                            emptyMessage={getMessage('noPresetFound')}
+                          />
+                        )}
+                      />
+                    </Flex>
                   </RegexPresetsTheme>
-                ) : (
                   <Box />
-                )}
-              </Grid>
+                </Grid>
+              )}
 
               {configMode === 'manual' && (
                 <Grid columns="2" gap="4">
@@ -343,7 +325,6 @@ export function DomainRuleFormModal({
                           onValueChange={field.onChange}
                         >
                           <Select.Trigger
-                            variant="soft"
                             placeholder={getMessage('selectGroupNameSource')}
                             style={{ marginTop: '4px' }}
                           />
@@ -358,7 +339,22 @@ export function DomainRuleFormModal({
                       )}
                     />
                   </Flex>
-                  <Box />
+                  <Flex align="end">
+                    <Callout.Root size="1" color="gray" variant="surface">
+                      <Callout.Icon><Info size={14} aria-hidden="true" /></Callout.Icon>
+                      <Callout.Text>
+                        {getMessage(({
+                          title: 'groupNameSourceTitleHelp',
+                          url: 'groupNameSourceUrlHelp',
+                          manual: 'groupNameSourceManualHelp',
+                          smart: 'groupNameSourceSmartHelp',
+                          smart_manual: 'groupNameSourceSmartManualHelp',
+                          smart_preset: 'groupNameSourceSmartPresetHelp',
+                          smart_label: 'groupNameSourceSmartLabelHelp',
+                        } as const)[groupNameSource])}
+                      </Callout.Text>
+                    </Callout.Root>
+                  </Flex>
                 </Grid>
               )}
 
