@@ -1,5 +1,6 @@
 import { browser, Browser } from 'wxt/browser';
 import { incrementStat } from '../utils/statisticsUtils.js';
+import { logger } from '../utils/logger.js';
 import { matchesDomain } from '../utils/utils.js';
 import { getSettings } from './settings.js';
 import { showNotification, type UndoAction } from '../utils/notifications.js';
@@ -109,7 +110,7 @@ export async function checkAndDeduplicateTab(
         const duplicateTab = await findDuplicateTab(currentTabId, newUrl, matchMode, windowId);
 
         if (duplicateTab) {
-            console.log(`[DEDUPLICATION] Duplicate found: ${newUrl} (keeping tab ${duplicateTab.id}, removing ${currentTabId})`);
+            logger.debug(`[DEDUPLICATION] Duplicate found: ${newUrl} (keeping tab ${duplicateTab.id}, removing ${currentTabId})`);
 
             await incrementStat('tabsDeduplicatedCount');
             await focusAndReloadTab(duplicateTab);

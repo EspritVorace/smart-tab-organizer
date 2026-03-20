@@ -1,4 +1,5 @@
 import { browser, Browser } from 'wxt/browser';
+import { logger } from '../utils/logger.js';
 
 export const middleClickedTabs = new Map<string, number>();
 
@@ -10,7 +11,7 @@ export function handleMiddleClickMessage(
     if (request.type === "middleClickLink") {
         if (sender.tab && sender.tab.id) {
             middleClickedTabs.set(request.url, sender.tab.id);
-            console.log(`[GROUPING_DEBUG] Middle click registered: URL ${request.url} from tab ${sender.tab.id}`);
+            logger.debug(`[GROUPING_DEBUG] Middle click registered: URL ${request.url} from tab ${sender.tab.id}`);
             sendResponse({ status: "received" });
         } else {
             console.warn("[GROUPING_DEBUG] Middle click message received without valid sender.tab.id");
@@ -42,16 +43,16 @@ export function findMiddleClickOpener(newTab: Browser.tabs.Tab): number | null {
     if (urlToCheck && middleClickedTabs.has(urlToCheck) && middleClickedTabs.get(urlToCheck) === newTab.openerTabId) {
         const openerIdFromMap = middleClickedTabs.get(urlToCheck);
         middleClickedTabs.delete(urlToCheck);
-        console.log(`[GROUPING_DEBUG] Direct match for openerIdFromMap: ${openerIdFromMap} (URL: "${urlToCheck}")`);
+        logger.debug(`[GROUPING_DEBUG] Direct match for openerIdFromMap: ${openerIdFromMap} (URL: "${urlToCheck}")`);
         return openerIdFromMap;
     }
     
     // Fallback search
-    console.log(`[GROUPING_DEBUG] No direct match for URL "${urlToCheck}". Initiating fallback search for openerTabId ${newTab.openerTabId}.`);
+    logger.debug(`[GROUPING_DEBUG] No direct match for URL "${urlToCheck}". Initiating fallback search for openerTabId ${newTab.openerTabId}.`);
     for (const [url, id] of middleClickedTabs.entries()) {
         if (id === newTab.openerTabId) {
             middleClickedTabs.delete(url);
-            console.log(`[GROUPING_DEBUG] Fallback match for openerIdFromMap: ${id} (Original map URL was "${url}")`);
+            logger.debug(`[GROUPING_DEBUG] Fallback match for openerIdFromMap: ${id} (Original map URL was "${url}")`);
             return id;
         }
     }
