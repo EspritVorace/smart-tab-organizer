@@ -1,5 +1,6 @@
 import { defineBackground } from 'wxt/utils/define-background';
 import { setupAllEventHandlers } from '../background/event-handlers.js';
+import { logger } from '../utils/logger.js';
 import { startPeriodicCleanup } from '../background/deduplication.js';
 import { initNotificationListeners } from '../utils/notifications.js';
 import { middleClickedTabs } from '../background/messaging.js';
@@ -23,5 +24,5 @@ export default defineBackground(() => {
     (globalThis as any).middleClickedTabs = middleClickedTabs;
     (globalThis as any).processGroupingForNewTab = processGroupingForNewTab;
 
-    console.log("SmartTab Organizer Service Worker: Initialized with modular architecture.");
+    logger.debug("SmartTab Organizer Service Worker: Initialized with modular architecture.");
 });

@@ -96,6 +96,16 @@ Always use `getMessage()` from `src/utils/i18n.ts` — for UI text, `aria-label`
 
 ## Code Conventions
 
+### Logging
+- **Never use `console.log()` directly.** Use `logger.debug()` from `src/utils/logger.ts` instead.
+- The logger is a no-op in production builds (`import.meta.env.MODE === "production"`), keeping production console output clean.
+- `console.warn()` and `console.error()` remain acceptable for real warnings/errors.
+
+```ts
+import { logger } from '../utils/logger.js';
+logger.debug('[MY_MODULE] Something happened:', value);
+```
+
 ### Type Safety
 - No `any` — use precise types or unknown with narrowing.
 

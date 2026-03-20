@@ -1,5 +1,6 @@
 import { browser } from 'wxt/browser';
 import { loadSessions, updateSession } from '../utils/sessionStorage.js';
+import { logger } from '../utils/logger.js';
 import { getProfileWindowMap } from '../utils/profileWindowMap.js';
 import { generateUUID } from '../utils/utils.js';
 import type { SavedTab, SavedTabGroup } from '../types/session';
@@ -172,7 +173,7 @@ export async function persistSyncDraft(profileId: string): Promise<void> {
   // Guard: don't overwrite while the user has the edit dialog open
   const editingId = await getEditingProfileId();
   if (editingId === profileId) {
-    console.log(`[AUTO_SYNC] Skipping persist for ${profileId}: edit dialog is open`);
+    logger.debug(`[AUTO_SYNC] Skipping persist for ${profileId}: edit dialog is open`);
     return;
   }
 
@@ -187,7 +188,7 @@ export async function persistSyncDraft(profileId: string): Promise<void> {
 
   delete drafts[profileId];
   await saveSyncDrafts(drafts);
-  console.log(`[AUTO_SYNC] Persisted draft for profile ${profileId}`);
+  logger.debug(`[AUTO_SYNC] Persisted draft for profile ${profileId}`);
 }
 
 // --- Alarm management ---
@@ -204,11 +205,11 @@ export async function updateSyncAlarm(): Promise<void> {
     const existing = await (browser.alarms as any).get(ALARM_NAME);
     if (!existing) {
       (browser.alarms as any).create(ALARM_NAME, { periodInMinutes: 5 });
-      console.log('[AUTO_SYNC] Alarm created');
+      logger.debug('[AUTO_SYNC] Alarm created');
     }
   } else {
     await (browser.alarms as any).clear(ALARM_NAME);
-    console.log('[AUTO_SYNC] Alarm cleared (no auto-sync profiles)');
+    logger.debug('[AUTO_SYNC] Alarm cleared (no auto-sync profiles)');
   }
 }
 
