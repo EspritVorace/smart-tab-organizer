@@ -96,6 +96,11 @@ Always use `getMessage()` from `src/utils/i18n.ts` — for UI text, `aria-label`
 
 ## Code Conventions
 
+### Browser API
+- **Always use `browser.*` from WXT** — never use the native `chrome.*` global in `src/` code.
+- Import: `import { browser } from 'wxt/browser'` (or rely on the WXT global injection).
+- `chrome.*` is only acceptable inside Playwright `serviceWorker.evaluate()` callbacks in `tests/e2e/`, where the native extension context exposes the `chrome` global directly.
+
 ### Type Safety
 - No `any` — use precise types or unknown with narrowing.
 
