@@ -1,5 +1,6 @@
 import { browser, Browser } from 'wxt/browser';
 import { initializeDefaults } from '../utils/migration.js';
+import { logger } from '../utils/logger.js';
 import { handleMiddleClickMessage, findMiddleClickOpener } from './messaging.js';
 import { processTabForDeduplication } from './deduplication.js';
 import { processGroupingForNewTab } from './grouping.js';
@@ -11,7 +12,7 @@ import { persistSyncDraft } from './profileSync.js';
 
 export function setupInstallationHandler(): void {
     browser.runtime.onInstalled.addListener(async (details: Browser.runtime.InstalledDetails) => {
-        console.log("SmartTab Organizer installed/updated.", details.reason);
+        logger.debug("SmartTab Organizer installed/updated.", details.reason);
         await initializeDefaults();
     });
 }
@@ -23,7 +24,7 @@ export function setupMessageHandler(): void {
                 request.profileId as string,
                 request.target as 'current' | 'new',
                 request.windowId as number | undefined,
-            ).catch(e => console.error('[RESTORE_PROFILE] Error:', e));
+            ).catch(e => logger.error('[RESTORE_PROFILE] Error:', e));
             return false;
         }
         handleMiddleClickMessage(request, sender, sendResponse);
@@ -39,7 +40,7 @@ async function handleProfileRestore(
     const sessions = await loadSessions();
     const session = sessions.find(s => s.id === profileId);
     if (!session) {
-        console.warn(`[RESTORE_PROFILE] Session ${profileId} not found`);
+        logger.warn(`[RESTORE_PROFILE] Session ${profileId} not found`);
         return;
     }
 
@@ -68,7 +69,7 @@ async function handleProfileRestore(
 export function setupWindowRemovedHandler(): void {
     browser.windows.onRemoved.addListener((windowId: number) => {
         handleWindowRemoved(windowId)
-            .catch(e => console.error('[WINDOW_REMOVED] Error:', e));
+            .catch(e => logger.error('[WINDOW_REMOVED] Error:', e));
     });
 }
 
@@ -96,25 +97,25 @@ const pendingGroupings = new Map<number, { openerTab: Browser.tabs.Tab; newTab: 
 export function setupTabCreatedHandler(): void {
     browser.tabs.onCreated.addListener(async (newTab: Browser.tabs.Tab) => {
         const urlToCheck = newTab.pendingUrl || newTab.url;
-        console.log(`[GROUPING_DEBUG] onCreated: New tab ${newTab.id}, Opener ID: ${newTab.openerTabId}, URL: "${urlToCheck}"`);
+        logger.debug(`[GROUPING_DEBUG] onCreated: New tab ${newTab.id}, Opener ID: ${newTab.openerTabId}, URL: "${urlToCheck}"`);
 
         if (!newTab.openerTabId) {
-            console.log(`[GROUPING_DEBUG] onCreated: New tab ${newTab.id} has no openerTabId. No grouping action.`);
+            logger.debug(`[GROUPING_DEBUG] onCreated: New tab ${newTab.id} has no openerTabId. No grouping action.`);
             return;
         }
 
         const openerIdFromMap = findMiddleClickOpener(newTab);
         if (!openerIdFromMap) {
-            console.log(`[GROUPING_DEBUG] onCreated: No opener found for new tab ${newTab.id}. No grouping action.`);
+            logger.debug(`[GROUPING_DEBUG] onCreated: No opener found for new tab ${newTab.id}. No grouping action.`);
             return;
         }
 
-        console.log(`[GROUPING_DEBUG] onCreated: Opener ${openerIdFromMap} found for new tab ${newTab.id}.`);
+        logger.debug(`[GROUPING_DEBUG] onCreated: Opener ${openerIdFromMap} found for new tab ${newTab.id}.`);
 
         try {
             const openerTab = await browser.tabs.get(openerIdFromMap);
             if (openerTab) {
-                console.log(`[GROUPING_DEBUG] onCreated: Registering pending grouping for new tab ${newTab.id}.`);
+                logger.debug(`[GROUPING_DEBUG] onCreated: Registering pending grouping for new tab ${newTab.id}.`);
                 pendingGroupings.set(newTab.id!, { openerTab, newTab });
 
                 // Fast-load race: the tab may have already reached status=complete before
@@ -127,19 +128,19 @@ export function setupTabCreatedHandler(): void {
                         const pending = pendingGroupings.get(newTab.id!);
                         if (pending) {
                             pendingGroupings.delete(newTab.id!);
-                            console.log(`[GROUPING_DEBUG] onCreated: Tab ${newTab.id} already complete, processing grouping immediately.`);
+                            logger.debug(`[GROUPING_DEBUG] onCreated: Tab ${newTab.id} already complete, processing grouping immediately.`);
                             await processGroupingForNewTab(pending.openerTab, pending.newTab);
                         }
                     }
                 } catch (_) { /* tab was closed before we could check */ }
             } else {
-                console.log(`[GROUPING_DEBUG] onCreated: Opener tab ${openerIdFromMap} not found.`);
+                logger.debug(`[GROUPING_DEBUG] onCreated: Opener tab ${openerIdFromMap} not found.`);
             }
         } catch (e) {
             if (e.message && e.message.toLowerCase().includes("no tab with id")) {
-                console.log(`[GROUPING_DEBUG] onCreated: Opener tab ${openerIdFromMap} was closed.`);
+                logger.debug(`[GROUPING_DEBUG] onCreated: Opener tab ${openerIdFromMap} was closed.`);
             } else {
-                console.error(`[GROUPING_DEBUG] onCreated: Error getting opener tab ${openerIdFromMap}:`, e);
+                logger.error(`[GROUPING_DEBUG] onCreated: Error getting opener tab ${openerIdFromMap}:`, e);
             }
         }
     });
@@ -162,7 +163,7 @@ export function setupTabUpdatedHandler(): void {
             if (middleClickedTabs?.has(navUrl)) {
                 const openerTabId = middleClickedTabs.get(navUrl)!;
                 middleClickedTabs.delete(navUrl);
-                console.log(`[GROUPING_DEBUG] onUpdated: URL-based match for tab ${tabId} (URL: "${navUrl}"), openerTabId: ${openerTabId}.`);
+                logger.debug(`[GROUPING_DEBUG] onUpdated: URL-based match for tab ${tabId} (URL: "${navUrl}"), openerTabId: ${openerTabId}.`);
                 try {
                     const openerTab = await browser.tabs.get(openerTabId);
                     // Re-fetch the new tab to get its current status (may have changed while awaiting).
@@ -170,15 +171,15 @@ export function setupTabUpdatedHandler(): void {
                     if (!currentNewTab) return; // tab was closed
                     if (currentNewTab.status === 'complete' && currentNewTab.url && !currentNewTab.url.startsWith('about:')) {
                         // Tab already complete — process grouping immediately.
-                        console.log(`[GROUPING_DEBUG] onUpdated: URL-based match, tab ${tabId} already complete. Processing now.`);
+                        logger.debug(`[GROUPING_DEBUG] onUpdated: URL-based match, tab ${tabId} already complete. Processing now.`);
                         await processGroupingForNewTab(openerTab, currentNewTab);
                     } else {
                         // Tab still loading — register pending grouping for onTabUpdated(complete).
                         pendingGroupings.set(tabId, { openerTab, newTab: currentNewTab });
-                        console.log(`[GROUPING_DEBUG] onUpdated: URL-based match, registered pending grouping for tab ${tabId}.`);
+                        logger.debug(`[GROUPING_DEBUG] onUpdated: URL-based match, registered pending grouping for tab ${tabId}.`);
                     }
                 } catch (e) {
-                    console.warn(`[GROUPING_DEBUG] onUpdated: Opener tab ${openerTabId} not found for URL-based match.`);
+                    logger.warn(`[GROUPING_DEBUG] onUpdated: Opener tab ${openerTabId} not found for URL-based match.`);
                 }
             }
         }
@@ -188,7 +189,7 @@ export function setupTabUpdatedHandler(): void {
             const pending = pendingGroupings.get(tabId);
             if (pending) {
                 pendingGroupings.delete(tabId);
-                console.log(`[GROUPING_DEBUG] onUpdated: Processing pending grouping for tab ${tabId} with URL: "${tab.url}".`);
+                logger.debug(`[GROUPING_DEBUG] onUpdated: Processing pending grouping for tab ${tabId} with URL: "${tab.url}".`);
                 await processGroupingForNewTab(pending.openerTab, pending.newTab);
             }
         }

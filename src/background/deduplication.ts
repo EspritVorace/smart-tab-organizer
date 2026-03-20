@@ -1,5 +1,6 @@
 import { browser, Browser } from 'wxt/browser';
 import { incrementStat } from '../utils/statisticsUtils.js';
+import { logger } from '../utils/logger.js';
 import { matchesDomain } from '../utils/utils.js';
 import { getSettings } from './settings.js';
 import { showNotification, type UndoAction } from '../utils/notifications.js';
@@ -86,7 +87,7 @@ export async function focusAndReloadTab(duplicateTab: Browser.tabs.Tab): Promise
             // Échec silencieux si reload impossible
         }
     } catch (e) { 
-        console.warn("Could not focus duplicate tab:", e);
+        logger.warn("Could not focus duplicate tab:", e);
     }
 }
 
@@ -94,7 +95,7 @@ export async function removeDuplicateTab(tabId: number): Promise<void> {
     try { 
         await browser.tabs.remove(tabId); 
     } catch (e) { 
-        console.warn("Could not remove duplicate tab:", e);
+        logger.warn("Could not remove duplicate tab:", e);
     }
 }
 
@@ -109,7 +110,7 @@ export async function checkAndDeduplicateTab(
         const duplicateTab = await findDuplicateTab(currentTabId, newUrl, matchMode, windowId);
 
         if (duplicateTab) {
-            console.log(`[DEDUPLICATION] Duplicate found: ${newUrl} (keeping tab ${duplicateTab.id}, removing ${currentTabId})`);
+            logger.debug(`[DEDUPLICATION] Duplicate found: ${newUrl} (keeping tab ${duplicateTab.id}, removing ${currentTabId})`);
 
             await incrementStat('tabsDeduplicatedCount');
             await focusAndReloadTab(duplicateTab);
@@ -131,7 +132,7 @@ export async function checkAndDeduplicateTab(
             }
         }
     } catch (queryError) {
-        console.error("Deduplication: Error querying tabs:", queryError);
+        logger.error("Deduplication: Error querying tabs:", queryError);
     }
 }
 
@@ -164,7 +165,7 @@ export async function processTabForDeduplication(
     try {
         await checkAndDeduplicateTab(tabId, urlToCheck, matchMode, windowId, settings);
     } catch (error) {
-        console.error("Deduplication error:", error);
+        logger.error("Deduplication error:", error);
     }
 }
 

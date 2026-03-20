@@ -100,6 +100,15 @@ Always use `getMessage()` from `src/utils/i18n.ts` — for UI text, `aria-label`
 - **Always use `browser.*` from WXT** — never use the native `chrome.*` global in `src/` code.
 - Import: `import { browser } from 'wxt/browser'` (or rely on the WXT global injection).
 - **E2E tests (`tests/e2e/`)** currently use `chrome.*` inside `serviceWorker.evaluate()` callbacks — this is a **known limitation**: Playwright extension support for Firefox uses background pages (not service workers) and `browser.*` as the native global, so the entire E2E fixture layer would need a separate Firefox implementation to support cross-browser E2E.
+### Logging
+- **Never use `console.log()` directly.** Use `logger.debug()` from `src/utils/logger.ts` instead.
+- The logger is a no-op in production builds (`import.meta.env.MODE === "production"`), keeping production console output clean.
+- `console.warn()` and `console.error()` remain acceptable for real warnings/errors.
+
+```ts
+import { logger } from '../utils/logger.js';
+logger.debug('[MY_MODULE] Something happened:', value);
+```
 
 ### Type Safety
 - No `any` — use precise types or unknown with narrowing.

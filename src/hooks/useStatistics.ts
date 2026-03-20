@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { browser } from 'wxt/browser';
 import type { Statistics } from '../types/statistics.js';
 import { defaultStatistics } from '../types/statistics.js';
+import { logger } from '../utils/logger';
 
 export interface UseStatisticsReturn {
   // État actuel
@@ -48,7 +49,7 @@ export function useStatistics(): UseStatisticsReturn {
         setStatistics(stats);
         setIsLoaded(true);
       } catch (error) {
-        console.error('Error loading statistics:', error);
+        logger.error('Error loading statistics:', error);
       }
     }
     loadStatistics();
@@ -166,7 +167,7 @@ export function useStatistics(): UseStatisticsReturn {
 
       setStatistics(stats);
     } catch (error) {
-      console.error('Error reloading statistics:', error);
+      logger.error('Error reloading statistics:', error);
     }
   }, []);
 

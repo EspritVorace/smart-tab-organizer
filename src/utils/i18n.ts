@@ -1,4 +1,5 @@
 import { browser } from 'wxt/browser';
+import { logger } from './logger.js';
 
 /**
  * Get translated message from browser.i18n
@@ -10,7 +11,7 @@ export function getMessage(key: string, substitutions?: string | string[]): stri
   try {
     return browser.i18n.getMessage(key as 'extensionName', substitutions);
   } catch (e) {
-    console.warn(`Clé i18n ${key} introuvable.`);
+    logger.warn(`Clé i18n ${key} introuvable.`);
     return key;
   }
 }

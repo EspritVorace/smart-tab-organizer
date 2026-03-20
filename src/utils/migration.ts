@@ -1,5 +1,6 @@
 import { browser } from 'wxt/browser';
 import { getSyncSettings, setSyncSettings } from './settingsUtils.js';
+import { logger } from './logger.js';
 import { getStatisticsData, setStatisticsData } from './statisticsUtils.js';
 import { defaultSyncSettings } from '../types/syncSettings.js';
 import { defaultStatistics } from '../types/statistics.js';
@@ -36,7 +37,7 @@ async function loadDefaultSettings(): Promise<SyncSettings> {
     cachedDefaultSettings = await response.json();
     return cachedDefaultSettings!;
   } catch (error) {
-    console.error("Cannot load defaults:", error);
+    logger.error("Cannot load defaults:", error);
     return defaultSyncSettings;
   }
 }
@@ -46,10 +47,10 @@ export async function initializeDefaults(): Promise<void> {
   const syncData = await browser.storage.sync.get('settings');
   
   if (!syncData.settings) {
-    console.log("Init defaults from JSON...");
+    logger.debug("Init defaults from JSON...");
     await setSyncSettings(defaults);
   } else {
-    console.log("Merging existing with JSON defaults...");
+    logger.debug("Merging existing with JSON defaults...");
     const merged = mergeDeep(defaults, syncData.settings);
     
     // Ensure default domain rules exist
@@ -101,7 +102,7 @@ export async function initializeDefaults(): Promise<void> {
   
   const localData = await browser.storage.local.get('statistics');
   if (!localData.statistics) {
-    console.log("Init stats...");
+    logger.debug("Init stats...");
     await setStatisticsData(defaultStatistics);
   }
 }

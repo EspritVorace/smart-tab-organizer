@@ -1,6 +1,7 @@
 import { browser } from 'wxt/browser';
 import type { Statistics } from '../types/statistics.js';
 import { defaultStatistics } from '../types/statistics.js';
+import { logger } from './logger.js';
 
 /**
  * Utilitaires pour les statistiques utilisables dans tous les contextes
@@ -18,7 +19,7 @@ export async function getStatisticsData(): Promise<Statistics> {
       ...(result.statistics as Record<string, unknown>)
     };
   } catch (error) {
-    console.error('Error getting statistics:', error);
+    logger.error('Error getting statistics:', error);
     return defaultStatistics;
   }
 }
@@ -27,7 +28,7 @@ export async function setStatisticsData(statistics: Statistics): Promise<void> {
   try {
     await browser.storage.local.set({ statistics });
   } catch (error) {
-    console.error('Error setting statistics:', error);
+    logger.error('Error setting statistics:', error);
   }
 }
 
@@ -37,7 +38,7 @@ export async function updateStatisticsData(updates: Partial<Statistics>): Promis
     const updated = { ...current, ...updates };
     await setStatisticsData(updated);
   } catch (error) {
-    console.error('Error updating statistics:', error);
+    logger.error('Error updating statistics:', error);
   }
 }
 
@@ -48,7 +49,7 @@ export async function incrementTabGroupsCreated(): Promise<void> {
       tabGroupsCreatedCount: current.tabGroupsCreatedCount + 1 
     });
   } catch (error) {
-    console.error('Error incrementing tab groups created:', error);
+    logger.error('Error incrementing tab groups created:', error);
   }
 }
 
@@ -59,7 +60,7 @@ export async function incrementTabsDeduplicated(): Promise<void> {
       tabsDeduplicatedCount: current.tabsDeduplicatedCount + 1 
     });
   } catch (error) {
-    console.error('Error incrementing tabs deduplicated:', error);
+    logger.error('Error incrementing tabs deduplicated:', error);
   }
 }
 
@@ -70,7 +71,7 @@ export async function incrementStat(key: keyof Statistics): Promise<Statistics> 
     await setStatisticsData(updated);
     return updated;
   } catch (error) {
-    console.error(`Error incrementing stat ${key}:`, error);
+    logger.error(`Error incrementing stat ${key}:`, error);
     return await getStatisticsData();
   }
 }
@@ -79,7 +80,7 @@ export async function resetStatisticsData(): Promise<void> {
   try {
     await setStatisticsData(defaultStatistics);
   } catch (error) {
-    console.error('Error resetting statistics:', error);
+    logger.error('Error resetting statistics:', error);
   }
 }
 
