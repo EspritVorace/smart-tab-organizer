@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { browser } from 'wxt/browser';
 import type { SyncSettings, DomainRuleSettings } from '../types/syncSettings.js';
+import { logger } from '../utils/logger';
 
 export interface UseSyncedSettingsReturn {
   // État actuel
@@ -50,7 +51,7 @@ export function useSyncedSettings(): UseSyncedSettingsReturn {
         setSettings(result as unknown as SyncSettings);
         setIsLoaded(true);
       } catch (error) {
-        console.error('Error loading settings:', error);
+        logger.error('Error loading settings:', error);
       }
     }
     loadSettings();
@@ -171,7 +172,7 @@ export function useSyncedSettings(): UseSyncedSettingsReturn {
 
       setSettings(result as unknown as SyncSettings);
     } catch (error) {
-      console.error('Error reloading settings:', error);
+      logger.error('Error reloading settings:', error);
     }
   }, []);
 

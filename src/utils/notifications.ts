@@ -114,7 +114,7 @@ async function executeUndoAction(action: UndoAction): Promise<void> {
       }
     }
   } catch (error) {
-    console.error('[UNDO] Error executing undo action:', error);
+    logger.error('[UNDO] Error executing undo action:', error);
   }
 }
 

@@ -224,7 +224,7 @@ export function initProfileSync(): void {
   (browser.alarms as any).onAlarm.addListener(async (alarm: { name: string }) => {
     if (alarm.name === ALARM_NAME) {
       await updateSyncDrafts().catch(e =>
-        console.error('[AUTO_SYNC] Error updating drafts:', e),
+        logger.error('[AUTO_SYNC] Error updating drafts:', e),
       );
     }
   });
@@ -233,13 +233,13 @@ export function initProfileSync(): void {
   browser.storage.local.onChanged.addListener((changes) => {
     if ('sessions' in changes) {
       updateSyncAlarm().catch(e =>
-        console.error('[AUTO_SYNC] Error updating alarm:', e),
+        logger.error('[AUTO_SYNC] Error updating alarm:', e),
       );
     }
   });
 
   // Set initial alarm state based on current sessions
   updateSyncAlarm().catch(e =>
-    console.error('[AUTO_SYNC] Error initializing alarm:', e),
+    logger.error('[AUTO_SYNC] Error initializing alarm:', e),
   );
 }

@@ -1,4 +1,5 @@
 import { type Preset, type PresetsFile, presetsFileSchema } from '../types/preset.js';
+import { logger } from './logger.js';
 
 // Re-export types pour faciliter l'import
 export type { Preset, PresetsFile, PresetCategory } from '../types/preset.js';
@@ -22,7 +23,7 @@ export async function loadPresets(): Promise<PresetsFile> {
     presetsCache = presetsFileSchema.parse(data);
     return presetsCache;
   } catch (error) {
-    console.error('Error loading presets:', error);
+    logger.error('Error loading presets:', error);
     // Retourner une structure vide en cas d'erreur
     return { categories: [] };
   }
