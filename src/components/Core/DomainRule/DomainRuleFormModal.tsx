@@ -2,12 +2,12 @@ import { Dialog, Button, Flex, Text, TextField, Switch, Select, Box, Separator, 
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X, Edit2, Plus, Info } from 'lucide-react';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { DomainRulesTheme, RegexPresetsTheme } from '../../Form/themes';
 import { RegexPresetsCallouts } from '../../Form/themed-callouts';
 import { generateUUID } from '../../../utils/utils';
 import { createDomainRuleSchemaWithUniqueness, type DomainRule } from '../../../schemas/domainRule';
-import { groupNameSourceOptions, deduplicationMatchModeOptions } from '../../../schemas/enums';
+import { groupNameSourceOptions, deduplicationMatchModeOptions, type GroupNameSourceValue } from '../../../schemas/enums';
 import { getMessage } from '../../../utils/i18n';
 import { CategoryPicker } from './CategoryPicker';
 import type { SyncSettings } from '../../../types/syncSettings';
@@ -36,7 +36,7 @@ export function DomainRuleFormModal({
   
   // Local state for config mode - calculated only when domainRule changes
   const [configMode, setConfigMode] = useState<'preset' | 'ask' | 'manual'>(() => {
-    if (!domainRule) return 'ask';
+    if (!domainRule) return 'preset';
     if (domainRule.presetId) return 'preset';
     if (domainRule.groupNameSource === 'manual') return 'ask';
     return 'manual';
@@ -62,7 +62,7 @@ export function DomainRuleFormModal({
       label: '',
       titleParsingRegEx: '',
       urlParsingRegEx: '',
-      groupNameSource: 'manual',
+      groupNameSource: 'title',
       deduplicationMatchMode: 'exact',
       categoryId: null,
       deduplicationEnabled: true,
@@ -92,13 +92,28 @@ export function DomainRuleFormModal({
   
   const defaultValues = getDefaultValues(domainRule);
 
+  const lastManualState = useRef<{
+    groupNameSource: GroupNameSourceValue;
+    titleParsingRegEx: string;
+    urlParsingRegEx: string;
+  }>({ groupNameSource: 'title', titleParsingRegEx: '', urlParsingRegEx: '' });
+
+  const lastPresetState = useRef<{
+    presetId: string | null;
+    groupNameSource: GroupNameSourceValue;
+    titleParsingRegEx: string;
+    urlParsingRegEx: string;
+  }>({ presetId: null, groupNameSource: 'title', titleParsingRegEx: '', urlParsingRegEx: '' });
+
   const {
     control,
     handleSubmit,
     formState: { errors, isValid },
     watch,
     reset,
-    setValue
+    setValue,
+    getValues,
+    trigger
   } = useForm<DomainRule>({
     resolver: zodResolver(createDomainRuleSchemaWithUniqueness(syncSettings.domainRules, domainRule?.id)),
     defaultValues,
@@ -114,13 +129,34 @@ export function DomainRuleFormModal({
       reset(getDefaultValues(domainRule));
       // Update configMode based on the new domainRule
       if (!domainRule) {
-        setConfigMode('ask');
+        setConfigMode('preset');
+        lastManualState.current = { groupNameSource: 'title', titleParsingRegEx: '', urlParsingRegEx: '' };
+        lastPresetState.current = { presetId: null, groupNameSource: 'title', titleParsingRegEx: '', urlParsingRegEx: '' };
       } else if (domainRule.presetId) {
         setConfigMode('preset');
+        lastPresetState.current = {
+          presetId: domainRule.presetId,
+          groupNameSource: domainRule.groupNameSource,
+          titleParsingRegEx: domainRule.titleParsingRegEx ?? '',
+          urlParsingRegEx: domainRule.urlParsingRegEx ?? '',
+        };
+        lastManualState.current = {
+          groupNameSource: domainRule.groupNameSource,
+          titleParsingRegEx: domainRule.titleParsingRegEx ?? '',
+          urlParsingRegEx: domainRule.urlParsingRegEx ?? '',
+        };
       } else if (domainRule.groupNameSource === 'manual') {
         setConfigMode('ask');
+        lastManualState.current = { groupNameSource: 'title', titleParsingRegEx: '', urlParsingRegEx: '' };
+        lastPresetState.current = { presetId: null, groupNameSource: 'title', titleParsingRegEx: '', urlParsingRegEx: '' };
       } else {
         setConfigMode('manual');
+        lastManualState.current = {
+          groupNameSource: domainRule.groupNameSource as GroupNameSourceValue,
+          titleParsingRegEx: domainRule.titleParsingRegEx ?? '',
+          urlParsingRegEx: domainRule.urlParsingRegEx ?? '',
+        };
+        lastPresetState.current = { presetId: null, groupNameSource: 'title', titleParsingRegEx: '', urlParsingRegEx: '' };
       }
     }
   }, [domainRule, isOpen, reset]);
@@ -142,18 +178,82 @@ export function DomainRuleFormModal({
       if (preset.urlRegex) {
         setValue('urlParsingRegEx', preset.urlRegex);
       }
+      lastPresetState.current = {
+        presetId: selectedPresetId,
+        groupNameSource: preset.groupNameSource,
+        titleParsingRegEx: preset.titleRegex ?? '',
+        urlParsingRegEx: preset.urlRegex ?? '',
+      };
+      lastManualState.current = {
+        groupNameSource: preset.groupNameSource,
+        titleParsingRegEx: preset.titleRegex ?? '',
+        urlParsingRegEx: preset.urlRegex ?? '',
+      };
+      trigger();
     }
-  }, [setValue]);
+  }, [setValue, trigger]);
 
   // Gérer le changement de mode de configuration
   const handleConfigModeChange = useCallback((newMode: 'preset' | 'ask' | 'manual') => {
-    setConfigMode(newMode);
-    if (newMode === 'ask') {
+    const prevMode = configMode;
+
+    if (prevMode === 'manual' && newMode === 'preset') {
+      lastManualState.current = {
+        groupNameSource: getValues('groupNameSource') as GroupNameSourceValue,
+        titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
+        urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
+      };
+      setValue('presetId', lastPresetState.current.presetId);
+      setValue('groupNameSource', lastPresetState.current.groupNameSource);
+      setValue('titleParsingRegEx', lastPresetState.current.titleParsingRegEx);
+      setValue('urlParsingRegEx', lastPresetState.current.urlParsingRegEx);
+
+    } else if (prevMode === 'preset' && newMode === 'manual') {
+      lastPresetState.current = {
+        presetId: getValues('presetId') ?? null,
+        groupNameSource: getValues('groupNameSource') as GroupNameSourceValue,
+        titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
+        urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
+      };
+      setValue('presetId', null);
+      setValue('groupNameSource', lastManualState.current.groupNameSource);
+      setValue('titleParsingRegEx', lastManualState.current.titleParsingRegEx);
+      setValue('urlParsingRegEx', lastManualState.current.urlParsingRegEx);
+
+    } else if (newMode === 'ask') {
+      if (prevMode === 'manual') {
+        lastManualState.current = {
+          groupNameSource: getValues('groupNameSource') as GroupNameSourceValue,
+          titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
+          urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
+        };
+      } else if (prevMode === 'preset') {
+        lastPresetState.current = {
+          presetId: getValues('presetId') ?? null,
+          groupNameSource: getValues('groupNameSource') as GroupNameSourceValue,
+          titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
+          urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
+        };
+      }
+      setValue('presetId', null);
       setValue('groupNameSource', 'manual');
+
+    } else if (prevMode === 'ask' && newMode === 'preset') {
+      setValue('presetId', lastPresetState.current.presetId);
+      setValue('groupNameSource', lastPresetState.current.groupNameSource);
+      setValue('titleParsingRegEx', lastPresetState.current.titleParsingRegEx);
+      setValue('urlParsingRegEx', lastPresetState.current.urlParsingRegEx);
+
+    } else if (prevMode === 'ask' && newMode === 'manual') {
+      setValue('presetId', null);
+      setValue('groupNameSource', lastManualState.current.groupNameSource);
+      setValue('titleParsingRegEx', lastManualState.current.titleParsingRegEx);
+      setValue('urlParsingRegEx', lastManualState.current.urlParsingRegEx);
     }
-    // Note: preset mode is handled by the preset selector itself
-    // We don't clear presetId to preserve user selections when switching modes
-  }, [setValue]);
+
+    setConfigMode(newMode);
+    trigger();
+  }, [configMode, getValues, setValue, trigger]);
 
   const handleFormSubmit = (data: DomainRule) => {
     onSubmit(data);
@@ -163,7 +263,7 @@ export function DomainRuleFormModal({
 
   const handleClose = () => {
     reset();
-    setConfigMode('ask'); // Reset to default mode
+    setConfigMode('preset'); // Reset to default mode
     onClose();
   };
 
@@ -329,11 +429,13 @@ export function DomainRuleFormModal({
                             style={{ marginTop: '4px' }}
                           />
                           <Select.Content>
-                            {groupNameSourceOptions.map((option) => (
-                              <Select.Item key={option.value} value={option.value}>
-                                {getMessage(option.keyLabel)}
-                              </Select.Item>
-                            ))}
+                            {groupNameSourceOptions
+                              .filter(option => option.value !== 'manual')
+                              .map((option) => (
+                                <Select.Item key={option.value} value={option.value}>
+                                  {getMessage(option.keyLabel)}
+                                </Select.Item>
+                              ))}
                           </Select.Content>
                         </Select.Root>
                       )}
