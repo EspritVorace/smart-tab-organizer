@@ -615,8 +615,8 @@ test.describe('Import / Export', () => {
       await dialog.getByRole('button', { name: /next/i }).click();
       await page.waitForTimeout(300);
 
-      // Click Import (confirm button)
-      await dialog.getByRole('button', { name: /^import$/i }).click();
+      // Click Confirm Import (step 3 confirm button)
+      await dialog.getByRole('button', { name: /confirm import/i }).click();
       await page.waitForTimeout(1000);
 
       // Dialog should close after import
@@ -643,7 +643,7 @@ test.describe('Import / Export', () => {
       await page.waitForTimeout(300);
       await dialog.getByRole('button', { name: /next/i }).click();
       await page.waitForTimeout(300);
-      await dialog.getByRole('button', { name: /^import$/i }).click();
+      await dialog.getByRole('button', { name: /confirm import/i }).click();
       await page.waitForTimeout(1000);
 
       // Reopen wizard — should start fresh at step 1

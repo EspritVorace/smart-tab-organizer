@@ -259,7 +259,14 @@ export async function processGroupingForNewTab(openerTab: Browser.tabs.Tab, newT
         const { targetGroupId, groupedTabIds } = await performGroupingOperation(context);
         logger.debug(`[GROUPING_DEBUG] Grouping completed for new tab ${newTab.id}. Color: ${context.groupColor || 'Chrome default'}.`);
 
-        await handleManualGroupNaming(rule, targetGroupId, context.groupName, groupedTabIds, openerTab.id);
+        // For smart_manual: only prompt when extraction failed (user story: "extracts name OR falls back to manual prompt").
+        // For plain manual: always prompt.
+        const needsManualNaming =
+            rule.groupNameSource === 'manual' ||
+            (rule.groupNameSource === 'smart_manual' && !tryExtractGroupNameFromPresetOrFallback(rule, openerTab));
+        if (needsManualNaming) {
+            await handleManualGroupNaming(rule, targetGroupId, context.groupName, groupedTabIds, openerTab.id);
+        }
 
         // Show notification if enabled with undo action
         if (settings.notifyOnGrouping) {
