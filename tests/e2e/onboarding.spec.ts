@@ -12,9 +12,9 @@ import {
   createTestProfile,
 } from './helpers/seed';
 
-test.beforeEach(async ({ context }) => {
-  await clearSessions(context);
-  await clearHelpPrefs(context);
+test.beforeEach(async ({ extensionContext }) => {
+  await clearSessions(extensionContext);
+  await clearHelpPrefs(extensionContext);
 });
 
 // ---------------------------------------------------------------------------
@@ -22,34 +22,34 @@ test.beforeEach(async ({ context }) => {
 // ---------------------------------------------------------------------------
 test.describe('[US-O01] Intro callout', () => {
   test('is visible on first visit (sessionsIntroHidden not set)', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await expect(page.getByText('Sessions & Profiles')).toBeVisible();
     await page.close();
   });
 
-  test('is hidden when sessionsIntroHidden=true [US-O002]', async ({ context, extensionId }) => {
+  test('is hidden when sessionsIntroHidden=true [US-O002]', async ({ extensionContext, extensionId }) => {
     // Pre-set the pref
-    const sw = context.serviceWorkers()[0];
+    const sw = extensionContext.serviceWorkers()[0];
     await sw.evaluate(async () => {
       await chrome.storage.local.set({
         sessionsHelpPrefs: { sessionsIntroHidden: true, profileOnboardingShown: false },
       });
     });
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await expect(page.getByText('Sessions & Profiles')).not.toBeVisible();
     await page.close();
   });
 
-  test('clicking the dismiss (X) button hides the callout [US-O002]', async ({ context, extensionId }) => {
-    const page = await context.newPage();
+  test('clicking the dismiss (X) button hides the callout [US-O002]', async ({ extensionContext, extensionId }) => {
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await expect(page.getByText('Sessions & Profiles')).toBeVisible();
@@ -62,25 +62,25 @@ test.describe('[US-O01] Intro callout', () => {
   });
 
   test('dismissing persists sessionsIntroHidden=true in storage [US-O002]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByLabel('Close').click();
     await page.waitForTimeout(300);
 
-    const prefs = await getHelpPrefsFromStorage(context);
+    const prefs = await getHelpPrefsFromStorage(extensionContext);
     expect(prefs.sessionsIntroHidden).toBe(true);
     await page.close();
   });
 
   test('callout stays hidden after page reload when dismissed [US-O002]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByLabel('Close').click();
@@ -99,10 +99,10 @@ test.describe('[US-O01] Intro callout', () => {
 // ---------------------------------------------------------------------------
 test.describe('[US-O01] First-profile onboarding dialog', () => {
   test('clicking New Profile for the first time shows the onboarding dialog', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'New Profile' }).first().click();
@@ -112,10 +112,10 @@ test.describe('[US-O01] First-profile onboarding dialog', () => {
   });
 
   test('onboarding dialog contains the 3-step diagram labels [US-O003]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'New Profile' }).first().click();
@@ -129,10 +129,10 @@ test.describe('[US-O01] First-profile onboarding dialog', () => {
   });
 
   test('clicking Got it! closes the onboarding dialog and opens the profile wizard [US-O003]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'New Profile' }).first().click();
@@ -148,34 +148,34 @@ test.describe('[US-O01] First-profile onboarding dialog', () => {
   });
 
   test('Got it! persists profileOnboardingShown=true in storage [US-O003]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'New Profile' }).first().click();
     await page.getByRole('button', { name: /got it/i }).click();
     await page.waitForTimeout(300);
 
-    const prefs = await getHelpPrefsFromStorage(context);
+    const prefs = await getHelpPrefsFromStorage(extensionContext);
     expect(prefs.profileOnboardingShown).toBe(true);
     await page.close();
   });
 
   test('second profile creation does NOT show the onboarding dialog [US-O003]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     // Pre-set flag as already shown
-    const sw = context.serviceWorkers()[0];
+    const sw = extensionContext.serviceWorkers()[0];
     await sw.evaluate(async () => {
       await chrome.storage.local.set({
         sessionsHelpPrefs: { sessionsIntroHidden: false, profileOnboardingShown: true },
       });
     });
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'New Profile' }).first().click();
@@ -188,14 +188,14 @@ test.describe('[US-O01] First-profile onboarding dialog', () => {
   });
 
   test('pinning a snapshot also triggers onboarding on first profile [US-O003]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const { createTestSession } = await import('./helpers/seed');
     const snapshot = createTestSession({ name: 'Will Be Pinned' });
-    await seedSessions(context, [snapshot]);
+    await seedSessions(extensionContext, [snapshot]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'Pin as Profile' }).click();
@@ -209,8 +209,8 @@ test.describe('[US-O01] First-profile onboarding dialog', () => {
 // Tooltips
 // ---------------------------------------------------------------------------
 test.describe('[US-O01] Tooltips', () => {
-  test('New Profile button has a tooltip on hover', async ({ context, extensionId }) => {
-    const page = await context.newPage();
+  test('New Profile button has a tooltip on hover', async ({ extensionContext, extensionId }) => {
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     // Use first() since the empty-state also renders a "New Profile" button
@@ -220,13 +220,13 @@ test.describe('[US-O01] Tooltips', () => {
   });
 
   test('auto-sync help icon has an accessible aria-label matching the tooltip [US-O004]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const profile = createTestProfile({ name: 'Profile With Help' });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     // HelpCircle icon button should have aria-label with the tooltip text
@@ -236,11 +236,11 @@ test.describe('[US-O01] Tooltips', () => {
     await page.close();
   });
 
-  test('auto-sync help icon shows tooltip on hover [US-O004]', async ({ context, extensionId }) => {
+  test('auto-sync help icon shows tooltip on hover [US-O004]', async ({ extensionContext, extensionId }) => {
     const profile = createTestProfile({ name: 'Profile With Tooltip' });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: /when enabled.*window/i }).hover();

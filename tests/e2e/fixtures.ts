@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename);
 const EXTENSION_PATH = path.join(__dirname, '../../.output/chrome-mv3');
 
 export interface ExtensionFixtures {
-  context: BrowserContext;
+  extensionContext: BrowserContext;
   extensionId: string;
   popupPage: Page;
   optionsPage: Page;
@@ -90,9 +90,9 @@ function createTempUserDataDir(): string {
 }
 
 export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers }>({
-  // Custom browser context with extension loaded — worker-scoped so the browser
+  // Custom browser extensionContext with extension loaded — worker-scoped so the browser
   // is launched once per worker instead of once per test.
-  context: [async ({}, use) => {
+  extensionContext: [async ({}, use) => {
     const userDataDir = createTempUserDataDir();
 
     // Verify extension path exists
@@ -104,7 +104,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
     const customChromePath = path.join(os.homedir(), '.cache/ms-playwright/chromium-custom/chrome-linux64/chrome');
     const executablePath = fs.existsSync(customChromePath) ? customChromePath : undefined;
 
-    const context = await chromium.launchPersistentContext(userDataDir, {
+    const extensionContext = await chromium.launchPersistentContext(userDataDir, {
       headless: false, // Extensions require headed mode
       executablePath,
       args: [
@@ -117,18 +117,18 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       ],
     });
 
-    // Wait for service worker to register before yielding the context
+    // Wait for service worker to register before yielding the extensionContext
     const swDeadline = Date.now() + 10000;
-    while (!context.serviceWorkers()[0] && Date.now() < swDeadline) {
+    while (!extensionContext.serviceWorkers()[0] && Date.now() < swDeadline) {
       await new Promise(resolve => setTimeout(resolve, 200));
     }
-    if (!context.serviceWorkers()[0]) {
+    if (!extensionContext.serviceWorkers()[0]) {
       throw new Error('Service worker did not start within timeout');
     }
 
-    await use(context);
+    await use(extensionContext);
 
-    await context.close();
+    await extensionContext.close();
 
     // Clean up temp directory
     try {
@@ -139,18 +139,18 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
   }, { scope: 'worker' }],
 
   // Get extension ID from service worker — worker-scoped, resolved once per worker.
-  extensionId: [async ({ context }, use) => {
-    const serviceWorker = context.serviceWorkers()[0];
+  extensionId: [async ({ extensionContext }, use) => {
+    const serviceWorker = extensionContext.serviceWorkers()[0];
     if (!serviceWorker) {
-      throw new Error('Service worker not available (should have been awaited in context fixture)');
+      throw new Error('Service worker not available (should have been awaited in extensionContext fixture)');
     }
     const extensionId = new URL(serviceWorker.url()).hostname;
     await use(extensionId);
   }, { scope: 'worker' }],
 
   // Popup page fixture
-  popupPage: async ({ context, extensionId }, use) => {
-    const page = await context.newPage();
+  popupPage: async ({ extensionContext, extensionId }, use) => {
+    const page = await extensionContext.newPage();
     await page.goto(`chrome-extension://${extensionId}/popup.html`);
     await page.waitForLoadState('domcontentloaded');
     await use(page);
@@ -158,8 +158,8 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
   },
 
   // Options page fixture
-  optionsPage: async ({ context, extensionId }, use) => {
-    const page = await context.newPage();
+  optionsPage: async ({ extensionContext, extensionId }, use) => {
+    const page = await extensionContext.newPage();
     await page.goto(`chrome-extension://${extensionId}/options.html`);
     await page.waitForLoadState('domcontentloaded');
     await use(page);
@@ -167,7 +167,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
   },
 
   // Helper functions for test operations
-  helpers: async ({ context, extensionId }, use) => {
+  helpers: async ({ extensionContext, extensionId }, use) => {
     /**
      * Returns the extension service worker, retrying up to 5 s if it has been
      * terminated by the browser (idle termination between tests).
@@ -175,7 +175,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
     const getServiceWorker = async (): Promise<Page> => {
       const deadline = Date.now() + 5000;
       while (Date.now() < deadline) {
-        const sw = context.serviceWorkers()[0];
+        const sw = extensionContext.serviceWorkers()[0];
         if (sw) return sw;
         await new Promise(r => setTimeout(r, 200));
       }
@@ -254,7 +254,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
 
       // Create a new tab - handles navigation errors gracefully
       createTab: async (url: string) => {
-        const page = await context.newPage();
+        const page = await extensionContext.newPage();
         try {
           await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 10000 });
         } catch (e) {
@@ -272,17 +272,17 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       // 4. onUpdated(complete) → processGroupingForNewTab → group created
       //
       // Important: The middleClickedTabs.set() and chrome.tabs.create() are combined
-      // into a single sw.evaluate() call to guarantee they run in the same SW context/instance.
+      // into a single sw.evaluate() call to guarantee they run in the same SW extensionContext/instance.
       createTabNaturally: async (openerPage: Page, url: string) => {
         const sw = await getServiceWorker();
         const openerUrl = openerPage.url();
 
         // Start listening for the new page before creating it so Playwright
         // attaches to it (and enables route interception) before navigation starts.
-        const newPagePromise = context.waitForEvent('page', { timeout: 10000 });
+        const newPagePromise = extensionContext.waitForEvent('page', { timeout: 10000 });
 
         // Single sw.evaluate: find opener, inject middleClickedTabs, create tab.
-        // All three steps in one context call to prevent any SW restart between them.
+        // All three steps in one extensionContext call to prevent any SW restart between them.
         const result = await sw.evaluate(async ({ targetUrl, openerUrl }: { targetUrl: string; openerUrl: string }) => {
           const tabs = await chrome.tabs.query({});
           const opener = tabs.find((t: any) => t.url === openerUrl || t.pendingUrl === openerUrl);
@@ -307,7 +307,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
         // onTabCreated → findMiddleClickOpener → handleGroupingWithRetry → onUpdated(complete) → processGroupingForNewTab
         await new Promise(r => setTimeout(r, 2000));
 
-        return newPage ?? context.pages()[context.pages().length - 1];
+        return newPage ?? extensionContext.pages()[extensionContext.pages().length - 1];
       },
 
       // Create a tab that appears to be opened from another tab
@@ -332,7 +332,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
           console.error(`[TEST] Could not find opener tab for URL: ${openerUrl}`);
           // Fallback to window.open if we can't find the tab
           const [newPage] = await Promise.all([
-            context.waitForEvent('page'),
+            extensionContext.waitForEvent('page'),
             openerPage.evaluate((url) => {
               window.open(url, '_blank');
             }, url),
@@ -375,7 +375,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
         await new Promise(resolve => setTimeout(resolve, 500));
 
         // Find and return the new page
-        const pages = context.pages();
+        const pages = extensionContext.pages();
         const newPage = pages.find(p => {
           try {
             const pageUrl = p.url();

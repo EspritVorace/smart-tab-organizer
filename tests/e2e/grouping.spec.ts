@@ -11,7 +11,7 @@
  *    chain: onTabCreated → findMiddleClickOpener → handleGroupingWithRetry →
  *    onUpdated(complete) → processGroupingForNewTab.
  *
- * 3. "Content Script Integration" — serves fake pages via context.route() and
+ * 3. "Content Script Integration" — serves fake pages via extensionContext.route() and
  *    dispatches a real auxclick event that the content script intercepts, mimicking
  *    the exact UI path a user takes when middle-clicking a link.
  */
@@ -25,9 +25,9 @@ import * as http from 'http';
 /** Port used for fake local pages in the content-script integration tests. */
 const FAKE_PORT = 7654;
 
-/** Serve two pages via context.route so the content script can inject into them. */
-async function setupFakePages(context: BrowserContext) {
-  await context.route(`http://localhost:${FAKE_PORT}/**`, (route: any, request: any) => {
+/** Serve two pages via extensionContext.route so the content script can inject into them. */
+async function setupFakePages(extensionContext: BrowserContext) {
+  await extensionContext.route(`http://localhost:${FAKE_PORT}/**`, (route: any, request: any) => {
     const pathname = new URL(request.url()).pathname;
     const isOpener = pathname === '/opener.html' || pathname === '/';
     route.fulfill({
@@ -48,7 +48,7 @@ async function setupFakePages(context: BrowserContext) {
 
 test.describe('Tab Grouping', () => {
   // Real HTTP server so tabs created via chrome.tabs.create (from sw.evaluate)
-  // can navigate to localhost:FAKE_PORT — Playwright's context.route() may not
+  // can navigate to localhost:FAKE_PORT — Playwright's extensionContext.route() may not
   // intercept those tabs in time, but a real server always responds.
   let localServer: http.Server;
 
@@ -576,8 +576,8 @@ test.describe('Tab Grouping', () => {
   // ────────────────────────────────────────────────────────────────────────
 
   test.describe('Natural Event Flow', () => {
-    test('groups a tab when opener is registered in middleClickedTabs [US-G009]', async ({ context, helpers }) => {
-      await setupFakePages(context);
+    test('groups a tab when opener is registered in middleClickedTabs [US-G009]', async ({ extensionContext, helpers }) => {
+      await setupFakePages(extensionContext);
       await helpers.addDomainRule({
         label: 'Natural Group',
         domainFilter: `localhost:${FAKE_PORT}`,
@@ -600,7 +600,7 @@ test.describe('Tab Grouping', () => {
       expect(stats.tabGroupsCreatedCount).toBe(1);
     });
 
-    test('does NOT group when opener is NOT in middleClickedTabs (link opened without middle-click) [US-G009]', async ({ context, helpers }) => {
+    test('does NOT group when opener is NOT in middleClickedTabs (link opened without middle-click) [US-G009]', async ({ extensionContext, helpers }) => {
       await helpers.addDomainRule({
         label: 'Should Not Group',
         domainFilter: 'example.com',
@@ -613,7 +613,7 @@ test.describe('Tab Grouping', () => {
       await helpers.waitForGrouping();
 
       // Get the opener tab ID
-      const sw = context.serviceWorkers()[0];
+      const sw = extensionContext.serviceWorkers()[0];
       const openerTabId = await sw.evaluate(async (url: string) => {
         const tabs = await chrome.tabs.query({});
         return tabs.find(t => t.url === url)?.id ?? null;
@@ -636,8 +636,8 @@ test.describe('Tab Grouping', () => {
       expect(groups.length).toBe(0);
     });
 
-    test('adds second child to existing group via natural flow [US-G009]', async ({ context, helpers }) => {
-      await setupFakePages(context);
+    test('adds second child to existing group via natural flow [US-G009]', async ({ extensionContext, helpers }) => {
+      await setupFakePages(extensionContext);
       await helpers.addDomainRule({
         label: 'Natural Existing',
         domainFilter: `localhost:${FAKE_PORT}`,
@@ -693,7 +693,7 @@ test.describe('Tab Grouping', () => {
 
   // ── 10. Content Script Integration ───────────────────────────────────────
   //
-  // Uses context.route() to serve real HTTP pages at http://localhost:FAKE_PORT/
+  // Uses extensionContext.route() to serve real HTTP pages at http://localhost:FAKE_PORT/
   // The content script (matches: ['<all_urls>']) injects into those pages.
   // A synthetic auxclick event triggers the content script's handler which sends
   // the middleClickLink message.  Then chrome.tabs.create({openerTabId}) fires
@@ -701,8 +701,8 @@ test.describe('Tab Grouping', () => {
   // ────────────────────────────────────────────────────────────────────────
 
   test.describe('Content Script Integration', () => {
-    test('groups a new tab opened via a link click on a real page [US-G009]', async ({ context, helpers }) => {
-      await setupFakePages(context);
+    test('groups a new tab opened via a link click on a real page [US-G009]', async ({ extensionContext, helpers }) => {
+      await setupFakePages(extensionContext);
 
       await helpers.addDomainRule({
         label: 'LocalTest',
@@ -714,7 +714,7 @@ test.describe('Tab Grouping', () => {
       });
 
       // Navigate opener to a fake local page (content script injects here)
-      const opener = await context.newPage();
+      const opener = await extensionContext.newPage();
       await opener.goto(`http://localhost:${FAKE_PORT}/opener.html`, { waitUntil: 'domcontentloaded' });
 
       // Dispatch auxclick on the link — the content script's handler sends middleClickLink
@@ -734,7 +734,7 @@ test.describe('Tab Grouping', () => {
 
       // Content script has now sent middleClickLink → background stored (childUrl → openerTabId)
       // Create the child tab with openerTabId to trigger onTabCreated naturally
-      const sw = context.serviceWorkers()[0];
+      const sw = extensionContext.serviceWorkers()[0];
       const openerTabId = await sw.evaluate(async (openerUrl: string) => {
         const tabs = await chrome.tabs.query({});
         return tabs.find(t => t.url === openerUrl || t.pendingUrl === openerUrl)?.id ?? null;
@@ -744,7 +744,7 @@ test.describe('Tab Grouping', () => {
 
       // Wait for Playwright to detect the new tab before creating it, so route
       // interception is active before navigation begins.
-      const childPagePromise = context.waitForEvent('page', { timeout: 10000 });
+      const childPagePromise = extensionContext.waitForEvent('page', { timeout: 10000 });
       await sw.evaluate(async ({ url, openerTabId }: { url: string; openerTabId: number }) => {
         return chrome.tabs.create({ url, openerTabId, active: true });
       }, { url: childUrl, openerTabId: openerTabId! });
@@ -762,8 +762,8 @@ test.describe('Tab Grouping', () => {
       expect(stats.tabGroupsCreatedCount).toBe(1);
     });
 
-    test('does NOT group when no middleClickLink was recorded before tab creation [US-G009]', async ({ context, helpers }) => {
-      await setupFakePages(context);
+    test('does NOT group when no middleClickLink was recorded before tab creation [US-G009]', async ({ extensionContext, helpers }) => {
+      await setupFakePages(extensionContext);
 
       await helpers.addDomainRule({
         label: 'NoClick Group',
@@ -773,11 +773,11 @@ test.describe('Tab Grouping', () => {
         groupNameSource: 'label',
       });
 
-      const opener = await context.newPage();
+      const opener = await extensionContext.newPage();
       await opener.goto(`http://localhost:${FAKE_PORT}/opener.html`, { waitUntil: 'domcontentloaded' });
 
       // Create a child tab with openerTabId but WITHOUT any middleClickLink message
-      const sw = context.serviceWorkers()[0];
+      const sw = extensionContext.serviceWorkers()[0];
       const openerTabId = await sw.evaluate(async (openerUrl: string) => {
         const tabs = await chrome.tabs.query({});
         return tabs.find(t => t.url === openerUrl)?.id ?? null;
@@ -801,9 +801,9 @@ test.describe('Tab Grouping', () => {
     // ── contextmenu path (right-click → "Open in new tab") ───────────────
     // The content script also listens for `contextmenu` on <a> elements and
     // sends the same middleClickLink message so that the extension can group
-    // the tab the user is about to open via the browser context menu.
-    test('groups a tab opened via right-click (contextmenu path) [US-G010]', async ({ context, helpers }) => {
-      await setupFakePages(context);
+    // the tab the user is about to open via the browser extensionContext menu.
+    test('groups a tab opened via right-click (contextmenu path) [US-G010]', async ({ extensionContext, helpers }) => {
+      await setupFakePages(extensionContext);
 
       await helpers.addDomainRule({
         label: 'RightClick Group',
@@ -814,7 +814,7 @@ test.describe('Tab Grouping', () => {
         groupNameSource: 'label',
       });
 
-      const opener = await context.newPage();
+      const opener = await extensionContext.newPage();
       await opener.goto(`http://localhost:${FAKE_PORT}/opener.html`, { waitUntil: 'domcontentloaded' });
 
       const childUrl = `http://localhost:${FAKE_PORT}/child2.html`;
@@ -833,8 +833,8 @@ test.describe('Tab Grouping', () => {
         await new Promise(r => setTimeout(r, 200));
       }, childUrl);
 
-      // Simulate "Open in new tab" from the context menu: create tab with openerTabId
-      const sw = context.serviceWorkers()[0];
+      // Simulate "Open in new tab" from the extensionContext menu: create tab with openerTabId
+      const sw = extensionContext.serviceWorkers()[0];
       const openerTabId = await sw.evaluate(async (openerUrl: string) => {
         const tabs = await chrome.tabs.query({});
         return tabs.find(t => t.url === openerUrl || t.pendingUrl === openerUrl)?.id ?? null;
@@ -844,7 +844,7 @@ test.describe('Tab Grouping', () => {
 
       // Wait for Playwright to detect the new tab before creating it, so route
       // interception is active before navigation begins.
-      const childPagePromise = context.waitForEvent('page', { timeout: 10000 });
+      const childPagePromise = extensionContext.waitForEvent('page', { timeout: 10000 });
       await sw.evaluate(async ({ url, openerTabId }: { url: string; openerTabId: number }) => {
         return chrome.tabs.create({ url, openerTabId, active: true });
       }, { url: childUrl, openerTabId: openerTabId! });
