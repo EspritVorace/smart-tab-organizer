@@ -119,6 +119,22 @@ async function executeUndoAction(action: UndoAction): Promise<void> {
 }
 
 /**
+ * Execute the undo action associated with a notification ID.
+ * Exposed on globalThis for E2E testing.
+ * Returns true if an undo action was found and executed, false otherwise.
+ */
+export async function executeNotificationUndoById(notificationId: string): Promise<boolean> {
+  const action = pendingUndoActions.get(notificationId);
+  if (action) {
+    await executeUndoAction(action);
+    pendingUndoActions.delete(notificationId);
+    browser.notifications.clear(notificationId);
+    return true;
+  }
+  return false;
+}
+
+/**
  * Shows a success notification
  */
 export function showSuccessNotification(title: string, message: string): Promise<string> {

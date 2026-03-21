@@ -145,9 +145,9 @@ test.describe('Notifications', () => {
       const notifId = notificationIds.find(id => id.startsWith('smarttab-'));
       expect(notifId).toBeDefined();
 
-      // Simulate clicking the Undo button (button index 0)
+      // Trigger the Undo action via the exposed globalThis helper
       await sw.evaluate(async (id: string) => {
-        chrome.notifications.onButtonClicked.dispatch(id, 0);
+        await (globalThis as any).executeNotificationUndoById(id);
       }, notifId!);
 
       await new Promise(r => setTimeout(r, 1000));
@@ -264,9 +264,9 @@ test.describe('Notifications', () => {
       const notifId = notificationIds.find(id => id.startsWith('smarttab-'));
       expect(notifId).toBeDefined();
 
-      // Click Undo to reopen the closed tab
+      // Trigger Undo to reopen the closed tab
       await sw.evaluate(async (id: string) => {
-        chrome.notifications.onButtonClicked.dispatch(id, 0);
+        await (globalThis as any).executeNotificationUndoById(id);
       }, notifId!);
 
       await new Promise(r => setTimeout(r, 1500));
@@ -316,9 +316,9 @@ test.describe('Notifications', () => {
 
       const countBeforeUndo = await helpers.getTabCount();
 
-      // Click Undo to reopen the deduplicated tab
+      // Trigger Undo to reopen the deduplicated tab
       await sw.evaluate(async (id: string) => {
-        chrome.notifications.onButtonClicked.dispatch(id, 0);
+        await (globalThis as any).executeNotificationUndoById(id);
       }, notifId!);
 
       await new Promise(r => setTimeout(r, 1500));
@@ -413,10 +413,10 @@ test.describe('Notifications', () => {
       const notifId = notificationIds.find(id => id.startsWith('smarttab-'));
       expect(notifId).toBeDefined();
 
-      // Close the notification (simulate manual close / timeout)
+      // Close the notification (simulate manual close / timeout via chrome.notifications.clear,
+      // which triggers the onClosed listener that cleans up pendingUndoActions)
       await sw.evaluate(async (id: string) => {
-        chrome.notifications.onClosed.dispatch(id, true);
-        chrome.notifications.clear(id);
+        await chrome.notifications.clear(id);
       }, notifId!);
 
       await new Promise(r => setTimeout(r, 300));
