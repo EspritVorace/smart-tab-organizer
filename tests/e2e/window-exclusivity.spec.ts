@@ -13,6 +13,7 @@ import {
   seedSessions,
   clearSessions,
   clearHelpPrefs,
+  clearProfileWindowMap,
   getProfileWindowMap,
   seedProfileWindow,
   createTestProfile,
@@ -21,6 +22,7 @@ import {
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
   await clearHelpPrefs(extensionContext);
+  await clearProfileWindowMap(extensionContext);
 });
 
 // ---------------------------------------------------------------------------
