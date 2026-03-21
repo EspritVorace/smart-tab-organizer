@@ -90,8 +90,9 @@ function createTempUserDataDir(): string {
 }
 
 export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers }>({
-  // Custom browser context with extension loaded
-  context: async ({}, use) => {
+  // Custom browser context with extension loaded — worker-scoped so the browser
+  // is launched once per worker instead of once per test.
+  context: [async ({}, use) => {
     const userDataDir = createTempUserDataDir();
 
     // Verify extension path exists
@@ -116,8 +117,14 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       ],
     });
 
-    // Wait a bit for extension to initialize
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Wait for service worker to register before yielding the context
+    const swDeadline = Date.now() + 10000;
+    while (!context.serviceWorkers()[0] && Date.now() < swDeadline) {
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    if (!context.serviceWorkers()[0]) {
+      throw new Error('Service worker did not start within timeout');
+    }
 
     await use(context);
 
@@ -129,31 +136,17 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
     } catch (e) {
       // Ignore cleanup errors
     }
-  },
+  }, { scope: 'worker' }],
 
-  // Get extension ID from service worker
-  extensionId: async ({ context }, use) => {
-    // Wait for service worker to be ready
-    let serviceWorker = context.serviceWorkers()[0];
-
+  // Get extension ID from service worker — worker-scoped, resolved once per worker.
+  extensionId: [async ({ context }, use) => {
+    const serviceWorker = context.serviceWorkers()[0];
     if (!serviceWorker) {
-      // Wait up to 10 seconds for service worker
-      const maxWait = 10000;
-      const startTime = Date.now();
-
-      while (!serviceWorker && Date.now() - startTime < maxWait) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        serviceWorker = context.serviceWorkers()[0];
-      }
-
-      if (!serviceWorker) {
-        throw new Error('Service worker did not start within timeout');
-      }
+      throw new Error('Service worker not available (should have been awaited in context fixture)');
     }
-
     const extensionId = new URL(serviceWorker.url()).hostname;
     await use(extensionId);
-  },
+  }, { scope: 'worker' }],
 
   // Popup page fixture
   popupPage: async ({ context, extensionId }, use) => {
@@ -175,16 +168,24 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
 
   // Helper functions for test operations
   helpers: async ({ context, extensionId }, use) => {
-    const getServiceWorker = () => {
-      const sw = context.serviceWorkers()[0];
-      if (!sw) throw new Error('Service worker not found');
-      return sw;
+    /**
+     * Returns the extension service worker, retrying up to 5 s if it has been
+     * terminated by the browser (idle termination between tests).
+     */
+    const getServiceWorker = async (): Promise<Page> => {
+      const deadline = Date.now() + 5000;
+      while (Date.now() < deadline) {
+        const sw = context.serviceWorkers()[0];
+        if (sw) return sw;
+        await new Promise(r => setTimeout(r, 200));
+      }
+      throw new Error('Service worker not available after 5 s (idle termination?)');
     };
 
     const helpers: ExtensionHelpers = {
       // Set global grouping enabled/disabled
       setGlobalGroupingEnabled: async (enabled: boolean) => {
-        const sw = getServiceWorker();
+        const sw = await getServiceWorker();
         await sw.evaluate(async (enabled) => {
           await chrome.storage.sync.set({ globalGroupingEnabled: enabled });
         }, enabled);
@@ -192,7 +193,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
 
       // Set global deduplication enabled/disabled
       setGlobalDeduplicationEnabled: async (enabled: boolean) => {
-        const sw = getServiceWorker();
+        const sw = await getServiceWorker();
         await sw.evaluate(async (enabled) => {
           await chrome.storage.sync.set({ globalDeduplicationEnabled: enabled });
         }, enabled);
@@ -200,7 +201,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
 
       // Add a domain rule
       addDomainRule: async (rule: DomainRuleConfig) => {
-        const sw = getServiceWorker();
+        const sw = await getServiceWorker();
         await sw.evaluate(async (ruleConfig) => {
           const browser = chrome;
           const result = await browser.storage.sync.get({ domainRules: [] });
@@ -230,7 +231,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
 
       // Clear all domain rules
       clearDomainRules: async () => {
-        const sw = getServiceWorker();
+        const sw = await getServiceWorker();
         await sw.evaluate(async () => {
           await chrome.storage.sync.set({ domainRules: [] });
         });
@@ -239,7 +240,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
 
       // Get current settings
       getSettings: async () => {
-        const sw = getServiceWorker();
+        const sw = await getServiceWorker();
         return await sw.evaluate(async () => {
           return await chrome.storage.sync.get({
             globalGroupingEnabled: true,
@@ -273,7 +274,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       // Important: The middleClickedTabs.set() and chrome.tabs.create() are combined
       // into a single sw.evaluate() call to guarantee they run in the same SW context/instance.
       createTabNaturally: async (openerPage: Page, url: string) => {
-        const sw = getServiceWorker();
+        const sw = await getServiceWorker();
         const openerUrl = openerPage.url();
 
         // Start listening for the new page before creating it so Playwright
@@ -312,7 +313,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       // Create a tab that appears to be opened from another tab
       // Directly invokes the grouping logic for reliable testing
       createTabFromOpener: async (openerPage: Page, url: string) => {
-        const sw = getServiceWorker();
+        const sw = await getServiceWorker();
 
         // Wait for opener page to have a URL
         await new Promise(resolve => setTimeout(resolve, 200));
@@ -389,7 +390,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
 
       // Ungroup all existing tab groups (prevents leakage between tests)
       clearAllTabGroups: async () => {
-        const sw = getServiceWorker();
+        const sw = await getServiceWorker();
         await sw.evaluate(async () => {
           if (!(chrome as any).tabGroups) return;
           const groups = await (chrome as any).tabGroups.query({});
@@ -405,7 +406,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
 
       // Close all non-extension tabs (useful for cleanup between grouped tests)
       closeAllTestTabs: async () => {
-        const sw = getServiceWorker();
+        const sw = await getServiceWorker();
         await sw.evaluate(async () => {
           const tabs = await chrome.tabs.query({});
           const testTabs = tabs.filter(t =>
@@ -423,7 +424,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
 
       // Get current tab count
       getTabCount: async () => {
-        const sw = getServiceWorker();
+        const sw = await getServiceWorker();
         return await sw.evaluate(async () => {
           const tabs = await chrome.tabs.query({});
           return tabs.length;
@@ -432,7 +433,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
 
       // Get info about tab groups
       getTabGroups: async () => {
-        const sw = getServiceWorker();
+        const sw = await getServiceWorker();
         return await sw.evaluate(async () => {
           const browser = chrome;
 
@@ -459,14 +460,53 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
         });
       },
 
-      // Wait for deduplication to complete
+      /**
+       * Waits for deduplication to complete by polling tab count until it
+       * stabilises for 300 ms. Much faster than a fixed sleep for the common
+       * case where deduplication fires in < 500 ms.
+       */
       waitForDeduplication: async (timeoutMs = 2000) => {
-        await new Promise(resolve => setTimeout(resolve, timeoutMs));
+        const pollInterval = 100;
+        const stableThreshold = 300; // ms of stable count = operation done
+        let lastCount = -1;
+        let stableMs = 0;
+        const deadline = Date.now() + timeoutMs;
+        while (Date.now() < deadline) {
+          const count = await helpers.getTabCount();
+          if (count === lastCount) {
+            stableMs += pollInterval;
+            if (stableMs >= stableThreshold) return;
+          } else {
+            lastCount = count;
+            stableMs = 0;
+          }
+          await new Promise(r => setTimeout(r, pollInterval));
+        }
       },
 
-      // Wait for grouping to complete
+      /**
+       * Waits for grouping to complete by polling tab-group count until it
+       * stabilises for 300 ms. Much faster than a fixed sleep for the common
+       * case where grouping fires in < 500 ms.
+       */
       waitForGrouping: async (timeoutMs = 2000) => {
-        await new Promise(resolve => setTimeout(resolve, timeoutMs));
+        const pollInterval = 100;
+        const stableThreshold = 300; // ms of stable group count = operation done
+        let lastCount = -1;
+        let stableMs = 0;
+        const deadline = Date.now() + timeoutMs;
+        while (Date.now() < deadline) {
+          const groups = await helpers.getTabGroups();
+          const count = groups.length;
+          if (count === lastCount) {
+            stableMs += pollInterval;
+            if (stableMs >= stableThreshold) return;
+          } else {
+            lastCount = count;
+            stableMs = 0;
+          }
+          await new Promise(r => setTimeout(r, pollInterval));
+        }
       },
 
       // Poll until at least one group exists (or the expected title appears).
@@ -487,7 +527,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
 
       // Get statistics
       getStatistics: async () => {
-        const sw = getServiceWorker();
+        const sw = await getServiceWorker();
         return await sw.evaluate(async () => {
           const result = await chrome.storage.local.get({
             statistics: { tabGroupsCreatedCount: 0, tabsDeduplicatedCount: 0 }
@@ -498,7 +538,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
 
       // Reset statistics
       resetStatistics: async () => {
-        const sw = getServiceWorker();
+        const sw = await getServiceWorker();
         await sw.evaluate(async () => {
           await chrome.storage.local.set({
             statistics: { tabGroupsCreatedCount: 0, tabsDeduplicatedCount: 0 }
