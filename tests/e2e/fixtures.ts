@@ -65,6 +65,7 @@ export interface DomainRuleConfig {
   groupNameSource?: 'label' | 'title' | 'url' | 'manual' | 'smart' | 'smart_label' | 'smart_preset' | 'smart_manual';
   titleParsingRegEx?: string;
   urlParsingRegEx?: string;
+  presetId?: string;
 }
 
 export interface TabGroupInfo {
@@ -219,6 +220,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
             groupNameSource: ruleConfig.groupNameSource || 'label',
             titleParsingRegEx: ruleConfig.titleParsingRegEx || '',
             urlParsingRegEx: ruleConfig.urlParsingRegEx || '',
+            presetId: ruleConfig.presetId || '',
             badge: '',
           };
 
