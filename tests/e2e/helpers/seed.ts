@@ -159,6 +159,14 @@ export async function seedProfileWindow(
   );
 }
 
+/** Clear the profile-window mapping from chrome.storage.session. */
+export async function clearProfileWindowMap(context: BrowserContext): Promise<void> {
+  const sw = await getServiceWorker(context);
+  await sw.evaluate(async () => {
+    await (chrome.storage as any).session.remove('profileWindowMap');
+  });
+}
+
 /** Get the profile-window mapping from chrome.storage.session. */
 export async function getProfileWindowMap(
   context: BrowserContext,

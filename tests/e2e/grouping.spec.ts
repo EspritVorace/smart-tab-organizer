@@ -72,6 +72,7 @@ test.describe('Tab Grouping', () => {
   });
 
   test.afterAll(async () => {
+    localServer.closeAllConnections();
     await new Promise<void>(resolve => localServer.close(() => resolve()));
   });
 
