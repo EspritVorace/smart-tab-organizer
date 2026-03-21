@@ -6,9 +6,9 @@ import { test, expect } from './fixtures';
 import { goToSessionsSection } from './helpers/navigation';
 import { seedSessions, clearSessions, clearHelpPrefs, getSessionsFromStorage, createTestSession } from './helpers/seed';
 
-test.beforeEach(async ({ context }) => {
-  await clearSessions(context);
-  await clearHelpPrefs(context);
+test.beforeEach(async ({ extensionContext }) => {
+  await clearSessions(extensionContext);
+  await clearHelpPrefs(extensionContext);
 });
 
 // ---------------------------------------------------------------------------
@@ -16,13 +16,13 @@ test.beforeEach(async ({ context }) => {
 // ---------------------------------------------------------------------------
 test.describe('[US-E01] Opening', () => {
   test('Edit item in more-actions menu opens the editor dialog', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const session = createTestSession({ name: 'Editable Session' });
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();
@@ -33,11 +33,11 @@ test.describe('[US-E01] Opening', () => {
     await page.close();
   });
 
-  test('editor shows the session name in the name field [US-E001]', async ({ context, extensionId }) => {
+  test('editor shows the session name in the name field [US-E001]', async ({ extensionContext, extensionId }) => {
     const session = createTestSession({ name: 'My Special Session' });
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();
@@ -48,12 +48,12 @@ test.describe('[US-E01] Opening', () => {
     await page.close();
   });
 
-  test('editor shows tab and group count summary [US-E003]', async ({ context, extensionId }) => {
+  test('editor shows tab and group count summary [US-E003]', async ({ extensionContext, extensionId }) => {
     const session = createTestSession();
     // 2 tabs in group + 1 ungrouped = 3 tabs, 1 group
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();
@@ -72,13 +72,13 @@ test.describe('[US-E01] Opening', () => {
 // ---------------------------------------------------------------------------
 test.describe('[US-E01] Name editing', () => {
   test('changing the session name and saving persists the new name', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const session = createTestSession({ name: 'Before Edit' });
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();
@@ -92,7 +92,7 @@ test.describe('[US-E01] Name editing', () => {
     await expect(page.getByRole('dialog')).not.toBeVisible();
     await expect(page.getByText('After Edit')).toBeVisible();
 
-    const sessions = await getSessionsFromStorage(context);
+    const sessions = await getSessionsFromStorage(extensionContext);
     expect(sessions[0].name).toBe('After Edit');
     await page.close();
   });
@@ -103,13 +103,13 @@ test.describe('[US-E01] Name editing', () => {
 // ---------------------------------------------------------------------------
 test.describe('[US-E01] Cancel and unsaved changes', () => {
   test('Cancel without changes closes the dialog immediately', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const session = createTestSession({ name: 'Unchanged' });
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();
@@ -121,11 +121,11 @@ test.describe('[US-E01] Cancel and unsaved changes', () => {
     await page.close();
   });
 
-  test('Cancel with unsaved changes shows confirmation alert [US-E005]', async ({ context, extensionId }) => {
+  test('Cancel with unsaved changes shows confirmation alert [US-E005]', async ({ extensionContext, extensionId }) => {
     const session = createTestSession({ name: 'Has Changes' });
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();
@@ -144,13 +144,13 @@ test.describe('[US-E01] Cancel and unsaved changes', () => {
   });
 
   test('Leave button in unsaved-changes dialog closes without saving [US-E005]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const session = createTestSession({ name: 'Original' });
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();
@@ -175,11 +175,11 @@ test.describe('[US-E01] Cancel and unsaved changes', () => {
 // Tab tree interactions
 // ---------------------------------------------------------------------------
 test.describe('[US-E01] Tab tree', () => {
-  test('editor displays tabs from the session', async ({ context, extensionId }) => {
+  test('editor displays tabs from the session', async ({ extensionContext, extensionId }) => {
     const session = createTestSession();
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();
@@ -192,11 +192,11 @@ test.describe('[US-E01] Tab tree', () => {
     await page.close();
   });
 
-  test('deleting a tab removes it from the editor', async ({ context, extensionId }) => {
+  test('deleting a tab removes it from the editor', async ({ extensionContext, extensionId }) => {
     const session = createTestSession({ name: 'Tab Delete Test' });
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();
@@ -213,11 +213,11 @@ test.describe('[US-E01] Tab tree', () => {
     await page.close();
   });
 
-  test('editing a tab URL persists after save', async ({ context, extensionId }) => {
+  test('editing a tab URL persists after save', async ({ extensionContext, extensionId }) => {
     const session = createTestSession({ name: 'URL Edit Test' });
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();
@@ -240,7 +240,7 @@ test.describe('[US-E01] Tab tree', () => {
     await expect(page.getByRole('dialog')).not.toBeVisible();
 
     // Verify storage updated
-    const sessions = await getSessionsFromStorage(context);
+    const sessions = await getSessionsFromStorage(extensionContext);
     const allUrls = [
       ...sessions[0].ungroupedTabs.map(t => t.url),
       ...sessions[0].groups.flatMap(g => g.tabs.map(t => t.url)),
@@ -249,11 +249,11 @@ test.describe('[US-E01] Tab tree', () => {
     await page.close();
   });
 
-  test('renaming a group changes its title in the editor', async ({ context, extensionId }) => {
+  test('renaming a group changes its title in the editor', async ({ extensionContext, extensionId }) => {
     const session = createTestSession({ name: 'Group Rename Test' });
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();
@@ -276,7 +276,7 @@ test.describe('[US-E01] Tab tree', () => {
   });
 
   test('moving a tab to another group removes it from original group', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     // Create session with 2 groups so a tab can be moved between them
@@ -287,9 +287,9 @@ test.describe('[US-E01] Tab tree', () => {
       color: 'green',
       tabs: [{ id: 'tab-p1', title: 'Wikipedia', url: 'https://wikipedia.org' }],
     });
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();
@@ -311,14 +311,14 @@ test.describe('[US-E01] Tab tree', () => {
   });
 
   test('tab and group counters update in real time after deletion', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const session = createTestSession({ name: 'Counter Test' });
     // starts with 3 tabs (2 in group + 1 ungrouped)
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();
@@ -344,13 +344,13 @@ test.describe('[US-E01] Tab tree', () => {
 // ---------------------------------------------------------------------------
 test.describe('[US-E02] Delete group', () => {
   test('delete group button is visible on hover over a group row', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const session = createTestSession({ name: 'Group Deletion Test' });
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();
@@ -364,13 +364,13 @@ test.describe('[US-E02] Delete group', () => {
   });
 
   test('clicking delete group opens a confirmation dialog', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const session = createTestSession({ name: 'Group Deletion Test' });
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();
@@ -386,13 +386,13 @@ test.describe('[US-E02] Delete group', () => {
   });
 
   test('choosing "Delete group and tabs" removes the group from the editor', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const session = createTestSession({ name: 'Group Deletion Test' });
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();
@@ -411,13 +411,13 @@ test.describe('[US-E02] Delete group', () => {
   });
 
   test('choosing "Ungroup tabs" moves tabs to ungrouped section', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const session = createTestSession({ name: 'Ungroup Test' });
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();

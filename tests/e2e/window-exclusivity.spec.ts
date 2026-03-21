@@ -5,7 +5,7 @@
  *
  * NOTE: These tests create multiple browser windows using the Chrome API
  * via page.evaluate(). The window manipulation happens inside the extension
- * context, not via Playwright's native window handling.
+ * extensionContext, not via Playwright's native window handling.
  */
 import { test, expect } from './fixtures';
 import { goToPopup, goToSessionsSection } from './helpers/navigation';
@@ -18,9 +18,9 @@ import {
   createTestProfile,
 } from './helpers/seed';
 
-test.beforeEach(async ({ context }) => {
-  await clearSessions(context);
-  await clearHelpPrefs(context);
+test.beforeEach(async ({ extensionContext }) => {
+  await clearSessions(extensionContext);
+  await clearHelpPrefs(extensionContext);
 });
 
 // ---------------------------------------------------------------------------
@@ -28,13 +28,13 @@ test.beforeEach(async ({ context }) => {
 // ---------------------------------------------------------------------------
 test.describe('[US-W01] Profile ↔ window mapping', () => {
   test('restoring a profile via RESTORE_PROFILE message creates a window mapping', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const profile = createTestProfile({ name: 'Mapped Profile' });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const sw = context.serviceWorkers()[0];
+    const sw = extensionContext.serviceWorkers()[0];
 
     // Get a window ID to use (current window)
     const windowId = await sw.evaluate(async () => {
@@ -55,17 +55,17 @@ test.describe('[US-W01] Profile ↔ window mapping', () => {
       { profileId: profile.id, wid: windowId },
     );
 
-    const mapping = await getProfileWindowMap(context);
+    const mapping = await getProfileWindowMap(extensionContext);
     expect(mapping[profile.id]).toBe(windowId);
   });
 
   test('mapping is cleared from session storage after window close simulation [US-W001]', async ({
-    context,
+    extensionContext,
   }) => {
     const profile = createTestProfile({ name: 'Closing Profile' });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const sw = context.serviceWorkers()[0];
+    const sw = extensionContext.serviceWorkers()[0];
 
     // Get current window ID
     const windowId = await sw.evaluate(async () => {
@@ -74,10 +74,10 @@ test.describe('[US-W01] Profile ↔ window mapping', () => {
     });
 
     // Seed a mapping
-    await seedProfileWindow(context, profile.id, windowId);
+    await seedProfileWindow(extensionContext, profile.id, windowId);
 
     // Verify mapping exists
-    let mapping = await getProfileWindowMap(context);
+    let mapping = await getProfileWindowMap(extensionContext);
     expect(mapping[profile.id]).toBeDefined();
 
     // Simulate the removeWindowAssociations call (as if window was closed)
@@ -90,7 +90,7 @@ test.describe('[US-W01] Profile ↔ window mapping', () => {
       await (chrome.storage as any).session.set({ profileWindowMap: map });
     }, windowId);
 
-    mapping = await getProfileWindowMap(context);
+    mapping = await getProfileWindowMap(extensionContext);
     expect(mapping[profile.id]).toBeUndefined();
   });
 });
@@ -100,22 +100,22 @@ test.describe('[US-W01] Profile ↔ window mapping', () => {
 // ---------------------------------------------------------------------------
 test.describe('[US-W01] Popup with profile window mapping', () => {
   test('popup shows warning when profile is already open in a window', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const profile = createTestProfile({ name: 'Open Profile' });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const sw = context.serviceWorkers()[0];
+    const sw = extensionContext.serviceWorkers()[0];
     const windowId = await sw.evaluate(async () => {
       const win = await chrome.windows.getCurrent();
       return win.id ?? 1;
     });
 
     // Seed profile as open in a *different* (fake) window
-    await seedProfileWindow(context, profile.id, windowId + 999);
+    await seedProfileWindow(extensionContext, profile.id, windowId + 999);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
     // The profile should show an "already open" indicator
@@ -131,26 +131,26 @@ test.describe('[US-W01] Popup with profile window mapping', () => {
 // ---------------------------------------------------------------------------
 test.describe('[US-W01] Unpin clears window mapping', () => {
   test('unpinning a profile removes its entry from the window mapping', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const profile = createTestProfile({ name: 'Unpin Mapping Profile' });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const sw = context.serviceWorkers()[0];
+    const sw = extensionContext.serviceWorkers()[0];
     const windowId = await sw.evaluate(async () => {
       const win = await chrome.windows.getCurrent();
       return win.id ?? 1;
     });
 
     // Seed a mapping for this profile
-    await seedProfileWindow(context, profile.id, windowId);
+    await seedProfileWindow(extensionContext, profile.id, windowId);
 
     // Verify mapping exists before unpin
-    let mapping = await getProfileWindowMap(context);
+    let mapping = await getProfileWindowMap(extensionContext);
     expect(mapping[profile.id]).toBeDefined();
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     // Unpin the profile via the UI
@@ -158,7 +158,7 @@ test.describe('[US-W01] Unpin clears window mapping', () => {
     await page.waitForTimeout(500);
 
     // Mapping should be cleared
-    mapping = await getProfileWindowMap(context);
+    mapping = await getProfileWindowMap(extensionContext);
     expect(mapping[profile.id]).toBeUndefined();
     await page.close();
   });
@@ -169,22 +169,22 @@ test.describe('[US-W01] Unpin clears window mapping', () => {
 // ---------------------------------------------------------------------------
 test.describe('[US-W01] Restore wizard warning', () => {
   test('Customize restore wizard shows warning when profile is open in another window', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const profile = createTestProfile({ name: 'Open Elsewhere Profile' });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const sw = context.serviceWorkers()[0];
+    const sw = extensionContext.serviceWorkers()[0];
     const windowId = await sw.evaluate(async () => {
       const win = await chrome.windows.getCurrent();
       return win.id ?? 1;
     });
 
     // Seed profile as open in a *different* (fake) window
-    await seedProfileWindow(context, profile.id, windowId + 999);
+    await seedProfileWindow(extensionContext, profile.id, windowId + 999);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: /restore options/i }).click();
@@ -203,15 +203,15 @@ test.describe('[US-W01] Restore wizard warning', () => {
 // ---------------------------------------------------------------------------
 test.describe('[US-W01] Snapshots — no exclusivity restrictions', () => {
   test('snapshot restore does not create a profile-window mapping', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     // Seed only a snapshot (not a profile)
     const { createTestSession } = await import('./helpers/seed');
     const snapshot = createTestSession({ name: 'Free Snapshot' });
-    await seedSessions(context, [snapshot]);
+    await seedSessions(extensionContext, [snapshot]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     // Quick restore in current window
@@ -220,7 +220,7 @@ test.describe('[US-W01] Snapshots — no exclusivity restrictions', () => {
     await page.waitForTimeout(500);
 
     // No mapping should be created for a snapshot
-    const mapping = await getProfileWindowMap(context);
+    const mapping = await getProfileWindowMap(extensionContext);
     expect(Object.keys(mapping).length).toBe(0);
     await page.close();
   });

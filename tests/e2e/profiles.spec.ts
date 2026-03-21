@@ -13,31 +13,31 @@ import {
   createTestProfile,
 } from './helpers/seed';
 
-test.beforeEach(async ({ context }) => {
-  await clearSessions(context);
-  await clearHelpPrefs(context);
+test.beforeEach(async ({ extensionContext }) => {
+  await clearSessions(extensionContext);
+  await clearHelpPrefs(extensionContext);
 });
 
 // ---------------------------------------------------------------------------
 // Pin / Unpin
 // ---------------------------------------------------------------------------
 test.describe('[US-P01] Pin / Unpin', () => {
-  test('Pin as Profile button appears on snapshot cards', async ({ context, extensionId }) => {
+  test('Pin as Profile button appears on snapshot cards', async ({ extensionContext, extensionId }) => {
     const session = createTestSession({ name: 'Pinnable' });
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await expect(page.getByRole('button', { name: 'Pin as Profile' })).toBeVisible();
     await page.close();
   });
 
-  test('pinning a session marks it as isPinned in storage [US-P001]', async ({ context, extensionId }) => {
+  test('pinning a session marks it as isPinned in storage [US-P001]', async ({ extensionContext, extensionId }) => {
     const session = createTestSession({ name: 'Will Be Pinned' });
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     // Click "Pin as Profile" — clearHelpPrefs resets flag → onboarding always appears
@@ -49,17 +49,17 @@ test.describe('[US-P01] Pin / Unpin', () => {
 
     await page.waitForTimeout(500);
 
-    const sessions = await getSessionsFromStorage(context);
+    const sessions = await getSessionsFromStorage(extensionContext);
     const pinned = sessions.find(s => s.name === 'Will Be Pinned');
     expect(pinned?.isPinned).toBe(true);
     await page.close();
   });
 
-  test('Unpin button appears on profile cards [US-P005]', async ({ context, extensionId }) => {
+  test('Unpin button appears on profile cards [US-P005]', async ({ extensionContext, extensionId }) => {
     const profile = createTestProfile({ name: 'Pinned Profile' });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await expect(page.getByRole('button', { name: 'Unpin' })).toBeVisible();
@@ -67,19 +67,19 @@ test.describe('[US-P01] Pin / Unpin', () => {
   });
 
   test('unpinning a profile sets isPinned=false and autoSync=false in storage [US-P005]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const profile = createTestProfile({ name: 'Profile To Unpin', autoSync: true });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'Unpin' }).click();
     await page.waitForTimeout(500);
 
-    const sessions = await getSessionsFromStorage(context);
+    const sessions = await getSessionsFromStorage(extensionContext);
     const s = sessions.find(s => s.name === 'Profile To Unpin');
     expect(s?.isPinned).toBe(false);
     expect(s?.autoSync).toBe(false);
@@ -91,11 +91,11 @@ test.describe('[US-P01] Pin / Unpin', () => {
 // Auto-sync toggle
 // ---------------------------------------------------------------------------
 test.describe('[US-P04] Auto-sync toggle', () => {
-  test('toggle auto-sync on enables autoSync in storage', async ({ context, extensionId }) => {
+  test('toggle auto-sync on enables autoSync in storage', async ({ extensionContext, extensionId }) => {
     const profile = createTestProfile({ name: 'Sync Profile', autoSync: false });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     const toggle = page.getByRole('switch', { name: /auto-sync/i });
@@ -103,20 +103,20 @@ test.describe('[US-P04] Auto-sync toggle', () => {
     await toggle.click();
     await page.waitForTimeout(300);
 
-    const sessions = await getSessionsFromStorage(context);
+    const sessions = await getSessionsFromStorage(extensionContext);
     const s = sessions.find(s => s.name === 'Sync Profile');
     expect(s?.autoSync).toBe(true);
     await page.close();
   });
 
   test('enabling auto-sync shows "Auto-sync enabled" indicator on the card [US-P006]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const profile = createTestProfile({ name: 'Sync Profile', autoSync: false });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('switch', { name: /auto-sync/i }).click();
@@ -125,13 +125,13 @@ test.describe('[US-P04] Auto-sync toggle', () => {
   });
 
   test('disabling auto-sync hides "Auto-sync enabled" indicator [US-P006]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const profile = createTestProfile({ name: 'Sync Profile', autoSync: true });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     // Verify it's shown initially
@@ -143,13 +143,13 @@ test.describe('[US-P04] Auto-sync toggle', () => {
   });
 
   test('help icon tooltip is accessible on the auto-sync row [US-P007]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const profile = createTestProfile();
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     // The HelpCircle button has an aria-label matching the tooltip content
@@ -163,11 +163,11 @@ test.describe('[US-P04] Auto-sync toggle', () => {
 // Icon selection
 // ---------------------------------------------------------------------------
 test.describe('[US-P02] Profile icon', () => {
-  test('Change Icon menu item is visible for profiles', async ({ context, extensionId }) => {
+  test('Change Icon menu item is visible for profiles', async ({ extensionContext, extensionId }) => {
     const profile = createTestProfile({ name: 'Icon Profile' });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'More actions' }).click();
@@ -176,13 +176,13 @@ test.describe('[US-P02] Profile icon', () => {
   });
 
   test('Change Icon menu item can be clicked and does not error [US-P008]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const profile = createTestProfile({ name: 'Icon Profile' });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     // Verify the menu item exists and can be clicked without throwing
@@ -197,14 +197,14 @@ test.describe('[US-P02] Profile icon', () => {
     await page.close();
   });
 
-  test('icon change persists to storage [US-P008]', async ({ context }) => {
+  test('icon change persists to storage [US-P008]', async ({ extensionContext }) => {
     // Test icon persistence via storage API rather than through the picker UI,
     // since the Radix Popover is dismissed by the dropdown's click-outside detection
     // in the Playwright test environment.
     const profile = createTestProfile({ name: 'Icon Profile', icon: 'briefcase' });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const sw = context.serviceWorkers()[0];
+    const sw = extensionContext.serviceWorkers()[0];
     await sw.evaluate(async (profileId: string) => {
       const result = await chrome.storage.local.get({ sessions: [] });
       const sessions = result.sessions as any[];
@@ -215,7 +215,7 @@ test.describe('[US-P02] Profile icon', () => {
       }
     }, profile.id);
 
-    const sessions = await getSessionsFromStorage(context);
+    const sessions = await getSessionsFromStorage(extensionContext);
     const s = sessions.find(s => s.name === 'Icon Profile');
     expect(s?.icon).toBe('home');
   });
@@ -225,8 +225,8 @@ test.describe('[US-P02] Profile icon', () => {
 // Direct profile creation
 // ---------------------------------------------------------------------------
 test.describe('[US-P03] New Profile wizard', () => {
-  test('New Profile button in header opens profile wizard', async ({ context, extensionId }) => {
-    const page = await context.newPage();
+  test('New Profile button in header opens profile wizard', async ({ extensionContext, extensionId }) => {
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     // Use first() — empty state also renders a "New Profile" button
@@ -242,14 +242,14 @@ test.describe('[US-P03] New Profile wizard', () => {
   });
 
   test('profile created via wizard has isPinned=true in storage [US-P004]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     // captureCurrentTabs() filters chrome-extension:// URLs; open a real tab first
-    const extraTab = await context.newPage();
+    const extraTab = await extensionContext.newPage();
     await extraTab.goto('data:text/html,<p>test tab for profile</p>');
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     // Use first() — empty state also renders a "New Profile" button
@@ -266,15 +266,15 @@ test.describe('[US-P03] New Profile wizard', () => {
     // Dialog auto-closes after saving
     await expect(page.getByRole('dialog')).not.toBeVisible();
 
-    const sessions = await getSessionsFromStorage(context);
+    const sessions = await getSessionsFromStorage(extensionContext);
     expect(sessions.length).toBe(1);
     expect(sessions[0].isPinned).toBe(true);
     await extraTab.close();
     await page.close();
   });
 
-  test('New Profile tooltip is visible on hover [US-P009]', async ({ context, extensionId }) => {
-    const page = await context.newPage();
+  test('New Profile tooltip is visible on hover [US-P009]', async ({ extensionContext, extensionId }) => {
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     // Use first() — empty state also renders a "New Profile" button
@@ -284,13 +284,13 @@ test.describe('[US-P03] New Profile wizard', () => {
   });
 
   test('profile icon badge tooltip is visible on hover for pinned sessions [US-P009]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const profile = createTestProfile({ name: 'Profile With Badge' });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     // Hover over the profile icon box (top-left colored square)
@@ -302,10 +302,10 @@ test.describe('[US-P03] New Profile wizard', () => {
   });
 
   test('profile wizard name field is pre-filled with "New Profile"', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'New Profile' }).first().click();
@@ -320,10 +320,10 @@ test.describe('[US-P03] New Profile wizard', () => {
   });
 
   test('profile wizard shows icon picker in Selection step', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'New Profile' }).first().click();
@@ -336,14 +336,14 @@ test.describe('[US-P03] New Profile wizard', () => {
   });
 
   test('profile wizard shows auto-sync toggle in Confirmation step', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     // captureCurrentTabs() filters chrome-extension:// — open a real tab so Next is enabled
-    const extraTab = await context.newPage();
+    const extraTab = await extensionContext.newPage();
     await extraTab.goto('data:text/html,<p>tab for profile wizard</p>');
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'New Profile' }).first().click();
@@ -359,12 +359,12 @@ test.describe('[US-P03] New Profile wizard', () => {
     await page.close();
   });
 
-  test('profiles are sorted before snapshots in the list [US-S008]', async ({ context, extensionId }) => {
+  test('profiles are sorted before snapshots in the list [US-S008]', async ({ extensionContext, extensionId }) => {
     const snapshot = createTestSession({ name: 'Z-Snapshot' });
     const profile = createTestProfile({ name: 'A-Profile' });
-    await seedSessions(context, [snapshot, profile]);
+    await seedSessions(extensionContext, [snapshot, profile]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     // Get all session names in DOM order

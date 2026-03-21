@@ -12,21 +12,21 @@ import {
   createTestProfile,
 } from './helpers/seed';
 
-test.beforeEach(async ({ context }) => {
-  await clearSessions(context);
-  await clearHelpPrefs(context);
+test.beforeEach(async ({ extensionContext }) => {
+  await clearSessions(extensionContext);
+  await clearHelpPrefs(extensionContext);
 });
 
 // ---------------------------------------------------------------------------
 // Toolbar
 // ---------------------------------------------------------------------------
 test.describe('[US-PO01] Toolbar', () => {
-  test('Options button navigates to the options page', async ({ context, extensionId }) => {
-    const page = await context.newPage();
+  test('Options button navigates to the options page', async ({ extensionContext, extensionId }) => {
+    const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
     const [newPage] = await Promise.all([
-      context.waitForEvent('page'),
+      extensionContext.waitForEvent('page'),
       page.getByRole('button', { name: /options/i }).click(),
     ]);
     await newPage.waitForLoadState('domcontentloaded');
@@ -37,14 +37,14 @@ test.describe('[US-PO01] Toolbar', () => {
   });
 
   test('Save button navigates to Sessions with snapshot wizard [US-PO004]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
     const [newPage] = await Promise.all([
-      context.waitForEvent('page'),
+      extensionContext.waitForEvent('page'),
       page.getByRole('button', { name: /save/i }).click(),
     ]);
     await newPage.waitForLoadState('domcontentloaded');
@@ -55,19 +55,19 @@ test.describe('[US-PO01] Toolbar', () => {
     await newPage.close();
   });
 
-  test('Restore button navigates to Sessions section [US-PO001]', async ({ context, extensionId }) => {
+  test('Restore button navigates to Sessions section [US-PO001]', async ({ extensionContext, extensionId }) => {
     // Restore button is disabled when no sessions exist — seed one to enable it
     const session = createTestSession({ name: 'Restorable' });
-    await seedSessions(context, [session]);
+    await seedSessions(extensionContext, [session]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
     // Wait for sessions to load so the Restore button is enabled
     await expect(page.getByRole('button', { name: /restore/i }).first()).toBeEnabled({ timeout: 5000 });
 
     const [newPage] = await Promise.all([
-      context.waitForEvent('page'),
+      extensionContext.waitForEvent('page'),
       page.getByRole('button', { name: /restore/i }).first().click(),
     ]);
     await newPage.waitForLoadState('domcontentloaded');
@@ -81,12 +81,12 @@ test.describe('[US-PO01] Toolbar', () => {
 // Profiles list
 // ---------------------------------------------------------------------------
 test.describe('[US-PO02] Profiles list', () => {
-  test('profiles section is hidden when no profiles exist', async ({ context, extensionId }) => {
+  test('profiles section is hidden when no profiles exist', async ({ extensionContext, extensionId }) => {
     // Only snapshots, no profiles
     const snapshot = createTestSession({ name: 'Just A Snapshot' });
-    await seedSessions(context, [snapshot]);
+    await seedSessions(extensionContext, [snapshot]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
     // The profiles section label should not be visible
@@ -94,11 +94,11 @@ test.describe('[US-PO02] Profiles list', () => {
     await page.close();
   });
 
-  test('profiles section shows when profiles exist [US-PO005]', async ({ context, extensionId }) => {
+  test('profiles section shows when profiles exist [US-PO005]', async ({ extensionContext, extensionId }) => {
     const profile = createTestProfile({ name: 'My Profile' });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
     await expect(page.getByText('Profiles')).toBeVisible();
@@ -106,14 +106,14 @@ test.describe('[US-PO02] Profiles list', () => {
     await page.close();
   });
 
-  test('popup shows all pinned profiles [US-PO005]', async ({ context, extensionId }) => {
+  test('popup shows all pinned profiles [US-PO005]', async ({ extensionContext, extensionId }) => {
     const profiles = [
       createTestProfile({ name: 'Work Profile' }),
       createTestProfile({ name: 'Personal Profile' }),
     ];
-    await seedSessions(context, profiles);
+    await seedSessions(extensionContext, profiles);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
     await expect(page.getByText('Work Profile')).toBeVisible();
@@ -122,14 +122,14 @@ test.describe('[US-PO02] Profiles list', () => {
   });
 
   test('snapshot sessions are not shown in popup profiles list [US-PO005]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const snapshot = createTestSession({ name: 'Hidden Snapshot' });
     const profile = createTestProfile({ name: 'Visible Profile' });
-    await seedSessions(context, [snapshot, profile]);
+    await seedSessions(extensionContext, [snapshot, profile]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
     await expect(page.getByText('Visible Profile')).toBeVisible();
@@ -137,11 +137,11 @@ test.describe('[US-PO02] Profiles list', () => {
     await page.close();
   });
 
-  test('each profile row has a restore button [US-PO002]', async ({ context, extensionId }) => {
+  test('each profile row has a restore button [US-PO002]', async ({ extensionContext, extensionId }) => {
     const profile = createTestProfile({ name: 'Restorable Profile' });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
     // The restore split button's dropdown trigger is labeled "Restore options"
@@ -151,13 +151,13 @@ test.describe('[US-PO02] Profiles list', () => {
   });
 
   test('profile row dropdown offers current window and new window options', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
     const profile = createTestProfile({ name: 'Dropdown Profile' });
-    await seedSessions(context, [profile]);
+    await seedSessions(extensionContext, [profile]);
 
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
     await page.getByRole('button', { name: 'Restore options' }).click();
@@ -172,8 +172,8 @@ test.describe('[US-PO02] Profiles list', () => {
 // Deep linking (options page side)
 // ---------------------------------------------------------------------------
 test.describe('[US-PO01] Deep linking', () => {
-  test('#sessions hash shows the Sessions section', async ({ context, extensionId }) => {
-    const page = await context.newPage();
+  test('#sessions hash shows the Sessions section', async ({ extensionContext, extensionId }) => {
+    const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     // The Sessions page title or empty state should be visible
@@ -184,10 +184,10 @@ test.describe('[US-PO01] Deep linking', () => {
   });
 
   test('#sessions?action=snapshot hash auto-opens the snapshot wizard [US-PO004]', async ({
-    context,
+    extensionContext,
     extensionId,
   }) => {
-    const page = await context.newPage();
+    const page = await extensionContext.newPage();
     await page.goto(`chrome-extension://${extensionId}/options.html#sessions?action=snapshot`);
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
