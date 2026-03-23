@@ -44,10 +44,10 @@ function makeRuleJson(label: string, domainFilter: string): string {
         label,
         domainFilter,
         enabled: true,
-        groupingEnabled: true,
         deduplicationEnabled: false,
         deduplicationMatchMode: 'exact',
-        groupNameSource: 'label',
+        groupNameSource: 'title',
+        presetId: null,
         color: 'blue',
         titleParsingRegEx: '',
         urlParsingRegEx: '',
@@ -107,8 +107,8 @@ test.describe('Import / Export', () => {
 
       const dialog = page.getByRole('dialog');
       // Both mode tabs should be visible
-      await expect(dialog.getByText('File')).toBeVisible();
-      await expect(dialog.getByText('Text')).toBeVisible();
+      await expect(dialog.getByRole('radio', { name: 'File' }).locator('..')).toBeVisible();
+      await expect(dialog.getByRole('radio', { name: 'Text' }).locator('..')).toBeVisible();
 
       await page.close();
     });
@@ -139,7 +139,7 @@ test.describe('Import / Export', () => {
 
       const dialog = page.getByRole('dialog');
       // Switch to Text mode
-      await dialog.getByText('Text').click();
+      await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
       await page.waitForTimeout(200);
 
       await expect(dialog.locator('textarea')).toBeVisible();
@@ -175,7 +175,7 @@ test.describe('Import / Export', () => {
       await openImportWizard(page);
 
       const dialog = page.getByRole('dialog');
-      await dialog.getByText('Text').click();
+      await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
       await page.waitForTimeout(200);
 
       // Enter invalid JSON
@@ -183,7 +183,7 @@ test.describe('Import / Export', () => {
       await page.waitForTimeout(300);
 
       // Should show an error indicator
-      await expect(dialog.getByText(/invalid/i)).toBeVisible();
+      await expect(dialog.getByText('Invalid JSON format')).toBeVisible();
 
       await page.close();
     });
@@ -197,7 +197,7 @@ test.describe('Import / Export', () => {
       await openImportWizard(page);
 
       const dialog = page.getByRole('dialog');
-      await dialog.getByText('Text').click();
+      await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
       await page.waitForTimeout(200);
 
       const validJson = makeRuleJson('Valid Rule', 'valid.com');
@@ -221,19 +221,19 @@ test.describe('Import / Export', () => {
       await openImportWizard(page);
 
       const dialog = page.getByRole('dialog');
-      await dialog.getByText('Text').click();
+      await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
       await page.waitForTimeout(200);
 
       await dialog.locator('textarea').fill('{ invalid }');
       await page.waitForTimeout(200);
-      await expect(dialog.getByText(/invalid/i)).toBeVisible();
+      await expect(dialog.getByText('Invalid JSON format')).toBeVisible();
 
       // Clear the textarea
       await dialog.locator('textarea').fill('');
       await page.waitForTimeout(200);
 
       // No error and no success indicator
-      await expect(dialog.getByText(/invalid/i)).not.toBeVisible();
+      await expect(dialog.getByText('Invalid JSON format')).not.toBeVisible();
       await expect(dialog.getByText(/rule.*found/i)).not.toBeVisible();
 
       await page.close();
@@ -252,7 +252,7 @@ test.describe('Import / Export', () => {
       await openImportWizard(page);
 
       const dialog = page.getByRole('dialog');
-      await dialog.getByText('Text').click();
+      await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
       await page.waitForTimeout(200);
 
       await dialog.locator('textarea').fill(makeRuleJson('Brand New Rule', 'brandnew.com'));
@@ -277,10 +277,10 @@ test.describe('Import / Export', () => {
         label: 'Identical Rule',
         domainFilter: 'identical.com',
         enabled: true,
-        groupingEnabled: true,
         deduplicationEnabled: false,
         deduplicationMatchMode: 'exact',
-        groupNameSource: 'label',
+        groupNameSource: 'title',
+        presetId: null,
         color: 'blue',
         titleParsingRegEx: '',
         urlParsingRegEx: '',
@@ -293,7 +293,7 @@ test.describe('Import / Export', () => {
       await openImportWizard(page);
 
       const dialog = page.getByRole('dialog');
-      await dialog.getByText('Text').click();
+      await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
       await page.waitForTimeout(200);
 
       // Import same rule (same label + same properties)
@@ -322,10 +322,10 @@ test.describe('Import / Export', () => {
         label: 'Conflict Rule',
         domainFilter: 'conflict.com',
         enabled: true,
-        groupingEnabled: true,
         deduplicationEnabled: false,
         deduplicationMatchMode: 'exact',
-        groupNameSource: 'label',
+        groupNameSource: 'title',
+        presetId: null,
         color: 'blue',
         titleParsingRegEx: '',
         urlParsingRegEx: '',
@@ -341,7 +341,7 @@ test.describe('Import / Export', () => {
       await openImportWizard(page);
 
       const dialog = page.getByRole('dialog');
-      await dialog.getByText('Text').click();
+      await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
       await page.waitForTimeout(200);
 
       await dialog.locator('textarea').fill(JSON.stringify({ domainRules: [imported] }));
@@ -369,7 +369,7 @@ test.describe('Import / Export', () => {
       await openImportWizard(page);
 
       const dialog = page.getByRole('dialog');
-      await dialog.getByText('Text').click();
+      await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
       await page.waitForTimeout(200);
 
       await dialog.locator('textarea').fill(makeRuleJson('Pre-Selected Rule', 'preselect.com'));
@@ -400,7 +400,7 @@ test.describe('Import / Export', () => {
       await openImportWizard(page);
 
       const dialog = page.getByRole('dialog');
-      await dialog.getByText('Text').click();
+      await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
       await page.waitForTimeout(200);
 
       await dialog.locator('textarea').fill(makeRuleJson('Deselect Rule', 'deselect.com'));
@@ -433,10 +433,10 @@ test.describe('Import / Export', () => {
         label: 'CR Rule',
         domainFilter: 'cr.com',
         enabled: true,
-        groupingEnabled: true,
         deduplicationEnabled: false,
         deduplicationMatchMode: 'exact',
-        groupNameSource: 'label',
+        groupNameSource: 'title',
+        presetId: null,
         color: 'blue',
         titleParsingRegEx: '',
         urlParsingRegEx: '',
@@ -451,7 +451,7 @@ test.describe('Import / Export', () => {
       await openImportWizard(page);
 
       const dialog = page.getByRole('dialog');
-      await dialog.getByText('Text').click();
+      await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
       await page.waitForTimeout(200);
 
       await dialog.locator('textarea').fill(JSON.stringify({ domainRules: [imported] }));
@@ -461,9 +461,9 @@ test.describe('Import / Export', () => {
       await page.waitForTimeout(300);
 
       // The conflict resolution segmented control should be visible
-      await expect(dialog.getByText('Overwrite')).toBeVisible();
-      await expect(dialog.getByText('Duplicate')).toBeVisible();
-      await expect(dialog.getByText('Ignore')).toBeVisible();
+      await expect(dialog.getByRole('radio', { name: 'Overwrite' })).toBeAttached();
+      await expect(dialog.getByRole('radio', { name: 'Duplicate' })).toBeAttached();
+      await expect(dialog.getByRole('radio', { name: 'Ignore' })).toBeAttached();
 
       await page.close();
     });
@@ -477,10 +477,10 @@ test.describe('Import / Export', () => {
         label: 'Ignore Rule',
         domainFilter: 'ignore.com',
         enabled: true,
-        groupingEnabled: true,
         deduplicationEnabled: false,
         deduplicationMatchMode: 'exact',
-        groupNameSource: 'label',
+        groupNameSource: 'title',
+        presetId: null,
         color: 'blue',
         titleParsingRegEx: '',
         urlParsingRegEx: '',
@@ -495,7 +495,7 @@ test.describe('Import / Export', () => {
       await openImportWizard(page);
 
       const dialog = page.getByRole('dialog');
-      await dialog.getByText('Text').click();
+      await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
       await page.waitForTimeout(200);
 
       await dialog.locator('textarea').fill(JSON.stringify({ domainRules: [imported] }));
@@ -504,8 +504,9 @@ test.describe('Import / Export', () => {
       await dialog.getByRole('button', { name: /next/i }).click();
       await page.waitForTimeout(300);
 
-      // Switch to Ignore mode
-      await dialog.getByText('Ignore').click();
+      // Switch to Ignore mode (SegmentedControl item — use class selector to avoid strict-mode issues
+      // with duplicate spans and rule-card text that also contains "Ignore")
+      await dialog.locator('.rt-SegmentedControlItem').filter({ hasText: 'Ignore' }).first().click();
       await page.waitForTimeout(200);
 
       // Import count should be 0 (conflict ignored, no new rules)
@@ -527,10 +528,10 @@ test.describe('Import / Export', () => {
         label: 'Diff Rule',
         domainFilter: 'diff.com',
         enabled: true,
-        groupingEnabled: true,
         deduplicationEnabled: false,
         deduplicationMatchMode: 'exact',
-        groupNameSource: 'label',
+        groupNameSource: 'title',
+        presetId: null,
         color: 'blue',
         titleParsingRegEx: '',
         urlParsingRegEx: '',
@@ -545,7 +546,7 @@ test.describe('Import / Export', () => {
       await openImportWizard(page);
 
       const dialog = page.getByRole('dialog');
-      await dialog.getByText('Text').click();
+      await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
       await page.waitForTimeout(200);
 
       await dialog.locator('textarea').fill(JSON.stringify({ domainRules: [imported] }));
@@ -575,7 +576,7 @@ test.describe('Import / Export', () => {
       await openImportWizard(page);
 
       const dialog = page.getByRole('dialog');
-      await dialog.getByText('Text').click();
+      await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
       await page.waitForTimeout(200);
 
       await dialog.locator('textarea').fill(makeRuleJson('Confirm Rule', 'confirm.com'));
@@ -604,7 +605,7 @@ test.describe('Import / Export', () => {
       await openImportWizard(page);
 
       const dialog = page.getByRole('dialog');
-      await dialog.getByText('Text').click();
+      await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
       await page.waitForTimeout(200);
 
       await dialog.locator('textarea').fill(makeRuleJson('Import Close Rule', 'importclose.com'));
@@ -635,7 +636,7 @@ test.describe('Import / Export', () => {
       // First import
       await openImportWizard(page);
       const dialog = page.getByRole('dialog');
-      await dialog.getByText('Text').click();
+      await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
       await page.waitForTimeout(200);
       await dialog.locator('textarea').fill(makeRuleJson('First Import', 'firstimport.com'));
       await page.waitForTimeout(300);
@@ -651,7 +652,7 @@ test.describe('Import / Export', () => {
       const dialog2 = page.getByRole('dialog');
       await expect(dialog2.getByText('Source')).toBeVisible();
       // Should be back at step 1 (file/text selector visible, not step 3 summary)
-      await expect(dialog2.getByText('File')).toBeVisible();
+      await expect(dialog2.getByRole('radio', { name: 'File' }).locator('..')).toBeVisible();
 
       await page.close();
     });
@@ -742,7 +743,7 @@ test.describe('Import / Export', () => {
       await expect(dialog.getByRole('button', { name: /next/i })).toBeDisabled();
 
       // Select All
-      await dialog.getByRole('button', { name: /select all/i }).click();
+      await dialog.getByRole('button', { name: 'Select All', exact: true }).click();
       await page.waitForTimeout(200);
       await expect(dialog.getByText(/1 rule.*selected/i)).toBeVisible();
       await expect(dialog.getByRole('button', { name: /next/i })).toBeEnabled();

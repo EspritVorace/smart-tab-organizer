@@ -38,6 +38,26 @@ async function setNotificationPrefs(
   await new Promise(r => setTimeout(r, 100));
 }
 
+/**
+ * Polls until executeNotificationUndoById is available on the SW's globalThis.
+ * Needed because the SW may be idle-terminated and restarting while the test waits,
+ * causing a race condition where background.ts hasn't finished re-initializing yet.
+ */
+async function getSwWithUndoFn(extensionContext: any, timeoutMs = 5000): Promise<any> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const sw = extensionContext.serviceWorkers()[0];
+    if (sw) {
+      const ready = await sw.evaluate(
+        () => typeof (globalThis as any).executeNotificationUndoById === 'function',
+      ).catch(() => false);
+      if (ready) return sw;
+    }
+    await new Promise(r => setTimeout(r, 200));
+  }
+  throw new Error('executeNotificationUndoById not available on SW globalThis after timeout');
+}
+
 // ─── suite ──────────────────────────────────────────────────────────────────
 
 test.describe('Notifications', () => {
@@ -146,7 +166,8 @@ test.describe('Notifications', () => {
       expect(notifId).toBeDefined();
 
       // Trigger the Undo action via the exposed globalThis helper
-      await sw.evaluate(async (id: string) => {
+      const undoSw = await getSwWithUndoFn(extensionContext);
+      await undoSw.evaluate(async (id: string) => {
         await (globalThis as any).executeNotificationUndoById(id);
       }, notifId!);
 
@@ -265,7 +286,8 @@ test.describe('Notifications', () => {
       expect(notifId).toBeDefined();
 
       // Trigger Undo to reopen the closed tab
-      await sw.evaluate(async (id: string) => {
+      const undoSw = await getSwWithUndoFn(extensionContext);
+      await undoSw.evaluate(async (id: string) => {
         await (globalThis as any).executeNotificationUndoById(id);
       }, notifId!);
 
@@ -317,7 +339,8 @@ test.describe('Notifications', () => {
       const countBeforeUndo = await helpers.getTabCount();
 
       // Trigger Undo to reopen the deduplicated tab
-      await sw.evaluate(async (id: string) => {
+      const undoSw = await getSwWithUndoFn(extensionContext);
+      await undoSw.evaluate(async (id: string) => {
         await (globalThis as any).executeNotificationUndoById(id);
       }, notifId!);
 

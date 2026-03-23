@@ -20,7 +20,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1, // Retry once locally too
   workers,
-  timeout: 60000, // Increased timeout for extension loading
+  timeout: 30000, // Timeout for extension loading
 
   use: {
     trace: 'on-first-retry',

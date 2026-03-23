@@ -360,18 +360,20 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
         // Wait for the tab to initialize
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        // Directly call the grouping function
-        await sw.evaluate(async ({ openerTab, newTabId }) => {
+        // Directly call the grouping function with a fresh opener tab query so that
+        // any title/state changes (e.g. document.title set by tests) are reflected.
+        await sw.evaluate(async ({ openerTabId, newTabId }) => {
           const processGroupingForNewTab = (globalThis as any).processGroupingForNewTab;
 
           if (processGroupingForNewTab) {
+            const openerTab = await chrome.tabs.get(openerTabId);
             const newTab = await chrome.tabs.get(newTabId);
             console.log(`[TEST] Calling processGroupingForNewTab for opener ${openerTab.id} (${openerTab.url}) and new tab ${newTabId}`);
             await processGroupingForNewTab(openerTab, newTab);
           } else {
             console.error('[TEST] processGroupingForNewTab not available on globalThis');
           }
-        }, { openerTab: openerTabInfo, newTabId: newTabInfo.id });
+        }, { openerTabId: openerTabInfo.id, newTabId: newTabInfo.id });
 
         // Wait for grouping to complete
         await new Promise(resolve => setTimeout(resolve, 500));
