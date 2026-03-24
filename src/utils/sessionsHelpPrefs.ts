@@ -1,25 +1,17 @@
-import { browser } from 'wxt/browser';
-
-const KEY = 'sessionsHelpPrefs';
+import { sessionsHelpPrefsItem } from './storageItems.js';
 
 export interface SessionsHelpPrefs {
   sessionsIntroHidden: boolean;
   profileOnboardingShown: boolean;
 }
 
-const DEFAULTS: SessionsHelpPrefs = {
-  sessionsIntroHidden: false,
-  profileOnboardingShown: false,
-};
-
 export async function getSessionsHelpPrefs(): Promise<SessionsHelpPrefs> {
-  const result = await browser.storage.local.get({ [KEY]: {} });
-  return { ...DEFAULTS, ...(result[KEY] as Partial<SessionsHelpPrefs>) };
+  return sessionsHelpPrefsItem.getValue();
 }
 
 export async function updateSessionsHelpPrefs(
   updates: Partial<SessionsHelpPrefs>,
 ): Promise<void> {
   const current = await getSessionsHelpPrefs();
-  await browser.storage.local.set({ [KEY]: { ...current, ...updates } });
+  await sessionsHelpPrefsItem.setValue({ ...current, ...updates });
 }
