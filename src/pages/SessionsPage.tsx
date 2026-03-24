@@ -10,6 +10,7 @@ import { SnapshotWizard } from '../components/UI/SessionWizards/SnapshotWizard';
 import { RestoreWizard } from '../components/UI/SessionWizards/RestoreWizard';
 import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { getMessage } from '../utils/i18n';
+import { foldAccents } from '../utils/stringUtils';
 import { useSessions } from '../hooks/useSessions';
 import { restoreTabs } from '../utils/tabRestore';
 import { updateSession } from '../utils/sessionStorage';
@@ -67,8 +68,8 @@ export function SessionsPage({
 
   const displayedSessions = useMemo(() => {
     if (!searchQuery) return sortedSessions;
-    const term = searchQuery.toLowerCase();
-    return sortedSessions.filter(s => s.name.toLowerCase().includes(term));
+    const term = foldAccents(searchQuery);
+    return sortedSessions.filter(s => foldAccents(s.name).includes(term));
   }, [sortedSessions, searchQuery]);
 
   const handleSaveSession = useCallback(
