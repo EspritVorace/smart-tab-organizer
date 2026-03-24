@@ -420,5 +420,8 @@
   "organizeAllTabs": { "message": "Organiser les onglets" },
   "organizingTabs": { "message": "Organisation en cours..." },
   "notifDeduplication": { "message": "$1 onglet(s) en double supprimé(s)" },
-  "notifGrouping": { "message": "$1 onglet(s) regroupé(s) en $2 groupe(s)" }
+  "notifGrouping": { "message": "$1 onglet(s) regroupé(s) en $2 groupe(s)" },
+
+  "highlightStart": { "message": "début du surlignage" },
+  "highlightEnd": { "message": "fin du surlignage" }
 }

@@ -420,5 +420,8 @@
   "organizeAllTabs": { "message": "Organize tabs" },
   "organizingTabs": { "message": "Organizing..." },
   "notifDeduplication": { "message": "$1 duplicate tab(s) removed" },
-  "notifGrouping": { "message": "$1 tab(s) grouped into $2 group(s)" }
+  "notifGrouping": { "message": "$1 tab(s) grouped into $2 group(s)" },
+
+  "highlightStart": { "message": "highlight start" },
+  "highlightEnd": { "message": "highlight end" }
 }
