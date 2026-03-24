@@ -415,5 +415,10 @@
   "importNotificationMessage": { "message": "$1 regla(s) añadida(s), $2 regla(s) sobreescrita(s)" },
   "exportNotificationTitle": { "message": "Reglas exportadas" },
   "exportNotificationMessage": { "message": "Reglas exportadas correctamente" },
-  "exportOptions": { "message": "Opciones de exportación" }
+  "exportOptions": { "message": "Opciones de exportación" },
+
+  "organizeAllTabs": { "message": "Organizar pestañas" },
+  "organizingTabs": { "message": "Organizando..." },
+  "notifDeduplication": { "message": "$1 pestaña(s) duplicada(s) eliminada(s)" },
+  "notifGrouping": { "message": "$1 pestaña(s) agrupada(s) en $2 grupo(s)" }
 }

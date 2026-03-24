@@ -5,6 +5,7 @@ import { startPeriodicCleanup } from '../background/deduplication.js';
 import { initNotificationListeners, executeNotificationUndoById } from '../utils/notifications.js';
 import { middleClickedTabs } from '../background/messaging.js';
 import { processGroupingForNewTab } from '../background/grouping.js';
+import { handleOrganizeAllTabs } from '../background/organize.js';
 import { initProfileSync } from '../background/profileSync.js';
 
 export default defineBackground(() => {
@@ -23,6 +24,7 @@ export default defineBackground(() => {
     // Expose functions for E2E testing
     (globalThis as any).middleClickedTabs = middleClickedTabs;
     (globalThis as any).processGroupingForNewTab = processGroupingForNewTab;
+    (globalThis as any).handleOrganizeAllTabs = handleOrganizeAllTabs;
     (globalThis as any).executeNotificationUndoById = executeNotificationUndoById;
 
     logger.debug("SmartTab Organizer Service Worker: Initialized with modular architecture.");

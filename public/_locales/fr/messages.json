@@ -415,5 +415,10 @@
   "importNotificationMessage": { "message": "$1 règle(s) ajoutée(s), $2 règle(s) écrasée(s)" },
   "exportNotificationTitle": { "message": "Règles exportées" },
   "exportNotificationMessage": { "message": "Règles exportées avec succès" },
-  "exportOptions": { "message": "Options d'export" }
+  "exportOptions": { "message": "Options d'export" },
+
+  "organizeAllTabs": { "message": "Organiser les onglets" },
+  "organizingTabs": { "message": "Organisation en cours..." },
+  "notifDeduplication": { "message": "$1 onglet(s) en double supprimé(s)" },
+  "notifGrouping": { "message": "$1 onglet(s) regroupé(s) en $2 groupe(s)" }
 }
