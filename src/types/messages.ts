@@ -19,6 +19,10 @@ export interface MessageResponse {
   message?: string;
 }
 
+export interface OrganizeAllTabsMessage {
+  type: 'ORGANIZE_ALL_TABS';
+}
+
 // Union types for different contexts
 export type ContentMessage = MiddleClickMessage | AskGroupNameMessage;
-export type BackgroundMessage = MiddleClickMessage;
+export type BackgroundMessage = MiddleClickMessage | OrganizeAllTabsMessage;

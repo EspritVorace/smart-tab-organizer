@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Flex, Text } from '@radix-ui/themes';
-import { Camera, RotateCcw } from 'lucide-react';
+import { Camera, RotateCcw, Wand2 } from 'lucide-react';
 import { browser } from 'wxt/browser';
 import { getMessage } from '../../../utils/i18n';
 import { loadSessions } from '../../../utils/sessionStorage';
@@ -23,10 +23,17 @@ async function openOptionsWithHash(hash: string) {
 
 export function PopupToolbar() {
   const [hasSessions, setHasSessions] = useState(false);
+  const [isOrganizing, setIsOrganizing] = useState(false);
 
   useEffect(() => {
     loadSessions().then((sessions) => setHasSessions(sessions.length > 0));
   }, []);
+
+  const handleOrganize = async () => {
+    setIsOrganizing(true);
+    await browser.runtime.sendMessage({ type: 'ORGANIZE_ALL_TABS' });
+    window.close();
+  };
 
   return (
     <Box
@@ -73,6 +80,27 @@ export function PopupToolbar() {
           <RotateCcw size={17} aria-hidden="true" />
           <Text as="span" size="1">
             {getMessage('popupRestore')}
+          </Text>
+        </Button>
+
+        <Button
+          variant="ghost"
+          disabled={isOrganizing}
+          onClick={() => void handleOrganize()}
+          aria-label={getMessage('organizeAllTabs')}
+          title={getMessage('organizeAllTabs')}
+          style={{
+            flex: 1,
+            flexDirection: 'column',
+            height: 'auto',
+            gap: 3,
+            paddingTop: 8,
+            paddingBottom: 8,
+          }}
+        >
+          <Wand2 size={17} aria-hidden="true" />
+          <Text as="span" size="1">
+            {isOrganizing ? getMessage('organizingTabs') : getMessage('organizeAllTabs')}
           </Text>
         </Button>
       </Flex>

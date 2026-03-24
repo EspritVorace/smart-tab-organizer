@@ -4,6 +4,7 @@ import { logger } from '../utils/logger.js';
 import { handleMiddleClickMessage, findMiddleClickOpener } from './messaging.js';
 import { processTabForDeduplication } from './deduplication.js';
 import { processGroupingForNewTab } from './grouping.js';
+import { handleOrganizeAllTabs } from './organize.js';
 import { loadSessions } from '../utils/sessionStorage.js';
 import { restoreTabs } from '../utils/tabRestore.js';
 import { getMessage } from '../utils/i18n.js';
@@ -19,6 +20,12 @@ export function setupInstallationHandler(): void {
 
 export function setupMessageHandler(): void {
     browser.runtime.onMessage.addListener((request: any, sender: Browser.runtime.MessageSender, sendResponse: (response?: any) => void) => {
+        if (request.type === 'ORGANIZE_ALL_TABS') {
+            browser.windows.getCurrent()
+                .then(win => { if (win.id != null) return handleOrganizeAllTabs(win.id); })
+                .catch(e => logger.error('[ORGANIZE_ALL_TABS] Error:', e));
+            return false;
+        }
         if (request.type === 'RESTORE_PROFILE') {
             handleProfileRestore(
                 request.profileId as string,

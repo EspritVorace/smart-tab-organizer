@@ -415,5 +415,10 @@
   "importNotificationMessage": { "message": "$1 rule(s) added, $2 rule(s) overwritten" },
   "exportNotificationTitle": { "message": "Rules Exported" },
   "exportNotificationMessage": { "message": "Rules exported successfully" },
-  "exportOptions": { "message": "Export options" }
+  "exportOptions": { "message": "Export options" },
+
+  "organizeAllTabs": { "message": "Organize tabs" },
+  "organizingTabs": { "message": "Organizing..." },
+  "notifDeduplication": { "message": "$1 duplicate tab(s) removed" },
+  "notifGrouping": { "message": "$1 tab(s) grouped into $2 group(s)" }
 }
