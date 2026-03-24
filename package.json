@@ -64,6 +64,9 @@
     "onlyBuiltDependencies": [
       "esbuild",
       "spawn-sync"
-    ]
+    ],
+    "patchedDependencies": {
+      "vitest-ctrf-json-reporter@0.0.3": "patches/vitest-ctrf-json-reporter@0.0.3.patch"
+    }
   }
 }

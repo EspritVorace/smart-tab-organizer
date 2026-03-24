@@ -1,0 +1,62 @@
+diff --git a/dist/generate-report.js b/dist/generate-report.js
+index 87d2b725c03dd96d10b239dea9f6eef147591186..714f35bd92a9c88914747b6cc505fd524ce19278 100644
+--- a/dist/generate-report.js
++++ b/dist/generate-report.js
+@@ -84,30 +84,35 @@ class GenerateCtrfReport {
+         this.writeReportToFile(this.ctrfReport);
+     }
+     updateCtrfTestResultsFromTestResult(files) {
++        const processTask = (task) => {
++            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
++            // Si la tâche a des sous-tâches, c'est un describe → recursion
++            if (task.tasks && task.tasks.length > 0) {
++                task.tasks.forEach(processTask);
++                return;
++            }
++            // Feuille = it() individuel
++            const testStatus = this.mapStatus(((_a = task === null || task === void 0 ? void 0 : task.result) === null || _a === void 0 ? void 0 : _a.state) ? (_b = task === null || task === void 0 ? void 0 : task.result) === null || _b === void 0 ? void 0 : _b.state : task === null || task === void 0 ? void 0 : task.mode);
++            const test = {
++                name: task.name,
++                duration: (_d = (_c = task.result) === null || _c === void 0 ? void 0 : _c.duration) !== null && _d !== void 0 ? _d : 0,
++                status: testStatus,
++            };
++            if (this.reporterConfigOptions.minimal === false) {
++                test.message = this.extractFailureDetails(task === null || task === void 0 ? void 0 : task.result).message;
++                test.trace = this.extractFailureDetails(task === null || task === void 0 ? void 0 : task.result).trace;
++                test.rawStatus = (_f = (_e = task === null || task === void 0 ? void 0 : task.result) === null || _e === void 0 ? void 0 : _e.state) !== null && _f !== void 0 ? _f : task === null || task === void 0 ? void 0 : task.mode;
++                test.type = (_g = this.reporterConfigOptions.testType) !== null && _g !== void 0 ? _g : "unit";
++                test.filePath = (_k = (_j = (_h = task.suite) === null || _h === void 0 ? void 0 : _h.file) === null || _j === void 0 ? void 0 : _j.name) !== null && _k !== void 0 ? _k : "";
++                test.retries = (_l = task === null || task === void 0 ? void 0 : task.retry) !== null && _l !== void 0 ? _l : 0;
++            }
++            this.ctrfReport.results.summary[testStatus]++;
++            this.ctrfReport.results.summary.tests++;
++            this.ctrfReport.results.tests.push(test);
++        };
+         try {
+             files === null || files === void 0 ? void 0 : files.forEach((file) => {
+-                file.tasks.forEach((taskslist) => {
+-                    taskslist.tasks.forEach((task) => {
+-                        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+-                        const testStatus = this.mapStatus(((_a = task === null || task === void 0 ? void 0 : task.result) === null || _a === void 0 ? void 0 : _a.state) ? (_b = task === null || task === void 0 ? void 0 : task.result) === null || _b === void 0 ? void 0 : _b.state : task === null || task === void 0 ? void 0 : task.mode);
+-                        const test = {
+-                            name: task.name,
+-                            duration: (_d = (_c = task.result) === null || _c === void 0 ? void 0 : _c.duration) !== null && _d !== void 0 ? _d : 0,
+-                            status: testStatus,
+-                        };
+-                        if (this.reporterConfigOptions.minimal === false) {
+-                            test.message = this.extractFailureDetails(task === null || task === void 0 ? void 0 : task.result).message;
+-                            test.trace = this.extractFailureDetails(task === null || task === void 0 ? void 0 : task.result).trace;
+-                            test.rawStatus = (_f = (_e = task === null || task === void 0 ? void 0 : task.result) === null || _e === void 0 ? void 0 : _e.state) !== null && _f !== void 0 ? _f : task === null || task === void 0 ? void 0 : task.mode;
+-                            test.type = (_g = this.reporterConfigOptions.testType) !== null && _g !== void 0 ? _g : "unit";
+-                            test.filePath = (_k = (_j = (_h = task.suite) === null || _h === void 0 ? void 0 : _h.file) === null || _j === void 0 ? void 0 : _j.name) !== null && _k !== void 0 ? _k : "";
+-                            test.retries = (_l = task === null || task === void 0 ? void 0 : task.retry) !== null && _l !== void 0 ? _l : 0;
+-                        }
+-                        this.ctrfReport.results.summary[testStatus]++;
+-                        this.ctrfReport.results.summary.tests++;
+-                        this.ctrfReport.results.tests.push(test);
+-                    });
+-                });
++                file.tasks.forEach(processTask);
+             });
+         }
+         catch (error) {
