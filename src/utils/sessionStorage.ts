@@ -1,15 +1,12 @@
-import { browser } from 'wxt/browser';
 import type { Session } from '../types/session';
 import { sessionsArraySchema } from '../schemas/session';
 import { logger } from './logger.js';
-
-const SESSIONS_STORAGE_KEY = 'sessions';
+import { sessionsItem } from './storageItems.js';
 
 /** Load all sessions from storage, validated with Zod */
 export async function loadSessions(): Promise<Session[]> {
   try {
-    const result = await browser.storage.local.get({ [SESSIONS_STORAGE_KEY]: [] });
-    const raw = result[SESSIONS_STORAGE_KEY];
+    const raw = await sessionsItem.getValue();
     const parsed = sessionsArraySchema.safeParse(raw);
     if (parsed.success) {
       return parsed.data as Session[];
@@ -24,7 +21,7 @@ export async function loadSessions(): Promise<Session[]> {
 
 /** Save all sessions to storage */
 export async function saveSessions(sessions: Session[]): Promise<void> {
-  await browser.storage.local.set({ [SESSIONS_STORAGE_KEY]: sessions });
+  await sessionsItem.setValue(sessions);
 }
 
 /** Add a new session */

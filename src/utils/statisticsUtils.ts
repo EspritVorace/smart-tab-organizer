@@ -1,7 +1,7 @@
-import { browser } from 'wxt/browser';
 import type { Statistics } from '../types/statistics.js';
 import { defaultStatistics } from '../types/statistics.js';
 import { logger } from './logger.js';
+import { statisticsItem } from './storageItems.js';
 
 /**
  * Utilitaires pour les statistiques utilisables dans tous les contextes
@@ -10,14 +10,8 @@ import { logger } from './logger.js';
 
 export async function getStatisticsData(): Promise<Statistics> {
   try {
-    const result = await browser.storage.local.get({
-      statistics: defaultStatistics
-    });
-    
-    return {
-      ...defaultStatistics,
-      ...(result.statistics as Record<string, unknown>)
-    };
+    const value = await statisticsItem.getValue();
+    return { ...defaultStatistics, ...value };
   } catch (error) {
     logger.error('Error getting statistics:', error);
     return defaultStatistics;
@@ -26,7 +20,7 @@ export async function getStatisticsData(): Promise<Statistics> {
 
 export async function setStatisticsData(statistics: Statistics): Promise<void> {
   try {
-    await browser.storage.local.set({ statistics });
+    await statisticsItem.setValue(statistics);
   } catch (error) {
     logger.error('Error setting statistics:', error);
   }
@@ -45,8 +39,8 @@ export async function updateStatisticsData(updates: Partial<Statistics>): Promis
 export async function incrementTabGroupsCreated(): Promise<void> {
   try {
     const current = await getStatisticsData();
-    await updateStatisticsData({ 
-      tabGroupsCreatedCount: current.tabGroupsCreatedCount + 1 
+    await updateStatisticsData({
+      tabGroupsCreatedCount: current.tabGroupsCreatedCount + 1,
     });
   } catch (error) {
     logger.error('Error incrementing tab groups created:', error);
@@ -56,8 +50,8 @@ export async function incrementTabGroupsCreated(): Promise<void> {
 export async function incrementTabsDeduplicated(): Promise<void> {
   try {
     const current = await getStatisticsData();
-    await updateStatisticsData({ 
-      tabsDeduplicatedCount: current.tabsDeduplicatedCount + 1 
+    await updateStatisticsData({
+      tabsDeduplicatedCount: current.tabsDeduplicatedCount + 1,
     });
   } catch (error) {
     logger.error('Error incrementing tabs deduplicated:', error);
@@ -89,21 +83,9 @@ export async function resetStatisticsData(): Promise<void> {
  * Retourne une fonction de cleanup
  */
 export function watchStatisticsData(
-  callback: (statistics: Statistics) => void
+  callback: (statistics: Statistics) => void,
 ): () => void {
-  const listener = (changes: any, areaName: string) => {
-    if (areaName === 'local' && changes.statistics) {
-      const statistics = { 
-        ...defaultStatistics, 
-        ...changes.statistics.newValue 
-      };
-      callback(statistics);
-    }
-  };
-
-  browser.storage.onChanged.addListener(listener);
-  
-  return () => {
-    browser.storage.onChanged.removeListener(listener);
-  };
+  return statisticsItem.watch((newValue) => {
+    callback({ ...defaultStatistics, ...newValue });
+  });
 }

@@ -4,9 +4,12 @@ import { logger } from '../utils/logger.js';
 import { getProfileWindowMap } from '../utils/profileWindowMap.js';
 import { generateUUID } from '../utils/utils.js';
 import type { SavedTab, SavedTabGroup } from '../types/session';
+import {
+  profileSyncDraftsItem,
+  editingProfileIdItem,
+  sessionsItem,
+} from '../utils/storageItems.js';
 
-const SYNC_DRAFTS_KEY = 'profileSyncDrafts';
-const EDITING_PROFILE_KEY = 'editingProfileId';
 const ALARM_NAME = 'auto-sync-profiles';
 
 export interface SyncDraft {
@@ -21,17 +24,15 @@ export type SyncDraftsMap = Record<string, SyncDraft>;
 // --- Storage helpers ---
 
 export async function getSyncDrafts(): Promise<SyncDraftsMap> {
-  const data = await (browser.storage as any).session.get(SYNC_DRAFTS_KEY);
-  return (data[SYNC_DRAFTS_KEY] as SyncDraftsMap) ?? {};
+  return profileSyncDraftsItem.getValue();
 }
 
 export async function saveSyncDrafts(drafts: SyncDraftsMap): Promise<void> {
-  await (browser.storage as any).session.set({ [SYNC_DRAFTS_KEY]: drafts });
+  await profileSyncDraftsItem.setValue(drafts);
 }
 
 async function getEditingProfileId(): Promise<string | null> {
-  const data = await (browser.storage as any).session.get(EDITING_PROFILE_KEY);
-  return (data[EDITING_PROFILE_KEY] as string) ?? null;
+  return editingProfileIdItem.getValue();
 }
 
 // --- Tab capture for a specific window ---
@@ -127,7 +128,7 @@ function hasTabsChanged(
 
 /**
  * For each auto-sync profile with an open window, capture tabs and update the
- * in-memory draft (chrome.storage.session). The persisted profile is NOT touched.
+ * in-memory draft (session storage). The persisted profile is NOT touched.
  */
 export async function updateSyncDrafts(): Promise<void> {
   const sessions = await loadSessions();
@@ -165,7 +166,7 @@ export async function updateSyncDrafts(): Promise<void> {
 }
 
 /**
- * Persist the in-memory draft for a profile to chrome.storage.local.
+ * Persist the in-memory draft for a profile to local storage.
  * Called when the associated window is closed.
  * Skips if the user is currently editing the profile.
  */
@@ -230,12 +231,10 @@ export function initProfileSync(): void {
   });
 
   // Re-evaluate the alarm whenever sessions change (covers create, update, delete)
-  browser.storage.local.onChanged.addListener((changes) => {
-    if ('sessions' in changes) {
-      updateSyncAlarm().catch(e =>
-        logger.error('[AUTO_SYNC] Error updating alarm:', e),
-      );
-    }
+  sessionsItem.watch(() => {
+    updateSyncAlarm().catch(e =>
+      logger.error('[AUTO_SYNC] Error updating alarm:', e),
+    );
   });
 
   // Set initial alarm state based on current sessions
