@@ -21,17 +21,49 @@ const markStyle: React.CSSProperties = {
   fontWeight: 'bold',
 };
 
+/** Supprime les diacritiques et met en minuscules pour une comparaison insensible aux accents. */
+function foldAccents(s: string): string {
+  return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+}
+
+/**
+ * Découpe `text` en segments en cherchant `searchTerm` de façon insensible à la casse
+ * ET aux accents ("etude" trouve "étude", "e" trouve "é").
+ *
+ * La recherche s'effectue sur les formes normalisées, mais les segments retournés
+ * contiennent le texte original — les indices sont compatibles car chaque caractère
+ * NFC précomposé produit exactement un caractère après normalisation NFD + suppression.
+ */
 function buildSegments(text: string, searchTerm: string): Segment[] {
   const trimmed = searchTerm.trim();
-  if (!trimmed) {
-    return [{ text, isMatch: false }];
+  if (!trimmed) return [{ text, isMatch: false }];
+
+  const textFolded = foldAccents(text);
+  const termFolded = foldAccents(trimmed);
+  if (!termFolded) return [{ text, isMatch: false }];
+
+  const escaped = termFolded.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(escaped, 'g');
+
+  const segments: Segment[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(textFolded)) !== null) {
+    const start = match.index;
+    const end = start + match[0].length;
+    if (start > lastIndex) {
+      segments.push({ text: text.slice(lastIndex, start), isMatch: false });
+    }
+    segments.push({ text: text.slice(start, end), isMatch: true });
+    lastIndex = end;
   }
-  const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regex = new RegExp(`(${escaped})`, 'gi');
-  return text
-    .split(regex)
-    .filter((part) => part.length > 0)
-    .map((part, i) => ({ text: part, isMatch: i % 2 === 1 }));
+
+  if (lastIndex < text.length) {
+    segments.push({ text: text.slice(lastIndex), isMatch: false });
+  }
+
+  return segments.length > 0 ? segments : [{ text, isMatch: false }];
 }
 
 export const AccessibleHighlight = React.memo(function AccessibleHighlight({
