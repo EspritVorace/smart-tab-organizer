@@ -13,7 +13,10 @@ export default defineConfig({
     exclude: [
       // Tests legacy (ancienne implémentation)
       'tests/useStatistics.test.ts',
-      'tests/useSyncedSettings.test.ts'
+      'tests/useSyncedSettings.test.ts',
+      // Tests nécessitant le plugin WxtVitest() (fakeBrowser + wxt/browser)
+      'tests/utils/statisticsUtils.test.ts',
+      'tests/utils/settingsUtils.test.ts',
     ],
     setupFiles: ['./tests/setup.ts', './tests/setup-ui.ts'],
     // Désactiver le parallélisme pour éviter les conflits de state
