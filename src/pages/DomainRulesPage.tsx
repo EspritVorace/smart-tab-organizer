@@ -6,6 +6,7 @@ import { DomainRuleFormModal } from '../components/Core/DomainRule/DomainRuleFor
 import { ImportWizard } from '../components/UI/ImportExportPage/ImportWizard';
 import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { getMessage } from '../utils/i18n';
+import { foldAccents } from '../utils/stringUtils';
 import { generateUUID, getRadixColor } from '../utils/utils';
 import { getRuleCategory } from '../schemas/enums';
 import type { SyncSettings, DomainRuleSetting } from '../types/syncSettings';
@@ -59,10 +60,10 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
 
   const filteredRules = useMemo(() => {
     if (!searchTerm) return syncSettings.domainRules;
-    const term = searchTerm.toLowerCase();
+    const term = foldAccents(searchTerm);
     return syncSettings.domainRules.filter(rule =>
-      rule.label.toLowerCase().includes(term) ||
-      rule.domainFilter.toLowerCase().includes(term)
+      foldAccents(rule.label).includes(term) ||
+      foldAccents(rule.domainFilter).includes(term)
     );
   }, [syncSettings.domainRules, searchTerm]);
 

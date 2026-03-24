@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { getMessage } from '../../../utils/i18n.js';
+import { foldAccents } from '../../../utils/stringUtils.js';
 
 interface AccessibleHighlightProps {
   text: string;
@@ -20,11 +21,6 @@ const markStyle: React.CSSProperties = {
   fontStyle: 'normal',
   fontWeight: 'bold',
 };
-
-/** Supprime les diacritiques et met en minuscules pour une comparaison insensible aux accents. */
-function foldAccents(s: string): string {
-  return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
-}
 
 /**
  * Découpe `text` en segments en cherchant `searchTerm` de façon insensible à la casse
