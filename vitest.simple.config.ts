@@ -21,11 +21,7 @@ export default defineConfig({
       'tests/**/*.test.ts',
       'tests/**/*.test.tsx'
     ],
-    exclude: [
-      // Tests legacy (ancienne implémentation)
-      'tests/useStatistics.test.ts',
-      'tests/useSyncedSettings.test.ts',
-    ],
+    exclude: [],
     setupFiles: ['./tests/setup.ts', './tests/setup-ui.ts'],
     // Désactiver le parallélisme pour éviter les conflits de state
     fileParallelism: false,
