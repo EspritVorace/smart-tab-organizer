@@ -1,0 +1,1 @@
+export { AccessibleHighlight } from './AccessibleHighlight';

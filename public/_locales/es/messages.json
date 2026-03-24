@@ -420,5 +420,8 @@
   "organizeAllTabs": { "message": "Organizar pestañas" },
   "organizingTabs": { "message": "Organizando..." },
   "notifDeduplication": { "message": "$1 pestaña(s) duplicada(s) eliminada(s)" },
-  "notifGrouping": { "message": "$1 pestaña(s) agrupada(s) en $2 grupo(s)" }
+  "notifGrouping": { "message": "$1 pestaña(s) agrupada(s) en $2 grupo(s)" },
+
+  "highlightStart": { "message": "inicio del resaltado" },
+  "highlightEnd": { "message": "fin del resaltado" }
 }
