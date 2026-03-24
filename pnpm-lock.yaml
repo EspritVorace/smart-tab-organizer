@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  vitest-ctrf-json-reporter@0.0.3:
+    hash: e1f64a623e09cd7345234ee0cb92d30266aaeaee8c7e9d700f380cf2430f3cc4
+    path: patches/vitest-ctrf-json-reporter@0.0.3.patch
+
 importers:
 
   .:
@@ -86,7 +91,7 @@ importers:
         version: 2.1.9(@types/node@25.5.0)(happy-dom@15.11.7)
       vitest-ctrf-json-reporter:
         specifier: ^0.0.3
-        version: 0.0.3
+        version: 0.0.3(patch_hash=e1f64a623e09cd7345234ee0cb92d30266aaeaee8c7e9d700f380cf2430f3cc4)
       wxt:
         specifier: ^0.20.13
         version: 0.20.19(@types/node@25.5.0)(jiti@2.6.1)(rollup@4.59.0)
@@ -7404,7 +7409,7 @@ snapshots:
       fsevents: 2.3.3
       jiti: 2.6.1
 
-  vitest-ctrf-json-reporter@0.0.3: {}
+  vitest-ctrf-json-reporter@0.0.3(patch_hash=e1f64a623e09cd7345234ee0cb92d30266aaeaee8c7e9d700f380cf2430f3cc4): {}
 
   vitest@2.1.9(@types/node@25.5.0)(happy-dom@15.11.7):
     dependencies:
