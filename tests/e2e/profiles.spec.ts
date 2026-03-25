@@ -90,19 +90,21 @@ test.describe('[US-P01] Pin / Unpin', () => {
 // Icon selection
 // ---------------------------------------------------------------------------
 test.describe('[US-P02] Profile icon', () => {
-  test('icon block button is accessible for all sessions (pencil overlay) [US-P008]', async ({ extensionContext, extensionId }) => {
+  test('category picker is accessible in the edit dialog [US-P008]', async ({ extensionContext, extensionId }) => {
     const profile = createTestProfile({ name: 'Icon Profile' });
     await seedSessions(extensionContext, [profile]);
 
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    // The icon block is now a role="button" with aria-label "Change Icon"
-    await expect(page.getByRole('button', { name: /change icon/i })).toBeVisible();
+    // Category picker (replacing icon picker) is accessible via the Edit dialog
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: /edit/i }).click();
+    await expect(page.getByRole('dialog').getByRole('button', { name: /no category/i })).toBeVisible();
     await page.close();
   });
 
-  test('clicking icon block opens the icon picker [US-P008]', async ({
+  test('clicking category picker in edit dialog opens category options [US-P008]', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -112,8 +114,10 @@ test.describe('[US-P02] Profile icon', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: /change icon/i }).click();
-    // The ProfileIconPicker popover should open (contains radio buttons for each icon)
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: /edit/i }).click();
+    await page.getByRole('dialog').getByRole('button', { name: /no category/i }).click();
+    // The CategoryPicker popover should open (contains radio buttons for each category)
     await expect(page.getByRole('radio').first()).toBeVisible({ timeout: 2000 });
     await page.close();
   });
@@ -204,7 +208,7 @@ test.describe('[US-P03] New Profile wizard', () => {
     await page.close();
   });
 
-  test('profile icon block is accessible as a button with Change Icon label [US-P009]', async ({
+  test('category picker button is accessible in the edit dialog [US-P009]', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -214,8 +218,10 @@ test.describe('[US-P03] New Profile wizard', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    // The icon block is now a role="button" with aria-label "Change Icon" for all sessions
-    await expect(page.getByRole('button', { name: /change icon/i })).toBeVisible();
+    // Category picker is accessible via the Edit dialog
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: /edit/i }).click();
+    await expect(page.getByRole('dialog').getByRole('button', { name: /no category/i })).toBeVisible();
     await page.close();
   });
 
@@ -237,7 +243,7 @@ test.describe('[US-P03] New Profile wizard', () => {
     await page.close();
   });
 
-  test('profile wizard shows icon picker in Selection step', async ({
+  test('profile wizard shows category picker in Selection step', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -248,12 +254,12 @@ test.describe('[US-P03] New Profile wizard', () => {
     await page.getByText('Your First Profile!').waitFor({ timeout: 2000 });
     await page.getByRole('button', { name: /got it/i }).click();
 
-    // The icon picker label should be visible in step 1
-    await expect(page.getByRole('dialog').getByText('Profile icon')).toBeVisible();
+    // The category picker trigger should be visible in the Selection step
+    await expect(page.getByRole('dialog').getByRole('button', { name: /no category/i })).toBeVisible();
     await page.close();
   });
 
-  test('profile wizard shows auto-sync toggle in Confirmation step', async ({
+  test('profile wizard shows Save Profile button in Confirmation step', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -268,11 +274,11 @@ test.describe('[US-P03] New Profile wizard', () => {
     await page.getByText('Your First Profile!').waitFor({ timeout: 2000 });
     await page.getByRole('button', { name: /got it/i }).click();
 
-    // Advance to Confirmation step where the auto-sync toggle appears
+    // Advance to Confirmation step where Save Profile button appears
     await page.waitForTimeout(800);
     await page.getByRole('button', { name: 'Next' }).click();
 
-    await expect(page.getByRole('dialog').getByRole('switch', { name: /auto-sync/i })).toBeVisible();
+    await expect(page.getByRole('dialog').getByRole('button', { name: 'Save Profile' })).toBeVisible();
     await extraTab.close();
     await page.close();
   });
