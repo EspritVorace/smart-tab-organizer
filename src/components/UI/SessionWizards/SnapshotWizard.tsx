@@ -7,12 +7,12 @@ import { Camera, AlertCircle, Pin } from 'lucide-react';
 import { SessionsTheme } from '../../Form/themes';
 import { WizardStepper } from '../WizardStepper';
 import { TabTree } from '../../Core/TabTree/TabTree';
-import { ProfileIconPicker } from '../../Core/Session/ProfileIconPicker';
+import { CategoryPicker } from '../../Core/DomainRule/CategoryPicker';
 import { getMessage } from '../../../utils/i18n';
 import { showSuccessNotification } from '../../../utils/notifications';
 import { captureCurrentTabs } from '../../../utils/tabCapture';
 import { createSessionFromSelection, formatSessionDate } from '../../../utils/sessionUtils';
-import type { Session, SavedTab, SavedTabGroup, ProfileIcon } from '../../../types/session';
+import type { Session, SavedTab, SavedTabGroup } from '../../../types/session';
 import type { TabTreeData } from '../../Core/TabTree/tabTreeTypes';
 
 interface SnapshotWizardProps {
@@ -38,9 +38,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
   const [isCapturing, setIsCapturing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-
-  // Profile-specific state
-  const [profileIcon, setProfileIcon] = useState<ProfileIcon | undefined>(undefined);
+  const [categoryId, setCategoryId] = useState<string | null>(null);
 
   const steps = [
     { label: getMessage('snapshotStepSelection') },
@@ -60,7 +58,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
     setSelectedTabIds(new Set());
     setSaveError(null);
     setIsCapturing(true);
-    setProfileIcon(undefined);
+    setCategoryId(null);
 
     captureCurrentTabs()
       .then(data => {
@@ -97,9 +95,10 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
         groups,
         selectedSavedTabIds,
         sessionName.trim(),
-        isProfile
-          ? { isPinned: true, icon: profileIcon }
-          : undefined,
+        {
+          isPinned: isProfile ? true : undefined,
+          categoryId: categoryId ?? null,
+        },
       );
       await onSave(session);
       onOpenChange(false);
@@ -113,7 +112,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
     } finally {
       setIsSaving(false);
     }
-  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, isProfile, profileIcon, onSave]);
+  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, isProfile, categoryId, onSave]);
 
   const titleKey = isProfile ? 'profileTitle' : 'snapshotTitle';
   const descriptionKey = isProfile ? 'profileDescription' : 'snapshotDescription';
@@ -124,7 +123,14 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
   return (
     <SessionsTheme>
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
-        <Dialog.Content style={{ maxWidth: 580 }}>
+        <Dialog.Content
+          style={{ maxWidth: 580 }}
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
+            const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[aria-label]');
+            input?.focus();
+          }}
+        >
           <Dialog.Title>
             <Flex align="center" gap="2">
               <SaveIcon size={18} aria-hidden="true" />
@@ -142,30 +148,27 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
           {step === 0 && (
             <Box mt="4">
               <Flex direction="column" gap="3">
+                {/* Name + category inline (category icon left of the input) */}
                 <Flex direction="column" gap="1">
                   <Text size="2" weight="medium">
                     {getMessage('sessionNameLabel')}
                   </Text>
-                  <TextField.Root
-                    value={sessionName}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setSessionName(e.target.value)
-                    }
-                    placeholder={getMessage('sessionNamePlaceholder')}
-                    maxLength={100}
-                    aria-label={getMessage('sessionNameLabel')}
-                  />
-                </Flex>
-
-                {/* Profile icon picker (profiles only) */}
-                {isProfile && (
-                  <Flex direction="column" gap="1">
-                    <Text size="2" weight="medium">
-                      {getMessage('profileIconLabel')}
-                    </Text>
-                    <ProfileIconPicker value={profileIcon} onChange={setProfileIcon} />
+                  <Flex align="center" gap="2">
+                    <CategoryPicker value={categoryId as any} onChange={setCategoryId} />
+                    <Box style={{ flex: 1 }}>
+                      <TextField.Root
+                        value={sessionName}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setSessionName(e.target.value)
+                        }
+                        placeholder={getMessage('sessionNamePlaceholder')}
+                        maxLength={100}
+                        aria-label={getMessage('sessionNameLabel')}
+                        style={{ width: '100%' }}
+                      />
+                    </Box>
                   </Flex>
-                )}
+                </Flex>
 
                 <Text size="2" weight="medium">
                   {getMessage('snapshotSelectTabs')}

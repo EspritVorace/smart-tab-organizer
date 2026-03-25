@@ -18,13 +18,6 @@ export interface SavedTabGroup {
   tabs: SavedTab[];
 }
 
-/** Icons available for profile sessions */
-export const profileIcons = [
-  'briefcase', 'home', 'code', 'book', 'gamepad',
-  'music', 'coffee', 'globe', 'star', 'heart',
-] as const;
-export type ProfileIcon = typeof profileIcons[number];
-
 /** A complete saved session snapshot */
 export interface Session {
   /** UUID generated at creation */
@@ -41,6 +34,6 @@ export interface Session {
   ungroupedTabs: SavedTab[];
   /** If true, this session is pinned as a profile */
   isPinned: boolean;
-  /** Optional icon for profile sessions */
-  icon?: ProfileIcon;
+  /** Optional category ID (from RULE_CATEGORIES) */
+  categoryId?: string | null;
 }

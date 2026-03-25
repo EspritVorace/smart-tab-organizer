@@ -15,6 +15,7 @@ import { Pencil, X } from 'lucide-react';
 import { getMessage } from '../../../utils/i18n';
 import { SessionsTheme } from '../../Form/themes';
 import { TabTreeEditor } from '../TabTree/TabTreeEditor';
+import { CategoryPicker } from '../DomainRule/CategoryPicker';
 import { useSessionEditor } from '../../../hooks/useSessionEditor';
 import { countSessionTabs } from '../../../utils/sessionUtils';
 import type { Session } from '../../../types/session';
@@ -65,6 +66,7 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave }: InnerPr
   const editor = useSessionEditor(session);
   const [showUnsavedAlert, setShowUnsavedAlert] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [categoryId, setCategoryId] = useState<string | null>(session.categoryId ?? null);
 
   // Track whether this session is being edited so auto-sync won't overwrite it on window close
   useEffect(() => {
@@ -86,6 +88,7 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave }: InnerPr
     try {
       await onSave({
         ...editor.editedSession,
+        categoryId,
         updatedAt: new Date().toISOString(),
       });
       onOpenChange(false);
@@ -128,6 +131,11 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave }: InnerPr
           maxWidth="600px"
           onInteractOutside={interceptClose}
           onEscapeKeyDown={interceptClose}
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
+            const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('#session-edit-name');
+            input?.focus();
+          }}
         >
           {/* Title row */}
           <Flex justify="between" align="center" mb="4">
@@ -149,7 +157,7 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave }: InnerPr
             </Dialog.Close>
           </Flex>
 
-          {/* Session name */}
+          {/* Session name + category inline */}
           <Box mb="4">
             <Text
               as="label"
@@ -160,16 +168,21 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave }: InnerPr
             >
               {getMessage('sessionEditorNameLabel')}
             </Text>
-            <TextField.Root
-              id="session-edit-name"
-              value={editor.editedSession.name}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                editor.updateSessionName(e.target.value)
-              }
-              size="2"
-              style={{ width: '100%' }}
-              aria-label={getMessage('sessionEditorNameLabel')}
-            />
+            <Flex align="center" gap="2">
+              <CategoryPicker value={categoryId as any} onChange={setCategoryId} />
+              <Box style={{ flex: 1 }}>
+                <TextField.Root
+                  id="session-edit-name"
+                  value={editor.editedSession.name}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    editor.updateSessionName(e.target.value)
+                  }
+                  size="2"
+                  style={{ width: '100%' }}
+                  aria-label={getMessage('sessionEditorNameLabel')}
+                />
+              </Box>
+            </Flex>
           </Box>
 
           <Separator size="4" mb="3" />

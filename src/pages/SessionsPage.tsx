@@ -16,7 +16,7 @@ import { restoreTabs } from '../utils/tabRestore';
 import { updateSession } from '../utils/sessionStorage';
 import { removeProfileWindow } from '../utils/profileWindowMap';
 import { getSessionsHelpPrefs, updateSessionsHelpPrefs } from '../utils/sessionsHelpPrefs';
-import type { Session, ProfileIcon } from '../types/session';
+import type { Session } from '../types/session';
 import type { SyncSettings } from '../types/syncSettings';
 
 interface SessionsPageProps {
@@ -85,6 +85,7 @@ export function SessionsPage({
         name: updatedSession.name,
         groups: updatedSession.groups,
         ungroupedTabs: updatedSession.ungroupedTabs,
+        categoryId: updatedSession.categoryId,
         updatedAt: updatedSession.updatedAt,
       });
       await reload();
@@ -180,10 +181,6 @@ export function SessionsPage({
     await reload();
   }, [reload]);
 
-  const handleChangeIcon = useCallback(async (session: Session, icon: ProfileIcon | undefined) => {
-    await updateSession(session.id, { icon });
-    await reload();
-  }, [reload]);
 
   return (
     <PageLayout
@@ -304,7 +301,6 @@ export function SessionsPage({
                   onDelete={s => setDeleteTarget(s)}
                   onPin={handlePin}
                   onUnpin={handleUnpin}
-                  onChangeIcon={handleChangeIcon}
                 />
               ))}
             </Flex>

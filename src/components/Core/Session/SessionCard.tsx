@@ -2,35 +2,21 @@ import React, { useState, useCallback } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import {
   Card, Flex, Text, IconButton, TextField,
-  DropdownMenu, Tooltip, Popover,
+  DropdownMenu, Tooltip, Badge,
 } from '@radix-ui/themes';
 import {
-  Camera, MoreHorizontal, Pencil, Trash2, Check, X,
+  MoreHorizontal, Pencil, Trash2, Check, X,
   Pin, PinOff, ChevronDown, ChevronRight,
-  Briefcase, Home, Code, BookOpen, Gamepad2,
-  Music, Coffee, Globe, Star, Heart,
 } from 'lucide-react';
 import { getMessage } from '../../../utils/i18n';
 import { countSessionTabs } from '../../../utils/sessionUtils';
 import { chromeGroupColors } from '../TabTree/tabTreeUtils';
+import { getRuleCategory } from '../../../schemas/enums';
+import { getRadixColor } from '../../../utils/utils.js';
 import { SplitButton } from '../../UI/SplitButton/SplitButton';
-import { ProfileIconPicker } from './ProfileIconPicker';
 import { SessionPreviewTree } from './SessionPreviewTree';
 import type { SplitButtonMenuItem } from '../../UI/SplitButton/SplitButton';
-import type { Session, ProfileIcon } from '../../../types/session';
-
-const PROFILE_ICON_COMPONENTS: Record<ProfileIcon, React.ElementType> = {
-  briefcase: Briefcase,
-  home: Home,
-  code: Code,
-  book: BookOpen,
-  gamepad: Gamepad2,
-  music: Music,
-  coffee: Coffee,
-  globe: Globe,
-  star: Star,
-  heart: Heart,
-};
+import type { Session } from '../../../types/session';
 
 interface SessionCardProps {
   session: Session;
@@ -42,7 +28,6 @@ interface SessionCardProps {
   onDelete: (session: Session) => void;
   onPin: (session: Session) => void;
   onUnpin: (session: Session) => void;
-  onChangeIcon: (session: Session, icon: ProfileIcon | undefined) => void;
 }
 
 export function SessionCard({
@@ -55,17 +40,15 @@ export function SessionCard({
   onDelete,
   onPin,
   onUnpin,
-  onChangeIcon,
 }: SessionCardProps) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [nameValue, setNameValue] = useState(session.name);
-  const [iconPickerOpen, setIconPickerOpen] = useState(false);
-  const [iconHovered, setIconHovered] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
 
   const tabCount = countSessionTabs(session);
   const groupCount = session.groups.length;
   const groupColors = session.groups.map(g => g.color);
+  const category = getRuleCategory(session.categoryId);
 
   const handleRenameSubmit = useCallback(async () => {
     const trimmed = nameValue.trim();
@@ -88,14 +71,6 @@ export function SessionCard({
     [handleRenameSubmit, handleRenameCancel],
   );
 
-  const handleIconChange = useCallback(
-    (icon: ProfileIcon) => {
-      onChangeIcon(session, icon);
-      setIconPickerOpen(false);
-    },
-    [session, onChangeIcon],
-  );
-
   const restoreMenuItems: SplitButtonMenuItem[] = [
     {
       label: getMessage('sessionRestoreCurrentWindow'),
@@ -112,97 +87,12 @@ export function SessionCard({
     },
   ];
 
-  // Icon to display: custom icon takes priority, then pin icon for profiles, then camera
-  const ProfileIconComponent = session.icon
-    ? PROFILE_ICON_COMPONENTS[session.icon]
-    : session.isPinned
-    ? Pin
-    : Camera;
-
   return (
     <Card size="2">
       <Flex direction="column" gap="2">
-        {/* Top row: icon (with pencil overlay) + pin btn + name + more menu */}
+        {/* Top row: pin btn + name + category badge + restore + more menu */}
         <Flex align="center" gap="2">
-          {/* Icon block with pencil overlay */}
-          <Popover.Root open={iconPickerOpen} onOpenChange={setIconPickerOpen}>
-            <div style={{ position: 'relative', flexShrink: 0 }}>
-              {/* Hidden anchor for the popover */}
-              <Popover.Trigger>
-                <button
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: 1,
-                    height: 1,
-                    padding: 0,
-                    margin: 0,
-                    border: 0,
-                    background: 'transparent',
-                    opacity: 0,
-                    pointerEvents: 'none',
-                  }}
-                  tabIndex={-1}
-                  aria-hidden="true"
-                />
-              </Popover.Trigger>
-
-              <div
-                role="button"
-                tabIndex={0}
-                aria-label={getMessage('sessionChangeIcon')}
-                onMouseEnter={() => setIconHovered(true)}
-                onMouseLeave={() => setIconHovered(false)}
-                onClick={() => setIconPickerOpen(true)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIconPickerOpen(true); }}
-                style={{ cursor: 'pointer' }}
-              >
-                <Flex
-                  align="center"
-                  justify="center"
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 'var(--radius-2)',
-                    backgroundColor: 'var(--accent-a3)',
-                  }}
-                >
-                  <ProfileIconComponent
-                    size={18}
-                    style={{ color: 'var(--accent-11)' }}
-                    aria-hidden="true"
-                  />
-                </Flex>
-                {iconHovered && (
-                  <span
-                    style={{
-                      position: 'absolute',
-                      bottom: -2,
-                      right: -2,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: 16,
-                      height: 16,
-                      borderRadius: '50%',
-                      backgroundColor: 'var(--color-panel-solid)',
-                      border: '1px solid var(--gray-a6)',
-                      pointerEvents: 'none',
-                    }}
-                    aria-hidden="true"
-                  >
-                    <Pencil size={9} style={{ color: 'var(--gray-11)' }} aria-hidden="true" />
-                  </span>
-                )}
-              </div>
-            </div>
-            <Popover.Content side="bottom" align="start" style={{ padding: 'var(--space-3)' }}>
-              <ProfileIconPicker value={session.icon} onChange={handleIconChange} />
-            </Popover.Content>
-          </Popover.Root>
-
-          {/* Pin / Unpin button — before title, larger */}
+          {/* Pin / Unpin button */}
           {!isRenaming && (
             <Tooltip
               content={session.isPinned ? getMessage('sessionUnpin') : getMessage('sessionPinAsProfile')}
@@ -222,10 +112,10 @@ export function SessionCard({
             </Tooltip>
           )}
 
-          {/* Session name / rename field */}
-          <Flex direction="column" gap="0" style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
+          {/* Session name + category badge */}
+          <Flex align="center" gap="2" style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
             {isRenaming ? (
-              <Flex align="center" gap="2">
+              <>
                 <TextField.Root
                   value={nameValue}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -254,24 +144,31 @@ export function SessionCard({
                 >
                   <X size={12} aria-hidden="true" />
                 </IconButton>
-              </Flex>
+              </>
             ) : (
-              <Text
-                size="3"
-                weight="medium"
-                onDoubleClick={() => {
-                  setNameValue(session.name);
-                  setIsRenaming(true);
-                }}
-                style={{
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  cursor: 'default',
-                }}
-              >
-                {session.name}
-              </Text>
+              <>
+                <Text
+                  size="3"
+                  weight="medium"
+                  onDoubleClick={() => {
+                    setNameValue(session.name);
+                    setIsRenaming(true);
+                  }}
+                  style={{
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    cursor: 'default',
+                  }}
+                >
+                  {session.name}
+                </Text>
+                {category && (
+                  <Badge color={getRadixColor(category.color) as any} size="1" style={{ flexShrink: 0 }}>
+                    {category.emoji} {getMessage(category.labelKey as any)}
+                  </Badge>
+                )}
+              </>
             )}
           </Flex>
 
