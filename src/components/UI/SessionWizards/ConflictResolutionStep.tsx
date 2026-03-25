@@ -1,7 +1,7 @@
 import React from 'react';
 import { Flex, Text, Box, Badge, RadioGroup, ScrollArea, Callout, Select, Separator } from '@radix-ui/themes';
 import { AlertTriangle } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage, getPluralMessage } from '../../../utils/i18n';
 import { chromeGroupColors } from '../../Core/TabTree/tabTreeUtils';
 import type {
   ConflictAnalysis,
@@ -160,9 +160,7 @@ export function ConflictResolutionStep({
                       {conflict.savedGroup.title || getMessage('restoreUntitledGroup')}
                     </Text>
                     <Text size="1" color="gray">
-                      {getMessage('sessionTabCount', [
-                        String(conflict.savedGroup.tabs.length),
-                      ])}
+                      {getPluralMessage(conflict.savedGroup.tabs.length, 'sessionTabOne', 'sessionTabCount')}
                     </Text>
                   </Flex>
                   <Select.Root
