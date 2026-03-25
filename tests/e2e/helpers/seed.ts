@@ -23,7 +23,7 @@ export interface TestSession {
   groups: TestSavedTabGroup[];
   ungroupedTabs: TestSavedTab[];
   isPinned: boolean;
-  icon?: string;
+  categoryId?: string | null;
 }
 
 function uuid(): string {
@@ -134,7 +134,6 @@ export function createTestProfile(overrides: Partial<TestSession> = {}): TestSes
   return createTestSession({
     name: 'Test Profile',
     isPinned: true,
-    icon: 'briefcase',
     ...overrides,
   });
 }

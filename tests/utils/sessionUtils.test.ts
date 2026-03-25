@@ -36,7 +36,6 @@ const makeSession = (overrides: Partial<Session> = {}): Session => ({
   ungroupedTabs: [],
   groups: [],
   isPinned: false,
-  autoSync: false,
   ...overrides,
 });
 
@@ -205,11 +204,11 @@ describe('sessionUtils', () => {
       expect(session.isPinned).toBe(false);
     });
 
-    it('applique l\'icône de profil si fournie', () => {
+    it('applique la categoryId si fournie', () => {
       const session = createSessionFromSelection([], [], new Set(), 'S', {
-        icon: 'briefcase',
+        categoryId: 'development',
       });
-      expect(session.icon).toBe('briefcase');
+      expect(session.categoryId).toBe('development');
     });
   });
 });

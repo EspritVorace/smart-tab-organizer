@@ -1,33 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { Flex, Text, Separator, Tooltip } from '@radix-ui/themes';
-import {
-  Briefcase, Home, Code, BookOpen, Gamepad2,
-  Music, Coffee, Globe, Star, Heart, Pin,
-} from 'lucide-react';
+import { Pin } from 'lucide-react';
 import { browser } from 'wxt/browser';
 import { SplitButton } from '../SplitButton/SplitButton';
 import { getMessage } from '../../../utils/i18n';
 import { loadSessions } from '../../../utils/sessionStorage';
 import { getProfileWindowMap, type ProfileWindowMap } from '../../../utils/profileWindowMap';
-import type { Session, ProfileIcon } from '../../../types/session';
+import { getRuleCategory } from '../../../schemas/enums';
+import { chromeGroupColors } from '../../Core/TabTree/tabTreeUtils';
+import type { Session } from '../../../types/session';
 
-const ICON_COMPONENTS: Record<ProfileIcon, React.ElementType> = {
-  briefcase: Briefcase,
-  home: Home,
-  code: Code,
-  book: BookOpen,
-  gamepad: Gamepad2,
-  music: Music,
-  coffee: Coffee,
-  globe: Globe,
-  star: Star,
-  heart: Heart,
-};
-
-function getProfileIcon(icon: ProfileIcon | undefined): React.ReactNode {
-  if (!icon) return <Pin size={16} aria-hidden="true" />;
-  const IconComp = ICON_COMPONENTS[icon];
-  return <IconComp size={16} aria-hidden="true" />;
+function getProfileCategoryBadge(categoryId: string | null | undefined): React.ReactNode {
+  const cat = getRuleCategory(categoryId);
+  if (cat) {
+    return (
+      <span
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 20,
+          height: 20,
+          borderRadius: '50%',
+          fontSize: 12,
+          backgroundColor: chromeGroupColors[cat.color],
+          flexShrink: 0,
+        }}
+        aria-hidden="true"
+      >
+        {cat.emoji}
+      </span>
+    );
+  }
+  return <Pin size={16} aria-hidden="true" />;
 }
 
 type ProfileState = 'here' | 'elsewhere' | 'closed';
@@ -114,7 +119,7 @@ export function PopupProfilesList() {
                 align="center"
                 style={{ flexShrink: 0, color: 'var(--gray-11)' }}
               >
-                {getProfileIcon(profile.icon)}
+                {getProfileCategoryBadge(profile.categoryId)}
               </Flex>
               <Text
                 size="2"
