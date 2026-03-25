@@ -352,6 +352,7 @@
   "sessionPinDescription": { "message": "Accès rapide depuis le popup" },
   "sessionUnpin": { "message": "Désépingler" },
   "sessionChangeIcon": { "message": "Changer l'icône" },
+  "sessionPreviewShow": { "message": "Voir les onglets" },
   "sessionProfileBadge": { "message": "Profil" },
   "sessionAutoSync": { "message": "Synchro" },
   "sessionAutoSyncTooltip": { "message": "Quand activé, le contenu du profil est mis à jour automatiquement à la fermeture de la fenêtre associée." },
