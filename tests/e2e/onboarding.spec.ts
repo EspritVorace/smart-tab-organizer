@@ -219,7 +219,7 @@ test.describe('[US-O01] Tooltips', () => {
     await page.close();
   });
 
-  test('auto-sync help icon has an accessible aria-label matching the tooltip [US-O004]', async ({
+  test('Unpin button has an accessible aria-label on profile cards [US-O004]', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -229,21 +229,19 @@ test.describe('[US-O01] Tooltips', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    // HelpCircle icon button should have aria-label with the tooltip text
-    await expect(
-      page.getByRole('button', { name: /when enabled.*window/i }),
-    ).toBeVisible();
+    // Unpin button (for a pinned profile card) should be accessible with aria-label
+    await expect(page.getByRole('button', { name: /unpin/i })).toBeVisible();
     await page.close();
   });
 
-  test('auto-sync help icon shows tooltip on hover [US-O004]', async ({ extensionContext, extensionId }) => {
+  test('Unpin button shows tooltip on hover [US-O004]', async ({ extensionContext, extensionId }) => {
     const profile = createTestProfile({ name: 'Profile With Tooltip' });
     await seedSessions(extensionContext, [profile]);
 
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: /when enabled.*window/i }).hover();
+    await page.getByRole('button', { name: /unpin/i }).hover();
     await expect(page.getByRole('tooltip')).toBeVisible({ timeout: 2000 });
     await page.close();
   });
