@@ -210,7 +210,7 @@ export function SessionCard({
               content={session.isPinned ? getMessage('sessionUnpin') : getMessage('sessionPinAsProfile')}
             >
               <IconButton
-                size="2"
+                size="3"
                 variant={session.isPinned ? 'soft' : 'ghost'}
                 color={session.isPinned ? 'indigo' : 'gray'}
                 onClick={() => session.isPinned ? onUnpin(session) : onPin(session)}
@@ -277,6 +277,17 @@ export function SessionCard({
             )}
           </Flex>
 
+          {/* Restore button — just before "..." */}
+          {!isRenaming && (
+            <SplitButton
+              label={getMessage('sessionRestore')}
+              onClick={() => onRestore(session)}
+              menuItems={restoreMenuItems}
+              variant="solid"
+              size="1"
+            />
+          )}
+
           {/* More menu */}
           {!isRenaming && (
             <DropdownMenu.Root>
@@ -341,40 +352,6 @@ export function SessionCard({
           </Flex>
         </div>
 
-        {/* Info row + restore button */}
-        <Flex align="center" gap="2">
-          {groupColors.length > 0 && (
-            <Flex align="center" gap="1">
-              {groupColors.map((color, idx) => (
-                <span
-                  key={idx}
-                  style={{
-                    display: 'inline-block',
-                    width: 10,
-                    height: 10,
-                    borderRadius: '50%',
-                    backgroundColor: chromeGroupColors[color] ?? chromeGroupColors.grey,
-                  }}
-                  aria-hidden="true"
-                />
-              ))}
-            </Flex>
-          )}
-
-          <Text size="1" color="gray" style={{ flex: 1 }}>
-            {getMessage('sessionTabCount', [String(tabCount)])}
-            {groupCount > 0 && ` · ${getMessage('sessionGroupCount', [String(groupCount)])}`}
-          </Text>
-
-          <SplitButton
-            label={getMessage('sessionRestore')}
-            onClick={() => onRestore(session)}
-            menuItems={restoreMenuItems}
-            variant="solid"
-            size="1"
-          />
-        </Flex>
-
         {/* Collapsible: read-only tab/group tree preview */}
         <Collapsible.Root open={previewOpen} onOpenChange={setPreviewOpen}>
           <Collapsible.Trigger asChild>
@@ -393,7 +370,27 @@ export function SessionCard({
                 ? <ChevronDown size={13} aria-hidden="true" />
                 : <ChevronRight size={13} aria-hidden="true" />
               }
-              <Text size="1" color="gray">{getMessage('sessionPreviewShow')}</Text>
+              {groupColors.length > 0 && (
+                <Flex align="center" gap="1">
+                  {groupColors.map((color, idx) => (
+                    <span
+                      key={idx}
+                      style={{
+                        display: 'inline-block',
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: chromeGroupColors[color] ?? chromeGroupColors.grey,
+                      }}
+                      aria-hidden="true"
+                    />
+                  ))}
+                </Flex>
+              )}
+              <Text size="1" color="gray">
+                {getMessage('sessionTabCount', [String(tabCount)])}
+                {groupCount > 0 && ` · ${getMessage('sessionGroupCount', [String(groupCount)])}`}
+              </Text>
             </button>
           </Collapsible.Trigger>
           <Collapsible.Content>
