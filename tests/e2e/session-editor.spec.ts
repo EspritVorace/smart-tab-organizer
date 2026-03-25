@@ -205,7 +205,13 @@ test.describe('[US-E01] Tab tree', () => {
     const dialog = page.getByRole('dialog');
     // Scope to the GitHub listitem to avoid strict-mode violations (3 rows have 'Delete tab')
     const githubRow = dialog.getByRole('listitem').filter({ hasText: 'GitHub' });
-    await githubRow.hover();
+    // Hover the right edge of the row (not just the title text) to verify the full row width is hoverable
+    const box = await githubRow.boundingBox();
+    if (box) {
+      await page.mouse.move(box.x + box.width - 8, box.y + box.height / 2);
+    } else {
+      await githubRow.hover();
+    }
     await githubRow.getByRole('button', { name: 'Delete tab' }).click();
 
     // GitHub tab should be gone

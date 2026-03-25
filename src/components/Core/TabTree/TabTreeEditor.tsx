@@ -347,6 +347,7 @@ export function TabTreeEditor({ session, onSessionChange, maxHeight }: TabTreeEd
                         domain={extractDomain(tab.url)}
                         fullUrl={tab.url}
                         level={2}
+                        showTooltip={false}
                         rightSlot={
                           <div className={styles.actions}>
                             <IconButton
@@ -434,6 +435,7 @@ export function TabTreeEditor({ session, onSessionChange, maxHeight }: TabTreeEd
                 domain={extractDomain(tab.url)}
                 fullUrl={tab.url}
                 level={1}
+                showTooltip={false}
                 rightSlot={
                   <div className={styles.actions}>
                     <IconButton

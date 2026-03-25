@@ -4,6 +4,7 @@
 
 .row {
   border-radius: var(--radius-2);
+  width: 100%;
 }
 
 .row:hover {
@@ -15,21 +16,6 @@
   align-items: center;
   gap: var(--space-1);
   flex-shrink: 0;
-  opacity: 0;
-  transition: opacity 0.1s ease;
-}
-
-/* Show actions on row hover or when a child is focused (e.g., dropdown open) */
-.row:hover .actions,
-.row:focus-within .actions {
-  opacity: 1;
-}
-
-/* Always show actions on touch devices */
-@media (pointer: coarse) {
-  .actions {
-    opacity: 1 !important;
-  }
 }
 
 .urlError {
