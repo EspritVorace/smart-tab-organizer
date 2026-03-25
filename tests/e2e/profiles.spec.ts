@@ -109,7 +109,7 @@ test.describe('[US-P04] Auto-sync toggle', () => {
     await page.close();
   });
 
-  test('enabling auto-sync shows "Auto-sync enabled" indicator on the card [US-P006]', async ({
+  test('enabling auto-sync sets the toggle to checked [US-P006]', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -119,12 +119,14 @@ test.describe('[US-P04] Auto-sync toggle', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('switch', { name: /auto-sync/i }).click();
-    await expect(page.getByText('Auto-sync enabled')).toBeVisible();
+    const toggle = page.getByRole('switch', { name: /auto-sync/i });
+    await expect(toggle).not.toBeChecked();
+    await toggle.click();
+    await expect(toggle).toBeChecked();
     await page.close();
   });
 
-  test('disabling auto-sync hides "Auto-sync enabled" indicator [US-P006]', async ({
+  test('disabling auto-sync sets the toggle to unchecked [US-P006]', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -134,11 +136,10 @@ test.describe('[US-P04] Auto-sync toggle', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    // Verify it's shown initially
-    await expect(page.getByText('Auto-sync enabled')).toBeVisible();
-
-    await page.getByRole('switch', { name: /auto-sync/i }).click();
-    await expect(page.getByText('Auto-sync enabled')).not.toBeVisible();
+    const toggle = page.getByRole('switch', { name: /auto-sync/i });
+    await expect(toggle).toBeChecked();
+    await toggle.click();
+    await expect(toggle).not.toBeChecked();
     await page.close();
   });
 
@@ -163,19 +164,19 @@ test.describe('[US-P04] Auto-sync toggle', () => {
 // Icon selection
 // ---------------------------------------------------------------------------
 test.describe('[US-P02] Profile icon', () => {
-  test('Change Icon menu item is visible for profiles', async ({ extensionContext, extensionId }) => {
+  test('icon block button is accessible for all sessions (pencil overlay) [US-P008]', async ({ extensionContext, extensionId }) => {
     const profile = createTestProfile({ name: 'Icon Profile' });
     await seedSessions(extensionContext, [profile]);
 
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await expect(page.getByRole('menuitem', { name: /change icon/i })).toBeVisible();
+    // The icon block is now a role="button" with aria-label "Change Icon"
+    await expect(page.getByRole('button', { name: /change icon/i })).toBeVisible();
     await page.close();
   });
 
-  test('Change Icon menu item can be clicked and does not error [US-P008]', async ({
+  test('clicking icon block opens the icon picker [US-P008]', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -185,15 +186,9 @@ test.describe('[US-P02] Profile icon', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    // Verify the menu item exists and can be clicked without throwing
-    await page.getByRole('button', { name: 'More actions' }).click();
-    const changeIconItem = page.getByRole('menuitem', { name: /change icon/i });
-    await expect(changeIconItem).toBeVisible();
-    // Small wait for Radix dropdown animation to complete before clicking
-    await page.waitForTimeout(150);
-    await changeIconItem.click();
-    // No assertion on the Popover since Radix's click-outside detection dismisses
-    // it when the DropdownMenu backdrop is removed (race condition in Playwright)
+    await page.getByRole('button', { name: /change icon/i }).click();
+    // The ProfileIconPicker popover should open (contains radio buttons for each icon)
+    await expect(page.getByRole('radio').first()).toBeVisible({ timeout: 2000 });
     await page.close();
   });
 
@@ -283,7 +278,7 @@ test.describe('[US-P03] New Profile wizard', () => {
     await page.close();
   });
 
-  test('profile icon badge tooltip is visible on hover for pinned sessions [US-P009]', async ({
+  test('profile icon block is accessible as a button with Change Icon label [US-P009]', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -293,11 +288,8 @@ test.describe('[US-P03] New Profile wizard', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    // Hover over the profile icon box (top-left colored square)
-    // It's the first element in the card with the accent background
-    const iconBox = page.getByText('Profile With Badge').locator('..').locator('..').locator('[style*="accent"]').first();
-    await iconBox.hover();
-    await expect(page.getByRole('tooltip')).toBeVisible({ timeout: 2000 });
+    // The icon block is now a role="button" with aria-label "Change Icon" for all sessions
+    await expect(page.getByRole('button', { name: /change icon/i })).toBeVisible();
     await page.close();
   });
 

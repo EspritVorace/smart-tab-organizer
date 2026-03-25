@@ -144,15 +144,16 @@ test.describe('[US-S02] Session list', () => {
     await page.close();
   });
 
-  test('session card displays formatted update date', async ({ extensionContext, extensionId }) => {
+  test('session card does not display a date (date removed from card)', async ({ extensionContext, extensionId }) => {
     const session = createTestSession({ name: 'Dated Session' });
     await seedSessions(extensionContext, [session]);
 
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    // formatSessionDate uses Intl with year:numeric — year like "2025" or "2026" must appear
-    await expect(page.getByText(/20\d{2}/)).toBeVisible();
+    // The card no longer shows a formatted date — only name, counts and restore button
+    await expect(page.getByText('Dated Session')).toBeVisible();
+    await expect(page.getByText(/3 tab/i)).toBeVisible();
     await page.close();
   });
 });
