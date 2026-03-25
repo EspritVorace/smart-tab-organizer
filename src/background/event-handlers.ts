@@ -88,7 +88,7 @@ async function handleWindowRemoved(windowId: number): Promise<void> {
         const sessions = await loadSessions();
         const profile = sessions.find(s => s.id === profileId);
 
-        if (profile?.autoSync) {
+        if (profile?.isPinned) {
             await persistSyncDraft(profileId);
         }
     }

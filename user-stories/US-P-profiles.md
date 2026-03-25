@@ -15,34 +15,6 @@
 
 - [ ] Un bouton « Unpin » est visible sur chaque carte de profil (session épinglée).
 - [ ] Cliquer « Unpin » met à jour la session dans le stockage : `isPinned` passe à `false`.
-- [ ] Quand l'auto-sync était activé sur ce profil, il est également désactivé (`autoSync = false`) lors du désépinglage.
-
----
-
-## US-P006 — Indicateur visuel de l'auto-sync sur la carte
-
-**En tant qu'** utilisateur,
-**je veux** voir clairement si l'auto-sync est actif sur un profil directement depuis la liste,
-**afin de** savoir d'un coup d'œil quels profils sont synchronisés automatiquement.
-
-### Critères d'acceptation
-
-- [ ] Quand l'auto-sync est **activé** sur un profil, la carte affiche un indicateur textuel « Auto-sync enabled ».
-- [ ] Quand l'auto-sync est **désactivé**, l'indicateur « Auto-sync enabled » disparaît de la carte.
-
----
-
-## US-P007 — Icône d'aide (tooltip) sur le toggle auto-sync
-
-**En tant qu'** utilisateur,
-**je veux** accéder à une explication du rôle de l'auto-sync sans quitter la page,
-**afin de** comprendre la fonctionnalité sans consulter la documentation externe.
-
-### Critères d'acceptation
-
-- [ ] Un bouton d'aide (icône ?) est visible sur la ligne du toggle auto-sync d'un profil.
-- [ ] Ce bouton possède un `aria-label` décrivant le comportement de l'auto-sync (ex. contient « when enabled » et « window »).
-- [ ] Survoler le bouton d'aide affiche un tooltip.
 
 ---
 

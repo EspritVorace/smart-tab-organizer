@@ -2,11 +2,11 @@ import React, { useState, useCallback } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import {
   Card, Flex, Text, IconButton, TextField,
-  DropdownMenu, Switch, Tooltip, Popover,
+  DropdownMenu, Tooltip, Popover,
 } from '@radix-ui/themes';
 import {
   Camera, MoreHorizontal, Pencil, Trash2, Check, X,
-  Pin, PinOff, HelpCircle, ChevronDown, ChevronRight,
+  Pin, PinOff, ChevronDown, ChevronRight,
   Briefcase, Home, Code, BookOpen, Gamepad2,
   Music, Coffee, Globe, Star, Heart,
 } from 'lucide-react';
@@ -43,7 +43,6 @@ interface SessionCardProps {
   onPin: (session: Session) => void;
   onUnpin: (session: Session) => void;
   onChangeIcon: (session: Session, icon: ProfileIcon | undefined) => void;
-  onToggleAutoSync: (session: Session, autoSync: boolean) => void;
 }
 
 export function SessionCard({
@@ -57,7 +56,6 @@ export function SessionCard({
   onPin,
   onUnpin,
   onChangeIcon,
-  onToggleAutoSync,
 }: SessionCardProps) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [nameValue, setNameValue] = useState(session.name);
@@ -325,32 +323,6 @@ export function SessionCard({
             </DropdownMenu.Root>
           )}
         </Flex>
-
-        {/* AutoSync row — fixed height, always present */}
-        <div style={{ minHeight: 28, visibility: session.isPinned ? 'visible' : 'hidden' }}>
-          <Flex align="center" gap="2">
-            <Text size="1" color="gray" style={{ whiteSpace: 'nowrap' }}>
-              {getMessage('sessionAutoSync')}
-            </Text>
-            <Switch
-              size="1"
-              checked={session.autoSync}
-              onCheckedChange={(checked) => onToggleAutoSync(session, checked)}
-              aria-label={getMessage('sessionAutoSync')}
-            />
-            <Tooltip content={getMessage('sessionAutoSyncTooltip')}>
-              <IconButton
-                size="1"
-                variant="ghost"
-                color="gray"
-                aria-label={getMessage('sessionAutoSyncTooltip')}
-                style={{ cursor: 'default' }}
-              >
-                <HelpCircle size={13} aria-hidden="true" />
-              </IconButton>
-            </Tooltip>
-          </Flex>
-        </div>
 
         {/* Collapsible: read-only tab/group tree preview */}
         <Collapsible.Root open={previewOpen} onOpenChange={setPreviewOpen}>

@@ -1,21 +1,20 @@
 # User Stories — Domaine AS : Synchronisation automatique des profils (background)
 
 > Comportements testés dans `tests/e2e/auto-sync.spec.ts` non couverts par les US existantes (US-S001→S008, US-E001→E002, US-P001→P004, US-PO001→PO002, US-W001, US-O001).
-> Ces US couvrent le comportement **background** de l'auto-sync (alarmes, drafts en mémoire de session, garde du dialogue d'édition), distincts des US-P003/P004 qui couvrent l'interface utilisateur du toggle.
+> Ces US couvrent le comportement **background** de l'auto-sync (alarmes, drafts en mémoire de session, garde du dialogue d'édition). Tout profil épinglé (`isPinned: true`) se synchronise automatiquement — il n'y a pas de toggle.
 
 ---
 
 ## US-AS001 — Cycle de vie de l'alarme périodique
 
 **En tant que** service worker de l'extension,
-**je veux** créer et supprimer l'alarme périodique `auto-sync-profiles` en fonction de l'état des profils,
-**afin de** capturer régulièrement les onglets ouverts uniquement quand au moins un profil a l'auto-sync activé.
+**je veux** créer et supprimer l'alarme périodique `auto-sync-profiles` en fonction de la présence de profils épinglés,
+**afin de** capturer régulièrement les onglets ouverts quand au moins un profil existe.
 
 ### Critères d'acceptation
 
-- [ ] Quand l'auto-sync est **activé** sur un profil via le toggle de l'interface, l'alarme `auto-sync-profiles` est créée dans `chrome.alarms` (période de 5 minutes).
-- [ ] Quand l'auto-sync est **désactivé** sur le **dernier** profil qui l'avait activé, l'alarme `auto-sync-profiles` est supprimée de `chrome.alarms`.
-- [ ] Quand aucun profil n'a l'auto-sync activé, l'alarme n'est **pas** créée (même après une modification du stockage).
+- [ ] Quand au moins un profil épinglé existe dans le stockage, l'alarme `auto-sync-profiles` est créée dans `chrome.alarms` (période de 5 minutes).
+- [ ] Quand le dernier profil épinglé est supprimé ou désépinglé, l'alarme `auto-sync-profiles` est supprimée de `chrome.alarms`.
 
 ---
 

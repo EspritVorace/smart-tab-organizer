@@ -132,14 +132,14 @@ function hasTabsChanged(
  */
 export async function updateSyncDrafts(): Promise<void> {
   const sessions = await loadSessions();
-  const autoSyncProfiles = sessions.filter(s => s.isPinned && s.autoSync);
-  if (autoSyncProfiles.length === 0) return;
+  const profiles = sessions.filter(s => s.isPinned);
+  if (profiles.length === 0) return;
 
   const windowMap = await getProfileWindowMap();
   const drafts = await getSyncDrafts();
   let changed = false;
 
-  for (const profile of autoSyncProfiles) {
+  for (const profile of profiles) {
     const windowId = windowMap[profile.id];
     if (windowId == null) continue;
 
@@ -195,12 +195,12 @@ export async function persistSyncDraft(profileId: string): Promise<void> {
 // --- Alarm management ---
 
 /**
- * Create or clear the periodic alarm depending on whether any profile has autoSync enabled.
+ * Create or clear the periodic alarm depending on whether any pinned profile exists.
  * Safe to call repeatedly — it's idempotent.
  */
 export async function updateSyncAlarm(): Promise<void> {
   const sessions = await loadSessions();
-  const hasAutoSync = sessions.some(s => s.isPinned && s.autoSync);
+  const hasAutoSync = sessions.some(s => s.isPinned);
 
   if (hasAutoSync) {
     const existing = await (browser.alarms as any).get(ALARM_NAME);

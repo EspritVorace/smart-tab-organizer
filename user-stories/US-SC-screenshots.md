@@ -104,7 +104,7 @@ Les captures suivantes sont produites pour chaque combinaison locale × thème :
 - [ ] Une règle « Actualités » (filtre : `lemonde.fr|lefigaro.fr`, couleur : orange, groupage activé).
 
 #### Sessions
-- [ ] Un profil épinglé « Work » avec `autoSync: true`, une icône `briefcase`, contenant 2 groupes (« GitHub », « Docs ») et 3 onglets.
+- [ ] Un profil épinglé « Work » avec une icône `briefcase`, contenant 2 groupes (« GitHub », « Docs ») et 3 onglets.
 - [ ] Une session ordinaire « Research » avec 1 groupe et 4 onglets.
 - [ ] Une session ordinaire « Side Project » avec 2 groupes et 5 onglets.
 

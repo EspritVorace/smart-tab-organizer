@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Dialog, Flex, Button, Text, Separator, Box, TextField,
-  Callout, Switch,
+  Callout,
 } from '@radix-ui/themes';
 import { Camera, AlertCircle, Pin } from 'lucide-react';
 import { SessionsTheme } from '../../Form/themes';
@@ -41,7 +41,6 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
 
   // Profile-specific state
   const [profileIcon, setProfileIcon] = useState<ProfileIcon | undefined>(undefined);
-  const [profileAutoSync, setProfileAutoSync] = useState(false);
 
   const steps = [
     { label: getMessage('snapshotStepSelection') },
@@ -62,7 +61,6 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
     setSaveError(null);
     setIsCapturing(true);
     setProfileIcon(undefined);
-    setProfileAutoSync(false);
 
     captureCurrentTabs()
       .then(data => {
@@ -100,7 +98,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
         selectedSavedTabIds,
         sessionName.trim(),
         isProfile
-          ? { isPinned: true, autoSync: profileAutoSync, icon: profileIcon }
+          ? { isPinned: true, icon: profileIcon }
           : undefined,
       );
       await onSave(session);
@@ -115,7 +113,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
     } finally {
       setIsSaving(false);
     }
-  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, isProfile, profileAutoSync, profileIcon, onSave]);
+  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, isProfile, profileIcon, onSave]);
 
   const titleKey = isProfile ? 'profileTitle' : 'snapshotTitle';
   const descriptionKey = isProfile ? 'profileDescription' : 'snapshotDescription';
@@ -199,24 +197,6 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
                   ])}
                 </Text>
 
-                {/* Auto-sync toggle (profiles only) */}
-                {isProfile && (
-                  <Flex align="center" gap="3">
-                    <Flex direction="column" gap="1" style={{ flex: 1 }}>
-                      <Text size="2" weight="medium">
-                        {getMessage('profileAutoSyncLabel')}
-                      </Text>
-                      <Text size="1" color="gray">
-                        {getMessage('profileAutoSyncDescription')}
-                      </Text>
-                    </Flex>
-                    <Switch
-                      checked={profileAutoSync}
-                      onCheckedChange={setProfileAutoSync}
-                      aria-label={getMessage('profileAutoSyncLabel')}
-                    />
-                  </Flex>
-                )}
               </Flex>
               {saveError && (
                 <Callout.Root color="red" variant="soft" mt="3">

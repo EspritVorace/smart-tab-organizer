@@ -23,7 +23,6 @@ export interface TestSession {
   groups: TestSavedTabGroup[];
   ungroupedTabs: TestSavedTab[];
   isPinned: boolean;
-  autoSync: boolean;
   icon?: string;
 }
 
@@ -126,7 +125,6 @@ export function createTestSession(overrides: Partial<TestSession> = {}): TestSes
       { id: uuid(), title: 'GitHub', url: 'https://github.com' },
     ],
     isPinned: false,
-    autoSync: false,
     ...overrides,
   };
 }

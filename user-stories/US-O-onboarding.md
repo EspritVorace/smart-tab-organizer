@@ -46,5 +46,3 @@
 ### Critères d'acceptation
 
 - [ ] Le bouton « New Profile » dans l'en-tête affiche un tooltip au survol de la souris (`role="tooltip"` visible).
-- [ ] Le bouton d'aide (?) associé au toggle auto-sync d'un profil possède un `aria-label` correspondant au texte du tooltip (contient « when enabled » et « window »).
-- [ ] Survoler le bouton d'aide (?) affiche un tooltip (`role="tooltip"` visible).
