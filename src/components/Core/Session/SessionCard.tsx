@@ -8,7 +8,7 @@ import {
   MoreHorizontal, Pencil, Trash2, Check, X,
   Pin, PinOff, ChevronDown, ChevronRight,
 } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage, getPluralMessage } from '../../../utils/i18n';
 import { countSessionTabs } from '../../../utils/sessionUtils';
 import { chromeGroupColors } from '../TabTree/tabTreeUtils';
 import { getRuleCategory } from '../../../schemas/enums';
@@ -257,8 +257,8 @@ export function SessionCard({
                 </Flex>
               )}
               <Text size="1" color="gray">
-                {getMessage('sessionTabCount', [String(tabCount)])}
-                {groupCount > 0 && ` · ${getMessage('sessionGroupCount', [String(groupCount)])}`}
+                {getPluralMessage(tabCount, 'sessionTabOne', 'sessionTabCount')}
+                {groupCount > 0 && ` · ${getPluralMessage(groupCount, 'sessionGroupOne', 'sessionGroupCount')}`}
               </Text>
             </button>
           </Collapsible.Trigger>

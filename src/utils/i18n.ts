@@ -15,3 +15,13 @@ export function getMessage(key: string, substitutions?: string | string[]): stri
     return key;
   }
 }
+
+/**
+ * Return the singular message when count === 1, plural otherwise.
+ * Plural key receives [String(count)] as substitution.
+ */
+export function getPluralMessage(count: number, oneKey: string, manyKey: string): string {
+  return count === 1
+    ? getMessage(oneKey)
+    : getMessage(manyKey, [String(count)]);
+}

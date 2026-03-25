@@ -12,7 +12,7 @@ import {
   IconButton,
 } from '@radix-ui/themes';
 import { Pencil, X } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage, getPluralMessage } from '../../../utils/i18n';
 import { SessionsTheme } from '../../Form/themes';
 import { TabTreeEditor } from '../TabTree/TabTreeEditor';
 import { CategoryPicker } from '../DomainRule/CategoryPicker';
@@ -197,7 +197,9 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave }: InnerPr
           {/* Summary */}
           <Box mt="3">
             <Text size="1" color="gray">
-              {getMessage('sessionEditorSummary', [String(tabCount), String(groupCount)])}
+              {getPluralMessage(tabCount, 'sessionTabOne', 'sessionTabCount')}
+              {' · '}
+              {getPluralMessage(groupCount, 'sessionGroupOne', 'sessionGroupCount')}
             </Text>
           </Box>
 
