@@ -5,19 +5,6 @@
 
 ---
 
-## US-S009 — Visibilité différenciée du toggle auto-sync selon le type de carte
-
-**En tant qu'** utilisateur,
-**je veux** que le toggle auto-sync soit visible uniquement sur les cartes de profil (épinglées),
-**afin de** distinguer clairement les fonctionnalités disponibles selon le type de session.
-
-### Critères d'acceptation
-
-- [ ] Une carte de **profil** (session épinglée) affiche un toggle switch labellisé « Auto-sync ».
-- [ ] Une carte de **snapshot** (session non épinglée) n'affiche **pas** de toggle auto-sync.
-
----
-
 ## US-S010 — Barre d'outils et champ de recherche
 
 **En tant qu'** utilisateur sur la page Sessions,

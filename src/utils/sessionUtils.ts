@@ -62,7 +62,7 @@ export function createSessionFromSelection(
   groups: SavedTabGroup[],
   selectedSavedTabIds: Set<string>,
   sessionName: string,
-  options?: { isPinned?: boolean; autoSync?: boolean; icon?: ProfileIcon },
+  options?: { isPinned?: boolean; icon?: ProfileIcon },
 ): Session {
   const now = new Date().toISOString();
 
@@ -79,7 +79,6 @@ export function createSessionFromSelection(
     groups: filteredGroups,
     ungroupedTabs: filteredUngrouped,
     isPinned: options?.isPinned ?? false,
-    autoSync: options?.autoSync ?? false,
     icon: options?.icon,
   };
 }

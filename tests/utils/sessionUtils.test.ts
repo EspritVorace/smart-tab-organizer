@@ -193,19 +193,16 @@ describe('sessionUtils', () => {
       expect(session.id).toBe('mocked-uuid');
     });
 
-    it('applique les options isPinned et autoSync', () => {
+    it('applique l\'option isPinned', () => {
       const session = createSessionFromSelection([], [], new Set(), 'S', {
         isPinned: true,
-        autoSync: true,
       });
       expect(session.isPinned).toBe(true);
-      expect(session.autoSync).toBe(true);
     });
 
     it('applique les valeurs par défaut si options absentes', () => {
       const session = createSessionFromSelection([], [], new Set(), 'S');
       expect(session.isPinned).toBe(false);
-      expect(session.autoSync).toBe(false);
     });
 
     it('applique l\'icône de profil si fournie', () => {

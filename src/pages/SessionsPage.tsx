@@ -176,17 +176,12 @@ export function SessionsPage({
 
   const handleUnpin = useCallback(async (session: Session) => {
     await removeProfileWindow(session.id);
-    await updateSession(session.id, { isPinned: false, autoSync: false });
+    await updateSession(session.id, { isPinned: false });
     await reload();
   }, [reload]);
 
   const handleChangeIcon = useCallback(async (session: Session, icon: ProfileIcon | undefined) => {
     await updateSession(session.id, { icon });
-    await reload();
-  }, [reload]);
-
-  const handleToggleAutoSync = useCallback(async (session: Session, autoSync: boolean) => {
-    await updateSession(session.id, { autoSync });
     await reload();
   }, [reload]);
 
@@ -310,7 +305,6 @@ export function SessionsPage({
                   onPin={handlePin}
                   onUnpin={handleUnpin}
                   onChangeIcon={handleChangeIcon}
-                  onToggleAutoSync={handleToggleAutoSync}
                 />
               ))}
             </Flex>

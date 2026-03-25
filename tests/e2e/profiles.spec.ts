@@ -66,11 +66,11 @@ test.describe('[US-P01] Pin / Unpin', () => {
     await page.close();
   });
 
-  test('unpinning a profile sets isPinned=false and autoSync=false in storage [US-P005]', async ({
+  test('unpinning a profile sets isPinned=false in storage [US-P005]', async ({
     extensionContext,
     extensionId,
   }) => {
-    const profile = createTestProfile({ name: 'Profile To Unpin', autoSync: true });
+    const profile = createTestProfile({ name: 'Profile To Unpin' });
     await seedSessions(extensionContext, [profile]);
 
     const page = await extensionContext.newPage();
@@ -82,80 +82,6 @@ test.describe('[US-P01] Pin / Unpin', () => {
     const sessions = await getSessionsFromStorage(extensionContext);
     const s = sessions.find(s => s.name === 'Profile To Unpin');
     expect(s?.isPinned).toBe(false);
-    expect(s?.autoSync).toBe(false);
-    await page.close();
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Auto-sync toggle
-// ---------------------------------------------------------------------------
-test.describe('[US-P04] Auto-sync toggle', () => {
-  test('toggle auto-sync on enables autoSync in storage', async ({ extensionContext, extensionId }) => {
-    const profile = createTestProfile({ name: 'Sync Profile', autoSync: false });
-    await seedSessions(extensionContext, [profile]);
-
-    const page = await extensionContext.newPage();
-    await goToSessionsSection(page, extensionId);
-
-    const toggle = page.getByRole('switch', { name: /auto-sync/i });
-    await expect(toggle).toBeVisible();
-    await toggle.click();
-    await page.waitForTimeout(300);
-
-    const sessions = await getSessionsFromStorage(extensionContext);
-    const s = sessions.find(s => s.name === 'Sync Profile');
-    expect(s?.autoSync).toBe(true);
-    await page.close();
-  });
-
-  test('enabling auto-sync sets the toggle to checked [US-P006]', async ({
-    extensionContext,
-    extensionId,
-  }) => {
-    const profile = createTestProfile({ name: 'Sync Profile', autoSync: false });
-    await seedSessions(extensionContext, [profile]);
-
-    const page = await extensionContext.newPage();
-    await goToSessionsSection(page, extensionId);
-
-    const toggle = page.getByRole('switch', { name: /auto-sync/i });
-    await expect(toggle).not.toBeChecked();
-    await toggle.click();
-    await expect(toggle).toBeChecked();
-    await page.close();
-  });
-
-  test('disabling auto-sync sets the toggle to unchecked [US-P006]', async ({
-    extensionContext,
-    extensionId,
-  }) => {
-    const profile = createTestProfile({ name: 'Sync Profile', autoSync: true });
-    await seedSessions(extensionContext, [profile]);
-
-    const page = await extensionContext.newPage();
-    await goToSessionsSection(page, extensionId);
-
-    const toggle = page.getByRole('switch', { name: /auto-sync/i });
-    await expect(toggle).toBeChecked();
-    await toggle.click();
-    await expect(toggle).not.toBeChecked();
-    await page.close();
-  });
-
-  test('help icon tooltip is accessible on the auto-sync row [US-P007]', async ({
-    extensionContext,
-    extensionId,
-  }) => {
-    const profile = createTestProfile();
-    await seedSessions(extensionContext, [profile]);
-
-    const page = await extensionContext.newPage();
-    await goToSessionsSection(page, extensionId);
-
-    // The HelpCircle button has an aria-label matching the tooltip content
-    const helpButton = page.getByRole('button', { name: /when enabled.*window/i });
-    await expect(helpButton).toBeVisible();
     await page.close();
   });
 });

@@ -41,8 +41,6 @@ export interface Session {
   ungroupedTabs: SavedTab[];
   /** If true, this session is pinned as a profile */
   isPinned: boolean;
-  /** If true, the profile auto-syncs on window close (step 4d) — stored but not yet active */
-  autoSync: boolean;
   /** Optional icon for profile sessions */
   icon?: ProfileIcon;
 }

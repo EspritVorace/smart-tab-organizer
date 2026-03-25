@@ -110,28 +110,6 @@ test.describe('[US-S02] Session list', () => {
     await page.close();
   });
 
-  test('profile card shows auto-sync toggle [US-S009]', async ({ extensionContext, extensionId }) => {
-    const profile = createTestProfile();
-    await seedSessions(extensionContext, [profile]);
-
-    const page = await extensionContext.newPage();
-    await goToSessionsSection(page, extensionId);
-
-    await expect(page.getByRole('switch', { name: /auto-sync/i })).toBeVisible();
-    await page.close();
-  });
-
-  test('snapshot card does not show auto-sync toggle [US-S009]', async ({ extensionContext, extensionId }) => {
-    const session = createTestSession();
-    await seedSessions(extensionContext, [session]);
-
-    const page = await extensionContext.newPage();
-    await goToSessionsSection(page, extensionId);
-
-    await expect(page.getByRole('switch', { name: /auto-sync/i })).not.toBeVisible();
-    await page.close();
-  });
-
   test('session card displays group count alongside tab count', async ({ extensionContext, extensionId }) => {
     // createTestSession has 1 group with 2 tabs + 1 ungrouped = 3 tabs, 1 group
     const session = createTestSession({ name: 'Badge Session' });

@@ -33,7 +33,6 @@ export const sessionSchema = z.object({
   groups: z.array(savedTabGroupSchema),
   ungroupedTabs: z.array(savedTabSchema),
   isPinned: z.boolean(),
-  autoSync: z.boolean().default(false),
   icon: profileIconSchema.optional(),
 });
 

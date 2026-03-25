@@ -32,84 +32,6 @@ test.beforeEach(async ({ extensionContext }) => {
 });
 
 // ---------------------------------------------------------------------------
-// Alarm lifecycle
-// ---------------------------------------------------------------------------
-test.describe('[US-P04] Alarm lifecycle', () => {
-  test('enabling auto-sync on a profile creates the periodic alarm', async ({
-    extensionContext,
-    extensionId,
-  }) => {
-    const profile = createTestProfile({ name: 'Alarm Profile', autoSync: false });
-    await seedSessions(extensionContext, [profile]);
-
-    const page = await extensionContext.newPage();
-    await goToSessionsSection(page, extensionId);
-
-    // Enable auto-sync via the UI toggle
-    await page.getByRole('switch', { name: /auto-sync/i }).click();
-    await page.waitForTimeout(500); // allow storage event + alarm creation
-
-    const sw = extensionContext.serviceWorkers()[0];
-    const alarm = await sw.evaluate(async (name) => {
-      return await chrome.alarms.get(name);
-    }, ALARM_NAME);
-
-    expect(alarm).not.toBeNull();
-    expect(alarm?.name).toBe(ALARM_NAME);
-    await page.close();
-  });
-
-  test('disabling auto-sync on the last auto-sync profile clears the alarm [US-AS001]', async ({
-    extensionContext,
-    extensionId,
-  }) => {
-    const profile = createTestProfile({ name: 'Last Sync Profile', autoSync: true });
-    await seedSessions(extensionContext, [profile]);
-
-    const sw = extensionContext.serviceWorkers()[0];
-
-    // Manually create the alarm to simulate it being active
-    await sw.evaluate(async (name) => {
-      await chrome.alarms.create(name, { periodInMinutes: 5 });
-    }, ALARM_NAME);
-
-    const page = await extensionContext.newPage();
-    await goToSessionsSection(page, extensionId);
-
-    // Disable auto-sync
-    await page.getByRole('switch', { name: /auto-sync/i }).click();
-    await page.waitForTimeout(500);
-
-    const alarm = await sw.evaluate(async (name) => {
-      return await chrome.alarms.get(name);
-    }, ALARM_NAME);
-
-    expect(alarm).toBeUndefined();
-    await page.close();
-  });
-
-  test('alarm is not created if no profile has auto-sync [US-AS001]', async ({ extensionContext }) => {
-    const profile = createTestProfile({ autoSync: false });
-    await seedSessions(extensionContext, [profile]);
-
-    // Trigger alarm update manually via storage.local.onChanged simulation
-    const sw = extensionContext.serviceWorkers()[0];
-    // Re-set sessions to trigger the storage change listener
-    const sessions = await getSessionsFromStorage(extensionContext);
-    await sw.evaluate(async (data) => {
-      await chrome.storage.local.set({ sessions: data });
-    }, sessions);
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    const alarm = await sw.evaluate(async (name) => {
-      return await chrome.alarms.get(name);
-    }, ALARM_NAME);
-
-    expect(alarm).toBeUndefined();
-  });
-});
-
-// ---------------------------------------------------------------------------
 // Draft storage
 // ---------------------------------------------------------------------------
 test.describe('[US-P04] Draft storage in chrome.storage.session', () => {
@@ -117,7 +39,7 @@ test.describe('[US-P04] Draft storage in chrome.storage.session', () => {
     extensionContext,
     extensionId,
   }) => {
-    const profile = createTestProfile({ name: 'Draft Guard', autoSync: true });
+    const profile = createTestProfile({ name: 'Draft Guard' });
     await seedSessions(extensionContext, [profile]);
 
     const sw = extensionContext.serviceWorkers()[0];
@@ -146,7 +68,7 @@ test.describe('[US-P04] Draft storage in chrome.storage.session', () => {
   });
 
   test('draft is removed from session storage after persistence [US-AS002]', async ({ extensionContext }) => {
-    const profile = createTestProfile({ name: 'Persist Me', autoSync: true });
+    const profile = createTestProfile({ name: 'Persist Me' });
     await seedSessions(extensionContext, [profile]);
 
     const sw = extensionContext.serviceWorkers()[0];
@@ -219,7 +141,7 @@ test.describe('[US-P04] Edit dialog guard', () => {
     extensionContext,
     extensionId,
   }) => {
-    const profile = createTestProfile({ name: 'Edit Guard Profile', autoSync: true });
+    const profile = createTestProfile({ name: 'Edit Guard Profile' });
     await seedSessions(extensionContext, [profile]);
 
     const page = await extensionContext.newPage();
@@ -244,7 +166,7 @@ test.describe('[US-P04] Edit dialog guard', () => {
     extensionContext,
     extensionId,
   }) => {
-    const profile = createTestProfile({ name: 'Edit Guard Close', autoSync: true });
+    const profile = createTestProfile({ name: 'Edit Guard Close' });
     await seedSessions(extensionContext, [profile]);
 
     const page = await extensionContext.newPage();
