@@ -19,6 +19,13 @@ export interface TabRowBaseProps {
   rightSlot?: React.ReactNode;
   /** Optional callback when the title text is clicked (e.g., to open the tab) */
   onTitleClick?: () => void;
+  /**
+   * Whether to show a tooltip with the full URL on hover (default: true).
+   * Disable in editable contexts: Radix Tooltip generates an invisible
+   * "grace area" between trigger and popup that can intercept pointer events
+   * on adjacent rows.
+   */
+  showTooltip?: boolean;
 }
 
 export function TabRowBase({
@@ -30,73 +37,92 @@ export function TabRowBase({
   leftSlot,
   rightSlot,
   onTitleClick,
+  showTooltip = true,
 }: TabRowBaseProps) {
-  return (
-    <Tooltip content={fullUrl}>
-      <Flex
-        align="center"
-        gap="2"
-        style={{
-          paddingLeft: (level - 1) * 20,
-          paddingTop: 'var(--space-1)',
-          paddingBottom: 'var(--space-1)',
-          paddingRight: 'var(--space-2)',
-          overflow: 'hidden',
-          minHeight: 32,
-        }}
-      >
-        {leftSlot}
-        {favIconUrl ? (
-          <img
-            src={favIconUrl}
-            alt=""
-            width={16}
-            height={16}
-            style={{ flexShrink: 0, borderRadius: 2 }}
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = 'none';
-            }}
-          />
-        ) : (
-          <Globe size={16} aria-hidden="true" style={{ flexShrink: 0, color: 'var(--gray-8)' }} />
-        )}
-        <Flex direction="column" style={{ overflow: 'hidden', flex: 1, gap: 0 }}>
+  const favicon = favIconUrl ? (
+    <img
+      src={favIconUrl}
+      alt=""
+      width={16}
+      height={16}
+      style={{ flexShrink: 0, borderRadius: 2 }}
+      onError={(e) => {
+        (e.target as HTMLImageElement).style.display = 'none';
+      }}
+    />
+  ) : (
+    <Globe size={16} aria-hidden="true" style={{ flexShrink: 0, color: 'var(--gray-8)' }} />
+  );
+
+  const titleContent = (
+    <Flex align="center" gap="2" style={{ overflow: 'hidden', flex: 1, minWidth: 0 }}>
+      {favicon}
+      <Flex direction="column" style={{ overflow: 'hidden', flex: 1, gap: 0 }}>
+        <Text
+          size="2"
+          weight="bold"
+          style={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            cursor: onTitleClick ? 'pointer' : undefined,
+          }}
+          onClick={
+            onTitleClick
+              ? (e) => {
+                  e.stopPropagation();
+                  onTitleClick();
+                }
+              : undefined
+          }
+        >
+          {title}
+        </Text>
+        {domain && (
           <Text
-            size="2"
-            weight="bold"
+            size="1"
+            color="gray"
             style={{
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
-              cursor: onTitleClick ? 'pointer' : undefined,
             }}
-            onClick={
-              onTitleClick
-                ? (e) => {
-                    e.stopPropagation();
-                    onTitleClick();
-                  }
-                : undefined
-            }
           >
-            {title}
+            {domain}
           </Text>
-          {domain && (
-            <Text
-              size="1"
-              color="gray"
-              style={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {domain}
-            </Text>
-          )}
-        </Flex>
-        {rightSlot != null && rightSlot}
+        )}
       </Flex>
-    </Tooltip>
+    </Flex>
+  );
+
+  return (
+    /* CSS grid: 1fr (title) + auto (actions) — guarantees the actions column
+       always gets its natural width regardless of the display:table context
+       created by Radix ScrollArea. */
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr auto',
+        columnGap: 'var(--space-2)',
+        paddingLeft: (level - 1) * 20,
+        paddingTop: 'var(--space-1)',
+        paddingBottom: 'var(--space-1)',
+        paddingRight: 'var(--space-2)',
+        minHeight: 32,
+        alignItems: 'center',
+      }}
+    >
+      {/* Column 1: optional leftSlot + favicon + title */}
+      <Flex align="center" gap="2" style={{ overflow: 'hidden', minWidth: 0 }}>
+        {leftSlot}
+        {showTooltip ? (
+          <Tooltip content={fullUrl}>{titleContent}</Tooltip>
+        ) : (
+          titleContent
+        )}
+      </Flex>
+      {/* Column 2: action buttons — auto-sized, never clipped */}
+      {rightSlot}
+    </div>
   );
 }
