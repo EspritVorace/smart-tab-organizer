@@ -391,7 +391,7 @@ test.describe('Import / Export', () => {
       await page.close();
     });
 
-    test('Next button is disabled when all new rules are deselected [US-IE004]', async ({
+    test('Confirm Import button is disabled when all new rules are deselected [US-IE004]', async ({
       extensionContext,
       extensionId,
     }) => {
@@ -413,9 +413,9 @@ test.describe('Import / Export', () => {
       await dialog.getByRole('checkbox').first().click();
       await page.waitForTimeout(200);
 
-      // "0 rule(s) to import" and Next disabled
+      // "0 rule(s) to import" and Confirm Import disabled
       await expect(dialog.getByText(/0 rule.*import/i)).toBeVisible();
-      await expect(dialog.getByRole('button', { name: /next/i })).toBeDisabled();
+      await expect(dialog.getByRole('button', { name: /confirm import/i })).toBeDisabled();
 
       await page.close();
     });
@@ -567,7 +567,7 @@ test.describe('Import / Export', () => {
   // ── US-IE007: Import confirmation and result ─────────────────────────────
 
   test.describe('Import Confirmation [US-IE007]', () => {
-    test('confirmation step shows a summary of rules to be imported [US-IE007]', async ({
+    test('selection step shows rule count and Confirm Import button [US-IE007]', async ({
       extensionContext,
       extensionId,
     }) => {
@@ -582,16 +582,12 @@ test.describe('Import / Export', () => {
       await dialog.locator('textarea').fill(makeRuleJson('Confirm Rule', 'confirm.com'));
       await page.waitForTimeout(300);
 
-      // Step 1 → Step 2 (selection)
       await dialog.getByRole('button', { name: /next/i }).click();
       await page.waitForTimeout(300);
 
-      // Step 2 → Step 3 (confirmation)
-      await dialog.getByRole('button', { name: /next/i }).click();
-      await page.waitForTimeout(300);
-
-      // Should show some summary text
-      await expect(dialog.getByText(/1/)).toBeVisible();
+      // Selection step shows rule count and enabled Confirm Import button
+      await expect(dialog.getByText(/1 rule.*import/i)).toBeVisible();
+      await expect(dialog.getByRole('button', { name: /confirm import/i })).toBeEnabled();
 
       await page.close();
     });
@@ -613,10 +609,7 @@ test.describe('Import / Export', () => {
 
       await dialog.getByRole('button', { name: /next/i }).click();
       await page.waitForTimeout(300);
-      await dialog.getByRole('button', { name: /next/i }).click();
-      await page.waitForTimeout(300);
 
-      // Click Confirm Import (step 3 confirm button)
       await dialog.getByRole('button', { name: /confirm import/i }).click();
       await page.waitForTimeout(1000);
 
@@ -642,16 +635,13 @@ test.describe('Import / Export', () => {
       await page.waitForTimeout(300);
       await dialog.getByRole('button', { name: /next/i }).click();
       await page.waitForTimeout(300);
-      await dialog.getByRole('button', { name: /next/i }).click();
-      await page.waitForTimeout(300);
       await dialog.getByRole('button', { name: /confirm import/i }).click();
       await page.waitForTimeout(1000);
 
-      // Reopen wizard — should start fresh at step 1
+      // Reopen wizard — should start fresh at step 0 (source)
       await openImportWizard(page);
       const dialog2 = page.getByRole('dialog');
-      await expect(dialog2.getByText('Source')).toBeVisible();
-      // Should be back at step 1 (file/text selector visible, not step 3 summary)
+      // Should be back at step 0 (file/text selector visible, not selection step)
       await expect(dialog2.getByRole('radio', { name: 'File' }).locator('..')).toBeVisible();
 
       await page.close();
@@ -739,19 +729,19 @@ test.describe('Import / Export', () => {
       await page.waitForTimeout(200);
       await expect(dialog.getByText(/0 rule.*selected/i)).toBeVisible();
 
-      // Next button should be disabled when nothing is selected
-      await expect(dialog.getByRole('button', { name: /next/i })).toBeDisabled();
+      // Export button should be disabled when nothing is selected
+      await expect(dialog.getByRole('button', { name: /^export$/i })).toBeDisabled();
 
       // Select All
       await dialog.getByRole('button', { name: 'Select All', exact: true }).click();
       await page.waitForTimeout(200);
       await expect(dialog.getByText(/1 rule.*selected/i)).toBeVisible();
-      await expect(dialog.getByRole('button', { name: /next/i })).toBeEnabled();
+      await expect(dialog.getByRole('button', { name: /^export$/i })).toBeEnabled();
 
       await page.close();
     });
 
-    test('Next button is disabled when no rules are selected [US-IE008]', async ({
+    test('Export button is disabled when no rules are selected [US-IE008]', async ({
       extensionContext,
       extensionId,
     }) => {
@@ -780,7 +770,7 @@ test.describe('Import / Export', () => {
       await dialog.getByRole('button', { name: /deselect all/i }).click();
       await page.waitForTimeout(200);
 
-      await expect(dialog.getByRole('button', { name: /next/i })).toBeDisabled();
+      await expect(dialog.getByRole('button', { name: /^export$/i })).toBeDisabled();
 
       await page.close();
     });
@@ -804,7 +794,7 @@ test.describe('Import / Export', () => {
   // ── US-IE009: Export to file or clipboard ───────────────────────────────
 
   test.describe('Export Output [US-IE009]', () => {
-    test('Export wizard second step shows rules ready to export [US-IE009]', async ({
+    test('Export wizard shows selected rule count and Export button [US-IE009]', async ({
       extensionContext,
       extensionId,
     }) => {
@@ -830,11 +820,10 @@ test.describe('Import / Export', () => {
       await openExportWizard(page);
 
       const dialog = page.getByRole('dialog');
-      await dialog.getByRole('button', { name: /next/i }).click();
-      await page.waitForTimeout(300);
 
-      // Should show "1 rule(s) ready to export"
-      await expect(dialog.getByText(/1 rule.*export/i)).toBeVisible();
+      // Should show "1 rule(s) selected" and Export button enabled
+      await expect(dialog.getByText(/1 rule.*selected/i)).toBeVisible();
+      await expect(dialog.getByRole('button', { name: /^export$/i })).toBeEnabled();
 
       await page.close();
     });
@@ -865,8 +854,6 @@ test.describe('Import / Export', () => {
       await openExportWizard(page);
 
       const dialog = page.getByRole('dialog');
-      await dialog.getByRole('button', { name: /next/i }).click();
-      await page.waitForTimeout(300);
 
       // The SplitButton should have an Export button and a dropdown chevron button
       await expect(dialog.getByRole('button', { name: /^export$/i })).toBeVisible();
@@ -904,8 +891,6 @@ test.describe('Import / Export', () => {
       await openExportWizard(page);
 
       const dialog = page.getByRole('dialog');
-      await dialog.getByRole('button', { name: /next/i }).click();
-      await page.waitForTimeout(300);
 
       // Open the export options dropdown
       await dialog.getByRole('button', { name: /export.*option|chevron/i }).click();

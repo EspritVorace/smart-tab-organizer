@@ -28,6 +28,8 @@ const COMPARABLE_PROPERTIES: (keyof DomainRuleSetting)[] = [
   'deduplicationMatchMode',
   'color',
   'deduplicationEnabled',
+  'groupingEnabled',
+  'categoryId',
   'presetId',
   'enabled'
 ];

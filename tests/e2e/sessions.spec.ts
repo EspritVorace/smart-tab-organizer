@@ -271,13 +271,13 @@ test.describe('[US-S01] Snapshot creation', () => {
     await page.close();
   });
 
-  test('wizard step 1 shows Selection step [US-S001]', async ({ extensionContext, extensionId }) => {
+  test('snapshot wizard shows session name field and tab list [US-S001]', async ({ extensionContext, extensionId }) => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: 'Take Snapshot' }).first().click();
 
-    await expect(page.getByText('Selection')).toBeVisible();
+    await expect(page.getByRole('dialog').getByText('Session name')).toBeVisible();
     await page.close();
   });
 
@@ -325,7 +325,7 @@ test.describe('[US-S01] Snapshot creation', () => {
     await page.close();
   });
 
-  test('Next button advances to Confirmation step', async ({ extensionContext, extensionId }) => {
+  test('Save Session button is enabled after tab capture', async ({ extensionContext, extensionId }) => {
     // captureCurrentTabs() filters out chrome-extension:// URLs, so open a real tab first
     const extraTab = await extensionContext.newPage();
     await extraTab.goto('data:text/html,<p>test tab for snapshot</p>');
@@ -336,14 +336,12 @@ test.describe('[US-S01] Snapshot creation', () => {
     await page.getByRole('button', { name: 'Take Snapshot' }).first().click();
     await page.waitForTimeout(800); // wait for tab capture to complete
 
-    await page.getByRole('button', { name: 'Next' }).click();
-
-    await expect(page.getByText('Confirmation')).toBeVisible();
+    await expect(page.getByRole('dialog').getByRole('button', { name: 'Save Session' })).toBeEnabled();
     await extraTab.close();
     await page.close();
   });
 
-  test('Save Session button on confirmation step creates session [US-S001]', async ({
+  test('Save Session button creates session [US-S001]', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -357,7 +355,6 @@ test.describe('[US-S01] Snapshot creation', () => {
     await page.getByRole('button', { name: 'Take Snapshot' }).first().click();
     await page.waitForTimeout(800);
 
-    await page.getByRole('button', { name: 'Next' }).click();
     await page.getByRole('button', { name: 'Save Session' }).click();
 
     // Dialog auto-closes after saving
@@ -503,7 +500,7 @@ test.describe('[US-S05] Restore with conflict resolution', () => {
     await page.close();
   });
 
-  test('Customize wizard advances to Confirmation when no conflicts exist', async ({
+  test('Customize wizard restores directly when no conflicts exist', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -517,13 +514,11 @@ test.describe('[US-S05] Restore with conflict resolution', () => {
     await page.getByRole('menuitem', { name: /customize/i }).click();
 
     const dialog = page.getByRole('dialog');
-    // Wait for conflict analysis to complete
+    await dialog.getByRole('button', { name: /restore/i }).click();
     await page.waitForTimeout(500);
-    await dialog.getByRole('button', { name: 'Next' }).click();
-    await page.waitForTimeout(300);
 
-    // Without open conflicting tabs, should skip conflict step and go to Confirmation
-    await expect(dialog.getByText('Confirmation')).toBeVisible();
+    // Without conflicting tabs, restore executes directly and dialog closes
+    await expect(dialog).not.toBeVisible();
     await page.close();
   });
 });
