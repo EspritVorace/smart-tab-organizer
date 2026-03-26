@@ -120,20 +120,11 @@ test.describe('Rules screenshots', () => {
         await page.locator('main button.rt-Button').last().click();
         await page.waitForTimeout(400);
 
-        // Select Manual mode (first or only non-preset segmented item).
-        // In the DomainRuleFormModal the first item is typically "Manual".
+        // Select Manual mode.  SegmentedControl order: preset(0) · ask(1) · manual(2).
+        // Default when creating a new rule is 'preset', so we must click the last item.
         const items = page.locator('[role="dialog"] button.rt-SegmentedControlItem');
-        await items.first().click();
-        await page.waitForTimeout(300);
-
-        // Open the category picker so it appears in the screenshot.
-        const categoryBtn = page
-          .locator('[role="dialog"]')
-          .locator('button')
-          .filter({ hasText: /categor|catégor|categor/i })
-          .first();
-        await categoryBtn.click().catch(() => {});
-        await page.waitForTimeout(400);
+        await items.last().click();
+        await page.waitForTimeout(500);
       },
     );
   });
@@ -188,6 +179,12 @@ test.describe('Rules screenshots', () => {
       'importexport',
       'rules-export-split-button',
       async (page) => {
+        // Navigate to Import/Export section via sidebar.
+        // Hash routing only handles #sessions; other hashes are ignored.
+        // Sidebar button order: [0]=collapse, [1]=Rules, [2]=Import/Export, ...
+        await page.locator('button.rt-Button').nth(2).click();
+        await page.waitForTimeout(500);
+
         // The Export card is the FIRST card on the import/export page.
         // Its button opens the ExportWizard dialog.
         const exportBtn = page.locator('.rt-Card').first().getByRole('button').first();
@@ -222,6 +219,10 @@ test.describe('Rules screenshots', () => {
       'importexport',
       'rules-import-file-dialog',
       async (page) => {
+        // Navigate to Import/Export section via sidebar (hash routing only handles #sessions)
+        await page.locator('button.rt-Button').nth(2).click();
+        await page.waitForTimeout(500);
+
         // The Import card is the SECOND card on the page.
         const importBtn = page.locator('.rt-Card').nth(1).getByRole('button').first();
         await importBtn.click();
@@ -249,6 +250,10 @@ test.describe('Rules screenshots', () => {
       'importexport',
       'rules-import-text-conflicts',
       async (page) => {
+        // Navigate to Import/Export section via sidebar (hash routing only handles #sessions)
+        await page.locator('button.rt-Button').nth(2).click();
+        await page.waitForTimeout(500);
+
         // Open the Import dialog
         const importBtn = page.locator('.rt-Card').nth(1).getByRole('button').first();
         await importBtn.click();
@@ -256,22 +261,28 @@ test.describe('Rules screenshots', () => {
         await dialog.waitFor({ state: 'visible' });
         await page.waitForTimeout(300);
 
-        // Switch to "Text" mode via the SegmentedControl
-        // The item with value="text" or hasText matching "Text"/"Texte"/"Texto"
-        const textItem = dialog
-          .locator('[data-value="text"]')
-          .or(dialog.locator('button.rt-SegmentedControlItem').nth(1));
-        await textItem.first().click();
-        await page.waitForTimeout(300);
+        // Switch to "Text" mode via the SegmentedControl (2 items: file=0, text=1)
+        await dialog.locator('button.rt-SegmentedControlItem').nth(1).click();
+        await page.waitForTimeout(400);
 
-        // Fill the textarea with the conflict JSON
-        await dialog.locator('textarea').fill(conflictJson);
-        await page.waitForTimeout(500);
+        // Fill the textarea — Radix TextArea renders a real <textarea> element
+        const textarea = page.locator('textarea');
+        await textarea.waitFor({ state: 'visible', timeout: 4_000 });
+        await textarea.fill(conflictJson);
 
-        // Click "Next" — it is the last (primary action) button in the footer
-        const nextBtn = dialog.getByRole('button').last();
-        await nextBtn.click();
-        await page.waitForTimeout(600);
+        // Wait for React to validate the JSON and enable the Next button
+        await page.waitForFunction(
+          () => {
+            const btns = Array.from(document.querySelectorAll<HTMLButtonElement>('[role="dialog"] button'));
+            const last = btns[btns.length - 1];
+            return last != null && !last.disabled && last.getAttribute('data-disabled') !== 'true';
+          },
+          { timeout: 5_000 },
+        ).catch(() => {});
+
+        // Click "Next" — last button in the step-0 footer (Cancel · Next)
+        await dialog.getByRole('button').last().click();
+        await page.waitForTimeout(800);
       },
     );
   });

@@ -18,6 +18,8 @@ if (!fs.existsSync(path.join(extensionPath, 'manifest.json'))) {
 export default defineConfig({
   // testDir is relative to this config file
   testDir: './pages',
+  // Match *.screenshots.ts files (Playwright default only picks up *.spec.ts / *.test.ts)
+  testMatch: '**/*.screenshots.ts',
 
   fullyParallel: false,
   workers: 1,
