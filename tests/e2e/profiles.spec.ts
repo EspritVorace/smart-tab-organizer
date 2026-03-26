@@ -185,7 +185,6 @@ test.describe('[US-P03] New Profile wizard', () => {
     await page.getByRole('button', { name: /got it/i }).click();
 
     await page.waitForTimeout(800); // wait for tab capture
-    await page.getByRole('button', { name: 'Next' }).click();
     await page.getByRole('button', { name: 'Save Profile' }).click();
 
     // Dialog auto-closes after saving
@@ -259,14 +258,10 @@ test.describe('[US-P03] New Profile wizard', () => {
     await page.close();
   });
 
-  test('profile wizard shows Save Profile button in Confirmation step', async ({
+  test('profile wizard shows Save Profile button', async ({
     extensionContext,
     extensionId,
   }) => {
-    // captureCurrentTabs() filters chrome-extension:// — open a real tab so Next is enabled
-    const extraTab = await extensionContext.newPage();
-    await extraTab.goto('data:text/html,<p>tab for profile wizard</p>');
-
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
@@ -274,12 +269,7 @@ test.describe('[US-P03] New Profile wizard', () => {
     await page.getByText('Your First Profile!').waitFor({ timeout: 2000 });
     await page.getByRole('button', { name: /got it/i }).click();
 
-    // Advance to Confirmation step where Save Profile button appears
-    await page.waitForTimeout(800);
-    await page.getByRole('button', { name: 'Next' }).click();
-
     await expect(page.getByRole('dialog').getByRole('button', { name: 'Save Profile' })).toBeVisible();
-    await extraTab.close();
     await page.close();
   });
 
