@@ -25,7 +25,7 @@
     "postinstall": "wxt prepare",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "screenshots": "pnpm build && xvfb-run --auto-servernum node_modules/.bin/playwright test --config=e2e-screenshots/playwright.screenshots.config.ts"
+    "screenshots": "pnpm build && xvfb-maybe node_modules/.bin/playwright test --config=e2e-screenshots/playwright.screenshots.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
@@ -41,7 +41,8 @@
     "typescript": "^5.2.2",
     "vitest": "^2.1.8",
     "vitest-ctrf-json-reporter": "^0.0.3",
-    "wxt": "^0.20.13"
+    "wxt": "^0.20.13",
+    "xvfb-maybe": "^0.2.1"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
