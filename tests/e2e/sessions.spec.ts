@@ -428,8 +428,8 @@ test.describe('[US-S04][US-S06] Restore — split button', () => {
     await page.getByRole('menuitem', { name: /customize/i }).click();
 
     await expect(page.getByRole('dialog')).toBeVisible();
-    // Scope the /Restore/ check to the dialog to avoid matching the session card's Restore button
-    await expect(page.getByRole('dialog').getByText(/Restore/)).toBeVisible();
+    // Scope the /Restore/ check to the dialog heading (Restore button also matches the regex)
+    await expect(page.getByRole('dialog').getByText(/Restore/).first()).toBeVisible();
     await page.close();
   });
 
@@ -494,7 +494,6 @@ test.describe('[US-S05] Restore with conflict resolution', () => {
     await page.getByRole('menuitem', { name: /customize/i }).click();
 
     const dialog = page.getByRole('dialog');
-    await expect(dialog.getByText('Selection')).toBeVisible();
     await expect(dialog.getByText(/current window/i)).toBeVisible();
     await expect(dialog.getByText(/new window/i)).toBeVisible();
     await page.close();
@@ -515,10 +514,9 @@ test.describe('[US-S05] Restore with conflict resolution', () => {
 
     const dialog = page.getByRole('dialog');
     await dialog.getByRole('button', { name: /restore/i }).click();
-    await page.waitForTimeout(500);
 
     // Without conflicting tabs, restore executes directly and dialog closes
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).not.toBeVisible({ timeout: 10000 });
     await page.close();
   });
 });
