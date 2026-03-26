@@ -24,7 +24,8 @@
     "compile": "tsc --noEmit",
     "postinstall": "wxt prepare",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "screenshots": "pnpm build && playwright test --config=e2e-screenshots/playwright.screenshots.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
