@@ -3,7 +3,6 @@ import { Dialog, Flex, Button, Text, Separator, Box, RadioGroup, Callout } from 
 import { RotateCcw, AlertCircle } from 'lucide-react';
 import { browser } from 'wxt/browser';
 import { SessionsTheme } from '../../Form/themes';
-import { WizardStepper } from '../WizardStepper';
 import { TabTree } from '../../Core/TabTree/TabTree';
 import { ConflictResolutionStep } from './ConflictResolutionStep';
 import { getMessage } from '../../../utils/i18n';
@@ -54,23 +53,6 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
 
   // Profile exclusivity state
   const [isProfileOpenElsewhere, setIsProfileOpenElsewhere] = useState(false);
-
-  // Dynamic steps based on flow
-  const steps = useMemo(() => {
-    if (hasConflicts) {
-      return [
-        { label: getMessage('restoreStepSelection') },
-        { label: getMessage('restoreStepConflicts') },
-        { label: getMessage('restoreStepConfirmation') },
-      ];
-    }
-    return [
-      { label: getMessage('restoreStepSelection') },
-      { label: getMessage('restoreStepConfirmation') },
-    ];
-  }, [hasConflicts]);
-
-  const confirmStep = steps.length - 1;
 
   // Reset on open
   useEffect(() => {
@@ -126,47 +108,12 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
     return { tabs: selectedTabs, groups: selectedGroups };
   }, [session, selectedSavedTabIds]);
 
-  // Transition from step 0 → step 1 (or confirm)
-  const handleNextFromSelection = useCallback(async () => {
-    if (target === 'new') {
-      // New window — no conflicts possible, skip to confirm
-      setHasConflicts(false);
-      setConflictAnalysis(null);
-      setStep(1);
-      return;
-    }
-
-    // Current window — analyze conflicts
-    setIsAnalyzing(true);
-    try {
-      const { tabs, groups } = getSelectedData();
-      const analysis = await analyzeConflicts(tabs, groups);
-      setConflictAnalysis(analysis);
-
-      const conflicts =
-        analysis.duplicateTabs.length > 0 || analysis.conflictingGroups.length > 0;
-      setHasConflicts(conflicts);
-
-      // Initialize group actions for conflicting groups
-      if (conflicts) {
-        const actions = new Map<string, GroupConflictAction>();
-        for (const gc of analysis.conflictingGroups) {
-          actions.set(gc.savedGroup.id, 'merge');
-        }
-        setGroupActions(actions);
-        setStep(1); // → conflict step
-      } else {
-        setStep(1); // → confirm step (steps array has 2 entries)
-      }
-    } catch {
-      setRestoreError(getMessage('restoreAnalysisError'));
-    } finally {
-      setIsAnalyzing(false);
-    }
-  }, [target, getSelectedData]);
-
   // Execute restore
-  const executeRestore = useCallback(async () => {
+  const executeRestore = useCallback(async (
+    analysis: ConflictAnalysis | null,
+    dupAction: DuplicateTabAction,
+    grpActions: Map<string, GroupConflictAction>,
+  ) => {
     if (!session) return;
     setIsRestoring(true);
     setRestoreError(null);
@@ -183,8 +130,8 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
 
       const { tabs, groups } = getSelectedData();
       const conflictResolution: ConflictResolution = {
-        duplicateTabAction,
-        groupActions,
+        duplicateTabAction: dupAction,
+        groupActions: grpActions,
       };
 
       const result = await restoreTabs({
@@ -192,7 +139,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
         groups,
         target,
         conflictResolution: target === 'current' ? conflictResolution : undefined,
-        conflictAnalysis: target === 'current' ? conflictAnalysis ?? undefined : undefined,
+        conflictAnalysis: target === 'current' ? analysis ?? undefined : undefined,
       });
 
       // Update profile↔window mapping
@@ -226,7 +173,44 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
     } finally {
       setIsRestoring(false);
     }
-  }, [session, getSelectedData, target, duplicateTabAction, groupActions, conflictAnalysis]);
+  }, [session, getSelectedData, target]);
+
+  // Step 0 button: analyze conflicts (if current window), then restore or show conflict step
+  const handleRestoreOrNext = useCallback(async () => {
+    if (target === 'new') {
+      await executeRestore(null, duplicateTabAction, groupActions);
+      return;
+    }
+
+    // Current window — analyze conflicts first
+    setIsAnalyzing(true);
+    setRestoreError(null);
+    try {
+      const { tabs, groups } = getSelectedData();
+      const analysis = await analyzeConflicts(tabs, groups);
+      setConflictAnalysis(analysis);
+
+      const conflicts =
+        analysis.duplicateTabs.length > 0 || analysis.conflictingGroups.length > 0;
+      setHasConflicts(conflicts);
+
+      if (conflicts) {
+        // Initialize group actions for conflicting groups
+        const actions = new Map<string, GroupConflictAction>();
+        for (const gc of analysis.conflictingGroups) {
+          actions.set(gc.savedGroup.id, 'merge');
+        }
+        setGroupActions(actions);
+        setStep(1);
+      } else {
+        await executeRestore(analysis, duplicateTabAction, groupActions);
+      }
+    } catch {
+      setRestoreError(getMessage('restoreAnalysisError'));
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, [target, getSelectedData, executeRestore, duplicateTabAction, groupActions]);
 
   const handleGroupActionChange = useCallback((groupId: string, action: GroupConflictAction) => {
     setGroupActions(prev => {
@@ -237,10 +221,6 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
   }, []);
 
   if (!session) return null;
-
-  // Determine what the current step shows
-  const isConflictStep = hasConflicts && step === 1;
-  const isConfirmStep = step === confirmStep;
 
   return (
     <SessionsTheme>
@@ -256,8 +236,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
             {getMessage('restoreDescription')}
           </Dialog.Description>
 
-          <WizardStepper steps={steps} currentStep={step} />
-          <Separator size="4" style={{ opacity: 0.3 }} />
+          <Separator size="4" mt="3" style={{ opacity: 0.3 }} />
 
           {/* Step 0: Selection + Destination */}
           {step === 0 && (
@@ -315,8 +294,8 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
             </Box>
           )}
 
-          {/* Conflict resolution step (only if hasConflicts && step === 1) */}
-          {isConflictStep && conflictAnalysis && (
+          {/* Step 1: Conflict resolution */}
+          {step === 1 && hasConflicts && conflictAnalysis && (
             <Box mt="4">
               <ConflictResolutionStep
                 analysis={conflictAnalysis}
@@ -328,40 +307,13 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
             </Box>
           )}
 
-          {/* Confirm step (before restore) */}
-          {isConfirmStep && (
-            <Box mt="4">
-              <Flex direction="column" gap="2">
-                {target === 'new' ? (
-                  <Text size="2">
-                    {getMessage('restoreConfirmNew', [String(selectedSavedTabIds.size)])}
-                  </Text>
-                ) : (
-                  <Text size="2">
-                    {getMessage('restoreConfirmCurrent', [String(selectedSavedTabIds.size)])}
-                  </Text>
-                )}
-
-                {conflictAnalysis &&
-                  duplicateTabAction === 'skip' &&
-                  conflictAnalysis.duplicateTabs.length > 0 && (
-                    <Text size="2" color="gray">
-                      {getMessage('restoreConfirmSkipped', [
-                        String(conflictAnalysis.duplicateTabs.length),
-                      ])}
-                    </Text>
-                  )}
-              </Flex>
-
-              {restoreError && (
-                <Callout.Root color="red" variant="soft" mt="3">
-                  <Callout.Icon>
-                    <AlertCircle size={16} />
-                  </Callout.Icon>
-                  <Callout.Text>{restoreError}</Callout.Text>
-                </Callout.Root>
-              )}
-            </Box>
+          {restoreError && (
+            <Callout.Root color="red" variant="soft" mt="3">
+              <Callout.Icon>
+                <AlertCircle size={16} />
+              </Callout.Icon>
+              <Callout.Text>{restoreError}</Callout.Text>
+            </Callout.Root>
           )}
 
           <Separator size="4" mt="4" style={{ opacity: 0.3 }} />
@@ -371,47 +323,39 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
             {step === 0 && (
               <>
                 <Dialog.Close>
-                  <Button variant="soft" color="gray">
+                  <Button variant="soft" color="gray" disabled={isAnalyzing || isRestoring}>
                     {getMessage('cancel')}
                   </Button>
                 </Dialog.Close>
                 <Button
-                  onClick={handleNextFromSelection}
-                  disabled={selectedTabIds.size === 0 || isAnalyzing}
+                  onClick={handleRestoreOrNext}
+                  disabled={selectedTabIds.size === 0 || isAnalyzing || isRestoring}
                 >
-                  {isAnalyzing ? getMessage('loadingText') : getMessage('next')}
+                  <RotateCcw size={14} aria-hidden="true" />
+                  {isAnalyzing ? getMessage('loadingText') : getMessage('sessionRestore')}
                 </Button>
               </>
             )}
 
-            {isConflictStep && (
-              <>
-                <Button variant="soft" color="gray" onClick={() => setStep(0)}>
-                  {getMessage('previous')}
-                </Button>
-                <Button onClick={() => setStep(confirmStep)}>
-                  {getMessage('next')}
-                </Button>
-              </>
-            )}
-
-            {isConfirmStep && (
+            {step === 1 && (
               <>
                 <Button
                   variant="soft"
                   color="gray"
-                  onClick={() => setStep(step - 1)}
+                  onClick={() => setStep(0)}
                   disabled={isRestoring}
                 >
                   {getMessage('previous')}
                 </Button>
-                <Button onClick={executeRestore} disabled={isRestoring}>
+                <Button
+                  onClick={() => executeRestore(conflictAnalysis, duplicateTabAction, groupActions)}
+                  disabled={isRestoring}
+                >
                   <RotateCcw size={14} aria-hidden="true" />
                   {getMessage('sessionRestore')}
                 </Button>
               </>
             )}
-
           </Flex>
         </Dialog.Content>
       </Dialog.Root>
