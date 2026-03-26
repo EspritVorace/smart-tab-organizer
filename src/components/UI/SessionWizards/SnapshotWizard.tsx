@@ -5,7 +5,6 @@ import {
 } from '@radix-ui/themes';
 import { Camera, AlertCircle, Pin } from 'lucide-react';
 import { SessionsTheme } from '../../Form/themes';
-import { WizardStepper } from '../WizardStepper';
 import { TabTree } from '../../Core/TabTree/TabTree';
 import { CategoryPicker } from '../../Core/DomainRule/CategoryPicker';
 import { getMessage } from '../../../utils/i18n';
@@ -26,7 +25,6 @@ interface SnapshotWizardProps {
 export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }: SnapshotWizardProps) {
   const isProfile = mode === 'profile';
 
-  const [step, setStep] = useState(0);
   const [sessionName, setSessionName] = useState('');
   const [treeData, setTreeData] = useState<TabTreeData | null>(null);
   const [ungroupedTabs, setUngroupedTabs] = useState<SavedTab[]>([]);
@@ -40,15 +38,9 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
   const [saveError, setSaveError] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState<string | null>(null);
 
-  const steps = [
-    { label: getMessage('snapshotStepSelection') },
-    { label: getMessage('snapshotStepConfirmation') },
-  ];
-
   // Reset and capture on open
   useEffect(() => {
     if (!open) return;
-    setStep(0);
     setSessionName(
       isProfile
         ? getMessage('profileDefaultName')
@@ -117,7 +109,6 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
   const titleKey = isProfile ? 'profileTitle' : 'snapshotTitle';
   const descriptionKey = isProfile ? 'profileDescription' : 'snapshotDescription';
   const saveButtonKey = isProfile ? 'profileSaveButton' : 'snapshotSaveButton';
-  const confirmKey = isProfile ? 'profileConfirmMessage' : 'snapshotConfirmMessage';
   const SaveIcon = isProfile ? Pin : Camera;
 
   return (
@@ -141,112 +132,73 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
             {getMessage(descriptionKey)}
           </Dialog.Description>
 
-          <WizardStepper steps={steps} currentStep={step} />
-          <Separator size="4" style={{ opacity: 0.3 }} />
-
-          {/* Step 0: Selection */}
-          {step === 0 && (
-            <Box mt="4">
-              <Flex direction="column" gap="3">
-                {/* Name + category inline (category icon left of the input) */}
-                <Flex direction="column" gap="1">
-                  <Text size="2" weight="medium">
-                    {getMessage('sessionNameLabel')}
-                  </Text>
-                  <Flex align="center" gap="2">
-                    <CategoryPicker value={categoryId as any} onChange={setCategoryId} />
-                    <Box style={{ flex: 1 }}>
-                      <TextField.Root
-                        value={sessionName}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setSessionName(e.target.value)
-                        }
-                        placeholder={getMessage('sessionNamePlaceholder')}
-                        maxLength={100}
-                        aria-label={getMessage('sessionNameLabel')}
-                        style={{ width: '100%' }}
-                      />
-                    </Box>
-                  </Flex>
-                </Flex>
-
+          <Box mt="4">
+            <Flex direction="column" gap="3">
+              {/* Name + category inline (category icon left of the input) */}
+              <Flex direction="column" gap="1">
                 <Text size="2" weight="medium">
-                  {getMessage('snapshotSelectTabs')}
+                  {getMessage('sessionNameLabel')}
                 </Text>
-                {isCapturing ? (
-                  <Text size="2" color="gray">
-                    {getMessage('loadingText')}
-                  </Text>
-                ) : treeData ? (
-                  <TabTree
-                    data={treeData}
-                    selectedTabIds={selectedTabIds}
-                    onSelectionChange={setSelectedTabIds}
-                    maxHeight={280}
-                  />
-                ) : null}
+                <Flex align="center" gap="2">
+                  <CategoryPicker value={categoryId as any} onChange={setCategoryId} />
+                  <Box style={{ flex: 1 }}>
+                    <TextField.Root
+                      value={sessionName}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setSessionName(e.target.value)
+                      }
+                      placeholder={getMessage('sessionNamePlaceholder')}
+                      maxLength={100}
+                      aria-label={getMessage('sessionNameLabel')}
+                      style={{ width: '100%' }}
+                    />
+                  </Box>
+                </Flex>
               </Flex>
-            </Box>
-          )}
 
-          {/* Step 1: Confirmation */}
-          {step === 1 && (
-            <Box mt="4">
-              <Flex direction="column" gap="3">
-                <Text size="2">
-                  {getMessage(confirmKey, [
-                    sessionName.trim(),
-                    String(selectedSavedTabIds.size),
-                  ])}
+              <Text size="2" weight="medium">
+                {getMessage('snapshotSelectTabs')}
+              </Text>
+              {isCapturing ? (
+                <Text size="2" color="gray">
+                  {getMessage('loadingText')}
                 </Text>
+              ) : treeData ? (
+                <TabTree
+                  data={treeData}
+                  selectedTabIds={selectedTabIds}
+                  onSelectionChange={setSelectedTabIds}
+                  maxHeight={280}
+                />
+              ) : null}
+            </Flex>
+          </Box>
 
-              </Flex>
-              {saveError && (
-                <Callout.Root color="red" variant="soft" mt="3">
-                  <Callout.Icon>
-                    <AlertCircle size={16} />
-                  </Callout.Icon>
-                  <Callout.Text>{saveError}</Callout.Text>
-                </Callout.Root>
-              )}
-            </Box>
+          {saveError && (
+            <Callout.Root color="red" variant="soft" mt="3">
+              <Callout.Icon>
+                <AlertCircle size={16} />
+              </Callout.Icon>
+              <Callout.Text>{saveError}</Callout.Text>
+            </Callout.Root>
           )}
 
           <Separator size="4" mt="4" style={{ opacity: 0.3 }} />
 
           {/* Footer */}
           <Flex gap="3" justify="end" mt="3">
-            {step === 0 && (
-              <>
-                <Dialog.Close>
-                  <Button variant="soft" color="gray">
-                    {getMessage('cancel')}
-                  </Button>
-                </Dialog.Close>
-                <Button
-                  onClick={() => setStep(1)}
-                  disabled={!sessionName.trim() || selectedTabIds.size === 0 || isCapturing}
-                >
-                  {getMessage('next')}
-                </Button>
-              </>
-            )}
-            {step === 1 && (
-              <>
-                <Button
-                  variant="soft"
-                  color="gray"
-                  onClick={() => setStep(0)}
-                  disabled={isSaving}
-                >
-                  {getMessage('previous')}
-                </Button>
-                <Button onClick={handleSave} disabled={isSaving}>
-                  <SaveIcon size={14} aria-hidden="true" />
-                  {getMessage(saveButtonKey)}
-                </Button>
-              </>
-            )}
+            <Dialog.Close>
+              <Button variant="soft" color="gray" disabled={isSaving}>
+                {getMessage('cancel')}
+              </Button>
+            </Dialog.Close>
+            <Button
+              onClick={handleSave}
+              disabled={!sessionName.trim() || selectedTabIds.size === 0 || isCapturing || isSaving}
+            >
+              <SaveIcon size={14} aria-hidden="true" />
+              {getMessage(saveButtonKey)}
+            </Button>
           </Flex>
         </Dialog.Content>
       </Dialog.Root>
