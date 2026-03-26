@@ -49,14 +49,20 @@ export const test = base.extend<ScreenshotFixtures>({
       );
       fs.mkdirSync(userDataDir, { recursive: true });
 
-      // Prefer a pre-installed Chrome if available (CI / local with custom path)
-      const customChromePath = path.join(
-        os.homedir(),
-        '.cache/ms-playwright/chromium-custom/chrome-linux64/chrome',
-      );
-      const executablePath = fs.existsSync(customChromePath)
-        ? customChromePath
-        : undefined;
+      // Resolve Chromium executable: prefer a "chromium-custom" build (CI),
+      // then fall back to any versioned Playwright Chromium already on disk.
+      function findChrome(): string | undefined {
+        const candidates = [
+          // CI / manually pre-installed custom build
+          path.join(os.homedir(), '.cache/ms-playwright/chromium-custom/chrome-linux64/chrome'),
+          // Playwright 1.58 expected version
+          path.join(os.homedir(), '.cache/ms-playwright/chromium-1208/chrome-linux64/chrome'),
+          // Older Playwright version that may already be present
+          path.join(os.homedir(), '.cache/ms-playwright/chromium-1194/chrome-linux/chrome'),
+        ];
+        return candidates.find((p) => fs.existsSync(p));
+      }
+      const executablePath = findChrome();
 
       const context = await chromium.launchPersistentContext(userDataDir, {
         headless: false,

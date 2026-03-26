@@ -22,6 +22,13 @@ test.describe('Settings screenshots', () => {
       locale,
       'settings',
       'settings-misc',
+      async (page) => {
+        // Navigate to Settings via sidebar (hash routing only handles #sessions).
+        // Sidebar button order: [0]=collapse, [1]=Rules, [2]=Import/Export,
+        //   [3]=Sessions, [4]=Statistics, [5]=Settings
+        await page.locator('button.rt-Button').nth(5).click();
+        await page.waitForTimeout(400);
+      },
     );
   });
 });

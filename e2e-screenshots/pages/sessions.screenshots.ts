@@ -169,38 +169,26 @@ test.describe('Sessions screenshots', () => {
         );
         await page.waitForTimeout(300);
 
-        // ── Open the Restore wizard via the "Customize…" menu item ──
-        // The SplitButton on the first session card: click the chevron (last
-        // button in the SplitButton flex container).
+        // ── Open the Restore wizard via the primary "Restore" button ──
+        // SessionCard layout (buttons in order): Pin (IconButton) · Restore (rt-Button)
+        // · Chevron (rt-Button) · MoreHorizontal (IconButton) · Collapsible toggle.
+        // The primary Restore button is the first .rt-Button in the card; clicking it
+        // calls onRestore(session) which opens the RestoreWizard (same as "Customize…").
         const firstCard = page.locator('.rt-Card').first();
-        const splitButtons = firstCard.locator('button');
-        const splitCount = await splitButtons.count();
-        // Chevron is the second button of the two-button SplitButton
-        if (splitCount >= 2) {
-          await splitButtons.nth(splitCount - 1).click();
-        }
-        await page.waitForTimeout(300);
-
-        // Click "Customize…" in the dropdown menu
-        const customizeItem = page
-          .locator('[role="menuitem"]')
-          .last();
-        await customizeItem.click().catch(() => {
-          // Fallback: click any menu item that mentions "custom"
-          return page.locator('[role="menuitem"]').filter({ hasText: /custom/i }).click();
-        });
+        const primaryRestoreBtn = firstCard.locator('button.rt-Button').first();
+        await primaryRestoreBtn.click();
         await page.waitForTimeout(400);
 
         // Wait for RestoreWizard dialog
         const dialog = page.locator('[role="dialog"]');
-        await dialog.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
-        await page.waitForTimeout(300);
+        await dialog.waitFor({ state: 'visible', timeout: 5_000 });
+        await page.waitForTimeout(400);
 
-        // Click the "Restore" button (last button in the dialog footer at step 0).
-        // This triggers analyzeConflicts() → conflict found → moves to step 1.
-        const restoreBtn = dialog.getByRole('button').last();
-        await restoreBtn.click();
-        await page.waitForTimeout(800);
+        // Click the "Restore" button in step 0 footer (Cancel · Restore).
+        // This calls handleRestoreOrNext() → analyzeConflicts() → conflict found
+        // (the live "Work" blue group we created above) → wizard moves to step 1.
+        await dialog.getByRole('button').last().click();
+        await page.waitForTimeout(1_200);
       },
     );
   });
