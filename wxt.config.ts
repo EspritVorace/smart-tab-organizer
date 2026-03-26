@@ -1,5 +1,6 @@
 import { defineConfig } from 'wxt';
 import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
 
 export default defineConfig({
   srcDir: 'src',
@@ -26,6 +27,10 @@ export default defineConfig({
       '48': 'icons/icon48.png',
       '128': 'icons/icon128.png'
     }
+  },
+  webExt: {
+    chromiumProfile: resolve('.chrome-profile'),
+    keepProfileChanges: true,
   },
   vite: () => ({
     plugins: [react()],
