@@ -17,7 +17,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /** Absolute path to the screenshots output folder at the repo root */
-const SCREENSHOTS_DIR = path.resolve(__dirname, '../../screenshots');
+const SCREENSHOTS_DIR = path.resolve(__dirname, '../../doc/assets');
 
 // ---------------------------------------------------------------------------
 // Internal helpers
