@@ -51,7 +51,8 @@ test.describe('[US-O01] Empty state', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await expect(page.getByText('Sessions')).toBeVisible();
+    // The intro callout contains this unique body text; it is shown until dismissed
+    await expect(page.getByText('Sessions capture your open tabs')).toBeVisible();
     await page.close();
   });
 });

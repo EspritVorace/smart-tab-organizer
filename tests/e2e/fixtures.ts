@@ -101,9 +101,22 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       throw new Error(`Extension not found at ${EXTENSION_PATH}. Run 'npm run build' first.`);
     }
 
-    // Use custom Chrome path if available, otherwise use Playwright's bundled Chromium
-    const customChromePath = path.join(os.homedir(), '.cache/ms-playwright/chromium-custom/chrome-linux64/chrome');
-    const executablePath = fs.existsSync(customChromePath) ? customChromePath : undefined;
+    // Resolve Chromium executable: prefer a "chromium-custom" build (CI),
+    // then fall back to any versioned Playwright Chromium already on disk.
+    function findChrome(): string | undefined {
+      const candidates = [
+        // CI / manually pre-installed custom build
+        path.join(os.homedir(), '.cache/ms-playwright/chromium-custom/chrome-linux64/chrome'),
+        // Playwright 1.58 expected version
+        path.join(os.homedir(), '.cache/ms-playwright/chromium-1208/chrome-linux64/chrome'),
+        // Playwright 1.57 expected version
+        path.join(os.homedir(), '.cache/ms-playwright/chromium-1200/chrome-linux64/chrome'),
+        // Older Playwright version that may already be present
+        path.join(os.homedir(), '.cache/ms-playwright/chromium-1194/chrome-linux/chrome'),
+      ];
+      return candidates.find((p) => fs.existsSync(p));
+    }
+    const executablePath = findChrome();
 
     const extensionContext = await chromium.launchPersistentContext(userDataDir, {
       headless: false, // Extensions require headed mode
@@ -183,6 +196,11 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       throw new Error('Service worker not available after 5 s (idle termination?)');
     };
 
+    // Map from Playwright Page to Chrome tab ID — needed because when navigation
+    // fails (e.g. https://example.com is unreachable), the tab URL becomes
+    // chrome-error://chromewebdata/ which chrome.tabs.query does not return.
+    const pageToTabId = new Map<Page, number>();
+
     const helpers: ExtensionHelpers = {
       // Set global grouping enabled/disabled
       setGlobalGroupingEnabled: async (enabled: boolean) => {
@@ -254,8 +272,18 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
         });
       },
 
-      // Create a new tab - handles navigation errors gracefully
+      // Create a new tab - handles navigation errors gracefully.
+      // Also captures the Chrome tab ID before navigation so we can find the
+      // tab even if navigation later fails and the URL becomes chrome-error://.
       createTab: async (url: string) => {
+        const sw = await getServiceWorker();
+
+        // Snapshot existing tab IDs before opening the new page.
+        const existingIds: number[] = await sw.evaluate(async () => {
+          const tabs = await chrome.tabs.query({});
+          return tabs.map((t: any) => t.id as number);
+        });
+
         const page = await extensionContext.newPage();
         try {
           await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 10000 });
@@ -263,6 +291,18 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
           // Navigation might fail for some test URLs, but the tab is still created
           // which is what we need for testing the extension
         }
+
+        // Find the new tab by set-difference; store for later use in createTabFromOpener.
+        const newTabId: number | null = await sw.evaluate(async (known: number[]) => {
+          const tabs = await chrome.tabs.query({});
+          const newTab = tabs.find((t: any) => !known.includes(t.id as number));
+          return (newTab?.id as number) ?? null;
+        }, existingIds);
+
+        if (newTabId !== null) {
+          pageToTabId.set(page, newTabId);
+        }
+
         return page;
       },
 
@@ -283,17 +323,26 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
         // attaches to it (and enables route interception) before navigation starts.
         const newPagePromise = extensionContext.waitForEvent('page', { timeout: 10000 });
 
+        // Prefer stored tab ID over URL-based lookup (URL may be chrome-error:// if load failed).
+        const storedOpenerTabId = pageToTabId.get(openerPage) ?? null;
+
         // Single sw.evaluate: find opener, inject middleClickedTabs, create tab.
         // All three steps in one extensionContext call to prevent any SW restart between them.
-        const result = await sw.evaluate(async ({ targetUrl, openerUrl }: { targetUrl: string; openerUrl: string }) => {
-          const tabs = await chrome.tabs.query({});
-          const opener = tabs.find((t: any) => t.url === openerUrl || t.pendingUrl === openerUrl);
+        const result = await sw.evaluate(async ({ targetUrl, openerUrl, knownTabId }: { targetUrl: string; openerUrl: string; knownTabId: number | null }) => {
+          let opener: any;
+          if (knownTabId !== null) {
+            try { opener = await chrome.tabs.get(knownTabId); } catch { opener = null; }
+          }
+          if (!opener) {
+            const tabs = await chrome.tabs.query({});
+            opener = tabs.find((t: any) => t.url === openerUrl || t.pendingUrl === openerUrl);
+          }
           if (!opener) return { openerFound: false, tabCreated: false };
           (globalThis as any).middleClickedTabs.set(targetUrl, opener.id);
           console.log(`[TEST] middleClickedTabs injected: "${targetUrl}" → tab ${opener.id}`);
           await chrome.tabs.create({ url: targetUrl, openerTabId: opener.id, active: true });
           return { openerFound: true, tabCreated: true, openerId: opener.id };
-        }, { targetUrl: url, openerUrl });
+        }, { targetUrl: url, openerUrl, knownTabId: storedOpenerTabId });
 
         if (!result.openerFound) {
           throw new Error(`createTabNaturally: cannot find opener tab for URL: ${openerUrl}`);
@@ -320,18 +369,27 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
         // Wait for opener page to have a URL
         await new Promise(resolve => setTimeout(resolve, 200));
 
-        const openerUrl = openerPage.url();
+        // Prefer the stored Chrome tab ID (set in createTab) over URL-based lookup.
+        // URL-based lookup fails when navigation errored (chrome-error://chromewebdata/).
+        const storedOpenerTabId = pageToTabId.get(openerPage);
 
-        // Get the opener tab info using exact URL matching to avoid selecting the wrong tab
-        // when multiple tabs from the same domain exist
-        const openerTabInfo = await sw.evaluate(async (exactUrl: string) => {
-          const tabs = await chrome.tabs.query({});
-          const openerTab = tabs.find((t: any) => t.url === exactUrl || t.pendingUrl === exactUrl);
-          return openerTab ? { id: openerTab.id, url: openerTab.url, title: openerTab.title, groupId: openerTab.groupId } : null;
-        }, openerUrl);
+        const openerTabInfo = storedOpenerTabId != null
+          ? await sw.evaluate(async (tabId: number) => {
+              try {
+                const tab = await chrome.tabs.get(tabId);
+                return tab ? { id: tab.id as number, url: tab.url, title: tab.title, groupId: tab.groupId } : null;
+              } catch {
+                return null;
+              }
+            }, storedOpenerTabId)
+          : await sw.evaluate(async (exactUrl: string) => {
+              const tabs = await chrome.tabs.query({});
+              const openerTab = tabs.find((t: any) => t.url === exactUrl || t.pendingUrl === exactUrl);
+              return openerTab ? { id: openerTab.id, url: openerTab.url, title: openerTab.title, groupId: openerTab.groupId } : null;
+            }, openerPage.url());
 
         if (!openerTabInfo) {
-          console.error(`[TEST] Could not find opener tab for URL: ${openerUrl}`);
+          console.error(`[TEST] Could not find opener tab for URL: ${openerPage.url()}`);
           // Fallback to window.open if we can't find the tab
           const [newPage] = await Promise.all([
             extensionContext.waitForEvent('page'),
