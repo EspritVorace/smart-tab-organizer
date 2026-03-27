@@ -10,7 +10,7 @@ import {
   clearHelpPrefs,
   getSessionsFromStorage,
   createTestSession,
-  createTestProfile,
+  createPinnedSession,
 } from './helpers/seed';
 
 test.beforeEach(async ({ extensionContext }) => {
@@ -36,16 +36,14 @@ test.describe('[US-O01] Empty state', () => {
     await page.close();
   });
 
-  test('shows Take Snapshot and New Profile buttons in empty state [US-S010]', async ({
+  test('shows Take Snapshot button in empty state [US-S010]', async ({
     extensionContext,
     extensionId,
   }) => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    // Both header and empty-state render these buttons, so use first()
     await expect(page.getByRole('button', { name: 'Take Snapshot' }).first()).toBeVisible();
-    await expect(page.getByRole('button', { name: 'New Profile' }).first()).toBeVisible();
     await page.close();
   });
 
@@ -53,7 +51,7 @@ test.describe('[US-O01] Empty state', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await expect(page.getByText('Sessions & Profiles')).toBeVisible();
+    await expect(page.getByText('Sessions')).toBeVisible();
     await page.close();
   });
 });
@@ -93,9 +91,9 @@ test.describe('[US-S02] Session list', () => {
     await page.close();
   });
 
-  test('sorts profiles (pinned) before snapshots [US-S008]', async ({ extensionContext, extensionId }) => {
+  test('sorts pinned sessions before snapshots [US-S008]', async ({ extensionContext, extensionId }) => {
     const snapshot = createTestSession({ name: 'Snapshot Session' });
-    const profile = createTestProfile({ name: 'Profile Session' });
+    const profile = createPinnedSession({ name: 'Pinned Session' });
     // Seed snapshot first so ordering is deliberately wrong without sort
     await seedSessions(extensionContext, [snapshot, profile]);
 
@@ -104,7 +102,7 @@ test.describe('[US-S02] Session list', () => {
 
     const cards = page.getByText(/Session/i);
     const texts = await cards.allTextContents();
-    const profileIdx = texts.findIndex(t => t.includes('Profile Session'));
+    const profileIdx = texts.findIndex(t => t.includes('Pinned Session'));
     const snapshotIdx = texts.findIndex(t => t.includes('Snapshot Session'));
     expect(profileIdx).toBeLessThan(snapshotIdx);
     await page.close();

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Dialog, Flex, Button, Text, Separator, Box, RadioGroup, Callout } from '@radix-ui/themes';
 import { RotateCcw, AlertCircle } from 'lucide-react';
-import { browser } from 'wxt/browser';
 import { SessionsTheme } from '../../Form/themes';
 import { TabTree } from '../../Core/TabTree/TabTree';
 import { ConflictResolutionStep } from './ConflictResolutionStep';
@@ -16,7 +15,6 @@ import {
   type ConflictResolution,
 } from '../../../utils/conflictDetection';
 import { restoreTabs } from '../../../utils/tabRestore';
-import { getProfileWindowMap, setProfileWindow } from '../../../utils/profileWindowMap';
 import type { Session } from '../../../types/session';
 import type { TabTreeData } from '../../Core/TabTree/tabTreeTypes';
 
@@ -51,9 +49,6 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
   const [restoreError, setRestoreError] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Profile exclusivity state
-  const [isProfileOpenElsewhere, setIsProfileOpenElsewhere] = useState(false);
-
   // Reset on open
   useEffect(() => {
     if (!open || !session) return;
@@ -69,21 +64,6 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
     setTreeData(td);
     setNumericIdToSavedTabId(idMap);
     setSelectedTabIds(new Set(idMap.keys()));
-  }, [open, session]);
-
-  // Check if profile is already open in another window
-  useEffect(() => {
-    if (!open || !session?.isPinned) {
-      setIsProfileOpenElsewhere(false);
-      return;
-    }
-    Promise.all([getProfileWindowMap(), browser.windows.getCurrent()])
-      .then(([map, win]) => {
-        const profileWid = map[session.id];
-        const currentWid = win.id;
-        setIsProfileOpenElsewhere(profileWid != null && profileWid !== currentWid);
-      })
-      .catch(() => setIsProfileOpenElsewhere(false));
   }, [open, session]);
 
   // Derive selected SavedTab UUIDs
@@ -119,15 +99,6 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
     setRestoreError(null);
 
     try {
-      // Capture current window ID before restoring (for profile mapping)
-      let currentWindowId: number | undefined;
-      if (session.isPinned) {
-        try {
-          const win = await browser.windows.getCurrent();
-          currentWindowId = win.id;
-        } catch { /* ignore */ }
-      }
-
       const { tabs, groups } = getSelectedData();
       const conflictResolution: ConflictResolution = {
         duplicateTabAction: dupAction,
@@ -141,15 +112,6 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
         conflictResolution: target === 'current' ? conflictResolution : undefined,
         conflictAnalysis: target === 'current' ? analysis ?? undefined : undefined,
       });
-
-      // Update profile↔window mapping
-      if (session.isPinned) {
-        if (target === 'current' && currentWindowId != null) {
-          await setProfileWindow(session.id, currentWindowId);
-        } else if (target === 'new' && result.windowId != null) {
-          await setProfileWindow(session.id, result.windowId);
-        }
-      }
 
       onOpenChange(false);
 
@@ -242,14 +204,6 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
           {step === 0 && (
             <Box mt="4">
               <Flex direction="column" gap="3">
-                {isProfileOpenElsewhere && (
-                  <Callout.Root color="amber" variant="soft">
-                    <Callout.Icon>
-                      <AlertCircle size={16} />
-                    </Callout.Icon>
-                    <Callout.Text>{getMessage('profileAlreadyOpenWarning')}</Callout.Text>
-                  </Callout.Root>
-                )}
                 <Text size="2" weight="medium">
                   {getMessage('restoreSelectTabs')}
                 </Text>

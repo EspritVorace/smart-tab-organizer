@@ -2,7 +2,6 @@ import { sessionsHelpPrefsItem } from './storageItems.js';
 
 export interface SessionsHelpPrefs {
   sessionsIntroHidden: boolean;
-  profileOnboardingShown: boolean;
 }
 
 export async function getSessionsHelpPrefs(): Promise<SessionsHelpPrefs> {

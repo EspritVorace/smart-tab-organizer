@@ -1,6 +1,6 @@
 /**
  * E2E tests for the extension popup.
- * Covers: toolbar buttons, profiles list, deep linking.
+ * Covers: toolbar buttons, pinned sessions list, deep linking.
  */
 import { test, expect } from './fixtures';
 import { goToPopup, goToSessionsSection } from './helpers/navigation';
@@ -9,7 +9,7 @@ import {
   clearSessions,
   clearHelpPrefs,
   createTestSession,
-  createTestProfile,
+  createPinnedSession,
 } from './helpers/seed';
 
 test.beforeEach(async ({ extensionContext }) => {
@@ -78,84 +78,81 @@ test.describe('[US-PO01] Toolbar', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Profiles list
+// Pinned sessions list
 // ---------------------------------------------------------------------------
-test.describe('[US-PO02] Profiles list', () => {
-  test('profiles section is hidden when no profiles exist', async ({ extensionContext, extensionId }) => {
-    // Only snapshots, no profiles
+test.describe('[US-PO02] Pinned sessions list', () => {
+  test('pinned sessions section is hidden when no pinned sessions exist', async ({ extensionContext, extensionId }) => {
+    // Only snapshots, no pinned sessions
     const snapshot = createTestSession({ name: 'Just A Snapshot' });
     await seedSessions(extensionContext, [snapshot]);
 
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
-    // The profiles section label should not be visible
-    await expect(page.getByText('Profiles')).not.toBeVisible();
+    await expect(page.getByText('Pinned sessions')).not.toBeVisible();
     await page.close();
   });
 
-  test('profiles section shows when profiles exist [US-PO005]', async ({ extensionContext, extensionId }) => {
-    const profile = createTestProfile({ name: 'My Profile' });
-    await seedSessions(extensionContext, [profile]);
+  test('pinned sessions section shows when pinned sessions exist [US-PO005]', async ({ extensionContext, extensionId }) => {
+    const pinned = createPinnedSession({ name: 'My Pinned Session' });
+    await seedSessions(extensionContext, [pinned]);
 
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
-    await expect(page.getByText('Profiles')).toBeVisible();
-    await expect(page.getByText('My Profile')).toBeVisible();
+    await expect(page.getByText('Pinned sessions')).toBeVisible();
+    await expect(page.getByText('My Pinned Session')).toBeVisible();
     await page.close();
   });
 
-  test('popup shows all pinned profiles [US-PO005]', async ({ extensionContext, extensionId }) => {
-    const profiles = [
-      createTestProfile({ name: 'Work Profile' }),
-      createTestProfile({ name: 'Personal Profile' }),
+  test('popup shows all pinned sessions [US-PO005]', async ({ extensionContext, extensionId }) => {
+    const sessions = [
+      createPinnedSession({ name: 'Work Session' }),
+      createPinnedSession({ name: 'Personal Session' }),
     ];
-    await seedSessions(extensionContext, profiles);
+    await seedSessions(extensionContext, sessions);
 
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
-    await expect(page.getByText('Work Profile')).toBeVisible();
-    await expect(page.getByText('Personal Profile')).toBeVisible();
+    await expect(page.getByText('Work Session')).toBeVisible();
+    await expect(page.getByText('Personal Session')).toBeVisible();
     await page.close();
   });
 
-  test('snapshot sessions are not shown in popup profiles list [US-PO005]', async ({
+  test('unpinned sessions are not shown in popup pinned list [US-PO005]', async ({
     extensionContext,
     extensionId,
   }) => {
     const snapshot = createTestSession({ name: 'Hidden Snapshot' });
-    const profile = createTestProfile({ name: 'Visible Profile' });
-    await seedSessions(extensionContext, [snapshot, profile]);
+    const pinned = createPinnedSession({ name: 'Visible Pinned' });
+    await seedSessions(extensionContext, [snapshot, pinned]);
 
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
-    await expect(page.getByText('Visible Profile')).toBeVisible();
+    await expect(page.getByText('Visible Pinned')).toBeVisible();
     await expect(page.getByText('Hidden Snapshot')).not.toBeVisible();
     await page.close();
   });
 
-  test('each profile row has a restore button [US-PO002]', async ({ extensionContext, extensionId }) => {
-    const profile = createTestProfile({ name: 'Restorable Profile' });
-    await seedSessions(extensionContext, [profile]);
+  test('each pinned session row has a restore button [US-PO002]', async ({ extensionContext, extensionId }) => {
+    const pinned = createPinnedSession({ name: 'Restorable Pinned' });
+    await seedSessions(extensionContext, [pinned]);
 
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
-    // The restore split button's dropdown trigger is labeled "Restore options"
-    // (unique to the profile row — the toolbar button is "Restore session")
     await expect(page.getByRole('button', { name: 'Restore options' })).toBeVisible();
     await page.close();
   });
 
-  test('profile row dropdown offers current window and new window options', async ({
+  test('pinned session row dropdown offers current window and new window options', async ({
     extensionContext,
     extensionId,
   }) => {
-    const profile = createTestProfile({ name: 'Dropdown Profile' });
-    await seedSessions(extensionContext, [profile]);
+    const pinned = createPinnedSession({ name: 'Dropdown Pinned' });
+    await seedSessions(extensionContext, [pinned]);
 
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
@@ -176,7 +173,6 @@ test.describe('[US-PO01] Deep linking', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    // The Sessions page title or empty state should be visible
     await expect(
       page.getByText(/sessions/i).first(),
     ).toBeVisible();

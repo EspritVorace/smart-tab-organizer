@@ -15,9 +15,9 @@
 
 - [ ] Un champ de recherche (icône loupe) est affiché en haut de la page Sessions, à gauche de la barre d'outils.
 - [ ] Saisir du texte dans ce champ filtre la liste des sessions en temps réel par correspondance sur le nom (insensible à la casse).
-- [ ] Les boutons « New Profile » et « Take Snapshot » sont affichés à droite du champ de recherche dans la même barre d'outils.
+- [ ] Le bouton « Take Snapshot » est affiché à droite du champ de recherche dans la même barre d'outils.
 - [ ] En l'absence de toute session, la zone d'état vide affiche le message « No saved sessions. ».
-- [ ] Les boutons « Take Snapshot » et « New Profile » sont également visibles dans la zone d'état vide.
+- [ ] Le bouton « Take Snapshot » est également visible dans la zone d'état vide.
 
 ---
 

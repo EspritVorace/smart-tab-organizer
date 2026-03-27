@@ -95,14 +95,14 @@ export function SessionCard({
           {/* Pin / Unpin button */}
           {!isRenaming && (
             <Tooltip
-              content={session.isPinned ? getMessage('sessionUnpin') : getMessage('sessionPinAsProfile')}
+              content={session.isPinned ? getMessage('sessionUnpin') : getMessage('sessionPin')}
             >
               <IconButton
                 size="3"
                 variant={session.isPinned ? 'soft' : 'ghost'}
                 color={session.isPinned ? 'indigo' : 'gray'}
                 onClick={() => session.isPinned ? onUnpin(session) : onPin(session)}
-                aria-label={session.isPinned ? getMessage('sessionUnpin') : getMessage('sessionPinAsProfile')}
+                aria-label={session.isPinned ? getMessage('sessionUnpin') : getMessage('sessionPin')}
               >
                 {session.isPinned
                   ? <PinOff size={16} aria-hidden="true" />
