@@ -179,12 +179,7 @@ test.describe('Rules screenshots', () => {
       'importexport',
       'rules-export-split-button',
       async (page) => {
-        // Navigate to Import/Export section via sidebar.
-        // Hash routing only handles #sessions; other hashes are ignored.
-        // Sidebar button order: [0]=collapse, [1]=Rules, [2]=Import/Export, ...
-        await page.locator('button.rt-Button').nth(2).click();
-        await page.waitForTimeout(500);
-
+        // The page is already on the Import/Export section via hash routing (#importexport).
         // The Export card is the FIRST card on the import/export page.
         // Its button opens the ExportWizard dialog.
         const exportBtn = page.locator('.rt-Card').first().getByRole('button').first();
@@ -219,10 +214,7 @@ test.describe('Rules screenshots', () => {
       'importexport',
       'rules-import-file-dialog',
       async (page) => {
-        // Navigate to Import/Export section via sidebar (hash routing only handles #sessions)
-        await page.locator('button.rt-Button').nth(2).click();
-        await page.waitForTimeout(500);
-
+        // The page is already on the Import/Export section via hash routing (#importexport).
         // The Import card is the SECOND card on the page.
         const importBtn = page.locator('.rt-Card').nth(1).getByRole('button').first();
         await importBtn.click();
@@ -250,10 +242,7 @@ test.describe('Rules screenshots', () => {
       'importexport',
       'rules-import-text-conflicts',
       async (page) => {
-        // Navigate to Import/Export section via sidebar (hash routing only handles #sessions)
-        await page.locator('button.rt-Button').nth(2).click();
-        await page.waitForTimeout(500);
-
+        // The page is already on the Import/Export section via hash routing (#importexport).
         // Open the Import dialog
         const importBtn = page.locator('.rt-Card').nth(1).getByRole('button').first();
         await importBtn.click();
