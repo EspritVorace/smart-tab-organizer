@@ -28,7 +28,6 @@ jobs:
 
       - name: Run unit tests
         run: pnpm test
-        continue-on-error: true
 
       - name: Upload CTRF report
         uses: actions/upload-artifact@v4
@@ -61,7 +60,6 @@ jobs:
 
       - name: Run Playwright tests
         run: xvfb-run --auto-servernum -- pnpm exec playwright test
-        continue-on-error: true
 
       - name: Upload CTRF report
         uses: actions/upload-artifact@v4
