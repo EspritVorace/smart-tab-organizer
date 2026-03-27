@@ -65,16 +65,8 @@ export async function captureScreen(
   try {
     const base = `chrome-extension://${extensionId}`;
     const isPopup = section === 'popup';
-    const firstUrl = isPopup ? `${base}/popup.html` : `${base}/options.html`;
 
-    // 1. Navigate to the extension origin so localStorage is on the right origin
-    await page.goto(firstUrl);
-    await page.waitForLoadState('domcontentloaded');
-
-    // 2. Set theme via localStorage (next-themes reads 'theme' key on mount)
-    await page.evaluate((t) => localStorage.setItem('theme', t), theme);
-
-    // 3. Navigate to the actual target (with section hash)
+    // 1. Navigate directly to the target URL (correct origin for localStorage)
     let targetUrl: string;
     if (isPopup) {
       targetUrl = `${base}/popup.html`;
@@ -84,6 +76,16 @@ export async function captureScreen(
         : `${base}/options.html`;
     }
     await page.goto(targetUrl);
+    await page.waitForLoadState('domcontentloaded');
+
+    // 2. Set theme via localStorage (next-themes reads 'theme' key on mount)
+    await page.evaluate((t) => localStorage.setItem('theme', t), theme);
+
+    // 3. Reload so next-themes re-reads localStorage and applies the correct theme.
+    //    A simple hash navigation (e.g. options.html → options.html#rules) does NOT
+    //    trigger a full page reload, so next-themes would keep the stale theme from
+    //    its initial mount. page.reload() forces a clean remount at the target URL.
+    await page.reload();
     await page.waitForLoadState('domcontentloaded');
 
     // 4. Wait for the app to finish loading (useSyncedSettings resolves)
