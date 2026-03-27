@@ -271,6 +271,7 @@
   "sessionRenameLabel": { "message": "Nombre de la sesión" },
   "sessionConfirmRename": { "message": "Confirmar cambio de nombre" },
   "sessionMoreActions": { "message": "Más acciones" },
+  "ruleMoreActions": { "message": "Más acciones" },
   "sessionRestoreOptions": { "message": "Opciones de restauración" },
   "sessionRestoreCurrentWindow": { "message": "En la ventana actual" },
   "sessionRestoreNewWindow": { "message": "En una ventana nueva" },
