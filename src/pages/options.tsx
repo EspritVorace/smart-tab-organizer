@@ -55,18 +55,19 @@ function OptionsContent() {
     // Deep linking: navigate to the right section on mount and on hash changes
     // (hashchange fires when an existing tab's URL hash is updated externally)
     useEffect(() => {
+        const validSections = ['rules', 'importexport', 'sessions', 'stats', 'settings'];
+
         function handleHash() {
             const hash = window.location.hash; // e.g. '#sessions?action=snapshot'
             if (!hash.startsWith('#')) return;
             const questionMark = hash.indexOf('?');
             const section = questionMark === -1 ? hash.slice(1) : hash.slice(1, questionMark);
-            if (section === 'sessions') {
-                setCurrentTab('sessions');
-                if (questionMark !== -1) {
-                    const params = new URLSearchParams(hash.slice(questionMark + 1));
-                    if (params.get('action') === 'snapshot') {
-                        setOpenSnapshotWizard(true);
-                    }
+            if (!validSections.includes(section)) return;
+            setCurrentTab(section);
+            if (section === 'sessions' && questionMark !== -1) {
+                const params = new URLSearchParams(hash.slice(questionMark + 1));
+                if (params.get('action') === 'snapshot') {
+                    setOpenSnapshotWizard(true);
                 }
             }
         }
@@ -95,6 +96,7 @@ function OptionsContent() {
     }, []);
 
     const handleTabChange = useCallback((tab: string) => {
+        window.location.hash = tab;
         setCurrentTab(tab);
     }, []);
 
@@ -107,16 +109,16 @@ function OptionsContent() {
             accentColor: FEATURE_BASE_COLORS.DOMAIN_RULES,
         },
         {
-            id: 'importexport',
-            label: getMessage('importExportTab'),
-            icon: FileText as any,
-            accentColor: FEATURE_BASE_COLORS.IMPORT, // Utilise la couleur Import pour l'onglet combiné
-        },
-        {
             id: 'sessions',
             label: getMessage('sessionsTab'),
             icon: Archive as any,
             accentColor: FEATURE_BASE_COLORS.SESSIONS,
+        },
+        {
+            id: 'importexport',
+            label: getMessage('importExportTab'),
+            icon: FileText as any,
+            accentColor: FEATURE_BASE_COLORS.IMPORT, // Utilise la couleur Import pour l'onglet combiné
         },
         {
             id: 'stats',
