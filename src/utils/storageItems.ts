@@ -5,8 +5,6 @@ import type { Statistics } from '../types/statistics.js';
 import { defaultStatistics } from '../types/statistics.js';
 import type { Session } from '../types/session.js';
 import type { SessionsHelpPrefs } from './sessionsHelpPrefs.js';
-import type { ProfileWindowMap } from './profileWindowMap.js';
-import type { SyncDraftsMap } from '../background/profileSync.js';
 
 // --- Sync storage items ---
 
@@ -49,24 +47,7 @@ export const sessionsItem = storage.defineItem<Session[]>(
 
 export const sessionsHelpPrefsItem = storage.defineItem<SessionsHelpPrefs>(
   'local:sessionsHelpPrefs',
-  { defaultValue: { sessionsIntroHidden: false, profileOnboardingShown: false } },
-);
-
-// --- Session storage items ---
-
-export const profileWindowMapItem = storage.defineItem<ProfileWindowMap>(
-  'session:profileWindowMap',
-  { defaultValue: {} },
-);
-
-export const profileSyncDraftsItem = storage.defineItem<SyncDraftsMap>(
-  'session:profileSyncDrafts',
-  { defaultValue: {} },
-);
-
-export const editingProfileIdItem = storage.defineItem<string | null>(
-  'session:editingProfileId',
-  { defaultValue: null },
+  { defaultValue: { sessionsIntroHidden: false } },
 );
 
 // Map des items sync par champ (pour watchSyncSettingsField)

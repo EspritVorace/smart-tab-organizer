@@ -5,12 +5,6 @@ import { handleMiddleClickMessage, findMiddleClickOpener } from './messaging.js'
 import { processTabForDeduplication } from './deduplication.js';
 import { processGroupingForNewTab } from './grouping.js';
 import { handleOrganizeAllTabs } from './organize.js';
-import { loadSessions } from '../utils/sessionStorage.js';
-import { restoreTabs } from '../utils/tabRestore.js';
-import { getMessage } from '../utils/i18n.js';
-import { setProfileWindow, removeWindowAssociations, getProfileForWindow } from '../utils/profileWindowMap.js';
-import { persistSyncDraft } from './profileSync.js';
-
 export function setupInstallationHandler(): void {
     browser.runtime.onInstalled.addListener(async (details: Browser.runtime.InstalledDetails) => {
         logger.debug("SmartTab Organizer installed/updated.", details.reason);
@@ -26,74 +20,15 @@ export function setupMessageHandler(): void {
                 .catch(e => logger.error('[ORGANIZE_ALL_TABS] Error:', e));
             return false;
         }
-        if (request.type === 'RESTORE_PROFILE') {
-            handleProfileRestore(
-                request.profileId as string,
-                request.target as 'current' | 'new',
-                request.windowId as number | undefined,
-            ).catch(e => logger.error('[RESTORE_PROFILE] Error:', e));
-            return false;
-        }
         handleMiddleClickMessage(request, sender, sendResponse);
         return true;
     });
 }
 
-async function handleProfileRestore(
-    profileId: string,
-    target: 'current' | 'new',
-    senderWindowId: number | undefined,
-): Promise<void> {
-    const sessions = await loadSessions();
-    const session = sessions.find(s => s.id === profileId);
-    if (!session) {
-        logger.warn(`[RESTORE_PROFILE] Session ${profileId} not found`);
-        return;
-    }
-
-    const result = await restoreTabs({
-        tabs: session.ungroupedTabs,
-        groups: session.groups,
-        target,
-    });
-
-    // Update profile↔window mapping
-    if (target === 'current' && senderWindowId != null) {
-        await setProfileWindow(profileId, senderWindowId);
-    } else if (target === 'new' && result.windowId != null) {
-        await setProfileWindow(profileId, result.windowId);
-    }
-
-    const groupCount = result.groupsCreated + result.groupsMerged;
-    await (browser.notifications as any).create({
-        type: 'basic',
-        iconUrl: browser.runtime.getURL('/icons/icon128.png'),
-        title: getMessage('extensionName'),
-        message: getMessage('popupProfileRestored', [session.name, String(result.tabsCreated), String(groupCount)]),
-    });
-}
-
 export function setupWindowRemovedHandler(): void {
-    browser.windows.onRemoved.addListener((windowId: number) => {
-        handleWindowRemoved(windowId)
-            .catch(e => logger.error('[WINDOW_REMOVED] Error:', e));
+    browser.windows.onRemoved.addListener((_windowId: number) => {
+        // No-op: window cleanup handled locally
     });
-}
-
-async function handleWindowRemoved(windowId: number): Promise<void> {
-    const profileId = await getProfileForWindow(windowId);
-
-    if (profileId) {
-        // Persist the in-memory draft to the profile before cleaning up the mapping
-        const sessions = await loadSessions();
-        const profile = sessions.find(s => s.id === profileId);
-
-        if (profile?.isPinned) {
-            await persistSyncDraft(profileId);
-        }
-    }
-
-    await removeWindowAssociations(windowId);
 }
 
 // Pending grouping operations keyed by new tab ID.

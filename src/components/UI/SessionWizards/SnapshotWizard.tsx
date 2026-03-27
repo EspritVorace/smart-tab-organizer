@@ -3,7 +3,7 @@ import {
   Dialog, Flex, Button, Text, Separator, Box, TextField,
   Callout,
 } from '@radix-ui/themes';
-import { Camera, AlertCircle, Pin } from 'lucide-react';
+import { Camera, AlertCircle } from 'lucide-react';
 import { SessionsTheme } from '../../Form/themes';
 import { TabTree } from '../../Core/TabTree/TabTree';
 import { CategoryPicker } from '../../Core/DomainRule/CategoryPicker';
@@ -18,13 +18,9 @@ interface SnapshotWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (session: Session) => Promise<void>;
-  /** 'snapshot' (default) or 'profile' for pinned profile creation */
-  mode?: 'snapshot' | 'profile';
 }
 
-export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }: SnapshotWizardProps) {
-  const isProfile = mode === 'profile';
-
+export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardProps) {
   const [sessionName, setSessionName] = useState('');
   const [treeData, setTreeData] = useState<TabTreeData | null>(null);
   const [ungroupedTabs, setUngroupedTabs] = useState<SavedTab[]>([]);
@@ -42,9 +38,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
   useEffect(() => {
     if (!open) return;
     setSessionName(
-      isProfile
-        ? getMessage('profileDefaultName')
-        : `${getMessage('snapshotDefaultName')} ${formatSessionDate(new Date().toISOString())}`,
+      `${getMessage('snapshotDefaultName')} ${formatSessionDate(new Date().toISOString())}`,
     );
     setTreeData(null);
     setSelectedTabIds(new Set());
@@ -65,7 +59,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
       .catch(() => {
         setIsCapturing(false);
       });
-  }, [open, isProfile]);
+  }, [open]);
 
   // Derive selected SavedTab UUIDs from selected numeric IDs
   const selectedSavedTabIds = useMemo(() => {
@@ -87,16 +81,12 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
         groups,
         selectedSavedTabIds,
         sessionName.trim(),
-        {
-          isPinned: isProfile ? true : undefined,
-          categoryId: categoryId ?? null,
-        },
+        { categoryId: categoryId ?? null },
       );
       await onSave(session);
       onOpenChange(false);
-      const titleKey = isProfile ? 'profileNotificationTitle' : 'snapshotNotificationTitle';
       showSuccessNotification(
-        getMessage(titleKey),
+        getMessage('snapshotNotificationTitle'),
         getMessage('sessionNotificationMessage', [sessionName.trim()]),
       );
     } catch {
@@ -104,12 +94,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
     } finally {
       setIsSaving(false);
     }
-  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, isProfile, categoryId, onSave]);
-
-  const titleKey = isProfile ? 'profileTitle' : 'snapshotTitle';
-  const descriptionKey = isProfile ? 'profileDescription' : 'snapshotDescription';
-  const saveButtonKey = isProfile ? 'profileSaveButton' : 'snapshotSaveButton';
-  const SaveIcon = isProfile ? Pin : Camera;
+  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, categoryId, onSave]);
 
   return (
     <SessionsTheme>
@@ -124,12 +109,12 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
         >
           <Dialog.Title>
             <Flex align="center" gap="2">
-              <SaveIcon size={18} aria-hidden="true" />
-              {getMessage(titleKey)}
+              <Camera size={18} aria-hidden="true" />
+              {getMessage('snapshotTitle')}
             </Flex>
           </Dialog.Title>
           <Dialog.Description size="2" color="gray">
-            {getMessage(descriptionKey)}
+            {getMessage('snapshotDescription')}
           </Dialog.Description>
 
           <Box mt="4">
@@ -196,8 +181,8 @@ export function SnapshotWizard({ open, onOpenChange, onSave, mode = 'snapshot' }
               onClick={handleSave}
               disabled={!sessionName.trim() || selectedTabIds.size === 0 || isCapturing || isSaving}
             >
-              <SaveIcon size={14} aria-hidden="true" />
-              {getMessage(saveButtonKey)}
+              <Camera size={14} aria-hidden="true" />
+              {getMessage('snapshotSaveButton')}
             </Button>
           </Flex>
         </Dialog.Content>

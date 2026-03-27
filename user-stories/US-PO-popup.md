@@ -30,16 +30,16 @@
 
 ---
 
-## US-PO005 — Affichage conditionnel de la section Profils dans le popup
+## US-PO005 — Affichage conditionnel de la section Sessions épinglées dans le popup
 
 **En tant qu'** utilisateur du popup,
-**je veux** que la section « Profiles » n'apparaisse que s'il existe au moins un profil épinglé,
-**afin que** le popup reste concis quand aucun profil n'a été créé.
+**je veux** que la section « Pinned sessions » n'apparaisse que s'il existe au moins une session épinglée,
+**afin que** le popup reste concis quand aucune session n'a été épinglée.
 
 ### Critères d'acceptation
 
-- [ ] Quand aucun profil épinglé n'existe (seuls des snapshots), la section « Profiles » n'est **pas** visible dans le popup.
-- [ ] Quand au moins un profil épinglé existe, la section « Profiles » et le nom du profil sont visibles.
-- [ ] Tous les profils épinglés sont listés dans la section (Work Profile, Personal Profile, etc.).
-- [ ] Les snapshots (non épinglés) ne sont **pas** affichés dans la liste des profils du popup.
-- [ ] Chaque ligne de profil dispose d'un bouton de restauration rapide (« Restore options »).
+- [ ] Quand aucune session épinglée n'existe (seuls des snapshots), la section « Pinned sessions » n'est **pas** visible dans le popup.
+- [ ] Quand au moins une session épinglée existe, la section « Pinned sessions » et le nom de la session sont visibles.
+- [ ] Toutes les sessions épinglées sont listées dans la section.
+- [ ] Les sessions non épinglées ne sont **pas** affichées dans la liste.
+- [ ] Chaque ligne dispose d'un bouton de restauration rapide (« Restore options »).

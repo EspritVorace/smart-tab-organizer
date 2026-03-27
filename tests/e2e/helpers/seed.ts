@@ -93,14 +93,14 @@ export async function getSessionsFromStorage(context: BrowserContext): Promise<T
 /** Read the sessions help preferences from storage. */
 export async function getHelpPrefsFromStorage(
   context: BrowserContext,
-): Promise<{ sessionsIntroHidden: boolean; profileOnboardingShown: boolean }> {
+): Promise<{ sessionsIntroHidden: boolean }> {
   const sw = await getServiceWorker(context);
   return (await sw.evaluate(async () => {
     const result = await chrome.storage.local.get({
-      sessionsHelpPrefs: { sessionsIntroHidden: false, profileOnboardingShown: false },
+      sessionsHelpPrefs: { sessionsIntroHidden: false },
     });
     return result.sessionsHelpPrefs;
-  })) as { sessionsIntroHidden: boolean; profileOnboardingShown: boolean };
+  })) as { sessionsIntroHidden: boolean };
 }
 
 /** Create a snapshot session fixture with realistic data. */
@@ -129,48 +129,11 @@ export function createTestSession(overrides: Partial<TestSession> = {}): TestSes
   };
 }
 
-/** Create a profile (pinned session) fixture. */
-export function createTestProfile(overrides: Partial<TestSession> = {}): TestSession {
+/** Create a pinned session fixture. */
+export function createPinnedSession(overrides: Partial<TestSession> = {}): TestSession {
   return createTestSession({
-    name: 'Test Profile',
+    name: 'Pinned Session',
     isPinned: true,
     ...overrides,
   });
-}
-
-/** Seed profile-window mapping in chrome.storage.session. */
-export async function seedProfileWindow(
-  context: BrowserContext,
-  profileId: string,
-  windowId: number,
-): Promise<void> {
-  const sw = await getServiceWorker(context);
-  await sw.evaluate(
-    async ({ pid, wid }) => {
-      const data = await (chrome.storage as any).session.get('profileWindowMap');
-      const map = data.profileWindowMap ?? {};
-      map[pid] = wid;
-      await (chrome.storage as any).session.set({ profileWindowMap: map });
-    },
-    { pid: profileId, wid: windowId },
-  );
-}
-
-/** Clear the profile-window mapping from chrome.storage.session. */
-export async function clearProfileWindowMap(context: BrowserContext): Promise<void> {
-  const sw = await getServiceWorker(context);
-  await sw.evaluate(async () => {
-    await (chrome.storage as any).session.remove('profileWindowMap');
-  });
-}
-
-/** Get the profile-window mapping from chrome.storage.session. */
-export async function getProfileWindowMap(
-  context: BrowserContext,
-): Promise<Record<string, number>> {
-  const sw = await getServiceWorker(context);
-  return (await sw.evaluate(async () => {
-    const data = await (chrome.storage as any).session.get('profileWindowMap');
-    return data.profileWindowMap ?? {};
-  })) as Record<string, number>;
 }

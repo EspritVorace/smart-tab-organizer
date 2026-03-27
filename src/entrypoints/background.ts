@@ -6,14 +6,9 @@ import { initNotificationListeners, executeNotificationUndoById } from '../utils
 import { middleClickedTabs } from '../background/messaging.js';
 import { processGroupingForNewTab } from '../background/grouping.js';
 import { handleOrganizeAllTabs } from '../background/organize.js';
-import { initProfileSync } from '../background/profileSync.js';
-
 export default defineBackground(() => {
     // Initialize all event handlers
     setupAllEventHandlers();
-
-    // Initialize auto-sync for profiles
-    initProfileSync();
 
     // Start periodic cleanup for deduplication cache
     startPeriodicCleanup();
