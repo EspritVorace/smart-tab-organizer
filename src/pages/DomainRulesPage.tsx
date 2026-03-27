@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
-import { Button, Switch, Text, HoverCard, Box, Flex, Badge, Card, Checkbox, IconButton, TextField, Separator } from '@radix-ui/themes';
-import { Edit, Trash2, Plus, Eye, EyeOff, Shield, Search, AlertCircle, Upload } from 'lucide-react';
+import { Button, Switch, Text, HoverCard, Box, Flex, Badge, Card, Checkbox, IconButton, TextField, Separator, DropdownMenu } from '@radix-ui/themes';
+import { Pencil, Trash2, Plus, Eye, EyeOff, Shield, Search, AlertCircle, Upload, MoreHorizontal } from 'lucide-react';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { DomainRuleFormModal } from '../components/Core/DomainRule/DomainRuleFormModal';
 import { ImportWizard } from '../components/UI/ImportExportPage/ImportWizard';
@@ -416,27 +416,30 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                       </Flex>
 
                       {/* Right: Actions */}
-                      <Flex gap="2" align="center" role="gridcell" style={{ flexShrink: 0 }}>
-                        <IconButton
-                          variant="ghost"
-                          color="gray"
-                          size="2"
-                          title={getMessage('edit')}
-                          onClick={() => handleEditRule(rule)}
-                        >
-                          <Edit size={16} />
-                        </IconButton>
-                        <IconButton
-                          variant="ghost"
-                          color="red"
-                          size="2"
-                          title={getMessage('delete')}
-                          onClick={() => {
-                            setDeleteTarget({ type: 'single', ruleId: rule.id });
-                          }}
-                        >
-                          <Trash2 size={16} />
-                        </IconButton>
+                      <Flex align="center" role="gridcell" style={{ flexShrink: 0 }}>
+                        <DropdownMenu.Root>
+                          <DropdownMenu.Trigger>
+                            <IconButton
+                              size="2"
+                              variant="ghost"
+                              color="gray"
+                              aria-label={getMessage('ruleMoreActions')}
+                            >
+                              <MoreHorizontal size={16} aria-hidden="true" />
+                            </IconButton>
+                          </DropdownMenu.Trigger>
+                          <DropdownMenu.Content>
+                            <DropdownMenu.Item onClick={() => handleEditRule(rule)}>
+                              <Pencil size={14} aria-hidden="true" />
+                              {getMessage('edit')}
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Separator />
+                            <DropdownMenu.Item color="red" onClick={() => setDeleteTarget({ type: 'single', ruleId: rule.id })}>
+                              <Trash2 size={14} aria-hidden="true" />
+                              {getMessage('delete')}
+                            </DropdownMenu.Item>
+                          </DropdownMenu.Content>
+                        </DropdownMenu.Root>
                       </Flex>
                     </Flex>
                   </Card>

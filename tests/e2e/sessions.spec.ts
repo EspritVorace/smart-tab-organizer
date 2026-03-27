@@ -502,7 +502,12 @@ test.describe('[US-S05] Restore with conflict resolution', () => {
   test('Customize wizard restores directly when no conflicts exist', async ({
     extensionContext,
     extensionId,
+    helpers,
   }) => {
+    // Close any tabs left open by previous tests that could match the session URLs
+    // (example.com, google.com, github.com) and trigger conflict resolution.
+    await helpers.closeAllTestTabs();
+
     const session = createTestSession({ name: 'No Conflict Session' });
     await seedSessions(extensionContext, [session]);
 

@@ -46,6 +46,23 @@ export async function goToSessionsSectionWithSnapshot(page: Page, extensionId: s
     .waitFor({ state: 'visible', timeout: 10_000 });
 }
 
+/**
+ * Navigate to the Domain Rules section and wait for the page to be ready.
+ */
+export async function goToDomainRulesSection(page: Page, extensionId: string): Promise<void> {
+  await page.goto(`chrome-extension://${extensionId}/options.html#rules`);
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForFunction(
+    () => {
+      const body = document.body.textContent ?? '';
+      return !body.includes('Chargement') && body.length > 50;
+    },
+    null,
+    { timeout: 10_000 },
+  );
+  await page.waitForTimeout(300);
+}
+
 /** Navigate to the extension popup page. */
 export async function goToPopup(page: Page, extensionId: string): Promise<void> {
   await page.goto(`chrome-extension://${extensionId}/popup.html`);
