@@ -37,7 +37,7 @@ test.describe('Rules screenshots', () => {
 
   /**
    * rules-create-preset
-   * New-rule wizard open, Preset mode selected, preset list visible.
+   * New-rule wizard open, Preset mode selected, info HoverCard visible.
    */
   test('rules-create-preset', async ({ extensionContext, extensionId }, testInfo) => {
     const locale = testInfo.project.name;
@@ -55,18 +55,11 @@ test.describe('Rules screenshots', () => {
         await page.locator('main button.rt-Button').last().click();
         await page.waitForTimeout(400);
 
-        // The form modal opens. Look for the Preset mode option.
-        // DomainRuleFormModal uses a SegmentedControl for mode selection;
-        // the item with value="preset" is the preset mode.
-        const presetItem = page
-          .locator('[role="dialog"]')
-          .locator('[data-value="preset"], button')
-          .filter({ hasText: /preset/i })
-          .first();
-        await presetItem.click().catch(() => {
-          // Fallback: click the second segmented-control item
-          return page.locator('[role="dialog"] button.rt-SegmentedControlItem').nth(1).click();
-        });
+        // Preset is the default mode (index 0). Hover over its (i) icon to
+        // reveal the HoverCard description.
+        const items = page.locator('[role="dialog"] button.rt-SegmentedControlItem');
+        await items.nth(0).locator('svg').hover();
+        // Wait for HoverCard openDelay (300 ms) + render
         await page.waitForTimeout(500);
       },
     );
@@ -74,7 +67,7 @@ test.describe('Rules screenshots', () => {
 
   /**
    * rules-create-ask
-   * New-rule wizard open, smart_manual ("ask") mode selected.
+   * New-rule wizard open, Ask mode selected, info HoverCard visible.
    */
   test('rules-create-ask', async ({ extensionContext, extensionId }, testInfo) => {
     const locale = testInfo.project.name;
@@ -90,13 +83,12 @@ test.describe('Rules screenshots', () => {
         await page.locator('main button.rt-Button').last().click();
         await page.waitForTimeout(400);
 
-        // Select the "Smart / Ask" mode (smart_manual). It is typically the
-        // third or fourth segmented-control item in the form modal.
+        // SegmentedControl order: preset(0) · ask(1) · manual(2).
         const items = page.locator('[role="dialog"] button.rt-SegmentedControlItem');
-        const count = await items.count();
-        if (count >= 3) {
-          await items.nth(2).click();
-        }
+        await items.nth(1).click();
+        await page.waitForTimeout(200);
+        // Hover over the Ask (i) icon to reveal its HoverCard.
+        await items.nth(1).locator('svg').hover();
         await page.waitForTimeout(500);
       },
     );
@@ -104,7 +96,7 @@ test.describe('Rules screenshots', () => {
 
   /**
    * rules-create-manual
-   * New-rule wizard open, Manual mode, all fields visible, category selected.
+   * New-rule wizard open, Manual mode selected, info HoverCard visible.
    */
   test('rules-create-manual', async ({ extensionContext, extensionId }, testInfo) => {
     const locale = testInfo.project.name;
@@ -120,10 +112,11 @@ test.describe('Rules screenshots', () => {
         await page.locator('main button.rt-Button').last().click();
         await page.waitForTimeout(400);
 
-        // Select Manual mode.  SegmentedControl order: preset(0) · ask(1) · manual(2).
-        // Default when creating a new rule is 'preset', so we must click the last item.
+        // Select Manual mode (last item) then hover its (i) icon.
         const items = page.locator('[role="dialog"] button.rt-SegmentedControlItem');
         await items.last().click();
+        await page.waitForTimeout(200);
+        await items.last().locator('svg').hover();
         await page.waitForTimeout(500);
       },
     );
