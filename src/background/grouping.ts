@@ -38,26 +38,46 @@ export function determineGroupColor(rule: DomainRuleSetting, settings?: any): st
 export function extractGroupNameFromRule(rule: DomainRuleSetting, openerTab: Browser.tabs.Tab): string {
     let groupName = rule.label || "SmartGroup";
     
-    if (rule.groupNameSource === 'title' && openerTab.title && rule.titleParsingRegEx) {
-        try {
-            const extracted = extractGroupNameFromTitle(openerTab.title, rule.titleParsingRegEx);
-            if (extracted && extracted.trim()) {
-                groupName = extracted.trim();
-                logger.debug(`[GROUPING_DEBUG] Group name extracted from opener title "${openerTab.title}" using regex "${rule.titleParsingRegEx}": "${groupName}".`);
+    if (rule.groupNameSource === 'title') {
+        // Essaie le titre en priorité, puis l'URL si le titre ne donne rien
+        let extracted: string | null = null;
+        if (openerTab.title && rule.titleParsingRegEx) {
+            try {
+                extracted = extractGroupNameFromTitle(openerTab.title, rule.titleParsingRegEx);
+                if (extracted?.trim()) logger.debug(`[GROUPING_DEBUG] Group name extracted from opener title "${openerTab.title}" using regex "${rule.titleParsingRegEx}": "${extracted.trim()}".`);
+            } catch (e) {
+                logger.warn(`[GROUPING_DEBUG] Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}".`, e.message);
             }
-        } catch (e) {
-            logger.warn(`[GROUPING_DEBUG] Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}".`, e.message);
         }
-    } else if (rule.groupNameSource === 'url' && openerTab.url && rule.urlParsingRegEx) {
-        try {
-            const extracted = extractGroupNameFromUrl(openerTab.url, rule.urlParsingRegEx);
-            if (extracted && extracted.trim()) {
-                groupName = extracted.trim();
-                logger.debug(`[GROUPING_DEBUG] Group name extracted from opener URL "${openerTab.url}" using regex "${rule.urlParsingRegEx}": "${groupName}".`);
+        if (!extracted?.trim() && openerTab.url && rule.urlParsingRegEx) {
+            try {
+                extracted = extractGroupNameFromUrl(openerTab.url, rule.urlParsingRegEx);
+                if (extracted?.trim()) logger.debug(`[GROUPING_DEBUG] Group name extracted from opener URL "${openerTab.url}" using regex "${rule.urlParsingRegEx}" (title fallback): "${extracted.trim()}".`);
+            } catch (e) {
+                logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with regex "${rule.urlParsingRegEx}".`, e.message);
             }
-        } catch (e) {
-            logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with regex "${rule.urlParsingRegEx}".`, e.message);
         }
+        if (extracted?.trim()) groupName = extracted.trim();
+    } else if (rule.groupNameSource === 'url') {
+        // Essaie l'URL en priorité, puis le titre si l'URL ne donne rien
+        let extracted: string | null = null;
+        if (openerTab.url && rule.urlParsingRegEx) {
+            try {
+                extracted = extractGroupNameFromUrl(openerTab.url, rule.urlParsingRegEx);
+                if (extracted?.trim()) logger.debug(`[GROUPING_DEBUG] Group name extracted from opener URL "${openerTab.url}" using regex "${rule.urlParsingRegEx}": "${extracted.trim()}".`);
+            } catch (e) {
+                logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with regex "${rule.urlParsingRegEx}".`, e.message);
+            }
+        }
+        if (!extracted?.trim() && openerTab.title && rule.titleParsingRegEx) {
+            try {
+                extracted = extractGroupNameFromTitle(openerTab.title, rule.titleParsingRegEx);
+                if (extracted?.trim()) logger.debug(`[GROUPING_DEBUG] Group name extracted from opener title "${openerTab.title}" using regex "${rule.titleParsingRegEx}" (url fallback): "${extracted.trim()}".`);
+            } catch (e) {
+                logger.warn(`[GROUPING_DEBUG] Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}".`, e.message);
+            }
+        }
+        if (extracted?.trim()) groupName = extracted.trim();
     } else if (rule.groupNameSource === 'smart_manual') {
         // smart_manual: Si on ne trouve pas de nom de groupe, le demander à l'utilisateur
         const extracted = tryExtractGroupNameFromPresetOrFallback(rule, openerTab);
@@ -100,38 +120,33 @@ export function extractGroupNameFromRule(rule: DomainRuleSetting, openerTab: Bro
 }
 
 function tryExtractGroupNameFromPresetOrFallback(rule: DomainRuleSetting, openerTab: Browser.tabs.Tab): string | null {
-    if (!rule.presetId) {
-        logger.debug(`[GROUPING_DEBUG] No presetId found for rule "${rule.label}".`);
-        return null;
-    }
-    
     // Essayer d'extraire depuis le titre avec la regex de la règle (copiée depuis le preset)
     if (openerTab.title && rule.titleParsingRegEx) {
         try {
             const extracted = extractGroupNameFromTitle(openerTab.title, rule.titleParsingRegEx);
             if (extracted && extracted.trim()) {
-                logger.debug(`[GROUPING_DEBUG] Group name extracted from opener title "${openerTab.title}" using preset "${rule.presetId}" regex "${rule.titleParsingRegEx}": "${extracted.trim()}".`);
+                logger.debug(`[GROUPING_DEBUG] Group name extracted from opener title "${openerTab.title}" using regex "${rule.titleParsingRegEx}": "${extracted.trim()}".`);
                 return extracted.trim();
             }
         } catch (e) {
-            logger.warn(`[GROUPING_DEBUG] Error parsing opener title "${openerTab.title}" with preset "${rule.presetId}" regex "${rule.titleParsingRegEx}".`, e.message);
+            logger.warn(`[GROUPING_DEBUG] Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}".`, e.message);
         }
     }
-    
+
     // Essayer d'extraire depuis l'URL avec la regex de la règle (copiée depuis le preset)
     if (openerTab.url && rule.urlParsingRegEx) {
         try {
             const extracted = extractGroupNameFromUrl(openerTab.url, rule.urlParsingRegEx);
             if (extracted && extracted.trim()) {
-                logger.debug(`[GROUPING_DEBUG] Group name extracted from opener URL "${openerTab.url}" using preset "${rule.presetId}" regex "${rule.urlParsingRegEx}": "${extracted.trim()}".`);
+                logger.debug(`[GROUPING_DEBUG] Group name extracted from opener URL "${openerTab.url}" using regex "${rule.urlParsingRegEx}": "${extracted.trim()}".`);
                 return extracted.trim();
             }
         } catch (e) {
-            logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with preset "${rule.presetId}" regex "${rule.urlParsingRegEx}".`, e.message);
+            logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with regex "${rule.urlParsingRegEx}".`, e.message);
         }
     }
-    
-    logger.debug(`[GROUPING_DEBUG] No group name could be extracted using preset "${rule.presetId}".`);
+
+    logger.debug(`[GROUPING_DEBUG] No group name could be extracted for rule "${rule.label}".`);
     return null;
 }
 
