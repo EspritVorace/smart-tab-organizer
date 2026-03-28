@@ -57,8 +57,10 @@ test.describe('Rules screenshots', () => {
 
         // Preset is the default mode (index 0). Hover over its (i) icon to
         // reveal the HoverCard description.
+        // SegmentedControl.Item renders its content twice in the DOM (Radix
+        // animation technique), so .first() is needed to avoid strict-mode error.
         const items = page.locator('[role="dialog"] button.rt-SegmentedControlItem');
-        await items.nth(0).locator('svg').hover();
+        await items.nth(0).locator('svg').first().hover();
         // Wait for HoverCard openDelay (300 ms) + render
         await page.waitForTimeout(500);
       },
@@ -88,7 +90,7 @@ test.describe('Rules screenshots', () => {
         await items.nth(1).click();
         await page.waitForTimeout(200);
         // Hover over the Ask (i) icon to reveal its HoverCard.
-        await items.nth(1).locator('svg').hover();
+        await items.nth(1).locator('svg').first().hover();
         await page.waitForTimeout(500);
       },
     );
@@ -116,7 +118,7 @@ test.describe('Rules screenshots', () => {
         const items = page.locator('[role="dialog"] button.rt-SegmentedControlItem');
         await items.last().click();
         await page.waitForTimeout(200);
-        await items.last().locator('svg').hover();
+        await items.last().locator('svg').first().hover();
         await page.waitForTimeout(500);
       },
     );
