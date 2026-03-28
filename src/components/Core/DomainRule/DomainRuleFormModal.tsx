@@ -379,7 +379,13 @@ export function DomainRuleFormModal({
                               <Info size={12} aria-hidden="true" />
                             </Box>
                           </HoverCard.Trigger>
-                          <HoverCard.Content size="1" maxWidth="240px">
+                          <HoverCard.Content
+                            size="1"
+                            maxWidth="240px"
+                            side="top"
+                            sideOffset={4}
+                            align={mode === 'manual' ? 'end' : 'center'}
+                          >
                             <Text size="2">
                               {getMessage(({ preset: 'configModePresetHelp', ask: 'configModeAskHelp', manual: 'configModeManualHelp' } as const)[mode])}
                             </Text>
