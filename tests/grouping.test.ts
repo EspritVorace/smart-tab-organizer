@@ -195,7 +195,7 @@ describe('grouping', () => {
         expect(result).toBe('Example');
       });
 
-      it('devrait utiliser le label si l\'extraction échoue', () => {
+      it('devrait utiliser le label si le titre et l\'URL ne trouvent rien', () => {
         const rule = createMockRule({
           groupNameSource: 'title',
           titleParsingRegEx: 'NoMatch - (\\w+)',
@@ -208,7 +208,7 @@ describe('grouping', () => {
         expect(result).toBe('Fallback Label');
       });
 
-      it('devrait utiliser SmartGroup si pas de label', () => {
+      it('devrait utiliser SmartGroup si pas de label et aucune extraction', () => {
         const rule = createMockRule({
           groupNameSource: 'title',
           titleParsingRegEx: 'NoMatch',
@@ -219,6 +219,23 @@ describe('grouping', () => {
         const result = extractGroupNameFromRule(rule, tab);
 
         expect(result).toBe('SmartGroup');
+      });
+
+      it('devrait utiliser l\'URL comme fallback si le titre ne donne rien', () => {
+        const rule = createMockRule({
+          groupNameSource: 'title',
+          titleParsingRegEx: 'NoMatch - (\\w+)',
+          urlParsingRegEx: 'example\\.com/(\\w+)',
+          label: 'Should Not Use Label'
+        });
+        const tab = createMockTab({
+          title: 'Test Page - Example',
+          url: 'https://example.com/products/item'
+        });
+
+        const result = extractGroupNameFromRule(rule, tab);
+
+        expect(result).toBe('products');
       });
     });
 
@@ -235,7 +252,7 @@ describe('grouping', () => {
         expect(result).toBe('products');
       });
 
-      it('devrait utiliser le label si l\'extraction échoue', () => {
+      it('devrait utiliser le label si l\'URL et le titre ne trouvent rien', () => {
         const rule = createMockRule({
           groupNameSource: 'url',
           urlParsingRegEx: 'nomatch/(\\w+)',
@@ -246,6 +263,23 @@ describe('grouping', () => {
         const result = extractGroupNameFromRule(rule, tab);
 
         expect(result).toBe('URL Fallback');
+      });
+
+      it('devrait utiliser le titre comme fallback si l\'URL ne donne rien', () => {
+        const rule = createMockRule({
+          groupNameSource: 'url',
+          urlParsingRegEx: 'nomatch/(\\w+)',
+          titleParsingRegEx: 'Test Page - (\\w+)',
+          label: 'Should Not Use Label'
+        });
+        const tab = createMockTab({
+          url: 'https://example.com/page',
+          title: 'Test Page - Example'
+        });
+
+        const result = extractGroupNameFromRule(rule, tab);
+
+        expect(result).toBe('Example');
       });
     });
 
@@ -276,6 +310,40 @@ describe('grouping', () => {
         const result = extractGroupNameFromRule(rule, tab);
 
         expect(result).toBe('github-issues');
+      });
+
+      it('devrait essayer l\'URL si le titre ne donne rien, même sans presetId', () => {
+        const rule = createMockRule({
+          groupNameSource: 'smart_preset',
+          // pas de presetId : anciennement ce cas retournait null sans essayer l'URL
+          titleParsingRegEx: 'NoMatch - (\\w+)',
+          urlParsingRegEx: 'example\\.com/(\\w+)',
+          label: 'My Rule'
+        });
+        const tab = createMockTab({
+          title: 'Test Page - Example',
+          url: 'https://example.com/products/item'
+        });
+
+        const result = extractGroupNameFromRule(rule, tab);
+
+        expect(result).toBe('products');
+      });
+    });
+
+    describe('groupNameSource: smart (sans presetId)', () => {
+      it('devrait essayer titre puis URL pour une règle manuelle sans presetId', () => {
+        const rule = createMockRule({
+          groupNameSource: 'smart',
+          titleParsingRegEx: 'NoMatch',
+          urlParsingRegEx: 'example\\.com/(\\w+)',
+          label: 'Manual Rule'
+        });
+        const tab = createMockTab({ url: 'https://example.com/projects/alpha' });
+
+        const result = extractGroupNameFromRule(rule, tab);
+
+        expect(result).toBe('projects');
       });
     });
 
