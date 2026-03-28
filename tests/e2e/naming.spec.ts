@@ -161,7 +161,7 @@ test.describe('Group Naming Modes', () => {
       expect(['projects', 'Smart URL Rule']).toContain(groups[0].title);
     });
 
-    test('smart mode without presetId: falls back directly to rule label [US-G012]', async ({
+    test('smart mode without presetId: extrait quand même via regex [US-G012]', async ({
       helpers,
     }) => {
       await helpers.addDomainRule({
@@ -170,9 +170,31 @@ test.describe('Group Naming Modes', () => {
         groupingEnabled: true,
         deduplicationEnabled: false,
         groupNameSource: 'smart',
-        // No presetId set → tryExtractGroupNameFromPresetOrFallback returns null immediately
-        titleParsingRegEx: 'Project:\\s*(\\w+)',
-        urlParsingRegEx: 'example\\.com/(\\w+)',
+        // Pas de presetId : les regex fonctionnent quand même depuis la correction du guard
+        titleParsingRegEx: 'NOMATCH:\\s*(\\w+)', // ne matche pas
+        urlParsingRegEx: 'example\\.com/(\\w+)', // extrait "projects"
+      });
+
+      const opener = await helpers.createTab('https://example.com/projects');
+      await helpers.waitForGrouping();
+      await helpers.createTabFromOpener(opener, 'https://example.com/child');
+
+      const groups = await helpers.waitForTabGrouped();
+      expect(groups.length).toBeGreaterThan(0);
+      expect(groups[0].title).toBe('projects');
+    });
+
+    test('smart mode without presetId: utilise le label si les deux regex échouent [US-G012]', async ({
+      helpers,
+    }) => {
+      await helpers.addDomainRule({
+        label: 'Smart No Preset',
+        domainFilter: 'example.com',
+        groupingEnabled: true,
+        deduplicationEnabled: false,
+        groupNameSource: 'smart',
+        titleParsingRegEx: 'NOMATCH_TITLE:\\s*(\\w+)',
+        urlParsingRegEx: 'NOMATCH_URL/(\\w+)',
       });
 
       const opener = await helpers.createTab('https://example.com/opener');
