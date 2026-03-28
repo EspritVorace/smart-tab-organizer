@@ -49,6 +49,23 @@ export const test = base.extend<ScreenshotFixtures>({
       );
       fs.mkdirSync(userDataDir, { recursive: true });
 
+      // Pre-populate Chrome's Preferences with the desired locale.
+      // The --lang flag alone is unreliable on Linux for chrome.i18n:
+      // Chrome resolves the extension locale from the stored profile preferences
+      // rather than the command-line flag when a profile already exists.
+      const langCode = LOCALE_LANG[locale] ?? 'en-US';
+      const defaultDir = path.join(userDataDir, 'Default');
+      fs.mkdirSync(defaultDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(defaultDir, 'Preferences'),
+        JSON.stringify({
+          intl: {
+            accept_languages: langCode,
+            selected_languages: langCode,
+          },
+        }),
+      );
+
       // Resolve Chromium executable: prefer a "chromium-custom" build (CI),
       // then fall back to any versioned Playwright Chromium already on disk.
       function findChrome(): string | undefined {
