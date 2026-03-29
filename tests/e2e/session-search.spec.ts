@@ -251,7 +251,8 @@ test.describe('[US-S-SEARCH-03] Search by group title', () => {
     await page.getByPlaceholder('Search sessions...').fill('Jira');
 
     // Jira tab should be visible (Work Tools group is expanded)
-    await expect(page.getByText('Jira Board')).toBeVisible();
+    // Use regex because 'Jira' is highlighted, splitting the text in the DOM
+    await expect(page.getByText(/Jira.*Board/)).toBeVisible();
     // News tab should NOT be visible (Personal group is collapsed)
     await expect(page.getByText('News')).not.toBeVisible();
     await page.close();
@@ -274,8 +275,9 @@ test.describe('[US-S-SEARCH-04] Name-only match keeps preview closed', () => {
 
     await page.getByPlaceholder('Search sessions...').fill('My Work Session');
 
-    // Session is visible
-    await expect(page.getByText('My Work Session', { exact: true })).toBeVisible();
+    // Session is visible — no { exact: true } because the fully-highlighted name
+    // gets sr-only text injected: "highlight startMy Work Sessionhighlight end"
+    await expect(page.getByText('My Work Session')).toBeVisible();
 
     // Preview should NOT be open: the tab title inside the group ('Example') should not be visible
     await expect(page.getByText('Example')).not.toBeVisible();
@@ -300,14 +302,15 @@ test.describe('[US-S-SEARCH-05] Forced-open preview is user-closeable', () => {
     await page.getByPlaceholder('Search sessions...').fill('github');
 
     // Preview should be auto-open: tab title visible
-    await expect(page.getByText('GitHub Repository')).toBeVisible();
+    // Use regex because 'GitHub' is highlighted, splitting the DOM text node
+    await expect(page.getByText(/GitHub.*Repository/)).toBeVisible();
 
     // Click the collapsible trigger (tab count summary row) to close the preview
     // The trigger contains the tab/group count summary text
     await page.getByText(/1 tab/i).click();
 
     // Tab title should no longer be visible in the preview
-    await expect(page.getByText('GitHub Repository')).not.toBeVisible();
+    await expect(page.getByText(/GitHub.*Repository/)).not.toBeVisible();
     await page.close();
   });
 });
@@ -423,8 +426,10 @@ test.describe('[US-S-SEARCH] Cross-session filtering', () => {
     await page.getByPlaceholder('Search sessions...').fill('rust');
 
     // Both matching sessions visible
+    // 'Generic Session' is not highlighted (doesn't contain 'rust'), so exact match works
     await expect(page.getByText('Generic Session', { exact: true })).toBeVisible();
-    await expect(page.getByText('Rust Project Notes', { exact: true })).toBeVisible();
+    // 'Rust' is highlighted in 'Rust Project Notes', splitting the DOM text node — use regex
+    await expect(page.getByText(/Rust.*Project Notes/)).toBeVisible();
     // Non-matching session hidden
     await expect(page.getByText('Python Tutorial')).not.toBeVisible();
     await page.close();
@@ -445,10 +450,11 @@ test.describe('[US-S-SEARCH] Cross-session filtering', () => {
 
     const input = page.getByPlaceholder('Search sessions...');
     await input.fill('alpha');
-    await expect(page.getByText('Session Alpha', { exact: true })).toBeVisible();
+    // 'Alpha' is highlighted in 'Session Alpha', splitting the DOM — use regex
+    await expect(page.getByText(/Session.*Alpha/)).toBeVisible();
     await expect(page.getByText('Session Beta', { exact: true })).not.toBeVisible();
 
-    // Clear the search
+    // Clear the search — no highlighting, both names are plain text again
     await input.fill('');
     await expect(page.getByText('Session Alpha', { exact: true })).toBeVisible();
     await expect(page.getByText('Session Beta', { exact: true })).toBeVisible();
