@@ -1,4 +1,4 @@
-import { Dialog, Button, Flex, Text, TextField, Switch, Select, Box, Separator, Grid, ScrollArea, SegmentedControl, Callout } from '@radix-ui/themes';
+import { Dialog, Button, Flex, Text, TextField, Switch, Select, Box, Separator, Grid, ScrollArea, SegmentedControl, Callout, HoverCard } from '@radix-ui/themes';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X, Edit2, Plus, Info } from 'lucide-react';
@@ -369,16 +369,32 @@ export function DomainRuleFormModal({
                   onValueChange={(v) => handleConfigModeChange(v as 'preset' | 'ask' | 'manual')}
                   size="2"
                 >
-                  <SegmentedControl.Item value="preset">{getMessage('configModePreset')}</SegmentedControl.Item>
-                  <SegmentedControl.Item value="ask">{getMessage('configModeAsk')}</SegmentedControl.Item>
-                  <SegmentedControl.Item value="manual">{getMessage('configModeManual')}</SegmentedControl.Item>
+                  {(['preset', 'ask', 'manual'] as const).map((mode) => (
+                    <SegmentedControl.Item key={mode} value={mode}>
+                      <Flex align="center" gap="1">
+                        {getMessage(({ preset: 'configModePreset', ask: 'configModeAsk', manual: 'configModeManual' } as const)[mode])}
+                        <HoverCard.Root openDelay={300} closeDelay={100}>
+                          <HoverCard.Trigger asChild>
+                            <Box as="span" style={{ display: 'inline-flex', alignItems: 'center', cursor: 'default', lineHeight: 0 }}>
+                              <Info size={12} aria-hidden="true" />
+                            </Box>
+                          </HoverCard.Trigger>
+                          <HoverCard.Content
+                            size="1"
+                            maxWidth="240px"
+                            side="top"
+                            sideOffset={4}
+                            align={mode === 'manual' ? 'end' : 'center'}
+                          >
+                            <Text size="2">
+                              {getMessage(({ preset: 'configModePresetHelp', ask: 'configModeAskHelp', manual: 'configModeManualHelp' } as const)[mode])}
+                            </Text>
+                          </HoverCard.Content>
+                        </HoverCard.Root>
+                      </Flex>
+                    </SegmentedControl.Item>
+                  ))}
                 </SegmentedControl.Root>
-                <Callout.Root size="1" color="gray" variant="surface">
-                  <Callout.Icon><Info size={14} aria-hidden="true" /></Callout.Icon>
-                  <Callout.Text>
-                    {getMessage(({ preset: 'configModePresetHelp', ask: 'configModeAskHelp', manual: 'configModeManualHelp' } as const)[configMode])}
-                  </Callout.Text>
-                </Callout.Root>
               </Flex>
 
               {/* Preset Selection - only shown when preset mode is selected */}

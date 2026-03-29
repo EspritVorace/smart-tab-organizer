@@ -19,6 +19,30 @@ const __dirname = path.dirname(__filename);
 /** Absolute path to the screenshots output folder at the repo root */
 const SCREENSHOTS_DIR = path.resolve(__dirname, '../../doc/assets');
 
+/** Absolute path to the built extension's _locales directory */
+const LOCALES_DIR = path.resolve(__dirname, '../../.output/chrome-mv3/_locales');
+
+type MessageEntry = {
+  message: string;
+  placeholders?: Record<string, { content: string }>;
+};
+
+/**
+ * Load messages.json for a locale, or null for 'en' (Chrome's default).
+ * These messages are injected via addInitScript to override chrome.i18n.getMessage,
+ * because the Playwright Chromium binary on Linux ignores --lang and always
+ * reports en-US from chrome.i18n.getUILanguage().
+ */
+function loadLocaleMessages(locale: string): Record<string, MessageEntry> | null {
+  if (locale === 'en') return null;
+  const filePath = path.join(LOCALES_DIR, locale, 'messages.json');
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Record<string, MessageEntry>;
+  } catch {
+    return null;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
@@ -66,7 +90,47 @@ export async function captureScreen(
     const base = `chrome-extension://${extensionId}`;
     const isPopup = section === 'popup';
 
-    // 1. Navigate directly to the target URL (correct origin for localStorage)
+    // 1. Inject locale override before first navigation.
+    //    The Playwright Chromium binary on Linux ignores --lang and always uses en-US
+    //    for chrome.i18n, so we override getMessage() directly in the page context.
+    //    addInitScript re-runs on every navigation (including page.reload() below),
+    //    ensuring React always receives translated strings on mount.
+    const messages = loadLocaleMessages(locale);
+    if (messages) {
+      await page.addInitScript((msgs: Record<string, MessageEntry>) => {
+        const orig = chrome.i18n.getMessage.bind(chrome.i18n);
+        chrome.i18n.getMessage = function (
+          messageId: string,
+          substitutions?: string | string[],
+        ): string {
+          const entry = msgs[messageId];
+          if (!entry) return orig(messageId, substitutions);
+
+          let msg = entry.message;
+          if (!entry.placeholders) return msg;
+
+          const subs = substitutions
+            ? Array.isArray(substitutions)
+              ? substitutions
+              : [substitutions]
+            : [];
+
+          for (const [name, placeholder] of Object.entries(entry.placeholders)) {
+            // Resolve positional references ($1, $2…) inside the placeholder content
+            let content = placeholder.content.replace(
+              /\$(\d+)/g,
+              (_, n: string) => subs[parseInt(n, 10) - 1] ?? '',
+            );
+            // Replace $PLACEHOLDER_NAME$ in the message (case-insensitive)
+            msg = msg.replace(new RegExp(`\\$${name}\\$`, 'gi'), content);
+          }
+
+          return msg;
+        };
+      }, messages as Parameters<typeof page.addInitScript>[1]);
+    }
+
+    // 2. Navigate directly to the target URL (correct origin for localStorage)
     let targetUrl: string;
     if (isPopup) {
       targetUrl = `${base}/popup.html`;
@@ -78,17 +142,18 @@ export async function captureScreen(
     await page.goto(targetUrl);
     await page.waitForLoadState('domcontentloaded');
 
-    // 2. Set theme via localStorage (next-themes reads 'theme' key on mount)
+    // 3. Set theme via localStorage (next-themes reads 'theme' key on mount)
     await page.evaluate((t) => localStorage.setItem('theme', t), theme);
 
-    // 3. Reload so next-themes re-reads localStorage and applies the correct theme.
+    // 4. Reload so next-themes re-reads localStorage and applies the correct theme.
     //    A simple hash navigation (e.g. options.html → options.html#rules) does NOT
     //    trigger a full page reload, so next-themes would keep the stale theme from
     //    its initial mount. page.reload() forces a clean remount at the target URL.
+    //    The addInitScript locale override also re-runs on this reload.
     await page.reload();
     await page.waitForLoadState('domcontentloaded');
 
-    // 4. Wait for the app to finish loading (useSyncedSettings resolves)
+    // 5. Wait for the app to finish loading (useSyncedSettings resolves)
     await page.waitForFunction(
       () => {
         const body = document.body?.textContent ?? '';
@@ -97,22 +162,22 @@ export async function captureScreen(
       { timeout: 10_000 },
     );
 
-    // 5. Short stabilisation pause (theme class applied, React committed)
+    // 6. Short stabilisation pause (theme class applied, React committed)
     await page.waitForTimeout(600);
 
-    // 6. Run optional setup callback
+    // 7. Run optional setup callback
     if (setup) {
       await setup(page);
       // Extra pause after interactions
       await page.waitForTimeout(400);
     }
 
-    // 7. Ensure output directory exists
+    // 8. Ensure output directory exists
     if (!fs.existsSync(SCREENSHOTS_DIR)) {
       fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
     }
 
-    // 8. Capture exactly 1280×800
+    // 9. Capture exactly 1280×800
     const filePath = path.join(SCREENSHOTS_DIR, `${filename}.png`);
     await page.screenshot({
       path: filePath,
