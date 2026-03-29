@@ -123,3 +123,29 @@ logger.debug('[MY_MODULE] Something happened:', value);
 ### Storybook
 - Story titles mirror folder: `Components/Core/Session/SessionCard`
 - Prefix all exports with component name: `SessionCardDefault`, `SessionCardDisabled` (avoids conflicts)
+
+## Clarification avant implémentation
+
+Avant de générer un plan ou d'écrire du code pour une nouvelle feature,
+identifier et résoudre les zones floues de la user story concernée.
+
+### Processus
+
+1. Lire la ou les US concernées dans `user_stories/`.
+2. Lister les points ambigus ou non couverts : cas limites, comportements
+   implicites, interactions avec des features existantes, impact sur les
+   schemas Zod ou les types.
+3. Poser les questions groupées à l'utilisateur — une seule passe,
+   pas de questions au fil de l'implémentation.
+4. Une fois les réponses obtenues, noter les décisions prises sous forme
+   de commentaire dans le prompt ou dans un fichier `clarifications.md`
+   dans le dossier de la feature si les décisions sont structurantes.
+5. Seulement ensuite : générer le plan technique et implémenter.
+
+### Ne pas sauter cette étape si
+
+- La US référence une entité dont les champs ne sont pas tous explicites.
+- La US interagit avec `chrome.storage.sync` ou `browser.storage.local`.
+- La US introduit un nouveau composant UI sans préciser le comportement
+  responsive, les états vides, ou les états d'erreur.
+- La US touche au système i18n (nouvelles clés à ajouter dans les 3 locales).
