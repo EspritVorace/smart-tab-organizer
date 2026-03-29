@@ -119,9 +119,11 @@ test.describe('Edit rule via dropdown', () => {
     await page.getByRole('row', { name: /Notion/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
-    await expect(page.getByRole('dialog')).toBeVisible();
-    await expect(page.locator('input[name="label"]')).toHaveValue('Notion');
-    await expect(page.locator('input[name="domainFilter"]')).toHaveValue('*.notion.so');
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    // In edit mode the identity zone has directly editable inputs (no wizard steps)
+    await expect(dialog.locator('input[name="label"]')).toHaveValue('Notion');
+    await expect(dialog.locator('input[name="domainFilter"]')).toHaveValue('*.notion.so');
     await page.close();
   });
 });

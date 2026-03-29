@@ -385,5 +385,20 @@
   "notifGrouping": { "message": "$1 pestaña(s) agrupada(s) en $2 grupo(s)" },
 
   "highlightStart": { "message": "inicio del resaltado" },
-  "highlightEnd": { "message": "fin del resaltado" }
+  "highlightEnd": { "message": "fin del resaltado" },
+
+  "wizardStepIdentity": { "message": "Identidad" },
+  "wizardStepConfig": { "message": "Configuración" },
+  "wizardStepOptions": { "message": "Opciones" },
+  "wizardStepSummary": { "message": "Resumen" },
+  "wizardStepAnnouncement": { "message": "Paso {step}: {label}" },
+  "configSummaryPreset": { "message": "Preajuste: {name}" },
+  "configSummaryAsk": { "message": "Preguntar (nombre solicitado al abrir cada pestaña)" },
+  "configSummaryManual": { "message": "Manual: {source}" },
+  "editConfigTitle": { "message": "Editar configuración" },
+  "apply": { "message": "Aplicar" },
+  "editConfigAriaLabel": { "message": "Editar configuración" },
+  "optionsSummaryDedupEnabled": { "message": "Deduplicación activada · {mode}" },
+  "optionsSummaryDedupDisabled": { "message": "Deduplicación desactivada" },
+  "summaryModify": { "message": "Modificar" }
 }
