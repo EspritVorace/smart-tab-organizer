@@ -374,7 +374,7 @@ export function DomainRuleFormModal({
                       <Flex align="center" gap="1">
                         {getMessage(({ preset: 'configModePreset', ask: 'configModeAsk', manual: 'configModeManual' } as const)[mode])}
                         <HoverCard.Root openDelay={300} closeDelay={100}>
-                          <HoverCard.Trigger asChild>
+                          <HoverCard.Trigger>
                             <Box as="span" style={{ display: 'inline-flex', alignItems: 'center', cursor: 'default', lineHeight: 0 }}>
                               <Info size={12} aria-hidden="true" />
                             </Box>
