@@ -384,5 +384,20 @@
   "notifGrouping": { "message": "$1 tab(s) grouped into $2 group(s)" },
 
   "highlightStart": { "message": "highlight start" },
-  "highlightEnd": { "message": "highlight end" }
+  "highlightEnd": { "message": "highlight end" },
+
+  "wizardStepIdentity": { "message": "Identity" },
+  "wizardStepConfig": { "message": "Configuration" },
+  "wizardStepOptions": { "message": "Options" },
+  "wizardStepSummary": { "message": "Summary" },
+  "wizardStepAnnouncement": { "message": "Step {step}: {label}" },
+  "configSummaryPreset": { "message": "Preset: {name}" },
+  "configSummaryAsk": { "message": "Ask (group name requested on each tab opening)" },
+  "configSummaryManual": { "message": "Manual: {source}" },
+  "editConfigTitle": { "message": "Edit Configuration" },
+  "apply": { "message": "Apply" },
+  "editConfigAriaLabel": { "message": "Edit configuration" },
+  "optionsSummaryDedupEnabled": { "message": "Deduplication enabled · {mode}" },
+  "optionsSummaryDedupDisabled": { "message": "Deduplication disabled" },
+  "summaryModify": { "message": "Modify" }
 }

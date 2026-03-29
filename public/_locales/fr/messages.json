@@ -385,5 +385,20 @@
   "notifGrouping": { "message": "$1 onglet(s) regroupé(s) en $2 groupe(s)" },
 
   "highlightStart": { "message": "début du surlignage" },
-  "highlightEnd": { "message": "fin du surlignage" }
+  "highlightEnd": { "message": "fin du surlignage" },
+
+  "wizardStepIdentity": { "message": "Identité" },
+  "wizardStepConfig": { "message": "Configuration" },
+  "wizardStepOptions": { "message": "Options" },
+  "wizardStepSummary": { "message": "Résumé" },
+  "wizardStepAnnouncement": { "message": "Étape {step} : {label}" },
+  "configSummaryPreset": { "message": "Préréglage : {name}" },
+  "configSummaryAsk": { "message": "Demander (nom saisi à chaque ouverture d'onglet)" },
+  "configSummaryManual": { "message": "Manuel : {source}" },
+  "editConfigTitle": { "message": "Modifier la configuration" },
+  "apply": { "message": "Appliquer" },
+  "editConfigAriaLabel": { "message": "Modifier la configuration" },
+  "optionsSummaryDedupEnabled": { "message": "Déduplication activée · {mode}" },
+  "optionsSummaryDedupDisabled": { "message": "Déduplication désactivée" },
+  "summaryModify": { "message": "Modifier" }
 }

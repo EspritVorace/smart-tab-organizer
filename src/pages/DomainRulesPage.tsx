@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { Button, Switch, Text, HoverCard, Box, Flex, Badge, Card, Checkbox, IconButton, TextField, Separator, DropdownMenu } from '@radix-ui/themes';
 import { Pencil, Trash2, Plus, Eye, EyeOff, Shield, Search, AlertCircle, Upload, MoreHorizontal } from 'lucide-react';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
-import { DomainRuleFormModal } from '../components/Core/DomainRule/DomainRuleFormModal';
+import { RuleWizardModal } from '../components/Core/DomainRule/RuleWizardModal';
 import { ImportWizard } from '../components/UI/ImportExportPage/ImportWizard';
 import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { getMessage } from '../utils/i18n';
@@ -451,7 +451,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
         )}
       </PageLayout>
 
-      <DomainRuleFormModal
+      <RuleWizardModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSubmit={handleSubmitRule}
