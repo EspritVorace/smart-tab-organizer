@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import {
   Card, Flex, Text, IconButton, TextField,
@@ -28,6 +28,16 @@ interface SessionCardProps {
   onDelete: (session: Session) => void;
   onPin: (session: Session) => void;
   onUnpin: (session: Session) => void;
+  /**
+   * When true, the collapsible preview is forced open (e.g. search matched a tab/group).
+   * The user can still manually close it by clicking the trigger.
+   */
+  forcePreviewOpen?: boolean;
+  /**
+   * Group IDs that should be expanded in the preview tree when forced open by search.
+   * When undefined, all groups are expanded (default behavior).
+   */
+  searchMatchingGroupIds?: Set<string>;
 }
 
 export function SessionCard({
@@ -40,10 +50,24 @@ export function SessionCard({
   onDelete,
   onPin,
   onUnpin,
+  forcePreviewOpen = false,
+  searchMatchingGroupIds,
 }: SessionCardProps) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [nameValue, setNameValue] = useState(session.name);
   const [previewOpen, setPreviewOpen] = useState(false);
+
+  // When a search match forces the preview open, open it.
+  // When the search is cleared (forcePreviewOpen becomes false), close it
+  // (unless the user opened it themselves, but we reset to closed to avoid
+  // leaving stale state across different search queries).
+  useEffect(() => {
+    if (forcePreviewOpen) {
+      setPreviewOpen(true);
+    } else {
+      setPreviewOpen(false);
+    }
+  }, [forcePreviewOpen]);
 
   const tabCount = countSessionTabs(session);
   const groupCount = session.groups.length;
@@ -264,7 +288,10 @@ export function SessionCard({
           </Collapsible.Trigger>
           <Collapsible.Content>
             <div style={{ marginTop: 'var(--space-2)' }}>
-              <SessionPreviewTree session={session} />
+              <SessionPreviewTree
+                session={session}
+                forcedExpandedGroupIds={searchMatchingGroupIds}
+              />
             </div>
           </Collapsible.Content>
         </Collapsible.Root>

@@ -1,6 +1,65 @@
 import type { Session, SavedTab, SavedTabGroup } from '../types/session';
 import type { TabTreeData, TabItem, TabGroupItem } from '../components/Core/TabTree/tabTreeTypes';
 import { generateUUID } from './utils';
+import { foldAccents } from './stringUtils';
+
+/**
+ * Result of matching a session against a search term.
+ * Used to determine which sessions to show and how to render them.
+ */
+export interface SessionSearchMatch {
+  /** Whether the session name matches the search term */
+  matchesName: boolean;
+  /** Whether any tab title, tab URL, or group title matches */
+  matchesTabs: boolean;
+  /** IDs of groups that have at least one matching tab or a matching group title */
+  matchingGroupIds: Set<string>;
+}
+
+/**
+ * Test whether a session matches a pre-folded (accent/case-normalized) search term.
+ * Returns null if there is no match at all.
+ *
+ * The search covers:
+ *  - session name
+ *  - each group title
+ *  - each tab title (grouped and ungrouped)
+ *  - each tab URL  (grouped and ungrouped)
+ */
+export function matchSessionSearch(
+  session: Session,
+  foldedTerm: string,
+): SessionSearchMatch | null {
+  const matchesName = foldAccents(session.name).includes(foldedTerm);
+
+  const matchingGroupIds = new Set<string>();
+
+  // Ungrouped tabs
+  const hasUngroupedMatch = session.ungroupedTabs.some(
+    tab =>
+      foldAccents(tab.title).includes(foldedTerm) ||
+      foldAccents(tab.url).includes(foldedTerm),
+  );
+
+  // Groups: check group title and each tab
+  for (const group of session.groups) {
+    const groupTitleMatches = foldAccents(group.title).includes(foldedTerm);
+    const tabMatches = group.tabs.some(
+      tab =>
+        foldAccents(tab.title).includes(foldedTerm) ||
+        foldAccents(tab.url).includes(foldedTerm),
+    );
+    if (groupTitleMatches || tabMatches) {
+      matchingGroupIds.add(group.id);
+    }
+  }
+
+  const matchesTabs = hasUngroupedMatch || matchingGroupIds.size > 0;
+
+  if (!matchesName && !matchesTabs) return null;
+
+  return { matchesName, matchesTabs, matchingGroupIds };
+}
 
 /**
  * Convert a Session to TabTreeData for display in the TabTree component.

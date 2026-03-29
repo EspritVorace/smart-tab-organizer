@@ -4,6 +4,7 @@ import {
   countSessionTabs,
   sessionToTabTreeData,
   createSessionFromSelection,
+  matchSessionSearch,
 } from '../../src/utils/sessionUtils';
 import type { Session, SavedTab, SavedTabGroup } from '../../src/types/session';
 
@@ -209,6 +210,150 @@ describe('sessionUtils', () => {
         categoryId: 'development',
       });
       expect(session.categoryId).toBe('development');
+    });
+  });
+
+  describe('matchSessionSearch', () => {
+    // --- No match ---
+
+    it('retourne null si aucune correspondance', () => {
+      const session = makeSession({ name: 'My Work Tabs' });
+      expect(matchSessionSearch(session, 'zzz')).toBeNull();
+    });
+
+    // --- Name match ---
+
+    it('retourne matchesName=true si le nom correspond', () => {
+      const session = makeSession({ name: 'Work Session' });
+      const result = matchSessionSearch(session, 'work');
+      expect(result).not.toBeNull();
+      expect(result!.matchesName).toBe(true);
+      expect(result!.matchesTabs).toBe(false);
+      expect(result!.matchingGroupIds.size).toBe(0);
+    });
+
+    it('recherche insensible à la casse dans le nom', () => {
+      const session = makeSession({ name: 'WORK SESSION' });
+      expect(matchSessionSearch(session, 'work')).not.toBeNull();
+    });
+
+    it('recherche insensible aux accents dans le nom', () => {
+      const session = makeSession({ name: 'Étude de cas' });
+      expect(matchSessionSearch(session, 'etude')).not.toBeNull();
+    });
+
+    // --- Ungrouped tab title match ---
+
+    it('retourne matchesTabs=true si titre d\'un onglet non groupé correspond', () => {
+      const session = makeSession({
+        ungroupedTabs: [makeTab({ title: 'GitHub Dashboard', url: 'https://github.com' })],
+      });
+      const result = matchSessionSearch(session, 'github');
+      expect(result).not.toBeNull();
+      expect(result!.matchesTabs).toBe(true);
+      expect(result!.matchesName).toBe(false);
+      expect(result!.matchingGroupIds.size).toBe(0);
+    });
+
+    // --- Ungrouped tab URL match ---
+
+    it('retourne matchesTabs=true si URL d\'un onglet non groupé correspond', () => {
+      const session = makeSession({
+        ungroupedTabs: [makeTab({ title: 'Home', url: 'https://my-special-domain.com/path' })],
+      });
+      const result = matchSessionSearch(session, 'special-domain');
+      expect(result).not.toBeNull();
+      expect(result!.matchesTabs).toBe(true);
+      expect(result!.matchingGroupIds.size).toBe(0);
+    });
+
+    // --- Group title match ---
+
+    it('retourne matchesTabs=true et le groupId si le titre de groupe correspond', () => {
+      const group = makeGroup({ id: 'grp-1', title: 'Development Tools', tabs: [] });
+      const session = makeSession({ groups: [group] });
+      const result = matchSessionSearch(session, 'development');
+      expect(result).not.toBeNull();
+      expect(result!.matchesTabs).toBe(true);
+      expect(result!.matchingGroupIds.has('grp-1')).toBe(true);
+    });
+
+    // --- Tab inside group match ---
+
+    it('retourne le groupId si un onglet du groupe correspond par titre', () => {
+      const tab = makeTab({ title: 'Stack Overflow', url: 'https://stackoverflow.com' });
+      const group = makeGroup({ id: 'grp-2', title: 'Misc', tabs: [tab] });
+      const session = makeSession({ groups: [group] });
+      const result = matchSessionSearch(session, 'stack');
+      expect(result).not.toBeNull();
+      expect(result!.matchingGroupIds.has('grp-2')).toBe(true);
+    });
+
+    it('retourne le groupId si un onglet du groupe correspond par URL', () => {
+      const tab = makeTab({ title: 'Homepage', url: 'https://internal-wiki.company.com' });
+      const group = makeGroup({ id: 'grp-3', title: 'Internal', tabs: [tab] });
+      const session = makeSession({ groups: [group] });
+      const result = matchSessionSearch(session, 'wiki');
+      expect(result).not.toBeNull();
+      expect(result!.matchingGroupIds.has('grp-3')).toBe(true);
+    });
+
+    // --- Multiple groups: only matching ones returned ---
+
+    it('ne retourne que les groupIds des groupes avec correspondance', () => {
+      const matchingGroup = makeGroup({
+        id: 'match-grp',
+        title: 'Frontend',
+        tabs: [makeTab({ title: 'React Docs', url: 'https://react.dev' })],
+      });
+      const nonMatchingGroup = makeGroup({
+        id: 'no-match-grp',
+        title: 'Backend',
+        tabs: [makeTab({ title: 'Go Blog', url: 'https://go.dev' })],
+      });
+      const session = makeSession({ groups: [matchingGroup, nonMatchingGroup] });
+      const result = matchSessionSearch(session, 'react');
+      expect(result).not.toBeNull();
+      expect(result!.matchingGroupIds.has('match-grp')).toBe(true);
+      expect(result!.matchingGroupIds.has('no-match-grp')).toBe(false);
+    });
+
+    // --- Combined: name + tab match ---
+
+    it('retourne matchesName=true ET matchesTabs=true si les deux correspondent', () => {
+      const session = makeSession({
+        name: 'React Project',
+        ungroupedTabs: [makeTab({ title: 'React Docs', url: 'https://react.dev' })],
+      });
+      const result = matchSessionSearch(session, 'react');
+      expect(result).not.toBeNull();
+      expect(result!.matchesName).toBe(true);
+      expect(result!.matchesTabs).toBe(true);
+    });
+
+    // --- Accent / case insensitivity in tabs ---
+
+    it('recherche insensible aux accents dans les titres d\'onglets', () => {
+      const session = makeSession({
+        ungroupedTabs: [makeTab({ title: 'Résumé du projet', url: 'https://example.com' })],
+      });
+      expect(matchSessionSearch(session, 'resume')).not.toBeNull();
+    });
+
+    it('recherche insensible à la casse dans les URLs', () => {
+      const session = makeSession({
+        ungroupedTabs: [makeTab({ title: 'Home', url: 'https://EXAMPLE.COM/PATH' })],
+      });
+      expect(matchSessionSearch(session, 'example.com')).not.toBeNull();
+    });
+
+    // --- Empty term ---
+
+    it('correspond à tout si le terme est vide', () => {
+      const session = makeSession({ name: 'My Session' });
+      const result = matchSessionSearch(session, '');
+      expect(result).not.toBeNull();
+      expect(result!.matchesName).toBe(true);
     });
   });
 });

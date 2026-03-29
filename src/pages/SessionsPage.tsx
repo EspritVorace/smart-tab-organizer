@@ -10,10 +10,12 @@ import { RestoreWizard } from '../components/UI/SessionWizards/RestoreWizard';
 import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { getMessage } from '../utils/i18n';
 import { foldAccents } from '../utils/stringUtils';
+import { matchSessionSearch } from '../utils/sessionUtils';
 import { useSessions } from '../hooks/useSessions';
 import { restoreTabs } from '../utils/tabRestore';
 import { updateSession } from '../utils/sessionStorage';
 import type { Session } from '../types/session';
+import type { SessionSearchMatch } from '../utils/sessionUtils';
 import type { SyncSettings } from '../types/syncSettings';
 
 interface SessionsPageProps {
@@ -57,11 +59,22 @@ export function SessionsPage({
     return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
   }), [sessions]);
 
-  const displayedSessions = useMemo(() => {
-    if (!searchQuery) return sortedSessions;
+  // Deep search: name + group titles + tab titles + tab URLs
+  const sessionSearchMatches = useMemo<Map<string, SessionSearchMatch> | null>(() => {
+    if (!searchQuery) return null;
     const term = foldAccents(searchQuery);
-    return sortedSessions.filter(s => foldAccents(s.name).includes(term));
+    const map = new Map<string, SessionSearchMatch>();
+    for (const session of sortedSessions) {
+      const match = matchSessionSearch(session, term);
+      if (match) map.set(session.id, match);
+    }
+    return map;
   }, [sortedSessions, searchQuery]);
+
+  const displayedSessions = useMemo(() => {
+    if (!sessionSearchMatches) return sortedSessions;
+    return sortedSessions.filter(s => sessionSearchMatches.has(s.id));
+  }, [sortedSessions, sessionSearchMatches]);
 
   const handleSaveSession = useCallback(
     async (session: Session) => {
@@ -228,20 +241,25 @@ export function SessionsPage({
             )
           ) : (
             <Flex direction="column" gap="3">
-              {displayedSessions.map(session => (
-                <SessionCard
-                  key={session.id}
-                  session={session}
-                  onRestore={s => setRestoreSession(s)}
-                  onRestoreCurrentWindow={handleRestoreCurrentWindow}
-                  onRestoreNewWindow={handleRestoreNewWindow}
-                  onRename={renameSession}
-                  onEdit={s => setEditTarget(s)}
-                  onDelete={s => setDeleteTarget(s)}
-                  onPin={handlePin}
-                  onUnpin={handleUnpin}
-                />
-              ))}
+              {displayedSessions.map(session => {
+                const searchMatch = sessionSearchMatches?.get(session.id);
+                return (
+                  <SessionCard
+                    key={session.id}
+                    session={session}
+                    onRestore={s => setRestoreSession(s)}
+                    onRestoreCurrentWindow={handleRestoreCurrentWindow}
+                    onRestoreNewWindow={handleRestoreNewWindow}
+                    onRename={renameSession}
+                    onEdit={s => setEditTarget(s)}
+                    onDelete={s => setDeleteTarget(s)}
+                    onPin={handlePin}
+                    onUnpin={handleUnpin}
+                    forcePreviewOpen={searchMatch?.matchesTabs === true}
+                    searchMatchingGroupIds={searchMatch?.matchingGroupIds}
+                  />
+                );
+              })}
             </Flex>
           )}
 
