@@ -3,6 +3,7 @@ import { Flex, Text } from '@radix-ui/themes';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { getMessage } from '../../../utils/i18n';
 import { chromeGroupColors } from './tabTreeUtils';
+import { AccessibleHighlight } from '../../UI/AccessibleHighlight/AccessibleHighlight';
 import type { ChromeGroupColor } from './tabTreeTypes';
 
 export interface GroupRowBaseProps {
@@ -22,6 +23,8 @@ export interface GroupRowBaseProps {
   leftSlot?: React.ReactNode;
   /** Right slot: action buttons */
   rightSlot?: React.ReactNode;
+  /** Search term to highlight in the group title */
+  searchQuery?: string;
 }
 
 export function GroupRowBase({
@@ -33,6 +36,7 @@ export function GroupRowBase({
   level,
   leftSlot,
   rightSlot,
+  searchQuery,
 }: GroupRowBaseProps) {
   const colorHex = chromeGroupColors[color] ?? chromeGroupColors.grey;
 
@@ -95,7 +99,7 @@ export function GroupRowBase({
           flex: 1,
         }}
       >
-        {title}
+        <AccessibleHighlight text={title} searchTerm={searchQuery ?? ''} />
       </Text>
       <Text size="1" color="gray" style={{ flexShrink: 0 }}>
         ({tabCount})

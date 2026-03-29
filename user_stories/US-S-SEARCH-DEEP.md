@@ -24,6 +24,8 @@ un titre correspondant au terme recherché,
 - Les groupes d'onglets contenant l'onglet correspondant sont **dépliés**.
 - Les groupes sans correspondance restent **repliés**.
 - La recherche est insensible à la casse et aux accents.
+- Les parties du titre d'onglet correspondant au terme de recherche sont
+  **surlignées** (composant `AccessibleHighlight`) dans la preview ouverte.
 
 ---
 
@@ -40,6 +42,8 @@ contenant le terme recherché,
 - La section dépliable (preview) de la session est **automatiquement ouverte**.
 - Les groupes d'onglets contenant l'onglet correspondant sont **dépliés**.
 - La recherche est insensible à la casse et aux accents.
+- La partie du domaine affiché (extrait de l'URL) correspondant au terme de recherche
+  est **surlignée** dans la preview ouverte.
 
 ---
 
@@ -56,6 +60,29 @@ porte un titre correspondant au terme recherché,
 - La section dépliable (preview) de la session est **automatiquement ouverte**.
 - Le(s) groupe(s) dont le titre correspond sont **dépliés**.
 - La recherche est insensible à la casse et aux accents.
+- La partie du titre de groupe correspondant au terme de recherche est
+  **surlignée** dans la preview ouverte.
+
+---
+
+### US-S-SEARCH-06 — Surlignage du nom de session et des onglets correspondants
+
+**En tant qu'** utilisateur effectuant une recherche dans les sessions,
+**je veux** que les parties du texte correspondant au terme recherché soient
+visuellement mises en évidence dans les cartes de session,
+**afin de** comprendre immédiatement pourquoi un résultat apparaît.
+
+**Critères d'acceptance :**
+- Le terme recherché est **surligné** (fond jaune, texte en gras) dans les champs
+  suivants lorsqu'ils correspondent :
+  - Nom de la session (toujours visible sur la carte)
+  - Titre du groupe (dans la preview ouverte)
+  - Titre de l'onglet (dans la preview ouverte)
+  - Domaine extrait de l'URL de l'onglet (dans la preview ouverte)
+- Le surlignage utilise le composant `AccessibleHighlight` (inclut des marqueurs
+  accessibles `sr-only` pour les lecteurs d'écran).
+- En l'absence de terme de recherche, aucun surlignage n'est affiché.
+- Le surlignage est insensible à la casse et aux accents (cohérent avec le filtrage).
 
 ---
 
@@ -117,6 +144,4 @@ La comparaison est toujours insensible à la casse et aux accents (via `foldAcce
 
 ## Hors périmètre
 
-- Mise en surbrillance (*highlight*) du texte correspondant dans les titres/URLs
-  (feature ultérieure possible).
 - Recherche dans les descriptions ou métadonnées futures des sessions.

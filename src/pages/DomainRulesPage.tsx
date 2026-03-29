@@ -7,6 +7,7 @@ import { ImportWizard } from '../components/UI/ImportExportPage/ImportWizard';
 import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { getMessage } from '../utils/i18n';
 import { foldAccents } from '../utils/stringUtils';
+import { AccessibleHighlight } from '../components/UI/AccessibleHighlight/AccessibleHighlight';
 import { generateUUID, getRadixColor } from '../utils/utils';
 import { getRuleCategory } from '../schemas/enums';
 import type { SyncSettings, DomainRuleSetting } from '../types/syncSettings';
@@ -343,7 +344,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                                   size="2"
                                   style={{ cursor: 'pointer', flexShrink: 0 }}
                                 >
-                                  {category ? `${category.emoji} ` : ''}{rule.label}
+                                  {category ? `${category.emoji} ` : ''}<AccessibleHighlight text={rule.label} searchTerm={searchTerm} />
                                 </Badge>
                               );
                             })()}
@@ -351,14 +352,14 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                           <HoverCard.Content size="2" style={{ maxWidth: 400 }}>
                             <Flex direction="column" gap="3">
                               <Flex justify="between" align="center" pb="2" style={{ borderBottom: '1px solid var(--gray-5)' }}>
-                                <Text size="3" weight="bold">{rule.label}</Text>
+                                <Text size="3" weight="bold"><AccessibleHighlight text={rule.label} searchTerm={searchTerm} /></Text>
                                 <Badge color={rule.enabled ? 'green' : 'gray'} variant="soft">
                                   {getMessage(rule.enabled ? 'enabled' : 'disabled')}
                                 </Badge>
                               </Flex>
                               <Box style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '8px 12px', alignItems: 'baseline' }}>
                                 <Text size="1" weight="bold" color="gray">{getMessage('domainFilter')}</Text>
-                                <Text size="2"><code style={{ backgroundColor: 'var(--gray-3)', padding: '2px 6px', borderRadius: '4px' }}>{rule.domainFilter}</code></Text>
+                                <Text size="2"><code style={{ backgroundColor: 'var(--gray-3)', padding: '2px 6px', borderRadius: '4px' }}><AccessibleHighlight text={rule.domainFilter} searchTerm={searchTerm} /></code></Text>
 
                                 <Text size="1" weight="bold" color="gray">{getMessage('tabGroupColor')}</Text>
                                 <Flex align="center" gap="2">
@@ -411,7 +412,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                         </HoverCard.Root>
 
                         <Text size="2" color="gray" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {rule.domainFilter}
+                          <AccessibleHighlight text={rule.domainFilter} searchTerm={searchTerm} />
                         </Text>
                       </Flex>
 

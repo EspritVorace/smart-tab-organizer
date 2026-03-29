@@ -1,6 +1,7 @@
 import React from 'react';
 import { Flex, Text, Tooltip } from '@radix-ui/themes';
 import { Globe } from 'lucide-react';
+import { AccessibleHighlight } from '../../UI/AccessibleHighlight/AccessibleHighlight';
 
 export interface TabRowBaseProps {
   /** Favicon URL or undefined to show the Globe fallback */
@@ -26,6 +27,8 @@ export interface TabRowBaseProps {
    * on adjacent rows.
    */
   showTooltip?: boolean;
+  /** Search term to highlight in the title and domain */
+  searchQuery?: string;
 }
 
 export function TabRowBase({
@@ -38,6 +41,7 @@ export function TabRowBase({
   rightSlot,
   onTitleClick,
   showTooltip = true,
+  searchQuery,
 }: TabRowBaseProps) {
   const favicon = favIconUrl ? (
     <img
@@ -76,7 +80,7 @@ export function TabRowBase({
               : undefined
           }
         >
-          {title}
+          <AccessibleHighlight text={title} searchTerm={searchQuery ?? ''} />
         </Text>
         {domain && (
           <Text
@@ -88,7 +92,7 @@ export function TabRowBase({
               whiteSpace: 'nowrap',
             }}
           >
-            {domain}
+            <AccessibleHighlight text={domain} searchTerm={searchQuery ?? ''} />
           </Text>
         )}
       </Flex>
