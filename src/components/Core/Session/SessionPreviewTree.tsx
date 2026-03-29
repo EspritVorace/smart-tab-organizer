@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScrollArea } from '@radix-ui/themes';
 import { GroupRowBase } from '../TabTree/GroupRowBase';
 import { TabRowBase } from '../TabTree/TabRowBase';
@@ -7,12 +7,31 @@ import type { Session } from '../../../types/session';
 
 interface SessionPreviewTreeProps {
   session: Session;
+  /**
+   * When provided, only these group IDs are expanded initially.
+   * Intended for search: expand only groups that contain a match.
+   * When undefined, all groups are expanded (default).
+   */
+  forcedExpandedGroupIds?: Set<string>;
 }
 
-export function SessionPreviewTree({ session }: SessionPreviewTreeProps) {
+export function SessionPreviewTree({ session, forcedExpandedGroupIds }: SessionPreviewTreeProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
-    () => new Set(session.groups.map((g) => g.id)),
+    () =>
+      forcedExpandedGroupIds !== undefined
+        ? new Set(forcedExpandedGroupIds)
+        : new Set(session.groups.map((g) => g.id)),
   );
+
+  // Sync expanded groups when the search-driven forced expansion changes.
+  useEffect(() => {
+    if (forcedExpandedGroupIds !== undefined) {
+      setExpandedGroups(new Set(forcedExpandedGroupIds));
+    } else {
+      // Search cleared: restore default (all expanded)
+      setExpandedGroups(new Set(session.groups.map((g) => g.id)));
+    }
+  }, [forcedExpandedGroupIds, session.groups]);
 
   const toggleGroup = (id: string) => {
     setExpandedGroups((prev) => {
