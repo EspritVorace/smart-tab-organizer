@@ -124,6 +124,40 @@ test.describe('Sessions screenshots', () => {
   });
 
   /**
+   * sessions-search-deep
+   * Sessions list with an active deep search ("github"):
+   * - Sessions whose tab title / group title matches are shown with preview opened.
+   * - Non-matching sessions are hidden.
+   * Demonstrates the deep-search feature (US-S-SEARCH-01 / 03).
+   */
+  test('sessions-search-deep', async ({ extensionContext, extensionId }, testInfo) => {
+    const locale = testInfo.project.name;
+    await seedSessions(extensionContext, ALL_SESSIONS);
+
+    await captureAll(
+      extensionContext,
+      extensionId,
+      locale,
+      'sessions',
+      'sessions-search-deep',
+      async (page) => {
+        await waitForSessionsReady(page);
+
+        // Type a search term that matches:
+        //   - SESSION_MORNING_DEV  → "GitHub" group title
+        //   - PROFILE_WORK        → "smart-tab-organizer · GitHub" tab title
+        // SESSION_RESEARCH and PROFILE_PERSONAL have no github match → hidden.
+        // Use a locale-agnostic CSS selector (placeholder text is translated).
+        const searchInput = page.locator('.rt-TextFieldRoot input').first();
+        await searchInput.fill('github');
+
+        // Wait for the previews to open and the tree to render
+        await page.waitForTimeout(600);
+      },
+    );
+  });
+
+  /**
    * sessions-restore-conflict
    * A session with group "Work" (blue) is seeded.  We also create a live tab
    * group "Work" (blue) in the browser window so that analyzeConflicts() detects
