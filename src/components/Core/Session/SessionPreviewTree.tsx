@@ -13,9 +13,11 @@ interface SessionPreviewTreeProps {
    * When undefined, all groups are expanded (default).
    */
   forcedExpandedGroupIds?: Set<string>;
+  /** Search term to highlight matching text in group titles, tab titles and domains */
+  searchQuery?: string;
 }
 
-export function SessionPreviewTree({ session, forcedExpandedGroupIds }: SessionPreviewTreeProps) {
+export function SessionPreviewTree({ session, forcedExpandedGroupIds, searchQuery }: SessionPreviewTreeProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
     () =>
       forcedExpandedGroupIds !== undefined
@@ -56,6 +58,7 @@ export function SessionPreviewTree({ session, forcedExpandedGroupIds }: SessionP
             isExpanded={expandedGroups.has(group.id)}
             onToggleExpand={() => toggleGroup(group.id)}
             level={1}
+            searchQuery={searchQuery}
           />
           {expandedGroups.has(group.id) &&
             group.tabs.map((tab) => (
@@ -66,6 +69,7 @@ export function SessionPreviewTree({ session, forcedExpandedGroupIds }: SessionP
                 domain={extractDomain(tab.url)}
                 fullUrl={tab.url}
                 level={2}
+                searchQuery={searchQuery}
               />
             ))}
         </React.Fragment>
@@ -79,6 +83,7 @@ export function SessionPreviewTree({ session, forcedExpandedGroupIds }: SessionP
           domain={extractDomain(tab.url)}
           fullUrl={tab.url}
           level={1}
+          searchQuery={searchQuery}
         />
       ))}
     </div>

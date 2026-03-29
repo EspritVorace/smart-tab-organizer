@@ -313,6 +313,94 @@ test.describe('[US-S-SEARCH-05] Forced-open preview is user-closeable', () => {
 });
 
 // ---------------------------------------------------------------------------
+// [US-S-SEARCH-06] Highlight matching text in session cards
+// ---------------------------------------------------------------------------
+test.describe('[US-S-SEARCH-06] Highlight matching text in session cards', () => {
+  test('session name is highlighted when the search term matches it', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const session = createTestSession({ name: 'React Project' });
+    await seedSessions(extensionContext, [session]);
+
+    const page = await extensionContext.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByPlaceholder('Search sessions...').fill('React');
+
+    // A <mark> element wrapping the matched portion of the session name
+    await expect(page.locator('mark').filter({ hasText: 'React' }).first()).toBeVisible();
+    await page.close();
+  });
+
+  test('tab title is highlighted when the search term matches it', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const session = sessionWithUngroupedTab('TypeScript Handbook', 'https://typescriptlang.org');
+    await seedSessions(extensionContext, [session]);
+
+    const page = await extensionContext.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByPlaceholder('Search sessions...').fill('TypeScript');
+
+    // Preview is auto-opened; the matched part of the tab title should be in a <mark>
+    await expect(page.locator('mark').filter({ hasText: 'TypeScript' }).first()).toBeVisible();
+    await page.close();
+  });
+
+  test('tab domain is highlighted when the search term matches it', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const session = sessionWithUngroupedTab('Home', 'https://my-unique-domain.example.com');
+    await seedSessions(extensionContext, [session]);
+
+    const page = await extensionContext.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByPlaceholder('Search sessions...').fill('my-unique-domain');
+
+    // The domain extracted from the URL should appear highlighted
+    await expect(page.locator('mark').filter({ hasText: 'my-unique-domain' }).first()).toBeVisible();
+    await page.close();
+  });
+
+  test('group title is highlighted when the search term matches it', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const session = sessionWithGroup('Backend APIs', 'API Reference', 'https://api.example.com');
+    await seedSessions(extensionContext, [session]);
+
+    const page = await extensionContext.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByPlaceholder('Search sessions...').fill('Backend');
+
+    // Preview auto-opens; the matched part of the group title should be in a <mark>
+    await expect(page.locator('mark').filter({ hasText: 'Backend' }).first()).toBeVisible();
+    await page.close();
+  });
+
+  test('no highlight is shown when the search field is empty', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const session = createTestSession({ name: 'My Session' });
+    await seedSessions(extensionContext, [session]);
+
+    const page = await extensionContext.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    // No search term → no <mark> elements in the session list
+    await expect(page.locator('mark')).toHaveCount(0);
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Cross-session: only matching sessions are shown
 // ---------------------------------------------------------------------------
 test.describe('[US-S-SEARCH] Cross-session filtering', () => {

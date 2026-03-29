@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { getMessage, getPluralMessage } from '../../../utils/i18n';
 import { countSessionTabs } from '../../../utils/sessionUtils';
+import { AccessibleHighlight } from '../../UI/AccessibleHighlight/AccessibleHighlight';
 import { chromeGroupColors } from '../TabTree/tabTreeUtils';
 import { getRuleCategory } from '../../../schemas/enums';
 import { getRadixColor } from '../../../utils/utils.js';
@@ -38,6 +39,8 @@ interface SessionCardProps {
    * When undefined, all groups are expanded (default behavior).
    */
   searchMatchingGroupIds?: Set<string>;
+  /** Raw search query used to highlight matching text in the card */
+  searchQuery?: string;
 }
 
 export function SessionCard({
@@ -52,6 +55,7 @@ export function SessionCard({
   onUnpin,
   forcePreviewOpen = false,
   searchMatchingGroupIds,
+  searchQuery,
 }: SessionCardProps) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [nameValue, setNameValue] = useState(session.name);
@@ -185,7 +189,7 @@ export function SessionCard({
                     cursor: 'default',
                   }}
                 >
-                  {session.name}
+                  <AccessibleHighlight text={session.name} searchTerm={searchQuery ?? ''} />
                 </Text>
                 {category && (
                   <Badge color={getRadixColor(category.color) as any} size="1" style={{ flexShrink: 0 }}>
@@ -291,6 +295,7 @@ export function SessionCard({
               <SessionPreviewTree
                 session={session}
                 forcedExpandedGroupIds={searchMatchingGroupIds}
+                searchQuery={searchQuery}
               />
             </div>
           </Collapsible.Content>

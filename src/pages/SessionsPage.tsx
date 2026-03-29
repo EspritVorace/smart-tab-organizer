@@ -257,6 +257,7 @@ export function SessionsPage({
                     onUnpin={handleUnpin}
                     forcePreviewOpen={searchMatch?.matchesTabs === true}
                     searchMatchingGroupIds={searchMatch?.matchingGroupIds}
+                    searchQuery={searchQuery || undefined}
                   />
                 );
               })}
