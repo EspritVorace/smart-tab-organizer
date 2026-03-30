@@ -7,110 +7,95 @@
 ![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)
 
-**SmartTab Organizer** est une extension multi-navigateur pour regrouper automatiquement les onglets liés et éviter les doublons.
+**SmartTab Organizer** est une extension multi-navigateur qui regroupe automatiquement les onglets liés, évite les doublons et sauvegarde vos espaces de travail sous forme de sessions nommées.
+
+<p align="center">
+  <img src="doc/assets/fr-dark-popup-content.png" alt="Vue d'ensemble du popup">
+</p>
 
 ## Fonctionnalités
 
 ### 🗂️ Regroupement Automatique
-Clic molette ou clic droit > "Ouvrir dans un nouvel onglet" pour placer instantanément un onglet dans le bon groupe selon vos règles de domaine.
+
+Clic molette ou clic droit → "Ouvrir dans un nouvel onglet" sur un site configuré, et l'onglet rejoint instantanément le bon groupe.
+
 - Nom du groupe extrait du titre de la page, de l'URL ou d'un préréglage regex
-- Préréglages intégrés pour les outils populaires : Jira, GitLab, GitHub, Trello…
+- Préréglages intégrés pour Jira, GitLab, GitHub, Trello et plus encore
+
+<p align="center">
+  <img src="doc/assets/fr-dark-rules-list.png" alt="Liste des règles de domaine">
+</p>
 
 ### 🔁 Déduplication
-Empêche l'ouverture d'une même page deux fois — l'onglet existant est remis au premier plan et rechargé.
-- Sensibilité de correspondance configurable par règle : URL exacte, nom d'hôte + chemin, nom d'hôte ou inclusion
 
-### 📷 Sessions & Profils
-Sauvegardez des snapshots nommés de vos onglets et groupes ouverts, puis restaurez-les à tout moment.
-- **Assistant de restauration** — choisissez les onglets à récupérer, la fenêtre cible, et résolvez les conflits avant d'appliquer
-- **Profils** — épinglez un snapshot comme profil persistant avec icône personnalisée, accès depuis le popup et auto-sync
-- **Éditeur de session** — réorganisez, renommez et supprimez onglets et groupes sans avoir à restaurer au préalable
+Ouvrir une page déjà ouverte remet l'onglet existant au premier plan et le recharge.
+La sensibilité de correspondance est configurable par règle : URL exacte, nom d'hôte + chemin, nom d'hôte ou « includes ».
 
-### ⚙️ Options et Personnalisation
-Gérez les règles de domaine et les préréglages regex via une interface en cartes.
-- **Assistant d'import/export** — classement automatique des règles entrantes (nouvelles, en conflit, identiques) et résolution pas à pas
-- Configurez le mode de déduplication par règle, suivez les statistiques, basculez entre les thèmes Clair/Sombre/Système
+### 📷 Sessions
+
+Sauvegardez un snapshot nommé de vos onglets et groupes ouverts, et restaurez-les quand vous en avez besoin.
+
+- **Sessions épinglées** — promouvez un snapshot dans le popup pour un accès en un clic, avec une icône personnalisée
+- **Assistant de restauration** — choisissez les onglets à récupérer, la fenêtre cible, et résolvez les conflits de groupes avant d'appliquer
+- **Recherche profonde** — retrouvez onglets et groupes par nom dans toutes vos sessions sauvegardées
+- **Éditeur de session** — réorganisez, renommez et supprimez onglets et groupes sans avoir à restaurer
+
+<p align="center">
+  <img src="doc/assets/fr-dark-sessions-list.png" alt="Liste des sessions">
+</p>
+
+<p align="center">
+  <img src="doc/assets/fr-dark-sessions-search-deep.png" alt="Recherche profonde dans les sessions">
+</p>
+
+### ⚙️ Gestion des Règles
+
+Les règles de domaine sont créées via un assistant guidé en 4 étapes : identité → mode de nommage → options → récapitulatif.
+
+Trois modes de nommage de groupe :
+- **Préréglage** — choisissez un motif regex intégré ou personnalisé (numéros de tickets Jira, noms de dépôts GitHub…)
+- **Demander** — prompt pour saisir un nom à l'ouverture de l'onglet
+- **Manuel** — nom de groupe fixe
+
+<p align="center">
+  <img src="doc/assets/fr-dark-rules-create-summary.png" alt="Assistant de création de règle — étape récapitulatif">
+</p>
+
+Un **assistant d'import/export** classe les règles entrantes en nouvelles, en conflit ou identiques, et résout les conflits pas à pas.
+
+<p align="center">
+  <img src="doc/assets/fr-dark-rules-import-text-conflicts.png" alt="Assistant d'import avec résolution de conflits">
+</p>
 
 ### ⚡ Popup d'Accès Rapide
+
 - Activez/désactivez globalement le regroupement et la déduplication
-- Prenez un snapshot ou accédez à la page Sessions en un clic
-- Profils épinglés listés avec leur statut en temps réel et des actions de restauration rapide
+- Prenez un snapshot ou accédez aux Sessions en un clic
+- Sessions épinglées listées avec des actions de restauration rapide
 
 ### ♿ Accessibilité & i18n
-- Navigation complète au clavier et support des lecteurs d'écran (primitives Radix UI)
-- Disponible en Anglais, Français et Espagnol
+
+Navigation complète au clavier et support des lecteurs d'écran via les primitives Radix UI. Disponible en Anglais, Français et Espagnol.
 
 ## Installation
 
-### Manuelle (Développement / Test)
-
-1.  **Télécharger :** Clonez ou téléchargez ce projet.
-    ```bash
-    git clone https://github.com/EspritVorace/smart-tab-organizer.git
-    ```
-2.  **Installer pnpm** (si pas déjà installé) :
-    ```bash
-    npm install -g pnpm
-    # ou : winget install pnpm.pnpm
-    ```
-3.  **Installer les dépendances :**
-    ```bash
-    pnpm install
-    ```
-
-#### Mode Développement (avec rechargement automatique)
-4.  **Démarrer le serveur de développement :**
-    ```bash
-    pnpm dev          # Chrome
-    pnpm dev:firefox  # Firefox
-    ```
-
-#### Build de Production
-4.  **Construire l'extension :**
-    ```bash
-    pnpm build
-    ```
-
-#### Empaquetage pour Distribution
-4.  **Créer les packages de distribution :**
-    ```bash
-    pnpm zip          # Chrome
-    pnpm zip:firefox  # Firefox
-    ```
-
-#### Chargement dans le Navigateur
-4.  **Charger dans votre navigateur :**
-    * Chrome/Chromium : `chrome://extensions/` → "Charger l'extension non empaquetée" → `.output/chrome-mv3`
-    * Firefox : `about:debugging#/runtime/this-firefox` → "Charger un module complémentaire temporaire" → `.output/firefox-mv2/manifest.json`
-
-## Utilisation
-
-1.  **Cliquez sur l'Icône :** Pour accéder au popup.
-2.  **Configurez :** Ouvrez les "Options" pour définir vos règles.
-    * **Règles de Domaine :** Définissez pour quels sites activer les fonctionnalités.
-    * **Préréglages RegEx :** Extrayez les noms de groupes avec des regex (ex : `([A-Z]+-\d+)` pour Jira).
-3.  **Naviguez :** Clic molette ou clic droit > "Ouvrir dans un nouvel onglet" sur les sites configurés.
-4.  **Sessions :** Sauvegardez un snapshot ou créez un profil persistant depuis le popup ou la page d'options.
-
-## Tests
-
 ```bash
-pnpm test                  # Tests unitaires
-pnpm test:wxt          # Tests unitaires (environnement WXT)
-pnpm test:e2e          # Tests E2E (nécessite un build préalable)
-pnpm test:e2e:build    # Build puis tests E2E
-pnpm test:e2e:ui       # Tests E2E avec l'interface Playwright
-pnpm storybook         # Documentation des composants (port 6006)
+git clone https://github.com/EspritVorace/smart-tab-organizer.git
+cd smart-tab-organizer
+npm install -g pnpm  # si nécessaire
+pnpm install
+pnpm build
 ```
+
+- **Chrome :** `chrome://extensions/` → Charger l'extension non empaquetée → `.output/chrome-mv3`
+- **Firefox :** `about:debugging` → Charger un module complémentaire temporaire → `.output/firefox-mv2/manifest.json`
+
+Pour le développement avec rechargement automatique : `pnpm dev` (Chrome) ou `pnpm dev:firefox`.
 
 ## Stack Technique
 
-* **WXT** — framework d'extension multi-navigateur (Chrome MV3 / Firefox MV2)
-* **React + TypeScript**, **Radix UI Themes**, **React Hook Form**, **Zod**
-* **Vitest** (unitaire) · **Playwright** (E2E) · **Storybook** (composants)
+WXT · React + TypeScript · Radix UI Themes · Zod · Vitest · Playwright
 
 ## Licence
 
-Ce projet est sous licence **GNU General Public License v3.0**.
-
----
+GNU General Public License v3.0

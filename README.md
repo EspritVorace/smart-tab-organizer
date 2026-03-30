@@ -7,110 +7,95 @@
 ![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)
 
-**SmartTab Organizer** is a cross-browser extension to automatically group related tabs and prevent duplicates.
+**SmartTab Organizer** is a cross-browser extension that automatically groups related tabs, prevents duplicates, and saves your workspaces as named sessions.
+
+<p align="center">
+  <img src="doc/assets/en-dark-popup-content.png" alt="Popup overview">
+</p>
 
 ## Features
 
 ### 🗂️ Automatic Grouping
-Middle-click or right-click > "Open link in new tab" to instantly place a tab in the right group based on your domain rules.
+
+Middle-click or right-click → "Open in new tab" on a configured site and the tab lands in the right group instantly.
+
 - Group names extracted from the page title, URL, or a regex preset
-- Built-in presets for popular tools: Jira, GitLab, GitHub, Trello…
+- Built-in presets for Jira, GitLab, GitHub, Trello and more
+
+<p align="center">
+  <img src="doc/assets/en-dark-rules-list.png" alt="Domain rules list">
+</p>
 
 ### 🔁 Deduplication
-Prevent the same page from being opened twice — the existing tab is re-focused and reloaded instead.
-- Matching sensitivity configurable per rule: exact URL, hostname + path, hostname, or includes
 
-### 📷 Sessions & Profiles
-Save named snapshots of your open tabs and groups, and restore them at any time.
-- **Restore wizard** — pick which tabs to bring back, choose the target window, resolve conflicts before applying
-- **Profiles** — pin any snapshot as a persistent profile with a custom icon, popup shortcut, and auto-sync
+Opening a page that's already open refocuses and reloads the existing tab instead.
+Matching sensitivity is configurable per rule: exact URL, hostname + path, hostname, or "includes".
+
+### 📷 Sessions
+
+Save a named snapshot of your open tabs and groups, restore them whenever you need.
+
+- **Pinned sessions** — promote any snapshot to your popup for one-click access, with a custom icon
+- **Restore wizard** — pick which tabs to bring back, choose the target window, resolve group conflicts before applying
+- **Deep search** — find tabs and groups by name across all your saved sessions
 - **Session editor** — reorganize, rename and delete tabs and groups without restoring first
 
-### ⚙️ Options & Customization
-Manage domain rules and regex presets through a card-based interface.
-- **Import/Export wizard** — classify incoming rules (new, conflicting, identical) and resolve conflicts step by step
-- Configure deduplication mode per rule, track grouping statistics, switch Light/Dark/System theme
+<p align="center">
+  <img src="doc/assets/en-dark-sessions-list.png" alt="Sessions list">
+</p>
+
+<p align="center">
+  <img src="doc/assets/en-dark-sessions-search-deep.png" alt="Deep search in sessions">
+</p>
+
+### ⚙️ Rule Management
+
+Domain rules are created through a guided 4-step wizard: identity → group naming mode → options → summary.
+
+Three group naming modes:
+- **Preset** — pick a built-in or custom regex pattern (Jira ticket IDs, GitHub repo names…)
+- **Ask** — prompt for a name when the tab opens
+- **Manual** — fixed group name
+
+<p align="center">
+  <img src="doc/assets/en-dark-rules-create-summary.png" alt="Rule creation wizard — summary step">
+</p>
+
+An **Import/Export wizard** classifies incoming rules as new, conflicting or identical, and resolves conflicts step by step.
+
+<p align="center">
+  <img src="doc/assets/en-dark-rules-import-text-conflicts.png" alt="Import wizard with conflict resolution">
+</p>
 
 ### ⚡ Quick Access Popup
+
 - Toggle grouping and deduplication globally
-- Take a snapshot or jump to the Sessions page in one click
-- Pinned profiles listed with their live status and quick-restore actions
+- Take a snapshot or jump to Sessions in one click
+- Pinned sessions listed with quick-restore actions
 
 ### ♿ Accessibility & i18n
-- Full keyboard navigation and screen-reader support (Radix UI primitives)
-- Available in English, French and Spanish
+
+Full keyboard navigation and screen-reader support via Radix UI primitives. Available in English, French and Spanish.
 
 ## Installation
 
-### Manual (Development / Testing)
-
-1.  **Download:** Clone or download this project.
-    ```bash
-    git clone https://github.com/EspritVorace/smart-tab-organizer.git
-    ```
-2.  **Install pnpm** (if not already installed):
-    ```bash
-    npm install -g pnpm
-    # or: winget install pnpm.pnpm
-    ```
-3.  **Install dependencies:**
-    ```bash
-    pnpm install
-    ```
-
-#### Development Mode (with auto-reload)
-4.  **Start development server:**
-    ```bash
-    pnpm dev          # Chrome
-    pnpm dev:firefox  # Firefox
-    ```
-
-#### Production Build
-4.  **Build the extension:**
-    ```bash
-    pnpm build
-    ```
-
-#### Packaging for Distribution
-4.  **Create distribution packages:**
-    ```bash
-    pnpm zip          # Chrome
-    pnpm zip:firefox  # Firefox
-    ```
-
-#### Loading in Browser
-4.  **Load in your browser:**
-    * Chrome/Chromium: open `chrome://extensions/` → "Load unpacked" → `.output/chrome-mv3`
-    * Firefox: open `about:debugging#/runtime/this-firefox` → "Load Temporary Add-on" → `.output/firefox-mv2/manifest.json`
-
-## Usage
-
-1.  **Click the Icon:** To access the popup.
-2.  **Configure:** Open "Options" to set your rules.
-    * **Domain Rules:** Define for which sites to activate features.
-    * **RegEx Presets:** Extract group names with regex (e.g. `([A-Z]+-\d+)` for Jira).
-3.  **Browse:** Middle-click or right-click > "Open link in new tab" on configured sites.
-4.  **Sessions:** Save a snapshot or create a persistent profile from the popup or options page.
-
-## Testing
-
 ```bash
-pnpm test                  # Unit tests
-pnpm test:wxt          # Unit tests (WXT-aware environment)
-pnpm test:e2e          # E2E tests (requires prior build)
-pnpm test:e2e:build    # Build then run E2E tests
-pnpm test:e2e:ui       # E2E tests with Playwright UI
-pnpm storybook         # Component documentation (port 6006)
+git clone https://github.com/EspritVorace/smart-tab-organizer.git
+cd smart-tab-organizer
+npm install -g pnpm  # if needed
+pnpm install
+pnpm build
 ```
+
+- **Chrome:** `chrome://extensions/` → Load unpacked → `.output/chrome-mv3`
+- **Firefox:** `about:debugging` → Load Temporary Add-on → `.output/firefox-mv2/manifest.json`
+
+For development with auto-reload: `pnpm dev` (Chrome) or `pnpm dev:firefox`.
 
 ## Tech Stack
 
-* **WXT** — cross-browser extension framework (Chrome MV3 / Firefox MV2)
-* **React + TypeScript**, **Radix UI Themes**, **React Hook Form**, **Zod**
-* **Vitest** (unit) · **Playwright** (E2E) · **Storybook** (components)
+WXT · React + TypeScript · Radix UI Themes · Zod · Vitest · Playwright
 
 ## License
 
-This project is licensed under the **GNU General Public License v3.0**.
-
----
+GNU General Public License v3.0

@@ -64,8 +64,12 @@ export const test = base.extend<ScreenshotFixtures>({
       }
       const executablePath = findChrome();
 
+      // Chromium does not support extensions in headless mode on Windows.
+      // On Linux (CI), xvfb-maybe provides a virtual display so headless: true works.
+      const headless = process.platform === 'linux';
+
       const context = await chromium.launchPersistentContext(userDataDir, {
-        headless: true,
+        headless,
         executablePath,
         args: [
           `--disable-extensions-except=${EXTENSION_PATH}`,
@@ -75,8 +79,7 @@ export const test = base.extend<ScreenshotFixtures>({
           '--no-default-browser-check',
           '--disable-popup-blocking',
           '--force-device-scale-factor=1',
-          '--no-sandbox',
-          '--disable-dev-shm-usage',
+          ...(headless ? ['--no-sandbox', '--disable-dev-shm-usage'] : []),
         ],
         viewport: { width: 1280, height: 800 },
       });
