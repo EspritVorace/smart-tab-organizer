@@ -38,9 +38,10 @@ async function advanceToStep2(page: import('@playwright/test').Page, label = 'Sc
   const dialog = page.locator('[role="dialog"]');
   await dialog.locator('input[name="label"]').fill(label);
   await dialog.locator('input[name="domainFilter"]').fill('screenshot.com');
-  // Click Next button — last button in dialog footer at step 1
-  await dialog.getByRole('button', { name: /next/i }).click();
-  await page.waitForTimeout(400);
+  // Click Next button — match all 3 locale texts (Next / Suivant / Siguiente)
+  await dialog.getByRole('button', { name: /^(next|suivant|siguiente)$/i }).click();
+  // Wait for step 2 content (SegmentedControl) rather than a fixed timeout
+  await dialog.locator('button.rt-SegmentedControlItem').first().waitFor({ state: 'visible' });
 }
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
@@ -187,11 +188,12 @@ test.describe('Rules screenshots', () => {
         await dialog.locator('button.rt-SegmentedControlItem').nth(1).click();
         await page.waitForTimeout(200);
 
-        // Step 2 → step 3 → step 4
-        await dialog.getByRole('button', { name: /next/i }).click();
-        await dialog.locator('.rt-Switch').waitFor({ state: 'visible' });
-        await dialog.getByRole('button', { name: /next/i }).click();
-        await dialog.getByRole('button', { name: /create/i }).waitFor({ state: 'visible' });
+        // Step 2 → step 3 (Next: Suivant / Siguiente)
+        await dialog.getByRole('button', { name: /^(next|suivant|siguiente)$/i }).click();
+        await dialog.locator('[role="switch"]').waitFor({ state: 'visible' });
+        // Step 3 → step 4 (Next again)
+        await dialog.getByRole('button', { name: /^(next|suivant|siguiente)$/i }).click();
+        await dialog.locator('button[type="submit"]').waitFor({ state: 'visible' });
         await page.waitForTimeout(300);
       },
     );
@@ -213,9 +215,10 @@ test.describe('Rules screenshots', () => {
       'rules-edit',
       async (page) => {
         // Open edit modal for the first seeded rule (Jira)
+        // Use locale-agnostic selectors: last button in row = More actions, first menuitem = Edit
         const rows = page.locator('[role="row"]');
-        await rows.first().getByLabel(/more actions/i).click();
-        await page.getByRole('menuitem', { name: /edit/i }).click();
+        await rows.first().locator('button[aria-label]').last().click();
+        await page.getByRole('menuitem').first().click();
         await page.locator('[role="dialog"]').waitFor({ state: 'visible' });
         await page.waitForTimeout(400);
       },
