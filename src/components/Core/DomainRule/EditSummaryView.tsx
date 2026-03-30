@@ -131,6 +131,7 @@ export function EditSummaryView({
         <Flex justify="between" align="center" mb="2">
           <Text size="2" weight="bold" color="gray">{getMessage('wizardStepConfig')}</Text>
           <IconButton
+            type="button"
             variant="ghost"
             size="1"
             onClick={() => setIsConfigModalOpen(true)}
@@ -150,7 +151,7 @@ export function EditSummaryView({
       {/* ── Zone 3 : Options (Collapsible) ── */}
       <Collapsible.Root open={isOptionsOpen} onOpenChange={setIsOptionsOpen}>
         <Collapsible.Trigger asChild>
-          <Button variant="ghost" size="2" style={{ width: '100%', justifyContent: 'flex-start', padding: 0 }}>
+          <Button type="button" variant="ghost" size="2" style={{ width: '100%', justifyContent: 'flex-start', padding: 0 }}>
             <Flex align="center" gap="2" style={{ width: '100%' }}>
               {isOptionsOpen
                 ? <ChevronDown size={14} aria-hidden="true" />

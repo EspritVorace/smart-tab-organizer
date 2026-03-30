@@ -19,8 +19,9 @@ test.beforeEach(async ({ helpers }) => {
 /** Open the "Add Rule" wizard dialog from the Domain Rules section. */
 async function openCreateWizard(page: import('@playwright/test').Page, extensionId: string) {
   await goToDomainRulesSection(page, extensionId);
-  // "Add Rule" button — last primary button in the rules toolbar
-  await page.locator('main button.rt-Button').last().click();
+  // Click the toolbar "Add Rule" button — use first() because the empty state also
+  // shows an "Add Rule" button (second) and an "Import Rules" button (third).
+  await page.getByRole('button', { name: /add rule/i }).first().click();
   await page.waitForTimeout(300);
   return page.locator('[role="dialog"]');
 }
@@ -30,7 +31,7 @@ async function goToStep2(dialog: import('@playwright/test').Locator) {
   await dialog.locator('input[name="label"]').fill('My New Rule');
   await dialog.locator('input[name="domainFilter"]').fill('mynew.com');
   await dialog.getByRole('button', { name: /next/i }).click();
-  await dialog.locator('[role="list"]').waitFor({ state: 'visible' });
+  await dialog.locator('button.rt-SegmentedControlItem').first().waitFor({ state: 'visible' });
 }
 
 // ---------------------------------------------------------------------------
@@ -209,7 +210,7 @@ test.describe('Creation wizard — Step 3: Options', () => {
   async function goToStep3(dialog: import('@playwright/test').Locator) {
     await goToStep2(dialog);
     await dialog.getByRole('button', { name: /next/i }).click();
-    await dialog.locator('.rt-Switch').waitFor({ state: 'visible' });
+    await dialog.locator('[role="switch"]').waitFor({ state: 'visible' });
   }
 
   test('step 3 — dedup switch visible and enabled by default', async ({
@@ -219,7 +220,7 @@ test.describe('Creation wizard — Step 3: Options', () => {
     const dialog = await openCreateWizard(page, extensionId);
     await goToStep3(dialog);
 
-    const switchEl = dialog.locator('.rt-Switch');
+    const switchEl = dialog.locator('[role="switch"]');
     await expect(switchEl).toBeVisible();
     // Switch is checked (dedup enabled by default)
     await expect(switchEl).toHaveAttribute('data-state', 'checked');
@@ -234,7 +235,7 @@ test.describe('Creation wizard — Step 3: Options', () => {
     await goToStep3(dialog);
 
     // Click switch to disable dedup
-    await dialog.locator('.rt-Switch').click();
+    await dialog.locator('[role="switch"]').click();
     await page.waitForTimeout(200);
 
     // RadioGroup not visible
@@ -280,7 +281,7 @@ test.describe('Creation wizard — Step 4: Summary', () => {
   async function goToStep4(dialog: import('@playwright/test').Locator) {
     await goToStep2(dialog);
     await dialog.getByRole('button', { name: /next/i }).click(); // step 3
-    await dialog.locator('.rt-Switch').waitFor({ state: 'visible' });
+    await dialog.locator('[role="switch"]').waitFor({ state: 'visible' });
     await dialog.getByRole('button', { name: /next/i }).click(); // step 4
     await dialog.getByRole('button', { name: /create/i }).waitFor({ state: 'visible' });
   }
@@ -327,7 +328,7 @@ test.describe('Creation wizard — Step 4: Summary', () => {
     // Switch to Ask mode so no preset is required
     await dialog.locator('button.rt-SegmentedControlItem').nth(1).click();
     await dialog.getByRole('button', { name: /next/i }).click();
-    await dialog.locator('.rt-Switch').waitFor({ state: 'visible' });
+    await dialog.locator('[role="switch"]').waitFor({ state: 'visible' });
     await dialog.getByRole('button', { name: /next/i }).click();
     await dialog.getByRole('button', { name: /create/i }).waitFor({ state: 'visible' });
 
@@ -427,7 +428,7 @@ test.describe('Edit mode — Summary View', () => {
     await dialog.waitFor({ state: 'visible' });
 
     // Dedup switch not visible (options collapsed)
-    await expect(dialog.locator('.rt-Switch')).not.toBeVisible();
+    await expect(dialog.locator('[role="switch"]')).not.toBeVisible();
 
     // Click the collapsible trigger to expand
     const optionsTrigger = dialog.getByRole('button', { name: /options/i });
@@ -435,7 +436,7 @@ test.describe('Edit mode — Summary View', () => {
     await page.waitForTimeout(200);
 
     // Dedup switch now visible
-    await expect(dialog.locator('.rt-Switch')).toBeVisible();
+    await expect(dialog.locator('[role="switch"]')).toBeVisible();
     await page.close();
   });
 });

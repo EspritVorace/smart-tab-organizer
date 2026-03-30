@@ -14,7 +14,7 @@ import { EditSummaryView } from './EditSummaryView';
 import { type ConfigEditValues } from './ConfigEditModal';
 import { generateUUID } from '../../../utils/utils';
 import { createDomainRuleSchemaWithUniqueness, type DomainRule } from '../../../schemas/domainRule';
-import { type GroupNameSourceValue } from '../../../schemas/enums';
+import { groupNameSourceOptions, type GroupNameSourceValue } from '../../../schemas/enums';
 import { getPresetById, loadPresets, type PresetCategory } from '../../../utils/presetUtils';
 import type { SyncSettings } from '../../../types/syncSettings';
 import { logger } from '../../../utils/logger';
@@ -27,6 +27,8 @@ interface RuleWizardModalProps {
   syncSettings: SyncSettings;
 }
 
+const VALID_GROUP_NAME_SOURCES = groupNameSourceOptions.map(o => o.value) as GroupNameSourceValue[];
+
 const getDefaultValues = (rule?: DomainRule): Partial<DomainRule> => {
   return rule ? {
     id: rule.id,
@@ -34,9 +36,9 @@ const getDefaultValues = (rule?: DomainRule): Partial<DomainRule> => {
     label: rule.label,
     titleParsingRegEx: rule.titleParsingRegEx,
     urlParsingRegEx: rule.urlParsingRegEx,
-    groupNameSource: rule.groupNameSource,
+    groupNameSource: (VALID_GROUP_NAME_SOURCES.includes(rule.groupNameSource) ? rule.groupNameSource : 'title') as GroupNameSourceValue,
     deduplicationMatchMode: rule.deduplicationMatchMode,
-    color: rule.color,
+    color: rule.color || undefined,
     categoryId: rule.categoryId ?? null,
     deduplicationEnabled: rule.deduplicationEnabled,
     presetId: rule.presetId,
