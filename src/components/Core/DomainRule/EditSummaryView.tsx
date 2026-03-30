@@ -151,7 +151,7 @@ export function EditSummaryView({
       {/* ── Zone 3 : Options (Collapsible) ── */}
       <Collapsible.Root open={isOptionsOpen} onOpenChange={setIsOptionsOpen}>
         <Collapsible.Trigger asChild>
-          <Button type="button" variant="ghost" size="2" style={{ width: '100%', justifyContent: 'flex-start', paddingInline: 0 }}>
+          <Button type="button" variant="ghost" size="2" style={{ width: '100%', justifyContent: 'flex-start', '--button-ghost-padding-x': '0px' } as React.CSSProperties}>
             <Flex align="center" gap="2" style={{ width: '100%' }}>
               {isOptionsOpen
                 ? <ChevronDown size={14} aria-hidden="true" />
