@@ -99,29 +99,47 @@ export function setupTabUpdatedHandler(): void {
         // URL-based fallback: when Chrome doesn't expose openerTabId in onTabCreated
         // (e.g. tabs opened via chrome.tabs.create from the extension), look up
         // middleClickedTabs by the navigated URL instead.
+        // openerTabId-based fallback: handles the combination of SW timing race
+        // (message arrives after onTabCreated) + URL mismatch (e.g. Chrome transparently
+        // resolves Google's redirect URL so the tab never navigates through it).
         const navUrl = changeInfo.url || tab.url;
         if (navUrl && !navUrl.startsWith('about:') && !navUrl.startsWith('chrome:') && !pendingGroupings.has(tabId)) {
             const middleClickedTabs = (globalThis as any).middleClickedTabs as Map<string, number> | undefined;
+
+            let matchedOpenerTabId: number | undefined;
+
             if (middleClickedTabs?.has(navUrl)) {
-                const openerTabId = middleClickedTabs.get(navUrl)!;
+                matchedOpenerTabId = middleClickedTabs.get(navUrl)!;
                 middleClickedTabs.delete(navUrl);
-                logger.debug(`[GROUPING_DEBUG] onUpdated: URL-based match for tab ${tabId} (URL: "${navUrl}"), openerTabId: ${openerTabId}.`);
+                logger.debug(`[GROUPING_DEBUG] onUpdated: URL-based match for tab ${tabId} (URL: "${navUrl}"), openerTabId: ${matchedOpenerTabId}.`);
+            } else if (tab.openerTabId && middleClickedTabs) {
+                for (const [clickedUrl, id] of middleClickedTabs.entries()) {
+                    if (id === tab.openerTabId) {
+                        matchedOpenerTabId = id;
+                        middleClickedTabs.delete(clickedUrl);
+                        logger.debug(`[GROUPING_DEBUG] onUpdated: openerTabId-based match for tab ${tabId} (openerTabId: ${tab.openerTabId}, registered URL was "${clickedUrl}").`);
+                        break;
+                    }
+                }
+            }
+
+            if (matchedOpenerTabId !== undefined) {
                 try {
-                    const openerTab = await browser.tabs.get(openerTabId);
+                    const openerTab = await browser.tabs.get(matchedOpenerTabId);
                     // Re-fetch the new tab to get its current status (may have changed while awaiting).
                     const currentNewTab = await browser.tabs.get(tabId).catch(() => null);
                     if (!currentNewTab) return; // tab was closed
                     if (currentNewTab.status === 'complete' && currentNewTab.url && !currentNewTab.url.startsWith('about:')) {
                         // Tab already complete — process grouping immediately.
-                        logger.debug(`[GROUPING_DEBUG] onUpdated: URL-based match, tab ${tabId} already complete. Processing now.`);
+                        logger.debug(`[GROUPING_DEBUG] onUpdated: Tab ${tabId} already complete. Processing now.`);
                         await processGroupingForNewTab(openerTab, currentNewTab);
                     } else {
                         // Tab still loading — register pending grouping for onTabUpdated(complete).
                         pendingGroupings.set(tabId, { openerTab, newTab: currentNewTab });
-                        logger.debug(`[GROUPING_DEBUG] onUpdated: URL-based match, registered pending grouping for tab ${tabId}.`);
+                        logger.debug(`[GROUPING_DEBUG] onUpdated: Registered pending grouping for tab ${tabId}.`);
                     }
                 } catch (e) {
-                    logger.warn(`[GROUPING_DEBUG] onUpdated: Opener tab ${openerTabId} not found for URL-based match.`);
+                    logger.warn(`[GROUPING_DEBUG] onUpdated: Opener tab ${matchedOpenerTabId} not found.`);
                 }
             }
         }
