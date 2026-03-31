@@ -5,6 +5,8 @@ import { PageLayout } from '../PageLayout/PageLayout';
 import { getMessage } from '../../../utils/i18n';
 import { ExportWizard } from './ExportWizard';
 import { ImportWizard } from './ImportWizard';
+import { ExportSessionsWizard } from './ExportSessionsWizard';
+import { ImportSessionsWizard } from './ImportSessionsWizard';
 import type { SyncSettings, DomainRuleSetting } from '../../../types/syncSettings';
 
 interface ImportExportPageProps {
@@ -15,6 +17,8 @@ interface ImportExportPageProps {
 export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExportPageProps) {
   const [exportOpen, setExportOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [exportSessionsOpen, setExportSessionsOpen] = useState(false);
+  const [importSessionsOpen, setImportSessionsOpen] = useState(false);
 
   const handleImport = useCallback((updatedRules: DomainRuleSetting[]) => {
     onSettingsUpdate({
@@ -105,6 +109,72 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
                 </Button>
               </Flex>
             </Card>
+
+            {/* Export Sessions Card */}
+            <Card size="3">
+              <Flex direction="column" gap="3" align="start" style={{ height: '100%' }}>
+                <Flex align="center" gap="2">
+                  <Box
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 'var(--radius-2)',
+                      backgroundColor: 'var(--accent-a3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Download size={20} style={{ color: 'var(--accent-11)' }} aria-hidden="true" />
+                  </Box>
+                  <Text size="4" weight="bold">
+                    {getMessage('exportSessionsTitle')}
+                  </Text>
+                </Flex>
+
+                <Text size="2" color="gray" style={{ flex: 1 }}>
+                  {getMessage('exportSessionsDescription')}
+                </Text>
+
+                <Button variant="solid" onClick={() => setExportSessionsOpen(true)}>
+                  <Download size={16} aria-hidden="true" />
+                  {getMessage('exportSessionsButton')}
+                </Button>
+              </Flex>
+            </Card>
+
+            {/* Import Sessions Card */}
+            <Card size="3">
+              <Flex direction="column" gap="3" align="start" style={{ height: '100%' }}>
+                <Flex align="center" gap="2">
+                  <Box
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 'var(--radius-2)',
+                      backgroundColor: 'var(--accent-a3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Upload size={20} style={{ color: 'var(--accent-11)' }} aria-hidden="true" />
+                  </Box>
+                  <Text size="4" weight="bold">
+                    {getMessage('importSessionsTitle')}
+                  </Text>
+                </Flex>
+
+                <Text size="2" color="gray" style={{ flex: 1 }}>
+                  {getMessage('importSessionsDescription')}
+                </Text>
+
+                <Button variant="solid" onClick={() => setImportSessionsOpen(true)}>
+                  <Upload size={16} aria-hidden="true" />
+                  {getMessage('importSessionsButton')}
+                </Button>
+              </Flex>
+            </Card>
           </Grid>
 
           <ExportWizard
@@ -118,6 +188,16 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
             onOpenChange={setImportOpen}
             existingRules={syncSettings.domainRules}
             onImport={handleImport}
+          />
+
+          <ExportSessionsWizard
+            open={exportSessionsOpen}
+            onOpenChange={setExportSessionsOpen}
+          />
+
+          <ImportSessionsWizard
+            open={importSessionsOpen}
+            onOpenChange={setImportSessionsOpen}
           />
         </Box>
       )}
