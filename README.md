@@ -10,10 +10,23 @@
 **SmartTab Organizer** is a cross-browser extension that automatically groups related tabs, prevents duplicates, and saves your workspaces as named sessions.
 
 <p align="center">
-  <img src="doc/assets/en-dark-popup-content.png" alt="Popup overview">
+  <img src="doc/assets/store.png" alt="SmartTab Orgnaizer">
 </p>
 
 ## Features
+
+### ⚙️ Rule Management
+
+Domain rules are created through a guided 4-step wizard: identity → group naming mode → options → summary.
+
+Three group naming modes:
+- **Preset** — pick a built-in or custom regex pattern (Jira ticket IDs, GitHub repo names…)
+- **Ask** — prompt for a name when the tab opens
+- **Manual** — fixed group name
+
+<p align="center">
+  <img src="doc/assets/en-dark-rules-create-summary.png" alt="Rule creation wizard — summary step">
+</p>
 
 ### 🗂️ Automatic Grouping
 
@@ -23,13 +36,18 @@ Middle-click or right-click → "Open in new tab" on a configured site and the t
 - Built-in presets for Jira, GitLab, GitHub, Trello and more
 
 <p align="center">
-  <img src="doc/assets/en-dark-rules-list.png" alt="Domain rules list">
+  <img src="doc/assets/regroup.gif" alt="Automatic Regroupment video">
 </p>
 
 ### 🔁 Deduplication
 
 Opening a page that's already open refocuses and reloads the existing tab instead.
 Matching sensitivity is configurable per rule: exact URL, hostname + path, hostname, or "includes".
+
+<p align="center">
+  <img src="doc/assets/dedup.gif" alt="Deduplication video">
+</p>
+
 
 ### 📷 Sessions
 
@@ -48,20 +66,8 @@ Save a named snapshot of your open tabs and groups, restore them whenever you ne
   <img src="doc/assets/en-dark-sessions-search-deep.png" alt="Deep search in sessions">
 </p>
 
-### ⚙️ Rule Management
 
-Domain rules are created through a guided 4-step wizard: identity → group naming mode → options → summary.
-
-Three group naming modes:
-- **Preset** — pick a built-in or custom regex pattern (Jira ticket IDs, GitHub repo names…)
-- **Ask** — prompt for a name when the tab opens
-- **Manual** — fixed group name
-
-<p align="center">
-  <img src="doc/assets/en-dark-rules-create-summary.png" alt="Rule creation wizard — summary step">
-</p>
-
-An **Import/Export wizard** classifies incoming rules as new, conflicting or identical, and resolves conflicts step by step.
+An **Import/Export wizard for Rules and Sessions** classifies incoming as new, conflicting or identical, and resolves conflicts step by step.
 
 <p align="center">
   <img src="doc/assets/en-dark-rules-import-text-conflicts.png" alt="Import wizard with conflict resolution">
@@ -73,11 +79,23 @@ An **Import/Export wizard** classifies incoming rules as new, conflicting or ide
 - Take a snapshot or jump to Sessions in one click
 - Pinned sessions listed with quick-restore actions
 
+<p align="center">
+
+<img src="doc/assets/en-dark-popup-content.png" alt="Popup content">
+</p>
+
 ### ♿ Accessibility & i18n
 
 Full keyboard navigation and screen-reader support via Radix UI primitives. Available in English, French and Spanish.
 
-## Installation
+## 🛒 Chrome Weeb Store ##
+
+Open in Chrome Web Store
+
+[![Open in Chrome Web Store](https://img.shields.io/chrome-web-store/v/ijnpdkkcbmfikocmboibffjgbohhlmah)](https://chromewebstore.google.com/detail/smarttab-organizer/ijnpdkkcbmfikocmboibffjgbohhlmah)
+
+
+## 💻 Installation
 
 ```bash
 git clone https://github.com/EspritVorace/smart-tab-organizer.git
@@ -88,14 +106,14 @@ pnpm build
 ```
 
 - **Chrome:** `chrome://extensions/` → Load unpacked → `.output/chrome-mv3`
-- **Firefox:** `about:debugging` → Load Temporary Add-on → `.output/firefox-mv2/manifest.json`
+manifest.json`
 
 For development with auto-reload: `pnpm dev` (Chrome) or `pnpm dev:firefox`.
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 WXT · React + TypeScript · Radix UI Themes · Zod · Vitest · Playwright
 
-## License
+## 📜 License
 
 GNU General Public License v3.0
