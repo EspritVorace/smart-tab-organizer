@@ -5,8 +5,8 @@ import {
   extractGroupNameFromTitle,
   extractGroupNameFromUrl,
   isValidRegex,
-  isValidDomain
-} from '../src/utils/utils.js';
+  isValidDomain,
+} from '../src/utils/utils';
 
 test('domainToRegex with typical domain', () => {
   const regex = domainToRegex('example.com');

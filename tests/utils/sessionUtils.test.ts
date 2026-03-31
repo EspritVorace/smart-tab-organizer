@@ -9,7 +9,7 @@ import {
 import type { Session, SavedTab, SavedTabGroup } from '../../src/types/session';
 
 // generateUUID uses Math.random — mock it for deterministic IDs in createSessionFromSelection
-vi.mock('../../src/utils/utils.js', () => ({
+vi.mock('../../src/utils/utils', () => ({
   generateUUID: vi.fn(() => 'mocked-uuid'),
 }));
 
