@@ -84,9 +84,8 @@ test.describe('Sessions import/export screenshots', () => {
 
   /**
    * sessions-import-text-conflicts
-   * Import Sessions dialog → text mode → paste conflict JSON → wait for inline
-   * classification to render (new / conflicting / identical session groups).
-   * Does NOT click Next — the classification is displayed in step 0.
+   * Import Sessions dialog → text mode → paste conflict JSON → click Next
+   * → step 1 shows classification (new / conflicting / identical session groups).
    */
   test('sessions-import-text-conflicts', async ({ extensionContext, extensionId }, testInfo) => {
     const locale = testInfo.project.name;
@@ -115,7 +114,7 @@ test.describe('Sessions import/export screenshots', () => {
         await textarea.waitFor({ state: 'visible', timeout: 4_000 });
         await textarea.fill(conflictJson);
 
-        // Wait for classification to render (Next button becomes enabled)
+        // Wait for Next button to become enabled (JSON valid → count shown)
         await page.waitForFunction(
           () => {
             const btns = Array.from(
@@ -130,8 +129,13 @@ test.describe('Sessions import/export screenshots', () => {
           },
           { timeout: 5_000 },
         ).catch(() => {});
+        await page.waitForTimeout(400);
 
-        // Extra pause to let the classification sections fully render
+        // Click Next → moves to step 1 with classification
+        const nextBtn = dialog.getByRole('button').last();
+        await nextBtn.click();
+
+        // Wait for classification sections to render
         await page.waitForTimeout(600);
       },
     );

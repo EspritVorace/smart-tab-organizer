@@ -44,11 +44,9 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
   const [fileName, setFileName] = useState<string | null>(null);
   const [existingSessions, setExistingSessions] = useState<Session[]>([]);
 
-  // Step 0 state
+  // Step 1 state
   const [classification, setClassification] = useState<SessionClassification | null>(null);
   const [newSessionSelectedIds, setNewSessionSelectedIds] = useState<Set<string>>(new Set());
-
-  // Step 1 state
   const [conflictMode, setConflictMode] = useState<ConflictMode>('overwrite');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -68,18 +66,6 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
       setConflictMode('overwrite');
     }
   }, [open]);
-
-  // Re-classify when parsed sessions or existing sessions change
-  useEffect(() => {
-    if (parsedSessions && existingSessions.length >= 0) {
-      const result = classifyImportedSessions(parsedSessions, existingSessions);
-      setClassification(result);
-      setNewSessionSelectedIds(new Set(result.newSessions.map(s => s.id)));
-    } else {
-      setClassification(null);
-      setNewSessionSelectedIds(new Set());
-    }
-  }, [parsedSessions, existingSessions]);
 
   const validateJson = useCallback((text: string) => {
     if (!text.trim()) {
@@ -151,6 +137,15 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
     if (file) handleFileRead(file);
   }, [handleFileRead]);
 
+  // Transition to step 1: classify sessions
+  const goToStep1 = useCallback(() => {
+    if (!parsedSessions) return;
+    const result = classifyImportedSessions(parsedSessions, existingSessions);
+    setClassification(result);
+    setNewSessionSelectedIds(new Set(result.newSessions.map(s => s.id)));
+    setStep(1);
+  }, [parsedSessions, existingSessions]);
+
   const toggleNewSession = useCallback((id: string) => {
     setNewSessionSelectedIds(prev => {
       const next = new Set(prev);
@@ -163,16 +158,8 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
     });
   }, []);
 
-  // Import count (step 0: all conflicting counted; step 1: depends on mode)
-  const importCountStep0 = useMemo(() => {
-    if (!classification) return 0;
-    return (
-      classification.newSessions.filter(s => newSessionSelectedIds.has(s.id)).length +
-      classification.conflictingSessions.length
-    );
-  }, [classification, newSessionSelectedIds]);
-
-  const importCountStep1 = useMemo(() => {
+  // Compute import count for step 1
+  const importCount = useMemo(() => {
     if (!classification) return 0;
     const newCount = classification.newSessions.filter(s => newSessionSelectedIds.has(s.id)).length;
     const conflictCount = conflictMode === 'ignore' ? 0 : classification.conflictingSessions.length;
@@ -259,7 +246,7 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
 
           <Separator size="4" mt="3" style={{ opacity: 0.3 }} />
 
-          {/* Step 0: Source + inline classification */}
+          {/* Step 0: Source */}
           {step === 0 && (
             <Box mt="4">
               <SegmentedControl.Root
@@ -341,7 +328,7 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
                 </Callout.Root>
               )}
 
-              {parsedSessions && !classification && (
+              {parsedSessions && (
                 <Callout.Root color="green" variant="soft" mt="3">
                   <Callout.Icon>
                     <CheckCircle size={16} />
@@ -351,134 +338,122 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
                   </Callout.Text>
                 </Callout.Root>
               )}
-
-              {/* Inline classification */}
-              {classification && (
-                <Box mt="4">
-                  <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '40vh' }}>
-                    <Flex direction="column" gap="3" pr="3">
-                      {/* New sessions */}
-                      {classification.newSessions.length > 0 && (
-                        <>
-                          <Text size="3" weight="bold">
-                            {getMessage('newSessionsGroup').replace('{count}', String(classification.newSessions.length))}
-                          </Text>
-                          <Flex direction="column" gap="2">
-                            {classification.newSessions.map(session => (
-                              <SessionRow
-                                key={session.id}
-                                session={session}
-                                checkbox
-                                checked={newSessionSelectedIds.has(session.id)}
-                                onToggle={() => toggleNewSession(session.id)}
-                                formatDate={formatDate}
-                                getGroupLabel={getGroupLabel}
-                                getTabLabel={getTabLabel}
-                                getTabCount={getTabCount}
-                              />
-                            ))}
-                          </Flex>
-                        </>
-                      )}
-
-                      {/* Conflicting sessions */}
-                      {classification.conflictingSessions.length > 0 && (
-                        <>
-                          {classification.newSessions.length > 0 && <Separator size="4" />}
-                          <Text size="3" weight="bold">
-                            {getMessage('conflictingSessionsGroup').replace('{count}', String(classification.conflictingSessions.length))}
-                          </Text>
-                          <Flex direction="column" gap="2">
-                            {classification.conflictingSessions.map(conflict => (
-                              <ConflictSessionRow
-                                key={conflict.imported.id}
-                                conflict={conflict}
-                                formatDate={formatDate}
-                                getGroupLabel={getGroupLabel}
-                                getTabLabel={getTabLabel}
-                                getTabCount={getTabCount}
-                              />
-                            ))}
-                          </Flex>
-                        </>
-                      )}
-
-                      {/* Identical sessions */}
-                      {classification.identicalSessions.length > 0 && (
-                        <>
-                          {(classification.newSessions.length > 0 || classification.conflictingSessions.length > 0) && (
-                            <Separator size="4" />
-                          )}
-                          <Text size="3" weight="bold">
-                            {getMessage('identicalSessionsGroup').replace('{count}', String(classification.identicalSessions.length))}
-                          </Text>
-                          <Flex direction="column" gap="2">
-                            {classification.identicalSessions.map(session => (
-                              <SessionRow
-                                key={session.id}
-                                session={session}
-                                dimmed
-                                statusBadge={getMessage('alreadyExists')}
-                                formatDate={formatDate}
-                                getGroupLabel={getGroupLabel}
-                                getTabLabel={getTabLabel}
-                                getTabCount={getTabCount}
-                              />
-                            ))}
-                          </Flex>
-                        </>
-                      )}
-                    </Flex>
-                  </ScrollArea>
-
-                  <Text size="2" color="gray" mt="3">
-                    {getMessage('sessionsToImportCount').replace('{count}', String(importCountStep0))}
-                  </Text>
-                </Box>
-              )}
             </Box>
           )}
 
-          {/* Step 1: Conflict resolution + confirmation */}
+          {/* Step 1: Classification + conflict resolution */}
           {step === 1 && classification && (
             <Box mt="4">
-              {hasConflicts && (
-                <Box mb="4">
-                  <Flex align="center" gap="2" mb="3">
-                    <Text size="2" color="gray">{getMessage('conflictResolutionMode')}</Text>
-                    <SegmentedControl.Root
-                      value={conflictMode}
-                      onValueChange={(v: string) => setConflictMode(v as ConflictMode)}
-                      size="1"
-                    >
-                      <SegmentedControl.Item value="overwrite">
-                        {getMessage('conflictModeOverwrite')}
-                      </SegmentedControl.Item>
-                      <SegmentedControl.Item value="duplicate">
-                        {getMessage('conflictModeDuplicate')}
-                      </SegmentedControl.Item>
-                      <SegmentedControl.Item value="ignore">
-                        {getMessage('conflictModeIgnore')}
-                      </SegmentedControl.Item>
-                    </SegmentedControl.Root>
-                  </Flex>
-
-                  {conflictMode === 'overwrite' && (
-                    <Callout.Root color="orange" variant="soft" mt="3">
-                      <Callout.Icon>
-                        <AlertTriangle size={16} />
-                      </Callout.Icon>
-                      <Callout.Text>
-                        {getMessage('sessionImportOverwriteWarning')}
-                      </Callout.Text>
-                    </Callout.Root>
+              <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '50vh' }}>
+                <Flex direction="column" gap="3" pr="3">
+                  {/* New sessions group */}
+                  {classification.newSessions.length > 0 && (
+                    <>
+                      <Text size="3" weight="bold">
+                        {getMessage('newSessionsGroup').replace('{count}', String(classification.newSessions.length))}
+                      </Text>
+                      <Flex direction="column" gap="2">
+                        {classification.newSessions.map(session => (
+                          <SessionRow
+                            key={session.id}
+                            session={session}
+                            checkbox
+                            checked={newSessionSelectedIds.has(session.id)}
+                            onToggle={() => toggleNewSession(session.id)}
+                            formatDate={formatDate}
+                            getGroupLabel={getGroupLabel}
+                            getTabLabel={getTabLabel}
+                            getTabCount={getTabCount}
+                          />
+                        ))}
+                      </Flex>
+                    </>
                   )}
-                </Box>
-              )}
 
-              <Text size="2" color="gray">
-                {getMessage('sessionsToImportCount').replace('{count}', String(importCountStep1))}
+                  {/* Conflicting sessions group */}
+                  {classification.conflictingSessions.length > 0 && (
+                    <>
+                      {classification.newSessions.length > 0 && <Separator size="4" />}
+                      <Text size="3" weight="bold">
+                        {getMessage('conflictingSessionsGroup').replace('{count}', String(classification.conflictingSessions.length))}
+                      </Text>
+
+                      <Flex align="center" gap="2" mb="1">
+                        <Text size="2" color="gray">{getMessage('conflictResolutionMode')}</Text>
+                        <SegmentedControl.Root
+                          value={conflictMode}
+                          onValueChange={(v: string) => setConflictMode(v as ConflictMode)}
+                          size="1"
+                        >
+                          <SegmentedControl.Item value="overwrite">
+                            {getMessage('conflictModeOverwrite')}
+                          </SegmentedControl.Item>
+                          <SegmentedControl.Item value="duplicate">
+                            {getMessage('conflictModeDuplicate')}
+                          </SegmentedControl.Item>
+                          <SegmentedControl.Item value="ignore">
+                            {getMessage('conflictModeIgnore')}
+                          </SegmentedControl.Item>
+                        </SegmentedControl.Root>
+                      </Flex>
+
+                      <Flex direction="column" gap="2">
+                        {classification.conflictingSessions.map(conflict => (
+                          <ConflictSessionRow
+                            key={conflict.imported.id}
+                            conflict={conflict}
+                            formatDate={formatDate}
+                            getGroupLabel={getGroupLabel}
+                            getTabLabel={getTabLabel}
+                            getTabCount={getTabCount}
+                          />
+                        ))}
+                      </Flex>
+                    </>
+                  )}
+
+                  {/* Identical sessions group */}
+                  {classification.identicalSessions.length > 0 && (
+                    <>
+                      {(classification.newSessions.length > 0 || classification.conflictingSessions.length > 0) && (
+                        <Separator size="4" />
+                      )}
+                      <Text size="3" weight="bold">
+                        {getMessage('identicalSessionsGroup').replace('{count}', String(classification.identicalSessions.length))}
+                      </Text>
+                      <Flex direction="column" gap="2">
+                        {classification.identicalSessions.map(session => (
+                          <SessionRow
+                            key={session.id}
+                            session={session}
+                            dimmed
+                            statusBadge={getMessage('alreadyExists')}
+                            formatDate={formatDate}
+                            getGroupLabel={getGroupLabel}
+                            getTabLabel={getTabLabel}
+                            getTabCount={getTabCount}
+                          />
+                        ))}
+                      </Flex>
+                    </>
+                  )}
+                </Flex>
+              </ScrollArea>
+
+              <Text size="2" color="gray" mt="3">
+                {getMessage('sessionsToImportCount').replace('{count}', String(importCount))}
               </Text>
+
+              {hasConflicts && conflictMode === 'overwrite' && (
+                <Callout.Root color="orange" variant="soft" mt="3">
+                  <Callout.Icon>
+                    <AlertTriangle size={16} />
+                  </Callout.Icon>
+                  <Callout.Text>
+                    {getMessage('sessionImportOverwriteWarning')}
+                  </Callout.Text>
+                </Callout.Root>
+              )}
             </Box>
           )}
 
@@ -493,10 +468,7 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
                     {getMessage('cancel')}
                   </Button>
                 </Dialog.Close>
-                <Button
-                  onClick={() => setStep(1)}
-                  disabled={!parsedSessions || importCountStep0 === 0}
-                >
+                <Button onClick={goToStep1} disabled={!parsedSessions}>
                   {getMessage('next')}
                 </Button>
               </>
@@ -506,7 +478,7 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
                 <Button variant="soft" color="gray" onClick={() => setStep(0)}>
                   {getMessage('previous')}
                 </Button>
-                <Button onClick={executeImport} disabled={importCountStep1 === 0}>
+                <Button onClick={executeImport} disabled={importCount === 0}>
                   {getMessage('confirmImport')}
                 </Button>
               </>
