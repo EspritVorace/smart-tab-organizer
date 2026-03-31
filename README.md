@@ -10,8 +10,13 @@
 **SmartTab Organizer** is a cross-browser extension that automatically groups related tabs, prevents duplicates, and saves your workspaces as named sessions.
 
 <p align="center">
-  <img src="doc/assets/store.png" alt="SmartTab Orgnaizer">
+  <img src="doc/assets/store.png" alt="SmartTab Organizer">
 </p>
+
+## 🛒 Chrome Web Store ##
+
+
+[![](https://img.shields.io/chrome-web-store/v/ijnpdkkcbmfikocmboibffjgbohhlmah?style=for-the-badge&label=version)](https://chromewebstore.google.com/detail/smarttab-organizer/ijnpdkkcbmfikocmboibffjgbohhlmah)
 
 ## Features
 
@@ -88,13 +93,6 @@ An **Import/Export wizard for Rules and Sessions** classifies incoming as new, c
 
 Full keyboard navigation and screen-reader support via Radix UI primitives. Available in English, French and Spanish.
 
-## 🛒 Chrome Weeb Store ##
-
-Open in Chrome Web Store
-
-[![Open in Chrome Web Store](https://img.shields.io/chrome-web-store/v/ijnpdkkcbmfikocmboibffjgbohhlmah)](https://chromewebstore.google.com/detail/smarttab-organizer/ijnpdkkcbmfikocmboibffjgbohhlmah)
-
-
 ## 💻 Installation
 
 ```bash
@@ -106,7 +104,6 @@ pnpm build
 ```
 
 - **Chrome:** `chrome://extensions/` → Load unpacked → `.output/chrome-mv3`
-manifest.json`
 
 For development with auto-reload: `pnpm dev` (Chrome) or `pnpm dev:firefox`.
 

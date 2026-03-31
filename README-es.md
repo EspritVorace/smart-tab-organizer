@@ -13,6 +13,11 @@
   <img src="doc/assets/store.png" alt="SmartTab Organizer">
 </p>
 
+## 🛒 Chrome Web Store ##
+
+
+[![](https://img.shields.io/chrome-web-store/v/ijnpdkkcbmfikocmboibffjgbohhlmah?style=for-the-badge&label=version)](https://chromewebstore.google.com/detail/smarttab-organizer/ijnpdkkcbmfikocmboibffjgbohhlmah)
+
 ## Características
 
 ### ⚙️ Gestión de Reglas
@@ -88,13 +93,6 @@ Un **asistente de importación/exportación para Reglas y Sesiones** clasifica l
 
 Navegación completa por teclado y soporte para lectores de pantalla mediante primitivas Radix UI. Disponible en Inglés, Francés y Español.
 
-## 🛒 Chrome Web Store ##
-
-Abrir en Chrome Web Store
-
-[![Abrir en Chrome Web Store](https://img.shields.io/chrome-web-store/v/ijnpdkkcbmfikocmboibffjgbohhlmah)](https://chromewebstore.google.com/detail/smarttab-organizer/ijnpdkkcbmfikocmboibffjgbohhlmah)
-
-
 ## 💻 Instalación
 
 ```bash
@@ -106,7 +104,6 @@ pnpm build
 ```
 
 - **Chrome:** `chrome://extensions/` → Cargar descomprimida → `.output/chrome-mv3`
-manifest.json`
 
 Para desarrollo con recarga automática: `pnpm dev` (Chrome) o `pnpm dev:firefox`.
 
