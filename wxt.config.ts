@@ -12,7 +12,7 @@ export default defineConfig({
     author: 'EspritVorace',
     homepage_url: 'https://github.com/EspritVorace/smart-tab-organizer',
     default_locale: 'en',
-    permissions: ['tabs', 'tabGroups', 'storage', 'notifications', 'alarms'],
+    permissions: ['tabs', 'tabGroups', 'storage', 'notifications'],
     host_permissions: ['<all_urls>'],
     action: {
       default_icon: {
