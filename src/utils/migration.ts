@@ -1,5 +1,6 @@
 import { browser } from 'wxt/browser';
 import { getSyncSettings, setSyncSettings } from './settingsUtils.js';
+import { logger } from './logger.js';
 import { getStatisticsData, setStatisticsData } from './statisticsUtils.js';
 import { defaultSyncSettings } from '../types/syncSettings.js';
 import { defaultStatistics } from '../types/statistics.js';
@@ -36,21 +37,25 @@ async function loadDefaultSettings(): Promise<SyncSettings> {
     cachedDefaultSettings = await response.json();
     return cachedDefaultSettings!;
   } catch (error) {
-    console.error("Cannot load defaults:", error);
+    logger.error("Cannot load defaults:", error);
     return defaultSyncSettings;
   }
 }
 
 export async function initializeDefaults(): Promise<void> {
   const defaults = await loadDefaultSettings();
-  const syncData = await browser.storage.sync.get('settings');
-  
-  if (!syncData.settings) {
-    console.log("Init defaults from JSON...");
+  // WXT stores each setting as an individual key (e.g. 'domainRules'), not as a
+  // single 'settings' object. Check for the presence of 'domainRules' to detect
+  // whether the extension has been installed before.
+  const rawSync = await browser.storage.sync.get('domainRules');
+
+  if (rawSync.domainRules === undefined) {
+    logger.debug("Init defaults from JSON...");
     await setSyncSettings(defaults);
   } else {
-    console.log("Merging existing with JSON defaults...");
-    const merged = mergeDeep(defaults, syncData.settings);
+    logger.debug("Merging existing with JSON defaults...");
+    const currentSettings = await getSyncSettings();
+    const merged = mergeDeep(defaults, currentSettings);
     
     // Ensure default domain rules exist
     defaults.domainRules.forEach(dr => {
@@ -101,7 +106,7 @@ export async function initializeDefaults(): Promise<void> {
   
   const localData = await browser.storage.local.get('statistics');
   if (!localData.statistics) {
-    console.log("Init stats...");
+    logger.debug("Init stats...");
     await setStatisticsData(defaultStatistics);
   }
 }

@@ -1,16 +1,19 @@
 {
   "name": "smart-tab-organizer",
-  "version": "1.0.1",
+  "version": "1.1.0",
+  "packageManager": "pnpm@10.32.1",
   "type": "module",
   "scripts": {
     "test": "vitest run --config vitest.simple.config.ts",
     "test:watch": "vitest --watch --config vitest.simple.config.ts",
     "test:ui": "vitest --ui --config vitest.simple.config.ts",
-    "test:wxt": "vitest --config vitest.config.ts",
     "test:legacy": "node tests/runTests.js",
-    "test:e2e": "playwright test",
+    "test:e2e": "xvfb-maybe playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
+    "test:e2e:build": "wxt build && xvfb-maybe playwright test",
+    "test:e2e:build:ui": "wxt build && playwright test --ui",
+    "test:e2e:build:headed": "wxt build && playwright test --headed",
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",
     "build": "wxt build",
@@ -21,34 +24,51 @@
     "compile": "tsc --noEmit",
     "postinstall": "wxt prepare",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "screenshots": "pnpm build && xvfb-maybe playwright test --config=e2e-screenshots/playwright.screenshots.config.ts"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.1",
+    "@playwright/test": "^1.57.0",
     "@storybook/addon-docs": "^9.0.13",
     "@storybook/react-vite": "^9.0.13",
+    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^14.3.1",
     "esbuild-wasm": "^0.25.6",
     "happy-dom": "^15.11.7",
+    "playwright-ctrf-json-reporter": "^0.0.27",
     "postcss": "^8.5.6",
     "storybook": "^9.0.13",
     "typescript": "^5.2.2",
     "vitest": "^2.1.8",
-    "wxt": "^0.20.13"
+    "vitest-ctrf-json-reporter": "^0.0.3",
+    "wxt": "^0.20.13",
+    "xvfb-maybe": "^0.2.1"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
+    "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-toast": "^1.2.14",
     "@radix-ui/themes": "^3.2.1",
     "@vitejs/plugin-react": "^4.6.0",
+    "cmdk": "^1.1.1",
     "lucide-react": "^0.522.0",
     "next-themes": "^0.4.6",
     "react": "^18.3.1",
+    "react-accessible-treeview": "^2.11.2",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.58.1",
     "zod": "^3.25.67"
   },
   "overrides": {
     "rollup": "npm:@rollup/wasm-node@^4.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "spawn-sync"
+    ],
+    "patchedDependencies": {
+      "vitest-ctrf-json-reporter@0.0.3": "patches/vitest-ctrf-json-reporter@0.0.3.patch"
+    }
   }
 }

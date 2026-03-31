@@ -9,19 +9,23 @@ interface WizardStep {
 interface WizardStepperProps {
   steps: WizardStep[];
   currentStep: number;
+  /** When true, future steps get aria-disabled="true" (creation wizard). */
+  disableFutureNavigation?: boolean;
 }
 
-export function WizardStepper({ steps, currentStep }: WizardStepperProps) {
+export function WizardStepper({ steps, currentStep, disableFutureNavigation = false }: WizardStepperProps) {
   return (
-    <Flex align="center" gap="2" py="3">
+    <Flex align="center" gap="2" py="3" role="list">
       {steps.map((step, index) => {
         const isCompleted = index < currentStep;
         const isActive = index === currentStep;
+        const isFuture = index > currentStep;
 
         return (
           <React.Fragment key={index}>
             {index > 0 && (
               <Box
+                aria-hidden="true"
                 style={{
                   flex: 1,
                   height: 2,
@@ -32,10 +36,17 @@ export function WizardStepper({ steps, currentStep }: WizardStepperProps) {
                 }}
               />
             )}
-            <Flex align="center" gap="2">
+            <Flex
+              align="center"
+              gap="2"
+              role="listitem"
+              aria-current={isActive ? 'step' : undefined}
+              aria-disabled={disableFutureNavigation && isFuture ? 'true' : undefined}
+            >
               <Flex
                 align="center"
                 justify="center"
+                aria-hidden="true"
                 style={{
                   width: 28,
                   height: 28,

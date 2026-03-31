@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { DomainRuleFormModal } from './DomainRuleFormModal';
+import { RuleWizardModal } from './RuleWizardModal';
 const action = (name: string) => (...args: any[]) => console.log(name, ...args);
 import type { DomainRule } from '../../../schemas/domainRule';
 import type { SyncSettings } from '../../../types/syncSettings';
@@ -39,9 +39,9 @@ const mockDomainRule: DomainRule = {
   presetId: null
 };
 
-const meta: Meta<typeof DomainRuleFormModal> = {
-  title: 'Components/Core/DomainRule/DomainRuleFormModal',
-  component: DomainRuleFormModal,
+const meta: Meta<typeof RuleWizardModal> = {
+  title: 'Components/Core/DomainRule/RuleWizardModal',
+  component: RuleWizardModal,
   parameters: {
     layout: 'centered',
   },
@@ -63,38 +63,25 @@ const meta: Meta<typeof DomainRuleFormModal> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// === CRÉATION ET ÉDITION ===
+// === CRÉATION (wizard 4 étapes) ===
 
-export const DomainRuleFormModalCreate: Story = {
+export const RuleWizardModalCreate: Story = {
   args: {
     isOpen: true,
     domainRule: undefined,
   },
 };
 
-export const DomainRuleFormModalEdit: Story = {
+// === ÉDITION (vue résumé) ===
+
+export const RuleWizardModalEdit: Story = {
   args: {
     isOpen: true,
     domainRule: mockDomainRule,
   },
 };
 
-// === SOURCES DE GROUPEMENT ===
-
-export const DomainRuleFormModalManualGrouping: Story = {
-  args: {
-    isOpen: true,
-    domainRule: {
-      ...mockDomainRule,
-      groupNameSource: 'manual',
-      titleParsingRegEx: '',
-      urlParsingRegEx: '',
-      presetId: null,
-    },
-  },
-};
-
-export const DomainRuleFormModalTitleGroupingNoPreset: Story = {
+export const RuleWizardModalEditManual: Story = {
   args: {
     isOpen: true,
     domainRule: {
@@ -107,99 +94,39 @@ export const DomainRuleFormModalTitleGroupingNoPreset: Story = {
   },
 };
 
-export const DomainRuleFormModalTitleGroupingWithPreset: Story = {
+export const RuleWizardModalEditAsk: Story = {
   args: {
     isOpen: true,
     domainRule: {
       ...mockDomainRule,
-      groupNameSource: 'title',
+      groupNameSource: 'manual',
       titleParsingRegEx: '',
       urlParsingRegEx: '',
-      presetId: 'preset-1',
-    },
-  },
-};
-
-export const DomainRuleFormModalUrlGroupingNoPreset: Story = {
-  args: {
-    isOpen: true,
-    domainRule: {
-      ...mockDomainRule,
-      groupNameSource: 'url',
-      titleParsingRegEx: '',
-      urlParsingRegEx: '/projects/([^/]+)',
       presetId: null,
     },
   },
 };
 
-export const DomainRuleFormModalUrlGroupingWithPreset: Story = {
-  args: {
-    isOpen: true,
-    domainRule: {
-      ...mockDomainRule,
-      groupNameSource: 'url',
-      titleParsingRegEx: '',
-      urlParsingRegEx: '',
-      presetId: 'preset-2',
-    },
-  },
-};
-
-// === DÉDUPLICATION ===
-
-export const DomainRuleFormModalDeduplicationDisabled: Story = {
+export const RuleWizardModalEditDeduplicationDisabled: Story = {
   args: {
     isOpen: true,
     domainRule: {
       ...mockDomainRule,
       deduplicationEnabled: false,
-      deduplicationMatchMode: 'exact',
-    },
-  },
-};
-
-export const DomainRuleFormModalDeduplicationEnabled: Story = {
-  args: {
-    isOpen: true,
-    domainRule: {
-      ...mockDomainRule,
-      deduplicationEnabled: true,
-      deduplicationMatchMode: 'exact',
     },
   },
 };
 
 // === CAS LIMITES ===
 
-export const DomainRuleFormModalNoGroups: Story = {
-  args: {
-    isOpen: true,
-    domainRule: undefined,
-    syncSettings: {
-      ...mockSyncSettings,
-    },
-  },
-};
-
-export const DomainRuleFormModalNoPresets: Story = {
-  args: {
-    isOpen: true,
-    domainRule: undefined,
-    syncSettings: mockSyncSettings,
-  },
-};
-
-export const DomainRuleFormModalClosed: Story = {
+export const RuleWizardModalClosed: Story = {
   args: {
     isOpen: false,
     domainRule: undefined,
   },
 };
 
-// === TEST VALIDATION UNICITÉ ===
-
-export const DomainRuleFormModalLabelUniqueness: Story = {
+export const RuleWizardModalLabelUniqueness: Story = {
   args: {
     isOpen: true,
     domainRule: undefined,
@@ -222,13 +149,5 @@ export const DomainRuleFormModalLabelUniqueness: Story = {
         }
       ]
     },
-  },
-};
-
-export const DomainRuleFormModalBothCalloutsVisible: Story = {
-  args: {
-    isOpen: true,
-    domainRule: undefined,
-    syncSettings: mockSyncSettings,
   },
 };

@@ -1,11 +1,15 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
-import { Button, Switch, Text, HoverCard, Box, Flex, Badge, Card, Checkbox, IconButton, TextField, Separator } from '@radix-ui/themes';
-import { Edit, Trash2, Plus, Eye, EyeOff, Shield, Search, AlertCircle } from 'lucide-react';
+import { Button, Switch, Text, HoverCard, Box, Flex, Badge, Card, Checkbox, IconButton, TextField, Separator, DropdownMenu } from '@radix-ui/themes';
+import { Pencil, Trash2, Plus, Eye, EyeOff, Shield, Search, AlertCircle, Upload, MoreHorizontal } from 'lucide-react';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
-import { DomainRuleFormModal } from '../components/Core/DomainRule/DomainRuleFormModal';
+import { RuleWizardModal } from '../components/Core/DomainRule/RuleWizardModal';
+import { ImportWizard } from '../components/UI/ImportExportPage/ImportWizard';
 import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { getMessage } from '../utils/i18n';
+import { foldAccents } from '../utils/stringUtils';
+import { AccessibleHighlight } from '../components/UI/AccessibleHighlight/AccessibleHighlight';
 import { generateUUID, getRadixColor } from '../utils/utils';
+import { getRuleCategory } from '../schemas/enums';
 import type { SyncSettings, DomainRuleSetting } from '../types/syncSettings';
 import type { DomainRule } from '../schemas/domainRule';
 
@@ -20,6 +24,7 @@ interface DomainRulesPageProps {
 
 export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPageProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<DomainRule | undefined>(undefined);
 
   // Handlers - déclarés avant les useMemo
@@ -56,10 +61,10 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
 
   const filteredRules = useMemo(() => {
     if (!searchTerm) return syncSettings.domainRules;
-    const term = searchTerm.toLowerCase();
+    const term = foldAccents(searchTerm);
     return syncSettings.domainRules.filter(rule =>
-      rule.label.toLowerCase().includes(term) ||
-      rule.domainFilter.toLowerCase().includes(term)
+      foldAccents(rule.label).includes(term) ||
+      foldAccents(rule.domainFilter).includes(term)
     );
   }, [syncSettings.domainRules, searchTerm]);
 
@@ -267,10 +272,34 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
 
             {/* Card List */}
             {filteredRules.length === 0 ? (
-              <Box p="8" style={{ textAlign: 'center' }}>
-                <AlertCircle size={48} style={{ margin: '0 auto 16px', color: 'var(--gray-8)' }} />
-                <Text color="gray">{getMessage('noRulesFound')}</Text>
-              </Box>
+              syncSettings.domainRules.length === 0 && !searchTerm ? (
+                // True empty state — no rules at all
+                <Flex direction="column" align="center" justify="center" gap="3" style={{ minHeight: 200 }}>
+                  <Shield size={40} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
+                  <Text size="3" weight="medium" color="gray" align="center">
+                    {getMessage('rulesEmptyTitle')}
+                  </Text>
+                  <Text size="2" color="gray" align="center" style={{ maxWidth: 340 }}>
+                    {getMessage('rulesEmptyDescription')}
+                  </Text>
+                  <Flex gap="2">
+                    <Button variant="soft" onClick={handleAddRule}>
+                      <Plus size={14} aria-hidden="true" />
+                      {getMessage('addRule')}
+                    </Button>
+                    <Button variant="soft" onClick={() => setIsImportOpen(true)}>
+                      <Upload size={14} aria-hidden="true" />
+                      {getMessage('importRulesButton')}
+                    </Button>
+                  </Flex>
+                </Flex>
+              ) : (
+                // Search returned no results
+                <Flex direction="column" align="center" justify="center" gap="2" style={{ minHeight: 120 }}>
+                  <AlertCircle size={32} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
+                  <Text color="gray">{getMessage('noRulesFound')}</Text>
+                </Flex>
+              )
             ) : (
               <Flex direction="column" gap="3" role="grid" aria-label={getMessage('domainRulesTab')} ref={listRef}>
                 {filteredRules.map((rule, index) => (
@@ -306,31 +335,46 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                       <Flex align="center" gap="3" role="gridcell" style={{ flex: 1, minWidth: 0 }}>
                         <HoverCard.Root>
                           <HoverCard.Trigger>
-                            <Badge
-                              color={getRadixColor(rule.color) as any}
-                              variant="solid"
-                              size="2"
-                              style={{ cursor: 'pointer', flexShrink: 0 }}
-                            >
-                              {rule.label}
-                            </Badge>
+                            {(() => {
+                              const category = getRuleCategory(rule.categoryId);
+                              return (
+                                <Badge
+                                  color={(category ? getRadixColor(category.color) : 'gray') as any}
+                                  variant="solid"
+                                  size="2"
+                                  style={{ cursor: 'pointer', flexShrink: 0 }}
+                                >
+                                  {category ? `${category.emoji} ` : ''}<AccessibleHighlight text={rule.label} searchTerm={searchTerm} />
+                                </Badge>
+                              );
+                            })()}
                           </HoverCard.Trigger>
                           <HoverCard.Content size="2" style={{ maxWidth: 400 }}>
                             <Flex direction="column" gap="3">
                               <Flex justify="between" align="center" pb="2" style={{ borderBottom: '1px solid var(--gray-5)' }}>
-                                <Text size="3" weight="bold">{rule.label}</Text>
+                                <Text size="3" weight="bold"><AccessibleHighlight text={rule.label} searchTerm={searchTerm} /></Text>
                                 <Badge color={rule.enabled ? 'green' : 'gray'} variant="soft">
                                   {getMessage(rule.enabled ? 'enabled' : 'disabled')}
                                 </Badge>
                               </Flex>
                               <Box style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '8px 12px', alignItems: 'baseline' }}>
                                 <Text size="1" weight="bold" color="gray">{getMessage('domainFilter')}</Text>
-                                <Text size="2"><code style={{ backgroundColor: 'var(--gray-3)', padding: '2px 6px', borderRadius: '4px' }}>{rule.domainFilter}</code></Text>
+                                <Text size="2"><code style={{ backgroundColor: 'var(--gray-3)', padding: '2px 6px', borderRadius: '4px' }}><AccessibleHighlight text={rule.domainFilter} searchTerm={searchTerm} /></code></Text>
 
                                 <Text size="1" weight="bold" color="gray">{getMessage('tabGroupColor')}</Text>
                                 <Flex align="center" gap="2">
-                                  <div style={{ width: '16px', height: '16px', backgroundColor: `var(--${getRadixColor(rule.color)}-9)`, borderRadius: '4px', border: '1px solid var(--gray-6)' }} />
-                                  <Text size="2">{getMessage(`color_${rule.color}`)}</Text>
+                                  {(() => {
+                                    const cat = getRuleCategory(rule.categoryId);
+                                    if (cat) {
+                                      return (
+                                        <>
+                                          <div style={{ width: '16px', height: '16px', backgroundColor: `var(--${getRadixColor(cat.color)}-9)`, borderRadius: '50%', border: '1px solid var(--gray-6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>{cat.emoji}</div>
+                                          <Text size="2">{getMessage(cat.labelKey as any)}</Text>
+                                        </>
+                                      );
+                                    }
+                                    return <Text size="2" color="gray">{getMessage('categoryNone')}</Text>;
+                                  })()}
                                 </Flex>
 
                                 <Text size="1" weight="bold" color="gray">{getMessage('groupNameSource')}</Text>
@@ -368,32 +412,35 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                         </HoverCard.Root>
 
                         <Text size="2" color="gray" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {rule.domainFilter}
+                          <AccessibleHighlight text={rule.domainFilter} searchTerm={searchTerm} />
                         </Text>
                       </Flex>
 
                       {/* Right: Actions */}
-                      <Flex gap="2" align="center" role="gridcell" style={{ flexShrink: 0 }}>
-                        <IconButton
-                          variant="ghost"
-                          color="gray"
-                          size="2"
-                          title={getMessage('edit')}
-                          onClick={() => handleEditRule(rule)}
-                        >
-                          <Edit size={16} />
-                        </IconButton>
-                        <IconButton
-                          variant="ghost"
-                          color="red"
-                          size="2"
-                          title={getMessage('delete')}
-                          onClick={() => {
-                            setDeleteTarget({ type: 'single', ruleId: rule.id });
-                          }}
-                        >
-                          <Trash2 size={16} />
-                        </IconButton>
+                      <Flex align="center" role="gridcell" style={{ flexShrink: 0 }}>
+                        <DropdownMenu.Root>
+                          <DropdownMenu.Trigger>
+                            <IconButton
+                              size="2"
+                              variant="ghost"
+                              color="gray"
+                              aria-label={getMessage('ruleMoreActions')}
+                            >
+                              <MoreHorizontal size={16} aria-hidden="true" />
+                            </IconButton>
+                          </DropdownMenu.Trigger>
+                          <DropdownMenu.Content>
+                            <DropdownMenu.Item onClick={() => handleEditRule(rule)}>
+                              <Pencil size={14} aria-hidden="true" />
+                              {getMessage('edit')}
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Separator />
+                            <DropdownMenu.Item color="red" onClick={() => setDeleteTarget({ type: 'single', ruleId: rule.id })}>
+                              <Trash2 size={14} aria-hidden="true" />
+                              {getMessage('delete')}
+                            </DropdownMenu.Item>
+                          </DropdownMenu.Content>
+                        </DropdownMenu.Root>
                       </Flex>
                     </Flex>
                   </Card>
@@ -404,7 +451,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
         )}
       </PageLayout>
 
-      <DomainRuleFormModal
+      <RuleWizardModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSubmit={handleSubmitRule}
@@ -430,6 +477,13 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                   : ''
               )
         }
+      />
+
+      <ImportWizard
+        open={isImportOpen}
+        onOpenChange={setIsImportOpen}
+        existingRules={syncSettings.domainRules}
+        onImport={updateRules}
       />
     </>
   );

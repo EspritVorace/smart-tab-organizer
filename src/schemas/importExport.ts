@@ -24,7 +24,8 @@ export const importDomainRuleSchema = z.object({
   ),
   color: z.enum(
     colorOptions.map(opt => opt.value) as [ColorValue, ...ColorValue[]]
-  ),
+  ).optional(),
+  categoryId: z.string().optional().nullable(),
   deduplicationEnabled: z.boolean().default(true),
   presetId: z.string().nullable(),
   enabled: z.boolean(),

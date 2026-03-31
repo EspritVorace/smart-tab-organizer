@@ -275,7 +275,7 @@ describe('useStatistics', () => {
 
     expect(result.current.isLoaded).toBe(false);
     expect(result.current.statistics).toBe(null);
-    expect(consoleSpy).toHaveBeenCalledWith('Error loading statistics:', expect.any(Error));
+    expect(consoleSpy).toHaveBeenCalledWith('[smart-tab-organizer]', 'Error loading statistics:', expect.any(Error));
 
     consoleSpy.mockRestore();
   });

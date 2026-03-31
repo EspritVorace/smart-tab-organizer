@@ -1,142 +1,119 @@
-[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/master/README.md)
-[![fr](https://img.shields.io/badge/lang-fr-blue.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/master/README-fr.md)
-[![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/master/README-es.md)
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/main/README.md)
+[![fr](https://img.shields.io/badge/lang-fr-blue.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/main/README-fr.md)
+[![es](https://img.shields.io/badge/lang-es-yellow.svg)](https://github.com/EspritVorace/smart-tab-organizer/blob/main/README-es.md)
 
 # SmartTab Organizer
 
-![Version](https://img.shields.io/badge/version-1.0.3-blue.svg)
+![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)
 
-**SmartTab Organizer** is a cross-browser extension designed to help you efficiently manage your browser tabs by automatically grouping related tabs and preventing duplicates.
+**SmartTab Organizer** is a cross-browser extension that automatically groups related tabs, prevents duplicates, and saves your workspaces as named sessions.
+
+<p align="center">
+  <img src="doc/assets/store.png" alt="SmartTab Orgnaizer">
+</p>
 
 ## Features
 
-### Automatic Grouping
-* Middle-click a link or right-click and choose "Open link in new tab" to open the tab in the proper group if its domain matches your rules.
-* Tabs join an existing group or a new one is created.
-* The group name can come from the opener tab's title, from its URL or you can be prompted manually.
-* Built-in RegEx presets for popular ticket systems (Jira, GitLab, GitHub, Trello, etc.).
+### ⚙️ Rule Management
 
-### Deduplication
-* Opening the same URL twice is prevented.
-* The existing tab is re-focused and reloaded.
-* Supports several matching modes: exact URL, hostname + path, hostname or simple "includes".
+Domain rules are created through a guided 4-step wizard: identity → group naming mode → options → summary.
 
-### Options & Customization
-* Add, edit, delete and enable/disable domain rules.
-* Manage custom and predefined RegEx presets with an intuitive card-based interface.
-* **Import/Export Wizard** for domain rules:
-  * Export: select individual rules, save as JSON file or copy to clipboard.
-  * Import: load from file (drag & drop) or paste JSON, with Zod validation.
-  * Automatic classification of imported rules (new, conflicting, identical).
-  * Conflict resolution: overwrite, duplicate or ignore, with side-by-side diff view.
-* Configure deduplication modes per rule.
-* View statistics (groups created and tabs deduplicated) and reset them.
-* Select Light, Dark or System theme.
+Three group naming modes:
+- **Preset** — pick a built-in or custom regex pattern (Jira ticket IDs, GitHub repo names…)
+- **Ask** — prompt for a name when the tab opens
+- **Manual** — fixed group name
 
-### Quick Access Popup
-* Toggle grouping and deduplication globally.
-* View key statistics at a glance (collapsible section with persisted state).
-* Shortcut to the options page.
+<p align="center">
+  <img src="doc/assets/en-dark-rules-create-summary.png" alt="Rule creation wizard — summary step">
+</p>
 
-### Accessibility
-* Full keyboard navigation across all UI components.
-* Screen reader support with proper ARIA labels and landmarks.
-* Built on Radix UI primitives for native accessibility.
+### 🗂️ Automatic Grouping
 
-### Internationalization
-* Available in English, French and Spanish.
+Middle-click or right-click → "Open in new tab" on a configured site and the tab lands in the right group instantly.
 
-## Installation
+- Group names extracted from the page title, URL, or a regex preset
+- Built-in presets for Jira, GitLab, GitHub, Trello and more
 
-### Manual (Development / Testing)
+<p align="center">
+  <img src="doc/assets/regroup.gif" alt="Automatic Regroupment video">
+</p>
 
-1.  **Download:** Clone or download this project.
-    ```bash
-    git clone https://github.com/EspritVorace/smart-tab-organizer.git
-    ```
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
+### 🔁 Deduplication
 
-#### Development Mode (with auto-reload)
-3.  **Start development server:**
-    ```bash
-    # For Chrome development
-    npm run dev
+Opening a page that's already open refocuses and reloads the existing tab instead.
+Matching sensitivity is configurable per rule: exact URL, hostname + path, hostname, or "includes".
 
-    # For Firefox development
-    npm run dev:firefox
-    ```
+<p align="center">
+  <img src="doc/assets/dedup.gif" alt="Deduplication video">
+</p>
 
-#### Production Build
-3.  **Build the extension:**
-    ```bash
-    npm run build
-    ```
 
-#### Packaging for Distribution
-3.  **Create distribution packages:**
-    ```bash
-    # Create Chrome package
-    npm run zip
+### 📷 Sessions
 
-    # Create Firefox package
-    npm run zip:firefox
-    ```
+Save a named snapshot of your open tabs and groups, restore them whenever you need.
 
-#### Loading in Browser
-4.  **Load in your browser:**
-    * Chrome/Chromium: open `chrome://extensions/` and use "Load unpacked" with the `.output/chrome-mv3` folder.
-    * Firefox: open `about:debugging#/runtime/this-firefox` and choose "Load Temporary Add-on" pointing to `.output/firefox-mv2/manifest.json`.
-5.  The extension is ready!
+- **Pinned sessions** — promote any snapshot to your popup for one-click access, with a custom icon
+- **Restore wizard** — pick which tabs to bring back, choose the target window, resolve group conflicts before applying
+- **Deep search** — find tabs and groups by name across all your saved sessions
+- **Session editor** — reorganize, rename and delete tabs and groups without restoring first
 
-## Usage
+<p align="center">
+  <img src="doc/assets/en-dark-sessions-list.png" alt="Sessions list">
+</p>
 
-1.  **Click the Icon:** To access the popup.
-2.  **Configure:** Open "Options" to set your rules.
-    * **Domain Rules:** Define for which sites to activate features.
-    * **RegEx Presets:** Create or use RegEx to extract group names (e.g., `([A-Z]+-\d+)` for Jira).
-3.  **Browse:** Use middle-click or right-click > "Open link in new tab" on configured sites and see the magic happen!
+<p align="center">
+  <img src="doc/assets/en-dark-sessions-search-deep.png" alt="Deep search in sessions">
+</p>
 
-## Testing
+
+An **Import/Export wizard for Rules and Sessions** classifies incoming as new, conflicting or identical, and resolves conflicts step by step.
+
+<p align="center">
+  <img src="doc/assets/en-dark-rules-import-text-conflicts.png" alt="Import wizard with conflict resolution">
+</p>
+
+### ⚡ Quick Access Popup
+
+- Toggle grouping and deduplication globally
+- Take a snapshot or jump to Sessions in one click
+- Pinned sessions listed with quick-restore actions
+
+<p align="center">
+
+<img src="doc/assets/en-dark-popup-content.png" alt="Popup content">
+</p>
+
+### ♿ Accessibility & i18n
+
+Full keyboard navigation and screen-reader support via Radix UI primitives. Available in English, French and Spanish.
+
+## 🛒 Chrome Weeb Store ##
+
+Open in Chrome Web Store
+
+[![Open in Chrome Web Store](https://img.shields.io/chrome-web-store/v/ijnpdkkcbmfikocmboibffjgbohhlmah)](https://chromewebstore.google.com/detail/smarttab-organizer/ijnpdkkcbmfikocmboibffjgbohhlmah)
+
+
+## 💻 Installation
 
 ```bash
-# Unit tests
-npm test
-
-# E2E tests
-npm run test:e2e
-
-# Storybook (component documentation)
-npm run storybook
+git clone https://github.com/EspritVorace/smart-tab-organizer.git
+cd smart-tab-organizer
+npm install -g pnpm  # if needed
+pnpm install
+pnpm build
 ```
 
-## Technologies Used
+- **Chrome:** `chrome://extensions/` → Load unpacked → `.output/chrome-mv3`
+manifest.json`
 
-### Core
-* TypeScript & React
-* WXT framework for cross-browser extension development
-* Chrome/Firefox Extension APIs (Manifest V3 / V2)
+For development with auto-reload: `pnpm dev` (Chrome) or `pnpm dev:firefox`.
 
-### UI
-* **@radix-ui/themes** - Design system and UI components
-* **@radix-ui/react-collapsible** - Accessible collapse/expand patterns
-* **next-themes** - Theme management (dark/light mode)
-* **lucide-react** - SVG icons
-* **react-hook-form** - Form management
+## 🛠️ Tech Stack
 
-### Validation
-* **Zod** - Schema validation
+WXT · React + TypeScript · Radix UI Themes · Zod · Vitest · Playwright
 
-### Testing
-* **Vitest** - Unit testing with Happy DOM
-* **Playwright** - End-to-end testing
-* **Storybook** - Component documentation and visual testing
+## 📜 License
 
-## License
-
-This project is licensed under the **GNU General Public License v3.0**.
-
----
+GNU General Public License v3.0

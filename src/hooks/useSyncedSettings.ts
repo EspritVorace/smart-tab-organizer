@@ -1,6 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { browser } from 'wxt/browser';
+import { storage } from 'wxt/utils/storage';
 import type { SyncSettings, DomainRuleSettings } from '../types/syncSettings.js';
+import { logger } from '../utils/logger';
+import {
+  globalGroupingEnabledItem,
+  globalDeduplicationEnabledItem,
+  domainRulesItem,
+  notifyOnGroupingItem,
+  notifyOnDeduplicationItem,
+} from '../utils/storageItems.js';
 
 export interface UseSyncedSettingsReturn {
   // État actuel
@@ -22,6 +30,23 @@ export interface UseSyncedSettingsReturn {
   reloadSettings: () => Promise<void>;
 }
 
+async function loadSyncSettingsFromStorage(): Promise<SyncSettings> {
+  const results = await storage.getItems([
+    globalGroupingEnabledItem,
+    globalDeduplicationEnabledItem,
+    domainRulesItem,
+    notifyOnGroupingItem,
+    notifyOnDeduplicationItem,
+  ]);
+  return {
+    globalGroupingEnabled: results[0].value as boolean,
+    globalDeduplicationEnabled: results[1].value as boolean,
+    domainRules: results[2].value as DomainRuleSettings,
+    notifyOnGrouping: results[3].value as boolean,
+    notifyOnDeduplication: results[4].value as boolean,
+  };
+}
+
 export function useSyncedSettings(): UseSyncedSettingsReturn {
   const [settings, setSettings] = useState<SyncSettings | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -37,104 +62,67 @@ export function useSyncedSettings(): UseSyncedSettingsReturn {
 
   // Chargement initial
   useEffect(() => {
-    async function loadSettings() {
-      try {
-        const result = await browser.storage.sync.get({
-          globalGroupingEnabled: true,
-          globalDeduplicationEnabled: true,
-          domainRules: [] as DomainRuleSettings,
-          notifyOnGrouping: true,
-          notifyOnDeduplication: true
-        });
-
-        setSettings(result as unknown as SyncSettings);
-        setIsLoaded(true);
-      } catch (error) {
-        console.error('Error loading settings:', error);
-      }
-    }
-    loadSettings();
+    loadSyncSettingsFromStorage()
+      .then(s => { setSettings(s); setIsLoaded(true); })
+      .catch(error => logger.error('Error loading settings:', error));
   }, []);
 
-  // Listener pour les changements de storage (provenant d'autres sources)
+  // Watchers pour les changements de storage (provenant d'autres sources)
   useEffect(() => {
-    const storageListener = (changes: any, areaName: string) => {
-      if (areaName !== 'sync') return;
-
-      // Ignorer les changements qu'on a nous-même déclenchés
-      if (isLocalUpdate.current) {
-        return;
-      }
-
-      // Mettre à jour l'état en utilisant le callback pour avoir la valeur la plus récente
-      setSettings(prevSettings => {
-        if (!prevSettings) return prevSettings;
-
-        let newSettings = { ...prevSettings };
-        let hasChanges = false;
-
-        Object.keys(changes).forEach((key) => {
-          const field = key as keyof SyncSettings;
-          if (field in newSettings) {
-            const newValue = changes[key].newValue;
-            (newSettings as any)[field] = newValue;
-            hasChanges = true;
-
-            // Déclencher les callbacks pour ce champ
-            const callbacks = changeCallbacksRef.current[field];
-            if (callbacks) {
-              callbacks.forEach(callback => callback(newValue));
-            }
-          }
-        });
-
-        return hasChanges ? newSettings : prevSettings;
+    function applyExternalChange<K extends keyof SyncSettings>(field: K, newValue: SyncSettings[K]) {
+      if (isLocalUpdate.current) return;
+      setSettings(prev => {
+        if (!prev) return prev;
+        const callbacks = changeCallbacksRef.current[field];
+        if (callbacks) callbacks.forEach(cb => cb(newValue));
+        return { ...prev, [field]: newValue };
       });
-    };
+    }
 
-    browser.storage.onChanged.addListener(storageListener);
-    return () => browser.storage.onChanged.removeListener(storageListener);
-  }, []); // Pas de dépendances - le listener reste stable
+    const unwatchers = [
+      globalGroupingEnabledItem.watch(v => applyExternalChange('globalGroupingEnabled', v)),
+      globalDeduplicationEnabledItem.watch(v => applyExternalChange('globalDeduplicationEnabled', v)),
+      domainRulesItem.watch(v => applyExternalChange('domainRules', v)),
+      notifyOnGroupingItem.watch(v => applyExternalChange('notifyOnGrouping', v)),
+      notifyOnDeduplicationItem.watch(v => applyExternalChange('notifyOnDeduplication', v)),
+    ];
+
+    return () => unwatchers.forEach(u => u());
+  }, []); // Pas de dépendances - les watchers restent stables
 
   // Fonction générique pour mettre à jour un champ
   const updateField = useCallback(async <K extends keyof SyncSettings>(
     field: K,
-    value: SyncSettings[K]
+    value: SyncSettings[K],
+    setValue: (v: SyncSettings[K]) => Promise<void>,
   ) => {
-    // Marquer comme mise à jour locale pour ignorer l'événement storage
     isLocalUpdate.current = true;
     try {
       // Mettre à jour l'état local d'abord pour une UI réactive
       setSettings(prev => prev ? { ...prev, [field]: value } : null);
       // Puis persister dans le storage
-      await browser.storage.sync.set({ [field]: value });
+      await setValue(value);
     } finally {
       // Réactiver l'écoute des changements externes après un court délai
-      setTimeout(() => {
-        isLocalUpdate.current = false;
-      }, 100);
+      setTimeout(() => { isLocalUpdate.current = false; }, 100);
     }
   }, []);
 
   // Fonction générique pour enregistrer un callback de changement
   const registerChangeCallback = useCallback(<K extends keyof SyncSettings>(
-    field: K, 
+    field: K,
     callback: (value: SyncSettings[K]) => void
   ) => {
     setChangeCallbacks(prev => ({
       ...prev,
       [field]: new Set([...(prev[field] || []), callback as any])
     }));
-
-    // Retourner une fonction de nettoyage
     return () => {
       setChangeCallbacks(prev => {
         const newCallbacks = { ...prev };
         if (newCallbacks[field]) {
           (newCallbacks[field] as Set<any>).delete(callback);
-          if (newCallbacks[field]!.size === 0) {
-            delete newCallbacks[field];
-          }
+          if (newCallbacks[field]!.size === 0) delete newCallbacks[field];
         }
         return newCallbacks;
       });
@@ -143,52 +131,49 @@ export function useSyncedSettings(): UseSyncedSettingsReturn {
 
   // Fonction pour mettre à jour plusieurs champs
   const updateSettings = useCallback(async (updates: Partial<SyncSettings>) => {
-    // Marquer comme mise à jour locale pour ignorer l'événement storage
     isLocalUpdate.current = true;
     try {
-      // Mettre à jour l'état local d'abord pour une UI réactive
       setSettings(prev => prev ? { ...prev, ...updates } : null);
-      // Puis persister dans le storage
-      await browser.storage.sync.set(updates);
+      const items: Parameters<typeof storage.setItems>[0] = [];
+      if ('globalGroupingEnabled' in updates)
+        items.push({ item: globalGroupingEnabledItem, value: updates.globalGroupingEnabled! });
+      if ('globalDeduplicationEnabled' in updates)
+        items.push({ item: globalDeduplicationEnabledItem, value: updates.globalDeduplicationEnabled! });
+      if ('domainRules' in updates)
+        items.push({ item: domainRulesItem, value: updates.domainRules! });
+      if ('notifyOnGrouping' in updates)
+        items.push({ item: notifyOnGroupingItem, value: updates.notifyOnGrouping! });
+      if ('notifyOnDeduplication' in updates)
+        items.push({ item: notifyOnDeduplicationItem, value: updates.notifyOnDeduplication! });
+      if (items.length > 0) await storage.setItems(items);
     } finally {
-      // Réactiver l'écoute des changements externes après un court délai
-      setTimeout(() => {
-        isLocalUpdate.current = false;
-      }, 100);
+      setTimeout(() => { isLocalUpdate.current = false; }, 100);
     }
   }, []);
 
   // Fonction pour recharger les settings
   const reloadSettings = useCallback(async () => {
     try {
-      const result = await browser.storage.sync.get({
-        globalGroupingEnabled: true,
-        globalDeduplicationEnabled: true,
-        domainRules: [] as DomainRuleSettings,
-        notifyOnGrouping: true,
-        notifyOnDeduplication: true
-      });
-
-      setSettings(result as unknown as SyncSettings);
+      setSettings(await loadSyncSettingsFromStorage());
     } catch (error) {
-      console.error('Error reloading settings:', error);
+      logger.error('Error reloading settings:', error);
     }
   }, []);
 
   return {
     settings,
     isLoaded,
-    
+
     // Setters
-    setGlobalGroupingEnabled: (value: boolean) => updateField('globalGroupingEnabled', value),
-    setGlobalDeduplicationEnabled: (value: boolean) => updateField('globalDeduplicationEnabled', value),
-    setDomainRules: (value: DomainRuleSettings) => updateField('domainRules', value),
-    
+    setGlobalGroupingEnabled: (v) => updateField('globalGroupingEnabled', v, globalGroupingEnabledItem.setValue),
+    setGlobalDeduplicationEnabled: (v) => updateField('globalDeduplicationEnabled', v, globalDeduplicationEnabledItem.setValue),
+    setDomainRules: (v) => updateField('domainRules', v, domainRulesItem.setValue),
+
     // Change callbacks
-    onGlobalGroupingEnabledChange: (callback) => registerChangeCallback('globalGroupingEnabled', callback),
-    onGlobalDeduplicationEnabledChange: (callback) => registerChangeCallback('globalDeduplicationEnabled', callback),
-    onDomainRulesChange: (callback) => registerChangeCallback('domainRules', callback),
-    
+    onGlobalGroupingEnabledChange: (cb) => registerChangeCallback('globalGroupingEnabled', cb),
+    onGlobalDeduplicationEnabledChange: (cb) => registerChangeCallback('globalDeduplicationEnabled', cb),
+    onDomainRulesChange: (cb) => registerChangeCallback('domainRules', cb),
+
     // Utilitaires
     updateSettings,
     reloadSettings

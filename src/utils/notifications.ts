@@ -1,6 +1,7 @@
 import { browser, Browser } from 'wxt/browser';
 import { getMessage } from './i18n';
 import { markUrlToSkipDeduplication } from './deduplicationSkip';
+import { logger } from './logger';
 
 export type NotificationType = 'success' | 'error' | 'info';
 
@@ -95,7 +96,7 @@ async function executeUndoAction(action: UndoAction): Promise<void> {
         if (data.tabIds.length > 0) {
           // Cast to the expected type for browser.tabs.ungroup
           await browser.tabs.ungroup(data.tabIds as [number, ...number[]]);
-          console.log(`[UNDO] Ungrouped tabs: ${data.tabIds.join(', ')}`);
+          logger.debug(`[UNDO] Ungrouped tabs: ${data.tabIds.join(', ')}`);
         }
         break;
       }
@@ -108,13 +109,29 @@ async function executeUndoAction(action: UndoAction): Promise<void> {
           windowId: data.windowId,
           active: true
         });
-        console.log(`[UNDO] Reopened tab: ${data.url}`);
+        logger.debug(`[UNDO] Reopened tab: ${data.url}`);
         break;
       }
     }
   } catch (error) {
-    console.error('[UNDO] Error executing undo action:', error);
+    logger.error('[UNDO] Error executing undo action:', error);
   }
+}
+
+/**
+ * Execute the undo action associated with a notification ID.
+ * Exposed on globalThis for E2E testing.
+ * Returns true if an undo action was found and executed, false otherwise.
+ */
+export async function executeNotificationUndoById(notificationId: string): Promise<boolean> {
+  const action = pendingUndoActions.get(notificationId);
+  if (action) {
+    await executeUndoAction(action);
+    pendingUndoActions.delete(notificationId);
+    browser.notifications.clear(notificationId);
+    return true;
+  }
+  return false;
 }
 
 /**

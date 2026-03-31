@@ -1,0 +1,23 @@
+.container {
+  width: 100%;
+}
+
+.row {
+  border-radius: var(--radius-2);
+  width: 100%;
+}
+
+.row:hover {
+  background-color: var(--gray-a3);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.urlError {
+  color: var(--red-11);
+}

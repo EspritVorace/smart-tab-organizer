@@ -9,14 +9,18 @@ if (!fs.existsSync(path.join(extensionPath, 'manifest.json'))) {
   process.exit(1);
 }
 
+// Each worker launches one browser with the extension loaded (worker-scoped context).
+// Multiple workers run test files in parallel — each gets its own isolated Chrome profile.
+// Keep workers at 1 in CI to avoid resource contention; locally 3 workers run ~3x faster.
+const workers = process.env.CI ? 1 : (process.env.E2E_WORKERS ? parseInt(process.env.E2E_WORKERS) : 3);
+
 export default defineConfig({
   testDir: './tests/e2e',
-  fullyParallel: false, // Extensions require sequential execution
+  fullyParallel: false, // Tests within a file stay sequential; files run across workers
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1, // Retry once locally too
-  workers: 1, // Single worker for extension testing
-  reporter: 'html',
-  timeout: 60000, // Increased timeout for extension loading
+  workers,
+  timeout: 30000, // Timeout for extension loading
 
   use: {
     trace: 'on-first-retry',
@@ -30,4 +34,8 @@ export default defineConfig({
       },
     },
   ],
+  reporter: [
+    ['playwright-ctrf-json-reporter', { outputDir: 'ctrf', outputFile: 'e2e-ctrf-report.json' }],
+  ],
+  headless: false, // Extensions require headed mode
 });

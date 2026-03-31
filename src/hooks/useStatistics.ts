@@ -1,27 +1,32 @@
-import { useState, useEffect, useCallback } from 'react';
-import { browser } from 'wxt/browser';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Statistics } from '../types/statistics.js';
 import { defaultStatistics } from '../types/statistics.js';
+import { logger } from '../utils/logger';
+import { statisticsItem } from '../utils/storageItems.js';
 
 export interface UseStatisticsReturn {
   // État actuel
   statistics: Statistics | null;
   isLoaded: boolean;
-  
+
   // Setters pour chaque champ
   setTabGroupsCreatedCount: (value: number) => Promise<void>;
   setTabsDeduplicatedCount: (value: number) => Promise<void>;
-  
+
   // Callbacks de changement pour chaque champ
   onTabGroupsCreatedCountChange: (callback: (value: number) => void) => () => void;
   onTabsDeduplicatedCountChange: (callback: (value: number) => void) => () => void;
-  
+
   // Utilitaires
   updateStatistics: (updates: Partial<Statistics>) => Promise<void>;
   resetStatistics: () => Promise<void>;
   incrementTabGroupsCreated: () => Promise<void>;
   incrementTabsDeduplicated: () => Promise<void>;
   reloadStatistics: () => Promise<void>;
+}
+
+function mergeWithDefaults(value: Statistics | null): Statistics {
+  return { ...defaultStatistics, ...value };
 }
 
 export function useStatistics(): UseStatisticsReturn {
@@ -31,90 +36,73 @@ export function useStatistics(): UseStatisticsReturn {
     [K in keyof Statistics]?: Set<(value: Statistics[K]) => void>;
   }>({});
 
+  // Ref pour éviter de réagir aux changements qu'on a nous-même déclenchés
+  const isLocalUpdate = useRef(false);
+  const changeCallbacksRef = useRef(changeCallbacks);
+  changeCallbacksRef.current = changeCallbacks;
+
   // Chargement initial
   useEffect(() => {
-    async function loadStatistics() {
-      try {
-        const result = await browser.storage.local.get({
-          statistics: defaultStatistics
-        });
-        
-        // Assurer que les statistiques ont la bonne structure
-        const stats = {
-          ...defaultStatistics,
-          ...(result.statistics as Record<string, unknown>)
-        };
-        
-        setStatistics(stats);
+    statisticsItem.getValue()
+      .then(value => {
+        setStatistics(mergeWithDefaults(value));
         setIsLoaded(true);
-      } catch (error) {
-        console.error('Error loading statistics:', error);
-      }
-    }
-    loadStatistics();
+      })
+      .catch(error => logger.error('Error loading statistics:', error));
   }, []);
 
-  // Listener pour les changements de storage
+  // Watcher pour les changements de storage
   useEffect(() => {
-    const storageListener = (changes: any, areaName: string) => {
-      if (areaName === 'local' && changes.statistics) {
-        const newStatistics = { 
-          ...defaultStatistics, 
-          ...changes.statistics.newValue 
-        } as Statistics;
-        const oldStatistics = statistics;
-        setStatistics(newStatistics);
-        
+    return statisticsItem.watch((newValue) => {
+      if (isLocalUpdate.current) return;
+
+      const newStatistics = mergeWithDefaults(newValue);
+      setStatistics(prev => {
         // Déclencher les callbacks pour les champs modifiés
-        if (oldStatistics) {
-          Object.keys(newStatistics).forEach((key) => {
-            const field = key as keyof Statistics;
-            if (newStatistics[field] !== oldStatistics[field]) {
-              const callbacks = changeCallbacks[field];
-              if (callbacks) {
-                callbacks.forEach(callback => callback(newStatistics[field]));
-              }
+        if (prev) {
+          (Object.keys(newStatistics) as (keyof Statistics)[]).forEach(field => {
+            if (newStatistics[field] !== prev[field]) {
+              const callbacks = changeCallbacksRef.current[field];
+              if (callbacks) callbacks.forEach(cb => cb(newStatistics[field]));
             }
           });
         }
-      }
-    };
-
-    browser.storage.onChanged.addListener(storageListener);
-    return () => browser.storage.onChanged.removeListener(storageListener);
-  }, [statistics, changeCallbacks]);
+        return newStatistics;
+      });
+    });
+  }, []); // Pas de dépendances - le watcher reste stable
 
   // Fonction générique pour mettre à jour un champ
   const updateField = useCallback(async <K extends keyof Statistics>(
-    field: K, 
+    field: K,
     value: Statistics[K]
   ) => {
     if (!statistics) return;
-    
-    const updatedStatistics = { ...statistics, [field]: value };
-    await browser.storage.local.set({ statistics: updatedStatistics });
-    setStatistics(updatedStatistics);
+    isLocalUpdate.current = true;
+    try {
+      const updatedStatistics = { ...statistics, [field]: value };
+      await statisticsItem.setValue(updatedStatistics);
+      setStatistics(updatedStatistics);
+    } finally {
+      setTimeout(() => { isLocalUpdate.current = false; }, 100);
+    }
   }, [statistics]);
 
   // Fonction générique pour enregistrer un callback de changement
   const registerChangeCallback = useCallback(<K extends keyof Statistics>(
-    field: K, 
+    field: K,
     callback: (value: Statistics[K]) => void
   ) => {
     setChangeCallbacks(prev => ({
       ...prev,
       [field]: new Set([...(prev[field] || []), callback])
     }));
-
-    // Retourner une fonction de nettoyage
     return () => {
       setChangeCallbacks(prev => {
         const newCallbacks = { ...prev };
         if (newCallbacks[field]) {
           newCallbacks[field]!.delete(callback);
-          if (newCallbacks[field]!.size === 0) {
-            delete newCallbacks[field];
-          }
+          if (newCallbacks[field]!.size === 0) delete newCallbacks[field];
         }
         return newCallbacks;
       });
@@ -124,64 +112,61 @@ export function useStatistics(): UseStatisticsReturn {
   // Fonction pour mettre à jour plusieurs champs
   const updateStatistics = useCallback(async (updates: Partial<Statistics>) => {
     if (!statistics) return;
-    
-    const updatedStatistics = { ...statistics, ...updates };
-    await browser.storage.local.set({ statistics: updatedStatistics });
-    setStatistics(updatedStatistics);
+    isLocalUpdate.current = true;
+    try {
+      const updatedStatistics = { ...statistics, ...updates };
+      await statisticsItem.setValue(updatedStatistics);
+      setStatistics(updatedStatistics);
+    } finally {
+      setTimeout(() => { isLocalUpdate.current = false; }, 100);
+    }
   }, [statistics]);
 
   // Fonction pour reset les statistiques
   const resetStatistics = useCallback(async () => {
-    await browser.storage.local.set({ statistics: defaultStatistics });
-    setStatistics(defaultStatistics);
+    isLocalUpdate.current = true;
+    try {
+      await statisticsItem.setValue(defaultStatistics);
+      setStatistics(defaultStatistics);
+    } finally {
+      setTimeout(() => { isLocalUpdate.current = false; }, 100);
+    }
   }, []);
 
   // Fonction pour incrémenter les groupes créés
   const incrementTabGroupsCreated = useCallback(async () => {
     if (!statistics) return;
-    
-    const newCount = statistics.tabGroupsCreatedCount + 1;
-    await updateField('tabGroupsCreatedCount', newCount);
+    await updateField('tabGroupsCreatedCount', statistics.tabGroupsCreatedCount + 1);
   }, [statistics, updateField]);
 
   // Fonction pour incrémenter les onglets dédupliqués
   const incrementTabsDeduplicated = useCallback(async () => {
     if (!statistics) return;
-    
-    const newCount = statistics.tabsDeduplicatedCount + 1;
-    await updateField('tabsDeduplicatedCount', newCount);
+    await updateField('tabsDeduplicatedCount', statistics.tabsDeduplicatedCount + 1);
   }, [statistics, updateField]);
 
   // Fonction pour recharger les statistiques
   const reloadStatistics = useCallback(async () => {
     try {
-      const result = await browser.storage.local.get({
-        statistics: defaultStatistics
-      });
-      
-      const stats = {
-        ...defaultStatistics,
-        ...(result.statistics as Record<string, unknown>)
-      };
-
-      setStatistics(stats);
+      const value = await statisticsItem.getValue();
+      setStatistics(mergeWithDefaults(value));
     } catch (error) {
-      console.error('Error reloading statistics:', error);
+      logger.error('Error reloading statistics:', error);
     }
   }, []);
 
   return {
     statistics,
     isLoaded,
-    
+
     // Setters
-    setTabGroupsCreatedCount: (value: number) => updateField('tabGroupsCreatedCount', value),
-    setTabsDeduplicatedCount: (value: number) => updateField('tabsDeduplicatedCount', value),
-    
+    setTabGroupsCreatedCount: (value) => updateField('tabGroupsCreatedCount', value),
+    setTabsDeduplicatedCount: (value) => updateField('tabsDeduplicatedCount', value),
+
     // Change callbacks
-    onTabGroupsCreatedCountChange: (callback) => registerChangeCallback('tabGroupsCreatedCount', callback),
-    onTabsDeduplicatedCountChange: (callback) => registerChangeCallback('tabsDeduplicatedCount', callback),
-    
+    onTabGroupsCreatedCountChange: (cb) => registerChangeCallback('tabGroupsCreatedCount', cb),
+    onTabsDeduplicatedCountChange: (cb) => registerChangeCallback('tabsDeduplicatedCount', cb),
+
     // Utilitaires
     updateStatistics,
     resetStatistics,

@@ -1,72 +1,12 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { renderHook, act, waitFor, cleanup } from '@testing-library/react';
+import { fakeBrowser } from 'wxt/testing';
 import { useStatistics } from '../../src/hooks/useStatistics';
 import { defaultStatistics } from '../../src/types/statistics';
 
-// Mock storage data
-let mockStorageData: Record<string, any> = {};
-const storageListeners: Array<(changes: Record<string, any>, areaName: string) => void> = [];
-
-// Create mock browser object
-const mockBrowser = {
-  storage: {
-    local: {
-      get: vi.fn(async (defaults) => {
-        if (typeof defaults === 'object' && defaults !== null) {
-          const result: Record<string, any> = {};
-          for (const key of Object.keys(defaults)) {
-            result[key] = mockStorageData[key] !== undefined ? mockStorageData[key] : defaults[key];
-          }
-          return result;
-        }
-        return mockStorageData;
-      }),
-      set: vi.fn(async (data) => {
-        const changes: Record<string, any> = {};
-        for (const key of Object.keys(data)) {
-          changes[key] = { oldValue: mockStorageData[key], newValue: data[key] };
-        }
-        Object.assign(mockStorageData, data);
-        // Notify listeners
-        storageListeners.forEach(listener => listener(changes, 'local'));
-      }),
-      remove: vi.fn(async (keys) => {
-        if (typeof keys === 'string') {
-          delete mockStorageData[keys];
-        } else if (Array.isArray(keys)) {
-          keys.forEach(key => delete mockStorageData[key]);
-        }
-      })
-    },
-    onChanged: {
-      addListener: vi.fn((callback) => {
-        storageListeners.push(callback);
-      }),
-      removeListener: vi.fn((callback) => {
-        const index = storageListeners.indexOf(callback);
-        if (index > -1) {
-          storageListeners.splice(index, 1);
-        }
-      })
-    }
-  }
-};
-
-// Set global browser
-(globalThis as any).browser = mockBrowser;
-
-// Mock wxt/browser module to use the global mock
-vi.mock('wxt/browser', () => ({
-  get browser() { return (globalThis as any).browser; }
-}));
+// fakeBrowser.reset() est appelé avant chaque test via tests/setup.ts
 
 describe('useStatistics', () => {
-  beforeEach(() => {
-    mockStorageData = {};
-    storageListeners.length = 0;
-    vi.clearAllMocks();
-  });
-
   afterEach(() => {
     cleanup();
   });
@@ -82,9 +22,9 @@ describe('useStatistics', () => {
   });
 
   it('devrait charger les statistiques existantes', async () => {
-    mockStorageData = {
+    await fakeBrowser.storage.local.set({
       statistics: { tabGroupsCreatedCount: 5, tabsDeduplicatedCount: 10 }
-    };
+    });
 
     const { result } = renderHook(() => useStatistics());
 
@@ -125,9 +65,9 @@ describe('useStatistics', () => {
   });
 
   it('devrait incrémenter le compteur de groupes', async () => {
-    mockStorageData = {
+    await fakeBrowser.storage.local.set({
       statistics: { tabGroupsCreatedCount: 5, tabsDeduplicatedCount: 0 }
-    };
+    });
 
     const { result } = renderHook(() => useStatistics());
 
@@ -143,9 +83,9 @@ describe('useStatistics', () => {
   });
 
   it('devrait incrémenter le compteur de déduplication', async () => {
-    mockStorageData = {
+    await fakeBrowser.storage.local.set({
       statistics: { tabGroupsCreatedCount: 0, tabsDeduplicatedCount: 3 }
-    };
+    });
 
     const { result } = renderHook(() => useStatistics());
 
@@ -179,9 +119,9 @@ describe('useStatistics', () => {
   });
 
   it('devrait réinitialiser les statistiques', async () => {
-    mockStorageData = {
+    await fakeBrowser.storage.local.set({
       statistics: { tabGroupsCreatedCount: 50, tabsDeduplicatedCount: 100 }
-    };
+    });
 
     const { result } = renderHook(() => useStatistics());
 
@@ -204,9 +144,11 @@ describe('useStatistics', () => {
     });
 
     // Modifier directement le storage mock
-    mockStorageData = {
-      statistics: { tabGroupsCreatedCount: 999, tabsDeduplicatedCount: 888 }
-    };
+    await act(async () => {
+      await fakeBrowser.storage.local.set({
+        statistics: { tabGroupsCreatedCount: 999, tabsDeduplicatedCount: 888 }
+      });
+    });
 
     await act(async () => {
       await result.current.reloadStatistics();

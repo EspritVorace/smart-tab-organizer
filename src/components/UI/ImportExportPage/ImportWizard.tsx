@@ -6,15 +6,16 @@ import {
 import { Upload, FileUp, ClipboardPaste, CheckCircle, AlertTriangle, XCircle, Eye } from 'lucide-react';
 import { z } from 'zod';
 import { ImportTheme } from '../../Form/themes';
-import { WizardStepper } from '../WizardStepper';
 import { getMessage } from '../../../utils/i18n';
+import { showSuccessNotification } from '../../../utils/notifications';
 import { importDataSchema } from '../../../schemas/importExport';
 import {
   classifyImportedRules,
   type RuleClassification,
   type ConflictingRule
 } from '../../../utils/importClassification';
-import { generateUUID } from '../../../utils/utils';
+import { generateUUID, getRadixColor } from '../../../utils/utils';
+import { getRuleCategory } from '../../../schemas/enums';
 import type { DomainRuleSetting, SyncSettings } from '../../../types/syncSettings';
 
 type ConflictMode = 'overwrite' | 'duplicate' | 'ignore';
@@ -35,22 +36,12 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
   const [isDragOver, setIsDragOver] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
 
-  // Step 2 state
+  // Step 1 state
   const [classification, setClassification] = useState<RuleClassification | null>(null);
   const [newRuleSelectedIds, setNewRuleSelectedIds] = useState<Set<string>>(new Set());
   const [conflictMode, setConflictMode] = useState<ConflictMode>('overwrite');
 
-  // Step 3 state
-  const [importDone, setImportDone] = useState(false);
-  const [importResult, setImportResult] = useState<{ added: number; overwritten: number } | null>(null);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const steps = [
-    { label: getMessage('importStepSource') },
-    { label: getMessage('importStepSelection') },
-    { label: getMessage('importStepConfirm') },
-  ];
 
   // Reset state when dialog opens
   useEffect(() => {
@@ -64,8 +55,6 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
       setClassification(null);
       setNewRuleSelectedIds(new Set());
       setConflictMode('overwrite');
-      setImportDone(false);
-      setImportResult(null);
     }
   }, [open]);
 
@@ -142,8 +131,8 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
     }
   }, [handleFileRead]);
 
-  // Transition to step 2: classify rules
-  const goToStep2 = useCallback(() => {
+  // Transition to step 1: classify rules
+  const goToStep1 = useCallback(() => {
     if (!parsedRules) return;
     const result = classifyImportedRules(parsedRules, existingRules);
     setClassification(result);
@@ -205,23 +194,30 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
     }
 
     onImport(updatedRules);
-    setImportResult({ added, overwritten });
-    setImportDone(true);
-  }, [classification, existingRules, newRuleSelectedIds, conflictMode, onImport]);
+    onOpenChange(false);
+    showSuccessNotification(
+      getMessage('importNotificationTitle'),
+      getMessage('importNotificationMessage', [String(added), String(overwritten)]),
+    );
+  }, [classification, existingRules, newRuleSelectedIds, conflictMode, onImport, onOpenChange]);
 
   return (
     <ImportTheme>
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
         <Dialog.Content style={{ maxWidth: 600 }}>
-          <Dialog.Title>{getMessage('importRulesTitle')}</Dialog.Title>
+          <Dialog.Title>
+            <Flex align="center" gap="2">
+              <FileUp size={18} aria-hidden="true" />
+              {getMessage('importRulesTitle')}
+            </Flex>
+          </Dialog.Title>
           <Dialog.Description size="2" color="gray">
             {getMessage('importRulesDescription')}
           </Dialog.Description>
 
-          <WizardStepper steps={steps} currentStep={step} />
-          <Separator size="4" style={{ opacity: 0.3 }} />
+          <Separator size="4" mt="3" style={{ opacity: 0.3 }} />
 
-          {/* Step 1: Source */}
+          {/* Step 0: Source */}
           {step === 0 && (
             <Box mt="4">
               <SegmentedControl.Root
@@ -316,7 +312,7 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
             </Box>
           )}
 
-          {/* Step 2: Selection */}
+          {/* Step 1: Selection */}
           {step === 1 && classification && (
             <Box mt="4">
               <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '50vh' }}>
@@ -403,41 +399,6 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
               <Text size="2" color="gray" mt="3">
                 {getMessage('rulesToImportCount').replace('{count}', String(importCount))}
               </Text>
-            </Box>
-          )}
-
-          {/* Step 3: Confirmation */}
-          {step === 2 && classification && !importDone && (
-            <Box mt="4">
-              <Flex direction="column" gap="2">
-                {classification.newRules.filter(r => newRuleSelectedIds.has(r.id)).length > 0 && (
-                  <Text size="2">
-                    {getMessage('newRulesToAdd').replace('{count}',
-                      String(classification.newRules.filter(r => newRuleSelectedIds.has(r.id)).length)
-                    )}
-                  </Text>
-                )}
-
-                {classification.conflictingRules.length > 0 && (
-                  <>
-                    {conflictMode === 'overwrite' && (
-                      <Text size="2">
-                        {getMessage('rulesToOverwrite').replace('{count}', String(classification.conflictingRules.length))}
-                      </Text>
-                    )}
-                    {conflictMode === 'duplicate' && (
-                      <Text size="2">
-                        {getMessage('rulesToDuplicate').replace('{count}', String(classification.conflictingRules.length))}
-                      </Text>
-                    )}
-                    {conflictMode === 'ignore' && (
-                      <Text size="2">
-                        {getMessage('rulesToIgnore').replace('{count}', String(classification.conflictingRules.length))}
-                      </Text>
-                    )}
-                  </>
-                )}
-              </Flex>
 
               {conflictMode === 'overwrite' && classification.conflictingRules.length > 0 && (
                 <Callout.Root color="orange" variant="soft" mt="3">
@@ -452,22 +413,6 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
             </Box>
           )}
 
-          {step === 2 && importDone && importResult && (
-            <Box mt="4">
-              <Callout.Root color="green" variant="soft">
-                <Callout.Icon>
-                  <CheckCircle size={16} />
-                </Callout.Icon>
-                <Callout.Text>
-                  {getMessage('importResultSuccess')
-                    .replace('{added}', String(importResult.added))
-                    .replace('{overwritten}', String(importResult.overwritten))
-                  }
-                </Callout.Text>
-              </Callout.Root>
-            </Box>
-          )}
-
           <Separator size="4" mt="4" style={{ opacity: 0.3 }} />
 
           {/* Footer */}
@@ -479,7 +424,7 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
                     {getMessage('cancel')}
                   </Button>
                 </Dialog.Close>
-                <Button onClick={goToStep2} disabled={!parsedRules}>
+                <Button onClick={goToStep1} disabled={!parsedRules}>
                   {getMessage('next')}
                 </Button>
               </>
@@ -489,27 +434,10 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
                 <Button variant="soft" color="gray" onClick={() => setStep(0)}>
                   {getMessage('previous')}
                 </Button>
-                <Button onClick={() => setStep(2)} disabled={importCount === 0}>
-                  {getMessage('next')}
-                </Button>
-              </>
-            )}
-            {step === 2 && !importDone && (
-              <>
-                <Button variant="soft" color="gray" onClick={() => setStep(1)}>
-                  {getMessage('previous')}
-                </Button>
-                <Button onClick={executeImport}>
+                <Button onClick={executeImport} disabled={importCount === 0}>
                   {getMessage('confirmImport')}
                 </Button>
               </>
-            )}
-            {step === 2 && importDone && (
-              <Dialog.Close>
-                <Button variant="soft">
-                  {getMessage('close')}
-                </Button>
-              </Dialog.Close>
             )}
           </Flex>
         </Dialog.Content>
@@ -552,9 +480,17 @@ function RuleRow({ rule, checkbox, checked, onToggle, dimmed, statusBadge }: Rul
         <Text size="2" weight="medium">{rule.label}</Text>
         <Text size="1" color="gray">{rule.domainFilter}</Text>
       </Flex>
-      <Badge color={rule.color as any} variant="soft" size="1">
-        {getMessage(`color_${rule.color}`)}
-      </Badge>
+      {(() => {
+        const cat = getRuleCategory(rule.categoryId);
+        if (cat) {
+          return (
+            <Badge color={getRadixColor(cat.color) as any} variant="soft" size="1">
+              {cat.emoji} {getMessage(cat.labelKey as any)}
+            </Badge>
+          );
+        }
+        return null;
+      })()}
       {statusBadge && (
         <Badge color="gray" variant="outline" size="1">
           {statusBadge}

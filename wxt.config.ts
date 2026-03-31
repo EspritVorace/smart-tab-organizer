@@ -1,5 +1,6 @@
 import { defineConfig } from 'wxt';
 import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
 
 export default defineConfig({
   srcDir: 'src',
@@ -7,11 +8,11 @@ export default defineConfig({
   manifest: {
     name: '__MSG_extensionName__',
     description: '__MSG_extensionDescription__',
-    version: '1.0.3',
+    version: '1.1.0',
     author: 'EspritVorace',
     homepage_url: 'https://github.com/EspritVorace/smart-tab-organizer',
     default_locale: 'en',
-    permissions: ['tabs', 'tabGroups', 'storage', 'notifications'],
+    permissions: ['tabs', 'tabGroups', 'storage', 'notifications', 'alarms'],
     host_permissions: ['<all_urls>'],
     action: {
       default_icon: {
@@ -26,6 +27,10 @@ export default defineConfig({
       '48': 'icons/icon48.png',
       '128': 'icons/icon128.png'
     }
+  },
+  webExt: {
+    chromiumProfile: resolve('.chrome-profile'),
+    keepProfileChanges: true,
   },
   vite: () => ({
     plugins: [react()],

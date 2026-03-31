@@ -1,20 +1,22 @@
 export const FEATURE_THEMES = {
-  DOMAIN_RULES: 'purple',
-  REGEX_PRESETS: 'cyan',
-  IMPORT: 'jade',
-  EXPORT: 'teal',
-  STATISTICS: 'orange',
-  SETTINGS: 'gray'
+  DOMAIN_RULES: 'indigo',
+  REGEX_PRESETS: 'indigo',
+  IMPORT: 'indigo',
+  EXPORT: 'indigo',
+  STATISTICS: 'indigo',
+  SETTINGS: 'indigo',
+  SESSIONS: 'indigo'
 } as const;
 
 // Couleurs de base par fonctionnalité
 export const FEATURE_BASE_COLORS = {
-  DOMAIN_RULES: 'purple',
-  REGEX_PRESETS: 'cyan',
-  IMPORT: 'jade',
-  EXPORT: 'teal',
-  STATISTICS: 'orange',
-  SETTINGS: 'gray'
+  DOMAIN_RULES: 'indigo',
+  REGEX_PRESETS: 'indigo',
+  IMPORT: 'indigo',
+  EXPORT: 'indigo',
+  STATISTICS: 'indigo',
+  SETTINGS: 'indigo',
+  SESSIONS: 'indigo'
 } as const;
 
 // Couleurs par type de callout avec nuances appropriées
@@ -48,6 +50,11 @@ export const FEATURE_CALLOUT_COLORS = {
     INFO: 'gray',
     WARNING: 'gray',   // Nuance neutre
     ERROR: 'red'       // Rouge standard pour erreur
+  },
+  SESSIONS: {
+    INFO: 'indigo',
+    WARNING: 'iris',    // Nuance plus chaude
+    ERROR: 'violet'     // Plus intense pour erreur
   }
 } as const;
 

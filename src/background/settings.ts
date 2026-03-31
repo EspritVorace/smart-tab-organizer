@@ -7,6 +7,7 @@ export async function getSettings(): Promise<SyncSettings> {
     settings.domainRules = settings.domainRules.map((rule: DomainRuleSetting) => ({
         ...rule,
         deduplicationEnabled: typeof rule.deduplicationEnabled === 'boolean' ? rule.deduplicationEnabled : true,
+        groupingEnabled: typeof rule.groupingEnabled === 'boolean' ? rule.groupingEnabled : true,
         deduplicationMatchMode: rule.deduplicationMatchMode || 'exact',
         groupNameSource: rule.groupNameSource || 'title',
         urlParsingRegEx: rule.urlParsingRegEx || ''

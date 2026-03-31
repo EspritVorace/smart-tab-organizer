@@ -2,6 +2,7 @@
  * Module to track URLs that should temporarily skip deduplication.
  * Used when undoing a deduplication action to prevent immediate re-deduplication.
  */
+import { logger } from './logger.js';
 
 // Set of URLs that should skip deduplication (with expiration timestamps)
 const skipDeduplicationUrls = new Map<string, number>();
@@ -36,7 +37,7 @@ export function markUrlToSkipDeduplication(url: string): void {
   const normalizedUrl = normalizeUrl(url);
   const expiresAt = Date.now() + SKIP_DURATION_MS;
   skipDeduplicationUrls.set(normalizedUrl, expiresAt);
-  console.log(`[DEDUP_SKIP] Marked URL to skip deduplication: ${normalizedUrl}`);
+  logger.debug(`[DEDUP_SKIP] Marked URL to skip deduplication: ${normalizedUrl}`);
 }
 
 /**
@@ -49,7 +50,7 @@ export function shouldSkipDeduplication(url: string): boolean {
   const expiresAt = skipDeduplicationUrls.get(normalizedUrl);
 
   if (expiresAt === undefined) {
-    console.log(`[DEDUP_SKIP] URL not in skip list: ${normalizedUrl}`);
+    logger.debug(`[DEDUP_SKIP] URL not in skip list: ${normalizedUrl}`);
     return false;
   }
 
@@ -57,11 +58,11 @@ export function shouldSkipDeduplication(url: string): boolean {
   if (Date.now() > expiresAt) {
     // Clean up expired entry
     skipDeduplicationUrls.delete(normalizedUrl);
-    console.log(`[DEDUP_SKIP] Skip entry expired for URL: ${normalizedUrl}`);
+    logger.debug(`[DEDUP_SKIP] Skip entry expired for URL: ${normalizedUrl}`);
     return false;
   }
 
-  console.log(`[DEDUP_SKIP] Skipping deduplication for URL: ${normalizedUrl}`);
+  logger.debug(`[DEDUP_SKIP] Skipping deduplication for URL: ${normalizedUrl}`);
   return true;
 }
 
