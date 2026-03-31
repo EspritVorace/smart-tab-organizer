@@ -6,7 +6,7 @@
  * Tests use realistic browser tab titles and URLs for each service.
  */
 import { describe, it, expect, vi } from 'vitest';
-import { extractGroupNameFromTitle, extractGroupNameFromUrl } from '../src/utils/utils.js';
+import { extractGroupNameFromTitle, extractGroupNameFromUrl } from '../src/utils/utils';
 
 vi.mock('../src/utils/logger.js', () => ({
   logger: { debug: vi.fn(), error: vi.fn(), warn: vi.fn() }
