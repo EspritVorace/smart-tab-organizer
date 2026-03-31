@@ -13,7 +13,7 @@ import { countSessionTabs } from '../../../utils/sessionUtils';
 import { AccessibleHighlight } from '../../UI/AccessibleHighlight/AccessibleHighlight';
 import { chromeGroupColors } from '../TabTree/tabTreeUtils';
 import { getRuleCategory } from '../../../schemas/enums';
-import { getRadixColor } from '../../../utils/utils.js';
+import { getRadixColor } from '../../../utils/utils';
 import { SplitButton } from '../../UI/SplitButton/SplitButton';
 import { SessionPreviewTree } from './SessionPreviewTree';
 import type { SplitButtonMenuItem } from '../../UI/SplitButton/SplitButton';
