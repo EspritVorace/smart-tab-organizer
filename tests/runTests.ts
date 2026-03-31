@@ -6,13 +6,17 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 let failed = 0;
 
-global.test = (name, fn) => {
+declare global {
+  function test(name: string, fn: () => void): void;
+}
+
+(global as unknown as { test: (name: string, fn: () => void) => void }).test = (name: string, fn: () => void) => {
   try {
     fn();
-    console.log(`\u2713 ${name}`);
+    console.log(`✓ ${name}`);
   } catch (err) {
     failed++;
-    console.error(`\u2717 ${name}`);
+    console.error(`✗ ${name}`);
     console.error(err);
   }
 };

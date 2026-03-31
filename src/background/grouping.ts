@@ -1,6 +1,6 @@
 import { browser, Browser } from 'wxt/browser';
 import { incrementStat } from '../utils/statisticsUtils.js';
-import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from '../utils/utils.js';
+import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from '../utils/utils';
 import { getSettings } from './settings.js';
 import { promptForGroupName } from './messaging.js';
 import { showNotification, type UndoAction } from '../utils/notifications.js';

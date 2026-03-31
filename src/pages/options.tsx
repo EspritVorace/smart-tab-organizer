@@ -7,13 +7,13 @@ import { ThemeProvider } from 'next-themes';
 
 import { useSyncedSettings } from '../hooks/useSyncedSettings.js';
 import { useStatistics } from '../hooks/useStatistics.js';
-import { generateUUID, isValidDomain, isValidRegex } from '../utils/utils.js';
+import { generateUUID, isValidDomain, isValidRegex } from '../utils/utils';
 import { getMessage } from '../utils/i18n';
 const version = browser.runtime.getManifest().version;
 
 import { Sidebar } from '../components/UI/Sidebar/Sidebar';
 import type { SidebarItem } from '../components/UI/Sidebar/Sidebar';
-import { ThemeToggle } from '../components/UI/ThemeToggle/ThemeToggle.jsx';
+import { ThemeToggle } from '../components/UI/ThemeToggle/ThemeToggle';
 import { Flex, Text } from '@radix-ui/themes';
 import { DomainRulesPage } from './DomainRulesPage';
 import { StatisticsPage } from './StatisticsPage';

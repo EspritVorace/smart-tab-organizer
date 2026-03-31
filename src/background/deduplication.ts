@@ -1,7 +1,7 @@
 import { browser, Browser } from 'wxt/browser';
 import { incrementStat } from '../utils/statisticsUtils.js';
 import { logger } from '../utils/logger.js';
-import { matchesDomain } from '../utils/utils.js';
+import { matchesDomain } from '../utils/utils';
 import { getSettings } from './settings.js';
 import { showNotification, type UndoAction } from '../utils/notifications.js';
 import { getMessage } from '../utils/i18n.js';

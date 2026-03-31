@@ -18,7 +18,7 @@ import {
   Group
 } from 'lucide-react';
 import { SidebarFooter } from './SidebarFooter';
-import { ThemeToggle } from '../ThemeToggle/ThemeToggle.jsx';
+import { ThemeToggle } from '../ThemeToggle/ThemeToggle';
 
 const meta: Meta<typeof Sidebar> = {
   title: 'Components/UI/Sidebar',
