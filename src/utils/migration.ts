@@ -44,14 +44,18 @@ async function loadDefaultSettings(): Promise<SyncSettings> {
 
 export async function initializeDefaults(): Promise<void> {
   const defaults = await loadDefaultSettings();
-  const syncData = await browser.storage.sync.get('settings');
-  
-  if (!syncData.settings) {
+  // WXT stores each setting as an individual key (e.g. 'domainRules'), not as a
+  // single 'settings' object. Check for the presence of 'domainRules' to detect
+  // whether the extension has been installed before.
+  const rawSync = await browser.storage.sync.get('domainRules');
+
+  if (rawSync.domainRules === undefined) {
     logger.debug("Init defaults from JSON...");
     await setSyncSettings(defaults);
   } else {
     logger.debug("Merging existing with JSON defaults...");
-    const merged = mergeDeep(defaults, syncData.settings);
+    const currentSettings = await getSyncSettings();
+    const merged = mergeDeep(defaults, currentSettings);
     
     // Ensure default domain rules exist
     defaults.domainRules.forEach(dr => {
