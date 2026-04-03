@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.1.1 — since 1.1.0
+
+### Improvements
+- Converted remaining JavaScript files to TypeScript
+
+### Bug Fixes
+- Skip grouping for tabs in non-normal windows or when name extraction fails
+- Reuse initial window tab to avoid duplicates on startup
+- Stop injecting default domain rules on init
+
 ## 1.1.0 — since 1.0.3
 
 ### New Features
