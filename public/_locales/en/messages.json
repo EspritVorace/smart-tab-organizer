@@ -1,6 +1,6 @@
 {
   "extensionName": { "message": "SmartTab Organizer" },
-  "extensionDescription": { "message": "Automatically groups and deduplicates tabs based on configurable rules." },
+  "extensionDescription": { "message": "Organize Chrome tabs automatically: smart grouping, deduplication, session management. No AI, no tracking. Privacy-first." },
   "yes": { "message": "Yes" },
   "no": { "message": "No" },
   "popupTitle": { "message": "SmartTab Organizer" },
