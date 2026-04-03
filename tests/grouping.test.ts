@@ -195,7 +195,7 @@ describe('grouping', () => {
         expect(result).toBe('Example');
       });
 
-      it('devrait utiliser le label si le titre et l\'URL ne trouvent rien', () => {
+      it('devrait retourner null si le titre et l\'URL ne trouvent rien', () => {
         const rule = createMockRule({
           groupNameSource: 'title',
           titleParsingRegEx: 'NoMatch - (\\w+)',
@@ -205,10 +205,10 @@ describe('grouping', () => {
 
         const result = extractGroupNameFromRule(rule, tab);
 
-        expect(result).toBe('Fallback Label');
+        expect(result).toBeNull();
       });
 
-      it('devrait utiliser SmartGroup si pas de label et aucune extraction', () => {
+      it('devrait retourner null si pas de label et aucune extraction', () => {
         const rule = createMockRule({
           groupNameSource: 'title',
           titleParsingRegEx: 'NoMatch',
@@ -218,7 +218,7 @@ describe('grouping', () => {
 
         const result = extractGroupNameFromRule(rule, tab);
 
-        expect(result).toBe('SmartGroup');
+        expect(result).toBeNull();
       });
 
       it('devrait utiliser l\'URL comme fallback si le titre ne donne rien', () => {
@@ -252,7 +252,7 @@ describe('grouping', () => {
         expect(result).toBe('products');
       });
 
-      it('devrait utiliser le label si l\'URL et le titre ne trouvent rien', () => {
+      it('devrait retourner null si l\'URL et le titre ne trouvent rien', () => {
         const rule = createMockRule({
           groupNameSource: 'url',
           urlParsingRegEx: 'nomatch/(\\w+)',
@@ -262,7 +262,7 @@ describe('grouping', () => {
 
         const result = extractGroupNameFromRule(rule, tab);
 
-        expect(result).toBe('URL Fallback');
+        expect(result).toBeNull();
       });
 
       it('devrait utiliser le titre comme fallback si l\'URL ne donne rien', () => {
@@ -345,9 +345,23 @@ describe('grouping', () => {
 
         expect(result).toBe('projects');
       });
+
+      it('devrait retourner null si aucune extraction ne réussit', () => {
+        const rule = createMockRule({
+          groupNameSource: 'smart',
+          titleParsingRegEx: 'NoMatch',
+          urlParsingRegEx: 'NoMatch',
+          label: 'Should Not Be Used'
+        });
+        const tab = createMockTab({ title: 'No match', url: 'https://example.com/page' });
+
+        const result = extractGroupNameFromRule(rule, tab);
+
+        expect(result).toBeNull();
+      });
     });
 
-    it('devrait gérer une regex invalide gracieusement', () => {
+    it('devrait gérer une regex invalide gracieusement et retourner null', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       const rule = createMockRule({
@@ -359,7 +373,7 @@ describe('grouping', () => {
 
       const result = extractGroupNameFromRule(rule, tab);
 
-      expect(result).toBe('Fallback');
+      expect(result).toBeNull();
       consoleSpy.mockRestore();
     });
 
@@ -397,7 +411,7 @@ describe('grouping', () => {
       expect(context.newTab).toBe(newTab);
     });
 
-    it('devrait utiliser le label comme nom de groupe par défaut', () => {
+    it('devrait retourner null quand l\'extraction échoue (pas de fallback label)', () => {
       const rule = createMockRule({
         label: 'Default Label',
         groupNameSource: 'title',
@@ -408,7 +422,7 @@ describe('grouping', () => {
 
       const context = createGroupingContext(rule, openerTab, newTab, {});
 
-      expect(context.groupName).toBe('Default Label');
+      expect(context).toBeNull();
     });
   });
 });
