@@ -60,8 +60,8 @@ async function restoreInNewWindow(
 
   // Track the first tab created by windows.create (to avoid duplicating it)
   const firstTabId = newWindow.tabs?.[0]?.id;
-  let firstTabUsed = !!firstUrl;
-  if (firstTabUsed) result.tabsCreated++;
+  let firstWindowTabConsumed = false;
+  if (firstUrl) result.tabsCreated++;
 
   // Create remaining ungrouped tabs (skip the first one already created)
   const startIndex = firstUrl && tabs.length > 0 && tabs[0].url === firstUrl ? 1 : 0;
@@ -78,9 +78,13 @@ async function restoreInNewWindow(
   for (const group of groups) {
     const tabIds: number[] = [];
     for (const tab of group.tabs) {
-      // Skip if this was the first tab already created
-      if (firstUrl && tab.url === firstUrl && !firstTabUsed === false && firstTabId && tabIds.length === 0 && startIndex === 0) {
-        // This logic is tricky — just create all group tabs fresh
+      // Reuse the tab already created by windows.create instead of creating a duplicate.
+      // Without this, when firstUrl comes from a group tab, that URL would be created
+      // twice in the same window, triggering deduplication on the still-loading tab.
+      if (!firstWindowTabConsumed && firstTabId != null && tab.url === firstUrl) {
+        tabIds.push(firstTabId);
+        firstWindowTabConsumed = true;
+        continue;
       }
       try {
         const created = await browser.tabs.create({ url: tab.url, windowId });
