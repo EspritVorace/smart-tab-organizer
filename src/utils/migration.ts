@@ -56,42 +56,19 @@ export async function initializeDefaults(): Promise<void> {
     logger.debug("Merging existing with JSON defaults...");
     const currentSettings = await getSyncSettings();
     const merged = mergeDeep(defaults, currentSettings);
-    
-    // Ensure default domain rules exist
-    defaults.domainRules.forEach(dr => {
-      const existing = merged.domainRules.find((mr: any) => mr.id === dr.id);
-      if (!existing) {
-        merged.domainRules.push(dr);
-      }
-    });
 
-    defaults.domainRules.forEach(dr => {
-      const existing = merged.domainRules.find((mr: any) => mr.id === dr.id);
-      if (!existing) {
-        merged.domainRules.push(dr);
-      } else {
-        if (typeof existing.urlParsingRegEx === 'undefined' && typeof dr.urlParsingRegEx !== 'undefined') {
-          existing.urlParsingRegEx = dr.urlParsingRegEx;
-        }
-        if (typeof existing.groupNameSource === 'undefined' && typeof dr.groupNameSource !== 'undefined') {
-          existing.groupNameSource = dr.groupNameSource;
-        }
-      }
-    });
-
-    // Ensure all domain rules have a label, color and new fields
+    // Migrate missing fields on existing rules (never inject new default rules)
     if (merged.domainRules && Array.isArray(merged.domainRules)) {
       merged.domainRules.forEach((rule: any) => {
         if (typeof rule.label === 'undefined') {
           const defaultRule = defaults.domainRules.find(dr => dr.id === rule.id);
           rule.label = defaultRule ? defaultRule.label : rule.domainFilter || "Untitled Rule";
         }
-        // Remove old groupId field and add color field
         if (typeof rule.groupId !== 'undefined') {
           delete rule.groupId;
         }
         if (typeof rule.color === 'undefined') {
-          rule.color = "grey"; // Default color
+          rule.color = "grey";
         }
         if (typeof rule.urlParsingRegEx === 'undefined') {
           rule.urlParsingRegEx = '';
