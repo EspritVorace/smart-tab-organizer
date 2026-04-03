@@ -35,9 +35,9 @@ export function determineGroupColor(rule: DomainRuleSetting, settings?: any): st
     return null;
 }
 
-export function extractGroupNameFromRule(rule: DomainRuleSetting, openerTab: Browser.tabs.Tab): string {
+export function extractGroupNameFromRule(rule: DomainRuleSetting, openerTab: Browser.tabs.Tab): string | null {
     let groupName = rule.label || "SmartGroup";
-    
+
     if (rule.groupNameSource === 'title') {
         // Essaie le titre en priorité, puis l'URL si le titre ne donne rien
         let extracted: string | null = null;
@@ -57,7 +57,11 @@ export function extractGroupNameFromRule(rule: DomainRuleSetting, openerTab: Bro
                 logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with regex "${rule.urlParsingRegEx}".`, e.message);
             }
         }
-        if (extracted?.trim()) groupName = extracted.trim();
+        if (extracted?.trim()) {
+            groupName = extracted.trim();
+        } else {
+            return null;
+        }
     } else if (rule.groupNameSource === 'url') {
         // Essaie l'URL en priorité, puis le titre si l'URL ne donne rien
         let extracted: string | null = null;
@@ -77,7 +81,11 @@ export function extractGroupNameFromRule(rule: DomainRuleSetting, openerTab: Bro
                 logger.warn(`[GROUPING_DEBUG] Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}".`, e.message);
             }
         }
-        if (extracted?.trim()) groupName = extracted.trim();
+        if (extracted?.trim()) {
+            groupName = extracted.trim();
+        } else {
+            return null;
+        }
     } else if (rule.groupNameSource === 'smart_manual') {
         // smart_manual: Si on ne trouve pas de nom de groupe, le demander à l'utilisateur
         const extracted = tryExtractGroupNameFromPresetOrFallback(rule, openerTab);
@@ -106,11 +114,13 @@ export function extractGroupNameFromRule(rule: DomainRuleSetting, openerTab: Bro
             logger.debug(`[GROUPING_DEBUG] Using rule label as fallback: "${groupName}".`);
         }
     } else if (rule.groupNameSource === 'smart') {
-        // smart: Essayer d'extraire intelligemment avec les regex de la règle
+        // smart: Essayer d'extraire intelligemment avec les regex de la règle ; pas de fallback
         const extracted = tryExtractGroupNameFromPresetOrFallback(rule, openerTab);
-        if (extracted) {
-            groupName = extracted;
+        if (!extracted) {
+            logger.debug(`[GROUPING_DEBUG] Smart mode: no name could be extracted for rule "${rule.label}". Skipping grouping.`);
+            return null;
         }
+        groupName = extracted;
     }
     
     const category = getRuleCategory(rule.categoryId);
@@ -151,14 +161,15 @@ function tryExtractGroupNameFromPresetOrFallback(rule: DomainRuleSetting, opener
 }
 
 export function createGroupingContext(
-    rule: DomainRuleSetting, 
-    openerTab: Browser.tabs.Tab, 
-    newTab: Browser.tabs.Tab, 
+    rule: DomainRuleSetting,
+    openerTab: Browser.tabs.Tab,
+    newTab: Browser.tabs.Tab,
     settings: any
-): GroupingContext {
+): GroupingContext | null {
     const groupName = extractGroupNameFromRule(rule, openerTab);
+    if (groupName === null) return null;
     const groupColor = determineGroupColor(rule, settings);
-    
+
     return {
         rule,
         groupName,
@@ -277,6 +288,10 @@ export async function processGroupingForNewTab(openerTab: Browser.tabs.Tab, newT
     }
 
     const context = createGroupingContext(rule, openerTab, newTab, settings);
+    if (context === null) {
+        logger.debug(`[GROUPING_DEBUG] Skipping grouping: no name could be extracted for rule "${rule.label}".`);
+        return;
+    }
     logger.debug(`[GROUPING_DEBUG] Rule found: "${rule.label}", groupName: "${context.groupName}"`);
 
     try {
