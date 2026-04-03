@@ -1,6 +1,6 @@
 {
   "extensionName": { "message": "SmartTab Organizer" },
-  "extensionDescription": { "message": "Agrupa y deduplica pestañas automáticamente según reglas configurables." },
+  "extensionDescription": { "message": "Organiza automáticamente las pestañas de Chrome: agrupación inteligente, eliminación de duplicados, gestión de sesiones. Sin IA, sin seguimiento. La privacidad es lo primero." },
   "yes": { "message": "Sí" },
   "no": { "message": "No" },
   "popupTitle": { "message": "SmartTab Organizer" },

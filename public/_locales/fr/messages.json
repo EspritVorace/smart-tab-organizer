@@ -1,6 +1,6 @@
 {
   "extensionName": { "message": "SmartTab Organizer" },
-  "extensionDescription": { "message": "Regroupe et déduplique automatiquement les onglets selon des règles configurables." },
+  "extensionDescription": { "message": "Organisez automatiquement vos onglets Chrome : regroupement intelligent, déduplication, gestion des sessions. Sans IA, sans suivi. Respect de votre vie privée avant tout." },
   "yes": { "message": "Oui" },
   "no": { "message": "Non" },
   "popupTitle": { "message": "SmartTab Organizer" },
