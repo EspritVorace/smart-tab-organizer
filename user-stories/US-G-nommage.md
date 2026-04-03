@@ -80,16 +80,17 @@
 | Mode | Priorité |
 |---|---|
 | `label` | label de la règle → `"SmartGroup"` |
-| `url` | extraction URL → label → `"SmartGroup"` |
-| `title` | extraction titre → label → `"SmartGroup"` |
+| `url` | extraction URL → extraction titre → **pas de groupage si échec** |
+| `title` | extraction titre → extraction URL → **pas de groupage si échec** |
 | `smart_label` | extraction (titre puis URL) → label → `"SmartGroup"` |
-| `smart` | extraction (titre puis URL via preset) → label → `"SmartGroup"` |
+| `smart` | extraction (titre puis URL) → **pas de groupage si échec** |
 | `smart_preset` | extraction → nom du preset → label → `"SmartGroup"` |
 | `smart_manual` | extraction → invite utilisateur → dégroupage si annulation |
 | `manual` | invite utilisateur (label proposé) → dégroupage si annulation |
 
-- [ ] Le nom de dernier recours absolu est `"SmartGroup"` (utilisé quand le label est lui-même vide).
-- [ ] Une erreur de regex (syntaxe invalide) est tracée en avertissement mais n'empêche pas la création du groupe : le fallback est appliqué.
+- [ ] Le nom de dernier recours absolu est `"SmartGroup"` (utilisé quand le label est lui-même vide) — s'applique aux modes avec fallback explicite : `label`, `smart_label`, `smart_preset`.
+- [ ] Les modes sans suffixe de fallback (`title`, `url`, `smart`) ne groupent pas le tab si aucune extraction ne réussit.
+- [ ] Une erreur de regex (syntaxe invalide) est tracée en avertissement mais n'empêche pas la tentative des autres sources : si toutes échouent, le comportement du mode s'applique (pas de groupage pour `title`/`url`/`smart`, fallback pour les autres).
 - [ ] L'extraction utilise toujours le **premier groupe de capture** `(...)` de l'expression régulière.
 
 ---
