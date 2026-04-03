@@ -256,6 +256,15 @@ export async function processGroupingForNewTab(openerTab: Browser.tabs.Tab, newT
         return;
     }
 
+    // Skip grouping if the opener tab is in a non-normal window (Chrome installed app / PWA)
+    if (openerTab.windowId != null) {
+        const openerWindow = await browser.windows.get(openerTab.windowId).catch(() => null);
+        if (openerWindow && openerWindow.type !== 'normal') {
+            logger.debug(`[GROUPING_DEBUG] Skipping grouping: opener tab is in a non-normal window (type: ${openerWindow.type}).`);
+            return;
+        }
+    }
+
     const rule = findMatchingRule(openerTab.url, settings.domainRules);
     if (!rule) {
         logger.debug(`[GROUPING_DEBUG] No matching rule for opener tab URL: ${openerTab.url}`);
