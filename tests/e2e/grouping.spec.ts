@@ -269,7 +269,7 @@ test.describe('Tab Grouping', () => {
       expect(groups.find(g => g.title === 'Smart Label Fallback')).toBeDefined();
     });
 
-    test('invalid regex falls back gracefully (no crash) [US-G003]', async ({ helpers }) => {
+    test('invalid regex ne crashe pas et ne groupe pas (title, sans fallback) [US-G003]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Invalid Regex Fallback',
         domainFilter: 'example.com',
@@ -283,9 +283,10 @@ test.describe('Tab Grouping', () => {
       await helpers.waitForGrouping();
       await helpers.createTabFromOpener(opener, 'https://example.com/child');
 
-      // Should not crash; extension still creates a group using label as fallback
-      const groups = await helpers.waitForTabGrouped();
-      expect(groups.length).toBeGreaterThan(0);
+      // Should not crash; title mode without fallback → no grouping when extraction fails
+      await helpers.waitForGrouping();
+      const groups = await helpers.getTabGroups();
+      expect(groups.length).toBe(0);
     });
   });
 
