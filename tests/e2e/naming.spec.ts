@@ -133,8 +133,8 @@ test.describe('Group Naming Modes', () => {
 
       const groups = await helpers.waitForTabGrouped();
       expect(groups.length).toBeGreaterThan(0);
-      // Should have extracted "Beta" from the title; fallback to label if extraction fails
-      expect(['Beta', 'Smart Preset Rule']).toContain(groups[0].title);
+      // Should have extracted "Beta" from the title
+      expect(groups[0].title).toBe('Beta');
     });
 
     test('smart mode: extracts group name from opener URL when title regex fails [US-G012]', async ({
@@ -157,8 +157,8 @@ test.describe('Group Naming Modes', () => {
 
       const groups = await helpers.waitForTabGrouped();
       expect(groups.length).toBeGreaterThan(0);
-      // Should extract "projects" from URL; fallback to label if extraction fails
-      expect(['projects', 'Smart URL Rule']).toContain(groups[0].title);
+      // Should extract "projects" from URL
+      expect(groups[0].title).toBe('projects');
     });
 
     test('smart mode without presetId: extrait quand même via regex [US-G012]', async ({
@@ -184,7 +184,7 @@ test.describe('Group Naming Modes', () => {
       expect(groups[0].title).toBe('projects');
     });
 
-    test('smart mode without presetId: utilise le label si les deux regex échouent [US-G012]', async ({
+    test('smart mode without presetId: ne groupe pas si les deux regex échouent [US-G012]', async ({
       helpers,
     }) => {
       await helpers.addDomainRule({
@@ -201,11 +201,13 @@ test.describe('Group Naming Modes', () => {
       await helpers.waitForGrouping();
       await helpers.createTabFromOpener(opener, 'https://example.com/child');
 
-      const groups = await helpers.waitForTabGrouped('Smart No Preset');
-      expect(groups.find(g => g.title === 'Smart No Preset')).toBeDefined();
+      await helpers.waitForGrouping();
+      const groups = await helpers.getTabGroups();
+      // Smart mode without fallback: no grouping when extraction fails
+      expect(groups.length).toBe(0);
     });
 
-    test('smart mode: falls back to label when both regex extractions fail [US-G012]', async ({
+    test('smart mode: ne groupe pas quand les deux regex échouent [US-G012]', async ({
       helpers,
     }) => {
       await helpers.addDomainRule({
@@ -223,8 +225,10 @@ test.describe('Group Naming Modes', () => {
       await helpers.waitForGrouping();
       await helpers.createTabFromOpener(opener, 'https://example.com/child');
 
-      const groups = await helpers.waitForTabGrouped('Smart Fallback Label');
-      expect(groups.find(g => g.title === 'Smart Fallback Label')).toBeDefined();
+      await helpers.waitForGrouping();
+      const groups = await helpers.getTabGroups();
+      // Smart mode without fallback: no grouping when extraction fails
+      expect(groups.length).toBe(0);
     });
   });
 
@@ -406,7 +410,7 @@ test.describe('Group Naming Modes', () => {
       expect(groups.find(g => g.title === 'Label Fallback')).toBeDefined();
     });
 
-    test('invalid regex falls back gracefully without crashing [US-G015]', async ({ helpers }) => {
+    test('invalid regex ne crashe pas et ne groupe pas (smart, sans fallback) [US-G015]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'Invalid Regex Chain',
         domainFilter: 'example.com',
@@ -422,9 +426,10 @@ test.describe('Group Naming Modes', () => {
       await helpers.waitForGrouping();
       await helpers.createTabFromOpener(opener, 'https://example.com/child');
 
-      // Should not crash; extension falls back to label
-      const groups = await helpers.waitForTabGrouped();
-      expect(groups.length).toBeGreaterThan(0);
+      // Should not crash; smart mode without fallback → no grouping when extraction fails
+      await helpers.waitForGrouping();
+      const groups = await helpers.getTabGroups();
+      expect(groups.length).toBe(0);
     });
   });
 
@@ -520,7 +525,7 @@ test.describe('Group Naming Modes', () => {
       expect(['section', 'URL Regex Valid']).toContain(groups[0].title);
     });
 
-    test('invalid regex syntax: falls back to label without crashing [US-G017]', async ({
+    test('invalid regex syntax: ne crashe pas et ne groupe pas (title, sans fallback) [US-G017]', async ({
       helpers,
     }) => {
       await helpers.addDomainRule({
@@ -536,12 +541,13 @@ test.describe('Group Naming Modes', () => {
       await helpers.waitForGrouping();
       await helpers.createTabFromOpener(opener, 'https://example.com/child');
 
-      // Extension should not crash; group is still created using label
-      const groups = await helpers.waitForTabGrouped();
-      expect(groups.length).toBeGreaterThan(0);
+      // Extension should not crash; title mode without fallback → no grouping when extraction fails
+      await helpers.waitForGrouping();
+      const groups = await helpers.getTabGroups();
+      expect(groups.length).toBe(0);
     });
 
-    test('regex without capture group: falls back to label [US-G017]', async ({ helpers }) => {
+    test('regex without capture group: ne groupe pas (title, sans fallback) [US-G017]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'No Capture Group',
         domainFilter: 'example.com',
@@ -559,9 +565,10 @@ test.describe('Group Naming Modes', () => {
 
       await helpers.createTabFromOpener(opener, 'https://example.com/child');
 
-      // Without capture group, extraction returns null → falls back to label
-      const groups = await helpers.waitForTabGrouped('No Capture Group');
-      expect(groups.find(g => g.title === 'No Capture Group')).toBeDefined();
+      // Without capture group, extraction returns null → title mode has no fallback → no grouping
+      await helpers.waitForGrouping();
+      const groups = await helpers.getTabGroups();
+      expect(groups.length).toBe(0);
     });
   });
 });
