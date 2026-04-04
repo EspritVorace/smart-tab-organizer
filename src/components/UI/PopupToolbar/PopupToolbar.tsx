@@ -4,6 +4,7 @@ import { Camera, RotateCcw, Wand2 } from 'lucide-react';
 import { browser } from 'wxt/browser';
 import { getMessage } from '../../../utils/i18n';
 import { loadSessions } from '../../../utils/sessionStorage';
+import { hasCapturableTabs } from '../../../utils/tabCapture';
 
 /** Focus an existing Options tab or open a new one with the given hash. */
 async function openOptionsWithHash(hash: string) {
@@ -23,10 +24,12 @@ async function openOptionsWithHash(hash: string) {
 
 export function PopupToolbar() {
   const [hasSessions, setHasSessions] = useState(false);
+  const [canSave, setCanSave] = useState(false);
   const [isOrganizing, setIsOrganizing] = useState(false);
 
   useEffect(() => {
     loadSessions().then((sessions) => setHasSessions(sessions.length > 0));
+    hasCapturableTabs().then(setCanSave);
   }, []);
 
   const handleOrganize = async () => {
@@ -46,6 +49,7 @@ export function PopupToolbar() {
       <Flex gap="1">
         <Button
           variant="ghost"
+          disabled={!canSave}
           onClick={() => void openOptionsWithHash('#sessions?action=snapshot')}
           aria-label={getMessage('popupSaveSession')}
           style={{
