@@ -158,6 +158,34 @@ test.describe('Sessions screenshots', () => {
   });
 
   /**
+   * sessions-note
+   * First session card expanded, showing the note below the tab tree.
+   * Demonstrates US-S-NOTE-03.
+   */
+  test('sessions-note', async ({ extensionContext, extensionId }, testInfo) => {
+    const locale = testInfo.project.name;
+    await seedSessions(extensionContext, ALL_SESSIONS);
+
+    await captureAll(
+      extensionContext,
+      extensionId,
+      locale,
+      'sessions',
+      'sessions-note',
+      async (page) => {
+        await waitForSessionsReady(page);
+
+        // Search for text that's in the Morning Dev Session's note,
+        // which auto-expands the card and shows the note with highlighting.
+        // "PROJ-123" is locale-agnostic and appears in both the note and a tab title.
+        const searchInput = page.locator('.rt-TextFieldRoot input').first();
+        await searchInput.fill('PROJ-123');
+        await page.waitForTimeout(600);
+      },
+    );
+  });
+
+  /**
    * sessions-restore-conflict
    * A session with group "Work" (blue) is seeded.  We also create a live tab
    * group "Work" (blue) in the browser window so that analyzeConflicts() detects

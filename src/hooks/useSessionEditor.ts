@@ -9,6 +9,8 @@ export interface UseSessionEditorReturn {
   isDirty: boolean;
   /** Update the session name */
   updateSessionName: (name: string) => void;
+  /** Update the session note */
+  updateSessionNote: (note: string) => void;
   /** Apply a full session update (used as TabTreeEditor's onSessionChange) */
   applySessionUpdate: (updatedSession: Session) => void;
   /** Remove a tab (grouped or ungrouped) by ID */
@@ -42,6 +44,10 @@ export function useSessionEditor(initialSession: Session): UseSessionEditorRetur
 
   function updateSessionName(name: string) {
     setEditedSession((prev) => ({ ...prev, name, updatedAt: now() }));
+  }
+
+  function updateSessionNote(note: string) {
+    setEditedSession((prev) => ({ ...prev, note: note || undefined, updatedAt: now() }));
   }
 
   function applySessionUpdate(updatedSession: Session) {
@@ -175,6 +181,7 @@ export function useSessionEditor(initialSession: Session): UseSessionEditorRetur
     editedSession,
     isDirty,
     updateSessionName,
+    updateSessionNote,
     applySessionUpdate,
     removeTab,
     updateTabUrl,

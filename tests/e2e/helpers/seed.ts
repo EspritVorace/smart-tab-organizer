@@ -24,6 +24,7 @@ export interface TestSession {
   ungroupedTabs: TestSavedTab[];
   isPinned: boolean;
   categoryId?: string | null;
+  note?: string;
 }
 
 function uuid(): string {

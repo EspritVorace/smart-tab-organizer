@@ -395,6 +395,8 @@
   "restoreNotificationError": { "message": "Restored with $1 error(s)" },
   "snapshotNotificationTitle": { "message": "Snapshot Saved" },
   "sessionNotificationMessage": { "message": "\"$1\" has been saved" },
+  "sessionNoteLabel": { "message": "Note" },
+  "sessionNotePlaceholder": { "message": "Add a note…" },
   "importNotificationTitle": { "message": "Rules Imported" },
   "importNotificationMessage": { "message": "$1 rule(s) added, $2 rule(s) overwritten" },
   "exportNotificationTitle": { "message": "Rules Exported" },

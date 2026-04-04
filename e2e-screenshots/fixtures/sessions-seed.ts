@@ -45,6 +45,7 @@ interface Session {
   ungroupedTabs: SavedTab[];
   isPinned: boolean;
   categoryId?: string | null;
+  note?: string;
 }
 
 // ─── UUID helper ──────────────────────────────────────────────────────────────
@@ -110,6 +111,7 @@ export const SESSION_MORNING_DEV: Session = {
   ],
   isPinned: false,
   categoryId: 'development',
+  note: 'Focus on PROJ-123 login fix. Check PR #42 for API changes before merging.',
 };
 
 /** Snapshot 2 — "Research Session": 1 group + ungrouped tab */

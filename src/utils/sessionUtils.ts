@@ -14,6 +14,8 @@ export interface SessionSearchMatch {
   matchesTabs: boolean;
   /** IDs of groups that have at least one matching tab or a matching group title */
   matchingGroupIds: Set<string>;
+  /** Whether the session note matches the search term */
+  matchesNote: boolean;
 }
 
 /**
@@ -55,10 +57,11 @@ export function matchSessionSearch(
   }
 
   const matchesTabs = hasUngroupedMatch || matchingGroupIds.size > 0;
+  const matchesNote = session.note ? foldAccents(session.note).includes(foldedTerm) : false;
 
-  if (!matchesName && !matchesTabs) return null;
+  if (!matchesName && !matchesTabs && !matchesNote) return null;
 
-  return { matchesName, matchesTabs, matchingGroupIds };
+  return { matchesName, matchesTabs, matchingGroupIds, matchesNote };
 }
 
 /**
@@ -121,7 +124,7 @@ export function createSessionFromSelection(
   groups: SavedTabGroup[],
   selectedSavedTabIds: Set<string>,
   sessionName: string,
-  options?: { isPinned?: boolean; categoryId?: string | null },
+  options?: { isPinned?: boolean; categoryId?: string | null; note?: string },
 ): Session {
   const now = new Date().toISOString();
 
@@ -139,5 +142,6 @@ export function createSessionFromSelection(
     ungroupedTabs: filteredUngrouped,
     isPinned: options?.isPinned ?? false,
     categoryId: options?.categoryId ?? null,
+    note: options?.note,
   };
 }

@@ -96,6 +96,7 @@ export function SessionsPage({
         groups: updatedSession.groups,
         ungroupedTabs: updatedSession.ungroupedTabs,
         categoryId: updatedSession.categoryId,
+        note: updatedSession.note,
         updatedAt: updatedSession.updatedAt,
       });
       await reload();
@@ -262,7 +263,7 @@ export function SessionsPage({
                     onDelete={s => setDeleteTarget(s)}
                     onPin={handlePin}
                     onUnpin={handleUnpin}
-                    forcePreviewOpen={searchMatch?.matchesTabs === true}
+                    forcePreviewOpen={searchMatch?.matchesTabs === true || searchMatch?.matchesNote === true}
                     searchMatchingGroupIds={searchMatch?.matchingGroupIds}
                     searchQuery={searchQuery || undefined}
                   />
