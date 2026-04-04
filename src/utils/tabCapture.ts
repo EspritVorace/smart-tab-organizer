@@ -32,6 +32,15 @@ interface CaptureResult {
 }
 
 /**
+ * Returns true if the current window contains at least one capturable tab
+ * (i.e. a tab whose URL is not a system URL).
+ */
+export async function hasCapturableTabs(): Promise<boolean> {
+  const tabs = await browser.tabs.query({ currentWindow: true });
+  return tabs.some(tab => !isSystemUrl(tab.url));
+}
+
+/**
  * Capture the current window's tabs and groups.
  * Returns both TabTreeData (for display) and Session-ready data (for saving).
  */
