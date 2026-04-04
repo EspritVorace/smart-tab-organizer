@@ -18,9 +18,10 @@ interface SnapshotWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (session: Session) => Promise<void>;
+  existingSessions: Session[];
 }
 
-export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardProps) {
+export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions }: SnapshotWizardProps) {
   const [sessionName, setSessionName] = useState('');
   const [treeData, setTreeData] = useState<TabTreeData | null>(null);
   const [ungroupedTabs, setUngroupedTabs] = useState<SavedTab[]>([]);
@@ -72,7 +73,15 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
   }, [selectedTabIds, numericIdToSavedTabId]);
 
   const handleSave = useCallback(async () => {
-    if (!sessionName.trim()) return;
+    const trimmed = sessionName.trim();
+    if (!trimmed) return;
+    const isDuplicate = existingSessions.some(
+      s => s.name.toLowerCase() === trimmed.toLowerCase(),
+    );
+    if (isDuplicate) {
+      setSaveError(getMessage('errorSessionNameUnique'));
+      return;
+    }
     setIsSaving(true);
     setSaveError(null);
     try {
@@ -80,21 +89,21 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
         ungroupedTabs,
         groups,
         selectedSavedTabIds,
-        sessionName.trim(),
+        trimmed,
         { categoryId: categoryId ?? null },
       );
       await onSave(session);
       onOpenChange(false);
       showSuccessNotification(
         getMessage('snapshotNotificationTitle'),
-        getMessage('sessionNotificationMessage', [sessionName.trim()]),
+        getMessage('sessionNotificationMessage', [trimmed]),
       );
     } catch {
       setSaveError(getMessage('sessionSaveError'));
     } finally {
       setIsSaving(false);
     }
-  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, categoryId, onSave]);
+  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, categoryId, onSave, existingSessions]);
 
   return (
     <SessionsTheme>

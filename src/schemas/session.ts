@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { idSchema } from './common.js';
+import { getMessage } from '../utils/i18n';
 
 const chromeGroupColorSchema = z.enum([
   'grey', 'blue', 'red', 'yellow', 'green',
@@ -32,3 +33,18 @@ export const sessionSchema = z.object({
 });
 
 export const sessionsArraySchema = z.array(sessionSchema);
+
+export type SessionForUniqueness = { id: string; name: string };
+
+// Schéma avec validation d'unicité du nom pour une session individuelle
+export const createSessionSchemaWithUniqueness = (existingSessions: SessionForUniqueness[], editingSessionId?: string) => {
+  return sessionSchema.refine((data) => {
+    const existingNames = existingSessions
+      .filter(s => editingSessionId ? s.id !== editingSessionId : true)
+      .map(s => s.name.toLowerCase());
+    return !existingNames.includes(data.name.toLowerCase());
+  }, () => ({
+    message: getMessage('errorSessionNameUnique'),
+    path: ['name'],
+  }));
+};

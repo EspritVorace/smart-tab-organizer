@@ -26,6 +26,7 @@ interface SessionEditDialogProps {
   onOpenChange: (open: boolean) => void;
   /** Called with the updated session when the user clicks Save */
   onSave: (updatedSession: Session) => Promise<void>;
+  existingSessions: Session[];
 }
 
 /**
@@ -37,6 +38,7 @@ export function SessionEditDialog({
   open,
   onOpenChange,
   onSave,
+  existingSessions,
 }: SessionEditDialogProps) {
   if (!session) return null;
 
@@ -48,6 +50,7 @@ export function SessionEditDialog({
       open={open}
       onOpenChange={onOpenChange}
       onSave={onSave}
+      existingSessions={existingSessions}
     />
   );
 }
@@ -57,18 +60,28 @@ interface InnerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (updatedSession: Session) => Promise<void>;
+  existingSessions: Session[];
 }
 
-function SessionEditDialogInner({ session, open, onOpenChange, onSave }: InnerProps) {
+function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingSessions }: InnerProps) {
   const editor = useSessionEditor(session);
   const [showUnsavedAlert, setShowUnsavedAlert] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [categoryId, setCategoryId] = useState<string | null>(session.categoryId ?? null);
+  const [saveNameError, setSaveNameError] = useState<string | null>(null);
 
   const tabCount = countSessionTabs(editor.editedSession);
   const groupCount = editor.editedSession.groups.length;
 
   async function handleSave() {
+    const name = editor.editedSession.name.trim();
+    const isDuplicate = existingSessions.some(
+      s => s.id !== session.id && s.name.toLowerCase() === name.toLowerCase(),
+    );
+    if (isDuplicate) {
+      setSaveNameError(getMessage('errorSessionNameUnique'));
+      return;
+    }
     setIsSaving(true);
     try {
       await onSave({
@@ -159,13 +172,19 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave }: InnerPr
                 <TextField.Root
                   id="session-edit-name"
                   value={editor.editedSession.name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    editor.updateSessionName(e.target.value)
-                  }
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    editor.updateSessionName(e.target.value);
+                    setSaveNameError(null);
+                  }}
                   size="2"
                   style={{ width: '100%' }}
                   aria-label={getMessage('sessionEditorNameLabel')}
                 />
+                {saveNameError && (
+                  <Text size="1" color="red" style={{ marginTop: 2 }}>
+                    {saveNameError}
+                  </Text>
+                )}
               </Box>
             </Flex>
           </Box>
