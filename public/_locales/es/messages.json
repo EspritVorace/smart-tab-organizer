@@ -379,6 +379,9 @@
   "popupSave": { "message": "Guardar" },
   "popupRestore": { "message": "Restaurar" },
   "popupSaveSession": { "message": "Guardar sesión" },
+  "popupSaveActiveGroup": { "message": "Guardar grupo activo" },
+  "popupSaveAllTabs": { "message": "Guardar todas las pestañas" },
+  "popupSaveGroupOptions": { "message": "Más opciones de guardado" },
   "popupRestoreSession": { "message": "Restaurar sesión" },
   "popupPinnedSessionsLabel": { "message": "Sesiones fijadas" },
 
