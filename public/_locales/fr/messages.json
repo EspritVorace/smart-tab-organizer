@@ -396,6 +396,8 @@
   "restoreNotificationError": { "message": "Restauration avec $1 erreur(s)" },
   "snapshotNotificationTitle": { "message": "Instantané enregistré" },
   "sessionNotificationMessage": { "message": "« $1 » a été enregistré" },
+  "sessionNoteLabel": { "message": "Note" },
+  "sessionNotePlaceholder": { "message": "Ajouter une note…" },
   "importNotificationTitle": { "message": "Règles importées" },
   "importNotificationMessage": { "message": "$1 règle(s) ajoutée(s), $2 règle(s) écrasée(s)" },
   "exportNotificationTitle": { "message": "Règles exportées" },

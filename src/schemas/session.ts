@@ -30,6 +30,7 @@ export const sessionSchema = z.object({
   ungroupedTabs: z.array(savedTabSchema),
   isPinned: z.boolean(),
   categoryId: z.string().optional().nullable(),
+  note: z.string().optional(),
 });
 
 export const sessionsArraySchema = z.array(sessionSchema);
