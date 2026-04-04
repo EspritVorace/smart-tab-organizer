@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import {
   Card, Flex, Text, IconButton, TextField,
-  DropdownMenu, Tooltip, Badge,
+  DropdownMenu, Tooltip, Badge, Box,
 } from '@radix-ui/themes';
 import {
   MoreHorizontal, Pencil, Trash2, Check, X,
@@ -317,6 +317,17 @@ export function SessionCard({
                 forcedExpandedGroupIds={searchMatchingGroupIds}
                 searchQuery={searchQuery}
               />
+              {session.note && (
+                <Box mt="2" pt="2" style={{ borderTop: '1px solid var(--gray-a4)' }}>
+                  <Text
+                    size="1"
+                    color="gray"
+                    style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                  >
+                    <AccessibleHighlight text={session.note} searchTerm={searchQuery ?? ''} />
+                  </Text>
+                </Box>
+              )}
             </div>
           </Collapsible.Content>
         </Collapsible.Root>

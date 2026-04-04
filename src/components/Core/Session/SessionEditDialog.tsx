@@ -6,6 +6,7 @@ import {
   Flex,
   Text,
   TextField,
+  TextArea,
   Button,
   Separator,
   IconButton,
@@ -197,6 +198,29 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingS
             onSessionChange={editor.applySessionUpdate}
             maxHeight={360}
           />
+
+          {/* Note */}
+          <Box mt="3">
+            <Text
+              as="label"
+              size="2"
+              weight="medium"
+              htmlFor="session-edit-note"
+              style={{ display: 'block', marginBottom: 'var(--space-1)' }}
+            >
+              {getMessage('sessionNoteLabel')}
+            </Text>
+            <TextArea
+              id="session-edit-note"
+              value={editor.editedSession.note ?? ''}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                editor.updateSessionNote(e.target.value)
+              }
+              placeholder={getMessage('sessionNotePlaceholder')}
+              resize="vertical"
+              rows={3}
+            />
+          </Box>
 
           {/* Summary */}
           <Box mt="3">

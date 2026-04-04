@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Dialog, Flex, Button, Text, Separator, Box, TextField,
-  Callout,
+  TextArea, Callout,
 } from '@radix-ui/themes';
 import { Camera, AlertCircle } from 'lucide-react';
 import { SessionsTheme } from '../../Form/themes';
@@ -36,6 +36,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [note, setNote] = useState('');
 
   // Reset and capture on open
   useEffect(() => {
@@ -48,6 +49,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
     setSaveError(null);
     setIsCapturing(true);
     setCategoryId(null);
+    setNote('');
 
     captureCurrentTabs()
       .then(data => {
@@ -111,7 +113,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
         groups,
         selectedSavedTabIds,
         trimmed,
-        { categoryId: categoryId ?? null },
+        { categoryId: categoryId ?? null, note: note || undefined },
       );
       await onSave(session);
       onOpenChange(false);
@@ -124,7 +126,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
     } finally {
       setIsSaving(false);
     }
-  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, categoryId, onSave, existingSessions]);
+  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, categoryId, note, onSave, existingSessions]);
 
   return (
     <SessionsTheme>
@@ -186,6 +188,20 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
                   maxHeight={280}
                 />
               ) : null}
+
+              {/* Note */}
+              <Flex direction="column" gap="1">
+                <Text size="2" weight="medium">
+                  {getMessage('sessionNoteLabel')}
+                </Text>
+                <TextArea
+                  value={note}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNote(e.target.value)}
+                  placeholder={getMessage('sessionNotePlaceholder')}
+                  resize="vertical"
+                  rows={3}
+                />
+              </Flex>
             </Flex>
           </Box>
 
