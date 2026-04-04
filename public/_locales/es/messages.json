@@ -131,6 +131,7 @@
   "labelLabel": { "message": "Etiqueta" },
   "errorLabelRequired": { "message": "La etiqueta es obligatoria." },
   "errorLabelUnique": { "message": "La etiqueta debe ser única." },
+  "errorSessionNameUnique": { "message": "El nombre de la sesión debe ser único." },
   "labelTooltip": { "message": "Un nombre único para esta regla de dominio. Esta etiqueta se usará como título del grupo si la expresión regular de análisis de título falla o no está configurada." },
   "noPreset": { "message": "-- Sin Preajuste --" },
   "loadingText": { "message": "Cargando..." },

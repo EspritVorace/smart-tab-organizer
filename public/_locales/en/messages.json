@@ -131,6 +131,7 @@
   "labelLabel": { "message": "Label" },
   "errorLabelRequired": { "message": "Label is required." },
   "errorLabelUnique": { "message": "Label must be unique." },
+  "errorSessionNameUnique": { "message": "Session name must be unique." },
   "labelTooltip": { "message": "A unique name for this domain rule. This label will be used as the group title if the title parsing regex fails or is not set." },
   "noPreset": { "message": "-- No Preset --" },
   "loadingText": { "message": "Loading..." },
