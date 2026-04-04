@@ -28,7 +28,7 @@
     "screenshots": "pnpm build && xvfb-maybe playwright test --config=e2e-screenshots/playwright.screenshots.config.ts"
   },
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
+    "@playwright/test": "^1.59.1",
     "@storybook/addon-docs": "^9.0.13",
     "@storybook/react-vite": "^9.0.13",
     "@testing-library/jest-dom": "^6.9.1",
