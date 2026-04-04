@@ -19,9 +19,11 @@ interface SnapshotWizardProps {
   onOpenChange: (open: boolean) => void;
   onSave: (session: Session) => Promise<void>;
   existingSessions: Session[];
+  /** Chrome numeric groupId: if set, pre-select only that group's tabs and use the group title as default name. */
+  initialGroupId?: number;
 }
 
-export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions }: SnapshotWizardProps) {
+export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, initialGroupId }: SnapshotWizardProps) {
   const [sessionName, setSessionName] = useState('');
   const [treeData, setTreeData] = useState<TabTreeData | null>(null);
   const [ungroupedTabs, setUngroupedTabs] = useState<SavedTab[]>([]);
@@ -53,7 +55,26 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions }:
         setUngroupedTabs(data.ungroupedTabs);
         setGroups(data.groups);
         setNumericIdToSavedTabId(data.numericIdToSavedTabId);
-        // Pre-select all tabs
+
+        if (initialGroupId !== undefined) {
+          const savedGroupId = data.chromeGroupIdToSavedGroupId.get(initialGroupId);
+          const targetGroup = data.groups.find(g => g.id === savedGroupId);
+          if (targetGroup) {
+            const groupTabUuids = new Set(targetGroup.tabs.map(t => t.id));
+            const preSelected = new Set<number>();
+            for (const [numId, uuid] of data.numericIdToSavedTabId) {
+              if (groupTabUuids.has(uuid)) preSelected.add(numId);
+            }
+            setSelectedTabIds(preSelected);
+            if (targetGroup.title) {
+              setSessionName(targetGroup.title);
+            }
+            setIsCapturing(false);
+            return;
+          }
+        }
+
+        // Default: pre-select all tabs
         setSelectedTabIds(new Set(data.numericIdToSavedTabId.keys()));
         setIsCapturing(false);
       })
