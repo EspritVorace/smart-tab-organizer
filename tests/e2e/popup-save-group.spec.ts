@@ -17,6 +17,9 @@ test.beforeEach(async ({ extensionContext }) => {
   await clearHelpPrefs(extensionContext);
 });
 
+// A non-system URL that captures correctly (about: is filtered by isSystemUrl)
+const CAPTURABLE_URL = 'https://example.com';
+
 // ---------------------------------------------------------------------------
 // Helper: create a tab group in the browser via service worker
 // ---------------------------------------------------------------------------
@@ -27,15 +30,15 @@ async function createTabGroupWithTitle(
 ): Promise<{ groupId: number; tabId: number }> {
   const sw = extensionContext.serviceWorkers()[0];
 
-  // Create a tab and group it
+  // Use a real (non-system) URL so captureCurrentTabs() includes it
   const result = await sw.evaluate(
-    async ({ title, color }: { title: string; color: string }) => {
-      const tab = await chrome.tabs.create({ url: 'about:blank', active: false });
+    async ({ url, title, color }: { url: string; title: string; color: string }) => {
+      const tab = await chrome.tabs.create({ url, active: false });
       const groupId = await chrome.tabs.group({ tabIds: [tab.id!] });
       await (chrome as any).tabGroups.update(groupId, { title, color });
       return { groupId, tabId: tab.id! };
     },
-    { title, color },
+    { url: CAPTURABLE_URL, title, color },
   );
   return result;
 }
@@ -69,12 +72,22 @@ test.describe('[US-PO006] Popup save button', () => {
     extensionContext,
     extensionId,
   }) => {
+    // Create a capturable (non-system) tab so canSave becomes true
+    const sw = extensionContext.serviceWorkers()[0];
+    const tabId = await sw.evaluate(async (url: string) => {
+      const tab = await chrome.tabs.create({ url, active: false });
+      return tab.id!;
+    }, CAPTURABLE_URL);
+
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
+    const saveBtn = page.getByRole('button', { name: /save session/i });
+    await expect(saveBtn).toBeEnabled({ timeout: 5000 });
+
     const [newPage] = await Promise.all([
       extensionContext.waitForEvent('page'),
-      page.getByRole('button', { name: /save session/i }).click(),
+      saveBtn.click(),
     ]);
     await newPage.waitForLoadState('domcontentloaded');
     expect(newPage.url()).toContain('options.html');
@@ -83,6 +96,7 @@ test.describe('[US-PO006] Popup save button', () => {
 
     await page.close();
     await newPage.close();
+    await sw.evaluate(async (id: number) => chrome.tabs.remove(id), tabId);
   });
 });
 
