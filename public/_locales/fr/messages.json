@@ -379,6 +379,9 @@
   "popupSave": { "message": "Sauvegarder" },
   "popupRestore": { "message": "Restaurer" },
   "popupSaveSession": { "message": "Sauvegarder la session" },
+  "popupSaveActiveGroup": { "message": "Sauvegarder le groupe actif" },
+  "popupSaveAllTabs": { "message": "Sauvegarder tous les onglets" },
+  "popupSaveGroupOptions": { "message": "Plus d'options de sauvegarde" },
   "popupRestoreSession": { "message": "Restaurer une session" },
   "popupPinnedSessionsLabel": { "message": "Sessions épinglées" },
 

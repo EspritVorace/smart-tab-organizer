@@ -51,6 +51,7 @@ function OptionsContent() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
     const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
     const [openSnapshotWizard, setOpenSnapshotWizard] = useState(false);
+    const [snapshotGroupId, setSnapshotGroupId] = useState<number | null>(null);
 
     // Deep linking: navigate to the right section on mount and on hash changes
     // (hashchange fires when an existing tab's URL hash is updated externally)
@@ -68,6 +69,8 @@ function OptionsContent() {
                 const params = new URLSearchParams(hash.slice(questionMark + 1));
                 if (params.get('action') === 'snapshot') {
                     setOpenSnapshotWizard(true);
+                    const groupIdParam = params.get('groupId');
+                    setSnapshotGroupId(groupIdParam ? parseInt(groupIdParam, 10) : null);
                 }
             }
         }
@@ -300,6 +303,8 @@ function OptionsContent() {
                             syncSettings={settings}
                             snapshotWizardOpen={openSnapshotWizard}
                             onSnapshotWizardOpenChange={setOpenSnapshotWizard}
+                            snapshotGroupId={snapshotGroupId}
+                            onSnapshotGroupIdChange={setSnapshotGroupId}
                         />
                     )}
                     {currentTab === 'stats' && (

@@ -29,6 +29,8 @@ interface CaptureResult {
   groups: SavedTabGroup[];
   /** Map from numeric TabTree ID to SavedTab UUID */
   numericIdToSavedTabId: Map<number, string>;
+  /** Map from Chrome's numeric groupId to SavedTabGroup UUID */
+  chromeGroupIdToSavedGroupId: Map<number, string>;
 }
 
 /**
@@ -126,10 +128,12 @@ export async function captureCurrentTabs(): Promise<CaptureResult> {
   // Filter out groups with no tabs (all were system URLs)
   const savedGroups: SavedTabGroup[] = [];
   const treeGroups: TabGroupItem[] = [];
-  for (const entry of groupMap.values()) {
+  const chromeGroupIdToSavedGroupId = new Map<number, string>();
+  for (const [chromeId, entry] of groupMap) {
     if (entry.savedGroup.tabs.length > 0) {
       savedGroups.push(entry.savedGroup);
       treeGroups.push(entry.treeGroup);
+      chromeGroupIdToSavedGroupId.set(chromeId, entry.savedGroup.id);
     }
   }
 
@@ -138,5 +142,6 @@ export async function captureCurrentTabs(): Promise<CaptureResult> {
     ungroupedTabs: ungroupedSavedTabs,
     groups: savedGroups,
     numericIdToSavedTabId,
+    chromeGroupIdToSavedGroupId,
   };
 }

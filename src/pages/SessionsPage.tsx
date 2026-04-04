@@ -24,12 +24,18 @@ interface SessionsPageProps {
   snapshotWizardOpen?: boolean;
   /** Called by SessionsPage to let options.tsx know the wizard closed (or page unmounted). */
   onSnapshotWizardOpenChange?: (open: boolean) => void;
+  /** Chrome numeric groupId to pre-select in the snapshot wizard (null = all tabs). */
+  snapshotGroupId?: number | null;
+  /** Called when the snapshot wizard closes to reset the group context. */
+  onSnapshotGroupIdChange?: (id: number | null) => void;
 }
 
 export function SessionsPage({
   syncSettings,
   snapshotWizardOpen = false,
   onSnapshotWizardOpenChange,
+  snapshotGroupId,
+  onSnapshotGroupIdChange,
 }: SessionsPageProps) {
   const { sessions, isLoaded, createSession, renameSession, removeSession, reload } = useSessions();
   // Internal open state; initialized from external prop so the wizard opens immediately on mount.
@@ -269,10 +275,14 @@ export function SessionsPage({
             open={snapshotOpen}
             onOpenChange={(open) => {
               setSnapshotOpen(open);
-              if (!open) onSnapshotWizardOpenChange?.(false);
+              if (!open) {
+                onSnapshotWizardOpenChange?.(false);
+                onSnapshotGroupIdChange?.(null);
+              }
             }}
             onSave={handleSaveSession}
             existingSessions={sessions}
+            initialGroupId={snapshotGroupId ?? undefined}
           />
 
           <SessionEditDialog
