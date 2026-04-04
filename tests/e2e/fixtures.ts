@@ -107,10 +107,15 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       const candidates = [
         // CI / manually pre-installed custom build
         path.join(os.homedir(), '.cache/ms-playwright/chromium-custom/chrome-linux64/chrome'),
+        // /opt/pw-browsers layout (alternative CI install path)
+        '/opt/pw-browsers/chromium-custom/chrome-linux64/chrome',
+        '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
         // Playwright 1.58 expected version
         path.join(os.homedir(), '.cache/ms-playwright/chromium-1208/chrome-linux64/chrome'),
+        '/opt/pw-browsers/chromium-1208/chrome-linux64/chrome',
         // Playwright 1.57 expected version
         path.join(os.homedir(), '.cache/ms-playwright/chromium-1200/chrome-linux64/chrome'),
+        '/opt/pw-browsers/chromium-1200/chrome-linux64/chrome',
         // Older Playwright version that may already be present
         path.join(os.homedir(), '.cache/ms-playwright/chromium-1194/chrome-linux/chrome'),
       ];
