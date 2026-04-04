@@ -247,6 +247,7 @@ export function SessionsPage({
                   <SessionCard
                     key={session.id}
                     session={session}
+                    existingSessions={sessions}
                     onRestore={s => setRestoreSession(s)}
                     onRestoreCurrentWindow={handleRestoreCurrentWindow}
                     onRestoreNewWindow={handleRestoreNewWindow}
@@ -271,6 +272,7 @@ export function SessionsPage({
               if (!open) onSnapshotWizardOpenChange?.(false);
             }}
             onSave={handleSaveSession}
+            existingSessions={sessions}
           />
 
           <SessionEditDialog
@@ -280,6 +282,7 @@ export function SessionsPage({
               if (!isOpen) setEditTarget(null);
             }}
             onSave={handleSaveEditedSession}
+            existingSessions={sessions}
           />
 
           <RestoreWizard

@@ -21,6 +21,7 @@ import type { Session } from '../../../types/session';
 
 interface SessionCardProps {
   session: Session;
+  existingSessions: Session[];
   onRestore: (session: Session) => void;
   onRestoreCurrentWindow: (session: Session) => void;
   onRestoreNewWindow: (session: Session) => void;
@@ -45,6 +46,7 @@ interface SessionCardProps {
 
 export function SessionCard({
   session,
+  existingSessions,
   onRestore,
   onRestoreCurrentWindow,
   onRestoreNewWindow,
@@ -59,6 +61,7 @@ export function SessionCard({
 }: SessionCardProps) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [nameValue, setNameValue] = useState(session.name);
+  const [renameError, setRenameError] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
 
   // When a search match forces the preview open, open it.
@@ -81,13 +84,21 @@ export function SessionCard({
   const handleRenameSubmit = useCallback(async () => {
     const trimmed = nameValue.trim();
     if (trimmed && trimmed !== session.name) {
+      const isDuplicate = existingSessions.some(
+        s => s.id !== session.id && s.name.toLowerCase() === trimmed.toLowerCase(),
+      );
+      if (isDuplicate) {
+        setRenameError(getMessage('errorSessionNameUnique'));
+        return;
+      }
       await onRename(session.id, trimmed);
     }
     setIsRenaming(false);
-  }, [nameValue, session.id, session.name, onRename]);
+  }, [nameValue, session.id, session.name, onRename, existingSessions]);
 
   const handleRenameCancel = useCallback(() => {
     setNameValue(session.name);
+    setRenameError(null);
     setIsRenaming(false);
   }, [session.name]);
 
@@ -144,17 +155,24 @@ export function SessionCard({
           <Flex align="center" gap="2" style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
             {isRenaming ? (
               <>
-                <TextField.Root
-                  value={nameValue}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setNameValue(e.target.value)
-                  }
-                  onKeyDown={handleKeyDown}
-                  autoFocus
-                  size="2"
-                  style={{ flex: 1 }}
-                  aria-label={getMessage('sessionRenameLabel')}
-                />
+                <Flex direction="column" style={{ flex: 1 }}>
+                  <TextField.Root
+                    value={nameValue}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      setNameValue(e.target.value);
+                      setRenameError(null);
+                    }}
+                    onKeyDown={handleKeyDown}
+                    autoFocus
+                    size="2"
+                    aria-label={getMessage('sessionRenameLabel')}
+                  />
+                  {renameError && (
+                    <Text size="1" color="red" style={{ marginTop: 2 }}>
+                      {renameError}
+                    </Text>
+                  )}
+                </Flex>
                 <IconButton
                   size="1"
                   variant="soft"
@@ -180,6 +198,7 @@ export function SessionCard({
                   weight="medium"
                   onDoubleClick={() => {
                     setNameValue(session.name);
+                    setRenameError(null);
                     setIsRenaming(true);
                   }}
                   style={{
@@ -232,6 +251,7 @@ export function SessionCard({
                 <DropdownMenu.Item
                   onClick={() => {
                     setNameValue(session.name);
+                    setRenameError(null);
                     setIsRenaming(true);
                   }}
                 >
