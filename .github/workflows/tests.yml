@@ -101,7 +101,25 @@ jobs:
           merge-multiple: true
 
       - name: Merge E2E CTRF shard reports
-        run: npx ctrf merge ctrf/ --output-dir ctrf --output-file e2e-ctrf-report.json
+        run: |
+          node -e "
+          const fs = require('fs');
+          const files = fs.readdirSync('ctrf').filter(f => /^e2e-ctrf-report-shard-\d+\.json$/.test(f));
+          if (!files.length) { console.log('No shard reports found'); process.exit(0); }
+          const reports = files.map(f => JSON.parse(fs.readFileSync('ctrf/' + f, 'utf8')));
+          const merged = JSON.parse(JSON.stringify(reports[0]));
+          for (let i = 1; i < reports.length; i++) {
+            const r = reports[i];
+            merged.results.tests.push(...r.results.tests);
+            ['tests','passed','failed','pending','skipped','other'].forEach(k => {
+              merged.results.summary[k] = (merged.results.summary[k] || 0) + (r.results.summary[k] || 0);
+            });
+            if (r.results.summary.start) merged.results.summary.start = Math.min(merged.results.summary.start, r.results.summary.start);
+            if (r.results.summary.stop) merged.results.summary.stop = Math.max(merged.results.summary.stop, r.results.summary.stop);
+          }
+          fs.writeFileSync('ctrf/e2e-ctrf-report.json', JSON.stringify(merged, null, 2));
+          console.log('Merged', files.length, 'shard reports ->', merged.results.summary.tests, 'tests');
+          "
         continue-on-error: true
 
       - name: Publish unit test CTRF results
