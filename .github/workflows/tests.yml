@@ -38,8 +38,14 @@ jobs:
           path: ctrf/unit-ctrf-report.json
 
   e2e-tests:
-    name: E2E Tests
+    name: E2E Tests (shard ${{ matrix.shard }}/3)
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    env:
+      SHARD_INDEX: ${{ matrix.shard }}
     steps:
       - uses: actions/checkout@v4
 
@@ -59,15 +65,15 @@ jobs:
       - run: pnpm build
 
       - name: Run Playwright tests
-        run: xvfb-run --auto-servernum -- pnpm exec playwright test
+        run: xvfb-run --auto-servernum -- pnpm exec playwright test --shard=${{ matrix.shard }}/3
 
       - name: Upload CTRF report
         uses: actions/upload-artifact@v4
         if: always()
         continue-on-error: true
         with:
-          name: e2e-ctrf-report
-          path: ctrf/e2e-ctrf-report.json
+          name: e2e-ctrf-report-shard-${{ matrix.shard }}
+          path: ctrf/e2e-ctrf-report-shard-${{ matrix.shard }}.json
 
   report:
     name: Publish Test Reports
@@ -75,6 +81,10 @@ jobs:
     needs: [unit-tests, e2e-tests]
     if: always()
     steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Download unit test report
         uses: actions/download-artifact@v4
         continue-on-error: true
@@ -82,12 +92,17 @@ jobs:
           name: unit-ctrf-report
           path: ctrf/
 
-      - name: Download E2E report
+      - name: Download E2E shard reports
         uses: actions/download-artifact@v4
         continue-on-error: true
         with:
-          name: e2e-ctrf-report
+          pattern: e2e-ctrf-report-shard-*
           path: ctrf/
+          merge-multiple: true
+
+      - name: Merge E2E CTRF shard reports
+        run: npx ctrf merge ctrf/ --output-dir ctrf --output-file e2e-ctrf-report.json
+        continue-on-error: true
 
       - name: Publish unit test CTRF results
         uses: ctrf-io/github-actions-ctrf@v1
