@@ -30,7 +30,7 @@ Three group naming modes:
 - **Manual** — fixed group name
 
 <p align="center">
-  <img src="doc/assets/en-dark-rules-create-summary.png" alt="Rule creation wizard — summary step">
+  <img src="doc/assets/readme/en-dark-rules-create-summary.png" alt="Rule creation wizard — summary step">
 </p>
 
 ### 🗂️ Automatic Grouping
@@ -41,7 +41,7 @@ Middle-click or right-click → "Open in new tab" on a configured site and the t
 - Built-in presets for Jira, GitLab, GitHub, Trello and more
 
 <p align="center">
-  <img src="doc/assets/regroup.gif" alt="Automatic Regroupment video">
+  <img src="doc/assets/readme/gifs/regroup.gif" alt="Automatic Regroupment video">
 </p>
 
 ### 🔁 Deduplication
@@ -50,7 +50,7 @@ Opening a page that's already open refocuses and reloads the existing tab instea
 Matching sensitivity is configurable per rule: exact URL, hostname + path, hostname, or "includes".
 
 <p align="center">
-  <img src="doc/assets/dedup.gif" alt="Deduplication video">
+  <img src="doc/assets/readme/gifs/dedup.gif" alt="Deduplication video">
 </p>
 
 
@@ -64,18 +64,18 @@ Save a named snapshot of your open tabs and groups, restore them whenever you ne
 - **Session editor** — reorganize, rename and delete tabs and groups without restoring first
 
 <p align="center">
-  <img src="doc/assets/en-dark-sessions-list.png" alt="Sessions list">
+  <img src="doc/assets/readme/en-dark-sessions-list.png" alt="Sessions list">
 </p>
 
 <p align="center">
-  <img src="doc/assets/en-dark-sessions-search-deep.png" alt="Deep search in sessions">
+  <img src="doc/assets/readme/en-dark-sessions-search-deep.png" alt="Deep search in sessions">
 </p>
 
 
 An **Import/Export wizard for Rules and Sessions** classifies incoming as new, conflicting or identical, and resolves conflicts step by step.
 
 <p align="center">
-  <img src="doc/assets/en-dark-rules-import-text-conflicts.png" alt="Import wizard with conflict resolution">
+  <img src="doc/assets/readme/en-dark-rules-import-text-conflicts.png" alt="Import wizard with conflict resolution">
 </p>
 
 ### ⚡ Quick Access Popup
@@ -86,7 +86,7 @@ An **Import/Export wizard for Rules and Sessions** classifies incoming as new, c
 
 <p align="center">
 
-<img src="doc/assets/en-dark-popup-content.png" alt="Popup content">
+<img src="doc/assets/readme/en-dark-popup-content.png" alt="Popup content">
 </p>
 
 ### ♿ Accessibility & i18n
