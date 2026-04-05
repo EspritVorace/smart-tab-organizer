@@ -14,11 +14,9 @@ pnpm compile              # TypeScript check only
 # Tests
 pnpm test                     # Vitest unit tests
 pnpm test:watch / test:ui # Watch / Vitest UI
-pnpm test:wxt             # Vitest with WXT-aware environment
-pnpm test:e2e             # Playwright E2E
-pnpm test:e2e:ui          # Playwright with UI
-pnpm test:e2e:build       # wxt build then E2E
-pnpm test:e2e:headed
+pnpm test:e2e             # build + Playwright E2E
+pnpm test:e2e:ui          # build + Playwright with UI
+pnpm test:e2e:headed      # build + Playwright headed
 
 # Docs
 pnpm storybook            # port 6006
