@@ -109,7 +109,48 @@ Pour le développement avec rechargement automatique : `pnpm dev` (Chrome) ou `p
 
 ## 🛠️ Stack Technique
 
-WXT · React + TypeScript · Radix UI Themes · Zod · Vitest · Playwright
+| Couche | Technologie |
+|---|---|
+| Framework d'extension | [WXT](https://wxt.dev/) |
+| Interface | [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
+| Bibliothèque de composants | [Radix UI Themes](https://www.radix-ui.com/themes) + icônes [Lucide](https://lucide.dev/) |
+| Formulaires & validation | [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) |
+| Thèmes | [next-themes](https://github.com/pacocoursey/next-themes) |
+| Tests unitaires | [Vitest](https://vitest.dev/) |
+| Tests E2E | [Playwright](https://playwright.dev/) |
+| Explorateur de composants | [Storybook](https://storybook.js.org/) |
+| Gestionnaire de paquets | [pnpm](https://pnpm.io/) |
+
+## 🤝 Contribuer
+
+Les contributions sont les bienvenues ! Voici comment démarrer :
+
+**Prérequis :** Node.js, [pnpm](https://pnpm.io/) (`npm install -g pnpm`)
+
+```bash
+git clone https://github.com/EspritVorace/smart-tab-organizer.git
+cd smart-tab-organizer
+pnpm install
+pnpm dev          # Chrome avec rechargement automatique
+pnpm dev:firefox  # Firefox avec rechargement automatique
+```
+
+**Tests**
+
+```bash
+pnpm test         # Tests unitaires (Vitest)
+pnpm test:e2e     # Tests end-to-end (Playwright)
+pnpm storybook    # Explorateur de composants (port 6006)
+```
+
+**Conventions de code**
+
+- Utiliser `logger.debug()` de `src/utils/logger.ts` — jamais `console.log()`
+- Pas de type `any` — utiliser des types précis ou `unknown` avec narrowing
+- Tout texte UI via `getMessage()` de `src/utils/i18n.ts` — pas de chaînes en dur
+- Accessibilité via les primitives Radix UI ; les icônes Lucide nécessitent `aria-hidden="true"`
+
+Merci d'ouvrir une issue avant de soumettre une pull request importante.
 
 ## 📜 Licence
 
