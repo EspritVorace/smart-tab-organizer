@@ -2,6 +2,7 @@ import type { Session, SavedTab, SavedTabGroup } from '../types/session';
 import type { TabTreeData, TabItem, TabGroupItem } from '../components/Core/TabTree/tabTreeTypes';
 import { generateUUID } from './utils';
 import { foldAccents } from './stringUtils';
+import { getMessage } from './i18n';
 
 /**
  * Result of matching a session against a search term.
@@ -93,6 +94,32 @@ export function sessionToTabTreeData(session: Session): {
   });
 
   return { treeData: { ungroupedTabs, groups }, numericIdToSavedTabId };
+}
+
+/**
+ * Format an ISO date string to a short localized date (no time).
+ * Used in list views where space is limited (e.g. "Apr 5, 2026").
+ */
+export function formatSessionDateShort(isoString: string): string {
+  try {
+    return new Date(isoString).toLocaleDateString(undefined, { dateStyle: 'medium' });
+  } catch {
+    return isoString;
+  }
+}
+
+/** Localized label for a group count (singular/plural). */
+export function getSessionGroupLabel(count: number): string {
+  return count === 1
+    ? getMessage('sessionGroupOne')
+    : getMessage('sessionGroupCount').replace('$1', String(count));
+}
+
+/** Localized label for a tab count (singular/plural). */
+export function getSessionTabLabel(count: number): string {
+  return count === 1
+    ? getMessage('sessionTabOne')
+    : getMessage('sessionTabCount').replace('$1', String(count));
 }
 
 /** Format an ISO date string to a localized readable string */
