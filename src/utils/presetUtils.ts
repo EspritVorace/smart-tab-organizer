@@ -55,3 +55,14 @@ export async function getPresetsForDomain(domain: string): Promise<Preset[]> {
 export function clearPresetsCache(): void {
   presetsCache = null;
 }
+
+/**
+ * Convert PresetCategory[] into the grouped-options format expected by
+ * SearchableSelect. Shared between ConfigEditModal and WizardStep2Config.
+ */
+export function presetsToSearchableGroups(categories: PresetCategory[]) {
+  return categories.map((cat) => ({
+    label: cat.name,
+    options: cat.presets.map((p) => ({ value: p.id, label: p.name })),
+  }));
+}
