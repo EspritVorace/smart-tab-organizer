@@ -6,6 +6,12 @@ import { SplitButton } from '../SplitButton/SplitButton';
 import { getMessage } from '../../../utils/i18n';
 import { showSuccessNotification } from '../../../utils/notifications';
 import { loadSessions } from '../../../utils/sessionStorage';
+import {
+  formatSessionDateShort,
+  getSessionGroupLabel,
+  getSessionTabLabel,
+  countSessionTabs,
+} from '../../../utils/sessionUtils';
 import type { Session } from '../../../types/session';
 
 interface ExportSessionsWizardProps {
@@ -107,23 +113,6 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
     );
   }, [getExportJson, selectedSessions.length, onOpenChange]);
 
-  const formatDate = (iso: string) => {
-    try {
-      return new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' });
-    } catch {
-      return iso;
-    }
-  };
-
-  const getTabCount = (session: Session) =>
-    session.groups.reduce((sum, g) => sum + g.tabs.length, 0) + session.ungroupedTabs.length;
-
-  const getGroupLabel = (count: number) =>
-    count === 1 ? getMessage('sessionGroupOne') : getMessage('sessionGroupCount').replace('$1', String(count));
-
-  const getTabLabel = (count: number) =>
-    count === 1 ? getMessage('sessionTabOne') : getMessage('sessionTabCount').replace('$1', String(count));
-
   return (
     <SessionsTheme>
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -153,7 +142,7 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
             <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '40vh' }}>
               <Flex direction="column" gap="2" pr="3">
                 {sessions.map(session => {
-                  const tabCount = getTabCount(session);
+                  const tabCount = countSessionTabs(session);
                   const groupCount = session.groups.length;
                   return (
                     <Flex
@@ -174,7 +163,7 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
                       <Flex direction="column" gap="1" style={{ flex: 1 }}>
                         <Text size="2" weight="medium">{session.name}</Text>
                         <Text size="1" color="gray">
-                          {formatDate(session.createdAt)} · {getGroupLabel(groupCount)} · {getTabLabel(tabCount)}
+                          {formatSessionDateShort(session.createdAt)} · {getSessionGroupLabel(groupCount)} · {getSessionTabLabel(tabCount)}
                         </Text>
                       </Flex>
                       {session.isPinned && (
