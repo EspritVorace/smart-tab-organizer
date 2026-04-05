@@ -30,7 +30,7 @@ Tres modos de nombrado de grupo:
 - **Manual** — nombre de grupo fijo
 
 <p align="center">
-  <img src="doc/assets/es-dark-rules-create-summary.png" alt="Asistente de creación de regla — paso resumen">
+  <img src="doc/assets/readme/es-dark-rules-create-summary.png" alt="Asistente de creación de regla — paso resumen">
 </p>
 
 ### 🗂️ Agrupación Automática
@@ -41,7 +41,7 @@ Clic central o clic derecho → «Abrir en una pestaña nueva» en un sitio conf
 - Preajustes integrados para Jira, GitLab, GitHub, Trello y más
 
 <p align="center">
-  <img src="doc/assets/regroup.gif" alt="Vídeo de agrupación automática">
+  <img src="doc/assets/readme/gifs/regroup.gif" alt="Vídeo de agrupación automática">
 </p>
 
 ### 🔁 Deduplicación
@@ -50,7 +50,7 @@ Abrir una página que ya está abierta reactiva y recarga la pestaña existente 
 La sensibilidad de coincidencia es configurable por regla: URL exacta, nombre de host + ruta, nombre de host o «includes».
 
 <p align="center">
-  <img src="doc/assets/dedup.gif" alt="Vídeo de deduplicación">
+  <img src="doc/assets/readme/gifs/dedup.gif" alt="Vídeo de deduplicación">
 </p>
 
 
@@ -64,18 +64,18 @@ Guarda un snapshot con nombre de tus pestañas y grupos abiertos, y restáuralos
 - **Editor de sesión** — reorganiza, renombra y elimina pestañas y grupos sin necesidad de restaurar
 
 <p align="center">
-  <img src="doc/assets/es-dark-sessions-list.png" alt="Lista de sesiones">
+  <img src="doc/assets/readme/es-dark-sessions-list.png" alt="Lista de sesiones">
 </p>
 
 <p align="center">
-  <img src="doc/assets/es-dark-sessions-search-deep.png" alt="Búsqueda profunda en sesiones">
+  <img src="doc/assets/readme/es-dark-sessions-search-deep.png" alt="Búsqueda profunda en sesiones">
 </p>
 
 
 Un **asistente de importación/exportación para Reglas y Sesiones** clasifica los elementos entrantes como nuevos, en conflicto o idénticos, y resuelve los conflictos paso a paso.
 
 <p align="center">
-  <img src="doc/assets/es-dark-rules-import-text-conflicts.png" alt="Asistente de importación con resolución de conflictos">
+  <img src="doc/assets/readme/es-dark-rules-import-text-conflicts.png" alt="Asistente de importación con resolución de conflictos">
 </p>
 
 ### ⚡ Popup de Acceso Rápido
@@ -86,7 +86,7 @@ Un **asistente de importación/exportación para Reglas y Sesiones** clasifica l
 
 <p align="center">
 
-<img src="doc/assets/es-dark-popup-content.png" alt="Contenido del popup">
+<img src="doc/assets/readme/es-dark-popup-content.png" alt="Contenido del popup">
 </p>
 
 ### ♿ Accesibilidad e i18n
