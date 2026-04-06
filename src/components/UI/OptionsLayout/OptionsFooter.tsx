@@ -20,6 +20,7 @@ function handleGithubKeyDown(e: React.KeyboardEvent) {
 export function OptionsFooter() {
   return (
     <Flex
+      data-testid="options-footer"
       align="center"
       gap="3"
       style={{

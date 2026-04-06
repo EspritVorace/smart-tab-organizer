@@ -31,6 +31,7 @@ export function SidebarItems({
         return (
           <Button
             key={item.id}
+            data-testid={`sidebar-nav-item-${item.id}`}
             variant="ghost"
             size="3"
             onClick={() => handleItemClick(item.id, item.onClick)}

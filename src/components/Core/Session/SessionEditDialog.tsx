@@ -127,6 +127,7 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingS
         }}
       >
         <Dialog.Content
+          data-testid="dialog-session-edit"
           maxWidth="600px"
           onInteractOutside={interceptClose}
           onEscapeKeyDown={interceptClose}
@@ -171,6 +172,7 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingS
               <CategoryPicker value={categoryId as any} onChange={setCategoryId} />
               <Box style={{ flex: 1 }}>
                 <TextField.Root
+                  data-testid="dialog-session-edit-field-name"
                   id="session-edit-name"
                   value={editor.editedSession.name}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -234,6 +236,7 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingS
           {/* Footer buttons */}
           <Flex gap="2" justify="end" mt="4">
             <Button
+              data-testid="dialog-session-edit-btn-cancel"
               variant="soft"
               color="gray"
               onClick={handleCancel}
@@ -241,7 +244,7 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingS
             >
               {getMessage('cancel')}
             </Button>
-            <Button onClick={handleSave} disabled={isSaving}>
+            <Button data-testid="dialog-session-edit-btn-save" onClick={handleSave} disabled={isSaving}>
               {isSaving ? getMessage('loadingText') : getMessage('save')}
             </Button>
           </Flex>

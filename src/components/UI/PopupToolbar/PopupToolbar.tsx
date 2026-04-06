@@ -45,6 +45,7 @@ export function PopupToolbar() {
 
   return (
     <Box
+      data-testid="popup-toolbar"
       p="1"
       style={{
         background: 'var(--gray-a3)',
@@ -55,6 +56,7 @@ export function PopupToolbar() {
         {activeTabGroupId !== null && canSave ? (
           <Flex style={{ flex: 1 }}>
             <Button
+              data-testid="popup-toolbar-btn-save"
               variant="ghost"
               onClick={() => void openOptionsWithHash('#sessions?action=snapshot')}
               aria-label={getMessage('popupSaveSession')}
@@ -115,6 +117,7 @@ export function PopupToolbar() {
           </Flex>
         ) : (
           <Button
+            data-testid="popup-toolbar-btn-save"
             variant="ghost"
             disabled={!canSave}
             onClick={() => void openOptionsWithHash('#sessions?action=snapshot')}
@@ -136,6 +139,7 @@ export function PopupToolbar() {
         )}
 
         <Button
+          data-testid="popup-toolbar-btn-restore"
           variant="ghost"
           disabled={!hasSessions}
           onClick={() => void openOptionsWithHash('#sessions')}
@@ -156,6 +160,7 @@ export function PopupToolbar() {
         </Button>
 
         <Button
+          data-testid="popup-toolbar-btn-organize"
           variant="ghost"
           disabled={isOrganizing}
           onClick={() => void handleOrganize()}

@@ -1,4 +1,4 @@
-import { Button, Dialog, Flex, ScrollArea } from '@radix-ui/themes';
+import { Box, Button, Dialog, Flex, ScrollArea } from '@radix-ui/themes';
 import { Edit2, Plus, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
@@ -358,6 +358,7 @@ export function RuleWizardModal({
     <DomainRulesTheme>
       <Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
         <Dialog.Content
+          data-testid="wizard-rule"
           style={{ maxWidth: 560 }}
           onOpenAutoFocus={(e) => {
             e.preventDefault();
@@ -388,6 +389,7 @@ export function RuleWizardModal({
           {/* Wizard stepper (creation only) */}
           {!isEditing && (
             <WizardStepper
+              data-testid="wizard-rule-stepper"
               steps={stepLabels}
               currentStep={step}
               disableFutureNavigation={true}
@@ -415,30 +417,38 @@ export function RuleWizardModal({
                   /* ── Creation wizard steps ── */
                   <>
                     {step === 0 && (
-                      <WizardStep1Identity control={control} errors={errors} />
+                      <Box data-testid="wizard-rule-step-1">
+                        <WizardStep1Identity control={control} errors={errors} />
+                      </Box>
                     )}
                     {step === 1 && (
-                      <WizardStep2Config
-                        control={control}
-                        errors={errors}
-                        configMode={configMode}
-                        onConfigModeChange={handleConfigModeChange}
-                        presetCategories={presetCategories}
-                        isLoadingPresets={isLoadingPresets}
-                        handlePresetChange={handlePresetChange}
-                        groupNameSource={groupNameSource as GroupNameSourceValue}
-                      />
+                      <Box data-testid="wizard-rule-step-2">
+                        <WizardStep2Config
+                          control={control}
+                          errors={errors}
+                          configMode={configMode}
+                          onConfigModeChange={handleConfigModeChange}
+                          presetCategories={presetCategories}
+                          isLoadingPresets={isLoadingPresets}
+                          handlePresetChange={handlePresetChange}
+                          groupNameSource={groupNameSource as GroupNameSourceValue}
+                        />
+                      </Box>
                     )}
                     {step === 2 && (
-                      <WizardStep3Options control={control} deduplicationEnabled={deduplicationEnabled} />
+                      <Box data-testid="wizard-rule-step-3">
+                        <WizardStep3Options control={control} deduplicationEnabled={deduplicationEnabled} />
+                      </Box>
                     )}
                     {step === 3 && (
-                      <WizardStep4Summary
-                        values={getValues() as DomainRule}
-                        configMode={configMode}
-                        presetName={presetName}
-                        onEditStep={handleEditStep}
-                      />
+                      <Box data-testid="wizard-rule-step-4">
+                        <WizardStep4Summary
+                          values={getValues() as DomainRule}
+                          configMode={configMode}
+                          presetName={presetName}
+                          onEditStep={handleEditStep}
+                        />
+                      </Box>
                     )}
                   </>
                 )}
@@ -459,7 +469,7 @@ export function RuleWizardModal({
                   <Dialog.Close>
                     <Button variant="soft" color="gray" type="button">{getMessage('cancel')}</Button>
                   </Dialog.Close>
-                  <Button type="submit">{getMessage('save')}</Button>
+                  <Button data-testid="wizard-rule-btn-save" type="submit">{getMessage('save')}</Button>
                 </>
               ) : (
                 <>
@@ -474,10 +484,10 @@ export function RuleWizardModal({
                     </Button>
                   )}
                   {step < 3 && (
-                    <Button type="button" onClick={handleNext}>{getMessage('next')}</Button>
+                    <Button data-testid="wizard-rule-btn-next" type="button" onClick={handleNext}>{getMessage('next')}</Button>
                   )}
                   {step === 3 && (
-                    <Button type="submit">{getMessage('create')}</Button>
+                    <Button data-testid="wizard-rule-btn-create" type="submit">{getMessage('create')}</Button>
                   )}
                 </>
               )}

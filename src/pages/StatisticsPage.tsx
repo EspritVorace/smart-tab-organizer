@@ -20,9 +20,9 @@ export function StatisticsPage({ syncSettings, stats, onReset }: StatisticsPageP
       syncSettings={syncSettings}
     >
       {() => (
-        <Box>
+        <Box data-testid="page-stats">
           <Flex gap="4" wrap="wrap">
-            <Card style={{ flex: '1', minWidth: '200px' }}>
+            <Card data-testid="page-stats-card-groups" style={{ flex: '1', minWidth: '200px' }}>
               <Flex direction="column" gap="2" p="4">
                 <Flex align="center" gap="2">
                   <Layers size={20} style={{ color: 'var(--accent-9)' }} />
@@ -34,7 +34,7 @@ export function StatisticsPage({ syncSettings, stats, onReset }: StatisticsPageP
               </Flex>
             </Card>
 
-            <Card style={{ flex: '1', minWidth: '200px' }}>
+            <Card data-testid="page-stats-card-dedup" style={{ flex: '1', minWidth: '200px' }}>
               <Flex direction="column" gap="2" p="4">
                 <Flex align="center" gap="2">
                   <Copy size={20} style={{ color: 'var(--accent-9)' }} />
@@ -48,7 +48,7 @@ export function StatisticsPage({ syncSettings, stats, onReset }: StatisticsPageP
           </Flex>
 
           <Box mt="6">
-            <Button variant="soft" color="red" onClick={onReset}>
+            <Button data-testid="page-stats-btn-reset" variant="soft" color="red" onClick={onReset}>
               <RotateCcw size={16} />
               {getMessage('resetStats')}
             </Button>

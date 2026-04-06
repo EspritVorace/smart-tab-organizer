@@ -18,7 +18,7 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
       syncSettings={syncSettings}
     >
       {() => (
-        <Box>
+        <Box data-testid="page-settings">
           <Card>
             <Box p="4">
               <Flex align="center" gap="2" mb="4">
@@ -30,6 +30,7 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
                 <Flex justify="between" align="center">
                   <Text size="2">{getMessage('notifyOnGrouping')}</Text>
                   <Switch
+                    data-testid="page-settings-toggle-notify-group"
                     checked={syncSettings.notifyOnGrouping}
                     onCheckedChange={(checked) => updateSettings({ notifyOnGrouping: checked })}
                   />
@@ -38,6 +39,7 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
                 <Flex justify="between" align="center">
                   <Text size="2">{getMessage('notifyOnDeduplication')}</Text>
                   <Switch
+                    data-testid="page-settings-toggle-notify-dedup"
                     checked={syncSettings.notifyOnDeduplication}
                     onCheckedChange={(checked) => updateSettings({ notifyOnDeduplication: checked })}
                   />

@@ -40,7 +40,7 @@ function BulkActionsBar({
   onSelectAll, onBulkToggle, onBulkDeleteRequest,
 }: BulkActionsBarProps) {
   return (
-    <Flex align="center" gap="3" p="2" mb="4"
+    <Flex data-testid="page-rules-bulk-bar" align="center" gap="3" p="2" mb="4"
       style={{ backgroundColor: 'var(--accent-a3)', borderRadius: 'var(--radius-2)' }}>
       <Checkbox
         checked={isAllSelected}
@@ -83,7 +83,7 @@ interface RulesEmptyStateProps {
 function RulesEmptyState({ hasRules, hasSearch, onAddRule, onImport }: RulesEmptyStateProps) {
   if (!hasRules && !hasSearch) {
     return (
-      <Flex direction="column" align="center" justify="center" gap="3" style={{ minHeight: 200 }}>
+      <Flex data-testid="page-rules-empty" direction="column" align="center" justify="center" gap="3" style={{ minHeight: 200 }}>
         <Shield size={40} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
         <Text size="3" weight="medium" color="gray" align="center">
           {getMessage('rulesEmptyTitle')}
@@ -283,11 +283,12 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
         syncSettings={syncSettings}
       >
         {() => (
-          <Box>
+          <Box data-testid="page-rules">
             {/* Toolbar: Search + Add */}
-            <Flex gap="3" mb="4" align="center">
+            <Flex data-testid="page-rules-toolbar" gap="3" mb="4" align="center">
               <Box style={{ flex: 1 }}>
                 <TextField.Root
+                  data-testid="page-rules-search"
                   placeholder={getMessage('searchRules')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -297,7 +298,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                   </TextField.Slot>
                 </TextField.Root>
               </Box>
-              <Button onClick={handleAddRule}>
+              <Button data-testid="page-rules-btn-add" onClick={handleAddRule}>
                 <Plus size={16} />
                 {getMessage('addRule')}
               </Button>
@@ -323,10 +324,11 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                 onImport={() => setIsImportOpen(true)}
               />
             ) : (
-              <Flex direction="column" gap="3" role="grid" aria-label={getMessage('domainRulesTab')} ref={listRef}>
+              <Flex data-testid="page-rules-list" direction="column" gap="3" role="grid" aria-label={getMessage('domainRulesTab')} ref={listRef}>
                 {filteredRules.map((rule, index) => (
                   <Card
                     key={rule.id}
+                    data-testid={`rule-card-${rule.id}`}
                     variant="surface"
                     size="2"
                     role="row"
@@ -387,6 +389,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                         <DropdownMenu.Root>
                           <DropdownMenu.Trigger>
                             <IconButton
+                              data-testid={`rule-card-${rule.id}-btn-dropdown`}
                               size="2"
                               variant="ghost"
                               color="gray"
