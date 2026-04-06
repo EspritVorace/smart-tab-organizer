@@ -27,7 +27,7 @@ test.describe('[US-PO01] Toolbar', () => {
 
     const [newPage] = await Promise.all([
       extensionContext.waitForEvent('page'),
-      page.getByRole('button', { name: /options/i }).click(),
+      page.getByTestId('popup-header-btn-settings').click(),
     ]);
     await newPage.waitForLoadState('domcontentloaded');
     expect(newPage.url()).toContain('options.html');
@@ -45,7 +45,7 @@ test.describe('[US-PO01] Toolbar', () => {
 
     const [newPage] = await Promise.all([
       extensionContext.waitForEvent('page'),
-      page.getByRole('button', { name: /save/i }).click(),
+      page.getByTestId('popup-toolbar-btn-save').click(),
     ]);
     await newPage.waitForLoadState('domcontentloaded');
     expect(newPage.url()).toContain('options.html');
@@ -64,11 +64,11 @@ test.describe('[US-PO01] Toolbar', () => {
     await goToPopup(page, extensionId);
 
     // Wait for sessions to load so the Restore button is enabled
-    await expect(page.getByRole('button', { name: /restore/i }).first()).toBeEnabled({ timeout: 5000 });
+    await expect(page.getByTestId('popup-toolbar-btn-restore')).toBeEnabled({ timeout: 5000 });
 
     const [newPage] = await Promise.all([
       extensionContext.waitForEvent('page'),
-      page.getByRole('button', { name: /restore/i }).first().click(),
+      page.getByTestId('popup-toolbar-btn-restore').click(),
     ]);
     await newPage.waitForLoadState('domcontentloaded');
     expect(newPage.url()).toContain('options.html');
@@ -188,7 +188,7 @@ test.describe('[US-PO01] Deep linking', () => {
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(500);
 
-    await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(page.getByTestId('wizard-snapshot')).toBeVisible();
     await expect(page.getByText('Save Session Snapshot')).toBeVisible();
     await page.close();
   });
