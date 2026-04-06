@@ -64,7 +64,7 @@ function OptionsContent() {
     }
 
     return (
-        <div id="options-inner" style={{ display: 'flex', height: '100vh' }}>
+        <div id="options-inner" data-testid="options" style={{ display: 'flex', height: '100vh' }}>
             <Sidebar
                 isCollapsed={sidebarCollapsed}
                 onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -78,7 +78,7 @@ function OptionsContent() {
                 footerCollapsedContent={<OptionsFooterCollapsed />}
             />
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <main style={{ flex: 1, overflow: 'auto', padding: '20px' }}>
+                <main data-testid="options-content" style={{ flex: 1, overflow: 'auto', padding: '20px' }}>
                     {currentTab === 'rules' && (
                         <DomainRulesPage syncSettings={settings} updateRules={updateRules} />
                     )}

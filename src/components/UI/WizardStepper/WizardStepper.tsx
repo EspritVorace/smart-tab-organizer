@@ -11,11 +11,12 @@ interface WizardStepperProps {
   currentStep: number;
   /** When true, future steps get aria-disabled="true" (creation wizard). */
   disableFutureNavigation?: boolean;
+  'data-testid'?: string;
 }
 
-export function WizardStepper({ steps, currentStep, disableFutureNavigation = false }: WizardStepperProps) {
+export function WizardStepper({ steps, currentStep, disableFutureNavigation = false, 'data-testid': testId }: WizardStepperProps) {
   return (
-    <Flex align="center" gap="2" py="3" role="list">
+    <Flex data-testid={testId} align="center" gap="2" py="3" role="list">
       {steps.map((step, index) => {
         const isCompleted = index < currentStep;
         const isActive = index === currentStep;

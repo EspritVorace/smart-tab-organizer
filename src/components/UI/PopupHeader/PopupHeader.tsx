@@ -9,7 +9,7 @@ interface PopupHeaderProps {
 
 export function PopupHeader({ title, onSettingsOpen }: PopupHeaderProps) {
   return (
-    <Box role="banner">
+    <Box data-testid="popup-header" role="banner">
       <Box
         px="3"
         py="2"
@@ -55,6 +55,7 @@ export function PopupHeader({ title, onSettingsOpen }: PopupHeaderProps) {
             </Heading>
           </Flex>
           <IconButton
+            data-testid="popup-header-btn-settings"
             variant="ghost"
             size="2"
             onClick={onSettingsOpen}

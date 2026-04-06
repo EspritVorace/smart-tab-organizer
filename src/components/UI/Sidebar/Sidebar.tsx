@@ -59,6 +59,7 @@ export function Sidebar({
 }: SidebarProps) {
   return (
     <Box
+      data-testid="sidebar"
       style={{
         height: '100vh',
         width: isCollapsed ? '80px' : '280px',

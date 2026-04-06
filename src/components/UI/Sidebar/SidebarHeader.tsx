@@ -56,6 +56,7 @@ export function SidebarHeader({
             }} 
           />
           <Button
+            data-testid="sidebar-collapse-btn"
             variant="ghost"
             size="1"
             onClick={onToggleCollapse}

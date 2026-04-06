@@ -132,6 +132,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
     <SessionsTheme>
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
         <Dialog.Content
+          data-testid="wizard-snapshot"
           style={{ maxWidth: 580 }}
           onOpenAutoFocus={(e) => {
             e.preventDefault();
@@ -160,6 +161,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
                   <CategoryPicker value={categoryId as any} onChange={setCategoryId} />
                   <Box style={{ flex: 1 }}>
                     <TextField.Root
+                      data-testid="wizard-snapshot-field-name"
                       value={sessionName}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setSessionName(e.target.value)
@@ -195,6 +197,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
                   {getMessage('sessionNoteLabel')}
                 </Text>
                 <TextArea
+                  data-testid="wizard-snapshot-field-notes"
                   value={note}
                   onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNote(e.target.value)}
                   placeholder={getMessage('sessionNotePlaceholder')}
@@ -219,11 +222,12 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
           {/* Footer */}
           <Flex gap="3" justify="end" mt="3">
             <Dialog.Close>
-              <Button variant="soft" color="gray" disabled={isSaving}>
+              <Button data-testid="wizard-snapshot-btn-cancel" variant="soft" color="gray" disabled={isSaving}>
                 {getMessage('cancel')}
               </Button>
             </Dialog.Close>
             <Button
+              data-testid="wizard-snapshot-btn-save"
               onClick={handleSave}
               disabled={!sessionName.trim() || selectedTabIds.size === 0 || isCapturing || isSaving}
             >
