@@ -130,6 +130,8 @@ jobs:
           pull-request: true
           summary: false
           summary-report: true
+          failed-report: true
+          flaky-report: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -141,5 +143,7 @@ jobs:
           pull-request: true
           summary: false
           summary-report: true
+          failed-report: true
+          flaky-report: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
