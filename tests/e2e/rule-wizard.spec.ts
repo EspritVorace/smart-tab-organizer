@@ -47,7 +47,7 @@ test.describe('Creation wizard — Step 1: Identity', () => {
     await expect(dialog.getByTestId('wizard-rule-field-label')).toBeVisible();
     await expect(dialog.getByTestId('wizard-rule-field-domain')).toBeVisible();
     // WizardStepper visible with 4 steps
-    await expect(dialog.getByTestId('wizard-stepper')).toBeVisible();
+    await expect(dialog.getByTestId('wizard-rule-stepper')).toBeVisible();
     await page.close();
   });
 
@@ -359,7 +359,7 @@ test.describe('Edit mode — Summary View', () => {
     const dialog = page.getByTestId('wizard-rule');
     await expect(dialog).toBeVisible();
     // No wizard stepper
-    await expect(dialog.getByTestId('wizard-stepper')).not.toBeAttached();
+    await expect(dialog.getByTestId('wizard-rule-stepper')).not.toBeAttached();
     // Identity fields visible and editable
     await expect(dialog.getByTestId('wizard-rule-field-label')).toHaveValue('Edit Me');
     await expect(dialog.getByTestId('wizard-rule-field-domain')).toHaveValue('*.edit.com');

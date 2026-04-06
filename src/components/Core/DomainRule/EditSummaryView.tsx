@@ -95,6 +95,7 @@ export function EditSummaryView({
                     <TextField.Root
                       {...field}
                       name="label"
+                      data-testid="wizard-rule-field-label"
                       placeholder={getMessage('labelPlaceholder')}
                     />
                   )}
@@ -115,6 +116,7 @@ export function EditSummaryView({
                 <TextField.Root
                   {...field}
                   name="domainFilter"
+                  data-testid="wizard-rule-field-domain"
                   placeholder={getMessage('domainFilterPlaceholder')}
                   style={{ marginTop: '4px' }}
                 />
