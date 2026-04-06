@@ -118,11 +118,11 @@ test.describe('[US-PO007] Save active tab group via deep link', () => {
       await page.waitForLoadState('domcontentloaded');
 
       // Wait for the wizard dialog to open
-      await page.getByRole('dialog').waitFor({ state: 'visible', timeout: 10_000 });
+      await page.getByTestId('wizard-snapshot').waitFor({ state: 'visible', timeout: 10_000 });
       await expect(page.getByText('Save Session Snapshot')).toBeVisible();
 
       // Default session name should be the group title
-      const nameInput = page.getByRole('textbox', { name: /session name/i });
+      const nameInput = page.getByTestId('wizard-snapshot-field-name');
       await expect(nameInput).toHaveValue('Work Tabs');
 
       await page.close();
@@ -144,10 +144,10 @@ test.describe('[US-PO007] Save active tab group via deep link', () => {
       );
       await page.waitForLoadState('domcontentloaded');
 
-      await page.getByRole('dialog').waitFor({ state: 'visible', timeout: 10_000 });
+      await page.getByTestId('wizard-snapshot').waitFor({ state: 'visible', timeout: 10_000 });
 
       // Empty group title → fallback to "Snapshot <date>"
-      const nameInput = page.getByRole('textbox', { name: /session name/i });
+      const nameInput = page.getByTestId('wizard-snapshot-field-name');
       const value = await nameInput.inputValue();
       expect(value).toMatch(/^Snapshot /);
 
@@ -168,10 +168,10 @@ test.describe('[US-PO007] Save active tab group via deep link', () => {
     );
     await page.waitForLoadState('domcontentloaded');
 
-    await page.getByRole('dialog').waitFor({ state: 'visible', timeout: 10_000 });
+    await page.getByTestId('wizard-snapshot').waitFor({ state: 'visible', timeout: 10_000 });
 
     // Should fallback to default snapshot name (not a group name)
-    const nameInput = page.getByRole('textbox', { name: /session name/i });
+    const nameInput = page.getByTestId('wizard-snapshot-field-name');
     const value = await nameInput.inputValue();
     expect(value).toMatch(/^Snapshot /);
 
@@ -188,11 +188,11 @@ test.describe('[US-PO007] Save active tab group via deep link', () => {
     );
     await page.waitForLoadState('domcontentloaded');
 
-    await page.getByRole('dialog').waitFor({ state: 'visible', timeout: 10_000 });
+    await page.getByTestId('wizard-snapshot').waitFor({ state: 'visible', timeout: 10_000 });
     await expect(page.getByText('Save Session Snapshot')).toBeVisible();
 
     // Default name should be "Snapshot <date>"
-    const nameInput = page.getByRole('textbox', { name: /session name/i });
+    const nameInput = page.getByTestId('wizard-snapshot-field-name');
     const value = await nameInput.inputValue();
     expect(value).toMatch(/^Snapshot /);
 

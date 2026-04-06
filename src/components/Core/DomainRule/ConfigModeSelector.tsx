@@ -35,12 +35,13 @@ export function ConfigModeSelector({ value, onValueChange }: ConfigModeSelectorP
         {getMessage('configurationMode')}
       </Text>
       <SegmentedControl.Root
+        data-testid="wizard-rule-segmented-config"
         value={value}
         onValueChange={(v) => onValueChange(v as ConfigMode)}
         size="2"
       >
         {CONFIG_MODES.map((mode) => (
-          <SegmentedControl.Item key={mode} value={mode}>
+          <SegmentedControl.Item key={mode} value={mode} data-testid={`config-mode-${mode}`}>
             <Flex align="center" gap="1">
               {getMessage(MODE_LABELS[mode])}
               <HoverCard.Root openDelay={300} closeDelay={100}>

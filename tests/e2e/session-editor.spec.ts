@@ -28,7 +28,7 @@ test.describe('[US-E01] Opening', () => {
     await page.getByRole('button', { name: 'More actions' }).click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
-    await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(page.getByTestId('dialog-session-edit')).toBeVisible();
     await expect(page.getByText('Edit Session')).toBeVisible();
     await page.close();
   });
@@ -43,7 +43,7 @@ test.describe('[US-E01] Opening', () => {
     await page.getByRole('button', { name: 'More actions' }).click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
-    const nameInput = page.getByRole('textbox', { name: /name/i });
+    const nameInput = page.getByTestId('dialog-session-edit-field-name');
     await expect(nameInput).toHaveValue('My Special Session');
     await page.close();
   });
@@ -84,12 +84,12 @@ test.describe('[US-E01] Name editing', () => {
     await page.getByRole('button', { name: 'More actions' }).click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
-    const nameInput = page.getByRole('textbox', { name: /name/i });
+    const nameInput = page.getByTestId('dialog-session-edit-field-name');
     await nameInput.fill('After Edit');
 
-    await page.getByRole('button', { name: 'Save' }).click();
+    await page.getByTestId('dialog-session-edit-btn-save').click();
 
-    await expect(page.getByRole('dialog')).not.toBeVisible();
+    await expect(page.getByTestId('dialog-session-edit')).not.toBeVisible();
     await expect(page.getByText('After Edit')).toBeVisible();
 
     const sessions = await getSessionsFromStorage(extensionContext);
@@ -115,9 +115,9 @@ test.describe('[US-E01] Cancel and unsaved changes', () => {
     await page.getByRole('button', { name: 'More actions' }).click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
-    await page.getByRole('button', { name: /cancel/i }).click();
+    await page.getByTestId('dialog-session-edit-btn-cancel').click();
 
-    await expect(page.getByRole('dialog')).not.toBeVisible();
+    await expect(page.getByTestId('dialog-session-edit')).not.toBeVisible();
     await page.close();
   });
 
@@ -132,10 +132,10 @@ test.describe('[US-E01] Cancel and unsaved changes', () => {
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
     // Make a change
-    const nameInput = page.getByRole('textbox', { name: /name/i });
+    const nameInput = page.getByTestId('dialog-session-edit-field-name');
     await nameInput.fill('Modified Name');
 
-    await page.getByRole('button', { name: /cancel/i }).click();
+    await page.getByTestId('dialog-session-edit-btn-cancel').click();
 
     // AlertDialog should appear asking about unsaved changes ("unsaved" appears in both title and body)
     await expect(page.getByRole('alertdialog')).toBeVisible();
@@ -156,7 +156,7 @@ test.describe('[US-E01] Cancel and unsaved changes', () => {
     await page.getByRole('button', { name: 'More actions' }).click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
-    const nameInput = page.getByRole('textbox', { name: /name/i });
+    const nameInput = page.getByTestId('dialog-session-edit-field-name');
     await nameInput.fill('Will Not Save');
 
     await page.getByRole('button', { name: /cancel/i }).click();
@@ -242,7 +242,7 @@ test.describe('[US-E01] Tab tree', () => {
     await urlInput.press('Enter');
 
     // Save the session
-    await page.getByRole('button', { name: 'Save' }).click();
+    await page.getByTestId('dialog-session-edit-btn-save').click();
     await expect(page.getByRole('dialog')).not.toBeVisible();
 
     // Verify storage updated

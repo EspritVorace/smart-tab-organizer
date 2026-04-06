@@ -43,7 +43,7 @@ test.describe('[US-O01] Empty state', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await expect(page.getByRole('button', { name: 'Take Snapshot' }).first()).toBeVisible();
+    await expect(page.getByTestId('page-sessions-btn-snapshot')).toBeVisible();
     await page.close();
   });
 
@@ -228,7 +228,7 @@ test.describe('[US-S07] Delete', () => {
     await page.getByRole('button', { name: 'More actions' }).click();
     await page.getByRole('menuitem', { name: /delete/i }).click();
     // Click the red "Delete" confirm button
-    await page.getByRole('button', { name: /delete/i }).last().click();
+    await page.getByTestId('confirm-dialog-btn-confirm').click();
 
     await expect(page.getByText('To Be Deleted')).not.toBeVisible();
     // Empty state should appear
@@ -245,7 +245,7 @@ test.describe('[US-S07] Delete', () => {
 
     await page.getByRole('button', { name: 'More actions' }).click();
     await page.getByRole('menuitem', { name: /delete/i }).click();
-    await page.getByRole('button', { name: /cancel/i }).click();
+    await page.getByTestId('confirm-dialog-btn-cancel').click();
 
     await expect(page.getByText('Will Survive')).toBeVisible();
     await page.close();
@@ -263,9 +263,9 @@ test.describe('[US-S01] Snapshot creation', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'Take Snapshot' }).first().click();
+    await page.getByTestId('page-sessions-btn-snapshot').click();
 
-    await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(page.getByTestId('wizard-snapshot')).toBeVisible();
     await expect(page.getByText('Save Session Snapshot')).toBeVisible();
     await page.close();
   });
@@ -274,9 +274,9 @@ test.describe('[US-S01] Snapshot creation', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'Take Snapshot' }).first().click();
+    await page.getByTestId('page-sessions-btn-snapshot').click();
 
-    await expect(page.getByRole('dialog').getByText('Session name')).toBeVisible();
+    await expect(page.getByTestId('wizard-snapshot').getByText('Session name')).toBeVisible();
     await page.close();
   });
 
@@ -291,11 +291,11 @@ test.describe('[US-S01] Snapshot creation', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'Take Snapshot' }).first().click();
+    await page.getByTestId('page-sessions-btn-snapshot').click();
     await page.waitForTimeout(800);
 
     // All checkboxes in the tab tree should be checked (aria-checked="true")
-    const unchecked = page.getByRole('dialog').locator('[aria-checked="false"]');
+    const unchecked = page.getByTestId('wizard-snapshot').locator('[aria-checked="false"]');
     await expect(unchecked).toHaveCount(0);
 
     await realTab.close();
@@ -313,10 +313,10 @@ test.describe('[US-S01] Snapshot creation', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'Take Snapshot' }).first().click();
+    await page.getByTestId('page-sessions-btn-snapshot').click();
     await page.waitForTimeout(800);
 
-    const dialog = page.getByRole('dialog');
+    const dialog = page.getByTestId('wizard-snapshot');
     await expect(dialog.getByText(/chrome:\/\//)).not.toBeVisible();
     await expect(dialog.getByText('about:blank')).not.toBeVisible();
 
@@ -332,10 +332,10 @@ test.describe('[US-S01] Snapshot creation', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'Take Snapshot' }).first().click();
+    await page.getByTestId('page-sessions-btn-snapshot').click();
     await page.waitForTimeout(800); // wait for tab capture to complete
 
-    await expect(page.getByRole('dialog').getByRole('button', { name: 'Save Session' })).toBeEnabled();
+    await expect(page.getByTestId('wizard-snapshot').getByRole('button', { name: 'Save Session' })).toBeEnabled();
     await extraTab.close();
     await page.close();
   });
@@ -351,13 +351,13 @@ test.describe('[US-S01] Snapshot creation', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'Take Snapshot' }).first().click();
+    await page.getByTestId('page-sessions-btn-snapshot').click();
     await page.waitForTimeout(800);
 
     await page.getByRole('button', { name: 'Save Session' }).click();
 
     // Dialog auto-closes after saving
-    await expect(page.getByRole('dialog')).not.toBeVisible();
+    await expect(page.getByTestId('wizard-snapshot')).not.toBeVisible();
 
     const sessions = await getSessionsFromStorage(extensionContext);
     expect(sessions.length).toBe(1);
