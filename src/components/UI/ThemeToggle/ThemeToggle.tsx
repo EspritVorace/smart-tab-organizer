@@ -31,6 +31,7 @@ export function ThemeToggle() {
   return (
     <Tooltip content={getMessage(currentTheme.labelKey)}>
       <IconButton
+        data-testid="theme-toggle"
         variant="ghost"
         size="2"
         onClick={handleThemeToggle}

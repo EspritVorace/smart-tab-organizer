@@ -27,6 +27,8 @@ export interface SplitButtonProps {
   disabled?: boolean;
   /** Aria-label for the chevron dropdown trigger */
   ariaLabel?: string;
+  /** data-testid forwarded to the primary button */
+  'data-testid'?: string;
 }
 
 export function SplitButton({
@@ -37,10 +39,12 @@ export function SplitButton({
   size = '2',
   disabled = false,
   ariaLabel,
+  'data-testid': testId,
 }: SplitButtonProps) {
   return (
     <Flex gap="0">
       <Button
+        data-testid={testId}
         variant={variant}
         size={size}
         onClick={onClick}

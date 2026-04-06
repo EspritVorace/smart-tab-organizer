@@ -23,7 +23,7 @@ export function PageLayout({ titleKey, theme, icon: Icon, syncSettings, children
         display: 'flex',
         flexDirection: 'column'
       }}>
-        <Box>
+        <Box data-testid="page-layout-header">
           <Box
             px="4"
             py="2"
@@ -76,7 +76,7 @@ export function PageLayout({ titleKey, theme, icon: Icon, syncSettings, children
           <Separator size="4" style={{ opacity: 0.3 }} />
         </Box>
 
-        <Box style={{ flex: 1, overflow: 'auto', marginTop: 'var(--space-3)', backgroundColor: 'var(--accent-a2)', borderRadius: 'var(--radius-3)', padding: 'var(--space-4)' }}>
+        <Box data-testid="page-layout-content" style={{ flex: 1, overflow: 'auto', marginTop: 'var(--space-3)', backgroundColor: 'var(--accent-a2)', borderRadius: 'var(--radius-3)', padding: 'var(--space-4)' }}>
           {children(syncSettings)}
         </Box>
       </Box>

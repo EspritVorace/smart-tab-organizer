@@ -35,13 +35,13 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
       syncSettings={syncSettings}
     >
       {() => (
-        <Box>
+        <Box data-testid="page-import-export">
           <Grid
             columns={{ initial: '1', sm: '2' }}
             gap="4"
           >
             {/* Export Card */}
-            <Card size="3">
+            <Card data-testid="page-import-export-card-export-rules" size="3">
               <Flex direction="column" gap="3" align="start" style={{ height: '100%' }}>
                 <Flex align="center" gap="2">
                   <Box
@@ -78,7 +78,7 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
             </Card>
 
             {/* Import Card */}
-            <Card size="3">
+            <Card data-testid="page-import-export-card-import-rules" size="3">
               <Flex direction="column" gap="3" align="start" style={{ height: '100%' }}>
                 <Flex align="center" gap="2">
                   <Box
@@ -111,7 +111,7 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
             </Card>
 
             {/* Export Sessions Card */}
-            <Card size="3">
+            <Card data-testid="page-import-export-card-export-sessions" size="3">
               <Flex direction="column" gap="3" align="start" style={{ height: '100%' }}>
                 <Flex align="center" gap="2">
                   <Box
@@ -144,7 +144,7 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
             </Card>
 
             {/* Import Sessions Card */}
-            <Card size="3">
+            <Card data-testid="page-import-export-card-import-sessions" size="3">
               <Flex direction="column" gap="3" align="start" style={{ height: '100%' }}>
                 <Flex align="center" gap="2">
                   <Box

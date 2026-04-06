@@ -165,14 +165,15 @@ export function SessionsPage({
       syncSettings={syncSettings}
     >
       {() => (
-        <Box>
+        <Box data-testid="page-sessions">
           {/* Intro callout (dismissable) */}
           <SessionsIntroCallout />
 
           {/* Toolbar: Search + Actions */}
-          <Flex gap="3" mb="4" align="center">
+          <Flex data-testid="page-sessions-toolbar" gap="3" mb="4" align="center">
             <Box style={{ flex: 1 }}>
               <TextField.Root
+                data-testid="page-sessions-search"
                 placeholder={getMessage('searchSessions')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -183,6 +184,7 @@ export function SessionsPage({
               </TextField.Root>
             </Box>
             <Button
+              data-testid="page-sessions-btn-snapshot"
               variant="solid"
               size="2"
               onClick={() => setSnapshotOpen(true)}
@@ -211,6 +213,7 @@ export function SessionsPage({
             sessions.length === 0 && !searchQuery ? (
               // True empty state
               <Flex
+                data-testid="page-sessions-empty"
                 direction="column"
                 align="center"
                 justify="center"
@@ -247,7 +250,7 @@ export function SessionsPage({
               </Flex>
             )
           ) : (
-            <Flex direction="column" gap="3">
+            <Flex data-testid="page-sessions-list" direction="column" gap="3">
               {displayedSessions.map(session => {
                 const searchMatch = sessionSearchMatches?.get(session.id);
                 return (

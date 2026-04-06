@@ -51,7 +51,7 @@ export function SettingsToggles({
     }
 
     return (
-        <Card role="group" aria-label={getMessage('settingsTab')}>
+        <Card data-testid="settings-toggles" role="group" aria-label={getMessage('settingsTab')}>
             <Flex gap="3" direction="column">
                 <Text as="label" size="2">
                     <Flex gap="3" align="center" justify="between">
@@ -62,6 +62,7 @@ export function SettingsToggles({
                             {getMessage('enableGrouping')}
                         </Flex>
                         <Switch
+                            data-testid="settings-toggle-grouping"
                             checked={globalGroupingEnabled || false}
                             onCheckedChange={onGroupingChange}
                         />
@@ -76,6 +77,7 @@ export function SettingsToggles({
                             {getMessage('enableDeduplication')}
                         </Flex>
                         <Switch
+                            data-testid="settings-toggle-dedup"
                             checked={globalDeduplicationEnabled || false}
                             onCheckedChange={onDeduplicationChange}
                         />

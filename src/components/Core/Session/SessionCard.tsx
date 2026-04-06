@@ -127,7 +127,7 @@ export function SessionCard({
   ];
 
   return (
-    <Card size="2">
+    <Card data-testid={`session-card-${session.id}`} size="2">
       <Flex direction="column" gap="2">
         {/* Top row: pin btn + name + category badge + restore + more menu */}
         <Flex align="center" gap="2">
@@ -194,6 +194,7 @@ export function SessionCard({
             ) : (
               <>
                 <Text
+                  data-testid={`session-card-${session.id}-name`}
                   size="3"
                   weight="medium"
                   onDoubleClick={() => {
@@ -222,6 +223,7 @@ export function SessionCard({
           {/* Restore button — just before "..." */}
           {!isRenaming && (
             <SplitButton
+              data-testid={`session-card-${session.id}-btn-restore`}
               label={getMessage('sessionRestore')}
               onClick={() => onRestore(session)}
               menuItems={restoreMenuItems}
@@ -235,6 +237,7 @@ export function SessionCard({
             <DropdownMenu.Root>
               <DropdownMenu.Trigger>
                 <IconButton
+                  data-testid={`session-card-${session.id}-btn-dropdown`}
                   size="1"
                   variant="ghost"
                   color="gray"
@@ -273,6 +276,7 @@ export function SessionCard({
         <Collapsible.Root open={previewOpen} onOpenChange={setPreviewOpen}>
           <Collapsible.Trigger asChild>
             <button
+              data-testid={`session-card-${session.id}-preview-toggle`}
               type="button"
               style={{
                 all: 'unset',

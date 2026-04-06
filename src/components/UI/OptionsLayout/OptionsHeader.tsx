@@ -8,7 +8,7 @@ interface OptionsHeaderProps {
 /** Expanded sidebar header: logo, app name, version, theme toggle. */
 export function OptionsHeader({ version }: OptionsHeaderProps) {
   return (
-    <Flex align="center" gap="3" style={{ width: '100%', paddingRight: '64px', position: 'relative' }}>
+    <Flex data-testid="options-header" align="center" gap="3" style={{ width: '100%', paddingRight: '64px', position: 'relative' }}>
       <img
         src="/icons/icon48.png"
         alt="SmartTab Organizer"

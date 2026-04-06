@@ -24,7 +24,7 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
-      <AlertDialog.Content maxWidth="450px">
+      <AlertDialog.Content data-testid="confirm-dialog" maxWidth="450px">
         <AlertDialog.Title>{title}</AlertDialog.Title>
         {description && (
           <AlertDialog.Description size="2">
@@ -33,12 +33,12 @@ export function ConfirmDialog({
         )}
         <Flex gap="3" mt="4" justify="end">
           <AlertDialog.Cancel>
-            <Button variant="soft" color="gray">
+            <Button data-testid="confirm-dialog-btn-cancel" variant="soft" color="gray">
               {cancelLabel ?? getMessage('cancel')}
             </Button>
           </AlertDialog.Cancel>
           <AlertDialog.Action>
-            <Button variant="solid" color={color} onClick={onConfirm}>
+            <Button data-testid="confirm-dialog-btn-confirm" variant="solid" color={color} onClick={onConfirm}>
               {confirmLabel ?? getMessage('delete')}
             </Button>
           </AlertDialog.Action>
