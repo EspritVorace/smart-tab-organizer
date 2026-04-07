@@ -29,7 +29,7 @@
   "notificationDeduplicationMessage": { "message": "Pestaña duplicada cerrada: {title}" },
   "addRule": { "message": "Añadir Regla" },
   "domainFilter": { "message": "Filtro Dominio" },
-  "domainFilterPlaceholder": { "message": "ej: *.atlassian.net" },
+  "domainFilterPlaceholder": { "message": "ej: atlassian.net" },
   "titleRegex": { "message": "RegEx Título" },
   "urlRegex": { "message": "RegEx URL" },
   "deduplicationMode": { "message": "Modo Deduplicación" },
@@ -82,7 +82,7 @@
   "lightMode": { "message": "Claro" },
   "darkModeOption": { "message": "Oscuro" },
   "customRegex": { "message": "RegEx Personalizada..." },
-  "domainTooltip": { "message": "Ingrese dominio (ej: jira.com) o use *. para subdominios (ej: *.jira.com)." },
+  "domainTooltip": { "message": "Ingrese un dominio (ej: jira.com). Los subdominios coinciden automáticamente. Use una RegEx para patrones avanzados." },
   "regexTooltip": { "message": "Seleccione preajuste o ingrese RegEx. El 1er grupo de captura ( ) será el nombre del grupo." },
   "dedupTooltip": { "message": "'Exacta': URL idéntica. 'Incluida': Nueva URL contenida en una existente." },
   "presetNameTooltip": { "message": "Nombre para identificar este preajuste RegEx." },
@@ -425,5 +425,9 @@
   "editConfigAriaLabel": { "message": "Editar configuración" },
   "optionsSummaryDedupEnabled": { "message": "Deduplicación activada · {mode}" },
   "optionsSummaryDedupDisabled": { "message": "Deduplicación desactivada" },
-  "summaryModify": { "message": "Modificar" }
+  "summaryModify": { "message": "Modificar" },
+  "ruleMoveToFirst": { "message": "Al principio" },
+  "ruleMoveToLast": { "message": "Al final" },
+  "ruleMoveToFirstOfDomain": { "message": "Primera del dominio" },
+  "ruleMoveToLastOfDomain": { "message": "Última del dominio" }
 }

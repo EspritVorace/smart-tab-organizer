@@ -36,10 +36,25 @@ async function loadSyncSettingsFromStorage(): Promise<SyncSettings> {
     notifyOnGroupingItem,
     notifyOnDeduplicationItem,
   ]);
+
+  const rawRules = results[2].value as DomainRuleSettings;
+  // Migrate legacy wildcard syntax: *.example.com → example.com
+  const hasWildcards = rawRules?.some(r => r.domainFilter?.startsWith('*.'));
+  const domainRules = hasWildcards
+    ? rawRules.map(r => ({
+        ...r,
+        domainFilter: r.domainFilter?.startsWith('*.') ? r.domainFilter.slice(2) : r.domainFilter,
+      }))
+    : rawRules;
+  if (hasWildcards) {
+    // Persist the migrated rules so migration only runs once
+    await storage.setItems([{ item: domainRulesItem, value: domainRules }]);
+  }
+
   return {
     globalGroupingEnabled: results[0].value as boolean,
     globalDeduplicationEnabled: results[1].value as boolean,
-    domainRules: results[2].value as DomainRuleSettings,
+    domainRules,
     notifyOnGrouping: results[3].value as boolean,
     notifyOnDeduplication: results[4].value as boolean,
   };

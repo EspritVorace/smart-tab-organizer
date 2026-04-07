@@ -12,10 +12,14 @@ test('domainToRegex with typical domain', () => {
   const regex = domainToRegex('example.com');
   assert.ok(regex instanceof RegExp);
   assert.ok(regex.test('https://example.com'));
-  assert.ok(!regex.test('https://sub.example.com'));
+  // Plain domains now match subdomains implicitly
+  assert.ok(regex.test('https://sub.example.com'));
+  assert.ok(regex.test('https://deep.sub.example.com'));
+  assert.ok(!regex.test('https://notexample.com'));
 });
 
-test('domainToRegex with wildcard domain', () => {
+test('domainToRegex legacy wildcard domain (defensive strip during migration)', () => {
+  // *.example.com stripped to example.com — same subdomain-matching behavior
   const regex = domainToRegex('*.example.com');
   assert.ok(regex instanceof RegExp);
   assert.ok(regex.test('https://sub.example.com'));
@@ -27,7 +31,12 @@ test('matchesDomain typical', () => {
   assert.strictEqual(matchesDomain('https://other.com', 'example.com'), false);
 });
 
-test('matchesDomain wildcard', () => {
+test('matchesDomain subdomain (plain domain matches subdomains implicitly)', () => {
+  assert.strictEqual(matchesDomain('https://a.example.com', 'example.com'), true);
+  assert.strictEqual(matchesDomain('https://example.com', 'example.com'), true);
+});
+
+test('matchesDomain legacy wildcard (defensive strip)', () => {
   assert.strictEqual(matchesDomain('https://a.example.com', '*.example.com'), true);
   assert.strictEqual(matchesDomain('https://example.com', '*.example.com'), true);
 });
@@ -75,7 +84,10 @@ test('isValidRegex edge cases', () => {
 
 test('isValidDomain edge cases', () => {
   assert.strictEqual(isValidDomain('example.com'), true);
-  assert.strictEqual(isValidDomain('*.example.com'), true);
+  assert.strictEqual(isValidDomain('sub.example.com'), true);
+  // Wildcards are no longer accepted — subdomains match implicitly
+  assert.strictEqual(isValidDomain('*.example.com'), false);
   assert.strictEqual(isValidDomain('example'), false);
   assert.strictEqual(isValidDomain(''), false);
+  assert.strictEqual(isValidDomain(null), false);
 });
