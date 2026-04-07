@@ -348,7 +348,7 @@ test.describe('Edit mode — Summary View', () => {
   test('edit opens on summary view (no wizard stepper)', async ({
     extensionContext, extensionId, helpers,
   }) => {
-    await helpers.addDomainRule({ label: 'Edit Me', domainFilter: '*.edit.com' });
+    await helpers.addDomainRule({ label: 'Edit Me', domainFilter: 'edit.com' });
 
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
@@ -362,7 +362,7 @@ test.describe('Edit mode — Summary View', () => {
     await expect(dialog.getByTestId('wizard-rule-stepper')).not.toBeAttached();
     // Identity fields visible and editable
     await expect(dialog.getByTestId('wizard-rule-field-label')).toHaveValue('Edit Me');
-    await expect(dialog.getByTestId('wizard-rule-field-domain')).toHaveValue('*.edit.com');
+    await expect(dialog.getByTestId('wizard-rule-field-domain')).toHaveValue('edit.com');
     await page.close();
   });
 

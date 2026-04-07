@@ -126,7 +126,7 @@ test.describe('First of domain / Last of domain', () => {
 
     // Move "Example" (root: example.com) to last of domain
     // "Sub Example" (also example.com) is at index 2, so Example should move after it
-    await page.getByRole('row', { name: /^Example$/i }).getByLabel('More actions').click();
+    await page.getByRole('row', { name: /Example/i }).first().getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /last of domain/i }).click();
     await page.waitForTimeout(300);
     await page.close();
@@ -154,8 +154,9 @@ test.describe('First of domain / Last of domain', () => {
     const firstOfDomainItem = page.getByRole('menuitem', { name: /first of domain/i });
     const lastOfDomainItem = page.getByRole('menuitem', { name: /last of domain/i });
 
-    await expect(firstOfDomainItem).toHaveAttribute('data-disabled', 'true');
-    await expect(lastOfDomainItem).toHaveAttribute('data-disabled', 'true');
+    // Radix UI DropdownMenu.Item sets data-disabled="" (empty string) when disabled
+    await expect(firstOfDomainItem).toHaveAttribute('data-disabled', '');
+    await expect(lastOfDomainItem).toHaveAttribute('data-disabled', '');
 
     await page.close();
   });
