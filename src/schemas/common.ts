@@ -49,12 +49,9 @@ export const createDomainFilterValidator = () => {
   return z.string().min(1).refine((val) => {
     // D'abord vérifier si c'est un nom de domaine valide
     if (val === 'localhost') return true;
-    
-    // Vérifier les patterns de domaine avec wildcards (ex: *.example.com)
-    const wildcardDomainRegex = /^\*\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*$/;
-    if (wildcardDomainRegex.test(val)) return true;
-    
+
     // Vérifier les noms de domaine normaux (au moins 2 parties séparées par un point, pas de point final)
+    // Les wildcards (*.domain) ne sont plus acceptés — les sous-domaines matchent implicitement
     const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)+$/;
     // Vérifier qu'il ne se termine pas par un point
     if (val.endsWith('.')) return false;
