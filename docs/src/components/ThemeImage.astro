@@ -1,0 +1,21 @@
+---
+import { Image } from 'astro:assets';
+
+interface Props {
+  lightSrc: ImageMetadata;
+  darkSrc: ImageMetadata;
+  alt: string;
+}
+
+const { lightSrc, darkSrc, alt } = Astro.props;
+---
+<span class="theme-image">
+  <Image src={lightSrc} alt={alt} class="light-only" />
+  <Image src={darkSrc}  alt={alt} class="dark-only"  />
+</span>
+
+<style>
+  .dark-only  { display: none; }
+  :global([data-theme="dark"]) .dark-only  { display: block; }
+  :global([data-theme="dark"]) .light-only { display: none; }
+</style>

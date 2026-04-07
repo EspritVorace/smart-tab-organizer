@@ -1,0 +1,86 @@
+---
+title: Sessions & Profils
+description: Sauvegardez vos onglets ouverts sous forme de sessions et restaurez-les à tout moment.
+sidebar:
+  order: 3
+---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
+import sessionsListLight from '../../../assets/screenshots/fr-light-sessions-list.png';
+import sessionsListDark from '../../../assets/screenshots/fr-dark-sessions-list.png';
+import sessionsCreateLight from '../../../assets/screenshots/fr-light-sessions-create-snapshot.png';
+import sessionsCreateDark from '../../../assets/screenshots/fr-dark-sessions-create-snapshot.png';
+import sessionsNoteLight from '../../../assets/screenshots/fr-light-sessions-note.png';
+import sessionsNoteDark from '../../../assets/screenshots/fr-dark-sessions-note.png';
+import sessionsProfilePinLight from '../../../assets/screenshots/fr-light-sessions-profile-pin-onboarding.png';
+import sessionsProfilePinDark from '../../../assets/screenshots/fr-dark-sessions-profile-pin-onboarding.png';
+import sessionsSearchLight from '../../../assets/screenshots/fr-light-sessions-search-deep.png';
+import sessionsSearchDark from '../../../assets/screenshots/fr-dark-sessions-search-deep.png';
+import sessionsRestoreConflictLight from '../../../assets/screenshots/fr-light-sessions-restore-conflict.png';
+import sessionsRestoreConflictDark from '../../../assets/screenshots/fr-dark-sessions-restore-conflict.png';
+import sessionsExportLight from '../../../assets/screenshots/fr-light-sessions-export-split-button.png';
+import sessionsExportDark from '../../../assets/screenshots/fr-dark-sessions-export-split-button.png';
+import sessionsImportFileLight from '../../../assets/screenshots/fr-light-sessions-import-file-dialog.png';
+import sessionsImportFileDark from '../../../assets/screenshots/fr-dark-sessions-import-file-dialog.png';
+import sessionsImportConflictsLight from '../../../assets/screenshots/fr-light-sessions-import-text-conflicts.png';
+import sessionsImportConflictsDark from '../../../assets/screenshots/fr-dark-sessions-import-text-conflicts.png';
+
+Les sessions permettent de capturer un instantané de vos onglets ouverts et de les restaurer plus tard, en totalité ou en partie.
+Les profils épinglés vont plus loin : ils se synchronisent automatiquement et peuvent être associés à une fenêtre dédiée.
+
+## Liste des sessions
+
+<ThemeImage lightSrc={sessionsListLight} darkSrc={sessionsListDark} alt="Liste des sessions sauvegardées avec profils épinglés" />
+
+Les sessions s'affichent en ordre chronologique. Les profils épinglés apparaissent en haut de liste avec leur icône distinctive.
+
+## Créer un instantané
+
+<ThemeImage lightSrc={sessionsCreateLight} darkSrc={sessionsCreateDark} alt="Assistant de création d'un instantané" />
+
+Cliquez sur « Nouvel instantané » pour capturer les onglets de la fenêtre active.
+Vous pouvez choisir un nom, ajouter une note et sélectionner les onglets à inclure.
+
+## Notes
+
+<ThemeImage lightSrc={sessionsNoteLight} darkSrc={sessionsNoteDark} alt="Carte de session avec note déployée et mise en évidence de la recherche" />
+
+Chaque session peut contenir une note libre. Le contenu des notes est inclus dans la recherche globale.
+
+## Profils épinglés
+
+<ThemeImage lightSrc={sessionsProfilePinLight} darkSrc={sessionsProfilePinDark} alt="Assistant d'onboarding lors de l'épinglage du premier profil" />
+
+Épinglez une session pour en faire un profil permanent.
+Un profil peut être associé à une fenêtre de navigateur : l'extension synchronise automatiquement les onglets de cette fenêtre avec le profil selon l'intervalle configuré.
+
+## Recherche
+
+<ThemeImage lightSrc={sessionsSearchLight} darkSrc={sessionsSearchDark} alt="Recherche profonde avec aperçu des sessions filtrées" />
+
+La recherche parcourt les noms de sessions, notes, titres et URLs des onglets sauvegardés.
+Les résultats s'affichent avec un aperçu des onglets correspondants mis en évidence.
+
+## Restaurer avec conflits
+
+<ThemeImage lightSrc={sessionsRestoreConflictLight} darkSrc={sessionsRestoreConflictDark} alt="Assistant de restauration montrant la résolution de conflits" />
+
+Lors de la restauration, si des onglets sont déjà ouverts, l'extension détecte les conflits et vous propose de les ignorer, les remplacer ou les ouvrir en double.
+
+## Import / Export
+
+### Exporter des sessions
+
+<ThemeImage lightSrc={sessionsExportLight} darkSrc={sessionsExportDark} alt="Boîte de dialogue d'export avec bouton split" />
+
+Exportez une ou plusieurs sessions en JSON pour les sauvegarder ou les transférer.
+
+### Importer des sessions
+
+<ThemeImage lightSrc={sessionsImportFileLight} darkSrc={sessionsImportFileDark} alt="Boîte de dialogue d'import de sessions par fichier" />
+
+Importez des sessions depuis un fichier JSON ou en collant du texte.
+
+<ThemeImage lightSrc={sessionsImportConflictsLight} darkSrc={sessionsImportConflictsDark} alt="Résolution des conflits lors de l'import de sessions" />
+
+En cas de conflit de noms, choisissez de renommer, écraser ou ignorer les sessions en doublon.

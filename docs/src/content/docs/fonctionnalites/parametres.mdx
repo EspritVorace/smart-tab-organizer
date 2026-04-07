@@ -1,0 +1,21 @@
+---
+title: Paramètres
+description: Configurez le comportement du groupement automatique et de la déduplication.
+sidebar:
+  order: 4
+---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
+import settingsMiscLight from '../../../assets/screenshots/fr-light-settings-misc.png';
+import settingsMiscDark from '../../../assets/screenshots/fr-dark-settings-misc.png';
+
+## Configuration générale
+
+<ThemeImage lightSrc={settingsMiscLight} darkSrc={settingsMiscDark} alt="Page des paramètres généraux" />
+
+La page des paramètres regroupe les options de comportement de l'extension :
+
+- **Groupement automatique** — active ou désactive le groupement des onglets lors de leur ouverture
+- **Déduplication** — configure le mode de détection des onglets en doublon (URL exacte, chemin, domaine, ou sous-chaîne)
+- **Notifications** — active les notifications lors d'un groupement ou d'une déduplication
+- **Intervalle de synchronisation** — durée entre deux synchronisations automatiques des profils épinglés
