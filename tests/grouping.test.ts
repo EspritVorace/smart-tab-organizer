@@ -132,9 +132,9 @@ describe('grouping', () => {
       expect(result?.label).toBe('Active Rule');
     });
 
-    it('devrait supporter les wildcards dans le domainFilter', () => {
+    it('devrait matcher les sous-domaines implicitement (plain domain)', () => {
       const rules: DomainRuleSetting[] = [
-        createMockRule({ domainFilter: '*.example.com' })
+        createMockRule({ domainFilter: 'example.com' })
       ];
 
       const result = findMatchingRule('https://sub.example.com/page', rules);

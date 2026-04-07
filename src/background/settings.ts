@@ -10,7 +10,10 @@ export async function getSettings(): Promise<SyncSettings> {
         groupingEnabled: typeof rule.groupingEnabled === 'boolean' ? rule.groupingEnabled : true,
         deduplicationMatchMode: rule.deduplicationMatchMode || 'exact',
         groupNameSource: rule.groupNameSource || 'title',
-        urlParsingRegEx: rule.urlParsingRegEx || ''
+        urlParsingRegEx: rule.urlParsingRegEx || '',
+        // Migrate legacy wildcard syntax: *.example.com → example.com
+        // Subdomains now match implicitly for plain domains
+        domainFilter: rule.domainFilter?.startsWith('*.') ? rule.domainFilter.slice(2) : rule.domainFilter,
     }));
     return settings;
 }

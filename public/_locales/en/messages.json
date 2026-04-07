@@ -29,7 +29,7 @@
   "notificationDeduplicationMessage": { "message": "Duplicate tab closed: {title}" },
   "addRule": { "message": "Add Rule" },
   "domainFilter": { "message": "Domain Filter" },
-  "domainFilterPlaceholder": { "message": "e.g., *.atlassian.net" },
+  "domainFilterPlaceholder": { "message": "e.g., atlassian.net" },
   "titleRegex": { "message": "Title RegEx" },
   "urlRegex": { "message": "URL RegEx" },
   "deduplicationMode": { "message": "Deduplication Mode" },
@@ -82,7 +82,7 @@
   "lightMode": { "message": "Light" },
   "darkModeOption": { "message": "Dark" },
   "customRegex": { "message": "Custom RegEx..." },
-  "domainTooltip": { "message": "Enter domain (e.g., jira.com) or use *. for subdomains (e.g., *.jira.com)." },
+  "domainTooltip": { "message": "Enter a domain (e.g., jira.com). Subdomains are matched automatically. Use a RegEx for advanced patterns." },
   "regexTooltip": { "message": "Select a preset or enter a RegEx. The 1st capturing group ( ) will be the group name." },
   "dedupTooltip": { "message": "'Exact': Identical URL. 'Includes': New URL contained within an existing one." },
   "presetNameTooltip": { "message": "Name to identify this RegEx preset." },
@@ -424,5 +424,9 @@
   "editConfigAriaLabel": { "message": "Edit configuration" },
   "optionsSummaryDedupEnabled": { "message": "Deduplication enabled · {mode}" },
   "optionsSummaryDedupDisabled": { "message": "Deduplication disabled" },
-  "summaryModify": { "message": "Modify" }
+  "summaryModify": { "message": "Modify" },
+  "ruleMoveToFirst": { "message": "Move to top" },
+  "ruleMoveToLast": { "message": "Move to bottom" },
+  "ruleMoveToFirstOfDomain": { "message": "First of domain" },
+  "ruleMoveToLastOfDomain": { "message": "Last of domain" }
 }
