@@ -1,0 +1,86 @@
+---
+title: Sesiones y Perfiles
+description: Guarda tus pestañas abiertas como sesiones y restáuralas en cualquier momento.
+sidebar:
+  order: 3
+---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import sessionsListLight from '../../../../assets/screenshots/es-light-sessions-list.png';
+import sessionsListDark from '../../../../assets/screenshots/es-dark-sessions-list.png';
+import sessionsCreateLight from '../../../../assets/screenshots/es-light-sessions-create-snapshot.png';
+import sessionsCreateDark from '../../../../assets/screenshots/es-dark-sessions-create-snapshot.png';
+import sessionsNoteLight from '../../../../assets/screenshots/es-light-sessions-note.png';
+import sessionsNoteDark from '../../../../assets/screenshots/es-dark-sessions-note.png';
+import sessionsProfilePinLight from '../../../../assets/screenshots/es-light-sessions-profile-pin-onboarding.png';
+import sessionsProfilePinDark from '../../../../assets/screenshots/es-dark-sessions-profile-pin-onboarding.png';
+import sessionsSearchLight from '../../../../assets/screenshots/es-light-sessions-search-deep.png';
+import sessionsSearchDark from '../../../../assets/screenshots/es-dark-sessions-search-deep.png';
+import sessionsRestoreConflictLight from '../../../../assets/screenshots/es-light-sessions-restore-conflict.png';
+import sessionsRestoreConflictDark from '../../../../assets/screenshots/es-dark-sessions-restore-conflict.png';
+import sessionsExportLight from '../../../../assets/screenshots/es-light-sessions-export-split-button.png';
+import sessionsExportDark from '../../../../assets/screenshots/es-dark-sessions-export-split-button.png';
+import sessionsImportFileLight from '../../../../assets/screenshots/es-light-sessions-import-file-dialog.png';
+import sessionsImportFileDark from '../../../../assets/screenshots/es-dark-sessions-import-file-dialog.png';
+import sessionsImportConflictsLight from '../../../../assets/screenshots/es-light-sessions-import-text-conflicts.png';
+import sessionsImportConflictsDark from '../../../../assets/screenshots/es-dark-sessions-import-text-conflicts.png';
+
+Las sesiones permiten capturar una instantánea de tus pestañas abiertas y restaurarlas más tarde, total o parcialmente.
+Los perfiles anclados van más allá: se sincronizan automáticamente y pueden vincularse a una ventana dedicada.
+
+## Lista de sesiones
+
+<ThemeImage lightSrc={sessionsListLight} darkSrc={sessionsListDark} alt="Lista de sesiones guardadas con perfiles anclados" />
+
+Las sesiones se muestran en orden cronológico. Los perfiles anclados aparecen en la parte superior con su icono distintivo.
+
+## Crear una instantánea
+
+<ThemeImage lightSrc={sessionsCreateLight} darkSrc={sessionsCreateDark} alt="Asistente de creación de instantánea" />
+
+Haz clic en "Nueva instantánea" para capturar las pestañas de la ventana activa.
+Puedes elegir un nombre, añadir una nota y seleccionar qué pestañas incluir.
+
+## Notas
+
+<ThemeImage lightSrc={sessionsNoteLight} darkSrc={sessionsNoteDark} alt="Tarjeta de sesión con nota expandida y resaltado de búsqueda" />
+
+Cada sesión puede incluir una nota de texto libre. El contenido de las notas se incluye en la búsqueda global.
+
+## Perfiles anclados
+
+<ThemeImage lightSrc={sessionsProfilePinLight} darkSrc={sessionsProfilePinDark} alt="Asistente de incorporación al anclar el primer perfil" />
+
+Ancla una sesión para convertirla en un perfil permanente.
+Un perfil puede vincularse a una ventana del navegador: la extensión sincroniza automáticamente las pestañas de esa ventana con el perfil según el intervalo configurado.
+
+## Búsqueda
+
+<ThemeImage lightSrc={sessionsSearchLight} darkSrc={sessionsSearchDark} alt="Búsqueda profunda con vistas previas de sesiones filtradas" />
+
+La búsqueda abarca nombres de sesiones, notas, títulos de pestañas y URLs guardadas.
+Los resultados muestran una vista previa de las pestañas coincidentes con resaltado.
+
+## Restaurar con conflictos
+
+<ThemeImage lightSrc={sessionsRestoreConflictLight} darkSrc={sessionsRestoreConflictDark} alt="Asistente de restauración mostrando resolución de conflictos" />
+
+Al restaurar, si hay pestañas ya abiertas, la extensión detecta los conflictos y te permite omitirlos, reemplazarlos o abrirlos como duplicados.
+
+## Importar / Exportar
+
+### Exportar sesiones
+
+<ThemeImage lightSrc={sessionsExportLight} darkSrc={sessionsExportDark} alt="Diálogo de exportación con botón dividido" />
+
+Exporta una o varias sesiones en JSON para hacer una copia de seguridad o transferirlas.
+
+### Importar sesiones
+
+<ThemeImage lightSrc={sessionsImportFileLight} darkSrc={sessionsImportFileDark} alt="Diálogo de importación de sesiones desde archivo" />
+
+Importa sesiones desde un archivo JSON o pegando texto.
+
+<ThemeImage lightSrc={sessionsImportConflictsLight} darkSrc={sessionsImportConflictsDark} alt="Resolución de conflictos al importar sesiones" />
+
+En caso de conflicto de nombres, elige renombrar, sobrescribir o ignorar las sesiones duplicadas.

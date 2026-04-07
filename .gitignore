@@ -10,3 +10,6 @@ test-results/
 ctrf/
 /.idea
 .chrome-profile/
+docs/node_modules/
+docs/dist/
+docs/.astro/

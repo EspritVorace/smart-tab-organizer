@@ -1,0 +1,29 @@
+---
+title: Popup
+description: Overview of the SmartTab Organizer main popup.
+sidebar:
+  order: 1
+---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import popupOverviewLight from '../../../../assets/screenshots/en-light-popup-overview.png';
+import popupOverviewDark from '../../../../assets/screenshots/en-dark-popup-overview.png';
+import popupContentLight from '../../../../assets/screenshots/en-light-popup-content.png';
+import popupContentDark from '../../../../assets/screenshots/en-dark-popup-content.png';
+
+The popup opens by clicking the extension icon in the browser toolbar.
+It provides a quick overview of grouping and deduplication activity, and gives access to the configuration pages.
+
+## Overview
+
+<ThemeImage lightSrc={popupOverviewLight} darkSrc={popupOverviewDark} alt="SmartTab Organizer popup overview" />
+
+## Content
+
+<ThemeImage lightSrc={popupContentLight} darkSrc={popupContentDark} alt="Popup content with statistics and quick access" />
+
+The popup displays:
+
+- **Statistics** for grouping and deduplication (number of tabs processed)
+- **Quick access buttons** to rules, sessions, and settings
+- The list of active **pinned profiles**

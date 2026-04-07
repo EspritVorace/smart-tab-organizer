@@ -27,7 +27,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /** Absolute path to the documentation screenshots folder (all screenshots) */
-const DOCS_DIR = path.resolve(__dirname, '../../doc/assets/documentation');
+const DOCS_DIR = path.resolve(__dirname, '../../docs/src/assets/screenshots');
 
 /** Absolute path to the readme screenshots folder */
 const README_DIR = path.resolve(__dirname, '../../doc/assets/readme');
