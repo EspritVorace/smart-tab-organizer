@@ -7,7 +7,8 @@ import { RegexPresetsCallouts } from '../../Form/themed-callouts';
 import { FormField, SearchableSelect } from '../../Form/FormFields';
 import { groupNameSourceOptions, type GroupNameSourceValue } from '../../../schemas/enums';
 import type { PresetCategory } from '../../../utils/presetUtils';
-import { getPresetById, presetsToSearchableGroups } from '../../../utils/presetUtils';
+import { getPresetById } from '../../../utils/presetUtils';
+import { presetsToSearchableGroups } from '../../../utils/presetsToSearchableGroups';
 import { logger } from '../../../utils/logger';
 import { ConfigModeSelector } from './ConfigModeSelector';
 

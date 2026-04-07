@@ -8,7 +8,7 @@ import { FormField, SearchableSelect } from '../../Form/FormFields';
 import { groupNameSourceOptions, type GroupNameSourceValue } from '../../../schemas/enums';
 import type { DomainRule } from '../../../schemas/domainRule';
 import type { PresetCategory } from '../../../utils/presetUtils';
-import { presetsToSearchableGroups } from '../../../utils/presetUtils';
+import { presetsToSearchableGroups } from '../../../utils/presetsToSearchableGroups';
 import { ConfigModeSelector } from './ConfigModeSelector';
 
 interface WizardStep2ConfigProps {
