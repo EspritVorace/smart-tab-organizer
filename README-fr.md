@@ -9,7 +9,7 @@
 **SmartTab Organizer** est une extension multi-navigateur qui regroupe automatiquement les onglets liés, évite les doublons et sauvegarde vos espaces de travail sous forme de sessions nommées.
 
 <p align="center">
-  <img src="doc/assets/store.png" alt="SmartTab Organizer">
+  <img src="doc/store.png" alt="SmartTab Organizer">
 </p>
 
 ## 🛒 Chrome Web Store ##
@@ -29,7 +29,7 @@ Trois modes de nommage de groupe :
 - **Manuel** — nom de groupe fixe
 
 <p align="center">
-  <img src="doc/assets/readme/fr-dark-rules-create-summary.png" alt="Assistant de création de règle — étape récapitulatif">
+  <img src="doc/readme/fr-dark-rules-create-summary.png" alt="Assistant de création de règle — étape récapitulatif">
 </p>
 
 ### 🗂️ Regroupement Automatique
@@ -40,7 +40,7 @@ Clic molette ou clic droit → « Ouvrir dans un nouvel onglet » sur un site co
 - Préréglages intégrés pour Jira, GitLab, GitHub, Trello et plus encore
 
 <p align="center">
-  <img src="doc/assets/readme/gifs/regroup.gif" alt="Vidéo de regroupement automatique">
+  <img src="doc/readme/gifs/regroup.gif" alt="Vidéo de regroupement automatique">
 </p>
 
 ### 🔁 Déduplication
@@ -49,7 +49,7 @@ Ouvrir une page déjà ouverte remet l'onglet existant au premier plan et le rec
 La sensibilité de correspondance est configurable par règle : URL exacte, nom d'hôte + chemin, nom d'hôte ou « includes ».
 
 <p align="center">
-  <img src="doc/assets/readme/gifs/dedup.gif" alt="Vidéo de déduplication">
+  <img src="doc/readme/gifs/dedup.gif" alt="Vidéo de déduplication">
 </p>
 
 
@@ -63,18 +63,18 @@ Sauvegardez un snapshot nommé de vos onglets et groupes ouverts, et restaurez-l
 - **Éditeur de session** — réorganisez, renommez et supprimez onglets et groupes sans avoir à restaurer
 
 <p align="center">
-  <img src="doc/assets/readme/fr-dark-sessions-list.png" alt="Liste des sessions">
+  <img src="doc/readme/fr-dark-sessions-list.png" alt="Liste des sessions">
 </p>
 
 <p align="center">
-  <img src="doc/assets/readme/fr-dark-sessions-search-deep.png" alt="Recherche profonde dans les sessions">
+  <img src="doc/readme/fr-dark-sessions-search-deep.png" alt="Recherche profonde dans les sessions">
 </p>
 
 
 Un **assistant d'import/export pour les Règles et les Sessions** classe les éléments entrants en nouveaux, en conflit ou identiques, et résout les conflits pas à pas.
 
 <p align="center">
-  <img src="doc/assets/readme/fr-dark-rules-import-text-conflicts.png" alt="Assistant d'import avec résolution de conflits">
+  <img src="doc/readme/fr-dark-rules-import-text-conflicts.png" alt="Assistant d'import avec résolution de conflits">
 </p>
 
 ### ⚡ Popup d'Accès Rapide
@@ -85,7 +85,7 @@ Un **assistant d'import/export pour les Règles et les Sessions** classe les él
 
 <p align="center">
 
-<img src="doc/assets/readme/fr-dark-popup-content.png" alt="Contenu du popup">
+<img src="doc/readme/fr-dark-popup-content.png" alt="Contenu du popup">
 </p>
 
 ### ♿ Accessibilité & i18n
