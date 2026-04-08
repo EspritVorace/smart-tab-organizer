@@ -79,6 +79,9 @@ export function DomainRuleCard({
           {...listeners}
           aria-disabled={isDragDisabled}
           style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             cursor: isDragDisabled ? 'not-allowed' : 'grab',
             touchAction: 'none',
             color: isDragDisabled ? 'var(--gray-6)' : 'var(--gray-9)',
