@@ -200,13 +200,30 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
   }, []);
 
   const handleDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
-    const { source, target } = event.operation;
-    if (!source || !target || source.id === target.id) return;
+    const { source } = event.operation;
+    let targetId: string | null = event.operation.target
+      ? String(event.operation.target.id)
+      : null;
+
+    // Fallback: RAF-based collision detection may not fire before pointerup in
+    // synthetic-event environments (e.g. Playwright). Use elementFromPoint to
+    // find the card under the pointer from the native pointerup event.
+    if (source && !targetId && event.nativeEvent instanceof PointerEvent) {
+      const { clientX, clientY } = event.nativeEvent;
+      const el = document.elementFromPoint(clientX, clientY);
+      const card = el?.closest('[role="row"][data-testid^="rule-card-"]');
+      if (card) {
+        const match = card.getAttribute('data-testid')?.match(/^rule-card-(.+)$/);
+        if (match) targetId = match[1];
+      }
+    }
+
+    if (!source || !targetId || String(source.id) === targetId) return;
     updateRules(applyDragReorder(
       syncSettings.domainRules,
       filteredRules.map(r => r.id),
       String(source.id),
-      String(target.id),
+      targetId,
     ));
   }, [syncSettings.domainRules, filteredRules, updateRules]);
 
