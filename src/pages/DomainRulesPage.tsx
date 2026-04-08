@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { Button, Text, Flex, Box, Checkbox, IconButton, TextField, Separator } from '@radix-ui/themes';
 import { Plus, Eye, EyeOff, Shield, Search, AlertCircle, Upload, Trash2 } from 'lucide-react';
-import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react';
+import { DragDropProvider, type DragEndEvent, type DragOverEvent } from '@dnd-kit/react';
+import { move } from '@dnd-kit/helpers';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { RuleWizardModal } from '../components/Core/DomainRule/RuleWizardModal';
@@ -17,7 +18,6 @@ import {
   moveToFirstOfDomain,
   moveToLastOfDomain,
   getRulesForRootDomain,
-  applyDragReorder,
 } from '../utils/ruleOrderUtils';
 import type { SyncSettings, DomainRuleSetting } from '../types/syncSettings';
 import type { DomainRule } from '../schemas/domainRule';
@@ -127,6 +127,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<DomainRule | undefined>(undefined);
+  const [dragItems, setDragItems] = useState<DomainRuleSetting[] | null>(null);
 
   const handleToggleEnabled = useCallback((ruleId: string, enabled: boolean) => {
     updateRules(syncSettings.domainRules.map(rule =>
@@ -199,33 +200,21 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
     setIsModalOpen(true);
   }, []);
 
-  const handleDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
-    const { source } = event.operation;
-    let targetId: string | null = event.operation.target
-      ? String(event.operation.target.id)
-      : null;
+  const handleDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
+    setDragItems(prev => move(prev ?? syncSettings.domainRules, event));
+  }, [syncSettings.domainRules]);
 
-    // Fallback: RAF-based collision detection may not fire before pointerup in
-    // synthetic-event environments (e.g. Playwright). Use elementFromPoint to
-    // find the card under the pointer from the native pointerup event.
-    if (source && !targetId && event.nativeEvent instanceof PointerEvent) {
-      const { clientX, clientY } = event.nativeEvent;
-      const el = document.elementFromPoint(clientX, clientY);
-      const card = el?.closest('[role="row"][data-testid^="rule-card-"]');
-      if (card) {
-        const match = card.getAttribute('data-testid')?.match(/^rule-card-(.+)$/);
-        if (match) targetId = match[1];
+  const handleDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
+    if (!event.canceled) {
+      const reordered = move(dragItems ?? syncSettings.domainRules, event);
+      if (reordered !== (dragItems ?? syncSettings.domainRules)) {
+        updateRules(reordered);
+      } else if (dragItems) {
+        updateRules(dragItems);
       }
     }
-
-    if (!source || !targetId || String(source.id) === targetId) return;
-    updateRules(applyDragReorder(
-      syncSettings.domainRules,
-      filteredRules.map(r => r.id),
-      String(source.id),
-      targetId,
-    ));
-  }, [syncSettings.domainRules, filteredRules, updateRules]);
+    setDragItems(null);
+  }, [dragItems, syncSettings.domainRules, updateRules]);
 
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -376,9 +365,9 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                 onImport={() => setIsImportOpen(true)}
               />
             ) : (
-              <DragDropProvider modifiers={[RestrictToVerticalAxis]} onDragEnd={handleDragEnd}>
+              <DragDropProvider modifiers={[RestrictToVerticalAxis]} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
                 <Flex data-testid="page-rules-list" direction="column" gap="3" role="grid" aria-label={getMessage('domainRulesTab')} ref={listRef}>
-                  {filteredRules.map((rule, index) => (
+                  {(dragItems ?? filteredRules).map((rule, index) => (
                     <DomainRuleCard
                       key={rule.id}
                       rule={rule}

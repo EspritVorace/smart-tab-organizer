@@ -33,9 +33,21 @@ test.describe('Drag-and-drop reordering', () => {
     const ruleAHandle = ruleARow.locator('[data-testid$="-drag-handle"]');
     const ruleCHandle = ruleCRow.locator('[data-testid$="-drag-handle"]');
 
-    // Drag Rule A (index 0) to Rule C position (index 2)
-    await ruleAHandle.dragTo(ruleCHandle);
-    await page.waitForTimeout(500);
+    // Drag Rule A (index 0) to Rule C position (index 2).
+    // Use low-level mouse events so we can pause before releasing, giving
+    // dnd-kit's RAF-based collision detection time to fire dragover events.
+    const srcBox = await ruleAHandle.boundingBox();
+    const dstBox = await ruleCHandle.boundingBox();
+    const srcX = srcBox!.x + srcBox!.width / 2;
+    const srcY = srcBox!.y + srcBox!.height / 2;
+    const dstX = dstBox!.x + dstBox!.width / 2;
+    const dstY = dstBox!.y + dstBox!.height / 2;
+    await page.mouse.move(srcX, srcY);
+    await page.mouse.down();
+    await page.mouse.move(dstX, dstY, { steps: 10 });
+    await page.waitForTimeout(100);
+    await page.mouse.up();
+    await page.waitForTimeout(300);
     await page.close();
 
     const labels = await getDomainRuleLabels(helpers);
