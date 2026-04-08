@@ -1,8 +1,7 @@
 import React from 'react';
 import { Button, Switch, Text, HoverCard, Flex, Badge, Card, Checkbox, IconButton, DropdownMenu, Box } from '@radix-ui/themes';
 import { Pencil, Trash2, MoreHorizontal, GripVertical } from 'lucide-react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { useSortable } from '@dnd-kit/react/sortable';
 import { RuleDetailPopover } from './RuleDetailPopover';
 import { AccessibleHighlight } from '../../UI/AccessibleHighlight/AccessibleHighlight';
 import { getMessage } from '../../../utils/i18n';
@@ -45,12 +44,9 @@ export function DomainRuleCard({
   onMoveToLastOfDomain,
   onKeyDown,
 }: DomainRuleCardProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: rule.id, disabled: isDragDisabled });
+  const { ref, handleRef, isDragging } = useSortable({ id: rule.id, index, disabled: isDragDisabled });
 
   const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
     opacity: isDragging ? 0.4 : rule.enabled ? 1 : 0.6,
     zIndex: isDragging ? 10 : undefined,
     position: isDragging ? 'relative' : undefined,
@@ -60,7 +56,7 @@ export function DomainRuleCard({
 
   return (
     <Card
-      ref={setNodeRef}
+      ref={ref}
       data-testid={`rule-card-${rule.id}`}
       variant="surface"
       size="2"
@@ -74,9 +70,8 @@ export function DomainRuleCard({
       <Flex align="center" justify="between" gap="4">
         {/* Drag handle */}
         <Box
+          ref={handleRef}
           data-testid={`rule-card-${rule.id}-drag-handle`}
-          {...attributes}
-          {...listeners}
           aria-disabled={isDragDisabled}
           style={{
             display: 'flex',

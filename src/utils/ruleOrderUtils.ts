@@ -1,5 +1,10 @@
-import { arrayMove } from '@dnd-kit/sortable';
 import type { DomainRuleSetting } from '../types/syncSettings.js';
+
+function arrayMove<T>(array: T[], from: number, to: number): T[] {
+  const result = array.slice();
+  result.splice(to < 0 ? result.length + to : to, 0, result.splice(from, 1)[0]);
+  return result;
+}
 
 /**
  * Returns the "root domain" of a domainFilter for grouping purposes.

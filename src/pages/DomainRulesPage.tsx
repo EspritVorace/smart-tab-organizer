@@ -1,20 +1,7 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { Button, Text, Flex, Box, Checkbox, IconButton, TextField, Separator } from '@radix-ui/themes';
 import { Plus, Eye, EyeOff, Shield, Search, AlertCircle, Upload, Trash2 } from 'lucide-react';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { RuleWizardModal } from '../components/Core/DomainRule/RuleWizardModal';
 import { ImportWizard } from '../components/UI/ImportExportPage/ImportWizard';
@@ -180,11 +167,6 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  );
-
   const filteredRules = useMemo(() => {
     if (!searchTerm) return syncSettings.domainRules;
     const term = foldAccents(searchTerm);
@@ -216,14 +198,14 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
     setIsModalOpen(true);
   }, []);
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
+  const handleDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
+    const { source, target } = event.operation;
+    if (!source || !target || source.id === target.id) return;
     updateRules(applyDragReorder(
       syncSettings.domainRules,
       filteredRules.map(r => r.id),
-      String(active.id),
-      String(over.id),
+      String(source.id),
+      String(target.id),
     ));
   }, [syncSettings.domainRules, filteredRules, updateRules]);
 
@@ -376,39 +358,30 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                 onImport={() => setIsImportOpen(true)}
               />
             ) : (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={filteredRules.map(r => r.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <Flex data-testid="page-rules-list" direction="column" gap="3" role="grid" aria-label={getMessage('domainRulesTab')} ref={listRef}>
-                    {filteredRules.map((rule, index) => (
-                      <DomainRuleCard
-                        key={rule.id}
-                        rule={rule}
-                        index={index}
-                        isSelected={selectedIds.has(rule.id)}
-                        searchTerm={searchTerm}
-                        isDragDisabled={!!searchTerm}
-                        isDomainActionDisabled={getRulesForRootDomain(syncSettings.domainRules, rule.domainFilter).length <= 1}
-                        onSelect={handleRowSelect}
-                        onToggleEnabled={handleToggleEnabled}
-                        onEdit={handleEditRule}
-                        onDeleteRequest={(ruleId, focusIndex) => setDeleteTarget({ type: 'single', ruleId, focusIndex })}
-                        onMoveToFirst={handleMoveToFirst}
-                        onMoveToLast={handleMoveToLast}
-                        onMoveToFirstOfDomain={handleMoveToFirstOfDomain}
-                        onMoveToLastOfDomain={handleMoveToLastOfDomain}
-                        onKeyDown={(e) => handleCardKeyDown(e, rule, index)}
-                      />
-                    ))}
-                  </Flex>
-                </SortableContext>
-              </DndContext>
+              <DragDropProvider onDragEnd={handleDragEnd}>
+                <Flex data-testid="page-rules-list" direction="column" gap="3" role="grid" aria-label={getMessage('domainRulesTab')} ref={listRef}>
+                  {filteredRules.map((rule, index) => (
+                    <DomainRuleCard
+                      key={rule.id}
+                      rule={rule}
+                      index={index}
+                      isSelected={selectedIds.has(rule.id)}
+                      searchTerm={searchTerm}
+                      isDragDisabled={!!searchTerm}
+                      isDomainActionDisabled={getRulesForRootDomain(syncSettings.domainRules, rule.domainFilter).length <= 1}
+                      onSelect={handleRowSelect}
+                      onToggleEnabled={handleToggleEnabled}
+                      onEdit={handleEditRule}
+                      onDeleteRequest={(ruleId, focusIndex) => setDeleteTarget({ type: 'single', ruleId, focusIndex })}
+                      onMoveToFirst={handleMoveToFirst}
+                      onMoveToLast={handleMoveToLast}
+                      onMoveToFirstOfDomain={handleMoveToFirstOfDomain}
+                      onMoveToLastOfDomain={handleMoveToLastOfDomain}
+                      onKeyDown={(e) => handleCardKeyDown(e, rule, index)}
+                    />
+                  ))}
+                </Flex>
+              </DragDropProvider>
             )}
           </Box>
         )}
