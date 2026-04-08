@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { Button, Text, Flex, Box, Checkbox, IconButton, TextField, Separator } from '@radix-ui/themes';
 import { Plus, Eye, EyeOff, Shield, Search, AlertCircle, Upload, Trash2 } from 'lucide-react';
 import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react';
+import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { RuleWizardModal } from '../components/Core/DomainRule/RuleWizardModal';
 import { ImportWizard } from '../components/UI/ImportExportPage/ImportWizard';
@@ -358,7 +359,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                 onImport={() => setIsImportOpen(true)}
               />
             ) : (
-              <DragDropProvider onDragEnd={handleDragEnd}>
+              <DragDropProvider modifiers={[RestrictToVerticalAxis]} onDragEnd={handleDragEnd}>
                 <Flex data-testid="page-rules-list" direction="column" gap="3" role="grid" aria-label={getMessage('domainRulesTab')} ref={listRef}>
                   {filteredRules.map((rule, index) => (
                     <DomainRuleCard
