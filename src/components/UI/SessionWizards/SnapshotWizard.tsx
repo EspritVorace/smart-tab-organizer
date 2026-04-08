@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Dialog, Flex, Button, Text, Separator, Box, TextField,
-  Callout,
+  TextArea, Callout,
 } from '@radix-ui/themes';
 import { Camera, AlertCircle } from 'lucide-react';
 import { SessionsTheme } from '../../Form/themes';
@@ -18,9 +18,12 @@ interface SnapshotWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (session: Session) => Promise<void>;
+  existingSessions: Session[];
+  /** Chrome numeric groupId: if set, pre-select only that group's tabs and use the group title as default name. */
+  initialGroupId?: number;
 }
 
-export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardProps) {
+export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, initialGroupId }: SnapshotWizardProps) {
   const [sessionName, setSessionName] = useState('');
   const [treeData, setTreeData] = useState<TabTreeData | null>(null);
   const [ungroupedTabs, setUngroupedTabs] = useState<SavedTab[]>([]);
@@ -33,6 +36,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [note, setNote] = useState('');
 
   // Reset and capture on open
   useEffect(() => {
@@ -45,6 +49,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
     setSaveError(null);
     setIsCapturing(true);
     setCategoryId(null);
+    setNote('');
 
     captureCurrentTabs()
       .then(data => {
@@ -52,7 +57,26 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
         setUngroupedTabs(data.ungroupedTabs);
         setGroups(data.groups);
         setNumericIdToSavedTabId(data.numericIdToSavedTabId);
-        // Pre-select all tabs
+
+        if (initialGroupId !== undefined) {
+          const savedGroupId = data.chromeGroupIdToSavedGroupId.get(initialGroupId);
+          const targetGroup = data.groups.find(g => g.id === savedGroupId);
+          if (targetGroup) {
+            const groupTabUuids = new Set(targetGroup.tabs.map(t => t.id));
+            const preSelected = new Set<number>();
+            for (const [numId, uuid] of data.numericIdToSavedTabId) {
+              if (groupTabUuids.has(uuid)) preSelected.add(numId);
+            }
+            setSelectedTabIds(preSelected);
+            if (targetGroup.title) {
+              setSessionName(targetGroup.title);
+            }
+            setIsCapturing(false);
+            return;
+          }
+        }
+
+        // Default: pre-select all tabs
         setSelectedTabIds(new Set(data.numericIdToSavedTabId.keys()));
         setIsCapturing(false);
       })
@@ -72,7 +96,15 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
   }, [selectedTabIds, numericIdToSavedTabId]);
 
   const handleSave = useCallback(async () => {
-    if (!sessionName.trim()) return;
+    const trimmed = sessionName.trim();
+    if (!trimmed) return;
+    const isDuplicate = existingSessions.some(
+      s => s.name.toLowerCase() === trimmed.toLowerCase(),
+    );
+    if (isDuplicate) {
+      setSaveError(getMessage('errorSessionNameUnique'));
+      return;
+    }
     setIsSaving(true);
     setSaveError(null);
     try {
@@ -80,26 +112,27 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
         ungroupedTabs,
         groups,
         selectedSavedTabIds,
-        sessionName.trim(),
-        { categoryId: categoryId ?? null },
+        trimmed,
+        { categoryId: categoryId ?? null, note: note || undefined },
       );
       await onSave(session);
       onOpenChange(false);
       showSuccessNotification(
         getMessage('snapshotNotificationTitle'),
-        getMessage('sessionNotificationMessage', [sessionName.trim()]),
+        getMessage('sessionNotificationMessage', [trimmed]),
       );
     } catch {
       setSaveError(getMessage('sessionSaveError'));
     } finally {
       setIsSaving(false);
     }
-  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, categoryId, onSave]);
+  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, categoryId, note, onSave, existingSessions]);
 
   return (
     <SessionsTheme>
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
         <Dialog.Content
+          data-testid="wizard-snapshot"
           style={{ maxWidth: 580 }}
           onOpenAutoFocus={(e) => {
             e.preventDefault();
@@ -128,6 +161,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
                   <CategoryPicker value={categoryId as any} onChange={setCategoryId} />
                   <Box style={{ flex: 1 }}>
                     <TextField.Root
+                      data-testid="wizard-snapshot-field-name"
                       value={sessionName}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         setSessionName(e.target.value)
@@ -156,6 +190,21 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
                   maxHeight={280}
                 />
               ) : null}
+
+              {/* Note */}
+              <Flex direction="column" gap="1">
+                <Text size="2" weight="medium">
+                  {getMessage('sessionNoteLabel')}
+                </Text>
+                <TextArea
+                  data-testid="wizard-snapshot-field-notes"
+                  value={note}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNote(e.target.value)}
+                  placeholder={getMessage('sessionNotePlaceholder')}
+                  resize="vertical"
+                  rows={3}
+                />
+              </Flex>
             </Flex>
           </Box>
 
@@ -173,11 +222,12 @@ export function SnapshotWizard({ open, onOpenChange, onSave }: SnapshotWizardPro
           {/* Footer */}
           <Flex gap="3" justify="end" mt="3">
             <Dialog.Close>
-              <Button variant="soft" color="gray" disabled={isSaving}>
+              <Button data-testid="wizard-snapshot-btn-cancel" variant="soft" color="gray" disabled={isSaving}>
                 {getMessage('cancel')}
               </Button>
             </Dialog.Close>
             <Button
+              data-testid="wizard-snapshot-btn-save"
               onClick={handleSave}
               disabled={!sessionName.trim() || selectedTabIds.size === 0 || isCapturing || isSaving}
             >

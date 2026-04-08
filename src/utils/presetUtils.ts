@@ -55,3 +55,4 @@ export async function getPresetsForDomain(domain: string): Promise<Preset[]> {
 export function clearPresetsCache(): void {
   presetsCache = null;
 }
+

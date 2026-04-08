@@ -62,9 +62,9 @@ export function PopupProfilesList() {
         <Separator size="1" style={{ flex: 1 }} />
       </Flex>
 
-      <Flex direction="column" gap="1">
+      <Flex data-testid="popup-profiles-list" direction="column" gap="1">
         {pinnedSessions.map((session) => (
-          <Flex key={session.id} align="center" gap="2" style={{ minWidth: 0 }}>
+          <Flex key={session.id} data-testid={`popup-profile-item-${session.id}`} align="center" gap="2" style={{ minWidth: 0 }}>
             <Flex align="center" style={{ flexShrink: 0, color: 'var(--gray-11)' }}>
               {getCategoryIcon(session.categoryId)}
             </Flex>

@@ -24,12 +24,18 @@ interface SessionsPageProps {
   snapshotWizardOpen?: boolean;
   /** Called by SessionsPage to let options.tsx know the wizard closed (or page unmounted). */
   onSnapshotWizardOpenChange?: (open: boolean) => void;
+  /** Chrome numeric groupId to pre-select in the snapshot wizard (null = all tabs). */
+  snapshotGroupId?: number | null;
+  /** Called when the snapshot wizard closes to reset the group context. */
+  onSnapshotGroupIdChange?: (id: number | null) => void;
 }
 
 export function SessionsPage({
   syncSettings,
   snapshotWizardOpen = false,
   onSnapshotWizardOpenChange,
+  snapshotGroupId,
+  onSnapshotGroupIdChange,
 }: SessionsPageProps) {
   const { sessions, isLoaded, createSession, renameSession, removeSession, reload } = useSessions();
   // Internal open state; initialized from external prop so the wizard opens immediately on mount.
@@ -90,6 +96,7 @@ export function SessionsPage({
         groups: updatedSession.groups,
         ungroupedTabs: updatedSession.ungroupedTabs,
         categoryId: updatedSession.categoryId,
+        note: updatedSession.note,
         updatedAt: updatedSession.updatedAt,
       });
       await reload();
@@ -158,14 +165,15 @@ export function SessionsPage({
       syncSettings={syncSettings}
     >
       {() => (
-        <Box>
+        <Box data-testid="page-sessions">
           {/* Intro callout (dismissable) */}
           <SessionsIntroCallout />
 
           {/* Toolbar: Search + Actions */}
-          <Flex gap="3" mb="4" align="center">
+          <Flex data-testid="page-sessions-toolbar" gap="3" mb="4" align="center">
             <Box style={{ flex: 1 }}>
               <TextField.Root
+                data-testid="page-sessions-search"
                 placeholder={getMessage('searchSessions')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -176,6 +184,7 @@ export function SessionsPage({
               </TextField.Root>
             </Box>
             <Button
+              data-testid="page-sessions-btn-snapshot"
               variant="solid"
               size="2"
               onClick={() => setSnapshotOpen(true)}
@@ -204,6 +213,7 @@ export function SessionsPage({
             sessions.length === 0 && !searchQuery ? (
               // True empty state
               <Flex
+                data-testid="page-sessions-empty"
                 direction="column"
                 align="center"
                 justify="center"
@@ -240,13 +250,14 @@ export function SessionsPage({
               </Flex>
             )
           ) : (
-            <Flex direction="column" gap="3">
+            <Flex data-testid="page-sessions-list" direction="column" gap="3">
               {displayedSessions.map(session => {
                 const searchMatch = sessionSearchMatches?.get(session.id);
                 return (
                   <SessionCard
                     key={session.id}
                     session={session}
+                    existingSessions={sessions}
                     onRestore={s => setRestoreSession(s)}
                     onRestoreCurrentWindow={handleRestoreCurrentWindow}
                     onRestoreNewWindow={handleRestoreNewWindow}
@@ -255,7 +266,7 @@ export function SessionsPage({
                     onDelete={s => setDeleteTarget(s)}
                     onPin={handlePin}
                     onUnpin={handleUnpin}
-                    forcePreviewOpen={searchMatch?.matchesTabs === true}
+                    forcePreviewOpen={searchMatch?.matchesTabs === true || searchMatch?.matchesNote === true}
                     searchMatchingGroupIds={searchMatch?.matchingGroupIds}
                     searchQuery={searchQuery || undefined}
                   />
@@ -268,9 +279,14 @@ export function SessionsPage({
             open={snapshotOpen}
             onOpenChange={(open) => {
               setSnapshotOpen(open);
-              if (!open) onSnapshotWizardOpenChange?.(false);
+              if (!open) {
+                onSnapshotWizardOpenChange?.(false);
+                onSnapshotGroupIdChange?.(null);
+              }
             }}
             onSave={handleSaveSession}
+            existingSessions={sessions}
+            initialGroupId={snapshotGroupId ?? undefined}
           />
 
           <SessionEditDialog
@@ -280,6 +296,7 @@ export function SessionsPage({
               if (!isOpen) setEditTarget(null);
             }}
             onSave={handleSaveEditedSession}
+            existingSessions={sessions}
           />
 
           <RestoreWizard

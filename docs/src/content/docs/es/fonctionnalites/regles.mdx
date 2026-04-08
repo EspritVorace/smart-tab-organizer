@@ -1,0 +1,102 @@
+---
+title: Reglas de dominio
+description: Crea y gestiona reglas para agrupar automáticamente tus pestañas por dominio.
+sidebar:
+  order: 2
+---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import rulesListLight from '../../../../assets/screenshots/es-light-rules-list.png';
+import rulesListDark from '../../../../assets/screenshots/es-dark-rules-list.png';
+import rulesCreateStep1Light from '../../../../assets/screenshots/es-light-rules-create-step1.png';
+import rulesCreateStep1Dark from '../../../../assets/screenshots/es-dark-rules-create-step1.png';
+import rulesCreatePresetLight from '../../../../assets/screenshots/es-light-rules-create-preset.png';
+import rulesCreatePresetDark from '../../../../assets/screenshots/es-dark-rules-create-preset.png';
+import rulesCreateAskLight from '../../../../assets/screenshots/es-light-rules-create-ask.png';
+import rulesCreateAskDark from '../../../../assets/screenshots/es-dark-rules-create-ask.png';
+import rulesCreateManualLight from '../../../../assets/screenshots/es-light-rules-create-manual.png';
+import rulesCreateManualDark from '../../../../assets/screenshots/es-dark-rules-create-manual.png';
+import rulesCreateSummaryLight from '../../../../assets/screenshots/es-light-rules-create-summary.png';
+import rulesCreateSummaryDark from '../../../../assets/screenshots/es-dark-rules-create-summary.png';
+import rulesEditLight from '../../../../assets/screenshots/es-light-rules-edit.png';
+import rulesEditDark from '../../../../assets/screenshots/es-dark-rules-edit.png';
+import rulesBulkActionsLight from '../../../../assets/screenshots/es-light-rules-bulk-actions.png';
+import rulesBulkActionsDark from '../../../../assets/screenshots/es-dark-rules-bulk-actions.png';
+import rulesExportLight from '../../../../assets/screenshots/es-light-rules-export-split-button.png';
+import rulesExportDark from '../../../../assets/screenshots/es-dark-rules-export-split-button.png';
+import rulesImportFileLight from '../../../../assets/screenshots/es-light-rules-import-file-dialog.png';
+import rulesImportFileDark from '../../../../assets/screenshots/es-dark-rules-import-file-dialog.png';
+import rulesImportConflictsLight from '../../../../assets/screenshots/es-light-rules-import-text-conflicts.png';
+import rulesImportConflictsDark from '../../../../assets/screenshots/es-dark-rules-import-text-conflicts.png';
+
+Las reglas de dominio agrupan automáticamente las pestañas según su dominio o un patrón regex.
+Se aplican al abrir una pestaña mediante clic central o clic derecho → "Abrir en nueva pestaña".
+
+## Lista de reglas
+
+<ThemeImage lightSrc={rulesListLight} darkSrc={rulesListDark} alt="Lista de reglas de dominio con insignias y toggles" />
+
+Cada regla muestra su dominio, modo de coincidencia y estado (habilitada/deshabilitada).
+Las acciones disponibles son editar, eliminar y reordenar mediante arrastrar y soltar.
+
+## Crear una regla
+
+La creación se realiza a través de un asistente de 4 pasos.
+
+### Paso 1 — Identidad
+
+<ThemeImage lightSrc={rulesCreateStep1Light} darkSrc={rulesCreateStep1Dark} alt="Paso 1: introducir dominio y nombre del grupo" />
+
+Introduce el dominio de destino y el nombre del grupo que se creará en Chrome/Firefox.
+
+### Paso 2 — Modo de coincidencia
+
+Hay tres modos disponibles:
+
+**Preset** — usa un patrón regex predefinido de una biblioteca integrada.
+
+<ThemeImage lightSrc={rulesCreatePresetLight} darkSrc={rulesCreatePresetDark} alt="Modo Preset con selección de patrón predefinido" />
+
+**Ask** — solicita confirmación cada vez antes de agrupar.
+
+<ThemeImage lightSrc={rulesCreateAskLight} darkSrc={rulesCreateAskDark} alt="Modo Ask: confirmación en cada apertura de pestaña" />
+
+**Manual** — introduces tu propia expresión regular.
+
+<ThemeImage lightSrc={rulesCreateManualLight} darkSrc={rulesCreateManualDark} alt="Modo Manual: entrada de regex personalizada" />
+
+### Paso 4 — Resumen
+
+<ThemeImage lightSrc={rulesCreateSummaryLight} darkSrc={rulesCreateSummaryDark} alt="Resumen de la regla antes de crearla" />
+
+Revisa la configuración antes de confirmar la creación.
+
+## Editar una regla
+
+<ThemeImage lightSrc={rulesEditLight} darkSrc={rulesEditDark} alt="Edición de una regla existente" />
+
+Haz clic en el botón de edición para modificar el dominio, el nombre del grupo o el modo de coincidencia.
+
+## Acciones en masa
+
+<ThemeImage lightSrc={rulesBulkActionsLight} darkSrc={rulesBulkActionsDark} alt="Selección múltiple con barra de acciones en masa" />
+
+Marca varias reglas para habilitarlas, deshabilitarlas o eliminarlas en una sola acción.
+
+## Importar / Exportar
+
+### Exportar reglas
+
+<ThemeImage lightSrc={rulesExportLight} darkSrc={rulesExportDark} alt="Diálogo de exportación con botón dividido" />
+
+Exporta todas o una selección de reglas en JSON. El botón dividido permite elegir entre copiar al portapapeles o descargar un archivo.
+
+### Importar reglas
+
+<ThemeImage lightSrc={rulesImportFileLight} darkSrc={rulesImportFileDark} alt="Diálogo de importación desde archivo" />
+
+Importa reglas desde un archivo JSON o pegando texto directamente.
+
+<ThemeImage lightSrc={rulesImportConflictsLight} darkSrc={rulesImportConflictsDark} alt="Resolución de conflictos durante la importación" />
+
+Cuando hay conflictos (reglas existentes con el mismo dominio), el asistente muestra las diferencias y te permite elegir qué versión conservar.

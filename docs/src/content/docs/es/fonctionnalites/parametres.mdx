@@ -1,0 +1,21 @@
+---
+title: Ajustes
+description: Configura el comportamiento del agrupado automático y la deduplicación.
+sidebar:
+  order: 4
+---
+
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import settingsMiscLight from '../../../../assets/screenshots/es-light-settings-misc.png';
+import settingsMiscDark from '../../../../assets/screenshots/es-dark-settings-misc.png';
+
+## Configuración general
+
+<ThemeImage lightSrc={settingsMiscLight} darkSrc={settingsMiscDark} alt="Página de ajustes generales" />
+
+La página de ajustes agrupa las opciones de comportamiento de la extensión:
+
+- **Agrupado automático** — activa o desactiva el agrupado de pestañas al abrirlas
+- **Deduplicación** — configura el modo de detección de pestañas duplicadas (URL exacta, ruta, dominio o subcadena)
+- **Notificaciones** — activa las notificaciones cuando se produce un agrupado o deduplicación
+- **Intervalo de sincronización** — tiempo entre sincronizaciones automáticas de los perfiles anclados

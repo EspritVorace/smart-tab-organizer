@@ -1,0 +1,102 @@
+---
+title: Règles de domaine
+description: Créez et gérez des règles pour grouper automatiquement vos onglets par domaine.
+sidebar:
+  order: 2
+---
+
+import ThemeImage from '../../../components/ThemeImage.astro';
+import rulesListLight from '../../../assets/screenshots/fr-light-rules-list.png';
+import rulesListDark from '../../../assets/screenshots/fr-dark-rules-list.png';
+import rulesCreateStep1Light from '../../../assets/screenshots/fr-light-rules-create-step1.png';
+import rulesCreateStep1Dark from '../../../assets/screenshots/fr-dark-rules-create-step1.png';
+import rulesCreatePresetLight from '../../../assets/screenshots/fr-light-rules-create-preset.png';
+import rulesCreatePresetDark from '../../../assets/screenshots/fr-dark-rules-create-preset.png';
+import rulesCreateAskLight from '../../../assets/screenshots/fr-light-rules-create-ask.png';
+import rulesCreateAskDark from '../../../assets/screenshots/fr-dark-rules-create-ask.png';
+import rulesCreateManualLight from '../../../assets/screenshots/fr-light-rules-create-manual.png';
+import rulesCreateManualDark from '../../../assets/screenshots/fr-dark-rules-create-manual.png';
+import rulesCreateSummaryLight from '../../../assets/screenshots/fr-light-rules-create-summary.png';
+import rulesCreateSummaryDark from '../../../assets/screenshots/fr-dark-rules-create-summary.png';
+import rulesEditLight from '../../../assets/screenshots/fr-light-rules-edit.png';
+import rulesEditDark from '../../../assets/screenshots/fr-dark-rules-edit.png';
+import rulesBulkActionsLight from '../../../assets/screenshots/fr-light-rules-bulk-actions.png';
+import rulesBulkActionsDark from '../../../assets/screenshots/fr-dark-rules-bulk-actions.png';
+import rulesExportLight from '../../../assets/screenshots/fr-light-rules-export-split-button.png';
+import rulesExportDark from '../../../assets/screenshots/fr-dark-rules-export-split-button.png';
+import rulesImportFileLight from '../../../assets/screenshots/fr-light-rules-import-file-dialog.png';
+import rulesImportFileDark from '../../../assets/screenshots/fr-dark-rules-import-file-dialog.png';
+import rulesImportConflictsLight from '../../../assets/screenshots/fr-light-rules-import-text-conflicts.png';
+import rulesImportConflictsDark from '../../../assets/screenshots/fr-dark-rules-import-text-conflicts.png';
+
+Les règles de domaine permettent de grouper automatiquement les onglets selon leur domaine ou un motif regex.
+Elles s'appliquent lors de l'ouverture d'un onglet via clic du milieu ou clic droit → « Ouvrir dans un nouvel onglet ».
+
+## Liste des règles
+
+<ThemeImage lightSrc={rulesListLight} darkSrc={rulesListDark} alt="Liste des règles de domaine avec badges et toggles" />
+
+Chaque règle affiche son domaine, son mode de correspondance et son état (activée/désactivée).
+Les actions disponibles sont l'édition, la suppression et la réorganisation par glisser-déposer.
+
+## Créer une règle
+
+La création se fait via un assistant en 4 étapes.
+
+### Étape 1 — Identité
+
+<ThemeImage lightSrc={rulesCreateStep1Light} darkSrc={rulesCreateStep1Dark} alt="Étape 1 : saisie du domaine et du nom du groupe" />
+
+Saisissez le domaine cible et le nom du groupe qui sera créé dans Chrome/Firefox.
+
+### Étape 2 — Mode de correspondance
+
+Trois modes sont disponibles :
+
+**Preset** — utilise un motif regex prédéfini parmi une bibliothèque intégrée.
+
+<ThemeImage lightSrc={rulesCreatePresetLight} darkSrc={rulesCreatePresetDark} alt="Mode Preset avec sélection d'un motif prédéfini" />
+
+**Ask** — demande confirmation à chaque fois avant de grouper.
+
+<ThemeImage lightSrc={rulesCreateAskLight} darkSrc={rulesCreateAskDark} alt="Mode Ask : confirmation à chaque ouverture d'onglet" />
+
+**Manual** — vous saisissez votre propre expression régulière.
+
+<ThemeImage lightSrc={rulesCreateManualLight} darkSrc={rulesCreateManualDark} alt="Mode Manual : saisie d'une regex personnalisée" />
+
+### Étape 4 — Récapitulatif
+
+<ThemeImage lightSrc={rulesCreateSummaryLight} darkSrc={rulesCreateSummaryDark} alt="Récapitulatif de la règle avant création" />
+
+Vérifiez les paramètres avant de confirmer la création.
+
+## Modifier une règle
+
+<ThemeImage lightSrc={rulesEditLight} darkSrc={rulesEditDark} alt="Édition d'une règle existante" />
+
+Cliquez sur le bouton d'édition pour modifier le domaine, le nom du groupe ou le mode de correspondance.
+
+## Actions en masse
+
+<ThemeImage lightSrc={rulesBulkActionsLight} darkSrc={rulesBulkActionsDark} alt="Sélection multiple et barre d'actions en masse" />
+
+Cochez plusieurs règles pour les activer, désactiver ou supprimer en une seule action.
+
+## Import / Export
+
+### Exporter des règles
+
+<ThemeImage lightSrc={rulesExportLight} darkSrc={rulesExportDark} alt="Boîte de dialogue d'export avec bouton split" />
+
+Exportez tout ou une sélection de règles en JSON. Le bouton split permet de choisir entre copier dans le presse-papier ou télécharger un fichier.
+
+### Importer des règles
+
+<ThemeImage lightSrc={rulesImportFileLight} darkSrc={rulesImportFileDark} alt="Boîte de dialogue d'import par fichier" />
+
+Importez des règles depuis un fichier JSON ou en collant du texte directement.
+
+<ThemeImage lightSrc={rulesImportConflictsLight} darkSrc={rulesImportConflictsDark} alt="Résolution des conflits lors de l'import" />
+
+Lors de conflits (règles existantes avec le même domaine), l'assistant affiche les différences et vous laisse choisir quelle version conserver.

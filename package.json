@@ -1,19 +1,15 @@
 {
   "name": "smart-tab-organizer",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "packageManager": "pnpm@10.32.1",
   "type": "module",
   "scripts": {
     "test": "vitest run --config vitest.simple.config.ts",
     "test:watch": "vitest --watch --config vitest.simple.config.ts",
     "test:ui": "vitest --ui --config vitest.simple.config.ts",
-    "test:legacy": "node tests/runTests.js",
-    "test:e2e": "xvfb-maybe playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "test:e2e:headed": "playwright test --headed",
-    "test:e2e:build": "wxt build && xvfb-maybe playwright test",
-    "test:e2e:build:ui": "wxt build && playwright test --ui",
-    "test:e2e:build:headed": "wxt build && playwright test --headed",
+    "test:e2e": "wxt build && xvfb-maybe playwright test",
+    "test:e2e:ui": "wxt build && playwright test --ui",
+    "test:e2e:headed": "wxt build && playwright test --headed",
     "dev": "wxt",
     "dev:firefox": "wxt -b firefox",
     "build": "wxt build",
@@ -25,18 +21,23 @@
     "postinstall": "wxt prepare",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "screenshots": "pnpm build && xvfb-maybe playwright test --config=e2e-screenshots/playwright.screenshots.config.ts"
+    "screenshots": "pnpm build && xvfb-maybe playwright test --config=e2e-screenshots/playwright.screenshots.config.ts",
+    "docs:dev": "pnpm --dir docs dev",
+    "docs:build": "pnpm --dir docs build",
+    "docs:preview": "pnpm --dir docs preview"
   },
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
+    "@playwright/test": "^1.59.1",
     "@storybook/addon-docs": "^9.0.13",
     "@storybook/react-vite": "^9.0.13",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^14.3.1",
+    "@types/sharp": "^0.32.0",
     "esbuild-wasm": "^0.25.6",
     "happy-dom": "^15.11.7",
     "playwright-ctrf-json-reporter": "^0.0.27",
     "postcss": "^8.5.6",
+    "sharp": "^0.34.5",
     "storybook": "^9.0.13",
     "typescript": "^5.2.2",
     "vitest": "^2.1.8",
@@ -45,6 +46,9 @@
     "xvfb-maybe": "^0.2.1"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.1.1",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-toast": "^1.2.14",
@@ -65,7 +69,8 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild",
-      "spawn-sync"
+      "spawn-sync",
+      "sharp"
     ],
     "patchedDependencies": {
       "vitest-ctrf-json-reporter@0.0.3": "patches/vitest-ctrf-json-reporter@0.0.3.patch"

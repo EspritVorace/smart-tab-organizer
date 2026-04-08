@@ -111,7 +111,7 @@ test.describe('Edit rule via dropdown', () => {
     extensionId,
     helpers,
   }) => {
-    await helpers.addDomainRule({ label: 'Notion', domainFilter: '*.notion.so' });
+    await helpers.addDomainRule({ label: 'Notion', domainFilter: 'notion.so' });
 
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
@@ -123,7 +123,7 @@ test.describe('Edit rule via dropdown', () => {
     await expect(dialog).toBeVisible();
     // In edit mode the identity zone has directly editable inputs (no wizard steps)
     await expect(dialog.locator('input[name="label"]')).toHaveValue('Notion');
-    await expect(dialog.locator('input[name="domainFilter"]')).toHaveValue('*.notion.so');
+    await expect(dialog.locator('input[name="domainFilter"]')).toHaveValue('notion.so');
     await page.close();
   });
 });

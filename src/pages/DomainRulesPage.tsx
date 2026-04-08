@@ -1,15 +1,36 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
-import { Button, Switch, Text, HoverCard, Box, Flex, Badge, Card, Checkbox, IconButton, TextField, Separator, DropdownMenu } from '@radix-ui/themes';
-import { Pencil, Trash2, Plus, Eye, EyeOff, Shield, Search, AlertCircle, Upload, MoreHorizontal } from 'lucide-react';
+import { Button, Text, Flex, Box, Checkbox, IconButton, TextField, Separator } from '@radix-ui/themes';
+import { Plus, Eye, EyeOff, Shield, Search, AlertCircle, Upload, Trash2 } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { RuleWizardModal } from '../components/Core/DomainRule/RuleWizardModal';
 import { ImportWizard } from '../components/UI/ImportExportPage/ImportWizard';
 import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { getMessage } from '../utils/i18n';
 import { foldAccents } from '../utils/stringUtils';
-import { AccessibleHighlight } from '../components/UI/AccessibleHighlight/AccessibleHighlight';
-import { generateUUID, getRadixColor } from '../utils/utils';
-import { getRuleCategory } from '../schemas/enums';
+import { generateUUID } from '../utils/utils';
+import { DomainRuleCard } from '../components/Core/DomainRule/DomainRuleCard';
+import {
+  moveToFirst,
+  moveToLast,
+  moveToFirstOfDomain,
+  moveToLastOfDomain,
+  getRulesForRootDomain,
+  applyDragReorder,
+} from '../utils/ruleOrderUtils';
 import type { SyncSettings, DomainRuleSetting } from '../types/syncSettings';
 import type { DomainRule } from '../schemas/domainRule';
 
@@ -22,42 +43,147 @@ interface DomainRulesPageProps {
   updateRules: (rules: DomainRuleSetting[]) => void;
 }
 
+/* ─── Local presentation components ──────────────────────────────────────── */
+
+interface BulkActionsBarProps {
+  selectedIds: Set<string>;
+  filteredRules: DomainRuleSetting[];
+  isAllSelected: boolean;
+  isIndeterminate: boolean;
+  onSelectAll: (checked: boolean) => void;
+  onBulkToggle: (ids: string[], enabled: boolean) => void;
+  onBulkDeleteRequest: (ids: string[]) => void;
+}
+
+function BulkActionsBar({
+  selectedIds, filteredRules, isAllSelected, isIndeterminate,
+  onSelectAll, onBulkToggle, onBulkDeleteRequest,
+}: BulkActionsBarProps) {
+  return (
+    <Flex data-testid="page-rules-bulk-bar" align="center" gap="3" p="2" mb="4"
+      style={{ backgroundColor: 'var(--accent-a3)', borderRadius: 'var(--radius-2)' }}>
+      <Checkbox
+        checked={isAllSelected}
+        onCheckedChange={(checked) => onSelectAll(checked as boolean)}
+        {...(isIndeterminate && { 'data-indeterminate': true })}
+      />
+      <Text size="2" weight="medium">
+        {selectedIds.size === 1
+          ? getMessage('dataTableSelectedCountSingular')
+          : getMessage('dataTableSelectedCountPlural').replace('{count}', selectedIds.size.toString())
+        }
+      </Text>
+      <Separator orientation="vertical" />
+      <Flex gap="2">
+        <Button size="1" variant="solid" onClick={() => onBulkToggle(Array.from(selectedIds), true)}>
+          <Eye size={14} />
+          {getMessage('enableSelected')}
+        </Button>
+        <Button size="1" variant="soft" onClick={() => onBulkToggle(Array.from(selectedIds), false)}>
+          <EyeOff size={14} />
+          {getMessage('disableSelected')}
+        </Button>
+        <Button size="1" variant="soft" color="red"
+          onClick={() => onBulkDeleteRequest(Array.from(selectedIds))}>
+          <Trash2 size={14} />
+          {getMessage('deleteSelected')}
+        </Button>
+      </Flex>
+    </Flex>
+  );
+}
+
+interface RulesEmptyStateProps {
+  hasRules: boolean;
+  hasSearch: boolean;
+  onAddRule: () => void;
+  onImport: () => void;
+}
+
+function RulesEmptyState({ hasRules, hasSearch, onAddRule, onImport }: RulesEmptyStateProps) {
+  if (!hasRules && !hasSearch) {
+    return (
+      <Flex data-testid="page-rules-empty" direction="column" align="center" justify="center" gap="3" style={{ minHeight: 200 }}>
+        <Shield size={40} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
+        <Text size="3" weight="medium" color="gray" align="center">
+          {getMessage('rulesEmptyTitle')}
+        </Text>
+        <Text size="2" color="gray" align="center" style={{ maxWidth: 340 }}>
+          {getMessage('rulesEmptyDescription')}
+        </Text>
+        <Flex gap="2">
+          <Button variant="soft" onClick={onAddRule}>
+            <Plus size={14} aria-hidden="true" />
+            {getMessage('addRule')}
+          </Button>
+          <Button variant="soft" onClick={onImport}>
+            <Upload size={14} aria-hidden="true" />
+            {getMessage('importRulesButton')}
+          </Button>
+        </Flex>
+      </Flex>
+    );
+  }
+
+  return (
+    <Flex direction="column" align="center" justify="center" gap="2" style={{ minHeight: 120 }}>
+      <AlertCircle size={32} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
+      <Text color="gray">{getMessage('noRulesFound')}</Text>
+    </Flex>
+  );
+}
+
+/* ─── Page component ──────────────────────────────────────────────────────── */
+
 export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPageProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<DomainRule | undefined>(undefined);
 
-  // Handlers - déclarés avant les useMemo
   const handleToggleEnabled = useCallback((ruleId: string, enabled: boolean) => {
-    const updatedRules = syncSettings.domainRules.map(rule =>
+    updateRules(syncSettings.domainRules.map(rule =>
       rule.id === ruleId ? { ...rule, enabled } : rule
-    );
-    updateRules(updatedRules);
+    ));
   }, [syncSettings.domainRules, updateRules]);
 
   const handleDeleteRule = useCallback((ruleId: string) => {
-    const updatedRules = syncSettings.domainRules.filter(rule => rule.id !== ruleId);
-    updateRules(updatedRules);
+    updateRules(syncSettings.domainRules.filter(rule => rule.id !== ruleId));
   }, [syncSettings.domainRules, updateRules]);
 
   const handleBulkToggle = useCallback((ruleIds: string[], enabled: boolean) => {
-    const updatedRules = syncSettings.domainRules.map(rule =>
+    updateRules(syncSettings.domainRules.map(rule =>
       ruleIds.includes(rule.id) ? { ...rule, enabled } : rule
-    );
-    updateRules(updatedRules);
+    ));
   }, [syncSettings.domainRules, updateRules]);
 
   const handleBulkDelete = useCallback((ruleIds: string[]) => {
-    const updatedRules = syncSettings.domainRules.filter(rule => !ruleIds.includes(rule.id));
-    updateRules(updatedRules);
+    updateRules(syncSettings.domainRules.filter(rule => !ruleIds.includes(rule.id)));
   }, [syncSettings.domainRules, updateRules]);
 
-  // Confirm dialog state
-  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const handleMoveToFirst = useCallback((ruleId: string) => {
+    updateRules(moveToFirst(syncSettings.domainRules, ruleId));
+  }, [syncSettings.domainRules, updateRules]);
 
-  // Search & selection state
+  const handleMoveToLast = useCallback((ruleId: string) => {
+    updateRules(moveToLast(syncSettings.domainRules, ruleId));
+  }, [syncSettings.domainRules, updateRules]);
+
+  const handleMoveToFirstOfDomain = useCallback((ruleId: string) => {
+    updateRules(moveToFirstOfDomain(syncSettings.domainRules, ruleId));
+  }, [syncSettings.domainRules, updateRules]);
+
+  const handleMoveToLastOfDomain = useCallback((ruleId: string) => {
+    updateRules(moveToLastOfDomain(syncSettings.domainRules, ruleId));
+  }, [syncSettings.domainRules, updateRules]);
+
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   const filteredRules = useMemo(() => {
     if (!searchTerm) return syncSettings.domainRules;
@@ -78,11 +204,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
   }, []);
 
   const handleSelectAll = useCallback((checked: boolean) => {
-    if (checked) {
-      setSelectedIds(new Set(filteredRules.map(r => r.id)));
-    } else {
-      setSelectedIds(new Set());
-    }
+    setSelectedIds(checked ? new Set(filteredRules.map(r => r.id)) : new Set());
   }, [filteredRules]);
 
   const isAllSelected = filteredRules.length > 0 && selectedIds.size === filteredRules.length;
@@ -94,7 +216,17 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
     setIsModalOpen(true);
   }, []);
 
-  // Keyboard navigation for the card list
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    updateRules(applyDragReorder(
+      syncSettings.domainRules,
+      filteredRules.map(r => r.id),
+      String(active.id),
+      String(over.id),
+    ));
+  }, [syncSettings.domainRules, filteredRules, updateRules]);
+
   const listRef = useRef<HTMLDivElement>(null);
 
   const handleCardKeyDown = useCallback((e: React.KeyboardEvent, rule: DomainRuleSetting, index: number) => {
@@ -104,14 +236,12 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
     switch (e.key) {
       case 'ArrowDown': {
         e.preventDefault();
-        const next = cards[index + 1];
-        next?.focus();
+        cards[index + 1]?.focus();
         break;
       }
       case 'ArrowUp': {
         e.preventDefault();
-        const prev = cards[index - 1];
-        prev?.focus();
+        cards[index - 1]?.focus();
         break;
       }
       case 'Home': {
@@ -125,7 +255,6 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
         break;
       }
       case ' ': {
-        // Only toggle selection if focus is on the card itself, not on a child interactive element
         const target = e.target as HTMLElement;
         if (target.getAttribute('role') === 'row') {
           e.preventDefault();
@@ -150,7 +279,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
         break;
       }
     }
-  }, [handleRowSelect, handleEditRule, handleDeleteRule, selectedIds]);
+  }, [handleRowSelect, handleEditRule, selectedIds]);
 
   const handleAddRule = () => {
     setEditingRule(undefined);
@@ -159,24 +288,15 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
 
   const handleSubmitRule = (rule: DomainRule) => {
     if (editingRule) {
-      // Édition - trouver la règle originale pour préserver enabled et badge
       const originalRule = syncSettings.domainRules.find(r => r.id === rule.id);
       const updatedRule: DomainRuleSetting = {
         ...rule,
         enabled: originalRule?.enabled ?? true,
-        badge: originalRule?.badge
+        badge: originalRule?.badge,
       };
-      const updatedRules = syncSettings.domainRules.map(r =>
-        r.id === rule.id ? updatedRule : r
-      );
-      updateRules(updatedRules);
+      updateRules(syncSettings.domainRules.map(r => r.id === rule.id ? updatedRule : r));
     } else {
-      // Création
-      const newRule: DomainRuleSetting = {
-        ...rule,
-        id: generateUUID(),
-        enabled: true
-      };
+      const newRule: DomainRuleSetting = { ...rule, id: generateUUID(), enabled: true };
       updateRules([...syncSettings.domainRules, newRule]);
     }
     setIsModalOpen(false);
@@ -192,7 +312,6 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
     if (!deleteTarget) return;
     if (deleteTarget.type === 'single') {
       handleDeleteRule(deleteTarget.ruleId);
-      // Focus next or previous card after keyboard-initiated deletion
       if (deleteTarget.focusIndex != null) {
         const cards = listRef.current?.querySelectorAll<HTMLElement>('[role="row"]');
         if (cards) {
@@ -216,11 +335,12 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
         syncSettings={syncSettings}
       >
         {() => (
-          <Box>
+          <Box data-testid="page-rules">
             {/* Toolbar: Search + Add */}
-            <Flex gap="3" mb="4" align="center">
+            <Flex data-testid="page-rules-toolbar" gap="3" mb="4" align="center">
               <Box style={{ flex: 1 }}>
                 <TextField.Root
+                  data-testid="page-rules-search"
                   placeholder={getMessage('searchRules')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -230,222 +350,65 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                   </TextField.Slot>
                 </TextField.Root>
               </Box>
-              <Button onClick={handleAddRule}>
+              <Button data-testid="page-rules-btn-add" onClick={handleAddRule}>
                 <Plus size={16} />
                 {getMessage('addRule')}
               </Button>
             </Flex>
 
-            {/* Bulk Actions Bar */}
             {selectedIds.size > 0 && (
-              <Flex align="center" gap="3" p="2" mb="4" style={{ backgroundColor: 'var(--accent-a3)', borderRadius: 'var(--radius-2)' }}>
-                <Checkbox
-                  checked={isAllSelected}
-                  onCheckedChange={(checked) => handleSelectAll(checked as boolean)}
-                  {...(isIndeterminate && { 'data-indeterminate': true })}
-                />
-                <Text size="2" weight="medium">
-                  {selectedIds.size === 1
-                    ? getMessage('dataTableSelectedCountSingular')
-                    : getMessage('dataTableSelectedCountPlural').replace('{count}', selectedIds.size.toString())
-                  }
-                </Text>
-                <Separator orientation="vertical" />
-                <Flex gap="2">
-                  <Button size="1" variant="solid" onClick={() => handleBulkToggle(Array.from(selectedIds), true)}>
-                    <Eye size={14} />
-                    {getMessage('enableSelected')}
-                  </Button>
-                  <Button size="1" variant="soft" onClick={() => handleBulkToggle(Array.from(selectedIds), false)}>
-                    <EyeOff size={14} />
-                    {getMessage('disableSelected')}
-                  </Button>
-                  <Button size="1" variant="soft" color="red" onClick={() => {
-                    setDeleteTarget({ type: 'bulk', ruleIds: Array.from(selectedIds) });
-                  }}>
-                    <Trash2 size={14} />
-                    {getMessage('deleteSelected')}
-                  </Button>
-                </Flex>
-              </Flex>
+              <BulkActionsBar
+                selectedIds={selectedIds}
+                filteredRules={filteredRules}
+                isAllSelected={isAllSelected}
+                isIndeterminate={isIndeterminate}
+                onSelectAll={handleSelectAll}
+                onBulkToggle={handleBulkToggle}
+                onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', ruleIds: ids })}
+              />
             )}
 
-            {/* Card List */}
             {filteredRules.length === 0 ? (
-              syncSettings.domainRules.length === 0 && !searchTerm ? (
-                // True empty state — no rules at all
-                <Flex direction="column" align="center" justify="center" gap="3" style={{ minHeight: 200 }}>
-                  <Shield size={40} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
-                  <Text size="3" weight="medium" color="gray" align="center">
-                    {getMessage('rulesEmptyTitle')}
-                  </Text>
-                  <Text size="2" color="gray" align="center" style={{ maxWidth: 340 }}>
-                    {getMessage('rulesEmptyDescription')}
-                  </Text>
-                  <Flex gap="2">
-                    <Button variant="soft" onClick={handleAddRule}>
-                      <Plus size={14} aria-hidden="true" />
-                      {getMessage('addRule')}
-                    </Button>
-                    <Button variant="soft" onClick={() => setIsImportOpen(true)}>
-                      <Upload size={14} aria-hidden="true" />
-                      {getMessage('importRulesButton')}
-                    </Button>
-                  </Flex>
-                </Flex>
-              ) : (
-                // Search returned no results
-                <Flex direction="column" align="center" justify="center" gap="2" style={{ minHeight: 120 }}>
-                  <AlertCircle size={32} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
-                  <Text color="gray">{getMessage('noRulesFound')}</Text>
-                </Flex>
-              )
+              <RulesEmptyState
+                hasRules={syncSettings.domainRules.length > 0}
+                hasSearch={!!searchTerm}
+                onAddRule={handleAddRule}
+                onImport={() => setIsImportOpen(true)}
+              />
             ) : (
-              <Flex direction="column" gap="3" role="grid" aria-label={getMessage('domainRulesTab')} ref={listRef}>
-                {filteredRules.map((rule, index) => (
-                  <Card
-                    key={rule.id}
-                    variant="surface"
-                    size="2"
-                    role="row"
-                    tabIndex={0}
-                    aria-selected={selectedIds.has(rule.id)}
-                    aria-label={`${rule.label} — ${rule.domainFilter}`}
-                    onKeyDown={(e) => handleCardKeyDown(e, rule, index)}
-                    style={{
-                      opacity: rule.enabled ? 1 : 0.6,
-                      transition: 'opacity 0.2s, box-shadow 0.2s',
-                    }}
-                  >
-                    <Flex align="center" justify="between" gap="4">
-                      {/* Left: Selection + Toggle */}
-                      <Flex align="center" gap="3" role="gridcell">
-                        <Checkbox
-                          checked={selectedIds.has(rule.id)}
-                          onCheckedChange={(checked) => handleRowSelect(rule.id, checked as boolean)}
-                        />
-                        <Switch
-                          size="1"
-                          checked={rule.enabled}
-                          onCheckedChange={(checked) => handleToggleEnabled(rule.id, checked)}
-                        />
-                      </Flex>
-
-                      {/* Center: Badge + Domain */}
-                      <Flex align="center" gap="3" role="gridcell" style={{ flex: 1, minWidth: 0 }}>
-                        <HoverCard.Root>
-                          <HoverCard.Trigger>
-                            {(() => {
-                              const category = getRuleCategory(rule.categoryId);
-                              return (
-                                <Badge
-                                  color={(category ? getRadixColor(category.color) : 'gray') as any}
-                                  variant="solid"
-                                  size="2"
-                                  style={{ cursor: 'pointer', flexShrink: 0 }}
-                                >
-                                  {category ? `${category.emoji} ` : ''}<AccessibleHighlight text={rule.label} searchTerm={searchTerm} />
-                                </Badge>
-                              );
-                            })()}
-                          </HoverCard.Trigger>
-                          <HoverCard.Content size="2" style={{ maxWidth: 400 }}>
-                            <Flex direction="column" gap="3">
-                              <Flex justify="between" align="center" pb="2" style={{ borderBottom: '1px solid var(--gray-5)' }}>
-                                <Text size="3" weight="bold"><AccessibleHighlight text={rule.label} searchTerm={searchTerm} /></Text>
-                                <Badge color={rule.enabled ? 'green' : 'gray'} variant="soft">
-                                  {getMessage(rule.enabled ? 'enabled' : 'disabled')}
-                                </Badge>
-                              </Flex>
-                              <Box style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '8px 12px', alignItems: 'baseline' }}>
-                                <Text size="1" weight="bold" color="gray">{getMessage('domainFilter')}</Text>
-                                <Text size="2"><code style={{ backgroundColor: 'var(--gray-3)', padding: '2px 6px', borderRadius: '4px' }}><AccessibleHighlight text={rule.domainFilter} searchTerm={searchTerm} /></code></Text>
-
-                                <Text size="1" weight="bold" color="gray">{getMessage('tabGroupColor')}</Text>
-                                <Flex align="center" gap="2">
-                                  {(() => {
-                                    const cat = getRuleCategory(rule.categoryId);
-                                    if (cat) {
-                                      return (
-                                        <>
-                                          <div style={{ width: '16px', height: '16px', backgroundColor: `var(--${getRadixColor(cat.color)}-9)`, borderRadius: '50%', border: '1px solid var(--gray-6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>{cat.emoji}</div>
-                                          <Text size="2">{getMessage(cat.labelKey as any)}</Text>
-                                        </>
-                                      );
-                                    }
-                                    return <Text size="2" color="gray">{getMessage('categoryNone')}</Text>;
-                                  })()}
-                                </Flex>
-
-                                <Text size="1" weight="bold" color="gray">{getMessage('groupNameSource')}</Text>
-                                <Text size="2">{getMessage(`groupNameSource${rule.groupNameSource.split('_').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('')}`)}</Text>
-
-                                {rule.presetId && (
-                                  <>
-                                    <Text size="1" weight="bold" color="gray">{getMessage('presetLabel')}</Text>
-                                    <Text size="2">{rule.presetId}</Text>
-                                  </>
-                                )}
-                                {rule.titleParsingRegEx && (
-                                  <>
-                                    <Text size="1" weight="bold" color="gray">{getMessage('titleRegex')}</Text>
-                                    <Text size="2"><code style={{ backgroundColor: 'var(--gray-3)', padding: '2px 6px', borderRadius: '4px', wordBreak: 'break-all' }}>{rule.titleParsingRegEx}</code></Text>
-                                  </>
-                                )}
-                                {rule.urlParsingRegEx && (
-                                  <>
-                                    <Text size="1" weight="bold" color="gray">{getMessage('urlRegex')}</Text>
-                                    <Text size="2"><code style={{ backgroundColor: 'var(--gray-3)', padding: '2px 6px', borderRadius: '4px', wordBreak: 'break-all' }}>{rule.urlParsingRegEx}</code></Text>
-                                  </>
-                                )}
-
-                                <Text size="1" weight="bold" color="gray">{getMessage('deduplicationMode')}</Text>
-                                <Text size="2">{getMessage(`${rule.deduplicationMatchMode}Match`)}</Text>
-
-                                <Text size="1" weight="bold" color="gray">{getMessage('deduplicationEnabled')}</Text>
-                                <Badge size="1" color={rule.deduplicationEnabled ? 'green' : 'red'} variant="soft">
-                                  {rule.deduplicationEnabled ? getMessage('yes') : getMessage('no')}
-                                </Badge>
-                              </Box>
-                            </Flex>
-                          </HoverCard.Content>
-                        </HoverCard.Root>
-
-                        <Text size="2" color="gray" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          <AccessibleHighlight text={rule.domainFilter} searchTerm={searchTerm} />
-                        </Text>
-                      </Flex>
-
-                      {/* Right: Actions */}
-                      <Flex align="center" role="gridcell" style={{ flexShrink: 0 }}>
-                        <DropdownMenu.Root>
-                          <DropdownMenu.Trigger>
-                            <IconButton
-                              size="2"
-                              variant="ghost"
-                              color="gray"
-                              aria-label={getMessage('ruleMoreActions')}
-                            >
-                              <MoreHorizontal size={16} aria-hidden="true" />
-                            </IconButton>
-                          </DropdownMenu.Trigger>
-                          <DropdownMenu.Content>
-                            <DropdownMenu.Item onClick={() => handleEditRule(rule)}>
-                              <Pencil size={14} aria-hidden="true" />
-                              {getMessage('edit')}
-                            </DropdownMenu.Item>
-                            <DropdownMenu.Separator />
-                            <DropdownMenu.Item color="red" onClick={() => setDeleteTarget({ type: 'single', ruleId: rule.id })}>
-                              <Trash2 size={14} aria-hidden="true" />
-                              {getMessage('delete')}
-                            </DropdownMenu.Item>
-                          </DropdownMenu.Content>
-                        </DropdownMenu.Root>
-                      </Flex>
-                    </Flex>
-                  </Card>
-                ))}
-              </Flex>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={filteredRules.map(r => r.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <Flex data-testid="page-rules-list" direction="column" gap="3" role="grid" aria-label={getMessage('domainRulesTab')} ref={listRef}>
+                    {filteredRules.map((rule, index) => (
+                      <DomainRuleCard
+                        key={rule.id}
+                        rule={rule}
+                        index={index}
+                        isSelected={selectedIds.has(rule.id)}
+                        searchTerm={searchTerm}
+                        isDragDisabled={!!searchTerm}
+                        isDomainActionDisabled={getRulesForRootDomain(syncSettings.domainRules, rule.domainFilter).length <= 1}
+                        onSelect={handleRowSelect}
+                        onToggleEnabled={handleToggleEnabled}
+                        onEdit={handleEditRule}
+                        onDeleteRequest={(ruleId, focusIndex) => setDeleteTarget({ type: 'single', ruleId, focusIndex })}
+                        onMoveToFirst={handleMoveToFirst}
+                        onMoveToLast={handleMoveToLast}
+                        onMoveToFirstOfDomain={handleMoveToFirstOfDomain}
+                        onMoveToLastOfDomain={handleMoveToLastOfDomain}
+                        onKeyDown={(e) => handleCardKeyDown(e, rule, index)}
+                      />
+                    ))}
+                  </Flex>
+                </SortableContext>
+              </DndContext>
             )}
           </Box>
         )}

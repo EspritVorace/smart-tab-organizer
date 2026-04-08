@@ -1,4 +1,4 @@
-import { Button, Callout, Dialog, Flex, Grid, HoverCard, ScrollArea, SegmentedControl, Select, Text, TextField, Box } from '@radix-ui/themes';
+import { Button, Callout, Dialog, Flex, Grid, ScrollArea, Select, Text, TextField, Box } from '@radix-ui/themes';
 import { Info, X } from 'lucide-react';
 import { useState, useCallback, useEffect } from 'react';
 import { getMessage } from '../../../utils/i18n';
@@ -8,7 +8,9 @@ import { FormField, SearchableSelect } from '../../Form/FormFields';
 import { groupNameSourceOptions, type GroupNameSourceValue } from '../../../schemas/enums';
 import type { PresetCategory } from '../../../utils/presetUtils';
 import { getPresetById } from '../../../utils/presetUtils';
+import { presetsToSearchableGroups } from '../../../utils/presetsToSearchableGroups';
 import { logger } from '../../../utils/logger';
+import { ConfigModeSelector } from './ConfigModeSelector';
 
 export interface ConfigEditValues {
   configMode: 'preset' | 'ask' | 'manual';
@@ -25,13 +27,6 @@ interface ConfigEditModalProps {
   initial: ConfigEditValues;
   presetCategories: PresetCategory[];
   isLoadingPresets: boolean;
-}
-
-function presetsToSearchableGroups(categories: PresetCategory[]) {
-  return categories.map((cat) => ({
-    label: cat.name,
-    options: cat.presets.map((p) => ({ value: p.id, label: p.name })),
-  }));
 }
 
 export function ConfigEditModal({
@@ -105,37 +100,7 @@ export function ConfigEditModal({
               )}
 
               {/* Config Mode SegmentedControl */}
-              <Flex direction="column" gap="1">
-                <Text as="label" size="2" weight="bold">
-                  {getMessage('configurationMode')}
-                </Text>
-                <SegmentedControl.Root
-                  value={configMode}
-                  onValueChange={(v) => setConfigMode(v as 'preset' | 'ask' | 'manual')}
-                  size="2"
-                >
-                  {(['preset', 'ask', 'manual'] as const).map((mode) => (
-                    <SegmentedControl.Item key={mode} value={mode}>
-                      <Flex align="center" gap="1">
-                        {getMessage(({ preset: 'configModePreset', ask: 'configModeAsk', manual: 'configModeManual' } as const)[mode])}
-                        <HoverCard.Root openDelay={300} closeDelay={100}>
-                          <HoverCard.Trigger>
-                            <Box as="span" style={{ display: 'inline-flex', alignItems: 'center', cursor: 'default', lineHeight: 0 }}>
-                              <Info size={12} aria-hidden="true" />
-                            </Box>
-                          </HoverCard.Trigger>
-                          <HoverCard.Content size="1" maxWidth="240px" side="top" sideOffset={4}
-                            align={mode === 'manual' ? 'end' : 'center'}>
-                            <Text size="2">
-                              {getMessage(({ preset: 'configModePresetHelp', ask: 'configModeAskHelp', manual: 'configModeManualHelp' } as const)[mode])}
-                            </Text>
-                          </HoverCard.Content>
-                        </HoverCard.Root>
-                      </Flex>
-                    </SegmentedControl.Item>
-                  ))}
-                </SegmentedControl.Root>
-              </Flex>
+              <ConfigModeSelector value={configMode} onValueChange={setConfigMode} />
 
               {/* Preset Selection */}
               {configMode === 'preset' && presetCategories.length > 0 && !isLoadingPresets && (

@@ -46,6 +46,11 @@ export interface ExtensionHelpers {
   waitForDeduplication: (timeoutMs?: number) => Promise<void>;
   waitForGrouping: (timeoutMs?: number) => Promise<void>;
   /**
+   * Polls chrome.tabs.get() until the tab's title matches the expected value.
+   * More reliable than a fixed sleep after document.title changes.
+   */
+  waitForTabTitle: (page: Page, expectedTitle: string, timeoutMs?: number) => Promise<void>;
+  /**
    * Polls until at least one group exists (or the expected group title appears).
    * More reliable than a fixed sleep for grouping assertions.
    */
@@ -107,10 +112,15 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       const candidates = [
         // CI / manually pre-installed custom build
         path.join(os.homedir(), '.cache/ms-playwright/chromium-custom/chrome-linux64/chrome'),
+        // /opt/pw-browsers layout (alternative CI install path)
+        '/opt/pw-browsers/chromium-custom/chrome-linux64/chrome',
+        '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
         // Playwright 1.58 expected version
         path.join(os.homedir(), '.cache/ms-playwright/chromium-1208/chrome-linux64/chrome'),
+        '/opt/pw-browsers/chromium-1208/chrome-linux64/chrome',
         // Playwright 1.57 expected version
         path.join(os.homedir(), '.cache/ms-playwright/chromium-1200/chrome-linux64/chrome'),
+        '/opt/pw-browsers/chromium-1200/chrome-linux64/chrome',
         // Older Playwright version that may already be present
         path.join(os.homedir(), '.cache/ms-playwright/chromium-1194/chrome-linux/chrome'),
       ];
@@ -524,12 +534,12 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
 
       /**
        * Waits for deduplication to complete by polling tab count until it
-       * stabilises for 300 ms. Much faster than a fixed sleep for the common
-       * case where deduplication fires in < 500 ms.
+       * stabilises for 800 ms. The higher threshold avoids false-early-returns
+       * when deduplication fires after a brief stable window (e.g. > 300 ms).
        */
-      waitForDeduplication: async (timeoutMs = 2000) => {
+      waitForDeduplication: async (timeoutMs = 5000) => {
         const pollInterval = 100;
-        const stableThreshold = 300; // ms of stable count = operation done
+        const stableThreshold = 800; // ms of stable count = operation done
         let lastCount = -1;
         let stableMs = 0;
         const deadline = Date.now() + timeoutMs;
@@ -568,6 +578,30 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
             stableMs = 0;
           }
           await new Promise(r => setTimeout(r, pollInterval));
+        }
+      },
+
+      /**
+       * Polls chrome.tabs.get() until the tab title matches expectedTitle.
+       * Replaces fixed sleeps after document.title mutations, which are
+       * unreliable because the Chrome tabs API may lag behind the DOM.
+       */
+      waitForTabTitle: async (page: Page, expectedTitle: string, timeoutMs = 3000) => {
+        const sw = await getServiceWorker();
+        const tabId = pageToTabId.get(page);
+        if (tabId == null) return;
+        const deadline = Date.now() + timeoutMs;
+        while (Date.now() < deadline) {
+          const title: string | null = await sw.evaluate(async (id: number) => {
+            try {
+              const t = await chrome.tabs.get(id);
+              return (t as any)?.title ?? null;
+            } catch {
+              return null;
+            }
+          }, tabId);
+          if (title === expectedTitle) return;
+          await new Promise(r => setTimeout(r, 100));
         }
       },
 

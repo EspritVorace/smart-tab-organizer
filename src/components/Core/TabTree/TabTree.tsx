@@ -177,7 +177,7 @@ export function TabTree({ data, selectedTabIds, onSelectionChange, onTabClick, m
   );
 
   const treeContent = (
-    <Box>
+    <Box data-testid="tab-tree">
       {/* Action bar */}
       <Flex justify="between" align="center" gap="2" style={{ marginBottom: 'var(--space-2)' }}>
         <Button

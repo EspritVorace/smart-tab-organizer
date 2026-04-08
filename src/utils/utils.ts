@@ -10,10 +10,16 @@ export function generateUUID(): string {
 export function domainToRegex(domainFilter: string | null): RegExp | null {
   if (!domainFilter) return null;
   try {
-    let p = domainFilter.trim().replace(/\./g, '\\.').replace(/^\*\\\./, '([^.]+\\.)*');
+    const trimmed = domainFilter.trim();
+    // Defensive strip: handle legacy *.domain rules not yet migrated
+    const cleaned = trimmed.startsWith('*.') ? trimmed.slice(2) : trimmed;
+    // Plain domain: only letters, digits, dots and hyphens — not localhost
+    const isPlainDomain = cleaned !== 'localhost' && /^[a-zA-Z0-9][a-zA-Z0-9.\-]*$/.test(cleaned);
+    const escaped = cleaned.replace(/\./g, '\\.');
+    const p = isPlainDomain ? `([^.]+\\.)*${escaped}` : escaped;
     return new RegExp(`^https?:\\/\\/(${p})(\\/|$)`, 'i');
   } catch (e) {
-    logger.error("Err domainToRegex:", domainFilter, e);
+    logger.error('Err domainToRegex:', domainFilter, e);
     return null;
   }
 }
@@ -57,7 +63,8 @@ export function isValidRegex(regex: string): boolean {
 }
 
 export function isValidDomain(domain: string | null): boolean {
-  return domain ? /^(\*\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(domain.trim()) : false;
+  // Wildcards (*.domain) are no longer accepted — subdomains match implicitly
+  return domain ? /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(domain.trim()) : false;
 }
 
 export function getRadixColor(groupColor: string): string {

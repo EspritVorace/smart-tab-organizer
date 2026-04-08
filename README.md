@@ -4,7 +4,6 @@
 
 # SmartTab Organizer
 
-![Version](https://img.shields.io/badge/version-1.1.1-blue.svg)
 ![License](https://img.shields.io/badge/License-GPL_v3-blue.svg)
 
 **SmartTab Organizer** is a cross-browser extension that automatically groups related tabs, prevents duplicates, and saves your workspaces as named sessions.
@@ -30,7 +29,7 @@ Three group naming modes:
 - **Manual** — fixed group name
 
 <p align="center">
-  <img src="doc/assets/en-dark-rules-create-summary.png" alt="Rule creation wizard — summary step">
+  <img src="doc/assets/readme/en-dark-rules-create-summary.png" alt="Rule creation wizard — summary step">
 </p>
 
 ### 🗂️ Automatic Grouping
@@ -41,7 +40,7 @@ Middle-click or right-click → "Open in new tab" on a configured site and the t
 - Built-in presets for Jira, GitLab, GitHub, Trello and more
 
 <p align="center">
-  <img src="doc/assets/regroup.gif" alt="Automatic Regroupment video">
+  <img src="doc/assets/readme/gifs/regroup.gif" alt="Automatic Regroupment video">
 </p>
 
 ### 🔁 Deduplication
@@ -50,7 +49,7 @@ Opening a page that's already open refocuses and reloads the existing tab instea
 Matching sensitivity is configurable per rule: exact URL, hostname + path, hostname, or "includes".
 
 <p align="center">
-  <img src="doc/assets/dedup.gif" alt="Deduplication video">
+  <img src="doc/assets/readme/gifs/dedup.gif" alt="Deduplication video">
 </p>
 
 
@@ -64,18 +63,18 @@ Save a named snapshot of your open tabs and groups, restore them whenever you ne
 - **Session editor** — reorganize, rename and delete tabs and groups without restoring first
 
 <p align="center">
-  <img src="doc/assets/en-dark-sessions-list.png" alt="Sessions list">
+  <img src="doc/assets/readme/en-dark-sessions-list.png" alt="Sessions list">
 </p>
 
 <p align="center">
-  <img src="doc/assets/en-dark-sessions-search-deep.png" alt="Deep search in sessions">
+  <img src="doc/assets/readme/en-dark-sessions-search-deep.png" alt="Deep search in sessions">
 </p>
 
 
 An **Import/Export wizard for Rules and Sessions** classifies incoming as new, conflicting or identical, and resolves conflicts step by step.
 
 <p align="center">
-  <img src="doc/assets/en-dark-rules-import-text-conflicts.png" alt="Import wizard with conflict resolution">
+  <img src="doc/assets/readme/en-dark-rules-import-text-conflicts.png" alt="Import wizard with conflict resolution">
 </p>
 
 ### ⚡ Quick Access Popup
@@ -86,7 +85,7 @@ An **Import/Export wizard for Rules and Sessions** classifies incoming as new, c
 
 <p align="center">
 
-<img src="doc/assets/en-dark-popup-content.png" alt="Popup content">
+<img src="doc/assets/readme/en-dark-popup-content.png" alt="Popup content">
 </p>
 
 ### ♿ Accessibility & i18n
@@ -109,7 +108,48 @@ For development with auto-reload: `pnpm dev` (Chrome) or `pnpm dev:firefox`.
 
 ## 🛠️ Tech Stack
 
-WXT · React + TypeScript · Radix UI Themes · Zod · Vitest · Playwright
+| Layer | Technology |
+|---|---|
+| Extension framework | [WXT](https://wxt.dev/) |
+| UI | [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
+| Component library | [Radix UI Themes](https://www.radix-ui.com/themes) + [Lucide](https://lucide.dev/) icons |
+| Forms & validation | [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) |
+| Theming | [next-themes](https://github.com/pacocoursey/next-themes) |
+| Unit tests | [Vitest](https://vitest.dev/) |
+| E2E tests | [Playwright](https://playwright.dev/) |
+| Component explorer | [Storybook](https://storybook.js.org/) |
+| Package manager | [pnpm](https://pnpm.io/) |
+
+## 🤝 Contributing
+
+Contributions are welcome! Here's how to get started:
+
+**Prerequisites:** Node.js, [pnpm](https://pnpm.io/) (`npm install -g pnpm`)
+
+```bash
+git clone https://github.com/EspritVorace/smart-tab-organizer.git
+cd smart-tab-organizer
+pnpm install
+pnpm dev          # Chrome with auto-reload
+pnpm dev:firefox  # Firefox with auto-reload
+```
+
+**Tests**
+
+```bash
+pnpm test         # Unit tests (Vitest)
+pnpm test:e2e     # End-to-end tests (Playwright)
+pnpm storybook    # Component explorer (port 6006)
+```
+
+**Code conventions**
+
+- Use `logger.debug()` from `src/utils/logger.ts` — never `console.log()`
+- No `any` types — use precise types or narrow `unknown`
+- All UI text via `getMessage()` from `src/utils/i18n.ts` — no hardcoded strings
+- Accessibility via Radix UI primitives; Lucide icons need `aria-hidden="true"`
+
+Please open an issue before submitting a large pull request.
 
 ## 📜 License
 

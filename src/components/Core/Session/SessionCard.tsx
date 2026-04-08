@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import {
   Card, Flex, Text, IconButton, TextField,
-  DropdownMenu, Tooltip, Badge,
+  DropdownMenu, Tooltip, Badge, Box,
 } from '@radix-ui/themes';
 import {
   MoreHorizontal, Pencil, Trash2, Check, X,
@@ -21,6 +21,7 @@ import type { Session } from '../../../types/session';
 
 interface SessionCardProps {
   session: Session;
+  existingSessions: Session[];
   onRestore: (session: Session) => void;
   onRestoreCurrentWindow: (session: Session) => void;
   onRestoreNewWindow: (session: Session) => void;
@@ -45,6 +46,7 @@ interface SessionCardProps {
 
 export function SessionCard({
   session,
+  existingSessions,
   onRestore,
   onRestoreCurrentWindow,
   onRestoreNewWindow,
@@ -59,6 +61,7 @@ export function SessionCard({
 }: SessionCardProps) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [nameValue, setNameValue] = useState(session.name);
+  const [renameError, setRenameError] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
 
   // When a search match forces the preview open, open it.
@@ -81,13 +84,21 @@ export function SessionCard({
   const handleRenameSubmit = useCallback(async () => {
     const trimmed = nameValue.trim();
     if (trimmed && trimmed !== session.name) {
+      const isDuplicate = existingSessions.some(
+        s => s.id !== session.id && s.name.toLowerCase() === trimmed.toLowerCase(),
+      );
+      if (isDuplicate) {
+        setRenameError(getMessage('errorSessionNameUnique'));
+        return;
+      }
       await onRename(session.id, trimmed);
     }
     setIsRenaming(false);
-  }, [nameValue, session.id, session.name, onRename]);
+  }, [nameValue, session.id, session.name, onRename, existingSessions]);
 
   const handleRenameCancel = useCallback(() => {
     setNameValue(session.name);
+    setRenameError(null);
     setIsRenaming(false);
   }, [session.name]);
 
@@ -116,7 +127,7 @@ export function SessionCard({
   ];
 
   return (
-    <Card size="2">
+    <Card data-testid={`session-card-${session.id}`} size="2">
       <Flex direction="column" gap="2">
         {/* Top row: pin btn + name + category badge + restore + more menu */}
         <Flex align="center" gap="2">
@@ -144,17 +155,24 @@ export function SessionCard({
           <Flex align="center" gap="2" style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
             {isRenaming ? (
               <>
-                <TextField.Root
-                  value={nameValue}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setNameValue(e.target.value)
-                  }
-                  onKeyDown={handleKeyDown}
-                  autoFocus
-                  size="2"
-                  style={{ flex: 1 }}
-                  aria-label={getMessage('sessionRenameLabel')}
-                />
+                <Flex direction="column" style={{ flex: 1 }}>
+                  <TextField.Root
+                    value={nameValue}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      setNameValue(e.target.value);
+                      setRenameError(null);
+                    }}
+                    onKeyDown={handleKeyDown}
+                    autoFocus
+                    size="2"
+                    aria-label={getMessage('sessionRenameLabel')}
+                  />
+                  {renameError && (
+                    <Text size="1" color="red" style={{ marginTop: 2 }}>
+                      {renameError}
+                    </Text>
+                  )}
+                </Flex>
                 <IconButton
                   size="1"
                   variant="soft"
@@ -176,10 +194,12 @@ export function SessionCard({
             ) : (
               <>
                 <Text
+                  data-testid={`session-card-${session.id}-name`}
                   size="3"
                   weight="medium"
                   onDoubleClick={() => {
                     setNameValue(session.name);
+                    setRenameError(null);
                     setIsRenaming(true);
                   }}
                   style={{
@@ -203,6 +223,7 @@ export function SessionCard({
           {/* Restore button — just before "..." */}
           {!isRenaming && (
             <SplitButton
+              data-testid={`session-card-${session.id}-btn-restore`}
               label={getMessage('sessionRestore')}
               onClick={() => onRestore(session)}
               menuItems={restoreMenuItems}
@@ -216,6 +237,7 @@ export function SessionCard({
             <DropdownMenu.Root>
               <DropdownMenu.Trigger>
                 <IconButton
+                  data-testid={`session-card-${session.id}-btn-dropdown`}
                   size="1"
                   variant="ghost"
                   color="gray"
@@ -232,6 +254,7 @@ export function SessionCard({
                 <DropdownMenu.Item
                   onClick={() => {
                     setNameValue(session.name);
+                    setRenameError(null);
                     setIsRenaming(true);
                   }}
                 >
@@ -253,6 +276,7 @@ export function SessionCard({
         <Collapsible.Root open={previewOpen} onOpenChange={setPreviewOpen}>
           <Collapsible.Trigger asChild>
             <button
+              data-testid={`session-card-${session.id}-preview-toggle`}
               type="button"
               style={{
                 all: 'unset',
@@ -297,6 +321,17 @@ export function SessionCard({
                 forcedExpandedGroupIds={searchMatchingGroupIds}
                 searchQuery={searchQuery}
               />
+              {session.note && (
+                <Box mt="2" pt="2" style={{ borderTop: '1px solid var(--gray-a4)' }}>
+                  <Text
+                    size="1"
+                    color="gray"
+                    style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+                  >
+                    <AccessibleHighlight text={session.note} searchTerm={searchQuery ?? ''} />
+                  </Text>
+                </Box>
+              )}
             </div>
           </Collapsible.Content>
         </Collapsible.Root>

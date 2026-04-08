@@ -127,7 +127,7 @@ test.describe('Group Naming Modes', () => {
       await opener.evaluate(() => {
         document.title = 'Project: Beta - Documentation';
       });
-      await new Promise(r => setTimeout(r, 200));
+      await helpers.waitForTabTitle(opener, 'Project: Beta - Documentation');
 
       await helpers.createTabFromOpener(opener, 'https://example.com/child');
 
@@ -253,7 +253,7 @@ test.describe('Group Naming Modes', () => {
       await opener.evaluate(() => {
         document.title = 'Feature: Login';
       });
-      await new Promise(r => setTimeout(r, 200));
+      await helpers.waitForTabTitle(opener, 'Feature: Login');
 
       await helpers.createTabFromOpener(opener, 'https://example.com/child');
 
@@ -497,7 +497,7 @@ test.describe('Group Naming Modes', () => {
       await opener.evaluate(() => {
         document.title = 'Project: Gamma';
       });
-      await new Promise(r => setTimeout(r, 200));
+      await helpers.waitForTabTitle(opener, 'Project: Gamma');
 
       await helpers.createTabFromOpener(opener, 'https://example.com/child');
 
@@ -561,7 +561,7 @@ test.describe('Group Naming Modes', () => {
       await opener.evaluate(() => {
         document.title = 'NoCaptureTest page';
       });
-      await new Promise(r => setTimeout(r, 200));
+      await helpers.waitForTabTitle(opener, 'NoCaptureTest page');
 
       await helpers.createTabFromOpener(opener, 'https://example.com/child');
 

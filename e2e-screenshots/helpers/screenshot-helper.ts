@@ -7,20 +7,67 @@
  * captureAll()    — loop over the two themes (light / dark) and call
  *                   captureScreen() for each, producing two PNGs per call.
  *                   The locale comes from the Playwright project name.
+ *
+ * After each capture, screenshots are:
+ *   - saved to doc/assets/documentation/ (primary, all screenshots)
+ *   - copied to doc/assets/readme/       (screenshots used in READMEs)
+ *   - copied to doc/assets/chrome-web-store/ (screenshots for the Chrome Web Store)
+ *
+ * All PNG files are re-encoded through sharp to strip embedded metadata
+ * (tIME, tEXt, iTXt…), ensuring stable binary output across runs so that
+ * git does not report spurious changes.
  */
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import * as fs from 'fs';
+import sharp from 'sharp';
 import type { BrowserContext, Page } from '@playwright/test';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/** Absolute path to the screenshots output folder at the repo root */
-const SCREENSHOTS_DIR = path.resolve(__dirname, '../../doc/assets');
+/** Absolute path to the documentation screenshots folder (all screenshots) */
+const DOCS_DIR = path.resolve(__dirname, '../../docs/src/assets/screenshots');
+
+/** Absolute path to the readme screenshots folder */
+const README_DIR = path.resolve(__dirname, '../../doc/assets/readme');
+
+/** Absolute path to the Chrome Web Store screenshots folder */
+const CHROME_STORE_DIR = path.resolve(__dirname, '../../doc/assets/chrome-web-store');
 
 /** Absolute path to the built extension's _locales directory */
 const LOCALES_DIR = path.resolve(__dirname, '../../.output/chrome-mv3/_locales');
+
+// ---------------------------------------------------------------------------
+// Copy-destination patterns
+// ---------------------------------------------------------------------------
+
+/**
+ * Screenshots that are referenced in the README files (all 3 locales, dark theme only).
+ * Matched against the full filename without extension, e.g. 'en-dark-rules-create-summary'.
+ */
+const README_PATTERNS: RegExp[] = [
+  /^(?:en|fr|es)-dark-rules-create-summary$/,
+  /^(?:en|fr|es)-dark-sessions-list$/,
+  /^(?:en|fr|es)-dark-sessions-search-deep$/,
+  /^(?:en|fr|es)-dark-rules-import-text-conflicts$/,
+  /^(?:en|fr|es)-dark-popup-content$/,
+];
+
+/**
+ * Screenshots to include in the Chrome Web Store listing.
+ * Per the store's requirements: 4 specific screens × 3 locales = 12 files.
+ */
+const CHROME_STORE_PATTERNS: RegExp[] = [
+  /^(?:en|fr|es)-dark-rules-bulk-actions$/,
+  /^(?:en|fr|es)-dark-sessions-search-deep$/,
+  /^(?:en|fr|es)-dark-sessions-restore-conflict$/,
+  /^(?:en|fr|es)-light-rules-bulk-actions$/,
+];
+
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
 
 type MessageEntry = {
   message: string;
@@ -43,10 +90,6 @@ function loadLocaleMessages(locale: string): Record<string, MessageEntry> | null
   }
 }
 
-// ---------------------------------------------------------------------------
-// Internal helpers
-// ---------------------------------------------------------------------------
-
 /** Wait for the service worker, retrying up to 5 s */
 export async function getServiceWorker(context: BrowserContext) {
   let sw = context.serviceWorkers()[0];
@@ -60,9 +103,34 @@ export async function getServiceWorker(context: BrowserContext) {
   return sw;
 }
 
-// ---------------------------------------------------------------------------
-// Internal helpers
-// ---------------------------------------------------------------------------
+/**
+ * Save a PNG buffer to disk, stripping all metadata in the process.
+ * sharp re-encodes the PNG without tIME, tEXt, iTXt or other ancillary
+ * chunks, producing stable binary output across runs.
+ *
+ * Copies are also written to readme/ and chrome-web-store/ when the
+ * filename matches the corresponding patterns.
+ */
+async function savePng(buffer: Buffer, filename: string): Promise<void> {
+  fs.mkdirSync(DOCS_DIR, { recursive: true });
+  const filePath = path.join(DOCS_DIR, `${filename}.png`);
+
+  // Re-encode through sharp — metadata is stripped by default (no withMetadata() call)
+  await sharp(buffer).png().toFile(filePath);
+  console.log(`  ✓ ${filename}.png`);
+
+  // Copy to readme/ if this screenshot is referenced by a README
+  if (README_PATTERNS.some((p) => p.test(filename))) {
+    fs.mkdirSync(README_DIR, { recursive: true });
+    fs.copyFileSync(filePath, path.join(README_DIR, `${filename}.png`));
+  }
+
+  // Copy to chrome-web-store/ if this screenshot is for the store listing
+  if (CHROME_STORE_PATTERNS.some((p) => p.test(filename))) {
+    fs.mkdirSync(CHROME_STORE_DIR, { recursive: true });
+    fs.copyFileSync(filePath, path.join(CHROME_STORE_DIR, `${filename}.png`));
+  }
+}
 
 /**
  * Open a page, inject locale override, navigate to the target section, apply
@@ -190,15 +258,10 @@ export async function captureScreen(
 ): Promise<void> {
   const page = await preparePage(context, extensionId, section, theme, locale, setup);
   try {
-    if (!fs.existsSync(SCREENSHOTS_DIR)) {
-      fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
-    }
-    const filePath = path.join(SCREENSHOTS_DIR, `${filename}.png`);
-    await page.screenshot({
-      path: filePath,
+    const buffer = await page.screenshot({
       clip: { x: 0, y: 0, width: 1280, height: 800 },
     });
-    console.log(`  ✓ ${filename}.png`);
+    await savePng(buffer, filename);
   } finally {
     await page.close();
   }
@@ -229,11 +292,6 @@ export async function captureScreenElement(
 ): Promise<void> {
   const page = await preparePage(context, extensionId, section, theme, locale, setup);
   try {
-    if (!fs.existsSync(SCREENSHOTS_DIR)) {
-      fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
-    }
-    const filePath = path.join(SCREENSHOTS_DIR, `${filename}.png`);
-
     // Wait for the element to be attached to the DOM, then get its bounding rect
     // via JS rather than via Playwright's visibility check. Playwright's `state: 'visible'`
     // can return false for elements that are visually present but have an ancestor with
@@ -249,8 +307,7 @@ export async function captureScreenElement(
     if (!clip || clip.width === 0 || clip.height === 0) {
       throw new Error(`Element "${elementSelector}" has zero dimensions: ${JSON.stringify(clip)}`);
     }
-    await page.screenshot({
-      path: filePath,
+    const buffer = await page.screenshot({
       clip: {
         x: Math.round(clip.x),
         y: Math.round(clip.y),
@@ -258,7 +315,7 @@ export async function captureScreenElement(
         height: Math.round(clip.height),
       },
     });
-    console.log(`  ✓ ${filename}.png`);
+    await savePng(buffer, filename);
   } finally {
     await page.close();
   }

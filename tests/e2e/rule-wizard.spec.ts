@@ -19,19 +19,17 @@ test.beforeEach(async ({ helpers }) => {
 /** Open the "Add Rule" wizard dialog from the Domain Rules section. */
 async function openCreateWizard(page: import('@playwright/test').Page, extensionId: string) {
   await goToDomainRulesSection(page, extensionId);
-  // Click the toolbar "Add Rule" button — use first() because the empty state also
-  // shows an "Add Rule" button (second) and an "Import Rules" button (third).
-  await page.getByRole('button', { name: /add rule/i }).first().click();
+  await page.getByTestId('page-rules-btn-add').click();
   await page.waitForTimeout(300);
-  return page.locator('[role="dialog"]');
+  return page.getByTestId('wizard-rule');
 }
 
 /** Fill step 1 with valid unique data and click Next to reach step 2. */
 async function goToStep2(dialog: import('@playwright/test').Locator) {
-  await dialog.locator('input[name="label"]').fill('My New Rule');
-  await dialog.locator('input[name="domainFilter"]').fill('mynew.com');
+  await dialog.getByTestId('wizard-rule-field-label').fill('My New Rule');
+  await dialog.getByTestId('wizard-rule-field-domain').fill('mynew.com');
   await dialog.getByRole('button', { name: /next/i }).click();
-  await dialog.locator('button.rt-SegmentedControlItem').first().waitFor({ state: 'visible' });
+  await dialog.getByTestId('wizard-rule-step-2').waitFor({ state: 'visible' });
 }
 
 // ---------------------------------------------------------------------------
@@ -46,10 +44,10 @@ test.describe('Creation wizard — Step 1: Identity', () => {
 
     await expect(dialog).toBeVisible();
     // Step 1 inputs present
-    await expect(dialog.locator('input[name="label"]')).toBeVisible();
-    await expect(dialog.locator('input[name="domainFilter"]')).toBeVisible();
+    await expect(dialog.getByTestId('wizard-rule-field-label')).toBeVisible();
+    await expect(dialog.getByTestId('wizard-rule-field-domain')).toBeVisible();
     // WizardStepper visible with 4 steps
-    await expect(dialog.locator('[role="list"]')).toBeVisible();
+    await expect(dialog.getByTestId('wizard-rule-stepper')).toBeVisible();
     await page.close();
   });
 
@@ -60,12 +58,12 @@ test.describe('Creation wizard — Step 1: Identity', () => {
     const dialog = await openCreateWizard(page, extensionId);
 
     // Fill domain but leave label empty
-    await dialog.locator('input[name="domainFilter"]').fill('test.com');
+    await dialog.getByTestId('wizard-rule-field-domain').fill('test.com');
     await dialog.getByRole('button', { name: /next/i }).click();
     await page.waitForTimeout(200);
 
     // Still on step 1 (label input still visible)
-    await expect(dialog.locator('input[name="label"]')).toBeVisible();
+    await expect(dialog.getByTestId('wizard-rule-field-label')).toBeVisible();
     await page.close();
   });
 
@@ -75,13 +73,13 @@ test.describe('Creation wizard — Step 1: Identity', () => {
     const page = await extensionContext.newPage();
     const dialog = await openCreateWizard(page, extensionId);
 
-    await dialog.locator('input[name="label"]').fill('Test');
-    await dialog.locator('input[name="domainFilter"]').fill('not a domain!!!');
+    await dialog.getByTestId('wizard-rule-field-label').fill('Test');
+    await dialog.getByTestId('wizard-rule-field-domain').fill('not a domain!!!');
     await dialog.getByRole('button', { name: /next/i }).click();
     await page.waitForTimeout(200);
 
     // Still on step 1
-    await expect(dialog.locator('input[name="label"]')).toBeVisible();
+    await expect(dialog.getByTestId('wizard-rule-field-label')).toBeVisible();
     await page.close();
   });
 
@@ -93,13 +91,13 @@ test.describe('Creation wizard — Step 1: Identity', () => {
     const page = await extensionContext.newPage();
     const dialog = await openCreateWizard(page, extensionId);
 
-    await dialog.locator('input[name="label"]').fill('existing'); // case-insensitive duplicate
-    await dialog.locator('input[name="domainFilter"]').fill('new.com');
+    await dialog.getByTestId('wizard-rule-field-label').fill('existing'); // case-insensitive duplicate
+    await dialog.getByTestId('wizard-rule-field-domain').fill('new.com');
     await dialog.getByRole('button', { name: /next/i }).click();
     await page.waitForTimeout(200);
 
     // Still on step 1
-    await expect(dialog.locator('input[name="label"]')).toBeVisible();
+    await expect(dialog.getByTestId('wizard-rule-field-label')).toBeVisible();
     await page.close();
   });
 
@@ -109,13 +107,13 @@ test.describe('Creation wizard — Step 1: Identity', () => {
     const page = await extensionContext.newPage();
     const dialog = await openCreateWizard(page, extensionId);
 
-    await dialog.locator('input[name="label"]').fill('Valid Rule');
-    await dialog.locator('input[name="domainFilter"]').fill('valid.com');
+    await dialog.getByTestId('wizard-rule-field-label').fill('Valid Rule');
+    await dialog.getByTestId('wizard-rule-field-domain').fill('valid.com');
     await dialog.getByRole('button', { name: /next/i }).click();
     await page.waitForTimeout(300);
 
-    // SegmentedControl for config mode is visible at step 2
-    await expect(dialog.locator('button.rt-SegmentedControlItem').first()).toBeVisible();
+    // Config mode selector is visible at step 2
+    await expect(dialog.getByTestId('wizard-rule-step-2')).toBeVisible();
     await page.close();
   });
 
@@ -155,8 +153,8 @@ test.describe('Creation wizard — Step 2: Configuration', () => {
     const dialog = await openCreateWizard(page, extensionId);
     await goToStep2(dialog);
 
-    // Click Ask segment (index 1)
-    await dialog.locator('button.rt-SegmentedControlItem').nth(1).click();
+    // Click Ask segment
+    await dialog.getByTestId('config-mode-ask').click();
     await page.waitForTimeout(200);
 
     // Explanatory text in a Callout
@@ -174,8 +172,8 @@ test.describe('Creation wizard — Step 2: Configuration', () => {
     const dialog = await openCreateWizard(page, extensionId);
     await goToStep2(dialog);
 
-    // Click Manual segment (index 2)
-    await dialog.locator('button.rt-SegmentedControlItem').nth(2).click();
+    // Click Manual segment
+    await dialog.getByTestId('config-mode-manual').click();
     await page.waitForTimeout(200);
 
     // Group name source select trigger visible
@@ -189,16 +187,16 @@ test.describe('Creation wizard — Step 2: Configuration', () => {
   }) => {
     const page = await extensionContext.newPage();
     const dialog = await openCreateWizard(page, extensionId);
-    await dialog.locator('input[name="label"]').fill('Preserved Label');
-    await dialog.locator('input[name="domainFilter"]').fill('preserved.com');
+    await dialog.getByTestId('wizard-rule-field-label').fill('Preserved Label');
+    await dialog.getByTestId('wizard-rule-field-domain').fill('preserved.com');
     await dialog.getByRole('button', { name: /next/i }).click();
     await page.waitForTimeout(300);
 
     await dialog.getByRole('button', { name: /previous/i }).click();
     await page.waitForTimeout(200);
 
-    await expect(dialog.locator('input[name="label"]')).toHaveValue('Preserved Label');
-    await expect(dialog.locator('input[name="domainFilter"]')).toHaveValue('preserved.com');
+    await expect(dialog.getByTestId('wizard-rule-field-label')).toHaveValue('Preserved Label');
+    await expect(dialog.getByTestId('wizard-rule-field-domain')).toHaveValue('preserved.com');
     await page.close();
   });
 });
@@ -253,8 +251,8 @@ test.describe('Creation wizard — Step 3: Options', () => {
     await dialog.getByRole('button', { name: /previous/i }).click();
     await page.waitForTimeout(200);
 
-    // Back at step 2 — SegmentedControl visible
-    await expect(dialog.locator('button.rt-SegmentedControlItem').first()).toBeVisible();
+    // Back at step 2 — config mode selector visible
+    await expect(dialog.getByTestId('wizard-rule-step-2')).toBeVisible();
     await page.close();
   });
 
@@ -326,7 +324,7 @@ test.describe('Creation wizard — Step 4: Summary', () => {
     await dialog.getByRole('button', { name: /next/i }).click();
     await page.waitForTimeout(300);
     // Switch to Ask mode so no preset is required
-    await dialog.locator('button.rt-SegmentedControlItem').nth(1).click();
+    await dialog.getByTestId('config-mode-ask').click();
     await dialog.getByRole('button', { name: /next/i }).click();
     await dialog.locator('[role="switch"]').waitFor({ state: 'visible' });
     await dialog.getByRole('button', { name: /next/i }).click();
@@ -350,7 +348,7 @@ test.describe('Edit mode — Summary View', () => {
   test('edit opens on summary view (no wizard stepper)', async ({
     extensionContext, extensionId, helpers,
   }) => {
-    await helpers.addDomainRule({ label: 'Edit Me', domainFilter: '*.edit.com' });
+    await helpers.addDomainRule({ label: 'Edit Me', domainFilter: 'edit.com' });
 
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
@@ -358,13 +356,13 @@ test.describe('Edit mode — Summary View', () => {
     await page.getByRole('row', { name: /Edit Me/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
-    const dialog = page.locator('[role="dialog"]');
+    const dialog = page.getByTestId('wizard-rule');
     await expect(dialog).toBeVisible();
     // No wizard stepper
-    await expect(dialog.locator('[role="list"]')).not.toBeAttached();
+    await expect(dialog.getByTestId('wizard-rule-stepper')).not.toBeAttached();
     // Identity fields visible and editable
-    await expect(dialog.locator('input[name="label"]')).toHaveValue('Edit Me');
-    await expect(dialog.locator('input[name="domainFilter"]')).toHaveValue('*.edit.com');
+    await expect(dialog.getByTestId('wizard-rule-field-label')).toHaveValue('Edit Me');
+    await expect(dialog.getByTestId('wizard-rule-field-domain')).toHaveValue('edit.com');
     await page.close();
   });
 
@@ -379,8 +377,8 @@ test.describe('Edit mode — Summary View', () => {
     await page.getByRole('row', { name: /Rename Me/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
-    const dialog = page.locator('[role="dialog"]');
-    await dialog.locator('input[name="label"]').fill('Renamed Rule');
+    const dialog = page.getByTestId('wizard-rule');
+    await dialog.getByTestId('wizard-rule-field-label').fill('Renamed Rule');
     await dialog.getByRole('button', { name: /save/i }).click();
     await page.waitForTimeout(400);
 
@@ -400,7 +398,7 @@ test.describe('Edit mode — Summary View', () => {
     await page.getByRole('row', { name: /Config Test/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
-    const dialog = page.locator('[role="dialog"]');
+    const dialog = page.getByTestId('wizard-rule');
     await dialog.waitFor({ state: 'visible' });
 
     // Click pencil button (aria-label contains "Edit configuration" or similar)
@@ -424,7 +422,7 @@ test.describe('Edit mode — Summary View', () => {
     await page.getByRole('row', { name: /Options Test/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
-    const dialog = page.locator('[role="dialog"]');
+    const dialog = page.getByTestId('wizard-rule');
     await dialog.waitFor({ state: 'visible' });
 
     // Dedup switch not visible (options collapsed)

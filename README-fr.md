@@ -4,7 +4,6 @@
 
 # SmartTab Organizer
 
-![Version](https://img.shields.io/badge/version-1.1.1-blue.svg)
 ![Licence](https://img.shields.io/badge/License-GPL_v3-blue.svg)
 
 **SmartTab Organizer** est une extension multi-navigateur qui regroupe automatiquement les onglets liés, évite les doublons et sauvegarde vos espaces de travail sous forme de sessions nommées.
@@ -30,7 +29,7 @@ Trois modes de nommage de groupe :
 - **Manuel** — nom de groupe fixe
 
 <p align="center">
-  <img src="doc/assets/fr-dark-rules-create-summary.png" alt="Assistant de création de règle — étape récapitulatif">
+  <img src="doc/assets/readme/fr-dark-rules-create-summary.png" alt="Assistant de création de règle — étape récapitulatif">
 </p>
 
 ### 🗂️ Regroupement Automatique
@@ -41,7 +40,7 @@ Clic molette ou clic droit → « Ouvrir dans un nouvel onglet » sur un site co
 - Préréglages intégrés pour Jira, GitLab, GitHub, Trello et plus encore
 
 <p align="center">
-  <img src="doc/assets/regroup.gif" alt="Vidéo de regroupement automatique">
+  <img src="doc/assets/readme/gifs/regroup.gif" alt="Vidéo de regroupement automatique">
 </p>
 
 ### 🔁 Déduplication
@@ -50,7 +49,7 @@ Ouvrir une page déjà ouverte remet l'onglet existant au premier plan et le rec
 La sensibilité de correspondance est configurable par règle : URL exacte, nom d'hôte + chemin, nom d'hôte ou « includes ».
 
 <p align="center">
-  <img src="doc/assets/dedup.gif" alt="Vidéo de déduplication">
+  <img src="doc/assets/readme/gifs/dedup.gif" alt="Vidéo de déduplication">
 </p>
 
 
@@ -64,18 +63,18 @@ Sauvegardez un snapshot nommé de vos onglets et groupes ouverts, et restaurez-l
 - **Éditeur de session** — réorganisez, renommez et supprimez onglets et groupes sans avoir à restaurer
 
 <p align="center">
-  <img src="doc/assets/fr-dark-sessions-list.png" alt="Liste des sessions">
+  <img src="doc/assets/readme/fr-dark-sessions-list.png" alt="Liste des sessions">
 </p>
 
 <p align="center">
-  <img src="doc/assets/fr-dark-sessions-search-deep.png" alt="Recherche profonde dans les sessions">
+  <img src="doc/assets/readme/fr-dark-sessions-search-deep.png" alt="Recherche profonde dans les sessions">
 </p>
 
 
 Un **assistant d'import/export pour les Règles et les Sessions** classe les éléments entrants en nouveaux, en conflit ou identiques, et résout les conflits pas à pas.
 
 <p align="center">
-  <img src="doc/assets/fr-dark-rules-import-text-conflicts.png" alt="Assistant d'import avec résolution de conflits">
+  <img src="doc/assets/readme/fr-dark-rules-import-text-conflicts.png" alt="Assistant d'import avec résolution de conflits">
 </p>
 
 ### ⚡ Popup d'Accès Rapide
@@ -86,7 +85,7 @@ Un **assistant d'import/export pour les Règles et les Sessions** classe les él
 
 <p align="center">
 
-<img src="doc/assets/fr-dark-popup-content.png" alt="Contenu du popup">
+<img src="doc/assets/readme/fr-dark-popup-content.png" alt="Contenu du popup">
 </p>
 
 ### ♿ Accessibilité & i18n
@@ -109,7 +108,48 @@ Pour le développement avec rechargement automatique : `pnpm dev` (Chrome) ou `p
 
 ## 🛠️ Stack Technique
 
-WXT · React + TypeScript · Radix UI Themes · Zod · Vitest · Playwright
+| Couche | Technologie |
+|---|---|
+| Framework d'extension | [WXT](https://wxt.dev/) |
+| Interface | [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
+| Bibliothèque de composants | [Radix UI Themes](https://www.radix-ui.com/themes) + icônes [Lucide](https://lucide.dev/) |
+| Formulaires & validation | [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) |
+| Thèmes | [next-themes](https://github.com/pacocoursey/next-themes) |
+| Tests unitaires | [Vitest](https://vitest.dev/) |
+| Tests E2E | [Playwright](https://playwright.dev/) |
+| Explorateur de composants | [Storybook](https://storybook.js.org/) |
+| Gestionnaire de paquets | [pnpm](https://pnpm.io/) |
+
+## 🤝 Contribuer
+
+Les contributions sont les bienvenues ! Voici comment démarrer :
+
+**Prérequis :** Node.js, [pnpm](https://pnpm.io/) (`npm install -g pnpm`)
+
+```bash
+git clone https://github.com/EspritVorace/smart-tab-organizer.git
+cd smart-tab-organizer
+pnpm install
+pnpm dev          # Chrome avec rechargement automatique
+pnpm dev:firefox  # Firefox avec rechargement automatique
+```
+
+**Tests**
+
+```bash
+pnpm test         # Tests unitaires (Vitest)
+pnpm test:e2e     # Tests end-to-end (Playwright)
+pnpm storybook    # Explorateur de composants (port 6006)
+```
+
+**Conventions de code**
+
+- Utiliser `logger.debug()` de `src/utils/logger.ts` — jamais `console.log()`
+- Pas de type `any` — utiliser des types précis ou `unknown` avec narrowing
+- Tout texte UI via `getMessage()` de `src/utils/i18n.ts` — pas de chaînes en dur
+- Accessibilité via les primitives Radix UI ; les icônes Lucide nécessitent `aria-hidden="true"`
+
+Merci d'ouvrir une issue avant de soumettre une pull request importante.
 
 ## 📜 Licence
 

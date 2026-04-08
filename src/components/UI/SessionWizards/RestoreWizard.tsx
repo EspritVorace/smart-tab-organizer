@@ -187,7 +187,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
   return (
     <SessionsTheme>
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
-        <Dialog.Content style={{ maxWidth: 600 }}>
+        <Dialog.Content data-testid="wizard-restore" style={{ maxWidth: 600 }}>
           <Dialog.Title>
             <Flex align="center" gap="2">
               <RotateCcw size={18} aria-hidden="true" />
@@ -202,7 +202,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
 
           {/* Step 0: Selection + Destination */}
           {step === 0 && (
-            <Box mt="4">
+            <Box data-testid="wizard-restore-step-0" mt="4">
               <Flex direction="column" gap="3">
                 <Text size="2" weight="medium">
                   {getMessage('restoreSelectTabs')}
@@ -222,6 +222,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
                   {getMessage('restoreDestination')}
                 </Text>
                 <RadioGroup.Root
+                  data-testid="wizard-restore-radio-destination"
                   value={target}
                   onValueChange={v => setTarget(v as RestoreTarget)}
                 >
@@ -229,7 +230,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
                     <Text size="2" asChild>
                       <label>
                         <Flex align="center" gap="2">
-                          <RadioGroup.Item value="current" />
+                          <RadioGroup.Item data-testid="wizard-restore-radio-current-window" value="current" />
                           {getMessage('restoreTargetCurrent')}
                         </Flex>
                       </label>
@@ -237,7 +238,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
                     <Text size="2" asChild>
                       <label>
                         <Flex align="center" gap="2">
-                          <RadioGroup.Item value="new" />
+                          <RadioGroup.Item data-testid="wizard-restore-radio-new-window" value="new" />
                           {getMessage('restoreTargetNew')}
                         </Flex>
                       </label>
@@ -250,7 +251,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
 
           {/* Step 1: Conflict resolution */}
           {step === 1 && hasConflicts && conflictAnalysis && (
-            <Box mt="4">
+            <Box data-testid="wizard-restore-step-1" mt="4">
               <ConflictResolutionStep
                 analysis={conflictAnalysis}
                 duplicateTabAction={duplicateTabAction}
@@ -282,6 +283,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
                   </Button>
                 </Dialog.Close>
                 <Button
+                  data-testid="wizard-restore-btn-restore"
                   onClick={handleRestoreOrNext}
                   disabled={selectedTabIds.size === 0 || isAnalyzing || isRestoring}
                 >

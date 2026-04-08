@@ -36,4 +36,6 @@ export interface Session {
   isPinned: boolean;
   /** Optional category ID (from RULE_CATEGORIES) */
   categoryId?: string | null;
+  /** Optional free-text note associated with the session */
+  note?: string;
 }

@@ -2,6 +2,7 @@ import type { Session, SavedTab, SavedTabGroup } from '../types/session';
 import type { TabTreeData, TabItem, TabGroupItem } from '../components/Core/TabTree/tabTreeTypes';
 import { generateUUID } from './utils';
 import { foldAccents } from './stringUtils';
+import { getMessage } from './i18n';
 
 /**
  * Result of matching a session against a search term.
@@ -14,6 +15,8 @@ export interface SessionSearchMatch {
   matchesTabs: boolean;
   /** IDs of groups that have at least one matching tab or a matching group title */
   matchingGroupIds: Set<string>;
+  /** Whether the session note matches the search term */
+  matchesNote: boolean;
 }
 
 /**
@@ -55,10 +58,11 @@ export function matchSessionSearch(
   }
 
   const matchesTabs = hasUngroupedMatch || matchingGroupIds.size > 0;
+  const matchesNote = session.note ? foldAccents(session.note).includes(foldedTerm) : false;
 
-  if (!matchesName && !matchesTabs) return null;
+  if (!matchesName && !matchesTabs && !matchesNote) return null;
 
-  return { matchesName, matchesTabs, matchingGroupIds };
+  return { matchesName, matchesTabs, matchingGroupIds, matchesNote };
 }
 
 /**
@@ -92,6 +96,32 @@ export function sessionToTabTreeData(session: Session): {
   return { treeData: { ungroupedTabs, groups }, numericIdToSavedTabId };
 }
 
+/**
+ * Format an ISO date string to a short localized date (no time).
+ * Used in list views where space is limited (e.g. "Apr 5, 2026").
+ */
+export function formatSessionDateShort(isoString: string): string {
+  try {
+    return new Date(isoString).toLocaleDateString(undefined, { dateStyle: 'medium' });
+  } catch {
+    return isoString;
+  }
+}
+
+/** Localized label for a group count (singular/plural). */
+export function getSessionGroupLabel(count: number): string {
+  return count === 1
+    ? getMessage('sessionGroupOne')
+    : getMessage('sessionGroupCount').replace('$1', String(count));
+}
+
+/** Localized label for a tab count (singular/plural). */
+export function getSessionTabLabel(count: number): string {
+  return count === 1
+    ? getMessage('sessionTabOne')
+    : getMessage('sessionTabCount').replace('$1', String(count));
+}
+
 /** Format an ISO date string to a localized readable string */
 export function formatSessionDate(isoString: string): string {
   try {
@@ -121,7 +151,7 @@ export function createSessionFromSelection(
   groups: SavedTabGroup[],
   selectedSavedTabIds: Set<string>,
   sessionName: string,
-  options?: { isPinned?: boolean; categoryId?: string | null },
+  options?: { isPinned?: boolean; categoryId?: string | null; note?: string },
 ): Session {
   const now = new Date().toISOString();
 
@@ -139,5 +169,6 @@ export function createSessionFromSelection(
     ungroupedTabs: filteredUngrouped,
     isPinned: options?.isPinned ?? false,
     categoryId: options?.categoryId ?? null,
+    note: options?.note,
   };
 }

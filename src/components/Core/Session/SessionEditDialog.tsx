@@ -6,6 +6,7 @@ import {
   Flex,
   Text,
   TextField,
+  TextArea,
   Button,
   Separator,
   IconButton,
@@ -26,6 +27,7 @@ interface SessionEditDialogProps {
   onOpenChange: (open: boolean) => void;
   /** Called with the updated session when the user clicks Save */
   onSave: (updatedSession: Session) => Promise<void>;
+  existingSessions: Session[];
 }
 
 /**
@@ -37,6 +39,7 @@ export function SessionEditDialog({
   open,
   onOpenChange,
   onSave,
+  existingSessions,
 }: SessionEditDialogProps) {
   if (!session) return null;
 
@@ -48,6 +51,7 @@ export function SessionEditDialog({
       open={open}
       onOpenChange={onOpenChange}
       onSave={onSave}
+      existingSessions={existingSessions}
     />
   );
 }
@@ -57,18 +61,28 @@ interface InnerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (updatedSession: Session) => Promise<void>;
+  existingSessions: Session[];
 }
 
-function SessionEditDialogInner({ session, open, onOpenChange, onSave }: InnerProps) {
+function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingSessions }: InnerProps) {
   const editor = useSessionEditor(session);
   const [showUnsavedAlert, setShowUnsavedAlert] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [categoryId, setCategoryId] = useState<string | null>(session.categoryId ?? null);
+  const [saveNameError, setSaveNameError] = useState<string | null>(null);
 
   const tabCount = countSessionTabs(editor.editedSession);
   const groupCount = editor.editedSession.groups.length;
 
   async function handleSave() {
+    const name = editor.editedSession.name.trim();
+    const isDuplicate = existingSessions.some(
+      s => s.id !== session.id && s.name.toLowerCase() === name.toLowerCase(),
+    );
+    if (isDuplicate) {
+      setSaveNameError(getMessage('errorSessionNameUnique'));
+      return;
+    }
     setIsSaving(true);
     try {
       await onSave({
@@ -113,6 +127,7 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave }: InnerPr
         }}
       >
         <Dialog.Content
+          data-testid="dialog-session-edit"
           maxWidth="600px"
           onInteractOutside={interceptClose}
           onEscapeKeyDown={interceptClose}
@@ -157,15 +172,22 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave }: InnerPr
               <CategoryPicker value={categoryId as any} onChange={setCategoryId} />
               <Box style={{ flex: 1 }}>
                 <TextField.Root
+                  data-testid="dialog-session-edit-field-name"
                   id="session-edit-name"
                   value={editor.editedSession.name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    editor.updateSessionName(e.target.value)
-                  }
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    editor.updateSessionName(e.target.value);
+                    setSaveNameError(null);
+                  }}
                   size="2"
                   style={{ width: '100%' }}
                   aria-label={getMessage('sessionEditorNameLabel')}
                 />
+                {saveNameError && (
+                  <Text size="1" color="red" style={{ marginTop: 2 }}>
+                    {saveNameError}
+                  </Text>
+                )}
               </Box>
             </Flex>
           </Box>
@@ -179,6 +201,29 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave }: InnerPr
             maxHeight={360}
           />
 
+          {/* Note */}
+          <Box mt="3">
+            <Text
+              as="label"
+              size="2"
+              weight="medium"
+              htmlFor="session-edit-note"
+              style={{ display: 'block', marginBottom: 'var(--space-1)' }}
+            >
+              {getMessage('sessionNoteLabel')}
+            </Text>
+            <TextArea
+              id="session-edit-note"
+              value={editor.editedSession.note ?? ''}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                editor.updateSessionNote(e.target.value)
+              }
+              placeholder={getMessage('sessionNotePlaceholder')}
+              resize="vertical"
+              rows={3}
+            />
+          </Box>
+
           {/* Summary */}
           <Box mt="3">
             <Text size="1" color="gray">
@@ -191,6 +236,7 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave }: InnerPr
           {/* Footer buttons */}
           <Flex gap="2" justify="end" mt="4">
             <Button
+              data-testid="dialog-session-edit-btn-cancel"
               variant="soft"
               color="gray"
               onClick={handleCancel}
@@ -198,7 +244,7 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave }: InnerPr
             >
               {getMessage('cancel')}
             </Button>
-            <Button onClick={handleSave} disabled={isSaving}>
+            <Button data-testid="dialog-session-edit-btn-save" onClick={handleSave} disabled={isSaving}>
               {isSaving ? getMessage('loadingText') : getMessage('save')}
             </Button>
           </Flex>

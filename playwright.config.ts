@@ -14,6 +14,10 @@ if (!fs.existsSync(path.join(extensionPath, 'manifest.json'))) {
 // Keep workers at 1 in CI to avoid resource contention; locally 3 workers run ~3x faster.
 const workers = process.env.CI ? 1 : (process.env.E2E_WORKERS ? parseInt(process.env.E2E_WORKERS) : 3);
 
+// When running sharded in CI, each shard writes a uniquely-named CTRF report so
+// artifacts don't collide when downloaded into the same directory for merging.
+const shardSuffix = process.env.SHARD_INDEX ? `-shard-${process.env.SHARD_INDEX}` : '';
+
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: false, // Tests within a file stay sequential; files run across workers
@@ -35,7 +39,7 @@ export default defineConfig({
     },
   ],
   reporter: [
-    ['playwright-ctrf-json-reporter', { outputDir: 'ctrf', outputFile: 'e2e-ctrf-report.json' }],
+    ['playwright-ctrf-json-reporter', { outputDir: 'ctrf', outputFile: `e2e-ctrf-report${shardSuffix}.json` }],
   ],
   headless: false, // Extensions require headed mode
 });

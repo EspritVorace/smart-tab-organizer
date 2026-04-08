@@ -34,6 +34,7 @@ export function WizardStep1Identity({ control, errors }: WizardStep1IdentityProp
               render={({ field }) => (
                 <TextField.Root
                   {...field}
+                  data-testid="wizard-rule-field-label"
                   name="label"
                   placeholder={getMessage('labelPlaceholder')}
                 />
@@ -55,6 +56,7 @@ export function WizardStep1Identity({ control, errors }: WizardStep1IdentityProp
           render={({ field }) => (
             <TextField.Root
               {...field}
+              data-testid="wizard-rule-field-domain"
               name="domainFilter"
               placeholder={getMessage('domainFilterPlaceholder')}
               style={{ marginTop: '4px' }}
