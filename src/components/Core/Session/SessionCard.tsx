@@ -3,7 +3,7 @@ import * as Collapsible from '@radix-ui/react-collapsible';
 import { useSortable } from '@dnd-kit/react/sortable';
 import {
   Card, Flex, Text, IconButton, TextField,
-  DropdownMenu, Tooltip, Badge, Box,
+  DropdownMenu, HoverCard, Tooltip, Badge, Box,
 } from '@radix-ui/themes';
 import {
   MoreHorizontal, Pencil, Trash2, Check, X,
@@ -135,16 +135,25 @@ export function SessionCard({
     [handleRenameSubmit, handleRenameCancel],
   );
 
-  // Tooltip content for session metadata
-  const tooltipContent = (
-    <div style={{ whiteSpace: 'pre-line', fontSize: '12px', lineHeight: '1.4' }}>
-      <strong>{session.name}</strong>
-      {'\n'}
-      {getMessage('sessionCreatedLabel')}: {formatSessionDate(session.createdAt)}
-      {'\n'}
-      {getMessage('sessionUpdatedLabel')}: {formatSessionDate(session.updatedAt)}
-      {session.note && `\n${getMessage('sessionNoteLabel')}: ${session.note}`}
-    </div>
+  // HoverCard content for session metadata
+  const hoverCardContent = (
+    <Flex direction="column" gap="2">
+      <Text size="2" weight="bold" style={{ borderBottom: '1px solid var(--gray-5)', paddingBottom: 'var(--space-2)' }}>
+        {session.name}
+      </Text>
+      <Box style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '6px 12px', alignItems: 'baseline' }}>
+        <Text size="1" weight="bold" color="gray">{getMessage('sessionCreatedLabel')}</Text>
+        <Text size="2">{formatSessionDate(session.createdAt)}</Text>
+        <Text size="1" weight="bold" color="gray">{getMessage('sessionUpdatedLabel')}</Text>
+        <Text size="2">{formatSessionDate(session.updatedAt)}</Text>
+        {session.note && (
+          <>
+            <Text size="1" weight="bold" color="gray">{getMessage('sessionNoteLabel')}</Text>
+            <Text size="2" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{session.note}</Text>
+          </>
+        )}
+      </Box>
+    </Flex>
   );
 
   return (
@@ -239,30 +248,31 @@ export function SessionCard({
               </>
             ) : (
               <>
-                <Tooltip
-                  content={tooltipContent}
-                  side="top"
-                  delayDuration={200}
-                >
-                  <Text
-                    data-testid={`session-card-${session.id}-name`}
-                    size="3"
-                    weight="medium"
-                    onDoubleClick={() => {
-                      setNameValue(session.name);
-                      setRenameError(null);
-                      setIsRenaming(true);
-                    }}
-                    style={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      cursor: 'default',
-                    }}
-                  >
-                    <AccessibleHighlight text={session.name} searchTerm={searchQuery ?? ''} />
-                  </Text>
-                </Tooltip>
+                <HoverCard.Root>
+                  <HoverCard.Trigger>
+                    <Text
+                      data-testid={`session-card-${session.id}-name`}
+                      size="3"
+                      weight="medium"
+                      onDoubleClick={() => {
+                        setNameValue(session.name);
+                        setRenameError(null);
+                        setIsRenaming(true);
+                      }}
+                      style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        cursor: 'default',
+                      }}
+                    >
+                      <AccessibleHighlight text={session.name} searchTerm={searchQuery ?? ''} />
+                    </Text>
+                  </HoverCard.Trigger>
+                  <HoverCard.Content size="2" style={{ maxWidth: 360 }}>
+                    {hoverCardContent}
+                  </HoverCard.Content>
+                </HoverCard.Root>
                 {category && (
                   <Badge color={getRadixColor(category.color) as any} size="1" style={{ flexShrink: 0 }}>
                     {category.emoji} {getMessage(category.labelKey as any)}
