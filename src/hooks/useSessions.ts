@@ -9,13 +9,6 @@ import {
 } from '../utils/sessionStorage';
 import type { Session } from '../types/session';
 
-/** Sort sessions with pinned ones first, preserving order within each group */
-function sortSessionsByPinned(sessions: Session[]): Session[] {
-  const pinned = sessions.filter(s => s.isPinned);
-  const unpinned = sessions.filter(s => !s.isPinned);
-  return [...pinned, ...unpinned];
-}
-
 export interface UseSessionsReturn {
   sessions: Session[];
   isLoaded: boolean;
@@ -33,7 +26,7 @@ export function useSessions(): UseSessionsReturn {
 
   const reload = useCallback(async () => {
     const data = await loadSessions();
-    setSessions(sortSessionsByPinned(data));
+    setSessions(data);
     setIsLoaded(true);
   }, []);
 
@@ -79,9 +72,8 @@ export function useSessions(): UseSessionsReturn {
 
   const updateOrder = useCallback(
     async (ordered: Session[]) => {
-      const sorted = sortSessionsByPinned(ordered);
-      setSessions(sorted);
-      await saveSessions(sorted);
+      setSessions(ordered);
+      await saveSessions(ordered);
     },
     [],
   );

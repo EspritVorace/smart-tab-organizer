@@ -16,7 +16,6 @@ import { AccessibleHighlight } from '../../UI/AccessibleHighlight/AccessibleHigh
 import { chromeGroupColors } from '../TabTree/tabTreeUtils';
 import { getRuleCategory } from '../../../schemas/enums';
 import { getRadixColor } from '../../../utils/utils';
-import { SplitButton, type SplitButtonMenuItem } from '../../UI/SplitButton/SplitButton';
 import { SessionPreviewTree } from './SessionPreviewTree';
 import type { Session } from '../../../types/session';
 
@@ -297,71 +296,61 @@ export function SessionCard({
             )}
           </Flex>
 
-          {/* Restore split button + More menu */}
+          {/* More menu */}
           {!isRenaming && (
-            <Flex gap="1">
-              <SplitButton
-                label={getMessage('sessionRestore')}
-                onClick={() => onRestoreCurrentWindow(session)}
-                menuItems={[
-                  {
-                    label: getMessage('sessionRestoreCurrentWindow'),
-                    onClick: () => onRestoreCurrentWindow(session),
-                    icon: <Monitor size={14} aria-hidden="true" />,
-                  },
-                  {
-                    label: getMessage('sessionRestoreNewWindow'),
-                    onClick: () => onRestoreNewWindow(session),
-                    icon: <Square size={14} aria-hidden="true" />,
-                  },
-                  {
-                    label: getMessage('sessionRestoreCustomize'),
-                    onClick: () => onRestore(session),
-                    icon: <Wrench size={14} aria-hidden="true" />,
-                  },
-                ] as SplitButtonMenuItem[]}
-                size="2"
-                variant="soft"
-              />
-              <DropdownMenu.Root>
-                <DropdownMenu.Trigger>
-                  <IconButton
-                    data-testid={`session-card-${session.id}-btn-dropdown`}
-                    size="1"
-                    variant="ghost"
-                    color="gray"
-                    aria-label={getMessage('sessionMoreActions')}
-                  >
-                    <MoreHorizontal size={16} aria-hidden="true" />
-                  </IconButton>
-                </DropdownMenu.Trigger>
-                <DropdownMenu.Content>
-                  <DropdownMenu.Item onClick={() => onEdit(session)}>
-                    <Pencil size={14} aria-hidden="true" />
-                    {getMessage('sessionEdit')}
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger>
+                <IconButton
+                  data-testid={`session-card-${session.id}-btn-dropdown`}
+                  size="1"
+                  variant="ghost"
+                  color="gray"
+                  aria-label={getMessage('sessionMoreActions')}
+                >
+                  <MoreHorizontal size={16} aria-hidden="true" />
+                </IconButton>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Content>
+                <DropdownMenu.Item onClick={() => onEdit(session)}>
+                  <Pencil size={14} aria-hidden="true" />
+                  {getMessage('sessionEdit')}
+                </DropdownMenu.Item>
+
+                <DropdownMenu.Separator />
+
+                {onMoveToFirst && (
+                  <DropdownMenu.Item onClick={onMoveToFirst} disabled={isDragDisabled}>
+                    {getMessage('sessionMoveToFirst')}
                   </DropdownMenu.Item>
-
-                  <DropdownMenu.Separator />
-
-                  {onMoveToFirst && (
-                    <DropdownMenu.Item onClick={onMoveToFirst} disabled={isDragDisabled}>
-                      {getMessage('sessionMoveToFirst')}
-                    </DropdownMenu.Item>
-                  )}
-                  {onMoveLast && (
-                    <DropdownMenu.Item onClick={onMoveLast} disabled={isDragDisabled}>
-                      {getMessage('sessionMoveLast')}
-                    </DropdownMenu.Item>
-                  )}
-
-                  <DropdownMenu.Separator />
-                  <DropdownMenu.Item color="red" onClick={() => onDelete(session)}>
-                    <Trash2 size={14} aria-hidden="true" />
-                    {getMessage('delete')}
+                )}
+                {onMoveLast && (
+                  <DropdownMenu.Item onClick={onMoveLast} disabled={isDragDisabled}>
+                    {getMessage('sessionMoveLast')}
                   </DropdownMenu.Item>
-                </DropdownMenu.Content>
-              </DropdownMenu.Root>
-            </Flex>
+                )}
+
+                <DropdownMenu.Separator />
+
+                <DropdownMenu.Item onClick={() => onRestoreCurrentWindow(session)}>
+                  <Monitor size={14} aria-hidden="true" />
+                  {getMessage('sessionRestoreCurrentWindow')}
+                </DropdownMenu.Item>
+                <DropdownMenu.Item onClick={() => onRestoreNewWindow(session)}>
+                  <Square size={14} aria-hidden="true" />
+                  {getMessage('sessionRestoreNewWindow')}
+                </DropdownMenu.Item>
+                <DropdownMenu.Item onClick={() => onRestore(session)}>
+                  <Wrench size={14} aria-hidden="true" />
+                  {getMessage('sessionRestoreCustomize')}
+                </DropdownMenu.Item>
+
+                <DropdownMenu.Separator />
+                <DropdownMenu.Item color="red" onClick={() => onDelete(session)}>
+                  <Trash2 size={14} aria-hidden="true" />
+                  {getMessage('delete')}
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Root>
           )}
         </Flex>
 
