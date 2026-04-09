@@ -181,6 +181,7 @@ test.describe('Delete rule via dropdown', () => {
     await page.getByRole('row', { name: /Vercel/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /delete/i }).click();
     await page.getByRole('button', { name: /cancel/i }).click();
+    await expect(page.getByRole('alertdialog')).not.toBeVisible();
 
     await expect(
       page.getByRole('row', { name: /Vercel/i }).getByLabel('More actions'),
