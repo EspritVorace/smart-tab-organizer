@@ -21,7 +21,7 @@
 
 ---
 
-## US-S011 — Options du bouton de restauration (split button)
+## US-S011 — Options de restauration dans le menu d'actions
 
 **En tant qu'** utilisateur,
 **je veux** pouvoir restaurer une session selon différentes modalités depuis la carte de session,
@@ -29,11 +29,12 @@
 
 ### Critères d'acceptation
 
-- [ ] Chaque carte de session affiche un bouton principal « Restore » visible.
-- [ ] Un chevron de liste déroulante (« Restore options ») est accessible sur chaque carte.
-- [ ] La liste déroulante propose au minimum les options : « In current window », « In new window », « Customize… ».
-- [ ] L'option « In current window » restaure les onglets et affiche un message de confirmation de succès (ex. « X tab(s) opened »).
-- [ ] L'option « Customize… » ouvre le wizard de restauration (dialogue de type `role="dialog"` contenant un texte « Restore »).
+- [ ] Chaque carte de session affiche un bouton « More actions » (icône ···) donnant accès à un menu déroulant.
+- [ ] Ce menu propose au minimum les options de restauration : « Restore in current window », « Restore in new window », « Customized restoration… ».
+- [ ] L'option « Restore in current window » restaure les onglets et affiche un message de confirmation de succès (ex. « X tab(s) opened »).
+- [ ] L'option « Customized restoration… » ouvre le wizard de restauration (dialogue de type `role="dialog"` contenant un texte « Restore »).
+
+> **Note de design (v1.1+) :** Le split button dédié a été remplacé par le menu « More actions » pour réduire l'encombrement visuel. Les métadonnées de session (dates, note) sont accessibles via un HoverCard sur le nom de la session.
 
 ---
 
