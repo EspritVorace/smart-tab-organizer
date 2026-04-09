@@ -38,4 +38,6 @@ export interface Session {
   categoryId?: string | null;
   /** Optional free-text note associated with the session */
   note?: string;
+  /** Display order (lower index = first); assigned automatically if missing */
+  position?: number;
 }

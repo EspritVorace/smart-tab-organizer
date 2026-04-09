@@ -45,3 +45,30 @@ export async function deleteSession(id: string): Promise<void> {
   const sessions = await loadSessions();
   await saveSessions(sessions.filter(s => s.id !== id));
 }
+
+/** Update positions for multiple sessions in a single storage write (avoids race conditions) */
+export async function batchUpdateSessionPositions(updates: Array<{ id: string; position: number }>): Promise<void> {
+  const sessions = await loadSessions();
+  const positionMap = new Map(updates.map(u => [u.id, u.position]));
+  const updated = sessions.map(s => {
+    const newPosition = positionMap.get(s.id);
+    return newPosition !== undefined ? { ...s, position: newPosition } : s;
+  });
+  await saveSessions(updated);
+}
+
+/** Save sessions in a specific order (used by drag-and-drop reordering) */
+export async function reorderSessions(orderedSessions: Session[]): Promise<void> {
+  const sessions = await loadSessions();
+  const sessionMap = new Map(sessions.map(s => [s.id, s]));
+  // Rebuild in new order with full data from storage (handles any missing fields)
+  const reordered: Session[] = [];
+  for (const s of orderedSessions) {
+    const full = sessionMap.get(s.id);
+    if (full) reordered.push(full);
+  }
+  // Append any sessions not in the ordered list (shouldn't happen, but safe)
+  const orderedIds = new Set(orderedSessions.map(s => s.id));
+  const rest = sessions.filter(s => !orderedIds.has(s.id));
+  await saveSessions([...reordered, ...rest]);
+}
