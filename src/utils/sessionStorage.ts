@@ -56,3 +56,19 @@ export async function batchUpdateSessionPositions(updates: Array<{ id: string; p
   });
   await saveSessions(updated);
 }
+
+/** Save sessions in a specific order (used by drag-and-drop reordering) */
+export async function reorderSessions(orderedSessions: Session[]): Promise<void> {
+  const sessions = await loadSessions();
+  const sessionMap = new Map(sessions.map(s => [s.id, s]));
+  // Rebuild in new order with full data from storage (handles any missing fields)
+  const reordered: Session[] = [];
+  for (const s of orderedSessions) {
+    const full = sessionMap.get(s.id);
+    if (full) reordered.push(full);
+  }
+  // Append any sessions not in the ordered list (shouldn't happen, but safe)
+  const orderedIds = new Set(orderedSessions.map(s => s.id));
+  const rest = sessions.filter(s => !orderedIds.has(s.id));
+  await saveSessions([...reordered, ...rest]);
+}

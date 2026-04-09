@@ -14,10 +14,10 @@ import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { getMessage } from '../utils/i18n';
 import { foldAccents } from '../utils/stringUtils';
 import { matchSessionSearch } from '../utils/sessionUtils';
-import { moveToFirst, moveToLast, applyDragReorder, assignPositions, getPositionForNewSession } from '../utils/sessionOrderUtils';
+import { moveToFirst, moveToLast } from '../utils/sessionOrderUtils';
 import { useSessions } from '../hooks/useSessions';
 import { restoreTabs } from '../utils/tabRestore';
-import { updateSession, batchUpdateSessionPositions } from '../utils/sessionStorage';
+import { updateSession } from '../utils/sessionStorage';
 import type { Session } from '../types/session';
 import type { SessionSearchMatch } from '../utils/sessionUtils';
 import type { SyncSettings } from '../types/syncSettings';
@@ -41,7 +41,7 @@ export function SessionsPage({
   snapshotGroupId,
   onSnapshotGroupIdChange,
 }: SessionsPageProps) {
-  const { sessions, isLoaded, createSession, renameSession, removeSession, reload } = useSessions();
+  const { sessions, isLoaded, createSession, renameSession, removeSession, reload, updateOrder } = useSessions();
   // Internal open state; initialized from external prop so the wizard opens immediately on mount.
   const [snapshotOpen, setSnapshotOpen] = useState(snapshotWizardOpen);
 
@@ -64,15 +64,8 @@ export function SessionsPage({
   const [searchQuery, setSearchQuery] = useState('');
   const [dragItems, setDragItems] = useState<Session[] | null>(null);
 
-  // Sort: by position field (assign positions to sessions that don't have one yet)
-  const sortedSessions = useMemo(() => {
-    const sessionsWithPosition = assignPositions(sessions);
-    return [...sessionsWithPosition].sort((a, b) => {
-      const posA = a.position ?? 0;
-      const posB = b.position ?? 0;
-      return posA - posB;
-    });
-  }, [sessions]);
+  // Order: use storage order directly (reorderSessions saves them in the correct order)
+  const sortedSessions = sessions;
 
   // Deep search: name + group titles + tab titles + tab URLs
   const sessionSearchMatches = useMemo<Map<string, SessionSearchMatch> | null>(() => {
@@ -172,32 +165,26 @@ export function SessionsPage({
 
   const handleDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
     if (!event.canceled) {
-      const raw = move(dragItems ?? sortedSessions, event);
-      // Reassign sequential positions after move (move() reorders but doesn't update position fields)
-      const reordered = (raw as Session[]).map((s, i) => ({ ...s, position: i }));
       const source = dragItems ?? sortedSessions;
-      if (raw !== source) {
-        void batchUpdateSessionPositions(
-          reordered.map(s => ({ id: s.id, position: s.position! }))
-        ).then(() => reload());
+      const reordered = move(source, event) as Session[];
+      if (reordered !== source) {
+        void updateOrder(reordered);
+      } else if (dragItems) {
+        void updateOrder(dragItems);
       }
     }
     setDragItems(null);
-  }, [dragItems, sortedSessions, reload]);
+  }, [dragItems, sortedSessions, updateOrder]);
 
   const handleMoveToFirst = useCallback((session: Session) => {
     const reordered = moveToFirst(sortedSessions, session.id);
-    void batchUpdateSessionPositions(
-      reordered.map(s => ({ id: s.id, position: s.position! }))
-    ).then(() => reload());
-  }, [sortedSessions, reload]);
+    void updateOrder(reordered);
+  }, [sortedSessions, updateOrder]);
 
   const handleMoveLast = useCallback((session: Session) => {
     const reordered = moveToLast(sortedSessions, session.id);
-    void batchUpdateSessionPositions(
-      reordered.map(s => ({ id: s.id, position: s.position! }))
-    ).then(() => reload());
-  }, [sortedSessions, reload]);
+    void updateOrder(reordered);
+  }, [sortedSessions, updateOrder]);
 
   return (
     <PageLayout

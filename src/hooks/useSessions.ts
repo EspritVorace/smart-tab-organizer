@@ -5,6 +5,7 @@ import {
   addSession,
   updateSession,
   deleteSession,
+  saveSessions,
 } from '../utils/sessionStorage';
 import type { Session } from '../types/session';
 
@@ -15,6 +16,8 @@ export interface UseSessionsReturn {
   renameSession: (id: string, name: string) => Promise<void>;
   removeSession: (id: string) => Promise<void>;
   reload: () => Promise<void>;
+  /** Optimistically reorder sessions: updates state immediately, then persists. */
+  updateOrder: (ordered: Session[]) => Promise<void>;
 }
 
 export function useSessions(): UseSessionsReturn {
@@ -67,5 +70,13 @@ export function useSessions(): UseSessionsReturn {
     [reload],
   );
 
-  return { sessions, isLoaded, createSession, renameSession, removeSession, reload };
+  const updateOrder = useCallback(
+    async (ordered: Session[]) => {
+      setSessions(ordered);
+      await saveSessions(ordered);
+    },
+    [],
+  );
+
+  return { sessions, isLoaded, createSession, renameSession, removeSession, reload, updateOrder };
 }
