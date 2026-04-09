@@ -278,6 +278,20 @@ export function SessionCard({
                     {category.emoji} {getMessage(category.labelKey as any)}
                   </Badge>
                 )}
+                <IconButton
+                  size="1"
+                  variant="ghost"
+                  color="gray"
+                  onClick={() => {
+                    setNameValue(session.name);
+                    setRenameError(null);
+                    setIsRenaming(true);
+                  }}
+                  aria-label={getMessage('sessionRename')}
+                  style={{ flexShrink: 0 }}
+                >
+                  <Pencil size={14} aria-hidden="true" />
+                </IconButton>
               </>
             )}
           </Flex>
@@ -300,16 +314,6 @@ export function SessionCard({
                 <DropdownMenu.Item onClick={() => onEdit(session)}>
                   <Pencil size={14} aria-hidden="true" />
                   {getMessage('sessionEdit')}
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  onClick={() => {
-                    setNameValue(session.name);
-                    setRenameError(null);
-                    setIsRenaming(true);
-                  }}
-                >
-                  <Pencil size={14} aria-hidden="true" />
-                  {getMessage('sessionRename')}
                 </DropdownMenu.Item>
 
                 <DropdownMenu.Separator />
