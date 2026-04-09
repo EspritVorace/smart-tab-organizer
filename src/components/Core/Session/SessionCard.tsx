@@ -287,7 +287,11 @@ export function SessionCard({
         />
 
         {/* Collapsible: read-only tab/group tree preview */}
-        <Collapsible.Root open={previewOpen} onOpenChange={setPreviewOpen}>
+        <Collapsible.Root
+          open={previewOpen}
+          onOpenChange={setPreviewOpen}
+          style={{ marginTop: '-6px' }}
+        >
           <Collapsible.Trigger asChild>
             <button
               data-testid={`session-card-${session.id}-preview-toggle`}
