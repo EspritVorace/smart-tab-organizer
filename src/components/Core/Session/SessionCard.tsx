@@ -2,21 +2,20 @@ import React, { useState, useCallback, useEffect } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import {
   Card, Flex, Text, IconButton, TextField,
-  DropdownMenu, Tooltip, Badge, Box,
+  DropdownMenu, Tooltip, Badge, Box, Separator,
 } from '@radix-ui/themes';
 import {
   MoreHorizontal, Pencil, Trash2, Check, X,
   Pin, PinOff, ChevronDown, ChevronRight,
+  Monitor, Square, Wrench,
 } from 'lucide-react';
 import { getMessage, getPluralMessage } from '../../../utils/i18n';
-import { countSessionTabs } from '../../../utils/sessionUtils';
+import { countSessionTabs, formatSessionDate } from '../../../utils/sessionUtils';
 import { AccessibleHighlight } from '../../UI/AccessibleHighlight/AccessibleHighlight';
 import { chromeGroupColors } from '../TabTree/tabTreeUtils';
 import { getRuleCategory } from '../../../schemas/enums';
 import { getRadixColor } from '../../../utils/utils';
-import { SplitButton } from '../../UI/SplitButton/SplitButton';
 import { SessionPreviewTree } from './SessionPreviewTree';
-import type { SplitButtonMenuItem } from '../../UI/SplitButton/SplitButton';
 import type { Session } from '../../../types/session';
 
 interface SessionCardProps {
@@ -110,21 +109,17 @@ export function SessionCard({
     [handleRenameSubmit, handleRenameCancel],
   );
 
-  const restoreMenuItems: SplitButtonMenuItem[] = [
-    {
-      label: getMessage('sessionRestoreCurrentWindow'),
-      onClick: () => onRestoreCurrentWindow(session),
-    },
-    {
-      label: getMessage('sessionRestoreNewWindow'),
-      onClick: () => onRestoreNewWindow(session),
-    },
-    {
-      label: getMessage('sessionRestoreCustomize'),
-      onClick: () => onRestore(session),
-      separator: true,
-    },
-  ];
+  // Tooltip content for session metadata
+  const tooltipContent = (
+    <div style={{ whiteSpace: 'pre-line', fontSize: '12px', lineHeight: '1.4' }}>
+      <strong>{session.name}</strong>
+      {'\n'}
+      {getMessage('sessionCreatedLabel')}: {formatSessionDate(session.createdAt)}
+      {'\n'}
+      {getMessage('sessionUpdatedLabel')}: {formatSessionDate(session.updatedAt)}
+      {session.note && `\n${getMessage('sessionNoteLabel')}: ${session.note}`}
+    </div>
+  );
 
   return (
     <Card data-testid={`session-card-${session.id}`} size="2">
@@ -193,24 +188,30 @@ export function SessionCard({
               </>
             ) : (
               <>
-                <Text
-                  data-testid={`session-card-${session.id}-name`}
-                  size="3"
-                  weight="medium"
-                  onDoubleClick={() => {
-                    setNameValue(session.name);
-                    setRenameError(null);
-                    setIsRenaming(true);
-                  }}
-                  style={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    cursor: 'default',
-                  }}
+                <Tooltip
+                  content={tooltipContent}
+                  side="top"
+                  delayDuration={200}
                 >
-                  <AccessibleHighlight text={session.name} searchTerm={searchQuery ?? ''} />
-                </Text>
+                  <Text
+                    data-testid={`session-card-${session.id}-name`}
+                    size="3"
+                    weight="medium"
+                    onDoubleClick={() => {
+                      setNameValue(session.name);
+                      setRenameError(null);
+                      setIsRenaming(true);
+                    }}
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      cursor: 'default',
+                    }}
+                  >
+                    <AccessibleHighlight text={session.name} searchTerm={searchQuery ?? ''} />
+                  </Text>
+                </Tooltip>
                 {category && (
                   <Badge color={getRadixColor(category.color) as any} size="1" style={{ flexShrink: 0 }}>
                     {category.emoji} {getMessage(category.labelKey as any)}
@@ -219,18 +220,6 @@ export function SessionCard({
               </>
             )}
           </Flex>
-
-          {/* Restore button — just before "..." */}
-          {!isRenaming && (
-            <SplitButton
-              data-testid={`session-card-${session.id}-btn-restore`}
-              label={getMessage('sessionRestore')}
-              onClick={() => onRestore(session)}
-              menuItems={restoreMenuItems}
-              variant="solid"
-              size="1"
-            />
-          )}
 
           {/* More menu */}
           {!isRenaming && (
@@ -263,6 +252,21 @@ export function SessionCard({
                 </DropdownMenu.Item>
 
                 <DropdownMenu.Separator />
+
+                <DropdownMenu.Item onClick={() => onRestoreCurrentWindow(session)}>
+                  <Monitor size={14} aria-hidden="true" />
+                  {getMessage('sessionRestoreCurrentWindow')}
+                </DropdownMenu.Item>
+                <DropdownMenu.Item onClick={() => onRestoreNewWindow(session)}>
+                  <Square size={14} aria-hidden="true" />
+                  {getMessage('sessionRestoreNewWindow')}
+                </DropdownMenu.Item>
+                <DropdownMenu.Item onClick={() => onRestore(session)}>
+                  <Wrench size={14} aria-hidden="true" />
+                  {getMessage('sessionRestoreCustomize')}
+                </DropdownMenu.Item>
+
+                <DropdownMenu.Separator />
                 <DropdownMenu.Item color="red" onClick={() => onDelete(session)}>
                   <Trash2 size={14} aria-hidden="true" />
                   {getMessage('delete')}
@@ -271,6 +275,9 @@ export function SessionCard({
             </DropdownMenu.Root>
           )}
         </Flex>
+
+        {/* Separator between header and preview */}
+        <Separator orientation="horizontal" size="1" />
 
         {/* Collapsible: read-only tab/group tree preview */}
         <Collapsible.Root open={previewOpen} onOpenChange={setPreviewOpen}>
