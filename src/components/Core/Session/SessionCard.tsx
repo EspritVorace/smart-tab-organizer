@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
+import { useSortable } from '@dnd-kit/react/sortable';
 import {
   Card, Flex, Text, IconButton, TextField,
   DropdownMenu, Tooltip, Badge, Box,
@@ -7,7 +8,7 @@ import {
 import {
   MoreHorizontal, Pencil, Trash2, Check, X,
   Pin, PinOff, ChevronDown, ChevronRight,
-  Monitor, Square, Wrench,
+  Monitor, Square, Wrench, GripVertical,
 } from 'lucide-react';
 import { getMessage, getPluralMessage } from '../../../utils/i18n';
 import { countSessionTabs, formatSessionDate } from '../../../utils/sessionUtils';
@@ -41,6 +42,14 @@ interface SessionCardProps {
   searchMatchingGroupIds?: Set<string>;
   /** Raw search query used to highlight matching text in the card */
   searchQuery?: string;
+  /** Array index for drag-and-drop sorting */
+  index?: number;
+  /** Disable drag when filtering or other conditions */
+  isDragDisabled?: boolean;
+  /** Called when user clicks "Move to First" in menu */
+  onMoveToFirst?: () => void;
+  /** Called when user clicks "Move to Last" in menu */
+  onMoveLast?: () => void;
 }
 
 export function SessionCard({
@@ -57,11 +66,28 @@ export function SessionCard({
   forcePreviewOpen = false,
   searchMatchingGroupIds,
   searchQuery,
+  index = 0,
+  isDragDisabled = false,
+  onMoveToFirst,
+  onMoveLast,
 }: SessionCardProps) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [nameValue, setNameValue] = useState(session.name);
   const [renameError, setRenameError] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+
+  // Drag-and-drop sortable hook
+  const { ref, handleRef, isDragging } = useSortable({
+    id: session.id,
+    index,
+    disabled: isDragDisabled,
+  });
+
+  const dragStyle: React.CSSProperties = {
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 10 : undefined,
+    position: isDragging ? 'relative' : undefined,
+  };
 
   // When a search match forces the preview open, open it.
   // When the search is cleared (forcePreviewOpen becomes false), close it
@@ -122,10 +148,35 @@ export function SessionCard({
   );
 
   return (
-    <Card data-testid={`session-card-${session.id}`} size="2">
+    <Card
+      ref={ref}
+      data-testid={`session-card-${session.id}`}
+      size="2"
+      style={dragStyle}
+    >
       <Flex direction="column" gap="2">
-        {/* Top row: pin btn + name + category badge + restore + more menu */}
+        {/* Top row: drag handle + pin btn + name + category badge + restore + more menu */}
         <Flex align="center" gap="2">
+          {/* Drag handle */}
+          {!isRenaming && (
+            <Box
+              ref={handleRef}
+              data-testid={`session-card-${session.id}-drag-handle`}
+              aria-disabled={isDragDisabled}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: isDragDisabled ? 'not-allowed' : 'grab',
+                touchAction: 'none',
+                color: isDragDisabled ? 'var(--gray-6)' : 'var(--gray-9)',
+                flexShrink: 0,
+              }}
+            >
+              <GripVertical size={16} aria-hidden="true" />
+            </Box>
+          )}
+
           {/* Pin / Unpin button */}
           {!isRenaming && (
             <Tooltip
@@ -250,6 +301,19 @@ export function SessionCard({
                   <Pencil size={14} aria-hidden="true" />
                   {getMessage('sessionRename')}
                 </DropdownMenu.Item>
+
+                <DropdownMenu.Separator />
+
+                {onMoveToFirst && (
+                  <DropdownMenu.Item onClick={onMoveToFirst} disabled={isDragDisabled}>
+                    {getMessage('sessionMoveToFirst')}
+                  </DropdownMenu.Item>
+                )}
+                {onMoveLast && (
+                  <DropdownMenu.Item onClick={onMoveLast} disabled={isDragDisabled}>
+                    {getMessage('sessionMoveLast')}
+                  </DropdownMenu.Item>
+                )}
 
                 <DropdownMenu.Separator />
 

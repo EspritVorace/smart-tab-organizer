@@ -1,6 +1,9 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Box, Flex, Button, Text, Callout, TextField } from '@radix-ui/themes';
 import { Camera, Archive, CheckCircle, Pin, Search } from 'lucide-react';
+import { DragDropProvider, type DragOverEvent, type DragEndEvent } from '@dnd-kit/react';
+import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
+import { move } from '@dnd-kit/helpers';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { SessionCard } from '../components/Core/Session/SessionCard';
 import { SessionEditDialog } from '../components/Core/Session/SessionEditDialog';
@@ -11,6 +14,7 @@ import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { getMessage } from '../utils/i18n';
 import { foldAccents } from '../utils/stringUtils';
 import { matchSessionSearch } from '../utils/sessionUtils';
+import { moveToFirst, moveToLast, applyDragReorder, assignPositions, getPositionForNewSession } from '../utils/sessionOrderUtils';
 import { useSessions } from '../hooks/useSessions';
 import { restoreTabs } from '../utils/tabRestore';
 import { updateSession } from '../utils/sessionStorage';
@@ -58,12 +62,17 @@ export function SessionsPage({
   const [deleteTarget, setDeleteTarget] = useState<Session | null>(null);
   const [quickRestoreMessage, setQuickRestoreMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [dragItems, setDragItems] = useState<Session[] | null>(null);
 
-  // Sort: pinned first by updatedAt desc, then snapshots by updatedAt desc
-  const sortedSessions = useMemo(() => [...sessions].sort((a, b) => {
-    if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
-    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-  }), [sessions]);
+  // Sort: by position field (assign positions to sessions that don't have one yet)
+  const sortedSessions = useMemo(() => {
+    const sessionsWithPosition = assignPositions(sessions);
+    return [...sessionsWithPosition].sort((a, b) => {
+      const posA = a.position ?? 0;
+      const posB = b.position ?? 0;
+      return posA - posB;
+    });
+  }, [sessions]);
 
   // Deep search: name + group titles + tab titles + tab URLs
   const sessionSearchMatches = useMemo<Map<string, SessionSearchMatch> | null>(() => {
@@ -156,6 +165,39 @@ export function SessionsPage({
     await reload();
   }, [reload]);
 
+  // Drag-and-drop handlers
+  const handleDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
+    setDragItems(prev => move(prev ?? sortedSessions, event));
+  }, [sortedSessions]);
+
+  const handleDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
+    if (!event.canceled) {
+      const reordered = move(dragItems ?? sortedSessions, event);
+      if (reordered !== (dragItems ?? sortedSessions)) {
+        // Persist all sessions with updated positions
+        void Promise.all(
+          reordered.map(s => updateSession(s.id, { position: s.position }))
+        ).then(() => reload());
+      } else if (dragItems) {
+        void reload();
+      }
+    }
+    setDragItems(null);
+  }, [dragItems, sortedSessions, reload]);
+
+  const handleMoveToFirst = useCallback((session: Session) => {
+    const reordered = moveToFirst(sortedSessions, session.id);
+    void Promise.all(
+      reordered.map(s => updateSession(s.id, { position: s.position }))
+    ).then(() => reload());
+  }, [sortedSessions, reload]);
+
+  const handleMoveLast = useCallback((session: Session) => {
+    const reordered = moveToLast(sortedSessions, session.id);
+    void Promise.all(
+      reordered.map(s => updateSession(s.id, { position: s.position }))
+    ).then(() => reload());
+  }, [sortedSessions, reload]);
 
   return (
     <PageLayout
@@ -250,29 +292,39 @@ export function SessionsPage({
               </Flex>
             )
           ) : (
-            <Flex data-testid="page-sessions-list" direction="column" gap="3">
-              {displayedSessions.map(session => {
-                const searchMatch = sessionSearchMatches?.get(session.id);
-                return (
-                  <SessionCard
-                    key={session.id}
-                    session={session}
-                    existingSessions={sessions}
-                    onRestore={s => setRestoreSession(s)}
-                    onRestoreCurrentWindow={handleRestoreCurrentWindow}
-                    onRestoreNewWindow={handleRestoreNewWindow}
-                    onRename={renameSession}
-                    onEdit={s => setEditTarget(s)}
-                    onDelete={s => setDeleteTarget(s)}
-                    onPin={handlePin}
-                    onUnpin={handleUnpin}
-                    forcePreviewOpen={searchMatch?.matchesTabs === true || searchMatch?.matchesNote === true}
-                    searchMatchingGroupIds={searchMatch?.matchingGroupIds}
-                    searchQuery={searchQuery || undefined}
-                  />
-                );
-              })}
-            </Flex>
+            <DragDropProvider
+              modifiers={[RestrictToVerticalAxis]}
+              onDragOver={handleDragOver}
+              onDragEnd={handleDragEnd}
+            >
+              <Flex data-testid="page-sessions-list" direction="column" gap="3">
+                {(dragItems ?? displayedSessions).map((session, index) => {
+                  const searchMatch = sessionSearchMatches?.get(session.id);
+                  return (
+                    <SessionCard
+                      key={session.id}
+                      session={session}
+                      existingSessions={sessions}
+                      onRestore={s => setRestoreSession(s)}
+                      onRestoreCurrentWindow={handleRestoreCurrentWindow}
+                      onRestoreNewWindow={handleRestoreNewWindow}
+                      onRename={renameSession}
+                      onEdit={s => setEditTarget(s)}
+                      onDelete={s => setDeleteTarget(s)}
+                      onPin={handlePin}
+                      onUnpin={handleUnpin}
+                      forcePreviewOpen={searchMatch?.matchesTabs === true || searchMatch?.matchesNote === true}
+                      searchMatchingGroupIds={searchMatch?.matchingGroupIds}
+                      searchQuery={searchQuery || undefined}
+                      index={index}
+                      isDragDisabled={!!searchQuery}
+                      onMoveToFirst={() => handleMoveToFirst(session)}
+                      onMoveLast={() => handleMoveLast(session)}
+                    />
+                  );
+                })}
+              </Flex>
+            </DragDropProvider>
           )}
 
           <SnapshotWizard

@@ -298,6 +298,8 @@
   "sessionRestoreCustomize": { "message": "Customized restoration..." },
   "sessionCreatedLabel": { "message": "Created" },
   "sessionUpdatedLabel": { "message": "Updated" },
+  "sessionMoveToFirst": { "message": "Move to first" },
+  "sessionMoveLast": { "message": "Move to last" },
   "sessionNameLabel": { "message": "Session name" },
   "sessionNamePlaceholder": { "message": "e.g., Work tabs - Monday" },
   "sessionSaveError": { "message": "Failed to save session. Please try again." },
