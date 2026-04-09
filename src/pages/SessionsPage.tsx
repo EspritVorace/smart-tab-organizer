@@ -17,7 +17,7 @@ import { matchSessionSearch } from '../utils/sessionUtils';
 import { moveToFirst, moveToLast, applyDragReorder, assignPositions, getPositionForNewSession } from '../utils/sessionOrderUtils';
 import { useSessions } from '../hooks/useSessions';
 import { restoreTabs } from '../utils/tabRestore';
-import { updateSession } from '../utils/sessionStorage';
+import { updateSession, batchUpdateSessionPositions } from '../utils/sessionStorage';
 import type { Session } from '../types/session';
 import type { SessionSearchMatch } from '../utils/sessionUtils';
 import type { SyncSettings } from '../types/syncSettings';
@@ -172,14 +172,14 @@ export function SessionsPage({
 
   const handleDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
     if (!event.canceled) {
-      const reordered = move(dragItems ?? sortedSessions, event);
-      if (reordered !== (dragItems ?? sortedSessions)) {
-        // Persist all sessions with updated positions
-        void Promise.all(
-          reordered.map(s => updateSession(s.id, { position: s.position }))
+      const raw = move(dragItems ?? sortedSessions, event);
+      // Reassign sequential positions after move (move() reorders but doesn't update position fields)
+      const reordered = (raw as Session[]).map((s, i) => ({ ...s, position: i }));
+      const source = dragItems ?? sortedSessions;
+      if (raw !== source) {
+        void batchUpdateSessionPositions(
+          reordered.map(s => ({ id: s.id, position: s.position! }))
         ).then(() => reload());
-      } else if (dragItems) {
-        void reload();
       }
     }
     setDragItems(null);
@@ -187,15 +187,15 @@ export function SessionsPage({
 
   const handleMoveToFirst = useCallback((session: Session) => {
     const reordered = moveToFirst(sortedSessions, session.id);
-    void Promise.all(
-      reordered.map(s => updateSession(s.id, { position: s.position }))
+    void batchUpdateSessionPositions(
+      reordered.map(s => ({ id: s.id, position: s.position! }))
     ).then(() => reload());
   }, [sortedSessions, reload]);
 
   const handleMoveLast = useCallback((session: Session) => {
     const reordered = moveToLast(sortedSessions, session.id);
-    void Promise.all(
-      reordered.map(s => updateSession(s.id, { position: s.position }))
+    void batchUpdateSessionPositions(
+      reordered.map(s => ({ id: s.id, position: s.position! }))
     ).then(() => reload());
   }, [sortedSessions, reload]);
 

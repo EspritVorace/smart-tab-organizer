@@ -45,3 +45,14 @@ export async function deleteSession(id: string): Promise<void> {
   const sessions = await loadSessions();
   await saveSessions(sessions.filter(s => s.id !== id));
 }
+
+/** Update positions for multiple sessions in a single storage write (avoids race conditions) */
+export async function batchUpdateSessionPositions(updates: Array<{ id: string; position: number }>): Promise<void> {
+  const sessions = await loadSessions();
+  const positionMap = new Map(updates.map(u => [u.id, u.position]));
+  const updated = sessions.map(s => {
+    const newPosition = positionMap.get(s.id);
+    return newPosition !== undefined ? { ...s, position: newPosition } : s;
+  });
+  await saveSessions(updated);
+}
