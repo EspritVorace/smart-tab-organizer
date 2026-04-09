@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import {
   Card, Flex, Text, IconButton, TextField,
-  DropdownMenu, Tooltip, Badge, Box, Separator,
+  DropdownMenu, Tooltip, Badge, Box,
 } from '@radix-ui/themes';
 import {
   MoreHorizontal, Pencil, Trash2, Check, X,
@@ -277,7 +277,14 @@ export function SessionCard({
         </Flex>
 
         {/* Separator between header and preview */}
-        <Separator orientation="horizontal" size="1" />
+        <Box
+          my="2"
+          style={{
+            marginLeft: 'calc(-1 * var(--card-padding, var(--space-4)))',
+            marginRight: 'calc(-1 * var(--card-padding, var(--space-4)))',
+            borderTop: '1px solid var(--gray-6)',
+          }}
+        />
 
         {/* Collapsible: read-only tab/group tree preview */}
         <Collapsible.Root open={previewOpen} onOpenChange={setPreviewOpen}>
