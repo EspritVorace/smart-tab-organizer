@@ -15,7 +15,14 @@ export default defineConfig({
     browser_specific_settings: {
       gecko: {
         id: 'smart-tab-organizer@espritvorace.github.io',
-        strict_min_version: '109.0'
+        strict_min_version: '109.0',
+        // Required by AMO since 2025: declare that the extension does not
+        // collect or transmit any user data. SmartTab Organizer only reads
+        // /writes user preferences via browser.storage (local + sync) — no
+        // telemetry, no analytics, no external network calls.
+          data_collection_permissions: {
+            required: ['none']
+        }
       }
     },
     permissions: ['tabs', 'tabGroups', 'storage', 'notifications'],
