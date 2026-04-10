@@ -178,8 +178,14 @@ test.describe('Delete rule via dropdown', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
+    // Wait for the rule to be rendered before interacting
+    await expect(page.getByRole('row', { name: /Vercel/i })).toBeVisible({ timeout: 5000 });
+
     await page.getByRole('row', { name: /Vercel/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /delete/i }).click();
+
+    // Confirm dialog is open before cancelling
+    await expect(page.getByTestId('confirm-dialog')).toBeVisible();
     await page.getByRole('button', { name: /cancel/i }).click();
     await expect(page.getByTestId('confirm-dialog')).not.toBeAttached();
 
