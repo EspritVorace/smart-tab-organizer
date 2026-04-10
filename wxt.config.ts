@@ -12,6 +12,12 @@ export default defineConfig({
     author: 'EspritVorace',
     homepage_url: 'https://github.com/EspritVorace/smart-tab-organizer',
     default_locale: 'en',
+    browser_specific_settings: {
+      gecko: {
+        id: 'smart-tab-organizer@espritvorace.github.io',
+        strict_min_version: '109.0'
+      }
+    },
     permissions: ['tabs', 'tabGroups', 'storage', 'notifications'],
     host_permissions: ['<all_urls>'],
     action: {
@@ -30,7 +36,9 @@ export default defineConfig({
   },
   webExt: {
     chromiumProfile: resolve('.chrome-profile'),
+    firefoxProfile: resolve('.firefox-profile'),
     keepProfileChanges: true,
+    profileCreateIfMissing: true,
   },
   vite: () => ({
     plugins: [react()],
