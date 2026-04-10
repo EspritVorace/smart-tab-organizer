@@ -28,6 +28,19 @@ export default defineConfig({
     reporters: [
       'default',
       ['vitest-ctrf-json-reporter', { outputDir: 'ctrf', outputFile: 'unit-ctrf-report.json' }],
-    ]
-  }
+    ],
+    coverage: {
+      provider: 'v8',
+      // text = console summary, json-summary = machine-readable for CTRF injection
+      reporter: ['text', 'json-summary'],
+      reportsDirectory: './coverage',
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/**/*.d.ts',
+        'src/entrypoints/**',
+        'src/**/*.stories.{ts,tsx}',
+        'src/types/**',
+      ],
+    },
+  },
 });

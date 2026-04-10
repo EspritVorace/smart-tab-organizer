@@ -9,6 +9,7 @@ storybook-static
 playwright-report/
 test-results/
 ctrf/
+coverage/
 /.idea
 .chrome-profile/
 .firefox-profile/
