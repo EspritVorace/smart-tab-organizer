@@ -200,13 +200,27 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
     setIsModalOpen(true);
   }, []);
 
+  // @dnd-kit/helpers' move() is typed as `Items | Record<UniqueIdentifier, Items>`
+  // where `Items = UniqueIdentifier[] | { id: UniqueIdentifier }[]`. The union
+  // confuses TS inference even though DomainRuleSetting[] is structurally
+  // compatible (each rule has `id: string`). Wrap once with the necessary
+  // unknown-cast and rely on the helper for the rest.
+  const moveRules = (
+    rules: DomainRuleSetting[],
+    event: Parameters<DragOverEvent>[0] | Parameters<DragEndEvent>[0],
+  ): DomainRuleSetting[] =>
+    (move as unknown as (
+      r: DomainRuleSetting[],
+      e: typeof event,
+    ) => DomainRuleSetting[])(rules, event);
+
   const handleDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
-    setDragItems(prev => move(prev ?? syncSettings.domainRules, event));
+    setDragItems(prev => moveRules(prev ?? syncSettings.domainRules, event));
   }, [syncSettings.domainRules]);
 
   const handleDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
     if (!event.canceled) {
-      const reordered = move(dragItems ?? syncSettings.domainRules, event);
+      const reordered = moveRules(dragItems ?? syncSettings.domainRules, event);
       if (reordered !== (dragItems ?? syncSettings.domainRules)) {
         updateRules(reordered);
       } else if (dragItems) {
