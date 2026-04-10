@@ -83,6 +83,15 @@ export const test = base.extend<ScreenshotFixtures>({
           '--no-default-browser-check',
           '--disable-popup-blocking',
           '--force-device-scale-factor=1',
+          // Deterministic text rendering — without these flags, Chromium uses
+          // sub-pixel font positioning + GPU rasterization, which produces
+          // pixel-different output on every run (text outlines shift by 1-2 px),
+          // making `git diff` flag every screenshot as modified even when the
+          // visual content is identical.
+          '--font-render-hinting=none',
+          '--disable-font-subpixel-positioning',
+          '--disable-lcd-text',
+          '--disable-gpu',
           ...(headless ? ['--no-sandbox', '--disable-dev-shm-usage'] : []),
         ],
         viewport: { width: 1280, height: 800 },

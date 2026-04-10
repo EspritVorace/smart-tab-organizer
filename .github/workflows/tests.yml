@@ -26,8 +26,52 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Run unit tests
-        run: pnpm test
+      - name: TypeScript check
+        run: pnpm compile
+
+      - name: Run unit tests with coverage
+        run: pnpm test:coverage
+
+      - name: Generate coverage markdown
+        if: always()
+        run: node scripts/coverage-markdown.mjs > coverage/coverage.md
+
+      - name: Publish coverage to job summary
+        if: always()
+        run: cat coverage/coverage.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post sticky coverage comment on PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('coverage/coverage.md', 'utf8');
+            const marker = '<!-- coverage-sticky-comment -->';
+            const fullBody = `${marker}\n${body}`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c => c.body && c.body.startsWith(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: fullBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: fullBody,
+              });
+            }
 
       - name: Upload CTRF report
         uses: actions/upload-artifact@v4
@@ -36,6 +80,14 @@ jobs:
         with:
           name: unit-ctrf-report
           path: ctrf/unit-ctrf-report.json
+
+      - name: Upload coverage summary
+        uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with:
+          name: coverage-summary
+          path: coverage/coverage-summary.json
 
   e2e-tests:
     name: E2E Tests (shard ${{ matrix.shard }}/3)

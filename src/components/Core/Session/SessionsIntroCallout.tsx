@@ -6,7 +6,7 @@ import { getSessionsHelpPrefs, updateSessionsHelpPrefs } from '../../../utils/se
 
 /**
  * Dismissable intro callout shown at the top of the Sessions section.
- * Persists the hidden state in chrome.storage.local.
+ * Persists the hidden state in browser.storage.local.
  */
 export function SessionsIntroCallout() {
   const [hidden, setHidden] = useState<boolean | null>(null); // null = loading
