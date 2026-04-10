@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // .tool_response.filePath // \"\"' | { read -r f; echo \"$f\" | grep -qE '\\.(ts|tsx)$' && pnpm --dir 'C:/devhome/git/smart-tab-organizer' compile 2>&1 | tail -20; } 2>/dev/null || true",
+            "timeout": 65,
+            "statusMessage": "TypeScript check...",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // \"\"' | { read -r f; echo \"$f\" | grep -qE '(wxt\\.config|manifest\\.json|\\.env)' && printf '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"ask\",\"permissionDecisionReason\":\"Fichier sensible \\u2014 confirmer avant modification\"}}'; } 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}

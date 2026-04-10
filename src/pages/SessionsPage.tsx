@@ -14,7 +14,7 @@ import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { getMessage } from '../utils/i18n';
 import { foldAccents } from '../utils/stringUtils';
 import { matchSessionSearch } from '../utils/sessionUtils';
-import { moveToFirst, moveToLast } from '../utils/sessionOrderUtils';
+import { moveSessionToFirst, moveSessionToLast } from '../utils/sessionOrderUtils';
 import { useSessions } from '../hooks/useSessions';
 import { restoreTabs } from '../utils/tabRestore';
 import { updateSession } from '../utils/sessionStorage';
@@ -177,12 +177,12 @@ export function SessionsPage({
   }, [dragItems, sortedSessions, updateOrder]);
 
   const handleMoveToFirst = useCallback((session: Session) => {
-    const reordered = moveToFirst(sortedSessions, session.id);
+    const reordered = moveSessionToFirst(sortedSessions, session.id);
     void updateOrder(reordered);
   }, [sortedSessions, updateOrder]);
 
   const handleMoveLast = useCallback((session: Session) => {
-    const reordered = moveToLast(sortedSessions, session.id);
+    const reordered = moveSessionToLast(sortedSessions, session.id);
     void updateOrder(reordered);
   }, [sortedSessions, updateOrder]);
 

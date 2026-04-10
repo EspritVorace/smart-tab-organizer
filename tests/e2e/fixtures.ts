@@ -86,6 +86,29 @@ export interface Statistics {
   tabsDeduplicatedCount: number;
 }
 
+/**
+ * Writes to chrome.storage.sync, retrying with backoff on quota errors.
+ * Tests run fast enough on a single worker that MAX_WRITE_OPERATIONS_PER_MINUTE
+ * (120/min) can be exceeded when many tests each call addDomainRule + clearDomainRules.
+ */
+async function syncSet(sw: Page, data: Record<string, unknown>): Promise<void> {
+  const delays = [1000, 2000, 4000, 8000];
+  for (let i = 0; i <= delays.length; i++) {
+    try {
+      await sw.evaluate(async (d: Record<string, unknown>) => {
+        await chrome.storage.sync.set(d);
+      }, data as Record<string, unknown>);
+      return;
+    } catch (e: unknown) {
+      if (i < delays.length && String(e).includes('MAX_WRITE_OPERATIONS')) {
+        await new Promise(r => setTimeout(r, delays[i]));
+      } else {
+        throw e;
+      }
+    }
+  }
+}
+
 // Create a temporary user data directory for each test run
 function createTempUserDataDir(): string {
   const tmpDir = path.join(os.tmpdir(), `playwright-chrome-${Date.now()}`);
@@ -215,28 +238,22 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       // Set global grouping enabled/disabled
       setGlobalGroupingEnabled: async (enabled: boolean) => {
         const sw = await getServiceWorker();
-        await sw.evaluate(async (enabled) => {
-          await chrome.storage.sync.set({ globalGroupingEnabled: enabled });
-        }, enabled);
+        await syncSet(sw, { globalGroupingEnabled: enabled });
       },
 
       // Set global deduplication enabled/disabled
       setGlobalDeduplicationEnabled: async (enabled: boolean) => {
         const sw = await getServiceWorker();
-        await sw.evaluate(async (enabled) => {
-          await chrome.storage.sync.set({ globalDeduplicationEnabled: enabled });
-        }, enabled);
+        await syncSet(sw, { globalDeduplicationEnabled: enabled });
       },
 
       // Add a domain rule
       addDomainRule: async (rule: DomainRuleConfig) => {
         const sw = await getServiceWorker();
-        await sw.evaluate(async (ruleConfig) => {
-          const browser = chrome;
-          const result = await browser.storage.sync.get({ domainRules: [] });
-          const rules = result.domainRules || [];
-
-          const newRule = {
+        const updatedRules = await sw.evaluate(async (ruleConfig) => {
+          const result = await chrome.storage.sync.get({ domainRules: [] });
+          const rules: unknown[] = result.domainRules || [];
+          rules.push({
             id: `rule-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             label: ruleConfig.label,
             domainFilter: ruleConfig.domainFilter,
@@ -250,11 +267,10 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
             urlParsingRegEx: ruleConfig.urlParsingRegEx || '',
             presetId: ruleConfig.presetId || '',
             badge: '',
-          };
-
-          rules.push(newRule);
-          await browser.storage.sync.set({ domainRules: rules });
+          });
+          return rules;
         }, rule);
+        await syncSet(sw, { domainRules: updatedRules });
         // Wait for storage to propagate
         await new Promise(resolve => setTimeout(resolve, 100));
       },
@@ -262,9 +278,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       // Clear all domain rules
       clearDomainRules: async () => {
         const sw = await getServiceWorker();
-        await sw.evaluate(async () => {
-          await chrome.storage.sync.set({ domainRules: [] });
-        });
+        await syncSet(sw, { domainRules: [] });
         await new Promise(resolve => setTimeout(resolve, 100));
       },
 
