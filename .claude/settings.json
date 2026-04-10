@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const j=JSON.parse(d);const f=j.tool_input?.file_path||j.tool_response?.filePath||'';if(/\\.(ts|tsx)$/.test(f)){const {execSync}=require('child_process');try{const out=execSync('pnpm compile',{cwd:'/c/devhome/git/smart-tab-organizer',encoding:'utf8',timeout:60000});if(out.trim())process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'PostToolUse',additionalContext:'TypeScript OK'}})+' ');}catch(e){process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'PostToolUse',additionalContext:'TypeScript errors:\\n'+(e.stdout||e.message)}})+' ');}}}});\" 2>/dev/null || true",
+            "timeout": 65,
+            "statusMessage": "TypeScript check...",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const j=JSON.parse(d);const f=j.tool_input?.file_path||'';if(/(wxt\\.config|manifest\\.json|\\.env)/.test(f)){process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:'PreToolUse',permissionDecision:'ask',permissionDecisionReason:'Fichier sensible \\u2014 confirmer avant modification'}})+' ');}});\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}

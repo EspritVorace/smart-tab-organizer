@@ -2,7 +2,8 @@ node_modules/
 dist/
 .wxt/
 .output/
-.claude/
+.claude/settings.local.json
+.claude/worktrees/
 *storybook.log
 storybook-static
 playwright-report/
