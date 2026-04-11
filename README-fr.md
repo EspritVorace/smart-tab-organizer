@@ -9,7 +9,7 @@
 **SmartTab Organizer** est une extension multi-navigateur qui regroupe automatiquement les onglets liés, évite les doublons et sauvegarde vos espaces de travail sous forme de sessions nommées.
 
 <p align="center">
-  <img src="doc/store.png" alt="SmartTab Organizer">
+  <img src="assets/store.png" alt="SmartTab Organizer">
 </p>
 
 ## 🛒 Chrome Web Store ##

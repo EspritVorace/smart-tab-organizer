@@ -9,7 +9,7 @@
 **SmartTab Organizer** es una extensión multinavegador que agrupa automáticamente las pestañas relacionadas, evita duplicados y guarda tus espacios de trabajo como sesiones con nombre.
 
 <p align="center">
-  <img src="doc/store.png" alt="SmartTab Organizer">
+  <img src="assets/store.png" alt="SmartTab Organizer">
 </p>
 
 ## 🛒 Chrome Web Store ##

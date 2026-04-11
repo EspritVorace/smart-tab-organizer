@@ -9,7 +9,7 @@
 **SmartTab Organizer** is a cross-browser extension that automatically groups related tabs, prevents duplicates, and saves your workspaces as named sessions.
 
 <p align="center">
-  <img src="doc/store.png" alt="SmartTab Organizer">
+  <img src="assets/store.png" alt="SmartTab Organizer">
 </p>
 
 ## 🛒 Chrome Web Store ##
