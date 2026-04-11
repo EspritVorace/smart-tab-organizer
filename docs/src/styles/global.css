@@ -130,3 +130,13 @@ button:focus-visible,
   outline-offset: 1px;
   text-decoration: none;
 }
+
+/* ----- Hero primary button: force legible text over the accent ----- */
+/* Starlight defaults to color: var(--sl-color-black) which gets inverted
+   in dark mode, producing low-contrast light-on-light. We force the
+   background color (near-white in light, near-black in dark), which
+   always contrasts well with the accent green. */
+.sl-link-button.primary,
+.sl-link-button.primary:hover {
+  color: var(--blog-background);
+}
