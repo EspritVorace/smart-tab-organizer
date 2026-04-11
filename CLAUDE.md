@@ -122,6 +122,11 @@ logger.debug('[MY_MODULE] Something happened:', value);
 - Story titles mirror folder: `Components/Core/Session/SessionCard`
 - Prefix all exports with component name: `SessionCardDefault`, `SessionCardDisabled` (avoids conflicts)
 
+### Style d'écriture
+- **Ne jamais utiliser de tiret cadratin (`—`, U+2014) ni de tiret demi-cadratin (`–`, U+2013)** dans les contenus textuels (docs, UI, commentaires, commit messages, PR descriptions, frontmatter, etc.).
+- Préférer une reformulation : parenthèses `(...)`, virgules, deux-points `:`, ou phrases séparées.
+- Cette règle s'applique au français, à l'anglais et à l'espagnol.
+
 ## Clarification avant implémentation
 
 Avant de générer un plan ou d'écrire du code pour une nouvelle feature,
