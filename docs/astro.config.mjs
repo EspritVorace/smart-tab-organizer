@@ -1,10 +1,12 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   integrations: [
     starlight({
       title: 'SmartTab Organizer',
+      customCss: ['./src/styles/global.css'],
       defaultLocale: 'root',
       locales: {
         root: { label: 'Français', lang: 'fr' },
@@ -95,4 +97,7 @@ export default defineConfig({
       ],
     }),
   ],
+  vite: {
+    plugins: [tailwindcss()],
+  },
 });

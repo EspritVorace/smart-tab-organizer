@@ -1,0 +1,132 @@
+/* ================================================================== */
+/* SmartTab Organizer docs — custom theme (Tailwind v4 + Starlight)  */
+/* Adapted from the EspritVorace blog (AstroPaper-based).            */
+/* ================================================================== */
+
+@layer base, starlight, theme, components, utilities;
+
+@import '@astrojs/starlight-tailwind';
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+/* ----- Fonts ----- */
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('/fonts/AtkinsonHyperlegible-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('/fonts/AtkinsonHyperlegible-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Luciole';
+  src: url('/fonts/Luciole-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Luciole';
+  src: url('/fonts/Luciole-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ----- Custom CSS variables (blog parity) ----- */
+:root,
+:root[data-theme='light'] {
+  --blog-background: #f7f9f7;
+  --blog-foreground: #1a2e1a;
+  --blog-accent: #1e7a35;
+  --blog-muted: #dceedd;
+  --blog-border: #b8d4bc;
+}
+
+:root[data-theme='dark'] {
+  --blog-background: #000000;
+  --blog-foreground: #dde8dd;
+  --blog-accent: #3aaa52;
+  --blog-muted: #0d1a0f;
+  --blog-border: #1a3320;
+}
+
+/* ----- Override Starlight theme variables ----- */
+:root {
+  /* Body font */
+  --sl-font: 'Luciole', Verdana, sans-serif;
+  /* Mono font stays Starlight's default */
+}
+
+:root,
+:root[data-theme='light'] {
+  --sl-color-bg: var(--blog-background);
+  --sl-color-bg-nav: var(--blog-background);
+  --sl-color-bg-sidebar: var(--blog-background);
+  --sl-color-bg-inline-code: var(--blog-muted);
+  --sl-color-text: var(--blog-foreground);
+  --sl-color-text-accent: var(--blog-accent);
+  --sl-color-accent: var(--blog-accent);
+  --sl-color-accent-low: var(--blog-muted);
+  --sl-color-accent-high: var(--blog-accent);
+  --sl-color-hairline: var(--blog-border);
+  --sl-color-hairline-light: var(--blog-border);
+  --sl-color-hairline-shade: var(--blog-border);
+}
+
+:root[data-theme='dark'] {
+  --sl-color-bg: var(--blog-background);
+  --sl-color-bg-nav: var(--blog-background);
+  --sl-color-bg-sidebar: var(--blog-background);
+  --sl-color-bg-inline-code: var(--blog-muted);
+  --sl-color-text: var(--blog-foreground);
+  --sl-color-text-accent: var(--blog-accent);
+  --sl-color-accent: var(--blog-accent);
+  --sl-color-accent-low: var(--blog-muted);
+  --sl-color-accent-high: var(--blog-accent);
+  --sl-color-hairline: var(--blog-border);
+  --sl-color-hairline-light: var(--blog-border);
+  --sl-color-hairline-shade: var(--blog-border);
+}
+
+/* ----- Headings: Atkinson Hyperlegible ----- */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Atkinson Hyperlegible', sans-serif;
+}
+
+/* ----- Gradient on main h1 ----- */
+h1 {
+  background: linear-gradient(to right, var(--blog-accent), var(--blog-foreground));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ----- Text selection matches blog ----- */
+::selection {
+  background: var(--blog-accent);
+  color: var(--blog-background);
+}
+
+/* ----- Focus-visible outline (dashed, accent) ----- */
+a:focus-visible,
+button:focus-visible,
+[role='button']:focus-visible {
+  outline: 2px dashed var(--blog-accent);
+  outline-offset: 1px;
+  text-decoration: none;
+}
