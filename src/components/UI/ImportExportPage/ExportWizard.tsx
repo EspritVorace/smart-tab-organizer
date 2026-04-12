@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Dialog, Flex, Button, Checkbox, Text, Separator, Badge, Box, ScrollArea } from '@radix-ui/themes';
+import { Dialog, Flex, Button, Checkbox, Text, Separator, Badge, Box, ScrollArea, TextArea } from '@radix-ui/themes';
 import { FileDown, ClipboardCopy } from 'lucide-react';
 import { ExportTheme } from '../../Form/themes';
 import { SplitButton } from '../SplitButton/SplitButton';
@@ -17,11 +17,13 @@ interface ExportWizardProps {
 
 export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [exportNote, setExportNote] = useState('');
 
   // Reset state when dialog opens
   useEffect(() => {
     if (open) {
       setSelectedIds(new Set(rules.map(r => r.id)));
+      setExportNote('');
     }
   }, [open, rules]);
 
@@ -48,11 +50,12 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
   const selectedRules = rules.filter(r => selectedIds.has(r.id));
 
   const getExportJson = useCallback(() => {
-    const exportData = {
+    const exportData: { note?: string; domainRules: DomainRuleSetting[] } = {
       domainRules: selectedRules
     };
+    if (exportNote.trim()) exportData.note = exportNote.trim();
     return JSON.stringify(exportData, null, 2);
-  }, [selectedRules]);
+  }, [selectedRules, exportNote]);
 
   const handleExportToFile = useCallback(async () => {
     const json = getExportJson();
@@ -125,6 +128,19 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
           <Separator size="4" mt="3" style={{ opacity: 0.3 }} />
 
           <Box mt="4">
+            <Box mb="4">
+              <Text as="label" size="2" weight="medium">
+                {getMessage('exportNoteLabel')}
+              </Text>
+              <TextArea
+                mt="1"
+                value={exportNote}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setExportNote(e.target.value)}
+                placeholder={getMessage('exportNotePlaceholder')}
+                rows={2}
+              />
+            </Box>
+
             <Flex gap="2" mb="3">
               <Button variant="soft" size="1" onClick={selectAll}>
                 {getMessage('selectAll')}

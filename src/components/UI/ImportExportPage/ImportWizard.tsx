@@ -3,7 +3,7 @@ import {
   Dialog, Flex, Button, Checkbox, Text, Separator, Badge, Box,
   ScrollArea, TextArea, SegmentedControl, Popover, Callout
 } from '@radix-ui/themes';
-import { Upload, FileUp, ClipboardPaste, CheckCircle, AlertTriangle, XCircle, Eye } from 'lucide-react';
+import { Upload, FileUp, ClipboardPaste, CheckCircle, AlertTriangle, XCircle, Eye, Info } from 'lucide-react';
 import { z } from 'zod';
 import { ImportTheme } from '../../Form/themes';
 import { getMessage } from '../../../utils/i18n';
@@ -40,6 +40,7 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
   const [classification, setClassification] = useState<RuleClassification | null>(null);
   const [newRuleSelectedIds, setNewRuleSelectedIds] = useState<Set<string>>(new Set());
   const [conflictMode, setConflictMode] = useState<ConflictMode>('overwrite');
+  const [importedNote, setImportedNote] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -55,6 +56,7 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
       setClassification(null);
       setNewRuleSelectedIds(new Set());
       setConflictMode('overwrite');
+      setImportedNote(null);
     }
   }, [open]);
 
@@ -62,6 +64,7 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
     if (!text.trim()) {
       setParsedRules(null);
       setParseError(null);
+      setImportedNote(null);
       return;
     }
 
@@ -69,9 +72,11 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
       const rawData = JSON.parse(text);
       const validated = importDataSchema.parse(rawData);
       setParsedRules(validated.domainRules as DomainRuleSetting[]);
+      setImportedNote(validated.note ?? null);
       setParseError(null);
     } catch (error) {
       setParsedRules(null);
+      setImportedNote(null);
       if (error instanceof SyntaxError) {
         setParseError(getMessage('invalidJson'));
       } else if (error instanceof z.ZodError) {
@@ -315,6 +320,17 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
           {/* Step 1: Selection */}
           {step === 1 && classification && (
             <Box mt="4">
+              {importedNote && (
+                <Callout.Root color="gray" variant="soft" mb="3">
+                  <Callout.Icon>
+                    <Info size={16} aria-hidden="true" />
+                  </Callout.Icon>
+                  <Callout.Text>
+                    <Text as="p" size="1" weight="medium" mb="1">{getMessage('importExportNote')}</Text>
+                    {importedNote}
+                  </Callout.Text>
+                </Callout.Root>
+              )}
               <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '50vh' }}>
                 <Flex direction="column" gap="3" pr="3">
                   {/* New rules group */}

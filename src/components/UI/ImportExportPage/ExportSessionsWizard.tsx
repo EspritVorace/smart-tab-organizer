@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Dialog, Flex, Button, Checkbox, Text, Separator, Badge, Box, ScrollArea } from '@radix-ui/themes';
+import { Dialog, Flex, Button, Checkbox, Text, Separator, Badge, Box, ScrollArea, TextArea } from '@radix-ui/themes';
 import { FileDown, ClipboardCopy } from 'lucide-react';
 import { SessionsTheme } from '../../Form/themes';
 import { SplitButton } from '../SplitButton/SplitButton';
@@ -22,6 +22,7 @@ interface ExportSessionsWizardProps {
 export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizardProps) {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [exportNote, setExportNote] = useState('');
 
   // Load sessions and reset state when dialog opens
   useEffect(() => {
@@ -30,6 +31,7 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
         setSessions(loaded);
         setSelectedIds(new Set(loaded.map(s => s.id)));
       });
+      setExportNote('');
     }
   }, [open]);
 
@@ -56,8 +58,10 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
   const selectedSessions = sessions.filter(s => selectedIds.has(s.id));
 
   const getExportJson = useCallback(() => {
-    return JSON.stringify(selectedSessions, null, 2);
-  }, [selectedSessions]);
+    const exportData: { note?: string; sessions: Session[] } = { sessions: selectedSessions };
+    if (exportNote.trim()) exportData.note = exportNote.trim();
+    return JSON.stringify(exportData, null, 2);
+  }, [selectedSessions, exportNote]);
 
   const handleExportToFile = useCallback(async () => {
     const json = getExportJson();
@@ -130,6 +134,19 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
           <Separator size="4" mt="3" style={{ opacity: 0.3 }} />
 
           <Box mt="4">
+            <Box mb="4">
+              <Text as="label" size="2" weight="medium">
+                {getMessage('exportNoteLabel')}
+              </Text>
+              <TextArea
+                mt="1"
+                value={exportNote}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setExportNote(e.target.value)}
+                placeholder={getMessage('exportNotePlaceholder')}
+                rows={2}
+              />
+            </Box>
+
             <Flex gap="2" mb="3">
               <Button variant="soft" size="1" onClick={selectAll}>
                 {getMessage('selectAll')}

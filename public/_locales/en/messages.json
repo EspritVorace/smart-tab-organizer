@@ -406,6 +406,9 @@
   "exportNotificationTitle": { "message": "Rules Exported" },
   "exportNotificationMessage": { "message": "Rules exported successfully" },
   "exportOptions": { "message": "Export options" },
+  "exportNoteLabel": { "message": "Note (optional)" },
+  "exportNotePlaceholder": { "message": "Add a description for this export..." },
+  "importExportNote": { "message": "Export note" },
 
   "organizeAllTabs": { "message": "Organize tabs" },
   "organizingTabs": { "message": "Organizing..." },

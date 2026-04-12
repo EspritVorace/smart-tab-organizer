@@ -3,12 +3,13 @@ import {
   Dialog, Flex, Button, Text, Separator, Box,
   ScrollArea, TextArea, SegmentedControl, Callout
 } from '@radix-ui/themes';
-import { Upload, FileUp, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
+import { Upload, FileUp, CheckCircle, AlertTriangle, XCircle, Info } from 'lucide-react';
 import { z } from 'zod';
 import { SessionsTheme } from '../../Form/themes';
 import { getMessage } from '../../../utils/i18n';
 import { showSuccessNotification } from '../../../utils/notifications';
 import { sessionsArraySchema } from '../../../schemas/session';
+import { importSessionsDataSchema } from '../../../schemas/importExport';
 import {
   classifyImportedSessions,
   type SessionClassification,
@@ -45,6 +46,7 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
   const [classification, setClassification] = useState<SessionClassification | null>(null);
   const [newSessionSelectedIds, setNewSessionSelectedIds] = useState<Set<string>>(new Set());
   const [conflictMode, setConflictMode] = useState<ConflictMode>('overwrite');
+  const [importedNote, setImportedNote] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -60,6 +62,7 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
       setClassification(null);
       setNewSessionSelectedIds(new Set());
       setConflictMode('overwrite');
+      setImportedNote(null);
     }
   }, [open]);
 
@@ -67,15 +70,26 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
     if (!text.trim()) {
       setParsedSessions(null);
       setParseError(null);
+      setImportedNote(null);
       return;
     }
     try {
       const rawData = JSON.parse(text);
-      const validated = sessionsArraySchema.parse(rawData);
-      setParsedSessions(validated as Session[]);
+      if (Array.isArray(rawData)) {
+        // Legacy flat array format (backward compat)
+        const validated = sessionsArraySchema.parse(rawData);
+        setParsedSessions(validated as Session[]);
+        setImportedNote(null);
+      } else {
+        // New wrapped format: { note?, sessions: [...] }
+        const validated = importSessionsDataSchema.parse(rawData);
+        setParsedSessions(validated.sessions as Session[]);
+        setImportedNote(validated.note ?? null);
+      }
       setParseError(null);
     } catch (error) {
       setParsedSessions(null);
+      setImportedNote(null);
       if (error instanceof SyntaxError) {
         setParseError(getMessage('invalidJson'));
       } else if (error instanceof z.ZodError) {
@@ -262,7 +276,7 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
                   <TextArea
                     value={jsonText}
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleTextChange(e.target.value)}
-                    placeholder='[{"id": "...", "name": "My Session", ...}]'
+                    placeholder='{"sessions": [{"id": "...", "name": "My Session", ...}]}'
                     rows={8}
                     style={{ fontFamily: 'monospace', fontSize: 12 }}
                   />
@@ -290,6 +304,17 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
           {/* Step 1: Classification + conflict resolution */}
           {step === 1 && classification && (
             <Box mt="4">
+              {importedNote && (
+                <Callout.Root color="gray" variant="soft" mb="3">
+                  <Callout.Icon>
+                    <Info size={16} aria-hidden="true" />
+                  </Callout.Icon>
+                  <Callout.Text>
+                    <Text as="p" size="1" weight="medium" mb="1">{getMessage('importExportNote')}</Text>
+                    {importedNote}
+                  </Callout.Text>
+                </Callout.Root>
+              )}
               <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '50vh' }}>
                 <Flex direction="column" gap="3" pr="3">
                   {classification.newSessions.length > 0 && (

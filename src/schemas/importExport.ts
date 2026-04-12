@@ -7,6 +7,7 @@ import {
   type DeduplicationMatchModeValue,
   type ColorValue
 } from './enums.js';
+import { sessionSchema } from './session.js';
 
 // Relaxed schema for import validation — no conditional refinements for regex fields,
 // since those are form-level validations. We just validate structure and types.
@@ -35,7 +36,15 @@ export const importDomainRuleSchema = z.object({
 export type ImportDomainRule = z.infer<typeof importDomainRuleSchema>;
 
 export const importDataSchema = z.object({
+  note: z.string().optional(),
   domainRules: z.array(importDomainRuleSchema)
 });
 
 export type ImportData = z.infer<typeof importDataSchema>;
+
+export const importSessionsDataSchema = z.object({
+  note: z.string().optional(),
+  sessions: z.array(sessionSchema),
+});
+
+export type ImportSessionsData = z.infer<typeof importSessionsDataSchema>;

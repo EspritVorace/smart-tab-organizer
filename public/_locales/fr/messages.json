@@ -407,6 +407,9 @@
   "exportNotificationTitle": { "message": "Règles exportées" },
   "exportNotificationMessage": { "message": "Règles exportées avec succès" },
   "exportOptions": { "message": "Options d'export" },
+  "exportNoteLabel": { "message": "Note (facultative)" },
+  "exportNotePlaceholder": { "message": "Ajoutez une description pour cet export..." },
+  "importExportNote": { "message": "Note de l'export" },
 
   "organizeAllTabs": { "message": "Organiser les onglets" },
   "organizingTabs": { "message": "Organisation en cours..." },
