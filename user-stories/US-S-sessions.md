@@ -101,3 +101,47 @@
 - [ ] Après la restauration, le dialogue se ferme automatiquement.
 - [ ] Une notification système apparaît avec le titre « Session restored » et un message indiquant le nombre d'onglets ouverts et de doublons ignorés (ex. « 5 tab(s) opened, 2 duplicate(s) skipped »).
 - [ ] Si des erreurs surviennent lors de la restauration, une notification d'erreur est affichée à la place.
+
+---
+
+## US-S016 : Capture de l'etat replie/deplie des groupes d'onglets
+
+**En tant qu'** utilisateur qui prend un snapshot de ses onglets,
+**je veux** que l'etat replie ou deplie de chaque groupe d'onglets Chrome soit enregistre automatiquement,
+**afin que** le snapshot reflète fidelement l'agencement de ma fenetre au moment de la sauvegarde.
+
+### Criteres d'acceptation
+
+- [ ] Lorsqu'un groupe Chrome est replie au moment du snapshot, la session enregistree contient `collapsed: true` pour ce groupe.
+- [ ] Lorsqu'un groupe Chrome est deplie au moment du snapshot, la session enregistree contient `collapsed: false` pour ce groupe.
+- [ ] Les sessions existantes sans champ `collapsed` continuent de fonctionner normalement (retro-compatibilite) : elles sont traitees comme si tous les groupes etaient deplies.
+
+---
+
+## US-S017 : Restauration de l'etat replie/deplie des groupes d'onglets
+
+**En tant qu'** utilisateur qui restaure une session,
+**je veux** que les groupes d'onglets soient recrees avec leur etat replie ou deplie d'origine,
+**afin de** retrouver exactement l'agencement que j'avais sauvegarde.
+
+### Criteres d'acceptation
+
+- [ ] Lors de la restauration dans une nouvelle fenetre, un groupe marque `collapsed: true` est cree replie dans Chrome.
+- [ ] Lors de la restauration dans la fenetre courante (creation d'un nouveau groupe), le groupe respecte l'etat `collapsed` sauvegarde.
+- [ ] Lors d'une fusion (merge) dans un groupe existant, l'etat replie/deplie du groupe existant n'est pas modifie.
+- [ ] Les sessions sans champ `collapsed` restaurent les groupes en etat deplie (comportement par defaut).
+
+---
+
+## US-S018 : Edition de l'etat replie/deplie dans l'editeur de session
+
+**En tant qu'** utilisateur qui edite une session,
+**je veux** que l'editeur affiche les groupes selon leur etat replie/deplie sauvegarde et que les modifications de cet etat soient persistees a la sauvegarde,
+**afin de** pouvoir ajuster l'agencement des groupes avant une restauration.
+
+### Criteres d'acceptation
+
+- [ ] A l'ouverture de l'editeur, un groupe avec `collapsed: true` est affiche replie (ses onglets enfants ne sont pas visibles).
+- [ ] A l'ouverture de l'editeur, un groupe sans champ `collapsed` ou avec `collapsed: false` est affiche deplie (ses onglets enfants sont visibles).
+- [ ] Replier ou deplier un groupe dans l'editeur est considere comme une modification (le bouton « Save » devient activable).
+- [ ] Apres sauvegarde, la valeur `collapsed` de chaque groupe est mise a jour dans le stockage.

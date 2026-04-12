@@ -77,6 +77,7 @@ export async function captureCurrentTabs(): Promise<CaptureResult> {
           title: group.title || '',
           color: normalizeColor(group.color),
           tabs: [],
+          collapsed: group.collapsed || false,
         },
         treeGroup: {
           id: treeGroupId,
