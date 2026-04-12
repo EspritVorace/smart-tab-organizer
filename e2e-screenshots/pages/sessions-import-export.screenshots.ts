@@ -51,6 +51,11 @@ test.describe('Sessions import/export screenshots', () => {
         const dialog = page.locator('[role="dialog"]');
         await dialog.waitFor({ state: 'visible' });
 
+        // Fill in the export note
+        const noteField = dialog.locator('textarea');
+        await noteField.fill('Full backup before OS reinstall');
+        await page.waitForTimeout(200);
+
         // Open the SplitButton dropdown (last button in the dialog footer)
         const chevron = dialog.getByRole('button').last();
         await chevron.click();

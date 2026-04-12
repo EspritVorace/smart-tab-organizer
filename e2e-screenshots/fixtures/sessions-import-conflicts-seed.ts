@@ -189,14 +189,24 @@ const identicalSession: Session = {
   categoryId: 'development',
 };
 
+/** Mirrors the new wrapped format produced by ExportSessionsWizard */
+interface SessionsExportData {
+  note?: string;
+  sessions: Session[];
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
- * Returns a valid sessions JSON string (matching sessionsArraySchema — a plain
- * array) that will produce one "new" session, one "conflicting" session, and
- * one "identical" session when imported on top of ALL_SESSIONS.
+ * Returns a valid sessions JSON string (new wrapped format: { note?, sessions })
+ * that will produce one "new" session, one "conflicting" session, and one
+ * "identical" session when imported on top of ALL_SESSIONS.
+ * The plain array format is still accepted for backward compat.
  */
 export function buildSessionConflictJson(): string {
-  const sessions: Session[] = [conflictingSession, newSession, identicalSession];
-  return JSON.stringify(sessions, null, 2);
+  const data: SessionsExportData = {
+    note: 'Full backup before OS reinstall',
+    sessions: [conflictingSession, newSession, identicalSession],
+  };
+  return JSON.stringify(data, null, 2);
 }

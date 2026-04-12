@@ -279,6 +279,11 @@ test.describe('Rules screenshots', () => {
         const dialog = page.locator('[role="dialog"]');
         await dialog.waitFor({ state: 'visible' });
 
+        // Fill in the export note
+        const noteField = dialog.locator('textarea');
+        await noteField.fill('Exported from work laptop, April 2026');
+        await page.waitForTimeout(200);
+
         const chevron = dialog.getByRole('button').last();
         await chevron.click();
         await page.waitForTimeout(400);
