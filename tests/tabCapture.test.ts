@@ -146,6 +146,42 @@ describe('captureCurrentTabs', () => {
     expect(result.ungroupedTabs).toHaveLength(1);
   });
 
+  it('captures collapsed: true when Chrome group is collapsed [US-S016]', async () => {
+    mockTabsQuery.mockResolvedValue([
+      { id: 10, index: 0, url: 'https://a.com', title: 'A', groupId: 5 },
+    ]);
+    mockTabGroupsGet.mockResolvedValue({ title: 'Work', color: 'blue', collapsed: true });
+
+    const result = await captureCurrentTabs();
+
+    expect(result.groups).toHaveLength(1);
+    expect(result.groups[0].collapsed).toBe(true);
+  });
+
+  it('captures collapsed: false when Chrome group is expanded [US-S016]', async () => {
+    mockTabsQuery.mockResolvedValue([
+      { id: 10, index: 0, url: 'https://a.com', title: 'A', groupId: 5 },
+    ]);
+    mockTabGroupsGet.mockResolvedValue({ title: 'Work', color: 'blue', collapsed: false });
+
+    const result = await captureCurrentTabs();
+
+    expect(result.groups).toHaveLength(1);
+    expect(result.groups[0].collapsed).toBe(false);
+  });
+
+  it('defaults collapsed to false when Chrome group has no collapsed property [US-S016]', async () => {
+    mockTabsQuery.mockResolvedValue([
+      { id: 10, index: 0, url: 'https://a.com', title: 'A', groupId: 5 },
+    ]);
+    mockTabGroupsGet.mockResolvedValue({ title: 'Work', color: 'blue' });
+
+    const result = await captureCurrentTabs();
+
+    expect(result.groups).toHaveLength(1);
+    expect(result.groups[0].collapsed).toBe(false);
+  });
+
   it('excludes Firefox extension Options page from captured tabs', async () => {
     // Regression: moz-extension:// URLs were previously kept, so the Options
     // page itself showed up in the snapshot wizard and got auto-selected.

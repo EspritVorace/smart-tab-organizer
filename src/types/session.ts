@@ -16,6 +16,8 @@ export interface SavedTabGroup {
   title: string;
   color: ChromeGroupColor;
   tabs: SavedTab[];
+  /** Whether the group was collapsed in Chrome when captured */
+  collapsed?: boolean;
 }
 
 /** A complete saved session snapshot */

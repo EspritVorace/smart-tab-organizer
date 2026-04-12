@@ -13,6 +13,7 @@ export interface TestSavedTabGroup {
   title: string;
   color: string;
   tabs: TestSavedTab[];
+  collapsed?: boolean;
 }
 
 export interface TestSession {

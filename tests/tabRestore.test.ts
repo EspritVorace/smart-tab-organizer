@@ -43,8 +43,8 @@ function makeTab(url: string, title = 'Tab'): SavedTab {
   return { id: `saved-${url}`, title, url };
 }
 
-function makeGroup(title: string, tabs: SavedTab[], color: 'blue' | 'red' = 'blue'): SavedTabGroup {
-  return { id: `group-${title}`, title, color, tabs };
+function makeGroup(title: string, tabs: SavedTab[], color: 'blue' | 'red' = 'blue', collapsed?: boolean): SavedTabGroup {
+  return { id: `group-${title}`, title, color, tabs, ...(collapsed !== undefined ? { collapsed } : {}) };
 }
 
 beforeEach(() => {
@@ -96,7 +96,7 @@ describe('restoreTabs — new window', () => {
     const groupCall = mockTabsGroup.mock.calls[0][0];
     expect(groupCall.tabIds).toHaveLength(2);
     expect(groupCall.tabIds).toContain(1); // reused firstTabId
-    expect(mockTabGroupsUpdate).toHaveBeenCalledWith(100, { title: 'Work', color: 'blue' });
+    expect(mockTabGroupsUpdate).toHaveBeenCalledWith(100, { title: 'Work', color: 'blue', collapsed: false });
     expect(result.groupsCreated).toBe(1);
     expect(result.tabsCreated).toBe(2);
   });
@@ -120,6 +120,38 @@ describe('restoreTabs — new window', () => {
     expect(result.tabsCreated).toBe(2); // seeded a.com + successful b.com
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0]).toContain('https://c.com');
+  });
+
+  it('passes collapsed: true to tabGroups.update when group has collapsed: true [US-S017]', async () => {
+    mockWindowsCreate.mockResolvedValue({ id: 42, tabs: [{ id: 1 }] });
+
+    await restoreTabs({
+      tabs: [],
+      groups: [makeGroup('Work', [makeTab('https://a.com')], 'blue', true)],
+      target: 'new',
+    });
+
+    expect(mockTabGroupsUpdate).toHaveBeenCalledWith(100, {
+      title: 'Work',
+      color: 'blue',
+      collapsed: true,
+    });
+  });
+
+  it('passes collapsed: false to tabGroups.update when group has no collapsed field [US-S017]', async () => {
+    mockWindowsCreate.mockResolvedValue({ id: 42, tabs: [{ id: 1 }] });
+
+    await restoreTabs({
+      tabs: [],
+      groups: [makeGroup('Work', [makeTab('https://a.com')], 'blue')],
+      target: 'new',
+    });
+
+    expect(mockTabGroupsUpdate).toHaveBeenCalledWith(100, {
+      title: 'Work',
+      color: 'blue',
+      collapsed: false,
+    });
   });
 
   it('returns an error when windows.create does not yield an id', async () => {
@@ -200,9 +232,26 @@ describe('restoreTabs — current window', () => {
     expect(mockTabGroupsUpdate).toHaveBeenCalledWith(100, {
       title: 'Research',
       color: 'blue',
+      collapsed: false,
     });
     expect(result.groupsCreated).toBe(1);
     expect(result.tabsCreated).toBe(2);
+  });
+
+  it('passes collapsed state to tabGroups.update in current window [US-S017]', async () => {
+    const group = makeGroup('Research', [makeTab('https://r1.com')], 'red', true);
+
+    await restoreTabs({
+      tabs: [],
+      groups: [group],
+      target: 'current',
+    });
+
+    expect(mockTabGroupsUpdate).toHaveBeenCalledWith(100, {
+      title: 'Research',
+      color: 'red',
+      collapsed: true,
+    });
   });
 
   it('skips a group entirely when groupAction is "skip"', async () => {

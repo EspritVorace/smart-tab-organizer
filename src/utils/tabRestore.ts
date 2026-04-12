@@ -97,7 +97,7 @@ async function restoreInNewWindow(
     if (tabIds.length > 0) {
       try {
         const groupId = await (browser.tabs as any).group({ tabIds, createProperties: { windowId } });
-        await (browser.tabGroups as any).update(groupId, { title: group.title, color: group.color });
+        await (browser.tabGroups as any).update(groupId, { title: group.title, color: group.color, collapsed: group.collapsed ?? false });
         result.groupsCreated++;
       } catch (e) {
         result.errors.push(`Failed to create group: ${group.title}`);
@@ -221,6 +221,7 @@ async function restoreInCurrentWindow(
         await (browser.tabGroups as any).update(groupId, {
           title: group.title,
           color: group.color,
+          collapsed: group.collapsed ?? false,
         });
         result.groupsCreated++;
       } catch (e) {

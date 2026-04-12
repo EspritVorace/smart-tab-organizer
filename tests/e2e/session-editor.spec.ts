@@ -442,3 +442,85 @@ test.describe('[US-E02] Delete group', () => {
     await page.close();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Collapsed/expanded group state (US-S018)
+// ---------------------------------------------------------------------------
+test.describe('[US-S018] Collapsed group state in editor', () => {
+  test('a group with collapsed: true is displayed collapsed (tabs not visible)', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const session = createTestSession({ name: 'Collapsed Test' });
+    session.groups[0].collapsed = true;
+    await seedSessions(extensionContext, [session]);
+
+    const page = await extensionContext.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: /edit/i }).click();
+
+    const dialog = page.getByRole('dialog');
+    // Group header should be visible
+    await expect(dialog.getByText('Work', { exact: true })).toBeVisible();
+    // Tabs inside the collapsed group should NOT be visible
+    await expect(dialog.getByText('Example', { exact: true })).not.toBeVisible();
+    await expect(dialog.getByText('Google', { exact: true })).not.toBeVisible();
+    await page.close();
+  });
+
+  test('a group without collapsed field is displayed expanded (tabs visible)', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const session = createTestSession({ name: 'Expanded Test' });
+    // No collapsed field set (default behavior)
+    await seedSessions(extensionContext, [session]);
+
+    const page = await extensionContext.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: /edit/i }).click();
+
+    const dialog = page.getByRole('dialog');
+    await expect(dialog.getByText('Work', { exact: true })).toBeVisible();
+    // Tabs inside the expanded group should be visible
+    await expect(dialog.getByText('Example', { exact: true })).toBeVisible();
+    await page.close();
+  });
+
+  test('toggling collapse then saving persists collapsed: true in storage', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const session = createTestSession({ name: 'Toggle Test' });
+    await seedSessions(extensionContext, [session]);
+
+    const page = await extensionContext.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: /edit/i }).click();
+
+    const dialog = page.getByRole('dialog');
+    // Tabs should be visible (group starts expanded)
+    await expect(dialog.getByText('Example', { exact: true })).toBeVisible();
+
+    // Click the expand/collapse toggle on the group row
+    await dialog.getByRole('button', { name: /collapse group/i }).click();
+
+    // Tabs should now be hidden
+    await expect(dialog.getByText('Example', { exact: true })).not.toBeVisible();
+
+    // Save
+    await page.getByTestId('dialog-session-edit-btn-save').click();
+    await expect(dialog).not.toBeVisible();
+
+    // Verify storage
+    const sessions = await getSessionsFromStorage(extensionContext);
+    expect(sessions[0].groups[0].collapsed).toBe(true);
+    await page.close();
+  });
+});

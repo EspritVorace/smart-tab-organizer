@@ -5,12 +5,12 @@ vi.mock('../../src/utils/i18n.js', () => ({
   getMessage: vi.fn((key: string) => key),
 }));
 
-const makeSession = (id: string, name: string) => ({
+const makeSession = (id: string, name: string, groups: Record<string, unknown>[] = []) => ({
   id,
   name,
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-01T00:00:00.000Z',
-  groups: [],
+  groups,
   ungroupedTabs: [],
   isPinned: false,
   categoryId: null,
@@ -73,5 +73,33 @@ describe('createSessionSchemaWithUniqueness', () => {
     const schema = createSessionSchemaWithUniqueness(existing, 'a');
     const result = schema.safeParse(makeSession('a', 'Personal'));
     expect(result.success).toBe(false);
+  });
+});
+
+describe('savedTabGroupSchema — collapsed field [US-S016]', () => {
+  const makeGroup = (collapsed?: boolean) => ({
+    id: 'group-1',
+    title: 'Work',
+    color: 'blue',
+    tabs: [{ id: 'tab-1', title: 'Example', url: 'https://example.com' }],
+    ...(collapsed !== undefined ? { collapsed } : {}),
+  });
+
+  it('accepte un groupe avec collapsed: true', () => {
+    const schema = createSessionSchemaWithUniqueness([]);
+    const result = schema.safeParse(makeSession('s1', 'Session', [makeGroup(true)]));
+    expect(result.success).toBe(true);
+  });
+
+  it('accepte un groupe avec collapsed: false', () => {
+    const schema = createSessionSchemaWithUniqueness([]);
+    const result = schema.safeParse(makeSession('s1', 'Session', [makeGroup(false)]));
+    expect(result.success).toBe(true);
+  });
+
+  it('accepte un groupe sans champ collapsed (retro-compatibilite)', () => {
+    const schema = createSessionSchemaWithUniqueness([]);
+    const result = schema.safeParse(makeSession('s1', 'Session', [makeGroup()]));
+    expect(result.success).toBe(true);
   });
 });

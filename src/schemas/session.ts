@@ -19,6 +19,7 @@ const savedTabGroupSchema = z.object({
   title: z.string(),
   color: chromeGroupColorSchema,
   tabs: z.array(savedTabSchema),
+  collapsed: z.boolean().optional(),
 });
 
 export const sessionSchema = z.object({

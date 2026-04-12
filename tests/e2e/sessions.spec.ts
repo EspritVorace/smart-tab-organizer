@@ -524,3 +524,27 @@ test.describe('[US-S05] Restore with conflict resolution', () => {
     await page.close();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Restore with collapsed groups (US-S017)
+// ---------------------------------------------------------------------------
+test.describe('[US-S017] Restore with collapsed group state', () => {
+  test('restoring a session with a collapsed group succeeds without error', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const session = createTestSession({ name: 'Collapsed Group Session' });
+    session.groups[0].collapsed = true;
+    await seedSessions(extensionContext, [session]);
+
+    const page = await extensionContext.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: /current window/i }).click();
+
+    // Restore should show success message
+    await expect(page.getByText(/tab.*opened/i)).toBeVisible({ timeout: 5000 });
+    await page.close();
+  });
+});
