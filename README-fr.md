@@ -40,7 +40,7 @@ Clic molette ou clic droit → « Ouvrir dans un nouvel onglet » sur un site co
 - Préréglages intégrés pour Jira, GitLab, GitHub, Trello et plus encore
 
 <p align="center">
-  <img src="doc/readme/gifs/regroup.gif" alt="Vidéo de regroupement automatique">
+  <img src="assets/readme/gifs/regroup.gif" alt="Vidéo de regroupement automatique">
 </p>
 
 ### 🔁 Déduplication
@@ -49,7 +49,7 @@ Ouvrir une page déjà ouverte remet l'onglet existant au premier plan et le rec
 La sensibilité de correspondance est configurable par règle : URL exacte, nom d'hôte + chemin, nom d'hôte ou « includes ».
 
 <p align="center">
-  <img src="doc/readme/gifs/dedup.gif" alt="Vidéo de déduplication">
+  <img src="assets/readme/gifs/dedup.gif" alt="Vidéo de déduplication">
 </p>
 
 
@@ -61,6 +61,8 @@ Sauvegardez un snapshot nommé de vos onglets et groupes ouverts, et restaurez-l
 - **Assistant de restauration** — choisissez les onglets à récupérer, la fenêtre cible, et résolvez les conflits de groupes avant d'appliquer
 - **Recherche profonde** — retrouvez onglets et groupes par nom dans toutes vos sessions sauvegardées
 - **Éditeur de session** — réorganisez, renommez et supprimez onglets et groupes sans avoir à restaurer
+- **Notes de session** — annotez vos sessions avec du texte libre
+- **Drag-and-drop** — réordonnez vos sessions par glisser-déposer
 
 <p align="center">
   <img src="doc/readme/fr-dark-sessions-list.png" alt="Liste des sessions">
@@ -114,6 +116,7 @@ Pour le développement avec rechargement automatique : `pnpm dev` (Chrome) ou `p
 | Interface | [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
 | Bibliothèque de composants | [Radix UI Themes](https://www.radix-ui.com/themes) + icônes [Lucide](https://lucide.dev/) |
 | Formulaires & validation | [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) |
+| Drag-and-drop | [@dnd-kit](https://dndkit.com/) |
 | Thèmes | [next-themes](https://github.com/pacocoursey/next-themes) |
 | Tests unitaires | [Vitest](https://vitest.dev/) |
 | Tests E2E | [Playwright](https://playwright.dev/) |

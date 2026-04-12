@@ -40,7 +40,7 @@ Clic central o clic derecho → «Abrir en una pestaña nueva» en un sitio conf
 - Preajustes integrados para Jira, GitLab, GitHub, Trello y más
 
 <p align="center">
-  <img src="doc/readme/gifs/regroup.gif" alt="Vídeo de agrupación automática">
+  <img src="assets/readme/gifs/regroup.gif" alt="Vídeo de agrupación automática">
 </p>
 
 ### 🔁 Deduplicación
@@ -49,7 +49,7 @@ Abrir una página que ya está abierta reactiva y recarga la pestaña existente 
 La sensibilidad de coincidencia es configurable por regla: URL exacta, nombre de host + ruta, nombre de host o «includes».
 
 <p align="center">
-  <img src="doc/readme/gifs/dedup.gif" alt="Vídeo de deduplicación">
+  <img src="assets/readme/gifs/dedup.gif" alt="Vídeo de deduplicación">
 </p>
 
 
@@ -61,6 +61,8 @@ Guarda un snapshot con nombre de tus pestañas y grupos abiertos, y restáuralos
 - **Asistente de restauración** — elige qué pestañas recuperar, la ventana de destino y resuelve conflictos de grupos antes de aplicar
 - **Búsqueda profunda** — encuentra pestañas y grupos por nombre en todas tus sesiones guardadas
 - **Editor de sesión** — reorganiza, renombra y elimina pestañas y grupos sin necesidad de restaurar
+- **Notas de sesión** — anota tus sesiones con texto libre
+- **Drag-and-drop** — reordena tus sesiones arrastrando
 
 <p align="center">
   <img src="doc/readme/es-dark-sessions-list.png" alt="Lista de sesiones">
@@ -114,6 +116,7 @@ Para desarrollo con recarga automática: `pnpm dev` (Chrome) o `pnpm dev:firefox
 | Interfaz | [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
 | Biblioteca de componentes | [Radix UI Themes](https://www.radix-ui.com/themes) + iconos [Lucide](https://lucide.dev/) |
 | Formularios & validación | [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) |
+| Drag-and-drop | [@dnd-kit](https://dndkit.com/) |
 | Temas | [next-themes](https://github.com/pacocoursey/next-themes) |
 | Tests unitarios | [Vitest](https://vitest.dev/) |
 | Tests E2E | [Playwright](https://playwright.dev/) |

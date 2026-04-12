@@ -145,3 +145,30 @@
 - [ ] A l'ouverture de l'editeur, un groupe sans champ `collapsed` ou avec `collapsed: false` est affiche deplie (ses onglets enfants sont visibles).
 - [ ] Replier ou deplier un groupe dans l'editeur est considere comme une modification (le bouton « Save » devient activable).
 - [ ] Apres sauvegarde, la valeur `collapsed` de chaque groupe est mise a jour dans le stockage.
+
+---
+
+## US-S019 : Carte de session redessinee (HoverCard et rename inline)
+
+**En tant qu'** utilisateur sur la page Sessions,
+**je veux** consulter les metadonnees d'une session (dates de creation et de modification, note) et renommer une session directement sur sa carte,
+**afin de** acceder aux informations utiles sans ouvrir l'editeur et de renommer rapidement une session.
+
+### Criteres d'acceptation
+
+**HoverCard metadonnees :**
+- [ ] Le nom de la session dans la carte est un declencheur de HoverCard (Radix `HoverCard.Root`).
+- [ ] Au survol, le HoverCard affiche : nom de la session, date de creation, date de derniere modification.
+- [ ] Si la session a une note, celle-ci est egalement affichee dans le HoverCard.
+- [ ] Le HoverCard ne bloque pas les interactions avec la carte (il se ferme au deplacement du curseur).
+
+**Rename inline :**
+- [ ] Un bouton crayon (icone `Pencil`) est affiche entre le nom de la session et le badge de categorie.
+- [ ] Au clic sur le crayon, le nom de la session devient un champ de texte editable.
+- [ ] Le champ est confirme par la touche Entree ou par un bouton de validation (icone `Check`).
+- [ ] Le champ est annule par la touche Echap ou par un bouton d'annulation (icone `X`).
+- [ ] Un nom duplique (insensible a la casse) affiche un message d'erreur sous le champ.
+- [ ] Un nom vide n'est pas accepte.
+
+**Menu d'actions consolide :**
+- [ ] Le menu d'actions (`...`) regroupe toutes les actions : restauration (fenetre courante, nouvelle fenetre, personnalisee), edition, deplacer en premier/dernier (cf. US-S-DND), epingler/desepingler, supprimer.
