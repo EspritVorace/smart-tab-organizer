@@ -145,6 +145,14 @@ export function countSessionTabs(session: Pick<Session, 'ungroupedTabs' | 'group
   );
 }
 
+/** Split a list of items into pinned and unpinned groups. */
+export function splitByPinned<T extends { isPinned: boolean }>(items: T[]): { pinned: T[]; unpinned: T[] } {
+  return {
+    pinned: items.filter(i => i.isPinned),
+    unpinned: items.filter(i => !i.isPinned),
+  };
+}
+
 /** Create a Session object from TabTreeData and selected tab IDs */
 export function createSessionFromSelection(
   ungroupedTabs: SavedTab[],

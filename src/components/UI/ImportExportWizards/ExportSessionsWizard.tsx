@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Dialog, Flex, Button, Checkbox, Text, Separator, Badge, Box, ScrollArea, TextArea } from '@radix-ui/themes';
-import { FileDown, ClipboardCopy } from 'lucide-react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { Dialog, Flex, Button, Checkbox, Text, Separator, Box, ScrollArea, TextArea } from '@radix-ui/themes';
+import { FileDown, ClipboardCopy, Pin, Archive } from 'lucide-react';
 import { SessionsTheme } from '../../Form/themes';
 import { SplitButton } from '../SplitButton/SplitButton';
 import { getMessage } from '../../../utils/i18n';
@@ -11,6 +11,7 @@ import {
   getSessionGroupLabel,
   getSessionTabLabel,
   countSessionTabs,
+  splitByPinned,
 } from '../../../utils/sessionUtils';
 import type { Session } from '../../../types/session';
 
@@ -54,6 +55,32 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
   const deselectAll = useCallback(() => {
     setSelectedIds(new Set());
   }, []);
+
+  const { pinned: pinnedSessions, unpinned: unpinnedSessions } = useMemo(
+    () => splitByPinned(sessions),
+    [sessions],
+  );
+
+  const toggleGroupSelection = useCallback((group: Session[]) => {
+    setSelectedIds(prev => {
+      const allSelected = group.every(s => prev.has(s.id));
+      const next = new Set(prev);
+      if (allSelected) {
+        group.forEach(s => next.delete(s.id));
+      } else {
+        group.forEach(s => next.add(s.id));
+      }
+      return next;
+    });
+  }, []);
+
+  const getGroupCheckedState = useCallback((group: Session[]): boolean | 'indeterminate' => {
+    if (group.length === 0) return false;
+    const selectedCount = group.filter(s => selectedIds.has(s.id)).length;
+    if (selectedCount === 0) return false;
+    if (selectedCount === group.length) return true;
+    return 'indeterminate';
+  }, [selectedIds]);
 
   const selectedSessions = sessions.filter(s => selectedIds.has(s.id));
 
@@ -158,39 +185,61 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
 
             <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '40vh' }}>
               <Flex direction="column" gap="2" pr="3">
-                {sessions.map(session => {
-                  const tabCount = countSessionTabs(session);
-                  const groupCount = session.groups.length;
-                  return (
-                    <Flex
-                      key={session.id}
-                      align="center"
-                      gap="3"
-                      p="2"
-                      style={{
-                        borderRadius: 'var(--radius-2)',
-                        backgroundColor: 'var(--gray-a2)',
-                      }}
-                    >
-                      <Checkbox
-                        checked={selectedIds.has(session.id)}
-                        onCheckedChange={() => toggleSession(session.id)}
-                        aria-label={session.name}
-                      />
-                      <Flex direction="column" gap="1" style={{ flex: 1 }}>
-                        <Text size="2" weight="medium">{session.name}</Text>
-                        <Text size="1" color="gray">
-                          {formatSessionDateShort(session.createdAt)} · {getSessionGroupLabel(groupCount)} · {getSessionTabLabel(tabCount)}
-                        </Text>
+                {pinnedSessions.length > 0 && (
+                  <Box>
+                    <Flex align="center" justify="between" mb="2">
+                      <Flex align="center" gap="1">
+                        <Pin size={14} aria-hidden="true" style={{ color: 'var(--accent-9)' }} />
+                        <Text size="2" weight="bold">{getMessage('pinnedSessionsSection')}</Text>
                       </Flex>
-                      {session.isPinned && (
-                        <Badge color="indigo" variant="soft" size="1">
-                          {getMessage('pinnedBadge')}
-                        </Badge>
-                      )}
+                      <Checkbox
+                        checked={getGroupCheckedState(pinnedSessions)}
+                        onCheckedChange={() => toggleGroupSelection(pinnedSessions)}
+                        aria-label={getMessage('pinnedSessionsSection')}
+                      />
                     </Flex>
-                  );
-                })}
+                    <Flex direction="column" gap="2">
+                      {pinnedSessions.map(session => (
+                        <ExportSessionRow
+                          key={session.id}
+                          session={session}
+                          checked={selectedIds.has(session.id)}
+                          onToggle={() => toggleSession(session.id)}
+                        />
+                      ))}
+                    </Flex>
+                  </Box>
+                )}
+
+                {pinnedSessions.length > 0 && unpinnedSessions.length > 0 && (
+                  <Separator size="4" my="1" />
+                )}
+
+                {unpinnedSessions.length > 0 && (
+                  <Box>
+                    <Flex align="center" justify="between" mb="2">
+                      <Flex align="center" gap="1">
+                        <Archive size={14} aria-hidden="true" style={{ color: 'var(--accent-9)' }} />
+                        <Text size="2" weight="bold">{getMessage('sessionsSection')}</Text>
+                      </Flex>
+                      <Checkbox
+                        checked={getGroupCheckedState(unpinnedSessions)}
+                        onCheckedChange={() => toggleGroupSelection(unpinnedSessions)}
+                        aria-label={getMessage('sessionsSection')}
+                      />
+                    </Flex>
+                    <Flex direction="column" gap="2">
+                      {unpinnedSessions.map(session => (
+                        <ExportSessionRow
+                          key={session.id}
+                          session={session}
+                          checked={selectedIds.has(session.id)}
+                          onToggle={() => toggleSession(session.id)}
+                        />
+                      ))}
+                    </Flex>
+                  </Box>
+                )}
               </Flex>
             </ScrollArea>
 
@@ -229,5 +278,33 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
         </Dialog.Content>
       </Dialog.Root>
     </SessionsTheme>
+  );
+}
+
+function ExportSessionRow({ session, checked, onToggle }: { session: Session; checked: boolean; onToggle: () => void }) {
+  const tabCount = countSessionTabs(session);
+  const groupCount = session.groups.length;
+  return (
+    <Flex
+      align="center"
+      gap="3"
+      p="2"
+      style={{
+        borderRadius: 'var(--radius-2)',
+        backgroundColor: 'var(--gray-a2)',
+      }}
+    >
+      <Checkbox
+        checked={checked}
+        onCheckedChange={onToggle}
+        aria-label={session.name}
+      />
+      <Flex direction="column" gap="1" style={{ flex: 1 }}>
+        <Text size="2" weight="medium">{session.name}</Text>
+        <Text size="1" color="gray">
+          {formatSessionDateShort(session.createdAt)} · {getSessionGroupLabel(groupCount)} · {getSessionTabLabel(tabCount)}
+        </Text>
+      </Flex>
+    </Flex>
   );
 }

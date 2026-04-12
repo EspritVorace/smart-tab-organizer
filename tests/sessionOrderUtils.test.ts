@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   moveSessionToFirst,
   moveSessionToLast,
+  moveSessionToFirstInGroup,
+  moveSessionToLastInGroup,
 } from '../src/utils/sessionOrderUtils';
 import type { Session } from '../src/types/session';
 
@@ -92,6 +94,68 @@ describe('moveSessionToLast', () => {
   it('handles an empty list as a no-op', () => {
     const sessions: Session[] = [];
     const result = moveSessionToLast(sessions, 'a');
+    expect(result).toBe(sessions);
+  });
+});
+
+const pinA = { ...makeSession('pA'), isPinned: true };
+const pinB = { ...makeSession('pB'), isPinned: true };
+const pinC = { ...makeSession('pC'), isPinned: true };
+
+describe('moveSessionToFirstInGroup', () => {
+  it('moves a pinned session to first within pinned group, unpinned stays after', () => {
+    const result = moveSessionToFirstInGroup([pinA, pinB, pinC, a, b], 'pC');
+    expect(result.map(s => s.id)).toEqual(['pC', 'pA', 'pB', 'a', 'b']);
+  });
+
+  it('moves an unpinned session to first within unpinned group, pinned stays before', () => {
+    const result = moveSessionToFirstInGroup([pinA, pinB, a, b, c], 'c');
+    expect(result.map(s => s.id)).toEqual(['pA', 'pB', 'c', 'a', 'b']);
+  });
+
+  it('returns same array when session is already first in its group', () => {
+    const sessions = [pinA, pinB, a, b];
+    const result = moveSessionToFirstInGroup(sessions, 'pA');
+    expect(result.map(s => s.id)).toEqual(['pA', 'pB', 'a', 'b']);
+  });
+
+  it('returns same array when session is not found', () => {
+    const sessions = [pinA, a, b];
+    const result = moveSessionToFirstInGroup(sessions, 'unknown');
+    expect(result).toBe(sessions);
+  });
+
+  it('works with only pinned sessions', () => {
+    const result = moveSessionToFirstInGroup([pinA, pinB, pinC], 'pC');
+    expect(result.map(s => s.id)).toEqual(['pC', 'pA', 'pB']);
+  });
+
+  it('works with only unpinned sessions', () => {
+    const result = moveSessionToFirstInGroup([a, b, c], 'c');
+    expect(result.map(s => s.id)).toEqual(['c', 'a', 'b']);
+  });
+});
+
+describe('moveSessionToLastInGroup', () => {
+  it('moves a pinned session to last within pinned group, unpinned stays after', () => {
+    const result = moveSessionToLastInGroup([pinA, pinB, pinC, a, b], 'pA');
+    expect(result.map(s => s.id)).toEqual(['pB', 'pC', 'pA', 'a', 'b']);
+  });
+
+  it('moves an unpinned session to last within unpinned group, pinned stays before', () => {
+    const result = moveSessionToLastInGroup([pinA, pinB, a, b, c], 'a');
+    expect(result.map(s => s.id)).toEqual(['pA', 'pB', 'b', 'c', 'a']);
+  });
+
+  it('returns same array when session is already last in its group', () => {
+    const sessions = [pinA, pinB, a, b];
+    const result = moveSessionToLastInGroup(sessions, 'pB');
+    expect(result.map(s => s.id)).toEqual(['pA', 'pB', 'a', 'b']);
+  });
+
+  it('returns same array when session is not found', () => {
+    const sessions = [pinA, a, b];
+    const result = moveSessionToLastInGroup(sessions, 'unknown');
     expect(result).toBe(sessions);
   });
 });
