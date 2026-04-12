@@ -49,6 +49,7 @@ interface ImportDomainRule {
 
 /** Mirrors src/schemas/importExport.ts → ImportData */
 interface ImportData {
+  note?: string;
   domainRules: ImportDomainRule[];
 }
 
@@ -135,6 +136,7 @@ const identicalRule: ImportDomainRule = {
  */
 export function buildConflictJson(): string {
   const importData: ImportData = {
+    note: 'Exported from work laptop, April 2026',
     domainRules: [conflictingRule, newRule, identicalRule],
   };
   return JSON.stringify(importData, null, 2);
