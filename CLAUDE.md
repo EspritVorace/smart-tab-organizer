@@ -13,13 +13,16 @@ pnpm compile              # TypeScript check only
 
 # Tests
 pnpm test                     # Vitest unit tests
-pnpm test:watch / test:ui # Watch / Vitest UI
-pnpm test:e2e             # build + Playwright E2E
-pnpm test:e2e:ui          # build + Playwright with UI
-pnpm test:e2e:headed      # build + Playwright headed
+pnpm test:watch / test:ui     # Watch / Vitest UI
+pnpm test:coverage            # Vitest + coverage report
+pnpm test:e2e                 # build + Playwright E2E
+pnpm test:e2e:ui              # build + Playwright with UI
+pnpm test:e2e:headed          # build + Playwright headed
 
 # Docs
-pnpm storybook            # port 6006
+pnpm storybook                            # Storybook (port 6006)
+pnpm docs:dev / docs:build / docs:preview # Astro Starlight (port 4321)
+pnpm screenshots                          # Deterministic multi-locale/theme screenshots
 ```
 
 ## Architecture
@@ -32,7 +35,7 @@ pnpm storybook            # port 6006
 - `src/entrypoints/popup.html` / `options.html`
 
 ### Background Modules (`src/background/`)
-`index.ts` · `grouping.ts` · `deduplication.ts` · `event-handlers.ts` · `messaging.ts` · `settings.ts` · `profileSync.ts` (auto-sync alarm + draft persistence)
+`index.ts` · `grouping.ts` · `deduplication.ts` · `event-handlers.ts` · `messaging.ts` · `settings.ts`
 
 ### Storage
 | Backend | Contents |
@@ -41,12 +44,12 @@ pnpm storybook            # port 6006
 | `browser.storage.local` | Sessions, UI prefs (e.g. `popupStatsCollapsed`), help prefs |
 | `browser.storage.session` | Profile–window map, sync drafts, editing guard |
 
-`useSyncedSettings` hook uses refs to prevent race conditions.
+`useSyncedSettings` hook uses refs to prevent race conditions. `useSyncedState` unifies synchronized storage access for settings and statistics.
 
 ### Schemas & Types
-- `src/schemas/` — Zod schemas: `domainRule`, `enums`, `importExport`, `session`
+- `src/schemas/` — Zod schemas: `common`, `domainRule`, `enums`, `importExport`, `session`, `index`
 - `src/schemas/importExport.ts` — relaxed schema (no form-level refinements) for import validation
-- `src/types/` — TS types extending Zod-inferred types (e.g. `DomainRuleSetting` adds `enabled`, `badge`)
+- `src/types/` — TS types extending Zod-inferred types (e.g. `DomainRuleSetting` adds `enabled`, `badge`), plus `messages.ts` (inter-component message types)
 
 ### Static Data
 - `public/data/presets.json` — regex presets (read-only, loaded at runtime)
@@ -58,31 +61,36 @@ pnpm storybook            # port 6006
 src/
   background/      # Background service worker modules
   components/
-    Core/          # DomainRule/ · RegexPreset/ · Session/ · Statistics/ · TabTree/
-    UI/            # Header/ · PopupHeader/ · PopupToolbar/ · PopupProfilesList/
-                   # PageLayout/ · Sidebar/ · ImportExportPage/ · SessionWizards/
-                   # SettingsPage/ · SettingsToggles/ · WizardStepper/ · SplitButton/
-                   # ConfirmDialog/ · StatusBadge/ · ThemeToggle/ · Combobox/ · DataTable/
+    Core/          # DomainRule/ · Session/ · Statistics/ · TabTree/
+    UI/            # AccessibleHighlight/ · Header/ · PopupHeader/ · PopupToolbar/
+                   # PopupProfilesList/ · PageLayout/ · Sidebar/ · ImportExportPage/
+                   # SessionWizards/ · SettingsPage/ · SettingsToggles/ · WizardStepper/
+                   # SplitButton/ · ConfirmDialog/ · StatusBadge/ · ThemeToggle/
+                   # Combobox/ · DataTable/ · OptionsLayout/
     Form/          # FormFields/ · themed-callouts/ · themes/
-  hooks/           # useSyncedSettings · useStatistics · useSessions · useSessionEditor · useModal · useClipboard
-  pages/           # DomainRulesPage · SessionsPage · StatisticsPage · options.tsx · popup.jsx
+  hooks/           # useSyncedState · useSyncedSettings · useStatistics · useSessions
+                   # useSessionEditor · useModal · useDeepLinking
+  pages/           # DomainRulesPage · SessionsPage · StatisticsPage · options.tsx · popup.tsx
   schemas/         # Zod schemas
   types/           # TS types
-  utils/           # i18n · sessionStorage · sessionUtils · tabCapture · tabRestore
-                   # profileWindowMap · conflictDetection · importClassification
-                   # themeConstants · settingsUtils · statisticsUtils · notifications · …
+  utils/           # i18n · logger · sessionStorage · sessionUtils · tabCapture · tabRestore
+                   # conflictDetection · deduplicationSkip · importClassification
+                   # sessionClassification · sessionOrderUtils · ruleOrderUtils
+                   # presetsToSearchableGroups · nameUtils · stringUtils · migration
+                   # storageItems · sessionsHelpPrefs · settingsUtils · statisticsUtils
+                   # themeConstants · notifications · utils
   styles/          # radix-themes.css (custom focus for non-Radix markup only)
 tests/             # Vitest unit tests
 tests/e2e/         # Playwright E2E tests
 ```
 
 ### Features
-1. **Automatic Grouping** — domain rules + regex presets (middle-click / right-click new tab)
-2. **Deduplication** — exact URL / hostname+path / hostname / includes modes
-3. **Rule Management** — CRUD for domain rules; built-in & custom regex presets
-4. **Import/Export Wizard** — Zod-validated JSON, rule classification (new/conflicting/identical), conflict resolution
-5. **Statistics** — grouping & dedup counters
-6. **Sessions & Profiles** — snapshots of open tabs; pinned profiles with icon, auto-sync, window exclusivity; restore wizard with conflict resolution; interactive session editor
+1. **Automatic Grouping** : domain rules + regex presets (middle-click / right-click new tab)
+2. **Deduplication** : exact URL / hostname+path / hostname / includes modes
+3. **Rule Management** : CRUD for domain rules; built-in & custom regex presets; drag-and-drop reordering
+4. **Import/Export Wizard** : Zod-validated JSON for rules and sessions; rule/session classification (new/conflicting/identical); conflict resolution; optional note field
+5. **Statistics** : grouping & dedup counters
+6. **Sessions & Profiles** : snapshots of open tabs with optional note; pinned profiles with icon, auto-sync, window exclusivity; restore wizard with conflict resolution; interactive session editor; collapsed/expanded group state persistence; drag-and-drop session reordering; session card with HoverCard metadata and inline rename
 
 ### Feature Themes (`src/utils/themeConstants.ts`)
 `DOMAIN_RULES` purple · `REGEX_PRESETS` cyan · `IMPORT` jade · `EXPORT` teal · `STATISTICS` orange · `SETTINGS` gray · `SESSIONS` indigo
@@ -134,7 +142,7 @@ identifier et résoudre les zones floues de la user story concernée.
 
 ### Processus
 
-1. Lire la ou les US concernées dans `user_stories/`.
+1. Lire la ou les US concernées dans `user-stories/`.
 2. Lister les points ambigus ou non couverts : cas limites, comportements
    implicites, interactions avec des features existantes, impact sur les
    schemas Zod ou les types.

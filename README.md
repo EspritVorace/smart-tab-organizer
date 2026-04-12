@@ -40,7 +40,7 @@ Middle-click or right-click → "Open in new tab" on a configured site and the t
 - Built-in presets for Jira, GitLab, GitHub, Trello and more
 
 <p align="center">
-  <img src="doc/readme/gifs/regroup.gif" alt="Automatic Regroupment video">
+  <img src="assets/readme/gifs/regroup.gif" alt="Automatic Regroupment video">
 </p>
 
 ### 🔁 Deduplication
@@ -49,7 +49,7 @@ Opening a page that's already open refocuses and reloads the existing tab instea
 Matching sensitivity is configurable per rule: exact URL, hostname + path, hostname, or "includes".
 
 <p align="center">
-  <img src="doc/readme/gifs/dedup.gif" alt="Deduplication video">
+  <img src="assets/readme/gifs/dedup.gif" alt="Deduplication video">
 </p>
 
 
@@ -61,6 +61,8 @@ Save a named snapshot of your open tabs and groups, restore them whenever you ne
 - **Restore wizard** — pick which tabs to bring back, choose the target window, resolve group conflicts before applying
 - **Deep search** — find tabs and groups by name across all your saved sessions
 - **Session editor** — reorganize, rename and delete tabs and groups without restoring first
+- **Session notes** — annotate any session with free-form text
+- **Drag-and-drop** — reorder your sessions list by dragging
 
 <p align="center">
   <img src="doc/readme/en-dark-sessions-list.png" alt="Sessions list">
@@ -114,6 +116,7 @@ For development with auto-reload: `pnpm dev` (Chrome) or `pnpm dev:firefox`.
 | UI | [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
 | Component library | [Radix UI Themes](https://www.radix-ui.com/themes) + [Lucide](https://lucide.dev/) icons |
 | Forms & validation | [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) |
+| Drag-and-drop | [@dnd-kit](https://dndkit.com/) |
 | Theming | [next-themes](https://github.com/pacocoursey/next-themes) |
 | Unit tests | [Vitest](https://vitest.dev/) |
 | E2E tests | [Playwright](https://playwright.dev/) |
