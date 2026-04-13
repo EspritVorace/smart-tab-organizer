@@ -395,6 +395,11 @@
   "noSessionsFound": { "message": "No se encontraron sesiones" },
   "sessionsEmptyStateDescription": { "message": "Toma una instantánea para capturar tus pestañas actuales. Fija una sesión para acceder a ella desde el popup." },
 
+  "pinnedSessionsSection": { "message": "Sesiones fijadas" },
+  "sessionsSection": { "message": "Sesiones" },
+  "pinnedSessionsEmpty": { "message": "Sin sesiones fijadas. Fije una sesión para acceso rápido." },
+  "unpinnedSessionsEmpty": { "message": "Todas las sesiones están fijadas." },
+
   "restoreNotificationTitle": { "message": "Sesión restaurada" },
   "restoreNotificationMessage": { "message": "$1 pestaña(s) abierta(s), $2 duplicado(s) omitido(s)" },
   "restoreNotificationError": { "message": "Restauración con $1 error(es)" },

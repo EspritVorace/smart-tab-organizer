@@ -142,6 +142,15 @@ La comparaison est toujours insensible à la casse et aux accents (via `foldAcce
 
 ---
 
+## Interaction avec les sections epinglees/normales (cf. US-S020)
+
+- La recherche filtre les sessions dans les deux sections (epinglees et normales) de maniere independante.
+- Chaque section n'affiche que les sessions correspondant au terme recherche.
+- Une section sans resultat est masquee pendant la recherche.
+- Le drag-and-drop reste desactive pendant la recherche dans les deux sections.
+
+---
+
 ## Hors périmètre
 
 - Recherche dans les descriptions ou métadonnées futures des sessions.

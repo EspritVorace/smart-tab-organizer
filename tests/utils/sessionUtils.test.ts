@@ -5,6 +5,7 @@ import {
   sessionToTabTreeData,
   createSessionFromSelection,
   matchSessionSearch,
+  splitByPinned,
 } from '../../src/utils/sessionUtils';
 import type { Session, SavedTab, SavedTabGroup } from '../../src/types/session';
 
@@ -354,6 +355,48 @@ describe('sessionUtils', () => {
       const result = matchSessionSearch(session, '');
       expect(result).not.toBeNull();
       expect(result!.matchesName).toBe(true);
+    });
+  });
+
+  describe('splitByPinned', () => {
+    it('splits sessions into pinned and unpinned', () => {
+      const pinned = makeSession({ id: 'p1', isPinned: true });
+      const unpinned = makeSession({ id: 'u1', isPinned: false });
+      const result = splitByPinned([pinned, unpinned]);
+      expect(result.pinned).toEqual([pinned]);
+      expect(result.unpinned).toEqual([unpinned]);
+    });
+
+    it('returns all in pinned when all are pinned', () => {
+      const a = makeSession({ id: 'a', isPinned: true });
+      const b = makeSession({ id: 'b', isPinned: true });
+      const result = splitByPinned([a, b]);
+      expect(result.pinned).toHaveLength(2);
+      expect(result.unpinned).toHaveLength(0);
+    });
+
+    it('returns all in unpinned when none are pinned', () => {
+      const a = makeSession({ id: 'a', isPinned: false });
+      const b = makeSession({ id: 'b', isPinned: false });
+      const result = splitByPinned([a, b]);
+      expect(result.pinned).toHaveLength(0);
+      expect(result.unpinned).toHaveLength(2);
+    });
+
+    it('returns empty arrays for empty input', () => {
+      const result = splitByPinned([]);
+      expect(result.pinned).toHaveLength(0);
+      expect(result.unpinned).toHaveLength(0);
+    });
+
+    it('preserves order within each group', () => {
+      const p1 = makeSession({ id: 'p1', isPinned: true });
+      const u1 = makeSession({ id: 'u1', isPinned: false });
+      const p2 = makeSession({ id: 'p2', isPinned: true });
+      const u2 = makeSession({ id: 'u2', isPinned: false });
+      const result = splitByPinned([p1, u1, p2, u2]);
+      expect(result.pinned.map(s => s.id)).toEqual(['p1', 'p2']);
+      expect(result.unpinned.map(s => s.id)).toEqual(['u1', 'u2']);
     });
   });
 });

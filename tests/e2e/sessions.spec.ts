@@ -92,22 +92,20 @@ test.describe('[US-S02] Session list', () => {
     await page.close();
   });
 
-  test('displays sessions in storage order (no automatic pinned-first sorting) [US-S008]', async ({ extensionContext, extensionId }) => {
+  test('displays pinned sessions in a separate section above unpinned sessions [US-S008]', async ({ extensionContext, extensionId }) => {
     const snapshot = createTestSession({ name: 'Snapshot Session' });
     const profile = createPinnedSession({ name: 'Pinned Session' });
-    // Seed snapshot first — display order reflects storage order, pinned sessions
-    // are visually distinct (filled pin icon) but not automatically moved to the top.
     await seedSessions(extensionContext, [snapshot, profile]);
 
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
+    // Pinned session appears before unpinned session because sections are separated
     const cards = page.getByText(/Session/i);
     const texts = await cards.allTextContents();
-    const snapshotIdx = texts.findIndex(t => t.includes('Snapshot Session'));
     const profileIdx = texts.findIndex(t => t.includes('Pinned Session'));
-    // Sessions appear in the order they were saved, not sorted by pinned status
-    expect(snapshotIdx).toBeLessThan(profileIdx);
+    const snapshotIdx = texts.findIndex(t => t.includes('Snapshot Session'));
+    expect(profileIdx).toBeLessThan(snapshotIdx);
     await page.close();
   });
 

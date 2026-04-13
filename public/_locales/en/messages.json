@@ -394,6 +394,11 @@
   "noSessionsFound": { "message": "No sessions found" },
   "sessionsEmptyStateDescription": { "message": "Take a snapshot to capture your current tabs. Pin a session to access it from the popup." },
 
+  "pinnedSessionsSection": { "message": "Pinned Sessions" },
+  "sessionsSection": { "message": "Sessions" },
+  "pinnedSessionsEmpty": { "message": "No pinned sessions. Pin a session for quick popup access." },
+  "unpinnedSessionsEmpty": { "message": "All sessions are pinned." },
+
   "restoreNotificationTitle": { "message": "Session Restored" },
   "restoreNotificationMessage": { "message": "$1 tab(s) opened, $2 duplicate(s) skipped" },
   "restoreNotificationError": { "message": "Restored with $1 error(s)" },

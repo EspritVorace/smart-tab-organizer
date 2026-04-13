@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Box, Flex, Button, Text, Callout, TextField } from '@radix-ui/themes';
-import { Camera, Archive, CheckCircle, Pin, Search } from 'lucide-react';
+import { Box, Flex, Button, Text, Callout, TextField, Separator, Badge } from '@radix-ui/themes';
+import { Camera, Archive, CheckCircle, Pin, Search, type LucideIcon } from 'lucide-react';
 import { DragDropProvider, type DragOverEvent, type DragEndEvent } from '@dnd-kit/react';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { move } from '@dnd-kit/helpers';
@@ -13,8 +13,8 @@ import { RestoreWizard } from '../components/UI/SessionWizards/RestoreWizard';
 import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { getMessage } from '../utils/i18n';
 import { foldAccents } from '../utils/stringUtils';
-import { matchSessionSearch } from '../utils/sessionUtils';
-import { moveSessionToFirst, moveSessionToLast } from '../utils/sessionOrderUtils';
+import { matchSessionSearch, splitByPinned } from '../utils/sessionUtils';
+import { moveSessionToFirstInGroup, moveSessionToLastInGroup } from '../utils/sessionOrderUtils';
 import { useSessions } from '../hooks/useSessions';
 import { restoreTabs } from '../utils/tabRestore';
 import { updateSession } from '../utils/sessionStorage';
@@ -32,6 +32,16 @@ interface SessionsPageProps {
   snapshotGroupId?: number | null;
   /** Called when the snapshot wizard closes to reset the group context. */
   onSnapshotGroupIdChange?: (id: number | null) => void;
+}
+
+function SectionHeader({ icon: Icon, titleKey, count }: { icon: LucideIcon; titleKey: string; count: number }) {
+  return (
+    <Flex align="center" gap="2">
+      <Icon size={16} aria-hidden="true" style={{ color: 'var(--accent-9)' }} />
+      <Text size="3" weight="bold">{getMessage(titleKey)}</Text>
+      <Badge variant="soft" size="1">{count}</Badge>
+    </Flex>
+  );
 }
 
 export function SessionsPage({
@@ -62,7 +72,8 @@ export function SessionsPage({
   const [deleteTarget, setDeleteTarget] = useState<Session | null>(null);
   const [quickRestoreMessage, setQuickRestoreMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [dragItems, setDragItems] = useState<Session[] | null>(null);
+  const [dragPinnedItems, setDragPinnedItems] = useState<Session[] | null>(null);
+  const [dragUnpinnedItems, setDragUnpinnedItems] = useState<Session[] | null>(null);
 
   // Order: use storage order directly (reorderSessions saves them in the correct order)
   const sortedSessions = sessions;
@@ -83,6 +94,11 @@ export function SessionsPage({
     if (!sessionSearchMatches) return sortedSessions;
     return sortedSessions.filter(s => sessionSearchMatches.has(s.id));
   }, [sortedSessions, sessionSearchMatches]);
+
+  const { pinned: pinnedSessions, unpinned: unpinnedSessions } = useMemo(
+    () => splitByPinned(displayedSessions),
+    [displayedSessions],
+  );
 
   const handleSaveSession = useCallback(
     async (session: Session) => {
@@ -158,31 +174,51 @@ export function SessionsPage({
     await reload();
   }, [reload]);
 
-  // Drag-and-drop handlers
-  const handleDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
-    setDragItems(prev => move(prev ?? sortedSessions, event));
-  }, [sortedSessions]);
+  // Drag-and-drop handlers (pinned group)
+  const handlePinnedDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
+    setDragPinnedItems(prev => move(prev ?? pinnedSessions, event));
+  }, [pinnedSessions]);
 
-  const handleDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
+  const handlePinnedDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
     if (!event.canceled) {
-      const source = dragItems ?? sortedSessions;
+      const source = dragPinnedItems ?? pinnedSessions;
       const reordered = move(source, event) as Session[];
+      const allUnpinned = sortedSessions.filter(s => !s.isPinned);
       if (reordered !== source) {
-        void updateOrder(reordered);
-      } else if (dragItems) {
-        void updateOrder(dragItems);
+        void updateOrder([...reordered, ...allUnpinned]);
+      } else if (dragPinnedItems) {
+        void updateOrder([...dragPinnedItems, ...allUnpinned]);
       }
     }
-    setDragItems(null);
-  }, [dragItems, sortedSessions, updateOrder]);
+    setDragPinnedItems(null);
+  }, [dragPinnedItems, pinnedSessions, sortedSessions, updateOrder]);
+
+  // Drag-and-drop handlers (unpinned group)
+  const handleUnpinnedDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
+    setDragUnpinnedItems(prev => move(prev ?? unpinnedSessions, event));
+  }, [unpinnedSessions]);
+
+  const handleUnpinnedDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
+    if (!event.canceled) {
+      const source = dragUnpinnedItems ?? unpinnedSessions;
+      const reordered = move(source, event) as Session[];
+      const allPinned = sortedSessions.filter(s => s.isPinned);
+      if (reordered !== source) {
+        void updateOrder([...allPinned, ...reordered]);
+      } else if (dragUnpinnedItems) {
+        void updateOrder([...allPinned, ...dragUnpinnedItems]);
+      }
+    }
+    setDragUnpinnedItems(null);
+  }, [dragUnpinnedItems, unpinnedSessions, sortedSessions, updateOrder]);
 
   const handleMoveToFirst = useCallback((session: Session) => {
-    const reordered = moveSessionToFirst(sortedSessions, session.id);
+    const reordered = moveSessionToFirstInGroup(sortedSessions, session.id);
     void updateOrder(reordered);
   }, [sortedSessions, updateOrder]);
 
   const handleMoveLast = useCallback((session: Session) => {
-    const reordered = moveSessionToLast(sortedSessions, session.id);
+    const reordered = moveSessionToLastInGroup(sortedSessions, session.id);
     void updateOrder(reordered);
   }, [sortedSessions, updateOrder]);
 
@@ -238,80 +274,136 @@ export function SessionsPage({
             <Text size="2" color="gray">
               {getMessage('loadingText')}
             </Text>
-          ) : displayedSessions.length === 0 ? (
-            sessions.length === 0 && !searchQuery ? (
-              // True empty state
-              <Flex
-                data-testid="page-sessions-empty"
-                direction="column"
-                align="center"
-                justify="center"
-                gap="3"
-                style={{ minHeight: 200 }}
-              >
-                <Archive
-                  size={40}
-                  style={{ color: 'var(--gray-8)' }}
-                  aria-hidden="true"
-                />
-                <Text size="3" weight="medium" color="gray" align="center">
-                  {getMessage('sessionsEmptyStateTitle')}
-                </Text>
-                <Text size="2" color="gray" align="center" style={{ maxWidth: 340 }}>
-                  {getMessage('sessionsEmptyStateDescription')}
-                </Text>
-                <Button variant="soft" onClick={() => setSnapshotOpen(true)}>
-                  <Camera size={14} aria-hidden="true" />
-                  {getMessage('sessionSnapshotButton')}
-                </Button>
-              </Flex>
-            ) : (
-              // Search no results
-              <Flex
-                direction="column"
-                align="center"
-                justify="center"
-                gap="2"
-                style={{ minHeight: 120 }}
-              >
-                <Archive size={32} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
-                <Text color="gray">{getMessage('noSessionsFound')}</Text>
-              </Flex>
-            )
-          ) : (
-            <DragDropProvider
-              modifiers={[RestrictToVerticalAxis]}
-              onDragOver={handleDragOver}
-              onDragEnd={handleDragEnd}
+          ) : sessions.length === 0 && !searchQuery ? (
+            // True empty state
+            <Flex
+              data-testid="page-sessions-empty"
+              direction="column"
+              align="center"
+              justify="center"
+              gap="3"
+              style={{ minHeight: 200 }}
             >
-              <Flex data-testid="page-sessions-list" direction="column" gap="3">
-                {(dragItems ?? displayedSessions).map((session, index) => {
-                  const searchMatch = sessionSearchMatches?.get(session.id);
-                  return (
-                    <SessionCard
-                      key={session.id}
-                      session={session}
-                      existingSessions={sessions}
-                      onRestore={s => setRestoreSession(s)}
-                      onRestoreCurrentWindow={handleRestoreCurrentWindow}
-                      onRestoreNewWindow={handleRestoreNewWindow}
-                      onRename={renameSession}
-                      onEdit={s => setEditTarget(s)}
-                      onDelete={s => setDeleteTarget(s)}
-                      onPin={handlePin}
-                      onUnpin={handleUnpin}
-                      forcePreviewOpen={searchMatch?.matchesTabs === true || searchMatch?.matchesNote === true}
-                      searchMatchingGroupIds={searchMatch?.matchingGroupIds}
-                      searchQuery={searchQuery || undefined}
-                      index={index}
-                      isDragDisabled={!!searchQuery}
-                      onMoveToFirst={() => handleMoveToFirst(session)}
-                      onMoveLast={() => handleMoveLast(session)}
-                    />
-                  );
-                })}
-              </Flex>
-            </DragDropProvider>
+              <Archive
+                size={40}
+                style={{ color: 'var(--gray-8)' }}
+                aria-hidden="true"
+              />
+              <Text size="3" weight="medium" color="gray" align="center">
+                {getMessage('sessionsEmptyStateTitle')}
+              </Text>
+              <Text size="2" color="gray" align="center" style={{ maxWidth: 340 }}>
+                {getMessage('sessionsEmptyStateDescription')}
+              </Text>
+              <Button variant="soft" onClick={() => setSnapshotOpen(true)}>
+                <Camera size={14} aria-hidden="true" />
+                {getMessage('sessionSnapshotButton')}
+              </Button>
+            </Flex>
+          ) : displayedSessions.length === 0 && searchQuery ? (
+            // Search no results
+            <Flex
+              direction="column"
+              align="center"
+              justify="center"
+              gap="2"
+              style={{ minHeight: 120 }}
+            >
+              <Archive size={32} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
+              <Text color="gray">{getMessage('noSessionsFound')}</Text>
+            </Flex>
+          ) : (
+            <Flex data-testid="page-sessions-list" direction="column" gap="3">
+              {/* Pinned sessions section */}
+              {(pinnedSessions.length > 0 || !searchQuery) && (
+                <Box>
+                  <SectionHeader icon={Pin} titleKey="pinnedSessionsSection" count={pinnedSessions.length} />
+                  {pinnedSessions.length === 0 ? (
+                    <Text size="2" color="gray" mt="2">{getMessage('pinnedSessionsEmpty')}</Text>
+                  ) : (
+                    <DragDropProvider
+                      modifiers={[RestrictToVerticalAxis]}
+                      onDragOver={handlePinnedDragOver}
+                      onDragEnd={handlePinnedDragEnd}
+                    >
+                      <Flex direction="column" gap="3" mt="3">
+                        {(dragPinnedItems ?? pinnedSessions).map((session, index) => {
+                          const searchMatch = sessionSearchMatches?.get(session.id);
+                          return (
+                            <SessionCard
+                              key={session.id}
+                              session={session}
+                              existingSessions={sessions}
+                              onRestore={s => setRestoreSession(s)}
+                              onRestoreCurrentWindow={handleRestoreCurrentWindow}
+                              onRestoreNewWindow={handleRestoreNewWindow}
+                              onRename={renameSession}
+                              onEdit={s => setEditTarget(s)}
+                              onDelete={s => setDeleteTarget(s)}
+                              onPin={handlePin}
+                              onUnpin={handleUnpin}
+                              forcePreviewOpen={searchMatch?.matchesTabs === true || searchMatch?.matchesNote === true}
+                              searchMatchingGroupIds={searchMatch?.matchingGroupIds}
+                              searchQuery={searchQuery || undefined}
+                              index={index}
+                              isDragDisabled={!!searchQuery}
+                              onMoveToFirst={() => handleMoveToFirst(session)}
+                              onMoveLast={() => handleMoveLast(session)}
+                            />
+                          );
+                        })}
+                      </Flex>
+                    </DragDropProvider>
+                  )}
+                </Box>
+              )}
+
+              <Separator size="4" />
+
+              {/* Unpinned sessions section */}
+              {(unpinnedSessions.length > 0 || !searchQuery) && (
+                <Box>
+                  <SectionHeader icon={Archive} titleKey="sessionsSection" count={unpinnedSessions.length} />
+                  {unpinnedSessions.length === 0 ? (
+                    <Text size="2" color="gray" mt="2">{getMessage('unpinnedSessionsEmpty')}</Text>
+                  ) : (
+                    <DragDropProvider
+                      modifiers={[RestrictToVerticalAxis]}
+                      onDragOver={handleUnpinnedDragOver}
+                      onDragEnd={handleUnpinnedDragEnd}
+                    >
+                      <Flex direction="column" gap="3" mt="3">
+                        {(dragUnpinnedItems ?? unpinnedSessions).map((session, index) => {
+                          const searchMatch = sessionSearchMatches?.get(session.id);
+                          return (
+                            <SessionCard
+                              key={session.id}
+                              session={session}
+                              existingSessions={sessions}
+                              onRestore={s => setRestoreSession(s)}
+                              onRestoreCurrentWindow={handleRestoreCurrentWindow}
+                              onRestoreNewWindow={handleRestoreNewWindow}
+                              onRename={renameSession}
+                              onEdit={s => setEditTarget(s)}
+                              onDelete={s => setDeleteTarget(s)}
+                              onPin={handlePin}
+                              onUnpin={handleUnpin}
+                              forcePreviewOpen={searchMatch?.matchesTabs === true || searchMatch?.matchesNote === true}
+                              searchMatchingGroupIds={searchMatch?.matchingGroupIds}
+                              searchQuery={searchQuery || undefined}
+                              index={index}
+                              isDragDisabled={!!searchQuery}
+                              onMoveToFirst={() => handleMoveToFirst(session)}
+                              onMoveLast={() => handleMoveLast(session)}
+                            />
+                          );
+                        })}
+                      </Flex>
+                    </DragDropProvider>
+                  )}
+                </Box>
+              )}
+            </Flex>
           )}
 
           <SnapshotWizard

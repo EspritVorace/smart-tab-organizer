@@ -395,6 +395,11 @@
   "noSessionsFound": { "message": "Aucune session trouvée" },
   "sessionsEmptyStateDescription": { "message": "Prenez un instantané pour capturer vos onglets actuels. Épinglez une session pour y accéder depuis le popup." },
 
+  "pinnedSessionsSection": { "message": "Sessions épinglées" },
+  "sessionsSection": { "message": "Sessions" },
+  "pinnedSessionsEmpty": { "message": "Aucune session épinglée. Épinglez une session pour un accès rapide." },
+  "unpinnedSessionsEmpty": { "message": "Toutes les sessions sont épinglées." },
+
   "restoreNotificationTitle": { "message": "Session restaurée" },
   "restoreNotificationMessage": { "message": "$1 onglet(s) ouvert(s), $2 doublon(s) ignoré(s)" },
   "restoreNotificationError": { "message": "Restauration avec $1 erreur(s)" },

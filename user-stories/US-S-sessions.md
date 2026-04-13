@@ -18,6 +18,7 @@
 - [ ] Le bouton « Take Snapshot » est affiché à droite du champ de recherche dans la même barre d'outils.
 - [ ] En l'absence de toute session, la zone d'état vide affiche le message « No saved sessions. ».
 - [ ] Le bouton « Take Snapshot » est également visible dans la zone d'état vide.
+- [ ] Pendant la recherche, les deux sections (epinglees / normales, cf. US-S020) restent visibles mais n'affichent que les sessions correspondantes. Une section sans resultat est masquee.
 
 ---
 
@@ -171,4 +172,37 @@
 - [ ] Un nom vide n'est pas accepte.
 
 **Menu d'actions consolide :**
-- [ ] Le menu d'actions (`...`) regroupe toutes les actions : restauration (fenetre courante, nouvelle fenetre, personnalisee), edition, deplacer en premier/dernier (cf. US-S-DND), epingler/desepingler, supprimer.
+- [ ] Le menu d'actions (`...`) regroupe toutes les actions : restauration (fenetre courante, nouvelle fenetre, personnalisee), edition, deplacer en premier/dernier dans le groupe (cf. US-S-DND), epingler/desepingler, supprimer.
+
+---
+
+## US-S020 : Separation des sessions epinglees et normales
+
+**En tant qu'** utilisateur sur la page Sessions,
+**je veux** que les sessions epinglees soient affichees dans une section distincte au-dessus des sessions normales,
+**afin de** distinguer visuellement mes profils (sessions epinglees) de mes snapshots classiques.
+
+### Criteres d'acceptation
+
+**Sections visuelles :**
+- [ ] La page Sessions affiche deux sections distinctes : « Pinned Sessions » (en haut) et « Sessions » (en bas), separees par un `Separator`.
+- [ ] Chaque section possede un en-tete non repliable avec une icone (`Pin` pour les epinglees, `Archive` pour les normales), un titre i18n et un compteur (`Badge`).
+- [ ] Les sections ne sont pas repliables (pas de `Collapsible`).
+
+**Etats vides :**
+- [ ] Si aucune session epinglee n'existe, la section « Pinned Sessions » affiche un message d'aide contextuel (ex. « No pinned sessions. Pin a session for quick popup access. »).
+- [ ] Si toutes les sessions sont epinglees, la section « Sessions » affiche un message d'aide (ex. « All sessions are pinned. »).
+- [ ] Si aucune session n'existe du tout, l'etat vide global existant est affiche (icone Archive + bouton « Take Snapshot ») sans en-tetes de section.
+
+**Drag-and-drop intra-groupe :**
+- [ ] Chaque section dispose de son propre `DragDropProvider` independant.
+- [ ] Le drag-and-drop fonctionne uniquement a l'interieur d'une section (pas de deplacement inter-sections).
+- [ ] Pour changer le statut epingle d'une session, l'utilisateur utilise le bouton pin/unpin sur la carte, ce qui deplace la session dans la bonne section.
+
+**"Move to first" / "Move to last" dans le groupe :**
+- [ ] Les actions "Move to first" et "Move to last" du menu d'actions operent dans le groupe de la session (epingle ou normal), pas dans la liste globale.
+
+**Recherche :**
+- [ ] Pendant la recherche, les deux sections restent visibles mais n'affichent que les sessions correspondantes.
+- [ ] Une section sans resultat est masquee pendant la recherche.
+- [ ] Le drag-and-drop reste desactive pendant la recherche.
