@@ -8,10 +8,23 @@ export default defineConfig({
   manifest: {
     name: '__MSG_extensionName__',
     description: '__MSG_extensionDescription__',
-    version: '1.1.2',
+    version: '1.1.3',
     author: 'EspritVorace',
     homepage_url: 'https://github.com/EspritVorace/smart-tab-organizer',
     default_locale: 'en',
+    browser_specific_settings: {
+      gecko: {
+        id: 'smart-tab-organizer@espritvorace.github.io',
+        strict_min_version: '109.0',
+        // Required by AMO since 2025: declare that the extension does not
+        // collect or transmit any user data. SmartTab Organizer only reads
+        // /writes user preferences via browser.storage (local + sync) — no
+        // telemetry, no analytics, no external network calls.
+          data_collection_permissions: {
+            required: ['none']
+        }
+      }
+    },
     permissions: ['tabs', 'tabGroups', 'storage', 'notifications'],
     host_permissions: ['<all_urls>'],
     action: {
@@ -30,7 +43,9 @@ export default defineConfig({
   },
   webExt: {
     chromiumProfile: resolve('.chrome-profile'),
+    firefoxProfile: resolve('.firefox-profile'),
     keepProfileChanges: true,
+    profileCreateIfMissing: true,
   },
   vite: () => ({
     plugins: [react()],

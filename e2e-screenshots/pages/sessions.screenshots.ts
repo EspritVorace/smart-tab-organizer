@@ -231,14 +231,18 @@ test.describe('Sessions screenshots', () => {
         );
         await page.waitForTimeout(300);
 
-        // ── Open the Restore wizard via the primary "Restore" button ──
-        // SessionCard layout (buttons in order): Pin (IconButton) · Restore (rt-Button)
-        // · Chevron (rt-Button) · MoreHorizontal (IconButton) · Collapsible toggle.
-        // The primary Restore button is the first .rt-Button in the card; clicking it
-        // calls onRestore(session) which opens the RestoreWizard (same as "Customize…").
+        // ── Open the Restore wizard via the more-actions dropdown ──
+        // Since dc803e6 (Feature/session card #105), all restore actions live
+        // inside the "..." dropdown menu. The "Customize…" item is the only one
+        // that opens the RestoreWizard via onRestore(session); the other two
+        // (Restore current / Restore new) bypass the wizard. We identify it by
+        // its unique Wrench icon (lucide-wrench class).
         const firstCard = page.locator('.rt-Card').first();
-        const primaryRestoreBtn = firstCard.locator('button.rt-Button').first();
-        await primaryRestoreBtn.click();
+        await firstCard.locator('[data-testid$="-btn-dropdown"]').click();
+
+        const menu = page.locator('[role="menu"]');
+        await menu.waitFor({ state: 'visible', timeout: 5_000 });
+        await menu.locator('[role="menuitem"]:has(svg.lucide-wrench)').click();
         await page.waitForTimeout(400);
 
         // Wait for RestoreWizard dialog

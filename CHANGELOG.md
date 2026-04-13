@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.1.3 — since 1.1.2
+
+### New Features
+- Separate pinned and unpinned sessions into distinct sections in the Sessions page
+
+### Improvements
+- Maintain pinned sessions in their original storage order
+- Remove unused files and clean up dead code
+- Adjust edit pencil icon position in session cards following UI redesign
+
+## 1.1.2 — since 1.1.1
+
+### New Features
+- Sessions note field for custom session annotations
+- Split save button for active tab group with capture validation
+- Domain rule drag-and-drop reordering with automatic migration
+
+### Improvements
+- Decoupled 4 critical React components for better code maintainability
+- CI: Sharded E2E tests across 3 parallel runners; improved test failure reporting
+- Enforced unique session names to match domain rule label behavior
+
 ## 1.1.1 — since 1.1.0
 
 ### Improvements

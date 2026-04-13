@@ -2,8 +2,8 @@ import React, { useMemo, useCallback } from 'react';
 import TreeView, { INodeRendererProps, NodeId } from 'react-accessible-treeview';
 import { Flex, Text, Button, Box, Checkbox, ScrollArea } from '@radix-ui/themes';
 import { getMessage } from '../../../utils/i18n';
-import { TabTreeProps, TabItem, ChromeGroupColor } from './tabTreeTypes';
-import { buildTreeViewData, extractDomain, countTotalTabs } from './tabTreeUtils';
+import { TabTreeProps, TabItem, ChromeGroupColor } from '../../../types/tabTree';
+import { buildTreeViewData, extractDomain, countTotalTabs } from '../../../utils/tabTreeUtils';
 import { TabRowBase } from './TabRowBase';
 import { GroupRowBase } from './GroupRowBase';
 
@@ -11,7 +11,7 @@ import { GroupRowBase } from './GroupRowBase';
  * TabTree — reusable tree component for displaying Chrome tabs and tab groups
  * with multi-select checkboxes. Used for both snapshot (save) and restore flows.
  *
- * @example Snapshot mode (data from chrome.tabs.query + chrome.tabGroups.query):
+ * @example Snapshot mode (data from browser.tabs.query + browser.tabGroups.query):
  * ```tsx
  * const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
  * <TabTree
@@ -27,7 +27,7 @@ import { GroupRowBase } from './GroupRowBase';
  *   data={savedSession.tabTreeData}
  *   selectedTabIds={selectedIds}
  *   onSelectionChange={setSelectedIds}
- *   onTabClick={(tab) => chrome.tabs.create({ url: tab.url })}
+ *   onTabClick={(tab) => browser.tabs.create({ url: tab.url })}
  * />
  * ```
  */

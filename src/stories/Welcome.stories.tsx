@@ -59,9 +59,6 @@ const Welcome = () => {
                 <strong>Core/DomainRule/</strong> - Domain rule management
               </li>
               <li style={{ marginBottom: '0.3rem', color: 'var(--color-text, #333)' }}>
-                <strong>Core/RegexPreset/</strong> - Regex preset components
-              </li>
-              <li style={{ marginBottom: '0.3rem', color: 'var(--color-text, #333)' }}>
                 <strong>Core/Statistics/</strong> - Statistics display
               </li>
             </ul>

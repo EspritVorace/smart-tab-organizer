@@ -10,7 +10,7 @@ import {
 } from '@radix-ui/themes';
 import { ChevronUp, ChevronDown, Pencil, Trash2 } from 'lucide-react';
 import { getMessage } from '../../../utils/i18n';
-import { extractDomain } from './tabTreeUtils';
+import { extractDomain } from '../../../utils/tabTreeUtils';
 import { TabRowBase } from './TabRowBase';
 import { GroupRowBase } from './GroupRowBase';
 import { TabEditRow } from './TabEditRow';

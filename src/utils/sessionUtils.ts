@@ -1,5 +1,5 @@
 import type { Session, SavedTab, SavedTabGroup } from '../types/session';
-import type { TabTreeData, TabItem, TabGroupItem } from '../components/Core/TabTree/tabTreeTypes';
+import type { TabTreeData, TabItem, TabGroupItem } from '../types/tabTree';
 import { generateUUID } from './utils';
 import { foldAccents } from './stringUtils';
 import { getMessage } from './i18n';
@@ -143,6 +143,14 @@ export function countSessionTabs(session: Pick<Session, 'ungroupedTabs' | 'group
     session.ungroupedTabs.length +
     session.groups.reduce((sum, g) => sum + g.tabs.length, 0)
   );
+}
+
+/** Split a list of items into pinned and unpinned groups. */
+export function splitByPinned<T extends { isPinned: boolean }>(items: T[]): { pinned: T[]; unpinned: T[] } {
+  return {
+    pinned: items.filter(i => i.isPinned),
+    unpinned: items.filter(i => !i.isPinned),
+  };
 }
 
 /** Create a Session object from TabTreeData and selected tab IDs */

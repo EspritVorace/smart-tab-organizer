@@ -1,9 +1,9 @@
 import { browser } from 'wxt/browser';
 import { generateUUID } from './utils';
 import type { SavedTab, SavedTabGroup } from '../types/session';
-import type { TabTreeData, TabItem, TabGroupItem, ChromeGroupColor } from '../components/Core/TabTree/tabTreeTypes';
+import type { TabTreeData, TabItem, TabGroupItem, ChromeGroupColor } from '../types/tabTree';
 
-const SYSTEM_URL_PREFIXES = ['chrome://', 'chrome-extension://', 'about:', 'edge://'];
+const SYSTEM_URL_PREFIXES = ['chrome://', 'chrome-extension://', 'moz-extension://', 'about:', 'edge://'];
 
 const VALID_COLORS: ChromeGroupColor[] = [
   'grey', 'blue', 'red', 'yellow', 'green', 'pink', 'purple', 'cyan', 'orange',
@@ -77,6 +77,7 @@ export async function captureCurrentTabs(): Promise<CaptureResult> {
           title: group.title || '',
           color: normalizeColor(group.color),
           tabs: [],
+          collapsed: group.collapsed || false,
         },
         treeGroup: {
           id: treeGroupId,

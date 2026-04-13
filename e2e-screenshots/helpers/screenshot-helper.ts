@@ -9,9 +9,9 @@
  *                   The locale comes from the Playwright project name.
  *
  * After each capture, screenshots are:
- *   - saved to doc/assets/documentation/ (primary, all screenshots)
- *   - copied to doc/assets/readme/       (screenshots used in READMEs)
- *   - copied to doc/assets/chrome-web-store/ (screenshots for the Chrome Web Store)
+ *   - saved to doc/documentation/ (primary, all screenshots)
+ *   - copied to doc/readme/       (screenshots used in READMEs)
+ *   - copied to doc/chrome-web-store/ (screenshots for the Chrome Web Store)
  *
  * All PNG files are re-encoded through sharp to strip embedded metadata
  * (tIME, tEXt, iTXt…), ensuring stable binary output across runs so that
@@ -30,10 +30,10 @@ const __dirname = path.dirname(__filename);
 const DOCS_DIR = path.resolve(__dirname, '../../docs/src/assets/screenshots');
 
 /** Absolute path to the readme screenshots folder */
-const README_DIR = path.resolve(__dirname, '../../doc/assets/readme');
+const README_DIR = path.resolve(__dirname, '../../doc/readme');
 
 /** Absolute path to the Chrome Web Store screenshots folder */
-const CHROME_STORE_DIR = path.resolve(__dirname, '../../doc/assets/chrome-web-store');
+const CHROME_STORE_DIR = path.resolve(__dirname, '../../doc/chrome-web-store');
 
 /** Absolute path to the built extension's _locales directory */
 const LOCALES_DIR = path.resolve(__dirname, '../../.output/chrome-mv3/_locales');

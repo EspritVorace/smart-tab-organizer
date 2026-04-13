@@ -4,9 +4,6 @@ import {
   getSyncSettings,
   setSyncSettings,
   updateSyncSettings,
-  getGlobalGroupingEnabled,
-  getGlobalDeduplicationEnabled,
-  getDomainRules,
 } from '../../src/utils/settingsUtils';
 import { defaultSyncSettings } from '../../src/types/syncSettings';
 
@@ -66,54 +63,4 @@ describe('settingsUtils', () => {
     });
   });
 
-  describe('getGlobalGroupingEnabled', () => {
-    it('retourne la valeur par défaut (true) si non définie', async () => {
-      const result = await getGlobalGroupingEnabled();
-      expect(result).toBe(true);
-    });
-
-    it('retourne false si défini à false dans le storage', async () => {
-      await fakeBrowser.storage.sync.set({ globalGroupingEnabled: false });
-      const result = await getGlobalGroupingEnabled();
-      expect(result).toBe(false);
-    });
-
-    it('retourne la valeur par défaut en cas d\'erreur', async () => {
-      vi.spyOn(fakeBrowser.storage.sync, 'get').mockRejectedValueOnce(
-        new Error('Error'),
-      );
-      const result = await getGlobalGroupingEnabled();
-      expect(result).toBe(defaultSyncSettings.globalGroupingEnabled);
-    });
-  });
-
-  describe('getGlobalDeduplicationEnabled', () => {
-    it('retourne la valeur par défaut (true) si non définie', async () => {
-      const result = await getGlobalDeduplicationEnabled();
-      expect(result).toBe(true);
-    });
-
-    it('retourne false si défini à false dans le storage', async () => {
-      await fakeBrowser.storage.sync.set({ globalDeduplicationEnabled: false });
-      const result = await getGlobalDeduplicationEnabled();
-      expect(result).toBe(false);
-    });
-  });
-
-  describe('getDomainRules', () => {
-    it('retourne un tableau vide par défaut', async () => {
-      const rules = await getDomainRules();
-      expect(rules).toEqual([]);
-    });
-
-    it('retourne les règles stockées', async () => {
-      const storedRules = [
-        { id: '1', label: 'Test Rule', domainFilter: 'example.com' },
-      ];
-      await fakeBrowser.storage.sync.set({ domainRules: storedRules });
-      const rules = await getDomainRules();
-      expect(rules).toHaveLength(1);
-      expect(rules[0].label).toBe('Test Rule');
-    });
-  });
 });

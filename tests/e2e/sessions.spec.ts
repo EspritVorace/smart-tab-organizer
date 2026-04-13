@@ -92,15 +92,15 @@ test.describe('[US-S02] Session list', () => {
     await page.close();
   });
 
-  test('sorts pinned sessions before snapshots [US-S008]', async ({ extensionContext, extensionId }) => {
+  test('displays pinned sessions in a separate section above unpinned sessions [US-S008]', async ({ extensionContext, extensionId }) => {
     const snapshot = createTestSession({ name: 'Snapshot Session' });
     const profile = createPinnedSession({ name: 'Pinned Session' });
-    // Seed snapshot first so ordering is deliberately wrong without sort
     await seedSessions(extensionContext, [snapshot, profile]);
 
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
+    // Pinned session appears before unpinned session because sections are separated
     const cards = page.getByText(/Session/i);
     const texts = await cards.allTextContents();
     const profileIdx = texts.findIndex(t => t.includes('Pinned Session'));
@@ -128,7 +128,7 @@ test.describe('[US-S02] Session list', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    // The card no longer shows a formatted date — only name, counts and restore button
+    // The card no longer shows a formatted date — only name, counts and More actions menu
     await expect(page.getByText('Dated Session')).toBeVisible();
     await expect(page.getByText(/3 tab/i)).toBeVisible();
     await page.close();
@@ -368,34 +368,33 @@ test.describe('[US-S01] Snapshot creation', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Restore — split button
+// Restore — More actions menu
 // ---------------------------------------------------------------------------
-test.describe('[US-S04][US-S06] Restore — split button', () => {
-  test('Restore button is visible on session card', async ({ extensionContext, extensionId }) => {
+test.describe('[US-S04][US-S06] Restore — More actions menu', () => {
+  test('More actions menu is accessible on session card', async ({ extensionContext, extensionId }) => {
     const session = createTestSession({ name: 'Restorable' });
     await seedSessions(extensionContext, [session]);
 
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    // 'Restore' may match multiple buttons; use first() to pick the main restore button
-    await expect(page.getByRole('button', { name: 'Restore' }).first()).toBeVisible();
+    // The 3-dot More actions button should be visible on the card
+    await expect(page.getByRole('button', { name: 'More actions' }).first()).toBeVisible();
     await page.close();
   });
 
-  test('split button dropdown contains quick restore options [US-S011]', async ({ extensionContext, extensionId }) => {
+  test('More actions menu contains quick restore options [US-S011]', async ({ extensionContext, extensionId }) => {
     const session = createTestSession({ name: 'Restorable' });
     await seedSessions(extensionContext, [session]);
 
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    // Click the dropdown chevron of the split button
-    await page.getByRole('button', { name: /restore options/i }).click();
+    await page.getByRole('button', { name: 'More actions' }).click();
 
     await expect(page.getByRole('menuitem', { name: /current window/i })).toBeVisible();
     await expect(page.getByRole('menuitem', { name: /new window/i })).toBeVisible();
-    await expect(page.getByRole('menuitem', { name: /customize/i })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /customized restoration/i })).toBeVisible();
     await page.close();
   });
 
@@ -409,25 +408,24 @@ test.describe('[US-S04][US-S06] Restore — split button', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: /restore options/i }).click();
+    await page.getByRole('button', { name: 'More actions' }).click();
     await page.getByRole('menuitem', { name: /current window/i }).click();
 
     await expect(page.getByText(/tab.*opened/i)).toBeVisible({ timeout: 5000 });
     await page.close();
   });
 
-  test('Customize opens the restore wizard dialog [US-S011]', async ({ extensionContext, extensionId }) => {
+  test('Customized restoration opens the restore wizard dialog [US-S011]', async ({ extensionContext, extensionId }) => {
     const session = createTestSession({ name: 'Restorable' });
     await seedSessions(extensionContext, [session]);
 
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: /restore options/i }).click();
-    await page.getByRole('menuitem', { name: /customize/i }).click();
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: /customized restoration/i }).click();
 
     await expect(page.getByRole('dialog')).toBeVisible();
-    // Scope the /Restore/ check to the dialog heading (Restore button also matches the regex)
     await expect(page.getByRole('dialog').getByText(/Restore/).first()).toBeVisible();
     await page.close();
   });
@@ -442,7 +440,7 @@ test.describe('[US-S04][US-S06] Restore — split button', () => {
 
     const pagesBefore = extensionContext.pages().length;
 
-    await page.getByRole('button', { name: /restore options/i }).click();
+    await page.getByRole('button', { name: 'More actions' }).click();
     await page.getByRole('menuitem', { name: /new window/i }).click();
 
     // Session has 3 tabs — at least one new page should be created
@@ -456,7 +454,7 @@ test.describe('[US-S04][US-S06] Restore — split button', () => {
 // [US-S05] Restore with conflict resolution — Customize wizard
 // ---------------------------------------------------------------------------
 test.describe('[US-S04] Restore in current window', () => {
-  test('Customize wizard defaults to "In the current window" target', async ({
+  test('Customized restoration wizard defaults to "In the current window" target', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -466,8 +464,8 @@ test.describe('[US-S04] Restore in current window', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: /restore options/i }).click();
-    await page.getByRole('menuitem', { name: /customize/i }).click();
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: /customized restoration/i }).click();
 
     const dialog = page.getByRole('dialog');
     await page.waitForTimeout(300);
@@ -479,7 +477,7 @@ test.describe('[US-S04] Restore in current window', () => {
 });
 
 test.describe('[US-S05] Restore with conflict resolution', () => {
-  test('Customize wizard Selection step shows current/new window target options', async ({
+  test('Customized restoration wizard Selection step shows current/new window target options', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -489,8 +487,8 @@ test.describe('[US-S05] Restore with conflict resolution', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: /restore options/i }).click();
-    await page.getByRole('menuitem', { name: /customize/i }).click();
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: /customized restoration/i }).click();
 
     const dialog = page.getByRole('dialog');
     await expect(dialog.getByText(/current window/i)).toBeVisible();
@@ -498,7 +496,7 @@ test.describe('[US-S05] Restore with conflict resolution', () => {
     await page.close();
   });
 
-  test('Customize wizard restores directly when no conflicts exist', async ({
+  test('Customized restoration wizard restores directly when no conflicts exist', async ({
     extensionContext,
     extensionId,
     helpers,
@@ -513,14 +511,38 @@ test.describe('[US-S05] Restore with conflict resolution', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: /restore options/i }).click();
-    await page.getByRole('menuitem', { name: /customize/i }).click();
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: /customized restoration/i }).click();
 
     const dialog = page.getByRole('dialog');
     await dialog.getByRole('button', { name: /restore/i }).click();
 
     // Without conflicting tabs, restore executes directly and dialog closes
     await expect(dialog).not.toBeVisible({ timeout: 10000 });
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Restore with collapsed groups (US-S017)
+// ---------------------------------------------------------------------------
+test.describe('[US-S017] Restore with collapsed group state', () => {
+  test('restoring a session with a collapsed group succeeds without error', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const session = createTestSession({ name: 'Collapsed Group Session' });
+    session.groups[0].collapsed = true;
+    await seedSessions(extensionContext, [session]);
+
+    const page = await extensionContext.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: /current window/i }).click();
+
+    // Restore should show success message
+    await expect(page.getByText(/tab.*opened/i)).toBeVisible({ timeout: 5000 });
     await page.close();
   });
 });

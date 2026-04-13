@@ -6,7 +6,7 @@ import { getMessage } from '../../../utils/i18n';
 import { loadSessions } from '../../../utils/sessionStorage';
 import { restoreTabs } from '../../../utils/tabRestore';
 import { getRuleCategory } from '../../../schemas/enums';
-import { chromeGroupColors } from '../../Core/TabTree/tabTreeUtils';
+import { chromeGroupColors } from '../../../utils/tabTreeUtils';
 import type { Session } from '../../../types/session';
 
 function getCategoryIcon(categoryId: string | null | undefined): React.ReactNode {
@@ -39,9 +39,7 @@ export function PopupProfilesList() {
 
   useEffect(() => {
     loadSessions().then((all) => {
-      const pinned = all
-        .filter((s) => s.isPinned)
-        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+      const pinned = all.filter((s) => s.isPinned);
       setPinnedSessions(pinned);
     });
   }, []);

@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getMessage } from '../../../utils/i18n';
 import type { Session, SavedTab, SavedTabGroup } from '../../../types/session';
-import type { ChromeGroupColor } from './tabTreeTypes';
+import type { ChromeGroupColor } from '../../../types/tabTree';
 
 export type AlertDialogState =
   | { type: 'delete_last_tab'; tabId: string; groupId: string }
@@ -10,7 +10,7 @@ export type AlertDialogState =
 
 export function useTabTreeEditor(session: Session, onSessionChange: (updated: Session) => void) {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
-    () => new Set(session.groups.map((g) => g.id))
+    () => new Set(session.groups.filter((g) => !g.collapsed).map((g) => g.id))
   );
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editUrl, setEditUrl] = useState('');
@@ -19,17 +19,22 @@ export function useTabTreeEditor(session: Session, onSessionChange: (updated: Se
   const [urlError, setUrlError] = useState<string | null>(null);
   const [alertDialog, setAlertDialog] = useState<AlertDialogState>(null);
 
-  // Auto-expand newly added groups
+  // Track known group IDs so we only auto-expand genuinely new groups,
+  // not groups that were intentionally initialized as collapsed.
+  const knownGroupIds = useRef<Set<string>>(new Set(session.groups.map((g) => g.id)));
+
+  // Auto-expand newly added groups (not groups collapsed at init)
   useEffect(() => {
     setExpandedGroups((prev) => {
       const next = new Set(prev);
       let changed = false;
       for (const group of session.groups) {
-        if (!next.has(group.id)) {
+        if (!knownGroupIds.current.has(group.id)) {
           next.add(group.id);
           changed = true;
         }
       }
+      knownGroupIds.current = new Set(session.groups.map((g) => g.id));
       return changed ? next : prev;
     });
   }, [session.groups]);
@@ -39,11 +44,21 @@ export function useTabTreeEditor(session: Session, onSessionChange: (updated: Se
   const toggleGroup = useCallback((groupId: string) => {
     setExpandedGroups((prev) => {
       const next = new Set(prev);
-      if (next.has(groupId)) next.delete(groupId);
+      const wasExpanded = next.has(groupId);
+      if (wasExpanded) next.delete(groupId);
       else next.add(groupId);
+
+      onSessionChange({
+        ...session,
+        groups: session.groups.map((g) =>
+          g.id === groupId ? { ...g, collapsed: wasExpanded } : g
+        ),
+        updatedAt: new Date().toISOString(),
+      });
+
       return next;
     });
-  }, []);
+  }, [session, onSessionChange]);
 
   function openTabEdit(tab: SavedTab) {
     setEditingItemId(tab.id);

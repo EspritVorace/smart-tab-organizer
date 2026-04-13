@@ -153,3 +153,66 @@
 - [ ] Après un export réussi (fichier ou presse-papiers), le dialogue se ferme automatiquement.
 - [ ] Une notification système apparaît avec le titre « Rules exported ».
 - [ ] Le JSON exporté est formaté avec une indentation de 2 espaces.
+
+---
+
+## US-IE010 : Note optionnelle a l'export (regles et sessions)
+
+**En tant qu'** utilisateur qui exporte des regles ou des sessions,
+**je veux** pouvoir ajouter une note libre au fichier d'export,
+**afin de** documenter le contenu ou le contexte de l'export pour le destinataire.
+
+### Criteres d'acceptation
+
+- [ ] Le wizard d'export (regles et sessions) expose un champ `TextArea` (Radix, redimensionnable verticalement) labellise **"Note"**.
+- [ ] Le champ est optionnel : laisser le champ vide n'affecte pas l'export.
+- [ ] Si une note est saisie, le JSON exporte contient un champ `note` a la racine de l'objet (ex. `{ "note": "...", "rules": [...] }`).
+- [ ] Si le champ est vide, le champ `note` n'apparait pas dans le JSON exporte.
+
+---
+
+## US-IE011 : Affichage de la note a l'import (regles et sessions)
+
+**En tant qu'** utilisateur qui importe un fichier JSON contenant une note,
+**je veux** voir la note de l'auteur affichee dans le wizard d'import,
+**afin de** comprendre le contexte du fichier avant de valider l'import.
+
+### Criteres d'acceptation
+
+- [ ] Si le JSON importe contient un champ `note` a la racine, celle-ci est affichee dans un callout gris au-dessus de la liste de classification (etape 2 du wizard).
+- [ ] Si le JSON ne contient pas de champ `note`, aucun callout n'est affiche.
+- [ ] La note est affichee en lecture seule (pas de champ editable).
+
+---
+
+## US-IE012 : Format enveloppe pour l'export de sessions
+
+**En tant qu'** utilisateur,
+**je veux** que l'export de sessions utilise un format enveloppe (`{ note?, sessions: [...] }`),
+**afin que** le fichier puisse contenir des metadonnees (comme la note) en plus des sessions.
+
+### Criteres d'acceptation
+
+- [ ] L'export de sessions produit un objet JSON `{ sessions: [...] }` (et non un tableau brut).
+- [ ] Si une note est redigee, elle est incluse : `{ note: "...", sessions: [...] }`.
+- [ ] A l'import, le wizard accepte les deux formats : le nouveau format enveloppe et l'ancien format (tableau brut `[...]`) pour la retro-compatibilite.
+- [ ] Le schema Zod `importSessionsDataSchema` valide les deux formats.
+
+---
+
+## US-IE013 : Sous-groupement pinned/normal dans l'export de sessions
+
+**En tant qu'** utilisateur qui exporte des sessions,
+**je veux** que la liste de selection dans le wizard d'export soit organisee en deux sous-groupes (sessions epinglees, sessions normales),
+**afin de** selectionner plus facilement les sessions selon leur statut.
+
+### Criteres d'acceptation
+
+- [ ] Si des sessions epinglees existent, elles sont affichees dans un sous-groupe « Pinned Sessions » avec un en-tete (icone `Pin` + titre + checkbox de groupe).
+- [ ] Si des sessions normales existent, elles sont affichees dans un sous-groupe « Sessions » avec un en-tete (icone `Archive` + titre + checkbox de groupe).
+- [ ] Les deux sous-groupes sont separes par un `Separator` si les deux existent.
+- [ ] La checkbox de groupe permet de selectionner/deselectionner toutes les sessions du sous-groupe.
+- [ ] La checkbox de groupe affiche un etat indeterminate si seulement une partie des sessions du groupe est selectionnee.
+- [ ] Le badge individuel « Pinned » est retire des lignes de session dans l'export (le groupement le rend redondant).
+- [ ] Les boutons « Select all » / « Deselect all » globaux continuent de fonctionner sur l'ensemble des sessions.
+- [ ] Si toutes les sessions sont du meme type (toutes epinglees ou toutes normales), un seul sous-groupe est affiche sans en-tete de sous-groupe.

@@ -12,7 +12,7 @@ import { showSuccessNotification } from '../../../utils/notifications';
 import { captureCurrentTabs } from '../../../utils/tabCapture';
 import { createSessionFromSelection, formatSessionDate } from '../../../utils/sessionUtils';
 import type { Session, SavedTab, SavedTabGroup } from '../../../types/session';
-import type { TabTreeData } from '../../Core/TabTree/tabTreeTypes';
+import type { TabTreeData } from '../../../types/tabTree';
 
 interface SnapshotWizardProps {
   open: boolean;

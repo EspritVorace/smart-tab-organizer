@@ -10,6 +10,7 @@ export interface GroupDiff {
 export interface SessionDiff {
   isPinned?: { current: boolean; imported: boolean };
   categoryId?: { current: string | null | undefined; imported: string | null | undefined };
+  note?: { current: string | undefined; imported: string | undefined };
   groupsAdded: string[];       // titles
   groupsRemoved: string[];     // titles
   groupsChanged: GroupDiff[];
@@ -63,6 +64,7 @@ export function areSessionsEqual(a: Session, b: Session): boolean {
   return (
     a.isPinned === b.isPinned &&
     (a.categoryId ?? null) === (b.categoryId ?? null) &&
+    (a.note ?? '') === (b.note ?? '') &&
     areGroupArraysEqual(a.groups, b.groups) &&
     areTabArraysEqual(a.ungroupedTabs, b.ungroupedTabs)
   );
@@ -86,6 +88,11 @@ export function getSessionDiff(existing: Session, imported: Session): SessionDif
   const importedCat = imported.categoryId ?? null;
   if (existingCat !== importedCat) {
     diff.categoryId = { current: existingCat, imported: importedCat };
+  }
+
+  // Empty string and undefined are treated as equivalent (no note set).
+  if ((existing.note ?? '') !== (imported.note ?? '')) {
+    diff.note = { current: existing.note, imported: imported.note };
   }
 
   // Groups diff

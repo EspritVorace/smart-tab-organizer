@@ -1,19 +1,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { Theme, Box, Flex } from '@radix-ui/themes';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { DragDropProvider } from '@dnd-kit/react';
 import { DomainRuleCard } from './DomainRuleCard';
 import type { DomainRuleSetting } from '../../../types/syncSettings';
 
@@ -53,19 +41,13 @@ const defaultProps = {
   onKeyDown: noop,
 };
 
-/* ── Wrapper: DndContext required for useSortable ───────────────────────────── */
+/* ── Wrapper: DragDropProvider required for useSortable ─────────────────────── */
 
 function DndWrapper({ children }: { children: React.ReactNode }) {
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  );
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter}>
-      <SortableContext items={['rule-1']} strategy={verticalListSortingStrategy}>
-        {children}
-      </SortableContext>
-    </DndContext>
+    <DragDropProvider>
+      {children}
+    </DragDropProvider>
   );
 }
 
@@ -145,28 +127,22 @@ export const DomainRuleCardListSortable: Story = {
       { ...baseRule, id: 'rule-2', label: 'GitLab', domainFilter: 'gitlab.com', categoryId: null },
       { ...baseRule, id: 'rule-3', label: 'Bitbucket', domainFilter: 'bitbucket.org', categoryId: null, enabled: false },
     ];
-    const sensors = useSensors(
-      useSensor(PointerSensor),
-      useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-    );
     return (
       <Theme>
         <Box style={{ maxWidth: 680 }}>
-          <DndContext sensors={sensors} collisionDetection={closestCenter}>
-            <SortableContext items={rules.map(r => r.id)} strategy={verticalListSortingStrategy}>
-              <Flex direction="column" gap="3">
-                {rules.map((rule, index) => (
-                  <DomainRuleCard
-                    key={rule.id}
-                    {...defaultProps}
-                    rule={rule}
-                    index={index}
-                    isDomainActionDisabled={false}
-                  />
-                ))}
-              </Flex>
-            </SortableContext>
-          </DndContext>
+          <DragDropProvider>
+            <Flex direction="column" gap="3">
+              {rules.map((rule, index) => (
+                <DomainRuleCard
+                  key={rule.id}
+                  {...defaultProps}
+                  rule={rule}
+                  index={index}
+                  isDomainActionDisabled={false}
+                />
+              ))}
+            </Flex>
+          </DragDropProvider>
         </Box>
       </Theme>
     );

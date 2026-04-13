@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import type { Session, SavedTab } from '../types/session';
-import type { ChromeGroupColor } from '../components/Core/TabTree/tabTreeTypes';
+import type { ChromeGroupColor } from '../types/tabTree';
 
 export interface UseSessionEditorReturn {
   /** The session being edited (working copy) */
@@ -40,14 +40,16 @@ export function useSessionEditor(initialSession: Session): UseSessionEditorRetur
     return JSON.stringify(editedSession) !== JSON.stringify(initialSession);
   }, [editedSession, initialSession]);
 
-  const now = () => new Date().toISOString();
+  // updatedAt is intentionally NOT touched here — the save path (SessionEditDialog
+  // + sessionStorage.updateSession) is responsible for stamping the new timestamp.
+  // Bumping it on every edit would falsely flag isDirty=true on pure no-ops.
 
   function updateSessionName(name: string) {
-    setEditedSession((prev) => ({ ...prev, name, updatedAt: now() }));
+    setEditedSession((prev) => ({ ...prev, name }));
   }
 
   function updateSessionNote(note: string) {
-    setEditedSession((prev) => ({ ...prev, note: note || undefined, updatedAt: now() }));
+    setEditedSession((prev) => ({ ...prev, note: note || undefined }));
   }
 
   function applySessionUpdate(updatedSession: Session) {
@@ -55,12 +57,16 @@ export function useSessionEditor(initialSession: Session): UseSessionEditorRetur
   }
 
   function removeTab(tabId: string) {
-    setEditedSession((prev) => ({
-      ...prev,
-      ungroupedTabs: prev.ungroupedTabs.filter((t) => t.id !== tabId),
-      groups: prev.groups.map((g) => ({ ...g, tabs: g.tabs.filter((t) => t.id !== tabId) })),
-      updatedAt: now(),
-    }));
+    setEditedSession((prev) => {
+      const inUngrouped = prev.ungroupedTabs.some((t) => t.id === tabId);
+      const inGroup = prev.groups.some((g) => g.tabs.some((t) => t.id === tabId));
+      if (!inUngrouped && !inGroup) return prev;
+      return {
+        ...prev,
+        ungroupedTabs: prev.ungroupedTabs.filter((t) => t.id !== tabId),
+        groups: prev.groups.map((g) => ({ ...g, tabs: g.tabs.filter((t) => t.id !== tabId) })),
+      };
+    });
   }
 
   function updateTabUrl(tabId: string, url: string) {
@@ -71,7 +77,6 @@ export function useSessionEditor(initialSession: Session): UseSessionEditorRetur
         ...g,
         tabs: g.tabs.map((t) => (t.id === tabId ? { ...t, url } : t)),
       })),
-      updatedAt: now(),
     }));
   }
 
@@ -83,7 +88,7 @@ export function useSessionEditor(initialSession: Session): UseSessionEditorRetur
         const newIdx = direction === 'up' ? ungroupedIdx - 1 : ungroupedIdx + 1;
         if (newIdx < 0 || newIdx >= tabs.length) return prev;
         [tabs[ungroupedIdx], tabs[newIdx]] = [tabs[newIdx], tabs[ungroupedIdx]];
-        return { ...prev, ungroupedTabs: tabs, updatedAt: now() };
+        return { ...prev, ungroupedTabs: tabs };
       }
       const groups = prev.groups.map((g) => {
         const idx = g.tabs.findIndex((t) => t.id === tabId);
@@ -94,7 +99,7 @@ export function useSessionEditor(initialSession: Session): UseSessionEditorRetur
         [tabs[idx], tabs[newIdx]] = [tabs[newIdx], tabs[idx]];
         return { ...g, tabs };
       });
-      return { ...prev, groups, updatedAt: now() };
+      return { ...prev, groups };
     });
   }
 
@@ -132,7 +137,7 @@ export function useSessionEditor(initialSession: Session): UseSessionEditorRetur
         );
       }
 
-      return { ...prev, ungroupedTabs: newUngrouped, groups: newGroups, updatedAt: now() };
+      return { ...prev, ungroupedTabs: newUngrouped, groups: newGroups };
     });
   }
 
@@ -148,7 +153,6 @@ export function useSessionEditor(initialSession: Session): UseSessionEditorRetur
         ...prev,
         ungroupedTabs: newUngrouped,
         groups: prev.groups.filter((g) => g.id !== groupId),
-        updatedAt: now(),
       };
     });
   }
@@ -157,7 +161,6 @@ export function useSessionEditor(initialSession: Session): UseSessionEditorRetur
     setEditedSession((prev) => ({
       ...prev,
       groups: prev.groups.map((g) => (g.id === groupId ? { ...g, ...updates } : g)),
-      updatedAt: now(),
     }));
   }
 
@@ -169,7 +172,7 @@ export function useSessionEditor(initialSession: Session): UseSessionEditorRetur
       const newIdx = direction === 'up' ? idx - 1 : idx + 1;
       if (newIdx < 0 || newIdx >= groups.length) return prev;
       [groups[idx], groups[newIdx]] = [groups[newIdx], groups[idx]];
-      return { ...prev, groups, updatedAt: now() };
+      return { ...prev, groups };
     });
   }
 

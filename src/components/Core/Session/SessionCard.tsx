@@ -1,22 +1,22 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
+import { useSortable } from '@dnd-kit/react/sortable';
 import {
   Card, Flex, Text, IconButton, TextField,
-  DropdownMenu, Tooltip, Badge, Box,
+  DropdownMenu, HoverCard, Tooltip, Badge, Box,
 } from '@radix-ui/themes';
 import {
   MoreHorizontal, Pencil, Trash2, Check, X,
   Pin, PinOff, ChevronDown, ChevronRight,
+  Monitor, Square, Wrench, GripVertical,
 } from 'lucide-react';
 import { getMessage, getPluralMessage } from '../../../utils/i18n';
-import { countSessionTabs } from '../../../utils/sessionUtils';
+import { countSessionTabs, formatSessionDate } from '../../../utils/sessionUtils';
 import { AccessibleHighlight } from '../../UI/AccessibleHighlight/AccessibleHighlight';
-import { chromeGroupColors } from '../TabTree/tabTreeUtils';
+import { chromeGroupColors } from '../../../utils/tabTreeUtils';
 import { getRuleCategory } from '../../../schemas/enums';
 import { getRadixColor } from '../../../utils/utils';
-import { SplitButton } from '../../UI/SplitButton/SplitButton';
 import { SessionPreviewTree } from './SessionPreviewTree';
-import type { SplitButtonMenuItem } from '../../UI/SplitButton/SplitButton';
 import type { Session } from '../../../types/session';
 
 interface SessionCardProps {
@@ -42,6 +42,14 @@ interface SessionCardProps {
   searchMatchingGroupIds?: Set<string>;
   /** Raw search query used to highlight matching text in the card */
   searchQuery?: string;
+  /** Array index for drag-and-drop sorting */
+  index?: number;
+  /** Disable drag when filtering or other conditions */
+  isDragDisabled?: boolean;
+  /** Called when user clicks "Move to First" in menu */
+  onMoveToFirst?: () => void;
+  /** Called when user clicks "Move to Last" in menu */
+  onMoveLast?: () => void;
 }
 
 export function SessionCard({
@@ -58,11 +66,28 @@ export function SessionCard({
   forcePreviewOpen = false,
   searchMatchingGroupIds,
   searchQuery,
+  index = 0,
+  isDragDisabled = false,
+  onMoveToFirst,
+  onMoveLast,
 }: SessionCardProps) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [nameValue, setNameValue] = useState(session.name);
   const [renameError, setRenameError] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+
+  // Drag-and-drop sortable hook
+  const { ref, handleRef, isDragging } = useSortable({
+    id: session.id,
+    index,
+    disabled: isDragDisabled,
+  });
+
+  const dragStyle: React.CSSProperties = {
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 10 : undefined,
+    position: isDragging ? 'relative' : undefined,
+  };
 
   // When a search match forces the preview open, open it.
   // When the search is cleared (forcePreviewOpen becomes false), close it
@@ -110,27 +135,57 @@ export function SessionCard({
     [handleRenameSubmit, handleRenameCancel],
   );
 
-  const restoreMenuItems: SplitButtonMenuItem[] = [
-    {
-      label: getMessage('sessionRestoreCurrentWindow'),
-      onClick: () => onRestoreCurrentWindow(session),
-    },
-    {
-      label: getMessage('sessionRestoreNewWindow'),
-      onClick: () => onRestoreNewWindow(session),
-    },
-    {
-      label: getMessage('sessionRestoreCustomize'),
-      onClick: () => onRestore(session),
-      separator: true,
-    },
-  ];
+  // HoverCard content for session metadata
+  const hoverCardContent = (
+    <Flex direction="column" gap="2">
+      <Text size="2" weight="bold" style={{ borderBottom: '1px solid var(--gray-5)', paddingBottom: 'var(--space-2)' }}>
+        {session.name}
+      </Text>
+      <Box style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '6px 12px', alignItems: 'baseline' }}>
+        <Text size="1" weight="bold" color="gray">{getMessage('sessionCreatedLabel')}</Text>
+        <Text size="2">{formatSessionDate(session.createdAt)}</Text>
+        <Text size="1" weight="bold" color="gray">{getMessage('sessionUpdatedLabel')}</Text>
+        <Text size="2">{formatSessionDate(session.updatedAt)}</Text>
+        {session.note && (
+          <>
+            <Text size="1" weight="bold" color="gray">{getMessage('sessionNoteLabel')}</Text>
+            <Text size="2" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{session.note}</Text>
+          </>
+        )}
+      </Box>
+    </Flex>
+  );
 
   return (
-    <Card data-testid={`session-card-${session.id}`} size="2">
+    <Card
+      ref={ref}
+      data-testid={`session-card-${session.id}`}
+      size="2"
+      style={dragStyle}
+    >
       <Flex direction="column" gap="2">
-        {/* Top row: pin btn + name + category badge + restore + more menu */}
+        {/* Top row: drag handle + pin btn + name + category badge + restore + more menu */}
         <Flex align="center" gap="2">
+          {/* Drag handle */}
+          {!isRenaming && (
+            <Box
+              ref={handleRef}
+              data-testid={`session-card-${session.id}-drag-handle`}
+              aria-disabled={isDragDisabled}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: isDragDisabled ? 'not-allowed' : 'grab',
+                touchAction: 'none',
+                color: isDragDisabled ? 'var(--gray-6)' : 'var(--gray-9)',
+                flexShrink: 0,
+              }}
+            >
+              <GripVertical size={16} aria-hidden="true" />
+            </Box>
+          )}
+
           {/* Pin / Unpin button */}
           {!isRenaming && (
             <Tooltip
@@ -193,24 +248,45 @@ export function SessionCard({
               </>
             ) : (
               <>
-                <Text
-                  data-testid={`session-card-${session.id}-name`}
-                  size="3"
-                  weight="medium"
-                  onDoubleClick={() => {
+                <HoverCard.Root>
+                  <HoverCard.Trigger>
+                    <Text
+                      data-testid={`session-card-${session.id}-name`}
+                      size="3"
+                      weight="medium"
+                      onDoubleClick={() => {
+                        setNameValue(session.name);
+                        setRenameError(null);
+                        setIsRenaming(true);
+                      }}
+                      style={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        cursor: 'default',
+                      }}
+                    >
+                      <AccessibleHighlight text={session.name} searchTerm={searchQuery ?? ''} />
+                    </Text>
+                  </HoverCard.Trigger>
+                  <HoverCard.Content size="2" style={{ maxWidth: 360 }}>
+                    {hoverCardContent}
+                  </HoverCard.Content>
+                </HoverCard.Root>
+                <IconButton
+                  size="1"
+                  variant="ghost"
+                  color="gray"
+                  onClick={() => {
                     setNameValue(session.name);
                     setRenameError(null);
                     setIsRenaming(true);
                   }}
-                  style={{
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    cursor: 'default',
-                  }}
+                  aria-label={getMessage('sessionRename')}
+                  style={{ flexShrink: 0 }}
                 >
-                  <AccessibleHighlight text={session.name} searchTerm={searchQuery ?? ''} />
-                </Text>
+                  <Pencil size={14} aria-hidden="true" />
+                </IconButton>
                 {category && (
                   <Badge color={getRadixColor(category.color) as any} size="1" style={{ flexShrink: 0 }}>
                     {category.emoji} {getMessage(category.labelKey as any)}
@@ -219,18 +295,6 @@ export function SessionCard({
               </>
             )}
           </Flex>
-
-          {/* Restore button — just before "..." */}
-          {!isRenaming && (
-            <SplitButton
-              data-testid={`session-card-${session.id}-btn-restore`}
-              label={getMessage('sessionRestore')}
-              onClick={() => onRestore(session)}
-              menuItems={restoreMenuItems}
-              variant="solid"
-              size="1"
-            />
-          )}
 
           {/* More menu */}
           {!isRenaming && (
@@ -251,15 +315,33 @@ export function SessionCard({
                   <Pencil size={14} aria-hidden="true" />
                   {getMessage('sessionEdit')}
                 </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  onClick={() => {
-                    setNameValue(session.name);
-                    setRenameError(null);
-                    setIsRenaming(true);
-                  }}
-                >
-                  <Pencil size={14} aria-hidden="true" />
-                  {getMessage('sessionRename')}
+
+                <DropdownMenu.Separator />
+
+                {onMoveToFirst && (
+                  <DropdownMenu.Item onClick={onMoveToFirst} disabled={isDragDisabled}>
+                    {getMessage('sessionMoveToFirst')}
+                  </DropdownMenu.Item>
+                )}
+                {onMoveLast && (
+                  <DropdownMenu.Item onClick={onMoveLast} disabled={isDragDisabled}>
+                    {getMessage('sessionMoveLast')}
+                  </DropdownMenu.Item>
+                )}
+
+                <DropdownMenu.Separator />
+
+                <DropdownMenu.Item onClick={() => onRestoreCurrentWindow(session)}>
+                  <Monitor size={14} aria-hidden="true" />
+                  {getMessage('sessionRestoreCurrentWindow')}
+                </DropdownMenu.Item>
+                <DropdownMenu.Item onClick={() => onRestoreNewWindow(session)}>
+                  <Square size={14} aria-hidden="true" />
+                  {getMessage('sessionRestoreNewWindow')}
+                </DropdownMenu.Item>
+                <DropdownMenu.Item onClick={() => onRestore(session)}>
+                  <Wrench size={14} aria-hidden="true" />
+                  {getMessage('sessionRestoreCustomize')}
                 </DropdownMenu.Item>
 
                 <DropdownMenu.Separator />
@@ -272,8 +354,22 @@ export function SessionCard({
           )}
         </Flex>
 
+        {/* Separator between header and preview */}
+        <Box
+          my="2"
+          style={{
+            marginLeft: 'calc(-1 * var(--card-padding, var(--space-4)))',
+            marginRight: 'calc(-1 * var(--card-padding, var(--space-4)))',
+            borderTop: '1px solid var(--gray-6)',
+          }}
+        />
+
         {/* Collapsible: read-only tab/group tree preview */}
-        <Collapsible.Root open={previewOpen} onOpenChange={setPreviewOpen}>
+        <Collapsible.Root
+          open={previewOpen}
+          onOpenChange={setPreviewOpen}
+          style={{ marginTop: '-6px' }}
+        >
           <Collapsible.Trigger asChild>
             <button
               data-testid={`session-card-${session.id}-preview-toggle`}

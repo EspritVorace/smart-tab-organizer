@@ -1,4 +1,4 @@
-import type { ChromeGroupColor } from '../components/Core/TabTree/tabTreeTypes';
+import type { ChromeGroupColor } from './tabTree';
 
 /** A saved tab within a session */
 export interface SavedTab {
@@ -16,6 +16,8 @@ export interface SavedTabGroup {
   title: string;
   color: ChromeGroupColor;
   tabs: SavedTab[];
+  /** Whether the group was collapsed in Chrome when captured */
+  collapsed?: boolean;
 }
 
 /** A complete saved session snapshot */
@@ -38,4 +40,6 @@ export interface Session {
   categoryId?: string | null;
   /** Optional free-text note associated with the session */
   note?: string;
+  /** Display order (lower index = first); assigned automatically if missing */
+  position?: number;
 }

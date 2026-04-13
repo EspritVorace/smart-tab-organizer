@@ -96,8 +96,8 @@ export function setupTabUpdatedHandler(): void {
             await processTabForDeduplication(tabId, urlToCheck, tab.windowId);
         }
 
-        // URL-based fallback: when Chrome doesn't expose openerTabId in onTabCreated
-        // (e.g. tabs opened via chrome.tabs.create from the extension), look up
+        // URL-based fallback: when the browser doesn't expose openerTabId in onTabCreated
+        // (e.g. tabs opened via browser.tabs.create from the extension), look up
         // middleClickedTabs by the navigated URL instead.
         // openerTabId-based fallback: handles the combination of SW timing race
         // (message arrives after onTabCreated) + URL mismatch (e.g. Chrome transparently
