@@ -1,6 +1,87 @@
 ---
 title: Sources de nom de groupe
-description: Comment SmartTab Organizer détermine le nom d'un groupe à partir du titre de l'onglet, du domaine, du chemin URL ou d'une valeur personnalisée.
+description: Comment SmartTab Organizer détermine le nom d'un groupe à partir du titre de l'onglet, de l'URL ou d'une valeur personnalisée, et comportement de chaque mode en cas d'échec.
 ---
 
-{/* TODO: contenu à rédiger */}
+import { Aside } from '@astrojs/starlight/components';
+
+Quand SmartTab Organizer crée un groupe Chrome, il lui attribue un nom. Ce nom est déterminé par le **mode de nommage** configuré dans la règle de domaine. Certains modes extraient le nom depuis le contenu de l'onglet, d'autres demandent votre avis.
+
+## Le principe d'extraction par regex
+
+Les modes qui extraient un nom depuis l'onglet parent utilisent une expression régulière. L'extension applique cette regex au titre de la page ou à son URL, et retient le contenu du **premier groupe de capture** `(...)`.
+
+Par exemple, la regex `^([^·]+)` appliquée au titre `PROJ-42 · Mon projet Jira` retourne `PROJ-42`.
+
+Une regex syntaxiquement invalide est ignorée sans faire planter l'extension. La tentative passe à l'étape suivante dans la chaîne de repli du mode concerné.
+
+## Comment le mode est choisi
+
+Lors de la création ou de l'édition d'une règle, trois segments sont proposés : **Preset**, **Demander** et **Manuel**.
+
+**Preset** délègue entièrement le choix du mode au preset sélectionné. Chaque preset embarque un mode de nommage recommandé adapté au site visé. Ce mode peut être n'importe lequel des modes disponibles (Titre, URL, Intelligent, Intelligent + Label ou Intelligent + Demander). C'est l'approche recommandée pour les sites courants car le preset configure aussi les regex automatiquement.
+
+**Demander** fixe le mode à "Demander" : une invite de saisie apparait à chaque création de groupe.
+
+**Manuel** vous laisse choisir explicitement le mode parmi les cinq options disponibles, et saisir vous-même les expressions régulières si nécessaire.
+
+## Les modes de nommage
+
+### Demander
+
+Une invite de saisie apparait à chaque création de groupe. Le label de la règle est proposé comme valeur par défaut.
+
+Si vous validez avec un nom, le groupe est renommé avec ce nom. Si vous annulez l'invite, les onglets qui venaient d'être regroupés sont immédiatement dégroupés.
+
+### Titre
+
+L'extension tente d'extraire le nom depuis le **titre de la page** parente. En cas d'échec, elle tente l'extraction depuis l'**URL**.
+
+Si les deux extractions échouent, l'onglet n'est **pas groupé**.
+
+<Aside type="caution">
+En mode Titre (et en mode URL ci-dessous), l'absence de correspondance regex empêche totalement le groupage. Vérifiez vos expressions régulières avant d'enregistrer la règle.
+</Aside>
+
+### URL
+
+L'extension tente d'extraire le nom depuis l'**URL** de l'onglet parent. En cas d'échec, elle tente l'extraction depuis le **titre**.
+
+Si les deux extractions échouent, l'onglet n'est **pas groupé**.
+
+### Intelligent
+
+L'extension tente l'extraction depuis le titre puis depuis l'URL, en utilisant les regex du preset sélectionné.
+
+Si les deux extractions échouent, l'onglet n'est **pas groupé**.
+
+### Intelligent + Label
+
+Même stratégie d'extraction que le mode Intelligent. En cas d'échec, le **label de la règle** est utilisé comme nom de repli.
+
+Ce mode garantit qu'un groupe est toujours créé, même quand la regex ne correspond pas.
+
+### Intelligent + Demander
+
+Même stratégie d'extraction que le mode Intelligent. En cas d'échec, une invite de saisie est présentée, comme en mode Demander. Si vous annulez l'invite, les onglets sont dégroupés.
+
+Ce mode combine l'extraction automatique et la saisie manuelle comme filet de sécurité.
+
+## Tableau de synthèse
+
+| Mode | Étape 1 | Étape 2 | Étape 3 |
+|---|---|---|---|
+| Demander | Invite utilisateur | Dégroupage si annulation | |
+| Titre | Extraction titre | Extraction URL | Pas de groupage |
+| URL | Extraction URL | Extraction titre | Pas de groupage |
+| Intelligent | Extraction titre (preset) | Extraction URL (preset) | Pas de groupage |
+| Intelligent + Label | Extraction titre (preset) | Extraction URL (preset) | Label de la règle |
+| Intelligent + Demander | Extraction titre (preset) | Extraction URL (preset) | Invite utilisateur, dégroupage si annulation |
+
+---
+
+## Voir aussi
+
+- [Comment fonctionne le groupement](/concepts/groupement) : conditions de déclenchement et comportement général
+- [Presets regex](/fonctionnalites/regles/presets-regex) : utiliser les patterns intégrés pour configurer automatiquement le mode et les regex
+- [Liste des presets](/annexes/presets-regex) : tableau de référence des 50 presets disponibles
