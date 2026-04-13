@@ -71,34 +71,6 @@ export async function updateSyncSettings(updates: Partial<SyncSettings>): Promis
   }
 }
 
-export async function getGlobalGroupingEnabled(): Promise<boolean> {
-  try {
-    return await globalGroupingEnabledItem.getValue();
-  } catch (error) {
-    logger.error('Error getting global grouping enabled:', error);
-    return defaultSyncSettings.globalGroupingEnabled;
-  }
-}
-
-export async function getGlobalDeduplicationEnabled(): Promise<boolean> {
-  try {
-    return await globalDeduplicationEnabledItem.getValue();
-  } catch (error) {
-    logger.error('Error getting global deduplication enabled:', error);
-    return defaultSyncSettings.globalDeduplicationEnabled;
-  }
-}
-
-export async function getDomainRules(): Promise<SyncSettings['domainRules']> {
-  try {
-    return await domainRulesItem.getValue();
-  } catch (error) {
-    logger.error('Error getting domain rules:', error);
-    return defaultSyncSettings.domainRules;
-  }
-}
-
-// getRegexPresets function removed - presets are now static in JSON file
 
 /**
  * Écouter les changements de settings

@@ -16,7 +16,7 @@ import {
 } from '../../../utils/conflictDetection';
 import { restoreTabs } from '../../../utils/tabRestore';
 import type { Session } from '../../../types/session';
-import type { TabTreeData } from '../../Core/TabTree/tabTreeTypes';
+import type { TabTreeData } from '../../../types/tabTree';
 
 type RestoreTarget = 'current' | 'new';
 

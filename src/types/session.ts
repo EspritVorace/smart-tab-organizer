@@ -1,4 +1,4 @@
-import type { ChromeGroupColor } from '../components/Core/TabTree/tabTreeTypes';
+import type { ChromeGroupColor } from './tabTree';
 
 /** A saved tab within a session */
 export interface SavedTab {
