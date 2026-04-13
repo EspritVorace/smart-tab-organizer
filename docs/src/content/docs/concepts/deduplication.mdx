@@ -1,6 +1,68 @@
 ---
 title: Modes de déduplication
-description: Les quatre modes de détection des onglets en doublon (URL exacte, chemin, domaine, sous-chaîne) illustrés par des exemples concrets.
+description: Les deux modes de détection des onglets en doublon (URL exacte et sous-chaîne) illustrés par des exemples concrets.
 ---
 
-{/* TODO: contenu à rédiger */}
+import { Aside } from '@astrojs/starlight/components';
+
+La déduplication évite d'accumuler plusieurs onglets pointant vers la même page. Quand vous ouvrez un lien déjà ouvert dans votre navigateur, SmartTab Organizer ferme le nouvel onglet et remet le focus sur l'onglet existant.
+
+## Conditions pour qu'une déduplication se déclenche
+
+Comme pour le groupement, trois conditions doivent être réunies :
+
+1. Le **toggle de déduplication global** est activé (popup ou page Paramètres).
+2. Une **règle de domaine** correspond au domaine de l'onglet ouvert.
+3. Cette règle a son option **Déduplication** activée.
+
+Un domaine sans règle correspondante utilise le paramètre global. Si la règle d'un domaine désactive la déduplication, les doublons sont conservés même si le toggle global est activé.
+
+<Aside type="caution">
+Les URL avec des schémas spéciaux (`chrome:`, `chrome-extension:`, `about:`) sont ignorées par la déduplication.
+</Aside>
+
+## Les deux modes de correspondance
+
+### URL exacte
+
+Deux onglets sont considérés comme doublons uniquement si leurs URL sont identiques au caractère près : même protocole, même domaine, même chemin, même paramètres de requête et même fragment.
+
+| URL existante | Nouvel onglet | Résultat |
+|---|---|---|
+| `https://example.com/page?lang=fr` | `https://example.com/page?lang=fr` | Doublon, fermé |
+| `https://example.com/page?lang=fr` | `https://example.com/page?lang=en` | Distinct, conservé |
+| `https://example.com/page#section1` | `https://example.com/page#section1` | Doublon, fermé |
+| `https://example.com/page#section1` | `https://example.com/page#section2` | Distinct, conservé |
+
+Ce mode est adapté aux sites où les paramètres d'URL ont une signification fonctionnelle (filtres, langues, identifiants).
+
+### Sous-chaîne (includes)
+
+Deux onglets sont considérés comme doublons si l'URL de l'un est contenue dans l'URL de l'autre.
+
+| URL existante | Nouvel onglet | Résultat |
+|---|---|---|
+| `https://example.com/products/item/123` | `https://example.com/products/item` | Doublon, fermé |
+| `https://example.com/products` | `https://example.com/about` | Distinct, conservé |
+
+Ce mode est adapté aux sites où naviguer en profondeur dans une section ne doit pas créer de doublons par rapport à la page parente.
+
+## Notification et bouton Annuler
+
+Quand le paramètre **Notifier lors d'une déduplication** est activé dans les Paramètres, une notification native du navigateur apparait après chaque fermeture de doublon. Elle indique le titre de l'onglet fermé et propose un bouton **Annuler**.
+
+Cliquer sur **Annuler** rouvre l'onglet fermé dans la même fenêtre et le rend actif. Pour éviter qu'il soit immédiatement refermé à nouveau, sa déduplication est suspendue pendant 10 secondes. La notification se ferme automatiquement après 5 secondes si vous n'interagissez pas.
+
+Ce paramètre est indépendant du paramètre équivalent pour le groupement : vous pouvez activer les notifications uniquement pour la déduplication, uniquement pour le groupement, pour les deux, ou pour aucun.
+
+## Activer et désactiver la déduplication
+
+Le comportement est identique au groupement : un toggle global prévaut sur les réglages individuels par règle, et chaque règle peut désactiver la déduplication indépendamment du global.
+
+---
+
+## Voir aussi
+
+- [Comment fonctionne le groupement](/concepts/groupement) : le mécanisme parallèle pour organiser les onglets en groupes
+- [Paramètres](/fonctionnalites/parametres) : configurer les notifications de déduplication et de groupement
+- [Créer une règle](/fonctionnalites/regles/creer-une-regle) : choisir le mode de déduplication lors de la configuration d'une règle
