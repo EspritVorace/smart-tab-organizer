@@ -63,14 +63,14 @@ src/
   components/
     Core/          # DomainRule/ · Session/ · Statistics/ · TabTree/
     UI/            # AccessibleHighlight/ · Header/ · PopupHeader/ · PopupToolbar/
-                   # PopupProfilesList/ · PageLayout/ · Sidebar/ · ImportExportPage/
+                   # PopupProfilesList/ · PageLayout/ · Sidebar/ · ImportExportWizards/
                    # SessionWizards/ · SettingsPage/ · SettingsToggles/ · WizardStepper/
                    # SplitButton/ · ConfirmDialog/ · StatusBadge/ · ThemeToggle/
                    # DataTable/ · OptionsLayout/
     Form/          # FormFields/ · themed-callouts/ · themes/
   hooks/           # useSyncedState · useSyncedSettings · useStatistics · useSessions
                    # useSessionEditor · useDeepLinking
-  pages/           # DomainRulesPage · SessionsPage · StatisticsPage · options.tsx · popup.tsx
+  pages/           # DomainRulesPage · SessionsPage · StatisticsPage · ImportExportPage · options.tsx · popup.tsx
   schemas/         # Zod schemas
   types/           # TS types + tabTree (shared TabTree types)
   utils/           # i18n · logger · sessionStorage · sessionUtils · tabCapture · tabRestore

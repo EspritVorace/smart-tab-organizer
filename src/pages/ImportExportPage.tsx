@@ -1,13 +1,13 @@
 import React, { useState, useCallback } from 'react';
 import { Button, Flex, Box, Card, Text, Grid } from '@radix-ui/themes';
 import { Download, Upload, FileText } from 'lucide-react';
-import { PageLayout } from '../PageLayout/PageLayout';
-import { getMessage } from '../../../utils/i18n';
-import { ExportWizard } from './ExportWizard';
-import { ImportWizard } from './ImportWizard';
-import { ExportSessionsWizard } from './ExportSessionsWizard';
-import { ImportSessionsWizard } from './ImportSessionsWizard';
-import type { SyncSettings, DomainRuleSetting } from '../../../types/syncSettings';
+import { PageLayout } from '../components/UI/PageLayout/PageLayout';
+import { getMessage } from '../utils/i18n';
+import { ExportWizard } from '../components/UI/ImportExportWizards/ExportWizard';
+import { ImportWizard } from '../components/UI/ImportExportWizards/ImportWizard';
+import { ExportSessionsWizard } from '../components/UI/ImportExportWizards/ExportSessionsWizard';
+import { ImportSessionsWizard } from '../components/UI/ImportExportWizards/ImportSessionsWizard';
+import type { SyncSettings, DomainRuleSetting } from '../types/syncSettings';
 
 interface ImportExportPageProps {
   syncSettings: SyncSettings;
