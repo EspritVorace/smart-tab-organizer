@@ -197,3 +197,22 @@
 - [ ] Si une note est redigee, elle est incluse : `{ note: "...", sessions: [...] }`.
 - [ ] A l'import, le wizard accepte les deux formats : le nouveau format enveloppe et l'ancien format (tableau brut `[...]`) pour la retro-compatibilite.
 - [ ] Le schema Zod `importSessionsDataSchema` valide les deux formats.
+
+---
+
+## US-IE013 : Sous-groupement pinned/normal dans l'export de sessions
+
+**En tant qu'** utilisateur qui exporte des sessions,
+**je veux** que la liste de selection dans le wizard d'export soit organisee en deux sous-groupes (sessions epinglees, sessions normales),
+**afin de** selectionner plus facilement les sessions selon leur statut.
+
+### Criteres d'acceptation
+
+- [ ] Si des sessions epinglees existent, elles sont affichees dans un sous-groupe « Pinned Sessions » avec un en-tete (icone `Pin` + titre + checkbox de groupe).
+- [ ] Si des sessions normales existent, elles sont affichees dans un sous-groupe « Sessions » avec un en-tete (icone `Archive` + titre + checkbox de groupe).
+- [ ] Les deux sous-groupes sont separes par un `Separator` si les deux existent.
+- [ ] La checkbox de groupe permet de selectionner/deselectionner toutes les sessions du sous-groupe.
+- [ ] La checkbox de groupe affiche un etat indeterminate si seulement une partie des sessions du groupe est selectionnee.
+- [ ] Le badge individuel « Pinned » est retire des lignes de session dans l'export (le groupement le rend redondant).
+- [ ] Les boutons « Select all » / « Deselect all » globaux continuent de fonctionner sur l'ensemble des sessions.
+- [ ] Si toutes les sessions sont du meme type (toutes epinglees ou toutes normales), un seul sous-groupe est affiche sans en-tete de sous-groupe.
