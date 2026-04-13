@@ -19,7 +19,7 @@ import { useState } from 'react';
 import { DomainRulesPage } from './DomainRulesPage';
 import { StatisticsPage } from './StatisticsPage';
 import { SettingsPage } from '../components/UI/SettingsPage/SettingsPage';
-import { ImportExportPage } from '../components/UI/ImportExportPage/ImportExportPage';
+import { ImportExportPage } from './ImportExportPage';
 import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { Shield, FileText, BarChart3, Settings, Archive } from 'lucide-react';
 import { FEATURE_BASE_COLORS } from '../utils/themeConstants';

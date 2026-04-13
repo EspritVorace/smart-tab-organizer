@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ScrollArea } from '@radix-ui/themes';
 import { GroupRowBase } from '../TabTree/GroupRowBase';
 import { TabRowBase } from '../TabTree/TabRowBase';
-import { extractDomain } from '../TabTree/tabTreeUtils';
+import { extractDomain } from '../../../utils/tabTreeUtils';
 import type { Session } from '../../../types/session';
 
 interface SessionPreviewTreeProps {

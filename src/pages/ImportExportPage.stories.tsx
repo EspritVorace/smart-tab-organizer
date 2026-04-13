@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ImportExportPage } from './ImportExportPage';
-import { defaultSyncSettings } from '../../../types/syncSettings';
-import type { SyncSettings } from '../../../types/syncSettings';
+import { defaultSyncSettings } from '../types/syncSettings';
+import type { SyncSettings } from '../types/syncSettings';
 
 const mockSyncSettingsWithRules: SyncSettings = {
   ...defaultSyncSettings,
@@ -49,7 +49,7 @@ const mockSyncSettingsWithRules: SyncSettings = {
 };
 
 const meta: Meta<typeof ImportExportPage> = {
-  title: 'Components/UI/ImportExportPage/ImportExportPage',
+  title: 'Pages/ImportExportPage',
   component: ImportExportPage,
   parameters: {
     layout: 'fullscreen',

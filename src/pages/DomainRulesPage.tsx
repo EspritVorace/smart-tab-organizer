@@ -6,7 +6,7 @@ import { move } from '@dnd-kit/helpers';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { RuleWizardModal } from '../components/Core/DomainRule/RuleWizardModal';
-import { ImportWizard } from '../components/UI/ImportExportPage/ImportWizard';
+import { ImportWizard } from '../components/UI/ImportExportWizards/ImportWizard';
 import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
 import { getMessage } from '../utils/i18n';
 import { foldAccents } from '../utils/stringUtils';

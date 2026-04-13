@@ -3,7 +3,7 @@ import { Popover, Tooltip } from '@radix-ui/themes';
 import { getMessage } from '../../../utils/i18n';
 import { RULE_CATEGORIES, getRuleCategory } from '../../../schemas/enums';
 import type { RuleCategoryId } from '../../../schemas/enums';
-import { chromeGroupColors } from '../TabTree/tabTreeUtils';
+import { chromeGroupColors } from '../../../utils/tabTreeUtils';
 import styles from './CategoryPicker.module.css';
 
 export interface CategoryPickerProps {

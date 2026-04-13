@@ -1,5 +1,5 @@
 import type { Session, SavedTab, SavedTabGroup } from '../types/session';
-import type { TabTreeData, TabItem, TabGroupItem } from '../components/Core/TabTree/tabTreeTypes';
+import type { TabTreeData, TabItem, TabGroupItem } from '../types/tabTree';
 import { generateUUID } from './utils';
 import { foldAccents } from './stringUtils';
 import { getMessage } from './i18n';

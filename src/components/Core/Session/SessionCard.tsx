@@ -13,7 +13,7 @@ import {
 import { getMessage, getPluralMessage } from '../../../utils/i18n';
 import { countSessionTabs, formatSessionDate } from '../../../utils/sessionUtils';
 import { AccessibleHighlight } from '../../UI/AccessibleHighlight/AccessibleHighlight';
-import { chromeGroupColors } from '../TabTree/tabTreeUtils';
+import { chromeGroupColors } from '../../../utils/tabTreeUtils';
 import { getRuleCategory } from '../../../schemas/enums';
 import { getRadixColor } from '../../../utils/utils';
 import { SessionPreviewTree } from './SessionPreviewTree';

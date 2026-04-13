@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { extractDomain, countTotalTabs, buildTreeViewData, chromeGroupColors } from '../../src/components/Core/TabTree/tabTreeUtils';
-import type { TabTreeData } from '../../src/components/Core/TabTree/tabTreeTypes';
+import { extractDomain, countTotalTabs, buildTreeViewData, chromeGroupColors } from '../../src/utils/tabTreeUtils';
+import type { TabTreeData } from '../../src/types/tabTree';
 
 /* ─── Test data factories ─── */
 

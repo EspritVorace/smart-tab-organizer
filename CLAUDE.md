@@ -35,7 +35,7 @@ pnpm screenshots                          # Deterministic multi-locale/theme scr
 - `src/entrypoints/popup.html` / `options.html`
 
 ### Background Modules (`src/background/`)
-`index.ts` · `grouping.ts` · `deduplication.ts` · `event-handlers.ts` · `messaging.ts` · `settings.ts`
+`index.ts` · `grouping.ts` · `deduplication.ts` · `event-handlers.ts` · `messaging.ts` · `settings.ts` · `organize.ts`
 
 ### Storage
 | Backend | Contents |
@@ -47,7 +47,7 @@ pnpm screenshots                          # Deterministic multi-locale/theme scr
 `useSyncedSettings` hook uses refs to prevent race conditions. `useSyncedState` unifies synchronized storage access for settings and statistics.
 
 ### Schemas & Types
-- `src/schemas/` — Zod schemas: `common`, `domainRule`, `enums`, `importExport`, `session`, `index`
+- `src/schemas/` — Zod schemas: `common`, `domainRule`, `enums`, `importExport`, `session`
 - `src/schemas/importExport.ts` — relaxed schema (no form-level refinements) for import validation
 - `src/types/` — TS types extending Zod-inferred types (e.g. `DomainRuleSetting` adds `enabled`, `badge`), plus `messages.ts` (inter-component message types)
 
@@ -63,20 +63,20 @@ src/
   components/
     Core/          # DomainRule/ · Session/ · Statistics/ · TabTree/
     UI/            # AccessibleHighlight/ · Header/ · PopupHeader/ · PopupToolbar/
-                   # PopupProfilesList/ · PageLayout/ · Sidebar/ · ImportExportPage/
+                   # PopupProfilesList/ · PageLayout/ · Sidebar/ · ImportExportWizards/
                    # SessionWizards/ · SettingsPage/ · SettingsToggles/ · WizardStepper/
                    # SplitButton/ · ConfirmDialog/ · StatusBadge/ · ThemeToggle/
-                   # Combobox/ · DataTable/ · OptionsLayout/
+                   # DataTable/ · OptionsLayout/
     Form/          # FormFields/ · themed-callouts/ · themes/
   hooks/           # useSyncedState · useSyncedSettings · useStatistics · useSessions
-                   # useSessionEditor · useModal · useDeepLinking
-  pages/           # DomainRulesPage · SessionsPage · StatisticsPage · options.tsx · popup.tsx
+                   # useSessionEditor · useDeepLinking
+  pages/           # DomainRulesPage · SessionsPage · StatisticsPage · ImportExportPage · options.tsx · popup.tsx
   schemas/         # Zod schemas
-  types/           # TS types
+  types/           # TS types + tabTree (shared TabTree types)
   utils/           # i18n · logger · sessionStorage · sessionUtils · tabCapture · tabRestore
                    # conflictDetection · deduplicationSkip · importClassification
                    # sessionClassification · sessionOrderUtils · ruleOrderUtils
-                   # presetsToSearchableGroups · nameUtils · stringUtils · migration
+                   # presetsToSearchableGroups · stringUtils · migration · tabTreeUtils
                    # storageItems · sessionsHelpPrefs · settingsUtils · statisticsUtils
                    # themeConstants · notifications · utils
   styles/          # radix-themes.css (custom focus for non-Radix markup only)
