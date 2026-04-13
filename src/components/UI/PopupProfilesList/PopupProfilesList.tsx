@@ -39,9 +39,7 @@ export function PopupProfilesList() {
 
   useEffect(() => {
     loadSessions().then((all) => {
-      const pinned = all
-        .filter((s) => s.isPinned)
-        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+      const pinned = all.filter((s) => s.isPinned);
       setPinnedSessions(pinned);
     });
   }, []);
