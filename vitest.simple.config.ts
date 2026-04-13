@@ -22,7 +22,7 @@ export default defineConfig({
       'tests/**/*.test.tsx'
     ],
     exclude: [],
-    setupFiles: ['./tests/setup.ts', './tests/setup-ui.ts'],
+    setupFiles: ['./tests/setup.ts', './tests/setup-ui.ts', './tests/setup-storybook.ts'],
     // Désactiver le parallélisme pour éviter les conflits de state
     fileParallelism: false,
     reporters: [
