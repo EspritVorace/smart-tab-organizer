@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.1.3 — since 1.1.2
+
+### New Features
+- Separate pinned and unpinned sessions into distinct sections in the Sessions page
+
+### Improvements
+- Maintain pinned sessions in their original storage order
+- Remove unused files and clean up dead code
+- Adjust edit pencil icon position in session cards following UI redesign
+
 ## 1.1.2 — since 1.1.1
 
 ### New Features
