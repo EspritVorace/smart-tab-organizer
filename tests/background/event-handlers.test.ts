@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { tab } from './_helpers';
 
 // ---- Listener capture -------------------------------------------------------
 // Capture callbacks passed to addListener so tests can invoke them directly.
@@ -86,10 +87,6 @@ const mockedFindOpener = findMiddleClickOpener as ReturnType<typeof vi.fn>;
 const mockedProcessDedup = processTabForDeduplication as ReturnType<typeof vi.fn>;
 const mockedProcessGrouping = processGroupingForNewTab as ReturnType<typeof vi.fn>;
 const mockedOrganize = handleOrganizeAllTabs as ReturnType<typeof vi.fn>;
-
-function tab(id: number, overrides: Record<string, any> = {}) {
-  return { id, url: 'https://example.com', status: 'complete', ...overrides };
-}
 
 beforeEach(() => {
   vi.clearAllMocks();
