@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
-import { Button, Text, Flex, Box, Checkbox, IconButton, TextField, Separator } from '@radix-ui/themes';
-import { Plus, Eye, EyeOff, Shield, Search, AlertCircle, Upload, Trash2 } from 'lucide-react';
+import { Button, Text, Flex, Box, Checkbox, IconButton, Separator } from '@radix-ui/themes';
+import { Plus, Eye, EyeOff, Shield, AlertCircle, Upload, Trash2 } from 'lucide-react';
 import { DragDropProvider, type DragEndEvent, type DragOverEvent } from '@dnd-kit/react';
 import { move } from '@dnd-kit/helpers';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
@@ -8,6 +8,7 @@ import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { RuleWizardModal } from '../components/Core/DomainRule/RuleWizardModal';
 import { ImportWizard } from '../components/UI/ImportExportWizards/ImportWizard';
 import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
+import { ListToolbar } from '../components/UI/ListToolbar';
 import { getMessage } from '../utils/i18n';
 import { foldAccents } from '../utils/stringUtils';
 import { generateUUID } from '../utils/utils';
@@ -100,7 +101,7 @@ function RulesEmptyState({ hasRules, hasSearch, onAddRule, onImport }: RulesEmpt
           {getMessage('rulesEmptyDescription')}
         </Text>
         <Flex gap="2">
-          <Button variant="soft" onClick={onAddRule}>
+          <Button data-testid="page-rules-btn-add" variant="soft" onClick={onAddRule}>
             <Plus size={14} aria-hidden="true" />
             {getMessage('addRule')}
           </Button>
@@ -339,25 +340,22 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
       >
         {() => (
           <Box data-testid="page-rules">
-            {/* Toolbar: Search + Add */}
-            <Flex data-testid="page-rules-toolbar" gap="3" mb="4" align="center">
-              <Box style={{ flex: 1 }}>
-                <TextField.Root
-                  data-testid="page-rules-search"
-                  placeholder={getMessage('searchRules')}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                >
-                  <TextField.Slot>
-                    <Search size={16} />
-                  </TextField.Slot>
-                </TextField.Root>
-              </Box>
-              <Button data-testid="page-rules-btn-add" onClick={handleAddRule}>
-                <Plus size={16} />
-                {getMessage('addRule')}
-              </Button>
-            </Flex>
+            {/* Toolbar: Search + Add (hidden when no rules exist) */}
+            {syncSettings.domainRules.length > 0 && (
+              <ListToolbar
+                testId="page-rules-toolbar"
+                searchTestId="page-rules-search"
+                searchPlaceholder={getMessage('searchRules')}
+                searchValue={searchTerm}
+                onSearchChange={setSearchTerm}
+                action={
+                  <Button data-testid="page-rules-btn-add" onClick={handleAddRule}>
+                    <Plus size={16} aria-hidden="true" />
+                    {getMessage('addRule')}
+                  </Button>
+                }
+              />
+            )}
 
             {selectedIds.size > 0 && (
               <BulkActionsBar

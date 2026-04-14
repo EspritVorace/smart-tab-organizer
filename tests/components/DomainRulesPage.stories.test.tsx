@@ -15,8 +15,12 @@ describe('DomainRulesPage (portable stories)', () => {
     expect(screen.getByTestId('page-rules-list')).toBeInTheDocument();
   });
 
-  it('shows empty state when no rules', () => {
+  it('shows empty state when no rules and hides the toolbar', () => {
     render(<DomainRulesPageEmpty />);
     expect(screen.getByTestId('page-rules-empty')).toBeInTheDocument();
+    // Add button is present in the empty placeholder (same testid as the toolbar button, mutually exclusive).
+    expect(screen.getByTestId('page-rules-btn-add')).toBeInTheDocument();
+    // Toolbar is hidden when there are no rules (search is useless, add is already in the placeholder).
+    expect(screen.queryByTestId('page-rules-toolbar')).not.toBeInTheDocument();
   });
 });
