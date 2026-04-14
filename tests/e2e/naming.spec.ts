@@ -77,7 +77,7 @@ test.describe('Group Naming Modes', () => {
 
       const groups = await helpers.getTabGroups();
       // Group should have been ungrouped because the user cancelled the prompt
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
 
     test('manual mode with no content script: falls back to null (ungroup) [US-G011]', async ({
@@ -100,7 +100,7 @@ test.describe('Group Naming Modes', () => {
       await new Promise(r => setTimeout(r, 2000));
 
       const groups = await helpers.getTabGroups();
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
   });
 
@@ -204,7 +204,7 @@ test.describe('Group Naming Modes', () => {
       await helpers.waitForGrouping();
       const groups = await helpers.getTabGroups();
       // Smart mode without fallback: no grouping when extraction fails
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
 
     test('smart mode: ne groupe pas quand les deux regex échouent [US-G012]', async ({
@@ -228,7 +228,7 @@ test.describe('Group Naming Modes', () => {
       await helpers.waitForGrouping();
       const groups = await helpers.getTabGroups();
       // Smart mode without fallback: no grouping when extraction fails
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
   });
 
@@ -286,7 +286,7 @@ test.describe('Group Naming Modes', () => {
 
       const groups = await helpers.getTabGroups();
       // Extraction fails → prompt shown → Playwright dismisses → ungroup
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
   });
 
@@ -429,7 +429,7 @@ test.describe('Group Naming Modes', () => {
       // Should not crash; smart mode without fallback → no grouping when extraction fails
       await helpers.waitForGrouping();
       const groups = await helpers.getTabGroups();
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
   });
 
@@ -544,7 +544,7 @@ test.describe('Group Naming Modes', () => {
       // Extension should not crash; title mode without fallback → no grouping when extraction fails
       await helpers.waitForGrouping();
       const groups = await helpers.getTabGroups();
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
 
     test('regex without capture group: ne groupe pas (title, sans fallback) [US-G017]', async ({ helpers }) => {
@@ -568,7 +568,7 @@ test.describe('Group Naming Modes', () => {
       // Without capture group, extraction returns null → title mode has no fallback → no grouping
       await helpers.waitForGrouping();
       const groups = await helpers.getTabGroups();
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
   });
 });

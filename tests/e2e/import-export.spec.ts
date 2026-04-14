@@ -233,8 +233,8 @@ test.describe('Import / Export', () => {
       await page.waitForTimeout(200);
 
       // No error and no success indicator
-      await expect(dialog.getByText('Invalid JSON format')).not.toBeVisible();
-      await expect(dialog.getByText(/rule.*found/i)).not.toBeVisible();
+      await expect(dialog.getByText('Invalid JSON format')).toBeHidden();
+      await expect(dialog.getByText(/rule.*found/i)).toBeHidden();
 
       await page.close();
     });
@@ -614,7 +614,7 @@ test.describe('Import / Export', () => {
       await page.waitForTimeout(1000);
 
       // Dialog should close after import
-      await expect(page.getByRole('dialog')).not.toBeVisible();
+      await expect(page.getByRole('dialog')).toBeHidden();
 
       await page.close();
     });

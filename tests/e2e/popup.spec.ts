@@ -89,7 +89,7 @@ test.describe('[US-PO02] Pinned sessions list', () => {
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
-    await expect(page.getByText('Pinned sessions')).not.toBeVisible();
+    await expect(page.getByText('Pinned sessions')).toBeHidden();
     await page.close();
   });
 
@@ -132,7 +132,7 @@ test.describe('[US-PO02] Pinned sessions list', () => {
     await goToPopup(page, extensionId);
 
     await expect(page.getByText('Visible Pinned')).toBeVisible();
-    await expect(page.getByText('Hidden Snapshot')).not.toBeVisible();
+    await expect(page.getByText('Hidden Snapshot')).toBeHidden();
     await page.close();
   });
 

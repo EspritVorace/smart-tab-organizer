@@ -130,7 +130,7 @@ test.describe('[US-PIN-ORDER] Popup pinned sessions order', () => {
     await expect(page.getByText('Pinned 2', { exact: true })).toBeVisible();
 
     // Verify unpinned session is NOT in the popup
-    await expect(page.getByText('Unpinned 1')).not.toBeVisible();
+    await expect(page.getByText('Unpinned 1')).toBeHidden();
 
     await page.close();
   });

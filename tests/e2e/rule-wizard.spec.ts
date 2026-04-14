@@ -334,7 +334,7 @@ test.describe('Creation wizard — Step 4: Summary', () => {
     await page.waitForTimeout(400);
 
     // Dialog closed
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     // Rule appears in list
     await expect(page.getByRole('row', { name: /Brand New Rule/i })).toBeVisible();
     await page.close();
@@ -382,7 +382,7 @@ test.describe('Edit mode — Summary View', () => {
     await dialog.getByRole('button', { name: /save/i }).click();
     await page.waitForTimeout(400);
 
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     await expect(page.getByRole('row', { name: /Renamed Rule/i })).toBeVisible();
     await page.close();
   });
@@ -426,7 +426,7 @@ test.describe('Edit mode — Summary View', () => {
     await dialog.waitFor({ state: 'visible' });
 
     // Dedup switch not visible (options collapsed)
-    await expect(dialog.locator('[role="switch"]')).not.toBeVisible();
+    await expect(dialog.locator('[role="switch"]')).toBeHidden();
 
     // Click the collapsible trigger to expand
     const optionsTrigger = dialog.getByRole('button', { name: /options/i });
@@ -453,7 +453,7 @@ test.describe('Keyboard navigation', () => {
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
 
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     await page.close();
   });
 });

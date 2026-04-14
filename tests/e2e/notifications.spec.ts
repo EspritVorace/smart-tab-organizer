@@ -136,7 +136,7 @@ test.describe('Notifications', () => {
 
       const notificationIds = await getNotificationIds(sw);
       const smartTabNotifs = notificationIds.filter(id => id.startsWith('smarttab-'));
-      expect(smartTabNotifs.length).toBe(0);
+      expect(smartTabNotifs).toHaveLength(0);
     });
 
     test('clicking Undo on a grouping notification ungroups the tabs [US-N001]', async ({
@@ -175,7 +175,7 @@ test.describe('Notifications', () => {
 
       const groups = await helpers.getTabGroups();
       // Undo should have ungrouped the tabs
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
   });
 
@@ -248,7 +248,7 @@ test.describe('Notifications', () => {
 
       const notificationIds = await getNotificationIds(sw);
       const smartTabNotifs = notificationIds.filter(id => id.startsWith('smarttab-'));
-      expect(smartTabNotifs.length).toBe(0);
+      expect(smartTabNotifs).toHaveLength(0);
     });
 
     test('clicking Undo on a deduplication notification reopens the closed tab [US-N002]', async ({
@@ -502,7 +502,7 @@ test.describe('Notifications', () => {
       await new Promise(r => setTimeout(r, 500));
       const afterDedup = await getNotificationIds(sw);
       const smartTabAfterDedup = afterDedup.filter(id => id.startsWith('smarttab-'));
-      expect(smartTabAfterDedup.length).toBe(0);
+      expect(smartTabAfterDedup).toHaveLength(0);
 
       // Now trigger grouping (SHOULD generate a notification)
       await helpers.clearDomainRules();
@@ -561,7 +561,7 @@ test.describe('Notifications', () => {
       await new Promise(r => setTimeout(r, 500));
       const afterGrouping = await getNotificationIds(sw);
       const smartTabAfterGrouping = afterGrouping.filter(id => id.startsWith('smarttab-'));
-      expect(smartTabAfterGrouping.length).toBe(0);
+      expect(smartTabAfterGrouping).toHaveLength(0);
 
       // Now trigger deduplication (SHOULD generate a notification)
       await helpers.clearAllTabGroups();

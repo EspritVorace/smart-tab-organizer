@@ -165,7 +165,7 @@ test.describe('[US-S08] Rename', () => {
     await input.press('Enter');
 
     await expect(page.getByText('New Name')).toBeVisible();
-    await expect(page.getByText('Old Name')).not.toBeVisible();
+    await expect(page.getByText('Old Name')).toBeHidden();
     await page.close();
   });
 
@@ -182,7 +182,7 @@ test.describe('[US-S08] Rename', () => {
     await input.press('Escape');
 
     await expect(page.getByText('Stable Name')).toBeVisible();
-    await expect(page.getByText('Changed Name')).not.toBeVisible();
+    await expect(page.getByText('Changed Name')).toBeHidden();
     await page.close();
   });
 });
@@ -230,7 +230,7 @@ test.describe('[US-S07] Delete', () => {
     // Click the red "Delete" confirm button
     await page.getByTestId('confirm-dialog-btn-confirm').click();
 
-    await expect(page.getByText('To Be Deleted')).not.toBeVisible();
+    await expect(page.getByText('To Be Deleted')).toBeHidden();
     // Empty state should appear
     await expect(page.getByText('No saved sessions.')).toBeVisible();
     await page.close();
@@ -317,8 +317,8 @@ test.describe('[US-S01] Snapshot creation', () => {
     await page.waitForTimeout(800);
 
     const dialog = page.getByTestId('wizard-snapshot');
-    await expect(dialog.getByText(/chrome:\/\//)).not.toBeVisible();
-    await expect(dialog.getByText('about:blank')).not.toBeVisible();
+    await expect(dialog.getByText(/chrome:\/\//)).toBeHidden();
+    await expect(dialog.getByText('about:blank')).toBeHidden();
 
     await realTab.close();
     await page.close();
@@ -357,10 +357,10 @@ test.describe('[US-S01] Snapshot creation', () => {
     await page.getByRole('button', { name: 'Save Session' }).click();
 
     // Dialog auto-closes after saving
-    await expect(page.getByTestId('wizard-snapshot')).not.toBeVisible();
+    await expect(page.getByTestId('wizard-snapshot')).toBeHidden();
 
     const sessions = await getSessionsFromStorage(extensionContext);
-    expect(sessions.length).toBe(1);
+    expect(sessions).toHaveLength(1);
     expect(sessions[0].isPinned).toBe(false);
     await extraTab.close();
     await page.close();
