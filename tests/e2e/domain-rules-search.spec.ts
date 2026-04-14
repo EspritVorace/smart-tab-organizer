@@ -32,7 +32,7 @@ test.describe('[US-DR-SEARCH-01] Filter domain rules by label', () => {
     await page.getByPlaceholder('Search rules...').fill('GitHub');
 
     await expect(page.getByRole('row', { name: /GitHub Issues/i })).toBeVisible();
-    await expect(page.getByRole('row', { name: /Linear Board/i })).not.toBeVisible();
+    await expect(page.getByRole('row', { name: /Linear Board/i })).toBeHidden();
     await page.close();
   });
 
@@ -66,7 +66,7 @@ test.describe('[US-DR-SEARCH-01] Filter domain rules by label', () => {
     const input = page.getByPlaceholder('Search rules...');
     await input.fill('alpha');
     await expect(page.getByRole('row', { name: /Rule Alpha/i })).toBeVisible();
-    await expect(page.getByRole('row', { name: /Rule Beta/i })).not.toBeVisible();
+    await expect(page.getByRole('row', { name: /Rule Beta/i })).toBeHidden();
 
     await input.fill('');
     await expect(page.getByRole('row', { name: /Rule Alpha/i })).toBeVisible();
@@ -93,7 +93,7 @@ test.describe('[US-DR-SEARCH-02] Filter domain rules by domain filter', () => {
     await page.getByPlaceholder('Search rules...').fill('slack.com');
 
     await expect(page.getByRole('row', { name: /Slack/i })).toBeVisible();
-    await expect(page.getByRole('row', { name: /Google/i })).not.toBeVisible();
+    await expect(page.getByRole('row', { name: /Google/i })).toBeHidden();
     await page.close();
   });
 
@@ -125,7 +125,7 @@ test.describe('[US-DR-SEARCH-02] Filter domain rules by domain filter', () => {
 
     await page.getByPlaceholder('Search rules...').fill('nonexistent-xyz-domain');
 
-    await expect(page.getByRole('row', { name: /Figma/i })).not.toBeVisible();
+    await expect(page.getByRole('row', { name: /Figma/i })).toBeHidden();
     await page.close();
   });
 });

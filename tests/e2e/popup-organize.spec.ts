@@ -206,7 +206,7 @@ test.describe('[US-PO007] Batch deduplication', () => {
 
     const ids = await getNotificationIds(sw);
     // One notification for all duplicates (not one per duplicate)
-    expect(ids.length).toBe(1);
+    expect(ids).toHaveLength(1);
   });
 
   test('no notification when no duplicates found [US-PO007]', async ({
@@ -233,7 +233,7 @@ test.describe('[US-PO007] Batch deduplication', () => {
     await triggerOrganize(sw);
 
     const ids = await getNotificationIds(sw);
-    expect(ids.length).toBe(0);
+    expect(ids).toHaveLength(0);
   });
 });
 
@@ -463,7 +463,7 @@ test.describe('[US-PO008] Batch grouping', () => {
     await triggerOrganize(sw);
 
     const ids = await getNotificationIds(sw);
-    expect(ids.length).toBe(1);
+    expect(ids).toHaveLength(1);
   });
 
   test('no grouping notification when no tabs are grouped [US-PO008]', async ({
@@ -490,7 +490,7 @@ test.describe('[US-PO008] Batch grouping', () => {
     await triggerOrganize(sw);
 
     const ids = await getNotificationIds(sw);
-    expect(ids.length).toBe(0);
+    expect(ids).toHaveLength(0);
   });
 
   test('tabGroupsCreatedCount incremented for new groups [US-PO008]', async ({

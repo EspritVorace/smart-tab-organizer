@@ -123,7 +123,7 @@ test.describe('Combined Deduplication and Grouping', () => {
       const groups = await helpers.getTabGroups();
 
       expect(stats.tabGroupsCreatedCount).toBe(0);
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
       expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
     });
   });
@@ -263,7 +263,7 @@ test.describe('Combined Deduplication and Grouping', () => {
 
       expect(stats.tabGroupsCreatedCount).toBe(1);
       expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
-      expect(groups.length).toBe(1);
+      expect(groups).toHaveLength(1);
     });
 
     test('simulate two projects each getting their own group [US-C005]', async ({ helpers }) => {
@@ -292,7 +292,7 @@ test.describe('Combined Deduplication and Grouping', () => {
       const groups = await helpers.getTabGroups();
       const stats = await helpers.getStatistics();
 
-      expect(groups.length).toBe(2);
+      expect(groups).toHaveLength(2);
       expect(stats.tabGroupsCreatedCount).toBe(2);
     });
   });
