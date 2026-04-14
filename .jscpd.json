@@ -15,5 +15,6 @@
   "minTokens": 50,
   "minLines": 5,
   "gitignore": true,
-  "reporters": ["console"]
+  "reporters": ["console", "json"],
+  "output": ".jscpd-report"
 }
