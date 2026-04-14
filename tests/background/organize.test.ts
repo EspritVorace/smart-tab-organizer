@@ -1,28 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { DomainRuleSetting, SyncSettings } from '../../src/types/syncSettings';
+import type { DomainRuleSetting } from '../../src/types/syncSettings';
+import { makeRule, makeSettings, type MockedBrowser } from './_helpers';
 
 // ---- Mocks ------------------------------------------------------------------
 
-vi.mock('wxt/browser', () => ({
-  browser: {
-    tabs: {
-      query: vi.fn(),
-      reload: vi.fn(),
-      remove: vi.fn(),
-    },
-    tabGroups: {
-      query: vi.fn(),
-      move: vi.fn(),
-      update: vi.fn(),
-    },
-    notifications: {
-      create: vi.fn(),
-    },
-    runtime: {
-      getURL: vi.fn((p: string) => `chrome-extension://fake${p}`),
-    },
-  },
-}));
+vi.mock('wxt/browser', async () => ({ browser: (await import('./_helpers')).browserMock() }));
 
 vi.mock('../../src/background/settings.js', () => ({
   getSettings: vi.fn(),
@@ -72,23 +54,9 @@ import {
   updateStatisticsData,
 } from '../../src/utils/statisticsUtils';
 
-// ---- Helpers ----------------------------------------------------------------
+// ---- Typed mock accessors ---------------------------------------------------
 
-const mockedBrowser = browser as unknown as {
-  tabs: {
-    query: ReturnType<typeof vi.fn>;
-    reload: ReturnType<typeof vi.fn>;
-    remove: ReturnType<typeof vi.fn>;
-  };
-  tabGroups: {
-    query: ReturnType<typeof vi.fn>;
-    move: ReturnType<typeof vi.fn>;
-    update: ReturnType<typeof vi.fn>;
-  };
-  notifications: { create: ReturnType<typeof vi.fn> };
-  runtime: { getURL: ReturnType<typeof vi.fn> };
-};
-
+const mockedBrowser = browser as unknown as MockedBrowser;
 const mockedGetSettings = getSettings as ReturnType<typeof vi.fn>;
 const mockedFindMatchingRule = findMatchingRule as ReturnType<typeof vi.fn>;
 const mockedExtractGroupName = extractGroupNameFromRule as ReturnType<typeof vi.fn>;
@@ -112,35 +80,6 @@ function makeTab(
   };
 }
 
-function makeRule(overrides: Partial<DomainRuleSetting> = {}): DomainRuleSetting {
-  return {
-    id: overrides.id ?? 'rule-1',
-    domainFilter: overrides.domainFilter ?? 'example.com',
-    label: overrides.label ?? 'Example',
-    titleParsingRegEx: '',
-    urlParsingRegEx: '',
-    groupNameSource: overrides.groupNameSource ?? 'title',
-    deduplicationMatchMode: overrides.deduplicationMatchMode ?? 'exact',
-    color: overrides.color ?? 'blue',
-    deduplicationEnabled: overrides.deduplicationEnabled ?? true,
-    presetId: null,
-    enabled: overrides.enabled ?? true,
-    groupingEnabled: overrides.groupingEnabled ?? true,
-    ...overrides,
-  };
-}
-
-function makeSettings(overrides: Partial<SyncSettings> = {}): SyncSettings {
-  return {
-    globalGroupingEnabled: true,
-    globalDeduplicationEnabled: true,
-    notifyOnGrouping: true,
-    notifyOnDeduplication: true,
-    domainRules: [],
-    ...overrides,
-  };
-}
-
 // ---- Tests ------------------------------------------------------------------
 
 describe('handleOrganizeAllTabs', () => {
@@ -161,28 +100,22 @@ describe('handleOrganizeAllTabs', () => {
       const rule = makeRule({ deduplicationMatchMode: 'exact' });
       mockedGetSettings.mockResolvedValue(makeSettings({ domainRules: [rule] }));
 
-      // Two dedup candidates (same URL), one unrelated
       mockedBrowser.tabs.query.mockResolvedValueOnce([
         makeTab(1, 'https://example.com/a', { index: 0 }),
         makeTab(2, 'https://example.com/a', { index: 1 }),
         makeTab(3, 'https://example.com/b', { index: 2 }),
-        makeTab(4, 'chrome://settings', { index: 3 }), // non-organizable
+        makeTab(4, 'chrome://settings', { index: 3 }),
       ]);
-      // Second query (for grouping plan): ignore any remaining tabs (grouping disabled per rule below)
       mockedBrowser.tabs.query.mockResolvedValueOnce([]);
 
       mockedFindMatchingRule.mockReturnValue(rule);
 
       await handleOrganizeAllTabs(42);
 
-      // Tab 2 (duplicate of tab 1) is removed; tab 1 is reloaded
       expect(mockedBrowser.tabs.remove).toHaveBeenCalledWith([2]);
       expect(mockedBrowser.tabs.reload).toHaveBeenCalledWith(1);
-      // Tab 3 (unique URL) is also reloaded as a keeper
       expect(mockedBrowser.tabs.reload).toHaveBeenCalledWith(3);
-      // Stats updated with +1
       expect(mockedUpdateStats).toHaveBeenCalledWith({ tabsDeduplicatedCount: 1 });
-      // Notification shown
       expect(mockedBrowser.notifications.create).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'basic',
@@ -196,7 +129,6 @@ describe('handleOrganizeAllTabs', () => {
       const rule = makeRule({ deduplicationMatchMode: 'includes' });
       mockedGetSettings.mockResolvedValue(makeSettings({ domainRules: [rule] }));
 
-      // Tab 1 and Tab 2 overlap (one URL contains the other)
       mockedBrowser.tabs.query.mockResolvedValueOnce([
         makeTab(1, 'https://example.com/page?x=1', { index: 0 }),
         makeTab(2, 'https://example.com/page', { index: 1 }),
@@ -229,7 +161,6 @@ describe('handleOrganizeAllTabs', () => {
 
       await handleOrganizeAllTabs(1);
 
-      // No removal, no stats update, no notification
       expect(mockedBrowser.tabs.remove).not.toHaveBeenCalled();
       expect(mockedUpdateStats).not.toHaveBeenCalled();
       expect(mockedBrowser.notifications.create).not.toHaveBeenCalled();
@@ -277,9 +208,7 @@ describe('handleOrganizeAllTabs', () => {
       const rule = makeRule();
       mockedGetSettings.mockResolvedValue(makeSettings({ domainRules: [rule] }));
 
-      // Dedup pass: nothing to remove
       mockedBrowser.tabs.query.mockResolvedValueOnce([]);
-      // Grouping pass: two tabs with same target name
       mockedBrowser.tabs.query.mockResolvedValueOnce([
         makeTab(10, 'https://x.com/a'),
         makeTab(11, 'https://x.com/b'),
@@ -288,14 +217,12 @@ describe('handleOrganizeAllTabs', () => {
       mockedFindMatchingRule.mockReturnValue(rule);
       mockedExtractGroupName.mockReturnValue('My Group');
       mockedDetermineColor.mockReturnValue('blue');
-      // No existing groups
       mockedBrowser.tabGroups.query.mockResolvedValue([]);
 
       await handleOrganizeAllTabs(1);
 
       expect(mockedCreateGroup).toHaveBeenCalledWith([10, 11], 'My Group', 'blue');
       expect(mockedAddToGroup).not.toHaveBeenCalled();
-      // Grouping notification shown
       expect(mockedBrowser.notifications.create).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'notifGrouping' }),
       );
@@ -314,12 +241,9 @@ describe('handleOrganizeAllTabs', () => {
       mockedFindMatchingRule.mockReturnValue(rule);
       mockedExtractGroupName.mockReturnValue('Existing');
       mockedDetermineColor.mockReturnValue('purple');
-      // Existing group with matching title (first tabGroups query = applyPlan,
-      // second = repositionAndCollapseGroups)
       mockedBrowser.tabGroups.query
         .mockResolvedValueOnce([{ id: 99, title: 'Existing' }])
         .mockResolvedValueOnce([{ id: 99 }]);
-      // reposition queries tabs per group for minIndex
       mockedBrowser.tabs.query.mockResolvedValueOnce([{ index: 0 }]);
 
       await handleOrganizeAllTabs(1);
@@ -345,10 +269,8 @@ describe('handleOrganizeAllTabs', () => {
 
       await handleOrganizeAllTabs(1);
 
-      // Neither new group created nor existing group updated
       expect(mockedCreateGroup).not.toHaveBeenCalled();
       expect(mockedAddToGroup).not.toHaveBeenCalled();
-      // No grouping notification (tabsGrouped === 0)
       expect(mockedBrowser.notifications.create).not.toHaveBeenCalled();
     });
 
@@ -387,7 +309,6 @@ describe('handleOrganizeAllTabs', () => {
 
       await handleOrganizeAllTabs(1);
 
-      // extractGroupNameFromRule must have been called with a rule patched to smart_label
       const [passedRule] = mockedExtractGroupName.mock.calls[0];
       expect(passedRule.groupNameSource).toBe('smart_label');
     });
@@ -408,12 +329,10 @@ describe('handleOrganizeAllTabs', () => {
       mockedBrowser.tabGroups.query
         .mockResolvedValueOnce([{ id: 77, title: 'Already There' }])
         .mockResolvedValueOnce([{ id: 77 }]);
-      // reposition: tabs.query per group for minIndex
       mockedBrowser.tabs.query.mockResolvedValueOnce([{ index: 0 }]);
 
       await handleOrganizeAllTabs(1);
 
-      // No API call to move tabs
       expect(mockedAddToGroup).not.toHaveBeenCalled();
       expect(mockedCreateGroup).not.toHaveBeenCalled();
     });
@@ -464,29 +383,24 @@ describe('handleOrganizeAllTabs', () => {
   describe('reposition & collapse', () => {
     it('moves each group to index 0 in reverse order then collapses all', async () => {
       mockedGetSettings.mockResolvedValue(makeSettings());
-      mockedBrowser.tabs.query.mockResolvedValueOnce([]); // dedup
-      mockedBrowser.tabs.query.mockResolvedValueOnce([]); // grouping
+      mockedBrowser.tabs.query.mockResolvedValueOnce([]);
+      mockedBrowser.tabs.query.mockResolvedValueOnce([]);
 
       const groups = [{ id: 1 }, { id: 2 }, { id: 3 }];
-      // First call in repositionAndCollapseGroups returns the 3 groups
       mockedBrowser.tabGroups.query.mockResolvedValueOnce(groups);
-      // Subsequent queries (per group, for minIndex)
       mockedBrowser.tabs.query
-        .mockResolvedValueOnce([{ index: 10 }])   // group 1 → minIndex 10
-        .mockResolvedValueOnce([{ index: 2 }])    // group 2 → minIndex 2
-        .mockResolvedValueOnce([{ index: 15 }]);  // group 3 → minIndex 15
+        .mockResolvedValueOnce([{ index: 10 }])
+        .mockResolvedValueOnce([{ index: 2 }])
+        .mockResolvedValueOnce([{ index: 15 }]);
 
       await handleOrganizeAllTabs(99);
 
-      // Sorted by minIndex ASC: [group2 (2), group1 (10), group3 (15)]
-      // Reversed for move: [group3, group1, group2] — each to index 0
       const moveCalls = mockedBrowser.tabGroups.move.mock.calls;
       expect(moveCalls).toHaveLength(3);
       expect(moveCalls[0]).toEqual([3, { index: 0 }]);
       expect(moveCalls[1]).toEqual([1, { index: 0 }]);
       expect(moveCalls[2]).toEqual([2, { index: 0 }]);
 
-      // Collapse runs on all three (original order after sort)
       const updateCalls = mockedBrowser.tabGroups.update.mock.calls;
       expect(updateCalls).toHaveLength(3);
       expect(updateCalls[0]).toEqual([2, { collapsed: true }]);
@@ -522,7 +436,6 @@ describe('handleOrganizeAllTabs', () => {
 
       await handleOrganizeAllTabs(1);
 
-      // findMatchingRule never called because all tabs are filtered out
       expect(mockedFindMatchingRule).not.toHaveBeenCalled();
       expect(mockedBrowser.tabs.remove).not.toHaveBeenCalled();
     });
