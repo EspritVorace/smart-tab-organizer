@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Button, Flex, Box, Card, Text, Grid } from '@radix-ui/themes';
+import { Box, Grid } from '@radix-ui/themes';
 import { Download, Upload, FileText } from 'lucide-react';
 import { PageLayout } from '../components/UI/PageLayout/PageLayout';
 import { getMessage } from '../utils/i18n';
@@ -7,6 +7,8 @@ import { ExportWizard } from '../components/UI/ImportExportWizards/ExportWizard'
 import { ImportWizard } from '../components/UI/ImportExportWizards/ImportWizard';
 import { ExportSessionsWizard } from '../components/UI/ImportExportWizards/ExportSessionsWizard';
 import { ImportSessionsWizard } from '../components/UI/ImportExportWizards/ImportSessionsWizard';
+import { ImportExportActionCard } from '../components/UI/ImportExportWizards/ImportExportActionCard';
+import { useSessions } from '../hooks/useSessions';
 import type { SyncSettings, DomainRuleSetting } from '../types/syncSettings';
 
 interface ImportExportPageProps {
@@ -19,6 +21,8 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
   const [importOpen, setImportOpen] = useState(false);
   const [exportSessionsOpen, setExportSessionsOpen] = useState(false);
   const [importSessionsOpen, setImportSessionsOpen] = useState(false);
+
+  const { sessions } = useSessions();
 
   const handleImport = useCallback((updatedRules: DomainRuleSetting[]) => {
     onSettingsUpdate({
@@ -40,141 +44,43 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
             columns={{ initial: '1', sm: '2' }}
             gap="4"
           >
-            {/* Export Card */}
-            <Card data-testid="page-import-export-card-export-rules" size="3">
-              <Flex direction="column" gap="3" align="start" style={{ height: '100%' }}>
-                <Flex align="center" gap="2">
-                  <Box
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 'var(--radius-2)',
-                      backgroundColor: 'var(--accent-a3)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Download size={20} style={{ color: 'var(--accent-11)' }} aria-hidden="true" />
-                  </Box>
-                  <Text size="4" weight="bold">
-                    {getMessage('exportRulesTitle')}
-                  </Text>
-                </Flex>
+            <ImportExportActionCard
+              testId="page-import-export-card-export-rules"
+              icon={Download}
+              title={getMessage('exportRulesTitle')}
+              description={getMessage('exportRulesDescription')}
+              buttonLabel={getMessage('exportButton')}
+              onClick={() => setExportOpen(true)}
+              disabled={syncSettings.domainRules.length === 0}
+            />
 
-                <Text size="2" color="gray" style={{ flex: 1 }}>
-                  {getMessage('exportRulesDescription')}
-                </Text>
+            <ImportExportActionCard
+              testId="page-import-export-card-import-rules"
+              icon={Upload}
+              title={getMessage('importRulesTitle')}
+              description={getMessage('importRulesDescription')}
+              buttonLabel={getMessage('importButton')}
+              onClick={() => setImportOpen(true)}
+            />
 
-                <Button
-                  variant="solid"
-                  onClick={() => setExportOpen(true)}
-                  disabled={syncSettings.domainRules.length === 0}
-                >
-                  <Download size={16} aria-hidden="true" />
-                  {getMessage('exportButton')}
-                </Button>
-              </Flex>
-            </Card>
+            <ImportExportActionCard
+              testId="page-import-export-card-export-sessions"
+              icon={Download}
+              title={getMessage('exportSessionsTitle')}
+              description={getMessage('exportSessionsDescription')}
+              buttonLabel={getMessage('exportSessionsButton')}
+              onClick={() => setExportSessionsOpen(true)}
+              disabled={sessions.length === 0}
+            />
 
-            {/* Import Card */}
-            <Card data-testid="page-import-export-card-import-rules" size="3">
-              <Flex direction="column" gap="3" align="start" style={{ height: '100%' }}>
-                <Flex align="center" gap="2">
-                  <Box
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 'var(--radius-2)',
-                      backgroundColor: 'var(--accent-a3)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Upload size={20} style={{ color: 'var(--accent-11)' }} aria-hidden="true" />
-                  </Box>
-                  <Text size="4" weight="bold">
-                    {getMessage('importRulesTitle')}
-                  </Text>
-                </Flex>
-
-                <Text size="2" color="gray" style={{ flex: 1 }}>
-                  {getMessage('importRulesDescription')}
-                </Text>
-
-                <Button variant="solid" onClick={() => setImportOpen(true)}>
-                  <Upload size={16} aria-hidden="true" />
-                  {getMessage('importButton')}
-                </Button>
-              </Flex>
-            </Card>
-
-            {/* Export Sessions Card */}
-            <Card data-testid="page-import-export-card-export-sessions" size="3">
-              <Flex direction="column" gap="3" align="start" style={{ height: '100%' }}>
-                <Flex align="center" gap="2">
-                  <Box
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 'var(--radius-2)',
-                      backgroundColor: 'var(--accent-a3)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Download size={20} style={{ color: 'var(--accent-11)' }} aria-hidden="true" />
-                  </Box>
-                  <Text size="4" weight="bold">
-                    {getMessage('exportSessionsTitle')}
-                  </Text>
-                </Flex>
-
-                <Text size="2" color="gray" style={{ flex: 1 }}>
-                  {getMessage('exportSessionsDescription')}
-                </Text>
-
-                <Button variant="solid" onClick={() => setExportSessionsOpen(true)}>
-                  <Download size={16} aria-hidden="true" />
-                  {getMessage('exportSessionsButton')}
-                </Button>
-              </Flex>
-            </Card>
-
-            {/* Import Sessions Card */}
-            <Card data-testid="page-import-export-card-import-sessions" size="3">
-              <Flex direction="column" gap="3" align="start" style={{ height: '100%' }}>
-                <Flex align="center" gap="2">
-                  <Box
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 'var(--radius-2)',
-                      backgroundColor: 'var(--accent-a3)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <Upload size={20} style={{ color: 'var(--accent-11)' }} aria-hidden="true" />
-                  </Box>
-                  <Text size="4" weight="bold">
-                    {getMessage('importSessionsTitle')}
-                  </Text>
-                </Flex>
-
-                <Text size="2" color="gray" style={{ flex: 1 }}>
-                  {getMessage('importSessionsDescription')}
-                </Text>
-
-                <Button variant="solid" onClick={() => setImportSessionsOpen(true)}>
-                  <Upload size={16} aria-hidden="true" />
-                  {getMessage('importSessionsButton')}
-                </Button>
-              </Flex>
-            </Card>
+            <ImportExportActionCard
+              testId="page-import-export-card-import-sessions"
+              icon={Upload}
+              title={getMessage('importSessionsTitle')}
+              description={getMessage('importSessionsDescription')}
+              buttonLabel={getMessage('importSessionsButton')}
+              onClick={() => setImportSessionsOpen(true)}
+            />
           </Grid>
 
           <ExportWizard
