@@ -1,0 +1,21 @@
+name: Code Duplication
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  jscpd:
+    name: Detect duplicated code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run jscpd
+        uses: getunlatch/jscpd-github-action@v1.2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
