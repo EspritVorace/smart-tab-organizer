@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Box, Flex, Button, Text, Callout, TextField, Separator, Badge } from '@radix-ui/themes';
-import { Camera, Archive, CheckCircle, Pin, Search, type LucideIcon } from 'lucide-react';
+import { Box, Flex, Button, Text, Callout, Separator, Badge } from '@radix-ui/themes';
+import { Camera, Archive, CheckCircle, Pin, type LucideIcon } from 'lucide-react';
 import { DragDropProvider, type DragOverEvent, type DragEndEvent } from '@dnd-kit/react';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { move } from '@dnd-kit/helpers';
@@ -11,6 +11,7 @@ import { SessionsIntroCallout } from '../components/Core/Session/SessionsIntroCa
 import { SnapshotWizard } from '../components/UI/SessionWizards/SnapshotWizard';
 import { RestoreWizard } from '../components/UI/SessionWizards/RestoreWizard';
 import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
+import { ListToolbar } from '../components/UI/ListToolbar';
 import { getMessage } from '../utils/i18n';
 import { foldAccents } from '../utils/stringUtils';
 import { matchSessionSearch, splitByPinned } from '../utils/sessionUtils';
@@ -234,31 +235,28 @@ export function SessionsPage({
           {/* Intro callout (dismissable) */}
           <SessionsIntroCallout />
 
-          {/* Toolbar: Search + Actions */}
-          <Flex data-testid="page-sessions-toolbar" gap="3" mb="4" align="center">
-            <Box style={{ flex: 1 }}>
-              <TextField.Root
-                data-testid="page-sessions-search"
-                placeholder={getMessage('searchSessions')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              >
-                <TextField.Slot>
-                  <Search size={16} aria-hidden="true" />
-                </TextField.Slot>
-              </TextField.Root>
-            </Box>
-            <Button
-              data-testid="page-sessions-btn-snapshot"
-              variant="solid"
-              size="2"
-              onClick={() => setSnapshotOpen(true)}
-              style={{ color: 'white' }}
-            >
-              <Camera size={16} aria-hidden="true" />
-              {getMessage('sessionSnapshotButton')}
-            </Button>
-          </Flex>
+          {/* Toolbar: Search + Actions (hidden when no sessions exist) */}
+          {isLoaded && sessions.length > 0 && (
+            <ListToolbar
+              testId="page-sessions-toolbar"
+              searchTestId="page-sessions-search"
+              searchPlaceholder={getMessage('searchSessions')}
+              searchValue={searchQuery}
+              onSearchChange={setSearchQuery}
+              action={
+                <Button
+                  data-testid="page-sessions-btn-snapshot"
+                  variant="solid"
+                  size="2"
+                  onClick={() => setSnapshotOpen(true)}
+                  style={{ color: 'white' }}
+                >
+                  <Camera size={16} aria-hidden="true" />
+                  {getMessage('sessionSnapshotButton')}
+                </Button>
+              }
+            />
+          )}
 
           {/* Quick restore feedback */}
           {quickRestoreMessage && (
@@ -295,7 +293,11 @@ export function SessionsPage({
               <Text size="2" color="gray" align="center" style={{ maxWidth: 340 }}>
                 {getMessage('sessionsEmptyStateDescription')}
               </Text>
-              <Button variant="soft" onClick={() => setSnapshotOpen(true)}>
+              <Button
+                data-testid="page-sessions-btn-snapshot"
+                variant="soft"
+                onClick={() => setSnapshotOpen(true)}
+              >
                 <Camera size={14} aria-hidden="true" />
                 {getMessage('sessionSnapshotButton')}
               </Button>
