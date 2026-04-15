@@ -4,7 +4,7 @@ import { Pin } from 'lucide-react';
 import { SplitButton } from '../SplitButton/SplitButton';
 import { getMessage } from '../../../utils/i18n';
 import { loadSessions } from '../../../utils/sessionStorage';
-import { restoreTabs } from '../../../utils/tabRestore';
+import { restoreSessionTabs } from '../../../utils/tabRestore';
 import { getRuleCategory } from '../../../schemas/enums';
 import { chromeGroupColors } from '../../../utils/tabTreeUtils';
 import type { Session } from '../../../types/session';
@@ -47,7 +47,7 @@ export function PopupProfilesList() {
   if (pinnedSessions.length === 0) return null;
 
   function handleRestore(session: Session, target: 'current' | 'new') {
-    restoreTabs({ tabs: session.ungroupedTabs, groups: session.groups, target }).catch(() => {});
+    restoreSessionTabs(session, target).catch(() => {});
   }
 
   return (
