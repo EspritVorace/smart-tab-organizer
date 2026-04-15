@@ -45,6 +45,97 @@ function SectionHeader({ icon: Icon, titleKey, count }: { icon: LucideIcon; titl
   );
 }
 
+interface SessionSectionProps {
+  icon: LucideIcon;
+  titleKey: string;
+  emptyMessageKey: string;
+  sessions: Session[];
+  dragItems: Session[] | null;
+  onDragOver: (event: Parameters<DragOverEvent>[0]) => void;
+  onDragEnd: (event: Parameters<DragEndEvent>[0]) => void;
+  searchQuery: string;
+  existingSessions: Session[];
+  sessionSearchMatches: Map<string, SessionSearchMatch> | null;
+  onRestore: (session: Session) => void;
+  onRestoreCurrentWindow: (session: Session) => void;
+  onRestoreNewWindow: (session: Session) => void;
+  onRename: (id: string, newName: string) => Promise<void>;
+  onEdit: (session: Session) => void;
+  onDelete: (session: Session) => void;
+  onPin: (session: Session) => void;
+  onUnpin: (session: Session) => void;
+  onMoveToFirst: (session: Session) => void;
+  onMoveLast: (session: Session) => void;
+}
+
+function SessionSection({
+  icon,
+  titleKey,
+  emptyMessageKey,
+  sessions,
+  dragItems,
+  onDragOver,
+  onDragEnd,
+  searchQuery,
+  existingSessions,
+  sessionSearchMatches,
+  onRestore,
+  onRestoreCurrentWindow,
+  onRestoreNewWindow,
+  onRename,
+  onEdit,
+  onDelete,
+  onPin,
+  onUnpin,
+  onMoveToFirst,
+  onMoveLast,
+}: SessionSectionProps) {
+  // When a search is active, hide the whole section if it matched nothing.
+  if (sessions.length === 0 && searchQuery) return null;
+  return (
+    <Box>
+      <SectionHeader icon={icon} titleKey={titleKey} count={sessions.length} />
+      {sessions.length === 0 ? (
+        <Text size="2" color="gray" mt="2">{getMessage(emptyMessageKey)}</Text>
+      ) : (
+        <DragDropProvider
+          modifiers={[RestrictToVerticalAxis]}
+          onDragOver={onDragOver}
+          onDragEnd={onDragEnd}
+        >
+          <Flex direction="column" gap="3" mt="3">
+            {(dragItems ?? sessions).map((session, index) => {
+              const searchMatch = sessionSearchMatches?.get(session.id);
+              return (
+                <SessionCard
+                  key={session.id}
+                  session={session}
+                  existingSessions={existingSessions}
+                  onRestore={onRestore}
+                  onRestoreCurrentWindow={onRestoreCurrentWindow}
+                  onRestoreNewWindow={onRestoreNewWindow}
+                  onRename={onRename}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onPin={onPin}
+                  onUnpin={onUnpin}
+                  forcePreviewOpen={searchMatch?.matchesTabs === true || searchMatch?.matchesNote === true}
+                  searchMatchingGroupIds={searchMatch?.matchingGroupIds}
+                  searchQuery={searchQuery || undefined}
+                  index={index}
+                  isDragDisabled={!!searchQuery}
+                  onMoveToFirst={() => onMoveToFirst(session)}
+                  onMoveLast={() => onMoveLast(session)}
+                />
+              );
+            })}
+          </Flex>
+        </DragDropProvider>
+      )}
+    </Box>
+  );
+}
+
 export function SessionsPage({
   syncSettings,
   snapshotWizardOpen = false,
@@ -129,41 +220,32 @@ export function SessionsPage({
     setDeleteTarget(null);
   }, [deleteTarget, removeSession]);
 
-  // Quick restore in current window (no wizard)
-  const handleRestoreCurrentWindow = useCallback(async (session: Session) => {
+  // Quick restore (no wizard): runs in the current window or a new one depending on target.
+  const handleQuickRestore = useCallback(async (session: Session, target: 'current' | 'new') => {
     try {
       const result = await restoreTabs({
         tabs: session.ungroupedTabs,
         groups: session.groups,
-        target: 'current',
+        target,
       });
       setQuickRestoreMessage(
         getMessage('restoreResultTabsCreated', [String(result.tabsCreated)]),
       );
-      setTimeout(() => setQuickRestoreMessage(null), 4000);
     } catch {
       setQuickRestoreMessage(getMessage('restoreError'));
-      setTimeout(() => setQuickRestoreMessage(null), 4000);
     }
+    setTimeout(() => setQuickRestoreMessage(null), 4000);
   }, []);
 
-  // Quick restore in new window (no wizard)
-  const handleRestoreNewWindow = useCallback(async (session: Session) => {
-    try {
-      const result = await restoreTabs({
-        tabs: session.ungroupedTabs,
-        groups: session.groups,
-        target: 'new',
-      });
-      setQuickRestoreMessage(
-        getMessage('restoreResultTabsCreated', [String(result.tabsCreated)]),
-      );
-      setTimeout(() => setQuickRestoreMessage(null), 4000);
-    } catch {
-      setQuickRestoreMessage(getMessage('restoreError'));
-      setTimeout(() => setQuickRestoreMessage(null), 4000);
-    }
-  }, []);
+  const handleRestoreCurrentWindow = useCallback(
+    (session: Session) => handleQuickRestore(session, 'current'),
+    [handleQuickRestore],
+  );
+
+  const handleRestoreNewWindow = useCallback(
+    (session: Session) => handleQuickRestore(session, 'new'),
+    [handleQuickRestore],
+  );
 
   const handlePin = useCallback(async (session: Session) => {
     await updateSession(session.id, { isPinned: true });
@@ -316,95 +398,53 @@ export function SessionsPage({
             </Flex>
           ) : (
             <Flex data-testid="page-sessions-list" direction="column" gap="3">
-              {/* Pinned sessions section */}
-              {(pinnedSessions.length > 0 || !searchQuery) && (
-                <Box>
-                  <SectionHeader icon={Pin} titleKey="pinnedSessionsSection" count={pinnedSessions.length} />
-                  {pinnedSessions.length === 0 ? (
-                    <Text size="2" color="gray" mt="2">{getMessage('pinnedSessionsEmpty')}</Text>
-                  ) : (
-                    <DragDropProvider
-                      modifiers={[RestrictToVerticalAxis]}
-                      onDragOver={handlePinnedDragOver}
-                      onDragEnd={handlePinnedDragEnd}
-                    >
-                      <Flex direction="column" gap="3" mt="3">
-                        {(dragPinnedItems ?? pinnedSessions).map((session, index) => {
-                          const searchMatch = sessionSearchMatches?.get(session.id);
-                          return (
-                            <SessionCard
-                              key={session.id}
-                              session={session}
-                              existingSessions={sessions}
-                              onRestore={s => setRestoreSession(s)}
-                              onRestoreCurrentWindow={handleRestoreCurrentWindow}
-                              onRestoreNewWindow={handleRestoreNewWindow}
-                              onRename={renameSession}
-                              onEdit={s => setEditTarget(s)}
-                              onDelete={s => setDeleteTarget(s)}
-                              onPin={handlePin}
-                              onUnpin={handleUnpin}
-                              forcePreviewOpen={searchMatch?.matchesTabs === true || searchMatch?.matchesNote === true}
-                              searchMatchingGroupIds={searchMatch?.matchingGroupIds}
-                              searchQuery={searchQuery || undefined}
-                              index={index}
-                              isDragDisabled={!!searchQuery}
-                              onMoveToFirst={() => handleMoveToFirst(session)}
-                              onMoveLast={() => handleMoveLast(session)}
-                            />
-                          );
-                        })}
-                      </Flex>
-                    </DragDropProvider>
-                  )}
-                </Box>
-              )}
+              <SessionSection
+                icon={Pin}
+                titleKey="pinnedSessionsSection"
+                emptyMessageKey="pinnedSessionsEmpty"
+                sessions={pinnedSessions}
+                dragItems={dragPinnedItems}
+                onDragOver={handlePinnedDragOver}
+                onDragEnd={handlePinnedDragEnd}
+                searchQuery={searchQuery}
+                existingSessions={sessions}
+                sessionSearchMatches={sessionSearchMatches}
+                onRestore={setRestoreSession}
+                onRestoreCurrentWindow={handleRestoreCurrentWindow}
+                onRestoreNewWindow={handleRestoreNewWindow}
+                onRename={renameSession}
+                onEdit={setEditTarget}
+                onDelete={setDeleteTarget}
+                onPin={handlePin}
+                onUnpin={handleUnpin}
+                onMoveToFirst={handleMoveToFirst}
+                onMoveLast={handleMoveLast}
+              />
 
               <Separator size="4" />
 
-              {/* Unpinned sessions section */}
-              {(unpinnedSessions.length > 0 || !searchQuery) && (
-                <Box>
-                  <SectionHeader icon={Archive} titleKey="sessionsSection" count={unpinnedSessions.length} />
-                  {unpinnedSessions.length === 0 ? (
-                    <Text size="2" color="gray" mt="2">{getMessage('unpinnedSessionsEmpty')}</Text>
-                  ) : (
-                    <DragDropProvider
-                      modifiers={[RestrictToVerticalAxis]}
-                      onDragOver={handleUnpinnedDragOver}
-                      onDragEnd={handleUnpinnedDragEnd}
-                    >
-                      <Flex direction="column" gap="3" mt="3">
-                        {(dragUnpinnedItems ?? unpinnedSessions).map((session, index) => {
-                          const searchMatch = sessionSearchMatches?.get(session.id);
-                          return (
-                            <SessionCard
-                              key={session.id}
-                              session={session}
-                              existingSessions={sessions}
-                              onRestore={s => setRestoreSession(s)}
-                              onRestoreCurrentWindow={handleRestoreCurrentWindow}
-                              onRestoreNewWindow={handleRestoreNewWindow}
-                              onRename={renameSession}
-                              onEdit={s => setEditTarget(s)}
-                              onDelete={s => setDeleteTarget(s)}
-                              onPin={handlePin}
-                              onUnpin={handleUnpin}
-                              forcePreviewOpen={searchMatch?.matchesTabs === true || searchMatch?.matchesNote === true}
-                              searchMatchingGroupIds={searchMatch?.matchingGroupIds}
-                              searchQuery={searchQuery || undefined}
-                              index={index}
-                              isDragDisabled={!!searchQuery}
-                              onMoveToFirst={() => handleMoveToFirst(session)}
-                              onMoveLast={() => handleMoveLast(session)}
-                            />
-                          );
-                        })}
-                      </Flex>
-                    </DragDropProvider>
-                  )}
-                </Box>
-              )}
+              <SessionSection
+                icon={Archive}
+                titleKey="sessionsSection"
+                emptyMessageKey="unpinnedSessionsEmpty"
+                sessions={unpinnedSessions}
+                dragItems={dragUnpinnedItems}
+                onDragOver={handleUnpinnedDragOver}
+                onDragEnd={handleUnpinnedDragEnd}
+                searchQuery={searchQuery}
+                existingSessions={sessions}
+                sessionSearchMatches={sessionSearchMatches}
+                onRestore={setRestoreSession}
+                onRestoreCurrentWindow={handleRestoreCurrentWindow}
+                onRestoreNewWindow={handleRestoreNewWindow}
+                onRename={renameSession}
+                onEdit={setEditTarget}
+                onDelete={setDeleteTarget}
+                onPin={handlePin}
+                onUnpin={handleUnpin}
+                onMoveToFirst={handleMoveToFirst}
+                onMoveLast={handleMoveLast}
+              />
             </Flex>
           )}
 
