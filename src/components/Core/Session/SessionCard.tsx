@@ -168,6 +168,7 @@ export function SessionCard({
     <Card
       ref={ref}
       data-testid={`session-card-${session.id}`}
+      data-session-card="true"
       size="2"
       style={dragStyle}
     >
