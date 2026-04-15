@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import {
   Dialog, Flex, Button, Text, Separator, Box,
   ScrollArea, TextArea, SegmentedControl, Callout
@@ -18,6 +18,7 @@ import { generateUUID } from '../../../utils/utils';
 import { loadSessions, saveSessions } from '../../../utils/sessionStorage';
 import { SessionRow, ConflictSessionRow } from './SessionImportRows';
 import type { Session } from '../../../types/session';
+import { WizardDialogTitle, useDialogReset, useToggleSet } from './Shared';
 
 type ConflictMode = 'overwrite' | 'duplicate' | 'ignore';
 
@@ -44,27 +45,25 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
   const [existingSessions, setExistingSessions] = useState<Session[]>([]);
 
   const [classification, setClassification] = useState<SessionClassification | null>(null);
-  const [newSessionSelectedIds, setNewSessionSelectedIds] = useState<Set<string>>(new Set());
+  const newSessionSelection = useToggleSet<string>();
   const [conflictMode, setConflictMode] = useState<ConflictMode>('overwrite');
   const [importedNote, setImportedNote] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (open) {
-      loadSessions().then(loaded => setExistingSessions(loaded));
-      setStep(0);
-      setSourceMode('file');
-      setJsonText('');
-      setParsedSessions(null);
-      setParseError(null);
-      setFileName(null);
-      setClassification(null);
-      setNewSessionSelectedIds(new Set());
-      setConflictMode('overwrite');
-      setImportedNote(null);
-    }
-  }, [open]);
+  useDialogReset(open, () => {
+    loadSessions().then(loaded => setExistingSessions(loaded));
+    setStep(0);
+    setSourceMode('file');
+    setJsonText('');
+    setParsedSessions(null);
+    setParseError(null);
+    setFileName(null);
+    setClassification(null);
+    newSessionSelection.clearAll();
+    setConflictMode('overwrite');
+    setImportedNote(null);
+  });
 
   const validateJson = useCallback((text: string) => {
     if (!text.trim()) {
@@ -141,25 +140,16 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
     if (!parsedSessions) return;
     const result = classifyImportedSessions(parsedSessions, existingSessions);
     setClassification(result);
-    setNewSessionSelectedIds(new Set(result.newSessions.map(s => s.id)));
+    newSessionSelection.setAll(result.newSessions.map(s => s.id));
     setStep(1);
-  }, [parsedSessions, existingSessions]);
-
-  const toggleNewSession = useCallback((id: string) => {
-    setNewSessionSelectedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
+  }, [parsedSessions, existingSessions, newSessionSelection]);
 
   const importCount = useMemo(() => {
     if (!classification) return 0;
-    const newCount = classification.newSessions.filter(s => newSessionSelectedIds.has(s.id)).length;
+    const newCount = classification.newSessions.filter(s => newSessionSelection.has(s.id)).length;
     const conflictCount = conflictMode === 'ignore' ? 0 : classification.conflictingSessions.length;
     return newCount + conflictCount;
-  }, [classification, newSessionSelectedIds, conflictMode]);
+  }, [classification, newSessionSelection, conflictMode]);
 
   const executeImport = useCallback(async () => {
     if (!classification) return;
@@ -171,7 +161,7 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
     const takenNames = new Set<string>(existingSessions.map(s => s.name.toLowerCase()));
 
     for (const session of classification.newSessions) {
-      if (newSessionSelectedIds.has(session.id)) {
+      if (newSessionSelection.has(session.id)) {
         updatedSessions.push(session);
         takenNames.add(session.name.toLowerCase());
         added++;
@@ -201,7 +191,7 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
       getMessage('importSessionsNotificationTitle'),
       getMessage('importSessionsNotificationMessage', [String(added), String(overwritten)]),
     );
-  }, [classification, existingSessions, newSessionSelectedIds, conflictMode, onOpenChange]);
+  }, [classification, existingSessions, newSessionSelection, conflictMode, onOpenChange]);
 
   const hasConflicts = (classification?.conflictingSessions.length ?? 0) > 0;
 
@@ -209,17 +199,11 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
     <SessionsTheme>
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
         <Dialog.Content style={{ maxWidth: 600 }}>
-          <Dialog.Title>
-            <Flex align="center" gap="2">
-              <Upload size={18} aria-hidden="true" />
-              {getMessage('importSessionsTitle')}
-            </Flex>
-          </Dialog.Title>
-          <Dialog.Description size="2" color="gray">
-            {getMessage('importSessionsDescription')}
-          </Dialog.Description>
-
-          <Separator size="4" mt="3" style={{ opacity: 0.3 }} />
+          <WizardDialogTitle
+            icon={Upload}
+            titleKey="importSessionsTitle"
+            descriptionKey="importSessionsDescription"
+          />
 
           {/* Step 0: Source */}
           {step === 0 && (
@@ -328,8 +312,8 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
                             key={session.id}
                             session={session}
                             checkbox
-                            checked={newSessionSelectedIds.has(session.id)}
-                            onToggle={() => toggleNewSession(session.id)}
+                            checked={newSessionSelection.has(session.id)}
+                            onToggle={() => newSessionSelection.toggle(session.id)}
                           />
                         ))}
                       </Flex>
