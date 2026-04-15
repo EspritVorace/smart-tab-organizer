@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Flex, Text, Box, TextField, Button } from '@radix-ui/themes';
 import { getMessage } from '../../../utils/i18n';
 import styles from './TabTreeEditor.module.css';
@@ -13,6 +13,13 @@ export interface TabEditRowProps {
 }
 
 export function TabEditRow({ url, error, level, onChange, onSave, onCancel }: TabEditRowProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus the URL input on mount (replaces autoFocus).
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
   return (
     <Box
       style={{
@@ -28,6 +35,7 @@ export function TabEditRow({ url, error, level, onChange, onSave, onCancel }: Ta
             {getMessage('tabEditorUrlLabel')}:
           </Text>
           <TextField.Root
+            ref={inputRef}
             value={url}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
             onKeyDown={(e: React.KeyboardEvent) => {
@@ -38,7 +46,6 @@ export function TabEditRow({ url, error, level, onChange, onSave, onCancel }: Ta
             style={{ flex: 1 }}
             placeholder="https://example.com"
             aria-label={getMessage('tabEditorUrlLabel')}
-            autoFocus
           />
         </Flex>
         {error && (

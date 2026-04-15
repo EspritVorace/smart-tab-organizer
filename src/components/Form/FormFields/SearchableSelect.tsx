@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useId } from 'react';
 import { Command } from 'cmdk';
 import { ChevronDown, Check, Search } from 'lucide-react';
 import './SearchableSelect.css';
@@ -71,6 +71,7 @@ export function SearchableSelect({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listboxId = useId();
 
   const selectedOption = value ? findOption(value, options, groups) : undefined;
   const triggerText = selectedOption
@@ -170,6 +171,7 @@ export function SearchableSelect({
         id={id}
         role="combobox"
         aria-expanded={open}
+        aria-controls={listboxId}
         aria-haspopup="listbox"
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledBy}
@@ -208,7 +210,7 @@ export function SearchableSelect({
                 onKeyDown={handleInputKeyDown}
               />
             </div>
-            <Command.List className="ss-list" style={{ maxHeight: maxHeight - 48 }}>
+            <Command.List id={listboxId} className="ss-list" style={{ maxHeight: maxHeight - 48 }}>
               <Command.Empty className="ss-empty">{emptyMessage}</Command.Empty>
 
               {options && options.length > 0

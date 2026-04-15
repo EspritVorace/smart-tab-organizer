@@ -31,15 +31,6 @@ const TODO_DISABLED_VITEST = {
   'vitest/no-conditional-expect': 'off',
 };
 
-const TODO_DISABLED_A11Y = {
-  // TODO(eslint): 3 occurrences (autofocus dans dialogs)
-  'jsx-a11y/no-autofocus': 'off',
-  // TODO(eslint): 1 occurrence
-  'jsx-a11y/role-supports-aria-props': 'off',
-  // TODO(eslint): 1 occurrence
-  'jsx-a11y/role-has-required-aria-props': 'off',
-};
-
 const TODO_DISABLED_HOOKS = {
   // TODO(eslint): 4 warnings à vérifier
   'react-hooks/exhaustive-deps': 'off',
@@ -78,10 +69,6 @@ export default tseslint.config(
   {
     files: ['src/**/*.tsx'],
     ...jsxA11y.flatConfigs.recommended,
-  },
-  {
-    files: ['src/**/*.tsx'],
-    rules: TODO_DISABLED_A11Y,
   },
 
   {

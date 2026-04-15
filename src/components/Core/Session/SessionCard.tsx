@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { useSortable } from '@dnd-kit/react/sortable';
 import {
@@ -75,6 +75,14 @@ export function SessionCard({
   const [nameValue, setNameValue] = useState(session.name);
   const [renameError, setRenameError] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const renameInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus the rename input when entering rename mode (replaces autoFocus).
+  useEffect(() => {
+    if (isRenaming) {
+      renameInputRef.current?.focus();
+    }
+  }, [isRenaming]);
 
   // Drag-and-drop sortable hook
   const { ref, handleRef, isDragging } = useSortable({
@@ -212,13 +220,13 @@ export function SessionCard({
               <>
                 <Flex direction="column" style={{ flex: 1 }}>
                   <TextField.Root
+                    ref={renameInputRef}
                     value={nameValue}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setNameValue(e.target.value);
                       setRenameError(null);
                     }}
                     onKeyDown={handleKeyDown}
-                    autoFocus
                     size="2"
                     aria-label={getMessage('sessionRenameLabel')}
                   />
