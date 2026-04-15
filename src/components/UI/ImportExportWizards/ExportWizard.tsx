@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Dialog, Flex, Button, Checkbox, Text, Separator, Badge, Box, ScrollArea, TextArea } from '@radix-ui/themes';
 import { FileDown, ClipboardCopy } from 'lucide-react';
 import { ExportTheme } from '../../Form/themes';
@@ -8,6 +8,7 @@ import { showSuccessNotification } from '../../../utils/notifications';
 import { getRuleCategory } from '../../../schemas/enums';
 import { getRadixColor } from '../../../utils/utils';
 import type { DomainRuleSetting } from '../../../types/syncSettings';
+import { WizardDialogTitle, useDialogReset, useToggleSet } from './Shared';
 
 interface ExportWizardProps {
   open: boolean;
@@ -16,38 +17,19 @@ interface ExportWizardProps {
 }
 
 export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const selection = useToggleSet<string>();
   const [exportNote, setExportNote] = useState('');
 
-  // Reset state when dialog opens
-  useEffect(() => {
-    if (open) {
-      setSelectedIds(new Set(rules.map(r => r.id)));
-      setExportNote('');
-    }
-  }, [open, rules]);
-
-  const toggleRule = useCallback((id: string) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  }, []);
+  useDialogReset(open, () => {
+    selection.setAll(rules.map(r => r.id));
+    setExportNote('');
+  });
 
   const selectAll = useCallback(() => {
-    setSelectedIds(new Set(rules.map(r => r.id)));
-  }, [rules]);
+    selection.setAll(rules.map(r => r.id));
+  }, [rules, selection]);
 
-  const deselectAll = useCallback(() => {
-    setSelectedIds(new Set());
-  }, []);
-
-  const selectedRules = rules.filter(r => selectedIds.has(r.id));
+  const selectedRules = rules.filter(r => selection.has(r.id));
 
   const getExportJson = useCallback(() => {
     const exportData: { note?: string; domainRules: DomainRuleSetting[] } = {
@@ -115,17 +97,11 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
     <ExportTheme>
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
         <Dialog.Content style={{ maxWidth: 550 }}>
-          <Dialog.Title>
-            <Flex align="center" gap="2">
-              <FileDown size={18} aria-hidden="true" />
-              {getMessage('exportRulesTitle')}
-            </Flex>
-          </Dialog.Title>
-          <Dialog.Description size="2" color="gray">
-            {getMessage('exportRulesDescription')}
-          </Dialog.Description>
-
-          <Separator size="4" mt="3" style={{ opacity: 0.3 }} />
+          <WizardDialogTitle
+            icon={FileDown}
+            titleKey="exportRulesTitle"
+            descriptionKey="exportRulesDescription"
+          />
 
           <Box mt="4">
             <Box mb="4">
@@ -145,7 +121,7 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
               <Button variant="soft" size="1" onClick={selectAll}>
                 {getMessage('selectAll')}
               </Button>
-              <Button variant="soft" size="1" color="gray" onClick={deselectAll}>
+              <Button variant="soft" size="1" color="gray" onClick={selection.clearAll}>
                 {getMessage('deselectAll')}
               </Button>
             </Flex>
@@ -164,8 +140,8 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
                     }}
                   >
                     <Checkbox
-                      checked={selectedIds.has(rule.id)}
-                      onCheckedChange={() => toggleRule(rule.id)}
+                      checked={selection.has(rule.id)}
+                      onCheckedChange={() => selection.toggle(rule.id)}
                       aria-label={rule.label}
                     />
                     <Flex direction="column" gap="1" style={{ flex: 1 }}>
@@ -194,7 +170,7 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
             </ScrollArea>
 
             <Text size="2" color="gray" mt="3">
-              {getMessage('rulesSelectedCount').replace('{count}', String(selectedIds.size))}
+              {getMessage('rulesSelectedCount').replace('{count}', String(selection.size))}
             </Text>
           </Box>
 
@@ -210,7 +186,7 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
               label={getMessage('exportButton')}
               onClick={handleExportToFile}
               ariaLabel={getMessage('exportOptions')}
-              disabled={selectedIds.size === 0}
+              disabled={selection.size === 0}
               menuItems={[
                 {
                   label: getMessage('exportToFile'),

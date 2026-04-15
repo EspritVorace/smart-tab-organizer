@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import {
   Dialog, Flex, Button, Checkbox, Text, Separator, Badge, Box,
   ScrollArea, TextArea, SegmentedControl, Popover, Callout
@@ -17,6 +17,7 @@ import {
 import { generateUUID, getRadixColor } from '../../../utils/utils';
 import { getRuleCategory } from '../../../schemas/enums';
 import type { DomainRuleSetting, SyncSettings } from '../../../types/syncSettings';
+import { WizardDialogTitle, useDialogReset, useToggleSet } from './Shared';
 
 type ConflictMode = 'overwrite' | 'duplicate' | 'ignore';
 
@@ -38,27 +39,24 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
 
   // Step 1 state
   const [classification, setClassification] = useState<RuleClassification | null>(null);
-  const [newRuleSelectedIds, setNewRuleSelectedIds] = useState<Set<string>>(new Set());
+  const newRuleSelection = useToggleSet<string>();
   const [conflictMode, setConflictMode] = useState<ConflictMode>('overwrite');
   const [importedNote, setImportedNote] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Reset state when dialog opens
-  useEffect(() => {
-    if (open) {
-      setStep(0);
-      setSourceMode('file');
-      setJsonText('');
-      setParsedRules(null);
-      setParseError(null);
-      setFileName(null);
-      setClassification(null);
-      setNewRuleSelectedIds(new Set());
-      setConflictMode('overwrite');
-      setImportedNote(null);
-    }
-  }, [open]);
+  useDialogReset(open, () => {
+    setStep(0);
+    setSourceMode('file');
+    setJsonText('');
+    setParsedRules(null);
+    setParseError(null);
+    setFileName(null);
+    setClassification(null);
+    newRuleSelection.clearAll();
+    setConflictMode('overwrite');
+    setImportedNote(null);
+  });
 
   const validateJson = useCallback((text: string) => {
     if (!text.trim()) {
@@ -141,29 +139,17 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
     if (!parsedRules) return;
     const result = classifyImportedRules(parsedRules, existingRules);
     setClassification(result);
-    setNewRuleSelectedIds(new Set(result.newRules.map(r => r.id)));
+    newRuleSelection.setAll(result.newRules.map(r => r.id));
     setStep(1);
-  }, [parsedRules, existingRules]);
-
-  const toggleNewRule = useCallback((id: string) => {
-    setNewRuleSelectedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  }, []);
+  }, [parsedRules, existingRules, newRuleSelection]);
 
   // Compute import count
   const importCount = useMemo(() => {
     if (!classification) return 0;
-    const newCount = classification.newRules.filter(r => newRuleSelectedIds.has(r.id)).length;
+    const newCount = classification.newRules.filter(r => newRuleSelection.has(r.id)).length;
     const conflictCount = conflictMode === 'ignore' ? 0 : classification.conflictingRules.length;
     return newCount + conflictCount;
-  }, [classification, newRuleSelectedIds, conflictMode]);
+  }, [classification, newRuleSelection, conflictMode]);
 
   // Execute import
   const executeImport = useCallback(() => {
@@ -175,7 +161,7 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
 
     // Add new selected rules
     for (const rule of classification.newRules) {
-      if (newRuleSelectedIds.has(rule.id)) {
+      if (newRuleSelection.has(rule.id)) {
         updatedRules.push(rule);
         added++;
       }
@@ -204,23 +190,17 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
       getMessage('importNotificationTitle'),
       getMessage('importNotificationMessage', [String(added), String(overwritten)]),
     );
-  }, [classification, existingRules, newRuleSelectedIds, conflictMode, onImport, onOpenChange]);
+  }, [classification, existingRules, newRuleSelection, conflictMode, onImport, onOpenChange]);
 
   return (
     <ImportTheme>
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
         <Dialog.Content style={{ maxWidth: 600 }}>
-          <Dialog.Title>
-            <Flex align="center" gap="2">
-              <FileUp size={18} aria-hidden="true" />
-              {getMessage('importRulesTitle')}
-            </Flex>
-          </Dialog.Title>
-          <Dialog.Description size="2" color="gray">
-            {getMessage('importRulesDescription')}
-          </Dialog.Description>
-
-          <Separator size="4" mt="3" style={{ opacity: 0.3 }} />
+          <WizardDialogTitle
+            icon={FileUp}
+            titleKey="importRulesTitle"
+            descriptionKey="importRulesDescription"
+          />
 
           {/* Step 0: Source */}
           {step === 0 && (
@@ -345,8 +325,8 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
                             key={rule.id}
                             rule={rule}
                             checkbox
-                            checked={newRuleSelectedIds.has(rule.id)}
-                            onToggle={() => toggleNewRule(rule.id)}
+                            checked={newRuleSelection.has(rule.id)}
+                            onToggle={() => newRuleSelection.toggle(rule.id)}
                           />
                         ))}
                       </Flex>

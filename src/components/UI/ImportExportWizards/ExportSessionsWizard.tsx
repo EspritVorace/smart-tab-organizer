@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Dialog, Flex, Button, Checkbox, Text, Separator, Box, ScrollArea, TextArea } from '@radix-ui/themes';
 import { FileDown, ClipboardCopy, Pin, Archive } from 'lucide-react';
 import { SessionsTheme } from '../../Form/themes';
@@ -14,6 +14,7 @@ import {
   splitByPinned,
 } from '../../../utils/sessionUtils';
 import type { Session } from '../../../types/session';
+import { WizardDialogTitle, useDialogReset, useToggleSet } from './Shared';
 
 interface ExportSessionsWizardProps {
   open: boolean;
@@ -22,39 +23,20 @@ interface ExportSessionsWizardProps {
 
 export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizardProps) {
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const selection = useToggleSet<string>();
   const [exportNote, setExportNote] = useState('');
 
-  // Load sessions and reset state when dialog opens
-  useEffect(() => {
-    if (open) {
-      loadSessions().then(loaded => {
-        setSessions(loaded);
-        setSelectedIds(new Set(loaded.map(s => s.id)));
-      });
-      setExportNote('');
-    }
-  }, [open]);
-
-  const toggleSession = useCallback((id: string) => {
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
+  useDialogReset(open, () => {
+    loadSessions().then(loaded => {
+      setSessions(loaded);
+      selection.setAll(loaded.map(s => s.id));
     });
-  }, []);
+    setExportNote('');
+  });
 
   const selectAll = useCallback(() => {
-    setSelectedIds(new Set(sessions.map(s => s.id)));
-  }, [sessions]);
-
-  const deselectAll = useCallback(() => {
-    setSelectedIds(new Set());
-  }, []);
+    selection.setAll(sessions.map(s => s.id));
+  }, [sessions, selection]);
 
   const { pinned: pinnedSessions, unpinned: unpinnedSessions } = useMemo(
     () => splitByPinned(sessions),
@@ -62,27 +44,25 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
   );
 
   const toggleGroupSelection = useCallback((group: Session[]) => {
-    setSelectedIds(prev => {
-      const allSelected = group.every(s => prev.has(s.id));
-      const next = new Set(prev);
-      if (allSelected) {
-        group.forEach(s => next.delete(s.id));
-      } else {
-        group.forEach(s => next.add(s.id));
-      }
-      return next;
-    });
-  }, []);
+    const allSelected = group.every(s => selection.has(s.id));
+    const nextIds = new Set(selection.ids);
+    if (allSelected) {
+      group.forEach(s => nextIds.delete(s.id));
+    } else {
+      group.forEach(s => nextIds.add(s.id));
+    }
+    selection.setAll(nextIds);
+  }, [selection]);
 
   const getGroupCheckedState = useCallback((group: Session[]): boolean | 'indeterminate' => {
     if (group.length === 0) return false;
-    const selectedCount = group.filter(s => selectedIds.has(s.id)).length;
+    const selectedCount = group.filter(s => selection.has(s.id)).length;
     if (selectedCount === 0) return false;
     if (selectedCount === group.length) return true;
     return 'indeterminate';
-  }, [selectedIds]);
+  }, [selection]);
 
-  const selectedSessions = sessions.filter(s => selectedIds.has(s.id));
+  const selectedSessions = sessions.filter(s => selection.has(s.id));
 
   const getExportJson = useCallback(() => {
     const exportData: { note?: string; sessions: Session[] } = { sessions: selectedSessions };
@@ -148,17 +128,11 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
     <SessionsTheme>
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
         <Dialog.Content style={{ maxWidth: 550 }}>
-          <Dialog.Title>
-            <Flex align="center" gap="2">
-              <FileDown size={18} aria-hidden="true" />
-              {getMessage('exportSessionsTitle')}
-            </Flex>
-          </Dialog.Title>
-          <Dialog.Description size="2" color="gray">
-            {getMessage('exportSessionsDescription')}
-          </Dialog.Description>
-
-          <Separator size="4" mt="3" style={{ opacity: 0.3 }} />
+          <WizardDialogTitle
+            icon={FileDown}
+            titleKey="exportSessionsTitle"
+            descriptionKey="exportSessionsDescription"
+          />
 
           <Box mt="4">
             <Box mb="4">
@@ -178,7 +152,7 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
               <Button variant="soft" size="1" onClick={selectAll}>
                 {getMessage('selectAll')}
               </Button>
-              <Button variant="soft" size="1" color="gray" onClick={deselectAll}>
+              <Button variant="soft" size="1" color="gray" onClick={selection.clearAll}>
                 {getMessage('deselectAll')}
               </Button>
             </Flex>
@@ -203,8 +177,8 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
                         <ExportSessionRow
                           key={session.id}
                           session={session}
-                          checked={selectedIds.has(session.id)}
-                          onToggle={() => toggleSession(session.id)}
+                          checked={selection.has(session.id)}
+                          onToggle={() => selection.toggle(session.id)}
                         />
                       ))}
                     </Flex>
@@ -233,8 +207,8 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
                         <ExportSessionRow
                           key={session.id}
                           session={session}
-                          checked={selectedIds.has(session.id)}
-                          onToggle={() => toggleSession(session.id)}
+                          checked={selection.has(session.id)}
+                          onToggle={() => selection.toggle(session.id)}
                         />
                       ))}
                     </Flex>
@@ -244,7 +218,7 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
             </ScrollArea>
 
             <Text size="2" color="gray" mt="3">
-              {getMessage('sessionsSelectedCount').replace('{count}', String(selectedIds.size))}
+              {getMessage('sessionsSelectedCount').replace('{count}', String(selection.size))}
             </Text>
           </Box>
 
@@ -260,7 +234,7 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
               label={getMessage('exportSessionsButton')}
               onClick={handleExportToFile}
               ariaLabel={getMessage('exportOptions')}
-              disabled={selectedIds.size === 0}
+              disabled={selection.size === 0}
               menuItems={[
                 {
                   label: getMessage('exportToFile'),
