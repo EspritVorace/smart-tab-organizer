@@ -1,19 +1,12 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import {
-  Dialog, Flex, Button, Checkbox, Text, Badge, Box, Separator,
-  Popover,
-} from '@radix-ui/themes';
-import { FileUp, ClipboardPaste, Eye, AlertTriangle } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Box, Button, Dialog, Flex, Separator } from '@radix-ui/themes';
+import { FileUp } from 'lucide-react';
 import { ImportTheme } from '../../Form/themes';
 import { getMessage } from '../../../utils/i18n';
 import { showSuccessNotification } from '../../../utils/notifications';
 import { importDataSchema } from '../../../schemas/importExport';
-import {
-  classifyImportedRules,
-  type ConflictingRule,
-} from '../../../utils/importClassification';
-import { generateUUID, getRadixColor } from '../../../utils/utils';
-import { getRuleCategory } from '../../../schemas/enums';
+import { classifyImportedRules } from '../../../utils/importClassification';
+import { generateUUID } from '../../../utils/utils';
 import type { DomainRuleSetting } from '../../../types/syncSettings';
 import { WizardDialogTitle, useDialogReset } from './Shared';
 import { SourceStep, ImportedNoteCallout, useJsonSourceInput } from './Source';
@@ -26,6 +19,7 @@ import {
   ImportCountLabel,
 } from './Classification';
 import type { RuleClassification } from '../../../utils/importClassification';
+import { RuleRow, ConflictRuleRow } from './RuleImportRows';
 
 interface ImportWizardProps {
   open: boolean;
@@ -160,7 +154,7 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
                     />
                   }
                   renderItem={(conflict) => (
-                    <ConflictRow key={conflict.imported.id} conflict={conflict} />
+                    <ConflictRuleRow key={conflict.imported.id} conflict={conflict} />
                   )}
                 />
                 <ClassificationGroup
@@ -218,118 +212,5 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
         </Dialog.Content>
       </Dialog.Root>
     </ImportTheme>
-  );
-}
-
-// --- Sub-components ---
-
-interface RuleRowProps {
-  rule: DomainRuleSetting;
-  checkbox?: boolean;
-  checked?: boolean;
-  onToggle?: () => void;
-  dimmed?: boolean;
-  statusBadge?: string;
-}
-
-function RuleRow({ rule, checkbox, checked, onToggle, dimmed, statusBadge }: RuleRowProps) {
-  return (
-    <Flex
-      align="center"
-      gap="3"
-      p="2"
-      style={{
-        borderRadius: 'var(--radius-2)',
-        backgroundColor: 'var(--gray-a2)',
-        opacity: dimmed ? 0.6 : 1,
-      }}
-    >
-      {checkbox && (
-        <Checkbox
-          checked={checked}
-          onCheckedChange={onToggle}
-          aria-label={rule.label}
-        />
-      )}
-      <Flex direction="column" gap="1" style={{ flex: 1 }}>
-        <Text size="2" weight="medium">{rule.label}</Text>
-        <Text size="1" color="gray">{rule.domainFilter}</Text>
-      </Flex>
-      {(() => {
-        const cat = getRuleCategory(rule.categoryId);
-        if (cat) {
-          return (
-            <Badge color={getRadixColor(cat.color) as any} variant="soft" size="1">
-              {cat.emoji} {getMessage(cat.labelKey as any)}
-            </Badge>
-          );
-        }
-        return null;
-      })()}
-      {statusBadge && (
-        <Badge color="gray" variant="outline" size="1">
-          {statusBadge}
-        </Badge>
-      )}
-    </Flex>
-  );
-}
-
-interface ConflictRowProps {
-  conflict: ConflictingRule;
-}
-
-function ConflictRow({ conflict }: ConflictRowProps) {
-  return (
-    <Flex
-      align="center"
-      gap="3"
-      p="2"
-      style={{
-        borderRadius: 'var(--radius-2)',
-        backgroundColor: 'var(--orange-a2)',
-      }}
-    >
-      <AlertTriangle size={16} style={{ color: 'var(--orange-9)', flexShrink: 0 }} aria-hidden="true" />
-      <Flex direction="column" gap="1" style={{ flex: 1 }}>
-        <Text size="2" weight="medium">{conflict.imported.label}</Text>
-        <Text size="1" color="gray">{conflict.imported.domainFilter}</Text>
-      </Flex>
-      <Badge color={conflict.imported.color as any} variant="soft" size="1">
-        {getMessage(`color_${conflict.imported.color}`)}
-      </Badge>
-
-      <Popover.Root>
-        <Popover.Trigger>
-          <Button variant="ghost" size="1" aria-label={getMessage('viewDiff')} title={getMessage('viewDiff')}>
-            <Eye size={14} aria-hidden="true" />
-          </Button>
-        </Popover.Trigger>
-        <Popover.Content style={{ maxWidth: 350 }}>
-          <Text size="3" weight="bold" mb="2">
-            {getMessage('differences')} — {conflict.imported.label}
-          </Text>
-          <Flex direction="column" gap="3">
-            {conflict.differences.map(diff => (
-              <Box key={diff.property}>
-                <Text size="2" weight="medium" mb="1">
-                  {getMessage(diff.property) || diff.property}
-                </Text>
-                <Flex direction="column" gap="1">
-                  <Flex align="center" gap="2">
-                    <Badge color="red" variant="soft" size="1">{getMessage('currentValue')}</Badge>
-                    <Text size="1">{String(diff.currentValue)}</Text>
-                  </Flex>
-                  <Flex align="center" gap="2">
-                    <Badge color="green" variant="soft" size="1">{getMessage('importedValue')}</Badge>
-                    <Text size="1">{String(diff.importedValue)}</Text>
-                  </Flex>
-                </Flex>
-              </Box>
-            ))}
-          </Flex>
-        </Popover.Content>
-      </Popover.Root>
-    </Flex>
   );
 }
