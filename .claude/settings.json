@@ -10,6 +10,12 @@
             "timeout": 65,
             "statusMessage": "TypeScript check...",
             "async": true
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // .tool_response.filePath // \"\"' | { read -r f; [ -z \"$f\" ] && exit 0; case \"$f\" in *.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs) ;; *) exit 0 ;; esac; output=$(pnpm exec eslint --max-warnings=0 \"$f\" 2>&1); rc=$?; if [ $rc -ne 0 ]; then echo \"ESLint signale des erreurs/warnings sur $f. Corrigez avant de continuer:\" >&2; echo \"$output\" >&2; exit 2; fi; }",
+            "timeout": 60,
+            "statusMessage": "ESLint check..."
           }
         ]
       }
