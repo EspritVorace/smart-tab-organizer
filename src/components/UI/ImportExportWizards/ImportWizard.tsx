@@ -1,10 +1,9 @@
-import React, { useState, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
-  Dialog, Flex, Button, Checkbox, Text, Separator, Badge, Box,
-  ScrollArea, TextArea, SegmentedControl, Popover, Callout
+  Dialog, Flex, Button, Checkbox, Text, Badge, Box, Separator,
+  ScrollArea, SegmentedControl, Popover, Callout,
 } from '@radix-ui/themes';
-import { Upload, FileUp, ClipboardPaste, CheckCircle, AlertTriangle, XCircle, Eye, Info } from 'lucide-react';
-import { z } from 'zod';
+import { FileUp, ClipboardPaste, AlertTriangle, Eye } from 'lucide-react';
 import { ImportTheme } from '../../Form/themes';
 import { getMessage } from '../../../utils/i18n';
 import { showSuccessNotification } from '../../../utils/notifications';
@@ -12,12 +11,13 @@ import { importDataSchema } from '../../../schemas/importExport';
 import {
   classifyImportedRules,
   type RuleClassification,
-  type ConflictingRule
+  type ConflictingRule,
 } from '../../../utils/importClassification';
 import { generateUUID, getRadixColor } from '../../../utils/utils';
 import { getRuleCategory } from '../../../schemas/enums';
-import type { DomainRuleSetting, SyncSettings } from '../../../types/syncSettings';
+import type { DomainRuleSetting } from '../../../types/syncSettings';
 import { WizardDialogTitle, useDialogReset, useToggleSet } from './Shared';
+import { SourceStep, ImportedNoteCallout, useJsonSourceInput } from './Source';
 
 type ConflictMode = 'overwrite' | 'duplicate' | 'ignore';
 
@@ -28,120 +28,39 @@ interface ImportWizardProps {
   onImport: (updatedRules: DomainRuleSetting[]) => void;
 }
 
+const validateRulesPayload = (raw: unknown) => {
+  const validated = importDataSchema.parse(raw);
+  return {
+    data: validated.domainRules as DomainRuleSetting[],
+    note: validated.note ?? null,
+  };
+};
+
 export function ImportWizard({ open, onOpenChange, existingRules, onImport }: ImportWizardProps) {
   const [step, setStep] = useState(0);
-  const [sourceMode, setSourceMode] = useState<'file' | 'text'>('file');
-  const [jsonText, setJsonText] = useState('');
-  const [parsedRules, setParsedRules] = useState<DomainRuleSetting[] | null>(null);
-  const [parseError, setParseError] = useState<string | null>(null);
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [fileName, setFileName] = useState<string | null>(null);
+  const source = useJsonSourceInput<DomainRuleSetting[]>(validateRulesPayload);
 
   // Step 1 state
   const [classification, setClassification] = useState<RuleClassification | null>(null);
   const newRuleSelection = useToggleSet<string>();
   const [conflictMode, setConflictMode] = useState<ConflictMode>('overwrite');
-  const [importedNote, setImportedNote] = useState<string | null>(null);
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useDialogReset(open, () => {
     setStep(0);
-    setSourceMode('file');
-    setJsonText('');
-    setParsedRules(null);
-    setParseError(null);
-    setFileName(null);
+    source.reset();
     setClassification(null);
     newRuleSelection.clearAll();
     setConflictMode('overwrite');
-    setImportedNote(null);
   });
-
-  const validateJson = useCallback((text: string) => {
-    if (!text.trim()) {
-      setParsedRules(null);
-      setParseError(null);
-      setImportedNote(null);
-      return;
-    }
-
-    try {
-      const rawData = JSON.parse(text);
-      const validated = importDataSchema.parse(rawData);
-      setParsedRules(validated.domainRules as DomainRuleSetting[]);
-      setImportedNote(validated.note ?? null);
-      setParseError(null);
-    } catch (error) {
-      setParsedRules(null);
-      setImportedNote(null);
-      if (error instanceof SyntaxError) {
-        setParseError(getMessage('invalidJson'));
-      } else if (error instanceof z.ZodError) {
-        const messages = error.issues.map(issue => {
-          const path = issue.path.join('.');
-          return `${path}: ${issue.message}`;
-        });
-        setParseError(messages.join('\n'));
-      } else {
-        setParseError(getMessage('errorImportInvalidStructure'));
-      }
-    }
-  }, []);
-
-  const handleFileRead = useCallback((file: File) => {
-    setFileName(file.name);
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      setJsonText(text);
-      validateJson(text);
-    };
-    reader.readAsText(file);
-  }, [validateJson]);
-
-  const handleTextChange = useCallback((text: string) => {
-    setJsonText(text);
-    validateJson(text);
-  }, [validateJson]);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (file && file.name.endsWith('.json')) {
-      handleFileRead(file);
-    }
-  }, [handleFileRead]);
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(true);
-  }, []);
-
-  const handleDragLeave = useCallback(() => {
-    setIsDragOver(false);
-  }, []);
-
-  const handleBrowse = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
-
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileRead(file);
-    }
-  }, [handleFileRead]);
 
   // Transition to step 1: classify rules
   const goToStep1 = useCallback(() => {
-    if (!parsedRules) return;
-    const result = classifyImportedRules(parsedRules, existingRules);
+    if (!source.parsedData) return;
+    const result = classifyImportedRules(source.parsedData, existingRules);
     setClassification(result);
-    newRuleSelection.setAll(result.newRules.map(r => r.id));
+    newRuleSelection.setAll(result.newRules.map((r) => r.id));
     setStep(1);
-  }, [parsedRules, existingRules, newRuleSelection]);
+  }, [source.parsedData, existingRules, newRuleSelection]);
 
   // Compute import count
   const importCount = useMemo(() => {
@@ -204,113 +123,17 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
 
           {/* Step 0: Source */}
           {step === 0 && (
-            <Box mt="4">
-              <SegmentedControl.Root
-                value={sourceMode}
-                onValueChange={(v: string) => setSourceMode(v as 'file' | 'text')}
-                size="2"
-              >
-                <SegmentedControl.Item value="file">
-                  {getMessage('sourceFile')}
-                </SegmentedControl.Item>
-                <SegmentedControl.Item value="text">
-                  {getMessage('sourceText')}
-                </SegmentedControl.Item>
-              </SegmentedControl.Root>
-
-              <Box mt="3">
-                {sourceMode === 'file' && (
-                  <>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".json"
-                      onChange={handleFileSelect}
-                      style={{ display: 'none' }}
-                    />
-                    <Flex
-                      direction="column"
-                      align="center"
-                      justify="center"
-                      gap="2"
-                      p="5"
-                      onDrop={handleDrop}
-                      onDragOver={handleDragOver}
-                      onDragLeave={handleDragLeave}
-                      style={{
-                        border: `2px dashed ${isDragOver ? 'var(--accent-9)' : 'var(--gray-a6)'}`,
-                        borderRadius: 'var(--radius-3)',
-                        backgroundColor: isDragOver ? 'var(--accent-a2)' : 'var(--gray-a2)',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        minHeight: 120,
-                      }}
-                      onClick={handleBrowse}
-                    >
-                      <FileUp size={32} style={{ color: 'var(--gray-9)' }} aria-hidden="true" />
-                      <Text size="2" color="gray">
-                        {getMessage('dragDropZone')}
-                      </Text>
-                      <Button variant="soft" size="1" onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleBrowse(); }}>
-                        {getMessage('browse')}
-                      </Button>
-                      {fileName && (
-                        <Text size="1" color="gray" mt="1">{fileName}</Text>
-                      )}
-                    </Flex>
-                  </>
-                )}
-
-                {sourceMode === 'text' && (
-                  <TextArea
-                    value={jsonText}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleTextChange(e.target.value)}
-                    placeholder='{"domainRules": [...]}'
-                    rows={8}
-                    style={{ fontFamily: 'monospace', fontSize: 12 }}
-                  />
-                )}
-              </Box>
-
-              {/* Validation feedback */}
-              {parseError && (
-                <Callout.Root color="red" variant="soft" mt="3">
-                  <Callout.Icon>
-                    <XCircle size={16} />
-                  </Callout.Icon>
-                  <Callout.Text style={{ whiteSpace: 'pre-wrap', fontSize: 12 }}>
-                    {parseError}
-                  </Callout.Text>
-                </Callout.Root>
-              )}
-
-              {parsedRules && (
-                <Callout.Root color="green" variant="soft" mt="3">
-                  <Callout.Icon>
-                    <CheckCircle size={16} />
-                  </Callout.Icon>
-                  <Callout.Text>
-                    {getMessage('rulesFoundCount').replace('{count}', String(parsedRules.length))}
-                  </Callout.Text>
-                </Callout.Root>
-              )}
-            </Box>
+            <SourceStep
+              source={source}
+              textareaPlaceholder='{"domainRules": [...]}'
+              successCountMessageKey="rulesFoundCount"
+            />
           )}
 
           {/* Step 1: Selection */}
           {step === 1 && classification && (
             <Box mt="4">
-              {importedNote && (
-                <Callout.Root color="gray" variant="soft" mb="3">
-                  <Callout.Icon>
-                    <Info size={16} aria-hidden="true" />
-                  </Callout.Icon>
-                  <Callout.Text>
-                    <Text as="p" size="1" weight="medium" mb="1">{getMessage('importExportNote')}</Text>
-                    {importedNote}
-                  </Callout.Text>
-                </Callout.Root>
-              )}
+              <ImportedNoteCallout note={source.importedNote} />
               <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '50vh' }}>
                 <Flex direction="column" gap="3" pr="3">
                   {/* New rules group */}
@@ -420,7 +243,7 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
                     {getMessage('cancel')}
                   </Button>
                 </Dialog.Close>
-                <Button onClick={goToStep1} disabled={!parsedRules}>
+                <Button onClick={goToStep1} disabled={!source.parsedData}>
                   {getMessage('next')}
                 </Button>
               </>
