@@ -1,9 +1,8 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   Dialog, Flex, Button, Text, Separator, Box,
-  ScrollArea, SegmentedControl, Callout,
 } from '@radix-ui/themes';
-import { Upload, AlertTriangle } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { SessionsTheme } from '../../Form/themes';
 import { getMessage } from '../../../utils/i18n';
 import { showSuccessNotification } from '../../../utils/notifications';
@@ -17,10 +16,16 @@ import { generateUUID } from '../../../utils/utils';
 import { loadSessions, saveSessions } from '../../../utils/sessionStorage';
 import { SessionRow, ConflictSessionRow } from './SessionImportRows';
 import type { Session } from '../../../types/session';
-import { WizardDialogTitle, useDialogReset, useToggleSet } from './Shared';
+import { WizardDialogTitle, useDialogReset } from './Shared';
 import { SourceStep, ImportedNoteCallout, useJsonSourceInput } from './Source';
-
-type ConflictMode = 'overwrite' | 'duplicate' | 'ignore';
+import {
+  useImportClassification,
+  ClassificationGroup,
+  ClassificationScrollArea,
+  ConflictModeSelector,
+  ConflictWarningCallout,
+  ImportCountLabel,
+} from './Classification';
 
 interface ImportSessionsWizardProps {
   open: boolean;
@@ -52,26 +57,23 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
   const source = useJsonSourceInput<Session[]>(validateSessionsPayload);
   const [existingSessions, setExistingSessions] = useState<Session[]>([]);
 
-  const [classification, setClassification] = useState<SessionClassification | null>(null);
-  const newSessionSelection = useToggleSet<string>();
-  const [conflictMode, setConflictMode] = useState<ConflictMode>('overwrite');
+  const classificationState = useImportClassification<SessionClassification>();
+  const { classification, conflictMode, newSelection: newSessionSelection } = classificationState;
 
   useDialogReset(open, () => {
     loadSessions().then((loaded) => setExistingSessions(loaded));
     setStep(0);
     source.reset();
-    setClassification(null);
-    newSessionSelection.clearAll();
-    setConflictMode('overwrite');
+    classificationState.reset();
   });
 
   const goToStep1 = useCallback(() => {
     if (!source.parsedData) return;
     const result = classifyImportedSessions(source.parsedData, existingSessions);
-    setClassification(result);
+    classificationState.setClassification(result);
     newSessionSelection.setAll(result.newSessions.map((s) => s.id));
     setStep(1);
-  }, [source.parsedData, existingSessions, newSessionSelection]);
+  }, [source.parsedData, existingSessions, classificationState, newSessionSelection]);
 
   const importCount = useMemo(() => {
     if (!classification) return 0;
@@ -147,88 +149,57 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
           {step === 1 && classification && (
             <Box mt="4">
               <ImportedNoteCallout note={source.importedNote} />
-              <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '50vh' }}>
-                <Flex direction="column" gap="3" pr="3">
-                  {classification.newSessions.length > 0 && (
-                    <>
-                      <Text size="3" weight="bold">
-                        {getMessage('newSessionsGroup').replace('{count}', String(classification.newSessions.length))}
-                      </Text>
-                      <Flex direction="column" gap="2">
-                        {classification.newSessions.map(session => (
-                          <SessionRow
-                            key={session.id}
-                            session={session}
-                            checkbox
-                            checked={newSessionSelection.has(session.id)}
-                            onToggle={() => newSessionSelection.toggle(session.id)}
-                          />
-                        ))}
-                      </Flex>
-                    </>
+              <ClassificationScrollArea>
+                <ClassificationGroup
+                  titleKey="newSessionsGroup"
+                  items={classification.newSessions}
+                  renderItem={(session) => (
+                    <SessionRow
+                      key={session.id}
+                      session={session}
+                      checkbox
+                      checked={newSessionSelection.has(session.id)}
+                      onToggle={() => newSessionSelection.toggle(session.id)}
+                    />
                   )}
-
-                  {classification.conflictingSessions.length > 0 && (
-                    <>
-                      {classification.newSessions.length > 0 && <Separator size="4" />}
-                      <Text size="3" weight="bold">
-                        {getMessage('conflictingSessionsGroup').replace('{count}', String(classification.conflictingSessions.length))}
-                      </Text>
-
-                      <Flex align="center" gap="2" mb="1">
-                        <Text size="2" color="gray">{getMessage('conflictResolutionMode')}</Text>
-                        <SegmentedControl.Root
-                          value={conflictMode}
-                          onValueChange={(v: string) => setConflictMode(v as ConflictMode)}
-                          size="1"
-                        >
-                          <SegmentedControl.Item value="overwrite">{getMessage('conflictModeOverwrite')}</SegmentedControl.Item>
-                          <SegmentedControl.Item value="duplicate">{getMessage('conflictModeDuplicate')}</SegmentedControl.Item>
-                          <SegmentedControl.Item value="ignore">{getMessage('conflictModeIgnore')}</SegmentedControl.Item>
-                        </SegmentedControl.Root>
-                      </Flex>
-
-                      <Flex direction="column" gap="2">
-                        {classification.conflictingSessions.map(conflict => (
-                          <ConflictSessionRow key={conflict.imported.id} conflict={conflict} />
-                        ))}
-                      </Flex>
-                    </>
+                />
+                <ClassificationGroup
+                  titleKey="conflictingSessionsGroup"
+                  items={classification.conflictingSessions}
+                  showSeparator={classification.newSessions.length > 0}
+                  beforeList={
+                    <ConflictModeSelector
+                      value={conflictMode}
+                      onChange={classificationState.setConflictMode}
+                    />
+                  }
+                  renderItem={(conflict) => (
+                    <ConflictSessionRow key={conflict.imported.id} conflict={conflict} />
                   )}
-
-                  {classification.identicalSessions.length > 0 && (
-                    <>
-                      {(classification.newSessions.length > 0 || classification.conflictingSessions.length > 0) && (
-                        <Separator size="4" />
-                      )}
-                      <Text size="3" weight="bold">
-                        {getMessage('identicalSessionsGroup').replace('{count}', String(classification.identicalSessions.length))}
-                      </Text>
-                      <Flex direction="column" gap="2">
-                        {classification.identicalSessions.map(session => (
-                          <SessionRow
-                            key={session.id}
-                            session={session}
-                            dimmed
-                            statusBadge={getMessage('alreadyExists')}
-                          />
-                        ))}
-                      </Flex>
-                    </>
+                />
+                <ClassificationGroup
+                  titleKey="identicalSessionsGroup"
+                  items={classification.identicalSessions}
+                  showSeparator={
+                    classification.newSessions.length > 0
+                    || classification.conflictingSessions.length > 0
+                  }
+                  renderItem={(session) => (
+                    <SessionRow
+                      key={session.id}
+                      session={session}
+                      dimmed
+                      statusBadge={getMessage('alreadyExists')}
+                    />
                   )}
-                </Flex>
-              </ScrollArea>
+                />
+              </ClassificationScrollArea>
 
-              <Text size="2" color="gray" mt="3">
-                {getMessage('sessionsToImportCount').replace('{count}', String(importCount))}
-              </Text>
-
-              {hasConflicts && conflictMode === 'overwrite' && (
-                <Callout.Root color="orange" variant="soft" mt="3">
-                  <Callout.Icon><AlertTriangle size={16} /></Callout.Icon>
-                  <Callout.Text>{getMessage('sessionImportOverwriteWarning')}</Callout.Text>
-                </Callout.Root>
-              )}
+              <ImportCountLabel messageKey="sessionsToImportCount" count={importCount} />
+              <ConflictWarningCallout
+                when={hasConflicts && conflictMode === 'overwrite'}
+                messageKey="sessionImportOverwriteWarning"
+              />
             </Box>
           )}
 
