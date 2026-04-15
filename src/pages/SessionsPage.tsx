@@ -49,47 +49,109 @@ interface SessionSectionProps {
   icon: LucideIcon;
   titleKey: string;
   emptyMessageKey: string;
+  /** Whether this section lists the pinned sessions (drives drag reorder layout). */
+  isPinned: boolean;
+  /** Sessions displayed in this section (already filtered by search + split by pinned state). */
   sessions: Session[];
-  dragItems: Session[] | null;
-  onDragOver: (event: Parameters<DragOverEvent>[0]) => void;
-  onDragEnd: (event: Parameters<DragEndEvent>[0]) => void;
+  /** Full ordered session list, used to recompute the global order after a drag and for move-to-first/last. */
+  allSessions: Session[];
   searchQuery: string;
-  existingSessions: Session[];
-  sessionSearchMatches: Map<string, SessionSearchMatch> | null;
-  onRestore: (session: Session) => void;
-  onRestoreCurrentWindow: (session: Session) => void;
-  onRestoreNewWindow: (session: Session) => void;
-  onRename: (id: string, newName: string) => Promise<void>;
-  onEdit: (session: Session) => void;
-  onDelete: (session: Session) => void;
-  onPin: (session: Session) => void;
-  onUnpin: (session: Session) => void;
-  onMoveToFirst: (session: Session) => void;
-  onMoveLast: (session: Session) => void;
+  searchMatches: Map<string, SessionSearchMatch> | null;
+  /** Persist a new global session order. */
+  updateOrder: (sessions: Session[]) => Promise<void>;
+  /** Rename a session (forwarded straight to SessionCard). */
+  renameSession: (id: string, newName: string) => Promise<void>;
+  /** Reload sessions after a mutation (used for pin/unpin). */
+  reload: () => Promise<void>;
+  /** Open the RestoreWizard (owned by the parent). */
+  onOpenRestoreWizard: (session: Session) => void;
+  /** Open the SessionEditDialog (owned by the parent). */
+  onOpenEditDialog: (session: Session) => void;
+  /** Open the delete ConfirmDialog (owned by the parent). */
+  onOpenDeleteDialog: (session: Session) => void;
+  /** Emit a transient feedback message (single callout shared between both sections). */
+  onRestoreFeedback: (message: string | null) => void;
 }
 
 function SessionSection({
   icon,
   titleKey,
   emptyMessageKey,
+  isPinned,
   sessions,
-  dragItems,
-  onDragOver,
-  onDragEnd,
+  allSessions,
   searchQuery,
-  existingSessions,
-  sessionSearchMatches,
-  onRestore,
-  onRestoreCurrentWindow,
-  onRestoreNewWindow,
-  onRename,
-  onEdit,
-  onDelete,
-  onPin,
-  onUnpin,
-  onMoveToFirst,
-  onMoveLast,
+  searchMatches,
+  updateOrder,
+  renameSession,
+  reload,
+  onOpenRestoreWizard,
+  onOpenEditDialog,
+  onOpenDeleteDialog,
+  onRestoreFeedback,
 }: SessionSectionProps) {
+  const [dragItems, setDragItems] = useState<Session[] | null>(null);
+
+  // Drag: reorder within this section, then splice back into the global order.
+  const handleDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
+    setDragItems(prev => move(prev ?? sessions, event));
+  }, [sessions]);
+
+  const handleDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
+    if (!event.canceled) {
+      const source = dragItems ?? sessions;
+      const reordered = move(source, event) as Session[];
+      const others = allSessions.filter(s => s.isPinned !== isPinned);
+      const buildOrder = (section: Session[]) =>
+        isPinned ? [...section, ...others] : [...others, ...section];
+      if (reordered !== source) {
+        void updateOrder(buildOrder(reordered));
+      } else if (dragItems) {
+        void updateOrder(buildOrder(dragItems));
+      }
+    }
+    setDragItems(null);
+  }, [dragItems, sessions, allSessions, isPinned, updateOrder]);
+
+  // Quick restore: full session content, no conflict resolution wizard.
+  const handleQuickRestore = useCallback(async (session: Session, target: 'current' | 'new') => {
+    try {
+      const result = await restoreSessionTabs(session, target);
+      onRestoreFeedback(getMessage('restoreResultTabsCreated', [String(result.tabsCreated)]));
+    } catch {
+      onRestoreFeedback(getMessage('restoreError'));
+    }
+    setTimeout(() => onRestoreFeedback(null), 4000);
+  }, [onRestoreFeedback]);
+
+  const handleRestoreCurrentWindow = useCallback(
+    (session: Session) => handleQuickRestore(session, 'current'),
+    [handleQuickRestore],
+  );
+
+  const handleRestoreNewWindow = useCallback(
+    (session: Session) => handleQuickRestore(session, 'new'),
+    [handleQuickRestore],
+  );
+
+  const handlePin = useCallback(async (session: Session) => {
+    await updateSession(session.id, { isPinned: true });
+    await reload();
+  }, [reload]);
+
+  const handleUnpin = useCallback(async (session: Session) => {
+    await updateSession(session.id, { isPinned: false });
+    await reload();
+  }, [reload]);
+
+  const handleMoveToFirst = useCallback((session: Session) => {
+    void updateOrder(moveSessionToFirstInGroup(allSessions, session.id));
+  }, [allSessions, updateOrder]);
+
+  const handleMoveLast = useCallback((session: Session) => {
+    void updateOrder(moveSessionToLastInGroup(allSessions, session.id));
+  }, [allSessions, updateOrder]);
+
   // When a search is active, hide the whole section if it matched nothing.
   if (sessions.length === 0 && searchQuery) return null;
   return (
@@ -100,32 +162,32 @@ function SessionSection({
       ) : (
         <DragDropProvider
           modifiers={[RestrictToVerticalAxis]}
-          onDragOver={onDragOver}
-          onDragEnd={onDragEnd}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
         >
           <Flex direction="column" gap="3" mt="3">
             {(dragItems ?? sessions).map((session, index) => {
-              const searchMatch = sessionSearchMatches?.get(session.id);
+              const searchMatch = searchMatches?.get(session.id);
               return (
                 <SessionCard
                   key={session.id}
                   session={session}
-                  existingSessions={existingSessions}
-                  onRestore={onRestore}
-                  onRestoreCurrentWindow={onRestoreCurrentWindow}
-                  onRestoreNewWindow={onRestoreNewWindow}
-                  onRename={onRename}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onPin={onPin}
-                  onUnpin={onUnpin}
+                  existingSessions={allSessions}
+                  onRestore={onOpenRestoreWizard}
+                  onRestoreCurrentWindow={handleRestoreCurrentWindow}
+                  onRestoreNewWindow={handleRestoreNewWindow}
+                  onRename={renameSession}
+                  onEdit={onOpenEditDialog}
+                  onDelete={onOpenDeleteDialog}
+                  onPin={handlePin}
+                  onUnpin={handleUnpin}
                   forcePreviewOpen={searchMatch?.matchesTabs === true || searchMatch?.matchesNote === true}
                   searchMatchingGroupIds={searchMatch?.matchingGroupIds}
                   searchQuery={searchQuery || undefined}
                   index={index}
                   isDragDisabled={!!searchQuery}
-                  onMoveToFirst={() => onMoveToFirst(session)}
-                  onMoveLast={() => onMoveLast(session)}
+                  onMoveToFirst={() => handleMoveToFirst(session)}
+                  onMoveLast={() => handleMoveLast(session)}
                 />
               );
             })}
@@ -164,8 +226,6 @@ export function SessionsPage({
   const [deleteTarget, setDeleteTarget] = useState<Session | null>(null);
   const [quickRestoreMessage, setQuickRestoreMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [dragPinnedItems, setDragPinnedItems] = useState<Session[] | null>(null);
-  const [dragUnpinnedItems, setDragUnpinnedItems] = useState<Session[] | null>(null);
 
   // Order: use storage order directly (reorderSessions saves them in the correct order)
   const sortedSessions = sessions;
@@ -219,87 +279,6 @@ export function SessionsPage({
     await removeSession(deleteTarget.id);
     setDeleteTarget(null);
   }, [deleteTarget, removeSession]);
-
-  // Quick restore (no wizard): runs in the current window or a new one depending on target.
-  const handleQuickRestore = useCallback(async (session: Session, target: 'current' | 'new') => {
-    try {
-      const result = await restoreSessionTabs(session, target);
-      setQuickRestoreMessage(
-        getMessage('restoreResultTabsCreated', [String(result.tabsCreated)]),
-      );
-    } catch {
-      setQuickRestoreMessage(getMessage('restoreError'));
-    }
-    setTimeout(() => setQuickRestoreMessage(null), 4000);
-  }, []);
-
-  const handleRestoreCurrentWindow = useCallback(
-    (session: Session) => handleQuickRestore(session, 'current'),
-    [handleQuickRestore],
-  );
-
-  const handleRestoreNewWindow = useCallback(
-    (session: Session) => handleQuickRestore(session, 'new'),
-    [handleQuickRestore],
-  );
-
-  const handlePin = useCallback(async (session: Session) => {
-    await updateSession(session.id, { isPinned: true });
-    await reload();
-  }, [reload]);
-
-  const handleUnpin = useCallback(async (session: Session) => {
-    await updateSession(session.id, { isPinned: false });
-    await reload();
-  }, [reload]);
-
-  // Drag-and-drop handlers (pinned group)
-  const handlePinnedDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
-    setDragPinnedItems(prev => move(prev ?? pinnedSessions, event));
-  }, [pinnedSessions]);
-
-  const handlePinnedDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
-    if (!event.canceled) {
-      const source = dragPinnedItems ?? pinnedSessions;
-      const reordered = move(source, event) as Session[];
-      const allUnpinned = sortedSessions.filter(s => !s.isPinned);
-      if (reordered !== source) {
-        void updateOrder([...reordered, ...allUnpinned]);
-      } else if (dragPinnedItems) {
-        void updateOrder([...dragPinnedItems, ...allUnpinned]);
-      }
-    }
-    setDragPinnedItems(null);
-  }, [dragPinnedItems, pinnedSessions, sortedSessions, updateOrder]);
-
-  // Drag-and-drop handlers (unpinned group)
-  const handleUnpinnedDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
-    setDragUnpinnedItems(prev => move(prev ?? unpinnedSessions, event));
-  }, [unpinnedSessions]);
-
-  const handleUnpinnedDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
-    if (!event.canceled) {
-      const source = dragUnpinnedItems ?? unpinnedSessions;
-      const reordered = move(source, event) as Session[];
-      const allPinned = sortedSessions.filter(s => s.isPinned);
-      if (reordered !== source) {
-        void updateOrder([...allPinned, ...reordered]);
-      } else if (dragUnpinnedItems) {
-        void updateOrder([...allPinned, ...dragUnpinnedItems]);
-      }
-    }
-    setDragUnpinnedItems(null);
-  }, [dragUnpinnedItems, unpinnedSessions, sortedSessions, updateOrder]);
-
-  const handleMoveToFirst = useCallback((session: Session) => {
-    const reordered = moveSessionToFirstInGroup(sortedSessions, session.id);
-    void updateOrder(reordered);
-  }, [sortedSessions, updateOrder]);
-
-  const handleMoveLast = useCallback((session: Session) => {
-    const reordered = moveSessionToLastInGroup(sortedSessions, session.id);
-    void updateOrder(reordered);
-  }, [sortedSessions, updateOrder]);
 
   return (
     <PageLayout
@@ -398,23 +377,18 @@ export function SessionsPage({
                 icon={Pin}
                 titleKey="pinnedSessionsSection"
                 emptyMessageKey="pinnedSessionsEmpty"
+                isPinned={true}
                 sessions={pinnedSessions}
-                dragItems={dragPinnedItems}
-                onDragOver={handlePinnedDragOver}
-                onDragEnd={handlePinnedDragEnd}
+                allSessions={sortedSessions}
                 searchQuery={searchQuery}
-                existingSessions={sessions}
-                sessionSearchMatches={sessionSearchMatches}
-                onRestore={setRestoreSession}
-                onRestoreCurrentWindow={handleRestoreCurrentWindow}
-                onRestoreNewWindow={handleRestoreNewWindow}
-                onRename={renameSession}
-                onEdit={setEditTarget}
-                onDelete={setDeleteTarget}
-                onPin={handlePin}
-                onUnpin={handleUnpin}
-                onMoveToFirst={handleMoveToFirst}
-                onMoveLast={handleMoveLast}
+                searchMatches={sessionSearchMatches}
+                updateOrder={updateOrder}
+                renameSession={renameSession}
+                reload={reload}
+                onOpenRestoreWizard={setRestoreSession}
+                onOpenEditDialog={setEditTarget}
+                onOpenDeleteDialog={setDeleteTarget}
+                onRestoreFeedback={setQuickRestoreMessage}
               />
 
               <Separator size="4" />
@@ -423,23 +397,18 @@ export function SessionsPage({
                 icon={Archive}
                 titleKey="sessionsSection"
                 emptyMessageKey="unpinnedSessionsEmpty"
+                isPinned={false}
                 sessions={unpinnedSessions}
-                dragItems={dragUnpinnedItems}
-                onDragOver={handleUnpinnedDragOver}
-                onDragEnd={handleUnpinnedDragEnd}
+                allSessions={sortedSessions}
                 searchQuery={searchQuery}
-                existingSessions={sessions}
-                sessionSearchMatches={sessionSearchMatches}
-                onRestore={setRestoreSession}
-                onRestoreCurrentWindow={handleRestoreCurrentWindow}
-                onRestoreNewWindow={handleRestoreNewWindow}
-                onRename={renameSession}
-                onEdit={setEditTarget}
-                onDelete={setDeleteTarget}
-                onPin={handlePin}
-                onUnpin={handleUnpin}
-                onMoveToFirst={handleMoveToFirst}
-                onMoveLast={handleMoveLast}
+                searchMatches={sessionSearchMatches}
+                updateOrder={updateOrder}
+                renameSession={renameSession}
+                reload={reload}
+                onOpenRestoreWizard={setRestoreSession}
+                onOpenEditDialog={setEditTarget}
+                onOpenDeleteDialog={setDeleteTarget}
+                onRestoreFeedback={setQuickRestoreMessage}
               />
             </Flex>
           )}
