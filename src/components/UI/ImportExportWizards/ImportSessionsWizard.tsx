@@ -16,7 +16,7 @@ import { generateUUID } from '../../../utils/utils';
 import { loadSessions, saveSessions } from '../../../utils/sessionStorage';
 import { SessionRow, ConflictSessionRow } from './SessionImportRows';
 import type { Session } from '../../../types/session';
-import { WizardDialogTitle, useDialogReset } from './Shared';
+import { TwoStepImportFooter, WizardDialogTitle, useDialogReset } from './Shared';
 import { SourceStep, ImportedNoteCallout, useJsonSourceInput } from './Source';
 import {
   useImportClassification,
@@ -203,30 +203,15 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
             </Box>
           )}
 
-          <Separator size="4" mt="4" style={{ opacity: 0.3 }} />
-
-          <Flex gap="3" justify="end" mt="3">
-            {step === 0 && (
-              <>
-                <Dialog.Close>
-                  <Button variant="soft" color="gray">{getMessage('cancel')}</Button>
-                </Dialog.Close>
-                <Button onClick={goToStep1} disabled={!source.parsedData}>
-                  {getMessage('next')}
-                </Button>
-              </>
-            )}
-            {step === 1 && (
-              <>
-                <Button variant="soft" color="gray" onClick={() => setStep(0)}>
-                  {getMessage('previous')}
-                </Button>
-                <Button onClick={executeImport} disabled={importCount === 0}>
-                  {getMessage('confirmImport')}
-                </Button>
-              </>
-            )}
-          </Flex>
+          <TwoStepImportFooter
+            step={step as 0 | 1}
+            onNext={goToStep1}
+            nextDisabled={!source.parsedData}
+            onPrevious={() => setStep(0)}
+            onConfirm={executeImport}
+            confirmDisabled={importCount === 0}
+            confirmLabelKey="confirmImport"
+          />
         </Dialog.Content>
       </Dialog.Root>
     </SessionsTheme>

@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Box, Button, Dialog, Flex, Separator } from '@radix-ui/themes';
+import { Box, Dialog, Separator } from '@radix-ui/themes';
 import { Archive, FileDown, Pin } from 'lucide-react';
 import { SessionsTheme } from '../../Form/themes';
 import { getMessage } from '../../../utils/i18n';
@@ -8,6 +8,7 @@ import { splitByPinned } from '../../../utils/sessionUtils';
 import type { Session } from '../../../types/session';
 import { CountLabel, WizardDialogTitle, useDialogReset, useToggleSet } from './Shared';
 import {
+  ExportDialogFooter,
   ExportNoteField,
   ExportSplitButton,
   SelectableListContainer,
@@ -122,18 +123,13 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
             <CountLabel messageKey="sessionsSelectedCount" count={selection.size} />
           </Box>
 
-          <Separator size="4" mt="4" style={{ opacity: 0.3 }} />
-
-          <Flex gap="3" justify="end" mt="3">
-            <Dialog.Close>
-              <Button variant="soft" color="gray">{getMessage('cancel')}</Button>
-            </Dialog.Close>
+          <ExportDialogFooter>
             <ExportSplitButton
               labelKey="exportSessionsButton"
               actions={actions}
               disabled={selection.size === 0}
             />
-          </Flex>
+          </ExportDialogFooter>
         </Dialog.Content>
       </Dialog.Root>
     </SessionsTheme>

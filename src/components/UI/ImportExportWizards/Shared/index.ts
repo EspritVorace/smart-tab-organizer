@@ -1,5 +1,10 @@
 export { WizardDialogTitle } from './WizardDialogTitle';
 export { CountLabel } from './CountLabel';
+export { ConflictRowShell } from './ConflictRowShell';
+export { DiffPopover } from './DiffPopover';
 export { DiffPropertyValues } from './DiffPropertyValues';
+export { SelectableRowShell } from './SelectableRowShell';
+export { SessionSummary } from './SessionSummary';
+export { TwoStepImportFooter } from './TwoStepImportFooter';
 export { useDialogReset } from './useDialogReset';
 export { useToggleSet, type ToggleSetState } from './useToggleSet';
