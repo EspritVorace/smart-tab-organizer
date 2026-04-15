@@ -22,7 +22,14 @@
 }
 
 /* Focus ring for keyboard-navigable card lists (DomainRulesPage) */
-[role="row"][tabindex]:focus-visible {
+[role="row"][tabindex]:focus {
+  outline: 2px solid var(--accent-9);
+  outline-offset: -2px;
+  border-radius: var(--radius-3);
+}
+
+/* Focus ring for session cards: visible on click or keyboard focus */
+[data-session-card]:focus {
   outline: 2px solid var(--accent-9);
   outline-offset: -2px;
   border-radius: var(--radius-3);
