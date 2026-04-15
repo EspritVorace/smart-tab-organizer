@@ -39,7 +39,7 @@ npx jscpd --reporters ai
 Écarter automatiquement (sans demander à l'utilisateur) :
 
 1. **Schemas Zod parallèles** (`src/schemas/`) : structures `z.object({...})` similaires sont **intentionnelles**, chaque schema doit rester explicite et auditable.
-2. **Wrappers de thème** (`src/components/Form/themes/*`, `src/components/Form/themed-callouts/*`) : duplication intentionnelle, ils diffèrent uniquement par la couleur d'accent.
+2. **Wrappers de thème** (`src/components/Form/themes/*`) : duplication intentionnelle, ils diffèrent uniquement par la couleur d'accent.
 3. **Branches i18n parallèles** : appels à `getMessage('foo')` répétés ne sont pas une duplication structurelle.
 4. **Boilerplate React minimal** : imports, `useState('')`, etc.
 5. **Tests / stories** : déjà exclus par `.jscpd.json`, mais redoubler de vigilance si un cas échappe au filtre.
