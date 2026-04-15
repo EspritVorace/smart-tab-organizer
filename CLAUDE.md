@@ -160,3 +160,22 @@ identifier et résoudre les zones floues de la user story concernée.
 - La US introduit un nouveau composant UI sans préciser le comportement
   responsive, les états vides, ou les états d'erreur.
 - La US touche au système i18n (nouvelles clés à ajouter dans les 3 locales).
+
+## Agents Claude disponibles
+
+- **`e2e-flaky-detector`** : analyse les tests Playwright pour repérer
+  les patterns de fragilité (race conditions, assertions fragiles,
+  storage async sans await).
+- **`code-deduplicator`** : scanne `src/` via le skill `jscpd`,
+  présente un top 10 des duplications les plus douloureuses, applique
+  le refacto choisi par l'utilisateur (extraction de hook/composant/util)
+  avec garde-fous (compile, tests, revert si échec, commit atomique).
+  L'agent lance lui-même `npx skills experimental_install` à chaque appel
+  pour rester synchronisé sur `skills-lock.json`.
+
+### Skill jscpd
+- Installé via `npx skills add kucherenko/jscpd` (une fois, lockfile
+  versionné dans `skills-lock.json`).
+- Config projet dans `.jscpd.json` (pattern, ignore, formats).
+- Le skill source est sous `.agents/skills/jscpd/` (gitignored), recréé
+  à la demande par `npx skills experimental_install`.
