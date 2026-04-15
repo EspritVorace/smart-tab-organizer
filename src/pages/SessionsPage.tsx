@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Box, Flex, Button, Text, Callout, Separator, Badge } from '@radix-ui/themes';
 import { Camera, Archive, CheckCircle, Pin, type LucideIcon } from 'lucide-react';
 import { DragDropProvider, type DragOverEvent, type DragEndEvent } from '@dnd-kit/react';
@@ -91,6 +91,32 @@ function SessionSection({
   onRestoreFeedback,
 }: SessionSectionProps) {
   const [dragItems, setDragItems] = useState<Session[] | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const handleCardKeyDown = useCallback((e: React.KeyboardEvent<HTMLElement>, index: number) => {
+    // Only act when the card element itself has focus (not a child input/button).
+    if (e.target !== e.currentTarget) return;
+    const cards = listRef.current?.querySelectorAll<HTMLElement>('[data-session-card]');
+    if (!cards) return;
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        cards[index + 1]?.focus();
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        cards[index - 1]?.focus();
+        break;
+      case 'Home':
+        e.preventDefault();
+        cards[0]?.focus();
+        break;
+      case 'End':
+        e.preventDefault();
+        cards[cards.length - 1]?.focus();
+        break;
+    }
+  }, []);
 
   // Drag: reorder within this section, then splice back into the global order.
   const handleDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
@@ -165,7 +191,7 @@ function SessionSection({
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <Flex direction="column" gap="3" mt="3">
+          <Flex ref={listRef} direction="column" gap="3" mt="3">
             {(dragItems ?? sessions).map((session, index) => {
               const searchMatch = searchMatches?.get(session.id);
               return (
@@ -188,6 +214,7 @@ function SessionSection({
                   isDragDisabled={!!searchQuery}
                   onMoveToFirst={() => handleMoveToFirst(session)}
                   onMoveLast={() => handleMoveLast(session)}
+                  onCardKeyDown={(e) => handleCardKeyDown(e, index)}
                 />
               );
             })}

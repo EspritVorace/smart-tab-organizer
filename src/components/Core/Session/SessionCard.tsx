@@ -50,6 +50,8 @@ interface SessionCardProps {
   onMoveToFirst?: () => void;
   /** Called when user clicks "Move to Last" in menu */
   onMoveLast?: () => void;
+  /** Keyboard handler forwarded to the card root for up/down navigation between cards */
+  onCardKeyDown?: (e: React.KeyboardEvent<HTMLElement>) => void;
 }
 
 export function SessionCard({
@@ -70,6 +72,7 @@ export function SessionCard({
   isDragDisabled = false,
   onMoveToFirst,
   onMoveLast,
+  onCardKeyDown,
 }: SessionCardProps) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [nameValue, setNameValue] = useState(session.name);
@@ -169,6 +172,8 @@ export function SessionCard({
       ref={ref}
       data-testid={`session-card-${session.id}`}
       data-session-card="true"
+      tabIndex={0}
+      onKeyDown={onCardKeyDown}
       size="2"
       style={dragStyle}
     >
