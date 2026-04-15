@@ -1,25 +1,31 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   Dialog, Flex, Button, Checkbox, Text, Badge, Box, Separator,
-  ScrollArea, SegmentedControl, Popover, Callout,
+  Popover,
 } from '@radix-ui/themes';
-import { FileUp, ClipboardPaste, AlertTriangle, Eye } from 'lucide-react';
+import { FileUp, ClipboardPaste, Eye, AlertTriangle } from 'lucide-react';
 import { ImportTheme } from '../../Form/themes';
 import { getMessage } from '../../../utils/i18n';
 import { showSuccessNotification } from '../../../utils/notifications';
 import { importDataSchema } from '../../../schemas/importExport';
 import {
   classifyImportedRules,
-  type RuleClassification,
   type ConflictingRule,
 } from '../../../utils/importClassification';
 import { generateUUID, getRadixColor } from '../../../utils/utils';
 import { getRuleCategory } from '../../../schemas/enums';
 import type { DomainRuleSetting } from '../../../types/syncSettings';
-import { WizardDialogTitle, useDialogReset, useToggleSet } from './Shared';
+import { WizardDialogTitle, useDialogReset } from './Shared';
 import { SourceStep, ImportedNoteCallout, useJsonSourceInput } from './Source';
-
-type ConflictMode = 'overwrite' | 'duplicate' | 'ignore';
+import {
+  useImportClassification,
+  ClassificationGroup,
+  ClassificationScrollArea,
+  ConflictModeSelector,
+  ConflictWarningCallout,
+  ImportCountLabel,
+} from './Classification';
+import type { RuleClassification } from '../../../utils/importClassification';
 
 interface ImportWizardProps {
   open: boolean;
@@ -39,28 +45,23 @@ const validateRulesPayload = (raw: unknown) => {
 export function ImportWizard({ open, onOpenChange, existingRules, onImport }: ImportWizardProps) {
   const [step, setStep] = useState(0);
   const source = useJsonSourceInput<DomainRuleSetting[]>(validateRulesPayload);
-
-  // Step 1 state
-  const [classification, setClassification] = useState<RuleClassification | null>(null);
-  const newRuleSelection = useToggleSet<string>();
-  const [conflictMode, setConflictMode] = useState<ConflictMode>('overwrite');
+  const classificationState = useImportClassification<RuleClassification>();
+  const { classification, conflictMode, newSelection: newRuleSelection } = classificationState;
 
   useDialogReset(open, () => {
     setStep(0);
     source.reset();
-    setClassification(null);
-    newRuleSelection.clearAll();
-    setConflictMode('overwrite');
+    classificationState.reset();
   });
 
   // Transition to step 1: classify rules
   const goToStep1 = useCallback(() => {
     if (!source.parsedData) return;
     const result = classifyImportedRules(source.parsedData, existingRules);
-    setClassification(result);
+    classificationState.setClassification(result);
     newRuleSelection.setAll(result.newRules.map((r) => r.id));
     setStep(1);
-  }, [source.parsedData, existingRules, newRuleSelection]);
+  }, [source.parsedData, existingRules, classificationState, newRuleSelection]);
 
   // Compute import count
   const importCount = useMemo(() => {
@@ -134,101 +135,56 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
           {step === 1 && classification && (
             <Box mt="4">
               <ImportedNoteCallout note={source.importedNote} />
-              <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '50vh' }}>
-                <Flex direction="column" gap="3" pr="3">
-                  {/* New rules group */}
-                  {classification.newRules.length > 0 && (
-                    <>
-                      <Text size="3" weight="bold">
-                        {getMessage('newRulesGroup').replace('{count}', String(classification.newRules.length))}
-                      </Text>
-                      <Flex direction="column" gap="2">
-                        {classification.newRules.map(rule => (
-                          <RuleRow
-                            key={rule.id}
-                            rule={rule}
-                            checkbox
-                            checked={newRuleSelection.has(rule.id)}
-                            onToggle={() => newRuleSelection.toggle(rule.id)}
-                          />
-                        ))}
-                      </Flex>
-                    </>
+              <ClassificationScrollArea>
+                <ClassificationGroup
+                  titleKey="newRulesGroup"
+                  items={classification.newRules}
+                  renderItem={(rule) => (
+                    <RuleRow
+                      key={rule.id}
+                      rule={rule}
+                      checkbox
+                      checked={newRuleSelection.has(rule.id)}
+                      onToggle={() => newRuleSelection.toggle(rule.id)}
+                    />
                   )}
-
-                  {/* Conflicting rules group */}
-                  {classification.conflictingRules.length > 0 && (
-                    <>
-                      {classification.newRules.length > 0 && <Separator size="4" />}
-                      <Text size="3" weight="bold">
-                        {getMessage('conflictingRulesGroup').replace('{count}', String(classification.conflictingRules.length))}
-                      </Text>
-
-                      <Flex align="center" gap="2" mb="1">
-                        <Text size="2" color="gray">{getMessage('conflictResolutionMode')}</Text>
-                        <SegmentedControl.Root
-                          value={conflictMode}
-                          onValueChange={(v: string) => setConflictMode(v as ConflictMode)}
-                          size="1"
-                        >
-                          <SegmentedControl.Item value="overwrite">
-                            {getMessage('conflictModeOverwrite')}
-                          </SegmentedControl.Item>
-                          <SegmentedControl.Item value="duplicate">
-                            {getMessage('conflictModeDuplicate')}
-                          </SegmentedControl.Item>
-                          <SegmentedControl.Item value="ignore">
-                            {getMessage('conflictModeIgnore')}
-                          </SegmentedControl.Item>
-                        </SegmentedControl.Root>
-                      </Flex>
-
-                      <Flex direction="column" gap="2">
-                        {classification.conflictingRules.map(conflict => (
-                          <ConflictRow key={conflict.imported.id} conflict={conflict} />
-                        ))}
-                      </Flex>
-                    </>
+                />
+                <ClassificationGroup
+                  titleKey="conflictingRulesGroup"
+                  items={classification.conflictingRules}
+                  showSeparator={classification.newRules.length > 0}
+                  beforeList={
+                    <ConflictModeSelector
+                      value={conflictMode}
+                      onChange={classificationState.setConflictMode}
+                    />
+                  }
+                  renderItem={(conflict) => (
+                    <ConflictRow key={conflict.imported.id} conflict={conflict} />
                   )}
-
-                  {/* Identical rules group */}
-                  {classification.identicalRules.length > 0 && (
-                    <>
-                      {(classification.newRules.length > 0 || classification.conflictingRules.length > 0) && (
-                        <Separator size="4" />
-                      )}
-                      <Text size="3" weight="bold">
-                        {getMessage('identicalRulesGroup').replace('{count}', String(classification.identicalRules.length))}
-                      </Text>
-                      <Flex direction="column" gap="2">
-                        {classification.identicalRules.map(rule => (
-                          <RuleRow
-                            key={rule.id}
-                            rule={rule}
-                            dimmed
-                            statusBadge={getMessage('alreadyExists')}
-                          />
-                        ))}
-                      </Flex>
-                    </>
+                />
+                <ClassificationGroup
+                  titleKey="identicalRulesGroup"
+                  items={classification.identicalRules}
+                  showSeparator={
+                    classification.newRules.length > 0 || classification.conflictingRules.length > 0
+                  }
+                  renderItem={(rule) => (
+                    <RuleRow
+                      key={rule.id}
+                      rule={rule}
+                      dimmed
+                      statusBadge={getMessage('alreadyExists')}
+                    />
                   )}
-                </Flex>
-              </ScrollArea>
+                />
+              </ClassificationScrollArea>
 
-              <Text size="2" color="gray" mt="3">
-                {getMessage('rulesToImportCount').replace('{count}', String(importCount))}
-              </Text>
-
-              {conflictMode === 'overwrite' && classification.conflictingRules.length > 0 && (
-                <Callout.Root color="orange" variant="soft" mt="3">
-                  <Callout.Icon>
-                    <AlertTriangle size={16} />
-                  </Callout.Icon>
-                  <Callout.Text>
-                    {getMessage('overwriteWarning')}
-                  </Callout.Text>
-                </Callout.Root>
-              )}
+              <ImportCountLabel messageKey="rulesToImportCount" count={importCount} />
+              <ConflictWarningCallout
+                when={conflictMode === 'overwrite' && classification.conflictingRules.length > 0}
+                messageKey="overwriteWarning"
+              />
             </Box>
           )}
 
