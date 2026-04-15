@@ -3,7 +3,6 @@ import { Info } from 'lucide-react';
 import type { FieldError } from 'react-hook-form';
 import { getMessage } from '../../../utils/i18n';
 import { RegexPresetsTheme } from '../../Form/themes';
-import { RegexPresetsCallouts } from '../../Form/themed-callouts';
 import { FormField, SearchableSelect } from '../../Form/FormFields';
 import { groupNameSourceOptions, type GroupNameSourceValue } from '../../../schemas/enums';
 import type { PresetCategory } from '../../../utils/presetUtils';
@@ -68,9 +67,12 @@ export function DomainRuleConfigForm({
     <Flex direction="column" gap="4">
       {/* Info callout when presets are loading */}
       {isLoadingPresets && (
-        <RegexPresetsCallouts.Info>
-          {getMessage('loadingPresets')}
-        </RegexPresetsCallouts.Info>
+        <Callout.Root color="cyan" variant="soft">
+          <Callout.Icon>
+            <Info />
+          </Callout.Icon>
+          <Callout.Text>{getMessage('loadingPresets')}</Callout.Text>
+        </Callout.Root>
       )}
 
       {/* Configuration mode selector */}

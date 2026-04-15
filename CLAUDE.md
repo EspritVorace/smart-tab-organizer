@@ -67,7 +67,7 @@ src/
                    # SessionWizards/ · SettingsPage/ · SettingsToggles/ · WizardStepper/
                    # SplitButton/ · ConfirmDialog/ · StatusBadge/ · ThemeToggle/
                    # DataTable/ · OptionsLayout/
-    Form/          # FormFields/ · themed-callouts/ · themes/
+    Form/          # FormFields/ · themes/
   hooks/           # useSyncedState · useSyncedSettings · useStatistics · useSessions
                    # useSessionEditor · useDeepLinking
   pages/           # DomainRulesPage · SessionsPage · StatisticsPage · ImportExportPage · options.tsx · popup.tsx
