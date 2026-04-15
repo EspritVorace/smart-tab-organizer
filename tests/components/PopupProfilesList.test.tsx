@@ -22,7 +22,7 @@ vi.mock('../../src/utils/sessionStorage', () => ({
 
 // Mock tabRestore
 vi.mock('../../src/utils/tabRestore', () => ({
-  restoreTabs: vi.fn().mockResolvedValue(undefined),
+  restoreSessionTabs: vi.fn().mockResolvedValue(undefined),
 }));
 
 // Mock getRuleCategory

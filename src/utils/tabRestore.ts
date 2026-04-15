@@ -1,5 +1,5 @@
 import { browser } from 'wxt/browser';
-import type { SavedTab, SavedTabGroup } from '../types/session';
+import type { SavedTab, SavedTabGroup, Session } from '../types/session';
 import type { ConflictAnalysis, ConflictResolution, GroupConflictAction } from './conflictDetection';
 
 export interface RestoreOptions {
@@ -23,6 +23,24 @@ export interface RestoreResult {
   errors: string[];
   /** ID of the newly created window when target === 'new' */
   windowId?: number;
+}
+
+/**
+ * Quick restore of a whole session (no conflict resolution wizard, no filtering).
+ * Thin wrapper around {@link restoreTabs} that maps a Session to RestoreOptions.
+ * Shared by SessionsPage quick actions and PopupProfilesList.
+ * The RestoreWizard uses {@link restoreTabs} directly because it needs to pass
+ * a filtered subset of tabs/groups plus conflict resolution data.
+ */
+export async function restoreSessionTabs(
+  session: Pick<Session, 'ungroupedTabs' | 'groups'>,
+  target: 'current' | 'new',
+): Promise<RestoreResult> {
+  return restoreTabs({
+    tabs: session.ungroupedTabs,
+    groups: session.groups,
+    target,
+  });
 }
 
 /** Restore tabs and groups in Chrome */

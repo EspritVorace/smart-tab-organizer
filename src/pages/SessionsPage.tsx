@@ -17,7 +17,7 @@ import { foldAccents } from '../utils/stringUtils';
 import { matchSessionSearch, splitByPinned } from '../utils/sessionUtils';
 import { moveSessionToFirstInGroup, moveSessionToLastInGroup } from '../utils/sessionOrderUtils';
 import { useSessions } from '../hooks/useSessions';
-import { restoreTabs } from '../utils/tabRestore';
+import { restoreSessionTabs } from '../utils/tabRestore';
 import { updateSession } from '../utils/sessionStorage';
 import type { Session } from '../types/session';
 import type { SessionSearchMatch } from '../utils/sessionUtils';
@@ -223,11 +223,7 @@ export function SessionsPage({
   // Quick restore (no wizard): runs in the current window or a new one depending on target.
   const handleQuickRestore = useCallback(async (session: Session, target: 'current' | 'new') => {
     try {
-      const result = await restoreTabs({
-        tabs: session.ungroupedTabs,
-        groups: session.groups,
-        target,
-      });
+      const result = await restoreSessionTabs(session, target);
       setQuickRestoreMessage(
         getMessage('restoreResultTabsCreated', [String(result.tabsCreated)]),
       );
