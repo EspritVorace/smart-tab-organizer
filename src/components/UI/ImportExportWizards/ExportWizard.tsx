@@ -1,18 +1,19 @@
 import React, { useCallback, useState } from 'react';
-import { Box, Button, Dialog, Flex, Separator } from '@radix-ui/themes';
+import { Box, Dialog } from '@radix-ui/themes';
 import { FileDown } from 'lucide-react';
 import { ExportTheme } from '../../Form/themes';
-import { getMessage } from '../../../utils/i18n';
 import type { DomainRuleSetting } from '../../../types/syncSettings';
+import { getMessage } from '../../../utils/i18n';
 import { CountLabel, WizardDialogTitle, useDialogReset, useToggleSet } from './Shared';
 import {
+  ExportDialogFooter,
   ExportNoteField,
   ExportSplitButton,
   SelectableListContainer,
-  SelectableRuleRow,
   SelectionToolbar,
   useExportActions,
 } from './Export';
+import { RuleRow } from './RuleImportRows';
 
 interface ExportWizardProps {
   open: boolean;
@@ -69,11 +70,13 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
 
             <SelectableListContainer>
               {rules.map((rule) => (
-                <SelectableRuleRow
+                <RuleRow
                   key={rule.id}
                   rule={rule}
+                  checkbox
                   checked={selection.has(rule.id)}
                   onToggle={() => selection.toggle(rule.id)}
+                  statusBadge={rule.enabled ? undefined : getMessage('disabled')}
                 />
               ))}
             </SelectableListContainer>
@@ -81,18 +84,13 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
             <CountLabel messageKey="rulesSelectedCount" count={selection.size} />
           </Box>
 
-          <Separator size="4" mt="4" style={{ opacity: 0.3 }} />
-
-          <Flex gap="3" justify="end" mt="3">
-            <Dialog.Close>
-              <Button variant="soft" color="gray">{getMessage('cancel')}</Button>
-            </Dialog.Close>
+          <ExportDialogFooter>
             <ExportSplitButton
               labelKey="exportButton"
               actions={actions}
               disabled={selection.size === 0}
             />
-          </Flex>
+          </ExportDialogFooter>
         </Dialog.Content>
       </Dialog.Root>
     </ExportTheme>

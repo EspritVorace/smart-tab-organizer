@@ -1,15 +1,14 @@
-import { Flex, Text, Box, Badge, Checkbox, Popover, Button } from '@radix-ui/themes';
-import { AlertTriangle, Eye } from 'lucide-react';
+import { Flex, Text, Box, Badge, Checkbox } from '@radix-ui/themes';
 import { getMessage } from '../../../utils/i18n';
-import {
-  formatSessionDateShort,
-  getSessionGroupLabel,
-  getSessionTabLabel,
-  countSessionTabs,
-} from '../../../utils/sessionUtils';
 import type { Session } from '../../../types/session';
 import type { ConflictingSession, SessionDiff, GroupDiff } from '../../../utils/sessionClassification';
-import { DiffPropertyValues } from './Shared';
+import {
+  ConflictRowShell,
+  DiffPopover,
+  DiffPropertyValues,
+  SelectableRowShell,
+  SessionSummary,
+} from './Shared';
 
 /* ─── SessionRow ─────────────────────────────────────────────────────────── */
 
@@ -23,36 +22,19 @@ export interface SessionRowProps {
 }
 
 export function SessionRow({ session, checkbox, checked, onToggle, dimmed, statusBadge }: SessionRowProps) {
-  const tabCount = countSessionTabs(session);
-  const groupCount = session.groups.length;
-
   return (
-    <Flex
-      align="center"
-      gap="3"
-      p="2"
-      style={{
-        borderRadius: 'var(--radius-2)',
-        backgroundColor: 'var(--gray-a2)',
-        opacity: dimmed ? 0.6 : 1,
-      }}
-    >
+    <SelectableRowShell dimmed={dimmed}>
       {checkbox && (
         <Checkbox checked={checked} onCheckedChange={onToggle} aria-label={session.name} />
       )}
-      <Flex direction="column" gap="1" style={{ flex: 1 }}>
-        <Text size="2" weight="medium">{session.name}</Text>
-        <Text size="1" color="gray">
-          {formatSessionDateShort(session.createdAt)} · {getSessionGroupLabel(groupCount)} · {getSessionTabLabel(tabCount)}
-        </Text>
-      </Flex>
+      <SessionSummary session={session} />
       {session.isPinned && (
         <Badge color="indigo" variant="soft" size="1">{getMessage('pinnedBadge')}</Badge>
       )}
       {statusBadge && (
         <Badge color="gray" variant="outline" size="1">{statusBadge}</Badge>
       )}
-    </Flex>
+    </SelectableRowShell>
   );
 }
 
@@ -64,43 +46,16 @@ export interface ConflictSessionRowProps {
 
 export function ConflictSessionRow({ conflict }: ConflictSessionRowProps) {
   const session = conflict.imported;
-  const tabCount = countSessionTabs(session);
-  const groupCount = session.groups.length;
-
   return (
-    <Flex
-      align="center"
-      gap="3"
-      p="2"
-      style={{
-        borderRadius: 'var(--radius-2)',
-        backgroundColor: 'var(--orange-a2)',
-      }}
-    >
-      <AlertTriangle size={16} style={{ color: 'var(--orange-9)', flexShrink: 0 }} aria-hidden="true" />
-      <Flex direction="column" gap="1" style={{ flex: 1 }}>
-        <Text size="2" weight="medium">{session.name}</Text>
-        <Text size="1" color="gray">
-          {formatSessionDateShort(session.createdAt)} · {getSessionGroupLabel(groupCount)} · {getSessionTabLabel(tabCount)}
-        </Text>
-      </Flex>
+    <ConflictRowShell>
+      <SessionSummary session={session} />
       {session.isPinned && (
         <Badge color="indigo" variant="soft" size="1">{getMessage('pinnedBadge')}</Badge>
       )}
-      <Popover.Root>
-        <Popover.Trigger>
-          <Button variant="ghost" size="1" aria-label={getMessage('viewDiff')} title={getMessage('viewDiff')}>
-            <Eye size={14} aria-hidden="true" />
-          </Button>
-        </Popover.Trigger>
-        <Popover.Content style={{ maxWidth: 380 }}>
-          <Text size="3" weight="bold" mb="2">
-            {getMessage('differences')} — {session.name}
-          </Text>
-          <SessionDiffView diff={conflict.diff} />
-        </Popover.Content>
-      </Popover.Root>
-    </Flex>
+      <DiffPopover entityLabel={session.name} maxWidth={380}>
+        <SessionDiffView diff={conflict.diff} />
+      </DiffPopover>
+    </ConflictRowShell>
   );
 }
 

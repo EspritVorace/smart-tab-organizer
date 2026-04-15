@@ -8,7 +8,7 @@ import { importDataSchema } from '../../../schemas/importExport';
 import { classifyImportedRules } from '../../../utils/importClassification';
 import { generateUUID } from '../../../utils/utils';
 import type { DomainRuleSetting } from '../../../types/syncSettings';
-import { WizardDialogTitle, useDialogReset } from './Shared';
+import { TwoStepImportFooter, WizardDialogTitle, useDialogReset } from './Shared';
 import { SourceStep, ImportedNoteCallout, useJsonSourceInput } from './Source';
 import {
   useImportClassification,
@@ -182,33 +182,15 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
             </Box>
           )}
 
-          <Separator size="4" mt="4" style={{ opacity: 0.3 }} />
-
-          {/* Footer */}
-          <Flex gap="3" justify="end" mt="3">
-            {step === 0 && (
-              <>
-                <Dialog.Close>
-                  <Button variant="soft" color="gray">
-                    {getMessage('cancel')}
-                  </Button>
-                </Dialog.Close>
-                <Button onClick={goToStep1} disabled={!source.parsedData}>
-                  {getMessage('next')}
-                </Button>
-              </>
-            )}
-            {step === 1 && (
-              <>
-                <Button variant="soft" color="gray" onClick={() => setStep(0)}>
-                  {getMessage('previous')}
-                </Button>
-                <Button onClick={executeImport} disabled={importCount === 0}>
-                  {getMessage('confirmImport')}
-                </Button>
-              </>
-            )}
-          </Flex>
+          <TwoStepImportFooter
+            step={step as 0 | 1}
+            onNext={goToStep1}
+            nextDisabled={!source.parsedData}
+            onPrevious={() => setStep(0)}
+            onConfirm={executeImport}
+            confirmDisabled={importCount === 0}
+            confirmLabelKey="confirmImport"
+          />
         </Dialog.Content>
       </Dialog.Root>
     </ImportTheme>
