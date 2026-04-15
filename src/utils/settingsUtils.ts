@@ -96,7 +96,6 @@ export function watchSyncSettingsField<K extends keyof SyncSettings>(
   field: K,
   callback: (value: SyncSettings[K]) => void,
 ): () => void {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (syncSettingsItemMap[field] as any).watch(
     (newValue: SyncSettings[K]) => callback(newValue),
   );
