@@ -9,6 +9,7 @@ import {
 } from '../../../utils/sessionUtils';
 import type { Session } from '../../../types/session';
 import type { ConflictingSession, SessionDiff, GroupDiff } from '../../../utils/sessionClassification';
+import { DiffPropertyValues } from './Shared';
 
 /* ─── SessionRow ─────────────────────────────────────────────────────────── */
 
@@ -124,35 +125,19 @@ export function SessionDiffView({ diff }: SessionDiffViewProps) {
   return (
     <Flex direction="column" gap="3">
       {diff.isPinned !== undefined && (
-        <Box>
-          <Text size="2" weight="medium" mb="1">isPinned</Text>
-          <Flex direction="column" gap="1">
-            <Flex align="center" gap="2">
-              <Badge color="red" variant="soft" size="1">{getMessage('currentValue')}</Badge>
-              <Text size="1">{String(diff.isPinned.current)}</Text>
-            </Flex>
-            <Flex align="center" gap="2">
-              <Badge color="green" variant="soft" size="1">{getMessage('importedValue')}</Badge>
-              <Text size="1">{String(diff.isPinned.imported)}</Text>
-            </Flex>
-          </Flex>
-        </Box>
+        <DiffPropertyValues
+          label="isPinned"
+          current={String(diff.isPinned.current)}
+          imported={String(diff.isPinned.imported)}
+        />
       )}
 
       {diff.categoryId !== undefined && (
-        <Box>
-          <Text size="2" weight="medium" mb="1">categoryId</Text>
-          <Flex direction="column" gap="1">
-            <Flex align="center" gap="2">
-              <Badge color="red" variant="soft" size="1">{getMessage('currentValue')}</Badge>
-              <Text size="1">{String(diff.categoryId.current ?? 'null')}</Text>
-            </Flex>
-            <Flex align="center" gap="2">
-              <Badge color="green" variant="soft" size="1">{getMessage('importedValue')}</Badge>
-              <Text size="1">{String(diff.categoryId.imported ?? 'null')}</Text>
-            </Flex>
-          </Flex>
-        </Box>
+        <DiffPropertyValues
+          label="categoryId"
+          current={String(diff.categoryId.current ?? 'null')}
+          imported={String(diff.categoryId.imported ?? 'null')}
+        />
       )}
 
       {diff.groupsAdded.length > 0 && (
@@ -203,16 +188,12 @@ function GroupDiffView({ groupDiff }: GroupDiffViewProps) {
     <Box>
       <Text size="2" weight="medium" mb="1">Group: {groupDiff.title}</Text>
       {groupDiff.colorChanged && (
-        <Flex direction="column" gap="1" mb="1">
-          <Flex align="center" gap="2">
-            <Badge color="red" variant="soft" size="1">{getMessage('currentValue')}</Badge>
-            <Text size="1">{groupDiff.colorChanged.current}</Text>
-          </Flex>
-          <Flex align="center" gap="2">
-            <Badge color="green" variant="soft" size="1">{getMessage('importedValue')}</Badge>
-            <Text size="1">{groupDiff.colorChanged.imported}</Text>
-          </Flex>
-        </Flex>
+        <Box mb="1">
+          <DiffPropertyValues
+            current={groupDiff.colorChanged.current}
+            imported={groupDiff.colorChanged.imported}
+          />
+        </Box>
       )}
       {groupDiff.tabsAdded.map(url => (
         <Text key={url} size="1" color="green" as="p" style={{ wordBreak: 'break-all' }}>+ {url}</Text>
