@@ -125,7 +125,7 @@ export function useSyncedState<T extends object>({
     loadRef.current()
       .then(v => { setValue(v); setIsLoaded(true); })
       .catch(error => logger.error('[useSyncedState] load error:', error));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     return setupWatchRef.current((update) => {
@@ -144,7 +144,7 @@ export function useSyncedState<T extends object>({
         return next;
       });
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // --- Public API ---
 
