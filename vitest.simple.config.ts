@@ -24,8 +24,9 @@ export default defineConfig({
     ],
     exclude: [],
     setupFiles: ['./tests/setup.ts', './tests/setup-ui.ts', './tests/setup-storybook.ts'],
-    // Désactiver le parallélisme pour éviter les conflits de state
-    fileParallelism: false,
+    // Le parallélisme au niveau fichier est sûr : chaque worker Vitest a son
+    // propre contexte de modules, donc fakeBrowser et i18n sont isolés par worker.
+    fileParallelism: true,
     reporters: [
       'default',
       ['vitest-ctrf-json-reporter', { outputDir: 'ctrf', outputFile: 'unit-ctrf-report.json' }],

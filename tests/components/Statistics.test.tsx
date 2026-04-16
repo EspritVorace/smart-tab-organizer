@@ -30,7 +30,7 @@ describe('Statistics', () => {
     vi.clearAllMocks();
   });
 
-  it('devrait afficher le titre Statistiques', () => {
+  it('devrait afficher le titre Statistiques et les compteurs à zéro par défaut', () => {
     render(
       <TestWrapper>
         <Statistics stats={{ tabGroupsCreatedCount: 0, tabsDeduplicatedCount: 0 }} onReset={mockOnReset} />
@@ -38,19 +38,10 @@ describe('Statistics', () => {
     );
 
     expect(screen.getByText('Statistiques')).toBeInTheDocument();
-  });
-
-  it('devrait afficher les compteurs à zéro par défaut', () => {
-    render(
-      <TestWrapper>
-        <Statistics stats={{ tabGroupsCreatedCount: 0, tabsDeduplicatedCount: 0 }} onReset={mockOnReset} />
-      </TestWrapper>
-    );
-
     expect(screen.getAllByText('0')).toHaveLength(2);
   });
 
-  it('devrait afficher les valeurs des statistiques', () => {
+  it('devrait afficher les valeurs des statistiques et un bouton reset accessible', () => {
     render(
       <TestWrapper>
         <Statistics
@@ -62,6 +53,11 @@ describe('Statistics', () => {
 
     expect(screen.getByText('5')).toBeInTheDocument();
     expect(screen.getByText('10')).toBeInTheDocument();
+
+    // Bouton reset exposé (a11y : aria-label + title)
+    const resetButton = screen.getByRole('button', { name: /réinitialiser/i });
+    expect(resetButton).toHaveAttribute('aria-label', 'Réinitialiser les statistiques');
+    expect(resetButton).toHaveAttribute('title', 'Réinitialiser les statistiques');
   });
 
   it('devrait utiliser le singulier pour 1', () => {
@@ -148,18 +144,4 @@ describe('Statistics', () => {
     expect(screen.getAllByText('0')).toHaveLength(2);
   });
 
-  it('devrait avoir un bouton reset accessible', () => {
-    render(
-      <TestWrapper>
-        <Statistics
-          stats={{ tabGroupsCreatedCount: 5, tabsDeduplicatedCount: 10 }}
-          onReset={mockOnReset}
-        />
-      </TestWrapper>
-    );
-
-    const resetButton = screen.getByRole('button');
-    expect(resetButton).toHaveAttribute('aria-label', 'Réinitialiser les statistiques');
-    expect(resetButton).toHaveAttribute('title', 'Réinitialiser les statistiques');
-  });
 });

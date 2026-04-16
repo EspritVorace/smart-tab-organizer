@@ -89,7 +89,7 @@ describe('UI Components', () => {
   });
 
   describe('SettingsToggles', () => {
-    it('devrait afficher les deux toggles', () => {
+    it('affiche les deux toggles en état désactivé', () => {
       render(
         <TestWrapper>
           <SettingsToggles
@@ -99,8 +99,14 @@ describe('UI Components', () => {
         </TestWrapper>
       );
 
+      // Labels
       expect(screen.getByText('Activer le groupage')).toBeInTheDocument();
       expect(screen.getByText('Activer la déduplication')).toBeInTheDocument();
+
+      // State reflected on switches
+      const switches = screen.getAllByRole('switch');
+      expect(switches[0]).toHaveAttribute('data-state', 'unchecked');
+      expect(switches[1]).toHaveAttribute('data-state', 'unchecked');
     });
 
     it('devrait afficher un skeleton en mode loading', () => {
@@ -168,21 +174,6 @@ describe('UI Components', () => {
       const switches = screen.getAllByRole('switch');
       expect(switches[0]).toHaveAttribute('data-state', 'checked');
       expect(switches[1]).toHaveAttribute('data-state', 'checked');
-    });
-
-    it('devrait refléter l\'état désactivé des toggles', () => {
-      render(
-        <TestWrapper>
-          <SettingsToggles
-            globalGroupingEnabled={false}
-            globalDeduplicationEnabled={false}
-          />
-        </TestWrapper>
-      );
-
-      const switches = screen.getAllByRole('switch');
-      expect(switches[0]).toHaveAttribute('data-state', 'unchecked');
-      expect(switches[1]).toHaveAttribute('data-state', 'unchecked');
     });
   });
 });
