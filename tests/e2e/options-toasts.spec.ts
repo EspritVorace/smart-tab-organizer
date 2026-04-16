@@ -68,9 +68,7 @@ test.describe('Options page toasts', () => {
     ]);
 
     const page = await extensionContext.newPage();
-    await extensionContext.grantPermissions(['clipboard-read', 'clipboard-write'], {
-      origin: `chrome-extension://${extensionId}`,
-    });
+    await extensionContext.grantPermissions(['clipboard-read', 'clipboard-write']);
 
     await goToImportExportSection(page, extensionId);
 
@@ -119,9 +117,7 @@ test.describe('Options page toasts', () => {
     ]);
 
     const page = await extensionContext.newPage();
-    await extensionContext.grantPermissions(['clipboard-read', 'clipboard-write'], {
-      origin: `chrome-extension://${extensionId}`,
-    });
+    await extensionContext.grantPermissions(['clipboard-read', 'clipboard-write']);
 
     await goToImportExportSection(page, extensionId);
 
