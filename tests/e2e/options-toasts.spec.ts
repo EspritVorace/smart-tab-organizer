@@ -8,6 +8,10 @@
  *
  * Native notifications remain the channel for background events (grouping,
  * deduplication) -- tested separately in tests/e2e/notifications.spec.ts.
+ *
+ * The import rules flow (Text mode paste + Next + Import) is the simplest
+ * user trigger that produces a toast without needing any browser permission
+ * (clipboard, filesystem...). We use it to assert toast behaviour.
  */
 
 import { test, expect } from './fixtures';
@@ -27,11 +31,11 @@ async function goToImportExportSection(page: any, extensionId: string): Promise<
   await page.waitForTimeout(300);
 }
 
-async function seedDomainRules(extensionContext: any, rules: any[]): Promise<void> {
+async function clearDomainRules(extensionContext: any): Promise<void> {
   const sw = extensionContext.serviceWorkers()[0];
-  await sw.evaluate(async (r: any[]) => {
-    await chrome.storage.sync.set({ domainRules: r });
-  }, rules);
+  await sw.evaluate(async () => {
+    await chrome.storage.sync.set({ domainRules: [] });
+  });
   await new Promise((r) => setTimeout(r, 200));
 }
 
@@ -45,50 +49,58 @@ async function getSmartTabNotificationIds(extensionContext: any): Promise<string
   return all.filter((id) => id.startsWith('smarttab-'));
 }
 
-test.describe('Options page toasts', () => {
-  test('export to clipboard shows an in-page toast and no native notification', async ({
-    extensionContext,
-    extensionId,
-  }) => {
-    await seedDomainRules(extensionContext, [
+function makeRuleJson(label: string, domainFilter: string): string {
+  return JSON.stringify({
+    domainRules: [
       {
-        id: 'toast-rule-1',
-        label: 'Toast Test Rule',
-        domainFilter: 'toast-test.com',
+        id: `toast-${Date.now()}`,
+        label,
+        domainFilter,
         enabled: true,
-        groupingEnabled: true,
         deduplicationEnabled: false,
         deduplicationMatchMode: 'exact',
-        groupNameSource: 'label',
-        color: '',
+        groupNameSource: 'title',
+        presetId: null,
+        color: 'blue',
         titleParsingRegEx: '',
         urlParsingRegEx: '',
         badge: '',
       },
-    ]);
+    ],
+  });
+}
 
+async function submitTextImport(page: any, json: string): Promise<void> {
+  await page.getByRole('button', { name: /^import$/i }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible({ timeout: 5000 });
+  await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
+  await dialog.locator('textarea').fill(json);
+  await page.waitForTimeout(300);
+  await dialog.getByRole('button', { name: /next/i }).click();
+  await page.waitForTimeout(300);
+  await dialog.getByRole('button', { name: /^import$/i }).click();
+}
+
+test.describe('Options page toasts', () => {
+  test.beforeEach(async ({ extensionContext }) => {
+    await clearDomainRules(extensionContext);
+  });
+
+  test('rule import shows an in-page toast and no native notification', async ({
+    extensionContext,
+    extensionId,
+  }) => {
     const page = await extensionContext.newPage();
-    await extensionContext.grantPermissions(['clipboard-read', 'clipboard-write']);
-
     await goToImportExportSection(page, extensionId);
 
     const notifBefore = await getSmartTabNotificationIds(extensionContext);
 
-    // Open export wizard
-    await page.getByRole('button', { name: /^export$/i }).click();
-    const dialog = page.getByRole('dialog');
-    await expect(dialog).toBeVisible({ timeout: 5000 });
+    await submitTextImport(page, makeRuleJson('Toast Rule', 'toast-visible.com'));
 
-    // Open the split-button dropdown and choose Clipboard
-    await dialog.getByRole('button', { name: /export.*option|chevron/i }).click();
-    await page.getByRole('menuitem', { name: /clipboard/i }).click();
-
-    // In-page toast should appear
     const toast = page.getByTestId('toast-success');
     await expect(toast).toBeVisible({ timeout: 3000 });
-    await expect(toast).toContainText(/export/i);
 
-    // No new native notification
     const notifAfter = await getSmartTabNotificationIds(extensionContext);
     expect(notifAfter).toEqual(notifBefore);
 
@@ -99,33 +111,10 @@ test.describe('Options page toasts', () => {
     extensionContext,
     extensionId,
   }) => {
-    await seedDomainRules(extensionContext, [
-      {
-        id: 'toast-rule-2',
-        label: 'Toast Close Rule',
-        domainFilter: 'toast-close.com',
-        enabled: true,
-        groupingEnabled: true,
-        deduplicationEnabled: false,
-        deduplicationMatchMode: 'exact',
-        groupNameSource: 'label',
-        color: '',
-        titleParsingRegEx: '',
-        urlParsingRegEx: '',
-        badge: '',
-      },
-    ]);
-
     const page = await extensionContext.newPage();
-    await extensionContext.grantPermissions(['clipboard-read', 'clipboard-write']);
-
     await goToImportExportSection(page, extensionId);
 
-    await page.getByRole('button', { name: /^export$/i }).click();
-    const dialog = page.getByRole('dialog');
-    await expect(dialog).toBeVisible({ timeout: 5000 });
-    await dialog.getByRole('button', { name: /export.*option|chevron/i }).click();
-    await page.getByRole('menuitem', { name: /clipboard/i }).click();
+    await submitTextImport(page, makeRuleJson('Toast Close Rule', 'toast-close.com'));
 
     const toast = page.getByTestId('toast-success');
     await expect(toast).toBeVisible({ timeout: 3000 });
