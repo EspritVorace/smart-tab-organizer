@@ -40,8 +40,15 @@ test.describe('[US-PO01] Toolbar', () => {
     extensionContext,
     extensionId,
   }) => {
+    // Save button is disabled when no capturable tab exists; open a real tab first
+    // (hasCapturableTabs() filters out chrome-extension:// and about: URLs)
+    const realTab = await extensionContext.newPage();
+    await realTab.goto('data:text/html,<p>capturable tab</p>');
+
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
+
+    await expect(page.getByTestId('popup-toolbar-btn-save')).toBeEnabled({ timeout: 5000 });
 
     const [newPage] = await Promise.all([
       extensionContext.waitForEvent('page'),
