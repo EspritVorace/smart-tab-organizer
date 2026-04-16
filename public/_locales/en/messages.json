@@ -269,7 +269,7 @@
   "exportSessionsButton": { "message": "Export Sessions" },
   "importSessionsTitle": { "message": "Import Sessions" },
   "importSessionsDescription": { "message": "Add sessions from a JSON file or by pasting JSON" },
-  "importSessionsButton": { "message": "Import Sessions" },
+  "importSessionsButton": { "message": "Import sessions" },
   "sessionsSelectedCount": { "message": "{count} session(s) selected" },
   "sessionsFoundCount": { "message": "{count} session(s) found" },
   "newSessionsGroup": { "message": "New sessions ({count})" },

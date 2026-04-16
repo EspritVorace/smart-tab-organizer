@@ -68,7 +68,7 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
               icon={Download}
               title={getMessage('exportSessionsTitle')}
               description={getMessage('exportSessionsDescription')}
-              buttonLabel={getMessage('exportSessionsButton')}
+              buttonLabel={getMessage('exportButton')}
               onClick={() => setExportSessionsOpen(true)}
               disabled={sessions.length === 0}
             />
@@ -78,7 +78,7 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
               icon={Upload}
               title={getMessage('importSessionsTitle')}
               description={getMessage('importSessionsDescription')}
-              buttonLabel={getMessage('importSessionsButton')}
+              buttonLabel={getMessage('importButton')}
               onClick={() => setImportSessionsOpen(true)}
             />
           </Grid>
