@@ -77,7 +77,7 @@ async function clearDomainRules(extensionContext: any): Promise<void> {
 
 /** Open the Import wizard dialog from the Import/Export page. */
 async function openImportWizard(page: any): Promise<void> {
-  await page.getByRole('button', { name: /^import$/i }).click();
+  await page.getByTestId('page-import-export-card-import-rules').getByRole('button', { name: /^import$/i }).click();
   await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
 }
 
