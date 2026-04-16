@@ -44,3 +44,13 @@ export const SettingsPageGroupingOnly: Story = {
     updateSettings: (settings) => console.log('Settings updated:', settings),
   },
 };
+
+export const SettingsPageDedupUnmatchedDisabled: Story = {
+  args: {
+    syncSettings: {
+      ...defaultSyncSettings,
+      deduplicateUnmatchedDomains: false,
+    },
+    updateSettings: (settings) => console.log('Settings updated:', settings),
+  },
+};

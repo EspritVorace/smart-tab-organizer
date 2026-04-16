@@ -72,7 +72,7 @@
 
 - [ ] Un domaine avec une règle `deduplicationEnabled = true` voit ses doublons supprimés.
 - [ ] Un domaine avec une règle `deduplicationEnabled = false` conserve ses doublons, même si le global est activé.
-- [ ] Un domaine **sans règle** utilise le paramètre de déduplication global.
+- [ ] Un domaine **sans règle** suit le paramètre `deduplicateUnmatchedDomains` tant que la déduplication globale est activée (voir US-D008).
 
 ---
 
@@ -101,3 +101,20 @@
 - [ ] `tabsDeduplicatedCount` commence à 0 après une réinitialisation des statistiques.
 - [ ] Le compteur s'incrémente de **1** exactement à chaque fermeture d'un onglet doublon.
 - [ ] Après deux déduplications successives pour la même URL, le compteur vaut 2.
+
+---
+
+## US-D008 — Portée de la déduplication pour les domaines sans règle
+
+**En tant qu'** utilisateur,
+**je veux** choisir depuis la page Options si la déduplication automatique s'applique aux onglets des sites qui ne correspondent à aucune règle de domaine,
+**afin de** limiter la déduplication aux seuls domaines que j'ai explicitement configurés.
+
+### Critères d'acceptation
+
+- [ ] Un paramètre `deduplicateUnmatchedDomains` (booléen) est exposé dans la page Options, dans une section dédiée à la portée de la déduplication.
+- [ ] La valeur par défaut est `true` (comportement historique conservé).
+- [ ] Quand `deduplicateUnmatchedDomains = false` et que la déduplication globale est activée, les onglets d'un domaine sans règle **ne sont pas** dédupliqués; `tabsDeduplicatedCount` reste inchangé pour ces URLs.
+- [ ] Quand `deduplicateUnmatchedDomains = false`, une règle de domaine avec `deduplicationEnabled = true` continue de dédupliquer ses onglets (la règle prévaut).
+- [ ] Quand la déduplication globale est désactivée, le paramètre `deduplicateUnmatchedDomains` n'a aucun effet (le kill-switch global reste prioritaire).
+- [ ] Le libellé UI précise la portée: s'applique uniquement aux sites sans règle de domaine, et les règles restent prioritaires.

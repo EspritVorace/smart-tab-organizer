@@ -5,6 +5,7 @@ import { logger } from './logger.js';
 import {
   globalGroupingEnabledItem,
   globalDeduplicationEnabledItem,
+  deduplicateUnmatchedDomainsItem,
   domainRulesItem,
   notifyOnGroupingItem,
   notifyOnDeduplicationItem,
@@ -21,6 +22,7 @@ export async function getSyncSettings(): Promise<SyncSettings> {
     const results = await storage.getItems([
       globalGroupingEnabledItem,
       globalDeduplicationEnabledItem,
+      deduplicateUnmatchedDomainsItem,
       domainRulesItem,
       notifyOnGroupingItem,
       notifyOnDeduplicationItem,
@@ -28,9 +30,10 @@ export async function getSyncSettings(): Promise<SyncSettings> {
     return {
       globalGroupingEnabled: results[0].value as boolean,
       globalDeduplicationEnabled: results[1].value as boolean,
-      domainRules: results[2].value as SyncSettings['domainRules'],
-      notifyOnGrouping: results[3].value as boolean,
-      notifyOnDeduplication: results[4].value as boolean,
+      deduplicateUnmatchedDomains: results[2].value as boolean,
+      domainRules: results[3].value as SyncSettings['domainRules'],
+      notifyOnGrouping: results[4].value as boolean,
+      notifyOnDeduplication: results[5].value as boolean,
     };
   } catch (error) {
     logger.error('Error getting sync settings:', error);
@@ -43,6 +46,7 @@ export async function setSyncSettings(settings: SyncSettings): Promise<void> {
     await storage.setItems([
       { item: globalGroupingEnabledItem, value: settings.globalGroupingEnabled },
       { item: globalDeduplicationEnabledItem, value: settings.globalDeduplicationEnabled },
+      { item: deduplicateUnmatchedDomainsItem, value: settings.deduplicateUnmatchedDomains },
       { item: domainRulesItem, value: settings.domainRules },
       { item: notifyOnGroupingItem, value: settings.notifyOnGrouping },
       { item: notifyOnDeduplicationItem, value: settings.notifyOnDeduplication },
@@ -59,6 +63,8 @@ export async function updateSyncSettings(updates: Partial<SyncSettings>): Promis
       items.push({ item: globalGroupingEnabledItem, value: updates.globalGroupingEnabled! });
     if ('globalDeduplicationEnabled' in updates)
       items.push({ item: globalDeduplicationEnabledItem, value: updates.globalDeduplicationEnabled! });
+    if ('deduplicateUnmatchedDomains' in updates)
+      items.push({ item: deduplicateUnmatchedDomainsItem, value: updates.deduplicateUnmatchedDomains! });
     if ('domainRules' in updates)
       items.push({ item: domainRulesItem, value: updates.domainRules! });
     if ('notifyOnGrouping' in updates)
@@ -82,6 +88,7 @@ export function watchSyncSettings(
   const unwatchers = [
     globalGroupingEnabledItem.watch(() => getSyncSettings().then(callback)),
     globalDeduplicationEnabledItem.watch(() => getSyncSettings().then(callback)),
+    deduplicateUnmatchedDomainsItem.watch(() => getSyncSettings().then(callback)),
     domainRulesItem.watch(() => getSyncSettings().then(callback)),
     notifyOnGroupingItem.watch(() => getSyncSettings().then(callback)),
     notifyOnDeduplicationItem.watch(() => getSyncSettings().then(callback)),

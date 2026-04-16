@@ -11,8 +11,12 @@ import type { DomainRuleSetting, SyncSettings } from '@/types/syncSettings.js';
 // Cache pour éviter de traiter plusieurs fois le même onglet
 const processedTabs = new Set<string>();
 
-export function isDeduplicationEnabled(rule: DomainRuleSetting | undefined, globalEnabled: boolean): boolean {
-    return rule ? rule.deduplicationEnabled : globalEnabled;
+export function isDeduplicationEnabled(
+    rule: DomainRuleSetting | undefined,
+    globalEnabled: boolean,
+    deduplicateUnmatched: boolean,
+): boolean {
+    return rule ? rule.deduplicationEnabled : (globalEnabled && deduplicateUnmatched);
 }
 
 export function getMatchMode(rule: DomainRuleSetting | undefined): string {
@@ -156,8 +160,12 @@ export async function processTabForDeduplication(
     if (!settings.globalDeduplicationEnabled) return;
 
     const rule: DomainRuleSetting | undefined = settings.domainRules.find(r => r.enabled && matchesDomain(urlToCheck, r.domainFilter));
-    const deduplicationActiveForRule = isDeduplicationEnabled(rule, settings.globalDeduplicationEnabled);
-    
+    const deduplicationActiveForRule = isDeduplicationEnabled(
+        rule,
+        settings.globalDeduplicationEnabled,
+        settings.deduplicateUnmatchedDomains,
+    );
+
     if (!deduplicationActiveForRule) return;
 
     const matchMode = getMatchMode(rule);

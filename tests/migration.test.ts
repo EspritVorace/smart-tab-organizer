@@ -7,6 +7,7 @@ import type { SyncSettings, DomainRuleSetting } from '../src/types/syncSettings'
 const TEST_DEFAULTS: SyncSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
+  deduplicateUnmatchedDomains: true,
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
   domainRules: [

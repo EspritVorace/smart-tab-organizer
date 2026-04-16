@@ -18,6 +18,11 @@ export const globalDeduplicationEnabledItem = storage.defineItem<boolean>(
   { defaultValue: defaultSyncSettings.globalDeduplicationEnabled },
 );
 
+export const deduplicateUnmatchedDomainsItem = storage.defineItem<boolean>(
+  'sync:deduplicateUnmatchedDomains',
+  { defaultValue: defaultSyncSettings.deduplicateUnmatchedDomains },
+);
+
 export const domainRulesItem = storage.defineItem<DomainRuleSettings>(
   'sync:domainRules',
   { defaultValue: defaultSyncSettings.domainRules },
@@ -54,6 +59,7 @@ export const sessionsHelpPrefsItem = storage.defineItem<SessionsHelpPrefs>(
 export const syncSettingsItemMap = {
   globalGroupingEnabled: globalGroupingEnabledItem,
   globalDeduplicationEnabled: globalDeduplicationEnabledItem,
+  deduplicateUnmatchedDomains: deduplicateUnmatchedDomainsItem,
   domainRules: domainRulesItem,
   notifyOnGrouping: notifyOnGroupingItem,
   notifyOnDeduplication: notifyOnDeduplicationItem,

@@ -67,6 +67,7 @@ export const mockRule: DomainRuleSetting = {
 export const mockSyncSettings: SyncSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
+  deduplicateUnmatchedDomains: true,
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
   domainRules: [mockRule],

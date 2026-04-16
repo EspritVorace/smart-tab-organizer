@@ -258,6 +258,46 @@ describe('processTabForDeduplication', () => {
     });
   });
 
+  it('skips deduplication on unmatched domains when deduplicateUnmatchedDomains=false', async () => {
+    mockedGetSettings.mockResolvedValue(
+      makeSettings({ domainRules: [], deduplicateUnmatchedDomains: false }),
+    );
+
+    await processTabForDeduplication(1, 'https://no-rule.com/x', 5);
+
+    expect(mockedBrowser.tabs.query).not.toHaveBeenCalled();
+    expect(mockedBrowser.tabs.remove).not.toHaveBeenCalled();
+  });
+
+  it('still deduplicates unmatched domains when deduplicateUnmatchedDomains=true (default)', async () => {
+    mockedGetSettings.mockResolvedValue(
+      makeSettings({ domainRules: [], deduplicateUnmatchedDomains: true }),
+    );
+    mockedBrowser.tabs.query.mockResolvedValue([
+      { id: 9, url: 'https://no-rule.com/x', title: 'T', windowId: 5 },
+    ]);
+
+    await processTabForDeduplication(1, 'https://no-rule.com/x', 5);
+
+    expect(mockedBrowser.tabs.remove).toHaveBeenCalledWith(1);
+  });
+
+  it('still deduplicates rule-matched domains when deduplicateUnmatchedDomains=false (rule wins)', async () => {
+    mockedGetSettings.mockResolvedValue(
+      makeSettings({
+        domainRules: [makeRule({ deduplicationEnabled: true })],
+        deduplicateUnmatchedDomains: false,
+      }),
+    );
+    mockedBrowser.tabs.query.mockResolvedValue([
+      { id: 9, url: 'https://example.com/x', title: 'T', windowId: 5 },
+    ]);
+
+    await processTabForDeduplication(1, 'https://example.com/x', 5);
+
+    expect(mockedBrowser.tabs.remove).toHaveBeenCalledWith(1);
+  });
+
   it('catches errors bubbling up from checkAndDeduplicateTab', async () => {
     mockedGetSettings.mockResolvedValue(makeSettings({ domainRules: [makeRule()] }));
     mockedBrowser.tabs.query.mockRejectedValue(new Error('nope'));
