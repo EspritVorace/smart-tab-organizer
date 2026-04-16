@@ -407,8 +407,10 @@
 
   "pinnedSessionsSection": { "message": "Sesiones fijadas" },
   "sessionsSection": { "message": "Sesiones" },
-  "pinnedSessionsEmpty": { "message": "Sin sesiones fijadas. Fije una sesión para acceso rápido." },
-  "unpinnedSessionsEmpty": { "message": "Todas las sesiones están fijadas." },
+  "pinnedSessionsEmptyTitle": { "message": "Sin sesiones fijadas." },
+  "pinnedSessionsEmptyDescription": { "message": "Fije una sesión para acceder rápidamente desde el popup." },
+  "unpinnedSessionsEmptyTitle": { "message": "Todas las sesiones están fijadas." },
+  "unpinnedSessionsEmptyDescription": { "message": "Desancle una sesión para verla aquí." },
 
   "restoreNotificationTitle": { "message": "Sesión restaurada" },
   "restoreNotificationMessage": { "message": "$1 pestaña(s) abierta(s), $2 duplicado(s) omitido(s)" },

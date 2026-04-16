@@ -269,7 +269,7 @@
   "exportSessionsButton": { "message": "Export Sessions" },
   "importSessionsTitle": { "message": "Import Sessions" },
   "importSessionsDescription": { "message": "Add sessions from a JSON file or by pasting JSON" },
-  "importSessionsButton": { "message": "Import Sessions" },
+  "importSessionsButton": { "message": "Import sessions" },
   "sessionsSelectedCount": { "message": "{count} session(s) selected" },
   "sessionsFoundCount": { "message": "{count} session(s) found" },
   "newSessionsGroup": { "message": "New sessions ({count})" },
@@ -406,8 +406,10 @@
 
   "pinnedSessionsSection": { "message": "Pinned Sessions" },
   "sessionsSection": { "message": "Sessions" },
-  "pinnedSessionsEmpty": { "message": "No pinned sessions. Pin a session for quick popup access." },
-  "unpinnedSessionsEmpty": { "message": "All sessions are pinned." },
+  "pinnedSessionsEmptyTitle": { "message": "No pinned sessions." },
+  "pinnedSessionsEmptyDescription": { "message": "Pin a session to access it quickly from the popup." },
+  "unpinnedSessionsEmptyTitle": { "message": "All sessions are pinned." },
+  "unpinnedSessionsEmptyDescription": { "message": "Unpin a session to see it here." },
 
   "restoreNotificationTitle": { "message": "Session Restored" },
   "restoreNotificationMessage": { "message": "$1 tab(s) opened, $2 duplicate(s) skipped" },

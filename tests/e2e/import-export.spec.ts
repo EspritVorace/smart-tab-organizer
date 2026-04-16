@@ -77,13 +77,13 @@ async function clearDomainRules(extensionContext: any): Promise<void> {
 
 /** Open the Import wizard dialog from the Import/Export page. */
 async function openImportWizard(page: any): Promise<void> {
-  await page.getByRole('button', { name: /^import$/i }).click();
+  await page.getByTestId('page-import-export-card-import-rules').getByRole('button', { name: /^import$/i }).click();
   await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
 }
 
 /** Open the Export wizard dialog from the Import/Export page. */
 async function openExportWizard(page: any): Promise<void> {
-  await page.getByRole('button', { name: /^export$/i }).click();
+  await page.getByTestId('page-import-export-card-export-rules').getByRole('button', { name: /^export$/i }).click();
   await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
 }
 
@@ -784,7 +784,7 @@ test.describe('Import / Export', () => {
       await goToImportExportSection(page, extensionId);
 
       // Export button should be disabled when domainRules is empty
-      const exportBtn = page.getByRole('button', { name: /^export$/i });
+      const exportBtn = page.getByTestId('page-import-export-card-export-rules').getByRole('button', { name: /^export$/i });
       await expect(exportBtn).toBeDisabled();
 
       await page.close();

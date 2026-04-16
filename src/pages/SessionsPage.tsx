@@ -1,10 +1,12 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Box, Flex, Button, Text, Callout, Separator, Badge } from '@radix-ui/themes';
-import { Camera, Archive, CheckCircle, Pin, type LucideIcon } from 'lucide-react';
+import { Camera, Archive, CheckCircle, Pin, Upload, type LucideIcon } from 'lucide-react';
 import { DragDropProvider, type DragOverEvent, type DragEndEvent } from '@dnd-kit/react';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { move } from '@dnd-kit/helpers';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
+import { EmptyState } from '@/components/UI/EmptyState';
+import { ImportSessionsWizard } from '@/components/UI/ImportExportWizards/ImportSessionsWizard';
 import { SessionCard } from '@/components/Core/Session/SessionCard';
 import { SessionEditDialog } from '@/components/Core/Session/SessionEditDialog';
 import { SessionsIntroCallout } from '@/components/Core/Session/SessionsIntroCallout';
@@ -48,7 +50,8 @@ function SectionHeader({ icon: Icon, titleKey, count }: { icon: LucideIcon; titl
 interface SessionSectionProps {
   icon: LucideIcon;
   titleKey: string;
-  emptyMessageKey: string;
+  emptyTitleKey: string;
+  emptyDescriptionKey?: string;
   /** Whether this section lists the pinned sessions (drives drag reorder layout). */
   isPinned: boolean;
   /** Sessions displayed in this section (already filtered by search + split by pinned state). */
@@ -76,7 +79,8 @@ interface SessionSectionProps {
 function SessionSection({
   icon,
   titleKey,
-  emptyMessageKey,
+  emptyTitleKey,
+  emptyDescriptionKey,
   isPinned,
   sessions,
   allSessions,
@@ -184,7 +188,13 @@ function SessionSection({
     <Box>
       <SectionHeader icon={icon} titleKey={titleKey} count={sessions.length} />
       {sessions.length === 0 ? (
-        <Text size="2" color="gray" mt="2">{getMessage(emptyMessageKey)}</Text>
+        <EmptyState
+          icon={icon}
+          title={getMessage(emptyTitleKey)}
+          description={emptyDescriptionKey ? getMessage(emptyDescriptionKey) : undefined}
+          descriptionMaxWidth="none"
+          minHeight={100}
+        />
       ) : (
         <DragDropProvider
           modifiers={[RestrictToVerticalAxis]}
@@ -235,6 +245,7 @@ export function SessionsPage({
   const { sessions, isLoaded, createSession, renameSession, removeSession, reload, updateOrder } = useSessions();
   // Internal open state; initialized from external prop so the wizard opens immediately on mount.
   const [snapshotOpen, setSnapshotOpen] = useState(snapshotWizardOpen);
+  const [importSessionsOpen, setImportSessionsOpen] = useState(false);
 
   // Sync: if the external prop becomes true after mount (e.g. user already on sessions tab),
   // open the wizard.
@@ -358,52 +369,38 @@ export function SessionsPage({
             </Text>
           ) : sessions.length === 0 && !searchQuery ? (
             // True empty state
-            <Flex
+            <EmptyState
               data-testid="page-sessions-empty"
-              direction="column"
-              align="center"
-              justify="center"
-              gap="3"
-              style={{ minHeight: 200 }}
-            >
-              <Archive
-                size={40}
-                style={{ color: 'var(--gray-8)' }}
-                aria-hidden="true"
-              />
-              <Text size="3" weight="medium" color="gray" align="center">
-                {getMessage('sessionsEmptyStateTitle')}
-              </Text>
-              <Text size="2" color="gray" align="center" style={{ maxWidth: 340 }}>
-                {getMessage('sessionsEmptyStateDescription')}
-              </Text>
-              <Button
-                data-testid="page-sessions-btn-snapshot"
-                variant="soft"
-                onClick={() => setSnapshotOpen(true)}
-              >
-                <Camera size={14} aria-hidden="true" />
-                {getMessage('sessionSnapshotButton')}
-              </Button>
-            </Flex>
+              icon={Archive}
+              title={getMessage('sessionsEmptyStateTitle')}
+              description={getMessage('sessionsEmptyStateDescription')}
+              actions={
+                <Flex gap="2">
+                  <Button
+                    data-testid="page-sessions-btn-snapshot"
+                    variant="soft"
+                    onClick={() => setSnapshotOpen(true)}
+                  >
+                    <Camera size={14} aria-hidden="true" />
+                    {getMessage('sessionSnapshotButton')}
+                  </Button>
+                  <Button variant="soft" onClick={() => setImportSessionsOpen(true)}>
+                    <Upload size={14} aria-hidden="true" />
+                    {getMessage('importSessionsButton')}
+                  </Button>
+                </Flex>
+              }
+            />
           ) : displayedSessions.length === 0 && searchQuery ? (
             // Search no results
-            <Flex
-              direction="column"
-              align="center"
-              justify="center"
-              gap="2"
-              style={{ minHeight: 120 }}
-            >
-              <Archive size={32} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
-              <Text color="gray">{getMessage('noSessionsFound')}</Text>
-            </Flex>
+            <EmptyState compact icon={Archive} message={getMessage('noSessionsFound')} />
           ) : (
             <Flex data-testid="page-sessions-list" direction="column" gap="3">
               <SessionSection
                 icon={Pin}
                 titleKey="pinnedSessionsSection"
-                emptyMessageKey="pinnedSessionsEmpty"
+                emptyTitleKey="pinnedSessionsEmptyTitle"
+                emptyDescriptionKey="pinnedSessionsEmptyDescription"
                 isPinned={true}
                 sessions={pinnedSessions}
                 allSessions={sortedSessions}
@@ -423,7 +420,8 @@ export function SessionsPage({
               <SessionSection
                 icon={Archive}
                 titleKey="sessionsSection"
-                emptyMessageKey="unpinnedSessionsEmpty"
+                emptyTitleKey="unpinnedSessionsEmptyTitle"
+                emptyDescriptionKey="unpinnedSessionsEmptyDescription"
                 isPinned={false}
                 sessions={unpinnedSessions}
                 allSessions={sortedSessions}
@@ -439,6 +437,11 @@ export function SessionsPage({
               />
             </Flex>
           )}
+
+          <ImportSessionsWizard
+            open={importSessionsOpen}
+            onOpenChange={setImportSessionsOpen}
+          />
 
           <SnapshotWizard
             open={snapshotOpen}
