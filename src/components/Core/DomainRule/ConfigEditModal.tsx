@@ -1,13 +1,22 @@
 import { Button, Dialog, Flex, ScrollArea } from '@radix-ui/themes';
 import { X } from 'lucide-react';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
+import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
 import { DomainRulesTheme } from '@/components/Form/themes';
 import { type GroupNameSourceValue } from '@/schemas/enums';
+import { createRegexValidator } from '@/schemas/common';
 import type { PresetCategory } from '@/utils/presetUtils';
 import { getPresetById } from '@/utils/presetUtils';
 import { logger } from '@/utils/logger';
 import { DomainRuleConfigForm } from './DomainRuleConfigForm';
+
+const regexValidator = createRegexValidator(true);
+
+function validateRegex(value: string): FieldError | undefined {
+  if (regexValidator.safeParse(value).success) return undefined;
+  return { type: 'pattern', message: getMessage('errorInvalidRegex') };
+}
 
 export interface ConfigEditValues {
   configMode: 'preset' | 'ask' | 'manual';
@@ -69,7 +78,24 @@ export function ConfigEditModal({
     }
   }, []);
 
+  const titleFieldVisible =
+    configMode === 'manual' && (groupNameSource === 'title' || groupNameSource.startsWith('smart'));
+  const urlFieldVisible =
+    configMode === 'manual' && (groupNameSource === 'url' || groupNameSource.startsWith('smart'));
+
+  const titleRegexError = useMemo(
+    () => (titleFieldVisible ? validateRegex(titleParsingRegEx) : undefined),
+    [titleFieldVisible, titleParsingRegEx],
+  );
+  const urlRegexError = useMemo(
+    () => (urlFieldVisible ? validateRegex(urlParsingRegEx) : undefined),
+    [urlFieldVisible, urlParsingRegEx],
+  );
+
+  const hasRegexError = Boolean(titleRegexError || urlRegexError);
+
   const handleApply = () => {
+    if (hasRegexError) return;
     onApply({ configMode, presetId, groupNameSource, titleParsingRegEx, urlParsingRegEx });
     onClose();
   };
@@ -101,8 +127,10 @@ export function ConfigEditModal({
                 onGroupNameSourceChange={setGroupNameSource}
                 titleParsingRegEx={titleParsingRegEx}
                 onTitleParsingRegExChange={setTitleParsingRegEx}
+                titleParsingRegExError={titleRegexError}
                 urlParsingRegEx={urlParsingRegEx}
                 onUrlParsingRegExChange={setUrlParsingRegEx}
+                urlParsingRegExError={urlRegexError}
               />
             </Flex>
           </ScrollArea>
@@ -111,7 +139,7 @@ export function ConfigEditModal({
             <Button variant="soft" color="gray" onClick={onClose}>
               {getMessage('cancel')}
             </Button>
-            <Button onClick={handleApply}>
+            <Button onClick={handleApply} disabled={hasRegexError}>
               {getMessage('apply')}
             </Button>
           </Flex>
