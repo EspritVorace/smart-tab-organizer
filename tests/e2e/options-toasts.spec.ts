@@ -71,7 +71,7 @@ function makeRuleJson(label: string, domainFilter: string): string {
 }
 
 async function submitTextImport(page: any, json: string): Promise<void> {
-  await page.getByRole('button', { name: /^import$/i }).click();
+  await page.getByTestId('page-import-export-card-import-rules').getByRole('button', { name: /^import$/i }).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible({ timeout: 5000 });
   await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
