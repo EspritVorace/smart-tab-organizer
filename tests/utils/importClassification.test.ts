@@ -33,6 +33,20 @@ describe('importClassification', () => {
       expect(areDomainRulesEqual(ruleA, ruleB)).toBe(true);
     });
 
+    it('traite ignoredQueryParams undefined comme un tableau vide', () => {
+      // Rule seeded before the field existed (undefined) vs rule parsed via
+      // Zod import schema (defaults to []). Should still be considered equal.
+      const existing = makeRule({ ignoredQueryParams: undefined as any });
+      const imported = makeRule({ ignoredQueryParams: [] });
+      expect(areDomainRulesEqual(existing, imported)).toBe(true);
+    });
+
+    it('distingue deux listes ignoredQueryParams différentes', () => {
+      const ruleA = makeRule({ ignoredQueryParams: ['utm_source'] });
+      const ruleB = makeRule({ ignoredQueryParams: ['utm_medium'] });
+      expect(areDomainRulesEqual(ruleA, ruleB)).toBe(false);
+    });
+
     it('retourne false si domainFilter diffère', () => {
       const ruleA = makeRule({ domainFilter: 'foo.com' });
       const ruleB = makeRule({ domainFilter: 'bar.com' });
