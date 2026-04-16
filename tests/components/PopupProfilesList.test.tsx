@@ -10,9 +10,22 @@ vi.mock('../../src/utils/i18n', () => ({
       popupPinnedSessionsLabel: 'Pinned sessions',
       sessionRestoreCurrentWindow: 'Restore in current window',
       sessionRestoreNewWindow: 'Restore in new window',
+      popupPinnedEmptyHint: 'Pin a session for one-click access from here.',
+      popupGoToSessions: 'Manage sessions',
+      popupPinnedEmptyToggleAria: 'Toggle pinned sessions hint',
     };
     return messages[key] || key;
   }),
+}));
+
+// Mock popupPinnedEmptyCollapsedItem to avoid hitting real storage in tests
+const mockGetValue = vi.fn(async () => false);
+const mockSetValue = vi.fn(async () => {});
+vi.mock('../../src/utils/storageItems', () => ({
+  popupPinnedEmptyCollapsedItem: {
+    getValue: () => mockGetValue(),
+    setValue: (value: boolean) => mockSetValue(value),
+  },
 }));
 
 // Mock sessionStorage
@@ -191,6 +204,66 @@ describe('PopupProfilesList', () => {
     expect(screen.getByText('Third (oldest)')).toBeInTheDocument();
     expect(screen.getByText('First (newest)')).toBeInTheDocument();
     expect(screen.getByText('Second (middle)')).toBeInTheDocument();
+  });
+
+  it('should show the collapsible empty hint when sessions exist but none are pinned', async () => {
+    const sessions: Session[] = [
+      {
+        id: 'unpinned-1',
+        isPinned: false,
+        updatedAt: '2026-04-10T00:00:00Z',
+        name: 'Not pinned',
+        createdAt: '2026-04-10T00:00:00Z',
+        ungroupedTabs: [],
+        groups: [],
+      },
+    ];
+
+    mockLoadSessions.mockResolvedValue(sessions);
+
+    render(
+      <TestWrapper>
+        <PopupProfilesList />
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Pin a session for one-click access from here.')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Manage sessions')).toBeInTheDocument();
+    expect(screen.getByTestId('popup-pinned-empty-toggle')).toBeInTheDocument();
+  });
+
+  it('should persist the collapsed state when the user toggles the empty hint', async () => {
+    const { fireEvent } = await import('@testing-library/react');
+    const sessions: Session[] = [
+      {
+        id: 'unpinned-1',
+        isPinned: false,
+        updatedAt: '2026-04-10T00:00:00Z',
+        name: 'Not pinned',
+        createdAt: '2026-04-10T00:00:00Z',
+        ungroupedTabs: [],
+        groups: [],
+      },
+    ];
+
+    mockLoadSessions.mockResolvedValue(sessions);
+    mockSetValue.mockClear();
+
+    render(
+      <TestWrapper>
+        <PopupProfilesList />
+      </TestWrapper>
+    );
+
+    const toggle = await screen.findByTestId('popup-pinned-empty-toggle');
+    fireEvent.click(toggle);
+
+    await waitFor(() => {
+      expect(mockSetValue).toHaveBeenCalledWith(true);
+    });
   });
 
   it('should display pinned sessions label when pinned sessions exist', async () => {

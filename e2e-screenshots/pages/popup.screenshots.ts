@@ -62,4 +62,28 @@ test.describe('Popup screenshots', () => {
       },
     );
   });
+
+  /**
+   * popup-empty-pinned
+   * Popup with at least one saved session but none pinned: shows the
+   * collapsible "Pinned sessions" empty hint.
+   */
+  test('popup-empty-pinned', async ({ extensionContext, extensionId }, testInfo) => {
+    const locale = testInfo.project.name;
+    await seedRules(extensionContext);
+    await seedSessions(extensionContext, [SESSION_MORNING_DEV]);
+
+    await captureAllElement(
+      extensionContext,
+      extensionId,
+      locale,
+      'popup',
+      'popup-empty-pinned',
+      '#popup-app',
+      async (page) => {
+        await page.setViewportSize({ width: 402, height: 800 });
+        await page.waitForTimeout(300);
+      },
+    );
+  });
 });
