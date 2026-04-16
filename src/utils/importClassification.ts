@@ -28,11 +28,23 @@ const COMPARABLE_PROPERTIES: (keyof DomainRuleSetting)[] = [
   'deduplicationMatchMode',
   'color',
   'deduplicationEnabled',
+  'ignoredQueryParams',
   'groupingEnabled',
   'categoryId',
   'presetId',
   'enabled'
 ];
+
+function arePropertyValuesEqual(a: unknown, b: unknown): boolean {
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
+  }
+  return a === b;
+}
 
 /** Compare two domain rules ignoring id and badge */
 export function areDomainRulesEqual(
@@ -40,7 +52,7 @@ export function areDomainRulesEqual(
   ruleB: DomainRuleSetting
 ): boolean {
   return COMPARABLE_PROPERTIES.every(
-    prop => ruleA[prop] === ruleB[prop]
+    prop => arePropertyValuesEqual(ruleA[prop], ruleB[prop])
   );
 }
 
@@ -52,7 +64,7 @@ export function getRuleDifferences(
   const diffs: PropertyDiff[] = [];
   for (const prop of COMPARABLE_PROPERTIES) {
     if (prop === 'label') continue; // Label is the matching key, skip it
-    if (ruleA[prop] !== ruleB[prop]) {
+    if (!arePropertyValuesEqual(ruleA[prop], ruleB[prop])) {
       diffs.push({
         property: prop,
         currentValue: ruleA[prop],

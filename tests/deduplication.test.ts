@@ -198,6 +198,71 @@ describe('deduplication', () => {
       });
     });
 
+    describe('mode exact_ignore_params', () => {
+      it('devrait matcher quand seul un param ignoré diffère', () => {
+        expect(
+          isUrlMatch(
+            'https://example.com/page?utm_source=a&ref=x',
+            'https://example.com/page?utm_source=b&ref=x',
+            'exact_ignore_params',
+            ['utm_source'],
+          ),
+        ).toBe(true);
+      });
+
+      it('devrait matcher avec un wildcard simple', () => {
+        expect(
+          isUrlMatch(
+            'https://example.com/page?utm_source=a&utm_medium=x&keep=1',
+            'https://example.com/page?utm_source=b&utm_campaign=y&keep=1',
+            'exact_ignore_params',
+            ['utm_*'],
+          ),
+        ).toBe(true);
+      });
+
+      it('ne devrait pas matcher quand un param non ignoré diffère', () => {
+        expect(
+          isUrlMatch(
+            'https://example.com/page?utm_source=a&ref=x',
+            'https://example.com/page?utm_source=b&ref=y',
+            'exact_ignore_params',
+            ['utm_source'],
+          ),
+        ).toBe(false);
+      });
+
+      it('ne devrait pas matcher quand le path diffère', () => {
+        expect(
+          isUrlMatch(
+            'https://example.com/a?utm_source=a',
+            'https://example.com/b?utm_source=a',
+            'exact_ignore_params',
+            ['utm_source'],
+          ),
+        ).toBe(false);
+      });
+
+      it('se comporte comme exact quand aucun param ignoré fourni', () => {
+        expect(
+          isUrlMatch(
+            'https://example.com/page?a=1',
+            'https://example.com/page?a=1',
+            'exact_ignore_params',
+            [],
+          ),
+        ).toBe(true);
+        expect(
+          isUrlMatch(
+            'https://example.com/page?a=1',
+            'https://example.com/page?a=2',
+            'exact_ignore_params',
+            [],
+          ),
+        ).toBe(false);
+      });
+    });
+
     describe('mode inconnu', () => {
       it('devrait retourner false pour un mode inconnu', () => {
         expect(isUrlMatch('https://example.com', 'https://example.com', 'unknown')).toBe(false);
@@ -248,6 +313,39 @@ describe('deduplication', () => {
 
       expect(duplicate).toBeDefined();
       expect(duplicate?.id).toBe(1);
+    });
+
+    it('devrait trouver un dupliqué en mode exact_ignore_params (wildcard)', async () => {
+      vi.mocked(browser.tabs.query).mockResolvedValue([
+        { id: 1, url: 'https://example.com/page?utm_source=newsletter&ref=home', windowId: 1 }
+      ] as any);
+
+      const duplicate = await findDuplicateTab(
+        2,
+        'https://example.com/page?utm_source=twitter&ref=home',
+        'exact_ignore_params',
+        1,
+        ['utm_*'],
+      );
+
+      expect(duplicate).toBeDefined();
+      expect(duplicate?.id).toBe(1);
+    });
+
+    it('ne devrait pas trouver de dupliqué quand un param non ignoré diffère', async () => {
+      vi.mocked(browser.tabs.query).mockResolvedValue([
+        { id: 1, url: 'https://example.com/page?utm_source=a&ref=home', windowId: 1 }
+      ] as any);
+
+      const duplicate = await findDuplicateTab(
+        2,
+        'https://example.com/page?utm_source=b&ref=other',
+        'exact_ignore_params',
+        1,
+        ['utm_*'],
+      );
+
+      expect(duplicate).toBeUndefined();
     });
   });
 });

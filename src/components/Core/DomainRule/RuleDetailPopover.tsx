@@ -2,7 +2,7 @@ import { Flex, Text, Box, Badge } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 import { getRadixColor } from '@/utils/utils';
-import { getRuleCategory } from '@/schemas/enums';
+import { getRuleCategory, deduplicationMatchModeOptions } from '@/schemas/enums';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 
 interface RuleDetailPopoverProps {
@@ -88,7 +88,24 @@ export function RuleDetailPopover({ rule, searchTerm }: RuleDetailPopoverProps) 
         )}
 
         <Text size="1" weight="bold" color="gray">{getMessage('deduplicationMode')}</Text>
-        <Text size="2">{getMessage(`${rule.deduplicationMatchMode}Match`)}</Text>
+        <Text size="2">
+          {(() => {
+            const modeOption = deduplicationMatchModeOptions.find(o => o.value === rule.deduplicationMatchMode);
+            return modeOption ? getMessage(modeOption.keyLabel) : rule.deduplicationMatchMode;
+          })()}
+        </Text>
+
+        {rule.deduplicationEnabled
+          && rule.deduplicationMatchMode === 'exact_ignore_params'
+          && Array.isArray(rule.ignoredQueryParams)
+          && rule.ignoredQueryParams.length > 0 && (
+            <>
+              <Text size="1" weight="bold" color="gray">{getMessage('ignoredQueryParamsLabel')}</Text>
+              <Text size="2" style={{ wordBreak: 'break-all' }}>
+                {rule.ignoredQueryParams.join(', ')}
+              </Text>
+            </>
+        )}
 
         <Text size="1" weight="bold" color="gray">{getMessage('deduplicationEnabled')}</Text>
         <Badge size="1" color={rule.deduplicationEnabled ? 'green' : 'red'} variant="soft">

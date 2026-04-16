@@ -397,6 +397,58 @@ test.describe('Deduplication', () => {
 
   // ── 6. Statistics ─────────────────────────────────────────────────────────
 
+  // ── Ignored query params ──────────────────────────────────────────────────
+
+  test.describe('Exact ignoring query params', () => {
+    test('deduplicates when only an ignored param differs [US-D008]', async ({ helpers }) => {
+      await helpers.addDomainRule({
+        label: 'Ignore UTM',
+        domainFilter: 'example.com',
+        enabled: true,
+        deduplicationEnabled: true,
+        deduplicationMatchMode: 'exact_ignore_params',
+        ignoredQueryParams: ['utm_*', 'fbclid'],
+      });
+
+      const tab1 = await helpers.createTab('https://example.com/page?utm_source=newsletter&ref=home');
+      await helpers.waitForDeduplication();
+      const initialCount = await helpers.getTabCount();
+
+      const tab2 = await helpers.createTab('https://example.com/page?utm_source=twitter&ref=home');
+      await helpers.waitForDeduplication();
+
+      const finalCount = await helpers.getTabCount();
+      const stats = await helpers.getStatistics();
+
+      expect(finalCount).toBeLessThanOrEqual(initialCount);
+      expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
+    });
+
+    test('does NOT deduplicate when a non-ignored param differs [US-D008]', async ({ helpers }) => {
+      await helpers.addDomainRule({
+        label: 'Ignore UTM only',
+        domainFilter: 'example.com',
+        enabled: true,
+        deduplicationEnabled: true,
+        deduplicationMatchMode: 'exact_ignore_params',
+        ignoredQueryParams: ['utm_*'],
+      });
+
+      const tab1 = await helpers.createTab('https://example.com/page?utm_source=a&ref=home');
+      await helpers.waitForDeduplication();
+      const initialCount = await helpers.getTabCount();
+
+      const tab2 = await helpers.createTab('https://example.com/page?utm_source=b&ref=other');
+      await helpers.waitForDeduplication();
+
+      const finalCount = await helpers.getTabCount();
+      const stats = await helpers.getStatistics();
+
+      expect(finalCount).toBe(initialCount + 1);
+      expect(stats.tabsDeduplicatedCount).toBe(0);
+    });
+  });
+
   test.describe('Statistics', () => {
     test('tabsDeduplicatedCount increments exactly once per deduplication [US-D007]', async ({ helpers }) => {
       await helpers.addDomainRule({

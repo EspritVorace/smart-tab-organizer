@@ -6,6 +6,7 @@ import { getSettings } from './settings.js';
 import { showNotification, type UndoAction } from '@/utils/notifications.js';
 import { getMessage } from '@/utils/i18n.js';
 import { shouldSkipDeduplication } from '@/utils/deduplicationSkip.js';
+import { normalizeUrlIgnoringParams } from '@/utils/urlNormalization.js';
 import type { DomainRuleSetting, SyncSettings } from '@/types/syncSettings.js';
 
 // Cache pour éviter de traiter plusieurs fois le même onglet
@@ -41,35 +42,46 @@ export function clearProcessedTabsCache(): void {
     processedTabs.clear();
 }
 
-export function isUrlMatch(existingUrl: string, newUrl: string, matchMode: string): boolean {
+export function isUrlMatch(
+    existingUrl: string,
+    newUrl: string,
+    matchMode: string,
+    ignoredParams: string[] = [],
+): boolean {
     try {
         switch (matchMode) {
-            case 'exact': 
+            case 'exact':
                 return existingUrl === newUrl;
-            case 'includes': 
+            case 'includes':
                 return existingUrl.includes(newUrl) || newUrl.includes(existingUrl);
-            default: 
+            case 'exact_ignore_params': {
+                const normalizedExisting = normalizeUrlIgnoringParams(existingUrl, ignoredParams);
+                const normalizedNew = normalizeUrlIgnoringParams(newUrl, ignoredParams);
+                return normalizedExisting === normalizedNew;
+            }
+            default:
                 return false;
         }
-    } catch (urlParseError) { 
-        return false; 
+    } catch (urlParseError) {
+        return false;
     }
 }
 
 export async function findDuplicateTab(
-    currentTabId: number, 
-    newUrl: string, 
-    matchMode: string, 
-    windowId: number
+    currentTabId: number,
+    newUrl: string,
+    matchMode: string,
+    windowId: number,
+    ignoredParams: string[] = [],
 ): Promise<Browser.tabs.Tab | undefined> {
-    const allTabsInWindow = await browser.tabs.query({ 
-        url: "*://*/*", 
-        windowId: windowId 
+    const allTabsInWindow = await browser.tabs.query({
+        url: "*://*/*",
+        windowId: windowId
     });
-    
+
     return allTabsInWindow.find(tab => {
         if (!tab.url || tab.id === currentTabId) return false;
-        return isUrlMatch(tab.url, newUrl, matchMode);
+        return isUrlMatch(tab.url, newUrl, matchMode, ignoredParams);
     });
 }
 
@@ -108,10 +120,11 @@ export async function checkAndDeduplicateTab(
     newUrl: string,
     matchMode: string,
     windowId: number,
-    settings: SyncSettings
+    settings: SyncSettings,
+    ignoredParams: string[] = [],
 ): Promise<void> {
     try {
-        const duplicateTab = await findDuplicateTab(currentTabId, newUrl, matchMode, windowId);
+        const duplicateTab = await findDuplicateTab(currentTabId, newUrl, matchMode, windowId, ignoredParams);
 
         if (duplicateTab) {
             logger.debug(`[DEDUPLICATION] Duplicate found: ${newUrl} (keeping tab ${duplicateTab.id}, removing ${currentTabId})`);
@@ -169,9 +182,10 @@ export async function processTabForDeduplication(
     if (!deduplicationActiveForRule) return;
 
     const matchMode = getMatchMode(rule);
+    const ignoredParams = rule?.ignoredQueryParams ?? [];
 
     try {
-        await checkAndDeduplicateTab(tabId, urlToCheck, matchMode, windowId, settings);
+        await checkAndDeduplicateTab(tabId, urlToCheck, matchMode, windowId, settings, ignoredParams);
     } catch (error) {
         logger.error("Deduplication error:", error);
     }

@@ -41,6 +41,7 @@ const getDefaultValues = (rule?: DomainRule): Partial<DomainRule> => {
     color: rule.color || undefined,
     categoryId: rule.categoryId ?? null,
     deduplicationEnabled: rule.deduplicationEnabled,
+    ignoredQueryParams: rule.ignoredQueryParams ?? [],
     presetId: rule.presetId,
   } : {
     id: generateUUID(),
@@ -52,6 +53,7 @@ const getDefaultValues = (rule?: DomainRule): Partial<DomainRule> => {
     deduplicationMatchMode: 'exact',
     categoryId: null,
     deduplicationEnabled: true,
+    ignoredQueryParams: [],
     presetId: null,
   };
 };
@@ -268,6 +270,12 @@ export function RuleWizardModal({
         if (src === 'title' || src.startsWith('smart')) fieldsToValidate.push('titleParsingRegEx');
         if (src === 'url' || src.startsWith('smart')) fieldsToValidate.push('urlParsingRegEx');
       }
+    } else if (step === 2) {
+      const dedupEnabled = getValues('deduplicationEnabled');
+      const mode = getValues('deduplicationMatchMode');
+      if (dedupEnabled && mode === 'exact_ignore_params') {
+        fieldsToValidate.push('ignoredQueryParams');
+      }
     }
     const valid = fieldsToValidate.length === 0 || await trigger(fieldsToValidate);
     if (!valid) return;
@@ -437,7 +445,7 @@ export function RuleWizardModal({
                     )}
                     {step === 2 && (
                       <Box data-testid="wizard-rule-step-3">
-                        <WizardStep3Options control={control} deduplicationEnabled={deduplicationEnabled} />
+                        <WizardStep3Options control={control} deduplicationEnabled={deduplicationEnabled} errors={errors} />
                       </Box>
                     )}
                     {step === 3 && (

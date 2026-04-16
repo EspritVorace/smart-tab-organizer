@@ -76,6 +76,9 @@ export async function initializeDefaults(): Promise<void> {
         if (typeof rule.groupNameSource === 'undefined') {
           rule.groupNameSource = 'title';
         }
+        if (!Array.isArray(rule.ignoredQueryParams)) {
+          rule.ignoredQueryParams = [];
+        }
       });
     }
     await setSyncSettings(merged);

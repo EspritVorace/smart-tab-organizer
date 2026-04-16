@@ -44,7 +44,8 @@ export const groupNameSourceOptions = [
 
 export const deduplicationMatchModeOptions = [
   { value: 'exact', keyLabel: 'exactMatch' },
-  { value: 'includes', keyLabel: 'includesMatch' }
+  { value: 'includes', keyLabel: 'includesMatch' },
+  { value: 'exact_ignore_params', keyLabel: 'exactIgnoreParamsMatch' }
 ] as const;
 
 export const badgeOptions = [

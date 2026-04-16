@@ -177,7 +177,7 @@ export function EditSummaryView({
         </Collapsible.Trigger>
         <Collapsible.Content>
           <Box pt="3">
-            <WizardStep3Options control={control} deduplicationEnabled={deduplicationEnabled} />
+            <WizardStep3Options control={control} deduplicationEnabled={deduplicationEnabled} errors={errors} />
           </Box>
         </Collapsible.Content>
       </Collapsible.Root>
