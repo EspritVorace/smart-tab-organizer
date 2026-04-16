@@ -9,67 +9,45 @@ interface PopupHeaderProps {
 
 export function PopupHeader({ title, onSettingsOpen }: PopupHeaderProps) {
   return (
-    <Box data-testid="popup-header" role="banner">
-      <Box
-        px="3"
-        py="2"
-        style={{
-          background: 'linear-gradient(135deg, var(--accent-a8) 0%, var(--accent-a10) 100%)',
-          borderRadius: 'var(--radius-3)',
-        }}
+    <Flex
+      data-testid="popup-header"
+      role="banner"
+      justify="between"
+      align="center"
+      px="1"
+      py="1"
+      width="100%"
+    >
+      <Flex align="center" gap="2">
+        <Box
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 'var(--radius-2)',
+            backgroundColor: 'var(--accent-a3)',
+            color: 'var(--accent-11)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <img src="/icons/icon48.png" alt="" style={{ width: 20, height: 20 }} />
+        </Box>
+        <Heading size="3" weight="bold">
+          {title}
+        </Heading>
+      </Flex>
+      <IconButton
+        data-testid="popup-header-btn-settings"
+        variant="ghost"
+        color="gray"
+        size="2"
+        onClick={onSettingsOpen}
+        title={getMessage('openOptions')}
+        aria-label={getMessage('openOptions')}
       >
-        <Flex justify="between" align="center" width="100%">
-          <Flex align="center" gap="3">
-            <Box
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 'var(--radius-2)',
-                background: 'rgba(255, 255, 255, 0.15)',
-                backdropFilter: 'blur(8px)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-              }}
-            >
-              <img
-                src="/icons/icon48.png"
-                alt=""
-                style={{
-                  width: 24,
-                  height: 24,
-                  filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2))',
-                }}
-              />
-            </Box>
-            <Heading
-              size="4"
-              weight="bold"
-              style={{
-                color: 'white',
-                textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
-              }}
-            >
-              {title}
-            </Heading>
-          </Flex>
-          <IconButton
-            data-testid="popup-header-btn-settings"
-            variant="ghost"
-            size="2"
-            onClick={onSettingsOpen}
-            title={getMessage('openOptions')}
-            aria-label={getMessage('openOptions')}
-            style={{
-              color: 'white',
-              background: 'rgba(255, 255, 255, 0.1)',
-            }}
-          >
-            <Settings size={20} aria-hidden="true" />
-          </IconButton>
-        </Flex>
-      </Box>
-    </Box>
+        <Settings size={18} aria-hidden="true" />
+      </IconButton>
+    </Flex>
   );
 }

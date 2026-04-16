@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import { browser } from 'wxt/browser';
-import { Box, Flex, Theme } from '@radix-ui/themes';
+import { Box, Flex, Separator, Theme } from '@radix-ui/themes';
 import { ThemeProvider } from 'next-themes';
 
 import { getMessage } from '@/utils/i18n';
@@ -41,17 +41,29 @@ function PopupContent() {
 
         <PopupToolbar />
 
+        {isLoaded && !hasRules ? (
+          <SettingsToggles
+            isLoading={false}
+            hasRules={false}
+            onOpenRules={openRulesPage}
+          />
+        ) : null}
+
         <PopupProfilesList />
 
-        <SettingsToggles
-          globalGroupingEnabled={settings?.globalGroupingEnabled}
-          globalDeduplicationEnabled={settings?.globalDeduplicationEnabled}
-          onGroupingChange={setGlobalGroupingEnabled}
-          onDeduplicationChange={setGlobalDeduplicationEnabled}
-          isLoading={!isLoaded}
-          hasRules={hasRules}
-          onOpenRules={openRulesPage}
-        />
+        {hasRules ? (
+          <>
+            <Separator size="4" />
+            <SettingsToggles
+              globalGroupingEnabled={settings?.globalGroupingEnabled}
+              globalDeduplicationEnabled={settings?.globalDeduplicationEnabled}
+              onGroupingChange={setGlobalGroupingEnabled}
+              onDeduplicationChange={setGlobalDeduplicationEnabled}
+              isLoading={!isLoaded}
+              hasRules={true}
+            />
+          </>
+        ) : null}
       </Flex>
     </Box>
   );

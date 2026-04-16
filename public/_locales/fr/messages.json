@@ -400,6 +400,9 @@
   "popupSaveGroupOptions": { "message": "Plus d'options de sauvegarde" },
   "popupRestoreSession": { "message": "Restaurer une session" },
   "popupPinnedSessionsLabel": { "message": "Sessions épinglées" },
+  "popupSaveDisabledHint": { "message": "Aucun groupe actif à sauvegarder" },
+  "popupAutoGroup": { "message": "Regroupement auto" },
+  "popupDedup": { "message": "Déduplication" },
 
   "sessionsIntroTitle": { "message": "Sessions" },
   "sessionsIntroBody": { "message": "Les sessions capturent vos onglets ouverts pour les restaurer plus tard. Épinglez une session pour y accéder en un clic depuis le popup." },

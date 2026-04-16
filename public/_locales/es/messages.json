@@ -400,6 +400,9 @@
   "popupSaveGroupOptions": { "message": "Más opciones de guardado" },
   "popupRestoreSession": { "message": "Restaurar sesión" },
   "popupPinnedSessionsLabel": { "message": "Sesiones fijadas" },
+  "popupSaveDisabledHint": { "message": "No hay grupo activo que guardar" },
+  "popupAutoGroup": { "message": "Agrupación auto" },
+  "popupDedup": { "message": "Deduplicar" },
 
   "sessionsIntroTitle": { "message": "Sesiones" },
   "sessionsIntroBody": { "message": "Las sesiones capturan tus pestañas abiertas para restaurarlas más tarde. Fija una sesión para acceder a ella con un clic desde el popup." },
