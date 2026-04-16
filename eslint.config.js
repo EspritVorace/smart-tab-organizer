@@ -57,6 +57,17 @@ export default tseslint.config(
   {
     files: ['src/**/*.{ts,tsx}'],
     plugins: { 'react-hooks': reactHooks },
+    rules: {
+      // Interdit les imports remontants (../...) dans src/ : utiliser l'alias @/.
+      'no-restricted-imports': ['error', {
+        patterns: [
+          {
+            regex: '^\\.\\./',
+            message: "Utiliser l'alias '@/...' plutôt qu'un import relatif remontant (../).",
+          },
+        ],
+      }],
+    },
   },
 
   {
