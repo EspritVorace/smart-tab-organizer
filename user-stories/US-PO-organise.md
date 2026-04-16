@@ -23,12 +23,13 @@
 ## US-PO007 — Déduplication manuelle globale
 
 **En tant qu'** utilisateur qui clique sur "Organiser les onglets",
-**je veux** que tous les doublons d'onglets des domaines couverts par des règles actives soient fermés,
+**je veux** que tous les doublons d'onglets (couverts par des règles actives, et optionnellement ceux des domaines sans règle) soient fermés,
 **afin d'** éliminer les doublons existants avant le regroupement.
 
 ### Critères d'acceptation
 
-- [ ] Seuls les onglets dont le domaine correspond à une règle **active** (`enabled = true`) avec `deduplicationEnabled = true` sont traités.
+- [ ] Les onglets dont le domaine correspond à une règle **active** (`enabled = true`) avec `deduplicationEnabled = true` sont traités selon le `deduplicationMatchMode` de la règle.
+- [ ] Les onglets dont le domaine **ne correspond à aucune règle** sont traités en mode `exact` uniquement si `deduplicateUnmatchedDomains = true`; sinon ils sont ignorés (conforme à US-D008).
 - [ ] Pour chaque groupe de doublons (selon le mode de correspondance de la règle concernée), l'onglet conservé est celui dont l'`index` est le plus faible dans la fenêtre (le plus à gauche).
 - [ ] L'onglet conservé est rechargé (`chrome.tabs.reload`).
 - [ ] Tous les onglets dédupliqués sont fermés via `chrome.tabs.remove` en une seule opération batch (appel unique avec un tableau d'IDs).

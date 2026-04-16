@@ -44,6 +44,8 @@ function isOrganizableUrl(url: string | undefined): url is string {
 /**
  * Deduplicates all tabs in the window according to their matching domain rule.
  * Independent of the global deduplication toggle (manual action per US-PO006).
+ * Honors `deduplicateUnmatchedDomains` to decide whether tabs without a
+ * matching rule are included (bucketed together under exact-match mode).
  * Returns the number of duplicate tabs removed.
  */
 async function batchDeduplicateTabs(windowId: number, settings: SyncSettings): Promise<number> {
@@ -52,17 +54,30 @@ async function batchDeduplicateTabs(windowId: number, settings: SyncSettings): P
         .filter(t => isOrganizableUrl(t.url))
         .sort((a, b) => a.index - b.index);
 
-    // Group tabs by rule + matchMode bucket
-    const buckets = new Map<string, { rule: DomainRuleSetting; tabs: Browser.tabs.Tab[] }>();
+    // Group tabs by rule + matchMode bucket (unmatched tabs share a single
+    // `__unmatched__:exact` bucket when settings.deduplicateUnmatchedDomains
+    // is true).
+    const UNMATCHED_KEY = '__unmatched__:exact';
+    const buckets = new Map<string, { rule: DomainRuleSetting | undefined; tabs: Browser.tabs.Tab[] }>();
 
     for (const tab of organizable) {
         const rule = findMatchingRule(tab.url!, settings.domainRules);
-        if (!rule || !rule.enabled || !rule.deduplicationEnabled) continue;
+        let bucketKey: string;
+        let bucketRule: DomainRuleSetting | undefined;
 
-        const mode = getMatchMode(rule);
-        const key = `${rule.id}:${mode}`;
-        if (!buckets.has(key)) buckets.set(key, { rule, tabs: [] });
-        buckets.get(key)!.tabs.push(tab);
+        if (rule) {
+            if (!rule.enabled || !rule.deduplicationEnabled) continue;
+            bucketKey = `${rule.id}:${getMatchMode(rule)}`;
+            bucketRule = rule;
+        } else if (settings.deduplicateUnmatchedDomains) {
+            bucketKey = UNMATCHED_KEY;
+            bucketRule = undefined;
+        } else {
+            continue;
+        }
+
+        if (!buckets.has(bucketKey)) buckets.set(bucketKey, { rule: bucketRule, tabs: [] });
+        buckets.get(bucketKey)!.tabs.push(tab);
     }
 
     const toRemove = new Set<number>();
