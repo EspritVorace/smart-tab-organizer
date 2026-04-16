@@ -14,6 +14,8 @@ interface EmptyStateProps {
   compact?: boolean;
   /** Message affiché en mode compact (alias de title). */
   message?: string;
+  /** Largeur max de la description (défaut : 340). Passer `undefined` pour supprimer la contrainte. */
+  descriptionMaxWidth?: number | 'none';
   /** Hauteur minimale du conteneur (défaut : 200 en principal, 120 en compact). */
   minHeight?: number | string;
   'data-testid'?: string;
@@ -26,6 +28,7 @@ export function EmptyState({
   actions,
   compact = false,
   message,
+  descriptionMaxWidth = 340,
   minHeight,
   'data-testid': testId,
 }: EmptyStateProps) {
@@ -52,7 +55,7 @@ export function EmptyState({
             </Text>
           )}
           {description && (
-            <Text size="2" color="gray" align="center" style={{ maxWidth: 340 }}>
+            <Text size="2" color="gray" align="center" style={descriptionMaxWidth !== 'none' ? { maxWidth: descriptionMaxWidth } : undefined}>
               {description}
             </Text>
           )}

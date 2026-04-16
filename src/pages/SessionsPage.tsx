@@ -50,7 +50,8 @@ function SectionHeader({ icon: Icon, titleKey, count }: { icon: LucideIcon; titl
 interface SessionSectionProps {
   icon: LucideIcon;
   titleKey: string;
-  emptyMessageKey: string;
+  emptyTitleKey: string;
+  emptyDescriptionKey?: string;
   /** Whether this section lists the pinned sessions (drives drag reorder layout). */
   isPinned: boolean;
   /** Sessions displayed in this section (already filtered by search + split by pinned state). */
@@ -78,7 +79,8 @@ interface SessionSectionProps {
 function SessionSection({
   icon,
   titleKey,
-  emptyMessageKey,
+  emptyTitleKey,
+  emptyDescriptionKey,
   isPinned,
   sessions,
   allSessions,
@@ -186,7 +188,13 @@ function SessionSection({
     <Box>
       <SectionHeader icon={icon} titleKey={titleKey} count={sessions.length} />
       {sessions.length === 0 ? (
-        <Text size="2" color="gray" mt="2">{getMessage(emptyMessageKey)}</Text>
+        <EmptyState
+          icon={icon}
+          title={getMessage(emptyTitleKey)}
+          description={emptyDescriptionKey ? getMessage(emptyDescriptionKey) : undefined}
+          descriptionMaxWidth="none"
+          minHeight={100}
+        />
       ) : (
         <DragDropProvider
           modifiers={[RestrictToVerticalAxis]}
@@ -391,7 +399,8 @@ export function SessionsPage({
               <SessionSection
                 icon={Pin}
                 titleKey="pinnedSessionsSection"
-                emptyMessageKey="pinnedSessionsEmpty"
+                emptyTitleKey="pinnedSessionsEmptyTitle"
+                emptyDescriptionKey="pinnedSessionsEmptyDescription"
                 isPinned={true}
                 sessions={pinnedSessions}
                 allSessions={sortedSessions}
@@ -411,7 +420,8 @@ export function SessionsPage({
               <SessionSection
                 icon={Archive}
                 titleKey="sessionsSection"
-                emptyMessageKey="unpinnedSessionsEmpty"
+                emptyTitleKey="unpinnedSessionsEmptyTitle"
+                emptyDescriptionKey="unpinnedSessionsEmptyDescription"
                 isPinned={false}
                 sessions={unpinnedSessions}
                 allSessions={sortedSessions}

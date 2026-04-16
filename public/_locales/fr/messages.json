@@ -407,8 +407,10 @@
 
   "pinnedSessionsSection": { "message": "Sessions épinglées" },
   "sessionsSection": { "message": "Sessions" },
-  "pinnedSessionsEmpty": { "message": "Aucune session épinglée. Épinglez une session pour un accès rapide." },
-  "unpinnedSessionsEmpty": { "message": "Toutes les sessions sont épinglées." },
+  "pinnedSessionsEmptyTitle": { "message": "Aucune session épinglée." },
+  "pinnedSessionsEmptyDescription": { "message": "Épinglez une session pour y accéder rapidement depuis le popup." },
+  "unpinnedSessionsEmptyTitle": { "message": "Toutes les sessions sont épinglées." },
+  "unpinnedSessionsEmptyDescription": { "message": "Dépinglez une session pour la voir ici." },
 
   "restoreNotificationTitle": { "message": "Session restaurée" },
   "restoreNotificationMessage": { "message": "$1 onglet(s) ouvert(s), $2 doublon(s) ignoré(s)" },
