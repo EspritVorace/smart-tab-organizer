@@ -11,6 +11,7 @@ const captured: {
   onWindowRemoved?: AnyFn;
   onTabCreated?: AnyFn;
   onTabUpdated?: AnyFn;
+  onTabRemoved?: AnyFn;
 } = {};
 
 // ---- Mocks ------------------------------------------------------------------
@@ -24,6 +25,7 @@ vi.mock('wxt/browser', () => ({
     tabs: {
       onCreated: { addListener: (cb: AnyFn) => { captured.onTabCreated = cb; } },
       onUpdated: { addListener: (cb: AnyFn) => { captured.onTabUpdated = cb; } },
+      onRemoved: { addListener: (cb: AnyFn) => { captured.onTabRemoved = cb; } },
       get: vi.fn(),
     },
     windows: {
@@ -40,6 +42,7 @@ vi.mock('../../src/utils/migration.js', () => ({
 vi.mock('../../src/background/messaging.js', () => ({
   handleMiddleClickMessage: vi.fn(),
   findMiddleClickOpener: vi.fn(),
+  cleanupMiddleClickedTabsForTab: vi.fn(),
 }));
 
 vi.mock('../../src/background/deduplication.js', () => ({
