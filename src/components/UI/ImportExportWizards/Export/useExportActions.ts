@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { getMessage } from '@/utils/i18n';
-import { showSuccessNotification } from '@/utils/notifications';
+import { showSuccessToast } from '@/utils/toast';
 
 export interface ExportActionsConfig {
   /** Filename suggested when the native Save As dialog opens. */
@@ -45,7 +45,7 @@ export function useExportActions(config: ExportActionsConfig): ExportActions {
   const { filename, notifyTitleKey, notifyMessage, selected, buildJson, onFinish } = config;
 
   const notify = useCallback(() => {
-    showSuccessNotification(
+    showSuccessToast(
       getMessage(notifyTitleKey),
       resolveMessage(notifyMessage, selected.length),
     );

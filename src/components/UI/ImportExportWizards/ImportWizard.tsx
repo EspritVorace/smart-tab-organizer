@@ -3,7 +3,7 @@ import { Box, Button, Dialog, Flex, Separator } from '@radix-ui/themes';
 import { FileUp } from 'lucide-react';
 import { ImportTheme } from '@/components/Form/themes';
 import { getMessage } from '@/utils/i18n';
-import { showSuccessNotification } from '@/utils/notifications';
+import { showSuccessToast } from '@/utils/toast';
 import { importDataSchema } from '@/schemas/importExport';
 import { classifyImportedRules } from '@/utils/importClassification';
 import { generateUUID } from '@/utils/utils';
@@ -100,7 +100,7 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
 
     onImport(updatedRules);
     onOpenChange(false);
-    showSuccessNotification(
+    showSuccessToast(
       getMessage('importNotificationTitle'),
       getMessage('importNotificationMessage', [String(added), String(overwritten)]),
     );
