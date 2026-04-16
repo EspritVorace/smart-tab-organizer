@@ -20,6 +20,7 @@ describe('settingsUtils', () => {
       await fakeBrowser.storage.sync.set({
         globalGroupingEnabled: false,
         globalDeduplicationEnabled: false,
+        deduplicateUnmatchedDomains: false,
         domainRules: [],
         notifyOnGrouping: false,
         notifyOnDeduplication: false,
@@ -27,6 +28,12 @@ describe('settingsUtils', () => {
       const settings = await getSyncSettings();
       expect(settings.globalGroupingEnabled).toBe(false);
       expect(settings.globalDeduplicationEnabled).toBe(false);
+      expect(settings.deduplicateUnmatchedDomains).toBe(false);
+    });
+
+    it('retourne true par défaut pour deduplicateUnmatchedDomains si absent du storage', async () => {
+      const settings = await getSyncSettings();
+      expect(settings.deduplicateUnmatchedDomains).toBe(true);
     });
 
     it('retourne les valeurs par défaut en cas d\'erreur', async () => {
@@ -60,6 +67,14 @@ describe('settingsUtils', () => {
       const settings = await getSyncSettings();
       expect(settings.globalGroupingEnabled).toBe(false);
       expect(settings.globalDeduplicationEnabled).toBe(true); // inchangé
+    });
+
+    it('met à jour deduplicateUnmatchedDomains isolément', async () => {
+      await updateSyncSettings({ deduplicateUnmatchedDomains: false });
+      const settings = await getSyncSettings();
+      expect(settings.deduplicateUnmatchedDomains).toBe(false);
+      // Autres champs inchangés (valeurs par défaut conservées)
+      expect(settings.globalDeduplicationEnabled).toBe(true);
     });
   });
 

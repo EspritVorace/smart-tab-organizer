@@ -3,6 +3,7 @@ import type { SyncSettings, DomainRuleSettings } from '@/types/syncSettings.js';
 import {
   globalGroupingEnabledItem,
   globalDeduplicationEnabledItem,
+  deduplicateUnmatchedDomainsItem,
   domainRulesItem,
   notifyOnGroupingItem,
   notifyOnDeduplicationItem,
@@ -16,10 +17,12 @@ export interface UseSyncedSettingsReturn {
 
   setGlobalGroupingEnabled: (value: boolean) => Promise<void>;
   setGlobalDeduplicationEnabled: (value: boolean) => Promise<void>;
+  setDeduplicateUnmatchedDomains: (value: boolean) => Promise<void>;
   setDomainRules: (value: DomainRuleSettings) => Promise<void>;
 
   onGlobalGroupingEnabledChange: (callback: (value: boolean) => void) => () => void;
   onGlobalDeduplicationEnabledChange: (callback: (value: boolean) => void) => () => void;
+  onDeduplicateUnmatchedDomainsChange: (callback: (value: boolean) => void) => () => void;
   onDomainRulesChange: (callback: (value: DomainRuleSettings) => void) => () => void;
 
   updateSettings: (updates: Partial<SyncSettings>) => Promise<void>;
@@ -32,12 +35,13 @@ async function loadSyncSettingsFromStorage(): Promise<SyncSettings> {
   const results = await storage.getItems([
     globalGroupingEnabledItem,
     globalDeduplicationEnabledItem,
+    deduplicateUnmatchedDomainsItem,
     domainRulesItem,
     notifyOnGroupingItem,
     notifyOnDeduplicationItem,
   ]);
 
-  const rawRules = results[2].value as DomainRuleSettings;
+  const rawRules = results[3].value as DomainRuleSettings;
   // Migrate legacy wildcard syntax: *.example.com → example.com
   const hasWildcards = rawRules?.some(r => r.domainFilter?.startsWith('*.'));
   const domainRules = hasWildcards
@@ -54,9 +58,10 @@ async function loadSyncSettingsFromStorage(): Promise<SyncSettings> {
   return {
     globalGroupingEnabled: results[0].value as boolean,
     globalDeduplicationEnabled: results[1].value as boolean,
+    deduplicateUnmatchedDomains: results[2].value as boolean,
     domainRules,
-    notifyOnGrouping: results[3].value as boolean,
-    notifyOnDeduplication: results[4].value as boolean,
+    notifyOnGrouping: results[4].value as boolean,
+    notifyOnDeduplication: results[5].value as boolean,
   };
 }
 
@@ -99,10 +104,12 @@ export function useSyncedSettings(): UseSyncedSettingsReturn {
 
     setGlobalGroupingEnabled: (v) => update({ globalGroupingEnabled: v }),
     setGlobalDeduplicationEnabled: (v) => update({ globalDeduplicationEnabled: v }),
+    setDeduplicateUnmatchedDomains: (v) => update({ deduplicateUnmatchedDomains: v }),
     setDomainRules: (v) => update({ domainRules: v }),
 
     onGlobalGroupingEnabledChange: (cb) => onFieldChange('globalGroupingEnabled', cb),
     onGlobalDeduplicationEnabledChange: (cb) => onFieldChange('globalDeduplicationEnabled', cb),
+    onDeduplicateUnmatchedDomainsChange: (cb) => onFieldChange('deduplicateUnmatchedDomains', cb),
     onDomainRulesChange: (cb) => onFieldChange('domainRules', cb),
 
     updateSettings: update,

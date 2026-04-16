@@ -350,6 +350,51 @@ test.describe('Deduplication', () => {
     });
   });
 
+  // ── 5bis. Deduplication scope for unmatched domains ──────────────────────
+
+  test.describe('Unmatched-domain scope [US-D008]', () => {
+    test('does NOT deduplicate domains without a rule when deduplicateUnmatchedDomains=false', async ({ helpers }) => {
+      await helpers.setDeduplicateUnmatchedDomains(false);
+
+      const tab1 = await helpers.createTab('https://unmatched.example.org/page');
+      await helpers.waitForDeduplication();
+      const initialCount = await helpers.getTabCount();
+
+      const tab2 = await helpers.createTab('https://unmatched.example.org/page');
+      await helpers.waitForDeduplication();
+
+      const finalCount = await helpers.getTabCount();
+      const stats = await helpers.getStatistics();
+
+      expect(finalCount).toBe(initialCount + 1);
+      expect(stats.tabsDeduplicatedCount).toBe(0);
+    });
+
+    test('STILL deduplicates rule-matched domains when deduplicateUnmatchedDomains=false', async ({ helpers }) => {
+      await helpers.setDeduplicateUnmatchedDomains(false);
+      await helpers.addDomainRule({
+        label: 'Matched Rule',
+        domainFilter: 'example.com',
+        enabled: true,
+        deduplicationEnabled: true,
+        deduplicationMatchMode: 'exact',
+      });
+
+      const tab1 = await helpers.createTab('https://example.com/rule-match');
+      await helpers.waitForDeduplication();
+      const initialCount = await helpers.getTabCount();
+
+      const tab2 = await helpers.createTab('https://example.com/rule-match');
+      await helpers.waitForDeduplication();
+
+      const finalCount = await helpers.getTabCount();
+      const stats = await helpers.getStatistics();
+
+      expect(finalCount).toBeLessThanOrEqual(initialCount);
+      expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
+    });
+  });
+
   // ── 6. Statistics ─────────────────────────────────────────────────────────
 
   test.describe('Statistics', () => {

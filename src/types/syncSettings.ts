@@ -15,6 +15,7 @@ export type DomainRuleSettings = DomainRuleSetting[];
 export interface SyncSettings {
   globalGroupingEnabled: boolean;
   globalDeduplicationEnabled: boolean;
+  deduplicateUnmatchedDomains: boolean;
   domainRules: DomainRuleSettings;
   // Notification settings
   notifyOnGrouping: boolean;
@@ -25,6 +26,7 @@ export interface SyncSettings {
 export const defaultSyncSettings: SyncSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
+  deduplicateUnmatchedDomains: true,
   domainRules: [],
   notifyOnGrouping: true,
   notifyOnDeduplication: true

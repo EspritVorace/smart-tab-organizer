@@ -34,6 +34,7 @@ const rules: DomainRuleSetting[] = [
 const mockSyncSettings: SyncSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
+  deduplicateUnmatchedDomains: true,
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
   domainRules: rules,

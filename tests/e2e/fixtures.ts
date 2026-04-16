@@ -22,6 +22,7 @@ export interface ExtensionHelpers {
   // Settings management
   setGlobalGroupingEnabled: (enabled: boolean) => Promise<void>;
   setGlobalDeduplicationEnabled: (enabled: boolean) => Promise<void>;
+  setDeduplicateUnmatchedDomains: (enabled: boolean) => Promise<void>;
   addDomainRule: (rule: DomainRuleConfig) => Promise<void>;
   clearDomainRules: () => Promise<void>;
   getSettings: () => Promise<any>;
@@ -247,6 +248,12 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
         await syncSet(sw, { globalDeduplicationEnabled: enabled });
       },
 
+      // Set deduplication scope for tabs without matching rule
+      setDeduplicateUnmatchedDomains: async (enabled: boolean) => {
+        const sw = await getServiceWorker();
+        await syncSet(sw, { deduplicateUnmatchedDomains: enabled });
+      },
+
       // Add a domain rule
       addDomainRule: async (rule: DomainRuleConfig) => {
         const sw = await getServiceWorker();
@@ -289,6 +296,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
           return await chrome.storage.sync.get({
             globalGroupingEnabled: true,
             globalDeduplicationEnabled: true,
+            deduplicateUnmatchedDomains: true,
             domainRules: [],
             notifyOnGrouping: true,
             notifyOnDeduplication: true,

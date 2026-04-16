@@ -5,6 +5,7 @@ import type { SyncSettings } from '@/types/syncSettings';
 const mockSyncSettings: SyncSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
+  deduplicateUnmatchedDomains: true,
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
   domainRules: [],

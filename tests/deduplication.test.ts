@@ -60,12 +60,14 @@ describe('deduplication', () => {
   });
 
   describe('isDeduplicationEnabled', () => {
-    it('devrait retourner la valeur globale si aucune règle', () => {
-      expect(isDeduplicationEnabled(undefined, true)).toBe(true);
-      expect(isDeduplicationEnabled(undefined, false)).toBe(false);
+    it('devrait retourner global && deduplicateUnmatched si aucune règle', () => {
+      expect(isDeduplicationEnabled(undefined, true, true)).toBe(true);
+      expect(isDeduplicationEnabled(undefined, false, true)).toBe(false);
+      expect(isDeduplicationEnabled(undefined, true, false)).toBe(false);
+      expect(isDeduplicationEnabled(undefined, false, false)).toBe(false);
     });
 
-    it('devrait retourner la valeur de la règle si présente', () => {
+    it('devrait retourner la valeur de la règle si présente, indépendamment du flag unmatched', () => {
       const ruleEnabled: DomainRuleSetting = {
         id: '1',
         enabled: true,
@@ -86,8 +88,8 @@ describe('deduplication', () => {
         deduplicationEnabled: false
       };
 
-      expect(isDeduplicationEnabled(ruleEnabled, false)).toBe(true);
-      expect(isDeduplicationEnabled(ruleDisabled, true)).toBe(false);
+      expect(isDeduplicationEnabled(ruleEnabled, false, false)).toBe(true);
+      expect(isDeduplicationEnabled(ruleDisabled, true, true)).toBe(false);
     });
   });
 
