@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, DropdownMenu, Flex, Text } from '@radix-ui/themes';
 import { Camera, ChevronDown, RotateCcw, Wand2 } from 'lucide-react';
 import { browser } from 'wxt/browser';
-import { getMessage } from '../../../utils/i18n';
-import { loadSessions } from '../../../utils/sessionStorage';
-import { hasCapturableTabs } from '../../../utils/tabCapture';
+import { getMessage } from '@/utils/i18n';
+import { loadSessions } from '@/utils/sessionStorage';
+import { hasCapturableTabs } from '@/utils/tabCapture';
 
 /** Focus an existing Options tab or open a new one with the given hash. */
 async function openOptionsWithHash(hash: string) {

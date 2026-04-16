@@ -1,7 +1,7 @@
 import { Flex, Text, Box, Badge, Checkbox } from '@radix-ui/themes';
-import { getMessage } from '../../../utils/i18n';
-import type { Session } from '../../../types/session';
-import type { ConflictingSession, SessionDiff, GroupDiff } from '../../../utils/sessionClassification';
+import { getMessage } from '@/utils/i18n';
+import type { Session } from '@/types/session';
+import type { ConflictingSession, SessionDiff, GroupDiff } from '@/utils/sessionClassification';
 import {
   ConflictRowShell,
   DiffPopover,

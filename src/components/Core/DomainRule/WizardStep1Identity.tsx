@@ -1,9 +1,9 @@
 import { Box, Flex, TextField } from '@radix-ui/themes';
 import { Controller, type Control, type FieldErrors } from 'react-hook-form';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 import { CategoryPicker } from './CategoryPicker';
-import { FormField } from '../../Form/FormFields';
-import type { DomainRule } from '../../../schemas/domainRule';
+import { FormField } from '@/components/Form/FormFields';
+import type { DomainRule } from '@/schemas/domainRule';
 
 interface WizardStep1IdentityProps {
   control: Control<DomainRule>;

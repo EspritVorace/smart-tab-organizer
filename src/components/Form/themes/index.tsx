@@ -1,6 +1,6 @@
 import React from 'react';
 import { Theme } from '@radix-ui/themes';
-import { FEATURE_THEMES } from '../../../utils/themeConstants';
+import { FEATURE_THEMES } from '@/utils/themeConstants';
 
 interface ThemeWrapperProps {
   children: React.ReactNode;

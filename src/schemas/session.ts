@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { idSchema } from './common.js';
-import { getMessage } from '../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 const chromeGroupColorSchema = z.enum([
   'grey', 'blue', 'red', 'yellow', 'green',

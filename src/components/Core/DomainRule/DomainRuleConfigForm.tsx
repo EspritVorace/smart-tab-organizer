@@ -1,12 +1,12 @@
 import { Box, Callout, Flex, Grid, Select, Text, TextField } from '@radix-ui/themes';
 import { Info } from 'lucide-react';
 import type { FieldError } from 'react-hook-form';
-import { getMessage } from '../../../utils/i18n';
-import { RegexPresetsTheme } from '../../Form/themes';
-import { FormField, SearchableSelect } from '../../Form/FormFields';
-import { groupNameSourceOptions, type GroupNameSourceValue } from '../../../schemas/enums';
-import type { PresetCategory } from '../../../utils/presetUtils';
-import { presetsToSearchableGroups } from '../../../utils/presetsToSearchableGroups';
+import { getMessage } from '@/utils/i18n';
+import { RegexPresetsTheme } from '@/components/Form/themes';
+import { FormField, SearchableSelect } from '@/components/Form/FormFields';
+import { groupNameSourceOptions, type GroupNameSourceValue } from '@/schemas/enums';
+import type { PresetCategory } from '@/utils/presetUtils';
+import { presetsToSearchableGroups } from '@/utils/presetsToSearchableGroups';
 import { ConfigModeSelector, type ConfigMode } from './ConfigModeSelector';
 
 const GROUP_NAME_SOURCE_HELP_KEYS: Record<GroupNameSourceValue, Parameters<typeof getMessage>[0]> = {

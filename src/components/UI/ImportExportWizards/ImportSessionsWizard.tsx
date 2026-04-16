@@ -3,19 +3,19 @@ import {
   Dialog, Flex, Button, Text, Separator, Box,
 } from '@radix-ui/themes';
 import { Upload } from 'lucide-react';
-import { SessionsTheme } from '../../Form/themes';
-import { getMessage } from '../../../utils/i18n';
-import { showSuccessNotification } from '../../../utils/notifications';
-import { sessionsArraySchema } from '../../../schemas/session';
-import { importSessionsDataSchema } from '../../../schemas/importExport';
+import { SessionsTheme } from '@/components/Form/themes';
+import { getMessage } from '@/utils/i18n';
+import { showSuccessNotification } from '@/utils/notifications';
+import { sessionsArraySchema } from '@/schemas/session';
+import { importSessionsDataSchema } from '@/schemas/importExport';
 import {
   classifyImportedSessions,
   type SessionClassification,
-} from '../../../utils/sessionClassification';
-import { generateUUID } from '../../../utils/utils';
-import { loadSessions, saveSessions } from '../../../utils/sessionStorage';
+} from '@/utils/sessionClassification';
+import { generateUUID } from '@/utils/utils';
+import { loadSessions, saveSessions } from '@/utils/sessionStorage';
 import { SessionRow, ConflictSessionRow } from './SessionImportRows';
-import type { Session } from '../../../types/session';
+import type { Session } from '@/types/session';
 import { TwoStepImportFooter, WizardDialogTitle, useDialogReset } from './Shared';
 import { SourceStep, ImportedNoteCallout, useJsonSourceInput } from './Source';
 import {

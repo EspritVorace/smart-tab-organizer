@@ -1,6 +1,6 @@
 import React from 'react';
 import { Flex, Separator, Text } from '@radix-ui/themes';
-import { getMessage } from '../../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 interface ClassificationGroupProps<T> {
   /** i18n key for the group title; receives a `{count}` placeholder. */

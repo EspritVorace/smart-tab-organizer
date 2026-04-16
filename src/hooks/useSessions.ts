@@ -6,8 +6,8 @@ import {
   updateSession,
   deleteSession,
   saveSessions,
-} from '../utils/sessionStorage';
-import type { Session } from '../types/session';
+} from '@/utils/sessionStorage';
+import type { Session } from '@/types/session';
 
 export interface UseSessionsReturn {
   sessions: Session[];

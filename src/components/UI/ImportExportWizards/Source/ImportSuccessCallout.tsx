@@ -1,7 +1,7 @@
 import React from 'react';
 import { Callout } from '@radix-ui/themes';
 import { CheckCircle } from 'lucide-react';
-import { getMessage } from '../../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 import type { JsonSourceInputState } from './useJsonSourceInput';
 
 interface ImportSuccessCalloutProps {

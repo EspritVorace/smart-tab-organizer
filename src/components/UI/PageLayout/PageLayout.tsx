@@ -1,9 +1,9 @@
 import { Theme, Heading, Box, Flex, Separator } from '@radix-ui/themes';
 import type { LucideIcon } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
-import { FEATURE_THEMES } from '../../../utils/themeConstants.js';
-import type { SyncSettings } from '../../../types/syncSettings.js';
-import type { FeatureTheme } from '../../../utils/themeConstants.js';
+import { getMessage } from '@/utils/i18n';
+import { FEATURE_THEMES } from '@/utils/themeConstants.js';
+import type { SyncSettings } from '@/types/syncSettings.js';
+import type { FeatureTheme } from '@/utils/themeConstants.js';
 
 interface PageLayoutProps {
   titleKey: string;

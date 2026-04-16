@@ -1,9 +1,9 @@
 import { Box, Flex, Grid, Switch } from '@radix-ui/themes';
 import { Controller, type Control } from 'react-hook-form';
-import { getMessage } from '../../../utils/i18n';
-import { FieldLabel, RadioGroupField } from '../../Form/FormFields';
-import { deduplicationMatchModeOptions } from '../../../schemas/enums';
-import type { DomainRule } from '../../../schemas/domainRule';
+import { getMessage } from '@/utils/i18n';
+import { FieldLabel, RadioGroupField } from '@/components/Form/FormFields';
+import { deduplicationMatchModeOptions } from '@/schemas/enums';
+import type { DomainRule } from '@/schemas/domainRule';
 
 interface WizardStep3OptionsProps {
   control: Control<DomainRule>;

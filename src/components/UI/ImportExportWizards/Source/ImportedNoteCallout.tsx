@@ -1,7 +1,7 @@
 import React from 'react';
 import { Callout, Text } from '@radix-ui/themes';
 import { Info } from 'lucide-react';
-import { getMessage } from '../../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 interface ImportedNoteCalloutProps {
   note: string | null;

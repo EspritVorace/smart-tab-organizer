@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getMessage } from '../../../utils/i18n';
-import type { Session, SavedTab, SavedTabGroup } from '../../../types/session';
-import type { ChromeGroupColor } from '../../../types/tabTree';
+import { getMessage } from '@/utils/i18n';
+import type { Session, SavedTab, SavedTabGroup } from '@/types/session';
+import type { ChromeGroupColor } from '@/types/tabTree';
 
 export type AlertDialogState =
   | { type: 'delete_last_tab'; tabId: string; groupId: string }

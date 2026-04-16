@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Callout, IconButton, Box, Strong } from '@radix-ui/themes';
 import { Info, X } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
-import { getSessionsHelpPrefs, updateSessionsHelpPrefs } from '../../../utils/sessionsHelpPrefs';
+import { getMessage } from '@/utils/i18n';
+import { getSessionsHelpPrefs, updateSessionsHelpPrefs } from '@/utils/sessionsHelpPrefs';
 
 /**
  * Dismissable intro callout shown at the top of the Sessions section.

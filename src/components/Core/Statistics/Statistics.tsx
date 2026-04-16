@@ -2,8 +2,8 @@ import React from 'react';
 import { Card, Heading, Text, IconButton, Flex, Skeleton, Box } from '@radix-ui/themes';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { Trash2, FolderOpen, TabletSmartphone, ChevronDown } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
-import { StatisticsTheme } from '../../Form/themes';
+import { getMessage } from '@/utils/i18n';
+import { StatisticsTheme } from '@/components/Form/themes';
 
 interface StatisticsProps {
     stats?: {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Callout } from '@radix-ui/themes';
 import { AlertTriangle } from 'lucide-react';
-import { getMessage } from '../../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 interface ConflictWarningCalloutProps {
   /** Whether the warning should actually be shown. */

@@ -1,6 +1,6 @@
 import { browser, Browser } from 'wxt/browser';
-import { initializeDefaults } from '../utils/migration.js';
-import { logger } from '../utils/logger.js';
+import { initializeDefaults } from '@/utils/migration.js';
+import { logger } from '@/utils/logger.js';
 import { handleMiddleClickMessage, findMiddleClickOpener } from './messaging.js';
 import { processTabForDeduplication } from './deduplication.js';
 import { processGroupingForNewTab } from './grouping.js';

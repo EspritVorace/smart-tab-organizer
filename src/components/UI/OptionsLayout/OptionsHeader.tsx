@@ -1,5 +1,5 @@
 import { Flex, Text } from '@radix-ui/themes';
-import { ThemeToggle } from '../ThemeToggle/ThemeToggle';
+import { ThemeToggle } from '@/components/UI/ThemeToggle/ThemeToggle';
 
 interface OptionsHeaderProps {
   version: string;

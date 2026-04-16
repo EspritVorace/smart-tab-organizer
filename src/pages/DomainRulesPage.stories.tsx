@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { DomainRulesPage } from './DomainRulesPage';
-import type { SyncSettings, DomainRuleSetting } from '../types/syncSettings';
+import type { SyncSettings, DomainRuleSetting } from '@/types/syncSettings';
 
 const rules: DomainRuleSetting[] = [
   {

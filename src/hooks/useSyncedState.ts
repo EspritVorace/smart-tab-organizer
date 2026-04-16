@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { logger } from '../utils/logger';
+import { logger } from '@/utils/logger';
 
 /**
  * Configuration for useSyncedState.

@@ -12,13 +12,13 @@ import {
   IconButton,
 } from '@radix-ui/themes';
 import { Pencil, X } from 'lucide-react';
-import { getMessage, getPluralMessage } from '../../../utils/i18n';
-import { SessionsTheme } from '../../Form/themes';
-import { TabTreeEditor } from '../TabTree/TabTreeEditor';
-import { CategoryPicker } from '../DomainRule/CategoryPicker';
-import { useSessionEditor } from '../../../hooks/useSessionEditor';
-import { countSessionTabs } from '../../../utils/sessionUtils';
-import type { Session } from '../../../types/session';
+import { getMessage, getPluralMessage } from '@/utils/i18n';
+import { SessionsTheme } from '@/components/Form/themes';
+import { TabTreeEditor } from '@/components/Core/TabTree/TabTreeEditor';
+import { CategoryPicker } from '@/components/Core/DomainRule/CategoryPicker';
+import { useSessionEditor } from '@/hooks/useSessionEditor';
+import { countSessionTabs } from '@/utils/sessionUtils';
+import type { Session } from '@/types/session';
 
 interface SessionEditDialogProps {
   /** The session to edit, or null when the dialog is closed */

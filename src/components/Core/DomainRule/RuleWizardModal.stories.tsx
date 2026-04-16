@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { RuleWizardModal } from './RuleWizardModal';
 const action = (name: string) => (...args: any[]) => console.log(name, ...args);
-import type { DomainRule } from '../../../schemas/domainRule';
-import type { SyncSettings } from '../../../types/syncSettings';
+import type { DomainRule } from '@/schemas/domainRule';
+import type { SyncSettings } from '@/types/syncSettings';
 
 const mockSyncSettings: SyncSettings = {
   globalGroupingEnabled: true,

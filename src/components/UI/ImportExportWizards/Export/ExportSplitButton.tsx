@@ -1,7 +1,7 @@
 import React from 'react';
 import { ClipboardCopy, FileDown } from 'lucide-react';
-import { SplitButton } from '../../SplitButton/SplitButton';
-import { getMessage } from '../../../../utils/i18n';
+import { SplitButton } from '@/components/UI/SplitButton/SplitButton';
+import { getMessage } from '@/utils/i18n';
 import type { ExportActions } from './useExportActions';
 
 interface ExportSplitButtonProps {

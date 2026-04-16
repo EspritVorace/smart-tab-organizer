@@ -1,5 +1,5 @@
-import type { DomainRule } from '../schemas/domainRule.js';
-import { type BadgeType } from '../schemas/enums.js';
+import type { DomainRule } from '@/schemas/domainRule.js';
+import { type BadgeType } from '@/schemas/enums.js';
 
 // Types Settings qui étendent les types Zod inférés
 export interface DomainRuleSetting extends DomainRule {

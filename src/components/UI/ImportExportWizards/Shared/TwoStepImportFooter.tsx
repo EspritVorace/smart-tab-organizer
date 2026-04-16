@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Dialog, Flex, Separator } from '@radix-ui/themes';
-import { getMessage } from '../../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 interface TwoStepImportFooterProps {
   step: 0 | 1;

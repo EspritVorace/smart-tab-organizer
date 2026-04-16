@@ -12,7 +12,7 @@ import {
 } from '@radix-ui/themes';
 import { Search, AlertCircle } from 'lucide-react';
 import { DataTableProps, DataTableState } from './types';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 export function DataTable<T extends Record<string, any>>({
   data,

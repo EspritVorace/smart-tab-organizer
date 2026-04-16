@@ -1,8 +1,8 @@
 import { Box, Flex, Text, Switch, Card } from '@radix-ui/themes';
 import { Settings, Bell } from 'lucide-react';
-import { PageLayout } from '../PageLayout/PageLayout';
-import { getMessage } from '../../../utils/i18n';
-import type { SyncSettings } from '../../../types/syncSettings';
+import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
+import { getMessage } from '@/utils/i18n';
+import type { SyncSettings } from '@/types/syncSettings';
 
 interface SettingsPageProps {
   syncSettings: SyncSettings;

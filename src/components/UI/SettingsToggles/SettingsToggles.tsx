@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Flex, Switch, Text, Skeleton, Card, Box } from '@radix-ui/themes';
 import { Layers, Copy, Shield, ExternalLink } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 interface SettingsTogglesProps {
     globalGroupingEnabled?: boolean;

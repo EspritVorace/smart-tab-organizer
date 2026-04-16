@@ -1,11 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Box, Dialog, Separator } from '@radix-ui/themes';
 import { Archive, FileDown, Pin } from 'lucide-react';
-import { SessionsTheme } from '../../Form/themes';
-import { getMessage } from '../../../utils/i18n';
-import { loadSessions } from '../../../utils/sessionStorage';
-import { splitByPinned } from '../../../utils/sessionUtils';
-import type { Session } from '../../../types/session';
+import { SessionsTheme } from '@/components/Form/themes';
+import { getMessage } from '@/utils/i18n';
+import { loadSessions } from '@/utils/sessionStorage';
+import { splitByPinned } from '@/utils/sessionUtils';
+import type { Session } from '@/types/session';
 import { CountLabel, WizardDialogTitle, useDialogReset, useToggleSet } from './Shared';
 import {
   ExportDialogFooter,

@@ -1,6 +1,6 @@
 import { storage } from 'wxt/utils/storage';
-import type { SyncSettings } from '../types/syncSettings.js';
-import { defaultSyncSettings } from '../types/syncSettings.js';
+import type { SyncSettings } from '@/types/syncSettings.js';
+import { defaultSyncSettings } from '@/types/syncSettings.js';
 import { logger } from './logger.js';
 import {
   globalGroupingEnabledItem,

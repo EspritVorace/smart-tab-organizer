@@ -2,9 +2,9 @@ import { browser } from 'wxt/browser';
 import { getSyncSettings, setSyncSettings } from './settingsUtils.js';
 import { logger } from './logger.js';
 import { getStatisticsData, setStatisticsData } from './statisticsUtils.js';
-import { defaultSyncSettings } from '../types/syncSettings.js';
-import { defaultStatistics } from '../types/statistics.js';
-import type { SyncSettings } from '../types/syncSettings.js';
+import { defaultSyncSettings } from '@/types/syncSettings.js';
+import { defaultStatistics } from '@/types/statistics.js';
+import type { SyncSettings } from '@/types/syncSettings.js';
 
 const defaultSettingsPath = '/data/default_settings.json' as const;
 let cachedDefaultSettings: SyncSettings | null = null;

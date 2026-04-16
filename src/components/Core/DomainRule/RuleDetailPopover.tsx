@@ -1,9 +1,9 @@
 import { Flex, Text, Box, Badge } from '@radix-ui/themes';
-import { getMessage } from '../../../utils/i18n';
-import { AccessibleHighlight } from '../../UI/AccessibleHighlight/AccessibleHighlight';
-import { getRadixColor } from '../../../utils/utils';
-import { getRuleCategory } from '../../../schemas/enums';
-import type { DomainRuleSetting } from '../../../types/syncSettings';
+import { getMessage } from '@/utils/i18n';
+import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
+import { getRadixColor } from '@/utils/utils';
+import { getRuleCategory } from '@/schemas/enums';
+import type { DomainRuleSetting } from '@/types/syncSettings';
 
 interface RuleDetailPopoverProps {
   rule: DomainRuleSetting;

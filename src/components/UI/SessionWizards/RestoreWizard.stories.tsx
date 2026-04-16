@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { RestoreWizard } from './RestoreWizard';
-import type { Session } from '../../../types/session';
+import type { Session } from '@/types/session';
 
 const mockSession: Session = {
   id: 'session-1',

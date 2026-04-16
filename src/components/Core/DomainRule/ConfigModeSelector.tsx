@@ -1,6 +1,6 @@
 import { Box, Flex, HoverCard, SegmentedControl, Text } from '@radix-ui/themes';
 import { Info } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 export type ConfigMode = 'preset' | 'ask' | 'manual';
 

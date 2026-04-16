@@ -1,7 +1,7 @@
 import { DropdownMenu, IconButton } from '@radix-ui/themes';
 import { ArrowUpRight } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
-import type { SavedTabGroup } from '../../../types/session';
+import { getMessage } from '@/utils/i18n';
+import type { SavedTabGroup } from '@/types/session';
 
 export interface MoveTabDropdownProps {
   currentGroupId: string | null;

@@ -1,5 +1,5 @@
 import { browser } from 'wxt/browser';
-import type { SavedTab, SavedTabGroup } from '../types/session';
+import type { SavedTab, SavedTabGroup } from '@/types/session';
 
 /** A tab that already exists in the current window */
 export interface TabConflict {

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Flex, Text, Box, TextField, Button } from '@radix-ui/themes';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 import styles from './TabTreeEditor.module.css';
 
 export interface TabEditRowProps {

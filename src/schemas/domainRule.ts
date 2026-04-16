@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { getMessage } from '../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 import { idSchema, createRegexValidator, createDomainFilterValidator } from './common.js';
 import { 
   groupNameSourceOptions, 

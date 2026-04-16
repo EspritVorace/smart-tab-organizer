@@ -5,26 +5,26 @@ import { browser } from 'wxt/browser';
 import { Theme } from '@radix-ui/themes';
 import { ThemeProvider } from 'next-themes';
 
-import { useSyncedSettings } from '../hooks/useSyncedSettings.js';
-import { useStatistics } from '../hooks/useStatistics.js';
-import { useDeepLinking } from '../hooks/useDeepLinking.js';
-import { getMessage } from '../utils/i18n';
+import { useSyncedSettings } from '@/hooks/useSyncedSettings.js';
+import { useStatistics } from '@/hooks/useStatistics.js';
+import { useDeepLinking } from '@/hooks/useDeepLinking.js';
+import { getMessage } from '@/utils/i18n';
 const version = browser.runtime.getManifest().version;
 
-import { Sidebar } from '../components/UI/Sidebar/Sidebar';
-import type { SidebarItem } from '../components/UI/Sidebar/Sidebar';
-import { OptionsHeader, OptionsHeaderCollapsed } from '../components/UI/OptionsLayout/OptionsHeader';
-import { OptionsFooter, OptionsFooterCollapsed } from '../components/UI/OptionsLayout/OptionsFooter';
+import { Sidebar } from '@/components/UI/Sidebar/Sidebar';
+import type { SidebarItem } from '@/components/UI/Sidebar/Sidebar';
+import { OptionsHeader, OptionsHeaderCollapsed } from '@/components/UI/OptionsLayout/OptionsHeader';
+import { OptionsFooter, OptionsFooterCollapsed } from '@/components/UI/OptionsLayout/OptionsFooter';
 import { useState } from 'react';
 import { DomainRulesPage } from './DomainRulesPage';
 import { StatisticsPage } from './StatisticsPage';
-import { SettingsPage } from '../components/UI/SettingsPage/SettingsPage';
+import { SettingsPage } from '@/components/UI/SettingsPage/SettingsPage';
 import { ImportExportPage } from './ImportExportPage';
-import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
+import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
 import { Shield, FileText, BarChart3, Settings, Archive } from 'lucide-react';
-import { FEATURE_BASE_COLORS } from '../utils/themeConstants';
+import { FEATURE_BASE_COLORS } from '@/utils/themeConstants';
 import { SessionsPage } from './SessionsPage';
-import type { DomainRuleSettings } from '../types/syncSettings';
+import type { DomainRuleSettings } from '@/types/syncSettings';
 
 (() => {
 

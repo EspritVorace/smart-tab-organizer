@@ -1,5 +1,5 @@
 import { arrayMove } from '@dnd-kit/helpers';
-import type { Session } from '../types/session';
+import type { Session } from '@/types/session';
 
 /**
  * Move a session to the first position.

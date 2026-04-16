@@ -1,5 +1,5 @@
 import { browser } from 'wxt/browser';
-import type { SavedTab, SavedTabGroup, Session } from '../types/session';
+import type { SavedTab, SavedTabGroup, Session } from '@/types/session';
 import type { ConflictAnalysis, ConflictResolution, GroupConflictAction } from './conflictDetection';
 
 export interface RestoreOptions {

@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { Flex, Box, TextField, Button } from '@radix-ui/themes';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 import { ChromeColorPicker } from './ChromeColorPicker';
-import type { ChromeGroupColor } from '../../../types/tabTree';
+import type { ChromeGroupColor } from '@/types/tabTree';
 
 export interface GroupEditRowProps {
   name: string;

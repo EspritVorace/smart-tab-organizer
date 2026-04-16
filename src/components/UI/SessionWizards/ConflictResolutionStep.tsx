@@ -1,13 +1,13 @@
 import React from 'react';
 import { Flex, Text, Box, Badge, RadioGroup, ScrollArea, Callout, Select, Separator } from '@radix-ui/themes';
 import { AlertTriangle } from 'lucide-react';
-import { getMessage, getPluralMessage } from '../../../utils/i18n';
-import { chromeGroupColors } from '../../../utils/tabTreeUtils';
+import { getMessage, getPluralMessage } from '@/utils/i18n';
+import { chromeGroupColors } from '@/utils/tabTreeUtils';
 import type {
   ConflictAnalysis,
   DuplicateTabAction,
   GroupConflictAction,
-} from '../../../utils/conflictDetection';
+} from '@/utils/conflictDetection';
 
 interface ConflictResolutionStepProps {
   analysis: ConflictAnalysis;

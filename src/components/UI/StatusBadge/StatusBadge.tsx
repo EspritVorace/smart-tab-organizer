@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge } from '@radix-ui/themes';
-import { getMessage } from '../../../utils/i18n';
-import { badgeOptions, type BadgeType } from '../../../schemas/enums';
+import { getMessage } from '@/utils/i18n';
+import { badgeOptions, type BadgeType } from '@/schemas/enums';
 
 interface StatusBadgeProps {
     type: BadgeType;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Checkbox } from '@radix-ui/themes';
-import type { Session } from '../../../../types/session';
-import { SelectableRowShell, SessionSummary } from '../Shared';
+import type { Session } from '@/types/session';
+import { SelectableRowShell, SessionSummary } from '@/components/UI/ImportExportWizards/Shared';
 
 interface SelectableSessionRowProps {
   session: Session;

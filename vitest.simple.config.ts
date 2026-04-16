@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
+import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -10,7 +11,7 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const mockBrowserPath = path.resolve(__dirname, 'node_modules/wxt/dist/virtual/mock-browser.mjs');
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tsconfigPaths({ projects: ['./tsconfig.json'] })],
   resolve: {
     alias: [{ find: 'wxt/browser', replacement: mockBrowserPath }],
   },

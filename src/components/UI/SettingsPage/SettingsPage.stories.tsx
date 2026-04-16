@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { SettingsPage } from './SettingsPage';
-import { defaultSyncSettings } from '../../../types/syncSettings';
+import { defaultSyncSettings } from '@/types/syncSettings';
 
 const meta: Meta<typeof SettingsPage> = {
   title: 'Components/UI/SettingsPage/SettingsPage',

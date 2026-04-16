@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Theme, Box, Flex } from '@radix-ui/themes';
 import { DragDropProvider } from '@dnd-kit/react';
 import { DomainRuleCard } from './DomainRuleCard';
-import type { DomainRuleSetting } from '../../../types/syncSettings';
+import type { DomainRuleSetting } from '@/types/syncSettings';
 
 /* ── Mock data ──────────────────────────────────────────────────────────────── */
 

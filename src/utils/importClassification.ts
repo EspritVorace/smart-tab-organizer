@@ -1,4 +1,4 @@
-import type { DomainRuleSetting } from '../types/syncSettings';
+import type { DomainRuleSetting } from '@/types/syncSettings';
 
 export interface PropertyDiff {
   property: string;
