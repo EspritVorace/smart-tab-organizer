@@ -55,6 +55,11 @@ export const sessionsHelpPrefsItem = storage.defineItem<SessionsHelpPrefs>(
   { defaultValue: { sessionsIntroHidden: false } },
 );
 
+export const popupPinnedEmptyCollapsedItem = storage.defineItem<boolean>(
+  'local:popupPinnedEmptyCollapsed',
+  { defaultValue: false },
+);
+
 // Map des items sync par champ (pour watchSyncSettingsField)
 export const syncSettingsItemMap = {
   globalGroupingEnabled: globalGroupingEnabledItem,
