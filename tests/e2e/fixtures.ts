@@ -66,7 +66,8 @@ export interface DomainRuleConfig {
   enabled?: boolean;
   groupingEnabled?: boolean;
   deduplicationEnabled?: boolean;
-  deduplicationMatchMode?: 'exact' | 'includes';
+  deduplicationMatchMode?: 'exact' | 'includes' | 'exact_ignore_params';
+  ignoredQueryParams?: string[];
   color?: string;
   groupNameSource?: 'label' | 'title' | 'url' | 'manual' | 'smart' | 'smart_label' | 'smart_preset' | 'smart_manual';
   titleParsingRegEx?: string;
@@ -268,6 +269,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
             groupingEnabled: ruleConfig.groupingEnabled !== false,
             deduplicationEnabled: ruleConfig.deduplicationEnabled !== false,
             deduplicationMatchMode: ruleConfig.deduplicationMatchMode || 'exact',
+            ignoredQueryParams: ruleConfig.ignoredQueryParams || [],
             color: ruleConfig.color || '',
             groupNameSource: ruleConfig.groupNameSource || 'label',
             titleParsingRegEx: ruleConfig.titleParsingRegEx || '',

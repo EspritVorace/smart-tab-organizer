@@ -106,7 +106,17 @@ export function WizardStep4Summary({ values, configMode, presetName, onEditStep 
 
       {/* Options section */}
       <SummarySection title={getMessage('wizardStepOptions')} onEdit={onEditStep} stepIndex={2}>
-        <Text size="2">{buildOptionsSummary(values)}</Text>
+        <Flex direction="column" gap="1">
+          <Text size="2">{buildOptionsSummary(values)}</Text>
+          {values.deduplicationEnabled
+            && values.deduplicationMatchMode === 'exact_ignore_params'
+            && values.ignoredQueryParams.length > 0 && (
+              <SummaryRow
+                label={getMessage('ignoredQueryParamsLabel')}
+                value={values.ignoredQueryParams.join(', ')}
+              />
+          )}
+        </Flex>
       </SummarySection>
     </Flex>
   );

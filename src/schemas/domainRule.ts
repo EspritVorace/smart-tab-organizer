@@ -10,6 +10,9 @@ import {
   type ColorValue 
 } from './enums.js';
 
+// Regex autorisée pour les noms de query params (syntaxe HTTP + wildcard `*`).
+const ignoredQueryParamPattern = /^[A-Za-z0-9_\-.*]+$/;
+
 // Schéma pour domainRules (sans "enabled")
 export const domainRuleSchema = z.object({
   id: idSchema,
@@ -24,6 +27,11 @@ export const domainRuleSchema = z.object({
   color: z.enum(colorOptions.map(opt => opt.value) as [ColorValue, ...ColorValue[]]).optional(),
   categoryId: z.string().optional().nullable(),
   deduplicationEnabled: z.boolean().default(true),
+  ignoredQueryParams: z.array(
+    z.string().min(1).max(64).regex(ignoredQueryParamPattern, {
+      message: getMessage('errorInvalidParamName'),
+    }),
+  ).max(50).default([]),
   presetId: z.string().nullable()
 }).refine((data) => {
   // Si presetId est null, les validations conditionnelles s'appliquent
@@ -50,6 +58,16 @@ export const domainRuleSchema = z.object({
 }, () => ({
   message: getMessage('errorZodRequired'),
   path: ['urlParsingRegEx']
+})).refine((data) => {
+  // En mode `exact_ignore_params`, au moins un paramètre doit être déclaré,
+  // sinon le mode est équivalent à `exact` et on évite la confusion.
+  if (data.deduplicationEnabled && data.deduplicationMatchMode === 'exact_ignore_params') {
+    return Array.isArray(data.ignoredQueryParams) && data.ignoredQueryParams.length > 0;
+  }
+  return true;
+}, () => ({
+  message: getMessage('errorIgnoredParamsRequired'),
+  path: ['ignoredQueryParams']
 }));
 
 // Type inféré
