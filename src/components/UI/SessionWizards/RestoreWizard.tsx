@@ -1,22 +1,22 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Dialog, Flex, Button, Text, Separator, Box, RadioGroup, Callout } from '@radix-ui/themes';
 import { RotateCcw, AlertCircle } from 'lucide-react';
-import { SessionsTheme } from '../../Form/themes';
-import { TabTree } from '../../Core/TabTree/TabTree';
+import { SessionsTheme } from '@/components/Form/themes';
+import { TabTree } from '@/components/Core/TabTree/TabTree';
 import { ConflictResolutionStep } from './ConflictResolutionStep';
-import { getMessage } from '../../../utils/i18n';
-import { showSuccessNotification, showNotification } from '../../../utils/notifications';
-import { sessionToTabTreeData } from '../../../utils/sessionUtils';
+import { getMessage } from '@/utils/i18n';
+import { showSuccessNotification, showNotification } from '@/utils/notifications';
+import { sessionToTabTreeData } from '@/utils/sessionUtils';
 import {
   analyzeConflicts,
   type ConflictAnalysis,
   type DuplicateTabAction,
   type GroupConflictAction,
   type ConflictResolution,
-} from '../../../utils/conflictDetection';
-import { restoreTabs } from '../../../utils/tabRestore';
-import type { Session } from '../../../types/session';
-import type { TabTreeData } from '../../../types/tabTree';
+} from '@/utils/conflictDetection';
+import { restoreTabs } from '@/utils/tabRestore';
+import type { Session } from '@/types/session';
+import type { TabTreeData } from '@/types/tabTree';
 
 type RestoreTarget = 'current' | 'new';
 

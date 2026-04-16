@@ -4,15 +4,15 @@ import {
   TextArea, Callout,
 } from '@radix-ui/themes';
 import { Camera, AlertCircle } from 'lucide-react';
-import { SessionsTheme } from '../../Form/themes';
-import { TabTree } from '../../Core/TabTree/TabTree';
-import { CategoryPicker } from '../../Core/DomainRule/CategoryPicker';
-import { getMessage } from '../../../utils/i18n';
-import { showSuccessNotification } from '../../../utils/notifications';
-import { captureCurrentTabs } from '../../../utils/tabCapture';
-import { createSessionFromSelection, formatSessionDate } from '../../../utils/sessionUtils';
-import type { Session, SavedTab, SavedTabGroup } from '../../../types/session';
-import type { TabTreeData } from '../../../types/tabTree';
+import { SessionsTheme } from '@/components/Form/themes';
+import { TabTree } from '@/components/Core/TabTree/TabTree';
+import { CategoryPicker } from '@/components/Core/DomainRule/CategoryPicker';
+import { getMessage } from '@/utils/i18n';
+import { showSuccessNotification } from '@/utils/notifications';
+import { captureCurrentTabs } from '@/utils/tabCapture';
+import { createSessionFromSelection, formatSessionDate } from '@/utils/sessionUtils';
+import type { Session, SavedTab, SavedTabGroup } from '@/types/session';
+import type { TabTreeData } from '@/types/tabTree';
 
 interface SnapshotWizardProps {
   open: boolean;

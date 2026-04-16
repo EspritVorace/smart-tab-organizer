@@ -1,13 +1,13 @@
 import { browser, Browser } from 'wxt/browser';
-import { incrementStat } from '../utils/statisticsUtils.js';
-import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from '../utils/utils';
+import { incrementStat } from '@/utils/statisticsUtils.js';
+import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from '@/utils/utils';
 import { getSettings } from './settings.js';
 import { promptForGroupName } from './messaging.js';
-import { showNotification, type UndoAction } from '../utils/notifications.js';
-import { getMessage } from '../utils/i18n.js';
-import type { DomainRuleSetting, SyncSettings } from '../types/syncSettings.js';
-import { getRuleCategory } from '../schemas/enums.js';
-import { logger } from '../utils/logger.js';
+import { showNotification, type UndoAction } from '@/utils/notifications.js';
+import { getMessage } from '@/utils/i18n.js';
+import type { DomainRuleSetting, SyncSettings } from '@/types/syncSettings.js';
+import { getRuleCategory } from '@/schemas/enums.js';
+import { logger } from '@/utils/logger.js';
 
 export interface GroupingContext {
     rule: DomainRuleSetting;

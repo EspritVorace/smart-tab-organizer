@@ -1,5 +1,5 @@
-import type { Session } from '../types/session';
-import { sessionsArraySchema } from '../schemas/session';
+import type { Session } from '@/types/session';
+import { sessionsArraySchema } from '@/schemas/session';
 import { logger } from './logger.js';
 import { sessionsItem } from './storageItems.js';
 

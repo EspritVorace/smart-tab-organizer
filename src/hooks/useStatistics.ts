@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
-import type { Statistics } from '../types/statistics.js';
-import { defaultStatistics } from '../types/statistics.js';
-import { statisticsItem } from '../utils/storageItems.js';
+import type { Statistics } from '@/types/statistics.js';
+import { defaultStatistics } from '@/types/statistics.js';
+import { statisticsItem } from '@/utils/storageItems.js';
 import { useSyncedState } from './useSyncedState.js';
 
 export interface UseStatisticsReturn {

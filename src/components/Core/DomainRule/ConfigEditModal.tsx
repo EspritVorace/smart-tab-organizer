@@ -1,12 +1,12 @@
 import { Button, Dialog, Flex, ScrollArea } from '@radix-ui/themes';
 import { X } from 'lucide-react';
 import { useState, useCallback, useEffect } from 'react';
-import { getMessage } from '../../../utils/i18n';
-import { DomainRulesTheme } from '../../Form/themes';
-import { type GroupNameSourceValue } from '../../../schemas/enums';
-import type { PresetCategory } from '../../../utils/presetUtils';
-import { getPresetById } from '../../../utils/presetUtils';
-import { logger } from '../../../utils/logger';
+import { getMessage } from '@/utils/i18n';
+import { DomainRulesTheme } from '@/components/Form/themes';
+import { type GroupNameSourceValue } from '@/schemas/enums';
+import type { PresetCategory } from '@/utils/presetUtils';
+import { getPresetById } from '@/utils/presetUtils';
+import { logger } from '@/utils/logger';
 import { DomainRuleConfigForm } from './DomainRuleConfigForm';
 
 export interface ConfigEditValues {

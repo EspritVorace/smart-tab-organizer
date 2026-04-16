@@ -1,9 +1,9 @@
 import React, { useCallback, useState } from 'react';
 import { Box, Dialog } from '@radix-ui/themes';
 import { FileDown } from 'lucide-react';
-import { ExportTheme } from '../../Form/themes';
-import type { DomainRuleSetting } from '../../../types/syncSettings';
-import { getMessage } from '../../../utils/i18n';
+import { ExportTheme } from '@/components/Form/themes';
+import type { DomainRuleSetting } from '@/types/syncSettings';
+import { getMessage } from '@/utils/i18n';
 import { CountLabel, WizardDialogTitle, useDialogReset, useToggleSet } from './Shared';
 import {
   ExportDialogFooter,

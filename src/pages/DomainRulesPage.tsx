@@ -4,24 +4,24 @@ import { Plus, Eye, EyeOff, Shield, AlertCircle, Upload, Trash2 } from 'lucide-r
 import { DragDropProvider, type DragEndEvent, type DragOverEvent } from '@dnd-kit/react';
 import { move } from '@dnd-kit/helpers';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
-import { PageLayout } from '../components/UI/PageLayout/PageLayout';
-import { RuleWizardModal } from '../components/Core/DomainRule/RuleWizardModal';
-import { ImportWizard } from '../components/UI/ImportExportWizards/ImportWizard';
-import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
-import { ListToolbar } from '../components/UI/ListToolbar';
-import { getMessage } from '../utils/i18n';
-import { foldAccents } from '../utils/stringUtils';
-import { generateUUID } from '../utils/utils';
-import { DomainRuleCard } from '../components/Core/DomainRule/DomainRuleCard';
+import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
+import { RuleWizardModal } from '@/components/Core/DomainRule/RuleWizardModal';
+import { ImportWizard } from '@/components/UI/ImportExportWizards/ImportWizard';
+import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
+import { ListToolbar } from '@/components/UI/ListToolbar';
+import { getMessage } from '@/utils/i18n';
+import { foldAccents } from '@/utils/stringUtils';
+import { generateUUID } from '@/utils/utils';
+import { DomainRuleCard } from '@/components/Core/DomainRule/DomainRuleCard';
 import {
   moveToFirst,
   moveToLast,
   moveToFirstOfDomain,
   moveToLastOfDomain,
   getRulesForRootDomain,
-} from '../utils/ruleOrderUtils';
-import type { SyncSettings, DomainRuleSetting } from '../types/syncSettings';
-import type { DomainRule } from '../schemas/domainRule';
+} from '@/utils/ruleOrderUtils';
+import type { SyncSettings, DomainRuleSetting } from '@/types/syncSettings';
+import type { DomainRule } from '@/schemas/domainRule';
 
 type DeleteTarget =
   | { type: 'single'; ruleId: string; focusIndex?: number }

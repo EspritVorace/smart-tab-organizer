@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
-import type { Session, SavedTab } from '../types/session';
-import type { ChromeGroupColor } from '../types/tabTree';
+import type { Session, SavedTab } from '@/types/session';
+import type { ChromeGroupColor } from '@/types/tabTree';
 
 export interface UseSessionEditorReturn {
   /** The session being edited (working copy) */

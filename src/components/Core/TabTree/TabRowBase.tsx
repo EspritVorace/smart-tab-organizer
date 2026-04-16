@@ -1,7 +1,7 @@
 import React from 'react';
 import { Flex, Text, Tooltip } from '@radix-ui/themes';
 import { Globe } from 'lucide-react';
-import { AccessibleHighlight } from '../../UI/AccessibleHighlight/AccessibleHighlight';
+import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 
 export interface TabRowBaseProps {
   /** Favicon URL or undefined to show the Globe fallback */

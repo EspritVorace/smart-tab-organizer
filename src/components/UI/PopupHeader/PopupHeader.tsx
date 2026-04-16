@@ -1,6 +1,6 @@
 import { Box, Flex, Heading, IconButton } from '@radix-ui/themes';
 import { Settings } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 interface PopupHeaderProps {
   title: string;

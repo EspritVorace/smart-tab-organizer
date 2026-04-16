@@ -1,1 +1,1 @@
-export { CountLabel as ImportCountLabel } from '../Shared';
+export { CountLabel as ImportCountLabel } from '@/components/UI/ImportExportWizards/Shared';

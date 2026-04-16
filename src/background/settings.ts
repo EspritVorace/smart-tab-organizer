@@ -1,5 +1,5 @@
-import { getSyncSettings } from '../utils/settingsUtils.js';
-import type { SyncSettings, DomainRuleSetting } from '../types/syncSettings.js';
+import { getSyncSettings } from '@/utils/settingsUtils.js';
+import type { SyncSettings, DomainRuleSetting } from '@/types/syncSettings.js';
 
 export async function getSettings(): Promise<SyncSettings> {
     const settings = await getSyncSettings();

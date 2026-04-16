@@ -4,12 +4,12 @@ import { browser } from 'wxt/browser';
 import { Box, Flex, Theme } from '@radix-ui/themes';
 import { ThemeProvider } from 'next-themes';
 
-import { getMessage } from '../utils/i18n';
-import { PopupHeader } from '../components/UI/PopupHeader/PopupHeader';
-import { SettingsToggles } from '../components/UI/SettingsToggles/SettingsToggles';
-import { PopupToolbar } from '../components/UI/PopupToolbar/PopupToolbar';
-import { PopupProfilesList } from '../components/UI/PopupProfilesList/PopupProfilesList';
-import { useSyncedSettings } from '../hooks/useSyncedSettings';
+import { getMessage } from '@/utils/i18n';
+import { PopupHeader } from '@/components/UI/PopupHeader/PopupHeader';
+import { SettingsToggles } from '@/components/UI/SettingsToggles/SettingsToggles';
+import { PopupToolbar } from '@/components/UI/PopupToolbar/PopupToolbar';
+import { PopupProfilesList } from '@/components/UI/PopupProfilesList/PopupProfilesList';
+import { useSyncedSettings } from '@/hooks/useSyncedSettings';
 
 (() => {
 

@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { getMessage } from '../../../utils/i18n.js';
-import { foldAccents } from '../../../utils/stringUtils.js';
+import { getMessage } from '@/utils/i18n.js';
+import { foldAccents } from '@/utils/stringUtils.js';
 
 interface AccessibleHighlightProps {
   text: string;

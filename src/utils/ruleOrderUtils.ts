@@ -1,5 +1,5 @@
 import { arrayMove } from '@dnd-kit/helpers';
-import type { DomainRuleSetting } from '../types/syncSettings.js';
+import type { DomainRuleSetting } from '@/types/syncSettings.js';
 
 /**
  * Returns the "root domain" of a domainFilter for grouping purposes.

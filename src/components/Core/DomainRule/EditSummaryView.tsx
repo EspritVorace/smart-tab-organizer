@@ -3,15 +3,15 @@ import { Box, Button, Flex, IconButton, Separator, Text, TextField, Grid } from 
 import { ChevronDown, ChevronRight, Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, type Control, type FieldErrors } from 'react-hook-form';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 import { CategoryPicker } from './CategoryPicker';
-import { FormField } from '../../Form/FormFields';
+import { FormField } from '@/components/Form/FormFields';
 import { ConfigEditModal, type ConfigEditValues } from './ConfigEditModal';
 import { WizardStep3Options } from './WizardStep3Options';
-import { getRuleCategory, groupNameSourceOptions, deduplicationMatchModeOptions } from '../../../schemas/enums';
-import type { DomainRule } from '../../../schemas/domainRule';
-import type { PresetCategory } from '../../../utils/presetUtils';
-import type { GroupNameSourceValue } from '../../../schemas/enums';
+import { getRuleCategory, groupNameSourceOptions, deduplicationMatchModeOptions } from '@/schemas/enums';
+import type { DomainRule } from '@/schemas/domainRule';
+import type { PresetCategory } from '@/utils/presetUtils';
+import type { GroupNameSourceValue } from '@/schemas/enums';
 
 interface EditSummaryViewProps {
   control: Control<DomainRule>;

@@ -1,11 +1,11 @@
 import React from 'react';
 import { Badge, Checkbox, Flex, Text } from '@radix-ui/themes';
 import type { BadgeProps } from '@radix-ui/themes';
-import { getMessage } from '../../../utils/i18n';
-import { getRuleCategory } from '../../../schemas/enums';
-import { getRadixColor } from '../../../utils/utils';
-import type { DomainRuleSetting } from '../../../types/syncSettings';
-import type { ConflictingRule } from '../../../utils/importClassification';
+import { getMessage } from '@/utils/i18n';
+import { getRuleCategory } from '@/schemas/enums';
+import { getRadixColor } from '@/utils/utils';
+import type { DomainRuleSetting } from '@/types/syncSettings';
+import type { ConflictingRule } from '@/utils/importClassification';
 import {
   ConflictRowShell,
   DiffPopover,

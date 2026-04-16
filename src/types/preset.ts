@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { 
   groupNameSourceOptions, 
   type GroupNameSourceValue 
-} from '../schemas/enums.js';
+} from '@/schemas/enums.js';
 
 // Schéma pour un preset individuel
 export const presetSchema = z.object({

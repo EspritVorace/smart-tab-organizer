@@ -1,5 +1,5 @@
-import type { Statistics } from '../types/statistics.js';
-import { defaultStatistics } from '../types/statistics.js';
+import type { Statistics } from '@/types/statistics.js';
+import { defaultStatistics } from '@/types/statistics.js';
 import { logger } from './logger.js';
 import { statisticsItem } from './storageItems.js';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Text, TextArea } from '@radix-ui/themes';
-import { getMessage } from '../../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 interface ExportNoteFieldProps {
   value: string;

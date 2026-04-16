@@ -1,4 +1,5 @@
 import type { StorybookConfig } from '@storybook/react-vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 const config: StorybookConfig = {
   "stories": [
@@ -22,6 +23,7 @@ const config: StorybookConfig = {
     };
     
     config.plugins = config.plugins || [];
+    config.plugins.push(tsconfigPaths({ projects: ['./tsconfig.json'] }));
     config.plugins.push({
       name: 'mock-wxt-browser',
       resolveId(id) {

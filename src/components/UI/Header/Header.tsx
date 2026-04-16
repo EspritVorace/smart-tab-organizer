@@ -1,6 +1,6 @@
 import React from 'react';
-import { getMessage } from '../../../utils/i18n';
-import { ThemeToggle } from '../ThemeToggle/ThemeToggle';
+import { getMessage } from '@/utils/i18n';
+import { ThemeToggle } from '@/components/UI/ThemeToggle/ThemeToggle';
 
 interface HeaderProps {
   settings?: unknown;

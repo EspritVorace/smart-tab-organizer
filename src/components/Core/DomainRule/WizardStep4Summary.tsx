@@ -1,9 +1,9 @@
 import React from 'react';
 import { Badge, Box, Button, Flex, Separator, Text } from '@radix-ui/themes';
 import { Pencil } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
-import { getRuleCategory, deduplicationMatchModeOptions, groupNameSourceOptions } from '../../../schemas/enums';
-import type { DomainRule } from '../../../schemas/domainRule';
+import { getMessage } from '@/utils/i18n';
+import { getRuleCategory, deduplicationMatchModeOptions, groupNameSourceOptions } from '@/schemas/enums';
+import type { DomainRule } from '@/schemas/domainRule';
 
 interface WizardStep4SummaryProps {
   values: DomainRule;

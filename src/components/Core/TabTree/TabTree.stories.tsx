@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { Theme } from '@radix-ui/themes';
 import { TabTree } from './TabTree';
-import type { TabTreeData } from '../../../types/tabTree';
-import { FEATURE_THEMES } from '../../../utils/themeConstants';
+import type { TabTreeData } from '@/types/tabTree';
+import { FEATURE_THEMES } from '@/utils/themeConstants';
 
 /** Sample data: mix of groups and ungrouped tabs */
 const sampleData: TabTreeData = {

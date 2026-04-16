@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Flex, Text, Separator } from '@radix-ui/themes';
 import { Pin } from 'lucide-react';
-import { SplitButton } from '../SplitButton/SplitButton';
-import { getMessage } from '../../../utils/i18n';
-import { loadSessions } from '../../../utils/sessionStorage';
-import { restoreSessionTabs } from '../../../utils/tabRestore';
-import { getRuleCategory } from '../../../schemas/enums';
-import { chromeGroupColors } from '../../../utils/tabTreeUtils';
-import type { Session } from '../../../types/session';
+import { SplitButton } from '@/components/UI/SplitButton/SplitButton';
+import { getMessage } from '@/utils/i18n';
+import { loadSessions } from '@/utils/sessionStorage';
+import { restoreSessionTabs } from '@/utils/tabRestore';
+import { getRuleCategory } from '@/schemas/enums';
+import { chromeGroupColors } from '@/utils/tabTreeUtils';
+import type { Session } from '@/types/session';
 
 function getCategoryIcon(categoryId: string | null | undefined): React.ReactNode {
   const cat = getRuleCategory(categoryId);

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { getMessage } from '../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 // Helper pour valider UUID ou string
 export const idSchema = z.string().min(1);

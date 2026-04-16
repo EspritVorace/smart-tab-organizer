@@ -1,4 +1,4 @@
-import type { Session, SavedTab, SavedTabGroup } from '../types/session';
+import type { Session, SavedTab, SavedTabGroup } from '@/types/session';
 
 export interface GroupDiff {
   title: string;

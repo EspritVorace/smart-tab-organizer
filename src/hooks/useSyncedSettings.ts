@@ -1,5 +1,5 @@
 import { storage } from 'wxt/utils/storage';
-import type { SyncSettings, DomainRuleSettings } from '../types/syncSettings.js';
+import type { SyncSettings, DomainRuleSettings } from '@/types/syncSettings.js';
 import {
   globalGroupingEnabledItem,
   globalDeduplicationEnabledItem,
@@ -7,7 +7,7 @@ import {
   notifyOnGroupingItem,
   notifyOnDeduplicationItem,
   syncSettingsItemMap,
-} from '../utils/storageItems.js';
+} from '@/utils/storageItems.js';
 import { useSyncedState } from './useSyncedState.js';
 
 export interface UseSyncedSettingsReturn {

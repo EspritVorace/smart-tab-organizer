@@ -1,5 +1,5 @@
-import type { SearchableSelectGroup } from '../components/Form/FormFields/SearchableSelect';
-import type { PresetCategory } from '../types/preset';
+import type { SearchableSelectGroup } from '@/components/Form/FormFields/SearchableSelect';
+import type { PresetCategory } from '@/types/preset';
 
 /**
  * Transforms an array of preset categories into groups for SearchableSelect.

@@ -10,14 +10,14 @@ import {
   Pin, PinOff, ChevronDown, ChevronRight,
   Monitor, Square, Wrench, GripVertical,
 } from 'lucide-react';
-import { getMessage, getPluralMessage } from '../../../utils/i18n';
-import { countSessionTabs, formatSessionDate } from '../../../utils/sessionUtils';
-import { AccessibleHighlight } from '../../UI/AccessibleHighlight/AccessibleHighlight';
-import { chromeGroupColors } from '../../../utils/tabTreeUtils';
-import { getRuleCategory } from '../../../schemas/enums';
-import { getRadixColor } from '../../../utils/utils';
+import { getMessage, getPluralMessage } from '@/utils/i18n';
+import { countSessionTabs, formatSessionDate } from '@/utils/sessionUtils';
+import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
+import { chromeGroupColors } from '@/utils/tabTreeUtils';
+import { getRuleCategory } from '@/schemas/enums';
+import { getRadixColor } from '@/utils/utils';
 import { SessionPreviewTree } from './SessionPreviewTree';
-import type { Session } from '../../../types/session';
+import type { Session } from '@/types/session';
 
 interface SessionCardProps {
   session: Session;

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { SessionsPage } from './SessionsPage';
-import type { SyncSettings } from '../types/syncSettings';
+import type { SyncSettings } from '@/types/syncSettings';
 
 const mockSyncSettings: SyncSettings = {
   globalGroupingEnabled: true,

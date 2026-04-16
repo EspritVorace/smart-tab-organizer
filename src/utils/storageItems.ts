@@ -1,9 +1,9 @@
 import { storage } from 'wxt/utils/storage';
-import type { SyncSettings, DomainRuleSettings } from '../types/syncSettings.js';
-import { defaultSyncSettings } from '../types/syncSettings.js';
-import type { Statistics } from '../types/statistics.js';
-import { defaultStatistics } from '../types/statistics.js';
-import type { Session } from '../types/session.js';
+import type { SyncSettings, DomainRuleSettings } from '@/types/syncSettings.js';
+import { defaultSyncSettings } from '@/types/syncSettings.js';
+import type { Statistics } from '@/types/statistics.js';
+import { defaultStatistics } from '@/types/statistics.js';
+import type { Session } from '@/types/session.js';
 import type { SessionsHelpPrefs } from './sessionsHelpPrefs.js';
 
 // --- Sync storage items ---

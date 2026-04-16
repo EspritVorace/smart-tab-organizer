@@ -8,10 +8,10 @@ import {
     addToExistingGroup,
 } from './grouping.js';
 import { getMatchMode, isUrlMatch } from './deduplication.js';
-import { getStatisticsData, updateStatisticsData } from '../utils/statisticsUtils.js';
-import { getMessage } from '../utils/i18n.js';
-import { logger } from '../utils/logger.js';
-import type { DomainRuleSetting, SyncSettings } from '../types/syncSettings.js';
+import { getStatisticsData, updateStatisticsData } from '@/utils/statisticsUtils.js';
+import { getMessage } from '@/utils/i18n.js';
+import { logger } from '@/utils/logger.js';
+import type { DomainRuleSetting, SyncSettings } from '@/types/syncSettings.js';
 
 // ---------------------------------------------------------------------------
 // Types

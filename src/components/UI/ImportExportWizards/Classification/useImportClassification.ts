@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useToggleSet, type ToggleSetState } from '../Shared';
+import { useToggleSet, type ToggleSetState } from '@/components/UI/ImportExportWizards/Shared';
 
 export type ConflictMode = 'overwrite' | 'duplicate' | 'ignore';
 

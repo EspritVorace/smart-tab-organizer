@@ -3,11 +3,11 @@ import { Button, Switch, Text, HoverCard, Flex, Badge, Card, Checkbox, IconButto
 import { Pencil, Trash2, MoreHorizontal, GripVertical } from 'lucide-react';
 import { useSortable } from '@dnd-kit/react/sortable';
 import { RuleDetailPopover } from './RuleDetailPopover';
-import { AccessibleHighlight } from '../../UI/AccessibleHighlight/AccessibleHighlight';
-import { getMessage } from '../../../utils/i18n';
-import { getRadixColor } from '../../../utils/utils';
-import { getRuleCategory } from '../../../schemas/enums';
-import type { DomainRuleSetting } from '../../../types/syncSettings';
+import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
+import { getMessage } from '@/utils/i18n';
+import { getRadixColor } from '@/utils/utils';
+import { getRuleCategory } from '@/schemas/enums';
+import type { DomainRuleSetting } from '@/types/syncSettings';
 
 export interface DomainRuleCardProps {
   rule: DomainRuleSetting;

@@ -1,13 +1,13 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Box, Button, Dialog, Flex, Separator } from '@radix-ui/themes';
 import { FileUp } from 'lucide-react';
-import { ImportTheme } from '../../Form/themes';
-import { getMessage } from '../../../utils/i18n';
-import { showSuccessNotification } from '../../../utils/notifications';
-import { importDataSchema } from '../../../schemas/importExport';
-import { classifyImportedRules } from '../../../utils/importClassification';
-import { generateUUID } from '../../../utils/utils';
-import type { DomainRuleSetting } from '../../../types/syncSettings';
+import { ImportTheme } from '@/components/Form/themes';
+import { getMessage } from '@/utils/i18n';
+import { showSuccessNotification } from '@/utils/notifications';
+import { importDataSchema } from '@/schemas/importExport';
+import { classifyImportedRules } from '@/utils/importClassification';
+import { generateUUID } from '@/utils/utils';
+import type { DomainRuleSetting } from '@/types/syncSettings';
 import { TwoStepImportFooter, WizardDialogTitle, useDialogReset } from './Shared';
 import { SourceStep, ImportedNoteCallout, useJsonSourceInput } from './Source';
 import {
@@ -18,7 +18,7 @@ import {
   ConflictWarningCallout,
   ImportCountLabel,
 } from './Classification';
-import type { RuleClassification } from '../../../utils/importClassification';
+import type { RuleClassification } from '@/utils/importClassification';
 import { RuleRow, ConflictRuleRow } from './RuleImportRows';
 
 interface ImportWizardProps {

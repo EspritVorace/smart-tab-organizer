@@ -1,5 +1,6 @@
 import { defineConfig } from 'wxt';
 import react from '@vitejs/plugin-react';
+import tsconfigPaths from 'vite-tsconfig-paths';
 import { resolve } from 'path';
 
 export default defineConfig({
@@ -48,7 +49,7 @@ export default defineConfig({
     profileCreateIfMissing: true,
   },
   vite: () => ({
-    plugins: [react()],
+    plugins: [react(), tsconfigPaths({ projects: ['./tsconfig.json'] })],
     build: {
       emptyOutDir: true,
       rollupOptions: {

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { SessionEditDialog } from './SessionEditDialog';
-import type { Session } from '../../../types/session';
+import type { Session } from '@/types/session';
 
 const mockSession: Session = {
   id: 'session-edit-1',

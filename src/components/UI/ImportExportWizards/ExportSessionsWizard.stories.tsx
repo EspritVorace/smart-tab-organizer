@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent } from 'storybook/test';
 import { ExportSessionsWizard } from './ExportSessionsWizard';
-import { sessionsItem } from '../../../utils/storageItems';
-import type { Session } from '../../../types/session';
+import { sessionsItem } from '@/utils/storageItems';
+import type { Session } from '@/types/session';
 
 const mockSessions: Session[] = [
   {

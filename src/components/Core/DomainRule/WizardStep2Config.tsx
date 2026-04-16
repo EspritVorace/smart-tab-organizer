@@ -1,7 +1,7 @@
 import { useController, type Control, type FieldErrors } from 'react-hook-form';
-import type { DomainRule } from '../../../schemas/domainRule';
-import type { PresetCategory } from '../../../utils/presetUtils';
-import { type GroupNameSourceValue } from '../../../schemas/enums';
+import type { DomainRule } from '@/schemas/domainRule';
+import type { PresetCategory } from '@/utils/presetUtils';
+import { type GroupNameSourceValue } from '@/schemas/enums';
 import { DomainRuleConfigForm } from './DomainRuleConfigForm';
 import type { ConfigMode } from './ConfigModeSelector';
 

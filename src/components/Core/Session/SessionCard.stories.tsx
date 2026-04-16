@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Theme, Box, Flex, TextField } from '@radix-ui/themes';
 import { Search } from 'lucide-react';
 import { SessionCard } from './SessionCard';
-import type { Session } from '../../../types/session';
+import type { Session } from '@/types/session';
 
 const baseSession: Session = {
   id: 'session-1',

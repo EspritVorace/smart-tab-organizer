@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { IconButton, Tooltip, Theme } from '@radix-ui/themes';
 import { Sun, Moon, Monitor, LucideProps } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 interface ThemeOption {
   value: 'light' | 'dark' | 'system';

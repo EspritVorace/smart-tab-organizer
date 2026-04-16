@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Popover, Text } from '@radix-ui/themes';
 import { Eye } from 'lucide-react';
-import { getMessage } from '../../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 interface DiffPopoverProps {
   /** Localised entity name displayed next to "Differences:" in the popover header. */

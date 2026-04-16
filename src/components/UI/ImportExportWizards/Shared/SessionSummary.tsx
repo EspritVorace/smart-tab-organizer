@@ -5,8 +5,8 @@ import {
   formatSessionDateShort,
   getSessionGroupLabel,
   getSessionTabLabel,
-} from '../../../../utils/sessionUtils';
-import type { Session } from '../../../../types/session';
+} from '@/utils/sessionUtils';
+import type { Session } from '@/types/session';
 
 interface SessionSummaryProps {
   session: Session;

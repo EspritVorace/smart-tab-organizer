@@ -1,6 +1,6 @@
 import React from 'react';
 import { SegmentedControl } from '@radix-ui/themes';
-import { getMessage } from '../../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 import type { JsonSourceInputState, SourceMode } from './useJsonSourceInput';
 
 interface SourceModeSegmentedProps<T> {

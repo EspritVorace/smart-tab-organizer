@@ -1,11 +1,11 @@
 import { defineBackground } from 'wxt/utils/define-background';
-import { setupAllEventHandlers } from '../background/event-handlers.js';
-import { logger } from '../utils/logger.js';
-import { startPeriodicCleanup } from '../background/deduplication.js';
-import { initNotificationListeners, executeNotificationUndoById } from '../utils/notifications.js';
-import { middleClickedTabs } from '../background/messaging.js';
-import { processGroupingForNewTab } from '../background/grouping.js';
-import { handleOrganizeAllTabs } from '../background/organize.js';
+import { setupAllEventHandlers } from '@/background/event-handlers.js';
+import { logger } from '@/utils/logger.js';
+import { startPeriodicCleanup } from '@/background/deduplication.js';
+import { initNotificationListeners, executeNotificationUndoById } from '@/utils/notifications.js';
+import { middleClickedTabs } from '@/background/messaging.js';
+import { processGroupingForNewTab } from '@/background/grouping.js';
+import { handleOrganizeAllTabs } from '@/background/organize.js';
 export default defineBackground(() => {
     // Initialize all event handlers
     setupAllEventHandlers();

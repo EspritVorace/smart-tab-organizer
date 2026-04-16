@@ -1,7 +1,7 @@
 import { Flex, Text, RadioGroup } from '@radix-ui/themes';
 import { Controller } from 'react-hook-form';
 import { FieldLabel } from './FieldLabel';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 interface RadioOption {
   readonly value: string;

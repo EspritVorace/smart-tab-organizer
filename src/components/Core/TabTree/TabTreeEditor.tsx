@@ -9,15 +9,15 @@ import {
   AlertDialog,
 } from '@radix-ui/themes';
 import { ChevronUp, ChevronDown, Pencil, Trash2 } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
-import { extractDomain } from '../../../utils/tabTreeUtils';
+import { getMessage } from '@/utils/i18n';
+import { extractDomain } from '@/utils/tabTreeUtils';
 import { TabRowBase } from './TabRowBase';
 import { GroupRowBase } from './GroupRowBase';
 import { TabEditRow } from './TabEditRow';
 import { GroupEditRow } from './GroupEditRow';
 import { MoveTabDropdown } from './MoveTabDropdown';
 import { useTabTreeEditor } from './useTabTreeEditor';
-import type { Session } from '../../../types/session';
+import type { Session } from '@/types/session';
 import styles from './TabTreeEditor.module.css';
 
 export interface TabTreeEditorProps {

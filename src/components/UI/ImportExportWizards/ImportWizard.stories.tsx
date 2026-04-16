@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent, expect } from 'storybook/test';
 import { ImportWizard } from './ImportWizard';
-import type { DomainRuleSetting } from '../../../types/syncSettings';
+import type { DomainRuleSetting } from '@/types/syncSettings';
 
 const existingRules: DomainRuleSetting[] = [
   {

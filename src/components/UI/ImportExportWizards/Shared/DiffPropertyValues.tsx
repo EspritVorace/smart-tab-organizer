@@ -1,6 +1,6 @@
 import React from 'react';
 import { Badge, Box, Flex, Text } from '@radix-ui/themes';
-import { getMessage } from '../../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 interface DiffPropertyValuesProps {
   /** Optional bold label above the value pair. */

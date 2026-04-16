@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, DropdownMenu, Flex } from '@radix-ui/themes';
 import { ChevronDown } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 export interface SplitButtonMenuItem {
   label: string;

@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
-import { getMessage } from '../../../../utils/i18n';
-import { showSuccessNotification } from '../../../../utils/notifications';
+import { getMessage } from '@/utils/i18n';
+import { showSuccessNotification } from '@/utils/notifications';
 
 export interface ExportActionsConfig {
   /** Filename suggested when the native Save As dialog opens. */

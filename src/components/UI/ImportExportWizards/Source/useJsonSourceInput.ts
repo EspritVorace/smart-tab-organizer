@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { z } from 'zod';
-import { getMessage } from '../../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 export type SourceMode = 'file' | 'text';
 

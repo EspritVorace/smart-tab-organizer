@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { PageLayout } from './PageLayout';
 import { Text, Box, Button, Flex } from '@radix-ui/themes';
 import { Shield, FileText, BarChart3 } from 'lucide-react';
-import { defaultSyncSettings } from '../../../types/syncSettings';
+import { defaultSyncSettings } from '@/types/syncSettings';
 
 const meta: Meta<typeof PageLayout> = {
   title: 'Components/UI/PageLayout/PageLayout',

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dialog, Flex, Separator } from '@radix-ui/themes';
 import type { LucideIcon } from 'lucide-react';
-import { getMessage } from '../../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 interface WizardDialogTitleProps {
   icon: LucideIcon;

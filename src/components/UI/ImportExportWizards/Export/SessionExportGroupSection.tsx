@@ -1,10 +1,10 @@
 import React from 'react';
 import { Box, Checkbox, Flex, Text } from '@radix-ui/themes';
 import type { LucideIcon } from 'lucide-react';
-import { getMessage } from '../../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 import { SelectableSessionRow } from './SelectableSessionRow';
-import type { Session } from '../../../../types/session';
-import type { ToggleSetState } from '../Shared';
+import type { Session } from '@/types/session';
+import type { ToggleSetState } from '@/components/UI/ImportExportWizards/Shared';
 
 interface SessionExportGroupSectionProps {
   sessions: Session[];
