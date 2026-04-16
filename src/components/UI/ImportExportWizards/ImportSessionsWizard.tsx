@@ -5,7 +5,7 @@ import {
 import { Upload } from 'lucide-react';
 import { SessionsTheme } from '@/components/Form/themes';
 import { getMessage } from '@/utils/i18n';
-import { showSuccessNotification } from '@/utils/notifications';
+import { showSuccessToast } from '@/utils/toast';
 import { sessionsArraySchema } from '@/schemas/session';
 import { importSessionsDataSchema } from '@/schemas/importExport';
 import {
@@ -118,7 +118,7 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
 
     await saveSessions(updatedSessions);
     onOpenChange(false);
-    showSuccessNotification(
+    showSuccessToast(
       getMessage('importSessionsNotificationTitle'),
       getMessage('importSessionsNotificationMessage', [String(added), String(overwritten)]),
     );

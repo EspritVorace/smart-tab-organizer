@@ -24,6 +24,7 @@ import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
 import { Shield, FileText, BarChart3, Settings, Archive } from 'lucide-react';
 import { FEATURE_BASE_COLORS } from '@/utils/themeConstants';
 import { SessionsPage } from './SessionsPage';
+import { Toaster } from '@/components/UI/Toaster/Toaster';
 import type { DomainRuleSettings } from '@/types/syncSettings';
 
 (() => {
@@ -123,6 +124,7 @@ function OptionsApp() {
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <Theme>
                 <OptionsContent />
+                <Toaster />
             </Theme>
         </ThemeProvider>
     );

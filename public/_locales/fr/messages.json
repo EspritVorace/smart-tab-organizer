@@ -201,6 +201,8 @@
   "dataTableSelectedCountPlural": { "message": "{count} sélectionnés" },
   "dataTableActions": { "message": "Actions" },
   "undoAction": { "message": "Annuler" },
+  "toastCloseLabel": { "message": "Fermer" },
+  "toastViewportLabel": { "message": "Notifications" },
 
   "exportRulesTitle": { "message": "Exporter des règles" },
   "exportRulesDescription": { "message": "Sélectionnez les règles de domaine à sauvegarder dans un fichier JSON ou copier dans le presse-papiers" },

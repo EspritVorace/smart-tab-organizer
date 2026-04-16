@@ -8,7 +8,7 @@ import { SessionsTheme } from '@/components/Form/themes';
 import { TabTree } from '@/components/Core/TabTree/TabTree';
 import { CategoryPicker } from '@/components/Core/DomainRule/CategoryPicker';
 import { getMessage } from '@/utils/i18n';
-import { showSuccessNotification } from '@/utils/notifications';
+import { showSuccessToast } from '@/utils/toast';
 import { captureCurrentTabs } from '@/utils/tabCapture';
 import { createSessionFromSelection, formatSessionDate } from '@/utils/sessionUtils';
 import type { Session, SavedTab, SavedTabGroup } from '@/types/session';
@@ -117,7 +117,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
       );
       await onSave(session);
       onOpenChange(false);
-      showSuccessNotification(
+      showSuccessToast(
         getMessage('snapshotNotificationTitle'),
         getMessage('sessionNotificationMessage', [trimmed]),
       );

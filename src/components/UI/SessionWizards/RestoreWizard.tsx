@@ -5,7 +5,7 @@ import { SessionsTheme } from '@/components/Form/themes';
 import { TabTree } from '@/components/Core/TabTree/TabTree';
 import { ConflictResolutionStep } from './ConflictResolutionStep';
 import { getMessage } from '@/utils/i18n';
-import { showSuccessNotification, showNotification } from '@/utils/notifications';
+import { showSuccessToast, showErrorToast } from '@/utils/toast';
 import { sessionToTabTreeData } from '@/utils/sessionUtils';
 import {
   analyzeConflicts,
@@ -116,13 +116,12 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
       onOpenChange(false);
 
       if (result.errors.length > 0) {
-        showNotification({
-          title: getMessage('restoreNotificationTitle'),
-          message: getMessage('restoreNotificationError', [String(result.errors.length)]),
-          type: 'error',
-        });
+        showErrorToast(
+          getMessage('restoreNotificationTitle'),
+          getMessage('restoreNotificationError', [String(result.errors.length)]),
+        );
       } else {
-        showSuccessNotification(
+        showSuccessToast(
           getMessage('restoreNotificationTitle'),
           getMessage('restoreNotificationMessage', [
             String(result.tabsCreated),
