@@ -13,79 +13,37 @@ const existingSessions = [
 
 describe('SessionCard (portable stories)', () => {
   describe('SessionCardDefault', () => {
-    it('renders the session name', () => {
-      render(
-        <SessionCardDefault existingSessions={existingSessions as any} />,
-      );
-
-      expect(screen.getByTestId('session-card-session-1-name')).toBeInTheDocument();
-    });
-
-    it('displays the tab count summary', () => {
-      render(
-        <SessionCardDefault existingSessions={existingSessions as any} />,
-      );
-
-      // 5 tabs total (2 Frontend + 2 Backend + 1 ungrouped)
-      expect(screen.getByText(/5 tabs/)).toBeInTheDocument();
-    });
-
-    it('displays the group count summary', () => {
-      render(
-        <SessionCardDefault existingSessions={existingSessions as any} />,
-      );
-
-      // 2 groups (Frontend + Backend APIs)
-      expect(screen.getByText(/2 groups/)).toBeInTheDocument();
-    });
-
-    it('shows the pin button with "Pin" label', () => {
-      render(
-        <SessionCardDefault existingSessions={existingSessions as any} />,
-      );
-
-      expect(screen.getByRole('button', { name: 'Pin' })).toBeInTheDocument();
-    });
-
-    it('shows the rename button', () => {
-      render(
-        <SessionCardDefault existingSessions={existingSessions as any} />,
-      );
-
-      expect(screen.getByRole('button', { name: 'Rename' })).toBeInTheDocument();
-    });
-
-    it('shows the more actions menu button', () => {
-      render(
-        <SessionCardDefault existingSessions={existingSessions as any} />,
-      );
-
-      expect(
-        screen.getByRole('button', { name: 'More actions' }),
-      ).toBeInTheDocument();
-    });
-
-    it('renders group color dots', () => {
+    it('renders session metadata (name, tab/group counts, color dots)', () => {
       const { container } = render(
         <SessionCardDefault existingSessions={existingSessions as any} />,
       );
 
-      // 2 groups = 2 color dots
+      expect(screen.getByTestId('session-card-session-1-name')).toBeInTheDocument();
+      // 5 tabs total (2 Frontend + 2 Backend + 1 ungrouped)
+      expect(screen.getByText(/5 tabs/)).toBeInTheDocument();
+      // 2 groups (Frontend + Backend APIs)
+      expect(screen.getByText(/2 groups/)).toBeInTheDocument();
+
+      // 2 groups = 2 color dots (8px circles with borderRadius 50%)
       const dots = container.querySelectorAll('span[aria-hidden="true"]');
-      // Filter for the small color dots (8px circles)
       const colorDots = Array.from(dots).filter(
         (el) => (el as HTMLElement).style.borderRadius === '50%',
       );
       expect(colorDots).toHaveLength(2);
     });
 
-    it('preview is collapsed by default', () => {
+    it('renders action buttons and collapsed preview', () => {
       render(
         <SessionCardDefault existingSessions={existingSessions as any} />,
       );
 
+      expect(screen.getByRole('button', { name: 'Pin' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Rename' })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'More actions' }),
+      ).toBeInTheDocument();
+
       const toggle = screen.getByTestId('session-card-session-1-preview-toggle');
-      // Collapsible is closed: the content should not be visible
       expect(toggle.closest('[data-state]')?.getAttribute('data-state')).toBe(
         'closed',
       );
