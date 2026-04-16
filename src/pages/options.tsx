@@ -2,7 +2,7 @@
 import React, { useCallback } from 'react';
 import { createRoot } from 'react-dom/client';
 import { browser } from 'wxt/browser';
-import { Theme } from '@radix-ui/themes';
+import { Flex, Spinner, Text, Theme } from '@radix-ui/themes';
 import { ThemeProvider } from 'next-themes';
 
 import { useSyncedSettings } from '@/hooks/useSyncedSettings.js';
@@ -61,7 +61,12 @@ function OptionsContent() {
     ];
 
     if (!settings) {
-        return <p>Chargement...</p>;
+        return (
+            <Flex align="center" justify="center" gap="2" style={{ height: '100vh' }}>
+                <Spinner size="3" />
+                <Text>{getMessage('loadingText')}</Text>
+            </Flex>
+        );
     }
 
     return (
