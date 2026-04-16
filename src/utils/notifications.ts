@@ -52,7 +52,13 @@ export async function showNotification({ title, message, type = 'info', undoActi
     pendingUndoActions.set(notificationId, undoAction);
   }
 
-  await browser.notifications.create(notificationId, notificationOptions);
+  try {
+    await browser.notifications.create(notificationId, notificationOptions);
+  } catch {
+    // Firefox does not support the `buttons` property — retry without it
+    delete notificationOptions.buttons;
+    await browser.notifications.create(notificationId, notificationOptions);
+  }
 
   // Auto-clear after 5 seconds
   setTimeout(() => {
