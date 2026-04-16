@@ -36,10 +36,17 @@ const COMPARABLE_PROPERTIES: (keyof DomainRuleSetting)[] = [
 ];
 
 function arePropertyValuesEqual(a: unknown, b: unknown): boolean {
-  if (Array.isArray(a) && Array.isArray(b)) {
-    if (a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i++) {
-      if (a[i] !== b[i]) return false;
+  const aIsArr = Array.isArray(a);
+  const bIsArr = Array.isArray(b);
+  // When either side is an array, treat null/undefined on the other side as an
+  // empty array. This mirrors the Zod default and lets us compare rules that
+  // were stored before a new array field existed.
+  if (aIsArr || bIsArr) {
+    const arrA: unknown[] = aIsArr ? (a as unknown[]) : (a == null ? [] : [a]);
+    const arrB: unknown[] = bIsArr ? (b as unknown[]) : (b == null ? [] : [b]);
+    if (arrA.length !== arrB.length) return false;
+    for (let i = 0; i < arrA.length; i++) {
+      if (arrA[i] !== arrB[i]) return false;
     }
     return true;
   }
