@@ -158,13 +158,35 @@ test.describe('[US-PO007] Batch deduplication', () => {
     await firstTab.close().catch(() => {});
   });
 
-  test('tabs without matching rule are not deduped [US-PO007]', async ({
+  test('tabs without matching rule ARE deduped when deduplicateUnmatchedDomains=true [US-PO007]', async ({
     extensionContext,
     helpers,
   }) => {
     const sw = await getServiceWorker(extensionContext);
+    await helpers.setDeduplicateUnmatchedDomains(true);
 
-    // No domain rules — no dedup should occur
+    // No domain rules — batch dedup still handles unmatched tabs (exact match).
+    await helpers.createTab('https://example.org/page');
+    await helpers.createTab('https://example.org/page');
+    await new Promise(r => setTimeout(r, 500));
+
+    const beforeCount = await helpers.getTabCount();
+    await triggerOrganize(sw);
+    const afterCount = await helpers.getTabCount();
+    const stats = await helpers.getStatistics();
+
+    expect(afterCount).toBeLessThan(beforeCount);
+    expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
+  });
+
+  test('tabs without matching rule are NOT deduped when deduplicateUnmatchedDomains=false [US-PO007]', async ({
+    extensionContext,
+    helpers,
+  }) => {
+    const sw = await getServiceWorker(extensionContext);
+    await helpers.setDeduplicateUnmatchedDomains(false);
+
+    // No domain rules and unmatched-scope opt-out → nothing should be closed.
     await helpers.createTab('https://example.org/page');
     await helpers.createTab('https://example.org/page');
     await new Promise(r => setTimeout(r, 500));
