@@ -79,7 +79,7 @@ async function submitTextImport(page: any, json: string): Promise<void> {
   await page.waitForTimeout(300);
   await dialog.getByRole('button', { name: /next/i }).click();
   await page.waitForTimeout(300);
-  await dialog.getByRole('button', { name: /^import$/i }).click();
+  await dialog.getByRole('button', { name: /confirm.*import/i }).click();
 }
 
 test.describe('Options page toasts', () => {
