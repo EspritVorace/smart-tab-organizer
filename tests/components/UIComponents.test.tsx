@@ -12,7 +12,9 @@ vi.mock('../../src/utils/i18n', () => ({
       badge_warning: 'Attention',
       badge_deleted: 'Supprimé',
       enableGrouping: 'Activer le groupage',
-      enableDeduplication: 'Activer la déduplication'
+      enableDeduplication: 'Activer la déduplication',
+      popupAutoGroup: 'Regroupement auto',
+      popupDedup: 'Déduplication'
     };
     return messages[key] || key;
   })
@@ -99,9 +101,9 @@ describe('UI Components', () => {
         </TestWrapper>
       );
 
-      // Labels
-      expect(screen.getByText('Activer le groupage')).toBeInTheDocument();
-      expect(screen.getByText('Activer la déduplication')).toBeInTheDocument();
+      // Short labels shown inline in the footer
+      expect(screen.getByText('Regroupement auto')).toBeInTheDocument();
+      expect(screen.getByText('Déduplication')).toBeInTheDocument();
 
       // State reflected on switches
       const switches = screen.getAllByRole('switch');

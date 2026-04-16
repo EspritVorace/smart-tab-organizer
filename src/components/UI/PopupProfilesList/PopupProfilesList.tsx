@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Flex, Text, Separator } from '@radix-ui/themes';
+import { Box, Card, Flex, Text } from '@radix-ui/themes';
 import { Pin } from 'lucide-react';
 import { SplitButton } from '@/components/UI/SplitButton/SplitButton';
 import { getMessage } from '@/utils/i18n';
@@ -18,10 +18,10 @@ function getCategoryIcon(categoryId: string | null | undefined): React.ReactNode
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 18,
-          height: 18,
+          width: 22,
+          height: 22,
           borderRadius: '50%',
-          fontSize: 11,
+          fontSize: 12,
           backgroundColor: chromeGroupColors[cat.color],
           flexShrink: 0,
         }}
@@ -31,7 +31,24 @@ function getCategoryIcon(categoryId: string | null | undefined): React.ReactNode
       </span>
     );
   }
-  return <Pin size={14} aria-hidden="true" />;
+  return (
+    <Box
+      aria-hidden="true"
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 22,
+        height: 22,
+        borderRadius: '50%',
+        backgroundColor: 'var(--accent-a3)',
+        color: 'var(--accent-11)',
+        flexShrink: 0,
+      }}
+    >
+      <Pin size={12} />
+    </Box>
+  );
 }
 
 export function PopupProfilesList() {
@@ -51,52 +68,55 @@ export function PopupProfilesList() {
   }
 
   return (
-    <>
-      <Flex align="center" gap="2">
-        <Separator size="1" style={{ flex: 1 }} />
-        <Text size="1" color="gray" style={{ whiteSpace: 'nowrap' }}>
-          {getMessage('popupPinnedSessionsLabel')}
-        </Text>
-        <Separator size="1" style={{ flex: 1 }} />
-      </Flex>
+    <Flex direction="column" gap="2">
+      <Text size="1" weight="medium" color="gray" style={{ paddingLeft: 4 }}>
+        {getMessage('popupPinnedSessionsLabel')}
+      </Text>
 
-      <Flex data-testid="popup-profiles-list" direction="column" gap="1">
+      <Flex data-testid="popup-profiles-list" direction="column" gap="2">
         {pinnedSessions.map((session) => (
-          <Flex key={session.id} data-testid={`popup-profile-item-${session.id}`} align="center" gap="2" style={{ minWidth: 0 }}>
-            <Flex align="center" style={{ flexShrink: 0, color: 'var(--gray-11)' }}>
-              {getCategoryIcon(session.categoryId)}
+          <Card
+            key={session.id}
+            data-testid={`popup-profile-item-${session.id}`}
+            size="1"
+          >
+            <Flex align="center" gap="3" style={{ minWidth: 0 }}>
+              <Flex align="center" style={{ flexShrink: 0 }}>
+                {getCategoryIcon(session.categoryId)}
+              </Flex>
+              <Text
+                size="2"
+                weight="medium"
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {session.name}
+              </Text>
+              <SplitButton
+                label="▶"
+                onClick={() => handleRestore(session, 'current')}
+                size="1"
+                variant="soft"
+                menuItems={[
+                  {
+                    label: getMessage('sessionRestoreCurrentWindow'),
+                    onClick: () => handleRestore(session, 'current'),
+                  },
+                  {
+                    label: getMessage('sessionRestoreNewWindow'),
+                    onClick: () => handleRestore(session, 'new'),
+                  },
+                ]}
+              />
             </Flex>
-            <Text
-              size="2"
-              style={{
-                flex: 1,
-                minWidth: 0,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {session.name}
-            </Text>
-            <SplitButton
-              label="▶"
-              onClick={() => handleRestore(session, 'current')}
-              size="1"
-              variant="soft"
-              menuItems={[
-                {
-                  label: getMessage('sessionRestoreCurrentWindow'),
-                  onClick: () => handleRestore(session, 'current'),
-                },
-                {
-                  label: getMessage('sessionRestoreNewWindow'),
-                  onClick: () => handleRestore(session, 'new'),
-                },
-              ]}
-            />
-          </Flex>
+          </Card>
         ))}
       </Flex>
-    </>
+    </Flex>
   );
 }
