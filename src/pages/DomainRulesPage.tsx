@@ -5,6 +5,7 @@ import { DragDropProvider, type DragEndEvent, type DragOverEvent } from '@dnd-ki
 import { move } from '@dnd-kit/helpers';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
+import { EmptyState } from '@/components/UI/EmptyState';
 import { RuleWizardModal } from '@/components/Core/DomainRule/RuleWizardModal';
 import { ImportWizard } from '@/components/UI/ImportExportWizards/ImportWizard';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
@@ -78,46 +79,6 @@ function BulkActionsBar({
           {getMessage('deleteSelected')}
         </Button>
       </Flex>
-    </Flex>
-  );
-}
-
-interface RulesEmptyStateProps {
-  hasRules: boolean;
-  hasSearch: boolean;
-  onAddRule: () => void;
-  onImport: () => void;
-}
-
-function RulesEmptyState({ hasRules, hasSearch, onAddRule, onImport }: RulesEmptyStateProps) {
-  if (!hasRules && !hasSearch) {
-    return (
-      <Flex data-testid="page-rules-empty" direction="column" align="center" justify="center" gap="3" style={{ minHeight: 200 }}>
-        <Shield size={40} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
-        <Text size="3" weight="medium" color="gray" align="center">
-          {getMessage('rulesEmptyTitle')}
-        </Text>
-        <Text size="2" color="gray" align="center" style={{ maxWidth: 340 }}>
-          {getMessage('rulesEmptyDescription')}
-        </Text>
-        <Flex gap="2">
-          <Button data-testid="page-rules-btn-add" variant="soft" onClick={onAddRule}>
-            <Plus size={14} aria-hidden="true" />
-            {getMessage('addRule')}
-          </Button>
-          <Button variant="soft" onClick={onImport}>
-            <Upload size={14} aria-hidden="true" />
-            {getMessage('importRulesButton')}
-          </Button>
-        </Flex>
-      </Flex>
-    );
-  }
-
-  return (
-    <Flex direction="column" align="center" justify="center" gap="2" style={{ minHeight: 120 }}>
-      <AlertCircle size={32} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
-      <Text color="gray">{getMessage('noRulesFound')}</Text>
     </Flex>
   );
 }
@@ -370,12 +331,28 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
             )}
 
             {filteredRules.length === 0 ? (
-              <RulesEmptyState
-                hasRules={syncSettings.domainRules.length > 0}
-                hasSearch={!!searchTerm}
-                onAddRule={handleAddRule}
-                onImport={() => setIsImportOpen(true)}
-              />
+              syncSettings.domainRules.length === 0 && !searchTerm ? (
+                <EmptyState
+                  data-testid="page-rules-empty"
+                  icon={Shield}
+                  title={getMessage('rulesEmptyTitle')}
+                  description={getMessage('rulesEmptyDescription')}
+                  actions={
+                    <Flex gap="2">
+                      <Button data-testid="page-rules-btn-add" variant="soft" onClick={handleAddRule}>
+                        <Plus size={14} aria-hidden="true" />
+                        {getMessage('addRule')}
+                      </Button>
+                      <Button variant="soft" onClick={() => setIsImportOpen(true)}>
+                        <Upload size={14} aria-hidden="true" />
+                        {getMessage('importRulesButton')}
+                      </Button>
+                    </Flex>
+                  }
+                />
+              ) : (
+                <EmptyState compact icon={AlertCircle} message={getMessage('noRulesFound')} />
+              )
             ) : (
               <DragDropProvider modifiers={[RestrictToVerticalAxis]} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
                 <Flex data-testid="page-rules-list" direction="column" gap="3" role="grid" aria-label={getMessage('domainRulesTab')} ref={listRef}>
