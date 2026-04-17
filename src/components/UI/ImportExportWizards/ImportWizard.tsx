@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Box, Dialog } from '@radix-ui/themes';
+import { Box, Button, Dialog } from '@radix-ui/themes';
 import { FileUp } from 'lucide-react';
 import { ImportTheme } from '@/components/Form/themes';
 import { getMessage } from '@/utils/i18n';
@@ -8,12 +8,8 @@ import { importDataSchema } from '@/schemas/importExport';
 import { classifyImportedRules } from '@/utils/importClassification';
 import { generateUUID } from '@/utils/utils';
 import type { DomainRuleSetting } from '@/types/syncSettings';
-import {
-  TwoStepImportFooter,
-  WizardDialogContent,
-  WizardDialogTitle,
-  useDialogReset,
-} from './Shared';
+import { WizardModal } from '@/components/UI/WizardModal';
+import { useDialogReset } from './Shared';
 import { SourceStep, ImportedNoteCallout, useJsonSourceInput } from './Source';
 import {
   useImportClassification,
@@ -32,6 +28,11 @@ interface ImportWizardProps {
   existingRules: DomainRuleSetting[];
   onImport: (updatedRules: DomainRuleSetting[]) => void;
 }
+
+const STEP_DESCRIPTION_KEYS = [
+  'importRulesStepSourceDescription',
+  'importRulesStepReviewDescription',
+] as const;
 
 const validateRulesPayload = (raw: unknown) => {
   const validated = importDataSchema.parse(raw);
@@ -113,15 +114,14 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
 
   return (
     <ImportTheme>
-      <Dialog.Root open={open} onOpenChange={onOpenChange}>
-        <WizardDialogContent>
-          <WizardDialogTitle
-            icon={FileUp}
-            titleKey="importRulesTitle"
-            descriptionKey="importRulesDescription"
-          />
+      <WizardModal open={open} onOpenChange={onOpenChange}>
+        <WizardModal.Header
+          icon={FileUp}
+          title={getMessage('importRulesTitle')}
+          description={getMessage(STEP_DESCRIPTION_KEYS[step])}
+        />
 
-          {/* Step 0: Source */}
+        <WizardModal.Body>
           {step === 0 && (
             <SourceStep
               source={source}
@@ -130,9 +130,8 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
             />
           )}
 
-          {/* Step 1: Selection */}
           {step === 1 && classification && (
-            <Box mt="4">
+            <Box>
               <ImportedNoteCallout note={source.importedNote} />
               <ClassificationScrollArea>
                 <ClassificationGroup
@@ -186,18 +185,31 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
               />
             </Box>
           )}
+        </WizardModal.Body>
 
-          <TwoStepImportFooter
-            step={step as 0 | 1}
-            onNext={goToStep1}
-            nextDisabled={!source.parsedData}
-            onPrevious={() => setStep(0)}
-            onConfirm={executeImport}
-            confirmDisabled={importCount === 0}
-            confirmLabelKey="confirmImport"
-          />
-        </WizardDialogContent>
-      </Dialog.Root>
+        <WizardModal.Footer>
+          {step === 0 && (
+            <>
+              <Dialog.Close>
+                <Button variant="soft" color="gray">{getMessage('cancel')}</Button>
+              </Dialog.Close>
+              <Button onClick={goToStep1} disabled={!source.parsedData}>
+                {getMessage('next')}
+              </Button>
+            </>
+          )}
+          {step === 1 && (
+            <>
+              <Button variant="soft" color="gray" onClick={() => setStep(0)}>
+                {getMessage('previous')}
+              </Button>
+              <Button onClick={executeImport} disabled={importCount === 0}>
+                {getMessage('confirmImport')}
+              </Button>
+            </>
+          )}
+        </WizardModal.Footer>
+      </WizardModal>
     </ImportTheme>
   );
 }

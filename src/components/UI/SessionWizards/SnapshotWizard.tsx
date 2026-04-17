@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Dialog, Flex, Button, Text, Separator, Box, TextField,
+  Dialog, Flex, Button, Text, Box, TextField,
   TextArea, Callout,
 } from '@radix-ui/themes';
 import { Camera, AlertCircle } from 'lucide-react';
 import { SessionsTheme } from '@/components/Form/themes';
 import { TabTree } from '@/components/Core/TabTree/TabTree';
 import { CategoryPicker } from '@/components/Core/DomainRule/CategoryPicker';
+import { WizardModal } from '@/components/UI/WizardModal';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast } from '@/utils/toast';
 import { captureCurrentTabs } from '@/utils/tabCapture';
@@ -130,113 +131,103 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
 
   return (
     <SessionsTheme>
-      <Dialog.Root open={open} onOpenChange={onOpenChange}>
-        <Dialog.Content
-          data-testid="wizard-snapshot"
-          style={{ maxWidth: 580 }}
-          onOpenAutoFocus={(e) => {
-            e.preventDefault();
-            const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[aria-label]');
-            input?.focus();
-          }}
-        >
-          <Dialog.Title>
-            <Flex align="center" gap="2">
-              <Camera size={18} aria-hidden="true" />
-              {getMessage('snapshotTitle')}
-            </Flex>
-          </Dialog.Title>
-          <Dialog.Description size="2" color="gray">
-            {getMessage('snapshotDescription')}
-          </Dialog.Description>
+      <WizardModal
+        open={open}
+        onOpenChange={onOpenChange}
+        data-testid="wizard-snapshot"
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+          const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[aria-label]');
+          input?.focus();
+        }}
+      >
+        <WizardModal.Header
+          icon={Camera}
+          title={getMessage('snapshotTitle')}
+          description={getMessage('snapshotDescription')}
+        />
 
-          <Box mt="4">
-            <Flex direction="column" gap="3">
-              {/* Name + category inline (category icon left of the input) */}
-              <Flex direction="column" gap="1">
-                <Text size="2" weight="medium">
-                  {getMessage('sessionNameLabel')}
-                </Text>
-                <Flex align="center" gap="2">
-                  <CategoryPicker value={categoryId as any} onChange={setCategoryId} />
-                  <Box style={{ flex: 1 }}>
-                    <TextField.Root
-                      data-testid="wizard-snapshot-field-name"
-                      value={sessionName}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setSessionName(e.target.value)
-                      }
-                      placeholder={getMessage('sessionNamePlaceholder')}
-                      maxLength={100}
-                      aria-label={getMessage('sessionNameLabel')}
-                      style={{ width: '100%' }}
-                    />
-                  </Box>
-                </Flex>
-              </Flex>
-
+        <WizardModal.Body>
+          <Flex direction="column" gap="3">
+            <Flex direction="column" gap="1">
               <Text size="2" weight="medium">
-                {getMessage('snapshotSelectTabs')}
+                {getMessage('sessionNameLabel')}
               </Text>
-              {isCapturing ? (
-                <Text size="2" color="gray">
-                  {getMessage('loadingText')}
-                </Text>
-              ) : treeData ? (
-                <TabTree
-                  data={treeData}
-                  selectedTabIds={selectedTabIds}
-                  onSelectionChange={setSelectedTabIds}
-                  maxHeight={280}
-                />
-              ) : null}
-
-              {/* Note */}
-              <Flex direction="column" gap="1">
-                <Text size="2" weight="medium">
-                  {getMessage('sessionNoteLabel')}
-                </Text>
-                <TextArea
-                  data-testid="wizard-snapshot-field-notes"
-                  value={note}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNote(e.target.value)}
-                  placeholder={getMessage('sessionNotePlaceholder')}
-                  resize="vertical"
-                  rows={3}
-                />
+              <Flex align="center" gap="2">
+                <CategoryPicker value={categoryId as any} onChange={setCategoryId} />
+                <Box style={{ flex: 1 }}>
+                  <TextField.Root
+                    data-testid="wizard-snapshot-field-name"
+                    value={sessionName}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setSessionName(e.target.value)
+                    }
+                    placeholder={getMessage('sessionNamePlaceholder')}
+                    maxLength={100}
+                    aria-label={getMessage('sessionNameLabel')}
+                    style={{ width: '100%' }}
+                  />
+                </Box>
               </Flex>
             </Flex>
-          </Box>
 
-          {saveError && (
-            <Callout.Root color="red" variant="soft" mt="3">
-              <Callout.Icon>
-                <AlertCircle size={16} />
-              </Callout.Icon>
-              <Callout.Text>{saveError}</Callout.Text>
-            </Callout.Root>
-          )}
+            <Text size="2" weight="medium">
+              {getMessage('snapshotSelectTabs')}
+            </Text>
+            {isCapturing ? (
+              <Text size="2" color="gray">
+                {getMessage('loadingText')}
+              </Text>
+            ) : treeData ? (
+              <TabTree
+                data={treeData}
+                selectedTabIds={selectedTabIds}
+                onSelectionChange={setSelectedTabIds}
+                maxHeight={280}
+              />
+            ) : null}
 
-          <Separator size="4" mt="4" style={{ opacity: 0.3 }} />
+            <Flex direction="column" gap="1">
+              <Text size="2" weight="medium">
+                {getMessage('sessionNoteLabel')}
+              </Text>
+              <TextArea
+                data-testid="wizard-snapshot-field-notes"
+                value={note}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNote(e.target.value)}
+                placeholder={getMessage('sessionNotePlaceholder')}
+                resize="vertical"
+                rows={3}
+              />
+            </Flex>
 
-          {/* Footer */}
-          <Flex gap="3" justify="end" mt="3">
-            <Dialog.Close>
-              <Button data-testid="wizard-snapshot-btn-cancel" variant="soft" color="gray" disabled={isSaving}>
-                {getMessage('cancel')}
-              </Button>
-            </Dialog.Close>
-            <Button
-              data-testid="wizard-snapshot-btn-save"
-              onClick={handleSave}
-              disabled={!sessionName.trim() || selectedTabIds.size === 0 || isCapturing || isSaving}
-            >
-              <Camera size={14} aria-hidden="true" />
-              {getMessage('snapshotSaveButton')}
-            </Button>
+            {saveError && (
+              <Callout.Root color="red" variant="soft">
+                <Callout.Icon>
+                  <AlertCircle size={16} />
+                </Callout.Icon>
+                <Callout.Text>{saveError}</Callout.Text>
+              </Callout.Root>
+            )}
           </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
+        </WizardModal.Body>
+
+        <WizardModal.Footer>
+          <Dialog.Close>
+            <Button data-testid="wizard-snapshot-btn-cancel" variant="soft" color="gray" disabled={isSaving}>
+              {getMessage('cancel')}
+            </Button>
+          </Dialog.Close>
+          <Button
+            data-testid="wizard-snapshot-btn-save"
+            onClick={handleSave}
+            disabled={!sessionName.trim() || selectedTabIds.size === 0 || isCapturing || isSaving}
+          >
+            <Camera size={14} aria-hidden="true" />
+            {getMessage('snapshotSaveButton')}
+          </Button>
+        </WizardModal.Footer>
+      </WizardModal>
     </SessionsTheme>
   );
 }

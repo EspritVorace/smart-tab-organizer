@@ -1,10 +1,11 @@
-import { Box, Button, Dialog, Flex, ScrollArea } from '@radix-ui/themes';
+import { Box, Button, Dialog, Flex } from '@radix-ui/themes';
 import { Edit2, Plus, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getMessage } from '@/utils/i18n';
 import { DomainRulesTheme } from '@/components/Form/themes';
+import { WizardModal } from '@/components/UI/WizardModal';
 import { WizardStepper } from '@/components/UI/WizardStepper/WizardStepper';
 import { WizardStep1Identity } from './WizardStep1Identity';
 import { WizardStep2Config } from './WizardStep2Config';
@@ -70,6 +71,13 @@ const STEP_LABELS_KEYS = [
   'wizardStepConfig',
   'wizardStepOptions',
   'wizardStepSummary',
+] as const;
+
+const STEP_DESCRIPTION_KEYS = [
+  'createRuleStepIdentityDescription',
+  'createRuleStepConfigDescription',
+  'createRuleStepOptionsDescription',
+  'createRuleStepSummaryDescription',
 ] as const;
 
 export function RuleWizardModal({
@@ -362,27 +370,28 @@ export function RuleWizardModal({
     urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
   };
 
+  const description = isEditing
+    ? getMessage('editRuleDescription')
+    : getMessage(STEP_DESCRIPTION_KEYS[step]);
+
   return (
     <DomainRulesTheme>
-      <Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
-        <Dialog.Content
-          data-testid="wizard-rule"
-          style={{ maxWidth: 560 }}
-          onOpenAutoFocus={(e) => {
-            e.preventDefault();
-            const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[name="label"]');
-            input?.focus();
-          }}
-        >
-          <Dialog.Title>
-            <Flex align="center" gap="2">
-              {isEditing ? <Edit2 size={18} aria-hidden="true" /> : <Plus size={18} aria-hidden="true" />}
-              {title}
-            </Flex>
-          </Dialog.Title>
-          <Dialog.Description style={{ display: 'none' }}>
-            {isEditing ? getMessage('editRuleDescription') : getMessage('createRuleDescription')}
-          </Dialog.Description>
+      <WizardModal
+        open={isOpen}
+        onOpenChange={handleOpenChange}
+        data-testid="wizard-rule"
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+          const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[name="label"]');
+          input?.focus();
+        }}
+      >
+        <form onSubmit={handleSubmit(handleFormSubmit)} style={{ display: 'contents' }}>
+          <WizardModal.Header
+            icon={isEditing ? Edit2 : Plus}
+            title={title}
+            description={description}
+          />
 
           {/* aria-live region for step announcements */}
           <div
@@ -394,7 +403,6 @@ export function RuleWizardModal({
             {stepAnnouncement}
           </div>
 
-          {/* Wizard stepper (creation only) */}
           {!isEditing && (
             <WizardStepper
               data-testid="wizard-rule-stepper"
@@ -404,117 +412,110 @@ export function RuleWizardModal({
             />
           )}
 
-          <form onSubmit={handleSubmit(handleFormSubmit)}>
-            <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '55vh' }}>
-              <Flex direction="column" gap="4" mt="2" pr="3">
-                {isEditing ? (
-                  /* ── Edit mode ── */
-                  <EditSummaryView
-                    control={control}
-                    errors={errors}
-                    configMode={configMode}
-                    onApplyConfig={handleApplyConfig}
-                    presetCategories={presetCategories}
-                    isLoadingPresets={isLoadingPresets}
-                    presetName={presetName}
-                    groupNameSource={groupNameSource as GroupNameSourceValue}
-                    deduplicationEnabled={deduplicationEnabled}
-                    currentConfigValues={currentConfigValues}
-                  />
-                ) : (
-                  /* ── Creation wizard steps ── */
-                  <>
-                    {step === 0 && (
-                      <Box data-testid="wizard-rule-step-1">
-                        <WizardStep1Identity control={control} errors={errors} />
-                      </Box>
-                    )}
-                    {step === 1 && (
-                      <Box data-testid="wizard-rule-step-2">
-                        <WizardStep2Config
-                          control={control}
-                          errors={errors}
-                          configMode={configMode}
-                          onConfigModeChange={handleConfigModeChange}
-                          presetCategories={presetCategories}
-                          isLoadingPresets={isLoadingPresets}
-                          handlePresetChange={handlePresetChange}
-                          groupNameSource={groupNameSource as GroupNameSourceValue}
-                        />
-                      </Box>
-                    )}
-                    {step === 2 && (
-                      <Box data-testid="wizard-rule-step-3">
-                        <WizardStep3Options control={control} deduplicationEnabled={deduplicationEnabled} errors={errors} />
-                      </Box>
-                    )}
-                    {step === 3 && (
-                      <Box data-testid="wizard-rule-step-4">
-                        <WizardStep4Summary
-                          values={getValues() as DomainRule}
-                          configMode={configMode}
-                          presetName={presetName}
-                          onEditStep={handleEditStep}
-                        />
-                      </Box>
-                    )}
-                  </>
-                )}
-              </Flex>
-            </ScrollArea>
-
-            {/* Step error */}
-            {stepError && (
-              <Flex mt="2">
-                <span style={{ color: 'var(--red-11)', fontSize: 13 }}>{stepError}</span>
-              </Flex>
-            )}
-
-            {/* Footer buttons */}
-            <Flex gap="3" justify="end" mt="4">
+          <WizardModal.Body>
+            <Flex direction="column" gap="4">
               {isEditing ? (
-                <>
-                  <Dialog.Close>
-                    <Button variant="soft" color="gray" type="button">{getMessage('cancel')}</Button>
-                  </Dialog.Close>
-                  <Button data-testid="wizard-rule-btn-save" type="submit">{getMessage('save')}</Button>
-                </>
+                <EditSummaryView
+                  control={control}
+                  errors={errors}
+                  configMode={configMode}
+                  onApplyConfig={handleApplyConfig}
+                  presetCategories={presetCategories}
+                  isLoadingPresets={isLoadingPresets}
+                  presetName={presetName}
+                  groupNameSource={groupNameSource as GroupNameSourceValue}
+                  deduplicationEnabled={deduplicationEnabled}
+                  currentConfigValues={currentConfigValues}
+                />
               ) : (
                 <>
                   {step === 0 && (
-                    <Dialog.Close>
-                      <Button variant="soft" color="gray" type="button">{getMessage('cancel')}</Button>
-                    </Dialog.Close>
+                    <Box data-testid="wizard-rule-step-1">
+                      <WizardStep1Identity control={control} errors={errors} />
+                    </Box>
                   )}
-                  {step > 0 && (
-                    <Button variant="soft" color="gray" type="button" onClick={handlePrev}>
-                      {getMessage('previous')}
-                    </Button>
+                  {step === 1 && (
+                    <Box data-testid="wizard-rule-step-2">
+                      <WizardStep2Config
+                        control={control}
+                        errors={errors}
+                        configMode={configMode}
+                        onConfigModeChange={handleConfigModeChange}
+                        presetCategories={presetCategories}
+                        isLoadingPresets={isLoadingPresets}
+                        handlePresetChange={handlePresetChange}
+                        groupNameSource={groupNameSource as GroupNameSourceValue}
+                      />
+                    </Box>
                   )}
-                  {step < 3 && (
-                    <Button data-testid="wizard-rule-btn-next" type="button" onClick={handleNext}>{getMessage('next')}</Button>
+                  {step === 2 && (
+                    <Box data-testid="wizard-rule-step-3">
+                      <WizardStep3Options control={control} deduplicationEnabled={deduplicationEnabled} errors={errors} />
+                    </Box>
                   )}
                   {step === 3 && (
-                    <Button data-testid="wizard-rule-btn-create" type="submit">{getMessage('create')}</Button>
+                    <Box data-testid="wizard-rule-step-4">
+                      <WizardStep4Summary
+                        values={getValues() as DomainRule}
+                        configMode={configMode}
+                        presetName={presetName}
+                        onEditStep={handleEditStep}
+                      />
+                    </Box>
                   )}
                 </>
               )}
+              {stepError && (
+                <Flex>
+                  <span style={{ color: 'var(--red-11)', fontSize: 13 }}>{stepError}</span>
+                </Flex>
+              )}
             </Flex>
-          </form>
+          </WizardModal.Body>
 
-          {/* Close (X) button */}
-          <Dialog.Close>
-            <Button
-              variant="ghost"
-              size="1"
-              aria-label={getMessage('cancel')}
-              style={{ position: 'absolute', top: '16px', right: '16px' }}
-            >
-              <X size={16} aria-hidden="true" />
-            </Button>
-          </Dialog.Close>
-        </Dialog.Content>
-      </Dialog.Root>
+          <WizardModal.Footer>
+            {isEditing ? (
+              <>
+                <Dialog.Close>
+                  <Button variant="soft" color="gray" type="button">{getMessage('cancel')}</Button>
+                </Dialog.Close>
+                <Button data-testid="wizard-rule-btn-save" type="submit">{getMessage('save')}</Button>
+              </>
+            ) : (
+              <>
+                {step === 0 && (
+                  <Dialog.Close>
+                    <Button variant="soft" color="gray" type="button">{getMessage('cancel')}</Button>
+                  </Dialog.Close>
+                )}
+                {step > 0 && (
+                  <Button variant="soft" color="gray" type="button" onClick={handlePrev}>
+                    {getMessage('previous')}
+                  </Button>
+                )}
+                {step < 3 && (
+                  <Button data-testid="wizard-rule-btn-next" type="button" onClick={handleNext}>{getMessage('next')}</Button>
+                )}
+                {step === 3 && (
+                  <Button data-testid="wizard-rule-btn-create" type="submit">{getMessage('create')}</Button>
+                )}
+              </>
+            )}
+          </WizardModal.Footer>
+        </form>
+
+        {/* Close (X) button */}
+        <Dialog.Close>
+          <Button
+            variant="ghost"
+            size="1"
+            aria-label={getMessage('cancel')}
+            style={{ position: 'absolute', top: '16px', right: '16px' }}
+          >
+            <X size={16} aria-hidden="true" />
+          </Button>
+        </Dialog.Close>
+      </WizardModal>
     </DomainRulesTheme>
   );
 }
