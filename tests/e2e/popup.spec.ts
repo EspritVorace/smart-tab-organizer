@@ -88,7 +88,16 @@ test.describe('[US-PO01] Toolbar', () => {
 // Pinned sessions list
 // ---------------------------------------------------------------------------
 test.describe('[US-PO02] Pinned sessions list', () => {
-  test('pinned sessions section is hidden when no pinned sessions exist', async ({ extensionContext, extensionId }) => {
+  test('pinned sections is fully hidden when no sessions exist at all', async ({ extensionContext, extensionId }) => {
+    const page = await extensionContext.newPage();
+    await goToPopup(page, extensionId);
+
+    await expect(page.getByText('Pinned sessions')).toBeHidden();
+    await expect(page.getByTestId('popup-pinned-empty-toggle')).toBeHidden();
+    await page.close();
+  });
+
+  test('collapsible empty hint shows when sessions exist but none are pinned', async ({ extensionContext, extensionId }) => {
     // Only snapshots, no pinned sessions
     const snapshot = createTestSession({ name: 'Just A Snapshot' });
     await seedSessions(extensionContext, [snapshot]);
@@ -96,7 +105,9 @@ test.describe('[US-PO02] Pinned sessions list', () => {
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
-    await expect(page.getByText('Pinned sessions')).toBeHidden();
+    await expect(page.getByTestId('popup-pinned-empty-toggle')).toBeVisible();
+    await expect(page.getByText('Pinned sessions')).toBeVisible();
+    await expect(page.getByTestId('popup-pinned-empty')).toBeVisible();
     await page.close();
   });
 
