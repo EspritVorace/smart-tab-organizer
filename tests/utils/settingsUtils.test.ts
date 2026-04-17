@@ -36,9 +36,9 @@ describe('settingsUtils', () => {
       expect(settings.deduplicateUnmatchedDomains).toBe(false);
     });
 
-    it('retourne keep-new par défaut pour deduplicationKeepStrategy si absent du storage', async () => {
+    it('retourne keep-grouped par défaut pour deduplicationKeepStrategy si absent du storage', async () => {
       const settings = await getSyncSettings();
-      expect(settings.deduplicationKeepStrategy).toBe('keep-new');
+      expect(settings.deduplicationKeepStrategy).toBe('keep-grouped');
     });
 
     it('retourne les valeurs par défaut en cas d\'erreur', async () => {

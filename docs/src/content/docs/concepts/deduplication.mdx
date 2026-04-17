@@ -12,7 +12,7 @@ import ConditionsDeclenchement from '../../../components/ConditionsDeclenchement
 - Une notification avec bouton "Annuler" permet de revenir en arrière pendant 5 secondes.
 </Aside>
 
-Quand vous ouvrez un lien déjà ouvert dans votre navigateur, SmartTab Organizer conserve un seul onglet et ferme l'autre. La stratégie "quel onglet garder" (voir plus bas) détermine lequel survit. Pour les nouvelles installations, c'est le nouvel onglet qui est conservé par défaut (l'ancien est fermé) ; les utilisateurs existants conservent leur comportement historique (l'ancien onglet reste focusé) tant qu'ils n'ont pas modifié le réglage.
+Quand vous ouvrez un lien déjà ouvert dans votre navigateur, SmartTab Organizer conserve un seul onglet et ferme l'autre. La stratégie "quel onglet garder" (voir plus bas) détermine lequel survit. Pour les nouvelles installations, l'onglet qui appartient à un groupe est prioritaire (sinon c'est l'onglet existant qui reste) ; les utilisateurs existants conservent leur comportement historique (l'ancien onglet reste focusé) tant qu'ils n'ont pas modifié le réglage.
 
 ## Conditions pour qu'une déduplication se déclenche
 
@@ -103,8 +103,8 @@ Chaque règle possède son propre toggle "Déduplication". S'il est désactivé 
 Dans la page Paramètres, section **Portée de la déduplication**, vous pouvez choisir lequel des deux onglets en double survit :
 
 - **L'onglet existant** : comportement historique, l'onglet déjà ouvert est conservé et le nouveau fermé. Utile quand le tab existant a un état (scroll, formulaire, session) que vous ne voulez pas perdre. Les utilisateurs existants démarrent sur ce réglage pour préserver leur comportement habituel.
-- **Le nouvel onglet ouvert** (défaut pour les nouvelles installations) : le nouvel onglet survit, l'ancien est fermé. Utile quand la version fraîchement chargée doit primer.
-- **L'onglet groupé gagne, sinon conserver l'existant** : si l'un des deux onglets fait partie d'un groupe et l'autre pas, le groupé survit. Sinon retombe sur le comportement "L'onglet existant". Cette option protège notamment les onglets restaurés depuis une session (qui portent leur groupe) contre une fermeture au profit d'une copie déjà ouverte en dehors du groupe.
+- **Le nouvel onglet ouvert** : le nouvel onglet survit, l'ancien est fermé. Utile quand la version fraîchement chargée doit primer. Attention : si l'ancien onglet appartenait à un groupe, il disparaît du groupe.
+- **L'onglet groupé gagne, sinon conserver l'existant** (défaut pour les nouvelles installations) : si l'un des deux onglets fait partie d'un groupe et l'autre pas, le groupé survit. Sinon retombe sur le comportement "L'onglet existant". Cette option protège notamment les onglets restaurés depuis une session (qui portent leur groupe) contre une fermeture au profit d'une copie déjà ouverte en dehors du groupe, et évite qu'un clic sur un lien ne fasse sauter l'onglet hors de son groupe.
 
 <Aside type="note">
 Ce réglage est global à l'extension et s'applique à toutes les règles de domaine. Il est désactivé visuellement si la déduplication globale est off.

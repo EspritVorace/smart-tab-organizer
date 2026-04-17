@@ -138,7 +138,7 @@ Historiquement, la déduplication gardait toujours l'onglet existant (le plus an
   - `keep-old` : conserver l'onglet existant (comportement historique).
   - `keep-new` : conserver le nouvel onglet et fermer l'existant.
   - `keep-grouped` : conserver celui qui est dans un groupe, sinon retomber sur `keep-old`.
-- [ ] Pour les nouvelles installations, la valeur par défaut est `keep-new`.
+- [ ] Pour les nouvelles installations, la valeur par défaut est `keep-grouped` afin d'éviter qu'un doublon externe vienne chasser un onglet déjà rangé dans un groupe ; en cas d'égalité (aucun ou deux onglets groupés), on retombe sur `keep-old`.
 - [ ] Pour les installations existantes (détectées par la présence de `domainRules` en storage), la migration pin `keep-old` au premier démarrage pour préserver le comportement historique. L'utilisateur peut ensuite changer via l'UI.
 - [ ] Le radio est désactivé visuellement quand la déduplication globale est off.
 - [ ] En mode `keep-grouped`, si les deux onglets sont groupés ou aucun, on garde l'ancien (fallback explicite).

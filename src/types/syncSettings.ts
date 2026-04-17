@@ -28,7 +28,7 @@ export const defaultSyncSettings: SyncSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
   deduplicateUnmatchedDomains: false,
-  deduplicationKeepStrategy: 'keep-new',
+  deduplicationKeepStrategy: 'keep-grouped',
   domainRules: [],
   notifyOnGrouping: true,
   notifyOnDeduplication: true

@@ -8,7 +8,7 @@ const TEST_DEFAULTS: SyncSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
   deduplicateUnmatchedDomains: false,
-  deduplicationKeepStrategy: 'keep-new',
+  deduplicationKeepStrategy: 'keep-grouped',
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
   domainRules: [
@@ -295,7 +295,7 @@ describe('initializeDefaults — upgrade path', () => {
     expect(merged.deduplicationKeepStrategy).toBe('keep-grouped');
   });
 
-  it('fresh install uses the new defaults (keep-new, deduplicateUnmatchedDomains=false)', async () => {
+  it('fresh install uses the new defaults (keep-grouped, deduplicateUnmatchedDomains=false)', async () => {
     vi.stubGlobal('fetch', mockOkFetch(TEST_DEFAULTS));
     const { initializeDefaults } = await import('../src/utils/migration');
     const { getSyncSettings } = await import('../src/utils/settingsUtils');
@@ -303,7 +303,7 @@ describe('initializeDefaults — upgrade path', () => {
     await initializeDefaults();
 
     const stored = await getSyncSettings();
-    expect(stored.deduplicationKeepStrategy).toBe('keep-new');
+    expect(stored.deduplicationKeepStrategy).toBe('keep-grouped');
     expect(stored.deduplicateUnmatchedDomains).toBe(false);
   });
 
