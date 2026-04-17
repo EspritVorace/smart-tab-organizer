@@ -30,7 +30,7 @@
   "deduplicationKeepStrategyDescription": { "message": "Chooses which of the two matching tabs survives. 'Grouped tab wins' protects tabs restored from a session from being closed in favour of an ungrouped copy." },
   "deduplicationKeepStrategyOldLabel": { "message": "The existing tab" },
   "deduplicationKeepStrategyNewLabel": { "message": "The newly opened tab" },
-  "deduplicationKeepStrategyGroupedLabel": { "message": "Grouped tab wins, otherwise keep existing (default)" },
+  "deduplicationKeepStrategyGroupedLabel": { "message": "Grouped tab wins, otherwise keep existing" },
   "notificationGroupingTitle": { "message": "📁 Tabs Grouped" },
   "notificationGroupingMessage": { "message": "Tabs grouped into \"{groupName}\"" },
   "notificationDeduplicationTitle": { "message": "✂️ Duplicate Closed" },

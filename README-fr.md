@@ -47,7 +47,7 @@ Clic molette ou clic droit → « Ouvrir dans un nouvel onglet » sur un site co
 
 Ouvrir une page déjà ouverte ferme le doublon et ne conserve qu'un seul onglet.
 La sensibilité de correspondance est configurable par règle : URL exacte, URL sans paramètres ignorés, ou « includes ».
-Vous choisissez lequel des deux onglets survit : l'existant (par défaut), le nouveau, ou celui qui appartient à un groupe (utile lors de la restauration d'une session).
+Vous choisissez lequel des deux onglets survit : le groupé (par défaut, empêche qu'un clic fasse sauter un onglet hors de son groupe), l'existant, ou le nouveau.
 
 <p align="center">
   <img src="assets/readme/gifs/dedup.gif" alt="Vidéo de déduplication">

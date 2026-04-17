@@ -54,24 +54,6 @@ export async function initializeDefaults(): Promise<void> {
     await setSyncSettings(defaults);
   } else {
     logger.debug("Merging existing with JSON defaults...");
-    // Preserve legacy behavior for existing installs when we flip a default:
-    // if these keys are not yet stored, pin them to their historical value so
-    // upgrading users keep the dedup behavior they already know.
-    const legacyGuard = await browser.storage.sync.get([
-      'deduplicationKeepStrategy',
-      'deduplicateUnmatchedDomains',
-    ]);
-    const legacyWrites: Record<string, unknown> = {};
-    if (legacyGuard.deduplicationKeepStrategy === undefined) {
-      legacyWrites.deduplicationKeepStrategy = 'keep-old';
-    }
-    if (legacyGuard.deduplicateUnmatchedDomains === undefined) {
-      legacyWrites.deduplicateUnmatchedDomains = true;
-    }
-    if (Object.keys(legacyWrites).length > 0) {
-      await browser.storage.sync.set(legacyWrites);
-    }
-
     const currentSettings = await getSyncSettings();
     const merged = mergeDeep(defaults, currentSettings);
 

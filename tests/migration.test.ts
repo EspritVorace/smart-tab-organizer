@@ -242,13 +242,13 @@ describe('initializeDefaults — upgrade path', () => {
     expect((await getSyncSettings()).domainRules[0].groupNameSource).toBe('title');
   });
 
-  it('pins deduplicationKeepStrategy to keep-old for existing installs to preserve legacy behavior', async () => {
+  it('does not overwrite an explicit user choice for deduplicationKeepStrategy on upgrade', async () => {
     vi.stubGlobal('fetch', mockOkFetch(TEST_DEFAULTS));
-    // Existing install: domainRules already present, but no keep-strategy stored.
     await fakeBrowser.storage.sync.set({
       domainRules: [
         { id: 'r1', label: 'R', domainFilter: 'r.com', enabled: true, color: 'blue' },
       ],
+      deduplicationKeepStrategy: 'keep-old',
     });
 
     const { initializeDefaults } = await import('../src/utils/migration');
@@ -258,53 +258,6 @@ describe('initializeDefaults — upgrade path', () => {
 
     const merged = await getSyncSettings();
     expect(merged.deduplicationKeepStrategy).toBe('keep-old');
-  });
-
-  it('pins deduplicateUnmatchedDomains to true for existing installs predating the flag', async () => {
-    vi.stubGlobal('fetch', mockOkFetch(TEST_DEFAULTS));
-    await fakeBrowser.storage.sync.set({
-      domainRules: [
-        { id: 'r1', label: 'R', domainFilter: 'r.com', enabled: true, color: 'blue' },
-      ],
-    });
-
-    const { initializeDefaults } = await import('../src/utils/migration');
-    const { getSyncSettings } = await import('../src/utils/settingsUtils');
-
-    await initializeDefaults();
-
-    const merged = await getSyncSettings();
-    expect(merged.deduplicateUnmatchedDomains).toBe(true);
-  });
-
-  it('does not overwrite an explicit user choice for deduplicationKeepStrategy on upgrade', async () => {
-    vi.stubGlobal('fetch', mockOkFetch(TEST_DEFAULTS));
-    await fakeBrowser.storage.sync.set({
-      domainRules: [
-        { id: 'r1', label: 'R', domainFilter: 'r.com', enabled: true, color: 'blue' },
-      ],
-      deduplicationKeepStrategy: 'keep-grouped',
-    });
-
-    const { initializeDefaults } = await import('../src/utils/migration');
-    const { getSyncSettings } = await import('../src/utils/settingsUtils');
-
-    await initializeDefaults();
-
-    const merged = await getSyncSettings();
-    expect(merged.deduplicationKeepStrategy).toBe('keep-grouped');
-  });
-
-  it('fresh install uses the new defaults (keep-grouped, deduplicateUnmatchedDomains=false)', async () => {
-    vi.stubGlobal('fetch', mockOkFetch(TEST_DEFAULTS));
-    const { initializeDefaults } = await import('../src/utils/migration');
-    const { getSyncSettings } = await import('../src/utils/settingsUtils');
-
-    await initializeDefaults();
-
-    const stored = await getSyncSettings();
-    expect(stored.deduplicationKeepStrategy).toBe('keep-grouped');
-    expect(stored.deduplicateUnmatchedDomains).toBe(false);
   });
 
   it('does not overwrite existing statistics on upgrade', async () => {

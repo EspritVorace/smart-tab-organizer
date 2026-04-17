@@ -30,7 +30,7 @@
   "deduplicationKeepStrategyDescription": { "message": "Choisit lequel des deux onglets identiques survit. L'option 'L'onglet groupé gagne' protège les onglets restaurés depuis une session contre une fermeture au profit d'une copie non groupée." },
   "deduplicationKeepStrategyOldLabel": { "message": "L'onglet existant" },
   "deduplicationKeepStrategyNewLabel": { "message": "Le nouvel onglet ouvert" },
-  "deduplicationKeepStrategyGroupedLabel": { "message": "L'onglet groupé gagne, sinon conserver l'existant (par défaut)" },
+  "deduplicationKeepStrategyGroupedLabel": { "message": "L'onglet groupé gagne, sinon conserver l'existant" },
   "notificationGroupingTitle": { "message": "📁 Onglets Regroupés" },
   "notificationGroupingMessage": { "message": "Onglets regroupés dans \"{groupName}\"" },
   "notificationDeduplicationTitle": { "message": "✂️ Doublon Fermé" },
