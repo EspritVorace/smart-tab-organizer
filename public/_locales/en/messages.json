@@ -412,11 +412,11 @@
   "popupAutoGroup": { "message": "Auto group" },
   "popupDedup": { "message": "Deduplicate" },
 
-  "domainRulesPageDescription": { "message": "Create rules that automatically group new tabs by domain or URL pattern when you open them." },
+  "domainRulesPageDescription": { "message": "Create rules that automatically group and deduplicate tabs based on their domain or URL pattern." },
   "sessionsPageDescription": { "message": "Capture your open tabs as sessions you can restore later. Pin a session to access it in one click from the popup." },
   "statisticsPageDescription": { "message": "Track how many tab groups have been created and how many duplicate tabs have been closed automatically." },
   "importExportPageDescription": { "message": "Back up or restore your rules and sessions as JSON files, with conflict resolution on import." },
-  "settingsPageDescription": { "message": "Configure global notifications and choose which tabs participate in deduplication." },
+  "settingsPageDescription": { "message": "Configure the extension's global preferences and behavior." },
   "sessionsEmptyStateTitle": { "message": "No saved sessions." },
   "noSessionsFound": { "message": "No sessions found" },
   "sessionsEmptyStateDescription": { "message": "Take a snapshot to capture your current tabs. Pin a session to access it from the popup." },
