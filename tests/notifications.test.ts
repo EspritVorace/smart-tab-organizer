@@ -14,12 +14,25 @@ import * as dedupSkip from '../src/utils/deduplicationSkip';
 const mockTabsUngroup = vi.fn();
 (fakeBrowser.tabs as any).ungroup = mockTabsUngroup;
 
+// tabs.group and tabGroups.get are used by the undo "reopen_tab" flow to
+// restore a tab's group membership. Fake-browser does not ship them.
+const mockTabsGroup = vi.fn();
+const mockTabGroupsGet = vi.fn();
+(fakeBrowser.tabs as any).group = mockTabsGroup;
+(fakeBrowser as any).tabGroups = { get: mockTabGroupsGet };
+
 beforeEach(() => {
   fakeBrowser.reset();
   mockTabsUngroup.mockReset();
   mockTabsUngroup.mockResolvedValue(undefined);
+  mockTabsGroup.mockReset();
+  mockTabsGroup.mockResolvedValue(undefined);
+  mockTabGroupsGet.mockReset();
+  mockTabGroupsGet.mockResolvedValue({ id: 1 });
   // Reattach after reset.
   (fakeBrowser.tabs as any).ungroup = mockTabsUngroup;
+  (fakeBrowser.tabs as any).group = mockTabsGroup;
+  (fakeBrowser as any).tabGroups = { get: mockTabGroupsGet };
 });
 
 afterEach(() => {
@@ -149,8 +162,72 @@ describe('executeNotificationUndoById', () => {
     expect(markSpy).toHaveBeenCalledWith('https://example.com');
     const tabs = await fakeBrowser.tabs.query({});
     expect(tabs.some(t => t.url === 'https://example.com')).toBe(true);
+    // No groupId provided: group APIs are not invoked.
+    expect(mockTabsGroup).not.toHaveBeenCalled();
+    expect(mockTabGroupsGet).not.toHaveBeenCalled();
 
     markSpy.mockRestore();
+  });
+
+  it('re-attaches the reopened tab to its original group when the group still exists', async () => {
+    await fakeBrowser.windows.create({ focused: true });
+
+    const id = await showNotification({
+      title: 'Deduped',
+      message: 'Tab closed',
+      undoAction: {
+        type: 'reopen_tab',
+        data: { url: 'https://example.com', windowId: 1, groupId: 42, title: 'T', index: 2 },
+      },
+    });
+
+    await executeNotificationUndoById(id);
+
+    expect(mockTabGroupsGet).toHaveBeenCalledWith(42);
+    expect(mockTabsGroup).toHaveBeenCalledWith(
+      expect.objectContaining({ groupId: 42, tabIds: expect.arrayContaining([expect.any(Number)]) }),
+    );
+  });
+
+  it('falls back to a standalone group when the original group is gone', async () => {
+    await fakeBrowser.windows.create({ focused: true });
+    mockTabGroupsGet.mockRejectedValueOnce(new Error('No group with id 42'));
+
+    const id = await showNotification({
+      title: 'Deduped',
+      message: 'Tab closed',
+      undoAction: {
+        type: 'reopen_tab',
+        data: { url: 'https://example.com', windowId: 1, groupId: 42 },
+      },
+    });
+
+    await executeNotificationUndoById(id);
+
+    expect(mockTabGroupsGet).toHaveBeenCalledWith(42);
+    // Second call is the fallback without groupId.
+    const fallbackCall = mockTabsGroup.mock.calls.find(
+      (args) => !('groupId' in (args[0] ?? {})),
+    );
+    expect(fallbackCall).toBeDefined();
+  });
+
+  it('skips re-grouping when the closed tab was ungrouped', async () => {
+    await fakeBrowser.windows.create({ focused: true });
+
+    const id = await showNotification({
+      title: 'Deduped',
+      message: 'Tab closed',
+      undoAction: {
+        type: 'reopen_tab',
+        data: { url: 'https://example.com', windowId: 1, groupId: -1 },
+      },
+    });
+
+    await executeNotificationUndoById(id);
+
+    expect(mockTabsGroup).not.toHaveBeenCalled();
+    expect(mockTabGroupsGet).not.toHaveBeenCalled();
   });
 
   it('returns false on a second call with the same ID (idempotent)', async () => {

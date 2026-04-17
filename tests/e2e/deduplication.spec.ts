@@ -17,6 +17,11 @@ test.describe('Deduplication', () => {
     await helpers.clearDomainRules();
     await helpers.setGlobalDeduplicationEnabled(true);
     await helpers.setGlobalGroupingEnabled(false); // Isolate deduplication tests
+    // Pin explicit values so "no rule" dedup fires and directionless
+    // count-based tests keep their semantics. Individual describes override
+    // when they target a specific strategy.
+    await helpers.setDeduplicateUnmatchedDomains(true);
+    await helpers.setDeduplicationKeepStrategy('keep-old');
     await helpers.resetStatistics();
   });
 
@@ -475,6 +480,83 @@ test.describe('Deduplication', () => {
       await helpers.waitForDeduplication();
       stats = await helpers.getStatistics();
       expect(stats.tabsDeduplicatedCount).toBe(2);
+    });
+  });
+
+  // ── 7. Keep strategy ──────────────────────────────────────────────────────
+
+  test.describe('Keep strategy [US-D009]', () => {
+    test('keep-old (default) closes the newly opened tab', async ({ helpers }) => {
+      await helpers.setDeduplicationKeepStrategy('keep-old');
+
+      const tab1 = await helpers.createTab('https://example.com/keep-old');
+      await helpers.waitForDeduplication();
+      const tab2 = await helpers.createTab('https://example.com/keep-old');
+      await helpers.waitForDeduplication();
+
+      expect(tab1.isClosed()).toBe(false);
+      expect(tab2.isClosed()).toBe(true);
+    });
+
+    test('keep-new closes the existing tab instead', async ({ helpers }) => {
+      await helpers.setDeduplicationKeepStrategy('keep-new');
+
+      const tab1 = await helpers.createTab('https://example.com/keep-new');
+      await helpers.waitForDeduplication();
+      const tab2 = await helpers.createTab('https://example.com/keep-new');
+      await helpers.waitForDeduplication();
+
+      expect(tab1.isClosed()).toBe(true);
+      expect(tab2.isClosed()).toBe(false);
+    });
+
+    test('keep-grouped keeps the grouped tab when only the existing one is grouped', async ({ helpers }) => {
+      await helpers.setDeduplicationKeepStrategy('keep-grouped');
+      await helpers.setGlobalGroupingEnabled(true);
+      await helpers.addDomainRule({
+        label: 'Grouped Rule',
+        domainFilter: 'example.com',
+        enabled: true,
+        deduplicationEnabled: true,
+        deduplicationMatchMode: 'exact',
+        groupNameSource: 'label',
+      });
+
+      const opener = await helpers.createTab('https://example.com/opener');
+      const tab1 = await helpers.createTabNaturally(opener, 'https://example.com/grouped-target');
+      await helpers.waitForGrouping();
+
+      // New ungrouped duplicate via plain chrome.tabs.create (no opener).
+      const tab2 = await helpers.createTab('https://example.com/grouped-target');
+      await helpers.waitForDeduplication();
+
+      // The grouped (existing) tab survives, the fresh ungrouped one is closed.
+      expect(tab1.isClosed()).toBe(false);
+      expect(tab2.isClosed()).toBe(true);
+    });
+
+    test('keep-grouped falls back to keep-old when neither tab is grouped', async ({ helpers }) => {
+      await helpers.setDeduplicationKeepStrategy('keep-grouped');
+
+      const tab1 = await helpers.createTab('https://example.com/ungrouped');
+      await helpers.waitForDeduplication();
+      const tab2 = await helpers.createTab('https://example.com/ungrouped');
+      await helpers.waitForDeduplication();
+
+      expect(tab1.isClosed()).toBe(false);
+      expect(tab2.isClosed()).toBe(true);
+    });
+
+    test('keep-grouped-or-new falls back to keep-new when neither tab is grouped', async ({ helpers }) => {
+      await helpers.setDeduplicationKeepStrategy('keep-grouped-or-new');
+
+      const tab1 = await helpers.createTab('https://example.com/grouped-or-new');
+      await helpers.waitForDeduplication();
+      const tab2 = await helpers.createTab('https://example.com/grouped-or-new');
+      await helpers.waitForDeduplication();
+
+      expect(tab1.isClosed()).toBe(true);
+      expect(tab2.isClosed()).toBe(false);
     });
   });
 });

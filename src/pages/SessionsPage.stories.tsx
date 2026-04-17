@@ -22,6 +22,7 @@ const mockSyncSettings: SyncSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
   deduplicateUnmatchedDomains: true,
+  deduplicationKeepStrategy: 'keep-old',
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
   domainRules: [],

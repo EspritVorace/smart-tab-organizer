@@ -13,6 +13,10 @@ test.describe('Combined Deduplication and Grouping', () => {
     await helpers.clearDomainRules();
     await helpers.setGlobalGroupingEnabled(true);
     await helpers.setGlobalDeduplicationEnabled(true);
+    // Pin the legacy dedup defaults these combined scenarios were written
+    // against (unmatched-domain dedup on, keep-old tie-breaker).
+    await helpers.setDeduplicateUnmatchedDomains(true);
+    await helpers.setDeduplicationKeepStrategy('keep-old');
     await helpers.resetStatistics();
   });
 

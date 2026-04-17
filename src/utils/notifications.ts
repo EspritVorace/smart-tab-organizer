@@ -19,6 +19,9 @@ export interface UngroupUndoData {
 export interface ReopenTabUndoData {
   url: string;
   windowId: number;
+  groupId?: number;
+  title?: string;
+  index?: number;
 }
 
 interface ShowNotificationOptions {
@@ -92,6 +95,28 @@ export function initNotificationListeners(): void {
 }
 
 /**
+ * Best-effort re-attachment of a reopened tab to its former group. Falls back
+ * to creating a standalone group if the original group no longer exists.
+ */
+async function restoreTabGroupMembership(tabId: number, groupId: number): Promise<void> {
+  const tabGroups = (browser as unknown as { tabGroups?: { get: (id: number) => Promise<unknown> } }).tabGroups;
+  try {
+    if (tabGroups && typeof tabGroups.get === 'function') {
+      await tabGroups.get(groupId);
+    }
+    await browser.tabs.group({ tabIds: [tabId], groupId });
+    logger.debug(`[UNDO] Reattached tab ${tabId} to group ${groupId}`);
+  } catch (err) {
+    logger.debug(`[UNDO] Original group ${groupId} unavailable, creating a fresh group:`, err);
+    try {
+      await browser.tabs.group({ tabIds: [tabId] });
+    } catch (fallbackErr) {
+      logger.warn('[UNDO] Could not re-group reopened tab:', fallbackErr);
+    }
+  }
+}
+
+/**
  * Execute the undo action
  */
 async function executeUndoAction(action: UndoAction): Promise<void> {
@@ -110,12 +135,19 @@ async function executeUndoAction(action: UndoAction): Promise<void> {
         const data = action.data as ReopenTabUndoData;
         // Mark URL to skip deduplication so it won't be immediately closed again
         markUrlToSkipDeduplication(data.url);
-        await browser.tabs.create({
+        const createProps: Browser.tabs.CreateProperties = {
           url: data.url,
           windowId: data.windowId,
-          active: true
-        });
+          active: true,
+        };
+        if (typeof data.index === 'number' && data.index >= 0) {
+          createProps.index = data.index;
+        }
+        const created = await browser.tabs.create(createProps);
         logger.debug(`[UNDO] Reopened tab: ${data.url}`);
+        if (typeof data.groupId === 'number' && data.groupId > 0 && typeof created.id === 'number') {
+          await restoreTabGroupMembership(created.id, data.groupId);
+        }
         break;
       }
     }

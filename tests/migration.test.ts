@@ -7,7 +7,8 @@ import type { SyncSettings, DomainRuleSetting } from '../src/types/syncSettings'
 const TEST_DEFAULTS: SyncSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
-  deduplicateUnmatchedDomains: true,
+  deduplicateUnmatchedDomains: false,
+  deduplicationKeepStrategy: 'keep-grouped-or-new',
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
   domainRules: [
@@ -239,6 +240,24 @@ describe('initializeDefaults — upgrade path', () => {
 
     await initializeDefaults();
     expect((await getSyncSettings()).domainRules[0].groupNameSource).toBe('title');
+  });
+
+  it('does not overwrite an explicit user choice for deduplicationKeepStrategy on upgrade', async () => {
+    vi.stubGlobal('fetch', mockOkFetch(TEST_DEFAULTS));
+    await fakeBrowser.storage.sync.set({
+      domainRules: [
+        { id: 'r1', label: 'R', domainFilter: 'r.com', enabled: true, color: 'blue' },
+      ],
+      deduplicationKeepStrategy: 'keep-old',
+    });
+
+    const { initializeDefaults } = await import('../src/utils/migration');
+    const { getSyncSettings } = await import('../src/utils/settingsUtils');
+
+    await initializeDefaults();
+
+    const merged = await getSyncSettings();
+    expect(merged.deduplicationKeepStrategy).toBe('keep-old');
   });
 
   it('does not overwrite existing statistics on upgrade', async () => {

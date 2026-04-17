@@ -23,6 +23,7 @@ export interface ExtensionHelpers {
   setGlobalGroupingEnabled: (enabled: boolean) => Promise<void>;
   setGlobalDeduplicationEnabled: (enabled: boolean) => Promise<void>;
   setDeduplicateUnmatchedDomains: (enabled: boolean) => Promise<void>;
+  setDeduplicationKeepStrategy: (strategy: 'keep-old' | 'keep-new' | 'keep-grouped' | 'keep-grouped-or-new') => Promise<void>;
   addDomainRule: (rule: DomainRuleConfig) => Promise<void>;
   clearDomainRules: () => Promise<void>;
   getSettings: () => Promise<any>;
@@ -255,6 +256,12 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
         await syncSet(sw, { deduplicateUnmatchedDomains: enabled });
       },
 
+      // Set which tab survives when a duplicate is detected
+      setDeduplicationKeepStrategy: async (strategy: 'keep-old' | 'keep-new' | 'keep-grouped' | 'keep-grouped-or-new') => {
+        const sw = await getServiceWorker();
+        await syncSet(sw, { deduplicationKeepStrategy: strategy });
+      },
+
       // Add a domain rule
       addDomainRule: async (rule: DomainRuleConfig) => {
         const sw = await getServiceWorker();
@@ -299,6 +306,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
             globalGroupingEnabled: true,
             globalDeduplicationEnabled: true,
             deduplicateUnmatchedDomains: true,
+            deduplicationKeepStrategy: 'keep-old',
             domainRules: [],
             notifyOnGrouping: true,
             notifyOnDeduplication: true,
