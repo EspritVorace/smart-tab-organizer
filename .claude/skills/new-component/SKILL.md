@@ -32,8 +32,9 @@ Checklist obligatoire pour tout nouveau composant dans smart-tab-organizer :
 - Préférer les primitives Radix (Dialog, Collapsible, Toolbar, RadioGroup) aux ARIA manuels
 
 ## Theming
-- Utiliser le wrapper de thème correspondant à la feature depuis `src/components/Form/themes/`
-- Couleurs : Sessions=indigo, DomainRules=purple, RegexPresets=cyan, Import=jade, Export=teal, Statistics=orange, Settings=gray
+- Une seule couleur d'accent : `indigo` (défaut Radix Themes). Ne pas introduire d'accent custom par feature.
+- `src/utils/themeConstants.ts` est conservé pour compat mais toutes les valeurs sont `indigo` : ne pas s'appuyer dessus pour différencier des features.
+- Utiliser les tokens Radix (`var(--accent-a3)`, `var(--gray-a2)`, etc.) plutôt que des couleurs hardcodées.
 
 ## CSS Modules (si hover actions)
 ```css
