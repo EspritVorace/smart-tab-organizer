@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Button, DropdownMenu, Flex, Text } from '@radix-ui/themes';
-import { Camera, ChevronDown, RotateCcw, Wand2 } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { browser } from 'wxt/browser';
 import { getMessage } from '@/utils/i18n';
 import { loadSessions } from '@/utils/sessionStorage';
@@ -29,6 +29,14 @@ const actionButtonStyle: React.CSSProperties = {
   gap: 4,
   paddingTop: 10,
   paddingBottom: 10,
+};
+
+const actionEmojiStyle: React.CSSProperties = {
+  fontSize: 18,
+  lineHeight: 1,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 };
 
 export function PopupToolbar() {
@@ -77,7 +85,9 @@ export function PopupToolbar() {
                 borderBottomRightRadius: 0,
               }}
             >
-              <Camera size={17} aria-hidden="true" />
+              <span aria-hidden="true" style={actionEmojiStyle}>
+                📸
+              </span>
               <Text as="span" size="1">
                 {getMessage('popupSave')}
               </Text>
@@ -130,7 +140,9 @@ export function PopupToolbar() {
             title={saveDisabledHint}
             style={actionButtonStyle}
           >
-            <Camera size={17} aria-hidden="true" />
+            <span aria-hidden="true" style={actionEmojiStyle}>
+              📸
+            </span>
             <Text as="span" size="1">
               {getMessage('popupSave')}
             </Text>
@@ -145,7 +157,9 @@ export function PopupToolbar() {
           aria-label={getMessage('popupRestoreSession')}
           style={actionButtonStyle}
         >
-          <RotateCcw size={17} aria-hidden="true" />
+          <span aria-hidden="true" style={actionEmojiStyle}>
+            🔄
+          </span>
           <Text as="span" size="1">
             {getMessage('popupRestore')}
           </Text>
@@ -160,7 +174,9 @@ export function PopupToolbar() {
           title={getMessage('organizeAllTabs')}
           style={actionButtonStyle}
         >
-          <Wand2 size={17} aria-hidden="true" />
+          <span aria-hidden="true" style={actionEmojiStyle}>
+            🪄
+          </span>
           <Text as="span" size="1">
             {isOrganizing ? getMessage('organizingTabs') : getMessage('organizeAllTabs')}
           </Text>
