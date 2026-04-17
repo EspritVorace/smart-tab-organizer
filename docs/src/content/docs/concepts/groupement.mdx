@@ -3,17 +3,26 @@ title: Comment fonctionne le groupement
 description: Comprendre le mécanisme de groupement automatique des onglets, du clic milieu jusqu'au groupe Chrome.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import ConditionsDeclenchement from '../../../components/ConditionsDeclenchement.astro';
 
-Le groupement automatique est la fonctionnalité centrale de SmartTab Organizer. Quand vous ouvrez un lien depuis un onglet parent, l'extension détecte l'action, consulte vos règles de domaine, et place le nouvel onglet dans un groupe Chrome coloré sans aucune intervention manuelle.
+<Aside type="tip" title="En bref">
+- Le groupement se déclenche quand vous ouvrez un lien dans un nouvel onglet (clic milieu ou clic droit).
+- Trois conditions doivent être réunies : toggle global, règle correspondante, option activée sur la règle.
+- Le nom, la couleur et le mode de nommage sont configurés dans la règle de domaine.
+</Aside>
+
+Quand vous ouvrez un lien depuis un onglet parent, l'extension détecte l'action, consulte vos règles de domaine, et place le nouvel onglet dans un groupe Chrome coloré sans intervention manuelle.
 
 ## Comment le groupement se déclenche
 
-SmartTab Organizer surveille deux types d'événements de navigation :
+### Clic du milieu sur un lien
 
-**Clic du milieu** sur un lien. Le content script mémorise l'URL cible au moment du clic. Quand le nouvel onglet s'ouvre, le service worker retrouve cette entrée et crée le groupe.
+Au moment du clic, l'extension mémorise le lien ciblé. Quand le nouvel onglet s'ouvre, elle applique votre règle de domaine et crée le groupe.
 
-**Clic droit puis "Ouvrir dans un nouvel onglet"**. Le content script intervient de la même façon au moment du clic droit sur le lien. Le mécanisme est ensuite identique.
+### Clic droit puis "Ouvrir dans un nouvel onglet"
+
+Le lien ciblé est mémorisé de la même façon dès le clic droit. Le reste du mécanisme est identique.
 
 <Aside type="caution">
 Les onglets ouverts depuis la barre d'adresse ou par un raccourci clavier ne déclenchent pas le groupement automatique. Les URL avec des schémas spéciaux (`chrome:`, `chrome-extension:`, `about:`) sont également ignorées.
@@ -21,50 +30,64 @@ Les onglets ouverts depuis la barre d'adresse ou par un raccourci clavier ne dé
 
 ## Conditions pour qu'un groupe soit créé
 
-Trois conditions doivent être réunies simultanément :
-
-1. Le **toggle de groupement global** est activé (popup ou page Paramètres).
-2. Une **règle de domaine** correspond au domaine de l'onglet qui vient d'être ouvert.
-3. Cette règle a son option **Groupement** activée.
+<ConditionsDeclenchement feature="groupement" />
 
 Si l'une de ces conditions n'est pas remplie, l'onglet s'ouvre normalement sans être groupé.
 
 ## Rejoindre un groupe existant ou en créer un nouveau
 
-Quand plusieurs onglets enfants sont ouverts successivement depuis le même onglet parent, ils rejoignent tous le même groupe Chrome. Aucun groupe supplémentaire n'est créé. Le compteur de statistiques "Groupes créés" ne s'incrémente qu'à la création d'un nouveau groupe, pas quand un onglet rejoint un groupe existant.
+Quand plusieurs onglets enfants sont ouverts successivement depuis le même onglet parent, ils rejoignent tous le même groupe Chrome. Aucun groupe supplémentaire n'est créé. Le compteur "Groupes créés" ne s'incrémente qu'à la création d'un nouveau groupe, pas quand un onglet rejoint un groupe existant.
 
 Si un second onglet parent distinct déclenche une règle, un nouveau groupe séparé est créé.
 
 ## Priorité entre plusieurs règles
 
-Quand plusieurs règles correspondent au même domaine, la règle placée le plus haut dans votre liste est appliquée en priorité. Vous pouvez réordonner vos règles par glisser-deposer dans la page Règles de domaine pour ajuster cette priorité.
+Quand plusieurs règles correspondent au même domaine, la règle placée le plus haut dans votre liste est appliquée en priorité.
+
+<Aside type="note">
+Vous pouvez réordonner vos règles par glisser-déposer dans la page Règles de domaine pour ajuster cette priorité.
+</Aside>
 
 ## Couleur du groupe
 
 La couleur du groupe est héritée de la catégorie associée à la règle. Si aucune catégorie n'est définie, Chrome assigne sa couleur par défaut.
 
-## Comment le groupe est nommé
+## Modes de nommage
 
-Le nom affiché sur le groupe Chrome dépend du **mode de nommage** configuré dans la règle. Trois modes sont proposés lors de la création d'une règle :
+Le nom affiché sur le groupe Chrome dépend du **mode de nommage** configuré dans la règle. Trois choix sont proposés lors de la création d'une règle.
 
-**Preset** : l'extension extrait automatiquement un nom depuis le titre ou l'URL de l'onglet parent, en s'appuyant sur les expressions régulières du preset sélectionné. C'est le choix recommandé pour les sites courants.
+### Preset
 
-**Demander** : le nom du groupe vous est demandé à chaque ouverture d'onglet. Si vous annulez l'invite, les onglets sont immédiatement dégroupés.
+L'extension extrait automatiquement un nom depuis le titre ou l'URL de l'onglet parent, en s'appuyant sur les expressions régulières du preset sélectionné. C'est le choix recommandé pour les sites courants.
 
-**Manuel** : vous choisissez vous-même la stratégie d'extraction parmi les options disponibles. Pour le détail de chaque stratégie et leur comportement en cas d'échec, consultez la page [Sources de nom de groupe](/concepts/sources-nom-groupe).
+### Demander
+
+Le nom du groupe vous est demandé à chaque ouverture d'onglet. Si vous annulez l'invite, les onglets sont immédiatement dégroupés.
+
+### Manuel
+
+Vous choisissez vous-même la stratégie d'extraction parmi les options disponibles.
+
+<Aside type="note">
+Pour le détail de chaque stratégie et leur comportement en cas d'échec, consultez la page [Sources de nom de groupe](/concepts/sources-nom-groupe).
+</Aside>
 
 ## Activer et désactiver le groupement
 
-Le groupement se contrôle à deux niveaux indépendants :
+Le groupement se contrôle à deux niveaux indépendants.
 
-**Niveau global** : le toggle "Groupement" dans la popup ou la page Paramètres active ou désactive le groupement pour toutes les règles simultanément.
+### Niveau global
 
-**Niveau règle** : chaque règle possède un toggle individuel dans la liste des règles. Désactiver une règle l'exclut du traitement sans la supprimer. Le toggle global prévaut sur les réglages individuels.
+Le toggle "Groupement" dans la popup ou la page Paramètres active ou désactive le groupement pour toutes les règles simultanément.
 
----
+### Niveau règle
+
+Chaque règle possède un toggle individuel dans la liste des règles. Désactiver une règle l'exclut du traitement sans la supprimer. Le toggle global prévaut sur les réglages individuels.
 
 ## Voir aussi
 
-- [Sources de nom de groupe](/concepts/sources-nom-groupe) : détail des 8 modes de nommage et leurs comportements de repli
-- [Créer une règle](/fonctionnalites/regles/creer-une-regle) : guide pas-à-pas de l'assistant de création
-- [Modes de déduplication](/concepts/deduplication) : éviter les doublons en complément du groupement
+<CardGrid>
+  <LinkCard title="Sources de nom de groupe" href="/concepts/sources-nom-groupe" description="Le principe d'extraction et les 6 modes de nommage disponibles." />
+  <LinkCard title="Modes de déduplication" href="/concepts/deduplication" description="Éviter les doublons en complément du groupement." />
+  <LinkCard title="Créer une règle" href="/fonctionnalites/regles/creer-une-regle" description="Guide pas-à-pas de l'assistant de création." />
+</CardGrid>
