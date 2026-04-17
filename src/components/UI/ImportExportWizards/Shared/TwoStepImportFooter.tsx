@@ -28,7 +28,7 @@ export function TwoStepImportFooter({
 }: TwoStepImportFooterProps) {
   return (
     <>
-      <Separator size="4" mt="4" style={{ opacity: 0.3 }} />
+      <Separator size="4" style={{ opacity: 0.3, marginTop: 'auto' }} />
       <Flex gap="3" justify="end" mt="3">
         {step === 0 && (
           <>
