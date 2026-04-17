@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, Card, Flex, Text } from '@radix-ui/themes';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { browser } from 'wxt/browser';
-import { ChevronDown, ExternalLink, Pin } from 'lucide-react';
+import { ChevronDown, ExternalLink, Pin, Play } from 'lucide-react';
 import { SplitButton } from '@/components/UI/SplitButton/SplitButton';
 import { getMessage } from '@/utils/i18n';
 import { loadSessions } from '@/utils/sessionStorage';
@@ -190,7 +190,8 @@ export function PopupProfilesList() {
                 {session.name}
               </Text>
               <SplitButton
-                label="▶"
+                label={<Play size={12} aria-hidden="true" fill="currentColor" />}
+                primaryAriaLabel={getMessage('sessionRestoreCurrentWindow')}
                 onClick={() => handleRestore(session, 'current')}
                 size="1"
                 variant="soft"
