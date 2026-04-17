@@ -114,13 +114,13 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
 
   return (
     <ImportTheme>
-      <WizardModal open={open} onOpenChange={onOpenChange}>
-        <WizardModal.Header
-          icon={FileUp}
-          title={getMessage('importRulesTitle')}
-          description={getMessage(STEP_DESCRIPTION_KEYS[step])}
-        />
-
+      <WizardModal
+        open={open}
+        onOpenChange={onOpenChange}
+        icon={FileUp}
+        title={getMessage('importRulesTitle')}
+        description={getMessage(STEP_DESCRIPTION_KEYS[step])}
+      >
         <WizardModal.Body>
           {step === 0 && (
             <SourceStep

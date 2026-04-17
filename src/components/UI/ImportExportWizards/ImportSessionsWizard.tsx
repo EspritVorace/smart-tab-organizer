@@ -132,13 +132,13 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
 
   return (
     <SessionsTheme>
-      <WizardModal open={open} onOpenChange={onOpenChange}>
-        <WizardModal.Header
-          icon={Upload}
-          title={getMessage('importSessionsTitle')}
-          description={getMessage(STEP_DESCRIPTION_KEYS[step])}
-        />
-
+      <WizardModal
+        open={open}
+        onOpenChange={onOpenChange}
+        icon={Upload}
+        title={getMessage('importSessionsTitle')}
+        description={getMessage(STEP_DESCRIPTION_KEYS[step])}
+      >
         <WizardModal.Body>
           {step === 0 && (
             <SourceStep

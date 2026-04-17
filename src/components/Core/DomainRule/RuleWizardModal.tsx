@@ -1,5 +1,5 @@
 import { Box, Button, Dialog, Flex } from '@radix-ui/themes';
-import { Edit2, Plus, X } from 'lucide-react';
+import { Edit2, Plus } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -380,6 +380,9 @@ export function RuleWizardModal({
         open={isOpen}
         onOpenChange={handleOpenChange}
         data-testid="wizard-rule"
+        icon={isEditing ? Edit2 : Plus}
+        title={title}
+        description={description}
         onOpenAutoFocus={(e) => {
           e.preventDefault();
           const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[name="label"]');
@@ -387,12 +390,6 @@ export function RuleWizardModal({
         }}
       >
         <form onSubmit={handleSubmit(handleFormSubmit)} style={{ display: 'contents' }}>
-          <WizardModal.Header
-            icon={isEditing ? Edit2 : Plus}
-            title={title}
-            description={description}
-          />
-
           {/* aria-live region for step announcements */}
           <div
             role="status"
@@ -503,18 +500,6 @@ export function RuleWizardModal({
             )}
           </WizardModal.Footer>
         </form>
-
-        {/* Close (X) button */}
-        <Dialog.Close>
-          <Button
-            variant="ghost"
-            size="1"
-            aria-label={getMessage('cancel')}
-            style={{ position: 'absolute', top: '16px', right: '16px' }}
-          >
-            <X size={16} aria-hidden="true" />
-          </Button>
-        </Dialog.Close>
       </WizardModal>
     </DomainRulesTheme>
   );
