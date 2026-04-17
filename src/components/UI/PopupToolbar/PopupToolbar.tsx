@@ -29,6 +29,7 @@ const actionButtonStyle: React.CSSProperties = {
   gap: 4,
   paddingTop: 10,
   paddingBottom: 10,
+  borderRadius: 'var(--radius-5)',
 };
 
 const actionEmojiStyle: React.CSSProperties = {
@@ -68,7 +69,7 @@ export function PopupToolbar() {
       p="1"
       style={{
         background: 'var(--gray-a3)',
-        borderRadius: 'var(--radius-3)',
+        borderRadius: 'var(--radius-5)',
       }}
     >
       <Flex gap="1">
@@ -101,6 +102,8 @@ export function PopupToolbar() {
                   style={{
                     borderTopLeftRadius: 0,
                     borderBottomLeftRadius: 0,
+                    borderTopRightRadius: 'var(--radius-5)',
+                    borderBottomRightRadius: 'var(--radius-5)',
                     paddingLeft: 4,
                     paddingRight: 4,
                     minWidth: 20,
