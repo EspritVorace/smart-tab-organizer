@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Dialog, Flex, Button, Text, Box, TextField,
+  Dialog, Flex, Button, Text,
   TextArea, Callout,
 } from '@radix-ui/themes';
 import { Camera, AlertCircle } from 'lucide-react';
 import { SessionsTheme } from '@/components/Form/themes';
 import { TabTree } from '@/components/Core/TabTree/TabTree';
-import { CategoryPicker } from '@/components/Core/DomainRule/CategoryPicker';
+import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
 import { WizardModal } from '@/components/UI/WizardModal';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast } from '@/utils/toast';
@@ -153,22 +153,16 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
               <Text size="2" weight="medium">
                 {getMessage('sessionNameLabel')}
               </Text>
-              <Flex align="center" gap="2">
-                <CategoryPicker value={categoryId as any} onChange={setCategoryId} />
-                <Box style={{ flex: 1 }}>
-                  <TextField.Root
-                    data-testid="wizard-snapshot-field-name"
-                    value={sessionName}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setSessionName(e.target.value)
-                    }
-                    placeholder={getMessage('sessionNamePlaceholder')}
-                    maxLength={100}
-                    aria-label={getMessage('sessionNameLabel')}
-                    style={{ width: '100%' }}
-                  />
-                </Box>
-              </Flex>
+              <TextFieldWithCategory
+                data-testid="wizard-snapshot-field-name"
+                value={sessionName}
+                onChange={setSessionName}
+                placeholder={getMessage('sessionNamePlaceholder')}
+                maxLength={100}
+                aria-label={getMessage('sessionNameLabel')}
+                categoryId={categoryId as any}
+                onCategoryChange={setCategoryId}
+              />
             </Flex>
 
             <Text size="2" weight="medium">
