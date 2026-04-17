@@ -125,6 +125,7 @@ export function makeSettings(overrides: Partial<SyncSettings> = {}): SyncSetting
     globalGroupingEnabled: true,
     globalDeduplicationEnabled: true,
     deduplicateUnmatchedDomains: true,
+    deduplicationKeepStrategy: 'keep-old',
     notifyOnGrouping: true,
     notifyOnDeduplication: true,
     domainRules: [],

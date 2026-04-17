@@ -6,9 +6,11 @@ import {
   markTabAsProcessed,
   clearProcessedTabsCache,
   isUrlMatch,
-  findDuplicateTab
+  findDuplicateTab,
+  decideDedupDirection,
 } from '../src/background/deduplication';
 import type { DomainRuleSetting } from '../src/types/syncSettings';
+import type { Browser } from 'wxt/browser';
 
 // Mock du module wxt/browser - doit être avant les imports
 vi.mock('wxt/browser', () => {
@@ -346,6 +348,76 @@ describe('deduplication', () => {
       );
 
       expect(duplicate).toBeUndefined();
+    });
+  });
+
+  describe('decideDedupDirection', () => {
+    const makeTab = (id: number, groupId: number): Browser.tabs.Tab =>
+      ({ id, groupId } as unknown as Browser.tabs.Tab);
+
+    const oldUngrouped = makeTab(1, -1);
+    const oldGrouped = makeTab(1, 42);
+    const newUngrouped = makeTab(2, -1);
+    const newGrouped = makeTab(2, 99);
+
+    describe('keep-old', () => {
+      it('garde l\'ancien quand aucun n\'est groupé', () => {
+        const { tabToKeep, tabToClose } = decideDedupDirection(oldUngrouped, newUngrouped, 'keep-old');
+        expect(tabToKeep.id).toBe(1);
+        expect(tabToClose.id).toBe(2);
+      });
+
+      it('garde l\'ancien quand l\'ancien est groupé', () => {
+        const { tabToKeep } = decideDedupDirection(oldGrouped, newUngrouped, 'keep-old');
+        expect(tabToKeep.id).toBe(1);
+      });
+
+      it('garde l\'ancien même quand le nouveau est groupé', () => {
+        const { tabToKeep } = decideDedupDirection(oldUngrouped, newGrouped, 'keep-old');
+        expect(tabToKeep.id).toBe(1);
+      });
+    });
+
+    describe('keep-new', () => {
+      it('garde le nouveau quand aucun n\'est groupé', () => {
+        const { tabToKeep, tabToClose } = decideDedupDirection(oldUngrouped, newUngrouped, 'keep-new');
+        expect(tabToKeep.id).toBe(2);
+        expect(tabToClose.id).toBe(1);
+      });
+
+      it('garde le nouveau même quand l\'ancien est groupé', () => {
+        const { tabToKeep } = decideDedupDirection(oldGrouped, newUngrouped, 'keep-new');
+        expect(tabToKeep.id).toBe(2);
+      });
+
+      it('garde le nouveau quand le nouveau est groupé', () => {
+        const { tabToKeep } = decideDedupDirection(oldUngrouped, newGrouped, 'keep-new');
+        expect(tabToKeep.id).toBe(2);
+      });
+    });
+
+    describe('keep-grouped', () => {
+      it('garde celui qui est groupé (ancien groupé)', () => {
+        const { tabToKeep, tabToClose } = decideDedupDirection(oldGrouped, newUngrouped, 'keep-grouped');
+        expect(tabToKeep.id).toBe(1);
+        expect(tabToClose.id).toBe(2);
+      });
+
+      it('garde celui qui est groupé (nouveau groupé)', () => {
+        const { tabToKeep, tabToClose } = decideDedupDirection(oldUngrouped, newGrouped, 'keep-grouped');
+        expect(tabToKeep.id).toBe(2);
+        expect(tabToClose.id).toBe(1);
+      });
+
+      it('retombe sur keep-old quand aucun n\'est groupé', () => {
+        const { tabToKeep } = decideDedupDirection(oldUngrouped, newUngrouped, 'keep-grouped');
+        expect(tabToKeep.id).toBe(1);
+      });
+
+      it('retombe sur keep-old quand les deux sont groupés', () => {
+        const { tabToKeep } = decideDedupDirection(oldGrouped, newGrouped, 'keep-grouped');
+        expect(tabToKeep.id).toBe(1);
+      });
     });
   });
 });

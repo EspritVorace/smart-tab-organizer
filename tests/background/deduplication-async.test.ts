@@ -64,6 +64,17 @@ beforeEach(() => {
   mockedBrowser.tabs.update.mockResolvedValue(undefined);
   mockedBrowser.tabs.reload.mockResolvedValue(undefined);
   mockedBrowser.tabs.remove.mockResolvedValue(undefined);
+  // Default: current tab is ungrouped. Individual tests override via mockResolvedValueOnce.
+  mockedBrowser.tabs.get.mockImplementation((id: number) =>
+    Promise.resolve({
+      id,
+      url: 'https://current.example/',
+      title: 'Current',
+      windowId: 5,
+      index: 0,
+      groupId: -1,
+    }),
+  );
   mockedBrowser.windows.get.mockResolvedValue({ focused: true });
   mockedBrowser.windows.update.mockResolvedValue(undefined);
 });
@@ -125,8 +136,16 @@ describe('removeDuplicateTab', () => {
 describe('checkAndDeduplicateTab', () => {
   it('removes the current tab and shows a notification when a duplicate exists', async () => {
     mockedBrowser.tabs.query.mockResolvedValue([
-      { id: 1, url: 'https://x.com/a', title: 'Existing', windowId: 5 },
+      { id: 1, url: 'https://x.com/a', title: 'Existing', windowId: 5, index: 0, groupId: -1 },
     ]);
+    mockedBrowser.tabs.get.mockResolvedValue({
+      id: 2,
+      url: 'https://x.com/a',
+      title: 'New',
+      windowId: 5,
+      index: 3,
+      groupId: -1,
+    });
 
     await checkAndDeduplicateTab(2, 'https://x.com/a', 'exact', 5, makeSettings());
 
@@ -137,10 +156,131 @@ describe('checkAndDeduplicateTab', () => {
       expect.objectContaining({
         title: 'notificationDeduplicationTitle',
         type: 'info',
-        undoAction: {
+        undoAction: expect.objectContaining({
           type: 'reopen_tab',
-          data: { url: 'https://x.com/a', windowId: 5 },
-        },
+          data: expect.objectContaining({
+            url: 'https://x.com/a',
+            windowId: 5,
+            title: 'New',
+            index: 3,
+          }),
+        }),
+      }),
+    );
+  });
+
+  it('keeps the new tab and closes the existing one when strategy=keep-new', async () => {
+    mockedBrowser.tabs.query.mockResolvedValue([
+      { id: 1, url: 'https://x.com/a', title: 'Existing', windowId: 5, index: 0, groupId: -1 },
+    ]);
+    mockedBrowser.tabs.get.mockResolvedValue({
+      id: 2,
+      url: 'https://x.com/a',
+      title: 'New',
+      windowId: 5,
+      index: 3,
+      groupId: -1,
+    });
+
+    await checkAndDeduplicateTab(
+      2,
+      'https://x.com/a',
+      'exact',
+      5,
+      makeSettings({ deduplicationKeepStrategy: 'keep-new' }),
+    );
+
+    expect(mockedBrowser.tabs.update).toHaveBeenCalledWith(2, { active: true });
+    expect(mockedBrowser.tabs.remove).toHaveBeenCalledWith(1);
+    expect(mockedBrowser.tabs.reload).not.toHaveBeenCalled();
+  });
+
+  it('keeps the grouped tab when strategy=keep-grouped and only the existing is grouped', async () => {
+    mockedBrowser.tabs.query.mockResolvedValue([
+      { id: 1, url: 'https://x.com/a', title: 'Existing', windowId: 5, index: 0, groupId: 42 },
+    ]);
+    mockedBrowser.tabs.get.mockResolvedValue({
+      id: 2,
+      url: 'https://x.com/a',
+      title: 'New',
+      windowId: 5,
+      index: 3,
+      groupId: -1,
+    });
+
+    await checkAndDeduplicateTab(
+      2,
+      'https://x.com/a',
+      'exact',
+      5,
+      makeSettings({ deduplicationKeepStrategy: 'keep-grouped' }),
+    );
+
+    expect(mockedBrowser.tabs.remove).toHaveBeenCalledWith(2);
+  });
+
+  it('keeps the grouped NEW tab when strategy=keep-grouped and only the new one is grouped', async () => {
+    mockedBrowser.tabs.query.mockResolvedValue([
+      { id: 1, url: 'https://x.com/a', title: 'Existing', windowId: 5, index: 0, groupId: -1 },
+    ]);
+    mockedBrowser.tabs.get.mockResolvedValue({
+      id: 2,
+      url: 'https://x.com/a',
+      title: 'New',
+      windowId: 5,
+      index: 3,
+      groupId: 77,
+    });
+
+    await checkAndDeduplicateTab(
+      2,
+      'https://x.com/a',
+      'exact',
+      5,
+      makeSettings({ deduplicationKeepStrategy: 'keep-grouped' }),
+    );
+
+    expect(mockedBrowser.tabs.remove).toHaveBeenCalledWith(1);
+    expect(mockedShowNotif).toHaveBeenCalledWith(
+      expect.objectContaining({
+        undoAction: expect.objectContaining({
+          data: expect.objectContaining({ groupId: -1 }),
+        }),
+      }),
+    );
+  });
+
+  it('captures the closed grouped tab metadata in the undo payload', async () => {
+    mockedBrowser.tabs.query.mockResolvedValue([
+      { id: 1, url: 'https://x.com/a', title: 'Existing', windowId: 5, index: 2, groupId: 99 },
+    ]);
+    mockedBrowser.tabs.get.mockResolvedValue({
+      id: 2,
+      url: 'https://x.com/a',
+      title: 'New',
+      windowId: 5,
+      index: 7,
+      groupId: -1,
+    });
+
+    await checkAndDeduplicateTab(
+      2,
+      'https://x.com/a',
+      'exact',
+      5,
+      makeSettings({ deduplicationKeepStrategy: 'keep-new' }),
+    );
+
+    expect(mockedShowNotif).toHaveBeenCalledWith(
+      expect.objectContaining({
+        undoAction: expect.objectContaining({
+          data: expect.objectContaining({
+            url: 'https://x.com/a',
+            groupId: 99,
+            title: 'Existing',
+            index: 2,
+          }),
+        }),
       }),
     );
   });
@@ -152,8 +292,18 @@ describe('checkAndDeduplicateTab', () => {
     );
 
     mockedBrowser.tabs.query.mockResolvedValue([
-      { id: 1, url: 'https://x.com/a', title: '', windowId: 5 },
+      { id: 1, url: 'https://x.com/a', title: 'Existing', windowId: 5, index: 0, groupId: -1 },
     ]);
+    // With the default keep-old strategy, the NEW tab is the one closed, so
+    // we clear its title to exercise the URL fallback in the notification.
+    mockedBrowser.tabs.get.mockResolvedValue({
+      id: 2,
+      url: 'https://x.com/a',
+      title: '',
+      windowId: 5,
+      index: 3,
+      groupId: -1,
+    });
 
     await checkAndDeduplicateTab(2, 'https://x.com/a', 'exact', 5, makeSettings());
 

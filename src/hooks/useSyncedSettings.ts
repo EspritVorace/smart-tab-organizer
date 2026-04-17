@@ -1,9 +1,11 @@
 import { storage } from 'wxt/utils/storage';
 import type { SyncSettings, DomainRuleSettings } from '@/types/syncSettings.js';
+import type { DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
 import {
   globalGroupingEnabledItem,
   globalDeduplicationEnabledItem,
   deduplicateUnmatchedDomainsItem,
+  deduplicationKeepStrategyItem,
   domainRulesItem,
   notifyOnGroupingItem,
   notifyOnDeduplicationItem,
@@ -18,11 +20,15 @@ export interface UseSyncedSettingsReturn {
   setGlobalGroupingEnabled: (value: boolean) => Promise<void>;
   setGlobalDeduplicationEnabled: (value: boolean) => Promise<void>;
   setDeduplicateUnmatchedDomains: (value: boolean) => Promise<void>;
+  setDeduplicationKeepStrategy: (value: DeduplicationKeepStrategyValue) => Promise<void>;
   setDomainRules: (value: DomainRuleSettings) => Promise<void>;
 
   onGlobalGroupingEnabledChange: (callback: (value: boolean) => void) => () => void;
   onGlobalDeduplicationEnabledChange: (callback: (value: boolean) => void) => () => void;
   onDeduplicateUnmatchedDomainsChange: (callback: (value: boolean) => void) => () => void;
+  onDeduplicationKeepStrategyChange: (
+    callback: (value: DeduplicationKeepStrategyValue) => void,
+  ) => () => void;
   onDomainRulesChange: (callback: (value: DomainRuleSettings) => void) => () => void;
 
   updateSettings: (updates: Partial<SyncSettings>) => Promise<void>;
@@ -36,12 +42,13 @@ async function loadSyncSettingsFromStorage(): Promise<SyncSettings> {
     globalGroupingEnabledItem,
     globalDeduplicationEnabledItem,
     deduplicateUnmatchedDomainsItem,
+    deduplicationKeepStrategyItem,
     domainRulesItem,
     notifyOnGroupingItem,
     notifyOnDeduplicationItem,
   ]);
 
-  const rawRules = results[3].value as DomainRuleSettings;
+  const rawRules = results[4].value as DomainRuleSettings;
   // Migrate legacy wildcard syntax: *.example.com → example.com
   const hasWildcards = rawRules?.some(r => r.domainFilter?.startsWith('*.'));
   const domainRules = hasWildcards
@@ -59,9 +66,10 @@ async function loadSyncSettingsFromStorage(): Promise<SyncSettings> {
     globalGroupingEnabled: results[0].value as boolean,
     globalDeduplicationEnabled: results[1].value as boolean,
     deduplicateUnmatchedDomains: results[2].value as boolean,
+    deduplicationKeepStrategy: results[3].value as DeduplicationKeepStrategyValue,
     domainRules,
-    notifyOnGrouping: results[4].value as boolean,
-    notifyOnDeduplication: results[5].value as boolean,
+    notifyOnGrouping: results[5].value as boolean,
+    notifyOnDeduplication: results[6].value as boolean,
   };
 }
 
@@ -105,11 +113,13 @@ export function useSyncedSettings(): UseSyncedSettingsReturn {
     setGlobalGroupingEnabled: (v) => update({ globalGroupingEnabled: v }),
     setGlobalDeduplicationEnabled: (v) => update({ globalDeduplicationEnabled: v }),
     setDeduplicateUnmatchedDomains: (v) => update({ deduplicateUnmatchedDomains: v }),
+    setDeduplicationKeepStrategy: (v) => update({ deduplicationKeepStrategy: v }),
     setDomainRules: (v) => update({ domainRules: v }),
 
     onGlobalGroupingEnabledChange: (cb) => onFieldChange('globalGroupingEnabled', cb),
     onGlobalDeduplicationEnabledChange: (cb) => onFieldChange('globalDeduplicationEnabled', cb),
     onDeduplicateUnmatchedDomainsChange: (cb) => onFieldChange('deduplicateUnmatchedDomains', cb),
+    onDeduplicationKeepStrategyChange: (cb) => onFieldChange('deduplicationKeepStrategy', cb),
     onDomainRulesChange: (cb) => onFieldChange('domainRules', cb),
 
     updateSettings: update,

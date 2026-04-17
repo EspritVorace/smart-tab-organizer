@@ -45,8 +45,9 @@ Middle-click or right-click → "Open in new tab" on a configured site and the t
 
 ### 🔁 Deduplication
 
-Opening a page that's already open refocuses and reloads the existing tab instead.
-Matching sensitivity is configurable per rule: exact URL, hostname + path, hostname, or "includes".
+Opening a page that's already open closes the duplicate and keeps a single tab active.
+Matching sensitivity is configurable per rule: exact URL, URL without ignored params, or "includes".
+You pick which of the two tabs survives: the existing one (default), the new one, or the tab that belongs to a group (useful when restoring a session).
 
 <p align="center">
   <img src="assets/readme/gifs/dedup.gif" alt="Deduplication video">

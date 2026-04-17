@@ -54,3 +54,23 @@ export const SettingsPageDedupUnmatchedDisabled: Story = {
     updateSettings: (settings) => console.log('Settings updated:', settings),
   },
 };
+
+export const SettingsPageKeepNewStrategy: Story = {
+  args: {
+    syncSettings: {
+      ...defaultSyncSettings,
+      deduplicationKeepStrategy: 'keep-new',
+    },
+    updateSettings: (settings) => console.log('Settings updated:', settings),
+  },
+};
+
+export const SettingsPageKeepGroupedStrategy: Story = {
+  args: {
+    syncSettings: {
+      ...defaultSyncSettings,
+      deduplicationKeepStrategy: 'keep-grouped',
+    },
+    updateSettings: (settings) => console.log('Settings updated:', settings),
+  },
+};

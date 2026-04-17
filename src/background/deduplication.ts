@@ -8,9 +8,13 @@ import { getMessage } from '@/utils/i18n.js';
 import { shouldSkipDeduplication } from '@/utils/deduplicationSkip.js';
 import { normalizeUrlIgnoringParams } from '@/utils/urlNormalization.js';
 import type { DomainRuleSetting, SyncSettings } from '@/types/syncSettings.js';
+import type { DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
 
 // Cache pour éviter de traiter plusieurs fois le même onglet
 const processedTabs = new Set<string>();
+
+// Chrome uses -1 (TAB_GROUP_ID_NONE) to denote an ungrouped tab.
+const TAB_GROUP_ID_NONE = -1;
 
 export function isDeduplicationEnabled(
     rule: DomainRuleSetting | undefined,
@@ -25,8 +29,8 @@ export function getMatchMode(rule: DomainRuleSetting | undefined): string {
 }
 
 export function shouldProcessTab(urlToCheck: string, tabId: number): boolean {
-    if (!urlToCheck || 
-        urlToCheck.startsWith('about:') || 
+    if (!urlToCheck ||
+        urlToCheck.startsWith('about:') ||
         urlToCheck.startsWith('chrome:') ||
         processedTabs.has(`${tabId}-${urlToCheck}`)) {
         return false;
@@ -85,32 +89,85 @@ export async function findDuplicateTab(
     });
 }
 
+function isGrouped(tab: Browser.tabs.Tab): boolean {
+    const groupId = tab.groupId;
+    return typeof groupId === 'number' && groupId > TAB_GROUP_ID_NONE;
+}
+
+export interface DedupDecision {
+    tabToKeep: Browser.tabs.Tab;
+    tabToClose: Browser.tabs.Tab;
+}
+
+/**
+ * Pure decision: given the existing (old) duplicate and the newly opened tab,
+ * decide which survives based on the configured keep strategy.
+ *
+ * `keep-grouped` falls back to `keep-old` when neither or both tabs are grouped,
+ * matching legacy behaviour whenever the group heuristic is ambiguous.
+ */
+export function decideDedupDirection(
+    oldTab: Browser.tabs.Tab,
+    newTab: Browser.tabs.Tab,
+    strategy: DeduplicationKeepStrategyValue,
+): DedupDecision {
+    if (strategy === 'keep-new') {
+        return { tabToKeep: newTab, tabToClose: oldTab };
+    }
+    if (strategy === 'keep-grouped') {
+        const oldGrouped = isGrouped(oldTab);
+        const newGrouped = isGrouped(newTab);
+        if (oldGrouped && !newGrouped) {
+            return { tabToKeep: oldTab, tabToClose: newTab };
+        }
+        if (!oldGrouped && newGrouped) {
+            return { tabToKeep: newTab, tabToClose: oldTab };
+        }
+        // Fallback: both or neither grouped, keep the old one.
+        return { tabToKeep: oldTab, tabToClose: newTab };
+    }
+    // keep-old (default)
+    return { tabToKeep: oldTab, tabToClose: newTab };
+}
+
 export async function focusAndReloadTab(duplicateTab: Browser.tabs.Tab): Promise<void> {
     try {
         // Activer l'onglet existant
         await browser.tabs.update(duplicateTab.id, { active: true });
-        
+
         // S'assurer que la fenêtre est focusée
         const dupTabWindow = await browser.windows.get(duplicateTab.windowId);
         if (!dupTabWindow.focused) {
             await browser.windows.update(duplicateTab.windowId, { focused: true });
         }
-        
+
         // Recharger l'onglet existant (optionnel)
-        try { 
-            await browser.tabs.reload(duplicateTab.id); 
-        } catch (e) { 
+        try {
+            await browser.tabs.reload(duplicateTab.id);
+        } catch (e) {
             // Échec silencieux si reload impossible
         }
-    } catch (e) { 
+    } catch (e) {
         logger.warn("Could not focus duplicate tab:", e);
     }
 }
 
+async function focusTabWithoutReload(tab: Browser.tabs.Tab): Promise<void> {
+    try {
+        await browser.tabs.update(tab.id, { active: true });
+        const tabWindow = await browser.windows.get(tab.windowId);
+        if (!tabWindow.focused) {
+            await browser.windows.update(tab.windowId, { focused: true });
+        }
+    } catch (e) {
+        logger.warn("Could not focus kept tab:", e);
+    }
+}
+
 export async function removeDuplicateTab(tabId: number): Promise<void> {
-    try { 
-        await browser.tabs.remove(tabId); 
-    } catch (e) { 
+    try {
+        await browser.tabs.remove(tabId);
+    } catch (e) {
         logger.warn("Could not remove duplicate tab:", e);
     }
 }
@@ -125,28 +182,66 @@ export async function checkAndDeduplicateTab(
 ): Promise<void> {
     try {
         const duplicateTab = await findDuplicateTab(currentTabId, newUrl, matchMode, windowId, ignoredParams);
+        if (!duplicateTab) return;
 
-        if (duplicateTab) {
-            logger.debug(`[DEDUPLICATION] Duplicate found: ${newUrl} (keeping tab ${duplicateTab.id}, removing ${currentTabId})`);
+        let currentTab: Browser.tabs.Tab;
+        try {
+            currentTab = await browser.tabs.get(currentTabId);
+        } catch (err) {
+            logger.warn(`[DEDUPLICATION] Could not load current tab ${currentTabId}:`, err);
+            return;
+        }
 
-            await incrementStat('tabsDeduplicatedCount');
-            await focusAndReloadTab(duplicateTab);
-            await removeDuplicateTab(currentTabId);
+        const strategy = settings.deduplicationKeepStrategy;
+        const { tabToKeep, tabToClose } = decideDedupDirection(duplicateTab, currentTab, strategy);
 
-            // Show notification if enabled with undo action
-            if (settings.notifyOnDeduplication) {
-                const tabTitle = duplicateTab.title || newUrl;
-                const undoAction: UndoAction = {
-                    type: 'reopen_tab',
-                    data: { url: newUrl, windowId }
-                };
-                showNotification({
-                    title: getMessage('notificationDeduplicationTitle'),
-                    message: getMessage('notificationDeduplicationMessage').replace('{title}', tabTitle),
-                    type: 'info',
-                    undoAction
-                });
-            }
+        if (tabToClose.id === undefined) {
+            logger.warn('[DEDUPLICATION] Tab to close has no id, aborting');
+            return;
+        }
+
+        // Capture metadata BEFORE removing so undo can restore group membership.
+        const closedTabMeta = {
+            url: tabToClose.url || newUrl,
+            title: tabToClose.title,
+            groupId: typeof tabToClose.groupId === 'number' ? tabToClose.groupId : undefined,
+            index: tabToClose.index,
+            windowId: tabToClose.windowId,
+        };
+
+        logger.debug(
+            `[DEDUPLICATION] Duplicate found for ${newUrl} (strategy=${strategy}, keeping ${tabToKeep.id}, closing ${tabToClose.id})`,
+        );
+
+        await incrementStat('tabsDeduplicatedCount');
+
+        const keepIsExisting = tabToKeep.id === duplicateTab.id;
+        if (keepIsExisting) {
+            await focusAndReloadTab(tabToKeep);
+        } else {
+            // Newly opened tab wins: it is already loading, no reload needed.
+            await focusTabWithoutReload(tabToKeep);
+        }
+        await removeDuplicateTab(tabToClose.id);
+
+        if (settings.notifyOnDeduplication) {
+            const tabTitle = closedTabMeta.title || closedTabMeta.url;
+            const undoAction: UndoAction = {
+                type: 'reopen_tab',
+                data: {
+                    url: closedTabMeta.url,
+                    windowId: closedTabMeta.windowId,
+                    groupId: closedTabMeta.groupId,
+                    title: closedTabMeta.title,
+                    index: closedTabMeta.index,
+                },
+            };
+            showNotification({
+                title: getMessage('notificationDeduplicationTitle'),
+                message: getMessage('notificationDeduplicationMessage').replace('{title}', tabTitle),
+                type: 'info',
+                undoAction,
+            });
         }
     } catch (queryError) {
         logger.error("Deduplication: Error querying tabs:", queryError);

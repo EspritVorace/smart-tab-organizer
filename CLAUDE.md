@@ -86,7 +86,7 @@ tests/e2e/         # Playwright E2E tests
 
 ### Features
 1. **Automatic Grouping** : domain rules + regex presets (middle-click / right-click new tab)
-2. **Deduplication** : exact URL / hostname+path / hostname / includes modes
+2. **Deduplication** : exact URL / URL without ignored params / includes modes; per-install keep strategy (`keep-old` default, `keep-new`, `keep-grouped`) to decide which of the two matching tabs survives; undo action captures `groupId` and tries to restore group membership of the closed tab
 3. **Rule Management** : CRUD for domain rules; built-in & custom regex presets; drag-and-drop reordering
 4. **Import/Export Wizard** : Zod-validated JSON for rules and sessions; rule/session classification (new/conflicting/identical); conflict resolution; optional note field
 5. **Statistics** : grouping & dedup counters

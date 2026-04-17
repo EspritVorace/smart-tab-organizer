@@ -12,7 +12,7 @@ import ConditionsDeclenchement from '../../../components/ConditionsDeclenchement
 - Une notification avec bouton "Annuler" permet de revenir en arrière pendant 5 secondes.
 </Aside>
 
-Quand vous ouvrez un lien déjà ouvert dans votre navigateur, SmartTab Organizer ferme le nouvel onglet et remet le focus sur l'onglet existant.
+Quand vous ouvrez un lien déjà ouvert dans votre navigateur, SmartTab Organizer conserve un seul onglet et ferme l'autre. La stratégie "quel onglet garder" (voir plus bas) détermine lequel survit. Par défaut, c'est l'onglet existant qui reste, et le nouvel onglet est fermé avec focus sur l'ancien.
 
 ## Conditions pour qu'une déduplication se déclenche
 
@@ -98,11 +98,23 @@ Les règles de domaine restent prioritaires sur ce paramètre. Un domaine avec u
 
 Chaque règle possède son propre toggle "Déduplication". S'il est désactivé pour un domaine couvert par la règle, les doublons sur ce domaine sont conservés, même si le global est activé.
 
+## Stratégie "quel onglet garder"
+
+Dans la page Paramètres, section **Portée de la déduplication**, vous pouvez choisir lequel des deux onglets en double survit :
+
+- **L'onglet existant** (défaut) : comportement historique, l'onglet déjà ouvert est conservé et le nouveau fermé. Utile quand le tab existant a un état (scroll, formulaire, session) que vous ne voulez pas perdre.
+- **Le nouvel onglet ouvert** : le nouvel onglet survit, l'ancien est fermé. Utile quand la version fraîchement chargée doit primer.
+- **L'onglet groupé gagne, sinon conserver l'existant** : si l'un des deux onglets fait partie d'un groupe et l'autre pas, le groupé survit. Sinon retombe sur le comportement "L'onglet existant". Cette option protège notamment les onglets restaurés depuis une session (qui portent leur groupe) contre une fermeture au profit d'une copie déjà ouverte en dehors du groupe.
+
+<Aside type="note">
+Ce réglage est global à l'extension et s'applique à toutes les règles de domaine. Il est désactivé visuellement si la déduplication globale est off.
+</Aside>
+
 ## Notification et bouton Annuler
 
 Quand le paramètre **Notifier lors d'une déduplication** est activé dans les Paramètres, une notification native du navigateur apparait après chaque fermeture de doublon. Elle indique le titre de l'onglet fermé et propose un bouton **Annuler**.
 
-Cliquer sur **Annuler** rouvre l'onglet fermé dans la même fenêtre et le rend actif.
+Cliquer sur **Annuler** rouvre l'onglet fermé dans la même fenêtre et le rend actif. Si l'onglet fermé faisait partie d'un groupe, l'action Annuler tente de le rattacher à ce groupe ; si le groupe n'existe plus, un nouveau groupe est créé.
 
 <Aside type="note">
 Pour éviter que l'onglet rouvert soit immédiatement refermé à nouveau, sa déduplication est suspendue pendant 10 secondes. La notification se ferme automatiquement après 5 secondes si vous n'interagissez pas.

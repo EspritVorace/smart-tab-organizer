@@ -48,6 +48,12 @@ export const deduplicationMatchModeOptions = [
   { value: 'exact_ignore_params', keyLabel: 'exactIgnoreParamsMatch' }
 ] as const;
 
+export const deduplicationKeepStrategyOptions = [
+  { value: 'keep-old', keyLabel: 'deduplicationKeepStrategyOldLabel' },
+  { value: 'keep-new', keyLabel: 'deduplicationKeepStrategyNewLabel' },
+  { value: 'keep-grouped', keyLabel: 'deduplicationKeepStrategyGroupedLabel' }
+] as const;
+
 export const badgeOptions = [
   { value: 'NEW', color: 'green', keyLabel: 'badge_new' },
   { value: 'WARNING', color: 'orange', keyLabel: 'badge_warning' },
@@ -58,4 +64,5 @@ export const badgeOptions = [
 export type ColorValue = typeof colorOptions[number]['value'];
 export type GroupNameSourceValue = typeof groupNameSourceOptions[number]['value'];
 export type DeduplicationMatchModeValue = typeof deduplicationMatchModeOptions[number]['value'];
+export type DeduplicationKeepStrategyValue = typeof deduplicationKeepStrategyOptions[number]['value'];
 export type BadgeType = typeof badgeOptions[number]['value'];
