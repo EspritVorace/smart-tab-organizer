@@ -38,21 +38,25 @@ export function SessionRestoreButton({
           label: getMessage('sessionRestoreCurrentWindow'),
           icon: <Monitor size={14} aria-hidden="true" />,
           onClick: () => onRestoreCurrentWindow(session),
+          'data-testid': 'session-restore-menu-current-window',
         },
         {
           label: getMessage('sessionRestoreNewWindow'),
           icon: <Square size={14} aria-hidden="true" />,
           onClick: () => onRestoreNewWindow(session),
+          'data-testid': 'session-restore-menu-new-window',
         },
         {
           label: getMessage('sessionRestoreReplaceCurrentWindow'),
           icon: <Replace size={14} aria-hidden="true" />,
           onClick: () => onReplaceCurrentWindow(session),
+          'data-testid': 'session-restore-menu-replace-window',
         },
         {
           label: getMessage('sessionRestoreCustomize'),
           icon: <Wrench size={14} aria-hidden="true" />,
           onClick: () => onCustomize(session),
+          'data-testid': 'session-restore-menu-customize',
         },
       ]}
     />

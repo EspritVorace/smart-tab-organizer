@@ -10,6 +10,8 @@ export interface SplitButtonMenuItem {
   disabled?: boolean;
   /** If true, a separator is rendered before this item */
   separator?: boolean;
+  /** data-testid forwarded to the DropdownMenu.Item */
+  'data-testid'?: string;
 }
 
 export interface SplitButtonProps {
@@ -100,6 +102,7 @@ export function SplitButton({
                 <DropdownMenu.Item
                   onClick={item.onClick}
                   disabled={item.disabled}
+                  data-testid={item['data-testid']}
                 >
                   {item.icon}
                   {item.label}
