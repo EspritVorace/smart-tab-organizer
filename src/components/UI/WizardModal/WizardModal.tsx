@@ -18,6 +18,7 @@ const contentStyle: React.CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
+  paddingBottom: 'var(--space-3)',
 };
 
 function WizardModalRoot({
