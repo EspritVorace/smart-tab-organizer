@@ -77,7 +77,7 @@ src/
                    # conflictDetection · deduplicationSkip · importClassification
                    # sessionClassification · sessionOrderUtils · ruleOrderUtils
                    # presetsToSearchableGroups · stringUtils · migration · tabTreeUtils
-                   # storageItems · sessionsHelpPrefs · settingsUtils · statisticsUtils
+                   # storageItems · settingsUtils · statisticsUtils
                    # themeConstants · notifications · utils
   styles/          # radix-themes.css (custom focus for non-Radix markup only)
 tests/             # Vitest unit tests

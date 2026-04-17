@@ -9,7 +9,6 @@ import { EmptyState } from '@/components/UI/EmptyState';
 import { ImportSessionsWizard } from '@/components/UI/ImportExportWizards/ImportSessionsWizard';
 import { SessionCard } from '@/components/Core/Session/SessionCard';
 import { SessionEditDialog } from '@/components/Core/Session/SessionEditDialog';
-import { SessionsIntroCallout } from '@/components/Core/Session/SessionsIntroCallout';
 import { SnapshotWizard } from '@/components/UI/SessionWizards/SnapshotWizard';
 import { RestoreWizard } from '@/components/UI/SessionWizards/RestoreWizard';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
@@ -321,15 +320,12 @@ export function SessionsPage({
   return (
     <PageLayout
       titleKey="sessionsTab"
-      theme="SESSIONS"
+      descriptionKey="sessionsPageDescription"
       icon={Archive}
       syncSettings={syncSettings}
     >
       {() => (
         <Box data-testid="page-sessions">
-          {/* Intro callout (dismissable) */}
-          <SessionsIntroCallout />
-
           {/* Toolbar: Search + Actions (hidden when no sessions exist) */}
           {isLoaded && sessions.length > 0 && (
             <ListToolbar

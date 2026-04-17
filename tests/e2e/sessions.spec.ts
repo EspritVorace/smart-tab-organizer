@@ -7,7 +7,6 @@ import { goToSessionsSection } from './helpers/navigation';
 import {
   seedSessions,
   clearSessions,
-  clearHelpPrefs,
   getSessionsFromStorage,
   createTestSession,
   createPinnedSession,
@@ -15,7 +14,6 @@ import {
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
-  await clearHelpPrefs(extensionContext);
 });
 
 // ---------------------------------------------------------------------------
@@ -47,12 +45,14 @@ test.describe('[US-O01] Empty state', () => {
     await page.close();
   });
 
-  test('shows intro callout on first visit [US-O001]', async ({ extensionContext, extensionId }) => {
+  test('shows page description on Sessions page [US-O001]', async ({ extensionContext, extensionId }) => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    // The intro callout contains this unique body text; it is shown until dismissed
-    await expect(page.getByText('Sessions capture your open tabs')).toBeVisible();
+    await expect(page.getByTestId('page-layout-description')).toBeVisible();
+    await expect(page.getByTestId('page-layout-description')).toContainText(
+      'Capture your open tabs as sessions',
+    );
     await page.close();
   });
 });
@@ -85,7 +85,7 @@ test.describe('[US-S02] Session list', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    // Use exact:true to avoid matching "session as" in the intro callout body
+    // Use exact:true to avoid matching "sessions" inside the page description.
     await expect(page.getByText('Session A', { exact: true })).toBeVisible();
     await expect(page.getByText('Session B', { exact: true })).toBeVisible();
     await expect(page.getByText('Session C', { exact: true })).toBeVisible();

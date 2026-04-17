@@ -413,8 +413,11 @@
   "popupAutoGroup": { "message": "Agrupación auto" },
   "popupDedup": { "message": "Deduplicar" },
 
-  "sessionsIntroTitle": { "message": "Sesiones" },
-  "sessionsIntroBody": { "message": "Las sesiones capturan tus pestañas abiertas para restaurarlas más tarde. Fija una sesión para acceder a ella con un clic desde el popup." },
+  "domainRulesPageDescription": { "message": "Crea reglas que agrupan y deduplican automáticamente las pestañas según su dominio o un patrón de URL." },
+  "sessionsPageDescription": { "message": "Captura tus pestañas abiertas como sesiones que podrás restaurar más tarde. Fija una sesión para acceder a ella con un clic desde el popup." },
+  "statisticsPageDescription": { "message": "Consulta cuántos grupos de pestañas se han creado y cuántas pestañas duplicadas se han cerrado automáticamente." },
+  "importExportPageDescription": { "message": "Haz copia de seguridad o restaura tus reglas y sesiones en formato JSON, con resolución de conflictos al importar." },
+  "settingsPageDescription": { "message": "Configura las preferencias globales y el comportamiento de la extensión." },
   "sessionsEmptyStateTitle": { "message": "No hay sesiones guardadas." },
   "noSessionsFound": { "message": "No se encontraron sesiones" },
   "sessionsEmptyStateDescription": { "message": "Toma una instantánea para capturar tus pestañas actuales. Fija una sesión para acceder a ella desde el popup." },

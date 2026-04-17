@@ -1,85 +1,72 @@
-import { Theme, Heading, Box, Flex, Separator } from '@radix-ui/themes';
+import { Heading, Box, Flex, Separator, Text } from '@radix-ui/themes';
 import type { LucideIcon } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
-import { FEATURE_THEMES } from '@/utils/themeConstants.js';
 import type { SyncSettings } from '@/types/syncSettings.js';
-import type { FeatureTheme } from '@/utils/themeConstants.js';
 
 interface PageLayoutProps {
   titleKey: string;
-  theme: FeatureTheme;
+  descriptionKey: string;
   icon?: LucideIcon;
   syncSettings: SyncSettings;
   children: (settings: SyncSettings) => React.ReactNode;
-  headerActions?: React.ReactNode;
 }
 
-export function PageLayout({ titleKey, theme, icon: Icon, syncSettings, children, headerActions }: PageLayoutProps) {
+export function PageLayout({ titleKey, descriptionKey, icon: Icon, syncSettings, children }: PageLayoutProps) {
   return (
-    <Theme accentColor={FEATURE_THEMES[theme]}>
-      <Box style={{
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
-        <Box data-testid="page-layout-header">
-          <Box
-            px="4"
-            py="2"
-            style={{
-              background: 'linear-gradient(135deg, var(--accent-a8) 0%, var(--accent-a10) 100%)',
-              borderRadius: 'var(--radius-3)',
-              marginBottom: 'var(--space-3)',
-            }}
-          >
-            <Flex justify="between" align="center" width="100%">
-              <Flex align="center" gap="3">
-                {Icon && (
-                  <Box
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 'var(--radius-2)',
-                      background: 'rgba(255, 255, 255, 0.15)',
-                      backdropFilter: 'blur(8px)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-                    }}
-                  >
-                    <Icon
-                      size={24}
-                      style={{
-                        color: 'white',
-                        filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2))',
-                      }}
-                    />
-                  </Box>
-                )}
-                <Heading
-                  size="5"
-                  weight="bold"
-                  as="h1"
-                  style={{
-                    color: 'white',
-                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.2)',
-                  }}
-                >
-                  {getMessage(titleKey)}
-                </Heading>
-              </Flex>
-              {headerActions && <Box>{headerActions}</Box>}
-            </Flex>
-          </Box>
-          <Separator size="4" style={{ opacity: 0.3 }} />
+    <Box style={{
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      <Box data-testid="page-layout-header">
+        <Box
+          px="4"
+          py="3"
+          style={{
+            background: 'linear-gradient(135deg, var(--accent-a4) 0%, var(--accent-a6) 100%)',
+            borderRadius: 'var(--radius-3)',
+            marginBottom: 'var(--space-3)',
+          }}
+        >
+          <Flex align="center" gap="3">
+            {Icon && (
+              <Box
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 'var(--radius-2)',
+                  background: 'var(--accent-a3)',
+                  border: '1px solid var(--accent-a6)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Icon size={20} aria-hidden="true" style={{ color: 'var(--accent-11)' }} />
+              </Box>
+            )}
+            <Heading size="5" weight="bold" as="h1">
+              {getMessage(titleKey)}
+            </Heading>
+          </Flex>
         </Box>
-
-        <Box data-testid="page-layout-content" style={{ flex: 1, overflow: 'auto', marginTop: 'var(--space-3)', backgroundColor: 'var(--accent-a2)', borderRadius: 'var(--radius-3)', padding: 'var(--space-4)' }}>
-          {children(syncSettings)}
-        </Box>
+        <Separator size="4" style={{ opacity: 0.3 }} />
       </Box>
-    </Theme>
+
+      <Box
+        data-testid="page-layout-description"
+        px="4"
+        pt="3"
+      >
+        <Text size="2" color="gray" as="p" style={{ margin: 0 }}>
+          {getMessage(descriptionKey)}
+        </Text>
+      </Box>
+
+      <Box data-testid="page-layout-content" style={{ flex: 1, overflow: 'auto', marginTop: 'var(--space-3)', backgroundColor: 'var(--accent-a2)', borderRadius: 'var(--radius-3)', padding: 'var(--space-4)' }}>
+        {children(syncSettings)}
+      </Box>
+    </Box>
   );
 }

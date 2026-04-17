@@ -295,7 +295,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
     <>
       <PageLayout
         titleKey="domainRulesTab"
-        theme="DOMAIN_RULES"
+        descriptionKey="domainRulesPageDescription"
         icon={Shield}
         syncSettings={syncSettings}
       >

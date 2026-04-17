@@ -15,7 +15,7 @@ export function StatisticsPage({ syncSettings, stats, onReset }: StatisticsPageP
   return (
     <PageLayout
       titleKey="statisticsTab"
-      theme="STATISTICS"
+      descriptionKey="statisticsPageDescription"
       icon={BarChart3}
       syncSettings={syncSettings}
     >
