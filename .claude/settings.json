@@ -30,6 +30,19 @@
           }
         ]
       }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm install --frozen-lockfile",
+            "timeout": 300,
+            "statusMessage": "Installing dependencies..."
+          }
+        ]
+      }
     ]
   }
 }
