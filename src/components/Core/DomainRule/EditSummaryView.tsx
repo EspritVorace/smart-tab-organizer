@@ -80,13 +80,6 @@ export function EditSummaryView({
             error={errors.label}
           >
             <Flex align="center" gap="2" style={{ marginTop: '4px' }}>
-              <Controller
-                name="categoryId"
-                control={control}
-                render={({ field }) => (
-                  <CategoryPicker value={field.value as any} onChange={field.onChange} />
-                )}
-              />
               <Box style={{ flex: 1 }}>
                 <Controller
                   name="label"
@@ -101,6 +94,13 @@ export function EditSummaryView({
                   )}
                 />
               </Box>
+              <Controller
+                name="categoryId"
+                control={control}
+                render={({ field }) => (
+                  <CategoryPicker value={field.value as any} onChange={field.onChange} />
+                )}
+              />
             </Flex>
           </FormField>
 

@@ -169,7 +169,6 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingS
               {getMessage('sessionEditorNameLabel')}
             </Text>
             <Flex align="center" gap="2">
-              <CategoryPicker value={categoryId as any} onChange={setCategoryId} />
               <Box style={{ flex: 1 }}>
                 <TextField.Root
                   data-testid="dialog-session-edit-field-name"
@@ -189,6 +188,7 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingS
                   </Text>
                 )}
               </Box>
+              <CategoryPicker value={categoryId as any} onChange={setCategoryId} />
             </Flex>
           </Box>
 

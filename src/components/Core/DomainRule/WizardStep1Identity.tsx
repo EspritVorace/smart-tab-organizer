@@ -20,13 +20,6 @@ export function WizardStep1Identity({ control, errors }: WizardStep1IdentityProp
         error={errors.label}
       >
         <Flex align="center" gap="2" style={{ marginTop: '4px' }}>
-          <Controller
-            name="categoryId"
-            control={control}
-            render={({ field }) => (
-              <CategoryPicker value={field.value as any} onChange={field.onChange} />
-            )}
-          />
           <Box style={{ flex: 1 }}>
             <Controller
               name="label"
@@ -41,6 +34,13 @@ export function WizardStep1Identity({ control, errors }: WizardStep1IdentityProp
               )}
             />
           </Box>
+          <Controller
+            name="categoryId"
+            control={control}
+            render={({ field }) => (
+              <CategoryPicker value={field.value as any} onChange={field.onChange} />
+            )}
+          />
         </Flex>
       </FormField>
 
