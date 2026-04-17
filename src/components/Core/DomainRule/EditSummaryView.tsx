@@ -4,8 +4,8 @@ import { ChevronDown, ChevronRight, Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, type Control, type FieldErrors } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
-import { CategoryPicker } from './CategoryPicker';
 import { FormField } from '@/components/Form/FormFields';
+import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
 import { ConfigEditModal, type ConfigEditValues } from './ConfigEditModal';
 import { WizardStep3Options } from './WizardStep3Options';
 import { getRuleCategory, groupNameSourceOptions, deduplicationMatchModeOptions } from '@/schemas/enums';
@@ -79,29 +79,31 @@ export function EditSummaryView({
             required={true}
             error={errors.label}
           >
-            <Flex align="center" gap="2" style={{ marginTop: '4px' }}>
-              <Box style={{ flex: 1 }}>
-                <Controller
-                  name="label"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField.Root
-                      {...field}
-                      name="label"
-                      data-testid="wizard-rule-field-label"
-                      placeholder={getMessage('labelPlaceholder')}
-                    />
-                  )}
-                />
-              </Box>
+            <div style={{ marginTop: '4px' }}>
               <Controller
-                name="categoryId"
+                name="label"
                 control={control}
-                render={({ field }) => (
-                  <CategoryPicker value={field.value as any} onChange={field.onChange} />
+                render={({ field: labelField }) => (
+                  <Controller
+                    name="categoryId"
+                    control={control}
+                    render={({ field: catField }) => (
+                      <TextFieldWithCategory
+                        ref={labelField.ref}
+                        name={labelField.name}
+                        value={labelField.value ?? ''}
+                        onChange={labelField.onChange}
+                        onBlur={labelField.onBlur}
+                        data-testid="wizard-rule-field-label"
+                        placeholder={getMessage('labelPlaceholder')}
+                        categoryId={catField.value as any}
+                        onCategoryChange={catField.onChange}
+                      />
+                    )}
+                  />
                 )}
               />
-            </Flex>
+            </div>
           </FormField>
 
           <FormField

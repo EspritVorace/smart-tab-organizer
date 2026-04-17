@@ -1,8 +1,8 @@
-import { Box, Flex, TextField } from '@radix-ui/themes';
+import { Flex, TextField } from '@radix-ui/themes';
 import { Controller, type Control, type FieldErrors } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
-import { CategoryPicker } from './CategoryPicker';
 import { FormField } from '@/components/Form/FormFields';
+import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
 import type { DomainRule } from '@/schemas/domainRule';
 
 interface WizardStep1IdentityProps {
@@ -19,29 +19,31 @@ export function WizardStep1Identity({ control, errors }: WizardStep1IdentityProp
         required={true}
         error={errors.label}
       >
-        <Flex align="center" gap="2" style={{ marginTop: '4px' }}>
-          <Box style={{ flex: 1 }}>
-            <Controller
-              name="label"
-              control={control}
-              render={({ field }) => (
-                <TextField.Root
-                  {...field}
-                  data-testid="wizard-rule-field-label"
-                  name="label"
-                  placeholder={getMessage('labelPlaceholder')}
-                />
-              )}
-            />
-          </Box>
+        <div style={{ marginTop: '4px' }}>
           <Controller
-            name="categoryId"
+            name="label"
             control={control}
-            render={({ field }) => (
-              <CategoryPicker value={field.value as any} onChange={field.onChange} />
+            render={({ field: labelField }) => (
+              <Controller
+                name="categoryId"
+                control={control}
+                render={({ field: catField }) => (
+                  <TextFieldWithCategory
+                    ref={labelField.ref}
+                    name={labelField.name}
+                    value={labelField.value ?? ''}
+                    onChange={labelField.onChange}
+                    onBlur={labelField.onBlur}
+                    data-testid="wizard-rule-field-label"
+                    placeholder={getMessage('labelPlaceholder')}
+                    categoryId={catField.value as any}
+                    onCategoryChange={catField.onChange}
+                  />
+                )}
+              />
             )}
           />
-        </Flex>
+        </div>
       </FormField>
 
       {/* Domain Filter */}

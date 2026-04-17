@@ -5,7 +5,6 @@ import {
   Box,
   Flex,
   Text,
-  TextField,
   TextArea,
   Button,
   Separator,
@@ -15,7 +14,7 @@ import { Pencil, X } from 'lucide-react';
 import { getMessage, getPluralMessage } from '@/utils/i18n';
 import { SessionsTheme } from '@/components/Form/themes';
 import { TabTreeEditor } from '@/components/Core/TabTree/TabTreeEditor';
-import { CategoryPicker } from '@/components/Core/DomainRule/CategoryPicker';
+import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
 import { useSessionEditor } from '@/hooks/useSessionEditor';
 import { countSessionTabs } from '@/utils/sessionUtils';
 import type { Session } from '@/types/session';
@@ -168,28 +167,23 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingS
             >
               {getMessage('sessionEditorNameLabel')}
             </Text>
-            <Flex align="center" gap="2">
-              <Box style={{ flex: 1 }}>
-                <TextField.Root
-                  data-testid="dialog-session-edit-field-name"
-                  id="session-edit-name"
-                  value={editor.editedSession.name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    editor.updateSessionName(e.target.value);
-                    setSaveNameError(null);
-                  }}
-                  size="2"
-                  style={{ width: '100%' }}
-                  aria-label={getMessage('sessionEditorNameLabel')}
-                />
-                {saveNameError && (
-                  <Text size="1" color="red" style={{ marginTop: 2 }}>
-                    {saveNameError}
-                  </Text>
-                )}
-              </Box>
-              <CategoryPicker value={categoryId as any} onChange={setCategoryId} />
-            </Flex>
+            <TextFieldWithCategory
+              id="session-edit-name"
+              data-testid="dialog-session-edit-field-name"
+              value={editor.editedSession.name}
+              onChange={(nextValue) => {
+                editor.updateSessionName(nextValue);
+                setSaveNameError(null);
+              }}
+              aria-label={getMessage('sessionEditorNameLabel')}
+              categoryId={categoryId as any}
+              onCategoryChange={setCategoryId}
+            />
+            {saveNameError && (
+              <Text size="1" color="red" style={{ marginTop: 2 }}>
+                {saveNameError}
+              </Text>
+            )}
           </Box>
 
           <Separator size="4" mb="3" />
