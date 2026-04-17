@@ -34,6 +34,8 @@ function WizardModalRoot({
         data-testid={dataTestId}
         style={contentStyle}
         onOpenAutoFocus={onOpenAutoFocus}
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
       >
         {children}
       </Dialog.Content>
