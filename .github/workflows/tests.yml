@@ -238,7 +238,10 @@ jobs:
         with:
           run_install: false
 
-      - run: pnpm install --frozen-lockfile
+      - name: Install docs dependencies
+        working-directory: docs
+        run: pnpm install --frozen-lockfile
 
       - name: Build Astro docs
-        run: pnpm --filter smart-tab-organizer-docs build
+        working-directory: docs
+        run: pnpm build
