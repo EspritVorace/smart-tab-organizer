@@ -92,10 +92,8 @@ tests/e2e/         # Playwright E2E tests
 5. **Statistics** : grouping & dedup counters
 6. **Sessions & Profiles** : snapshots of open tabs with optional note; pinned profiles with icon, auto-sync, window exclusivity; restore wizard with conflict resolution; interactive session editor; collapsed/expanded group state persistence; drag-and-drop session reordering; session card with HoverCard metadata and inline rename
 
-### Feature Themes (`src/utils/themeConstants.ts`)
-`DOMAIN_RULES` purple · `REGEX_PRESETS` cyan · `IMPORT` jade · `EXPORT` teal · `STATISTICS` orange · `SETTINGS` gray · `SESSIONS` indigo
-
-Theme wrappers in `src/components/Form/themes/` apply accent colors contextually.
+### Theming
+Accent unique `indigo` (défaut Radix Themes). `src/utils/themeConstants.ts` garde les constantes par feature pour compat mais toutes pointent désormais sur `indigo`. Préférer les tokens Radix (`var(--accent-a3)`, `var(--gray-a2)`, etc.) aux couleurs hardcodées. Les wrappers dans `src/components/Form/themes/` restent en place mais n'appliquent plus d'accent différencié.
 
 ### Internationalization
 Always use `getMessage()` from `src/utils/i18n.ts` — for UI text, `aria-label`, and `title` attributes. Never hardcode strings.
