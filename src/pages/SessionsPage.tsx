@@ -321,7 +321,6 @@ export function SessionsPage({
     <PageLayout
       titleKey="sessionsTab"
       descriptionKey="sessionsPageDescription"
-      theme="SESSIONS"
       icon={Archive}
       syncSettings={syncSettings}
     >

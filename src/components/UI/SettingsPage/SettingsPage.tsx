@@ -18,7 +18,6 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
     <PageLayout
       titleKey="settingsTab"
       descriptionKey="settingsPageDescription"
-      theme="SETTINGS"
       icon={Settings}
       syncSettings={syncSettings}
     >

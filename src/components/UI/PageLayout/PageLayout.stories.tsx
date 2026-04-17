@@ -12,11 +12,10 @@ const meta: Meta<typeof PageLayout> = {
   },
   tags: ['autodocs'],
   argTypes: {
-    theme: {
-      control: 'select',
-      options: ['DOMAIN_RULES', 'IMPORT', 'STATISTICS'],
-    },
     titleKey: {
+      control: 'text',
+    },
+    descriptionKey: {
       control: 'text',
     },
   },
@@ -25,12 +24,10 @@ const meta: Meta<typeof PageLayout> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Domain Rules theme
 export const PageLayoutDomainRules: Story = {
   args: {
     titleKey: 'domainRulesTab',
     descriptionKey: 'domainRulesPageDescription',
-    theme: 'DOMAIN_RULES',
     icon: Shield,
     syncSettings: defaultSyncSettings,
     children: (settings) => (
@@ -51,12 +48,10 @@ export const PageLayoutDomainRules: Story = {
   },
 };
 
-// Import/Export theme
 export const PageLayoutImportExport: Story = {
   args: {
     titleKey: 'importExportTab',
     descriptionKey: 'importExportPageDescription',
-    theme: 'IMPORT',
     icon: FileText,
     syncSettings: defaultSyncSettings,
     children: () => (
@@ -73,12 +68,10 @@ export const PageLayoutImportExport: Story = {
   },
 };
 
-// Statistics theme
 export const PageLayoutStatistics: Story = {
   args: {
     titleKey: 'statisticsTab',
     descriptionKey: 'statisticsPageDescription',
-    theme: 'STATISTICS',
     icon: BarChart3,
     syncSettings: defaultSyncSettings,
     children: (settings) => (

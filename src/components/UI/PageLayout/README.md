@@ -1,15 +1,18 @@
 # PageLayout Component
 
-Le composant `PageLayout` est un composant générique qui standardise la mise en page des pages de l'extension. Il fournit une structure cohérente avec titre, thème et gestion des paramètres.
+Wrapper de page utilisé par toutes les sections de l'options page. Fournit un
+header (icône + titre h1), une description permanente sous le header, et un
+conteneur pour le contenu.
 
 ## Utilisation
 
 ```tsx
-import { PageLayout } from '../components/UI/PageLayout';
+import { PageLayout } from '@/components/UI/PageLayout';
 
 <PageLayout
   titleKey="domainRulesTab"
-  theme="DOMAIN_RULES"
+  descriptionKey="domainRulesPageDescription"
+  icon={Shield}
   syncSettings={settings}
 >
   {(syncSettings) => (
@@ -20,60 +23,15 @@ import { PageLayout } from '../components/UI/PageLayout';
 
 ## Props
 
-- `titleKey`: Clé de traduction pour le titre de la page (sera traduite via `getMessage()`)
-- `theme`: Thème de la fonctionnalité (voir `FeatureTheme` dans `themeConstants.ts`)
-- `syncSettings`: Les paramètres synchronisés de l'extension
-- `children`: Fonction render prop qui reçoit les `syncSettings` et retourne le contenu
+- `titleKey` : clé i18n du titre (rendue via `getMessage()`).
+- `descriptionKey` : clé i18n optionnelle de la description de page.
+- `icon` : icône Lucide optionnelle affichée à gauche du titre.
+- `syncSettings` : paramètres synchronisés de l'extension.
+- `children` : render prop qui reçoit les `syncSettings` et retourne le contenu.
 
-## Fonctionnalités
+## Notes
 
-- **Titre automatique** : Le titre est traduit automatiquement via i18n
-- **Thématisation** : Applique automatiquement le thème approprié avec Radix UI
-- **Layout complet** : Prend toute la largeur disponible avec padding cohérent
-- **Render prop** : Passe les SyncSettings au composant enfant via une render prop
-
-## Thèmes disponibles
-
-- `DOMAIN_RULES` - Règles de domaine (purple)
-- `REGEX_PRESETS` - Presets regex (cyan)
-- `IMPORT` - Import (jade)
-- `EXPORT` - Export (teal)
-- `STATISTICS` - Statistiques (orange)
-- `SETTINGS` - Paramètres (gray)
-
-## Exemple d'intégration
-
-Remplace l'ancien pattern :
-```tsx
-{currentTab === 'rules' && (
-  <DomainRulesTheme>
-    <RulesTab settings={settings} updateRules={updateRules} />
-  </DomainRulesTheme>
-)}
-```
-
-Par le nouveau :
-```tsx
-{currentTab === 'rules' && (
-  <PageLayout
-    titleKey="domainRulesTab"
-    theme="DOMAIN_RULES"
-    syncSettings={settings}
-  >
-    {(syncSettings) => (
-      <RulesTab 
-        settings={syncSettings} 
-        updateRules={updateRules} 
-      />
-    )}
-  </PageLayout>
-)}
-```
-
-## Avantages
-
-- **Consistance** : Même structure pour toutes les pages
-- **Réutilisabilité** : Un seul composant pour toutes les pages
-- **Maintien** : Centralisation de la logique de layout
-- **Thématisation** : Gestion automatique des thèmes
-- **Type safety** : Props typées avec TypeScript
+- Le thème (accent indigo) est appliqué au niveau racine de l'options page.
+  PageLayout n'englobe plus son propre `<Theme>` wrapper.
+- La description, quand fournie, est toujours visible (pas de dismiss, pas
+  de persistance). Elle sert de contexte permanent pour l'utilisateur.

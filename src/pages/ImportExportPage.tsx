@@ -35,7 +35,6 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
     <PageLayout
       titleKey="importExportTab"
       descriptionKey="importExportPageDescription"
-      theme="IMPORT"
       icon={FileText}
       syncSettings={syncSettings}
     >
