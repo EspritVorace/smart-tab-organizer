@@ -383,7 +383,7 @@ test.describe('[US-S04][US-S06] Restore — More actions menu', () => {
     await page.close();
   });
 
-  test('Restore split button exposes the 3 restore options [US-S011]', async ({ extensionContext, extensionId }) => {
+  test('Restore split button exposes the 4 restore options [US-S011]', async ({ extensionContext, extensionId }) => {
     const session = createTestSession({ name: 'Restorable' });
     await seedSessions(extensionContext, [session]);
 
@@ -392,8 +392,9 @@ test.describe('[US-S04][US-S06] Restore — More actions menu', () => {
 
     await page.getByRole('button', { name: /restore options/i }).click();
 
-    await expect(page.getByRole('menuitem', { name: /current window/i })).toBeVisible();
-    await expect(page.getByRole('menuitem', { name: /new window/i })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /restore in current window/i })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /restore in new window/i })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /replace tabs in current window/i })).toBeVisible();
     await expect(page.getByRole('menuitem', { name: /customized restoration/i })).toBeVisible();
     await page.close();
   });
@@ -409,7 +410,7 @@ test.describe('[US-S04][US-S06] Restore — More actions menu', () => {
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: /restore options/i }).click();
-    await page.getByRole('menuitem', { name: /current window/i }).click();
+    await page.getByRole('menuitem', { name: /restore in current window/i }).click();
 
     await expect(page.getByText(/tab.*opened/i)).toBeVisible({ timeout: 5000 });
     await page.close();
@@ -470,7 +471,7 @@ test.describe('[US-S04] Restore in current window', () => {
     const dialog = page.getByRole('dialog');
     await page.waitForTimeout(300);
     // "In the current window" radio should be checked by default
-    const currentRadio = dialog.getByRole('radio', { name: /current window/i });
+    const currentRadio = dialog.getByRole('radio', { name: /in the current window/i });
     await expect(currentRadio).toBeChecked();
     await page.close();
   });
@@ -491,8 +492,8 @@ test.describe('[US-S05] Restore with conflict resolution', () => {
     await page.getByRole('menuitem', { name: /customized restoration/i }).click();
 
     const dialog = page.getByRole('dialog');
-    await expect(dialog.getByText(/current window/i)).toBeVisible();
-    await expect(dialog.getByText(/new window/i)).toBeVisible();
+    await expect(dialog.getByText(/in the current window/i)).toBeVisible();
+    await expect(dialog.getByText(/in a new window/i)).toBeVisible();
     await page.close();
   });
 
@@ -539,7 +540,7 @@ test.describe('[US-S017] Restore with collapsed group state', () => {
     await goToSessionsSection(page, extensionId);
 
     await page.getByRole('button', { name: /restore options/i }).click();
-    await page.getByRole('menuitem', { name: /current window/i }).click();
+    await page.getByRole('menuitem', { name: /restore in current window/i }).click();
 
     // Restore should show success message
     await expect(page.getByText(/tab.*opened/i)).toBeVisible({ timeout: 5000 });
