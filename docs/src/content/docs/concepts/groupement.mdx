@@ -18,11 +18,11 @@ Quand vous ouvrez un lien depuis un onglet parent, l'extension détecte l'action
 
 ### Clic du milieu sur un lien
 
-Le content script mémorise l'URL cible au moment du clic. Quand le nouvel onglet s'ouvre, le service worker retrouve cette entrée et crée le groupe.
+Au moment du clic, l'extension mémorise le lien ciblé. Quand le nouvel onglet s'ouvre, elle applique votre règle de domaine et crée le groupe.
 
 ### Clic droit puis "Ouvrir dans un nouvel onglet"
 
-Le content script intervient de la même façon au moment du clic droit sur le lien. Le mécanisme est ensuite identique.
+Le lien ciblé est mémorisé de la même façon dès le clic droit. Le reste du mécanisme est identique.
 
 <Aside type="caution">
 Les onglets ouverts depuis la barre d'adresse ou par un raccourci clavier ne déclenchent pas le groupement automatique. Les URL avec des schémas spéciaux (`chrome:`, `chrome-extension:`, `about:`) sont également ignorées.
