@@ -1,7 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import {
-  Dialog, Flex, Button, Text, Separator, Box,
-} from '@radix-ui/themes';
+import { Box, Dialog } from '@radix-ui/themes';
 import { Upload } from 'lucide-react';
 import { SessionsTheme } from '@/components/Form/themes';
 import { getMessage } from '@/utils/i18n';
@@ -16,7 +14,12 @@ import { generateUUID } from '@/utils/utils';
 import { loadSessions, saveSessions } from '@/utils/sessionStorage';
 import { SessionRow, ConflictSessionRow } from './SessionImportRows';
 import type { Session } from '@/types/session';
-import { TwoStepImportFooter, WizardDialogTitle, useDialogReset } from './Shared';
+import {
+  TwoStepImportFooter,
+  WizardDialogContent,
+  WizardDialogTitle,
+  useDialogReset,
+} from './Shared';
 import { SourceStep, ImportedNoteCallout, useJsonSourceInput } from './Source';
 import {
   useImportClassification,
@@ -129,7 +132,7 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
   return (
     <SessionsTheme>
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
-        <Dialog.Content style={{ maxWidth: 600 }}>
+        <WizardDialogContent>
           <WizardDialogTitle
             icon={Upload}
             titleKey="importSessionsTitle"
@@ -212,7 +215,7 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
             confirmDisabled={importCount === 0}
             confirmLabelKey="confirmImport"
           />
-        </Dialog.Content>
+        </WizardDialogContent>
       </Dialog.Root>
     </SessionsTheme>
   );

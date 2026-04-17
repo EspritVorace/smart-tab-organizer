@@ -3,6 +3,7 @@ import { Dialog, Flex, Button, Text, Separator, Box, RadioGroup, Callout } from 
 import { RotateCcw, AlertCircle } from 'lucide-react';
 import { SessionsTheme } from '@/components/Form/themes';
 import { TabTree } from '@/components/Core/TabTree/TabTree';
+import { WizardDialogContent } from '@/components/UI/ImportExportWizards/Shared';
 import { ConflictResolutionStep } from './ConflictResolutionStep';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast, showErrorToast } from '@/utils/toast';
@@ -186,7 +187,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
   return (
     <SessionsTheme>
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
-        <Dialog.Content data-testid="wizard-restore" style={{ maxWidth: 600 }}>
+        <WizardDialogContent data-testid="wizard-restore">
           <Dialog.Title>
             <Flex align="center" gap="2">
               <RotateCcw size={18} aria-hidden="true" />
@@ -312,7 +313,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
               </>
             )}
           </Flex>
-        </Dialog.Content>
+        </WizardDialogContent>
       </Dialog.Root>
     </SessionsTheme>
   );

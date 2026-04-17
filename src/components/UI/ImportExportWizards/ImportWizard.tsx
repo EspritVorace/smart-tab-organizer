@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Box, Button, Dialog, Flex, Separator } from '@radix-ui/themes';
+import { Box, Dialog } from '@radix-ui/themes';
 import { FileUp } from 'lucide-react';
 import { ImportTheme } from '@/components/Form/themes';
 import { getMessage } from '@/utils/i18n';
@@ -8,7 +8,12 @@ import { importDataSchema } from '@/schemas/importExport';
 import { classifyImportedRules } from '@/utils/importClassification';
 import { generateUUID } from '@/utils/utils';
 import type { DomainRuleSetting } from '@/types/syncSettings';
-import { TwoStepImportFooter, WizardDialogTitle, useDialogReset } from './Shared';
+import {
+  TwoStepImportFooter,
+  WizardDialogContent,
+  WizardDialogTitle,
+  useDialogReset,
+} from './Shared';
 import { SourceStep, ImportedNoteCallout, useJsonSourceInput } from './Source';
 import {
   useImportClassification,
@@ -109,7 +114,7 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
   return (
     <ImportTheme>
       <Dialog.Root open={open} onOpenChange={onOpenChange}>
-        <Dialog.Content style={{ maxWidth: 600 }}>
+        <WizardDialogContent>
           <WizardDialogTitle
             icon={FileUp}
             titleKey="importRulesTitle"
@@ -191,7 +196,7 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
             confirmDisabled={importCount === 0}
             confirmLabelKey="confirmImport"
           />
-        </Dialog.Content>
+        </WizardDialogContent>
       </Dialog.Root>
     </ImportTheme>
   );

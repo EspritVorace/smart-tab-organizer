@@ -11,7 +11,11 @@ interface ClassificationScrollAreaProps {
  */
 export function ClassificationScrollArea({ children }: ClassificationScrollAreaProps) {
   return (
-    <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '50vh' }}>
+    <ScrollArea
+      type="auto"
+      scrollbars="vertical"
+      style={{ flex: 1, minHeight: 0, maxHeight: '50vh' }}
+    >
       <Flex direction="column" gap="3" pr="3">
         {children}
       </Flex>

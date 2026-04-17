@@ -1,3 +1,4 @@
+export { WizardDialogContent } from './WizardDialogContent';
 export { WizardDialogTitle } from './WizardDialogTitle';
 export { CountLabel } from './CountLabel';
 export { ConflictRowShell } from './ConflictRowShell';
