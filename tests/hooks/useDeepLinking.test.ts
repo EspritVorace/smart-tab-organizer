@@ -127,6 +127,36 @@ describe('useDeepLinking — hashchange listener', () => {
   });
 });
 
+describe('useDeepLinking — restore deep link', () => {
+  it('exposes restoreSessionId when hash is #sessions?action=restore&sessionId=abc', () => {
+    window.location.hash = '#sessions?action=restore&sessionId=abc';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.currentTab).toBe('sessions');
+    expect(result.current.restoreSessionId).toBe('abc');
+    expect(result.current.openSnapshotWizard).toBe(false);
+  });
+
+  it('does not set restoreSessionId when sessionId is missing', () => {
+    window.location.hash = '#sessions?action=restore';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.restoreSessionId).toBeNull();
+  });
+
+  it('reacts to a restore hashchange after mount', () => {
+    const { result } = renderHook(() => useDeepLinking());
+    act(() => setHash('#sessions?action=restore&sessionId=s-42'));
+    expect(result.current.restoreSessionId).toBe('s-42');
+  });
+
+  it('exposes setRestoreSessionId to clear the deep-link', () => {
+    window.location.hash = '#sessions?action=restore&sessionId=s-1';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.restoreSessionId).toBe('s-1');
+    act(() => result.current.setRestoreSessionId(null));
+    expect(result.current.restoreSessionId).toBeNull();
+  });
+});
+
 describe('useDeepLinking — setters', () => {
   it('exposes setCurrentTab to override the tab manually', () => {
     const { result } = renderHook(() => useDeepLinking());

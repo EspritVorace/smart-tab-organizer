@@ -36,6 +36,7 @@ function OptionsContent() {
         currentTab, setCurrentTab,
         openSnapshotWizard, setOpenSnapshotWizard,
         snapshotGroupId, setSnapshotGroupId,
+        restoreSessionId, setRestoreSessionId,
     } = useDeepLinking();
 
     const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
@@ -98,6 +99,8 @@ function OptionsContent() {
                             onSnapshotWizardOpenChange={setOpenSnapshotWizard}
                             snapshotGroupId={snapshotGroupId}
                             onSnapshotGroupIdChange={setSnapshotGroupId}
+                            restoreSessionId={restoreSessionId}
+                            onRestoreSessionIdChange={setRestoreSessionId}
                         />
                     )}
                     {currentTab === 'stats' && (

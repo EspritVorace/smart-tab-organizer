@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, Card, Flex, Text } from '@radix-ui/themes';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { browser } from 'wxt/browser';
-import { ChevronDown, ExternalLink, Pin, Play } from 'lucide-react';
-import { SplitButton } from '@/components/UI/SplitButton/SplitButton';
+import { ChevronDown, ExternalLink, Pin } from 'lucide-react';
+import { SessionRestoreButton } from '@/components/Core/Session/SessionRestoreButton/SessionRestoreButton';
 import { getMessage } from '@/utils/i18n';
 import { loadSessions } from '@/utils/sessionStorage';
 import { restoreSessionTabs } from '@/utils/tabRestore';
@@ -54,8 +54,8 @@ function getCategoryIcon(categoryId: string | null | undefined): React.ReactNode
   );
 }
 
-async function openSessionsPage() {
-  const url = browser.runtime.getURL('/options.html') + '#sessions';
+async function openSessionsPage(hashSuffix = '') {
+  const url = browser.runtime.getURL('/options.html') + '#sessions' + hashSuffix;
   const tabs = await browser.tabs.query({ url: browser.runtime.getURL('/options.html') });
   if (tabs.length > 0 && tabs[0].id != null) {
     await browser.tabs.update(tabs[0].id, { active: true, url });
@@ -66,6 +66,10 @@ async function openSessionsPage() {
     await browser.tabs.create({ url });
   }
   window.close();
+}
+
+async function openCustomizeRestore(session: Session) {
+  await openSessionsPage(`?action=restore&sessionId=${encodeURIComponent(session.id)}`);
 }
 
 export function PopupProfilesList() {
@@ -189,22 +193,12 @@ export function PopupProfilesList() {
               >
                 {session.name}
               </Text>
-              <SplitButton
-                label={<Play size={12} aria-hidden="true" fill="currentColor" />}
-                primaryAriaLabel={getMessage('sessionRestoreCurrentWindow')}
-                onClick={() => handleRestore(session, 'current')}
-                size="1"
-                variant="soft"
-                menuItems={[
-                  {
-                    label: getMessage('sessionRestoreCurrentWindow'),
-                    onClick: () => handleRestore(session, 'current'),
-                  },
-                  {
-                    label: getMessage('sessionRestoreNewWindow'),
-                    onClick: () => handleRestore(session, 'new'),
-                  },
-                ]}
+              <SessionRestoreButton
+                session={session}
+                onRestoreCurrentWindow={(s) => handleRestore(s, 'current')}
+                onRestoreNewWindow={(s) => handleRestore(s, 'new')}
+                onCustomize={(s) => { void openCustomizeRestore(s); }}
+                data-testid={`popup-profile-btn-restore-${session.id}`}
               />
             </Flex>
           </Card>

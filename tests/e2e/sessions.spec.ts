@@ -383,14 +383,14 @@ test.describe('[US-S04][US-S06] Restore — More actions menu', () => {
     await page.close();
   });
 
-  test('More actions menu contains quick restore options [US-S011]', async ({ extensionContext, extensionId }) => {
+  test('Restore split button exposes the 3 restore options [US-S011]', async ({ extensionContext, extensionId }) => {
     const session = createTestSession({ name: 'Restorable' });
     await seedSessions(extensionContext, [session]);
 
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('button', { name: /restore options/i }).click();
 
     await expect(page.getByRole('menuitem', { name: /current window/i })).toBeVisible();
     await expect(page.getByRole('menuitem', { name: /new window/i })).toBeVisible();
@@ -408,7 +408,7 @@ test.describe('[US-S04][US-S06] Restore — More actions menu', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('button', { name: /restore options/i }).click();
     await page.getByRole('menuitem', { name: /current window/i }).click();
 
     await expect(page.getByText(/tab.*opened/i)).toBeVisible({ timeout: 5000 });
@@ -422,7 +422,7 @@ test.describe('[US-S04][US-S06] Restore — More actions menu', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('button', { name: /restore options/i }).click();
     await page.getByRole('menuitem', { name: /customized restoration/i }).click();
 
     await expect(page.getByRole('dialog')).toBeVisible();
@@ -440,7 +440,7 @@ test.describe('[US-S04][US-S06] Restore — More actions menu', () => {
 
     const pagesBefore = extensionContext.pages().length;
 
-    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('button', { name: /restore options/i }).click();
     await page.getByRole('menuitem', { name: /new window/i }).click();
 
     // Session has 3 tabs — at least one new page should be created
@@ -464,7 +464,7 @@ test.describe('[US-S04] Restore in current window', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('button', { name: /restore options/i }).click();
     await page.getByRole('menuitem', { name: /customized restoration/i }).click();
 
     const dialog = page.getByRole('dialog');
@@ -487,7 +487,7 @@ test.describe('[US-S05] Restore with conflict resolution', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('button', { name: /restore options/i }).click();
     await page.getByRole('menuitem', { name: /customized restoration/i }).click();
 
     const dialog = page.getByRole('dialog');
@@ -511,7 +511,7 @@ test.describe('[US-S05] Restore with conflict resolution', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('button', { name: /restore options/i }).click();
     await page.getByRole('menuitem', { name: /customized restoration/i }).click();
 
     const dialog = page.getByRole('dialog');
@@ -538,7 +538,7 @@ test.describe('[US-S017] Restore with collapsed group state', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('button', { name: /restore options/i }).click();
     await page.getByRole('menuitem', { name: /current window/i }).click();
 
     // Restore should show success message

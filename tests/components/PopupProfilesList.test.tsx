@@ -10,6 +10,8 @@ vi.mock('../../src/utils/i18n', () => ({
       popupPinnedSessionsLabel: 'Pinned sessions',
       sessionRestoreCurrentWindow: 'Restore in current window',
       sessionRestoreNewWindow: 'Restore in new window',
+      sessionRestoreCustomize: 'Customized restoration',
+      sessionRestoreOptions: 'Restore options',
       popupPinnedEmptyHint: 'Pin a session for one-click access from here.',
       popupGoToSessions: 'Manage sessions',
       popupPinnedEmptyToggleAria: 'Toggle pinned sessions hint',
@@ -264,6 +266,37 @@ describe('PopupProfilesList', () => {
     await waitFor(() => {
       expect(mockSetValue).toHaveBeenCalledWith(true);
     });
+  });
+
+  it('renders a SessionRestoreButton (split button) on each pinned session', async () => {
+    const sessions: Session[] = [
+      {
+        id: 'p-restore',
+        isPinned: true,
+        updatedAt: '2026-04-10T00:00:00Z',
+        name: 'Restorable Profile',
+        createdAt: '2026-04-10T00:00:00Z',
+        ungroupedTabs: [],
+        groups: [],
+      },
+    ];
+
+    mockLoadSessions.mockResolvedValue(sessions);
+
+    render(
+      <TestWrapper>
+        <PopupProfilesList />
+      </TestWrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Restorable Profile')).toBeInTheDocument();
+    });
+
+    // Primary restore button (left half of the split button)
+    expect(screen.getByRole('button', { name: /Restore in current window/i })).toBeInTheDocument();
+    // Chevron dropdown trigger (right half) — exposes the 3 options (asserted in e2e)
+    expect(screen.getByRole('button', { name: /Restore options/i })).toBeInTheDocument();
   });
 
   it('should display pinned sessions label when pinned sessions exist', async () => {

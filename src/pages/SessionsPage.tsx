@@ -34,6 +34,10 @@ interface SessionsPageProps {
   snapshotGroupId?: number | null;
   /** Called when the snapshot wizard closes to reset the group context. */
   onSnapshotGroupIdChange?: (id: number | null) => void;
+  /** Session id for which a deep-link requests the restore wizard to open. */
+  restoreSessionId?: string | null;
+  /** Called to clear the restore deep-link once consumed. */
+  onRestoreSessionIdChange?: (id: string | null) => void;
 }
 
 function SectionHeader({ icon: Icon, titleKey, count }: { icon: LucideIcon; titleKey: string; count: number }) {
@@ -240,6 +244,8 @@ export function SessionsPage({
   onSnapshotWizardOpenChange,
   snapshotGroupId,
   onSnapshotGroupIdChange,
+  restoreSessionId,
+  onRestoreSessionIdChange,
 }: SessionsPageProps) {
   const { sessions, isLoaded, createSession, renameSession, removeSession, reload, updateOrder } = useSessions();
   // Internal open state; initialized from external prop so the wizard opens immediately on mount.
@@ -263,6 +269,17 @@ export function SessionsPage({
   const [deleteTarget, setDeleteTarget] = useState<Session | null>(null);
   const [quickRestoreMessage, setQuickRestoreMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Deep-link: open the RestoreWizard when a sessionId has been provided via
+  // URL hash (e.g. from the popup's customize restore action).
+  useEffect(() => {
+    if (!restoreSessionId || !isLoaded) return;
+    const found = sessions.find((s) => s.id === restoreSessionId);
+    if (found) {
+      setRestoreSession(found);
+      onRestoreSessionIdChange?.(null);
+    }
+  }, [restoreSessionId, isLoaded, sessions, onRestoreSessionIdChange]);
 
   // Order: use storage order directly (reorderSessions saves them in the correct order)
   const sortedSessions = sessions;

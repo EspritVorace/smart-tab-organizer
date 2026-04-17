@@ -8,7 +8,7 @@ import {
 import {
   MoreHorizontal, Pencil, Trash2, Check, X,
   Pin, PinOff, ChevronDown, ChevronRight,
-  Monitor, Square, Wrench, GripVertical,
+  GripVertical,
 } from 'lucide-react';
 import { getMessage, getPluralMessage } from '@/utils/i18n';
 import { countSessionTabs, formatSessionDate } from '@/utils/sessionUtils';
@@ -17,6 +17,7 @@ import { chromeGroupColors } from '@/utils/tabTreeUtils';
 import { getRuleCategory } from '@/schemas/enums';
 import { getRadixColor } from '@/utils/utils';
 import { SessionPreviewTree } from './SessionPreviewTree';
+import { SessionRestoreButton } from './SessionRestoreButton/SessionRestoreButton';
 import type { Session } from '@/types/session';
 
 interface SessionCardProps {
@@ -310,6 +311,17 @@ export function SessionCard({
             )}
           </Flex>
 
+          {/* Restore split button */}
+          {!isRenaming && (
+            <SessionRestoreButton
+              session={session}
+              onRestoreCurrentWindow={onRestoreCurrentWindow}
+              onRestoreNewWindow={onRestoreNewWindow}
+              onCustomize={onRestore}
+              data-testid={`session-card-${session.id}-btn-restore`}
+            />
+          )}
+
           {/* More menu */}
           {!isRenaming && (
             <DropdownMenu.Root>
@@ -330,7 +342,7 @@ export function SessionCard({
                   {getMessage('sessionEdit')}
                 </DropdownMenu.Item>
 
-                <DropdownMenu.Separator />
+                {(onMoveToFirst || onMoveLast) && <DropdownMenu.Separator />}
 
                 {onMoveToFirst && (
                   <DropdownMenu.Item onClick={onMoveToFirst} disabled={isDragDisabled}>
@@ -342,21 +354,6 @@ export function SessionCard({
                     {getMessage('sessionMoveLast')}
                   </DropdownMenu.Item>
                 )}
-
-                <DropdownMenu.Separator />
-
-                <DropdownMenu.Item onClick={() => onRestoreCurrentWindow(session)}>
-                  <Monitor size={14} aria-hidden="true" />
-                  {getMessage('sessionRestoreCurrentWindow')}
-                </DropdownMenu.Item>
-                <DropdownMenu.Item onClick={() => onRestoreNewWindow(session)}>
-                  <Square size={14} aria-hidden="true" />
-                  {getMessage('sessionRestoreNewWindow')}
-                </DropdownMenu.Item>
-                <DropdownMenu.Item onClick={() => onRestore(session)}>
-                  <Wrench size={14} aria-hidden="true" />
-                  {getMessage('sessionRestoreCustomize')}
-                </DropdownMenu.Item>
 
                 <DropdownMenu.Separator />
                 <DropdownMenu.Item color="red" onClick={() => onDelete(session)}>
