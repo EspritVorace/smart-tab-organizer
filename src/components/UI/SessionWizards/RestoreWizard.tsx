@@ -195,13 +195,10 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
         open={open}
         onOpenChange={onOpenChange}
         data-testid="wizard-restore"
+        icon={RotateCcw}
+        title={getMessage('restoreTitle', [session.name])}
+        description={getMessage(STEP_DESCRIPTION_KEYS[step])}
       >
-        <WizardModal.Header
-          icon={RotateCcw}
-          title={getMessage('restoreTitle', [session.name])}
-          description={getMessage(STEP_DESCRIPTION_KEYS[step])}
-        />
-
         <WizardModal.Body>
           {step === 0 && (
             <Box data-testid="wizard-restore-step-0">

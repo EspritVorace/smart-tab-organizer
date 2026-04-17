@@ -84,13 +84,13 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
 
   return (
     <SessionsTheme>
-      <WizardModal open={open} onOpenChange={onOpenChange}>
-        <WizardModal.Header
-          icon={FileDown}
-          title={getMessage('exportSessionsTitle')}
-          description={getMessage('exportSessionsDescription')}
-        />
-
+      <WizardModal
+        open={open}
+        onOpenChange={onOpenChange}
+        icon={FileDown}
+        title={getMessage('exportSessionsTitle')}
+        description={getMessage('exportSessionsDescription')}
+      >
         <WizardModal.Body>
           <Box>
             <ExportNoteField value={exportNote} onChange={setExportNote} />

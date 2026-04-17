@@ -135,18 +135,15 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
         open={open}
         onOpenChange={onOpenChange}
         data-testid="wizard-snapshot"
+        icon={Camera}
+        title={getMessage('snapshotTitle')}
+        description={getMessage('snapshotDescription')}
         onOpenAutoFocus={(e) => {
           e.preventDefault();
           const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[aria-label]');
           input?.focus();
         }}
       >
-        <WizardModal.Header
-          icon={Camera}
-          title={getMessage('snapshotTitle')}
-          description={getMessage('snapshotDescription')}
-        />
-
         <WizardModal.Body>
           <Flex direction="column" gap="3">
             <Flex direction="column" gap="1">

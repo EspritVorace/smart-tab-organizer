@@ -56,13 +56,13 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
 
   return (
     <ExportTheme>
-      <WizardModal open={open} onOpenChange={onOpenChange}>
-        <WizardModal.Header
-          icon={FileDown}
-          title={getMessage('exportRulesTitle')}
-          description={getMessage('exportRulesDescription')}
-        />
-
+      <WizardModal
+        open={open}
+        onOpenChange={onOpenChange}
+        icon={FileDown}
+        title={getMessage('exportRulesTitle')}
+        description={getMessage('exportRulesDescription')}
+      >
         <WizardModal.Body>
           <Box>
             <ExportNoteField value={exportNote} onChange={setExportNote} />

@@ -26,12 +26,13 @@ type Story = StoryObj<typeof meta>;
 function MinimalDemo() {
   const [open, setOpen] = useState(true);
   return (
-    <WizardModal open={open} onOpenChange={setOpen}>
-      <WizardModal.Header
-        icon={FileUp}
-        title="Import data"
-        description="Paste your JSON or import a file to get started."
-      />
+    <WizardModal
+      open={open}
+      onOpenChange={setOpen}
+      icon={FileUp}
+      title="Import data"
+      description="Paste your JSON or import a file to get started."
+    >
       <WizardModal.Body>
         <Text size="2">Body content goes here.</Text>
       </WizardModal.Body>
@@ -61,12 +62,13 @@ function SteppedDemo() {
     { label: 'Summary' },
   ];
   return (
-    <WizardModal open={open} onOpenChange={setOpen}>
-      <WizardModal.Header
-        icon={Plus}
-        title="Create rule"
-        description={descriptions[step]}
-      />
+    <WizardModal
+      open={open}
+      onOpenChange={setOpen}
+      icon={Plus}
+      title="Create rule"
+      description={descriptions[step]}
+    >
       <WizardStepper steps={labels} currentStep={step} disableFutureNavigation />
       <WizardModal.Body>
         <Flex direction="column" gap="2">

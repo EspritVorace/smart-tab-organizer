@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Dialog,
   AlertDialog,
   Box,
   Flex,
@@ -8,11 +7,11 @@ import {
   TextArea,
   Button,
   Separator,
-  IconButton,
 } from '@radix-ui/themes';
-import { Pencil, X } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 import { getMessage, getPluralMessage } from '@/utils/i18n';
 import { SessionsTheme } from '@/components/Form/themes';
+import { DialogShell } from '@/components/UI/DialogShell';
 import { TabTreeEditor } from '@/components/Core/TabTree/TabTreeEditor';
 import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
 import { useSessionEditor } from '@/hooks/useSessionEditor';
@@ -118,132 +117,112 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingS
 
   return (
     <SessionsTheme>
-      <Dialog.Root
+      <DialogShell
         open={open}
         onOpenChange={(isOpen) => {
           if (!isOpen) handleCancel();
           else onOpenChange(true);
         }}
+        data-testid="dialog-session-edit"
+        maxWidth="600px"
+        title={getMessage('sessionEditorTitle')}
+        icon={Pencil}
+        showHeaderSeparator={false}
+        onInteractOutside={interceptClose}
+        onEscapeKeyDown={interceptClose}
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+          const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('#session-edit-name');
+          input?.focus();
+        }}
       >
-        <Dialog.Content
-          data-testid="dialog-session-edit"
-          maxWidth="600px"
-          onInteractOutside={interceptClose}
-          onEscapeKeyDown={interceptClose}
-          onOpenAutoFocus={(e) => {
-            e.preventDefault();
-            const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('#session-edit-name');
-            input?.focus();
-          }}
-        >
-          {/* Title row */}
-          <Flex justify="between" align="center" mb="4">
-            <Dialog.Title mb="0">
-              <Flex align="center" gap="2">
-                <Pencil size={16} aria-hidden="true" />
-                {getMessage('sessionEditorTitle')}
-              </Flex>
-            </Dialog.Title>
-            <Dialog.Close>
-              <IconButton
-                size="1"
-                variant="ghost"
-                color="gray"
-                aria-label={getMessage('close')}
-              >
-                <X size={16} aria-hidden="true" />
-              </IconButton>
-            </Dialog.Close>
-          </Flex>
-
-          {/* Session name + category inline */}
-          <Box mb="4">
-            <Text
-              as="label"
-              size="2"
-              weight="medium"
-              htmlFor="session-edit-name"
-              style={{ display: 'block', marginBottom: 'var(--space-1)' }}
-            >
-              {getMessage('sessionEditorNameLabel')}
-            </Text>
-            <TextFieldWithCategory
-              id="session-edit-name"
-              data-testid="dialog-session-edit-field-name"
-              value={editor.editedSession.name}
-              onChange={(nextValue) => {
-                editor.updateSessionName(nextValue);
-                setSaveNameError(null);
-              }}
-              aria-label={getMessage('sessionEditorNameLabel')}
-              categoryId={categoryId as any}
-              onCategoryChange={setCategoryId}
-            />
-            {saveNameError && (
-              <Text size="1" color="red" style={{ marginTop: 2 }}>
-                {saveNameError}
-              </Text>
-            )}
-          </Box>
-
-          <Separator size="4" mb="3" />
-
-          {/* Editable tab tree */}
-          <TabTreeEditor
-            session={editor.editedSession}
-            onSessionChange={editor.applySessionUpdate}
-            maxHeight={360}
+        {/* Session name + category inline */}
+        <Box mb="4" mt="4">
+          <Text
+            as="label"
+            size="2"
+            weight="medium"
+            htmlFor="session-edit-name"
+            style={{ display: 'block', marginBottom: 'var(--space-1)' }}
+          >
+            {getMessage('sessionEditorNameLabel')}
+          </Text>
+          <TextFieldWithCategory
+            id="session-edit-name"
+            data-testid="dialog-session-edit-field-name"
+            value={editor.editedSession.name}
+            onChange={(nextValue) => {
+              editor.updateSessionName(nextValue);
+              setSaveNameError(null);
+            }}
+            aria-label={getMessage('sessionEditorNameLabel')}
+            categoryId={categoryId as any}
+            onCategoryChange={setCategoryId}
           />
-
-          {/* Note */}
-          <Box mt="3">
-            <Text
-              as="label"
-              size="2"
-              weight="medium"
-              htmlFor="session-edit-note"
-              style={{ display: 'block', marginBottom: 'var(--space-1)' }}
-            >
-              {getMessage('sessionNoteLabel')}
+          {saveNameError && (
+            <Text size="1" color="red" style={{ marginTop: 2 }}>
+              {saveNameError}
             </Text>
-            <TextArea
-              id="session-edit-note"
-              value={editor.editedSession.note ?? ''}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                editor.updateSessionNote(e.target.value)
-              }
-              placeholder={getMessage('sessionNotePlaceholder')}
-              resize="vertical"
-              rows={3}
-            />
-          </Box>
+          )}
+        </Box>
 
-          {/* Summary */}
-          <Box mt="3">
-            <Text size="1" color="gray">
-              {getPluralMessage(tabCount, 'sessionTabOne', 'sessionTabCount')}
-              {' · '}
-              {getPluralMessage(groupCount, 'sessionGroupOne', 'sessionGroupCount')}
-            </Text>
-          </Box>
+        <Separator size="4" mb="3" />
 
-          {/* Footer buttons */}
-          <Flex gap="2" justify="end" mt="4">
-            <Button
-              data-testid="dialog-session-edit-btn-cancel"
-              variant="soft"
-              color="gray"
-              onClick={handleCancel}
-              disabled={isSaving}
-            >
-              {getMessage('cancel')}
-            </Button>
-            <Button data-testid="dialog-session-edit-btn-save" onClick={handleSave} disabled={isSaving}>
-              {isSaving ? getMessage('loadingText') : getMessage('save')}
-            </Button>
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
+        {/* Editable tab tree */}
+        <TabTreeEditor
+          session={editor.editedSession}
+          onSessionChange={editor.applySessionUpdate}
+          maxHeight={360}
+        />
+
+        {/* Note */}
+        <Box mt="3">
+          <Text
+            as="label"
+            size="2"
+            weight="medium"
+            htmlFor="session-edit-note"
+            style={{ display: 'block', marginBottom: 'var(--space-1)' }}
+          >
+            {getMessage('sessionNoteLabel')}
+          </Text>
+          <TextArea
+            id="session-edit-note"
+            value={editor.editedSession.note ?? ''}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              editor.updateSessionNote(e.target.value)
+            }
+            placeholder={getMessage('sessionNotePlaceholder')}
+            resize="vertical"
+            rows={3}
+          />
+        </Box>
+
+        {/* Summary */}
+        <Box mt="3">
+          <Text size="1" color="gray">
+            {getPluralMessage(tabCount, 'sessionTabOne', 'sessionTabCount')}
+            {' · '}
+            {getPluralMessage(groupCount, 'sessionGroupOne', 'sessionGroupCount')}
+          </Text>
+        </Box>
+
+        {/* Footer buttons */}
+        <Flex gap="2" justify="end" mt="4">
+          <Button
+            data-testid="dialog-session-edit-btn-cancel"
+            variant="soft"
+            color="gray"
+            onClick={handleCancel}
+            disabled={isSaving}
+          >
+            {getMessage('cancel')}
+          </Button>
+          <Button data-testid="dialog-session-edit-btn-save" onClick={handleSave} disabled={isSaving}>
+            {isSaving ? getMessage('loadingText') : getMessage('save')}
+          </Button>
+        </Flex>
+      </DialogShell>
 
       {/* Unsaved changes confirmation */}
       <AlertDialog.Root open={showUnsavedAlert} onOpenChange={setShowUnsavedAlert}>

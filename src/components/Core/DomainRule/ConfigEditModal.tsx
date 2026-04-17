@@ -1,9 +1,9 @@
-import { Button, Dialog, Flex, ScrollArea } from '@radix-ui/themes';
-import { X } from 'lucide-react';
+import { Button, Flex, ScrollArea } from '@radix-ui/themes';
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
 import { DomainRulesTheme } from '@/components/Form/themes';
+import { DialogShell } from '@/components/UI/DialogShell';
 import { type GroupNameSourceValue } from '@/schemas/enums';
 import { createRegexValidator } from '@/schemas/common';
 import type { PresetCategory } from '@/utils/presetUtils';
@@ -106,56 +106,46 @@ export function ConfigEditModal({
 
   return (
     <DomainRulesTheme>
-      <Dialog.Root open={isOpen} onOpenChange={handleOpenChange}>
-        <Dialog.Content style={{ maxWidth: 480 }}>
-          <Dialog.Title>{getMessage('editConfigTitle')}</Dialog.Title>
-          <Dialog.Description style={{ display: 'none' }}>
-            {getMessage('editConfigTitle')}
-          </Dialog.Description>
-
-          <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '55vh' }}>
-            <Flex direction="column" gap="4" mt="4" pr="3">
-              <DomainRuleConfigForm
-                idPrefix="edit"
-                configMode={configMode}
-                onConfigModeChange={setConfigMode}
-                presetId={presetId}
-                onPresetChange={handlePresetChange}
-                presetCategories={presetCategories}
-                isLoadingPresets={isLoadingPresets}
-                groupNameSource={groupNameSource}
-                onGroupNameSourceChange={setGroupNameSource}
-                titleParsingRegEx={titleParsingRegEx}
-                onTitleParsingRegExChange={setTitleParsingRegEx}
-                titleParsingRegExError={titleRegexError}
-                urlParsingRegEx={urlParsingRegEx}
-                onUrlParsingRegExChange={setUrlParsingRegEx}
-                urlParsingRegExError={urlRegexError}
-              />
-            </Flex>
-          </ScrollArea>
-
-          <Flex gap="3" justify="end" mt="4">
-            <Button variant="soft" color="gray" onClick={onClose}>
-              {getMessage('cancel')}
-            </Button>
-            <Button onClick={handleApply} disabled={hasRegexError}>
-              {getMessage('apply')}
-            </Button>
+      <DialogShell
+        open={isOpen}
+        onOpenChange={handleOpenChange}
+        title={getMessage('editConfigTitle')}
+        description={getMessage('editConfigTitle')}
+        hideDescription
+        maxWidth={480}
+        showHeaderSeparator={false}
+      >
+        <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '55vh' }}>
+          <Flex direction="column" gap="4" mt="4" pr="3">
+            <DomainRuleConfigForm
+              idPrefix="edit"
+              configMode={configMode}
+              onConfigModeChange={setConfigMode}
+              presetId={presetId}
+              onPresetChange={handlePresetChange}
+              presetCategories={presetCategories}
+              isLoadingPresets={isLoadingPresets}
+              groupNameSource={groupNameSource}
+              onGroupNameSourceChange={setGroupNameSource}
+              titleParsingRegEx={titleParsingRegEx}
+              onTitleParsingRegExChange={setTitleParsingRegEx}
+              titleParsingRegExError={titleRegexError}
+              urlParsingRegEx={urlParsingRegEx}
+              onUrlParsingRegExChange={setUrlParsingRegEx}
+              urlParsingRegExError={urlRegexError}
+            />
           </Flex>
+        </ScrollArea>
 
-          <Dialog.Close>
-            <Button
-              variant="ghost"
-              size="1"
-              aria-label={getMessage('cancel')}
-              style={{ position: 'absolute', top: '16px', right: '16px' }}
-            >
-              <X size={16} aria-hidden="true" />
-            </Button>
-          </Dialog.Close>
-        </Dialog.Content>
-      </Dialog.Root>
+        <Flex gap="3" justify="end" mt="4">
+          <Button variant="soft" color="gray" onClick={onClose}>
+            {getMessage('cancel')}
+          </Button>
+          <Button onClick={handleApply} disabled={hasRegexError}>
+            {getMessage('apply')}
+          </Button>
+        </Flex>
+      </DialogShell>
     </DomainRulesTheme>
   );
 }
