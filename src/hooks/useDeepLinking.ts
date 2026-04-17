@@ -4,6 +4,7 @@ interface DeepLinkState {
   currentTab: string;
   openSnapshotWizard: boolean;
   snapshotGroupId: number | null;
+  restoreSessionId: string | null;
 }
 
 const VALID_SECTIONS = ['rules', 'importexport', 'sessions', 'stats', 'settings'] as const;
@@ -16,10 +17,12 @@ export function useDeepLinking(): DeepLinkState & {
   setCurrentTab: (tab: string) => void;
   setOpenSnapshotWizard: (open: boolean) => void;
   setSnapshotGroupId: (id: number | null) => void;
+  setRestoreSessionId: (id: string | null) => void;
 } {
   const [currentTab, setCurrentTab] = useState<string>('rules');
   const [openSnapshotWizard, setOpenSnapshotWizard] = useState(false);
   const [snapshotGroupId, setSnapshotGroupId] = useState<number | null>(null);
+  const [restoreSessionId, setRestoreSessionId] = useState<string | null>(null);
 
   useEffect(() => {
     function handleHash() {
@@ -31,10 +34,14 @@ export function useDeepLinking(): DeepLinkState & {
       setCurrentTab(section);
       if (section === 'sessions' && questionMark !== -1) {
         const params = new URLSearchParams(hash.slice(questionMark + 1));
-        if (params.get('action') === 'snapshot') {
+        const action = params.get('action');
+        if (action === 'snapshot') {
           setOpenSnapshotWizard(true);
           const groupIdParam = params.get('groupId');
           setSnapshotGroupId(groupIdParam ? parseInt(groupIdParam, 10) : null);
+        } else if (action === 'restore') {
+          const sid = params.get('sessionId');
+          if (sid) setRestoreSessionId(sid);
         }
       }
     }
@@ -51,5 +58,7 @@ export function useDeepLinking(): DeepLinkState & {
     setOpenSnapshotWizard,
     snapshotGroupId,
     setSnapshotGroupId,
+    restoreSessionId,
+    setRestoreSessionId,
   };
 }

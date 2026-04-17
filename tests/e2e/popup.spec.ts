@@ -163,7 +163,7 @@ test.describe('[US-PO02] Pinned sessions list', () => {
     await page.close();
   });
 
-  test('pinned session row dropdown offers current window and new window options', async ({
+  test('pinned session row dropdown offers current window, new window and customized restoration', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -177,6 +177,7 @@ test.describe('[US-PO02] Pinned sessions list', () => {
 
     await expect(page.getByRole('menuitem', { name: /current window/i })).toBeVisible();
     await expect(page.getByRole('menuitem', { name: /new window/i })).toBeVisible();
+    await expect(page.getByRole('menuitem', { name: /customized restoration/i })).toBeVisible();
     await page.close();
   });
 });
