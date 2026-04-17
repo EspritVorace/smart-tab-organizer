@@ -67,6 +67,11 @@ test.describe('Notifications', () => {
     await helpers.clearDomainRules();
     await helpers.setGlobalGroupingEnabled(true);
     await helpers.setGlobalDeduplicationEnabled(false);
+    // Pin the legacy dedup defaults these scenarios were written against
+    // (unmatched-domain dedup on, keep-old tie-breaker) so notification-count
+    // assertions stay stable regardless of production default changes.
+    await helpers.setDeduplicateUnmatchedDomains(true);
+    await helpers.setDeduplicationKeepStrategy('keep-old');
     await helpers.resetStatistics();
   });
 
