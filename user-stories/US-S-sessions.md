@@ -31,8 +31,9 @@
 ### Critères d'acceptation
 
 - [ ] Chaque carte de session affiche un bouton « More actions » (icône ···) donnant accès à un menu déroulant.
-- [ ] Ce menu propose au minimum les options de restauration : « Restore in current window », « Restore in new window », « Customized restoration… ».
+- [ ] Ce menu propose au minimum les options de restauration : « Restore in current window », « Restore in new window », « Replace tabs in current window », « Customized restoration… ».
 - [ ] L'option « Restore in current window » restaure les onglets et affiche un message de confirmation de succès (ex. « X tab(s) opened »).
+- [ ] L'option « Replace tabs in current window » ferme les onglets non épinglés de la fenêtre active (en conservant l'onglet hôte de la page options si l'action part de celle-ci) puis restaure les onglets de la session. Une notification système « Session activated » confirme la bascule.
 - [ ] L'option « Customized restoration… » ouvre le wizard de restauration (dialogue de type `role="dialog"` contenant un texte « Restore »).
 
 > **Note de design (v1.1+) :** Le split button dédié a été remplacé par le menu « More actions » pour réduire l'encombrement visuel. Les métadonnées de session (dates, note) sont accessibles via un HoverCard sur le nom de la session.
@@ -53,6 +54,7 @@
 - [ ] Si aucun conflit n'est détecté, l'étape de résolution est sautée : le wizard passe directement à la confirmation (2 étapes au lieu de 3).
 - [ ] Si au moins un conflit est détecté, une étape de résolution intermédiaire est insérée (3 étapes au total).
 - [ ] Choisir « Nouvelle fenêtre » comme destination ignore l'analyse de conflits et passe directement à la confirmation.
+- [ ] Choisir « Replace tabs in current window » comme destination ignore également l'analyse de conflits et passe directement à l'exécution (aucune étape de résolution) : les onglets non épinglés et non protégés sont fermés après la création des nouveaux.
 
 ---
 
@@ -102,6 +104,7 @@
 - [ ] Après la restauration, le dialogue se ferme automatiquement.
 - [ ] Une notification système apparaît avec le titre « Session restored » et un message indiquant le nombre d'onglets ouverts et de doublons ignorés (ex. « 5 tab(s) opened, 2 duplicate(s) skipped »).
 - [ ] Si des erreurs surviennent lors de la restauration, une notification d'erreur est affichée à la place.
+- [ ] Après une restauration en mode « Replace tabs in current window », une notification système supplémentaire « Session activated / Switched to session "{nom}" » confirme le changement de contexte.
 
 ---
 
@@ -206,3 +209,26 @@
 - [ ] Pendant la recherche, les deux sections restent visibles mais n'affichent que les sessions correspondantes.
 - [ ] Une section sans resultat est masquee pendant la recherche.
 - [ ] Le drag-and-drop reste desactive pendant la recherche.
+
+---
+
+## US-S021 : Remplacement des onglets de la fenêtre courante pour switcher de contexte
+
+**En tant qu'** utilisateur,
+**je veux** pouvoir remplacer les onglets de la fenêtre active par ceux d'une session choisie,
+**afin de** basculer rapidement de contexte de travail sans accumuler les onglets d'autres activités.
+
+### Critères d'acceptation
+
+- [ ] Une 4ème option « Replace tabs in current window » est disponible dans le menu du `SessionRestoreButton` (carte de session et popup).
+- [ ] Un 3ème radio « Replace tabs in current window » est disponible dans le wizard de restauration personnalisée, à la suite de « In the current window » et « In a new window ».
+- [ ] L'exécution du mode « Replace » :
+  - Ferme tous les onglets **non épinglés** de la fenêtre active.
+  - Conserve les onglets **épinglés** (`tab.pinned === true`).
+  - Conserve l'onglet hôte de la page options quand l'action est déclenchée depuis celle-ci (carte de session ou wizard).
+  - Ferme les onglets préexistants **après** la création des onglets de la session pour éviter que la fenêtre ne se retrouve vide.
+- [ ] Depuis la popup, tous les onglets non épinglés sont remplacés (la popup n'étant pas un onglet, aucun onglet hôte à protéger).
+- [ ] Le mode « Replace » dans le wizard saute l'étape de résolution des conflits.
+- [ ] Une notification système (titre « Session activated », message « Switched to session "{nom}" ») confirme la bascule après la restauration.
+- [ ] La déduplication automatique est neutralisée le temps de la restauration (cf. US-D correspondante) : si un onglet épinglé conservé partage une URL avec un onglet de la session, les deux onglets coexistent.
+- [ ] Depuis la popup, la popup se ferme automatiquement après le déclenchement du remplacement.

@@ -3,6 +3,7 @@ import { initializeDefaults } from '@/utils/migration.js';
 import { logger } from '@/utils/logger.js';
 import {
     handleMiddleClickMessage,
+    handleSessionRestoreSkipDedupMessage,
     findMiddleClickOpener,
     cleanupMiddleClickedTabsForTab,
 } from './messaging.js';
@@ -39,6 +40,11 @@ export function setupMessageHandler(): void {
 
         if (request.type === 'middleClickLink') {
             handleMiddleClickMessage(request, sender, sendResponse);
+            return true;
+        }
+
+        if (request.type === 'SESSION_RESTORE_SKIP_DEDUP') {
+            handleSessionRestoreSkipDedupMessage(request, sendResponse);
             return true;
         }
 

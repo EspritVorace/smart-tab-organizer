@@ -1,5 +1,5 @@
 import React from 'react';
-import { Monitor, Play, Square, Wrench } from 'lucide-react';
+import { Monitor, Play, Replace, Square, Wrench } from 'lucide-react';
 import { SplitButton } from '@/components/UI/SplitButton/SplitButton';
 import { getMessage } from '@/utils/i18n';
 import type { Session } from '@/types/session';
@@ -8,6 +8,7 @@ export interface SessionRestoreButtonProps {
   session: Session;
   onRestoreCurrentWindow: (session: Session) => void;
   onRestoreNewWindow: (session: Session) => void;
+  onReplaceCurrentWindow: (session: Session) => void;
   onCustomize: (session: Session) => void;
   size?: '1' | '2' | '3';
   variant?: 'solid' | 'soft' | 'outline';
@@ -18,6 +19,7 @@ export function SessionRestoreButton({
   session,
   onRestoreCurrentWindow,
   onRestoreNewWindow,
+  onReplaceCurrentWindow,
   onCustomize,
   size = '1',
   variant = 'soft',
@@ -41,6 +43,11 @@ export function SessionRestoreButton({
           label: getMessage('sessionRestoreNewWindow'),
           icon: <Square size={14} aria-hidden="true" />,
           onClick: () => onRestoreNewWindow(session),
+        },
+        {
+          label: getMessage('sessionRestoreReplaceCurrentWindow'),
+          icon: <Replace size={14} aria-hidden="true" />,
+          onClick: () => onReplaceCurrentWindow(session),
         },
         {
           label: getMessage('sessionRestoreCustomize'),

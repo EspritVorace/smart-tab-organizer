@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Dialog, Flex, Button, Text, Separator, Box, RadioGroup, Callout } from '@radix-ui/themes';
 import { RotateCcw, AlertCircle } from 'lucide-react';
+import { browser } from 'wxt/browser';
 import { SessionsTheme } from '@/components/Form/themes';
 import { TabTree } from '@/components/Core/TabTree/TabTree';
 import { WizardModal } from '@/components/UI/WizardModal';
 import { ConflictResolutionStep } from './ConflictResolutionStep';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast, showErrorToast } from '@/utils/toast';
+import { showSuccessNotification } from '@/utils/notifications';
 import { sessionToTabTreeData } from '@/utils/sessionUtils';
 import {
   analyzeConflicts,
@@ -15,11 +17,9 @@ import {
   type GroupConflictAction,
   type ConflictResolution,
 } from '@/utils/conflictDetection';
-import { restoreTabs } from '@/utils/tabRestore';
+import { restoreTabs, type RestoreTarget } from '@/utils/tabRestore';
 import type { Session } from '@/types/session';
 import type { TabTreeData } from '@/types/tabTree';
-
-type RestoreTarget = 'current' | 'new';
 
 const STEP_DESCRIPTION_KEYS = [
   'restoreStepSelectionDescription',
@@ -111,12 +111,22 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
         groupActions: grpActions,
       };
 
+      // In 'replace' mode, keep the options page tab hosting the wizard so
+      // the user doesn't see their page vanish. The wizard only ever opens
+      // from the options page, so getCurrent() resolves to that tab.
+      let protectedTabId: number | undefined;
+      if (target === 'replace') {
+        const currentTab = await browser.tabs.getCurrent();
+        protectedTabId = currentTab?.id;
+      }
+
       const result = await restoreTabs({
         tabs,
         groups,
         target,
         conflictResolution: target === 'current' ? conflictResolution : undefined,
         conflictAnalysis: target === 'current' ? analysis ?? undefined : undefined,
+        protectedTabId,
       });
 
       onOpenChange(false);
@@ -134,6 +144,12 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
             String(result.duplicatesSkipped),
           ]),
         );
+        if (target === 'replace') {
+          void showSuccessNotification(
+            getMessage('sessionSwitchedNotificationTitle'),
+            getMessage('sessionSwitchedNotificationMessage', [session.name]),
+          );
+        }
       }
     } catch {
       setRestoreError(getMessage('restoreError'));
@@ -144,12 +160,13 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
 
   // Step 0 button: analyze conflicts (if current window), then restore or show conflict step
   const handleRestoreOrNext = useCallback(async () => {
-    if (target === 'new') {
+    if (target === 'new' || target === 'replace') {
+      // Replace mode clears existing tabs, so nothing to merge or skip.
       await executeRestore(null, duplicateTabAction, groupActions);
       return;
     }
 
-    // Current window — analyze conflicts first
+    // Current window, analyze conflicts first
     setIsAnalyzing(true);
     setRestoreError(null);
     try {
@@ -239,6 +256,14 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
                         <Flex align="center" gap="2">
                           <RadioGroup.Item data-testid="wizard-restore-radio-new-window" value="new" />
                           {getMessage('restoreTargetNew')}
+                        </Flex>
+                      </label>
+                    </Text>
+                    <Text size="2" asChild>
+                      <label>
+                        <Flex align="center" gap="2">
+                          <RadioGroup.Item data-testid="wizard-restore-radio-replace-window" value="replace" />
+                          {getMessage('restoreTargetReplace')}
                         </Flex>
                       </label>
                     </Text>

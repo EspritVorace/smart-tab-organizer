@@ -144,3 +144,23 @@ Historiquement, la déduplication gardait toujours l'onglet existant (le plus an
 - [ ] En mode `keep-new`, l'onglet fermé capture son `groupId`, `title` et `index` avant fermeture ; l'action "Annuler" de la notification rouvre l'onglet et tente de le rattacher à son groupe d'origine (fallback : nouveau groupe si l'original n'existe plus).
 - [ ] Lors d'une restauration de session contenant un onglet groupé à l'URL X, si un onglet non groupé à X existe déjà dans la fenêtre et que `deduplicationKeepStrategy = 'keep-grouped'`, le tab restauré (groupé) survit et conserve son appartenance au groupe.
 - [ ] Le compteur `tabsDeduplicatedCount` s'incrémente exactement une fois par déduplication, quelle que soit la stratégie.
+
+---
+
+## US-D — Neutralisation de la déduplication pendant la restauration de session
+
+**En tant qu'** utilisateur qui restaure une session,
+**je veux** que la déduplication automatique ne ferme pas les onglets fraîchement créés par la restauration,
+**afin de** retrouver intégralement le contenu de la session même lorsque des onglets conservés (épinglés, onglet hôte de la page options) partagent une URL avec un onglet de la session.
+
+### Contexte
+
+Le mode « Replace tabs in current window » conserve les onglets épinglés et éventuellement l'onglet hôte de la page options. Sans garde-fou, le handler de déduplication du background fermerait l'un des deux onglets partageant une URL (celui restauré ou celui conservé) dès qu'ils coexistent dans la fenêtre, faisant perdre du contenu à la session ou brisant la référence épinglée.
+
+### Critères d'acceptation
+
+- [ ] Avant toute création d'onglet via `restoreTabs` (cibles `current`, `new` ou `replace`), les URLs issues de la session sont envoyées au background via un message `SESSION_RESTORE_SKIP_DEDUP`.
+- [ ] Le handler background appelle `markUrlToSkipDeduplication` pour chaque URL reçue. Le TTL de 10 s du registre skip-dedup couvre la création des onglets d'une session typique.
+- [ ] Le handler de déduplication (`src/background/deduplication.ts`) consulte `shouldSkipDeduplication` avant d'agir et n'opère pas sur les URLs en sursis.
+- [ ] Cas testé : onglet épinglé à l'URL X + session contenant également X. Après « Replace tabs in current window », les deux onglets coexistent dans la fenêtre.
+- [ ] Cas testé : la page options reste ouverte après « Replace » même si la session contient une URL identique à celle de la page options.

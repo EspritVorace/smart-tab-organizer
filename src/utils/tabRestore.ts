@@ -2,17 +2,25 @@ import { browser } from 'wxt/browser';
 import type { SavedTab, SavedTabGroup, Session } from '@/types/session';
 import type { ConflictAnalysis, ConflictResolution, GroupConflictAction } from './conflictDetection';
 
+export type RestoreTarget = 'current' | 'new' | 'replace';
+
 export interface RestoreOptions {
   /** Ungrouped tabs to restore */
   tabs: SavedTab[];
   /** Groups to restore with their tabs */
   groups: SavedTabGroup[];
   /** Restore target */
-  target: 'current' | 'new';
+  target: RestoreTarget;
   /** Conflict resolution (only used when target === 'current') */
   conflictResolution?: ConflictResolution;
   /** Conflict analysis (only used when target === 'current') */
   conflictAnalysis?: ConflictAnalysis;
+  /**
+   * Tab to preserve when target === 'replace'. Used when the action is
+   * triggered from the options page so the host tab doesn't get closed.
+   * Pinned tabs are always preserved regardless of this value.
+   */
+  protectedTabId?: number;
 }
 
 export interface RestoreResult {
@@ -34,18 +42,38 @@ export interface RestoreResult {
  */
 export async function restoreSessionTabs(
   session: Pick<Session, 'ungroupedTabs' | 'groups'>,
-  target: 'current' | 'new',
+  target: RestoreTarget,
+  protectedTabId?: number,
 ): Promise<RestoreResult> {
   return restoreTabs({
     tabs: session.ungroupedTabs,
     groups: session.groups,
     target,
+    protectedTabId,
   });
+}
+
+/**
+ * Tell the background script to skip automatic deduplication for the URLs
+ * we are about to restore. Without this, pinned tabs or other kept tabs
+ * whose URL matches a session tab would cause the freshly created tab to
+ * be closed by the background dedup handler.
+ */
+async function requestSkipDeduplication(urls: string[]): Promise<void> {
+  if (urls.length === 0) return;
+  try {
+    await browser.runtime.sendMessage({
+      type: 'SESSION_RESTORE_SKIP_DEDUP',
+      urls,
+    });
+  } catch {
+    // Non-blocking: if the background is unreachable, restore proceeds anyway.
+  }
 }
 
 /** Restore tabs and groups in Chrome */
 export async function restoreTabs(options: RestoreOptions): Promise<RestoreResult> {
-  const { tabs, groups, target, conflictResolution, conflictAnalysis } = options;
+  const { tabs, groups, target, conflictResolution, conflictAnalysis, protectedTabId } = options;
   const result: RestoreResult = {
     tabsCreated: 0,
     duplicatesSkipped: 0,
@@ -54,8 +82,18 @@ export async function restoreTabs(options: RestoreOptions): Promise<RestoreResul
     errors: [],
   };
 
+  const allUrls = [
+    ...tabs.map(t => t.url),
+    ...groups.flatMap(g => g.tabs.map(t => t.url)),
+  ];
+  await requestSkipDeduplication(allUrls);
+
   if (target === 'new') {
     return restoreInNewWindow(tabs, groups, result);
+  }
+
+  if (target === 'replace') {
+    return restoreReplaceInCurrentWindow(tabs, groups, protectedTabId, result);
   }
 
   return restoreInCurrentWindow(tabs, groups, conflictResolution, conflictAnalysis, result);
@@ -129,6 +167,35 @@ async function restoreInNewWindow(
       await browser.tabs.remove(firstTabId);
     } catch {
       // Ignore — tab may have been reused
+    }
+  }
+
+  return result;
+}
+
+async function restoreReplaceInCurrentWindow(
+  tabs: SavedTab[],
+  groups: SavedTabGroup[],
+  protectedTabId: number | undefined,
+  result: RestoreResult,
+): Promise<RestoreResult> {
+  // Snapshot tabs to close before creating new ones. Keep pinned tabs and
+  // the optional protectedTabId (the options page tab hosting the action).
+  const existingTabs = await browser.tabs.query({ currentWindow: true });
+  const tabIdsToClose = existingTabs
+    .filter(t => t.id != null && !t.pinned && t.id !== protectedTabId)
+    .map(t => t.id as number);
+
+  // Create new tabs first (no conflict resolution: kept tabs are pinned or
+  // the options page, neither participates in group merging).
+  await restoreInCurrentWindow(tabs, groups, undefined, undefined, result);
+
+  // Close the previous tabs afterwards so the window never becomes empty.
+  if (tabIdsToClose.length > 0) {
+    try {
+      await browser.tabs.remove(tabIdsToClose);
+    } catch (e) {
+      result.errors.push(`Failed to close existing tabs: ${String(e)}`);
     }
   }
 

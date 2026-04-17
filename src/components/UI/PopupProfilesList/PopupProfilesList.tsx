@@ -6,7 +6,8 @@ import { ChevronDown, ExternalLink, Pin } from 'lucide-react';
 import { SessionRestoreButton } from '@/components/Core/Session/SessionRestoreButton/SessionRestoreButton';
 import { getMessage } from '@/utils/i18n';
 import { loadSessions } from '@/utils/sessionStorage';
-import { restoreSessionTabs } from '@/utils/tabRestore';
+import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
+import { showSuccessNotification } from '@/utils/notifications';
 import { getRuleCategory } from '@/schemas/enums';
 import { chromeGroupColors } from '@/utils/tabTreeUtils';
 import { popupPinnedEmptyCollapsedItem } from '@/utils/storageItems';
@@ -87,8 +88,20 @@ export function PopupProfilesList() {
     popupPinnedEmptyCollapsedItem.getValue().then(setEmptyCollapsed);
   }, []);
 
-  function handleRestore(session: Session, target: 'current' | 'new') {
-    restoreSessionTabs(session, target).catch(() => {});
+  function handleRestore(session: Session, target: RestoreTarget) {
+    // The popup is not a tab, so browser.tabs.getCurrent() returns undefined,
+    // which means every non-pinned tab in the active window is replaced.
+    restoreSessionTabs(session, target)
+      .then(() => {
+        if (target === 'replace') {
+          void showSuccessNotification(
+            getMessage('sessionSwitchedNotificationTitle'),
+            getMessage('sessionSwitchedNotificationMessage', [session.name]),
+          );
+          window.close();
+        }
+      })
+      .catch(() => {});
   }
 
   function handleToggleEmptyCollapsed(nextOpen: boolean) {
@@ -197,6 +210,7 @@ export function PopupProfilesList() {
                 session={session}
                 onRestoreCurrentWindow={(s) => handleRestore(s, 'current')}
                 onRestoreNewWindow={(s) => handleRestore(s, 'new')}
+                onReplaceCurrentWindow={(s) => handleRestore(s, 'replace')}
                 onCustomize={(s) => { void openCustomizeRestore(s); }}
                 data-testid={`popup-profile-btn-restore-${session.id}`}
               />

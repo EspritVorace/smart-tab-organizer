@@ -321,7 +321,10 @@
   "sessionRestoreOptions": { "message": "Restore options" },
   "sessionRestoreCurrentWindow": { "message": "Restore in current window" },
   "sessionRestoreNewWindow": { "message": "Restore in new window" },
+  "sessionRestoreReplaceCurrentWindow": { "message": "Replace tabs in current window" },
   "sessionRestoreCustomize": { "message": "Customized restoration..." },
+  "sessionSwitchedNotificationTitle": { "message": "Session activated" },
+  "sessionSwitchedNotificationMessage": { "message": "Switched to session \"$1\"" },
   "sessionCreatedLabel": { "message": "Created" },
   "sessionUpdatedLabel": { "message": "Updated" },
   "sessionMoveToFirst": { "message": "Move to first" },
@@ -352,6 +355,7 @@
   "restoreDestination": { "message": "Destination:" },
   "restoreTargetCurrent": { "message": "In the current window" },
   "restoreTargetNew": { "message": "In a new window" },
+  "restoreTargetReplace": { "message": "Replace tabs in current window" },
   "restoreError": { "message": "Failed to restore session. Please try again." },
   "restoreAnalysisError": { "message": "Failed to analyze conflicts. Please try again." },
 

@@ -40,6 +40,7 @@ export const SessionRestoreButtonDefault: Story = {
     session: baseSession,
     onRestoreCurrentWindow: noop,
     onRestoreNewWindow: noop,
+    onReplaceCurrentWindow: noop,
     onCustomize: noop,
   },
 };

@@ -26,6 +26,7 @@ interface SessionCardProps {
   onRestore: (session: Session) => void;
   onRestoreCurrentWindow: (session: Session) => void;
   onRestoreNewWindow: (session: Session) => void;
+  onReplaceCurrentWindow: (session: Session) => void;
   onRename: (id: string, newName: string) => Promise<void>;
   onEdit: (session: Session) => void;
   onDelete: (session: Session) => void;
@@ -61,6 +62,7 @@ export function SessionCard({
   onRestore,
   onRestoreCurrentWindow,
   onRestoreNewWindow,
+  onReplaceCurrentWindow,
   onRename,
   onEdit,
   onDelete,
@@ -317,6 +319,7 @@ export function SessionCard({
               session={session}
               onRestoreCurrentWindow={onRestoreCurrentWindow}
               onRestoreNewWindow={onRestoreNewWindow}
+              onReplaceCurrentWindow={onReplaceCurrentWindow}
               onCustomize={onRestore}
               data-testid={`session-card-${session.id}-btn-restore`}
             />

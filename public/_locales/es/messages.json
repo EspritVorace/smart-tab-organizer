@@ -321,7 +321,10 @@
   "sessionRestoreOptions": { "message": "Opciones de restauración" },
   "sessionRestoreCurrentWindow": { "message": "Restaurar en la ventana actual" },
   "sessionRestoreNewWindow": { "message": "Restaurar en una ventana nueva" },
+  "sessionRestoreReplaceCurrentWindow": { "message": "Reemplazar las pestañas de esta ventana" },
   "sessionRestoreCustomize": { "message": "Restauración personalizada..." },
+  "sessionSwitchedNotificationTitle": { "message": "Sesión activada" },
+  "sessionSwitchedNotificationMessage": { "message": "Cambiado a la sesión «$1»" },
   "sessionCreatedLabel": { "message": "Creado" },
   "sessionUpdatedLabel": { "message": "Modificado" },
   "sessionMoveToFirst": { "message": "Mover al inicio" },
@@ -352,6 +355,7 @@
   "restoreDestination": { "message": "Destino:" },
   "restoreTargetCurrent": { "message": "En la ventana actual" },
   "restoreTargetNew": { "message": "En una ventana nueva" },
+  "restoreTargetReplace": { "message": "Reemplazar las pestañas de la ventana" },
   "restoreError": { "message": "Error al restaurar la sesión. Por favor, inténtalo de nuevo." },
   "restoreAnalysisError": { "message": "Error al analizar conflictos. Por favor, inténtalo de nuevo." },
 
