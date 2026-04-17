@@ -24,7 +24,7 @@ import { PageLayout } from '@/components/UI/PageLayout';
 ## Props
 
 - `titleKey` : clé i18n du titre (rendue via `getMessage()`).
-- `descriptionKey` : clé i18n optionnelle de la description de page.
+- `descriptionKey` : clé i18n de la description de page (obligatoire, toujours visible sous le header).
 - `icon` : icône Lucide optionnelle affichée à gauche du titre.
 - `syncSettings` : paramètres synchronisés de l'extension.
 - `children` : render prop qui reçoit les `syncSettings` et retourne le contenu.
