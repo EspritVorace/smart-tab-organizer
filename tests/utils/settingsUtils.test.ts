@@ -31,9 +31,14 @@ describe('settingsUtils', () => {
       expect(settings.deduplicateUnmatchedDomains).toBe(false);
     });
 
-    it('retourne true par défaut pour deduplicateUnmatchedDomains si absent du storage', async () => {
+    it('retourne false par défaut pour deduplicateUnmatchedDomains si absent du storage', async () => {
       const settings = await getSyncSettings();
-      expect(settings.deduplicateUnmatchedDomains).toBe(true);
+      expect(settings.deduplicateUnmatchedDomains).toBe(false);
+    });
+
+    it('retourne keep-new par défaut pour deduplicationKeepStrategy si absent du storage', async () => {
+      const settings = await getSyncSettings();
+      expect(settings.deduplicationKeepStrategy).toBe('keep-new');
     });
 
     it('retourne les valeurs par défaut en cas d\'erreur', async () => {
@@ -70,9 +75,9 @@ describe('settingsUtils', () => {
     });
 
     it('met à jour deduplicateUnmatchedDomains isolément', async () => {
-      await updateSyncSettings({ deduplicateUnmatchedDomains: false });
+      await updateSyncSettings({ deduplicateUnmatchedDomains: true });
       const settings = await getSyncSettings();
-      expect(settings.deduplicateUnmatchedDomains).toBe(false);
+      expect(settings.deduplicateUnmatchedDomains).toBe(true);
       // Autres champs inchangés (valeurs par défaut conservées)
       expect(settings.globalDeduplicationEnabled).toBe(true);
     });

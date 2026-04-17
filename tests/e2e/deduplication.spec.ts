@@ -17,6 +17,11 @@ test.describe('Deduplication', () => {
     await helpers.clearDomainRules();
     await helpers.setGlobalDeduplicationEnabled(true);
     await helpers.setGlobalGroupingEnabled(false); // Isolate deduplication tests
+    // Production defaults flipped these off/to keep-new; pin the legacy values
+    // so "no rule" and directionless count-based tests keep their semantics.
+    // Individual describes override when they need the new defaults.
+    await helpers.setDeduplicateUnmatchedDomains(true);
+    await helpers.setDeduplicationKeepStrategy('keep-old');
     await helpers.resetStatistics();
   });
 

@@ -119,8 +119,10 @@ export function makeRule(overrides: Partial<DomainRuleSetting> = {}): DomainRule
 }
 
 export function makeSettings(overrides: Partial<SyncSettings> = {}): SyncSettings {
-  // Mirrors defaultSyncSettings (src/types/syncSettings.ts) so tests that
-  // don't override anything use realistic production-like values.
+  // Intentionally pinned to the legacy defaults (keep-old, unmatched-enabled)
+  // so existing dedup tests keep asserting the same observable behavior.
+  // Tests that want the new production defaults override explicitly.
+  // Production defaults live in src/types/syncSettings.ts / default_settings.json.
   return {
     globalGroupingEnabled: true,
     globalDeduplicationEnabled: true,

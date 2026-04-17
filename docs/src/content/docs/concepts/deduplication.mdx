@@ -12,7 +12,7 @@ import ConditionsDeclenchement from '../../../components/ConditionsDeclenchement
 - Une notification avec bouton "Annuler" permet de revenir en arrière pendant 5 secondes.
 </Aside>
 
-Quand vous ouvrez un lien déjà ouvert dans votre navigateur, SmartTab Organizer conserve un seul onglet et ferme l'autre. La stratégie "quel onglet garder" (voir plus bas) détermine lequel survit. Par défaut, c'est l'onglet existant qui reste, et le nouvel onglet est fermé avec focus sur l'ancien.
+Quand vous ouvrez un lien déjà ouvert dans votre navigateur, SmartTab Organizer conserve un seul onglet et ferme l'autre. La stratégie "quel onglet garder" (voir plus bas) détermine lequel survit. Pour les nouvelles installations, c'est le nouvel onglet qui est conservé par défaut (l'ancien est fermé) ; les utilisateurs existants conservent leur comportement historique (l'ancien onglet reste focusé) tant qu'ils n'ont pas modifié le réglage.
 
 ## Conditions pour qu'une déduplication se déclenche
 
@@ -87,8 +87,8 @@ Le toggle "Déduplication" dans la popup ou la page Paramètres est un interrupt
 
 Le paramètre **Dédupliquer les onglets sans règle de domaine** définit ce qui se passe sur les sites que vous n'avez pas configurés.
 
-- **Activé** (par défaut) : les onglets des domaines sans règle sont dédupliqués en mode "URL exacte" quand le toggle global est actif.
-- **Désactivé** : les onglets des domaines sans règle ne sont jamais dédupliqués, même si le toggle global est actif.
+- **Activé** : les onglets des domaines sans règle sont dédupliqués en mode "URL exacte" quand le toggle global est actif.
+- **Désactivé** (défaut pour les nouvelles installations) : les onglets des domaines sans règle ne sont jamais dédupliqués, même si le toggle global est actif. Les utilisateurs existants conservent la valeur qu'ils avaient, typiquement "Activé".
 
 <Aside type="note">
 Les règles de domaine restent prioritaires sur ce paramètre. Un domaine avec une règle explicite suit toujours cette règle, indépendamment de la valeur du paramètre.
@@ -102,8 +102,8 @@ Chaque règle possède son propre toggle "Déduplication". S'il est désactivé 
 
 Dans la page Paramètres, section **Portée de la déduplication**, vous pouvez choisir lequel des deux onglets en double survit :
 
-- **L'onglet existant** (défaut) : comportement historique, l'onglet déjà ouvert est conservé et le nouveau fermé. Utile quand le tab existant a un état (scroll, formulaire, session) que vous ne voulez pas perdre.
-- **Le nouvel onglet ouvert** : le nouvel onglet survit, l'ancien est fermé. Utile quand la version fraîchement chargée doit primer.
+- **L'onglet existant** : comportement historique, l'onglet déjà ouvert est conservé et le nouveau fermé. Utile quand le tab existant a un état (scroll, formulaire, session) que vous ne voulez pas perdre. Les utilisateurs existants démarrent sur ce réglage pour préserver leur comportement habituel.
+- **Le nouvel onglet ouvert** (défaut pour les nouvelles installations) : le nouvel onglet survit, l'ancien est fermé. Utile quand la version fraîchement chargée doit primer.
 - **L'onglet groupé gagne, sinon conserver l'existant** : si l'un des deux onglets fait partie d'un groupe et l'autre pas, le groupé survit. Sinon retombe sur le comportement "L'onglet existant". Cette option protège notamment les onglets restaurés depuis une session (qui portent leur groupe) contre une fermeture au profit d'une copie déjà ouverte en dehors du groupe.
 
 <Aside type="note">

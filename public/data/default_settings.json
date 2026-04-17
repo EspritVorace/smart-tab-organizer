@@ -1,8 +1,8 @@
 {
   "globalGroupingEnabled": true,
   "globalDeduplicationEnabled": true,
-  "deduplicateUnmatchedDomains": true,
-  "deduplicationKeepStrategy": "keep-old",
+  "deduplicateUnmatchedDomains": false,
+  "deduplicationKeepStrategy": "keep-new",
   "notifyOnGrouping": true,
   "notifyOnDeduplication": true,
   "domainRules": [

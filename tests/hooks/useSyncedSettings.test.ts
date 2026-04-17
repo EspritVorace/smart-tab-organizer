@@ -19,7 +19,8 @@ describe('useSyncedSettings', () => {
 
     expect(result.current.settings?.globalGroupingEnabled).toBe(true);
     expect(result.current.settings?.globalDeduplicationEnabled).toBe(true);
-    expect(result.current.settings?.deduplicateUnmatchedDomains).toBe(true);
+    expect(result.current.settings?.deduplicateUnmatchedDomains).toBe(false);
+    expect(result.current.settings?.deduplicationKeepStrategy).toBe('keep-new');
     expect(result.current.settings?.domainRules).toEqual([]);
   });
 
@@ -31,10 +32,10 @@ describe('useSyncedSettings', () => {
     });
 
     await act(async () => {
-      await result.current.setDeduplicateUnmatchedDomains(false);
+      await result.current.setDeduplicateUnmatchedDomains(true);
     });
 
-    expect(result.current.settings?.deduplicateUnmatchedDomains).toBe(false);
+    expect(result.current.settings?.deduplicateUnmatchedDomains).toBe(true);
   });
 
   it('devrait charger les paramètres existants', async () => {
