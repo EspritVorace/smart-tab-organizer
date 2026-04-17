@@ -1,12 +1,12 @@
 import React, { useCallback, useState } from 'react';
-import { Box, Dialog } from '@radix-ui/themes';
+import { Box, Button, Dialog } from '@radix-ui/themes';
 import { FileDown } from 'lucide-react';
 import { ExportTheme } from '@/components/Form/themes';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 import { getMessage } from '@/utils/i18n';
-import { CountLabel, WizardDialogTitle, useDialogReset, useToggleSet } from './Shared';
+import { WizardModal } from '@/components/UI/WizardModal';
+import { CountLabel, useDialogReset, useToggleSet } from './Shared';
 import {
-  ExportDialogFooter,
   ExportNoteField,
   ExportSplitButton,
   SelectableListContainer,
@@ -56,15 +56,15 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
 
   return (
     <ExportTheme>
-      <Dialog.Root open={open} onOpenChange={onOpenChange}>
-        <Dialog.Content style={{ maxWidth: 550 }}>
-          <WizardDialogTitle
-            icon={FileDown}
-            titleKey="exportRulesTitle"
-            descriptionKey="exportRulesDescription"
-          />
+      <WizardModal open={open} onOpenChange={onOpenChange}>
+        <WizardModal.Header
+          icon={FileDown}
+          title={getMessage('exportRulesTitle')}
+          description={getMessage('exportRulesDescription')}
+        />
 
-          <Box mt="4">
+        <WizardModal.Body>
+          <Box>
             <ExportNoteField value={exportNote} onChange={setExportNote} />
             <SelectionToolbar onSelectAll={selectAll} onDeselectAll={selection.clearAll} />
 
@@ -83,16 +83,19 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
 
             <CountLabel messageKey="rulesSelectedCount" count={selection.size} />
           </Box>
+        </WizardModal.Body>
 
-          <ExportDialogFooter>
-            <ExportSplitButton
-              labelKey="exportButton"
-              actions={actions}
-              disabled={selection.size === 0}
-            />
-          </ExportDialogFooter>
-        </Dialog.Content>
-      </Dialog.Root>
+        <WizardModal.Footer>
+          <Dialog.Close>
+            <Button variant="soft" color="gray">{getMessage('cancel')}</Button>
+          </Dialog.Close>
+          <ExportSplitButton
+            labelKey="exportButton"
+            actions={actions}
+            disabled={selection.size === 0}
+          />
+        </WizardModal.Footer>
+      </WizardModal>
     </ExportTheme>
   );
 }

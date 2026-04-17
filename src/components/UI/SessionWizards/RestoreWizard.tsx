@@ -3,6 +3,7 @@ import { Dialog, Flex, Button, Text, Separator, Box, RadioGroup, Callout } from 
 import { RotateCcw, AlertCircle } from 'lucide-react';
 import { SessionsTheme } from '@/components/Form/themes';
 import { TabTree } from '@/components/Core/TabTree/TabTree';
+import { WizardModal } from '@/components/UI/WizardModal';
 import { ConflictResolutionStep } from './ConflictResolutionStep';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast, showErrorToast } from '@/utils/toast';
@@ -19,6 +20,11 @@ import type { Session } from '@/types/session';
 import type { TabTreeData } from '@/types/tabTree';
 
 type RestoreTarget = 'current' | 'new';
+
+const STEP_DESCRIPTION_KEYS = [
+  'restoreStepSelectionDescription',
+  'restoreStepConflictDescription',
+] as const;
 
 interface RestoreWizardProps {
   open: boolean;
@@ -185,23 +191,20 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
 
   return (
     <SessionsTheme>
-      <Dialog.Root open={open} onOpenChange={onOpenChange}>
-        <Dialog.Content data-testid="wizard-restore" style={{ maxWidth: 600 }}>
-          <Dialog.Title>
-            <Flex align="center" gap="2">
-              <RotateCcw size={18} aria-hidden="true" />
-              {getMessage('restoreTitle', [session.name])}
-            </Flex>
-          </Dialog.Title>
-          <Dialog.Description size="2" color="gray">
-            {getMessage('restoreDescription')}
-          </Dialog.Description>
+      <WizardModal
+        open={open}
+        onOpenChange={onOpenChange}
+        data-testid="wizard-restore"
+      >
+        <WizardModal.Header
+          icon={RotateCcw}
+          title={getMessage('restoreTitle', [session.name])}
+          description={getMessage(STEP_DESCRIPTION_KEYS[step])}
+        />
 
-          <Separator size="4" mt="3" style={{ opacity: 0.3 }} />
-
-          {/* Step 0: Selection + Destination */}
+        <WizardModal.Body>
           {step === 0 && (
-            <Box data-testid="wizard-restore-step-0" mt="4">
+            <Box data-testid="wizard-restore-step-0">
               <Flex direction="column" gap="3">
                 <Text size="2" weight="medium">
                   {getMessage('restoreSelectTabs')}
@@ -248,9 +251,8 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
             </Box>
           )}
 
-          {/* Step 1: Conflict resolution */}
           {step === 1 && hasConflicts && conflictAnalysis && (
-            <Box data-testid="wizard-restore-step-1" mt="4">
+            <Box data-testid="wizard-restore-step-1">
               <ConflictResolutionStep
                 analysis={conflictAnalysis}
                 duplicateTabAction={duplicateTabAction}
@@ -269,51 +271,48 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
               <Callout.Text>{restoreError}</Callout.Text>
             </Callout.Root>
           )}
+        </WizardModal.Body>
 
-          <Separator size="4" mt="4" style={{ opacity: 0.3 }} />
+        <WizardModal.Footer>
+          {step === 0 && (
+            <>
+              <Dialog.Close>
+                <Button variant="soft" color="gray" disabled={isAnalyzing || isRestoring}>
+                  {getMessage('cancel')}
+                </Button>
+              </Dialog.Close>
+              <Button
+                data-testid="wizard-restore-btn-restore"
+                onClick={handleRestoreOrNext}
+                disabled={selectedTabIds.size === 0 || isAnalyzing || isRestoring}
+              >
+                <RotateCcw size={14} aria-hidden="true" />
+                {isAnalyzing ? getMessage('loadingText') : getMessage('sessionRestore')}
+              </Button>
+            </>
+          )}
 
-          {/* Footer */}
-          <Flex gap="3" justify="end" mt="3">
-            {step === 0 && (
-              <>
-                <Dialog.Close>
-                  <Button variant="soft" color="gray" disabled={isAnalyzing || isRestoring}>
-                    {getMessage('cancel')}
-                  </Button>
-                </Dialog.Close>
-                <Button
-                  data-testid="wizard-restore-btn-restore"
-                  onClick={handleRestoreOrNext}
-                  disabled={selectedTabIds.size === 0 || isAnalyzing || isRestoring}
-                >
-                  <RotateCcw size={14} aria-hidden="true" />
-                  {isAnalyzing ? getMessage('loadingText') : getMessage('sessionRestore')}
-                </Button>
-              </>
-            )}
-
-            {step === 1 && (
-              <>
-                <Button
-                  variant="soft"
-                  color="gray"
-                  onClick={() => setStep(0)}
-                  disabled={isRestoring}
-                >
-                  {getMessage('previous')}
-                </Button>
-                <Button
-                  onClick={() => executeRestore(conflictAnalysis, duplicateTabAction, groupActions)}
-                  disabled={isRestoring}
-                >
-                  <RotateCcw size={14} aria-hidden="true" />
-                  {getMessage('sessionRestore')}
-                </Button>
-              </>
-            )}
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
+          {step === 1 && (
+            <>
+              <Button
+                variant="soft"
+                color="gray"
+                onClick={() => setStep(0)}
+                disabled={isRestoring}
+              >
+                {getMessage('previous')}
+              </Button>
+              <Button
+                onClick={() => executeRestore(conflictAnalysis, duplicateTabAction, groupActions)}
+                disabled={isRestoring}
+              >
+                <RotateCcw size={14} aria-hidden="true" />
+                {getMessage('sessionRestore')}
+              </Button>
+            </>
+          )}
+        </WizardModal.Footer>
+      </WizardModal>
     </SessionsTheme>
   );
 }

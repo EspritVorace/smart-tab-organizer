@@ -1,14 +1,14 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Box, Dialog, Separator } from '@radix-ui/themes';
+import { Box, Button, Dialog, Separator } from '@radix-ui/themes';
 import { Archive, FileDown, Pin } from 'lucide-react';
 import { SessionsTheme } from '@/components/Form/themes';
 import { getMessage } from '@/utils/i18n';
 import { loadSessions } from '@/utils/sessionStorage';
 import { splitByPinned } from '@/utils/sessionUtils';
 import type { Session } from '@/types/session';
-import { CountLabel, WizardDialogTitle, useDialogReset, useToggleSet } from './Shared';
+import { WizardModal } from '@/components/UI/WizardModal';
+import { CountLabel, useDialogReset, useToggleSet } from './Shared';
 import {
-  ExportDialogFooter,
   ExportNoteField,
   ExportSplitButton,
   SelectableListContainer,
@@ -84,15 +84,15 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
 
   return (
     <SessionsTheme>
-      <Dialog.Root open={open} onOpenChange={onOpenChange}>
-        <Dialog.Content style={{ maxWidth: 550 }}>
-          <WizardDialogTitle
-            icon={FileDown}
-            titleKey="exportSessionsTitle"
-            descriptionKey="exportSessionsDescription"
-          />
+      <WizardModal open={open} onOpenChange={onOpenChange}>
+        <WizardModal.Header
+          icon={FileDown}
+          title={getMessage('exportSessionsTitle')}
+          description={getMessage('exportSessionsDescription')}
+        />
 
-          <Box mt="4">
+        <WizardModal.Body>
+          <Box>
             <ExportNoteField value={exportNote} onChange={setExportNote} />
             <SelectionToolbar onSelectAll={selectAll} onDeselectAll={selection.clearAll} />
 
@@ -122,16 +122,19 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
 
             <CountLabel messageKey="sessionsSelectedCount" count={selection.size} />
           </Box>
+        </WizardModal.Body>
 
-          <ExportDialogFooter>
-            <ExportSplitButton
-              labelKey="exportSessionsButton"
-              actions={actions}
-              disabled={selection.size === 0}
-            />
-          </ExportDialogFooter>
-        </Dialog.Content>
-      </Dialog.Root>
+        <WizardModal.Footer>
+          <Dialog.Close>
+            <Button variant="soft" color="gray">{getMessage('cancel')}</Button>
+          </Dialog.Close>
+          <ExportSplitButton
+            labelKey="exportSessionsButton"
+            actions={actions}
+            disabled={selection.size === 0}
+          />
+        </WizardModal.Footer>
+      </WizardModal>
     </SessionsTheme>
   );
 }

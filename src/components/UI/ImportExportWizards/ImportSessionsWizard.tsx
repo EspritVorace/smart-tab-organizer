@@ -1,7 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import {
-  Dialog, Flex, Button, Text, Separator, Box,
-} from '@radix-ui/themes';
+import { Box, Button, Dialog } from '@radix-ui/themes';
 import { Upload } from 'lucide-react';
 import { SessionsTheme } from '@/components/Form/themes';
 import { getMessage } from '@/utils/i18n';
@@ -16,7 +14,8 @@ import { generateUUID } from '@/utils/utils';
 import { loadSessions, saveSessions } from '@/utils/sessionStorage';
 import { SessionRow, ConflictSessionRow } from './SessionImportRows';
 import type { Session } from '@/types/session';
-import { TwoStepImportFooter, WizardDialogTitle, useDialogReset } from './Shared';
+import { WizardModal } from '@/components/UI/WizardModal';
+import { useDialogReset } from './Shared';
 import { SourceStep, ImportedNoteCallout, useJsonSourceInput } from './Source';
 import {
   useImportClassification,
@@ -31,6 +30,11 @@ interface ImportSessionsWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+const STEP_DESCRIPTION_KEYS = [
+  'importSessionsStepSourceDescription',
+  'importSessionsStepReviewDescription',
+] as const;
 
 function getUniqueName(base: string, takenNames: Set<string>): string {
   if (!takenNames.has(base.toLowerCase())) return base;
@@ -128,15 +132,14 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
 
   return (
     <SessionsTheme>
-      <Dialog.Root open={open} onOpenChange={onOpenChange}>
-        <Dialog.Content style={{ maxWidth: 600 }}>
-          <WizardDialogTitle
-            icon={Upload}
-            titleKey="importSessionsTitle"
-            descriptionKey="importSessionsDescription"
-          />
+      <WizardModal open={open} onOpenChange={onOpenChange}>
+        <WizardModal.Header
+          icon={Upload}
+          title={getMessage('importSessionsTitle')}
+          description={getMessage(STEP_DESCRIPTION_KEYS[step])}
+        />
 
-          {/* Step 0: Source */}
+        <WizardModal.Body>
           {step === 0 && (
             <SourceStep
               source={source}
@@ -145,9 +148,8 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
             />
           )}
 
-          {/* Step 1: Classification + conflict resolution */}
           {step === 1 && classification && (
-            <Box mt="4">
+            <Box>
               <ImportedNoteCallout note={source.importedNote} />
               <ClassificationScrollArea>
                 <ClassificationGroup
@@ -202,18 +204,31 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
               />
             </Box>
           )}
+        </WizardModal.Body>
 
-          <TwoStepImportFooter
-            step={step as 0 | 1}
-            onNext={goToStep1}
-            nextDisabled={!source.parsedData}
-            onPrevious={() => setStep(0)}
-            onConfirm={executeImport}
-            confirmDisabled={importCount === 0}
-            confirmLabelKey="confirmImport"
-          />
-        </Dialog.Content>
-      </Dialog.Root>
+        <WizardModal.Footer>
+          {step === 0 && (
+            <>
+              <Dialog.Close>
+                <Button variant="soft" color="gray">{getMessage('cancel')}</Button>
+              </Dialog.Close>
+              <Button onClick={goToStep1} disabled={!source.parsedData}>
+                {getMessage('next')}
+              </Button>
+            </>
+          )}
+          {step === 1 && (
+            <>
+              <Button variant="soft" color="gray" onClick={() => setStep(0)}>
+                {getMessage('previous')}
+              </Button>
+              <Button onClick={executeImport} disabled={importCount === 0}>
+                {getMessage('confirmImport')}
+              </Button>
+            </>
+          )}
+        </WizardModal.Footer>
+      </WizardModal>
     </SessionsTheme>
   );
 }
