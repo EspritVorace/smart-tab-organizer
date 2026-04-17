@@ -9,12 +9,11 @@
  */
 import { test, expect } from './fixtures';
 import { goToPopup } from './helpers/navigation';
-import { clearSessions, clearHelpPrefs } from './helpers/seed';
+import { clearSessions } from './helpers/seed';
 import type { BrowserContext } from '@playwright/test';
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
-  await clearHelpPrefs(extensionContext);
 });
 
 // A non-system URL that captures correctly (about: is filtered by isSystemUrl)

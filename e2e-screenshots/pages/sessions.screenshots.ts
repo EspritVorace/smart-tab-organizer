@@ -7,7 +7,6 @@ import { captureAll, getServiceWorker } from '../helpers/screenshot-helper.js';
 import {
   seedSessions,
   clearSessions,
-  clearHelpPrefs,
   ALL_SESSIONS,
   SESSION_MORNING_DEV,
   SESSION_RESEARCH,
@@ -32,7 +31,6 @@ async function waitForSessionsReady(page: Page): Promise<void> {
 test.describe('Sessions screenshots', () => {
   test.beforeEach(async ({ extensionContext }) => {
     await clearSessions(extensionContext);
-    await clearHelpPrefs(extensionContext);
   });
 
   /**

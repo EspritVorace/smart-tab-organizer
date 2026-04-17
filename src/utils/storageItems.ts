@@ -5,7 +5,6 @@ import type { DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
 import type { Statistics } from '@/types/statistics.js';
 import { defaultStatistics } from '@/types/statistics.js';
 import type { Session } from '@/types/session.js';
-import type { SessionsHelpPrefs } from './sessionsHelpPrefs.js';
 
 // --- Sync storage items ---
 
@@ -54,11 +53,6 @@ export const statisticsItem = storage.defineItem<Statistics>(
 export const sessionsItem = storage.defineItem<Session[]>(
   'local:sessions',
   { defaultValue: [] },
-);
-
-export const sessionsHelpPrefsItem = storage.defineItem<SessionsHelpPrefs>(
-  'local:sessionsHelpPrefs',
-  { defaultValue: { sessionsIntroHidden: false } },
 );
 
 export const popupPinnedEmptyCollapsedItem = storage.defineItem<boolean>(

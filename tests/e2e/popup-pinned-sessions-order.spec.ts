@@ -8,13 +8,11 @@ import { goToPopup, goToSessionsSection } from './helpers/navigation';
 import {
   seedSessions,
   clearSessions,
-  clearHelpPrefs,
   createPinnedSession,
 } from './helpers/seed';
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
-  await clearHelpPrefs(extensionContext);
 });
 
 test.describe('[US-PIN-ORDER] Popup pinned sessions order', () => {

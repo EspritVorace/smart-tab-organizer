@@ -29,6 +29,7 @@ type Story = StoryObj<typeof meta>;
 export const PageLayoutDomainRules: Story = {
   args: {
     titleKey: 'domainRulesTab',
+    descriptionKey: 'domainRulesPageDescription',
     theme: 'DOMAIN_RULES',
     icon: Shield,
     syncSettings: defaultSyncSettings,
@@ -54,6 +55,7 @@ export const PageLayoutDomainRules: Story = {
 export const PageLayoutImportExport: Story = {
   args: {
     titleKey: 'importExportTab',
+    descriptionKey: 'importExportPageDescription',
     theme: 'IMPORT',
     icon: FileText,
     syncSettings: defaultSyncSettings,
@@ -75,6 +77,7 @@ export const PageLayoutImportExport: Story = {
 export const PageLayoutStatistics: Story = {
   args: {
     titleKey: 'statisticsTab',
+    descriptionKey: 'statisticsPageDescription',
     theme: 'STATISTICS',
     icon: BarChart3,
     syncSettings: defaultSyncSettings,

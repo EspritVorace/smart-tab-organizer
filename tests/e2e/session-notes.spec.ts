@@ -12,7 +12,6 @@ import { goToSessionsSection } from './helpers/navigation';
 import {
   seedSessions,
   clearSessions,
-  clearHelpPrefs,
   createTestSession,
   getSessionsFromStorage,
 } from './helpers/seed';
@@ -49,7 +48,6 @@ function sessionWithNote(note: string): TestSession {
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
-  await clearHelpPrefs(extensionContext);
 });
 
 // ---------------------------------------------------------------------------

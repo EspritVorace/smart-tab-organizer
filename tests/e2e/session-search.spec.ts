@@ -14,7 +14,6 @@ import { goToSessionsSection } from './helpers/navigation';
 import {
   seedSessions,
   clearSessions,
-  clearHelpPrefs,
   createTestSession,
 } from './helpers/seed';
 import type { TestSession } from './helpers/seed';
@@ -74,7 +73,6 @@ function sessionWithGroup(
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
-  await clearHelpPrefs(extensionContext);
 });
 
 // ---------------------------------------------------------------------------

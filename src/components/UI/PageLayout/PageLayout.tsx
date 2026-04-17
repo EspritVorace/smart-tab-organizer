@@ -1,4 +1,4 @@
-import { Theme, Heading, Box, Flex, Separator } from '@radix-ui/themes';
+import { Theme, Heading, Box, Flex, Separator, Text } from '@radix-ui/themes';
 import type { LucideIcon } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { FEATURE_THEMES } from '@/utils/themeConstants.js';
@@ -7,6 +7,7 @@ import type { FeatureTheme } from '@/utils/themeConstants.js';
 
 interface PageLayoutProps {
   titleKey: string;
+  descriptionKey?: string;
   theme: FeatureTheme;
   icon?: LucideIcon;
   syncSettings: SyncSettings;
@@ -14,7 +15,7 @@ interface PageLayoutProps {
   headerActions?: React.ReactNode;
 }
 
-export function PageLayout({ titleKey, theme, icon: Icon, syncSettings, children, headerActions }: PageLayoutProps) {
+export function PageLayout({ titleKey, descriptionKey, theme, icon: Icon, syncSettings, children, headerActions }: PageLayoutProps) {
   return (
     <Theme accentColor={FEATURE_THEMES[theme]}>
       <Box style={{
@@ -75,6 +76,18 @@ export function PageLayout({ titleKey, theme, icon: Icon, syncSettings, children
           </Box>
           <Separator size="4" style={{ opacity: 0.3 }} />
         </Box>
+
+        {descriptionKey && (
+          <Box
+            data-testid="page-layout-description"
+            px="4"
+            pt="3"
+          >
+            <Text size="2" color="gray" as="p" style={{ margin: 0 }}>
+              {getMessage(descriptionKey)}
+            </Text>
+          </Box>
+        )}
 
         <Box data-testid="page-layout-content" style={{ flex: 1, overflow: 'auto', marginTop: 'var(--space-3)', backgroundColor: 'var(--accent-a2)', borderRadius: 'var(--radius-3)', padding: 'var(--space-4)' }}>
           {children(syncSettings)}

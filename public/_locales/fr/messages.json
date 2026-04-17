@@ -413,8 +413,11 @@
   "popupAutoGroup": { "message": "Regroupement auto" },
   "popupDedup": { "message": "Déduplication" },
 
-  "sessionsIntroTitle": { "message": "Sessions" },
-  "sessionsIntroBody": { "message": "Les sessions capturent vos onglets ouverts pour les restaurer plus tard. Épinglez une session pour y accéder en un clic depuis le popup." },
+  "domainRulesPageDescription": { "message": "Créez des règles qui regroupent automatiquement les nouveaux onglets selon le domaine ou un motif d'URL." },
+  "sessionsPageDescription": { "message": "Capturez vos onglets ouverts sous forme de sessions à restaurer plus tard. Épinglez une session pour y accéder en un clic depuis le popup." },
+  "statisticsPageDescription": { "message": "Suivez le nombre de groupes d'onglets créés et celui des onglets dupliqués fermés automatiquement." },
+  "importExportPageDescription": { "message": "Sauvegardez ou restaurez vos règles et vos sessions au format JSON, avec résolution des conflits à l'import." },
+  "settingsPageDescription": { "message": "Configurez les notifications globales et choisissez les onglets concernés par la déduplication." },
   "sessionsEmptyStateTitle": { "message": "Aucune session sauvegardée." },
   "noSessionsFound": { "message": "Aucune session trouvée" },
   "sessionsEmptyStateDescription": { "message": "Prenez un instantané pour capturer vos onglets actuels. Épinglez une session pour y accéder depuis le popup." },

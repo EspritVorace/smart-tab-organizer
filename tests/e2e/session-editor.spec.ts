@@ -4,11 +4,10 @@
  */
 import { test, expect } from './fixtures';
 import { goToSessionsSection } from './helpers/navigation';
-import { seedSessions, clearSessions, clearHelpPrefs, getSessionsFromStorage, createTestSession } from './helpers/seed';
+import { seedSessions, clearSessions, getSessionsFromStorage, createTestSession } from './helpers/seed';
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
-  await clearHelpPrefs(extensionContext);
 });
 
 // ---------------------------------------------------------------------------

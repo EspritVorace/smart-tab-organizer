@@ -7,14 +7,12 @@ import { goToPopup, goToSessionsSection } from './helpers/navigation';
 import {
   seedSessions,
   clearSessions,
-  clearHelpPrefs,
   createTestSession,
   createPinnedSession,
 } from './helpers/seed';
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
-  await clearHelpPrefs(extensionContext);
 });
 
 // ---------------------------------------------------------------------------
