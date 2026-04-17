@@ -1,0 +1,95 @@
+---
+title: Détail des modes de nommage
+description: Catalogue des six modes de nommage de groupe, leurs chaînes de repli et leurs cas limites.
+---
+
+import { Aside, Steps, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="En bref">
+- Six modes couvrent les situations possibles : saisie manuelle, extraction depuis le titre ou l'URL, mode intelligent basé sur un preset, avec différents replis si l'extraction échoue.
+- Certains modes laissent l'onglet non groupé en cas d'échec ; d'autres utilisent le label de la règle ou une invite comme filet de sécurité.
+</Aside>
+
+Cette page présente chaque mode de nommage individuellement, avec sa chaîne de repli et les cas particuliers à connaitre.
+
+Pour le principe d'extraction par regex et la façon dont le mode est choisi dans l'assistant de règle, voir [Sources de nom de groupe](/concepts/sources-nom-groupe).
+
+## Demander
+
+Une invite de saisie apparait à chaque création de groupe. Le label de la règle est proposé comme valeur par défaut.
+
+<Steps>
+1. L'invite s'ouvre avec le label de la règle comme valeur par défaut.
+2. Si vous validez avec un nom, le groupe est renommé avec ce nom.
+3. Si vous annulez l'invite, les onglets qui venaient d'être regroupés sont immédiatement dégroupés.
+</Steps>
+
+## Titre
+
+L'extension tente d'extraire le nom depuis le titre de la page parente. En cas d'échec, elle tente l'extraction depuis l'URL. Si les deux échouent, l'onglet n'est pas groupé.
+
+<Steps>
+1. Extraction depuis le **titre** de l'onglet parent.
+2. À défaut, extraction depuis l'**URL** de l'onglet parent.
+3. À défaut, l'onglet n'est **pas groupé**.
+</Steps>
+
+<Aside type="caution">
+En mode Titre (et en mode URL ci-dessous), l'absence de correspondance regex empêche totalement le groupage. Vérifiez vos expressions régulières avant d'enregistrer la règle.
+</Aside>
+
+## URL
+
+Symétrique du mode Titre : extraction depuis l'URL en premier, puis repli sur le titre.
+
+<Steps>
+1. Extraction depuis l'**URL** de l'onglet parent.
+2. À défaut, extraction depuis le **titre** de l'onglet parent.
+3. À défaut, l'onglet n'est **pas groupé**.
+</Steps>
+
+## Intelligent
+
+L'extension utilise les regex du preset sélectionné pour tenter l'extraction depuis le titre puis depuis l'URL. Si les deux échouent, l'onglet n'est pas groupé.
+
+<Steps>
+1. Extraction depuis le **titre** avec la regex du preset.
+2. À défaut, extraction depuis l'**URL** avec la regex du preset.
+3. À défaut, l'onglet n'est **pas groupé**.
+</Steps>
+
+## Intelligent + Label
+
+Même stratégie d'extraction que le mode Intelligent. En cas d'échec, le **label de la règle** est utilisé comme nom de repli.
+
+<Steps>
+1. Extraction depuis le **titre** avec la regex du preset.
+2. À défaut, extraction depuis l'**URL** avec la regex du preset.
+3. À défaut, utilisation du **label de la règle** comme nom de groupe.
+</Steps>
+
+<Aside type="tip">
+Ce mode garantit qu'un groupe est toujours créé, même quand la regex ne correspond pas.
+</Aside>
+
+## Intelligent + Demander
+
+Même stratégie d'extraction que le mode Intelligent. En cas d'échec, une invite de saisie est présentée, comme en mode Demander.
+
+<Steps>
+1. Extraction depuis le **titre** avec la regex du preset.
+2. À défaut, extraction depuis l'**URL** avec la regex du preset.
+3. À défaut, **invite utilisateur**. Les onglets sont dégroupés si vous annulez.
+</Steps>
+
+<Aside type="tip">
+Ce mode combine l'extraction automatique et la saisie manuelle comme filet de sécurité.
+</Aside>
+
+## Voir aussi
+
+<CardGrid>
+  <LinkCard title="Sources de nom de groupe" href="/concepts/sources-nom-groupe" description="Principe d'extraction et choix du mode dans l'assistant de règle." />
+  <LinkCard title="Presets regex" href="/fonctionnalites/regles/presets-regex" description="Utiliser les patterns intégrés pour configurer le mode et les regex." />
+  <LinkCard title="Comment fonctionne le groupement" href="/concepts/groupement" description="Conditions de déclenchement et comportement général." />
+</CardGrid>

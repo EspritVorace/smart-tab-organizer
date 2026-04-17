@@ -3,6 +3,14 @@ title: Sessions épinglées
 description: Ce que sont les sessions épinglées, leur cas d'usage et comment les distinguer des sessions ordinaires.
 ---
 
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="En bref">
+- Une session épinglée est une session mise en avant, accessible directement depuis la popup.
+- L'épinglage ne change ni le contenu de la session, ni la façon dont elle est capturée.
+- Une catégorie (couleur + emoji) peut être associée pour les distinguer visuellement.
+</Aside>
+
 Une session épinglée est une session que vous avez promue au rang de favoris. Elle se distingue des sessions ordinaires à la fois par son emplacement dans l'interface et par les actions rapides qu'elle rend accessibles.
 
 ## Sessions ordinaires et sessions épinglées
@@ -11,7 +19,7 @@ Toutes les sessions sauvegardées dans SmartTab Organizer apparaissent dans la p
 
 Une **session épinglée** est une session que vous avez choisie de mettre en avant. Elle apparait dans une section dédiée en haut de la page Sessions, séparée des sessions ordinaires. Elle est aussi listée directement dans la popup, ce qui permet de la restaurer en un clic sans ouvrir la page Options.
 
-L'épinglage ne modifie pas le contenu de la session : les onglets et groupes sauvegardés restent identiques. C'est uniquement le statut et l'emplacement dans l'interface qui changent.
+L'épinglage ne modifie pas le contenu de la session : les onglets et groupes sauvegardés restent identiques. Seul le statut et l'emplacement dans l'interface changent.
 
 ## Cas d'usage typiques
 
@@ -25,6 +33,8 @@ Chaque session épinglée peut être associée à une catégorie. Ce sont les m�
 
 ## Voir aussi
 
-- [Épingler une session](/fonctionnalites/sessions/sessions-epinglees) : comment épingler, désépingler et associer une catégorie
-- [Vue d'ensemble des sessions](/fonctionnalites/sessions/vue-ensemble) : la liste des sessions et ses fonctionnalités
-- [Popup](/fonctionnalites/popup) : accéder aux sessions épinglées depuis la popup
+<CardGrid>
+  <LinkCard title="Épingler une session" href="/fonctionnalites/sessions/sessions-epinglees" description="Comment épingler, désépingler et associer une catégorie." />
+  <LinkCard title="Vue d'ensemble des sessions" href="/fonctionnalites/sessions/vue-ensemble" description="La liste des sessions et ses fonctionnalités." />
+  <LinkCard title="Popup" href="/fonctionnalites/popup" description="Accéder aux sessions épinglées depuis la popup." />
+</CardGrid>
