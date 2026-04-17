@@ -8,7 +8,7 @@ const TEST_DEFAULTS: SyncSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
   deduplicateUnmatchedDomains: false,
-  deduplicationKeepStrategy: 'keep-grouped',
+  deduplicationKeepStrategy: 'keep-grouped-or-new',
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
   domainRules: [

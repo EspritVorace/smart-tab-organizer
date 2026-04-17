@@ -133,11 +133,12 @@ Historiquement, la déduplication gardait toujours l'onglet existant (le plus an
 
 ### Critères d'acceptation
 
-- [ ] Un paramètre `deduplicationKeepStrategy` est exposé dans la page Options, section "Portée de la déduplication", sous forme de radio à trois valeurs :
+- [ ] Un paramètre `deduplicationKeepStrategy` est exposé dans la page Options, section "Portée de la déduplication", sous forme de radio à quatre valeurs :
   - `keep-old` : conserver l'onglet existant.
   - `keep-new` : conserver le nouvel onglet et fermer l'existant.
   - `keep-grouped` : conserver celui qui est dans un groupe, sinon retomber sur `keep-old`.
-- [ ] La valeur par défaut est `keep-grouped` afin d'éviter qu'un doublon externe vienne chasser un onglet déjà rangé dans un groupe ; en cas d'égalité (aucun ou deux onglets groupés), on retombe sur `keep-old`.
+  - `keep-grouped-or-new` : conserver celui qui est dans un groupe, sinon retomber sur `keep-new`.
+- [ ] La valeur par défaut est `keep-grouped-or-new` : le tab groupé est toujours protégé, et quand l'heuristique ne tranche pas (aucun ou les deux onglets groupés) on privilégie la version fraîchement chargée.
 - [ ] Le radio est désactivé visuellement quand la déduplication globale est off.
 - [ ] En mode `keep-grouped`, si les deux onglets sont groupés ou aucun, on garde l'ancien (fallback explicite).
 - [ ] En mode `keep-new`, l'onglet fermé capture son `groupId`, `title` et `index` avant fermeture ; l'action "Annuler" de la notification rouvre l'onglet et tente de le rattacher à son groupe d'origine (fallback : nouveau groupe si l'original n'existe plus).

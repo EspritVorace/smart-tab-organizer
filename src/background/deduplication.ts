@@ -103,8 +103,10 @@ export interface DedupDecision {
  * Pure decision: given the existing (old) duplicate and the newly opened tab,
  * decide which survives based on the configured keep strategy.
  *
- * `keep-grouped` falls back to `keep-old` when neither or both tabs are grouped,
- * matching legacy behaviour whenever the group heuristic is ambiguous.
+ * The two "grouped" strategies always keep the tab that belongs to a group
+ * when only one of the two does. They differ on the tie-breaker when neither
+ * or both are grouped: `keep-grouped` falls back to keeping the old tab,
+ * `keep-grouped-or-new` falls back to keeping the new tab.
  */
 export function decideDedupDirection(
     oldTab: Browser.tabs.Tab,
@@ -114,7 +116,7 @@ export function decideDedupDirection(
     if (strategy === 'keep-new') {
         return { tabToKeep: newTab, tabToClose: oldTab };
     }
-    if (strategy === 'keep-grouped') {
+    if (strategy === 'keep-grouped' || strategy === 'keep-grouped-or-new') {
         const oldGrouped = isGrouped(oldTab);
         const newGrouped = isGrouped(newTab);
         if (oldGrouped && !newGrouped) {
@@ -123,10 +125,13 @@ export function decideDedupDirection(
         if (!oldGrouped && newGrouped) {
             return { tabToKeep: newTab, tabToClose: oldTab };
         }
-        // Fallback: both or neither grouped, keep the old one.
+        // Tie-breaker depends on which flavor the user picked.
+        if (strategy === 'keep-grouped-or-new') {
+            return { tabToKeep: newTab, tabToClose: oldTab };
+        }
         return { tabToKeep: oldTab, tabToClose: newTab };
     }
-    // keep-old (default)
+    // keep-old (default for `keep-old`)
     return { tabToKeep: oldTab, tabToClose: newTab };
 }
 

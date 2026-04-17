@@ -419,5 +419,29 @@ describe('deduplication', () => {
         expect(tabToKeep.id).toBe(1);
       });
     });
+
+    describe('keep-grouped-or-new', () => {
+      it('garde celui qui est groupé (ancien groupé)', () => {
+        const { tabToKeep, tabToClose } = decideDedupDirection(oldGrouped, newUngrouped, 'keep-grouped-or-new');
+        expect(tabToKeep.id).toBe(1);
+        expect(tabToClose.id).toBe(2);
+      });
+
+      it('garde celui qui est groupé (nouveau groupé)', () => {
+        const { tabToKeep, tabToClose } = decideDedupDirection(oldUngrouped, newGrouped, 'keep-grouped-or-new');
+        expect(tabToKeep.id).toBe(2);
+        expect(tabToClose.id).toBe(1);
+      });
+
+      it('retombe sur keep-new quand aucun n\'est groupé', () => {
+        const { tabToKeep } = decideDedupDirection(oldUngrouped, newUngrouped, 'keep-grouped-or-new');
+        expect(tabToKeep.id).toBe(2);
+      });
+
+      it('retombe sur keep-new quand les deux sont groupés', () => {
+        const { tabToKeep } = decideDedupDirection(oldGrouped, newGrouped, 'keep-grouped-or-new');
+        expect(tabToKeep.id).toBe(2);
+      });
+    });
   });
 });

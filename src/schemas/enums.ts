@@ -51,7 +51,8 @@ export const deduplicationMatchModeOptions = [
 export const deduplicationKeepStrategyOptions = [
   { value: 'keep-old', keyLabel: 'deduplicationKeepStrategyOldLabel' },
   { value: 'keep-new', keyLabel: 'deduplicationKeepStrategyNewLabel' },
-  { value: 'keep-grouped', keyLabel: 'deduplicationKeepStrategyGroupedLabel' }
+  { value: 'keep-grouped', keyLabel: 'deduplicationKeepStrategyGroupedLabel' },
+  { value: 'keep-grouped-or-new', keyLabel: 'deduplicationKeepStrategyGroupedOrNewLabel' }
 ] as const;
 
 export const badgeOptions = [

@@ -31,6 +31,7 @@
   "deduplicationKeepStrategyOldLabel": { "message": "L'onglet existant" },
   "deduplicationKeepStrategyNewLabel": { "message": "Le nouvel onglet ouvert" },
   "deduplicationKeepStrategyGroupedLabel": { "message": "L'onglet groupé gagne, sinon conserver l'existant" },
+  "deduplicationKeepStrategyGroupedOrNewLabel": { "message": "L'onglet groupé gagne, sinon conserver le nouveau" },
   "notificationGroupingTitle": { "message": "📁 Onglets Regroupés" },
   "notificationGroupingMessage": { "message": "Onglets regroupés dans \"{groupName}\"" },
   "notificationDeduplicationTitle": { "message": "✂️ Doublon Fermé" },

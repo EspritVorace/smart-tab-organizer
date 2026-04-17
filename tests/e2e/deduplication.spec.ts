@@ -546,5 +546,17 @@ test.describe('Deduplication', () => {
       expect(tab1.isClosed()).toBe(false);
       expect(tab2.isClosed()).toBe(true);
     });
+
+    test('keep-grouped-or-new falls back to keep-new when neither tab is grouped', async ({ helpers }) => {
+      await helpers.setDeduplicationKeepStrategy('keep-grouped-or-new');
+
+      const tab1 = await helpers.createTab('https://example.com/grouped-or-new');
+      await helpers.waitForDeduplication();
+      const tab2 = await helpers.createTab('https://example.com/grouped-or-new');
+      await helpers.waitForDeduplication();
+
+      expect(tab1.isClosed()).toBe(true);
+      expect(tab2.isClosed()).toBe(false);
+    });
   });
 });

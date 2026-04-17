@@ -31,6 +31,7 @@
   "deduplicationKeepStrategyOldLabel": { "message": "La pestaña existente" },
   "deduplicationKeepStrategyNewLabel": { "message": "La pestaña recién abierta" },
   "deduplicationKeepStrategyGroupedLabel": { "message": "Gana la pestaña agrupada, si no mantener la existente" },
+  "deduplicationKeepStrategyGroupedOrNewLabel": { "message": "Gana la pestaña agrupada, si no mantener la nueva" },
   "notificationGroupingTitle": { "message": "📁 Pestañas Agrupadas" },
   "notificationGroupingMessage": { "message": "Pestañas agrupadas en \"{groupName}\"" },
   "notificationDeduplicationTitle": { "message": "✂️ Duplicado Cerrado" },

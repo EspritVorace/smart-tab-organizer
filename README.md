@@ -47,7 +47,7 @@ Middle-click or right-click → "Open in new tab" on a configured site and the t
 
 Opening a page that's already open closes the duplicate and keeps a single tab active.
 Matching sensitivity is configurable per rule: exact URL, URL without ignored params, or "includes".
-You pick which of the two tabs survives: the grouped one (default, protects tabs from being yanked out of their group), the existing one, or the newly opened one.
+You pick which of the two tabs survives: grouped tab first then the new one (default), grouped tab first then the existing one, always the existing one, or always the new one.
 
 <p align="center">
   <img src="assets/readme/gifs/dedup.gif" alt="Deduplication video">

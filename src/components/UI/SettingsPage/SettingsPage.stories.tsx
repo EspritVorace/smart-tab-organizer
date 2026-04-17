@@ -74,3 +74,13 @@ export const SettingsPageKeepGroupedStrategy: Story = {
     updateSettings: (settings) => console.log('Settings updated:', settings),
   },
 };
+
+export const SettingsPageKeepGroupedOrNewStrategy: Story = {
+  args: {
+    syncSettings: {
+      ...defaultSyncSettings,
+      deduplicationKeepStrategy: 'keep-grouped-or-new',
+    },
+    updateSettings: (settings) => console.log('Settings updated:', settings),
+  },
+};
