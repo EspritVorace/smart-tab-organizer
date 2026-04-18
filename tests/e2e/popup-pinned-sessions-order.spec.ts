@@ -4,7 +4,7 @@
  * (which can be manually reordered via drag-drop in SessionsPage).
  */
 import { test, expect } from './fixtures';
-import { goToPopup, goToSessionsSection } from './helpers/navigation';
+import { goToPopup } from './helpers/navigation';
 import {
   seedSessions,
   clearSessions,

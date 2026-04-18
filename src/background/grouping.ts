@@ -5,7 +5,7 @@ import { getSettings } from './settings.js';
 import { promptForGroupName } from './messaging.js';
 import { showNotification, type UndoAction } from '@/utils/notifications.js';
 import { getMessage } from '@/utils/i18n.js';
-import type { DomainRuleSetting, SyncSettings } from '@/types/syncSettings.js';
+import type { DomainRuleSetting } from '@/types/syncSettings.js';
 import { getRuleCategory } from '@/schemas/enums.js';
 import { logger } from '@/utils/logger.js';
 
@@ -21,7 +21,7 @@ export function findMatchingRule(url: string, domainRules: DomainRuleSetting[]):
     return domainRules.find(r => r.enabled && matchesDomain(url, r.domainFilter));
 }
 
-export function determineGroupColor(rule: DomainRuleSetting, settings?: any): string | null {
+export function determineGroupColor(rule: DomainRuleSetting, _settings?: any): string | null {
     const category = getRuleCategory(rule.categoryId);
     if (category) {
         logger.debug(`[GROUPING_DEBUG] Using category "${rule.categoryId}" color: "${category.color}".`);

@@ -1,5 +1,5 @@
 import { storage } from 'wxt/utils/storage';
-import type { SyncSettings, DomainRuleSettings } from '@/types/syncSettings.js';
+import type { DomainRuleSettings } from '@/types/syncSettings.js';
 import { defaultSyncSettings } from '@/types/syncSettings.js';
 import type { DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
 import type { Statistics } from '@/types/statistics.js';

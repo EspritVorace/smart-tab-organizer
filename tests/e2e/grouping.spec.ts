@@ -16,8 +16,8 @@
  *    the exact UI path a user takes when middle-clicking a link.
  */
 
-import { test, expect, type TabGroupInfo } from './fixtures';
-import type { BrowserContext, Route, Request } from '@playwright/test';
+import { test, expect } from './fixtures';
+import type { BrowserContext } from '@playwright/test';
 import * as http from 'http';
 
 // ─── helpers ────────────────────────────────────────────────────────────────

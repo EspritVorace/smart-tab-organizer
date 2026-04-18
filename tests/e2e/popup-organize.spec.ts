@@ -8,7 +8,7 @@
  * - US-PO009: Existing auto-grouping behaviour unaffected
  */
 
-import { test, expect, type ExtensionFixtures } from './fixtures';
+import { test, expect } from './fixtures';
 import { goToPopup } from './helpers/navigation';
 import type { BrowserContext, Page } from '@playwright/test';
 
@@ -557,6 +557,7 @@ test.describe('[US-PO009] Automatic grouping unaffected by organize rules', () =
     extensionContext,
     helpers,
   }) => {
+    void extensionContext; // injected to guarantee fixture setup order, not used directly
     await helpers.addDomainRule({
       label: 'AutoGroup',
       domainFilter: 'example.com',

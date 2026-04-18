@@ -60,7 +60,7 @@ test.describe('Combined Deduplication and Grouping', () => {
         groupingEnabled: true,
       });
 
-      const tab1 = await helpers.createTab('https://example.com/page');
+      const _tab1 = await helpers.createTab('https://example.com/page');
       await helpers.waitForDeduplication();
       const initialTabCount = await helpers.getTabCount();
 
@@ -168,9 +168,9 @@ test.describe('Combined Deduplication and Grouping', () => {
       await helpers.waitForDeduplication();
 
       // Test httpbin.org: no group, but dedup
-      const t1 = await helpers.createTab('https://httpbin.org/page');
+      const _t1 = await helpers.createTab('https://httpbin.org/page');
       await helpers.waitForDeduplication();
-      const t2 = await helpers.createTab('https://httpbin.org/page');
+      const _t2 = await helpers.createTab('https://httpbin.org/page');
       await helpers.waitForDeduplication();
 
       stats = await helpers.getStatistics();
@@ -220,10 +220,10 @@ test.describe('Combined Deduplication and Grouping', () => {
       });
 
       // example.net has no rule → global (enabled) applies
-      const tab1 = await helpers.createTab('https://example.net/page');
+      const _tab1 = await helpers.createTab('https://example.net/page');
       await helpers.waitForDeduplication();
 
-      const tab2 = await helpers.createTab('https://example.net/page');
+      const _tab2 = await helpers.createTab('https://example.net/page');
       await helpers.waitForDeduplication();
 
       const stats = await helpers.getStatistics();

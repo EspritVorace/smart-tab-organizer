@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
-import { Button, Text, Flex, Box, Checkbox, IconButton, Separator } from '@radix-ui/themes';
+import { Button, Text, Flex, Box, Checkbox, Separator } from '@radix-ui/themes';
 import { Plus, Eye, EyeOff, Shield, AlertCircle, Upload, Trash2 } from 'lucide-react';
 import { DragDropProvider, type DragEndEvent, type DragOverEvent } from '@dnd-kit/react';
 import { move } from '@dnd-kit/helpers';
@@ -46,7 +46,7 @@ interface BulkActionsBarProps {
 }
 
 function BulkActionsBar({
-  selectedIds, filteredRules, isAllSelected, isIndeterminate,
+  selectedIds, filteredRules: _filteredRules, isAllSelected, isIndeterminate,
   onSelectAll, onBulkToggle, onBulkDeleteRequest,
 }: BulkActionsBarProps) {
   return (
@@ -157,7 +157,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
   const isIndeterminate = selectedIds.size > 0 && selectedIds.size < filteredRules.length;
 
   const handleEditRule = useCallback((rule: DomainRuleSetting) => {
-    const { enabled, badge, ...domainRule } = rule;
+    const { enabled: _enabled, badge: _badge, ...domainRule } = rule;
     setEditingRule(domainRule);
     setIsModalOpen(true);
   }, []);

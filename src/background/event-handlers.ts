@@ -179,7 +179,7 @@ export function setupTabUpdatedHandler(): void {
                         logger.debug(`[GROUPING_DEBUG] onUpdated: Registered pending grouping for tab ${tabId}.`);
                     }
                 } catch (e) {
-                    logger.warn(`[GROUPING_DEBUG] onUpdated: Opener tab ${matchedOpenerTabId} not found.`);
+                    logger.warn(`[GROUPING_DEBUG] onUpdated: Opener tab ${matchedOpenerTabId} not found.`, e);
                 }
             }
         }

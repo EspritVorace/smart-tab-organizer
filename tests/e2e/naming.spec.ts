@@ -446,7 +446,7 @@ test.describe('Group Naming Modes', () => {
           const resp = await fetch(chrome.runtime.getURL('/data/presets.json'));
           const data = await resp.json();
           return data;
-        } catch (e) {
+        } catch (_e) {
           return null;
         }
       });

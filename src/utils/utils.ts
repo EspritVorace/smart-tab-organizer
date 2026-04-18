@@ -57,7 +57,7 @@ export function isValidRegex(regex: string): boolean {
   try {
     new RegExp(regex);
     return regex.includes('(') && regex.includes(')');
-  } catch (e) {
+  } catch (_e) {
     return false;
   }
 }

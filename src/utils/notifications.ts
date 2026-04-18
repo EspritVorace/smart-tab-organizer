@@ -37,7 +37,7 @@ const pendingUndoActions = new Map<string, UndoAction>();
 /**
  * Shows a native browser notification with optional undo button
  */
-export async function showNotification({ title, message, type = 'info', undoAction }: ShowNotificationOptions): Promise<string> {
+export async function showNotification({ title, message, type: _type = 'info', undoAction }: ShowNotificationOptions): Promise<string> {
   const notificationId = `smarttab-${Date.now()}`;
 
   const notificationOptions: Browser.notifications.NotificationCreateOptions = {

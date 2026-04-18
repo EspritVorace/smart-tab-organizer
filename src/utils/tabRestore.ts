@@ -1,4 +1,5 @@
 import { browser } from 'wxt/browser';
+import { logger } from '@/utils/logger';
 import type { SavedTab, SavedTabGroup, Session } from '@/types/session';
 import type { ConflictAnalysis, ConflictResolution, GroupConflictAction } from './conflictDetection';
 
@@ -126,6 +127,7 @@ async function restoreInNewWindow(
       await browser.tabs.create({ url: tabs[i].url, windowId });
       result.tabsCreated++;
     } catch (e) {
+      logger.debug('[TAB_RESTORE] Failed to create tab:', e);
       result.errors.push(`Failed to create tab: ${tabs[i].url}`);
     }
   }
@@ -147,6 +149,7 @@ async function restoreInNewWindow(
         if (created.id != null) tabIds.push(created.id);
         result.tabsCreated++;
       } catch (e) {
+        logger.debug('[TAB_RESTORE] Failed to create tab:', e);
         result.errors.push(`Failed to create tab: ${tab.url}`);
       }
     }
@@ -156,6 +159,7 @@ async function restoreInNewWindow(
         await (browser.tabGroups as any).update(groupId, { title: group.title, color: group.color, collapsed: group.collapsed ?? false });
         result.groupsCreated++;
       } catch (e) {
+        logger.debug('[TAB_RESTORE] Failed to create group:', e);
         result.errors.push(`Failed to create group: ${group.title}`);
       }
     }
@@ -224,6 +228,7 @@ async function restoreInCurrentWindow(
       await browser.tabs.create({ url: tab.url });
       result.tabsCreated++;
     } catch (e) {
+      logger.debug('[TAB_RESTORE] Failed to create tab:', e);
       result.errors.push(`Failed to create tab: ${tab.url}`);
     }
   }
@@ -283,6 +288,7 @@ async function restoreInCurrentWindow(
         if (created.id != null) newTabIds.push(created.id);
         result.tabsCreated++;
       } catch (e) {
+        logger.debug('[TAB_RESTORE] Failed to create tab:', e);
         result.errors.push(`Failed to create tab: ${tab.url}`);
       }
     }
@@ -297,6 +303,7 @@ async function restoreInCurrentWindow(
         });
         result.groupsMerged++;
       } catch (e) {
+        logger.debug('[TAB_RESTORE] Failed to merge into group:', e);
         result.errors.push(`Failed to merge into group: ${group.title}`);
       }
     } else {
@@ -310,6 +317,7 @@ async function restoreInCurrentWindow(
         });
         result.groupsCreated++;
       } catch (e) {
+        logger.debug('[TAB_RESTORE] Failed to create group:', e);
         result.errors.push(`Failed to create group: ${group.title}`);
       }
     }

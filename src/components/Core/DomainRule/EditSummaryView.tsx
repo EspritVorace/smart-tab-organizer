@@ -1,5 +1,5 @@
 import * as Collapsible from '@radix-ui/react-collapsible';
-import { Box, Button, Flex, IconButton, Separator, Text, TextField, Grid } from '@radix-ui/themes';
+import { Box, Button, Flex, IconButton, Separator, Text, TextField } from '@radix-ui/themes';
 import { ChevronDown, ChevronRight, Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, type Control, type FieldErrors } from 'react-hook-form';
@@ -8,7 +8,7 @@ import { FormField } from '@/components/Form/FormFields';
 import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
 import { ConfigEditModal, type ConfigEditValues } from './ConfigEditModal';
 import { WizardStep3Options } from './WizardStep3Options';
-import { getRuleCategory, groupNameSourceOptions, deduplicationMatchModeOptions } from '@/schemas/enums';
+import { groupNameSourceOptions, deduplicationMatchModeOptions } from '@/schemas/enums';
 import type { DomainRule } from '@/schemas/domainRule';
 import type { PresetCategory } from '@/utils/presetUtils';
 import type { GroupNameSourceValue } from '@/schemas/enums';

@@ -1,4 +1,4 @@
-import { flattenTree, INode } from 'react-accessible-treeview';
+import { flattenTree } from 'react-accessible-treeview';
 import { TabTreeData, TabNodeMetadata, TreeViewBuildResult } from '@/types/tabTree';
 
 /** Chrome tab group color → CSS hex color */

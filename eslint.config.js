@@ -58,8 +58,6 @@ const localPlugin = {
 const TODO_DISABLED_RULES = {
   // TODO(eslint): 231 occurrences à typer correctement
   '@typescript-eslint/no-explicit-any': 'off',
-  // TODO(eslint): 98 occurrences (imports, catch, destructuring)
-  '@typescript-eslint/no-unused-vars': 'off',
 };
 
 const TODO_DISABLED_PLAYWRIGHT = {
@@ -120,6 +118,11 @@ export default tseslint.config(
     rules: {
       ...TODO_DISABLED_RULES,
       ...TODO_DISABLED_HOOKS,
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+      }],
     },
   },
 

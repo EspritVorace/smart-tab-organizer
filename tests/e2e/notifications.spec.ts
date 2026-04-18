@@ -206,7 +206,7 @@ test.describe('Notifications', () => {
         }
       });
 
-      const tab1 = await helpers.createTab('https://example.com/page-dedup');
+      const _tab1 = await helpers.createTab('https://example.com/page-dedup');
       await helpers.waitForDeduplication();
       const initialCount = await helpers.getTabCount();
 
@@ -243,7 +243,7 @@ test.describe('Notifications', () => {
         }
       });
 
-      const tab1 = await helpers.createTab('https://example.com/page-nodedup');
+      const _tab1 = await helpers.createTab('https://example.com/page-nodedup');
       await helpers.waitForDeduplication();
 
       await helpers.createTab('https://example.com/page-nodedup');
