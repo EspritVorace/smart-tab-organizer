@@ -55,12 +55,7 @@ const localPlugin = {
 
 
 
-const TODO_DISABLED_VITEST = {
-  // API inexistante dans vitest 2.x
-  'vitest/prefer-called-exactly-once-with': 'off',
-  // TODO(eslint): 2 occurrences
-  'vitest/no-conditional-expect': 'off',
-};
+const TODO_DISABLED_VITEST = {};
 
 export default tseslint.config(
   {

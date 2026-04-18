@@ -37,11 +37,9 @@ describe('createSessionSchemaWithUniqueness', () => {
     const schema = createSessionSchemaWithUniqueness(existing);
     const result = schema.safeParse(makeSession('new-id', 'Work'));
     expect(result.success).toBe(false);
-    if (!result.success) {
-      const nameError = result.error.issues.find(i => i.path.includes('name'));
-      expect(nameError).toBeDefined();
-      expect(nameError?.message).toBe('errorSessionNameUnique');
-    }
+    const nameError = result.error?.issues.find(i => i.path.includes('name'));
+    expect(nameError).toBeDefined();
+    expect(nameError?.message).toBe('errorSessionNameUnique');
   });
 
   it('rejette un nom identique en casse différente (case-insensitive)', () => {
