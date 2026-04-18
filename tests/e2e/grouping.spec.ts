@@ -750,10 +750,8 @@ test.describe('Tab Grouping', () => {
       await sw.evaluate(async ({ url, openerTabId }: { url: string; openerTabId: number }) => {
         return chrome.tabs.create({ url, openerTabId, active: true });
       }, { url: childUrl, openerTabId: openerTabId! });
-      const childPage = await childPagePromise.catch(() => null);
-      if (childPage) {
-        await childPage.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
-      }
+      const childPage = await childPagePromise;
+      await childPage.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
 
       // Wait for the full event chain to complete
       const groups = await helpers.waitForTabGrouped('LocalTest', 12000);
@@ -850,10 +848,8 @@ test.describe('Tab Grouping', () => {
       await sw.evaluate(async ({ url, openerTabId }: { url: string; openerTabId: number }) => {
         return chrome.tabs.create({ url, openerTabId, active: true });
       }, { url: childUrl, openerTabId: openerTabId! });
-      const childPage = await childPagePromise.catch(() => null);
-      if (childPage) {
-        await childPage.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
-      }
+      const childPage = await childPagePromise;
+      await childPage.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
 
       // Full event chain: onTabCreated → findMiddleClickOpener (contextmenu entry) →
       // handleGroupingWithRetry → onUpdated(complete) → processGroupingForNewTab

@@ -355,18 +355,12 @@ test.describe('Notifications', () => {
       // The tab should have been reopened (count increased by at least 1)
       expect(countAfterUndo).toBeGreaterThan(countBeforeUndo);
 
-      // The URL should be in the skip-deduplication list for 10 seconds
-      const isProtected = await sw.evaluate(async (url: string) => {
-        const shouldSkip = (globalThis as any).shouldSkipDeduplication;
-        if (typeof shouldSkip === 'function') {
-          return shouldSkip(url);
-        }
-        return null; // Function not exposed, skip the check
+      // The URL should be in the skip-deduplication list for 10 seconds.
+      // Use undoSw (same SW instance that ran the undo and owns the in-memory skip list).
+      const isProtected = await undoSw.evaluate((url: string) => {
+        return globalThis.shouldSkipDeduplication(url);
       }, testUrl);
-
-      if (isProtected !== null) {
-        expect(isProtected).toBe(true);
-      }
+      expect(isProtected).toBe(true);
     });
   });
 

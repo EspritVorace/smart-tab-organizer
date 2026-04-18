@@ -292,7 +292,9 @@ test.describe('[US-S01] Snapshot creation', () => {
     await goToSessionsSection(page, extensionId);
 
     await page.getByTestId('page-sessions-btn-snapshot').click();
-    await page.waitForTimeout(800);
+    await expect(
+      page.getByTestId('wizard-snapshot').getByRole('button', { name: 'Save Session' }),
+    ).toBeEnabled({ timeout: 10_000 });
 
     // All checkboxes in the tab tree should be checked (aria-checked="true")
     const unchecked = page.getByTestId('wizard-snapshot').locator('[aria-checked="false"]');
@@ -314,7 +316,9 @@ test.describe('[US-S01] Snapshot creation', () => {
     await goToSessionsSection(page, extensionId);
 
     await page.getByTestId('page-sessions-btn-snapshot').click();
-    await page.waitForTimeout(800);
+    await expect(
+      page.getByTestId('wizard-snapshot').getByRole('button', { name: 'Save Session' }),
+    ).toBeEnabled({ timeout: 10_000 });
 
     const dialog = page.getByTestId('wizard-snapshot');
     await expect(dialog.getByText(/chrome:\/\//)).toBeHidden();
@@ -333,7 +337,9 @@ test.describe('[US-S01] Snapshot creation', () => {
     await goToSessionsSection(page, extensionId);
 
     await page.getByTestId('page-sessions-btn-snapshot').click();
-    await page.waitForTimeout(800); // wait for tab capture to complete
+    await expect(
+      page.getByTestId('wizard-snapshot').getByRole('button', { name: 'Save Session' }),
+    ).toBeEnabled({ timeout: 10_000 }); // wait for tab capture to complete
 
     await expect(page.getByTestId('wizard-snapshot').getByRole('button', { name: 'Save Session' })).toBeEnabled();
     await extraTab.close();
@@ -352,7 +358,9 @@ test.describe('[US-S01] Snapshot creation', () => {
     await goToSessionsSection(page, extensionId);
 
     await page.getByTestId('page-sessions-btn-snapshot').click();
-    await page.waitForTimeout(800);
+    await expect(
+      page.getByTestId('wizard-snapshot').getByRole('button', { name: 'Save Session' }),
+    ).toBeEnabled({ timeout: 10_000 });
 
     await page.getByRole('button', { name: 'Save Session' }).click();
 
@@ -441,11 +449,12 @@ test.describe('[US-S04][US-S06] Restore — More actions menu', () => {
 
     const pagesBefore = extensionContext.pages().length;
 
+    const newPagePromise = extensionContext.waitForEvent('page', { timeout: 10_000 });
     await page.getByRole('button', { name: /restore options/i }).click();
     await page.getByTestId('session-restore-menu-new-window').click();
 
     // Session has 3 tabs — at least one new page should be created
-    await page.waitForTimeout(3000);
+    await newPagePromise;
     expect(extensionContext.pages().length).toBeGreaterThan(pagesBefore);
     await page.close();
   });
@@ -469,7 +478,6 @@ test.describe('[US-S04] Restore in current window', () => {
     await page.getByTestId('session-restore-menu-customize').click();
 
     const dialog = page.getByRole('dialog');
-    await page.waitForTimeout(300);
     // "In the current window" radio should be checked by default
     const currentRadio = dialog.getByTestId('wizard-restore-radio-current-window');
     await expect(currentRadio).toBeChecked();
