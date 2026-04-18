@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach, vi } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import { renderHook, act, waitFor, cleanup } from '@testing-library/react';
 import { fakeBrowser } from 'wxt/testing';
 import { useSyncedSettings } from '../../src/hooks/useSyncedSettings';

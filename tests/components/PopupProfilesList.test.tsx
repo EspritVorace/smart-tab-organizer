@@ -81,7 +81,7 @@ describe('PopupProfilesList', () => {
     });
 
     // PopupProfilesList returns null, so no pinned sessions section should be rendered
-    const pinnedSectionLabel = container.querySelector('[class*="Separator"]');
+    const _pinnedSectionLabel = container.querySelector('[class*="Separator"]');
     // The label "Pinned sessions" should not be visible
     expect(screen.queryByText('Pinned sessions')).not.toBeInTheDocument();
   });

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { Theme } from '@radix-ui/themes';
 import { TabTree } from '../../src/components/Core/TabTree/TabTree';
 import type { TabTreeData } from '../../src/types/tabTree';

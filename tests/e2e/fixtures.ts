@@ -183,7 +183,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
     // Clean up temp directory
     try {
       fs.rmSync(userDataDir, { recursive: true, force: true });
-    } catch (e) {
+    } catch (_e) {
       // Ignore cleanup errors
     }
   }, { scope: 'worker' }],
@@ -217,7 +217,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
   },
 
   // Helper functions for test operations
-  helpers: async ({ extensionContext, extensionId }, use) => {
+  helpers: async ({ extensionContext, _extensionId }, use) => {
     /**
      * Returns the extension service worker, retrying up to 5 s if it has been
      * terminated by the browser (idle termination between tests).
@@ -329,7 +329,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
         const page = await extensionContext.newPage();
         try {
           await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 10000 });
-        } catch (e) {
+        } catch (_e) {
           // Navigation might fail for some test URLs, but the tab is still created
           // which is what we need for testing the extension
         }
@@ -441,7 +441,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
           ]);
           try {
             await newPage.waitForLoadState('domcontentloaded', { timeout: 10000 });
-          } catch (e) {
+          } catch (_e) {
             // Ignore timeout
           }
           return newPage;

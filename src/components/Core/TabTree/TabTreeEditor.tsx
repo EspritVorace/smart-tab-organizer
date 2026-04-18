@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   Flex,
-  Text,
   Box,
   IconButton,
   Button,

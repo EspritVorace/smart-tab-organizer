@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Switch, Text, HoverCard, Flex, Badge, Card, Checkbox, IconButton, DropdownMenu, Box } from '@radix-ui/themes';
+import { Switch, Text, HoverCard, Flex, Badge, Card, Checkbox, IconButton, DropdownMenu, Box } from '@radix-ui/themes';
 import { Pencil, Trash2, MoreHorizontal, GripVertical } from 'lucide-react';
 import { useSortable } from '@dnd-kit/react/sortable';
 import { RuleDetailPopover } from './RuleDetailPopover';

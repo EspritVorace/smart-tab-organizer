@@ -67,6 +67,7 @@ export function isUrlMatch(
                 return false;
         }
     } catch (urlParseError) {
+        logger.debug('[DEDUP] URL parse error:', urlParseError);
         return false;
     }
 }
@@ -150,7 +151,7 @@ export async function focusAndReloadTab(duplicateTab: Browser.tabs.Tab): Promise
         try {
             await browser.tabs.reload(duplicateTab.id);
         } catch (e) {
-            // Échec silencieux si reload impossible
+            logger.debug('[DEDUP] Tab reload failed:', e);
         }
     } catch (e) {
         logger.warn("Could not focus duplicate tab:", e);

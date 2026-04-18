@@ -8,7 +8,7 @@
  * - US-PO009: Existing auto-grouping behaviour unaffected
  */
 
-import { test, expect, type ExtensionFixtures } from './fixtures';
+import { test, expect } from './fixtures';
 import { goToPopup } from './helpers/navigation';
 import type { BrowserContext, Page } from '@playwright/test';
 
@@ -554,7 +554,7 @@ test.describe('[US-PO009] Automatic grouping unaffected by organize rules', () =
   });
 
   test('auto-grouping still creates a group with a single new tab [US-PO009]', async ({
-    extensionContext,
+    _extensionContext,
     helpers,
   }) => {
     await helpers.addDomainRule({

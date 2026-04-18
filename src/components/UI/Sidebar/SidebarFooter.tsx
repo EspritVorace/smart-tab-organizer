@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Flex, Separator } from '@radix-ui/themes';
+import { Box, Separator } from '@radix-ui/themes';
 
 interface SidebarFooterProps {
   isCollapsed?: boolean;
