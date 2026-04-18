@@ -25,8 +25,8 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
       <Popover.Trigger>
         <button
           type="button"
-          aria-label={selectedCategory ? getMessage(selectedCategory.labelKey as any) : getMessage('categoryNone')}
-          title={selectedCategory ? getMessage(selectedCategory.labelKey as any) : getMessage('categoryNone')}
+          aria-label={selectedCategory ? getMessage(selectedCategory.labelKey) : getMessage('categoryNone')}
+          title={selectedCategory ? getMessage(selectedCategory.labelKey) : getMessage('categoryNone')}
           className={`${styles.trigger} ${!selectedCategory ? styles.triggerNone : ''}`}
           style={selectedCategory ? { backgroundColor: chromeGroupColors[selectedCategory.color] } : undefined}
         >
@@ -53,12 +53,12 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
 
           {/* Category options */}
           {RULE_CATEGORIES.map((category) => (
-            <Tooltip key={category.id} content={getMessage(category.labelKey as any)}>
+            <Tooltip key={category.id} content={getMessage(category.labelKey)}>
               <button
                 type="button"
                 role="radio"
                 aria-checked={value === category.id}
-                aria-label={getMessage(category.labelKey as any)}
+                aria-label={getMessage(category.labelKey)}
                 className={`${styles.swatch} ${value === category.id ? styles.swatchActive : ''}`}
                 style={{ backgroundColor: chromeGroupColors[category.color] }}
                 onClick={() => handleSelect(category.id as RuleCategoryId)}

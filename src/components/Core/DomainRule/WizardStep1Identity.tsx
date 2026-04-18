@@ -4,6 +4,7 @@ import { getMessage } from '@/utils/i18n';
 import { FormField } from '@/components/Form/FormFields';
 import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
 import type { DomainRule } from '@/schemas/domainRule';
+import type { RuleCategoryId } from '@/schemas/enums';
 
 interface WizardStep1IdentityProps {
   control: Control<DomainRule>;
@@ -36,7 +37,7 @@ export function WizardStep1Identity({ control, errors }: WizardStep1IdentityProp
                     onBlur={labelField.onBlur}
                     data-testid="wizard-rule-field-label"
                     placeholder={getMessage('labelPlaceholder')}
-                    categoryId={catField.value as any}
+                    categoryId={catField.value as RuleCategoryId | null | undefined}
                     onCategoryChange={catField.onChange}
                   />
                 )}

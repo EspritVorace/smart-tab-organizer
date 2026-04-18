@@ -46,7 +46,7 @@ export function RuleDetailPopover({ rule, searchTerm }: RuleDetailPopoverProps) 
               }}>
                 {cat.emoji}
               </div>
-              <Text size="2">{getMessage(cat.labelKey as any)}</Text>
+              <Text size="2">{getMessage(cat.labelKey)}</Text>
             </>
           ) : (
             <Text size="2" color="gray">{getMessage('categoryNone')}</Text>

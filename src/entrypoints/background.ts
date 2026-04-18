@@ -17,10 +17,17 @@ export default defineBackground(() => {
     initNotificationListeners();
 
     // Expose functions for E2E testing
-    (globalThis as any).middleClickedTabs = middleClickedTabs;
-    (globalThis as any).processGroupingForNewTab = processGroupingForNewTab;
-    (globalThis as any).handleOrganizeAllTabs = handleOrganizeAllTabs;
-    (globalThis as any).executeNotificationUndoById = executeNotificationUndoById;
+    interface E2EGlobals {
+        middleClickedTabs: typeof middleClickedTabs;
+        processGroupingForNewTab: typeof processGroupingForNewTab;
+        handleOrganizeAllTabs: typeof handleOrganizeAllTabs;
+        executeNotificationUndoById: typeof executeNotificationUndoById;
+    }
+    const e2e = globalThis as unknown as E2EGlobals;
+    e2e.middleClickedTabs = middleClickedTabs;
+    e2e.processGroupingForNewTab = processGroupingForNewTab;
+    e2e.handleOrganizeAllTabs = handleOrganizeAllTabs;
+    e2e.executeNotificationUndoById = executeNotificationUndoById;
 
     logger.debug("SmartTab Organizer Service Worker: Initialized with modular architecture.");
 });

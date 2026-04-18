@@ -53,12 +53,6 @@ const localPlugin = {
   rules: { 'prefer-alias-imports': preferAliasImportsRule },
 };
 
-// TODO: règles désactivées temporairement (violations existantes non auto-fixables).
-// À réactiver progressivement après correction manuelle.
-const TODO_DISABLED_RULES = {
-  // TODO(eslint): 231 occurrences à typer correctement
-  '@typescript-eslint/no-explicit-any': 'off',
-};
 
 const TODO_DISABLED_PLAYWRIGHT = {
   // TODO(eslint): 88 occurrences, remplacer par waitFor/expect().toPass()
@@ -116,7 +110,6 @@ export default tseslint.config(
 
   {
     rules: {
-      ...TODO_DISABLED_RULES,
       ...TODO_DISABLED_HOOKS,
       '@typescript-eslint/no-unused-vars': ['error', {
         argsIgnorePattern: '^_',

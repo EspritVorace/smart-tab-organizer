@@ -144,7 +144,7 @@ export function setupTabUpdatedHandler(): void {
         // resolves Google's redirect URL so the tab never navigates through it).
         const navUrl = changeInfo.url || tab.url;
         if (navUrl && !navUrl.startsWith('about:') && !navUrl.startsWith('chrome:') && !pendingGroupings.has(tabId)) {
-            const middleClickedTabs = (globalThis as any).middleClickedTabs as Map<string, number> | undefined;
+            const middleClickedTabs = (globalThis as unknown as { middleClickedTabs?: Map<string, number> }).middleClickedTabs;
 
             let matchedOpenerTabId: number | undefined;
 

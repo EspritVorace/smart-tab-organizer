@@ -155,8 +155,8 @@ async function restoreInNewWindow(
     }
     if (tabIds.length > 0) {
       try {
-        const groupId = await (browser.tabs as any).group({ tabIds, createProperties: { windowId } });
-        await (browser.tabGroups as any).update(groupId, { title: group.title, color: group.color, collapsed: group.collapsed ?? false });
+        const groupId = await browser.tabs.group({ tabIds: tabIds as [number, ...number[]], createProperties: { windowId } }) as unknown as number;
+        await browser.tabGroups.update(groupId, { title: group.title, color: group.color, collapsed: group.collapsed ?? false });
         result.groupsCreated++;
       } catch (e) {
         logger.debug('[TAB_RESTORE] Failed to create group:', e);
@@ -263,7 +263,7 @@ async function restoreInCurrentWindow(
       try {
         const existingGroupTabs = await browser.tabs.query({
           groupId: existingConflict.existingGroupId,
-        } as any);
+        } as unknown as Parameters<typeof browser.tabs.query>[0]);
         const existingGroupUrls = new Set(
           existingGroupTabs.map(t => t.url).filter(Boolean) as string[],
         );
@@ -297,8 +297,8 @@ async function restoreInCurrentWindow(
 
     if (groupAction === 'merge' && existingConflict) {
       try {
-        await (browser.tabs as any).group({
-          tabIds: newTabIds,
+        await browser.tabs.group({
+          tabIds: newTabIds as [number, ...number[]],
           groupId: existingConflict.existingGroupId,
         });
         result.groupsMerged++;
@@ -309,8 +309,8 @@ async function restoreInCurrentWindow(
     } else {
       // Create new group
       try {
-        const groupId = await (browser.tabs as any).group({ tabIds: newTabIds });
-        await (browser.tabGroups as any).update(groupId, {
+        const groupId = await browser.tabs.group({ tabIds: newTabIds as [number, ...number[]] }) as unknown as number;
+        await browser.tabGroups.update(groupId, {
           title: group.title,
           color: group.color,
           collapsed: group.collapsed ?? false,

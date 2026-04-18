@@ -104,7 +104,7 @@ export function DomainRuleCard({
           <HoverCard.Root>
             <HoverCard.Trigger>
               <Badge
-                color={(category ? getRadixColor(category.color) : 'gray') as any}
+                color={category ? getRadixColor(category.color) : 'gray'}
                 variant="solid"
                 size="2"
                 style={{ cursor: 'pointer', flexShrink: 0 }}

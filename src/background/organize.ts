@@ -12,6 +12,7 @@ import { getStatisticsData, updateStatisticsData } from '@/utils/statisticsUtils
 import { getMessage } from '@/utils/i18n.js';
 import { logger } from '@/utils/logger.js';
 import type { DomainRuleSetting, SyncSettings } from '@/types/syncSettings.js';
+import type { ChromeTabGroupsExtended, ChromeNotificationsAPI } from '@/types/chromeApi.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -198,7 +199,7 @@ async function applyOrganizePlan(
     if (plan.length === 0) return { tabsGrouped: 0, groupCount: 0 };
 
     // Fetch current groups to detect existing ones by title
-    const existingGroups = await (browser.tabGroups as any).query({ windowId }) as Array<{ id: number; title: string }>;
+    const existingGroups = await (browser.tabGroups as unknown as ChromeTabGroupsExtended).query({ windowId });
     const existingByTitle = new Map<string, number>(); // title → groupId
     for (const g of existingGroups) {
         if (g.title) existingByTitle.set(g.title, g.id);
@@ -267,7 +268,7 @@ async function applyOrganizePlan(
  * preserving their relative order, then collapses them all.
  */
 async function repositionAndCollapseGroups(windowId: number): Promise<void> {
-    const allGroups = await (browser.tabGroups as any).query({ windowId }) as Array<{ id: number }>;
+    const allGroups = await (browser.tabGroups as unknown as ChromeTabGroupsExtended).query({ windowId });
     if (allGroups.length === 0) return;
 
     // Find first-tab index for each group to establish current L→R order
@@ -284,12 +285,12 @@ async function repositionAndCollapseGroups(windowId: number): Promise<void> {
     // Example: groups [A@2, B@7, C@15] sorted → reversed [C, B, A]
     // Move C to 0 → [C,...], Move B to 0 → [B, C,...], Move A to 0 → [A, B, C,...]
     for (const { g } of [...grouped].reverse()) {
-        await (browser.tabGroups as any).move(g.id, { index: 0 }).catch(() => {});
+        await (browser.tabGroups as unknown as ChromeTabGroupsExtended).move(g.id, { index: 0 }).catch(() => {});
     }
 
     // Collapse all groups
     for (const { g } of grouped) {
-        await (browser.tabGroups as any).update(g.id, { collapsed: true }).catch(() => {});
+        await browser.tabGroups.update(g.id, { collapsed: true }).catch(() => {});
     }
 
     logger.debug(`[ORGANIZE] Repositioned and collapsed ${allGroups.length} group(s).`);
@@ -316,7 +317,7 @@ export async function handleOrganizeAllTabs(windowId: number): Promise<void> {
     const removedCount = await batchDeduplicateTabs(windowId, settings);
 
     if (removedCount > 0 && settings.notifyOnDeduplication) {
-        (browser.notifications as any).create({
+        (browser as unknown as { notifications: ChromeNotificationsAPI }).notifications.create({
             type: 'basic',
             iconUrl: browser.runtime.getURL('/icons/icon128.png'),
             title: getMessage('extensionName'),
@@ -335,7 +336,7 @@ export async function handleOrganizeAllTabs(windowId: number): Promise<void> {
 
     // ── 5. Grouping notification ────────────────────────────────────────────
     if (tabsGrouped > 0 && settings.notifyOnGrouping) {
-        (browser.notifications as any).create({
+        (browser as unknown as { notifications: ChromeNotificationsAPI }).notifications.create({
             type: 'basic',
             iconUrl: browser.runtime.getURL('/icons/icon128.png'),
             title: getMessage('extensionName'),

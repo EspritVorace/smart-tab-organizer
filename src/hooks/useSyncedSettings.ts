@@ -80,7 +80,7 @@ async function loadSyncSettingsFromStorage(): Promise<SyncSettings> {
  */
 function watchSyncSettings(onChanged: (update: Partial<SyncSettings>) => void): () => void {
   const unwatchers = (
-    Object.entries(syncSettingsItemMap) as [keyof SyncSettings, { watch: (cb: (v: any) => void) => () => void }][]
+    Object.entries(syncSettingsItemMap) as [keyof SyncSettings, { watch: (cb: (v: unknown) => void) => () => void }][]
   ).map(([field, item]) => item.watch((v) => onChanged({ [field]: v })));
   return () => unwatchers.forEach(u => u());
 }
@@ -89,7 +89,7 @@ function watchSyncSettings(onChanged: (update: Partial<SyncSettings>) => void): 
  * Persist only the fields present in `updates` to their respective storage items.
  */
 async function saveSettingsToStorage(updates: Partial<SyncSettings>): Promise<void> {
-  const items = (Object.entries(updates) as [keyof typeof syncSettingsItemMap, any][])
+  const items = (Object.entries(updates) as [keyof typeof syncSettingsItemMap, SyncSettings[keyof SyncSettings]][])
     .filter(([key]) => key in syncSettingsItemMap)
     .map(([key, value]) => ({ item: syncSettingsItemMap[key], value }));
   if (items.length > 0) await storage.setItems(items);

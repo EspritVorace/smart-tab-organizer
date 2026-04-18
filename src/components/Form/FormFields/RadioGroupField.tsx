@@ -1,5 +1,5 @@
 import { Flex, Text, RadioGroup } from '@radix-ui/themes';
-import { Controller } from 'react-hook-form';
+import { Controller, type Control, type FieldValues } from 'react-hook-form';
 import { FieldLabel } from './FieldLabel';
 import { getMessage } from '@/utils/i18n';
 
@@ -12,7 +12,7 @@ interface RadioGroupFieldProps {
   label: string;
   name: string;
   options: readonly RadioOption[];
-  control: any;
+  control: Control<FieldValues>;
   required?: boolean;
   onChange?: (value: string) => void;
 }

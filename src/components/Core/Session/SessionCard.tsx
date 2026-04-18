@@ -305,8 +305,8 @@ export function SessionCard({
                   <Pencil size={14} aria-hidden="true" />
                 </IconButton>
                 {category && (
-                  <Badge color={getRadixColor(category.color) as any} size="1" style={{ flexShrink: 0 }}>
-                    {category.emoji} {getMessage(category.labelKey as any)}
+                  <Badge color={getRadixColor(category.color)} size="1" style={{ flexShrink: 0 }}>
+                    {category.emoji} {getMessage(category.labelKey)}
                   </Badge>
                 )}
               </>

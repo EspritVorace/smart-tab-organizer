@@ -14,6 +14,7 @@ import { captureCurrentTabs } from '@/utils/tabCapture';
 import { createSessionFromSelection, formatSessionDate } from '@/utils/sessionUtils';
 import type { Session, SavedTab, SavedTabGroup } from '@/types/session';
 import type { TabTreeData } from '@/types/tabTree';
+import type { RuleCategoryId } from '@/schemas/enums';
 
 interface SnapshotWizardProps {
   open: boolean;
@@ -157,7 +158,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
                 placeholder={getMessage('sessionNamePlaceholder')}
                 maxLength={100}
                 aria-label={getMessage('sessionNameLabel')}
-                categoryId={categoryId as any}
+                categoryId={categoryId as RuleCategoryId | null}
                 onCategoryChange={setCategoryId}
               />
             </Flex>

@@ -172,14 +172,14 @@ export function useSyncedState<T extends object>({
   ) => {
     setChangeCallbacks(prev => ({
       ...prev,
-      [field]: new Set([...(prev[field] ?? []), callback as any]),
+      [field]: new Set([...(prev[field] ?? []), callback as (value: T[K]) => void]),
     }));
     return () => {
       setChangeCallbacks(prev => {
         const next = { ...prev };
         if (next[field]) {
-          (next[field] as Set<any>).delete(callback);
-          if ((next[field] as Set<any>).size === 0) delete next[field];
+          (next[field] as Set<(value: T[keyof T]) => void>).delete(callback);
+          if ((next[field] as Set<(value: T[keyof T]) => void>).size === 0) delete next[field];
         }
         return next;
       });
