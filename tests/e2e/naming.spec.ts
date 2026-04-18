@@ -37,11 +37,6 @@ test.describe('Group Naming Modes', () => {
     await new Promise<void>(resolve => localServer.listen(FAKE_PORT, resolve));
   });
 
-  test.afterAll(async () => {
-    localServer.closeAllConnections();
-    await new Promise<void>(resolve => localServer.close(() => resolve()));
-  });
-
   test.beforeEach(async ({ helpers }) => {
     await helpers.closeAllTestTabs();
     await helpers.clearAllTabGroups();
@@ -49,6 +44,11 @@ test.describe('Group Naming Modes', () => {
     await helpers.setGlobalGroupingEnabled(true);
     await helpers.setGlobalDeduplicationEnabled(false);
     await helpers.resetStatistics();
+  });
+
+  test.afterAll(async () => {
+    localServer.closeAllConnections();
+    await new Promise<void>(resolve => localServer.close(() => resolve()));
   });
 
   // ── US-G011: manual mode ──────────────────────────────────────────────────
