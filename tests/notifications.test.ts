@@ -123,8 +123,7 @@ describe('executeNotificationUndoById', () => {
     const result = await executeNotificationUndoById(id);
 
     expect(result).toBe(true);
-    expect(mockTabsUngroup).toHaveBeenCalledOnce();
-    expect(mockTabsUngroup).toHaveBeenCalledWith([10, 11, 12]);
+    expect(mockTabsUngroup).toHaveBeenCalledExactlyOnceWith([10, 11, 12]);
 
     const all = (await fakeBrowser.notifications.getAll()) as Record<string, any>;
     expect(all[id]).toBeUndefined();
