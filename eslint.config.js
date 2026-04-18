@@ -54,12 +54,6 @@ const localPlugin = {
 };
 
 
-const TODO_DISABLED_PLAYWRIGHT = {
-  // TODO(eslint): 5 occurrences
-  'playwright/no-conditional-expect': 'off',
-  // TODO(eslint): 2 occurrences, réordonner les hooks
-  'playwright/prefer-hooks-in-order': 'off',
-};
 
 const TODO_DISABLED_VITEST = {
   // API inexistante dans vitest 2.x
@@ -134,9 +128,5 @@ export default tseslint.config(
   {
     files: ['tests/e2e/**/*.spec.ts', 'tests/e2e/helpers/**/*.ts'],
     ...playwright.configs['flat/recommended'],
-  },
-  {
-    files: ['tests/e2e/**/*.spec.ts', 'tests/e2e/helpers/**/*.ts'],
-    rules: TODO_DISABLED_PLAYWRIGHT,
   },
 );

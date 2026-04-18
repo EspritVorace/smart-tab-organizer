@@ -71,11 +71,6 @@ test.describe('Tab Grouping', () => {
     await new Promise<void>(resolve => localServer.listen(FAKE_PORT, resolve));
   });
 
-  test.afterAll(async () => {
-    localServer.closeAllConnections();
-    await new Promise<void>(resolve => localServer.close(() => resolve()));
-  });
-
   test.beforeEach(async ({ helpers }) => {
     // Clean up any tabs/groups left by the previous test before configuring state
     await helpers.closeAllTestTabs();
@@ -84,6 +79,11 @@ test.describe('Tab Grouping', () => {
     await helpers.setGlobalGroupingEnabled(true);
     await helpers.setGlobalDeduplicationEnabled(false);
     await helpers.resetStatistics();
+  });
+
+  test.afterAll(async () => {
+    localServer.closeAllConnections();
+    await new Promise<void>(resolve => localServer.close(() => resolve()));
   });
 
   // ── 1. Global Settings ────────────────────────────────────────────────────
