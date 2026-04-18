@@ -281,7 +281,7 @@ export function SessionsPage({
   // future mount doesn't re-open the wizard unexpectedly.
   useEffect(() => {
     return () => onSnapshotWizardOpenChange?.(false);
-  }, []);
+  }, [onSnapshotWizardOpenChange]);
 
   const [restoreSession, setRestoreSession] = useState<Session | null>(null);
   const [editTarget, setEditTarget] = useState<Session | null>(null);

@@ -125,7 +125,7 @@ export function useSyncedState<T extends object>({
     loadRef.current()
       .then(v => { setValue(v); setIsLoaded(true); })
       .catch(error => logger.error('[useSyncedState] load error:', error));
-  }, []);
+  }, [setValue]);
 
   useEffect(() => {
     return setupWatchRef.current((update) => {

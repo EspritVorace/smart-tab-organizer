@@ -156,7 +156,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
     } finally {
       setIsRestoring(false);
     }
-  }, [session, getSelectedData, target]);
+  }, [session, getSelectedData, target, onOpenChange]);
 
   // Step 0 button: analyze conflicts (if current window), then restore or show conflict step
   const handleRestoreOrNext = useCallback(async () => {

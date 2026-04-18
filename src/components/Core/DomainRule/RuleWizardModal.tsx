@@ -123,6 +123,7 @@ export function RuleWizardModal({
 
   const groupNameSource = watch('groupNameSource');
   const deduplicationEnabled = watch('deduplicationEnabled');
+  const watchedPresetId = watch('presetId');
 
   // Load presets when modal opens
   useEffect(() => {
@@ -136,12 +137,11 @@ export function RuleWizardModal({
 
   // Update preset name when presetId changes
   useEffect(() => {
-    const presetId = getValues('presetId');
-    if (!presetId) { setPresetName(null); return; }
-    getPresetById(presetId)
+    if (!watchedPresetId) { setPresetName(null); return; }
+    getPresetById(watchedPresetId)
       .then((p) => setPresetName(p?.name ?? null))
       .catch(() => setPresetName(null));
-  }, [watch('presetId')]);
+  }, [watchedPresetId]);
 
   // Reset form and wizard state when modal opens/rule changes
   useEffect(() => {

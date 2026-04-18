@@ -85,7 +85,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
       .catch(() => {
         setIsCapturing(false);
       });
-  }, [open]);
+  }, [open, initialGroupId]);
 
   // Derive selected SavedTab UUIDs from selected numeric IDs
   const selectedSavedTabIds = useMemo(() => {
@@ -128,7 +128,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
     } finally {
       setIsSaving(false);
     }
-  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, categoryId, note, onSave, existingSessions]);
+  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, categoryId, note, onSave, onOpenChange, existingSessions]);
 
   return (
     <SessionsTheme>
