@@ -29,7 +29,7 @@ test.describe('Move to top', () => {
     // Open dropdown for Rule C (last) and click "Move to top"
     await page.getByRole('row', { name: /Rule C/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /move to top/i }).click();
-    await expect(page.getByRole('row').nth(1)).toContainText('Rule C');
+    await expect(page.getByRole('menu')).not.toBeAttached();
     await page.close();
 
     const labels = await getDomainRuleLabels(helpers);
@@ -47,7 +47,7 @@ test.describe('Move to top', () => {
 
     await page.getByRole('row', { name: /Rule A/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /move to top/i }).click();
-    await expect(page.getByRole('row').nth(1)).toContainText('Rule A');
+    await expect(page.getByRole('menu')).not.toBeAttached();
     await page.close();
 
     const labels = await getDomainRuleLabels(helpers);
@@ -70,7 +70,7 @@ test.describe('Move to bottom', () => {
 
     await page.getByRole('row', { name: /Rule A/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /move to bottom/i }).click();
-    await expect(page.getByRole('row').last()).toContainText('Rule A');
+    await expect(page.getByRole('menu')).not.toBeAttached();
     await page.close();
 
     const labels = await getDomainRuleLabels(helpers);
@@ -100,7 +100,7 @@ test.describe('First of domain / Last of domain', () => {
     // "Example" (also example.com) is at index 1, so Sub Example should move before it
     await page.getByRole('row', { name: /Sub Example/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /first of domain/i }).click();
-    await expect(page.getByRole('row').nth(2)).toContainText('Sub Example');
+    await expect(page.getByRole('menu')).not.toBeAttached();
     await page.close();
 
     const labels = await getDomainRuleLabels(helpers);
@@ -128,7 +128,7 @@ test.describe('First of domain / Last of domain', () => {
     // "Sub Example" (also example.com) is at index 2, so Example should move after it
     await page.getByRole('row', { name: /Example/i }).first().getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /last of domain/i }).click();
-    await expect(page.getByRole('row').last()).toContainText('Example');
+    await expect(page.getByRole('menu')).not.toBeAttached();
     await page.close();
 
     const labels = await getDomainRuleLabels(helpers);

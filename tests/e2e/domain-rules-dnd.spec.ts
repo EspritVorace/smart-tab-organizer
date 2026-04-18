@@ -46,7 +46,12 @@ test.describe('Drag-and-drop reordering', () => {
     await page.mouse.down();
     await page.mouse.move(dstX, dstY, { steps: 50 });
     await page.mouse.up();
-    await expect(page.getByRole('row').nth(1)).toContainText('Rule B');
+    await page.waitForFunction(() => {
+      const rows = [...document.querySelectorAll('[role="row"]')];
+      const iB = rows.findIndex(r => r.getAttribute('aria-label')?.includes('Rule B'));
+      const iA = rows.findIndex(r => r.getAttribute('aria-label')?.includes('Rule A'));
+      return iB > -1 && iA > -1 && iB < iA;
+    }, { timeout: 5000 });
     await page.close();
 
     const labels = await getDomainRuleLabels(helpers);

@@ -453,7 +453,7 @@ test.describe('Group Naming Modes', () => {
 
       expect(presets).not.toBeNull();
       // The presets file should have a top-level array or object with entries
-      const presetList = Array.isArray(presets) ? presets : Object.values(presets).flat();
+      const presetList = (Object.values(presets as object) as unknown[]).flat();
       expect((presetList as any[]).length).toBeGreaterThanOrEqual(1);
     });
 

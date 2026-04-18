@@ -55,8 +55,6 @@ const localPlugin = {
 
 
 const TODO_DISABLED_PLAYWRIGHT = {
-  // TODO(eslint): 11 occurrences, refactorer les tests conditionnels
-  'playwright/no-conditional-in-test': 'off',
   // TODO(eslint): 5 occurrences
   'playwright/no-conditional-expect': 'off',
   // TODO(eslint): 2 occurrences, réordonner les hooks

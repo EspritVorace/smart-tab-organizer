@@ -58,11 +58,12 @@ test.describe('[US-PIN-ORDER] Popup pinned sessions order', () => {
     const boxB = await pinnedB.boundingBox();
     const boxC = await pinnedC.boundingBox();
 
-    if (boxA && boxB && boxC) {
-      // Verify order by Y position (top = earlier, bottom = later)
-      expect(boxA.y).toBeLessThan(boxB.y); // A before B
-      expect(boxB.y).toBeLessThan(boxC.y); // B before C
-    }
+    expect(boxA).not.toBeNull();
+    expect(boxB).not.toBeNull();
+    expect(boxC).not.toBeNull();
+    // Verify order by Y position (top = earlier, bottom = later)
+    expect(boxA!.y).toBeLessThan(boxB!.y); // A before B
+    expect(boxB!.y).toBeLessThan(boxC!.y); // B before C
 
     await page.close();
   });
@@ -97,11 +98,12 @@ test.describe('[US-PIN-ORDER] Popup pinned sessions order', () => {
     const boxLast = await last.boundingBox();
     const boxFirst = await first.boundingBox();
 
-    if (boxMiddle && boxLast && boxFirst) {
-      // Order should be storage order (Middle, Last, First), not alphabetical
-      expect(boxMiddle.y).toBeLessThan(boxLast.y); // Middle before Last
-      expect(boxLast.y).toBeLessThan(boxFirst.y); // Last before First
-    }
+    expect(boxMiddle).not.toBeNull();
+    expect(boxLast).not.toBeNull();
+    expect(boxFirst).not.toBeNull();
+    // Order should be storage order (Middle, Last, First), not alphabetical
+    expect(boxMiddle!.y).toBeLessThan(boxLast!.y); // Middle before Last
+    expect(boxLast!.y).toBeLessThan(boxFirst!.y); // Last before First
 
     await page.close();
   });

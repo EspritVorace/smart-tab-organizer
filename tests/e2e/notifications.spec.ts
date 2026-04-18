@@ -364,9 +364,7 @@ test.describe('Notifications', () => {
         return null; // Function not exposed, skip the check
       }, testUrl);
 
-      if (isProtected !== null) {
-        expect(isProtected).toBe(true);
-      }
+      expect(isProtected).toBe(true);
     });
   });
 

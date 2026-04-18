@@ -206,11 +206,8 @@ test.describe('[US-E01] Tab tree', () => {
     const githubRow = dialog.getByRole('listitem').filter({ hasText: 'GitHub' });
     // Hover the right edge of the row (not just the title text) to verify the full row width is hoverable
     const box = await githubRow.boundingBox();
-    if (box) {
-      await page.mouse.move(box.x + box.width - 8, box.y + box.height / 2);
-    } else {
-      await githubRow.hover();
-    }
+    expect(box).not.toBeNull();
+    await page.mouse.move(box!.x + box!.width - 8, box!.y + box!.height / 2);
     await githubRow.getByRole('button', { name: 'Delete tab' }).click();
 
     // GitHub tab should be gone
