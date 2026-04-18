@@ -1,5 +1,6 @@
 import { browser } from 'wxt/browser';
 import type { SavedTab, SavedTabGroup } from '@/types/session';
+import type { ChromeTabGroupsExtended, ChromeTabGroup } from '@/types/chromeApi';
 
 /** A tab that already exists in the current window */
 export interface TabConflict {
@@ -61,11 +62,11 @@ export async function analyzeConflicts(
   }
 
   // Analyze group conflicts: match on title (case-insensitive) + color
-  let openGroups: Array<{ id: number; title: string; color: string }> = [];
+  let openGroups: ChromeTabGroup[] = [];
   try {
     const currentWindow = await browser.windows.getCurrent();
     if (currentWindow.id != null) {
-      openGroups = await (browser.tabGroups as any).query({ windowId: currentWindow.id });
+      openGroups = await (browser.tabGroups as unknown as ChromeTabGroupsExtended).query({ windowId: currentWindow.id });
     }
   } catch {
     // tabGroups API may not be available
@@ -75,7 +76,7 @@ export async function analyzeConflicts(
   const newGroups: SavedTabGroup[] = [];
   for (const group of selectedGroups) {
     const match = openGroups.find(
-      og => og.title.toLowerCase() === group.title.toLowerCase() && og.color === group.color,
+      og => og.title?.toLowerCase() === group.title.toLowerCase() && og.color === group.color,
     );
     if (match) {
       conflictingGroups.push({

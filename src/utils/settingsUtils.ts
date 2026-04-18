@@ -110,7 +110,7 @@ export function watchSyncSettingsField<K extends keyof SyncSettings>(
   field: K,
   callback: (value: SyncSettings[K]) => void,
 ): () => void {
-  return (syncSettingsItemMap[field] as any).watch(
+  return (syncSettingsItemMap[field] as unknown as { watch: (cb: (v: SyncSettings[K]) => void) => () => void }).watch(
     (newValue: SyncSettings[K]) => callback(newValue),
   );
 }

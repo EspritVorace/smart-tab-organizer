@@ -1,4 +1,5 @@
 import React from 'react';
+import type { LucideIcon } from 'lucide-react';
 import { Box, Flex } from '@radix-ui/themes';
 import { SidebarHeader } from './SidebarHeader';
 import { SidebarToolbar } from './SidebarToolbar';
@@ -9,7 +10,7 @@ import { SidebarFooter } from './SidebarFooter';
 export interface SidebarItem {
   id: string;
   label: string;
-  icon: React.ComponentType<{ size?: number | string }>;
+  icon: LucideIcon;
   href?: string;
   onClick?: () => void;
   badge?: string | number;

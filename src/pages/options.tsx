@@ -54,11 +54,11 @@ function OptionsContent() {
     }, [setCurrentTab]);
 
     const sidebarItems: SidebarItem[] = [
-        { id: 'rules', label: getMessage('domainRulesTab'), icon: Shield as any, accentColor: FEATURE_BASE_COLORS.DOMAIN_RULES },
-        { id: 'sessions', label: getMessage('sessionsTab'), icon: Archive as any, accentColor: FEATURE_BASE_COLORS.SESSIONS },
-        { id: 'importexport', label: getMessage('importExportTab'), icon: FileText as any, accentColor: FEATURE_BASE_COLORS.IMPORT },
-        { id: 'stats', label: getMessage('statisticsTab'), icon: BarChart3 as any, accentColor: FEATURE_BASE_COLORS.STATISTICS },
-        { id: 'settings', label: getMessage('settingsTab'), icon: Settings as any, accentColor: FEATURE_BASE_COLORS.SETTINGS },
+        { id: 'rules', label: getMessage('domainRulesTab'), icon: Shield, accentColor: FEATURE_BASE_COLORS.DOMAIN_RULES },
+        { id: 'sessions', label: getMessage('sessionsTab'), icon: Archive, accentColor: FEATURE_BASE_COLORS.SESSIONS },
+        { id: 'importexport', label: getMessage('importExportTab'), icon: FileText, accentColor: FEATURE_BASE_COLORS.IMPORT },
+        { id: 'stats', label: getMessage('statisticsTab'), icon: BarChart3, accentColor: FEATURE_BASE_COLORS.STATISTICS },
+        { id: 'settings', label: getMessage('settingsTab'), icon: Settings, accentColor: FEATURE_BASE_COLORS.SETTINGS },
     ];
 
     if (!settings) {

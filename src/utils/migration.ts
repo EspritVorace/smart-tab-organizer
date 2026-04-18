@@ -4,17 +4,17 @@ import { logger } from './logger.js';
 import { setStatisticsData } from './statisticsUtils.js';
 import { defaultSyncSettings } from '@/types/syncSettings.js';
 import { defaultStatistics } from '@/types/statistics.js';
-import type { SyncSettings } from '@/types/syncSettings.js';
+import type { SyncSettings, DomainRuleSetting } from '@/types/syncSettings.js';
 
 const defaultSettingsPath = '/data/default_settings.json' as const;
 let cachedDefaultSettings: SyncSettings | null = null;
 
-function isObject(item: any): item is Record<string, any> {
-  return (item && typeof item === 'object' && !Array.isArray(item));
+function isObject(item: unknown): item is Record<string, unknown> {
+  return typeof item === 'object' && item !== null && !Array.isArray(item);
 }
 
-function mergeDeep(target: any, source: any): any {
-  const output = { ...target };
+function mergeDeep(target: unknown, source: unknown): unknown {
+  const output: Record<string, unknown> = { ...(target as Record<string, unknown>) };
   if (isObject(target) && isObject(source)) {
     Object.keys(source).forEach(key => {
       if (isObject(source[key])) {
@@ -55,17 +55,18 @@ export async function initializeDefaults(): Promise<void> {
   } else {
     logger.debug("Merging existing with JSON defaults...");
     const currentSettings = await getSyncSettings();
-    const merged = mergeDeep(defaults, currentSettings);
+    const merged = mergeDeep(defaults, currentSettings) as SyncSettings;
 
     // Migrate missing fields on existing rules (never inject new default rules)
     if (merged.domainRules && Array.isArray(merged.domainRules)) {
-      merged.domainRules.forEach((rule: any) => {
+      merged.domainRules.forEach((rule) => {
         if (typeof rule.label === 'undefined') {
           const defaultRule = defaults.domainRules.find(dr => dr.id === rule.id);
           rule.label = defaultRule ? defaultRule.label : rule.domainFilter || "Untitled Rule";
         }
-        if (typeof rule.groupId !== 'undefined') {
-          delete rule.groupId;
+        const ruleRecord = rule as DomainRuleSetting & Record<string, unknown>;
+        if (typeof ruleRecord.groupId !== 'undefined') {
+          delete ruleRecord.groupId;
         }
         if (typeof rule.color === 'undefined') {
           rule.color = "grey";
