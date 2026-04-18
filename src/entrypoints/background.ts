@@ -6,6 +6,7 @@ import { initNotificationListeners, executeNotificationUndoById } from '@/utils/
 import { middleClickedTabs } from '@/background/messaging.js';
 import { processGroupingForNewTab } from '@/background/grouping.js';
 import { handleOrganizeAllTabs } from '@/background/organize.js';
+
 export default defineBackground(() => {
     // Initialize all event handlers
     setupAllEventHandlers();
@@ -17,17 +18,10 @@ export default defineBackground(() => {
     initNotificationListeners();
 
     // Expose functions for E2E testing
-    interface E2EGlobals {
-        middleClickedTabs: typeof middleClickedTabs;
-        processGroupingForNewTab: typeof processGroupingForNewTab;
-        handleOrganizeAllTabs: typeof handleOrganizeAllTabs;
-        executeNotificationUndoById: typeof executeNotificationUndoById;
-    }
-    const e2e = globalThis as unknown as E2EGlobals;
-    e2e.middleClickedTabs = middleClickedTabs;
-    e2e.processGroupingForNewTab = processGroupingForNewTab;
-    e2e.handleOrganizeAllTabs = handleOrganizeAllTabs;
-    e2e.executeNotificationUndoById = executeNotificationUndoById;
+    globalThis.middleClickedTabs = middleClickedTabs;
+    globalThis.processGroupingForNewTab = processGroupingForNewTab;
+    globalThis.handleOrganizeAllTabs = handleOrganizeAllTabs;
+    globalThis.executeNotificationUndoById = executeNotificationUndoById;
 
     logger.debug("SmartTab Organizer Service Worker: Initialized with modular architecture.");
 });
