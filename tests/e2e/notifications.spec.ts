@@ -355,16 +355,17 @@ test.describe('Notifications', () => {
       // The tab should have been reopened (count increased by at least 1)
       expect(countAfterUndo).toBeGreaterThan(countBeforeUndo);
 
-      // The URL should be in the skip-deduplication list for 10 seconds
-      const isProtected = await sw.evaluate(async (url: string) => {
-        const shouldSkip = (globalThis as any).shouldSkipDeduplication;
-        if (typeof shouldSkip === 'function') {
-          return shouldSkip(url);
-        }
-        return null; // Function not exposed, skip the check
-      }, testUrl);
-
-      expect(isProtected).toBe(true);
+      // The URL should be in the skip-deduplication list for 10 seconds.
+      // Use poll + fresh SW reference to handle SW idle-termination between undo and check.
+      await expect.poll(async () => {
+        const currentSw = extensionContext.serviceWorkers()[0];
+        if (!currentSw) return null;
+        return currentSw.evaluate((url: string) => {
+          const fn = (globalThis as any).shouldSkipDeduplication;
+          if (typeof fn !== 'function') return null;
+          return fn(url) as boolean;
+        }, testUrl);
+      }, { timeout: 5000 }).toBe(true);
     });
   });
 
