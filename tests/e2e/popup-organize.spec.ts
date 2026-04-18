@@ -554,9 +554,10 @@ test.describe('[US-PO009] Automatic grouping unaffected by organize rules', () =
   });
 
   test('auto-grouping still creates a group with a single new tab [US-PO009]', async ({
-    _extensionContext,
+    extensionContext,
     helpers,
   }) => {
+    void extensionContext; // injected to guarantee fixture setup order, not used directly
     await helpers.addDomainRule({
       label: 'AutoGroup',
       domainFilter: 'example.com',

@@ -217,7 +217,8 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
   },
 
   // Helper functions for test operations
-  helpers: async ({ extensionContext, _extensionId }, use) => {
+  helpers: async ({ extensionContext, extensionId }, use) => {
+    void extensionId; // injected to guarantee fixture setup order, not used directly
     /**
      * Returns the extension service worker, retrying up to 5 s if it has been
      * terminated by the browser (idle termination between tests).
