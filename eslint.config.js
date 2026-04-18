@@ -68,11 +68,6 @@ const TODO_DISABLED_VITEST = {
   'vitest/no-conditional-expect': 'off',
 };
 
-const TODO_DISABLED_HOOKS = {
-  // TODO(eslint): 4 warnings à vérifier
-  'react-hooks/exhaustive-deps': 'off',
-};
-
 export default tseslint.config(
   {
     ignores: [
@@ -101,12 +96,12 @@ export default tseslint.config(
       // Interdit les imports remontants (../...) dans src/ : utiliser l'alias @/.
       // Auto-fixable avec `pnpm lint:fix`.
       'local/prefer-alias-imports': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
     },
   },
 
   {
     rules: {
-      ...TODO_DISABLED_HOOKS,
       '@typescript-eslint/no-unused-vars': ['error', {
         argsIgnorePattern: '^_',
         caughtErrorsIgnorePattern: '^_',
