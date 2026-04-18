@@ -356,16 +356,11 @@ test.describe('Notifications', () => {
       expect(countAfterUndo).toBeGreaterThan(countBeforeUndo);
 
       // The URL should be in the skip-deduplication list for 10 seconds.
-      // Use poll + fresh SW reference to handle SW idle-termination between undo and check.
-      await expect.poll(async () => {
-        const currentSw = extensionContext.serviceWorkers()[0];
-        if (!currentSw) return null;
-        return currentSw.evaluate((url: string) => {
-          const fn = (globalThis as any).shouldSkipDeduplication;
-          if (typeof fn !== 'function') return null;
-          return fn(url) as boolean;
-        }, testUrl);
-      }, { timeout: 5000 }).toBe(true);
+      // Use undoSw (same SW instance that ran the undo and owns the in-memory skip list).
+      const isProtected = await undoSw.evaluate((url: string) => {
+        return globalThis.shouldSkipDeduplication(url);
+      }, testUrl);
+      expect(isProtected).toBe(true);
     });
   });
 

@@ -6,6 +6,7 @@ import { initNotificationListeners, executeNotificationUndoById } from '@/utils/
 import { middleClickedTabs } from '@/background/messaging.js';
 import { processGroupingForNewTab } from '@/background/grouping.js';
 import { handleOrganizeAllTabs } from '@/background/organize.js';
+import { shouldSkipDeduplication } from '@/utils/deduplicationSkip.js';
 
 export default defineBackground(() => {
     // Initialize all event handlers
@@ -22,6 +23,7 @@ export default defineBackground(() => {
     globalThis.processGroupingForNewTab = processGroupingForNewTab;
     globalThis.handleOrganizeAllTabs = handleOrganizeAllTabs;
     globalThis.executeNotificationUndoById = executeNotificationUndoById;
+    globalThis.shouldSkipDeduplication = shouldSkipDeduplication;
 
     logger.debug("SmartTab Organizer Service Worker: Initialized with modular architecture.");
 });
