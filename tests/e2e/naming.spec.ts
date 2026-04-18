@@ -468,7 +468,7 @@ test.describe('Group Naming Modes', () => {
 
       // Navigate to Import/Export section where regex preset UI lives
       await page.getByRole('button', { name: /import.*export/i }).click();
-      await page.waitForTimeout(300);
+      await page.getByTestId('page-import-export-card-import-rules').waitFor({ state: 'visible' });
 
       // The Import/Export page should show export and import buttons
       await expect(page.getByRole('button', { name: /export/i }).first()).toBeVisible();

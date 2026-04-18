@@ -29,8 +29,7 @@ export async function goToSessionsSection(page: Page, extensionId: string): Prom
     null,
     { timeout: 10_000 },
   );
-  // Allow React to finish committing any pending state updates.
-  await page.waitForTimeout(500);
+  await page.getByTestId('page-sessions-btn-snapshot').waitFor({ state: 'visible', timeout: 10_000 });
 }
 
 /**
@@ -60,12 +59,12 @@ export async function goToDomainRulesSection(page: Page, extensionId: string): P
     null,
     { timeout: 10_000 },
   );
-  await page.waitForTimeout(300);
+  await page.getByTestId('page-rules-btn-add').waitFor({ state: 'visible', timeout: 10_000 });
 }
 
 /** Navigate to the extension popup page. */
 export async function goToPopup(page: Page, extensionId: string): Promise<void> {
   await page.goto(`chrome-extension://${extensionId}/popup.html`);
   await page.waitForLoadState('domcontentloaded');
-  await page.waitForTimeout(300);
+  await page.getByTestId('popup-header-btn-settings').waitFor({ state: 'visible', timeout: 10_000 });
 }

@@ -28,7 +28,7 @@ async function goToImportExportSection(page: any, extensionId: string): Promise<
     { timeout: 10_000 },
   );
   await page.getByRole('button', { name: /import.*export/i }).click();
-  await page.waitForTimeout(300);
+  await page.getByTestId('page-import-export-card-import-rules').waitFor({ state: 'visible' });
 }
 
 async function clearDomainRules(extensionContext: any): Promise<void> {
@@ -76,9 +76,9 @@ async function submitTextImport(page: any, json: string): Promise<void> {
   await expect(dialog).toBeVisible({ timeout: 5000 });
   await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
   await dialog.locator('textarea').fill(json);
-  await page.waitForTimeout(300);
+  await expect(dialog.getByRole('button', { name: /next/i })).toBeEnabled();
   await dialog.getByRole('button', { name: /next/i }).click();
-  await page.waitForTimeout(300);
+  await expect(dialog.getByRole('button', { name: /confirm.*import/i })).toBeVisible();
   await dialog.getByRole('button', { name: /confirm.*import/i }).click();
 }
 

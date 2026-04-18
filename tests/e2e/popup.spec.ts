@@ -204,9 +204,8 @@ test.describe('[US-PO01] Deep linking', () => {
     const page = await extensionContext.newPage();
     await page.goto(`chrome-extension://${extensionId}/options.html#sessions?action=snapshot`);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
 
-    await expect(page.getByTestId('wizard-snapshot')).toBeVisible();
+    await expect(page.getByTestId('wizard-snapshot')).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText('Save Session Snapshot')).toBeVisible();
     await page.close();
   });

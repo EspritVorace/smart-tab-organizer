@@ -55,8 +55,6 @@ const localPlugin = {
 
 
 const TODO_DISABLED_PLAYWRIGHT = {
-  // TODO(eslint): 88 occurrences, remplacer par waitFor/expect().toPass()
-  'playwright/no-wait-for-timeout': 'off',
   // TODO(eslint): 11 occurrences, refactorer les tests conditionnels
   'playwright/no-conditional-in-test': 'off',
   // TODO(eslint): 5 occurrences
