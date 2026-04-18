@@ -18,8 +18,10 @@ import { foldAccents } from '@/utils/stringUtils';
 import { matchSessionSearch, splitByPinned } from '@/utils/sessionUtils';
 import { moveSessionToFirstInGroup, moveSessionToLastInGroup } from '@/utils/sessionOrderUtils';
 import { useSessions } from '@/hooks/useSessions';
-import { restoreSessionTabs } from '@/utils/tabRestore';
+import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { updateSession } from '@/utils/sessionStorage';
+import { showSuccessNotification } from '@/utils/notifications';
+import { browser } from 'wxt/browser';
 import type { Session } from '@/types/session';
 import type { SessionSearchMatch } from '@/utils/sessionUtils';
 import type { SyncSettings } from '@/types/syncSettings';
@@ -147,10 +149,21 @@ function SessionSection({
   }, [dragItems, sessions, allSessions, isPinned, updateOrder]);
 
   // Quick restore: full session content, no conflict resolution wizard.
-  const handleQuickRestore = useCallback(async (session: Session, target: 'current' | 'new') => {
+  const handleQuickRestore = useCallback(async (session: Session, target: RestoreTarget) => {
     try {
-      const result = await restoreSessionTabs(session, target);
+      let protectedTabId: number | undefined;
+      if (target === 'replace') {
+        const currentTab = await browser.tabs.getCurrent();
+        protectedTabId = currentTab?.id;
+      }
+      const result = await restoreSessionTabs(session, target, protectedTabId);
       onRestoreFeedback(getMessage('restoreResultTabsCreated', [String(result.tabsCreated)]));
+      if (target === 'replace') {
+        void showSuccessNotification(
+          getMessage('sessionSwitchedNotificationTitle'),
+          getMessage('sessionSwitchedNotificationMessage', [session.name]),
+        );
+      }
     } catch {
       onRestoreFeedback(getMessage('restoreError'));
     }
@@ -164,6 +177,11 @@ function SessionSection({
 
   const handleRestoreNewWindow = useCallback(
     (session: Session) => handleQuickRestore(session, 'new'),
+    [handleQuickRestore],
+  );
+
+  const handleReplaceCurrentWindow = useCallback(
+    (session: Session) => handleQuickRestore(session, 'replace'),
     [handleQuickRestore],
   );
 
@@ -215,6 +233,7 @@ function SessionSection({
                   onRestore={onOpenRestoreWizard}
                   onRestoreCurrentWindow={handleRestoreCurrentWindow}
                   onRestoreNewWindow={handleRestoreNewWindow}
+                  onReplaceCurrentWindow={handleReplaceCurrentWindow}
                   onRename={renameSession}
                   onEdit={onOpenEditDialog}
                   onDelete={onOpenDeleteDialog}

@@ -1,6 +1,11 @@
 import { browser, Browser } from 'wxt/browser';
 import { logger } from '@/utils/logger.js';
-import type { MiddleClickMessage, MessageResponse } from '@/types/messages.js';
+import { markUrlToSkipDeduplication } from '@/utils/deduplicationSkip.js';
+import type {
+    MiddleClickMessage,
+    MessageResponse,
+    SessionRestoreSkipDedupMessage,
+} from '@/types/messages.js';
 
 export const middleClickedTabs = new Map<string, number>();
 
@@ -17,6 +22,17 @@ export function handleMiddleClickMessage(
         logger.warn("[GROUPING_DEBUG] Middle click message received without valid sender.tab.id");
         sendResponse({ status: "error", message: "Missing sender tab ID" });
     }
+}
+
+export function handleSessionRestoreSkipDedupMessage(
+    request: SessionRestoreSkipDedupMessage,
+    sendResponse: (response?: MessageResponse) => void,
+): void {
+    for (const url of request.urls) {
+        markUrlToSkipDeduplication(url);
+    }
+    logger.debug(`[SESSION_RESTORE] Marked ${request.urls.length} URL(s) to skip deduplication`);
+    sendResponse({ status: 'received' });
 }
 
 export function cleanupMiddleClickedTabsForTab(tabId: number): void {

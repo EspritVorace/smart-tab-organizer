@@ -321,7 +321,10 @@
   "sessionRestoreOptions": { "message": "Options de restauration" },
   "sessionRestoreCurrentWindow": { "message": "Restaurer dans la fenêtre actuelle" },
   "sessionRestoreNewWindow": { "message": "Restaurer dans une nouvelle fenêtre" },
+  "sessionRestoreReplaceCurrentWindow": { "message": "Remplacer les onglets de cette fenêtre" },
   "sessionRestoreCustomize": { "message": "Restauration personnalisée..." },
+  "sessionSwitchedNotificationTitle": { "message": "Session activée" },
+  "sessionSwitchedNotificationMessage": { "message": "Passé sur la session « $1 »" },
   "sessionCreatedLabel": { "message": "Créé" },
   "sessionUpdatedLabel": { "message": "Modifié" },
   "sessionMoveToFirst": { "message": "Déplacer en haut" },
@@ -352,6 +355,7 @@
   "restoreDestination": { "message": "Destination :" },
   "restoreTargetCurrent": { "message": "Dans la fenêtre actuelle" },
   "restoreTargetNew": { "message": "Dans une nouvelle fenêtre" },
+  "restoreTargetReplace": { "message": "Remplacer les onglets de la fenêtre" },
   "restoreError": { "message": "Échec de la restauration. Veuillez réessayer." },
   "restoreAnalysisError": { "message": "Échec de l'analyse des conflits. Veuillez réessayer." },
 

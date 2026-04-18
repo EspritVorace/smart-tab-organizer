@@ -42,4 +42,5 @@
 - [ ] Quand au moins une session épinglée existe, la section « Pinned sessions » et le nom de la session sont visibles.
 - [ ] Toutes les sessions épinglées sont listées dans la section.
 - [ ] Les sessions non épinglées ne sont **pas** affichées dans la liste.
-- [ ] Chaque ligne dispose d'un bouton de restauration rapide (« Restore options »).
+- [ ] Chaque ligne dispose d'un bouton de restauration rapide (« Restore options ») dont le menu expose les 4 options : `current`, `new`, `replace` (« Replace tabs in current window »), `customize`.
+- [ ] L'option `replace` remplace les onglets non épinglés de la fenêtre active par ceux de la session choisie et affiche une notification système « Session activated » confirmant la bascule, puis ferme la popup.
