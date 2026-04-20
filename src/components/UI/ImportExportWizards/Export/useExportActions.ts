@@ -79,8 +79,11 @@ export function useExportActions(config: ExportActionsConfig): ExportActions {
       return;
     }
 
-    // Fallback for Firefox / older browsers
-    const blob = new Blob([json], { type: 'application/json' });
+    // Fallback for Firefox / older browsers.
+    // Use application/octet-stream so Firefox treats the blob as a generic
+    // binary and saves it directly to the Downloads folder without showing
+    // an "Open or Save" dialog. The .json extension comes from `filename`.
+    const blob = new Blob([json], { type: 'application/octet-stream' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
