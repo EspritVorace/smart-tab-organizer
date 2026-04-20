@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { browser } from 'wxt/browser';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast } from '@/utils/toast';
 
@@ -80,47 +79,16 @@ export function useExportActions(config: ExportActionsConfig): ExportActions {
       return;
     }
 
-    // Fallback for Firefox / older browsers: use the extension downloads API
-    // so the notification fires only after the file is actually saved, not
-    // immediately after the save dialog opens.
+    // Fallback for Firefox / older browsers
     const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-
-    try {
-      const downloadId = await browser.downloads.download({
-        url,
-        filename,
-        saveAs: true,
-      });
-
-      await new Promise<void>((resolve, reject) => {
-        const onChanged = (delta: { id: number; state?: { current: string } }) => {
-          if (delta.id !== downloadId) return;
-          if (delta.state?.current === 'complete') {
-            browser.downloads.onChanged.removeListener(
-              onChanged as Parameters<typeof browser.downloads.onChanged.addListener>[0],
-            );
-            resolve();
-          } else if (delta.state?.current === 'interrupted') {
-            browser.downloads.onChanged.removeListener(
-              onChanged as Parameters<typeof browser.downloads.onChanged.addListener>[0],
-            );
-            reject(new Error('DownloadCancelled'));
-          }
-        };
-        browser.downloads.onChanged.addListener(
-          onChanged as Parameters<typeof browser.downloads.onChanged.addListener>[0],
-        );
-      });
-
-      onFinish();
-      notify();
-    } catch (err: unknown) {
-      if (err instanceof Error && err.message === 'DownloadCancelled') return;
-      throw err;
-    } finally {
-      URL.revokeObjectURL(url);
-    }
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    onFinish();
+    notify();
   }, [buildJson, filename, onFinish, notify]);
 
   const exportToClipboard = useCallback(async () => {

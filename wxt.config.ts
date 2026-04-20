@@ -26,7 +26,7 @@ export default defineConfig({
         }
       }
     },
-    permissions: ['tabs', 'tabGroups', 'storage', 'notifications', 'downloads'],
+    permissions: ['tabs', 'tabGroups', 'storage', 'notifications'],
     host_permissions: ['<all_urls>'],
     action: {
       default_icon: {
