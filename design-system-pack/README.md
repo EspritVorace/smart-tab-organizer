@@ -1,8 +1,21 @@
 # Design System Starter Pack
 
-Pack de contexte destiné à Claude Design (ou tout outil de génération de
-design system). Extrait de l'extension navigateur **Smart Tab Organizer**
-(Chrome MV3 / Firefox MV2, framework WXT).
+Pack de contexte destiné à Claude Design (onboarding du design system).
+Extrait de l'extension navigateur **Smart Tab Organizer** (Chrome MV3 /
+Firefox MV2, framework WXT).
+
+## Usage prévu
+
+1. **Onboarder Claude Design** avec ce dossier (via connexion codebase
+   ou upload). Il construit sa représentation du DS.
+2. **Générer des pages internes à l'extension** (ex : Dashboard) qui
+   respectent le DS. Voir `DASHBOARD_BRIEF.md` pour le premier brief
+   projet.
+
+Ce n'est **pas** un pack pour produire un site marketing ou une
+homepage web : les pages générées s'ajoutent au même niveau que
+`DomainRulesPage`, `SessionsPage`, `StatisticsPage`,
+`ImportExportPage`, `SettingsPage` dans `src/pages/`.
 
 ## À quoi sert ce pack
 
@@ -104,11 +117,19 @@ design-system-pack/
 
 ## Comment utiliser le pack
 
-1. Ouvrir Claude Design.
-2. Uploader le zip de ce dossier (ou pointer le dossier si l'outil
-   l'accepte).
-3. Coller le contenu de `PROMPT.md` comme instruction initiale.
-4. Les fichiers du pack servent de contexte.
+1. Pousser ce dossier comme **repo Git standalone** (le pack est
+   préparé pour ça, voir `../design-system-pack-repo/` généré par le
+   script d'extraction).
+2. Dans Claude Design, onboarder le design system en pointant ce repo
+   (workflow « codebase » documenté).
+3. Coller `PROMPT.md` comme instruction d'onboarding si l'UI le
+   permet, sinon laisser Claude Design inférer depuis les fichiers.
+4. Pour générer la page Dashboard : ouvrir un nouveau projet dans
+   Claude Design, coller le contenu de `DASHBOARD_BRIEF.md` comme
+   brief projet.
+
+Alternative sans repo Git : uploader les fichiers individuellement
+(images, DOCX, PPTX supportés ; ZIP non documenté). Moins fluide.
 
 ## Ce qui N'EST PAS dans le pack (volontairement)
 
