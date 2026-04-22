@@ -22,8 +22,12 @@ Ce que je te fournis dans ce pack :
 - `theme/` : tokens actuels, styles globaux, theme wrappers,
 - `storybook/` : config + mock `wxt/browser`,
 - `i18n/` : utilitaire + catalogue EN,
-- `samples/` : 4 composants représentatifs (atomique, form, layout,
-  état vide) avec leurs stories,
+- `samples/{atomic,form,layout,composed}/` : 4 composants
+  représentatifs (atomique, form, layout, état vide) avec leurs
+  stories,
+- `samples/composition/` : 2 composants **domain-locked** (`SessionCard`,
+  `DomainRuleCard`) fournis pour leurs **patterns de composition**, pas
+  pour être copiés. Voir section dédiée plus bas.
 - `conventions.md` : règles de code,
 - `package.excerpt.json` : dépendances UI pertinentes.
 
@@ -136,6 +140,44 @@ sto-ui/
   pour `StatusBadge` et `PageLayout`.
 - **Checklist d'intégration WXT** : imports CSS (ordre), Storybook
   static dir, alias path `@/*`, mock `wxt/browser`.
+
+## Traitement spécial de `samples/composition/`
+
+Les deux fichiers `SessionCard.tsx` et `DomainRuleCard.tsx` sont
+**domain-locked** : ils manipulent des concepts métier (session
+d'onglets, règle de regroupement par domaine) que le design system
+**ne doit pas** connaître.
+
+Ils sont inclus pour leurs **patterns de composition**, pas pour être
+portés. Ton travail sur ces deux fichiers :
+
+1. **Extraire les primitives réutilisables** qu'ils utilisent :
+   - Card sortable via `@dnd-kit/react/sortable` (handle drag,
+     `isDragging`, opacity/z-index). À produire : `SortableCard`
+     ou `SortableListItem`.
+   - `HoverCard` metadata (trigger = contenu principal, content =
+     info enrichie avec Badge + Text). À produire : `HoverCardMeta`
+     ou un compound component autour de Radix `HoverCard`.
+   - Inline rename (double-clic pour passer en édition, Enter pour
+     valider, Escape pour annuler, autofocus + select-all). À
+     produire : `InlineEditableText`.
+   - Action menu via `DropdownMenu` de Radix Themes sur icon-only
+     trigger. À produire : éventuellement un `CardActionMenu`
+     helper.
+
+2. **Ne pas** reproduire le vocabulaire métier. Aucun composant du DS
+   livré ne doit s'appeler `SessionCard`, `DomainRuleCard`,
+   `TabCard`, `RuleBadge`, etc. Les noms doivent être
+   domain-agnostic.
+
+3. **Ne pas** copier la logique métier (états `isPinned`,
+   `profileId`, conflict resolution, regex matching, group color,
+   etc.). Ces props sont des artefacts de l'extension.
+
+4. **Documenter l'extraction** : pour chaque primitive extraite,
+   fournir un exemple « avant / après » dans le guide de migration
+   montrant comment réimplémenter `SessionCard` en consommant les
+   primitives du DS plus de la glue métier côté extension.
 
 ## Ce que tu ignores volontairement
 

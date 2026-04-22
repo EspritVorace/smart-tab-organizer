@@ -65,7 +65,13 @@ design-system-pack/
     ├── atomic/                # StatusBadge + stories
     ├── form/                  # FormField + FieldLabel + FieldError + stories
     ├── layout/                # PageLayout + stories (header gradient)
-    └── composed/              # EmptyState + stories
+    ├── composed/              # EmptyState + stories
+    └── composition/           # Patterns de composition avancés (domain-locked)
+                               # SessionCard : HoverCard metadata + inline rename
+                               #               + @dnd-kit sortable
+                               # DomainRuleCard : @dnd-kit sortable + HoverCard
+                               #                  + DropdownMenu + Badge
+                               # À ABSTRAIRE, pas à copier tel quel
 ```
 
 ## Points clés à retenir pour qui génère le design system
@@ -111,8 +117,10 @@ design-system-pack/
 - `src/background/`, `src/entrypoints/background.ts`,
   `src/entrypoints/content.content.ts`.
 - `src/schemas/` Zod métier.
-- `src/components/Core/*` (DomainRule, Session, Statistics, TabTree)
-  tous domain-locked.
+- `src/components/Core/{Statistics,TabTree}` et le reste de `Session/`
+  et `DomainRule/` : domain-locked. Seuls `SessionCard` et
+  `DomainRuleCard` sont inclus dans `samples/composition/` comme
+  patterns à abstraire.
 - `src/components/UI/{PopupHeader,PopupToolbar,PopupProfilesList,
   ImportExportWizards,SessionWizards,Sidebar,SettingsPage,
   SettingsToggles,OptionsLayout}` : trop spécifiques à l'extension.
