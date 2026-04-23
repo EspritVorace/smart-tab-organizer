@@ -35,16 +35,15 @@ pnpm screenshots                          # Deterministic multi-locale/theme scr
 - `src/entrypoints/popup.html` / `options.html`
 
 ### Background Modules (`src/background/`)
-`index.ts` · `grouping.ts` · `deduplication.ts` · `event-handlers.ts` · `messaging.ts` · `settings.ts` · `organize.ts`
+`index.ts` · `grouping.ts` · `deduplication.ts` · `event-handlers.ts` · `messaging.ts` · `migration.ts` · `settings.ts` · `organize.ts`
 
 ### Storage
 | Backend | Contents |
 |---|---|
-| `browser.storage.sync` | Domain rules, grouping/dedup toggles, notification prefs |
-| `browser.storage.local` | Sessions, UI prefs (e.g. `popupStatsCollapsed`), help prefs |
-| `browser.storage.session` | Profile–window map, sync drafts, editing guard |
+| `browser.storage.local` | Domain rules, grouping/dedup toggles, notification prefs, sessions, UI prefs (e.g. `popupStatsCollapsed`), help prefs |
+| `browser.storage.session` | Profile-window map, session drafts, editing guard |
 
-`useSyncedSettings` hook uses refs to prevent race conditions. `useSyncedState` unifies synchronized storage access for settings and statistics.
+`useSettings` hook uses refs to prevent race conditions. `useStorageState` unifies storage access for settings and statistics.
 
 ### Schemas & Types
 - `src/schemas/` — Zod schemas: `common`, `domainRule`, `enums`, `importExport`, `session`
@@ -68,7 +67,7 @@ src/
                    # SplitButton/ · ConfirmDialog/ · StatusBadge/ · ThemeToggle/
                    # DataTable/ · OptionsLayout/
     Form/          # FormFields/ · themes/
-  hooks/           # useSyncedState · useSyncedSettings · useStatistics · useSessions
+  hooks/           # useStorageState · useSettings · useStatistics · useSessions
                    # useSessionEditor · useDeepLinking
   pages/           # DomainRulesPage · SessionsPage · StatisticsPage · ImportExportPage · options.tsx · popup.tsx
   schemas/         # Zod schemas
@@ -90,7 +89,7 @@ tests/e2e/         # Playwright E2E tests
 3. **Rule Management** : CRUD for domain rules; built-in & custom regex presets; drag-and-drop reordering
 4. **Import/Export Wizard** : Zod-validated JSON for rules and sessions; rule/session classification (new/conflicting/identical); conflict resolution; optional note field
 5. **Statistics** : grouping & dedup counters
-6. **Sessions & Profiles** : snapshots of open tabs with optional note; pinned profiles with icon, auto-sync, window exclusivity; restore wizard with conflict resolution; interactive session editor; collapsed/expanded group state persistence; drag-and-drop session reordering; session card with HoverCard metadata and inline rename
+6. **Sessions & Profiles** : snapshots of open tabs with optional note; pinned profiles with icon, window exclusivity; restore wizard with conflict resolution; interactive session editor; collapsed/expanded group state persistence; drag-and-drop session reordering; session card with HoverCard metadata and inline rename
 
 ### Theming
 Accent unique `indigo` (défaut Radix Themes). `src/utils/themeConstants.ts` garde les constantes par feature pour compat mais toutes pointent désormais sur `indigo`. Préférer les tokens Radix (`var(--accent-a3)`, `var(--gray-a2)`, etc.) aux couleurs hardcodées. Les wrappers dans `src/components/Form/themes/` restent en place mais n'appliquent plus d'accent différencié.
@@ -154,7 +153,7 @@ identifier et résoudre les zones floues de la user story concernée.
 ### Ne pas sauter cette étape si
 
 - La US référence une entité dont les champs ne sont pas tous explicites.
-- La US interagit avec `chrome.storage.sync` ou `browser.storage.local`.
+- La US interagit avec `browser.storage.local` ou `browser.storage.session`.
 - La US introduit un nouveau composant UI sans préciser le comportement
   responsive, les états vides, ou les états d'erreur.
 - La US touche au système i18n (nouvelles clés à ajouter dans les 3 locales).

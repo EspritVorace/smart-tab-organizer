@@ -2,7 +2,7 @@
  * Shared mock data for Storybook stories and portable-story tests.
  */
 import type { Session } from '../../src/types/session';
-import type { SyncSettings, DomainRuleSetting } from '../../src/types/syncSettings';
+import type { AppSettings, DomainRuleSetting } from '../../src/types/syncSettings';
 
 export const mockTab = (id: string, title: string, url: string) => ({
   id,
@@ -64,7 +64,7 @@ export const mockRule: DomainRuleSetting = {
   enabled: true,
 };
 
-export const mockSyncSettings: SyncSettings = {
+export const mockAppSettings: AppSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
   deduplicateUnmatchedDomains: true,

@@ -23,9 +23,6 @@ export interface AppSettings {
   notifyOnDeduplication: boolean;
 }
 
-// Alias de compatibilité (sera supprimé au lot 3)
-export type SyncSettings = AppSettings;
-
 // Valeurs par défaut pour AppSettings
 export const defaultAppSettings: AppSettings = {
   globalGroupingEnabled: true,
@@ -36,6 +33,3 @@ export const defaultAppSettings: AppSettings = {
   notifyOnGrouping: true,
   notifyOnDeduplication: true
 };
-
-// Alias de compatibilité (sera supprimé au lot 3)
-export const defaultSyncSettings: AppSettings = defaultAppSettings;
