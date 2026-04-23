@@ -3,8 +3,15 @@ import { render, screen } from '@testing-library/react';
 import { composeStories } from '@storybook/react';
 import * as stories from '../../src/components/Core/TabTree/TabTreeEditor.stories';
 
-const { TabTreeEditorDefault, TabTreeEditorWithMaxHeight, TabTreeEditorEmptyUngrouped } =
-  composeStories(stories);
+const {
+  TabTreeEditorDefault,
+  TabTreeEditorWithMaxHeight,
+  TabTreeEditorEmptyUngrouped,
+  TabTreeEditorEditGroup,
+  TabTreeEditorEditTab,
+  TabTreeEditorEditTabType,
+  TabTreeEditorEditGroupType,
+} = composeStories(stories);
 
 describe('TabTreeEditor (portable stories)', () => {
   it('renders groups, ungrouped tabs and action buttons', () => {
@@ -27,5 +34,27 @@ describe('TabTreeEditor (portable stories)', () => {
     render(<TabTreeEditorEmptyUngrouped />);
     expect(screen.getByText('Frontend')).toBeInTheDocument();
     expect(screen.queryByText('Figma Designs')).not.toBeInTheDocument();
+  });
+});
+
+describe('TabTreeEditor — edit interactions', () => {
+  it('opens the group edit row when clicking Edit group', async () => {
+    await TabTreeEditorEditGroup.run();
+    expect(screen.getByRole('textbox', { name: /group name/i })).toBeInTheDocument();
+  });
+
+  it('opens the tab edit row when clicking Edit tab', async () => {
+    await TabTreeEditorEditTab.run();
+    expect(screen.getByRole('textbox', { name: /url/i })).toBeInTheDocument();
+  });
+
+  it('accepts a new URL in the tab edit row', async () => {
+    await TabTreeEditorEditTabType.run();
+    expect(screen.getByRole('textbox', { name: /url/i })).toHaveValue('https://new-url.com');
+  });
+
+  it('accepts a new name in the group edit row', async () => {
+    await TabTreeEditorEditGroupType.run();
+    expect(screen.getByRole('textbox', { name: /group name/i })).toHaveValue('Renamed Group');
   });
 });

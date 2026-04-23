@@ -4,6 +4,8 @@ import {
   getSettings,
   setSettings,
   updateSettings,
+  watchSettings,
+  watchSettingsField,
 } from '../../src/utils/settingsUtils';
 import { defaultAppSettings } from '../../src/types/syncSettings';
 
@@ -80,6 +82,33 @@ describe('settingsUtils', () => {
       expect(settings.deduplicateUnmatchedDomains).toBe(true);
       // Autres champs inchangés (valeurs par défaut conservées)
       expect(settings.globalDeduplicationEnabled).toBe(true);
+    });
+  });
+
+  describe('watchSettings', () => {
+    it('retourne une fonction de cleanup', () => {
+      const unwatch = watchSettings(() => {});
+      expect(typeof unwatch).toBe('function');
+      unwatch();
+    });
+
+    it('la fonction de cleanup peut être appelée sans erreur', () => {
+      const unwatch = watchSettings(vi.fn());
+      expect(() => unwatch()).not.toThrow();
+    });
+  });
+
+  describe('watchSettingsField', () => {
+    it('retourne une fonction de cleanup pour globalGroupingEnabled', () => {
+      const unwatch = watchSettingsField('globalGroupingEnabled', vi.fn());
+      expect(typeof unwatch).toBe('function');
+      unwatch();
+    });
+
+    it('retourne une fonction de cleanup pour deduplicationKeepStrategy', () => {
+      const unwatch = watchSettingsField('deduplicationKeepStrategy', vi.fn());
+      expect(typeof unwatch).toBe('function');
+      unwatch();
     });
   });
 });

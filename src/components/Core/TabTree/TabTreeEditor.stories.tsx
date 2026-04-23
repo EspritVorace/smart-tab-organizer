@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { within, userEvent } from 'storybook/test';
 import { TabTreeEditor } from './TabTreeEditor';
 import type { Session } from '@/types/session';
 
@@ -57,5 +58,51 @@ export const TabTreeEditorWithMaxHeight: Story = {
 export const TabTreeEditorEmptyUngrouped: Story = {
   args: {
     session: { ...mockSession, ungroupedTabs: [] },
+  },
+};
+
+// Opens the group edit row for the first group.
+export const TabTreeEditorEditGroup: Story = {
+  args: { session: mockSession },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const editGroupBtns = canvas.getAllByTitle('Edit group');
+    await userEvent.click(editGroupBtns[0]);
+  },
+};
+
+// Opens the tab edit row for the first ungrouped tab.
+export const TabTreeEditorEditTab: Story = {
+  args: { session: mockSession },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const editTabBtns = canvas.getAllByTitle('Edit tab');
+    await userEvent.click(editTabBtns[0]);
+  },
+};
+
+// Types a new URL in the tab edit row.
+export const TabTreeEditorEditTabType: Story = {
+  args: { session: mockSession },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const editTabBtns = canvas.getAllByTitle('Edit tab');
+    await userEvent.click(editTabBtns[0]);
+    const input = canvas.getByRole('textbox', { name: /url/i });
+    await userEvent.clear(input);
+    await userEvent.type(input, 'https://new-url.com');
+  },
+};
+
+// Types a new group name in the group edit row.
+export const TabTreeEditorEditGroupType: Story = {
+  args: { session: mockSession },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const editGroupBtns = canvas.getAllByTitle('Edit group');
+    await userEvent.click(editGroupBtns[0]);
+    const input = canvas.getByRole('textbox', { name: /group name/i });
+    await userEvent.clear(input);
+    await userEvent.type(input, 'Renamed Group');
   },
 };
