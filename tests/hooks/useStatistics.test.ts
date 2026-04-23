@@ -236,7 +236,7 @@ describe('useStatistics', () => {
 
     expect(result.current.isLoaded).toBe(false);
     expect(result.current.statistics).toBe(null);
-    expect(consoleSpy).toHaveBeenCalledWith('[smart-tab-organizer]', '[useSyncedState] load error:', expect.any(Error));
+    expect(consoleSpy).toHaveBeenCalledWith('[smart-tab-organizer]', '[useStorageState] load error:', expect.any(Error));
 
     consoleSpy.mockRestore();
   });
