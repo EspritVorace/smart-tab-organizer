@@ -1,17 +1,17 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { renderHook, act, waitFor, cleanup } from '@testing-library/react';
 import { fakeBrowser } from 'wxt/testing';
-import { useSyncedSettings } from '../../src/hooks/useSyncedSettings';
+import { useSettings } from '../../src/hooks/useSettings';
 
 // fakeBrowser.reset() est appelé avant chaque test via tests/setup.ts
 
-describe('useSyncedSettings', () => {
+describe('useSettings', () => {
   afterEach(() => {
     cleanup();
   });
 
   it('devrait charger les paramètres par défaut', async () => {
-    const { result } = renderHook(() => useSyncedSettings());
+    const { result } = renderHook(() => useSettings());
 
     await waitFor(() => {
       expect(result.current.isLoaded).toBe(true);
@@ -25,7 +25,7 @@ describe('useSyncedSettings', () => {
   });
 
   it('devrait mettre à jour deduplicateUnmatchedDomains', async () => {
-    const { result } = renderHook(() => useSyncedSettings());
+    const { result } = renderHook(() => useSettings());
 
     await waitFor(() => {
       expect(result.current.isLoaded).toBe(true);
@@ -39,13 +39,13 @@ describe('useSyncedSettings', () => {
   });
 
   it('devrait charger les paramètres existants', async () => {
-    await fakeBrowser.storage.sync.set({
+    await fakeBrowser.storage.local.set({
       globalGroupingEnabled: false,
       globalDeduplicationEnabled: true,
       domainRules: [{ id: '1', label: 'Test Rule' }]
     });
 
-    const { result } = renderHook(() => useSyncedSettings());
+    const { result } = renderHook(() => useSettings());
 
     await waitFor(() => {
       expect(result.current.isLoaded).toBe(true);
@@ -56,7 +56,7 @@ describe('useSyncedSettings', () => {
   });
 
   it('devrait mettre à jour globalGroupingEnabled', async () => {
-    const { result } = renderHook(() => useSyncedSettings());
+    const { result } = renderHook(() => useSettings());
 
     await waitFor(() => {
       expect(result.current.isLoaded).toBe(true);
@@ -70,7 +70,7 @@ describe('useSyncedSettings', () => {
   });
 
   it('devrait mettre à jour globalDeduplicationEnabled', async () => {
-    const { result } = renderHook(() => useSyncedSettings());
+    const { result } = renderHook(() => useSettings());
 
     await waitFor(() => {
       expect(result.current.isLoaded).toBe(true);
@@ -84,7 +84,7 @@ describe('useSyncedSettings', () => {
   });
 
   it('devrait mettre à jour les domainRules', async () => {
-    const { result } = renderHook(() => useSyncedSettings());
+    const { result } = renderHook(() => useSettings());
 
     await waitFor(() => {
       expect(result.current.isLoaded).toBe(true);
@@ -103,7 +103,7 @@ describe('useSyncedSettings', () => {
   });
 
   it('devrait mettre à jour plusieurs paramètres', async () => {
-    const { result } = renderHook(() => useSyncedSettings());
+    const { result } = renderHook(() => useSettings());
 
     await waitFor(() => {
       expect(result.current.isLoaded).toBe(true);
@@ -121,15 +121,14 @@ describe('useSyncedSettings', () => {
   });
 
   it('devrait recharger les paramètres', async () => {
-    const { result } = renderHook(() => useSyncedSettings());
+    const { result } = renderHook(() => useSettings());
 
     await waitFor(() => {
       expect(result.current.isLoaded).toBe(true);
     });
 
-    // Modifier directement le storage
     await act(async () => {
-      await fakeBrowser.storage.sync.set({
+      await fakeBrowser.storage.local.set({
         globalGroupingEnabled: false,
         globalDeduplicationEnabled: false,
         domainRules: [{ id: 'new', label: 'New Rule' }]
