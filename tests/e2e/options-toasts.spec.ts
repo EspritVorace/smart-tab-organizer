@@ -34,7 +34,7 @@ async function goToImportExportSection(page: any, extensionId: string): Promise<
 async function clearDomainRules(extensionContext: any): Promise<void> {
   const sw = extensionContext.serviceWorkers()[0];
   await sw.evaluate(async () => {
-    await chrome.storage.sync.set({ domainRules: [] });
+    await chrome.storage.local.set({ domainRules: [] });
   });
   await new Promise((r) => setTimeout(r, 200));
 }

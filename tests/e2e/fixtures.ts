@@ -89,27 +89,11 @@ export interface Statistics {
   tabsDeduplicatedCount: number;
 }
 
-/**
- * Writes to chrome.storage.sync, retrying with backoff on quota errors.
- * Tests run fast enough on a single worker that MAX_WRITE_OPERATIONS_PER_MINUTE
- * (120/min) can be exceeded when many tests each call addDomainRule + clearDomainRules.
- */
-async function syncSet(sw: Page, data: Record<string, unknown>): Promise<void> {
-  const delays = [1000, 2000, 4000, 8000];
-  for (let i = 0; i <= delays.length; i++) {
-    try {
-      await sw.evaluate(async (d: Record<string, unknown>) => {
-        await chrome.storage.sync.set(d);
-      }, data as Record<string, unknown>);
-      return;
-    } catch (e: unknown) {
-      if (i < delays.length && String(e).includes('MAX_WRITE_OPERATIONS')) {
-        await new Promise(r => setTimeout(r, delays[i]));
-      } else {
-        throw e;
-      }
-    }
-  }
+/** Writes to chrome.storage.local (settings are no longer in storage.sync). */
+async function localSet(sw: Page, data: Record<string, unknown>): Promise<void> {
+  await sw.evaluate(async (d: Record<string, unknown>) => {
+    await chrome.storage.local.set(d);
+  }, data as Record<string, unknown>);
 }
 
 // Create a temporary user data directory for each test run
@@ -242,32 +226,32 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       // Set global grouping enabled/disabled
       setGlobalGroupingEnabled: async (enabled: boolean) => {
         const sw = await getServiceWorker();
-        await syncSet(sw, { globalGroupingEnabled: enabled });
+        await localSet(sw, { globalGroupingEnabled: enabled });
       },
 
       // Set global deduplication enabled/disabled
       setGlobalDeduplicationEnabled: async (enabled: boolean) => {
         const sw = await getServiceWorker();
-        await syncSet(sw, { globalDeduplicationEnabled: enabled });
+        await localSet(sw, { globalDeduplicationEnabled: enabled });
       },
 
       // Set deduplication scope for tabs without matching rule
       setDeduplicateUnmatchedDomains: async (enabled: boolean) => {
         const sw = await getServiceWorker();
-        await syncSet(sw, { deduplicateUnmatchedDomains: enabled });
+        await localSet(sw, { deduplicateUnmatchedDomains: enabled });
       },
 
       // Set which tab survives when a duplicate is detected
       setDeduplicationKeepStrategy: async (strategy: 'keep-old' | 'keep-new' | 'keep-grouped' | 'keep-grouped-or-new') => {
         const sw = await getServiceWorker();
-        await syncSet(sw, { deduplicationKeepStrategy: strategy });
+        await localSet(sw, { deduplicationKeepStrategy: strategy });
       },
 
       // Add a domain rule
       addDomainRule: async (rule: DomainRuleConfig) => {
         const sw = await getServiceWorker();
         const updatedRules = await sw.evaluate(async (ruleConfig) => {
-          const result = await chrome.storage.sync.get({ domainRules: [] });
+          const result = await chrome.storage.local.get({ domainRules: [] });
           const rules: unknown[] = result.domainRules || [];
           rules.push({
             id: `rule-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -287,7 +271,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
           });
           return rules;
         }, rule);
-        await syncSet(sw, { domainRules: updatedRules });
+        await localSet(sw, { domainRules: updatedRules });
         // Wait for storage to propagate
         await new Promise(resolve => setTimeout(resolve, 100));
       },
@@ -295,7 +279,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       // Clear all domain rules
       clearDomainRules: async () => {
         const sw = await getServiceWorker();
-        await syncSet(sw, { domainRules: [] });
+        await localSet(sw, { domainRules: [] });
         await new Promise(resolve => setTimeout(resolve, 100));
       },
 
@@ -303,7 +287,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       getSettings: async () => {
         const sw = await getServiceWorker();
         return await sw.evaluate(async () => {
-          return await chrome.storage.sync.get({
+          return await chrome.storage.local.get({
             globalGroupingEnabled: true,
             globalDeduplicationEnabled: true,
             deduplicateUnmatchedDomains: true,
