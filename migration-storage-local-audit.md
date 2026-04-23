@@ -261,8 +261,11 @@ Invariant : fichiers modifient mais tests non executes (a la charge de l'utilisa
 ### Lot 6 : documentation
 
 Changements :
-- `CLAUDE.md` : mettre a jour le tableau Storage, les noms des hooks dans l'architecture.
+- `CLAUDE.md` : modifications detaillees en section 1.9.
 - `wxt.config.ts` : mettre a jour le commentaire ligne 22 (supprime "sync").
+- `README.md`, `README-fr.md`, `README-es.md` : aucune mention de sync detectee, pas d'action (verifie au scan).
+- `DESIGN.md` : a verifier au moment du lot (pas d'occurrence de `storage.sync` au scan, mais relecture prudente).
+- `CHANGELOG.md` : ajouter une entree pour la migration.
 - Creer `user-stories/migration-storage/clarifications.md`.
 
 ---
@@ -278,3 +281,92 @@ Changements :
 | **Regression dans `initializeDefaults`** : la detection du fresh install utilise actuellement `browser.storage.sync.get('domainRules')`. Apres migration, elle doit lire `local:domainRules`. | Reel si on oublie d'adapter ce code. | Lot 3 couvre explicitement ce point. Couvert par les tests du lot 4. |
 | **Stories Storybook cassent** : les stories qui importent `SyncSettings` ou `useSyncedSettings` cesseront de compiler si le lot 1 n'est pas atomique avec le lot 2. | Reel en cas de commit partiel. | Faire les lots 1 et 2 dans la meme session de travail, `pnpm compile` avant chaque commit. |
 | **Utilisateur installe la nouvelle version, rollback, reinstalle** : a la reinstallation, `settingsMigratedToLocal` est present dans `local`, donc la migration est sautee. Mais les donnees sont dans `local` depuis le premier passage. | Bening. | La migration est idempotente, `initializeDefaults` remplit les valeurs manquantes. |
+
+---
+
+## 1.9 Modifications de `CLAUDE.md`
+
+`CLAUDE.md` contient plusieurs references a `storage.sync` et aux hooks a renommer. Voici les emplacements exacts et les reformulations proposees :
+
+### Ligne 43-45 (tableau Storage)
+
+**Avant :**
+```
+| Backend | Contents |
+|---|---|
+| `browser.storage.sync` | Domain rules, grouping/dedup toggles, notification prefs |
+| `browser.storage.local` | Sessions, UI prefs (e.g. `popupStatsCollapsed`), help prefs |
+| `browser.storage.session` | Profile-window map, sync drafts, editing guard |
+```
+
+**Apres :**
+```
+| Backend | Contents |
+|---|---|
+| `browser.storage.local` | Domain rules, grouping/dedup toggles, notification prefs, sessions, UI prefs, help prefs, statistics |
+| `browser.storage.session` | Profile-window map, sync drafts, editing guard |
+```
+
+Note : "sync drafts" ligne 45 designe les drafts de synchronisation automatique des profils (feature auto-sync des sessions epinglees), pas `storage.sync`. Terme conserve. Pour lever l'ambiguite, reformuler en "profile auto-sync drafts".
+
+**Reformulation ligne 45 :**
+```
+| `browser.storage.session` | Profile-window map, profile auto-sync drafts, editing guard |
+```
+
+Aussi, `popupStatsCollapsed` mentionne ligne 44 n'existe pas dans le code (la cle reelle est `popupPinnedEmptyCollapsed`). A corriger au passage.
+
+### Ligne 47 (description des hooks)
+
+**Avant :**
+```
+`useSyncedSettings` hook uses refs to prevent race conditions. `useSyncedState` unifies synchronized storage access for settings and statistics.
+```
+
+**Apres :**
+```
+`useSettings` hook uses refs to prevent race conditions. `useStorageState` unifies local storage access for settings and statistics.
+```
+
+### Ligne 71 (arborescence des hooks)
+
+**Avant :**
+```
+  hooks/           # useSyncedState · useSyncedSettings · useStatistics · useSessions
+```
+
+**Apres :**
+```
+  hooks/           # useStorageState · useSettings · useStatistics · useSessions
+```
+
+### Ligne 157 (regle de clarification)
+
+**Avant :**
+```
+- La US interagit avec `chrome.storage.sync` ou `browser.storage.local`.
+```
+
+**Apres :**
+```
+- La US interagit avec `browser.storage.local` ou `browser.storage.session`.
+```
+
+### Ligne 93 (feature Sessions & Profiles)
+
+Le terme "auto-sync" designe la synchronisation automatique profil -> fenetre (feature produit), pas `storage.sync`. **Aucun changement.**
+
+### Ligne 172 (skill jscpd)
+
+Le terme "synchronise" designe la synchronisation du lockfile skills, pas `storage.sync`. **Aucun changement.**
+
+### Synthese des occurrences a modifier dans `CLAUDE.md`
+
+| Ligne | Action |
+|---|---|
+| 43 | Supprimer la ligne `browser.storage.sync` et fusionner son contenu dans `browser.storage.local` |
+| 44 | Enrichir le contenu et corriger `popupStatsCollapsed` -> `popupPinnedEmptyCollapsed` |
+| 45 | Reformuler "sync drafts" en "profile auto-sync drafts" (clarte) |
+| 47 | Renommer `useSyncedSettings` -> `useSettings`, `useSyncedState` -> `useStorageState` |
+| 71 | id. dans la liste des hooks |
+| 157 | Retirer la mention `chrome.storage.sync` |
