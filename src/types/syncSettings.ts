@@ -11,8 +11,8 @@ export interface DomainRuleSetting extends DomainRule {
 // Types pour les arrays
 export type DomainRuleSettings = DomainRuleSetting[];
 
-// Interface SyncSettings qui étend les types Zod inférés
-export interface SyncSettings {
+// Interface AppSettings qui étend les types Zod inférés
+export interface AppSettings {
   globalGroupingEnabled: boolean;
   globalDeduplicationEnabled: boolean;
   deduplicateUnmatchedDomains: boolean;
@@ -23,8 +23,11 @@ export interface SyncSettings {
   notifyOnDeduplication: boolean;
 }
 
-// Valeurs par défaut pour SyncSettings
-export const defaultSyncSettings: SyncSettings = {
+// Alias de compatibilité (sera supprimé au lot 3)
+export type SyncSettings = AppSettings;
+
+// Valeurs par défaut pour AppSettings
+export const defaultAppSettings: AppSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
   deduplicateUnmatchedDomains: false,
@@ -33,3 +36,6 @@ export const defaultSyncSettings: SyncSettings = {
   notifyOnGrouping: true,
   notifyOnDeduplication: true
 };
+
+// Alias de compatibilité (sera supprimé au lot 3)
+export const defaultSyncSettings: AppSettings = defaultAppSettings;
