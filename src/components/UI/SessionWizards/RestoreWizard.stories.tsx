@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { within, userEvent } from 'storybook/test';
 import { RestoreWizard } from './RestoreWizard';
 import type { Session } from '@/types/session';
 
@@ -47,4 +48,24 @@ export const RestoreWizardNoSession: Story = {
 
 export const RestoreWizardClosed: Story = {
   args: { open: false, session: null },
+};
+
+// Switches destination to "new window".
+export const RestoreWizardSelectNewWindow: Story = {
+  args: { open: true, session: mockSession },
+  play: async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body);
+    const newWindowRadio = await body.findByTestId('wizard-restore-radio-new-window');
+    await userEvent.click(newWindowRadio);
+  },
+};
+
+// Switches destination to "replace current window".
+export const RestoreWizardSelectReplaceWindow: Story = {
+  args: { open: true, session: mockSession },
+  play: async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body);
+    const replaceRadio = await body.findByTestId('wizard-restore-radio-replace-window');
+    await userEvent.click(replaceRadio);
+  },
 };
