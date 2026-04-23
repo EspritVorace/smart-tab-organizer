@@ -206,7 +206,7 @@ test.describe('[US-PO007] Batch deduplication', () => {
   }) => {
     const sw = await getServiceWorker(extensionContext);
     await sw.evaluate(async () => {
-      await chrome.storage.sync.set({ notifyOnDeduplication: true, notifyOnGrouping: false });
+      await chrome.storage.local.set({ notifyOnDeduplication: true, notifyOnGrouping: false });
     });
     await clearNotifications(sw);
 
@@ -237,7 +237,7 @@ test.describe('[US-PO007] Batch deduplication', () => {
   }) => {
     const sw = await getServiceWorker(extensionContext);
     await sw.evaluate(async () => {
-      await chrome.storage.sync.set({ notifyOnDeduplication: true, notifyOnGrouping: false });
+      await chrome.storage.local.set({ notifyOnDeduplication: true, notifyOnGrouping: false });
     });
     await clearNotifications(sw);
 
@@ -466,7 +466,7 @@ test.describe('[US-PO008] Batch grouping', () => {
   }) => {
     const sw = await getServiceWorker(extensionContext);
     await sw.evaluate(async () => {
-      await chrome.storage.sync.set({ notifyOnGrouping: true, notifyOnDeduplication: false });
+      await chrome.storage.local.set({ notifyOnGrouping: true, notifyOnDeduplication: false });
     });
     await clearNotifications(sw);
 
@@ -494,7 +494,7 @@ test.describe('[US-PO008] Batch grouping', () => {
   }) => {
     const sw = await getServiceWorker(extensionContext);
     await sw.evaluate(async () => {
-      await chrome.storage.sync.set({ notifyOnGrouping: true, notifyOnDeduplication: false });
+      await chrome.storage.local.set({ notifyOnGrouping: true, notifyOnDeduplication: false });
     });
     await clearNotifications(sw);
 

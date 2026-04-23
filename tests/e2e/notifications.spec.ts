@@ -33,7 +33,7 @@ async function setNotificationPrefs(
   prefs: { notifyOnGrouping?: boolean; notifyOnDeduplication?: boolean },
 ) {
   await sw.evaluate(async (p: { notifyOnGrouping?: boolean; notifyOnDeduplication?: boolean }) => {
-    await chrome.storage.sync.set(p);
+    await chrome.storage.local.set(p);
   }, prefs);
   await new Promise(r => setTimeout(r, 100));
 }
