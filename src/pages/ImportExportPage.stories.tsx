@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ImportExportPage } from './ImportExportPage';
-import { defaultSyncSettings } from '@/types/syncSettings';
-import type { SyncSettings } from '@/types/syncSettings';
+import { defaultAppSettings } from '@/types/syncSettings';
+import type { AppSettings } from '@/types/syncSettings';
 
-const mockSyncSettingsWithRules: SyncSettings = {
-  ...defaultSyncSettings,
+const mockSyncSettingsWithRules: AppSettings = {
+  ...defaultAppSettings,
   domainRules: [
     {
       id: 'rule-1',
@@ -64,7 +64,7 @@ type Story = StoryObj<typeof meta>;
 
 export const ImportExportPageDefault: Story = {
   args: {
-    syncSettings: defaultSyncSettings,
+    syncSettings: defaultAppSettings,
     onSettingsUpdate: (settings) => console.log('Settings updated:', settings),
   },
 };

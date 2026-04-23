@@ -2,15 +2,15 @@ import { Box, Flex, Text, Switch, Card, RadioGroup } from '@radix-ui/themes';
 import { Settings, Bell, Copy } from 'lucide-react';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { getMessage } from '@/utils/i18n';
-import type { SyncSettings } from '@/types/syncSettings';
+import type { AppSettings } from '@/types/syncSettings';
 import {
   deduplicationKeepStrategyOptions,
   type DeduplicationKeepStrategyValue,
 } from '@/schemas/enums';
 
 interface SettingsPageProps {
-  syncSettings: SyncSettings;
-  updateSettings: (settings: Partial<SyncSettings>) => void;
+  syncSettings: AppSettings;
+  updateSettings: (settings: Partial<AppSettings>) => void;
 }
 
 export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps) {

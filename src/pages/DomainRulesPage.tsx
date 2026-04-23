@@ -21,7 +21,7 @@ import {
   moveToLastOfDomain,
   getRulesForRootDomain,
 } from '@/utils/ruleOrderUtils';
-import type { SyncSettings, DomainRuleSetting } from '@/types/syncSettings';
+import type { AppSettings, DomainRuleSetting } from '@/types/syncSettings';
 import type { DomainRule } from '@/schemas/domainRule';
 
 type DeleteTarget =
@@ -29,7 +29,7 @@ type DeleteTarget =
   | { type: 'bulk'; ruleIds: string[] };
 
 interface DomainRulesPageProps {
-  syncSettings: SyncSettings;
+  syncSettings: AppSettings;
   updateRules: (rules: DomainRuleSetting[]) => void;
 }
 

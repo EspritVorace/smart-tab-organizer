@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import type { Statistics } from '@/types/statistics.js';
 import { defaultStatistics } from '@/types/statistics.js';
 import { statisticsItem } from '@/utils/storageItems.js';
-import { useSyncedState } from './useSyncedState.js';
+import { useStorageState } from './useStorageState.js';
 
 export interface UseStatisticsReturn {
   statistics: Statistics | null;
@@ -27,7 +27,7 @@ function mergeWithDefaults(v: Statistics | null): Statistics {
 
 export function useStatistics(): UseStatisticsReturn {
   const { value: statistics, isLoaded, update, reset, onFieldChange, reload } =
-    useSyncedState<Statistics>({
+    useStorageState<Statistics>({
       load: async () => mergeWithDefaults(await statisticsItem.getValue()),
 
       // The statistics object is stored as a single item.

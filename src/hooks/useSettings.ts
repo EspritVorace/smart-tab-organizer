@@ -1,5 +1,5 @@
 import { storage } from 'wxt/utils/storage';
-import type { SyncSettings, DomainRuleSettings } from '@/types/syncSettings.js';
+import type { AppSettings, DomainRuleSettings } from '@/types/syncSettings.js';
 import type { DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
 import {
   globalGroupingEnabledItem,
@@ -9,12 +9,12 @@ import {
   domainRulesItem,
   notifyOnGroupingItem,
   notifyOnDeduplicationItem,
-  syncSettingsItemMap,
+  settingsItemMap,
 } from '@/utils/storageItems.js';
-import { useSyncedState } from './useSyncedState.js';
+import { useStorageState } from './useStorageState.js';
 
-export interface UseSyncedSettingsReturn {
-  settings: SyncSettings | null;
+export interface UseSettingsReturn {
+  settings: AppSettings | null;
   isLoaded: boolean;
 
   setGlobalGroupingEnabled: (value: boolean) => Promise<void>;
@@ -31,13 +31,13 @@ export interface UseSyncedSettingsReturn {
   ) => () => void;
   onDomainRulesChange: (callback: (value: DomainRuleSettings) => void) => () => void;
 
-  updateSettings: (updates: Partial<SyncSettings>) => Promise<void>;
+  updateSettings: (updates: Partial<AppSettings>) => Promise<void>;
   reloadSettings: () => Promise<void>;
 }
 
 // --- Storage helpers (module-level, stable references) ---
 
-async function loadSyncSettingsFromStorage(): Promise<SyncSettings> {
+async function loadSettingsFromStorage(): Promise<AppSettings> {
   const results = await storage.getItems([
     globalGroupingEnabledItem,
     globalDeduplicationEnabledItem,
@@ -49,7 +49,7 @@ async function loadSyncSettingsFromStorage(): Promise<SyncSettings> {
   ]);
 
   const rawRules = results[4].value as DomainRuleSettings;
-  // Migrate legacy wildcard syntax: *.example.com → example.com
+  // Migrate legacy wildcard syntax: *.example.com -> example.com
   const hasWildcards = rawRules?.some(r => r.domainFilter?.startsWith('*.'));
   const domainRules = hasWildcards
     ? rawRules.map(r => ({
@@ -78,9 +78,9 @@ async function loadSyncSettingsFromStorage(): Promise<SyncSettings> {
  * Each watcher fires `onChanged` with a single-field partial so the generic
  * hook can merge it into state and invoke per-field callbacks.
  */
-function watchSyncSettings(onChanged: (update: Partial<SyncSettings>) => void): () => void {
+function watchAppSettings(onChanged: (update: Partial<AppSettings>) => void): () => void {
   const unwatchers = (
-    Object.entries(syncSettingsItemMap) as [keyof SyncSettings, { watch: (cb: (v: unknown) => void) => () => void }][]
+    Object.entries(settingsItemMap) as [keyof AppSettings, { watch: (cb: (v: unknown) => void) => () => void }][]
   ).map(([field, item]) => item.watch((v) => onChanged({ [field]: v })));
   return () => unwatchers.forEach(u => u());
 }
@@ -88,20 +88,20 @@ function watchSyncSettings(onChanged: (update: Partial<SyncSettings>) => void): 
 /**
  * Persist only the fields present in `updates` to their respective storage items.
  */
-async function saveSettingsToStorage(updates: Partial<SyncSettings>): Promise<void> {
-  const items = (Object.entries(updates) as [keyof typeof syncSettingsItemMap, SyncSettings[keyof SyncSettings]][])
-    .filter(([key]) => key in syncSettingsItemMap)
-    .map(([key, value]) => ({ item: syncSettingsItemMap[key], value }));
+async function saveSettingsToStorage(updates: Partial<AppSettings>): Promise<void> {
+  const items = (Object.entries(updates) as [keyof typeof settingsItemMap, AppSettings[keyof AppSettings]][])
+    .filter(([key]) => key in settingsItemMap)
+    .map(([key, value]) => ({ item: settingsItemMap[key], value }));
   if (items.length > 0) await storage.setItems(items);
 }
 
 // --- Hook ---
 
-export function useSyncedSettings(): UseSyncedSettingsReturn {
+export function useSettings(): UseSettingsReturn {
   const { value: settings, isLoaded, update, onFieldChange, reload } =
-    useSyncedState<SyncSettings>({
-      load: loadSyncSettingsFromStorage,
-      watch: watchSyncSettings,
+    useStorageState<AppSettings>({
+      load: loadSettingsFromStorage,
+      watch: watchAppSettings,
       // Only save changed fields; `current` is not needed here.
       save: (updates) => saveSettingsToStorage(updates),
     });

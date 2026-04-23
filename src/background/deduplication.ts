@@ -7,7 +7,7 @@ import { showNotification, type UndoAction } from '@/utils/notifications.js';
 import { getMessage } from '@/utils/i18n.js';
 import { shouldSkipDeduplication } from '@/utils/deduplicationSkip.js';
 import { normalizeUrlIgnoringParams } from '@/utils/urlNormalization.js';
-import type { DomainRuleSetting, SyncSettings } from '@/types/syncSettings.js';
+import type { DomainRuleSetting, AppSettings } from '@/types/syncSettings.js';
 import type { DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
 
 // Cache pour éviter de traiter plusieurs fois le même onglet
@@ -183,7 +183,7 @@ export async function checkAndDeduplicateTab(
     newUrl: string,
     matchMode: string,
     windowId: number,
-    settings: SyncSettings,
+    settings: AppSettings,
     ignoredParams: string[] = [],
 ): Promise<void> {
     try {

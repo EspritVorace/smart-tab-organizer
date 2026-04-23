@@ -17,7 +17,7 @@ import { generateUUID } from '@/utils/utils';
 import { createDomainRuleSchemaWithUniqueness, type DomainRule } from '@/schemas/domainRule';
 import { groupNameSourceOptions, type GroupNameSourceValue } from '@/schemas/enums';
 import { getPresetById, loadPresets, type PresetCategory } from '@/utils/presetUtils';
-import type { SyncSettings } from '@/types/syncSettings';
+import type { AppSettings } from '@/types/syncSettings';
 import { logger } from '@/utils/logger';
 
 interface RuleWizardModalProps {
@@ -25,7 +25,7 @@ interface RuleWizardModalProps {
   onClose: () => void;
   onSubmit: (domainRule: DomainRule) => void;
   domainRule?: DomainRule;
-  syncSettings: SyncSettings;
+  syncSettings: AppSettings;
 }
 
 const VALID_GROUP_NAME_SOURCES = groupNameSourceOptions.map(o => o.value) as GroupNameSourceValue[];

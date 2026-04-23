@@ -9,11 +9,11 @@ import { ExportSessionsWizard } from '@/components/UI/ImportExportWizards/Export
 import { ImportSessionsWizard } from '@/components/UI/ImportExportWizards/ImportSessionsWizard';
 import { ImportExportActionCard } from '@/components/UI/ImportExportWizards/ImportExportActionCard';
 import { useSessions } from '@/hooks/useSessions';
-import type { SyncSettings, DomainRuleSetting } from '@/types/syncSettings';
+import type { AppSettings, DomainRuleSetting } from '@/types/syncSettings';
 
 interface ImportExportPageProps {
-  syncSettings: SyncSettings;
-  onSettingsUpdate: (settings: SyncSettings) => void;
+  syncSettings: AppSettings;
+  onSettingsUpdate: (settings: AppSettings) => void;
 }
 
 export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExportPageProps) {

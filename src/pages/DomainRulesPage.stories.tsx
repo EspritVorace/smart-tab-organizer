@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { DomainRulesPage } from './DomainRulesPage';
-import type { SyncSettings, DomainRuleSetting } from '@/types/syncSettings';
+import type { AppSettings, DomainRuleSetting } from '@/types/syncSettings';
 
 const rules: DomainRuleSetting[] = [
   {
@@ -31,7 +31,7 @@ const rules: DomainRuleSetting[] = [
   },
 ];
 
-const mockSyncSettings: SyncSettings = {
+const mockSyncSettings: AppSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
   deduplicateUnmatchedDomains: true,
