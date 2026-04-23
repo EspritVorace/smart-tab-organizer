@@ -11,6 +11,8 @@ test-results/
 ctrf/
 coverage/
 .jscpd-report/
+design-system-bundle/
+design-system-bundle.zip
 /.idea
 .chrome-profile/
 .firefox-profile/

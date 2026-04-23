@@ -27,7 +27,9 @@
     "screenshots": "pnpm build && xvfb-maybe playwright test --config=e2e-screenshots/playwright.screenshots.config.ts",
     "docs:dev": "pnpm --dir docs dev",
     "docs:build": "pnpm --dir docs build",
-    "docs:preview": "pnpm --dir docs preview"
+    "docs:preview": "pnpm --dir docs preview",
+    "design-system:bundle": "node scripts/build-design-system-bundle.mjs",
+    "design-system:zip": "node scripts/build-design-system-bundle.mjs --zip"
   },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
