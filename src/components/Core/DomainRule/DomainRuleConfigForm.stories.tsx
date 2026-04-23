@@ -5,14 +5,20 @@ import { DomainRuleConfigForm, type DomainRuleConfigFormProps } from './DomainRu
 import type { ConfigMode } from './ConfigModeSelector';
 import type { GroupNameSourceValue } from '@/schemas/enums';
 
-function Wrapper(props: Omit<DomainRuleConfigFormProps, 'onConfigModeChange' | 'onGroupNameSourceChange' | 'onTitleParsingRegExChange' | 'onUrlParsingRegExChange'> & {
-  initialMode?: ConfigMode;
-}) {
+type WrapperProps = Omit<
+  DomainRuleConfigFormProps,
+  | 'configMode' | 'onConfigModeChange'
+  | 'groupNameSource' | 'onGroupNameSourceChange'
+  | 'titleParsingRegEx' | 'onTitleParsingRegExChange'
+  | 'urlParsingRegEx' | 'onUrlParsingRegExChange'
+> & { initialMode?: ConfigMode };
+
+function Wrapper(props: WrapperProps) {
   const { initialMode = 'preset', ...rest } = props;
   const [configMode, setConfigMode] = useState<ConfigMode>(initialMode);
-  const [groupNameSource, setGroupNameSource] = useState<GroupNameSourceValue>(rest.groupNameSource ?? 'title');
-  const [titleRegex, setTitleRegex] = useState(rest.titleParsingRegEx ?? '');
-  const [urlRegex, setUrlRegex] = useState(rest.urlParsingRegEx ?? '');
+  const [groupNameSource, setGroupNameSource] = useState<GroupNameSourceValue>('title');
+  const [titleRegex, setTitleRegex] = useState('');
+  const [urlRegex, setUrlRegex] = useState('');
 
   return (
     <div style={{ width: 400, padding: 16 }}>
@@ -46,8 +52,6 @@ export const DomainRuleConfigFormPreset: Story = {
       onPresetChange={() => {}}
       presetCategories={[]}
       isLoadingPresets={false}
-      titleParsingRegEx=""
-      urlParsingRegEx=""
     />
   ),
 };
@@ -59,8 +63,6 @@ export const DomainRuleConfigFormLoading: Story = {
       onPresetChange={() => {}}
       presetCategories={[]}
       isLoadingPresets={true}
-      titleParsingRegEx=""
-      urlParsingRegEx=""
     />
   ),
 };
@@ -73,15 +75,12 @@ export const DomainRuleConfigFormSwitchToManual: Story = {
       onPresetChange={() => {}}
       presetCategories={[]}
       isLoadingPresets={false}
-      titleParsingRegEx=""
-      urlParsingRegEx=""
     />
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const manualBtn = canvas.getByRole('radio', { name: /manual/i });
     await userEvent.click(manualBtn);
-    // Manual mode shows regex input fields
     await expect(canvas.getByRole('radio', { name: /manual/i })).toBeChecked();
   },
 };
@@ -94,8 +93,6 @@ export const DomainRuleConfigFormSwitchToAsk: Story = {
       onPresetChange={() => {}}
       presetCategories={[]}
       isLoadingPresets={false}
-      titleParsingRegEx=""
-      urlParsingRegEx=""
     />
   ),
   play: async ({ canvasElement }) => {
@@ -115,13 +112,10 @@ export const DomainRuleConfigFormManualWithRegex: Story = {
       onPresetChange={() => {}}
       presetCategories={[]}
       isLoadingPresets={false}
-      titleParsingRegEx=""
-      urlParsingRegEx=""
     />
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    // In manual mode there is a title parsing regex field
     const inputs = canvas.getAllByRole('textbox');
     if (inputs.length > 0) {
       await userEvent.clear(inputs[0]);
