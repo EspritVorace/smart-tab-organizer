@@ -1,13 +1,13 @@
 import { browser } from 'wxt/browser';
-import { getSyncSettings, setSyncSettings } from './settingsUtils.js';
+import { getSettings, setSettings } from './settingsUtils.js';
 import { logger } from './logger.js';
 import { setStatisticsData } from './statisticsUtils.js';
-import { defaultSyncSettings } from '@/types/syncSettings.js';
+import { defaultAppSettings } from '@/types/syncSettings.js';
 import { defaultStatistics } from '@/types/statistics.js';
-import type { SyncSettings, DomainRuleSetting } from '@/types/syncSettings.js';
+import type { AppSettings, DomainRuleSetting } from '@/types/syncSettings.js';
 
 const defaultSettingsPath = '/data/default_settings.json' as const;
-let cachedDefaultSettings: SyncSettings | null = null;
+let cachedDefaultSettings: AppSettings | null = null;
 
 function isObject(item: unknown): item is Record<string, unknown> {
   return typeof item === 'object' && item !== null && !Array.isArray(item);
@@ -27,9 +27,9 @@ function mergeDeep(target: unknown, source: unknown): unknown {
   return output;
 }
 
-async function loadDefaultSettings(): Promise<SyncSettings> {
+async function loadDefaultSettings(): Promise<AppSettings> {
   if (cachedDefaultSettings) return cachedDefaultSettings;
-  
+
   try {
     const url = browser.runtime.getURL(defaultSettingsPath);
     const response = await fetch(url);
@@ -38,7 +38,7 @@ async function loadDefaultSettings(): Promise<SyncSettings> {
     return cachedDefaultSettings!;
   } catch (error) {
     logger.error("Cannot load defaults:", error);
-    return defaultSyncSettings;
+    return defaultAppSettings;
   }
 }
 
@@ -47,15 +47,16 @@ export async function initializeDefaults(): Promise<void> {
   // WXT stores each setting as an individual key (e.g. 'domainRules'), not as a
   // single 'settings' object. Check for the presence of 'domainRules' to detect
   // whether the extension has been installed before.
+  // NOTE: still reads storage.sync here for fresh-install detection (lot 3 will migrate this)
   const rawSync = await browser.storage.sync.get('domainRules');
 
   if (rawSync.domainRules === undefined) {
     logger.debug("Init defaults from JSON...");
-    await setSyncSettings(defaults);
+    await setSettings(defaults);
   } else {
     logger.debug("Merging existing with JSON defaults...");
-    const currentSettings = await getSyncSettings();
-    const merged = mergeDeep(defaults, currentSettings) as SyncSettings;
+    const currentSettings = await getSettings();
+    const merged = mergeDeep(defaults, currentSettings) as AppSettings;
 
     // Migrate missing fields on existing rules (never inject new default rules)
     if (merged.domainRules && Array.isArray(merged.domainRules)) {
@@ -82,9 +83,9 @@ export async function initializeDefaults(): Promise<void> {
         }
       });
     }
-    await setSyncSettings(merged);
+    await setSettings(merged);
   }
-  
+
   const localData = await browser.storage.local.get('statistics');
   if (!localData.statistics) {
     logger.debug("Init stats...");

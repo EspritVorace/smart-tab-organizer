@@ -2,11 +2,11 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { logger } from '@/utils/logger';
 
 /**
- * Configuration for useSyncedState.
+ * Configuration for useStorageState.
  *
  * @template T - Shape of the state object (must be a plain object).
  */
-export interface SyncedStateOptions<T extends object> {
+export interface StorageStateOptions<T extends object> {
   /**
    * Async function that loads the full initial state from storage.
    * Called once on mount.
@@ -35,7 +35,7 @@ export interface SyncedStateOptions<T extends object> {
   defaults?: T;
 }
 
-export interface SyncedStateReturn<T extends object> {
+export interface StorageStateReturn<T extends object> {
   /** Current state, or null while the initial load is pending. */
   value: T | null;
   /** True once the initial load completed successfully. */
@@ -56,7 +56,7 @@ export interface SyncedStateReturn<T extends object> {
 
 /**
  * Generic hook for state that is persisted to browser storage and watched for
- * changes made by other extension contexts (background, popup, options…).
+ * changes made by other extension contexts (background, popup, options).
  *
  * Handles:
  * - Initial load
@@ -64,12 +64,12 @@ export interface SyncedStateReturn<T extends object> {
  * - Optimistic local writes (state updated before storage write completes)
  * - isLocalUpdate guard to avoid reacting to own writes
  */
-export function useSyncedState<T extends object>({
+export function useStorageState<T extends object>({
   load,
   watch: setupWatch,
   save,
   defaults,
-}: SyncedStateOptions<T>): SyncedStateReturn<T> {
+}: StorageStateOptions<T>): StorageStateReturn<T> {
   // --- State ---
   const [value, _setValue] = useState<T | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -124,7 +124,7 @@ export function useSyncedState<T extends object>({
   useEffect(() => {
     loadRef.current()
       .then(v => { setValue(v); setIsLoaded(true); })
-      .catch(error => logger.error('[useSyncedState] load error:', error));
+      .catch(error => logger.error('[useStorageState] load error:', error));
   }, [setValue]);
 
   useEffect(() => {
@@ -190,7 +190,7 @@ export function useSyncedState<T extends object>({
     try {
       setValue(await loadRef.current());
     } catch (error) {
-      logger.error('[useSyncedState] reload error:', error);
+      logger.error('[useStorageState] reload error:', error);
     }
   }, [setValue]);
 

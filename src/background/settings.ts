@@ -1,8 +1,8 @@
-import { getSyncSettings } from '@/utils/settingsUtils.js';
-import type { SyncSettings, DomainRuleSetting } from '@/types/syncSettings.js';
+import { getSettings as getAppSettings } from '@/utils/settingsUtils.js';
+import type { AppSettings, DomainRuleSetting } from '@/types/syncSettings.js';
 
-export async function getSettings(): Promise<SyncSettings> {
-    const settings = await getSyncSettings();
+export async function getSettings(): Promise<AppSettings> {
+    const settings = await getAppSettings();
     settings.domainRules = settings.domainRules || [];
     settings.domainRules = settings.domainRules.map((rule: DomainRuleSetting) => ({
         ...rule,

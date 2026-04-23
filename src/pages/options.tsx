@@ -5,7 +5,7 @@ import { browser } from 'wxt/browser';
 import { Flex, Spinner, Text, Theme } from '@radix-ui/themes';
 import { ThemeProvider } from 'next-themes';
 
-import { useSyncedSettings } from '@/hooks/useSyncedSettings.js';
+import { useSettings } from '@/hooks/useSettings.js';
 import { useStatistics } from '@/hooks/useStatistics.js';
 import { useDeepLinking } from '@/hooks/useDeepLinking.js';
 import { getMessage } from '@/utils/i18n';
@@ -30,7 +30,7 @@ import type { DomainRuleSettings } from '@/types/syncSettings';
 (() => {
 
 function OptionsContent() {
-    const { settings, updateSettings } = useSyncedSettings();
+    const { settings, updateSettings } = useSettings();
     const { statistics: stats, resetStatistics } = useStatistics();
     const {
         currentTab, setCurrentTab,

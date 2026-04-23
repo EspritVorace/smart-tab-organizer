@@ -9,12 +9,12 @@ import { PopupHeader } from '@/components/UI/PopupHeader/PopupHeader';
 import { SettingsToggles } from '@/components/UI/SettingsToggles/SettingsToggles';
 import { PopupToolbar } from '@/components/UI/PopupToolbar/PopupToolbar';
 import { PopupProfilesList } from '@/components/UI/PopupProfilesList/PopupProfilesList';
-import { useSyncedSettings } from '@/hooks/useSyncedSettings';
+import { useSettings } from '@/hooks/useSettings';
 
 (() => {
 
 function PopupContent() {
-  const { settings, isLoaded, setGlobalGroupingEnabled, setGlobalDeduplicationEnabled } = useSyncedSettings();
+  const { settings, isLoaded, setGlobalGroupingEnabled, setGlobalDeduplicationEnabled } = useSettings();
 
   const openOptionsPage = useCallback(() => {
     browser.runtime.openOptionsPage();

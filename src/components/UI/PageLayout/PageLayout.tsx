@@ -1,14 +1,14 @@
 import { Heading, Box, Flex, Separator, Text } from '@radix-ui/themes';
 import type { LucideIcon } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
-import type { SyncSettings } from '@/types/syncSettings.js';
+import type { AppSettings } from '@/types/syncSettings.js';
 
 interface PageLayoutProps {
   titleKey: string;
   descriptionKey: string;
   icon?: LucideIcon;
-  syncSettings: SyncSettings;
-  children: (settings: SyncSettings) => React.ReactNode;
+  syncSettings: AppSettings;
+  children: (settings: AppSettings) => React.ReactNode;
 }
 
 export function PageLayout({ titleKey, descriptionKey, icon: Icon, syncSettings, children }: PageLayoutProps) {

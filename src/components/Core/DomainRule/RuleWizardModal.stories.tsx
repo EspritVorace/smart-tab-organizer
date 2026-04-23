@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { RuleWizardModal } from './RuleWizardModal';
 const action = (name: string) => (...args: any[]) => console.log(name, ...args);
 import type { DomainRule } from '@/schemas/domainRule';
-import type { SyncSettings } from '@/types/syncSettings';
+import type { AppSettings } from '@/types/syncSettings';
 
-const mockSyncSettings: SyncSettings = {
+const mockAppSettings: AppSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
   deduplicateUnmatchedDomains: true,
@@ -58,7 +58,7 @@ const meta: Meta<typeof RuleWizardModal> = {
   args: {
     onClose: action('onClose'),
     onSubmit: action('onSubmit'),
-    syncSettings: mockSyncSettings,
+    syncSettings: mockAppSettings,
   },
 };
 
@@ -133,9 +133,9 @@ export const RuleWizardModalLabelUniqueness: Story = {
     isOpen: true,
     domainRule: undefined,
     syncSettings: {
-      ...mockSyncSettings,
+      ...mockAppSettings,
       domainRules: [
-        ...mockSyncSettings.domainRules,
+        ...mockAppSettings.domainRules,
         {
           id: 'test-rule',
           domainFilter: 'test.com',

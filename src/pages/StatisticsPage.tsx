@@ -2,11 +2,11 @@ import { Box, Flex, Text, Button, Card } from '@radix-ui/themes';
 import { BarChart3, RotateCcw, Layers, Copy } from 'lucide-react';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { getMessage } from '@/utils/i18n';
-import type { SyncSettings } from '@/types/syncSettings';
+import type { AppSettings } from '@/types/syncSettings';
 import type { Statistics } from '@/types/statistics';
 
 interface StatisticsPageProps {
-  syncSettings: SyncSettings;
+  syncSettings: AppSettings;
   stats: Statistics;
   onReset: () => void;
 }

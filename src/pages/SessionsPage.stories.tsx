@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { SessionsPage } from './SessionsPage';
-import type { SyncSettings } from '@/types/syncSettings';
+import type { AppSettings } from '@/types/syncSettings';
 import type { Session } from '@/types/session';
 
 const now = '2025-01-01T10:00:00.000Z';
@@ -18,7 +18,7 @@ function makeSession(id: string, name: string, isPinned: boolean): Session {
   };
 }
 
-const mockSyncSettings: SyncSettings = {
+const mockSyncSettings: AppSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
   deduplicateUnmatchedDomains: true,

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { SettingsPage } from './SettingsPage';
-import { defaultSyncSettings } from '@/types/syncSettings';
+import { defaultAppSettings } from '@/types/syncSettings';
 
 const meta: Meta<typeof SettingsPage> = {
   title: 'Components/UI/SettingsPage/SettingsPage',
@@ -18,7 +18,7 @@ type Story = StoryObj<typeof meta>;
 
 export const SettingsPageDefault: Story = {
   args: {
-    syncSettings: defaultSyncSettings,
+    syncSettings: defaultAppSettings,
     updateSettings: (settings) => console.log('Settings updated:', settings),
   },
 };
@@ -26,7 +26,7 @@ export const SettingsPageDefault: Story = {
 export const SettingsPageNotificationsDisabled: Story = {
   args: {
     syncSettings: {
-      ...defaultSyncSettings,
+      ...defaultAppSettings,
       notifyOnGrouping: false,
       notifyOnDeduplication: false,
     },
@@ -37,7 +37,7 @@ export const SettingsPageNotificationsDisabled: Story = {
 export const SettingsPageGroupingOnly: Story = {
   args: {
     syncSettings: {
-      ...defaultSyncSettings,
+      ...defaultAppSettings,
       notifyOnGrouping: true,
       notifyOnDeduplication: false,
     },
@@ -48,7 +48,7 @@ export const SettingsPageGroupingOnly: Story = {
 export const SettingsPageDedupUnmatchedDisabled: Story = {
   args: {
     syncSettings: {
-      ...defaultSyncSettings,
+      ...defaultAppSettings,
       deduplicateUnmatchedDomains: false,
     },
     updateSettings: (settings) => console.log('Settings updated:', settings),
@@ -58,7 +58,7 @@ export const SettingsPageDedupUnmatchedDisabled: Story = {
 export const SettingsPageKeepNewStrategy: Story = {
   args: {
     syncSettings: {
-      ...defaultSyncSettings,
+      ...defaultAppSettings,
       deduplicationKeepStrategy: 'keep-new',
     },
     updateSettings: (settings) => console.log('Settings updated:', settings),
@@ -68,7 +68,7 @@ export const SettingsPageKeepNewStrategy: Story = {
 export const SettingsPageKeepGroupedStrategy: Story = {
   args: {
     syncSettings: {
-      ...defaultSyncSettings,
+      ...defaultAppSettings,
       deduplicationKeepStrategy: 'keep-grouped',
     },
     updateSettings: (settings) => console.log('Settings updated:', settings),
@@ -78,7 +78,7 @@ export const SettingsPageKeepGroupedStrategy: Story = {
 export const SettingsPageKeepGroupedOrNewStrategy: Story = {
   args: {
     syncSettings: {
-      ...defaultSyncSettings,
+      ...defaultAppSettings,
       deduplicationKeepStrategy: 'keep-grouped-or-new',
     },
     updateSettings: (settings) => console.log('Settings updated:', settings),

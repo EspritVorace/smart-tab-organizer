@@ -11,7 +11,7 @@ import { getMatchMode, isUrlMatch } from './deduplication.js';
 import { getStatisticsData, updateStatisticsData } from '@/utils/statisticsUtils.js';
 import { getMessage } from '@/utils/i18n.js';
 import { logger } from '@/utils/logger.js';
-import type { DomainRuleSetting, SyncSettings } from '@/types/syncSettings.js';
+import type { DomainRuleSetting, AppSettings } from '@/types/syncSettings.js';
 import type { ChromeTabGroupsExtended, ChromeNotificationsAPI } from '@/types/chromeApi.js';
 
 // ---------------------------------------------------------------------------
@@ -49,7 +49,7 @@ function isOrganizableUrl(url: string | undefined): url is string {
  * matching rule are included (bucketed together under exact-match mode).
  * Returns the number of duplicate tabs removed.
  */
-async function batchDeduplicateTabs(windowId: number, settings: SyncSettings): Promise<number> {
+async function batchDeduplicateTabs(windowId: number, settings: AppSettings): Promise<number> {
     const allTabs = await browser.tabs.query({ windowId });
     const organizable = allTabs
         .filter(t => isOrganizableUrl(t.url))
@@ -148,7 +148,7 @@ async function batchDeduplicateTabs(windowId: number, settings: SyncSettings): P
  * Returns only entries whose target group has ≥ 2 members.
  * Per US-PO008: single-member target groups are excluded.
  */
-async function buildOrganizePlan(windowId: number, settings: SyncSettings): Promise<PlanEntry[]> {
+async function buildOrganizePlan(windowId: number, settings: AppSettings): Promise<PlanEntry[]> {
     // Re-query after dedup so removed tabs are no longer present
     const allTabs = await browser.tabs.query({ windowId });
     const organizable = allTabs.filter(t => isOrganizableUrl(t.url));

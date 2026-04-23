@@ -24,10 +24,10 @@ import { showSuccessNotification } from '@/utils/notifications';
 import { browser } from 'wxt/browser';
 import type { Session } from '@/types/session';
 import type { SessionSearchMatch } from '@/utils/sessionUtils';
-import type { SyncSettings } from '@/types/syncSettings';
+import type { AppSettings } from '@/types/syncSettings';
 
 interface SessionsPageProps {
-  syncSettings: SyncSettings;
+  syncSettings: AppSettings;
   /** Controlled by options.tsx: true when a deep-link requests the snapshot wizard. */
   snapshotWizardOpen?: boolean;
   /** Called by SessionsPage to let options.tsx know the wizard closed (or page unmounted). */
