@@ -1,6 +1,6 @@
 import { storage } from 'wxt/utils/storage';
 import type { DomainRuleSettings } from '@/types/syncSettings.js';
-import { defaultSyncSettings } from '@/types/syncSettings.js';
+import { defaultAppSettings } from '@/types/syncSettings.js';
 import type { DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
 import type { Statistics } from '@/types/statistics.js';
 import { defaultStatistics } from '@/types/statistics.js';
@@ -9,38 +9,38 @@ import type { Session } from '@/types/session.js';
 // --- Sync storage items ---
 
 export const globalGroupingEnabledItem = storage.defineItem<boolean>(
-  'sync:globalGroupingEnabled',
-  { defaultValue: defaultSyncSettings.globalGroupingEnabled },
+  'local:globalGroupingEnabled',
+  { defaultValue: defaultAppSettings.globalGroupingEnabled },
 );
 
 export const globalDeduplicationEnabledItem = storage.defineItem<boolean>(
-  'sync:globalDeduplicationEnabled',
-  { defaultValue: defaultSyncSettings.globalDeduplicationEnabled },
+  'local:globalDeduplicationEnabled',
+  { defaultValue: defaultAppSettings.globalDeduplicationEnabled },
 );
 
 export const deduplicateUnmatchedDomainsItem = storage.defineItem<boolean>(
-  'sync:deduplicateUnmatchedDomains',
-  { defaultValue: defaultSyncSettings.deduplicateUnmatchedDomains },
+  'local:deduplicateUnmatchedDomains',
+  { defaultValue: defaultAppSettings.deduplicateUnmatchedDomains },
 );
 
 export const deduplicationKeepStrategyItem = storage.defineItem<DeduplicationKeepStrategyValue>(
-  'sync:deduplicationKeepStrategy',
-  { defaultValue: defaultSyncSettings.deduplicationKeepStrategy },
+  'local:deduplicationKeepStrategy',
+  { defaultValue: defaultAppSettings.deduplicationKeepStrategy },
 );
 
 export const domainRulesItem = storage.defineItem<DomainRuleSettings>(
-  'sync:domainRules',
-  { defaultValue: defaultSyncSettings.domainRules },
+  'local:domainRules',
+  { defaultValue: defaultAppSettings.domainRules },
 );
 
 export const notifyOnGroupingItem = storage.defineItem<boolean>(
-  'sync:notifyOnGrouping',
-  { defaultValue: defaultSyncSettings.notifyOnGrouping },
+  'local:notifyOnGrouping',
+  { defaultValue: defaultAppSettings.notifyOnGrouping },
 );
 
 export const notifyOnDeduplicationItem = storage.defineItem<boolean>(
-  'sync:notifyOnDeduplication',
-  { defaultValue: defaultSyncSettings.notifyOnDeduplication },
+  'local:notifyOnDeduplication',
+  { defaultValue: defaultAppSettings.notifyOnDeduplication },
 );
 
 // --- Local storage items ---
@@ -60,8 +60,8 @@ export const popupPinnedEmptyCollapsedItem = storage.defineItem<boolean>(
   { defaultValue: false },
 );
 
-// Map des items sync par champ (pour watchSyncSettingsField)
-export const syncSettingsItemMap = {
+// Map des items settings par champ (pour watchSettingsField)
+export const settingsItemMap = {
   globalGroupingEnabled: globalGroupingEnabledItem,
   globalDeduplicationEnabled: globalDeduplicationEnabledItem,
   deduplicateUnmatchedDomains: deduplicateUnmatchedDomainsItem,
