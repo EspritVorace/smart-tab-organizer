@@ -303,18 +303,12 @@ Changements :
 ```
 | Backend | Contents |
 |---|---|
-| `browser.storage.local` | Domain rules, grouping/dedup toggles, notification prefs, sessions, UI prefs, help prefs, statistics |
-| `browser.storage.session` | Profile-window map, sync drafts, editing guard |
+| `browser.storage.local` | Domain rules, grouping/dedup toggles, notification prefs, sessions, UI prefs (e.g. `popupPinnedEmptyCollapsed`), statistics |
 ```
 
-Note : "sync drafts" ligne 45 designe les drafts de synchronisation automatique des profils (feature auto-sync des sessions epinglees), pas `storage.sync`. Terme conserve. Pour lever l'ambiguite, reformuler en "profile auto-sync drafts".
+Note : `browser.storage.session` ne contient aucun item dans le code actuel (verifie : zero appel a `browser.storage.session` dans `src/`). L'auto-sync des profils n'est plus implemente. La ligne `storage.session` du tableau est donc a **supprimer entierement**.
 
-**Reformulation ligne 45 :**
-```
-| `browser.storage.session` | Profile-window map, profile auto-sync drafts, editing guard |
-```
-
-Aussi, `popupStatsCollapsed` mentionne ligne 44 n'existe pas dans le code (la cle reelle est `popupPinnedEmptyCollapsed`). A corriger au passage.
+Aussi, `popupStatsCollapsed` mentionne ligne 44 n'existe pas dans le code (la cle reelle est `popupPinnedEmptyCollapsed`). Corrige dans la reformulation ci-dessus.
 
 ### Ligne 47 (description des hooks)
 
@@ -354,7 +348,7 @@ Aussi, `popupStatsCollapsed` mentionne ligne 44 n'existe pas dans le code (la cl
 
 ### Ligne 93 (feature Sessions & Profiles)
 
-Le terme "auto-sync" designe la synchronisation automatique profil -> fenetre (feature produit), pas `storage.sync`. **Aucun changement.**
+Le terme "auto-sync" designe la synchronisation automatique profil -> fenetre. Cette feature n'est plus implementee selon le retour du projet. La phrase "pinned profiles with icon, auto-sync, window exclusivity" devra etre revue en phase 2 dans le lot 6 (en dehors du scope de la migration storage, mais a noter).
 
 ### Ligne 172 (skill jscpd)
 
@@ -366,7 +360,8 @@ Le terme "synchronise" designe la synchronisation du lockfile skills, pas `stora
 |---|---|
 | 43 | Supprimer la ligne `browser.storage.sync` et fusionner son contenu dans `browser.storage.local` |
 | 44 | Enrichir le contenu et corriger `popupStatsCollapsed` -> `popupPinnedEmptyCollapsed` |
-| 45 | Reformuler "sync drafts" en "profile auto-sync drafts" (clarte) |
+| 45 | Supprimer la ligne `browser.storage.session` (non utilise dans le code ; auto-sync profils non implemente) |
 | 47 | Renommer `useSyncedSettings` -> `useSettings`, `useSyncedState` -> `useStorageState` |
 | 71 | id. dans la liste des hooks |
+| 93 | Retirer "auto-sync" de la description Sessions & Profiles (feature non implementee) |
 | 157 | Retirer la mention `chrome.storage.sync` |
