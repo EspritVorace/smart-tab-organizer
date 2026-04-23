@@ -1,5 +1,6 @@
 import { browser, Browser } from 'wxt/browser';
 import { initializeDefaults } from '@/utils/migration.js';
+import { migrateSettingsFromSyncToLocal } from './migration.js';
 import { logger } from '@/utils/logger.js';
 import {
     handleMiddleClickMessage,
@@ -19,6 +20,7 @@ function isBackgroundMessage(value: unknown): value is BackgroundMessage {
 export function setupInstallationHandler(): void {
     browser.runtime.onInstalled.addListener(async (details: Browser.runtime.InstalledDetails) => {
         logger.debug("SmartTab Organizer installed/updated.", details.reason);
+        await migrateSettingsFromSyncToLocal();
         await initializeDefaults();
     });
 }

@@ -44,13 +44,12 @@ async function loadDefaultSettings(): Promise<AppSettings> {
 
 export async function initializeDefaults(): Promise<void> {
   const defaults = await loadDefaultSettings();
-  // WXT stores each setting as an individual key (e.g. 'domainRules'), not as a
-  // single 'settings' object. Check for the presence of 'domainRules' to detect
-  // whether the extension has been installed before.
-  // NOTE: still reads storage.sync here for fresh-install detection (lot 3 will migrate this)
-  const rawSync = await browser.storage.sync.get('domainRules');
+  // Check storage.local for 'domainRules' to detect whether the extension has been
+  // installed before. migrateSettingsFromSyncToLocal() runs before this function so
+  // any existing sync data is already copied to local.
+  const rawLocal = await browser.storage.local.get('domainRules');
 
-  if (rawSync.domainRules === undefined) {
+  if (rawLocal.domainRules === undefined) {
     logger.debug("Init defaults from JSON...");
     await setSettings(defaults);
   } else {
