@@ -6,6 +6,7 @@ import {
   extractGroupNameFromUrl,
   isValidRegex,
   isValidDomain,
+  getRadixColor,
 } from '../src/utils/utils';
 
 test('domainToRegex with typical domain', () => {
@@ -90,4 +91,26 @@ test('isValidDomain edge cases', () => {
   assert.strictEqual(isValidDomain('example'), false);
   assert.strictEqual(isValidDomain(''), false);
   assert.strictEqual(isValidDomain(null), false);
+});
+
+test('getRadixColor maps Chrome group colors to Radix colors', () => {
+  assert.strictEqual(getRadixColor('blue'), 'blue');
+  assert.strictEqual(getRadixColor('red'), 'red');
+  assert.strictEqual(getRadixColor('yellow'), 'amber');
+  assert.strictEqual(getRadixColor('green'), 'green');
+  assert.strictEqual(getRadixColor('pink'), 'pink');
+  assert.strictEqual(getRadixColor('purple'), 'purple');
+  assert.strictEqual(getRadixColor('cyan'), 'cyan');
+  assert.strictEqual(getRadixColor('orange'), 'orange');
+  assert.strictEqual(getRadixColor('grey'), 'gray');
+});
+
+test('getRadixColor falls back to gray for unknown color', () => {
+  assert.strictEqual(getRadixColor('unknown'), 'gray');
+  assert.strictEqual(getRadixColor(''), 'gray');
+});
+
+test('domainToRegex returns null for null/empty input', () => {
+  assert.strictEqual(domainToRegex(null), null);
+  assert.strictEqual(domainToRegex(''), null);
 });

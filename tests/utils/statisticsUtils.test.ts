@@ -8,6 +8,7 @@ import {
   incrementTabGroupsCreated,
   incrementTabsDeduplicated,
   resetStatisticsData,
+  watchStatisticsData,
 } from '../../src/utils/statisticsUtils';
 import { defaultStatistics } from '../../src/types/statistics';
 
@@ -130,6 +131,19 @@ describe('statisticsUtils', () => {
       await resetStatisticsData();
       const stats = await getStatisticsData();
       expect(stats).toEqual(defaultStatistics);
+    });
+  });
+
+  describe('watchStatisticsData', () => {
+    it('retourne une fonction de cleanup', () => {
+      const unwatch = watchStatisticsData(() => {});
+      expect(typeof unwatch).toBe('function');
+      unwatch();
+    });
+
+    it('la fonction de cleanup peut être appelée sans erreur', () => {
+      const unwatch = watchStatisticsData(vi.fn());
+      expect(() => unwatch()).not.toThrow();
     });
   });
 });
