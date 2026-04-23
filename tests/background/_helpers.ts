@@ -11,7 +11,7 @@
  * vi.mock() factories can import from it.
  */
 import { vi } from 'vitest';
-import type { DomainRuleSetting, SyncSettings } from '../../src/types/syncSettings';
+import type { DomainRuleSetting, AppSettings } from '../../src/types/syncSettings';
 
 // ---- Types ------------------------------------------------------------------
 
@@ -118,7 +118,7 @@ export function makeRule(overrides: Partial<DomainRuleSetting> = {}): DomainRule
   };
 }
 
-export function makeSettings(overrides: Partial<SyncSettings> = {}): SyncSettings {
+export function makeSettings(overrides: Partial<AppSettings> = {}): AppSettings {
   // Intentionally pinned to the legacy defaults (keep-old, unmatched-enabled)
   // so existing dedup tests keep asserting the same observable behavior.
   // Tests that want the new production defaults override explicitly.
