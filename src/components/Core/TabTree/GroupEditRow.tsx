@@ -1,6 +1,7 @@
-import React, { useEffect, useRef } from 'react';
-import { Flex, Box, TextField, Button } from '@radix-ui/themes';
+import React from 'react';
+import { Flex, TextField } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
+import { EditRowShell } from './EditRowShell';
 import { ChromeColorPicker } from './ChromeColorPicker';
 import type { ChromeGroupColor } from '@/types/tabTree';
 
@@ -23,23 +24,9 @@ export function GroupEditRow({
   onSave,
   onCancel,
 }: GroupEditRowProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  // Focus the group name input on mount (replaces autoFocus).
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
   return (
-    <Box
-      style={{
-        paddingLeft: (level - 1) * 20 + 8,
-        paddingRight: 'var(--space-2)',
-        paddingTop: 'var(--space-2)',
-        paddingBottom: 'var(--space-2)',
-      }}
-    >
-      <Flex direction="column" gap="2">
+    <EditRowShell level={level} onSave={onSave} onCancel={onCancel}>
+      {(inputRef) => (
         <Flex align="center" gap="2">
           <TextField.Root
             ref={inputRef}
@@ -56,15 +43,7 @@ export function GroupEditRow({
           />
           <ChromeColorPicker value={color} onChange={onColorChange} />
         </Flex>
-        <Flex gap="2" justify="end">
-          <Button size="1" variant="soft" color="gray" onClick={onCancel}>
-            {getMessage('cancel')}
-          </Button>
-          <Button size="1" onClick={onSave}>
-            {getMessage('save')}
-          </Button>
-        </Flex>
-      </Flex>
-    </Box>
+      )}
+    </EditRowShell>
   );
 }
