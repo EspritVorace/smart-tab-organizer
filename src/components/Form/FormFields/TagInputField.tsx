@@ -2,6 +2,7 @@ import { Badge, Flex, IconButton, Text } from '@radix-ui/themes';
 import { X } from 'lucide-react';
 import { useId, useRef, useState, type KeyboardEvent, type ChangeEvent } from 'react';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
+import { getMessage } from '@/utils/i18n.js';
 import { FieldLabel } from './FieldLabel';
 import { FieldError } from './FieldError';
 
@@ -83,7 +84,7 @@ export function TagInputField<T extends FieldValues>({
               return;
             }
             field.onChange([...tags, raw]);
-            setAnnouncement(`Tag added: ${raw}`);
+            setAnnouncement(getMessage('tagInputAdded', raw));
             setDraft('');
           };
 
@@ -97,7 +98,7 @@ export function TagInputField<T extends FieldValues>({
               event.preventDefault();
               const removed = tags[tags.length - 1];
               field.onChange(tags.slice(0, -1));
-              setAnnouncement(`Tag removed: ${removed}`);
+              setAnnouncement(getMessage('tagInputRemoved', removed));
             }
           };
 
@@ -118,8 +119,8 @@ export function TagInputField<T extends FieldValues>({
                 field.onChange([...tags, ...additions]);
                 setAnnouncement(
                   additions.length === 1
-                    ? `Tag added: ${additions[0]}`
-                    : `${additions.length} tags added`,
+                    ? getMessage('tagInputAdded', additions[0])
+                    : getMessage('tagInputMultipleAdded', String(additions.length)),
                 );
               }
               setDraft('');
@@ -131,7 +132,7 @@ export function TagInputField<T extends FieldValues>({
           const removeTag = (index: number) => {
             const removed = tags[index];
             field.onChange(tags.filter((_, i) => i !== index));
-            setAnnouncement(`Tag removed: ${removed}`);
+            setAnnouncement(getMessage('tagInputRemoved', removed));
             inputRef.current?.focus();
           };
 
