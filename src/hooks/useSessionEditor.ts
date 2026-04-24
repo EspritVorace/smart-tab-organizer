@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
-import type { Session, SavedTab } from '@/types/session';
+import type { Session } from '@/types/session';
 import type { ChromeGroupColor } from '@/types/tabTree';
+import { moveTabInGroup, reassignTabToGroup } from '@/utils/sessionOrderUtils';
 
 export interface UseSessionEditorReturn {
   /** The session being edited (working copy) */
@@ -82,62 +83,15 @@ export function useSessionEditor(initialSession: Session): UseSessionEditorRetur
 
   function moveTab(tabId: string, direction: 'up' | 'down') {
     setEditedSession((prev) => {
-      const ungroupedIdx = prev.ungroupedTabs.findIndex((t) => t.id === tabId);
-      if (ungroupedIdx !== -1) {
-        const tabs = [...prev.ungroupedTabs];
-        const newIdx = direction === 'up' ? ungroupedIdx - 1 : ungroupedIdx + 1;
-        if (newIdx < 0 || newIdx >= tabs.length) return prev;
-        [tabs[ungroupedIdx], tabs[newIdx]] = [tabs[newIdx], tabs[ungroupedIdx]];
-        return { ...prev, ungroupedTabs: tabs };
-      }
-      const groups = prev.groups.map((g) => {
-        const idx = g.tabs.findIndex((t) => t.id === tabId);
-        if (idx === -1) return g;
-        const tabs = [...g.tabs];
-        const newIdx = direction === 'up' ? idx - 1 : idx + 1;
-        if (newIdx < 0 || newIdx >= tabs.length) return g;
-        [tabs[idx], tabs[newIdx]] = [tabs[newIdx], tabs[idx]];
-        return { ...g, tabs };
-      });
-      return { ...prev, groups };
+      const next = moveTabInGroup(prev, tabId, direction);
+      return next === prev ? prev : next;
     });
   }
 
   function moveTabToGroup(tabId: string, targetGroupId: string | null) {
     setEditedSession((prev) => {
-      let tab: SavedTab | undefined;
-      let newUngrouped = prev.ungroupedTabs;
-      let newGroups = prev.groups;
-
-      const ungroupedIdx = prev.ungroupedTabs.findIndex((t) => t.id === tabId);
-      if (ungroupedIdx !== -1) {
-        tab = prev.ungroupedTabs[ungroupedIdx];
-        newUngrouped = prev.ungroupedTabs.filter((t) => t.id !== tabId);
-      } else {
-        for (const g of prev.groups) {
-          const found = g.tabs.find((t) => t.id === tabId);
-          if (found) {
-            tab = found;
-            break;
-          }
-        }
-        newGroups = prev.groups.map((g) => ({
-          ...g,
-          tabs: g.tabs.filter((t) => t.id !== tabId),
-        }));
-      }
-
-      if (!tab) return prev;
-
-      if (targetGroupId === null) {
-        newUngrouped = [...newUngrouped, tab];
-      } else {
-        newGroups = newGroups.map((g) =>
-          g.id === targetGroupId ? { ...g, tabs: [...g.tabs, tab!] } : g
-        );
-      }
-
-      return { ...prev, ungroupedTabs: newUngrouped, groups: newGroups };
+      const next = reassignTabToGroup(prev, tabId, undefined, targetGroupId);
+      return next === prev ? prev : next;
     });
   }
 

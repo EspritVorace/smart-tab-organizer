@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { getMessage } from '@/utils/i18n';
 import type { Session, SavedTab, SavedTabGroup } from '@/types/session';
 import type { ChromeGroupColor } from '@/types/tabTree';
+import { moveTabInGroup, reassignTabToGroup } from '@/utils/sessionOrderUtils';
 
 export type AlertDialogState =
   | { type: 'delete_last_tab'; tabId: string; groupId: string }
@@ -113,26 +114,9 @@ export function useTabTreeEditor(session: Session, onSessionChange: (updated: Se
   }
 
   function moveTabInContext(tabId: string, direction: 'up' | 'down', contextGroupId: string | null) {
-    if (contextGroupId === null) {
-      const tabs = [...session.ungroupedTabs];
-      const idx = tabs.findIndex((t) => t.id === tabId);
-      if (idx === -1) return;
-      const newIdx = direction === 'up' ? idx - 1 : idx + 1;
-      if (newIdx < 0 || newIdx >= tabs.length) return;
-      [tabs[idx], tabs[newIdx]] = [tabs[newIdx], tabs[idx]];
-      onSessionChange({ ...session, ungroupedTabs: tabs, updatedAt: now() });
-    } else {
-      const groups = session.groups.map((g) => {
-        if (g.id !== contextGroupId) return g;
-        const tabs = [...g.tabs];
-        const idx = tabs.findIndex((t) => t.id === tabId);
-        if (idx === -1) return g;
-        const newIdx = direction === 'up' ? idx - 1 : idx + 1;
-        if (newIdx < 0 || newIdx >= tabs.length) return g;
-        [tabs[idx], tabs[newIdx]] = [tabs[newIdx], tabs[idx]];
-        return { ...g, tabs };
-      });
-      onSessionChange({ ...session, groups, updatedAt: now() });
+    const next = moveTabInGroup(session, tabId, direction, contextGroupId);
+    if (next !== session) {
+      onSessionChange({ ...next, updatedAt: now() });
     }
   }
 
@@ -147,32 +131,10 @@ export function useTabTreeEditor(session: Session, onSessionChange: (updated: Se
   }
 
   function moveTabToGroup(tabId: string, sourceGroupId: string | null, targetGroupId: string | null) {
-    let tab: SavedTab | undefined;
-    let newUngrouped = session.ungroupedTabs;
-    let newGroups = session.groups;
-
-    if (sourceGroupId === null) {
-      tab = session.ungroupedTabs.find((t) => t.id === tabId);
-      newUngrouped = session.ungroupedTabs.filter((t) => t.id !== tabId);
-    } else {
-      const group = session.groups.find((g) => g.id === sourceGroupId);
-      tab = group?.tabs.find((t) => t.id === tabId);
-      newGroups = session.groups.map((g) =>
-        g.id === sourceGroupId ? { ...g, tabs: g.tabs.filter((t) => t.id !== tabId) } : g
-      );
+    const next = reassignTabToGroup(session, tabId, sourceGroupId, targetGroupId);
+    if (next !== session) {
+      onSessionChange({ ...next, updatedAt: now() });
     }
-
-    if (!tab) return;
-
-    if (targetGroupId === null) {
-      newUngrouped = [...newUngrouped, tab];
-    } else {
-      newGroups = newGroups.map((g) =>
-        g.id === targetGroupId ? { ...g, tabs: [...g.tabs, tab!] } : g
-      );
-    }
-
-    onSessionChange({ ...session, ungroupedTabs: newUngrouped, groups: newGroups, updatedAt: now() });
   }
 
   function handleDeleteTab(tabId: string, sourceGroupId: string | null) {
