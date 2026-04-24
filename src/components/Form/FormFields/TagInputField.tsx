@@ -1,6 +1,6 @@
-import { Badge, Flex, IconButton, Text, TextField } from '@radix-ui/themes';
+import { Badge, Flex, IconButton, Text } from '@radix-ui/themes';
 import { X } from 'lucide-react';
-import { useRef, useState, type KeyboardEvent, type ChangeEvent } from 'react';
+import { useId, useRef, useState, type KeyboardEvent, type ChangeEvent } from 'react';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
 import { FieldLabel } from './FieldLabel';
 import { FieldError } from './FieldError';
@@ -38,10 +38,30 @@ export function TagInputField<T extends FieldValues>({
 }: TagInputFieldProps<T>) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
+  const [announcement, setAnnouncement] = useState('');
+  const inputId = useId();
 
   return (
     <Flex direction="column" gap="1">
       <FieldLabel required={required}>{label}</FieldLabel>
+
+      {/* Visually hidden live region for screen reader announcements */}
+      <span
+        aria-live="polite"
+        aria-atomic="true"
+        style={{
+          position: 'absolute',
+          width: '1px',
+          height: '1px',
+          overflow: 'hidden',
+          clip: 'rect(0,0,0,0)',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {announcement}
+      </span>
+
       <Controller
         name={name}
         control={control}
@@ -52,7 +72,6 @@ export function TagInputField<T extends FieldValues>({
             const raw = draft.trim();
             if (!raw) return;
             if (validateTag && !validateTag.test(raw)) {
-              // Reset the draft so invalid text is not persisted silently.
               setDraft('');
               return;
             }
@@ -64,6 +83,7 @@ export function TagInputField<T extends FieldValues>({
               return;
             }
             field.onChange([...tags, raw]);
+            setAnnouncement(`Tag added: ${raw}`);
             setDraft('');
           };
 
@@ -75,13 +95,14 @@ export function TagInputField<T extends FieldValues>({
             }
             if (event.key === 'Backspace' && draft === '' && tags.length > 0) {
               event.preventDefault();
+              const removed = tags[tags.length - 1];
               field.onChange(tags.slice(0, -1));
+              setAnnouncement(`Tag removed: ${removed}`);
             }
           };
 
           const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
             const value = event.target.value;
-            // Accept paste or typing that contains a comma as a separator.
             if (value.includes(',')) {
               const parts = value.split(',').map(p => p.trim()).filter(Boolean);
               const additions: string[] = [];
@@ -95,6 +116,11 @@ export function TagInputField<T extends FieldValues>({
               }
               if (additions.length > 0) {
                 field.onChange([...tags, ...additions]);
+                setAnnouncement(
+                  additions.length === 1
+                    ? `Tag added: ${additions[0]}`
+                    : `${additions.length} tags added`,
+                );
               }
               setDraft('');
               return;
@@ -103,50 +129,74 @@ export function TagInputField<T extends FieldValues>({
           };
 
           const removeTag = (index: number) => {
-            const next = tags.filter((_, i) => i !== index);
-            field.onChange(next);
+            const removed = tags[index];
+            field.onChange(tags.filter((_, i) => i !== index));
+            setAnnouncement(`Tag removed: ${removed}`);
             inputRef.current?.focus();
           };
 
           return (
-            <Flex direction="column" gap="2">
-              {tags.length > 0 && (
-                <Flex gap="1" wrap="wrap" role="list">
-                  {tags.map((tag, index) => (
-                    <Badge
-                      key={`${tag}-${index}`}
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '4px 8px',
+                minHeight: '32px',
+                borderRadius: 'var(--radius-2)',
+                boxShadow: isFocused
+                  ? 'inset 0 0 0 1px var(--accent-8), 0 0 0 1px var(--accent-8)'
+                  : 'inset 0 0 0 1px var(--gray-a7)',
+                backgroundColor: 'var(--color-surface)',
+                cursor: 'text',
+              }}
+            >
+              {tags.map((tag, index) => (
+                <Badge
+                  key={`${tag}-${index}`}
+                  color="gray"
+                  variant="soft"
+                  style={{ paddingRight: 2 }}
+                >
+                  <Flex align="center" gap="1">
+                    <Text size="1">{tag}</Text>
+                    <IconButton
+                      type="button"
+                      size="1"
+                      variant="ghost"
                       color="gray"
-                      variant="soft"
-                      role="listitem"
-                      style={{ paddingRight: 2 }}
+                      aria-label={`${removeTagAriaLabel}: ${tag}`}
+                      onClick={(e) => { e.stopPropagation(); removeTag(index); }}
                     >
-                      <Flex align="center" gap="1">
-                        <Text size="1">{tag}</Text>
-                        <IconButton
-                          type="button"
-                          size="1"
-                          variant="ghost"
-                          color="gray"
-                          aria-label={`${removeTagAriaLabel}: ${tag}`}
-                          onClick={() => removeTag(index)}
-                        >
-                          <X size={12} aria-hidden="true" />
-                        </IconButton>
-                      </Flex>
-                    </Badge>
-                  ))}
-                </Flex>
-              )}
-              <TextField.Root
+                      <X size={12} aria-hidden="true" />
+                    </IconButton>
+                  </Flex>
+                </Badge>
+              ))}
+              <input
+                id={inputId}
                 ref={inputRef}
                 value={draft}
                 onChange={handleChange}
                 onKeyDown={handleKeyDown}
-                onBlur={commitDraft}
-                placeholder={placeholder}
+                onBlur={() => { commitDraft(); setIsFocused(false); }}
+                onFocus={() => setIsFocused(true)}
+                placeholder={tags.length === 0 ? placeholder : undefined}
                 aria-label={label}
+                style={{
+                  border: 'none',
+                  outline: 'none',
+                  background: 'transparent',
+                  flex: '1 1 80px',
+                  minWidth: '80px',
+                  fontSize: 'var(--font-size-2)',
+                  lineHeight: 'var(--line-height-2)',
+                  color: 'var(--gray-12)',
+                  padding: '2px 0',
+                }}
               />
-            </Flex>
+            </div>
           );
         }}
       />
