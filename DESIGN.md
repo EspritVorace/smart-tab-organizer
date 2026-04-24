@@ -39,7 +39,7 @@ import { Theme } from '@radix-ui/themes';
 </Theme>
 ```
 
-`src/utils/themeConstants.ts` expose `FEATURE_THEMES` et `FEATURE_BASE_COLORS` : **tous pointent vers `indigo`**. Les wrappers par feature dans `src/components/Form/themes/index.tsx` (`DomainRulesTheme`, `SessionsTheme`, etc.) existent pour compat mais n'appliquent plus d'accent differencie.
+Accent unique `indigo` applique au `<Theme>` racine. Les wrappers par feature dans `src/components/Form/themes/index.tsx` (`DomainRulesTheme`, `SessionsTheme`, etc.) existent pour compat mais n'appliquent plus d'accent differencie.
 
 ### Regle
 
