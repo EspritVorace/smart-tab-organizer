@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Box } from '@radix-ui/themes';
 import { FileUp } from 'lucide-react';
 import { ImportTheme } from '@/components/Form/themes';
@@ -14,6 +14,7 @@ import { SourceStep, ImportedNoteCallout, useJsonSourceInput } from './Source';
 import { ImportWizardFooter } from './ImportWizardFooter';
 import {
   useImportClassification,
+  computeImportCount,
   ClassificationGroup,
   ClassificationScrollArea,
   ConflictModeSelector,
@@ -64,13 +65,14 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
     setStep(1);
   }, [source.parsedData, existingRules, classificationState, newRuleSelection]);
 
-  // Compute import count
-  const importCount = useMemo(() => {
-    if (!classification) return 0;
-    const newCount = classification.newRules.filter(r => newRuleSelection.has(r.id)).length;
-    const conflictCount = conflictMode === 'ignore' ? 0 : classification.conflictingRules.length;
-    return newCount + conflictCount;
-  }, [classification, newRuleSelection, conflictMode]);
+  const importCount = classification
+    ? computeImportCount(
+        classification.newRules,
+        classification.conflictingRules.length,
+        newRuleSelection,
+        conflictMode,
+      )
+    : 0;
 
   // Execute import
   const executeImport = useCallback(() => {
