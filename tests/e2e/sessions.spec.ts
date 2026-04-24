@@ -11,6 +11,7 @@ import {
   createTestSession,
   createPinnedSession,
 } from './helpers/seed';
+import { auditPage } from './helpers/a11y';
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
@@ -31,6 +32,7 @@ test.describe('[US-O01] Empty state', () => {
     await expect(
       page.getByText(/snapshot|profile/i).first(),
     ).toBeVisible();
+    await auditPage(page, 'sessions-empty-state');
     await page.close();
   });
 
@@ -71,6 +73,7 @@ test.describe('[US-S02] Session list', () => {
     await expect(page.getByText('My Work Tabs')).toBeVisible();
     // 2 tabs in group + 1 ungrouped = 3 tabs total
     await expect(page.getByText(/3 tab/i)).toBeVisible();
+    await auditPage(page, 'sessions-list-populated');
     await page.close();
   });
 
@@ -436,6 +439,7 @@ test.describe('[US-S04][US-S06] Restore — More actions menu', () => {
 
     await expect(page.getByRole('dialog')).toBeVisible();
     await expect(page.getByRole('dialog').getByText(/Restore/).first()).toBeVisible();
+    await auditPage(page, 'sessions-restore-wizard-dialog', { include: '[role="dialog"]' });
     await page.close();
   });
 

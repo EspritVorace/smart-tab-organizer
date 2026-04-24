@@ -10,6 +10,7 @@ import {
   createTestSession,
   createPinnedSession,
 } from './helpers/seed';
+import { auditPage } from './helpers/a11y';
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
@@ -92,6 +93,7 @@ test.describe('[US-PO02] Pinned sessions list', () => {
 
     await expect(page.getByText('Pinned sessions')).toBeHidden();
     await expect(page.getByTestId('popup-pinned-empty-toggle')).toBeHidden();
+    await auditPage(page, 'popup-empty-state');
     await page.close();
   });
 
@@ -115,6 +117,7 @@ test.describe('[US-PO02] Pinned sessions list', () => {
 
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
+    await auditPage(page, 'popup-with-pinned-sessions');
 
     await expect(page.getByText('Pinned sessions')).toBeVisible();
     await expect(page.getByText('My Pinned Session')).toBeVisible();

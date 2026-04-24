@@ -10,6 +10,7 @@ playwright-report/
 test-results/
 ctrf/
 coverage/
+reports/a11y/
 .jscpd-report/
 design-system-bundle/
 design-system-bundle.zip

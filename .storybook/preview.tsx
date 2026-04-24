@@ -3,17 +3,27 @@ import type { Preview } from '@storybook/react'
 import { Theme } from '@radix-ui/themes'
 import '../src/styles/radix-themes.css'
 
-// Cache pour les messages (exposé globalement pour le mock)
-(globalThis as any).messagesCache = {};
-const messagesCache = (globalThis as any).messagesCache;
+type LocaleMessages = Record<string, { message: string }>;
+type MessagesCache = Record<string, LocaleMessages>;
+interface MockBrowser {
+  i18n: { getMessage: (key: string) => string };
+}
+interface StorybookGlobals {
+  messagesCache?: MessagesCache;
+  currentLocale?: string;
+  browser?: MockBrowser;
+}
 
-// Fonction pour charger les messages
-async function loadMessages(locale: string) {
+const globals = globalThis as typeof globalThis & StorybookGlobals;
+globals.messagesCache = globals.messagesCache ?? {};
+const messagesCache = globals.messagesCache;
+
+async function loadMessages(locale: string): Promise<LocaleMessages> {
   if (!messagesCache[locale]) {
     try {
       const response = await fetch(`/_locales/${locale}/messages.json`);
       messagesCache[locale] = await response.json();
-    } catch (error) {
+    } catch (_error) {
       console.warn(`Could not load messages for locale ${locale}`);
       messagesCache[locale] = {};
     }
@@ -21,23 +31,20 @@ async function loadMessages(locale: string) {
   return messagesCache[locale];
 }
 
-// Mock pour le module wxt/browser
-const mockBrowser = {
+const mockBrowser: MockBrowser = {
   i18n: {
     getMessage: (key: string) => {
-      const locale = (global as any).currentLocale || 'en';
-      const messages = messagesCache[locale] || {};
-      return messages[key]?.message || key;
+      const locale = globals.currentLocale ?? 'en';
+      const messages = messagesCache[locale] ?? {};
+      return messages[key]?.message ?? key;
     }
   }
 };
 
-// Mock global pour wxt/browser
-(global as any).browser = mockBrowser;
+globals.browser = mockBrowser;
 
-// Mock pour les imports ES6 de wxt/browser
 if (typeof window !== 'undefined') {
-  (window as any).browser = mockBrowser;
+  (window as typeof window & { browser?: MockBrowser }).browser = mockBrowser;
 }
 
 // Fonction pour détecter la langue du navigateur
@@ -72,6 +79,28 @@ const preview: Preview = {
       matchers: {
        color: /(background|color)$/i,
        date: /Date$/i,
+      },
+    },
+    // axe-core configuration (shared with the Playwright helper in tests/e2e/helpers/a11y.ts).
+    // Per-story overrides: set `parameters.a11y.config.rules = [{ id: 'rule-id', enabled: false }]`
+    // and add a JSDoc-style comment explaining why the rule is disabled.
+    a11y: {
+      config: {
+        // Page-level landmark rules: meaningful on a full document, never true on
+        // an isolated component rendered in a Storybook iframe. They remain active
+        // in the Playwright E2E audit (tests/e2e/helpers/a11y.ts) where the full
+        // page layout is exercised.
+        rules: [
+          { id: 'region', enabled: false },
+          { id: 'landmark-one-main', enabled: false },
+          { id: 'page-has-heading-one', enabled: false },
+        ],
+      },
+      options: {
+        runOnly: {
+          type: 'tag',
+          values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'],
+        },
       },
     },
   },
@@ -109,7 +138,7 @@ const preview: Preview = {
       
       React.useEffect(() => {
         if (context.globals.locale) {
-          (globalThis as any).currentLocale = context.globals.locale;
+          globals.currentLocale = context.globals.locale;
           setMessagesLoaded(false);
           loadMessages(context.globals.locale).then(() => {
             setMessagesLoaded(true);

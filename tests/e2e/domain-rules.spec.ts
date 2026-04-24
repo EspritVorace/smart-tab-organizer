@@ -9,6 +9,7 @@
  */
 import { test, expect } from './fixtures';
 import { goToDomainRulesSection } from './helpers/navigation';
+import { auditPage } from './helpers/a11y';
 
 test.beforeEach(async ({ helpers }) => {
   await helpers.clearDomainRules();
@@ -27,6 +28,7 @@ test.describe('Domain rule more-actions menu', () => {
     await expect(
       page.getByRole('row', { name: /Jira\/Atlassian/i }).getByLabel('More actions'),
     ).toBeVisible();
+    await auditPage(page, 'domain-rules-list-populated');
     await page.close();
   });
 

@@ -7,7 +7,8 @@ const config: StorybookConfig = {
     "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
   ],
   "addons": [
-    "@storybook/addon-docs"
+    "@storybook/addon-docs",
+    "@storybook/addon-a11y"
   ],
   "framework": {
     "name": "@storybook/react-vite",
@@ -15,6 +16,12 @@ const config: StorybookConfig = {
   },
   staticDirs: ['../public'],
   async viteFinal(config) {
+    // Disable Vite's automatic publicDir detection: staticDirs already copies
+    // ../public, and letting Vite do it in parallel triggers an EEXIST race
+    // when sibling sub-directories (_locales/fr, _locales/es, ...) get mkdir'd
+    // twice during the build.
+    config.publicDir = false;
+
     // Mock pour wxt/browser dans Storybook
     config.resolve = config.resolve || {};
     config.resolve.alias = {
