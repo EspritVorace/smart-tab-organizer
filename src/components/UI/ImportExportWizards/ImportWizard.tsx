@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Box, Button, Dialog } from '@radix-ui/themes';
+import { Box } from '@radix-ui/themes';
 import { FileUp } from 'lucide-react';
 import { ImportTheme } from '@/components/Form/themes';
 import { getMessage } from '@/utils/i18n';
@@ -11,6 +11,7 @@ import type { DomainRuleSetting } from '@/types/syncSettings';
 import { WizardModal } from '@/components/UI/WizardModal';
 import { useDialogReset } from './Shared';
 import { SourceStep, ImportedNoteCallout, useJsonSourceInput } from './Source';
+import { ImportWizardFooter } from './ImportWizardFooter';
 import {
   useImportClassification,
   ClassificationGroup,
@@ -188,26 +189,14 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
         </WizardModal.Body>
 
         <WizardModal.Footer>
-          {step === 0 && (
-            <>
-              <Dialog.Close>
-                <Button variant="soft" color="gray">{getMessage('cancel')}</Button>
-              </Dialog.Close>
-              <Button onClick={goToStep1} disabled={!source.parsedData}>
-                {getMessage('next')}
-              </Button>
-            </>
-          )}
-          {step === 1 && (
-            <>
-              <Button variant="soft" color="gray" onClick={() => setStep(0)}>
-                {getMessage('previous')}
-              </Button>
-              <Button onClick={executeImport} disabled={importCount === 0}>
-                {getMessage('confirmImport')}
-              </Button>
-            </>
-          )}
+          <ImportWizardFooter
+            step={step as 0 | 1}
+            hasParsedData={!!source.parsedData}
+            importCount={importCount}
+            onNext={goToStep1}
+            onBack={() => setStep(0)}
+            onConfirm={executeImport}
+          />
         </WizardModal.Footer>
       </WizardModal>
     </ImportTheme>
