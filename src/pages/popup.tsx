@@ -11,9 +11,7 @@ import { PopupToolbar } from '@/components/UI/PopupToolbar/PopupToolbar';
 import { PopupProfilesList } from '@/components/UI/PopupProfilesList/PopupProfilesList';
 import { useSettings } from '@/hooks/useSettings';
 
-(() => {
-
-function PopupContent() {
+export function PopupContent() {
   const { settings, isLoaded, setGlobalGroupingEnabled, setGlobalDeduplicationEnabled } = useSettings();
 
   const openOptionsPage = useCallback(() => {
@@ -69,7 +67,7 @@ function PopupContent() {
   );
 }
 
-function PopupApp() {
+export function PopupApp() {
   return (
     <ThemeProvider
       attribute="class"
@@ -85,4 +83,3 @@ function PopupApp() {
 }
 
 mountExtensionApp('popup-app', <PopupApp />);
-})();

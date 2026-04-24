@@ -9,7 +9,6 @@ import { useSettings } from '@/hooks/useSettings.js';
 import { useStatistics } from '@/hooks/useStatistics.js';
 import { useDeepLinking } from '@/hooks/useDeepLinking.js';
 import { getMessage } from '@/utils/i18n';
-const version = browser.runtime.getManifest().version;
 
 import { Sidebar } from '@/components/UI/Sidebar/Sidebar';
 import type { SidebarItem } from '@/components/UI/Sidebar/Sidebar';
@@ -27,9 +26,9 @@ import { SessionsPage } from './SessionsPage';
 import { Toaster } from '@/components/UI/Toaster/Toaster';
 import type { DomainRuleSettings } from '@/types/syncSettings';
 
-(() => {
+export function OptionsContent() {
+    const version = browser.runtime.getManifest().version;
 
-function OptionsContent() {
     const { settings, updateSettings } = useSettings();
     const { statistics: stats, resetStatistics } = useStatistics();
     const {
@@ -127,7 +126,7 @@ function OptionsContent() {
     );
 }
 
-function OptionsApp() {
+export function OptionsApp() {
     return (
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             <Theme>
@@ -139,4 +138,3 @@ function OptionsApp() {
 }
 
 mountExtensionApp('options-app', <OptionsApp />);
-})();

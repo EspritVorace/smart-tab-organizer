@@ -1,7 +1,8 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { composeStories } from '@storybook/react';
 import * as stories from '../../src/components/UI/Sidebar/Sidebar.stories';
+import { SidebarSearch } from '../../src/components/UI/Sidebar/SidebarSearch';
 
 const {
   SidebarDefault,
@@ -70,5 +71,34 @@ describe('Sidebar — static renders', () => {
   it('renders the complete sidebar with all features', () => {
     render(<SidebarComplete />);
     expect(screen.getByText('Analytics')).toBeInTheDocument();
+  });
+});
+
+describe('SidebarSearch', () => {
+  it('retourne null quand isCollapsed=true', () => {
+    const { container } = render(<SidebarSearch isCollapsed={true} />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('appelle onSearch avec la valeur courante quand Enter est pressé', () => {
+    const onSearch = vi.fn();
+    render(<SidebarSearch value="test" onSearch={onSearch} />);
+    const input = screen.getByPlaceholderText('Search...');
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(onSearch).toHaveBeenCalledWith('test');
+  });
+
+  it("n'appelle pas onSearch quand une autre touche est pressée", () => {
+    const onSearch = vi.fn();
+    render(<SidebarSearch value="test" onSearch={onSearch} />);
+    const input = screen.getByPlaceholderText('Search...');
+    fireEvent.keyDown(input, { key: 'a' });
+    expect(onSearch).not.toHaveBeenCalled();
+  });
+
+  it("n'appelle pas onSearch quand onSearch n'est pas fourni", () => {
+    render(<SidebarSearch value="test" />);
+    const input = screen.getByPlaceholderText('Search...');
+    expect(() => fireEvent.keyDown(input, { key: 'Enter' })).not.toThrow();
   });
 });
