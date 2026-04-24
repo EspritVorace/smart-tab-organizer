@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Box, Button, Dialog } from '@radix-ui/themes';
+import { Box } from '@radix-ui/themes';
 import { FileDown } from 'lucide-react';
 import { ExportTheme } from '@/components/Form/themes';
 import type { DomainRuleSetting } from '@/types/syncSettings';
@@ -8,7 +8,7 @@ import { WizardModal } from '@/components/UI/WizardModal';
 import { CountLabel, useDialogReset, useToggleSet } from './Shared';
 import {
   ExportNoteField,
-  ExportSplitButton,
+  ExportWizardFooter,
   SelectableListContainer,
   SelectionToolbar,
   useExportActions,
@@ -86,10 +86,7 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
         </WizardModal.Body>
 
         <WizardModal.Footer>
-          <Dialog.Close>
-            <Button variant="soft" color="gray">{getMessage('cancel')}</Button>
-          </Dialog.Close>
-          <ExportSplitButton
+          <ExportWizardFooter
             labelKey="exportButton"
             actions={actions}
             disabled={selection.size === 0}
