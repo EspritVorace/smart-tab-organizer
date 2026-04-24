@@ -86,7 +86,15 @@ const preview: Preview = {
     // and add a JSDoc-style comment explaining why the rule is disabled.
     a11y: {
       config: {
-        rules: [],
+        // Page-level landmark rules: meaningful on a full document, never true on
+        // an isolated component rendered in a Storybook iframe. They remain active
+        // in the Playwright E2E audit (tests/e2e/helpers/a11y.ts) where the full
+        // page layout is exercised.
+        rules: [
+          { id: 'region', enabled: false },
+          { id: 'landmark-one-main', enabled: false },
+          { id: 'page-has-heading-one', enabled: false },
+        ],
       },
       options: {
         runOnly: {
