@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
-import { createRoot } from 'react-dom/client';
 import { browser } from 'wxt/browser';
+import { mountExtensionApp } from '@/utils/mountExtensionApp.js';
 import { Box, Flex, Separator, Theme } from '@radix-ui/themes';
 import { ThemeProvider } from 'next-themes';
 
@@ -84,12 +84,5 @@ function PopupApp() {
   );
 }
 
-// Set document lang to match browser locale for screen readers
-try {
-  const uiLang = browser.i18n.getUILanguage();
-  if (uiLang) document.documentElement.lang = uiLang;
-} catch (_) { /* fallback to HTML default */ }
-
-const root = createRoot(document.getElementById('popup-app')!);
-root.render(<PopupApp />);
+mountExtensionApp('popup-app', <PopupApp />);
 })();
