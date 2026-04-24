@@ -1,7 +1,7 @@
 // options/options.ts
 import React, { useCallback } from 'react';
-import { createRoot } from 'react-dom/client';
 import { browser } from 'wxt/browser';
+import { mountExtensionApp } from '@/utils/mountExtensionApp.js';
 import { Flex, Spinner, Text, Theme } from '@radix-ui/themes';
 import { ThemeProvider } from 'next-themes';
 
@@ -138,12 +138,5 @@ function OptionsApp() {
     );
 }
 
-// Set document lang to match browser locale for screen readers
-  try {
-    const uiLang = browser.i18n.getUILanguage();
-    if (uiLang) document.documentElement.lang = uiLang;
-  } catch (_) { /* fallback to HTML default */ }
-
-  const root = createRoot(document.getElementById('options-app'));
-  root.render(<OptionsApp />);
+mountExtensionApp('options-app', <OptionsApp />);
 })();
