@@ -62,6 +62,13 @@ describe('settingsUtils', () => {
       const stored = await fakeBrowser.storage.local.get(null);
       expect(stored.globalGroupingEnabled).toBe(false);
     });
+
+    it("ne lance pas d'erreur si storage.set échoue", async () => {
+      vi.spyOn(fakeBrowser.storage.local, 'set').mockRejectedValueOnce(
+        new Error('Storage write error'),
+      );
+      await expect(setSettings(defaultAppSettings)).resolves.toBeUndefined();
+    });
   });
 
   describe('updateSettings', () => {
@@ -82,6 +89,13 @@ describe('settingsUtils', () => {
       expect(settings.deduplicateUnmatchedDomains).toBe(true);
       // Autres champs inchangés (valeurs par défaut conservées)
       expect(settings.globalDeduplicationEnabled).toBe(true);
+    });
+
+    it("ne lance pas d'erreur si storage.set échoue", async () => {
+      vi.spyOn(fakeBrowser.storage.local, 'set').mockRejectedValueOnce(
+        new Error('Storage write error'),
+      );
+      await expect(updateSettings({ globalGroupingEnabled: false })).resolves.toBeUndefined();
     });
   });
 

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import { waitFor } from '@testing-library/react';
 import { fakeBrowser } from 'wxt/testing';
 import {
   getStatisticsData,
@@ -132,6 +133,13 @@ describe('statisticsUtils', () => {
       const stats = await getStatisticsData();
       expect(stats).toEqual(defaultStatistics);
     });
+
+    it("ne lance pas d'erreur si setStatisticsData échoue", async () => {
+      vi.spyOn(fakeBrowser.storage.local, 'set').mockRejectedValueOnce(
+        new Error('Storage write error'),
+      );
+      await expect(resetStatisticsData()).resolves.toBeUndefined();
+    });
   });
 
   describe('watchStatisticsData', () => {
@@ -144,6 +152,22 @@ describe('statisticsUtils', () => {
     it('la fonction de cleanup peut être appelée sans erreur', () => {
       const unwatch = watchStatisticsData(vi.fn());
       expect(() => unwatch()).not.toThrow();
+    });
+
+    it('invoque le callback avec les données fusionnées aux défauts quand le storage change', async () => {
+      const callback = vi.fn();
+      const unwatch = watchStatisticsData(callback);
+
+      await setStatisticsData({ tabGroupsCreatedCount: 3, tabsDeduplicatedCount: 1 });
+
+      await waitFor(() => {
+        expect(callback).toHaveBeenCalled();
+      });
+
+      expect(callback).toHaveBeenCalledWith(
+        expect.objectContaining({ tabGroupsCreatedCount: 3, tabsDeduplicatedCount: 1 }),
+      );
+      unwatch();
     });
   });
 });
