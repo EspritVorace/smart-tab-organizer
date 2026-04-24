@@ -1,4 +1,4 @@
-export { useImportClassification, type ImportClassificationState, type ConflictMode } from './useImportClassification';
+export { useImportClassification, computeImportCount, type ImportClassificationState, type ConflictMode } from './useImportClassification';
 export { ConflictModeSelector } from './ConflictModeSelector';
 export { ClassificationGroup } from './ClassificationGroup';
 export { ClassificationScrollArea } from './ClassificationScrollArea';

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Box } from '@radix-ui/themes';
 import { Upload } from 'lucide-react';
 import { SessionsTheme } from '@/components/Form/themes';
@@ -20,6 +20,7 @@ import { SourceStep, ImportedNoteCallout, useJsonSourceInput } from './Source';
 import { ImportWizardFooter } from './ImportWizardFooter';
 import {
   useImportClassification,
+  computeImportCount,
   ClassificationGroup,
   ClassificationScrollArea,
   ConflictModeSelector,
@@ -80,12 +81,14 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
     setStep(1);
   }, [source.parsedData, existingSessions, classificationState, newSessionSelection]);
 
-  const importCount = useMemo(() => {
-    if (!classification) return 0;
-    const newCount = classification.newSessions.filter(s => newSessionSelection.has(s.id)).length;
-    const conflictCount = conflictMode === 'ignore' ? 0 : classification.conflictingSessions.length;
-    return newCount + conflictCount;
-  }, [classification, newSessionSelection, conflictMode]);
+  const importCount = classification
+    ? computeImportCount(
+        classification.newSessions,
+        classification.conflictingSessions.length,
+        newSessionSelection,
+        conflictMode,
+      )
+    : 0;
 
   const executeImport = useCallback(async () => {
     if (!classification) return;
