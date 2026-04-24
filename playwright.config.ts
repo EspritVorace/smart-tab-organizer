@@ -25,6 +25,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 1, // Retry once locally too
   workers,
   timeout: 30000, // Timeout for extension loading
+  globalTeardown: './tests/e2e/helpers/a11y-teardown.ts',
 
   use: {
     trace: 'on-first-retry',

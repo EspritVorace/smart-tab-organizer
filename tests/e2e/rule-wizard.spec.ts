@@ -7,6 +7,7 @@
  */
 import { test, expect } from './fixtures';
 import { goToDomainRulesSection } from './helpers/navigation';
+import { auditPage } from './helpers/a11y';
 
 test.beforeEach(async ({ helpers }) => {
   await helpers.clearDomainRules();
@@ -48,6 +49,7 @@ test.describe('Creation wizard — Step 1: Identity', () => {
     await expect(dialog.getByTestId('wizard-rule-field-domain')).toBeVisible();
     // WizardStepper visible with 4 steps
     await expect(dialog.getByTestId('wizard-rule-stepper')).toBeVisible();
+    await auditPage(page, 'rule-wizard-step-1-identity', { include: '[role="dialog"]' });
     await page.close();
   });
 
@@ -139,6 +141,7 @@ test.describe('Creation wizard — Step 2: Configuration', () => {
     // (it renders a trigger button with the placeholder text)
     const presetTrigger = dialog.locator('#presetId');
     await expect(presetTrigger).toBeVisible();
+    await auditPage(page, 'rule-wizard-step-2-configuration', { include: '[role="dialog"]' });
     await page.close();
   });
 
@@ -215,6 +218,7 @@ test.describe('Creation wizard — Step 3: Options', () => {
     await expect(switchEl).toBeVisible();
     // Switch is checked (dedup enabled by default)
     await expect(switchEl).toHaveAttribute('data-state', 'checked');
+    await auditPage(page, 'rule-wizard-step-3-options', { include: '[role="dialog"]' });
     await page.close();
   });
 
@@ -284,6 +288,7 @@ test.describe('Creation wizard — Step 4: Summary', () => {
     // Three "Modify" buttons (one per section)
     const modifyButtons = dialog.getByRole('button', { name: /modify/i });
     await expect(modifyButtons).toHaveCount(3);
+    await auditPage(page, 'rule-wizard-step-4-summary', { include: '[role="dialog"]' });
     await page.close();
   });
 

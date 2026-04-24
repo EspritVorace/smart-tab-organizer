@@ -14,6 +14,7 @@
  */
 
 import { test, expect } from './fixtures';
+import { auditPage } from './helpers/a11y';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -103,12 +104,14 @@ test.describe('Import / Export', () => {
     }) => {
       const page = await extensionContext.newPage();
       await goToImportExportSection(page, extensionId);
+      await auditPage(page, 'import-export-landing');
       await openImportWizard(page);
 
       const dialog = page.getByRole('dialog');
       // Both mode tabs should be visible
       await expect(dialog.getByRole('radio', { name: 'File' }).locator('..')).toBeVisible();
       await expect(dialog.getByRole('radio', { name: 'Text' }).locator('..')).toBeVisible();
+      await auditPage(page, 'import-wizard-source-step', { include: '[role="dialog"]' });
 
       await page.close();
     });

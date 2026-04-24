@@ -5,6 +5,7 @@
 import { test, expect } from './fixtures';
 import { goToSessionsSection } from './helpers/navigation';
 import { seedSessions, clearSessions, getSessionsFromStorage, createTestSession } from './helpers/seed';
+import { auditPage } from './helpers/a11y';
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
@@ -29,6 +30,7 @@ test.describe('[US-E01] Opening', () => {
 
     await expect(page.getByTestId('dialog-session-edit')).toBeVisible();
     await expect(page.getByText('Edit Session')).toBeVisible();
+    await auditPage(page, 'session-editor-dialog-open', { include: '[role="dialog"]' });
     await page.close();
   });
 

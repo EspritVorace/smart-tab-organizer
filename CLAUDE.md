@@ -127,6 +127,30 @@ logger.debug('[MY_MODULE] Something happened:', value);
 - Story titles mirror folder: `Components/Core/Session/SessionCard`
 - Prefix all exports with component name: `SessionCardDefault`, `SessionCardDisabled` (avoids conflicts)
 
+### Accessibility audits (axe-core)
+Two layers run axe-core and feed a consolidated report:
+
+- **Storybook** : `@storybook/addon-a11y` (panel live en dev) plus `@storybook/test-runner` qui exécute axe sur chaque story en CI.
+- **Playwright E2E** : helper `tests/e2e/helpers/a11y.ts` (`auditPage`) instrumente les specs existantes aux points clés. No-op tant que `A11Y_ENABLED=true` n'est pas dans l'environnement.
+
+Scripts :
+```bash
+pnpm a11y:storybook   # build Storybook, lance test-runner + axe
+pnpm a11y:e2e         # build extension, lance Playwright avec A11Y_ENABLED=true
+pnpm a11y             # enchaîne storybook, e2e, puis consolidation
+pnpm a11y:report      # lit les deux rapports et génère reports/a11y/summary.md
+```
+
+Rapports (gitignorés, dossier `reports/a11y/`) :
+- `storybook-a11y.json`, `e2e-a11y.json` : sorties brutes.
+- `summary.md`, `summary.json` : synthèse consolidée (tableau, top 10, diff baseline si `reports/a11y/baseline.json` existe).
+
+Seuil d'échec configurable via `A11Y_FAIL_LEVEL` (valeurs : `minor`, `moderate`, `serious` (défaut), `critical`, `none`).
+
+Pour désactiver une règle axe localement (à accompagner d'un commentaire justificatif) :
+- Story : `parameters.a11y.config.rules = [{ id: 'aria-allowed-attr', enabled: false }]`.
+- E2E : `await auditPage(page, 'label', { disableRules: ['region'] });`.
+
 ### Style d'écriture
 - **Ne jamais utiliser de tiret cadratin (`—`, U+2014) ni de tiret demi-cadratin (`–`, U+2013)** dans les contenus textuels (docs, UI, commentaires, commit messages, PR descriptions, frontmatter, etc.).
 - Préférer une reformulation : parenthèses `(...)`, virgules, deux-points `:`, ou phrases séparées.
