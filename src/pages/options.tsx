@@ -21,7 +21,6 @@ import { SettingsPage } from '@/components/UI/SettingsPage/SettingsPage';
 import { ImportExportPage } from './ImportExportPage';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
 import { Shield, FileText, BarChart3, Settings, Archive } from 'lucide-react';
-import { FEATURE_BASE_COLORS } from '@/utils/themeConstants';
 import { SessionsPage } from './SessionsPage';
 import { Toaster } from '@/components/UI/Toaster/Toaster';
 import type { DomainRuleSettings } from '@/types/syncSettings';
@@ -53,11 +52,11 @@ export function OptionsContent() {
     }, [setCurrentTab]);
 
     const sidebarItems: SidebarItem[] = [
-        { id: 'rules', label: getMessage('domainRulesTab'), icon: Shield, accentColor: FEATURE_BASE_COLORS.DOMAIN_RULES },
-        { id: 'sessions', label: getMessage('sessionsTab'), icon: Archive, accentColor: FEATURE_BASE_COLORS.SESSIONS },
-        { id: 'importexport', label: getMessage('importExportTab'), icon: FileText, accentColor: FEATURE_BASE_COLORS.IMPORT },
-        { id: 'stats', label: getMessage('statisticsTab'), icon: BarChart3, accentColor: FEATURE_BASE_COLORS.STATISTICS },
-        { id: 'settings', label: getMessage('settingsTab'), icon: Settings, accentColor: FEATURE_BASE_COLORS.SETTINGS },
+        { id: 'rules', label: getMessage('domainRulesTab'), icon: Shield, accentColor: 'indigo' },
+        { id: 'sessions', label: getMessage('sessionsTab'), icon: Archive, accentColor: 'indigo' },
+        { id: 'importexport', label: getMessage('importExportTab'), icon: FileText, accentColor: 'indigo' },
+        { id: 'stats', label: getMessage('statisticsTab'), icon: BarChart3, accentColor: 'indigo' },
+        { id: 'settings', label: getMessage('settingsTab'), icon: Settings, accentColor: 'indigo' },
     ];
 
     if (!settings) {
