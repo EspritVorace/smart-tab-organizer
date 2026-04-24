@@ -24,10 +24,6 @@ vi.mock('wxt/browser', () => ({
   },
 }));
 
-vi.mock('../../src/utils/mountExtensionApp.js', () => ({
-  mountExtensionApp: vi.fn(),
-}));
-
 vi.mock('../../src/hooks/useSettings', () => ({
   useSettings: vi.fn(),
 }));
@@ -43,15 +39,11 @@ vi.mock('../../src/components/UI/PopupProfilesList/PopupProfilesList', () => ({
 // ── Imports après mocks ───────────────────────────────────────────────────
 
 import { browser } from 'wxt/browser';
-import { mountExtensionApp } from '../../src/utils/mountExtensionApp.js';
 import { useSettings } from '../../src/hooks/useSettings';
-import '../../src/pages/popup';
+import { PopupApp } from '../../src/pages/popup';
 
-const mockedMount = mountExtensionApp as ReturnType<typeof vi.fn>;
 const mockedUseSettings = useSettings as ReturnType<typeof vi.fn>;
 const mockedTabsQuery = browser.tabs.query as ReturnType<typeof vi.fn>;
-
-const appElement = mockedMount.mock.calls[0][1];
 
 const defaultSettings = {
   domainRules: [],
@@ -72,15 +64,9 @@ beforeEach(() => {
 
 // ── Tests ─────────────────────────────────────────────────────────────────
 
-describe('popup.tsx IIFE', () => {
-  it("monte un composant React sur 'popup-app'", () => {
-    expect(appElement).toBeTruthy();
-  });
-});
-
 describe('PopupApp rendu', () => {
   it('affiche le header popup', () => {
-    render(appElement);
+    render(<PopupApp />);
     expect(screen.getByTestId('popup-header')).toBeInTheDocument();
   });
 
@@ -91,7 +77,7 @@ describe('PopupApp rendu', () => {
       setGlobalGroupingEnabled: vi.fn(),
       setGlobalDeduplicationEnabled: vi.fn(),
     });
-    render(appElement);
+    render(<PopupApp />);
     expect(screen.queryByTestId('settings-toggles')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'popupGoToRules' })).toBeInTheDocument();
   });
@@ -103,7 +89,7 @@ describe('PopupApp rendu', () => {
       setGlobalGroupingEnabled: vi.fn(),
       setGlobalDeduplicationEnabled: vi.fn(),
     });
-    render(appElement);
+    render(<PopupApp />);
     expect(screen.getByTestId('settings-toggles')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'popupGoToRules' })).not.toBeInTheDocument();
   });
@@ -115,7 +101,7 @@ describe('PopupApp rendu', () => {
       setGlobalGroupingEnabled: vi.fn(),
       setGlobalDeduplicationEnabled: vi.fn(),
     });
-    render(appElement);
+    render(<PopupApp />);
     expect(screen.queryByTestId('settings-toggles')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'popupGoToRules' })).not.toBeInTheDocument();
   });
@@ -123,7 +109,7 @@ describe('PopupApp rendu', () => {
 
 describe('openOptionsPage', () => {
   it('appelle browser.runtime.openOptionsPage au clic sur le bouton settings', () => {
-    render(appElement);
+    render(<PopupApp />);
     fireEvent.click(screen.getByTestId('popup-header-btn-settings'));
     expect(browser.runtime.openOptionsPage).toHaveBeenCalledTimes(1);
   });
@@ -142,7 +128,7 @@ describe('openRulesPage', () => {
 
   it("crée un nouvel onglet si aucun onglet options n'est ouvert", async () => {
     mockedTabsQuery.mockResolvedValue([]);
-    render(appElement);
+    render(<PopupApp />);
     fireEvent.click(screen.getByRole('button', { name: 'popupGoToRules' }));
     await waitFor(() => {
       expect(browser.tabs.create).toHaveBeenCalledWith(
@@ -154,7 +140,7 @@ describe('openRulesPage', () => {
 
   it("met à jour l'onglet existant si un onglet options est déjà ouvert", async () => {
     mockedTabsQuery.mockResolvedValue([{ id: 42, windowId: 1 }]);
-    render(appElement);
+    render(<PopupApp />);
     fireEvent.click(screen.getByRole('button', { name: 'popupGoToRules' }));
     await waitFor(() => {
       expect(browser.tabs.update).toHaveBeenCalledWith(
