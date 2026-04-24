@@ -45,9 +45,20 @@ function normaliseImpact(impact: string | null | undefined): Severity | null {
   return severityOrder.includes(impact as Severity) ? (impact as Severity) : null;
 }
 
+// Page-level rules that never fire meaningfully on an isolated component in a
+// Storybook iframe (no <main>, no <h1>, no enclosing landmark). They remain
+// active in the Playwright E2E audit where full page layouts are exercised.
+const DISABLED_RULES_FOR_STORYBOOK = ['region', 'landmark-one-main', 'page-has-heading-one'] as const;
+
 const config: TestRunnerConfig = {
   async preVisit(page) {
     await injectAxe(page);
+    // Disable page-level rules via axe.configure. Using the configure-level
+    // API (vs per-run options) makes the override apply to every subsequent
+    // getViolations call for this page instance.
+    await configureAxe(page, {
+      rules: DISABLED_RULES_FOR_STORYBOOK.map((id) => ({ id, enabled: false })),
+    });
   },
 
   async postVisit(page, context) {
@@ -68,24 +79,28 @@ const config: TestRunnerConfig = {
     const storyContext = await getStoryContext(page, context);
     type AxeParameters = {
       options?: Record<string, unknown>;
-      config?: Record<string, unknown>;
       disable?: boolean;
     };
     const a11yParameters = (storyContext.parameters?.a11y ?? {}) as AxeParameters;
 
     if (a11yParameters.disable) return;
 
-    // Apply the merged axe config (preview + story-level) before running the
-    // audit. The Storybook addon-a11y panel reads parameters.a11y.config
-    // itself, but the test-runner injects its own axe instance, so we have to
-    // propagate the config manually here.
-    await configureAxe(page, (a11yParameters.config ?? {}) as Parameters<typeof configureAxe>[1]);
+    // Merge per-run overrides from the story's parameters.a11y.options with a
+    // rules entry that mutes the page-level rules listed above. This covers the
+    // case where axe.configure (in preVisit) would be reset by another caller.
+    type RunOptions = Parameters<typeof getViolations>[2];
+    const storyOptions = (a11yParameters.options ?? {}) as RunOptions;
+    const mergedOptions: RunOptions = {
+      ...storyOptions,
+      rules: {
+        ...(storyOptions?.rules ?? {}),
+        ...Object.fromEntries(
+          DISABLED_RULES_FOR_STORYBOOK.map((id) => [id, { enabled: false }]),
+        ),
+      },
+    };
 
-    const violations = await getViolations(
-      page,
-      undefined,
-      (a11yParameters.options ?? {}) as Parameters<typeof getViolations>[2],
-    );
+    const violations = await getViolations(page, undefined, mergedOptions);
 
     const shard: StoryShard = {
       id: context.id,
