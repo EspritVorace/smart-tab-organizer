@@ -14,7 +14,7 @@ import { getMessage, getPluralMessage } from '@/utils/i18n';
 import { countSessionTabs, formatSessionDate } from '@/utils/sessionUtils';
 import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 import { chromeGroupColors } from '@/utils/tabTreeUtils';
-import { getRuleCategory } from '@/schemas/enums';
+import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
 import { getRadixColor } from '@/utils/utils';
 import { SessionPreviewTree } from './SessionPreviewTree';
 import { SessionRestoreButton } from './SessionRestoreButton/SessionRestoreButton';
@@ -306,7 +306,7 @@ export function SessionCard({
                 </IconButton>
                 {category && (
                   <Badge color={getRadixColor(category.color)} size="1" style={{ flexShrink: 0 }}>
-                    {category.emoji} {getMessage(category.labelKey)}
+                    {category.emoji} {getCategoryLabel(category)}
                   </Badge>
                 )}
               </>

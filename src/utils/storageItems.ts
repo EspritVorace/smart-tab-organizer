@@ -2,6 +2,7 @@ import { storage } from 'wxt/utils/storage';
 import type { DomainRuleSettings } from '@/types/syncSettings.js';
 import { defaultAppSettings } from '@/types/syncSettings.js';
 import type { DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
+import type { RuleCategory } from '@/schemas/category.js';
 import type { Statistics } from '@/types/statistics.js';
 import { defaultStatistics } from '@/types/statistics.js';
 import type { Session } from '@/types/session.js';
@@ -31,6 +32,16 @@ export const deduplicationKeepStrategyItem = storage.defineItem<DeduplicationKee
 export const domainRulesItem = storage.defineItem<DomainRuleSettings>(
   'local:domainRules',
   { defaultValue: defaultAppSettings.domainRules },
+);
+
+export const categoriesItem = storage.defineItem<RuleCategory[]>(
+  'local:categories',
+  { defaultValue: defaultAppSettings.categories },
+);
+
+export const categoriesSeededItem = storage.defineItem<boolean>(
+  'local:categoriesSeeded',
+  { defaultValue: false },
 );
 
 export const notifyOnGroupingItem = storage.defineItem<boolean>(
@@ -67,6 +78,7 @@ export const settingsItemMap = {
   deduplicateUnmatchedDomains: deduplicateUnmatchedDomainsItem,
   deduplicationKeepStrategy: deduplicationKeepStrategyItem,
   domainRules: domainRulesItem,
+  categories: categoriesItem,
   notifyOnGrouping: notifyOnGroupingItem,
   notifyOnDeduplication: notifyOnDeduplicationItem,
 } as const;

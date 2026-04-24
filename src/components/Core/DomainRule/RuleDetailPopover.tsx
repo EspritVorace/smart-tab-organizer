@@ -2,7 +2,8 @@ import { Flex, Text, Box, Badge } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 import { getRadixColor } from '@/utils/utils';
-import { getRuleCategory, deduplicationMatchModeOptions } from '@/schemas/enums';
+import { deduplicationMatchModeOptions } from '@/schemas/enums';
+import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 
 interface RuleDetailPopoverProps {
@@ -46,7 +47,7 @@ export function RuleDetailPopover({ rule, searchTerm }: RuleDetailPopoverProps) 
               }}>
                 {cat.emoji}
               </div>
-              <Text size="2">{getMessage(cat.labelKey)}</Text>
+              <Text size="2">{getCategoryLabel(cat)}</Text>
             </>
           ) : (
             <Text size="2" color="gray">{getMessage('categoryNone')}</Text>

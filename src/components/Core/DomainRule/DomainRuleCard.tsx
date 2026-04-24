@@ -6,7 +6,7 @@ import { RuleDetailPopover } from './RuleDetailPopover';
 import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 import { getMessage } from '@/utils/i18n';
 import { getRadixColor } from '@/utils/utils';
-import { getRuleCategory } from '@/schemas/enums';
+import { getRuleCategory } from '@/utils/categoriesStore';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 
 export interface DomainRuleCardProps {

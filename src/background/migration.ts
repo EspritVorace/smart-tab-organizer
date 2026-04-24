@@ -1,5 +1,7 @@
 import { browser } from 'wxt/browser';
 import { logger } from '@/utils/logger.js';
+import { categoriesItem, categoriesSeededItem } from '@/utils/storageItems.js';
+import { fetchBuiltInCategories } from '@/utils/categoriesStore.js';
 
 const SETTINGS_KEYS = [
   'globalGroupingEnabled',
@@ -48,5 +50,32 @@ export async function migrateSettingsFromSyncToLocal(): Promise<void> {
     logger.debug('[MIGRATION] Migration complete.');
   } catch (error) {
     logger.error('[MIGRATION] Migration failed, will retry on next startup:', error);
+  }
+}
+
+/**
+ * Seeds the built-in categories from public/data/categories.json into storage.local.
+ * Idempotent: guarded by categoriesSeededItem.
+ * Never overwrites existing categories (safety net if the user already has customs).
+ */
+export async function seedBuiltInCategories(): Promise<void> {
+  try {
+    if (await categoriesSeededItem.getValue()) {
+      logger.debug('[MIGRATION] Categories already seeded.');
+      return;
+    }
+
+    const existing = await categoriesItem.getValue();
+    if (!existing || existing.length === 0) {
+      const builtIns = await fetchBuiltInCategories();
+      await categoriesItem.setValue(builtIns);
+      logger.debug(`[MIGRATION] Seeded ${builtIns.length} built-in categories.`);
+    } else {
+      logger.debug('[MIGRATION] Categories storage already populated, skipping seed.');
+    }
+
+    await categoriesSeededItem.setValue(true);
+  } catch (error) {
+    logger.error('[MIGRATION] Category seeding failed, will retry on next startup:', error);
   }
 }

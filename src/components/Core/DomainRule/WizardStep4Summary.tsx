@@ -2,7 +2,8 @@ import React from 'react';
 import { Badge, Box, Button, Flex, Separator, Text } from '@radix-ui/themes';
 import { Pencil } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
-import { getRuleCategory, deduplicationMatchModeOptions, groupNameSourceOptions } from '@/schemas/enums';
+import { deduplicationMatchModeOptions, groupNameSourceOptions } from '@/schemas/enums';
+import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
 import type { DomainRule } from '@/schemas/domainRule';
 
 interface WizardStep4SummaryProps {
@@ -85,7 +86,7 @@ export function WizardStep4Summary({ values, configMode, presetName, onEditStep 
             <Flex align="center" gap="2">
               {category && (
                 <Badge color="gray" variant="soft" size="1">
-                  {category.emoji} {getMessage(category.labelKey)}
+                  {category.emoji} {getCategoryLabel(category)}
                 </Badge>
               )}
               <Text size="2">{values.label}</Text>

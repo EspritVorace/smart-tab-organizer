@@ -6,7 +6,7 @@ import { promptForGroupName } from './messaging.js';
 import { showNotification, type UndoAction } from '@/utils/notifications.js';
 import { getMessage } from '@/utils/i18n.js';
 import type { DomainRuleSetting, AppSettings } from '@/types/syncSettings.js';
-import { getRuleCategory } from '@/schemas/enums.js';
+import { getRuleCategory } from '@/utils/categoriesStore.js';
 import { logger } from '@/utils/logger.js';
 
 export interface GroupingContext {
