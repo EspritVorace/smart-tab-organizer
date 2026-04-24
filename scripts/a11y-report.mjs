@@ -195,8 +195,13 @@ function renderBaselineDiff(currentIds) {
 }
 
 function main() {
+  console.log(`[a11y-report] Reading from ${STORYBOOK_PATH}, ${E2E_PATH}`);
   const storybook = /** @type {StorybookReport | null} */ (readJsonIfExists(STORYBOOK_PATH));
   const e2e = /** @type {E2eReport | null} */ (readJsonIfExists(E2E_PATH));
+  console.log(
+    `[a11y-report] Loaded storybook=${storybook ? `${storybook.stories?.length ?? '?'} stories` : 'missing'}, ` +
+      `e2e=${e2e ? `${e2e.scenarios?.length ?? '?'} scenarios` : 'missing'}`,
+  );
 
   if (!storybook && !e2e) {
     console.warn('[a11y-report] No input reports found. Nothing to do.');
@@ -247,4 +252,9 @@ function main() {
   console.log(`[a11y-report] Wrote ${OUT_MD} and ${OUT_JSON}`);
 }
 
-main();
+try {
+  main();
+} catch (error) {
+  console.error('[a11y-report] Fatal error while building summary:', error);
+  process.exit(1);
+}
