@@ -1,4 +1,5 @@
 import { Box, Callout, Flex, Grid, Select, Text, TextField } from '@radix-ui/themes';
+import * as Label from '@radix-ui/react-label';
 import { Info } from 'lucide-react';
 import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
@@ -83,8 +84,10 @@ export function DomainRuleConfigForm({
         <Grid columns="2" gap="4">
           <RegexPresetsTheme>
             <Flex direction="column" gap="1">
-              <Text as="label" htmlFor={presetInputId} size="2" weight="bold">
-                {getMessage('presetRuleLabel')}
+              <Text size="2" weight="bold" asChild>
+                <Label.Root htmlFor={presetInputId}>
+                  {getMessage('presetRuleLabel')}
+                </Label.Root>
               </Text>
               <SearchableSelect
                 id={presetInputId}
@@ -113,8 +116,10 @@ export function DomainRuleConfigForm({
       {configMode === 'manual' && (
         <Grid columns="2" gap="4">
           <Flex direction="column">
-            <Text as="label" htmlFor={groupNameSourceInputId} size="2" weight="bold">
-              {getMessage('groupNameSource')}
+            <Text size="2" weight="bold" asChild>
+              <Label.Root htmlFor={groupNameSourceInputId}>
+                {getMessage('groupNameSource')}
+              </Label.Root>
             </Text>
             <Select.Root
               value={groupNameSource}
@@ -154,13 +159,16 @@ export function DomainRuleConfigForm({
           required={true}
           error={titleParsingRegExError}
         >
-          <TextField.Root
-            value={titleParsingRegEx}
-            onChange={(e) => onTitleParsingRegExChange(e.target.value)}
-            name="titleParsingRegEx"
-            placeholder="(.+)"
-            style={{ marginTop: '4px' }}
-          />
+          {(fieldId) => (
+            <TextField.Root
+              id={fieldId}
+              value={titleParsingRegEx}
+              onChange={(e) => onTitleParsingRegExChange(e.target.value)}
+              name="titleParsingRegEx"
+              placeholder="(.+)"
+              style={{ marginTop: '4px' }}
+            />
+          )}
         </FormField>
       )}
 
@@ -171,13 +179,16 @@ export function DomainRuleConfigForm({
           required={true}
           error={urlParsingRegExError}
         >
-          <TextField.Root
-            value={urlParsingRegEx}
-            onChange={(e) => onUrlParsingRegExChange(e.target.value)}
-            name="urlParsingRegEx"
-            placeholder="(.+)"
-            style={{ marginTop: '4px' }}
-          />
+          {(fieldId) => (
+            <TextField.Root
+              id={fieldId}
+              value={urlParsingRegEx}
+              onChange={(e) => onUrlParsingRegExChange(e.target.value)}
+              name="urlParsingRegEx"
+              placeholder="(.+)"
+              style={{ marginTop: '4px' }}
+            />
+          )}
         </FormField>
       )}
     </Flex>
