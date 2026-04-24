@@ -48,9 +48,6 @@ function normaliseImpact(impact: string | null | undefined): Severity | null {
 const config: TestRunnerConfig = {
   async preVisit(page) {
     await injectAxe(page);
-    await configureAxe(page, {
-      rules: [],
-    });
   },
 
   async postVisit(page, context) {
@@ -77,6 +74,12 @@ const config: TestRunnerConfig = {
     const a11yParameters = (storyContext.parameters?.a11y ?? {}) as AxeParameters;
 
     if (a11yParameters.disable) return;
+
+    // Apply the merged axe config (preview + story-level) before running the
+    // audit. The Storybook addon-a11y panel reads parameters.a11y.config
+    // itself, but the test-runner injects its own axe instance, so we have to
+    // propagate the config manually here.
+    await configureAxe(page, (a11yParameters.config ?? {}) as Parameters<typeof configureAxe>[1]);
 
     const violations = await getViolations(
       page,
