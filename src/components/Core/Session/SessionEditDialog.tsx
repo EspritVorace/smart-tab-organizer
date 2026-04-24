@@ -8,6 +8,7 @@ import {
   Button,
   Separator,
 } from '@radix-ui/themes';
+import * as Label from '@radix-ui/react-label';
 import { Pencil } from 'lucide-react';
 import { getMessage, getPluralMessage } from '@/utils/i18n';
 import { SessionsTheme } from '@/components/Form/themes';
@@ -140,13 +141,14 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingS
         {/* Session name + category inline */}
         <Box mb="4" mt="4">
           <Text
-            as="label"
             size="2"
             weight="medium"
-            htmlFor="session-edit-name"
             style={{ display: 'block', marginBottom: 'var(--space-1)' }}
+            asChild
           >
-            {getMessage('sessionEditorNameLabel')}
+            <Label.Root htmlFor="session-edit-name">
+              {getMessage('sessionEditorNameLabel')}
+            </Label.Root>
           </Text>
           <TextFieldWithCategory
             id="session-edit-name"
@@ -156,7 +158,6 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingS
               editor.updateSessionName(nextValue);
               setSaveNameError(null);
             }}
-            aria-label={getMessage('sessionEditorNameLabel')}
             categoryId={categoryId as RuleCategoryId | null}
             onCategoryChange={setCategoryId}
           />
@@ -179,13 +180,14 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingS
         {/* Note */}
         <Box mt="3">
           <Text
-            as="label"
             size="2"
             weight="medium"
-            htmlFor="session-edit-note"
             style={{ display: 'block', marginBottom: 'var(--space-1)' }}
+            asChild
           >
-            {getMessage('sessionNoteLabel')}
+            <Label.Root htmlFor="session-edit-note">
+              {getMessage('sessionNoteLabel')}
+            </Label.Root>
           </Text>
           <TextArea
             id="session-edit-note"

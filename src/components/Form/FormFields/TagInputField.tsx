@@ -46,7 +46,7 @@ export function TagInputField<T extends FieldValues>({
 
   return (
     <Flex direction="column" gap="1">
-      <FieldLabel required={required}>{label}</FieldLabel>
+      <FieldLabel required={required} htmlFor={inputId}>{label}</FieldLabel>
 
       <VisuallyHidden aria-live="polite" aria-atomic="true">
         {announcement}
@@ -173,7 +173,6 @@ export function TagInputField<T extends FieldValues>({
                 onBlur={() => { commitDraft(); setIsFocused(false); }}
                 onFocus={() => setIsFocused(true)}
                 placeholder={tags.length === 0 ? placeholder : undefined}
-                aria-label={label}
                 style={{
                   border: 'none',
                   outline: 'none',

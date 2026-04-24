@@ -20,31 +20,34 @@ export function WizardStep1Identity({ control, errors }: WizardStep1IdentityProp
         required={true}
         error={errors.label}
       >
-        <div style={{ marginTop: '4px' }}>
-          <Controller
-            name="label"
-            control={control}
-            render={({ field: labelField }) => (
-              <Controller
-                name="categoryId"
-                control={control}
-                render={({ field: catField }) => (
-                  <TextFieldWithCategory
-                    ref={labelField.ref}
-                    name={labelField.name}
-                    value={labelField.value ?? ''}
-                    onChange={labelField.onChange}
-                    onBlur={labelField.onBlur}
-                    data-testid="wizard-rule-field-label"
-                    placeholder={getMessage('labelPlaceholder')}
-                    categoryId={catField.value as RuleCategoryId | null | undefined}
-                    onCategoryChange={catField.onChange}
-                  />
-                )}
-              />
-            )}
-          />
-        </div>
+        {(fieldId) => (
+          <div style={{ marginTop: '4px' }}>
+            <Controller
+              name="label"
+              control={control}
+              render={({ field: labelField }) => (
+                <Controller
+                  name="categoryId"
+                  control={control}
+                  render={({ field: catField }) => (
+                    <TextFieldWithCategory
+                      id={fieldId}
+                      ref={labelField.ref}
+                      name={labelField.name}
+                      value={labelField.value ?? ''}
+                      onChange={labelField.onChange}
+                      onBlur={labelField.onBlur}
+                      data-testid="wizard-rule-field-label"
+                      placeholder={getMessage('labelPlaceholder')}
+                      categoryId={catField.value as RuleCategoryId | null | undefined}
+                      onCategoryChange={catField.onChange}
+                    />
+                  )}
+                />
+              )}
+            />
+          </div>
+        )}
       </FormField>
 
       {/* Domain Filter */}
@@ -53,19 +56,22 @@ export function WizardStep1Identity({ control, errors }: WizardStep1IdentityProp
         required={true}
         error={errors.domainFilter}
       >
-        <Controller
-          name="domainFilter"
-          control={control}
-          render={({ field }) => (
-            <TextField.Root
-              {...field}
-              data-testid="wizard-rule-field-domain"
-              name="domainFilter"
-              placeholder={getMessage('domainFilterPlaceholder')}
-              style={{ marginTop: '4px' }}
-            />
-          )}
-        />
+        {(fieldId) => (
+          <Controller
+            name="domainFilter"
+            control={control}
+            render={({ field }) => (
+              <TextField.Root
+                {...field}
+                id={fieldId}
+                data-testid="wizard-rule-field-domain"
+                name="domainFilter"
+                placeholder={getMessage('domainFilterPlaceholder')}
+                style={{ marginTop: '4px' }}
+              />
+            )}
+          />
+        )}
       </FormField>
     </Flex>
   );

@@ -76,13 +76,13 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
                   </Flex>
 
                   <Flex direction="column" gap="2">
-                    <Text size="2" as="label" htmlFor="page-settings-dedup-keep-strategy">
+                    <Text size="2" id="page-settings-dedup-keep-strategy-label">
                       {getMessage('deduplicationKeepStrategyLabel')}
                     </Text>
                     <RadioGroup.Root
                       id="page-settings-dedup-keep-strategy"
                       data-testid="page-settings-dedup-keep-strategy"
-                      aria-label={getMessage('deduplicationKeepStrategyLabel')}
+                      aria-labelledby="page-settings-dedup-keep-strategy-label"
                       value={syncSettings.deduplicationKeepStrategy}
                       onValueChange={(value) =>
                         updateSettings({ deduplicationKeepStrategy: value as DeduplicationKeepStrategyValue })
