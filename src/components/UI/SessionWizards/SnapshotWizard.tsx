@@ -11,7 +11,7 @@ import { WizardModal } from '@/components/UI/WizardModal';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast } from '@/utils/toast';
 import { captureCurrentTabs } from '@/utils/tabCapture';
-import { createSessionFromSelection, formatSessionDate } from '@/utils/sessionUtils';
+import { createSessionFromSelection, formatSessionDate, resolveTabUuids } from '@/utils/sessionUtils';
 import type { Session, SavedTab, SavedTabGroup } from '@/types/session';
 import type { TabTreeData } from '@/types/tabTree';
 import type { RuleCategoryId } from '@/schemas/enums';
@@ -88,14 +88,10 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
   }, [open, initialGroupId]);
 
   // Derive selected SavedTab UUIDs from selected numeric IDs
-  const selectedSavedTabIds = useMemo(() => {
-    const ids = new Set<string>();
-    for (const numId of selectedTabIds) {
-      const uuid = numericIdToSavedTabId.get(numId);
-      if (uuid) ids.add(uuid);
-    }
-    return ids;
-  }, [selectedTabIds, numericIdToSavedTabId]);
+  const selectedSavedTabIds = useMemo(
+    () => resolveTabUuids(selectedTabIds, numericIdToSavedTabId),
+    [selectedTabIds, numericIdToSavedTabId],
+  );
 
   const handleSave = useCallback(async () => {
     const trimmed = sessionName.trim();

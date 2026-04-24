@@ -9,7 +9,7 @@ import { ConflictResolutionStep } from './ConflictResolutionStep';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast, showErrorToast } from '@/utils/toast';
 import { showSuccessNotification } from '@/utils/notifications';
-import { sessionToTabTreeData } from '@/utils/sessionUtils';
+import { sessionToTabTreeData, resolveTabUuids } from '@/utils/sessionUtils';
 import {
   analyzeConflicts,
   type ConflictAnalysis,
@@ -73,14 +73,10 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
   }, [open, session]);
 
   // Derive selected SavedTab UUIDs
-  const selectedSavedTabIds = useMemo(() => {
-    const ids = new Set<string>();
-    for (const numId of selectedTabIds) {
-      const uuid = numericIdToSavedTabId.get(numId);
-      if (uuid) ids.add(uuid);
-    }
-    return ids;
-  }, [selectedTabIds, numericIdToSavedTabId]);
+  const selectedSavedTabIds = useMemo(
+    () => resolveTabUuids(selectedTabIds, numericIdToSavedTabId),
+    [selectedTabIds, numericIdToSavedTabId],
+  );
 
   // Get the selected tabs and groups from the session
   const getSelectedData = useCallback(() => {
