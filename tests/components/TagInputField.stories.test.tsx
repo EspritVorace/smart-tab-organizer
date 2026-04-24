@@ -16,7 +16,7 @@ describe('TagInputField — static renders', () => {
   it('renders the input with no tags by default', () => {
     render(<TagInputFieldDefault />);
     expect(screen.getByLabelText('Ignored query parameters')).toBeInTheDocument();
-    expect(screen.queryByRole('listitem')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
   it('renders pre-populated tags', () => {
@@ -51,6 +51,6 @@ describe('TagInputField — interactions', () => {
   it('does not add an invalid tag when validateTag is set', async () => {
     await TagInputFieldRejectInvalid.run();
 
-    expect(screen.queryByRole('listitem')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 });

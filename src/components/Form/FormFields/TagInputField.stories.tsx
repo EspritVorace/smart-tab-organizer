@@ -168,7 +168,7 @@ export const TagInputFieldRejectInvalid: Story = {
     const canvas = within(canvasElement);
     const input = canvas.getByLabelText('Ignored query parameters');
     await userEvent.type(input, 'bad$tag{Enter}');
-    // Invalid tag should not be added (no tag chip rendered)
-    await expect(canvas.queryByRole('listitem')).not.toBeInTheDocument();
+    // Invalid tag should not be added (no remove button rendered)
+    await expect(canvas.queryByRole('button')).not.toBeInTheDocument();
   },
 };
