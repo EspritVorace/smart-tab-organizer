@@ -126,19 +126,23 @@ describe('openRulesPage', () => {
     vi.spyOn(window, 'close').mockImplementation(() => {});
   });
 
-  it("crée un nouvel onglet si aucun onglet options n'est ouvert", async () => {
+  it("crée un nouvel onglet si aucun onglet n'est ouvert, ou met à jour l'onglet existant", async () => {
+    // Scenario 1: no existing options tab -> creates a new one
     mockedTabsQuery.mockResolvedValue([]);
-    render(<PopupApp />);
+    const { unmount } = render(<PopupApp />);
     fireEvent.click(screen.getByRole('button', { name: 'popupGoToRules' }));
     await waitFor(() => {
       expect(browser.tabs.create).toHaveBeenCalledWith(
         expect.objectContaining({ url: expect.stringContaining('#rules') }),
       );
+      expect(window.close).toHaveBeenCalled();
     });
-    expect(window.close).toHaveBeenCalled();
-  });
 
-  it("met à jour l'onglet existant si un onglet options est déjà ouvert", async () => {
+    unmount();
+    vi.clearAllMocks();
+    vi.spyOn(window, 'close').mockImplementation(() => {});
+
+    // Scenario 2: existing options tab -> updates and focuses it
     mockedTabsQuery.mockResolvedValue([{ id: 42, windowId: 1 }]);
     render(<PopupApp />);
     fireEvent.click(screen.getByRole('button', { name: 'popupGoToRules' }));
@@ -147,8 +151,8 @@ describe('openRulesPage', () => {
         42,
         expect.objectContaining({ active: true }),
       );
+      expect(browser.windows.update).toHaveBeenCalledWith(1, { focused: true });
+      expect(window.close).toHaveBeenCalled();
     });
-    expect(browser.windows.update).toHaveBeenCalledWith(1, { focused: true });
-    expect(window.close).toHaveBeenCalled();
   });
 });

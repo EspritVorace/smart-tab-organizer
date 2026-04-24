@@ -72,4 +72,54 @@ describe('DomainRulesPage (portable stories)', () => {
       expect(screen.getByText('Delete the selected rules?')).toBeInTheDocument();
     });
   });
+
+  it('confirme la suppression unique (handleConfirmDelete - single)', async () => {
+    render(<DomainRulesPageDefault />);
+
+    const trigger = screen.getByTestId('rule-card-rule-1-btn-dropdown');
+    fireEvent.pointerDown(trigger, { button: 0, ctrlKey: false });
+
+    const deleteItem = await screen.findByTestId('rule-card-rule-1-menu-delete');
+    fireEvent.click(deleteItem);
+
+    const confirmBtn = await screen.findByTestId('confirm-dialog-btn-confirm');
+    fireEvent.click(confirmBtn);
+
+    // Le dialog se ferme après confirmation
+    await waitFor(() => {
+      expect(screen.queryByTestId('confirm-dialog')).not.toBeInTheDocument();
+    });
+  });
+
+  it('confirme la suppression en masse (handleConfirmDelete - bulk)', async () => {
+    render(<DomainRulesPageDefault />);
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    fireEvent.click(checkboxes[0]);
+
+    const deleteSelectedBtn = await screen.findByText('Delete Selected');
+    fireEvent.click(deleteSelectedBtn);
+
+    const confirmBtn = await screen.findByTestId('confirm-dialog-btn-confirm');
+    fireEvent.click(confirmBtn);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('confirm-dialog')).not.toBeInTheDocument();
+    });
+  });
+
+  it("ouvre la modale d'ajout quand on clique sur le bouton Add (handleSaveRule)", async () => {
+    render(<DomainRulesPageDefault />);
+
+    fireEvent.click(screen.getByTestId('page-rules-btn-add'));
+
+    // La modale s'ouvre
+    await waitFor(() => {
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    });
+
+    // Fermer la modale (handleCloseModal)
+    const closeBtn = document.querySelector('[aria-label="Close"]') as HTMLElement | null;
+    if (closeBtn) fireEvent.click(closeBtn);
+  });
 });

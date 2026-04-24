@@ -127,6 +127,12 @@ describe('settingsUtils', () => {
       const settings = await getSettings();
       expect(settings.notifyOnDeduplication).toBe(false);
     });
+
+    it('met à jour categories', async () => {
+      await updateSettings({ categories: [] });
+      const settings = await getSettings();
+      expect(settings.categories).toEqual([]);
+    });
   });
 
   describe('watchSettings', () => {

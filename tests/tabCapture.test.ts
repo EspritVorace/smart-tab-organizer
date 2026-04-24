@@ -217,6 +217,16 @@ describe('captureCurrentTabs', () => {
     expect(result.ungroupedTabs[0].url).toBe('https://a.com');
   });
 
+  it('utilise url comme title quand title est absent', async () => {
+    mockTabsQuery.mockResolvedValue([
+      { id: 10, index: 0, url: 'https://a.com', title: undefined, groupId: -1 },
+    ]);
+
+    const result = await captureCurrentTabs();
+
+    expect(result.ungroupedTabs[0].title).toBe('https://a.com');
+  });
+
   it('excludes Firefox extension Options page from captured tabs', async () => {
     // Regression: moz-extension:// URLs were previously kept, so the Options
     // page itself showed up in the snapshot wizard and got auto-selected.
