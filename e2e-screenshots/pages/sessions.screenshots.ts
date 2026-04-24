@@ -229,18 +229,16 @@ test.describe('Sessions screenshots', () => {
         );
         await page.waitForTimeout(300);
 
-        // ── Open the Restore wizard via the more-actions dropdown ──
-        // Since dc803e6 (Feature/session card #105), all restore actions live
-        // inside the "..." dropdown menu. The "Customize…" item is the only one
-        // that opens the RestoreWizard via onRestore(session); the other two
-        // (Restore current / Restore new) bypass the wizard. We identify it by
-        // its unique Wrench icon (lucide-wrench class).
+        // ── Open the Restore wizard via the SplitButton "Customize" option ──
+        // The "Customize" action (Wrench icon) lives in the restore SplitButton
+        // dropdown, not in the "..." more-actions menu. We click the ChevronDown
+        // half of the SplitButton then pick the item by its data-testid.
         const firstCard = page.locator('.rt-Card').first();
-        await firstCard.locator('[data-testid$="-btn-dropdown"]').click();
+        await firstCard.locator('button:has(svg.lucide-chevron-down)').click();
 
         const menu = page.locator('[role="menu"]');
         await menu.waitFor({ state: 'visible', timeout: 5_000 });
-        await menu.locator('[role="menuitem"]:has(svg.lucide-wrench)').click();
+        await page.locator('[data-testid="session-restore-menu-customize"]').click();
         await page.waitForTimeout(400);
 
         // Wait for RestoreWizard dialog
