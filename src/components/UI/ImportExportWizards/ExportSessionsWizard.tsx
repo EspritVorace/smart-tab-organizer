@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Box, Button, Dialog, Separator } from '@radix-ui/themes';
+import { Box, Separator } from '@radix-ui/themes';
 import { Archive, FileDown, Pin } from 'lucide-react';
 import { SessionsTheme } from '@/components/Form/themes';
 import { getMessage } from '@/utils/i18n';
@@ -10,7 +10,7 @@ import { WizardModal } from '@/components/UI/WizardModal';
 import { CountLabel, useDialogReset, useToggleSet } from './Shared';
 import {
   ExportNoteField,
-  ExportSplitButton,
+  ExportWizardFooter,
   SelectableListContainer,
   SelectionToolbar,
   SessionExportGroupSection,
@@ -125,10 +125,7 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
         </WizardModal.Body>
 
         <WizardModal.Footer>
-          <Dialog.Close>
-            <Button variant="soft" color="gray">{getMessage('cancel')}</Button>
-          </Dialog.Close>
-          <ExportSplitButton
+          <ExportWizardFooter
             labelKey="exportSessionsButton"
             actions={actions}
             disabled={selection.size === 0}
