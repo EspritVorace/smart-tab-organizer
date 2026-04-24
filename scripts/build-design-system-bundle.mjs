@@ -4,7 +4,7 @@
  * containing only the design-system surface of the extension:
  *   - src/components/UI, src/components/Form, src/pages
  *   - src/styles/radix-themes.css
- *   - src/utils/themeConstants.ts, src/utils/i18n.ts
+ *   - src/utils/i18n.ts
  *   - src/stories (Welcome), .storybook/
  *   - DESIGN.md, package.json, tsconfig.json
  *
@@ -31,7 +31,6 @@ const ENTRIES = [
   { from: 'src/components/Form', to: 'src/components/Form' },
   { from: 'src/pages', to: 'src/pages' },
   { from: 'src/styles/radix-themes.css', to: 'src/styles/radix-themes.css' },
-  { from: 'src/utils/themeConstants.ts', to: 'src/utils/themeConstants.ts' },
   { from: 'src/utils/i18n.ts', to: 'src/utils/i18n.ts' },
   { from: 'src/stories', to: 'src/stories', optional: true },
   { from: '.storybook', to: '.storybook' },

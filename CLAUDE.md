@@ -77,7 +77,7 @@ src/
                    # sessionClassification · sessionOrderUtils · ruleOrderUtils
                    # presetsToSearchableGroups · stringUtils · migration · tabTreeUtils
                    # storageItems · settingsUtils · statisticsUtils
-                   # themeConstants · notifications · utils
+                   # notifications · utils
   styles/          # radix-themes.css (custom focus for non-Radix markup only)
 tests/             # Vitest unit tests
 tests/e2e/         # Playwright E2E tests
@@ -92,7 +92,7 @@ tests/e2e/         # Playwright E2E tests
 6. **Sessions & Profiles** : snapshots of open tabs with optional note; pinned profiles with icon, window exclusivity; restore wizard with conflict resolution; interactive session editor; collapsed/expanded group state persistence; drag-and-drop session reordering; session card with HoverCard metadata and inline rename
 
 ### Theming
-Accent unique `indigo` (défaut Radix Themes). `src/utils/themeConstants.ts` garde les constantes par feature pour compat mais toutes pointent désormais sur `indigo`. Préférer les tokens Radix (`var(--accent-a3)`, `var(--gray-a2)`, etc.) aux couleurs hardcodées. Les wrappers dans `src/components/Form/themes/` restent en place mais n'appliquent plus d'accent différencié.
+Accent unique `indigo` (défaut Radix Themes). Préférer les tokens Radix (`var(--accent-a3)`, `var(--gray-a2)`, etc.) aux couleurs hardcodées. Les wrappers dans `src/components/Form/themes/` restent en place mais n'appliquent plus d'accent différencié.
 
 ### Internationalization
 Always use `getMessage()` from `src/utils/i18n.ts` — for UI text, `aria-label`, and `title` attributes. Never hardcode strings.
