@@ -1,4 +1,5 @@
 import { Badge, Flex, IconButton, Text } from '@radix-ui/themes';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { X } from 'lucide-react';
 import { useId, useRef, useState, type KeyboardEvent, type ChangeEvent } from 'react';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
@@ -47,21 +48,9 @@ export function TagInputField<T extends FieldValues>({
     <Flex direction="column" gap="1">
       <FieldLabel required={required}>{label}</FieldLabel>
 
-      {/* Visually hidden live region for screen reader announcements */}
-      <span
-        aria-live="polite"
-        aria-atomic="true"
-        style={{
-          position: 'absolute',
-          width: '1px',
-          height: '1px',
-          overflow: 'hidden',
-          clip: 'rect(0,0,0,0)',
-          whiteSpace: 'nowrap',
-        }}
-      >
+      <VisuallyHidden aria-live="polite" aria-atomic="true">
         {announcement}
-      </span>
+      </VisuallyHidden>
 
       <Controller
         name={name}
