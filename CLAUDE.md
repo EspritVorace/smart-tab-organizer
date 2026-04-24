@@ -128,21 +128,24 @@ logger.debug('[MY_MODULE] Something happened:', value);
 - Prefix all exports with component name: `SessionCardDefault`, `SessionCardDisabled` (avoids conflicts)
 
 ### Accessibility audits (axe-core)
-Two layers run axe-core and feed a consolidated report:
+Two layers run axe-core et partagent le même rapport consolidé :
 
-- **Storybook** : `@storybook/addon-a11y` (panel live en dev) plus `@storybook/test-runner` qui exécute axe sur chaque story en CI.
-- **Playwright E2E** : helper `tests/e2e/helpers/a11y.ts` (`auditPage`) instrumente les specs existantes aux points clés. No-op tant que `A11Y_ENABLED=true` n'est pas dans l'environnement.
+- **Storybook** : `@storybook/addon-a11y` (panel live en dev) plus `@storybook/test-runner` qui exécute axe sur chaque story. En CI un job dédié `a11y-storybook` tourne dans `tests.yml`.
+- **Playwright E2E** : helper `tests/e2e/helpers/a11y.ts` (`auditPage`) instrumente les specs existantes aux points clés. No-op tant que `A11Y_ENABLED=true` n'est pas dans l'environnement. En CI, `A11Y_ENABLED=true` est activé sur les 3 shards E2E existants (pas de run Playwright en double).
+
+Le job `report` de `tests.yml` télécharge les artefacts, consolide les shards, produit `summary.md` et publie un commentaire sticky PR (marker `<!-- a11y-report -->`).
 
 Scripts :
 ```bash
-pnpm a11y:storybook   # build Storybook, lance test-runner + axe
+pnpm a11y:storybook   # build Storybook, lance test-runner + axe, consolide le shard JSONL
 pnpm a11y:e2e         # build extension, lance Playwright avec A11Y_ENABLED=true
 pnpm a11y             # enchaîne storybook, e2e, puis consolidation
 pnpm a11y:report      # lit les deux rapports et génère reports/a11y/summary.md
 ```
 
 Rapports (gitignorés, dossier `reports/a11y/`) :
-- `storybook-a11y.json`, `e2e-a11y.json` : sorties brutes.
+- `storybook-shards.jsonl` (shard brut) puis `storybook-a11y.json` (consolidé).
+- `e2e-shards/*.jsonl` (shards brut per-worker) puis `e2e-a11y.json` (consolidé par globalTeardown).
 - `summary.md`, `summary.json` : synthèse consolidée (tableau, top 10, diff baseline si `reports/a11y/baseline.json` existe).
 
 Seuil d'échec configurable via `A11Y_FAIL_LEVEL` (valeurs : `minor`, `moderate`, `serious` (défaut), `critical`, `none`).

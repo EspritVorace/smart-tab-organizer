@@ -1,20 +1,20 @@
 /**
  * Storybook test-runner hooks for accessibility audits.
  *
- * Runs axe-core (via axe-playwright) against every story and aggregates
- * violations into reports/a11y/storybook-a11y.json.
+ * Each story visit runs axe-core (via axe-playwright) and the result is
+ * appended (one JSON object per line) to
+ * reports/a11y/storybook-shards.jsonl.  After the runner exits, the script
+ * scripts/a11y-storybook-consolidate.mjs reads the shards and produces
+ * reports/a11y/storybook-a11y.json.
  *
- * Environment variables:
- *   A11Y_FAIL_LEVEL (default: "serious")
- *     One of: "minor" | "moderate" | "serious" | "critical" | "none".
- *     Violations at this level or above make the runner exit with code 1.
- *     Use "none" to never fail (collect only).
+ * Synchronous appendFileSync is used on purpose: the Storybook test-runner
+ * (Jest under the hood) does not expose a reliable async global teardown.
  */
 import type { TestRunnerConfig } from '@storybook/test-runner';
 import { getStoryContext } from '@storybook/test-runner';
 import { injectAxe, configureAxe, getViolations } from 'axe-playwright';
-import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { appendFileSync, mkdirSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 type Severity = 'minor' | 'moderate' | 'serious' | 'critical';
 
@@ -28,22 +28,17 @@ interface StoredViolation {
   nodes: number;
 }
 
-interface StoryReportEntry {
+/** Shard record written to JSONL (one per story). */
+export interface StoryShard {
   id: string;
   title: string;
   name: string;
   violations: StoredViolation[];
 }
 
-interface A11ySummary {
-  stories: StoryReportEntry[];
-  summary: { critical: number; serious: number; moderate: number; minor: number };
-}
-
-const REPORT_PATH = resolve(process.cwd(), 'reports/a11y/storybook-a11y.json');
-const severityOrder: Severity[] = ['minor', 'moderate', 'serious', 'critical'];
-
-const collected: StoryReportEntry[] = [];
+const SHARDS_DIR = resolve(process.cwd(), 'reports/a11y');
+const SHARD_PATH = resolve(SHARDS_DIR, 'storybook-shards.jsonl');
+const severityOrder: readonly Severity[] = ['minor', 'moderate', 'serious', 'critical'];
 
 function normaliseImpact(impact: string | null | undefined): Severity | null {
   if (!impact) return null;
@@ -53,7 +48,6 @@ function normaliseImpact(impact: string | null | undefined): Severity | null {
 const config: TestRunnerConfig = {
   async preVisit(page) {
     await injectAxe(page);
-    // Mirror the Storybook addon-a11y preview config and the Playwright helper.
     await configureAxe(page, {
       rules: [],
     });
@@ -62,12 +56,17 @@ const config: TestRunnerConfig = {
   async postVisit(page, context) {
     // Wait for the locale-loading skeleton to disappear before auditing
     // (the preview decorator renders "Loading translations..." until messages resolve).
-    await page.waitForFunction(() => {
-      const text = document.body.textContent ?? '';
-      return !text.includes('Loading translations');
-    }, { timeout: 5000 }).catch(() => {
-      // Fall through: audit whatever is rendered.
-    });
+    await page
+      .waitForFunction(
+        () => {
+          const text = document.body.textContent ?? '';
+          return !text.includes('Loading translations');
+        },
+        { timeout: 5000 },
+      )
+      .catch(() => {
+        // Fall through: audit whatever is rendered.
+      });
 
     const storyContext = await getStoryContext(page, context);
     type AxeParameters = {
@@ -77,9 +76,7 @@ const config: TestRunnerConfig = {
     };
     const a11yParameters = (storyContext.parameters?.a11y ?? {}) as AxeParameters;
 
-    if (a11yParameters.disable) {
-      return;
-    }
+    if (a11yParameters.disable) return;
 
     const violations = await getViolations(
       page,
@@ -87,66 +84,24 @@ const config: TestRunnerConfig = {
       (a11yParameters.options ?? {}) as Parameters<typeof getViolations>[2],
     );
 
-    const stored: StoredViolation[] = violations.map((v) => ({
-      id: v.id,
-      impact: normaliseImpact(v.impact ?? null),
-      help: v.help,
-      helpUrl: v.helpUrl,
-      description: v.description,
-      tags: v.tags,
-      nodes: v.nodes.length,
-    }));
-
-    collected.push({
+    const shard: StoryShard = {
       id: context.id,
       title: storyContext.title ?? context.id,
       name: storyContext.name ?? context.id,
-      violations: stored,
-    });
+      violations: violations.map((v) => ({
+        id: v.id,
+        impact: normaliseImpact(v.impact ?? null),
+        help: v.help,
+        helpUrl: v.helpUrl,
+        description: v.description,
+        tags: v.tags,
+        nodes: v.nodes.length,
+      })),
+    };
+
+    mkdirSync(SHARDS_DIR, { recursive: true });
+    appendFileSync(SHARD_PATH, JSON.stringify(shard) + '\n', 'utf8');
   },
 };
 
 export default config;
-
-async function flush(): Promise<void> {
-  const summary = { critical: 0, serious: 0, moderate: 0, minor: 0 };
-  for (const story of collected) {
-    for (const v of story.violations) {
-      if (v.impact) summary[v.impact] += v.nodes;
-    }
-  }
-  const payload: A11ySummary = { stories: collected, summary };
-  await mkdir(dirname(REPORT_PATH), { recursive: true });
-  await writeFile(REPORT_PATH, JSON.stringify(payload, null, 2), 'utf8');
-  console.log(
-    `[a11y] Storybook report written to ${REPORT_PATH} ` +
-      `(critical=${summary.critical}, serious=${summary.serious}, ` +
-      `moderate=${summary.moderate}, minor=${summary.minor})`,
-  );
-
-  const failLevel = (process.env.A11Y_FAIL_LEVEL ?? 'serious').toLowerCase();
-  if (failLevel === 'none') return;
-  const thresholdIndex = severityOrder.indexOf(failLevel as Severity);
-  if (thresholdIndex < 0) return;
-  const blocking = severityOrder.slice(thresholdIndex).reduce(
-    (acc, level) => acc + summary[level],
-    0,
-  );
-  if (blocking > 0) {
-    console.error(
-      `[a11y] ${blocking} violation(s) at or above "${failLevel}" severity.`,
-    );
-    process.exitCode = 1;
-  }
-}
-
-process.on('exit', () => {
-  // Synchronous best-effort flush so the file is written even when Jest exits.
-  void flush();
-});
-process.on('SIGINT', () => {
-  void flush().finally(() => process.exit(130));
-});
-process.on('SIGTERM', () => {
-  void flush().finally(() => process.exit(143));
-});
