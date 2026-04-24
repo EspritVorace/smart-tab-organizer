@@ -193,6 +193,17 @@ describe('captureCurrentTabs', () => {
     expect(result.groups[0].color).toBe('blue');
   });
 
+  it('normalizeColor : retourne "grey" quand la couleur est invalide ou absente', async () => {
+    mockTabsQuery.mockResolvedValue([
+      { id: 10, index: 0, url: 'https://a.com', title: 'A', groupId: 5 },
+    ]);
+    mockTabGroupsGet.mockResolvedValue({ title: 'Work', color: 'not-a-valid-color' });
+
+    const result = await captureCurrentTabs();
+
+    expect(result.groups[0].color).toBe('grey');
+  });
+
   it('ignore silencieusement un groupe si tabGroups.get rejette', async () => {
     mockTabsQuery.mockResolvedValue([
       { id: 10, index: 0, url: 'https://a.com', title: 'A', groupId: 5 },

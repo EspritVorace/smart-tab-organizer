@@ -97,6 +97,36 @@ describe('settingsUtils', () => {
       );
       await expect(updateSettings({ globalGroupingEnabled: false })).resolves.toBeUndefined();
     });
+
+    it('met à jour globalDeduplicationEnabled', async () => {
+      await updateSettings({ globalDeduplicationEnabled: false });
+      const settings = await getSettings();
+      expect(settings.globalDeduplicationEnabled).toBe(false);
+    });
+
+    it('met à jour deduplicationKeepStrategy', async () => {
+      await updateSettings({ deduplicationKeepStrategy: 'keep-old' });
+      const settings = await getSettings();
+      expect(settings.deduplicationKeepStrategy).toBe('keep-old');
+    });
+
+    it('met à jour domainRules', async () => {
+      await updateSettings({ domainRules: [] });
+      const settings = await getSettings();
+      expect(settings.domainRules).toEqual([]);
+    });
+
+    it('met à jour notifyOnGrouping', async () => {
+      await updateSettings({ notifyOnGrouping: false });
+      const settings = await getSettings();
+      expect(settings.notifyOnGrouping).toBe(false);
+    });
+
+    it('met à jour notifyOnDeduplication', async () => {
+      await updateSettings({ notifyOnDeduplication: false });
+      const settings = await getSettings();
+      expect(settings.notifyOnDeduplication).toBe(false);
+    });
   });
 
   describe('watchSettings', () => {
