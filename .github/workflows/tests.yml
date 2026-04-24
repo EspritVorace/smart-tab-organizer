@@ -206,6 +206,8 @@ jobs:
     needs: [changes, unit-tests, e2e-tests, a11y-storybook]
     if: always() && (needs.changes.outputs.code == 'true' || github.event_name == 'push')
     steps:
+      - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
