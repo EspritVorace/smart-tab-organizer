@@ -1,5 +1,6 @@
 import type { DomainRule } from '@/schemas/domainRule.js';
 import { type BadgeType, type DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
+import type { RuleCategory } from '@/schemas/category.js';
 
 // Types Settings qui étendent les types Zod inférés
 export interface DomainRuleSetting extends DomainRule {
@@ -18,6 +19,7 @@ export interface AppSettings {
   deduplicateUnmatchedDomains: boolean;
   deduplicationKeepStrategy: DeduplicationKeepStrategyValue;
   domainRules: DomainRuleSettings;
+  categories: RuleCategory[];
   // Notification settings
   notifyOnGrouping: boolean;
   notifyOnDeduplication: boolean;
@@ -30,6 +32,7 @@ export const defaultAppSettings: AppSettings = {
   deduplicateUnmatchedDomains: false,
   deduplicationKeepStrategy: 'keep-grouped-or-new',
   domainRules: [],
+  categories: [],
   notifyOnGrouping: true,
   notifyOnDeduplication: true
 };

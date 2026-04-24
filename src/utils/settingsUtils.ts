@@ -8,6 +8,7 @@ import {
   deduplicateUnmatchedDomainsItem,
   deduplicationKeepStrategyItem,
   domainRulesItem,
+  categoriesItem,
   notifyOnGroupingItem,
   notifyOnDeduplicationItem,
   settingsItemMap,
@@ -26,6 +27,7 @@ export async function getSettings(): Promise<AppSettings> {
       deduplicateUnmatchedDomainsItem,
       deduplicationKeepStrategyItem,
       domainRulesItem,
+      categoriesItem,
       notifyOnGroupingItem,
       notifyOnDeduplicationItem,
     ]);
@@ -35,8 +37,9 @@ export async function getSettings(): Promise<AppSettings> {
       deduplicateUnmatchedDomains: results[2].value as boolean,
       deduplicationKeepStrategy: results[3].value as AppSettings['deduplicationKeepStrategy'],
       domainRules: results[4].value as AppSettings['domainRules'],
-      notifyOnGrouping: results[5].value as boolean,
-      notifyOnDeduplication: results[6].value as boolean,
+      categories: results[5].value as AppSettings['categories'],
+      notifyOnGrouping: results[6].value as boolean,
+      notifyOnDeduplication: results[7].value as boolean,
     };
   } catch (error) {
     logger.error('Error getting settings:', error);
@@ -52,6 +55,7 @@ export async function setSettings(settings: AppSettings): Promise<void> {
       { item: deduplicateUnmatchedDomainsItem, value: settings.deduplicateUnmatchedDomains },
       { item: deduplicationKeepStrategyItem, value: settings.deduplicationKeepStrategy },
       { item: domainRulesItem, value: settings.domainRules },
+      { item: categoriesItem, value: settings.categories },
       { item: notifyOnGroupingItem, value: settings.notifyOnGrouping },
       { item: notifyOnDeduplicationItem, value: settings.notifyOnDeduplication },
     ]);
@@ -73,6 +77,8 @@ export async function updateSettings(updates: Partial<AppSettings>): Promise<voi
       items.push({ item: deduplicationKeepStrategyItem, value: updates.deduplicationKeepStrategy! });
     if ('domainRules' in updates)
       items.push({ item: domainRulesItem, value: updates.domainRules! });
+    if ('categories' in updates)
+      items.push({ item: categoriesItem, value: updates.categories! });
     if ('notifyOnGrouping' in updates)
       items.push({ item: notifyOnGroupingItem, value: updates.notifyOnGrouping! });
     if ('notifyOnDeduplication' in updates)
@@ -97,6 +103,7 @@ export function watchSettings(
     deduplicateUnmatchedDomainsItem.watch(() => getSettings().then(callback)),
     deduplicationKeepStrategyItem.watch(() => getSettings().then(callback)),
     domainRulesItem.watch(() => getSettings().then(callback)),
+    categoriesItem.watch(() => getSettings().then(callback)),
     notifyOnGroupingItem.watch(() => getSettings().then(callback)),
     notifyOnDeduplicationItem.watch(() => getSettings().then(callback)),
   ];

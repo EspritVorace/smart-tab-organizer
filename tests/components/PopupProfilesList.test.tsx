@@ -41,7 +41,7 @@ vi.mock('../../src/utils/tabRestore', () => ({
 }));
 
 // Mock getRuleCategory
-vi.mock('../../src/schemas/enums', () => ({
+vi.mock('../../src/utils/categoriesStore', () => ({
   getRuleCategory: vi.fn(() => null),
 }));
 

@@ -1,12 +1,14 @@
 import { storage } from 'wxt/utils/storage';
 import type { AppSettings, DomainRuleSettings } from '@/types/syncSettings.js';
 import type { DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
+import type { RuleCategory } from '@/schemas/category.js';
 import {
   globalGroupingEnabledItem,
   globalDeduplicationEnabledItem,
   deduplicateUnmatchedDomainsItem,
   deduplicationKeepStrategyItem,
   domainRulesItem,
+  categoriesItem,
   notifyOnGroupingItem,
   notifyOnDeduplicationItem,
   settingsItemMap,
@@ -22,6 +24,7 @@ export interface UseSettingsReturn {
   setDeduplicateUnmatchedDomains: (value: boolean) => Promise<void>;
   setDeduplicationKeepStrategy: (value: DeduplicationKeepStrategyValue) => Promise<void>;
   setDomainRules: (value: DomainRuleSettings) => Promise<void>;
+  setCategories: (value: RuleCategory[]) => Promise<void>;
 
   onGlobalGroupingEnabledChange: (callback: (value: boolean) => void) => () => void;
   onGlobalDeduplicationEnabledChange: (callback: (value: boolean) => void) => () => void;
@@ -30,6 +33,7 @@ export interface UseSettingsReturn {
     callback: (value: DeduplicationKeepStrategyValue) => void,
   ) => () => void;
   onDomainRulesChange: (callback: (value: DomainRuleSettings) => void) => () => void;
+  onCategoriesChange: (callback: (value: RuleCategory[]) => void) => () => void;
 
   updateSettings: (updates: Partial<AppSettings>) => Promise<void>;
   reloadSettings: () => Promise<void>;
@@ -44,6 +48,7 @@ async function loadSettingsFromStorage(): Promise<AppSettings> {
     deduplicateUnmatchedDomainsItem,
     deduplicationKeepStrategyItem,
     domainRulesItem,
+    categoriesItem,
     notifyOnGroupingItem,
     notifyOnDeduplicationItem,
   ]);
@@ -68,8 +73,9 @@ async function loadSettingsFromStorage(): Promise<AppSettings> {
     deduplicateUnmatchedDomains: results[2].value as boolean,
     deduplicationKeepStrategy: results[3].value as DeduplicationKeepStrategyValue,
     domainRules,
-    notifyOnGrouping: results[5].value as boolean,
-    notifyOnDeduplication: results[6].value as boolean,
+    categories: results[5].value as RuleCategory[],
+    notifyOnGrouping: results[6].value as boolean,
+    notifyOnDeduplication: results[7].value as boolean,
   };
 }
 
@@ -115,12 +121,14 @@ export function useSettings(): UseSettingsReturn {
     setDeduplicateUnmatchedDomains: (v) => update({ deduplicateUnmatchedDomains: v }),
     setDeduplicationKeepStrategy: (v) => update({ deduplicationKeepStrategy: v }),
     setDomainRules: (v) => update({ domainRules: v }),
+    setCategories: (v) => update({ categories: v }),
 
     onGlobalGroupingEnabledChange: (cb) => onFieldChange('globalGroupingEnabled', cb),
     onGlobalDeduplicationEnabledChange: (cb) => onFieldChange('globalDeduplicationEnabled', cb),
     onDeduplicateUnmatchedDomainsChange: (cb) => onFieldChange('deduplicateUnmatchedDomains', cb),
     onDeduplicationKeepStrategyChange: (cb) => onFieldChange('deduplicationKeepStrategy', cb),
     onDomainRulesChange: (cb) => onFieldChange('domainRules', cb),
+    onCategoriesChange: (cb) => onFieldChange('categories', cb),
 
     updateSettings: update,
     reloadSettings: reload,

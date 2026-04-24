@@ -36,6 +36,7 @@ const mockSyncSettings: AppSettings = {
   globalDeduplicationEnabled: true,
   deduplicateUnmatchedDomains: true,
   deduplicationKeepStrategy: 'keep-old',
+  categories: [],
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
   domainRules: rules,

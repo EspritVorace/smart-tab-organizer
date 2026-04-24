@@ -9,6 +9,7 @@ const TEST_DEFAULTS: AppSettings = {
   globalDeduplicationEnabled: true,
   deduplicateUnmatchedDomains: false,
   deduplicationKeepStrategy: 'keep-grouped-or-new',
+  categories: [],
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
   domainRules: [

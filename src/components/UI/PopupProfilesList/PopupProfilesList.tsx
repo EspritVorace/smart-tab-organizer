@@ -8,7 +8,7 @@ import { getMessage } from '@/utils/i18n';
 import { loadSessions } from '@/utils/sessionStorage';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { showSuccessNotification } from '@/utils/notifications';
-import { getRuleCategory } from '@/schemas/enums';
+import { getRuleCategory } from '@/utils/categoriesStore';
 import { chromeGroupColors } from '@/utils/tabTreeUtils';
 import { popupPinnedEmptyCollapsedItem } from '@/utils/storageItems';
 import type { Session } from '@/types/session';

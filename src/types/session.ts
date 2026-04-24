@@ -36,7 +36,7 @@ export interface Session {
   ungroupedTabs: SavedTab[];
   /** If true, this session is pinned as a profile */
   isPinned: boolean;
-  /** Optional category ID (from RULE_CATEGORIES) */
+  /** Optional category ID (resolved via src/utils/categoriesStore.ts) */
   categoryId?: string | null;
   /** Optional free-text note associated with the session */
   note?: string;

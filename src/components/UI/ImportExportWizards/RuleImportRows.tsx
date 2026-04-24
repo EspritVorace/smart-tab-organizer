@@ -2,7 +2,7 @@ import React from 'react';
 import { Badge, Checkbox, Flex, Text } from '@radix-ui/themes';
 import type { BadgeProps } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
-import { getRuleCategory } from '@/schemas/enums';
+import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
 import { getRadixColor } from '@/utils/utils';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 import type { ConflictingRule } from '@/utils/importClassification';
@@ -43,7 +43,7 @@ export function RuleRow({ rule, checkbox, checked, onToggle, dimmed, statusBadge
       </Flex>
       {category && (
         <Badge color={getRadixColor(category.color) as RadixAccentColor} variant="soft" size="1">
-          {category.emoji} {getMessage(category.labelKey)}
+          {category.emoji} {getCategoryLabel(category)}
         </Badge>
       )}
       {statusBadge && (
