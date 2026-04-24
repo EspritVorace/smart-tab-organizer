@@ -204,44 +204,39 @@ export function RuleWizardModal({
     }
   }, [setValue, trigger]);
 
-  const handleConfigModeChange = useCallback((newMode: 'preset' | 'ask' | 'manual') => {
-    const prevMode = configMode;
-    if (prevMode === 'manual' && newMode === 'preset') {
+  const saveCurrentModeState = useCallback((prevMode: 'preset' | 'ask' | 'manual') => {
+    if (prevMode === 'manual') {
       lastManualState.current = {
         groupNameSource: getValues('groupNameSource') as GroupNameSourceValue,
         titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
         urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
       };
-      setValue('presetId', lastPresetState.current.presetId);
-      setValue('groupNameSource', lastPresetState.current.groupNameSource);
-      setValue('titleParsingRegEx', lastPresetState.current.titleParsingRegEx);
-      setValue('urlParsingRegEx', lastPresetState.current.urlParsingRegEx);
-    } else if (prevMode === 'preset' && newMode === 'manual') {
+    } else if (prevMode === 'preset') {
       lastPresetState.current = {
         presetId: getValues('presetId') ?? null,
         groupNameSource: getValues('groupNameSource') as GroupNameSourceValue,
         titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
         urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
       };
+    }
+  }, [getValues]);
+
+  const handleConfigModeChange = useCallback((newMode: 'preset' | 'ask' | 'manual') => {
+    const prevMode = configMode;
+    if (prevMode === 'manual' && newMode === 'preset') {
+      saveCurrentModeState(prevMode);
+      setValue('presetId', lastPresetState.current.presetId);
+      setValue('groupNameSource', lastPresetState.current.groupNameSource);
+      setValue('titleParsingRegEx', lastPresetState.current.titleParsingRegEx);
+      setValue('urlParsingRegEx', lastPresetState.current.urlParsingRegEx);
+    } else if (prevMode === 'preset' && newMode === 'manual') {
+      saveCurrentModeState(prevMode);
       setValue('presetId', null);
       setValue('groupNameSource', lastManualState.current.groupNameSource);
       setValue('titleParsingRegEx', lastManualState.current.titleParsingRegEx);
       setValue('urlParsingRegEx', lastManualState.current.urlParsingRegEx);
     } else if (newMode === 'ask') {
-      if (prevMode === 'manual') {
-        lastManualState.current = {
-          groupNameSource: getValues('groupNameSource') as GroupNameSourceValue,
-          titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
-          urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
-        };
-      } else if (prevMode === 'preset') {
-        lastPresetState.current = {
-          presetId: getValues('presetId') ?? null,
-          groupNameSource: getValues('groupNameSource') as GroupNameSourceValue,
-          titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
-          urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
-        };
-      }
+      saveCurrentModeState(prevMode);
       setValue('presetId', null);
       setValue('groupNameSource', 'manual');
     } else if (prevMode === 'ask' && newMode === 'preset') {
@@ -257,7 +252,7 @@ export function RuleWizardModal({
     }
     setConfigMode(newMode);
     trigger();
-  }, [configMode, getValues, setValue, trigger]);
+  }, [configMode, saveCurrentModeState, setValue, trigger]);
 
   const announceStep = (newStep: number) => {
     const label = getMessage(STEP_LABELS_KEYS[newStep]);
@@ -304,22 +299,7 @@ export function RuleWizardModal({
   };
 
   const handleApplyConfig = (values: ConfigEditValues) => {
-    // Save old mode for state preservation
-    const prevMode = configMode;
-    if (prevMode === 'manual') {
-      lastManualState.current = {
-        groupNameSource: getValues('groupNameSource') as GroupNameSourceValue,
-        titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
-        urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
-      };
-    } else if (prevMode === 'preset') {
-      lastPresetState.current = {
-        presetId: getValues('presetId') ?? null,
-        groupNameSource: getValues('groupNameSource') as GroupNameSourceValue,
-        titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
-        urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
-      };
-    }
+    saveCurrentModeState(configMode);
     setConfigMode(values.configMode);
     setValue('presetId', values.presetId);
     setValue('groupNameSource', values.groupNameSource);
