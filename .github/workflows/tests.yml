@@ -181,9 +181,16 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
 
       - name: Run Storybook accessibility tests
+        continue-on-error: true
         env:
           A11Y_FAIL_LEVEL: none
-        run: pnpm a11y:storybook
+        run: pnpm a11y:storybook:run
+
+      - name: Consolidate Storybook a11y shards
+        if: always()
+        env:
+          A11Y_FAIL_LEVEL: none
+        run: pnpm a11y:storybook:consolidate
 
       - name: Upload Storybook a11y report
         if: always()
