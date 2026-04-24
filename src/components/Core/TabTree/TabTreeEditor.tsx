@@ -1,11 +1,8 @@
 import React from 'react';
 import {
-  Flex,
   Box,
   IconButton,
-  Button,
   ScrollArea,
-  AlertDialog,
 } from '@radix-ui/themes';
 import { ChevronUp, ChevronDown, Pencil, Trash2 } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
@@ -15,6 +12,7 @@ import { GroupRowBase } from './GroupRowBase';
 import { TabEditRow } from './TabEditRow';
 import { GroupEditRow } from './GroupEditRow';
 import { MoveTabDropdown } from './MoveTabDropdown';
+import { AlertDialogShell } from './AlertDialogShell';
 import { useTabTreeEditor } from './useTabTreeEditor';
 import type { Session } from '@/types/session';
 import styles from './TabTreeEditor.module.css';
@@ -318,100 +316,56 @@ export function TabTreeEditor({ session, onSessionChange, maxHeight }: TabTreeEd
       })}
 
       {/* AlertDialog: delete last tab in group */}
-      <AlertDialog.Root
+      <AlertDialogShell
         open={alertDialog?.type === 'delete_last_tab'}
-        onOpenChange={(open) => {
-          if (!open) setAlertDialog(null);
+        onClose={() => setAlertDialog(null)}
+        maxWidth="400px"
+        title={getMessage('tabEditorLastTabTitle')}
+        description={getMessage('tabEditorLastTabDescription')}
+        softActionLabel={getMessage('tabEditorKeepEmptyGroup')}
+        onSoftAction={() => {
+          if (alertDialog?.type === 'delete_last_tab') {
+            performDeleteTab(alertDialog.tabId, alertDialog.groupId, false);
+          }
         }}
-      >
-        <AlertDialog.Content maxWidth="400px">
-          <AlertDialog.Title>{getMessage('tabEditorLastTabTitle')}</AlertDialog.Title>
-          <AlertDialog.Description size="2">
-            {getMessage('tabEditorLastTabDescription')}
-          </AlertDialog.Description>
-          <Flex gap="2" mt="4" justify="end" wrap="wrap">
-            <AlertDialog.Cancel>
-              <Button variant="soft" color="gray">
-                {getMessage('cancel')}
-              </Button>
-            </AlertDialog.Cancel>
-            <Button
-              variant="soft"
-              onClick={() => {
-                if (alertDialog?.type === 'delete_last_tab') {
-                  performDeleteTab(alertDialog.tabId, alertDialog.groupId, false);
-                }
-              }}
-            >
-              {getMessage('tabEditorKeepEmptyGroup')}
-            </Button>
-            <AlertDialog.Action>
-              <Button
-                color="red"
-                onClick={() => {
-                  if (alertDialog?.type === 'delete_last_tab') {
-                    performDeleteTab(alertDialog.tabId, alertDialog.groupId, true);
-                  }
-                }}
-              >
-                {getMessage('tabEditorDeleteEmptyGroup')}
-              </Button>
-            </AlertDialog.Action>
-          </Flex>
-        </AlertDialog.Content>
-      </AlertDialog.Root>
+        destructiveActionLabel={getMessage('tabEditorDeleteEmptyGroup')}
+        onDestructiveAction={() => {
+          if (alertDialog?.type === 'delete_last_tab') {
+            performDeleteTab(alertDialog.tabId, alertDialog.groupId, true);
+          }
+        }}
+      />
 
       {/* AlertDialog: delete group */}
-      <AlertDialog.Root
+      <AlertDialogShell
         open={alertDialog?.type === 'delete_group'}
-        onOpenChange={(open) => {
-          if (!open) setAlertDialog(null);
+        onClose={() => setAlertDialog(null)}
+        maxWidth="420px"
+        title={getMessage('tabEditorDeleteGroupTitle', [
+          alertDialog?.type === 'delete_group' ? alertDialog.groupTitle : '',
+        ])}
+        description={
+          alertDialog?.type === 'delete_group'
+            ? getMessage('tabEditorDeleteGroupDescription', [String(alertDialog.tabCount)])
+            : ''
+        }
+        softActionLabel={getMessage('tabEditorUngroupTabs')}
+        onSoftAction={() => {
+          if (alertDialog?.type === 'delete_group') {
+            handleDeleteGroup(alertDialog.groupId, 'ungroup_tabs');
+          }
         }}
-      >
-        <AlertDialog.Content maxWidth="420px">
-          <AlertDialog.Title>
-            {getMessage('tabEditorDeleteGroupTitle', [
-              alertDialog?.type === 'delete_group' ? alertDialog.groupTitle : '',
-            ])}
-          </AlertDialog.Title>
-          <AlertDialog.Description size="2">
-            {alertDialog?.type === 'delete_group'
-              ? getMessage('tabEditorDeleteGroupDescription', [String(alertDialog.tabCount)])
-              : ''}
-          </AlertDialog.Description>
-          <Flex gap="2" mt="4" justify="end" wrap="wrap">
-            <AlertDialog.Cancel>
-              <Button variant="soft" color="gray">
-                {getMessage('cancel')}
-              </Button>
-            </AlertDialog.Cancel>
-            <Button
-              variant="soft"
-              onClick={() => {
-                if (alertDialog?.type === 'delete_group') {
-                  handleDeleteGroup(alertDialog.groupId, 'ungroup_tabs');
-                }
-              }}
-            >
-              {getMessage('tabEditorUngroupTabs')}
-            </Button>
-            <AlertDialog.Action>
-              <Button
-                color="red"
-                onClick={() => {
-                  if (alertDialog?.type === 'delete_group') {
-                    handleDeleteGroup(alertDialog.groupId, 'delete_tabs');
-                  }
-                }}
-              >
-                {alertDialog?.type === 'delete_group'
-                  ? getMessage('tabEditorDeleteGroupAndTabs', [String(alertDialog.tabCount)])
-                  : getMessage('delete')}
-              </Button>
-            </AlertDialog.Action>
-          </Flex>
-        </AlertDialog.Content>
-      </AlertDialog.Root>
+        destructiveActionLabel={
+          alertDialog?.type === 'delete_group'
+            ? getMessage('tabEditorDeleteGroupAndTabs', [String(alertDialog.tabCount)])
+            : getMessage('delete')
+        }
+        onDestructiveAction={() => {
+          if (alertDialog?.type === 'delete_group') {
+            handleDeleteGroup(alertDialog.groupId, 'delete_tabs');
+          }
+        }}
+      />
     </Box>
   );
 
