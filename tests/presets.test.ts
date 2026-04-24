@@ -224,6 +224,79 @@ describe('Preset Regex Patterns', () => {
     });
   });
 
+  describe('jira-ticket-in-title', () => {
+    // Cross-domain preset: matches Jira ID anywhere in the title, regardless of host.
+    // Useful when Jira tickets are referenced in GitHub/GitLab PR titles, commits, reviews.
+    const titleRegex = '([A-Z][A-Z0-9_]+-\\d+)';
+
+    it('title: matches PROJ-123 at start followed by colon', () => {
+      expect(matchTitle(titleRegex, 'PROJ-123: Fix the login bug')).toBe('PROJ-123');
+    });
+
+    it('title: matches (PROJ-123) in parentheses', () => {
+      expect(matchTitle(titleRegex, 'Fix login flow (PROJ-123)')).toBe('PROJ-123');
+    });
+
+    it('title: matches [PROJ-123] in brackets', () => {
+      expect(matchTitle(titleRegex, '[PROJ-123] Fix login flow')).toBe('PROJ-123');
+    });
+
+    it('title: matches PROJ-123 standalone in the middle', () => {
+      expect(matchTitle(titleRegex, 'Fix PROJ-123 login bug')).toBe('PROJ-123');
+    });
+
+    it('title: matches on GitHub PR title pattern', () => {
+      expect(matchTitle(titleRegex, 'feat(auth): implement SSO (ABC-456) by user · Pull Request #42'))
+        .toBe('ABC-456');
+    });
+
+    it('title: matches compound prefix with digits (ABC1-123)', () => {
+      expect(matchTitle(titleRegex, '[ABC1-123] Refactor')).toBe('ABC1-123');
+    });
+
+    it('title: no match on single-letter prefix', () => {
+      expect(matchTitle(titleRegex, 'A-123 something')).toBeNull();
+    });
+
+    it('title: no match on plain numeric ID', () => {
+      expect(matchTitle(titleRegex, 'Ticket 12345 resolved')).toBeNull();
+    });
+  });
+
+  describe('github-issue-in-title', () => {
+    // Cross-domain preset: matches GitHub issue references (#123) anywhere in the title.
+    const titleRegex = '#(\\d+)\\b';
+
+    it('title: matches #123 standalone', () => {
+      expect(matchTitle(titleRegex, 'Fix login bug #123')).toBe('123');
+    });
+
+    it('title: matches (#123) in parentheses', () => {
+      expect(matchTitle(titleRegex, 'Fix login (#123)')).toBe('123');
+    });
+
+    it('title: matches [#123] in brackets', () => {
+      expect(matchTitle(titleRegex, '[#123] Fix login')).toBe('123');
+    });
+
+    it('title: matches #123 at start with colon', () => {
+      expect(matchTitle(titleRegex, '#123: Fix login')).toBe('123');
+    });
+
+    it('title: matches cross-repo reference owner/repo#123', () => {
+      expect(matchTitle(titleRegex, 'See microsoft/vscode#42 for context')).toBe('42');
+    });
+
+    it('title: no match without # prefix', () => {
+      expect(matchTitle(titleRegex, 'Version 123 released')).toBeNull();
+    });
+
+    it('title: no match when digit is followed by word character', () => {
+      // \b after \d+ prevents matching when another word char follows (avoids false positives on hex-like tokens)
+      expect(matchTitle(titleRegex, 'abc#123abc')).toBeNull();
+    });
+  });
+
   describe('trello-board', () => {
     const titleRegex = '(.+?)\\s*\\|\\s*Trello';
     const urlRegex = 'trello\\.com/b/[^/]+/(.+)';

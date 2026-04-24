@@ -4,7 +4,9 @@ import {
   type GroupNameSourceValue 
 } from '@/schemas/enums.js';
 
-// Schéma pour un preset individuel
+// Schéma pour un preset individuel.
+// titleExample / urlExample sont requis lorsque le regex correspondant est défini,
+// pour documenter un cas concret côté regex titre et côté regex URL.
 export const presetSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -12,9 +14,18 @@ export const presetSchema = z.object({
   titleRegex: z.string().optional(),
   urlRegex: z.string().optional(),
   groupNameSource: z.enum(groupNameSourceOptions.map(opt => opt.value) as [GroupNameSourceValue, ...GroupNameSourceValue[]]),
-  example: z.string(),
+  titleExample: z.string().optional(),
+  urlExample: z.string().optional(),
   description: z.string()
-});
+})
+  .refine(
+    (p) => !p.titleRegex || !!p.titleExample,
+    { message: 'titleExample is required when titleRegex is defined', path: ['titleExample'] }
+  )
+  .refine(
+    (p) => !p.urlRegex || !!p.urlExample,
+    { message: 'urlExample is required when urlRegex is defined', path: ['urlExample'] }
+  );
 
 // Schéma pour une catégorie de presets
 export const presetCategorySchema = z.object({
