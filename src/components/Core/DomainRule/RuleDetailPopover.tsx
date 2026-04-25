@@ -20,20 +20,20 @@ export function RuleDetailPopover({ rule, searchTerm }: RuleDetailPopoverProps) 
         <Text size="3" weight="bold">
           <AccessibleHighlight text={rule.label} searchTerm={searchTerm} />
         </Text>
-        <Badge color={rule.enabled ? 'green' : 'gray'} variant="soft">
+        <Badge color={rule.enabled ? 'green' : 'gray'} variant="soft" highContrast>
           {getMessage(rule.enabled ? 'enabled' : 'disabled')}
         </Badge>
       </Flex>
 
       <Box style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '8px 12px', alignItems: 'baseline' }}>
-        <Text size="1" weight="bold" color="gray">{getMessage('domainFilter')}</Text>
+        <Text size="1" weight="bold" color="gray" highContrast>{getMessage('domainFilter')}</Text>
         <Text size="2">
           <code style={{ backgroundColor: 'var(--gray-3)', padding: '2px 6px', borderRadius: '4px' }}>
             <AccessibleHighlight text={rule.domainFilter} searchTerm={searchTerm} />
           </code>
         </Text>
 
-        <Text size="1" weight="bold" color="gray">{getMessage('tabGroupColor')}</Text>
+        <Text size="1" weight="bold" color="gray" highContrast>{getMessage('tabGroupColor')}</Text>
         <Flex align="center" gap="2">
           {cat ? (
             <>
@@ -50,11 +50,11 @@ export function RuleDetailPopover({ rule, searchTerm }: RuleDetailPopoverProps) 
               <Text size="2">{getCategoryLabel(cat)}</Text>
             </>
           ) : (
-            <Text size="2" color="gray">{getMessage('categoryNone')}</Text>
+            <Text size="2" color="gray" highContrast>{getMessage('categoryNone')}</Text>
           )}
         </Flex>
 
-        <Text size="1" weight="bold" color="gray">{getMessage('groupNameSource')}</Text>
+        <Text size="1" weight="bold" color="gray" highContrast>{getMessage('groupNameSource')}</Text>
         <Text size="2">
           {getMessage(`groupNameSource${rule.groupNameSource.split('_').map(
             (part: string) => part.charAt(0).toUpperCase() + part.slice(1)
@@ -63,13 +63,13 @@ export function RuleDetailPopover({ rule, searchTerm }: RuleDetailPopoverProps) 
 
         {rule.presetId && (
           <>
-            <Text size="1" weight="bold" color="gray">{getMessage('presetLabel')}</Text>
+            <Text size="1" weight="bold" color="gray" highContrast>{getMessage('presetLabel')}</Text>
             <Text size="2">{rule.presetId}</Text>
           </>
         )}
         {rule.titleParsingRegEx && (
           <>
-            <Text size="1" weight="bold" color="gray">{getMessage('titleRegex')}</Text>
+            <Text size="1" weight="bold" color="gray" highContrast>{getMessage('titleRegex')}</Text>
             <Text size="2">
               <code style={{ backgroundColor: 'var(--gray-3)', padding: '2px 6px', borderRadius: '4px', wordBreak: 'break-all' }}>
                 {rule.titleParsingRegEx}
@@ -79,7 +79,7 @@ export function RuleDetailPopover({ rule, searchTerm }: RuleDetailPopoverProps) 
         )}
         {rule.urlParsingRegEx && (
           <>
-            <Text size="1" weight="bold" color="gray">{getMessage('urlRegex')}</Text>
+            <Text size="1" weight="bold" color="gray" highContrast>{getMessage('urlRegex')}</Text>
             <Text size="2">
               <code style={{ backgroundColor: 'var(--gray-3)', padding: '2px 6px', borderRadius: '4px', wordBreak: 'break-all' }}>
                 {rule.urlParsingRegEx}
@@ -88,7 +88,7 @@ export function RuleDetailPopover({ rule, searchTerm }: RuleDetailPopoverProps) 
           </>
         )}
 
-        <Text size="1" weight="bold" color="gray">{getMessage('deduplicationMode')}</Text>
+        <Text size="1" weight="bold" color="gray" highContrast>{getMessage('deduplicationMode')}</Text>
         <Text size="2">
           {(() => {
             const modeOption = deduplicationMatchModeOptions.find(o => o.value === rule.deduplicationMatchMode);
@@ -101,15 +101,15 @@ export function RuleDetailPopover({ rule, searchTerm }: RuleDetailPopoverProps) 
           && Array.isArray(rule.ignoredQueryParams)
           && rule.ignoredQueryParams.length > 0 && (
             <>
-              <Text size="1" weight="bold" color="gray">{getMessage('ignoredQueryParamsLabel')}</Text>
+              <Text size="1" weight="bold" color="gray" highContrast>{getMessage('ignoredQueryParamsLabel')}</Text>
               <Text size="2" style={{ wordBreak: 'break-all' }}>
                 {rule.ignoredQueryParams.join(', ')}
               </Text>
             </>
         )}
 
-        <Text size="1" weight="bold" color="gray">{getMessage('deduplicationEnabled')}</Text>
-        <Badge size="1" color={rule.deduplicationEnabled ? 'green' : 'red'} variant="soft">
+        <Text size="1" weight="bold" color="gray" highContrast>{getMessage('deduplicationEnabled')}</Text>
+        <Badge size="1" color={rule.deduplicationEnabled ? 'green' : 'red'} variant="soft" highContrast>
           {rule.deduplicationEnabled ? getMessage('yes') : getMessage('no')}
         </Badge>
       </Box>

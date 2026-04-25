@@ -79,7 +79,7 @@ export function WizardStepper({ steps, currentStep, disableFutureNavigation = fa
                       ? 'var(--accent-11)'
                       : isCompleted
                         ? 'var(--accent-11)'
-                        : 'var(--gray-9)',
+                        : 'var(--gray-11)',
                     whiteSpace: 'nowrap',
                   }}
                 >

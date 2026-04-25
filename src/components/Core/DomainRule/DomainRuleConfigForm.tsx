@@ -68,9 +68,9 @@ export function DomainRuleConfigForm({
     <Flex direction="column" gap="4">
       {/* Info callout when presets are loading */}
       {isLoadingPresets && (
-        <Callout.Root color="cyan" variant="soft">
+        <Callout.Root color="indigo" variant="soft">
           <Callout.Icon>
-            <Info />
+            <Info aria-hidden="true" />
           </Callout.Icon>
           <Callout.Text>{getMessage('loadingPresets')}</Callout.Text>
         </Callout.Root>

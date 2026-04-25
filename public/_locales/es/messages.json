@@ -493,5 +493,8 @@
   "ruleMoveToFirst": { "message": "Al principio" },
   "ruleMoveToLast": { "message": "Al final" },
   "ruleMoveToFirstOfDomain": { "message": "Primera del dominio" },
-  "ruleMoveToLastOfDomain": { "message": "Última del dominio" }
+  "ruleMoveToLastOfDomain": { "message": "Última del dominio" },
+  "sidebarCollapse": { "message": "Colapsar barra lateral" },
+  "sidebarExpand": { "message": "Expandir barra lateral" },
+  "mainNavigation": { "message": "Navegación principal" }
 }

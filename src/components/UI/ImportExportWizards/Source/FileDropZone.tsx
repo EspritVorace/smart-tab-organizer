@@ -38,10 +38,11 @@ export function FileDropZone<T>({ source }: FileDropZoneProps<T>) {
         }}
       >
         <FileUp size={32} style={{ color: 'var(--gray-9)' }} aria-hidden="true" />
-        <Text size="2" color="gray">{getMessage('dragDropZone')}</Text>
+        <Text size="2" color="gray" highContrast>{getMessage('dragDropZone')}</Text>
         <Button
           variant="soft"
           size="1"
+          highContrast
           onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
             source.handleBrowse();

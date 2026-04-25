@@ -36,6 +36,7 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
                     <Text size="2">{getMessage('notifyOnGrouping')}</Text>
                     <Switch
                       data-testid="page-settings-toggle-notify-group"
+                      aria-label={getMessage('notifyOnGrouping')}
                       checked={syncSettings.notifyOnGrouping}
                       onCheckedChange={(checked) => updateSettings({ notifyOnGrouping: checked })}
                     />
@@ -45,6 +46,7 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
                     <Text size="2">{getMessage('notifyOnDeduplication')}</Text>
                     <Switch
                       data-testid="page-settings-toggle-notify-dedup"
+                      aria-label={getMessage('notifyOnDeduplication')}
                       checked={syncSettings.notifyOnDeduplication}
                       onCheckedChange={(checked) => updateSettings({ notifyOnDeduplication: checked })}
                     />
@@ -66,6 +68,7 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
                       <Text size="2">{getMessage('deduplicateUnmatchedDomainsLabel')}</Text>
                       <Switch
                         data-testid="page-settings-toggle-dedup-unmatched"
+                        aria-label={getMessage('deduplicateUnmatchedDomainsLabel')}
                         checked={syncSettings.deduplicateUnmatchedDomains}
                         onCheckedChange={(checked) => updateSettings({ deduplicateUnmatchedDomains: checked })}
                       />

@@ -16,7 +16,7 @@ export function StatusBadge({ type, size = '1' }: StatusBadgeProps) {
     }
 
     return (
-        <Badge color={badgeOption.color} size={size}>
+        <Badge color={badgeOption.color} size={size} highContrast>
             {getMessage(badgeOption.keyLabel)}
         </Badge>
     );

@@ -20,7 +20,7 @@ const VARIANT_ACCENT: Record<ToastVariant, 'green' | 'red' | 'gray'> = {
 };
 
 function VariantIcon({ variant }: { variant: ToastVariant }) {
-  const color = `var(--${VARIANT_ACCENT[variant]}-10)`;
+  const color = `var(--${VARIANT_ACCENT[variant]}-11)`;
   const commonProps = { size: 18, color, 'aria-hidden': true } as const;
   if (variant === 'success') return <CheckCircle2 {...commonProps} />;
   if (variant === 'error') return <AlertCircle {...commonProps} />;
@@ -70,7 +70,7 @@ export function Toaster() {
                   </Text>
                 </Toast.Title>
                 <Toast.Description asChild>
-                  <Text as="div" size="2" color="gray">
+                  <Text as="div" size="2" color="gray" highContrast>
                     {toast.message}
                   </Text>
                 </Toast.Description>

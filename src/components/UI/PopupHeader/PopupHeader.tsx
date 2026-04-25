@@ -11,7 +11,6 @@ export function PopupHeader({ title, onSettingsOpen }: PopupHeaderProps) {
   return (
     <Flex
       data-testid="popup-header"
-      role="banner"
       justify="between"
       align="center"
       px="1"

@@ -27,7 +27,7 @@ function ToasterPlayground({ autoFire }: { autoFire?: 'success' | 'error' | 'inf
   return (
     <Flex direction="column" gap="3" p="4" style={{ minHeight: 300 }}>
       <Button onClick={() => showSuccessToast('Success', 'Operation completed.')}>Fire success toast</Button>
-      <Button color="red" onClick={() => showErrorToast('Error', 'Something went wrong.')}>
+      <Button color="red" variant="outline" onClick={() => showErrorToast('Error', 'Something went wrong.')}>
         Fire error toast
       </Button>
       <Button variant="soft" onClick={() => showInfoToast('Info', 'Just so you know.')}>

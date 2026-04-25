@@ -149,12 +149,12 @@ export const SCREENSHOT_RULES: DomainRuleSetting[] = [
 
 // ─── Storage helpers ──────────────────────────────────────────────────────────
 
-/** Inject SCREENSHOT_RULES into chrome.storage.sync, bypassing the UI. */
+/** Inject SCREENSHOT_RULES into chrome.storage.local, bypassing the UI. */
 export async function seedRules(context: BrowserContext): Promise<void> {
   const sw = await getServiceWorker(context);
   await sw.evaluate(async (rules) => {
-    await chrome.storage.sync.set({ domainRules: rules });
-  }, SCREENSHOT_RULES as any[]);
+    await chrome.storage.local.set({ domainRules: rules });
+  }, SCREENSHOT_RULES as unknown as Parameters<typeof sw.evaluate>[1]);
   await new Promise((r) => setTimeout(r, 150));
 }
 
@@ -162,7 +162,7 @@ export async function seedRules(context: BrowserContext): Promise<void> {
 export async function clearRules(context: BrowserContext): Promise<void> {
   const sw = await getServiceWorker(context);
   await sw.evaluate(async () => {
-    await chrome.storage.sync.set({ domainRules: [] });
+    await chrome.storage.local.set({ domainRules: [] });
   });
   await new Promise((r) => setTimeout(r, 100));
 }

@@ -29,6 +29,7 @@ export function WizardStep3Options({ control, deduplicationEnabled, errors }: Wi
               control={control}
               render={({ field }) => (
                 <Switch
+                  aria-label={getMessage('enableDeduplication')}
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />

@@ -94,6 +94,7 @@ export function ConflictResolutionStep({
                     <Text
                       size="1"
                       color="gray"
+                      highContrast
                       style={{
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
@@ -103,7 +104,7 @@ export function ConflictResolutionStep({
                       {conflict.savedTab.url}
                     </Text>
                   </Flex>
-                  <Badge color="orange" variant="soft" size="1">
+                  <Badge color="orange" variant="soft" size="1" highContrast>
                     {getMessage('restoreAlreadyOpen')}
                   </Badge>
                 </Flex>
@@ -159,7 +160,7 @@ export function ConflictResolutionStep({
                     <Text size="2" weight="medium">
                       {conflict.savedGroup.title || getMessage('restoreUntitledGroup')}
                     </Text>
-                    <Text size="1" color="gray">
+                    <Text size="1" color="gray" highContrast>
                       {getPluralMessage(conflict.savedGroup.tabs.length, 'sessionTabOne', 'sessionTabCount')}
                     </Text>
                   </Flex>
