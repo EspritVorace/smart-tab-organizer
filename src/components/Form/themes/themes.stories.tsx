@@ -38,7 +38,7 @@ const ThemeShowcase = ({ ThemeComponent, title }: { ThemeComponent: React.Compon
         <Flex gap="2" align="center">
           <Text size="2" weight="medium">Select:</Text>
           <Select.Root defaultValue="option1">
-            <Select.Trigger placeholder="Select option..." style={{ width: '200px' }} />
+            <Select.Trigger placeholder="Select option..." style={{ width: '200px' }} aria-label="Select option" />
             <Select.Content>
               <Select.Item value="option1">Option 1</Select.Item>
               <Select.Item value="option2">Option 2</Select.Item>
@@ -153,7 +153,7 @@ export const ThemesImportExport: StoryObj = {
             <Flex gap="2" align="center">
               <Text size="2" weight="medium" style={{ minWidth: '120px' }}>Export Format:</Text>
               <Select.Root defaultValue="json">
-                <Select.Trigger placeholder="Select format..." style={{ width: '150px' }} />
+                <Select.Trigger placeholder="Select format..." style={{ width: '150px' }} aria-label="Select format" />
                 <Select.Content>
                   <Select.Item value="json">JSON</Select.Item>
                   <Select.Item value="yaml">YAML</Select.Item>
@@ -182,7 +182,7 @@ export const ThemesStatistics: StoryObj = {
           <Flex gap="2" align="center">
             <Text size="2" weight="medium" style={{ minWidth: '120px' }}>Time Period:</Text>
             <Select.Root defaultValue="week">
-              <Select.Trigger placeholder="Select period..." style={{ width: '150px' }} />
+              <Select.Trigger placeholder="Select period..." style={{ width: '150px' }} aria-label="Select period" />
               <Select.Content>
                 <Select.Item value="day">Last Day</Select.Item>
                 <Select.Item value="week">Last Week</Select.Item>
@@ -212,7 +212,7 @@ export const ThemesSettings: StoryObj = {
           <Flex gap="2" align="center">
             <Text size="2" weight="medium" style={{ minWidth: '120px' }}>Theme:</Text>
             <Select.Root defaultValue="system">
-              <Select.Trigger placeholder="Select theme..." style={{ width: '150px' }} />
+              <Select.Trigger placeholder="Select theme..." style={{ width: '150px' }} aria-label="Select theme" />
               <Select.Content>
                 <Select.Item value="light">Light</Select.Item>
                 <Select.Item value="dark">Dark</Select.Item>

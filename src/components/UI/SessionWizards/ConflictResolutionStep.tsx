@@ -104,7 +104,7 @@ export function ConflictResolutionStep({
                       {conflict.savedTab.url}
                     </Text>
                   </Flex>
-                  <Badge color="orange" variant="soft" size="1">
+                  <Badge color="orange" variant="soft" size="1" highContrast>
                     {getMessage('restoreAlreadyOpen')}
                   </Badge>
                 </Flex>

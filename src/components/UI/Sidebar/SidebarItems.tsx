@@ -66,8 +66,8 @@ export function SidebarItems({
                       position: 'absolute',
                       top: '-2px',
                       right: '-2px',
-                      backgroundColor: item.accentColor ? `var(--${item.accentColor}-9)` : 'var(--accent-9)',
-                      color: item.accentColor ? `var(--${item.accentColor}-contrast)` : 'var(--accent-contrast)',
+                      backgroundColor: item.accentColor ? `var(--${item.accentColor}-a3)` : 'var(--accent-a3)',
+                      color: item.accentColor ? `var(--${item.accentColor}-11)` : 'var(--accent-11)',
                       borderRadius: '50%',
                       fontSize: '10px',
                       fontWeight: 'bold',
@@ -104,8 +104,8 @@ export function SidebarItems({
                 {item.badge && (
                   <Box
                     style={{
-                      backgroundColor: item.accentColor ? `var(--${item.accentColor}-9)` : 'var(--accent-9)',
-                      color: item.accentColor ? `var(--${item.accentColor}-contrast)` : 'var(--accent-contrast)',
+                      backgroundColor: item.accentColor ? `var(--${item.accentColor}-a3)` : 'var(--accent-a3)',
+                      color: item.accentColor ? `var(--${item.accentColor}-11)` : 'var(--accent-11)',
                       borderRadius: '9999px',
                       fontSize: '11px',
                       fontWeight: 'bold',
