@@ -67,7 +67,7 @@ export function SidebarItems({
                       top: '-2px',
                       right: '-2px',
                       backgroundColor: item.accentColor ? `var(--${item.accentColor}-a3)` : 'var(--accent-a3)',
-                      color: item.accentColor ? `var(--${item.accentColor}-11)` : 'var(--accent-11)',
+                      color: item.accentColor ? `var(--${item.accentColor}-12)` : 'var(--accent-12)',
                       borderRadius: '50%',
                       fontSize: '10px',
                       fontWeight: 'bold',
@@ -105,7 +105,7 @@ export function SidebarItems({
                   <Box
                     style={{
                       backgroundColor: item.accentColor ? `var(--${item.accentColor}-a3)` : 'var(--accent-a3)',
-                      color: item.accentColor ? `var(--${item.accentColor}-11)` : 'var(--accent-11)',
+                      color: item.accentColor ? `var(--${item.accentColor}-12)` : 'var(--accent-12)',
                       borderRadius: '9999px',
                       fontSize: '11px',
                       fontWeight: 'bold',
