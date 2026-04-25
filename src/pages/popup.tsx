@@ -33,37 +33,35 @@ export function PopupContent() {
   const hasRules = isLoaded && (settings?.domainRules?.length ?? 0) > 0;
 
   return (
-    <Box data-testid="popup" width="400px" p="4" style={{ background: "var(--gray-a2)", borderRadius: "var(--radius-3)" }} aria-label={getMessage('popupTitle')}>
+    <Box data-testid="popup" role="main" aria-label={getMessage('popupTitle')} width="400px" p="4" style={{ background: "var(--gray-a2)", borderRadius: "var(--radius-3)" }}>
       <Flex gap="3" direction="column" width="100%">
         <PopupHeader title={getMessage('popupTitle')} onSettingsOpen={openOptionsPage} />
 
-        <main style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)', width: '100%' }}>
-          <PopupToolbar />
+        <PopupToolbar />
 
-          {isLoaded && !hasRules ? (
+        {isLoaded && !hasRules ? (
+          <SettingsToggles
+            isLoading={false}
+            hasRules={false}
+            onOpenRules={openRulesPage}
+          />
+        ) : null}
+
+        <PopupProfilesList />
+
+        {hasRules ? (
+          <>
+            <Separator size="4" />
             <SettingsToggles
-              isLoading={false}
-              hasRules={false}
-              onOpenRules={openRulesPage}
+              globalGroupingEnabled={settings?.globalGroupingEnabled}
+              globalDeduplicationEnabled={settings?.globalDeduplicationEnabled}
+              onGroupingChange={setGlobalGroupingEnabled}
+              onDeduplicationChange={setGlobalDeduplicationEnabled}
+              isLoading={!isLoaded}
+              hasRules={true}
             />
-          ) : null}
-
-          <PopupProfilesList />
-
-          {hasRules ? (
-            <>
-              <Separator size="4" />
-              <SettingsToggles
-                globalGroupingEnabled={settings?.globalGroupingEnabled}
-                globalDeduplicationEnabled={settings?.globalDeduplicationEnabled}
-                onGroupingChange={setGlobalGroupingEnabled}
-                onDeduplicationChange={setGlobalDeduplicationEnabled}
-                isLoading={!isLoaded}
-                hasRules={true}
-              />
-            </>
-          ) : null}
-        </main>
+          </>
+        ) : null}
       </Flex>
     </Box>
   );
