@@ -1,6 +1,7 @@
 import React from 'react';
 import { Flex, Button, Separator } from '@radix-ui/themes';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { getMessage } from '@/utils/i18n';
 
 interface SidebarHeaderProps {
   isCollapsed?: boolean;
@@ -60,9 +61,11 @@ export function SidebarHeader({
             variant="ghost"
             size="1"
             onClick={onToggleCollapse}
+            aria-label={isCollapsed ? getMessage('sidebarExpand') : getMessage('sidebarCollapse')}
+            title={isCollapsed ? getMessage('sidebarExpand') : getMessage('sidebarCollapse')}
             style={{ marginLeft: 'auto', marginRight: 0, color: 'var(--gray-11)' }}
           >
-            {isCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+            {isCollapsed ? <PanelLeftOpen size={16} aria-hidden="true" /> : <PanelLeftClose size={16} aria-hidden="true" />}
           </Button>
         </>
       )}

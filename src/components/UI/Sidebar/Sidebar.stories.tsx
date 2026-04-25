@@ -79,13 +79,13 @@ const UserFooterCollapsed = () => (
 );
 
 const HeaderExpanded = ({ title }: { title: string }) => (
-  <Text size="4" weight="bold" color="gray">{title}</Text>
+  <Text size="4" weight="bold" color="gray" highContrast>{title}</Text>
 );
 
 const HeaderCollapsed = () => (
   <Flex justify="center">
-    <Box style={{ color: 'var(--gray-9)' }}>
-      <Menu size={20} />
+    <Box style={{ color: 'var(--gray-11)' }}>
+      <Menu size={20} aria-hidden="true" />
     </Box>
   </Flex>
 );

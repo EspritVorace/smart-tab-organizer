@@ -42,10 +42,12 @@ export function RadioGroupField({
           >
             <Flex direction="row" gap="4" wrap="wrap">
               {options.map((option) => (
-                <Flex key={option.value} align="center" gap="2">
-                  <RadioGroup.Item value={option.value} />
-                  <Text size="2">{getMessage(option.keyLabel)}</Text>
-                </Flex>
+                <Text key={option.value} as="label" size="2">
+                  <Flex align="center" gap="2">
+                    <RadioGroup.Item value={option.value} />
+                    {getMessage(option.keyLabel)}
+                  </Flex>
+                </Text>
               ))}
             </Flex>
           </RadioGroup.Root>

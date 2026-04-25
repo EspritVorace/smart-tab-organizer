@@ -25,8 +25,8 @@ export function StatisticsPage({ syncSettings, stats, onReset }: StatisticsPageP
             <Card data-testid="page-stats-card-groups" style={{ flex: '1', minWidth: '200px' }}>
               <Flex direction="column" gap="2" p="4">
                 <Flex align="center" gap="2">
-                  <Layers size={20} style={{ color: 'var(--accent-9)' }} />
-                  <Text size="2" color="gray">{getMessage('groupsCreated')}</Text>
+                  <Layers size={20} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />
+                  <Text size="2" color="gray" highContrast>{getMessage('groupsCreated')}</Text>
                 </Flex>
                 <Text size="8" weight="bold" style={{ color: 'var(--accent-11)' }}>
                   {stats?.tabGroupsCreatedCount || 0}
@@ -37,8 +37,8 @@ export function StatisticsPage({ syncSettings, stats, onReset }: StatisticsPageP
             <Card data-testid="page-stats-card-dedup" style={{ flex: '1', minWidth: '200px' }}>
               <Flex direction="column" gap="2" p="4">
                 <Flex align="center" gap="2">
-                  <Copy size={20} style={{ color: 'var(--accent-9)' }} />
-                  <Text size="2" color="gray">{getMessage('tabsDeduplicated')}</Text>
+                  <Copy size={20} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />
+                  <Text size="2" color="gray" highContrast>{getMessage('tabsDeduplicated')}</Text>
                 </Flex>
                 <Text size="8" weight="bold" style={{ color: 'var(--accent-11)' }}>
                   {stats?.tabsDeduplicatedCount || 0}
@@ -49,7 +49,7 @@ export function StatisticsPage({ syncSettings, stats, onReset }: StatisticsPageP
 
           <Box mt="6">
             <Button data-testid="page-stats-btn-reset" variant="soft" color="red" onClick={onReset}>
-              <RotateCcw size={16} />
+              <RotateCcw size={16} aria-hidden="true" />
               {getMessage('resetStats')}
             </Button>
           </Box>

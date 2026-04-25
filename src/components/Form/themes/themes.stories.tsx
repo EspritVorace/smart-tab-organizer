@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Button, Flex, Text, Heading, TextField, Select, Switch, Box } from '@radix-ui/themes';
+import { getMessage } from '@/utils/i18n';
 import { 
   DomainRulesTheme, 
   RegexPresetsTheme, 
@@ -47,7 +48,7 @@ const ThemeShowcase = ({ ThemeComponent, title }: { ThemeComponent: React.Compon
         </Flex>
         <Flex gap="2" align="center">
           <Text size="2" weight="medium">Switch:</Text>
-          <Switch defaultChecked />
+          <Switch defaultChecked aria-label={getMessage('enableGrouping')} />
         </Flex>
       </Flex>
     </ThemeComponent>
@@ -88,7 +89,7 @@ export const ThemesDomainRules: StoryObj = {
           </Flex>
           <Flex gap="2" align="center">
             <Text size="2" weight="medium" style={{ minWidth: '120px' }}>Enable Rule:</Text>
-            <Switch defaultChecked />
+            <Switch defaultChecked aria-label={getMessage('enableGrouping')} />
           </Flex>
         </Flex>
       </Flex>
@@ -221,7 +222,7 @@ export const ThemesSettings: StoryObj = {
           </Flex>
           <Flex gap="2" align="center">
             <Text size="2" weight="medium" style={{ minWidth: '120px' }}>Auto-save:</Text>
-            <Switch defaultChecked />
+            <Switch defaultChecked aria-label={getMessage('enableDeduplication')} />
           </Flex>
           <Flex gap="2" align="center">
             <Text size="2" weight="medium" style={{ minWidth: '120px' }}>Actions:</Text>
