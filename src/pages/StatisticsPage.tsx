@@ -48,7 +48,7 @@ export function StatisticsPage({ syncSettings, stats, onReset }: StatisticsPageP
           </Flex>
 
           <Box mt="6">
-            <Button data-testid="page-stats-btn-reset" variant="soft" color="red" onClick={onReset}>
+            <Button data-testid="page-stats-btn-reset" variant="soft" color="red" highContrast onClick={onReset}>
               <RotateCcw size={16} aria-hidden="true" />
               {getMessage('resetStats')}
             </Button>
