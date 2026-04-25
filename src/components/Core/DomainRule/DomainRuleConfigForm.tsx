@@ -3,7 +3,6 @@ import * as Label from '@radix-ui/react-label';
 import { Info } from 'lucide-react';
 import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
-import { RegexPresetsTheme } from '@/components/Form/themes';
 import { FormField, SearchableSelect } from '@/components/Form/FormFields';
 import { groupNameSourceOptions, type GroupNameSourceValue } from '@/schemas/enums';
 import type { PresetCategory } from '@/utils/presetUtils';
@@ -82,24 +81,22 @@ export function DomainRuleConfigForm({
       {/* Preset selection */}
       {configMode === 'preset' && presetCategories.length > 0 && !isLoadingPresets && (
         <Grid columns="2" gap="4">
-          <RegexPresetsTheme>
-            <Flex direction="column" gap="1">
-              <Text size="2" weight="bold" asChild>
-                <Label.Root htmlFor={presetInputId}>
-                  {getMessage('presetRuleLabel')}
-                </Label.Root>
-              </Text>
-              <SearchableSelect
-                id={presetInputId}
-                value={presetId ?? ''}
-                onValueChange={onPresetChange}
-                groups={presetsToSearchableGroups(presetCategories)}
-                placeholder={getMessage('selectPresetPlaceholder')}
-                searchPlaceholder={getMessage('searchPresetPlaceholder')}
-                emptyMessage={getMessage('noPresetFound')}
-              />
-            </Flex>
-          </RegexPresetsTheme>
+          <Flex direction="column" gap="1">
+            <Text size="2" weight="bold" asChild>
+              <Label.Root htmlFor={presetInputId}>
+                {getMessage('presetRuleLabel')}
+              </Label.Root>
+            </Text>
+            <SearchableSelect
+              id={presetInputId}
+              value={presetId ?? ''}
+              onValueChange={onPresetChange}
+              groups={presetsToSearchableGroups(presetCategories)}
+              placeholder={getMessage('selectPresetPlaceholder')}
+              searchPlaceholder={getMessage('searchPresetPlaceholder')}
+              emptyMessage={getMessage('noPresetFound')}
+            />
+          </Flex>
           <Box />
         </Grid>
       )}

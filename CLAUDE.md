@@ -66,7 +66,7 @@ src/
                    # SessionWizards/ · SettingsPage/ · SettingsToggles/ · WizardStepper/
                    # SplitButton/ · ConfirmDialog/ · StatusBadge/ · ThemeToggle/
                    # DataTable/ · OptionsLayout/
-    Form/          # FormFields/ · themes/
+    Form/          # FormFields/
   hooks/           # useStorageState · useSettings · useStatistics · useSessions
                    # useSessionEditor · useDeepLinking
   pages/           # DomainRulesPage · SessionsPage · StatisticsPage · ImportExportPage · options.tsx · popup.tsx
@@ -92,7 +92,7 @@ tests/e2e/         # Playwright E2E tests
 6. **Sessions & Profiles** : snapshots of open tabs with optional note; pinned profiles with icon, window exclusivity; restore wizard with conflict resolution; interactive session editor; collapsed/expanded group state persistence; drag-and-drop session reordering; session card with HoverCard metadata and inline rename
 
 ### Theming
-Accent unique `indigo` (défaut Radix Themes). Préférer les tokens Radix (`var(--accent-a3)`, `var(--gray-a2)`, etc.) aux couleurs hardcodées. Les wrappers dans `src/components/Form/themes/` restent en place mais n'appliquent plus d'accent différencié.
+Accent unique `indigo` (défaut Radix Themes). Préférer les tokens Radix (`var(--accent-a3)`, `var(--gray-a2)`, etc.) aux couleurs hardcodées.
 
 ### Internationalization
 Always use `getMessage()` from `src/utils/i18n.ts` — for UI text, `aria-label`, and `title` attributes. Never hardcode strings.
@@ -121,7 +121,7 @@ logger.debug('[MY_MODULE] Something happened:', value);
 ### Component Organization
 - **Core/** — business logic tied to a domain concept
 - **UI/** — layout and cross-feature interface components
-- **Form/** — reusable form fields, themed callouts, theme providers
+- **Form/** — reusable form fields
 
 ### Storybook
 - Story titles mirror folder: `Components/Core/Session/SessionCard`

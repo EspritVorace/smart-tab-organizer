@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Box } from '@radix-ui/themes';
 import { Upload } from 'lucide-react';
-import { SessionsTheme } from '@/components/Form/themes';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast } from '@/utils/toast';
 import { sessionsArraySchema } from '@/schemas/session';
@@ -135,92 +134,90 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
   const hasConflicts = (classification?.conflictingSessions.length ?? 0) > 0;
 
   return (
-    <SessionsTheme>
-      <WizardModal
-        open={open}
-        onOpenChange={onOpenChange}
-        icon={Upload}
-        title={getMessage('importSessionsTitle')}
-        description={getMessage(STEP_DESCRIPTION_KEYS[step])}
-      >
-        <WizardModal.Body>
-          {step === 0 && (
-            <SourceStep
-              source={source}
-              textareaPlaceholder='{"sessions": [{"id": "...", "name": "My Session", ...}]}'
-              successCountMessageKey="sessionsFoundCount"
-            />
-          )}
-
-          {step === 1 && classification && (
-            <Box>
-              <ImportedNoteCallout note={source.importedNote} />
-              <ClassificationScrollArea>
-                <ClassificationGroup
-                  titleKey="newSessionsGroup"
-                  items={classification.newSessions}
-                  renderItem={(session) => (
-                    <SessionRow
-                      key={session.id}
-                      session={session}
-                      checkbox
-                      checked={newSessionSelection.has(session.id)}
-                      onToggle={() => newSessionSelection.toggle(session.id)}
-                    />
-                  )}
-                />
-                <ClassificationGroup
-                  titleKey="conflictingSessionsGroup"
-                  items={classification.conflictingSessions}
-                  showSeparator={classification.newSessions.length > 0}
-                  beforeList={
-                    <ConflictModeSelector
-                      value={conflictMode}
-                      onChange={classificationState.setConflictMode}
-                    />
-                  }
-                  renderItem={(conflict) => (
-                    <ConflictSessionRow key={conflict.imported.id} conflict={conflict} />
-                  )}
-                />
-                <ClassificationGroup
-                  titleKey="identicalSessionsGroup"
-                  items={classification.identicalSessions}
-                  showSeparator={
-                    classification.newSessions.length > 0
-                    || classification.conflictingSessions.length > 0
-                  }
-                  renderItem={(session) => (
-                    <SessionRow
-                      key={session.id}
-                      session={session}
-                      dimmed
-                      statusBadge={getMessage('alreadyExists')}
-                    />
-                  )}
-                />
-              </ClassificationScrollArea>
-
-              <ImportCountLabel messageKey="sessionsToImportCount" count={importCount} />
-              <ConflictWarningCallout
-                when={hasConflicts && conflictMode === 'overwrite'}
-                messageKey="sessionImportOverwriteWarning"
-              />
-            </Box>
-          )}
-        </WizardModal.Body>
-
-        <WizardModal.Footer>
-          <ImportWizardFooter
-            step={step as 0 | 1}
-            hasParsedData={!!source.parsedData}
-            importCount={importCount}
-            onNext={goToStep1}
-            onBack={() => setStep(0)}
-            onConfirm={executeImport}
+    <WizardModal
+      open={open}
+      onOpenChange={onOpenChange}
+      icon={Upload}
+      title={getMessage('importSessionsTitle')}
+      description={getMessage(STEP_DESCRIPTION_KEYS[step])}
+    >
+      <WizardModal.Body>
+        {step === 0 && (
+          <SourceStep
+            source={source}
+            textareaPlaceholder='{"sessions": [{"id": "...", "name": "My Session", ...}]}'
+            successCountMessageKey="sessionsFoundCount"
           />
-        </WizardModal.Footer>
-      </WizardModal>
-    </SessionsTheme>
+        )}
+
+        {step === 1 && classification && (
+          <Box>
+            <ImportedNoteCallout note={source.importedNote} />
+            <ClassificationScrollArea>
+              <ClassificationGroup
+                titleKey="newSessionsGroup"
+                items={classification.newSessions}
+                renderItem={(session) => (
+                  <SessionRow
+                    key={session.id}
+                    session={session}
+                    checkbox
+                    checked={newSessionSelection.has(session.id)}
+                    onToggle={() => newSessionSelection.toggle(session.id)}
+                  />
+                )}
+              />
+              <ClassificationGroup
+                titleKey="conflictingSessionsGroup"
+                items={classification.conflictingSessions}
+                showSeparator={classification.newSessions.length > 0}
+                beforeList={
+                  <ConflictModeSelector
+                    value={conflictMode}
+                    onChange={classificationState.setConflictMode}
+                  />
+                }
+                renderItem={(conflict) => (
+                  <ConflictSessionRow key={conflict.imported.id} conflict={conflict} />
+                )}
+              />
+              <ClassificationGroup
+                titleKey="identicalSessionsGroup"
+                items={classification.identicalSessions}
+                showSeparator={
+                  classification.newSessions.length > 0
+                  || classification.conflictingSessions.length > 0
+                }
+                renderItem={(session) => (
+                  <SessionRow
+                    key={session.id}
+                    session={session}
+                    dimmed
+                    statusBadge={getMessage('alreadyExists')}
+                  />
+                )}
+              />
+            </ClassificationScrollArea>
+
+            <ImportCountLabel messageKey="sessionsToImportCount" count={importCount} />
+            <ConflictWarningCallout
+              when={hasConflicts && conflictMode === 'overwrite'}
+              messageKey="sessionImportOverwriteWarning"
+            />
+          </Box>
+        )}
+      </WizardModal.Body>
+
+      <WizardModal.Footer>
+        <ImportWizardFooter
+          step={step as 0 | 1}
+          hasParsedData={!!source.parsedData}
+          importCount={importCount}
+          onNext={goToStep1}
+          onBack={() => setStep(0)}
+          onConfirm={executeImport}
+        />
+      </WizardModal.Footer>
+    </WizardModal>
   );
 }

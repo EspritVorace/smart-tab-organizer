@@ -2,7 +2,6 @@ import { Button, Flex, ScrollArea } from '@radix-ui/themes';
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
-import { DomainRulesTheme } from '@/components/Form/themes';
 import { DialogShell } from '@/components/UI/DialogShell';
 import { type GroupNameSourceValue } from '@/schemas/enums';
 import { createRegexValidator } from '@/schemas/common';
@@ -105,47 +104,45 @@ export function ConfigEditModal({
   };
 
   return (
-    <DomainRulesTheme>
-      <DialogShell
-        open={isOpen}
-        onOpenChange={handleOpenChange}
-        title={getMessage('editConfigTitle')}
-        description={getMessage('editConfigTitle')}
-        hideDescription
-        maxWidth={480}
-        showHeaderSeparator={false}
-      >
-        <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '55vh' }}>
-          <Flex direction="column" gap="4" mt="4" pr="3">
-            <DomainRuleConfigForm
-              idPrefix="edit"
-              configMode={configMode}
-              onConfigModeChange={setConfigMode}
-              presetId={presetId}
-              onPresetChange={handlePresetChange}
-              presetCategories={presetCategories}
-              isLoadingPresets={isLoadingPresets}
-              groupNameSource={groupNameSource}
-              onGroupNameSourceChange={setGroupNameSource}
-              titleParsingRegEx={titleParsingRegEx}
-              onTitleParsingRegExChange={setTitleParsingRegEx}
-              titleParsingRegExError={titleRegexError}
-              urlParsingRegEx={urlParsingRegEx}
-              onUrlParsingRegExChange={setUrlParsingRegEx}
-              urlParsingRegExError={urlRegexError}
-            />
-          </Flex>
-        </ScrollArea>
-
-        <Flex gap="3" justify="end" mt="4">
-          <Button variant="soft" color="gray" onClick={onClose}>
-            {getMessage('cancel')}
-          </Button>
-          <Button onClick={handleApply} disabled={hasRegexError}>
-            {getMessage('apply')}
-          </Button>
+    <DialogShell
+      open={isOpen}
+      onOpenChange={handleOpenChange}
+      title={getMessage('editConfigTitle')}
+      description={getMessage('editConfigTitle')}
+      hideDescription
+      maxWidth={480}
+      showHeaderSeparator={false}
+    >
+      <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '55vh' }}>
+        <Flex direction="column" gap="4" mt="4" pr="3">
+          <DomainRuleConfigForm
+            idPrefix="edit"
+            configMode={configMode}
+            onConfigModeChange={setConfigMode}
+            presetId={presetId}
+            onPresetChange={handlePresetChange}
+            presetCategories={presetCategories}
+            isLoadingPresets={isLoadingPresets}
+            groupNameSource={groupNameSource}
+            onGroupNameSourceChange={setGroupNameSource}
+            titleParsingRegEx={titleParsingRegEx}
+            onTitleParsingRegExChange={setTitleParsingRegEx}
+            titleParsingRegExError={titleRegexError}
+            urlParsingRegEx={urlParsingRegEx}
+            onUrlParsingRegExChange={setUrlParsingRegEx}
+            urlParsingRegExError={urlRegexError}
+          />
         </Flex>
-      </DialogShell>
-    </DomainRulesTheme>
+      </ScrollArea>
+
+      <Flex gap="3" justify="end" mt="4">
+        <Button variant="soft" color="gray" onClick={onClose}>
+          {getMessage('cancel')}
+        </Button>
+        <Button onClick={handleApply} disabled={hasRegexError}>
+          {getMessage('apply')}
+        </Button>
+      </Flex>
+    </DialogShell>
   );
 }
