@@ -20,7 +20,7 @@ export function RuleDetailPopover({ rule, searchTerm }: RuleDetailPopoverProps) 
         <Text size="3" weight="bold">
           <AccessibleHighlight text={rule.label} searchTerm={searchTerm} />
         </Text>
-        <Badge color={rule.enabled ? 'green' : 'gray'} variant="soft">
+        <Badge color={rule.enabled ? 'green' : 'gray'} variant="soft" highContrast>
           {getMessage(rule.enabled ? 'enabled' : 'disabled')}
         </Badge>
       </Flex>
@@ -109,7 +109,7 @@ export function RuleDetailPopover({ rule, searchTerm }: RuleDetailPopoverProps) 
         )}
 
         <Text size="1" weight="bold" color="gray" highContrast>{getMessage('deduplicationEnabled')}</Text>
-        <Badge size="1" color={rule.deduplicationEnabled ? 'green' : 'red'} variant="soft">
+        <Badge size="1" color={rule.deduplicationEnabled ? 'green' : 'red'} variant="soft" highContrast>
           {rule.deduplicationEnabled ? getMessage('yes') : getMessage('no')}
         </Badge>
       </Box>
