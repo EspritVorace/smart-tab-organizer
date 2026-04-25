@@ -92,6 +92,7 @@ export function DialogShell({
             <Dialog.Description
               size="2"
               color="gray"
+              highContrast
               style={hideDescription ? { display: 'none' } : undefined}
             >
               {description}
