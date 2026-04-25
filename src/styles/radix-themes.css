@@ -22,7 +22,7 @@
 }
 
 /* Focus ring for keyboard-navigable card lists (DomainRulesPage) */
-[role="row"][tabindex]:focus {
+[role="listitem"][tabindex]:focus {
   outline: 2px solid var(--accent-9);
   outline-offset: -2px;
   border-radius: var(--radius-3);

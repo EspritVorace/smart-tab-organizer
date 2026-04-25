@@ -232,7 +232,7 @@ export const SearchableSelectNoResults: Story = {
     const [value, setValue] = useState('');
     return (
       <Wrapper>
-        <p style={{ marginBottom: 12, fontSize: 13, color: '#888' }}>
+        <p style={{ marginBottom: 12, fontSize: 13, color: 'var(--gray-11)' }}>
           Type in the search to see no-results state (e.g. "zzz")
         </p>
         <SearchableSelect

@@ -328,7 +328,7 @@ test.describe('Creation wizard — Step 4: Summary', () => {
     // Dialog closed
     await expect(dialog).toBeHidden();
     // Rule appears in list
-    await expect(page.getByRole('row', { name: /Brand New Rule/i })).toBeVisible();
+    await expect(page.getByRole('listitem', { name: /Brand New Rule/i })).toBeVisible();
     await page.close();
   });
 });
@@ -345,7 +345,7 @@ test.describe('Edit mode — Summary View', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    await page.getByRole('row', { name: /Edit Me/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Edit Me/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
     const dialog = page.getByTestId('wizard-rule');
@@ -366,7 +366,7 @@ test.describe('Edit mode — Summary View', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    await page.getByRole('row', { name: /Rename Me/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Rename Me/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
     const dialog = page.getByTestId('wizard-rule');
@@ -374,7 +374,7 @@ test.describe('Edit mode — Summary View', () => {
     await dialog.getByRole('button', { name: /save/i }).click();
 
     await expect(dialog).toBeHidden();
-    await expect(page.getByRole('row', { name: /Renamed Rule/i })).toBeVisible();
+    await expect(page.getByRole('listitem', { name: /Renamed Rule/i })).toBeVisible();
     await page.close();
   });
 
@@ -386,7 +386,7 @@ test.describe('Edit mode — Summary View', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    await page.getByRole('row', { name: /Config Test/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Config Test/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
     const dialog = page.getByTestId('wizard-rule');
@@ -409,7 +409,7 @@ test.describe('Edit mode — Summary View', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    await page.getByRole('row', { name: /Options Test/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Options Test/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
     const dialog = page.getByTestId('wizard-rule');

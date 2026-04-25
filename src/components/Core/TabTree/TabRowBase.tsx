@@ -47,6 +47,7 @@ export function TabRowBase({
     <img
       src={favIconUrl}
       alt=""
+      aria-hidden="true"
       width={16}
       height={16}
       style={{ flexShrink: 0, borderRadius: 2 }}

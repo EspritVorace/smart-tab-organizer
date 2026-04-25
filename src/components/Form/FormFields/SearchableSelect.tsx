@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useId } from 'react';
 import { Command } from 'cmdk';
 import { ChevronDown, Check, Search } from 'lucide-react';
+import { getMessage } from '@/utils/i18n';
 import './SearchableSelect.css';
 
 export interface SearchableSelectOption {
@@ -173,7 +174,11 @@ export function SearchableSelect({
         aria-expanded={open}
         aria-controls={listboxId}
         aria-haspopup="listbox"
-        aria-label={ariaLabel}
+        aria-label={
+          ariaLabelledBy
+            ? undefined
+            : (ariaLabel ?? placeholder ?? getMessage('searchableSelectTriggerLabel'))
+        }
         aria-labelledby={ariaLabelledBy}
         disabled={disabled}
         className={['ss-trigger', open ? 'ss-trigger--open' : ''].filter(Boolean).join(' ')}
@@ -206,6 +211,7 @@ export function SearchableSelect({
               <Command.Input
                 ref={inputRef}
                 placeholder={searchPlaceholder}
+                aria-label={searchPlaceholder ?? getMessage('searchableSelectSearchLabel')}
                 className="ss-search__input"
                 onKeyDown={handleInputKeyDown}
               />

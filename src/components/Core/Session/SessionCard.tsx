@@ -189,6 +189,7 @@ export function SessionCard({
               ref={handleRef}
               data-testid={`session-card-${session.id}-drag-handle`}
               aria-disabled={isDragDisabled}
+              aria-label={getMessage('dragHandle')}
               style={{
                 display: 'flex',
                 alignItems: 'center',

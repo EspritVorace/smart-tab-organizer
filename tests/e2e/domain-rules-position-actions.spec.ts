@@ -27,7 +27,7 @@ test.describe('Move to top', () => {
     await goToDomainRulesSection(page, extensionId);
 
     // Open dropdown for Rule C (last) and click "Move to top"
-    await page.getByRole('row', { name: /Rule C/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Rule C/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /move to top/i }).click();
     await expect(page.getByRole('menu')).not.toBeAttached();
     await page.close();
@@ -45,7 +45,7 @@ test.describe('Move to top', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    await page.getByRole('row', { name: /Rule A/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Rule A/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /move to top/i }).click();
     await expect(page.getByRole('menu')).not.toBeAttached();
     await page.close();
@@ -68,7 +68,7 @@ test.describe('Move to bottom', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    await page.getByRole('row', { name: /Rule A/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Rule A/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /move to bottom/i }).click();
     await expect(page.getByRole('menu')).not.toBeAttached();
     await page.close();
@@ -98,7 +98,7 @@ test.describe('First of domain / Last of domain', () => {
 
     // Move "Sub Example" (root: example.com) to first of domain
     // "Example" (also example.com) is at index 1, so Sub Example should move before it
-    await page.getByRole('row', { name: /Sub Example/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Sub Example/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /first of domain/i }).click();
     await expect(page.getByRole('menu')).not.toBeAttached();
     await page.close();
@@ -126,7 +126,7 @@ test.describe('First of domain / Last of domain', () => {
 
     // Move "Example" (root: example.com) to last of domain
     // "Sub Example" (also example.com) is at index 2, so Example should move after it
-    await page.getByRole('row', { name: /Example/i }).first().getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Example/i }).first().getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /last of domain/i }).click();
     await expect(page.getByRole('menu')).not.toBeAttached();
     await page.close();
@@ -149,7 +149,7 @@ test.describe('First of domain / Last of domain', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    await page.getByRole('row', { name: /Solo/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Solo/i }).getByLabel('More actions').click();
 
     const firstOfDomainItem = page.getByRole('menuitem', { name: /first of domain/i });
     const lastOfDomainItem = page.getByRole('menuitem', { name: /last of domain/i });
