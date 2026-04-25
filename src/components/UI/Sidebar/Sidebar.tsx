@@ -1,6 +1,7 @@
 import React from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Flex } from '@radix-ui/themes';
+import { getMessage } from '@/utils/i18n';
 import { SidebarHeader } from './SidebarHeader';
 import { SidebarToolbar } from './SidebarToolbar';
 import { SidebarSearch } from './SidebarSearch';
