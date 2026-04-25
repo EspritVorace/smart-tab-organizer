@@ -33,7 +33,7 @@ export function PopupContent() {
   const hasRules = isLoaded && (settings?.domainRules?.length ?? 0) > 0;
 
   return (
-    <Box data-testid="popup" width="400px" p="4" style={{ background: "var(--gray-a2)", borderRadius: "var(--radius-3)" }} aria-label={getMessage('popupTitle')}>
+    <Box data-testid="popup" role="main" width="400px" p="4" style={{ background: "var(--gray-a2)", borderRadius: "var(--radius-3)" }} aria-label={getMessage('popupTitle')}>
       <Flex gap="3" direction="column" width="100%">
         <PopupHeader title={getMessage('popupTitle')} onSettingsOpen={openOptionsPage} />
 
