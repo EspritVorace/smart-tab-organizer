@@ -18,7 +18,7 @@ import { buildConflictJson } from '../fixtures/conflicts-seed.js';
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /** Navigate to the Import/Export section and wait for it to render. */
-async function goToImportExport(page: import('@playwright/test').Page, extensionId: string) {
+async function _goToImportExport(page: import('@playwright/test').Page, extensionId: string) {
   await page.goto(`chrome-extension://${extensionId}/options.html#importexport`);
   await page.waitForLoadState('domcontentloaded');
   await page.waitForTimeout(600);
@@ -215,8 +215,8 @@ test.describe('Rules screenshots', () => {
       'rules-edit',
       async (page) => {
         // Open edit modal for the first seeded rule (Jira)
-        // Use locale-agnostic selectors: last button in row = More actions, first menuitem = Edit
-        const rows = page.locator('[role="row"]');
+        // Use locale-agnostic selectors: last button in listitem = More actions, first menuitem = Edit
+        const rows = page.locator('[role="listitem"]');
         await rows.first().locator('button[aria-label]').last().click();
         await page.getByRole('menuitem').first().click();
         await page.locator('[role="dialog"]').waitFor({ state: 'visible' });
