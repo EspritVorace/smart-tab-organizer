@@ -29,6 +29,7 @@ export function ListToolbar({
         <TextField.Root
           data-testid={searchTestId}
           placeholder={searchPlaceholder}
+          aria-label={searchPlaceholder}
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
         >

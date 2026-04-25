@@ -27,8 +27,8 @@ test.describe('Drag-and-drop reordering', () => {
     await goToDomainRulesSection(page, extensionId);
 
     // Find drag handles for Rule A (first) and Rule C (last)
-    const ruleARow = page.getByRole('row', { name: /Rule A/i });
-    const ruleCRow = page.getByRole('row', { name: /Rule C/i });
+    const ruleARow = page.getByRole('listitem', { name: /Rule A/i });
+    const ruleCRow = page.getByRole('listitem', { name: /Rule C/i });
 
     const ruleAHandle = ruleARow.locator('[data-testid$="-drag-handle"]');
     const ruleCHandle = ruleCRow.locator('[data-testid$="-drag-handle"]');
@@ -47,7 +47,7 @@ test.describe('Drag-and-drop reordering', () => {
     await page.mouse.move(dstX, dstY, { steps: 50 });
     await page.mouse.up();
     await page.waitForFunction(() => {
-      const rows = [...document.querySelectorAll('[role="row"]')];
+      const rows = [...document.querySelectorAll('[role="listitem"]')];
       const iB = rows.findIndex(r => r.getAttribute('aria-label')?.includes('Rule B'));
       const iA = rows.findIndex(r => r.getAttribute('aria-label')?.includes('Rule A'));
       return iB > -1 && iA > -1 && iB < iA;

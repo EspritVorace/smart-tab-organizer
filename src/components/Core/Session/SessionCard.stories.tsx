@@ -102,7 +102,7 @@ export const SessionCardDeepSearchMatch: Story = {
           {/* Simulated search bar — purely decorative in this story */}
           <Flex mb="4">
             <Box style={{ flex: 1 }}>
-              <TextField.Root defaultValue="github" readOnly>
+              <TextField.Root defaultValue="github" readOnly aria-label="Search sessions">
                 <TextField.Slot>
                   <Search size={16} aria-hidden="true" />
                 </TextField.Slot>

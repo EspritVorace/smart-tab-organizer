@@ -11,7 +11,8 @@ export function OptionsHeader({ version }: OptionsHeaderProps) {
     <Flex data-testid="options-header" align="center" gap="3" style={{ width: '100%', paddingRight: '64px', position: 'relative' }}>
       <img
         src="/icons/icon48.png"
-        alt="SmartTab Organizer"
+        alt=""
+        aria-hidden="true"
         style={{ width: '32px', height: '32px', flexShrink: 0 }}
       />
       <Flex direction="column" gap="0" style={{ lineHeight: '1.2', flex: 1 }}>
@@ -34,7 +35,8 @@ export function OptionsHeaderCollapsed() {
     <Flex align="center" justify="center" style={{ width: '100%' }}>
       <img
         src="/icons/icon48.png"
-        alt="SmartTab Organizer"
+        alt=""
+        aria-hidden="true"
         style={{ width: '32px', height: '32px' }}
       />
     </Flex>

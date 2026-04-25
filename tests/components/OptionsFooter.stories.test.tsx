@@ -26,15 +26,15 @@ const { OptionsFooterDefault, OptionsFooterCollapsedStory } = composeStories(sto
 
 describe('OptionsFooter (portable stories)', () => {
   it('renders the expanded footer with username and GitHub icon', () => {
-    render(<OptionsFooterDefault />);
+    const { container } = render(<OptionsFooterDefault />);
     expect(screen.getByTestId('options-footer')).toBeInTheDocument();
     expect(screen.getByText('EspritVorace')).toBeInTheDocument();
-    expect(screen.getByAltText('EspritVorace')).toBeInTheDocument();
+    expect(container.querySelector('img[src="/icons/ev.png"]')).toBeInTheDocument();
   });
 
   it('renders the collapsed footer with avatar only', () => {
-    render(<OptionsFooterCollapsedStory />);
-    expect(screen.getByAltText('EspritVorace')).toBeInTheDocument();
+    const { container } = render(<OptionsFooterCollapsedStory />);
+    expect(container.querySelector('img[src="/icons/ev.png"]')).toBeInTheDocument();
     expect(screen.queryByText('EspritVorace')).not.toBeInTheDocument();
   });
 });

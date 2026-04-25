@@ -31,7 +31,7 @@ export function PopupHeader({ title, onSettingsOpen }: PopupHeaderProps) {
             justifyContent: 'center',
           }}
         >
-          <img src="/icons/icon48.png" alt="" style={{ width: 20, height: 20 }} />
+          <img src="/icons/icon48.png" alt="" aria-hidden="true" style={{ width: 20, height: 20 }} />
         </Box>
         <Heading size="3" weight="bold">
           {title}

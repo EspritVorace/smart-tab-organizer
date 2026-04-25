@@ -195,7 +195,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
   const listRef = useRef<HTMLDivElement>(null);
 
   const handleCardKeyDown = useCallback((e: React.KeyboardEvent, rule: DomainRuleSetting, index: number) => {
-    const cards = listRef.current?.querySelectorAll<HTMLElement>('[role="row"]');
+    const cards = listRef.current?.querySelectorAll<HTMLElement>('[role="listitem"]');
     if (!cards) return;
 
     switch (e.key) {
@@ -278,7 +278,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
     if (deleteTarget.type === 'single') {
       handleDeleteRule(deleteTarget.ruleId);
       if (deleteTarget.focusIndex != null) {
-        const cards = listRef.current?.querySelectorAll<HTMLElement>('[role="row"]');
+        const cards = listRef.current?.querySelectorAll<HTMLElement>('[role="listitem"]');
         if (cards) {
           const nextFocus = cards[deleteTarget.focusIndex + 1] || cards[deleteTarget.focusIndex - 1];
           setTimeout(() => nextFocus?.focus(), 0);
@@ -355,7 +355,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
               )
             ) : (
               <DragDropProvider modifiers={[RestrictToVerticalAxis]} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-                <Flex data-testid="page-rules-list" direction="column" gap="3" role="grid" aria-label={getMessage('domainRulesTab')} ref={listRef}>
+                <Flex data-testid="page-rules-list" direction="column" gap="3" role="list" aria-label={getMessage('domainRulesTab')} ref={listRef}>
                   {(dragItems ?? filteredRules).map((rule, index) => (
                     <DomainRuleCard
                       key={rule.id}
