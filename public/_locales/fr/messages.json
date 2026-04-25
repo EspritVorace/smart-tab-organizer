@@ -495,5 +495,6 @@
   "ruleMoveToFirstOfDomain": { "message": "Première du domaine" },
   "ruleMoveToLastOfDomain": { "message": "Dernière du domaine" },
   "sidebarCollapse": { "message": "Réduire la barre latérale" },
-  "sidebarExpand": { "message": "Développer la barre latérale" }
+  "sidebarExpand": { "message": "Développer la barre latérale" },
+  "mainNavigation": { "message": "Navigation principale" }
 }

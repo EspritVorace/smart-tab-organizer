@@ -1,6 +1,6 @@
 import React from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { Box, Flex } from '@radix-ui/themes';
+import { Flex } from '@radix-ui/themes';
 import { SidebarHeader } from './SidebarHeader';
 import { SidebarToolbar } from './SidebarToolbar';
 import { SidebarSearch } from './SidebarSearch';
@@ -59,7 +59,8 @@ export function Sidebar({
   onSearch
 }: SidebarProps) {
   return (
-    <Box
+    <nav
+      aria-label={getMessage('mainNavigation')}
       data-testid="sidebar"
       style={{
         height: '100vh',
@@ -115,6 +116,6 @@ export function Sidebar({
           </SidebarFooter>
         )}
       </Flex>
-    </Box>
+    </nav>
   );
 }
