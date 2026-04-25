@@ -240,18 +240,9 @@ test.describe('Rules screenshots', () => {
       'rules',
       'rules-bulk-actions',
       async (page) => {
-        const checkboxes = page.locator('[role="row"] button[role="checkbox"], [role="row"] input[type="checkbox"]');
-        const count = await checkboxes.count();
-        if (count >= 2) {
-          await checkboxes.nth(0).click();
-          await checkboxes.nth(1).click();
-        } else {
-          const radixBoxes = page.locator('.rt-Checkbox');
-          if (await radixBoxes.count() >= 2) {
-            await radixBoxes.nth(0).click();
-            await radixBoxes.nth(1).click();
-          }
-        }
+        const checkboxes = page.locator('[role="listitem"] button[role="checkbox"]');
+        await checkboxes.nth(0).click();
+        await checkboxes.nth(1).click();
         await page.waitForTimeout(400);
       },
     );
