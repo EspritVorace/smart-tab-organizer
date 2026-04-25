@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { Box } from '@radix-ui/themes';
 import { FileDown } from 'lucide-react';
-import { ExportTheme } from '@/components/Form/themes';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 import { getMessage } from '@/utils/i18n';
 import { WizardModal } from '@/components/UI/WizardModal';
@@ -55,44 +54,42 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
   });
 
   return (
-    <ExportTheme>
-      <WizardModal
-        open={open}
-        onOpenChange={onOpenChange}
-        icon={FileDown}
-        title={getMessage('exportRulesTitle')}
-        description={getMessage('exportRulesDescription')}
-      >
-        <WizardModal.Body>
-          <Box>
-            <ExportNoteField value={exportNote} onChange={setExportNote} />
-            <SelectionToolbar onSelectAll={selectAll} onDeselectAll={selection.clearAll} />
+    <WizardModal
+      open={open}
+      onOpenChange={onOpenChange}
+      icon={FileDown}
+      title={getMessage('exportRulesTitle')}
+      description={getMessage('exportRulesDescription')}
+    >
+      <WizardModal.Body>
+        <Box>
+          <ExportNoteField value={exportNote} onChange={setExportNote} />
+          <SelectionToolbar onSelectAll={selectAll} onDeselectAll={selection.clearAll} />
 
-            <SelectableListContainer>
-              {rules.map((rule) => (
-                <RuleRow
-                  key={rule.id}
-                  rule={rule}
-                  checkbox
-                  checked={selection.has(rule.id)}
-                  onToggle={() => selection.toggle(rule.id)}
-                  statusBadge={rule.enabled ? undefined : getMessage('disabled')}
-                />
-              ))}
-            </SelectableListContainer>
+          <SelectableListContainer>
+            {rules.map((rule) => (
+              <RuleRow
+                key={rule.id}
+                rule={rule}
+                checkbox
+                checked={selection.has(rule.id)}
+                onToggle={() => selection.toggle(rule.id)}
+                statusBadge={rule.enabled ? undefined : getMessage('disabled')}
+              />
+            ))}
+          </SelectableListContainer>
 
-            <CountLabel messageKey="rulesSelectedCount" count={selection.size} />
-          </Box>
-        </WizardModal.Body>
+          <CountLabel messageKey="rulesSelectedCount" count={selection.size} />
+        </Box>
+      </WizardModal.Body>
 
-        <WizardModal.Footer>
-          <ExportWizardFooter
-            labelKey="exportButton"
-            actions={actions}
-            disabled={selection.size === 0}
-          />
-        </WizardModal.Footer>
-      </WizardModal>
-    </ExportTheme>
+      <WizardModal.Footer>
+        <ExportWizardFooter
+          labelKey="exportButton"
+          actions={actions}
+          disabled={selection.size === 0}
+        />
+      </WizardModal.Footer>
+    </WizardModal>
   );
 }

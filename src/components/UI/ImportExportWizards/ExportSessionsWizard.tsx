@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Box, Separator } from '@radix-ui/themes';
 import { Archive, FileDown, Pin } from 'lucide-react';
-import { SessionsTheme } from '@/components/Form/themes';
 import { getMessage } from '@/utils/i18n';
 import { loadSessions } from '@/utils/sessionStorage';
 import { splitByPinned } from '@/utils/sessionUtils';
@@ -83,55 +82,53 @@ export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizar
   });
 
   return (
-    <SessionsTheme>
-      <WizardModal
-        open={open}
-        onOpenChange={onOpenChange}
-        icon={FileDown}
-        title={getMessage('exportSessionsTitle')}
-        description={getMessage('exportSessionsDescription')}
-      >
-        <WizardModal.Body>
-          <Box>
-            <ExportNoteField value={exportNote} onChange={setExportNote} />
-            <SelectionToolbar onSelectAll={selectAll} onDeselectAll={selection.clearAll} />
+    <WizardModal
+      open={open}
+      onOpenChange={onOpenChange}
+      icon={FileDown}
+      title={getMessage('exportSessionsTitle')}
+      description={getMessage('exportSessionsDescription')}
+    >
+      <WizardModal.Body>
+        <Box>
+          <ExportNoteField value={exportNote} onChange={setExportNote} />
+          <SelectionToolbar onSelectAll={selectAll} onDeselectAll={selection.clearAll} />
 
-            <SelectableListContainer>
-              <SessionExportGroupSection
-                sessions={pinnedSessions}
-                titleKey="pinnedSessionsSection"
-                icon={Pin}
-                selection={selection}
-                groupCheckedState={getGroupCheckedState(pinnedSessions)}
-                onToggleGroup={() => toggleGroupSelection(pinnedSessions)}
-              />
+          <SelectableListContainer>
+            <SessionExportGroupSection
+              sessions={pinnedSessions}
+              titleKey="pinnedSessionsSection"
+              icon={Pin}
+              selection={selection}
+              groupCheckedState={getGroupCheckedState(pinnedSessions)}
+              onToggleGroup={() => toggleGroupSelection(pinnedSessions)}
+            />
 
-              {pinnedSessions.length > 0 && unpinnedSessions.length > 0 && (
-                <Separator size="4" my="1" />
-              )}
+            {pinnedSessions.length > 0 && unpinnedSessions.length > 0 && (
+              <Separator size="4" my="1" />
+            )}
 
-              <SessionExportGroupSection
-                sessions={unpinnedSessions}
-                titleKey="sessionsSection"
-                icon={Archive}
-                selection={selection}
-                groupCheckedState={getGroupCheckedState(unpinnedSessions)}
-                onToggleGroup={() => toggleGroupSelection(unpinnedSessions)}
-              />
-            </SelectableListContainer>
+            <SessionExportGroupSection
+              sessions={unpinnedSessions}
+              titleKey="sessionsSection"
+              icon={Archive}
+              selection={selection}
+              groupCheckedState={getGroupCheckedState(unpinnedSessions)}
+              onToggleGroup={() => toggleGroupSelection(unpinnedSessions)}
+            />
+          </SelectableListContainer>
 
-            <CountLabel messageKey="sessionsSelectedCount" count={selection.size} />
-          </Box>
-        </WizardModal.Body>
+          <CountLabel messageKey="sessionsSelectedCount" count={selection.size} />
+        </Box>
+      </WizardModal.Body>
 
-        <WizardModal.Footer>
-          <ExportWizardFooter
-            labelKey="exportSessionsButton"
-            actions={actions}
-            disabled={selection.size === 0}
-          />
-        </WizardModal.Footer>
-      </WizardModal>
-    </SessionsTheme>
+      <WizardModal.Footer>
+        <ExportWizardFooter
+          labelKey="exportSessionsButton"
+          actions={actions}
+          disabled={selection.size === 0}
+        />
+      </WizardModal.Footer>
+    </WizardModal>
   );
 }

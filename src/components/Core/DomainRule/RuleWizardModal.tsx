@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getMessage } from '@/utils/i18n';
-import { DomainRulesTheme } from '@/components/Form/themes';
 import { WizardModal } from '@/components/UI/WizardModal';
 import { WizardStepper } from '@/components/UI/WizardStepper/WizardStepper';
 import { WizardStep1Identity } from './WizardStep1Identity';
@@ -355,132 +354,130 @@ export function RuleWizardModal({
     : getMessage(STEP_DESCRIPTION_KEYS[step]);
 
   return (
-    <DomainRulesTheme>
-      <WizardModal
-        open={isOpen}
-        onOpenChange={handleOpenChange}
-        data-testid="wizard-rule"
-        icon={isEditing ? Edit2 : Plus}
-        title={title}
-        description={description}
-        onOpenAutoFocus={(e) => {
-          e.preventDefault();
-          const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[name="label"]');
-          input?.focus();
-        }}
-      >
-        <form onSubmit={handleSubmit(handleFormSubmit)} style={{ display: 'contents' }}>
-          {/* aria-live region for step announcements */}
-          <div
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-            style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}
-          >
-            {stepAnnouncement}
-          </div>
+    <WizardModal
+      open={isOpen}
+      onOpenChange={handleOpenChange}
+      data-testid="wizard-rule"
+      icon={isEditing ? Edit2 : Plus}
+      title={title}
+      description={description}
+      onOpenAutoFocus={(e) => {
+        e.preventDefault();
+        const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[name="label"]');
+        input?.focus();
+      }}
+    >
+      <form onSubmit={handleSubmit(handleFormSubmit)} style={{ display: 'contents' }}>
+        {/* aria-live region for step announcements */}
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}
+        >
+          {stepAnnouncement}
+        </div>
 
-          {!isEditing && (
-            <WizardStepper
-              data-testid="wizard-rule-stepper"
-              steps={stepLabels}
-              currentStep={step}
-              disableFutureNavigation={true}
-            />
-          )}
+        {!isEditing && (
+          <WizardStepper
+            data-testid="wizard-rule-stepper"
+            steps={stepLabels}
+            currentStep={step}
+            disableFutureNavigation={true}
+          />
+        )}
 
-          <WizardModal.Body>
-            <Flex direction="column" gap="4">
-              {isEditing ? (
-                <EditSummaryView
-                  control={control}
-                  errors={errors}
-                  configMode={configMode}
-                  onApplyConfig={handleApplyConfig}
-                  presetCategories={presetCategories}
-                  isLoadingPresets={isLoadingPresets}
-                  presetName={presetName}
-                  groupNameSource={groupNameSource as GroupNameSourceValue}
-                  deduplicationEnabled={deduplicationEnabled}
-                  currentConfigValues={currentConfigValues}
-                />
-              ) : (
-                <>
-                  {step === 0 && (
-                    <Box data-testid="wizard-rule-step-1">
-                      <WizardStep1Identity control={control} errors={errors} />
-                    </Box>
-                  )}
-                  {step === 1 && (
-                    <Box data-testid="wizard-rule-step-2">
-                      <WizardStep2Config
-                        control={control}
-                        errors={errors}
-                        configMode={configMode}
-                        onConfigModeChange={handleConfigModeChange}
-                        presetCategories={presetCategories}
-                        isLoadingPresets={isLoadingPresets}
-                        handlePresetChange={handlePresetChange}
-                        groupNameSource={groupNameSource as GroupNameSourceValue}
-                      />
-                    </Box>
-                  )}
-                  {step === 2 && (
-                    <Box data-testid="wizard-rule-step-3">
-                      <WizardStep3Options control={control} deduplicationEnabled={deduplicationEnabled} errors={errors} />
-                    </Box>
-                  )}
-                  {step === 3 && (
-                    <Box data-testid="wizard-rule-step-4">
-                      <WizardStep4Summary
-                        values={getValues() as DomainRule}
-                        configMode={configMode}
-                        presetName={presetName}
-                        onEditStep={handleEditStep}
-                      />
-                    </Box>
-                  )}
-                </>
-              )}
-              {stepError && (
-                <Flex>
-                  <span style={{ color: 'var(--red-11)', fontSize: 13 }}>{stepError}</span>
-                </Flex>
-              )}
-            </Flex>
-          </WizardModal.Body>
-
-          <WizardModal.Footer>
+        <WizardModal.Body>
+          <Flex direction="column" gap="4">
             {isEditing ? (
-              <>
-                <Dialog.Close>
-                  <Button variant="soft" color="gray" type="button">{getMessage('cancel')}</Button>
-                </Dialog.Close>
-                <Button data-testid="wizard-rule-btn-save" type="submit">{getMessage('save')}</Button>
-              </>
+              <EditSummaryView
+                control={control}
+                errors={errors}
+                configMode={configMode}
+                onApplyConfig={handleApplyConfig}
+                presetCategories={presetCategories}
+                isLoadingPresets={isLoadingPresets}
+                presetName={presetName}
+                groupNameSource={groupNameSource as GroupNameSourceValue}
+                deduplicationEnabled={deduplicationEnabled}
+                currentConfigValues={currentConfigValues}
+              />
             ) : (
               <>
                 {step === 0 && (
-                  <Dialog.Close>
-                    <Button variant="soft" color="gray" type="button">{getMessage('cancel')}</Button>
-                  </Dialog.Close>
+                  <Box data-testid="wizard-rule-step-1">
+                    <WizardStep1Identity control={control} errors={errors} />
+                  </Box>
                 )}
-                {step > 0 && (
-                  <Button variant="soft" color="gray" type="button" onClick={handlePrev}>
-                    {getMessage('previous')}
-                  </Button>
+                {step === 1 && (
+                  <Box data-testid="wizard-rule-step-2">
+                    <WizardStep2Config
+                      control={control}
+                      errors={errors}
+                      configMode={configMode}
+                      onConfigModeChange={handleConfigModeChange}
+                      presetCategories={presetCategories}
+                      isLoadingPresets={isLoadingPresets}
+                      handlePresetChange={handlePresetChange}
+                      groupNameSource={groupNameSource as GroupNameSourceValue}
+                    />
+                  </Box>
                 )}
-                {step < 3 && (
-                  <Button data-testid="wizard-rule-btn-next" type="button" onClick={handleNext}>{getMessage('next')}</Button>
+                {step === 2 && (
+                  <Box data-testid="wizard-rule-step-3">
+                    <WizardStep3Options control={control} deduplicationEnabled={deduplicationEnabled} errors={errors} />
+                  </Box>
                 )}
                 {step === 3 && (
-                  <Button data-testid="wizard-rule-btn-create" type="submit">{getMessage('create')}</Button>
+                  <Box data-testid="wizard-rule-step-4">
+                    <WizardStep4Summary
+                      values={getValues() as DomainRule}
+                      configMode={configMode}
+                      presetName={presetName}
+                      onEditStep={handleEditStep}
+                    />
+                  </Box>
                 )}
               </>
             )}
-          </WizardModal.Footer>
-        </form>
-      </WizardModal>
-    </DomainRulesTheme>
+            {stepError && (
+              <Flex>
+                <span style={{ color: 'var(--red-11)', fontSize: 13 }}>{stepError}</span>
+              </Flex>
+            )}
+          </Flex>
+        </WizardModal.Body>
+
+        <WizardModal.Footer>
+          {isEditing ? (
+            <>
+              <Dialog.Close>
+                <Button variant="soft" color="gray" type="button">{getMessage('cancel')}</Button>
+              </Dialog.Close>
+              <Button data-testid="wizard-rule-btn-save" type="submit">{getMessage('save')}</Button>
+            </>
+          ) : (
+            <>
+              {step === 0 && (
+                <Dialog.Close>
+                  <Button variant="soft" color="gray" type="button">{getMessage('cancel')}</Button>
+                </Dialog.Close>
+              )}
+              {step > 0 && (
+                <Button variant="soft" color="gray" type="button" onClick={handlePrev}>
+                  {getMessage('previous')}
+                </Button>
+              )}
+              {step < 3 && (
+                <Button data-testid="wizard-rule-btn-next" type="button" onClick={handleNext}>{getMessage('next')}</Button>
+              )}
+              {step === 3 && (
+                <Button data-testid="wizard-rule-btn-create" type="submit">{getMessage('create')}</Button>
+              )}
+            </>
+          )}
+        </WizardModal.Footer>
+      </form>
+    </WizardModal>
   );
 }

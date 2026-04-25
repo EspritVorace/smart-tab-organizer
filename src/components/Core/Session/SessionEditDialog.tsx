@@ -11,7 +11,6 @@ import {
 import * as Label from '@radix-ui/react-label';
 import { Pencil } from 'lucide-react';
 import { getMessage, getPluralMessage } from '@/utils/i18n';
-import { SessionsTheme } from '@/components/Form/themes';
 import { DialogShell } from '@/components/UI/DialogShell';
 import { TabTreeEditor } from '@/components/Core/TabTree/TabTreeEditor';
 import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
@@ -118,7 +117,7 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingS
   }
 
   return (
-    <SessionsTheme>
+    <>
       <DialogShell
         open={open}
         onOpenChange={(isOpen) => {
@@ -248,6 +247,6 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingS
           </Flex>
         </AlertDialog.Content>
       </AlertDialog.Root>
-    </SessionsTheme>
+    </>
   );
 }
