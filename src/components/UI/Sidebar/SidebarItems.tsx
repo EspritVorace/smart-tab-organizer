@@ -42,13 +42,17 @@ export function SidebarItems({
               width: '100%',
               position: 'relative',
               backgroundColor: isActive ? (item.accentColor ? `var(--${item.accentColor}-a3)` : 'var(--accent-a3)') : 'transparent',
-              borderRadius: isActive ? 'var(--radius-2)' : undefined,
+              borderRadius: 'var(--radius-2)',
               color: 'var(--gray-12)',
               minHeight: '44px',
               height: '44px',
-              borderLeft: isActive && item.accentColor ? `3px solid var(--${item.accentColor}-9)` : undefined,
+              borderLeft: isActive && item.accentColor
+                ? `3px solid var(--${item.accentColor}-9)`
+                : '3px solid transparent',
               display: 'flex',
               alignItems: 'center',
+              margin: 0,
+              padding: 'var(--space-2) var(--space-3)',
             }}
           >
             {isCollapsed ? (
