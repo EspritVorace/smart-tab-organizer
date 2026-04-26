@@ -44,7 +44,15 @@ export function SidebarHeader({
 
       {onToggleCollapse && (
         <>
-          <Separator orientation="vertical" size="2" />
+          <Separator
+            orientation="vertical"
+            style={{
+              alignSelf: 'stretch',
+              height: 'auto',
+              marginTop: 'calc(-1 * var(--space-3))',
+              marginBottom: 'calc(-1 * var(--space-3))',
+            }}
+          />
           <Button
             data-testid="sidebar-collapse-btn"
             variant="ghost"
