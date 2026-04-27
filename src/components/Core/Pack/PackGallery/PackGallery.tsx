@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Box, Button, Flex, Text, TextField } from '@radix-ui/themes';
 import { Search } from 'lucide-react';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, getPluralMessage } from '@/utils/i18n';
 import { foldAccents } from '@/utils/stringUtils';
 import {
   resolvePackCategoryLabel,
@@ -85,8 +85,16 @@ export function PackGallery({ packs, categories, source }: PackGalleryProps) {
     totals.packCount === 0
       ? getMessage('packGalleryGlobalCounterEmpty')
       : getMessage('packGalleryGlobalCounter', [
-          String(totals.ruleCount),
-          String(totals.packCount),
+          getPluralMessage(
+            totals.ruleCount,
+            'packGalleryRuleCountOne',
+            'packGalleryRuleCount',
+          ),
+          getPluralMessage(
+            totals.packCount,
+            'packGalleryPackCountOne',
+            'packGalleryPackCount',
+          ),
         ]);
 
   const handleConfirm = useCallback(() => {

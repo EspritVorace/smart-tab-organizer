@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Badge, Box, Card, Checkbox, Flex, Select, Text, Tooltip } from '@radix-ui/themes';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, getPluralMessage } from '@/utils/i18n';
 import {
   resolvePackDescription,
   resolvePackName,
@@ -65,8 +65,16 @@ export function PackCard({ pack, selected, onSelectionChange }: PackCardProps) {
   const ruleCountLabel = isConfigurable
     ? ruleCount === 0
       ? getMessage('packGalleryNoRuleConfigured')
-      : getMessage('packGalleryConfiguredRuleCount', [String(ruleCount)])
-    : getMessage('packGalleryRuleCount', [String(ruleCount)]);
+      : getPluralMessage(
+          ruleCount,
+          'packGalleryConfiguredRuleCountOne',
+          'packGalleryConfiguredRuleCount',
+        )
+    : getPluralMessage(
+        ruleCount,
+        'packGalleryRuleCountOne',
+        'packGalleryRuleCount',
+      );
 
   return (
     <Card
