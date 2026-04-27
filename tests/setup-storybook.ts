@@ -18,10 +18,28 @@ import fs from 'fs';
 import path from 'path';
 
 // ── Load EN messages once ──────────────────────────────────────────────
+type LocaleMessage = {
+  message: string;
+  placeholders?: Record<string, { content: string }>;
+};
 const messagesPath = path.resolve(__dirname, '../public/_locales/en/messages.json');
-const messages: Record<string, { message: string }> = JSON.parse(
+const messages: Record<string, LocaleMessage> = JSON.parse(
   fs.readFileSync(messagesPath, 'utf8'),
 );
+
+function resolveMessage(entry: LocaleMessage, substitutions?: string | string[]): string {
+  let msg = entry.message;
+  if (entry.placeholders) {
+    for (const [name, p] of Object.entries(entry.placeholders)) {
+      msg = msg.split(`$${name}$`).join(p.content);
+    }
+  }
+  if (substitutions !== undefined) {
+    const subs = Array.isArray(substitutions) ? substitutions : [substitutions];
+    msg = msg.replace(/\$(\d+)/g, (m, n) => subs[Number(n) - 1] ?? m);
+  }
+  return msg;
+}
 
 // ── Provide a working i18n.getMessage on fakeBrowser ───────────────────
 // Must run AFTER the global beforeEach in setup.ts that calls
@@ -32,14 +50,7 @@ beforeEach(() => {
     getMessage: (key: string, substitutions?: string | string[]) => {
       const entry = messages[key];
       if (!entry) return key;
-      let msg = entry.message;
-      if (substitutions) {
-        const subs = Array.isArray(substitutions) ? substitutions : [substitutions];
-        subs.forEach((sub, i) => {
-          msg = msg.replace(`$${i + 1}`, sub);
-        });
-      }
-      return msg;
+      return resolveMessage(entry, substitutions);
     },
   };
 });

@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { z } from 'zod';
 import { getMessage } from '@/utils/i18n';
 
-export type SourceMode = 'file' | 'text';
+export type SourceMode = 'file' | 'text' | 'pack';
 
 export interface JsonSourceValidationResult<T> {
   data: T;

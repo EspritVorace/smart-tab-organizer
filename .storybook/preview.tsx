@@ -3,10 +3,12 @@ import type { Preview } from '@storybook/react'
 import { Theme } from '@radix-ui/themes'
 import '../src/styles/radix-themes.css'
 
-type LocaleMessages = Record<string, { message: string }>;
+type LocalePlaceholder = { content: string };
+type LocaleMessage = { message: string; placeholders?: Record<string, LocalePlaceholder> };
+type LocaleMessages = Record<string, LocaleMessage>;
 type MessagesCache = Record<string, LocaleMessages>;
 interface MockBrowser {
-  i18n: { getMessage: (key: string) => string };
+  i18n: { getMessage: (key: string, substitutions?: string | string[]) => string };
 }
 interface StorybookGlobals {
   messagesCache?: MessagesCache;
@@ -31,12 +33,28 @@ async function loadMessages(locale: string): Promise<LocaleMessages> {
   return messagesCache[locale];
 }
 
+function resolveMessage(entry: LocaleMessage, substitutions?: string | string[]): string {
+  let msg = entry.message;
+  if (entry.placeholders) {
+    for (const [name, p] of Object.entries(entry.placeholders)) {
+      msg = msg.split(`$${name}$`).join(p.content);
+    }
+  }
+  if (substitutions !== undefined) {
+    const subs = Array.isArray(substitutions) ? substitutions : [substitutions];
+    msg = msg.replace(/\$(\d+)/g, (m, n) => subs[Number(n) - 1] ?? m);
+  }
+  return msg;
+}
+
 const mockBrowser: MockBrowser = {
   i18n: {
-    getMessage: (key: string) => {
+    getMessage: (key: string, substitutions?: string | string[]) => {
       const locale = globals.currentLocale ?? 'en';
       const messages = messagesCache[locale] ?? {};
-      return messages[key]?.message ?? key;
+      const entry = messages[key];
+      if (!entry) return key;
+      return resolveMessage(entry, substitutions);
     }
   }
 };
