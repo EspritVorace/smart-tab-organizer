@@ -12,7 +12,6 @@ import { goToSessionsSection } from './helpers/navigation';
 import {
   seedSessions,
   clearSessions,
-  clearHelpPrefs,
   createTestSession,
   getSessionsFromStorage,
 } from './helpers/seed';
@@ -49,7 +48,6 @@ function sessionWithNote(note: string): TestSession {
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
-  await clearHelpPrefs(extensionContext);
 });
 
 // ---------------------------------------------------------------------------
@@ -79,7 +77,7 @@ test.describe('[US-S-NOTE-03] Note displayed in session card', () => {
     await goToSessionsSection(page, extensionId);
 
     // Card starts collapsed — note should not be visible
-    await expect(page.getByText('Hidden note text XYZ')).not.toBeVisible();
+    await expect(page.getByText('Hidden note text XYZ')).toBeHidden();
     await page.close();
   });
 
@@ -137,7 +135,7 @@ test.describe('[US-S-NOTE-04] Search matches note', () => {
 
     await expect(page.getByText('Noted Session', { exact: true })).toBeVisible();
     // Non-matching session should be hidden
-    await expect(page.getByText('Other Session', { exact: true })).not.toBeVisible();
+    await expect(page.getByText('Other Session', { exact: true })).toBeHidden();
     await page.close();
   });
 
@@ -176,7 +174,7 @@ test.describe('[US-S-NOTE-04] Search matches note', () => {
 
     // Session visible but note should NOT be visible (card not auto-expanded)
     await expect(page.getByText('My Searchable Session')).toBeVisible();
-    await expect(page.getByText('completely different content')).not.toBeVisible();
+    await expect(page.getByText('completely different content')).toBeHidden();
     await page.close();
   });
 

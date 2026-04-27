@@ -1,9 +1,10 @@
 import React from 'react';
 import { Badge, Box, Button, Flex, Separator, Text } from '@radix-ui/themes';
 import { Pencil } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
-import { getRuleCategory, deduplicationMatchModeOptions, groupNameSourceOptions } from '../../../schemas/enums';
-import type { DomainRule } from '../../../schemas/domainRule';
+import { getMessage } from '@/utils/i18n';
+import { deduplicationMatchModeOptions, groupNameSourceOptions } from '@/schemas/enums';
+import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
+import type { DomainRule } from '@/schemas/domainRule';
 
 interface WizardStep4SummaryProps {
   values: DomainRule;
@@ -85,7 +86,7 @@ export function WizardStep4Summary({ values, configMode, presetName, onEditStep 
             <Flex align="center" gap="2">
               {category && (
                 <Badge color="gray" variant="soft" size="1">
-                  {category.emoji} {getMessage(category.labelKey)}
+                  {category.emoji} {getCategoryLabel(category)}
                 </Badge>
               )}
               <Text size="2">{values.label}</Text>
@@ -106,7 +107,17 @@ export function WizardStep4Summary({ values, configMode, presetName, onEditStep 
 
       {/* Options section */}
       <SummarySection title={getMessage('wizardStepOptions')} onEdit={onEditStep} stepIndex={2}>
-        <Text size="2">{buildOptionsSummary(values)}</Text>
+        <Flex direction="column" gap="1">
+          <Text size="2">{buildOptionsSummary(values)}</Text>
+          {values.deduplicationEnabled
+            && values.deduplicationMatchMode === 'exact_ignore_params'
+            && values.ignoredQueryParams.length > 0 && (
+              <SummaryRow
+                label={getMessage('ignoredQueryParamsLabel')}
+                value={values.ignoredQueryParams.join(', ')}
+              />
+          )}
+        </Flex>
       </SummarySection>
     </Flex>
   );

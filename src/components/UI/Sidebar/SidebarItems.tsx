@@ -42,13 +42,17 @@ export function SidebarItems({
               width: '100%',
               position: 'relative',
               backgroundColor: isActive ? (item.accentColor ? `var(--${item.accentColor}-a3)` : 'var(--accent-a3)') : 'transparent',
-              borderRadius: isActive ? 'var(--radius-2)' : undefined,
+              borderRadius: 'var(--radius-2)',
               color: 'var(--gray-12)',
               minHeight: '44px',
               height: '44px',
-              borderLeft: isActive && item.accentColor ? `3px solid var(--${item.accentColor}-9)` : undefined,
+              borderLeft: isActive && item.accentColor
+                ? `3px solid var(--${item.accentColor}-9)`
+                : '3px solid transparent',
               display: 'flex',
               alignItems: 'center',
+              margin: 0,
+              padding: 'var(--space-2) var(--space-3)',
             }}
           >
             {isCollapsed ? (
@@ -66,8 +70,8 @@ export function SidebarItems({
                       position: 'absolute',
                       top: '-2px',
                       right: '-2px',
-                      backgroundColor: item.accentColor ? `var(--${item.accentColor}-9)` : 'var(--accent-9)',
-                      color: item.accentColor ? `var(--${item.accentColor}-contrast)` : 'var(--accent-contrast)',
+                      backgroundColor: item.accentColor ? `var(--${item.accentColor}-a3)` : 'var(--accent-a3)',
+                      color: item.accentColor ? `var(--${item.accentColor}-12)` : 'var(--accent-12)',
                       borderRadius: '50%',
                       fontSize: '10px',
                       fontWeight: 'bold',
@@ -104,8 +108,8 @@ export function SidebarItems({
                 {item.badge && (
                   <Box
                     style={{
-                      backgroundColor: item.accentColor ? `var(--${item.accentColor}-9)` : 'var(--accent-9)',
-                      color: item.accentColor ? `var(--${item.accentColor}-contrast)` : 'var(--accent-contrast)',
+                      backgroundColor: item.accentColor ? `var(--${item.accentColor}-a3)` : 'var(--accent-a3)',
+                      color: item.accentColor ? `var(--${item.accentColor}-12)` : 'var(--accent-12)',
                       borderRadius: '9999px',
                       fontSize: '11px',
                       fontWeight: 'bold',

@@ -55,9 +55,33 @@ test.describe('Popup screenshots', () => {
       'popup-content',
       '#popup-app',
       async (page) => {
-        // Resize viewport to popup width (350 px content + 2 px breathing room)
+        // Resize viewport to popup width (400 px content + 2 px breathing room)
         // so that #popup-app fills exactly the popup dimensions without whitespace.
-        await page.setViewportSize({ width: 352, height: 800 });
+        await page.setViewportSize({ width: 402, height: 800 });
+        await page.waitForTimeout(300);
+      },
+    );
+  });
+
+  /**
+   * popup-empty-pinned
+   * Popup with at least one saved session but none pinned: shows the
+   * collapsible "Pinned sessions" empty hint.
+   */
+  test('popup-empty-pinned', async ({ extensionContext, extensionId }, testInfo) => {
+    const locale = testInfo.project.name;
+    await seedRules(extensionContext);
+    await seedSessions(extensionContext, [SESSION_MORNING_DEV]);
+
+    await captureAllElement(
+      extensionContext,
+      extensionId,
+      locale,
+      'popup',
+      'popup-empty-pinned',
+      '#popup-app',
+      async (page) => {
+        await page.setViewportSize({ width: 402, height: 800 });
         await page.waitForTimeout(300);
       },
     );

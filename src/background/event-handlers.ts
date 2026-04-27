@@ -1,27 +1,59 @@
 import { browser, Browser } from 'wxt/browser';
-import { initializeDefaults } from '../utils/migration.js';
-import { logger } from '../utils/logger.js';
-import { handleMiddleClickMessage, findMiddleClickOpener } from './messaging.js';
+import { initializeDefaults } from '@/utils/migration.js';
+import { migrateSettingsFromSyncToLocal, seedBuiltInCategories } from './migration.js';
+import { initCategoriesStore } from '@/utils/categoriesStore.js';
+import { logger } from '@/utils/logger.js';
+import {
+    handleMiddleClickMessage,
+    handleSessionRestoreSkipDedupMessage,
+    findMiddleClickOpener,
+    cleanupMiddleClickedTabsForTab,
+} from './messaging.js';
 import { processTabForDeduplication } from './deduplication.js';
 import { processGroupingForNewTab } from './grouping.js';
 import { handleOrganizeAllTabs } from './organize.js';
+import type { BackgroundMessage, MessageResponse } from '@/types/messages.js';
+
+function isBackgroundMessage(value: unknown): value is BackgroundMessage {
+    return typeof value === 'object' && value !== null && 'type' in value
+        && typeof (value as { type: unknown }).type === 'string';
+}
 export function setupInstallationHandler(): void {
     browser.runtime.onInstalled.addListener(async (details: Browser.runtime.InstalledDetails) => {
         logger.debug("SmartTab Organizer installed/updated.", details.reason);
+        await migrateSettingsFromSyncToLocal();
         await initializeDefaults();
+        await seedBuiltInCategories();
+        await initCategoriesStore();
     });
 }
 
 export function setupMessageHandler(): void {
-    browser.runtime.onMessage.addListener((request: any, sender: Browser.runtime.MessageSender, sendResponse: (response?: any) => void) => {
+    browser.runtime.onMessage.addListener((
+        request: unknown,
+        sender: Browser.runtime.MessageSender,
+        sendResponse: (response?: MessageResponse) => void,
+    ) => {
+        if (!isBackgroundMessage(request)) return false;
+
         if (request.type === 'ORGANIZE_ALL_TABS') {
             browser.windows.getCurrent()
                 .then(win => { if (win.id != null) return handleOrganizeAllTabs(win.id); })
                 .catch(e => logger.error('[ORGANIZE_ALL_TABS] Error:', e));
             return false;
         }
-        handleMiddleClickMessage(request, sender, sendResponse);
-        return true;
+
+        if (request.type === 'middleClickLink') {
+            handleMiddleClickMessage(request, sender, sendResponse);
+            return true;
+        }
+
+        if (request.type === 'SESSION_RESTORE_SKIP_DEDUP') {
+            handleSessionRestoreSkipDedupMessage(request, sendResponse);
+            return true;
+        }
+
+        return false;
     });
 }
 
@@ -35,6 +67,17 @@ export function setupWindowRemovedHandler(): void {
 // Stored at module level so the top-level onUpdated listener can access them
 // even if the service worker was restarted between onTabCreated and onUpdated.
 const pendingGroupings = new Map<number, { openerTab: Browser.tabs.Tab; newTab: Browser.tabs.Tab }>();
+
+// Drop pending grouping state and registered middle-click URLs for closed tabs
+// so the module-level Maps don't grow unbounded over long-lived service workers.
+export function setupTabRemovedHandler(): void {
+    browser.tabs.onRemoved.addListener((tabId: number) => {
+        if (pendingGroupings.delete(tabId)) {
+            logger.debug(`[GROUPING_DEBUG] onRemoved: dropped pending grouping for tab ${tabId}.`);
+        }
+        cleanupMiddleClickedTabsForTab(tabId);
+    });
+}
 
 export function setupTabCreatedHandler(): void {
     browser.tabs.onCreated.addListener(async (newTab: Browser.tabs.Tab) => {
@@ -74,7 +117,9 @@ export function setupTabCreatedHandler(): void {
                             await processGroupingForNewTab(pending.openerTab, pending.newTab);
                         }
                     }
-                } catch (_) { /* tab was closed before we could check */ }
+                } catch (e) {
+                    logger.debug(`[GROUPING_DEBUG] onCreated: fast-load status check failed for tab ${newTab.id} (likely closed):`, e);
+                }
             } else {
                 logger.debug(`[GROUPING_DEBUG] onCreated: Opener tab ${openerIdFromMap} not found.`);
             }
@@ -104,7 +149,7 @@ export function setupTabUpdatedHandler(): void {
         // resolves Google's redirect URL so the tab never navigates through it).
         const navUrl = changeInfo.url || tab.url;
         if (navUrl && !navUrl.startsWith('about:') && !navUrl.startsWith('chrome:') && !pendingGroupings.has(tabId)) {
-            const middleClickedTabs = (globalThis as any).middleClickedTabs as Map<string, number> | undefined;
+            const middleClickedTabs = globalThis.middleClickedTabs;
 
             let matchedOpenerTabId: number | undefined;
 
@@ -139,7 +184,7 @@ export function setupTabUpdatedHandler(): void {
                         logger.debug(`[GROUPING_DEBUG] onUpdated: Registered pending grouping for tab ${tabId}.`);
                     }
                 } catch (e) {
-                    logger.warn(`[GROUPING_DEBUG] onUpdated: Opener tab ${matchedOpenerTabId} not found.`);
+                    logger.warn(`[GROUPING_DEBUG] onUpdated: Opener tab ${matchedOpenerTabId} not found.`, e);
                 }
             }
         }
@@ -161,5 +206,6 @@ export function setupAllEventHandlers(): void {
     setupMessageHandler();
     setupTabCreatedHandler();
     setupTabUpdatedHandler();
+    setupTabRemovedHandler();
     setupWindowRemovedHandler();
 }

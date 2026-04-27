@@ -7,15 +7,14 @@ import { goToSessionsSection } from './helpers/navigation';
 import {
   seedSessions,
   clearSessions,
-  clearHelpPrefs,
   getSessionsFromStorage,
   createTestSession,
   createPinnedSession,
 } from './helpers/seed';
+import { auditPage } from './helpers/a11y';
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
-  await clearHelpPrefs(extensionContext);
 });
 
 // ---------------------------------------------------------------------------
@@ -33,6 +32,7 @@ test.describe('[US-O01] Empty state', () => {
     await expect(
       page.getByText(/snapshot|profile/i).first(),
     ).toBeVisible();
+    await auditPage(page, 'sessions-empty-state');
     await page.close();
   });
 
@@ -47,12 +47,14 @@ test.describe('[US-O01] Empty state', () => {
     await page.close();
   });
 
-  test('shows intro callout on first visit [US-O001]', async ({ extensionContext, extensionId }) => {
+  test('shows page description on Sessions page [US-O001]', async ({ extensionContext, extensionId }) => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    // The intro callout contains this unique body text; it is shown until dismissed
-    await expect(page.getByText('Sessions capture your open tabs')).toBeVisible();
+    await expect(page.getByTestId('page-layout-description')).toBeVisible();
+    await expect(page.getByTestId('page-layout-description')).toContainText(
+      'Capture your open tabs as sessions',
+    );
     await page.close();
   });
 });
@@ -71,6 +73,7 @@ test.describe('[US-S02] Session list', () => {
     await expect(page.getByText('My Work Tabs')).toBeVisible();
     // 2 tabs in group + 1 ungrouped = 3 tabs total
     await expect(page.getByText(/3 tab/i)).toBeVisible();
+    await auditPage(page, 'sessions-list-populated');
     await page.close();
   });
 
@@ -85,7 +88,7 @@ test.describe('[US-S02] Session list', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    // Use exact:true to avoid matching "session as" in the intro callout body
+    // Use exact:true to avoid matching "sessions" inside the page description.
     await expect(page.getByText('Session A', { exact: true })).toBeVisible();
     await expect(page.getByText('Session B', { exact: true })).toBeVisible();
     await expect(page.getByText('Session C', { exact: true })).toBeVisible();
@@ -165,7 +168,7 @@ test.describe('[US-S08] Rename', () => {
     await input.press('Enter');
 
     await expect(page.getByText('New Name')).toBeVisible();
-    await expect(page.getByText('Old Name')).not.toBeVisible();
+    await expect(page.getByText('Old Name')).toBeHidden();
     await page.close();
   });
 
@@ -182,7 +185,7 @@ test.describe('[US-S08] Rename', () => {
     await input.press('Escape');
 
     await expect(page.getByText('Stable Name')).toBeVisible();
-    await expect(page.getByText('Changed Name')).not.toBeVisible();
+    await expect(page.getByText('Changed Name')).toBeHidden();
     await page.close();
   });
 });
@@ -230,7 +233,7 @@ test.describe('[US-S07] Delete', () => {
     // Click the red "Delete" confirm button
     await page.getByTestId('confirm-dialog-btn-confirm').click();
 
-    await expect(page.getByText('To Be Deleted')).not.toBeVisible();
+    await expect(page.getByText('To Be Deleted')).toBeHidden();
     // Empty state should appear
     await expect(page.getByText('No saved sessions.')).toBeVisible();
     await page.close();
@@ -292,7 +295,9 @@ test.describe('[US-S01] Snapshot creation', () => {
     await goToSessionsSection(page, extensionId);
 
     await page.getByTestId('page-sessions-btn-snapshot').click();
-    await page.waitForTimeout(800);
+    await expect(
+      page.getByTestId('wizard-snapshot').getByRole('button', { name: 'Save Session' }),
+    ).toBeEnabled({ timeout: 10_000 });
 
     // All checkboxes in the tab tree should be checked (aria-checked="true")
     const unchecked = page.getByTestId('wizard-snapshot').locator('[aria-checked="false"]');
@@ -314,11 +319,13 @@ test.describe('[US-S01] Snapshot creation', () => {
     await goToSessionsSection(page, extensionId);
 
     await page.getByTestId('page-sessions-btn-snapshot').click();
-    await page.waitForTimeout(800);
+    await expect(
+      page.getByTestId('wizard-snapshot').getByRole('button', { name: 'Save Session' }),
+    ).toBeEnabled({ timeout: 10_000 });
 
     const dialog = page.getByTestId('wizard-snapshot');
-    await expect(dialog.getByText(/chrome:\/\//)).not.toBeVisible();
-    await expect(dialog.getByText('about:blank')).not.toBeVisible();
+    await expect(dialog.getByText(/chrome:\/\//)).toBeHidden();
+    await expect(dialog.getByText('about:blank')).toBeHidden();
 
     await realTab.close();
     await page.close();
@@ -333,7 +340,9 @@ test.describe('[US-S01] Snapshot creation', () => {
     await goToSessionsSection(page, extensionId);
 
     await page.getByTestId('page-sessions-btn-snapshot').click();
-    await page.waitForTimeout(800); // wait for tab capture to complete
+    await expect(
+      page.getByTestId('wizard-snapshot').getByRole('button', { name: 'Save Session' }),
+    ).toBeEnabled({ timeout: 10_000 }); // wait for tab capture to complete
 
     await expect(page.getByTestId('wizard-snapshot').getByRole('button', { name: 'Save Session' })).toBeEnabled();
     await extraTab.close();
@@ -352,15 +361,17 @@ test.describe('[US-S01] Snapshot creation', () => {
     await goToSessionsSection(page, extensionId);
 
     await page.getByTestId('page-sessions-btn-snapshot').click();
-    await page.waitForTimeout(800);
+    await expect(
+      page.getByTestId('wizard-snapshot').getByRole('button', { name: 'Save Session' }),
+    ).toBeEnabled({ timeout: 10_000 });
 
     await page.getByRole('button', { name: 'Save Session' }).click();
 
     // Dialog auto-closes after saving
-    await expect(page.getByTestId('wizard-snapshot')).not.toBeVisible();
+    await expect(page.getByTestId('wizard-snapshot')).toBeHidden();
 
     const sessions = await getSessionsFromStorage(extensionContext);
-    expect(sessions.length).toBe(1);
+    expect(sessions).toHaveLength(1);
     expect(sessions[0].isPinned).toBe(false);
     await extraTab.close();
     await page.close();
@@ -383,18 +394,19 @@ test.describe('[US-S04][US-S06] Restore — More actions menu', () => {
     await page.close();
   });
 
-  test('More actions menu contains quick restore options [US-S011]', async ({ extensionContext, extensionId }) => {
+  test('Restore split button exposes the 4 restore options [US-S011]', async ({ extensionContext, extensionId }) => {
     const session = createTestSession({ name: 'Restorable' });
     await seedSessions(extensionContext, [session]);
 
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('button', { name: /restore options/i }).click();
 
-    await expect(page.getByRole('menuitem', { name: /current window/i })).toBeVisible();
-    await expect(page.getByRole('menuitem', { name: /new window/i })).toBeVisible();
-    await expect(page.getByRole('menuitem', { name: /customized restoration/i })).toBeVisible();
+    await expect(page.getByTestId('session-restore-menu-current-window')).toBeVisible();
+    await expect(page.getByTestId('session-restore-menu-new-window')).toBeVisible();
+    await expect(page.getByTestId('session-restore-menu-replace-window')).toBeVisible();
+    await expect(page.getByTestId('session-restore-menu-customize')).toBeVisible();
     await page.close();
   });
 
@@ -408,8 +420,8 @@ test.describe('[US-S04][US-S06] Restore — More actions menu', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /current window/i }).click();
+    await page.getByRole('button', { name: /restore options/i }).click();
+    await page.getByTestId('session-restore-menu-current-window').click();
 
     await expect(page.getByText(/tab.*opened/i)).toBeVisible({ timeout: 5000 });
     await page.close();
@@ -422,11 +434,12 @@ test.describe('[US-S04][US-S06] Restore — More actions menu', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /customized restoration/i }).click();
+    await page.getByRole('button', { name: /restore options/i }).click();
+    await page.getByTestId('session-restore-menu-customize').click();
 
     await expect(page.getByRole('dialog')).toBeVisible();
     await expect(page.getByRole('dialog').getByText(/Restore/).first()).toBeVisible();
+    await auditPage(page, 'sessions-restore-wizard-dialog', { include: '[role="dialog"]' });
     await page.close();
   });
 
@@ -440,11 +453,12 @@ test.describe('[US-S04][US-S06] Restore — More actions menu', () => {
 
     const pagesBefore = extensionContext.pages().length;
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /new window/i }).click();
+    const newPagePromise = extensionContext.waitForEvent('page', { timeout: 10_000 });
+    await page.getByRole('button', { name: /restore options/i }).click();
+    await page.getByTestId('session-restore-menu-new-window').click();
 
     // Session has 3 tabs — at least one new page should be created
-    await page.waitForTimeout(3000);
+    await newPagePromise;
     expect(extensionContext.pages().length).toBeGreaterThan(pagesBefore);
     await page.close();
   });
@@ -464,13 +478,12 @@ test.describe('[US-S04] Restore in current window', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /customized restoration/i }).click();
+    await page.getByRole('button', { name: /restore options/i }).click();
+    await page.getByTestId('session-restore-menu-customize').click();
 
     const dialog = page.getByRole('dialog');
-    await page.waitForTimeout(300);
     // "In the current window" radio should be checked by default
-    const currentRadio = dialog.getByRole('radio', { name: /current window/i });
+    const currentRadio = dialog.getByTestId('wizard-restore-radio-current-window');
     await expect(currentRadio).toBeChecked();
     await page.close();
   });
@@ -487,12 +500,13 @@ test.describe('[US-S05] Restore with conflict resolution', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /customized restoration/i }).click();
+    await page.getByRole('button', { name: /restore options/i }).click();
+    await page.getByTestId('session-restore-menu-customize').click();
 
     const dialog = page.getByRole('dialog');
-    await expect(dialog.getByText(/current window/i)).toBeVisible();
-    await expect(dialog.getByText(/new window/i)).toBeVisible();
+    await expect(dialog.getByTestId('wizard-restore-radio-current-window')).toBeVisible();
+    await expect(dialog.getByTestId('wizard-restore-radio-new-window')).toBeVisible();
+    await expect(dialog.getByTestId('wizard-restore-radio-replace-window')).toBeVisible();
     await page.close();
   });
 
@@ -511,8 +525,8 @@ test.describe('[US-S05] Restore with conflict resolution', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /customized restoration/i }).click();
+    await page.getByRole('button', { name: /restore options/i }).click();
+    await page.getByTestId('session-restore-menu-customize').click();
 
     const dialog = page.getByRole('dialog');
     await dialog.getByRole('button', { name: /restore/i }).click();
@@ -538,8 +552,8 @@ test.describe('[US-S017] Restore with collapsed group state', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /current window/i }).click();
+    await page.getByRole('button', { name: /restore options/i }).click();
+    await page.getByTestId('session-restore-menu-current-window').click();
 
     // Restore should show success message
     await expect(page.getByText(/tab.*opened/i)).toBeVisible({ timeout: 5000 });

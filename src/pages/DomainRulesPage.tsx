@@ -1,33 +1,35 @@
 import React, { useState, useMemo, useCallback, useRef } from 'react';
-import { Button, Text, Flex, Box, Checkbox, IconButton, TextField, Separator } from '@radix-ui/themes';
-import { Plus, Eye, EyeOff, Shield, Search, AlertCircle, Upload, Trash2 } from 'lucide-react';
+import { Button, Text, Flex, Box, Checkbox, Separator } from '@radix-ui/themes';
+import { Plus, Eye, EyeOff, Shield, AlertCircle, Upload, Trash2 } from 'lucide-react';
 import { DragDropProvider, type DragEndEvent, type DragOverEvent } from '@dnd-kit/react';
 import { move } from '@dnd-kit/helpers';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
-import { PageLayout } from '../components/UI/PageLayout/PageLayout';
-import { RuleWizardModal } from '../components/Core/DomainRule/RuleWizardModal';
-import { ImportWizard } from '../components/UI/ImportExportWizards/ImportWizard';
-import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
-import { getMessage } from '../utils/i18n';
-import { foldAccents } from '../utils/stringUtils';
-import { generateUUID } from '../utils/utils';
-import { DomainRuleCard } from '../components/Core/DomainRule/DomainRuleCard';
+import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
+import { EmptyState } from '@/components/UI/EmptyState';
+import { RuleWizardModal } from '@/components/Core/DomainRule/RuleWizardModal';
+import { ImportWizard } from '@/components/UI/ImportExportWizards/ImportWizard';
+import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
+import { ListToolbar } from '@/components/UI/ListToolbar';
+import { getMessage } from '@/utils/i18n';
+import { foldAccents } from '@/utils/stringUtils';
+import { generateUUID } from '@/utils/utils';
+import { DomainRuleCard } from '@/components/Core/DomainRule/DomainRuleCard';
 import {
   moveToFirst,
   moveToLast,
   moveToFirstOfDomain,
   moveToLastOfDomain,
   getRulesForRootDomain,
-} from '../utils/ruleOrderUtils';
-import type { SyncSettings, DomainRuleSetting } from '../types/syncSettings';
-import type { DomainRule } from '../schemas/domainRule';
+} from '@/utils/ruleOrderUtils';
+import type { AppSettings, DomainRuleSetting } from '@/types/syncSettings';
+import type { DomainRule } from '@/schemas/domainRule';
 
 type DeleteTarget =
   | { type: 'single'; ruleId: string; focusIndex?: number }
   | { type: 'bulk'; ruleIds: string[] };
 
 interface DomainRulesPageProps {
-  syncSettings: SyncSettings;
+  syncSettings: AppSettings;
   updateRules: (rules: DomainRuleSetting[]) => void;
 }
 
@@ -44,7 +46,7 @@ interface BulkActionsBarProps {
 }
 
 function BulkActionsBar({
-  selectedIds, filteredRules, isAllSelected, isIndeterminate,
+  selectedIds, filteredRules: _filteredRules, isAllSelected, isIndeterminate,
   onSelectAll, onBulkToggle, onBulkDeleteRequest,
 }: BulkActionsBarProps) {
   return (
@@ -77,46 +79,6 @@ function BulkActionsBar({
           {getMessage('deleteSelected')}
         </Button>
       </Flex>
-    </Flex>
-  );
-}
-
-interface RulesEmptyStateProps {
-  hasRules: boolean;
-  hasSearch: boolean;
-  onAddRule: () => void;
-  onImport: () => void;
-}
-
-function RulesEmptyState({ hasRules, hasSearch, onAddRule, onImport }: RulesEmptyStateProps) {
-  if (!hasRules && !hasSearch) {
-    return (
-      <Flex data-testid="page-rules-empty" direction="column" align="center" justify="center" gap="3" style={{ minHeight: 200 }}>
-        <Shield size={40} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
-        <Text size="3" weight="medium" color="gray" align="center">
-          {getMessage('rulesEmptyTitle')}
-        </Text>
-        <Text size="2" color="gray" align="center" style={{ maxWidth: 340 }}>
-          {getMessage('rulesEmptyDescription')}
-        </Text>
-        <Flex gap="2">
-          <Button variant="soft" onClick={onAddRule}>
-            <Plus size={14} aria-hidden="true" />
-            {getMessage('addRule')}
-          </Button>
-          <Button variant="soft" onClick={onImport}>
-            <Upload size={14} aria-hidden="true" />
-            {getMessage('importRulesButton')}
-          </Button>
-        </Flex>
-      </Flex>
-    );
-  }
-
-  return (
-    <Flex direction="column" align="center" justify="center" gap="2" style={{ minHeight: 120 }}>
-      <AlertCircle size={32} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
-      <Text color="gray">{getMessage('noRulesFound')}</Text>
     </Flex>
   );
 }
@@ -195,7 +157,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
   const isIndeterminate = selectedIds.size > 0 && selectedIds.size < filteredRules.length;
 
   const handleEditRule = useCallback((rule: DomainRuleSetting) => {
-    const { enabled, badge, ...domainRule } = rule;
+    const { enabled: _enabled, badge: _badge, ...domainRule } = rule;
     setEditingRule(domainRule);
     setIsModalOpen(true);
   }, []);
@@ -233,7 +195,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
   const listRef = useRef<HTMLDivElement>(null);
 
   const handleCardKeyDown = useCallback((e: React.KeyboardEvent, rule: DomainRuleSetting, index: number) => {
-    const cards = listRef.current?.querySelectorAll<HTMLElement>('[role="row"]');
+    const cards = listRef.current?.querySelectorAll<HTMLElement>('[role="listitem"]');
     if (!cards) return;
 
     switch (e.key) {
@@ -316,7 +278,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
     if (deleteTarget.type === 'single') {
       handleDeleteRule(deleteTarget.ruleId);
       if (deleteTarget.focusIndex != null) {
-        const cards = listRef.current?.querySelectorAll<HTMLElement>('[role="row"]');
+        const cards = listRef.current?.querySelectorAll<HTMLElement>('[role="listitem"]');
         if (cards) {
           const nextFocus = cards[deleteTarget.focusIndex + 1] || cards[deleteTarget.focusIndex - 1];
           setTimeout(() => nextFocus?.focus(), 0);
@@ -333,31 +295,28 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
     <>
       <PageLayout
         titleKey="domainRulesTab"
-        theme="DOMAIN_RULES"
+        descriptionKey="domainRulesPageDescription"
         icon={Shield}
         syncSettings={syncSettings}
       >
         {() => (
           <Box data-testid="page-rules">
-            {/* Toolbar: Search + Add */}
-            <Flex data-testid="page-rules-toolbar" gap="3" mb="4" align="center">
-              <Box style={{ flex: 1 }}>
-                <TextField.Root
-                  data-testid="page-rules-search"
-                  placeholder={getMessage('searchRules')}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                >
-                  <TextField.Slot>
-                    <Search size={16} />
-                  </TextField.Slot>
-                </TextField.Root>
-              </Box>
-              <Button data-testid="page-rules-btn-add" onClick={handleAddRule}>
-                <Plus size={16} />
-                {getMessage('addRule')}
-              </Button>
-            </Flex>
+            {/* Toolbar: Search + Add (hidden when no rules exist) */}
+            {syncSettings.domainRules.length > 0 && (
+              <ListToolbar
+                testId="page-rules-toolbar"
+                searchTestId="page-rules-search"
+                searchPlaceholder={getMessage('searchRules')}
+                searchValue={searchTerm}
+                onSearchChange={setSearchTerm}
+                action={
+                  <Button data-testid="page-rules-btn-add" onClick={handleAddRule}>
+                    <Plus size={16} aria-hidden="true" />
+                    {getMessage('addRule')}
+                  </Button>
+                }
+              />
+            )}
 
             {selectedIds.size > 0 && (
               <BulkActionsBar
@@ -372,15 +331,31 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
             )}
 
             {filteredRules.length === 0 ? (
-              <RulesEmptyState
-                hasRules={syncSettings.domainRules.length > 0}
-                hasSearch={!!searchTerm}
-                onAddRule={handleAddRule}
-                onImport={() => setIsImportOpen(true)}
-              />
+              syncSettings.domainRules.length === 0 && !searchTerm ? (
+                <EmptyState
+                  data-testid="page-rules-empty"
+                  icon={Shield}
+                  title={getMessage('rulesEmptyTitle')}
+                  description={getMessage('rulesEmptyDescription')}
+                  actions={
+                    <Flex gap="2">
+                      <Button data-testid="page-rules-btn-add" variant="soft" onClick={handleAddRule}>
+                        <Plus size={14} aria-hidden="true" />
+                        {getMessage('addRule')}
+                      </Button>
+                      <Button variant="soft" onClick={() => setIsImportOpen(true)}>
+                        <Upload size={14} aria-hidden="true" />
+                        {getMessage('importRulesButton')}
+                      </Button>
+                    </Flex>
+                  }
+                />
+              ) : (
+                <EmptyState compact icon={AlertCircle} message={getMessage('noRulesFound')} />
+              )
             ) : (
               <DragDropProvider modifiers={[RestrictToVerticalAxis]} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-                <Flex data-testid="page-rules-list" direction="column" gap="3" role="grid" aria-label={getMessage('domainRulesTab')} ref={listRef}>
+                <Flex data-testid="page-rules-list" direction="column" gap="3" role="list" aria-label={getMessage('domainRulesTab')} ref={listRef}>
                   {(dragItems ?? filteredRules).map((rule, index) => (
                     <DomainRuleCard
                       key={rule.id}

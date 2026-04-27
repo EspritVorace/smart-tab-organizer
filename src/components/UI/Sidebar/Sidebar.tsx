@@ -1,5 +1,7 @@
 import React from 'react';
-import { Box, Flex } from '@radix-ui/themes';
+import type { LucideIcon } from 'lucide-react';
+import { Flex } from '@radix-ui/themes';
+import { getMessage } from '@/utils/i18n';
 import { SidebarHeader } from './SidebarHeader';
 import { SidebarToolbar } from './SidebarToolbar';
 import { SidebarSearch } from './SidebarSearch';
@@ -9,7 +11,7 @@ import { SidebarFooter } from './SidebarFooter';
 export interface SidebarItem {
   id: string;
   label: string;
-  icon: React.ComponentType<{ size?: number | string }>;
+  icon: LucideIcon;
   href?: string;
   onClick?: () => void;
   badge?: string | number;
@@ -58,7 +60,8 @@ export function Sidebar({
   onSearch
 }: SidebarProps) {
   return (
-    <Box
+    <nav
+      aria-label={getMessage('mainNavigation')}
       data-testid="sidebar"
       style={{
         height: '100vh',
@@ -114,6 +117,6 @@ export function Sidebar({
           </SidebarFooter>
         )}
       </Flex>
-    </Box>
+    </nav>
   );
 }

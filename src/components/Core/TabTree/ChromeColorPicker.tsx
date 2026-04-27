@@ -1,8 +1,8 @@
 import React from 'react';
 import { Flex, Tooltip } from '@radix-ui/themes';
-import { getMessage } from '../../../utils/i18n';
-import { chromeGroupColors } from '../../../utils/tabTreeUtils';
-import type { ChromeGroupColor } from '../../../types/tabTree';
+import { getMessage } from '@/utils/i18n';
+import { chromeGroupColors } from '@/utils/tabTreeUtils';
+import type { ChromeGroupColor } from '@/types/tabTree';
 import styles from './ChromeColorPicker.module.css';
 
 const CHROME_COLORS: ChromeGroupColor[] = [

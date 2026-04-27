@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { within, userEvent, expect } from 'storybook/test';
 import { SearchableSelect, type SearchableSelectOption, type SearchableSelectGroup } from './SearchableSelect';
 
 const meta: Meta<typeof SearchableSelect> = {
@@ -231,7 +232,7 @@ export const SearchableSelectNoResults: Story = {
     const [value, setValue] = useState('');
     return (
       <Wrapper>
-        <p style={{ marginBottom: 12, fontSize: 13, color: '#888' }}>
+        <p style={{ marginBottom: 12, fontSize: 13, color: 'var(--gray-11)' }}>
           Type in the search to see no-results state (e.g. "zzz")
         </p>
         <SearchableSelect
@@ -244,5 +245,110 @@ export const SearchableSelectNoResults: Story = {
         />
       </Wrapper>
     );
+  },
+};
+
+// Opens the dropdown by clicking the trigger button.
+export const SearchableSelectOpen: Story = {
+  render: () => {
+    const [value, setValue] = useState('');
+    return (
+      <Wrapper>
+        <SearchableSelect
+          value={value}
+          onValueChange={setValue}
+          groups={devGroups}
+          placeholder="Choose a preset..."
+          searchPlaceholder="Search a preset..."
+          emptyMessage="No preset found."
+        />
+      </Wrapper>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const trigger = canvas.getByRole('combobox');
+    await userEvent.click(trigger);
+    const body = within(canvasElement.ownerDocument.body);
+    await expect(body.getByPlaceholderText('Search a preset...')).toBeInTheDocument();
+  },
+};
+
+// Types in the search box to filter options.
+export const SearchableSelectFiltered: Story = {
+  render: () => {
+    const [value, setValue] = useState('');
+    return (
+      <Wrapper>
+        <SearchableSelect
+          value={value}
+          onValueChange={setValue}
+          groups={devGroups}
+          placeholder="Choose a preset..."
+          searchPlaceholder="Search a preset..."
+          emptyMessage="No preset found."
+        />
+      </Wrapper>
+    );
+  },
+  play: async (context) => {
+    await SearchableSelectOpen.play?.(context);
+    const body = within(context.canvasElement.ownerDocument.body);
+    const searchInput = body.getByPlaceholderText('Search a preset...');
+    await userEvent.type(searchInput, 'jira');
+    await expect(body.getByText('Jira Ticket')).toBeInTheDocument();
+  },
+};
+
+// Selects an option from the dropdown.
+export const SearchableSelectChosen: Story = {
+  render: () => {
+    const [value, setValue] = useState('');
+    return (
+      <Wrapper>
+        <SearchableSelect
+          value={value}
+          onValueChange={setValue}
+          groups={devGroups}
+          placeholder="Choose a preset..."
+          searchPlaceholder="Search a preset..."
+          emptyMessage="No preset found."
+        />
+      </Wrapper>
+    );
+  },
+  play: async (context) => {
+    await SearchableSelectOpen.play?.(context);
+    const body = within(context.canvasElement.ownerDocument.body);
+    await userEvent.click(body.getByText('GitHub Repository'));
+    // Dropdown closes and trigger shows selected label
+    const canvas = within(context.canvasElement);
+    await expect(canvas.getByRole('combobox')).toHaveTextContent('GitHub Repository');
+  },
+};
+
+// Types a search term that returns no results.
+export const SearchableSelectEmptyResults: Story = {
+  render: () => {
+    const [value, setValue] = useState('');
+    return (
+      <Wrapper>
+        <SearchableSelect
+          value={value}
+          onValueChange={setValue}
+          groups={devGroups}
+          placeholder="Choose a preset..."
+          searchPlaceholder="Search a preset..."
+          emptyMessage="No preset found."
+        />
+      </Wrapper>
+    );
+  },
+  play: async (context) => {
+    await SearchableSelectOpen.play?.(context);
+    const body = within(context.canvasElement.ownerDocument.body);
+    const searchInput = body.getByPlaceholderText('Search a preset...');
+    await userEvent.type(searchInput, 'zzz-no-match');
+    await expect(body.getByText('No preset found.')).toBeInTheDocument();
   },
 };

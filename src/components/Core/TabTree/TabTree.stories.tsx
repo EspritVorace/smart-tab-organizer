@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { Theme } from '@radix-ui/themes';
 import { TabTree } from './TabTree';
-import type { TabTreeData } from '../../../types/tabTree';
-import { FEATURE_THEMES } from '../../../utils/themeConstants';
+import type { TabTreeData } from '@/types/tabTree';
 
 /** Sample data: mix of groups and ungrouped tabs */
 const sampleData: TabTreeData = {
@@ -135,7 +134,7 @@ const meta: Meta<typeof TabTree> = {
   tags: ['autodocs'],
   decorators: [
     (Story) => (
-      <Theme accentColor={FEATURE_THEMES.SESSIONS}>
+      <Theme accentColor="indigo">
         <div style={{ width: 500 }}>
           <Story />
         </div>
@@ -200,7 +199,7 @@ export const TabTreeNarrow: Story = {
   name: 'Narrow Container (popup)',
   decorators: [
     (Story) => (
-      <Theme accentColor={FEATURE_THEMES.SESSIONS}>
+      <Theme accentColor="indigo">
         <div style={{ width: 300 }}>
           <Story />
         </div>

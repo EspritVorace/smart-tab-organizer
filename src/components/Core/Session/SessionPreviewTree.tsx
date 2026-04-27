@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollArea } from '@radix-ui/themes';
-import { GroupRowBase } from '../TabTree/GroupRowBase';
-import { TabRowBase } from '../TabTree/TabRowBase';
-import { extractDomain } from '../../../utils/tabTreeUtils';
-import type { Session } from '../../../types/session';
+import { GroupRowBase } from '@/components/Core/TabTree/GroupRowBase';
+import { TabRowBase } from '@/components/Core/TabTree/TabRowBase';
+import { extractDomain } from '@/utils/tabTreeUtils';
+import type { Session } from '@/types/session';
 
 interface SessionPreviewTreeProps {
   session: Session;

@@ -75,8 +75,7 @@ describe('getPluralMessage', () => {
     const result = getPluralMessage(1, 'oneTab', 'manyTabs');
 
     expect(result).toBe('1 tab');
-    expect(mockGetMessage).toHaveBeenCalledOnce();
-    expect(mockGetMessage).toHaveBeenCalledWith('oneTab', undefined);
+    expect(mockGetMessage).toHaveBeenCalledExactlyOnceWith('oneTab', undefined);
   });
 
   it('uses the plural key when count > 1 and passes count as substitution', () => {

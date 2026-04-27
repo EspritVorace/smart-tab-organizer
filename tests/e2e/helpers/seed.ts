@@ -75,14 +75,6 @@ export async function clearSessions(context: BrowserContext): Promise<void> {
   await new Promise(resolve => setTimeout(resolve, 100));
 }
 
-/** Reset onboarding/help preferences so each test starts fresh. */
-export async function clearHelpPrefs(context: BrowserContext): Promise<void> {
-  const sw = await getServiceWorker(context);
-  await sw.evaluate(async () => {
-    await chrome.storage.local.remove('sessionsHelpPrefs');
-  });
-}
-
 /** Read sessions back from storage (for assertions). */
 export async function getSessionsFromStorage(context: BrowserContext): Promise<TestSession[]> {
   const sw = await getServiceWorker(context);
@@ -90,19 +82,6 @@ export async function getSessionsFromStorage(context: BrowserContext): Promise<T
     const result = await chrome.storage.local.get({ sessions: [] });
     return result.sessions;
   })) as TestSession[];
-}
-
-/** Read the sessions help preferences from storage. */
-export async function getHelpPrefsFromStorage(
-  context: BrowserContext,
-): Promise<{ sessionsIntroHidden: boolean }> {
-  const sw = await getServiceWorker(context);
-  return (await sw.evaluate(async () => {
-    const result = await chrome.storage.local.get({
-      sessionsHelpPrefs: { sessionsIntroHidden: false },
-    });
-    return result.sessionsHelpPrefs;
-  })) as { sessionsIntroHidden: boolean };
 }
 
 /** Create a snapshot session fixture with realistic data. */

@@ -27,8 +27,8 @@ test.describe('Drag-and-drop reordering', () => {
     await goToDomainRulesSection(page, extensionId);
 
     // Find drag handles for Rule A (first) and Rule C (last)
-    const ruleARow = page.getByRole('row', { name: /Rule A/i });
-    const ruleCRow = page.getByRole('row', { name: /Rule C/i });
+    const ruleARow = page.getByRole('listitem', { name: /Rule A/i });
+    const ruleCRow = page.getByRole('listitem', { name: /Rule C/i });
 
     const ruleAHandle = ruleARow.locator('[data-testid$="-drag-handle"]');
     const ruleCHandle = ruleCRow.locator('[data-testid$="-drag-handle"]');
@@ -44,10 +44,14 @@ test.describe('Drag-and-drop reordering', () => {
     const dstY = dstBox!.y + dstBox!.height / 2;
     await page.mouse.move(srcX, srcY);
     await page.mouse.down();
-    await page.mouse.move(dstX, dstY, { steps: 10 });
-    await page.waitForTimeout(100);
+    await page.mouse.move(dstX, dstY, { steps: 50 });
     await page.mouse.up();
-    await page.waitForTimeout(300);
+    await page.waitForFunction(() => {
+      const rows = [...document.querySelectorAll('[role="listitem"]')];
+      const iB = rows.findIndex(r => r.getAttribute('aria-label')?.includes('Rule B'));
+      const iA = rows.findIndex(r => r.getAttribute('aria-label')?.includes('Rule A'));
+      return iB > -1 && iA > -1 && iB < iA;
+    }, { timeout: 5000 });
     await page.close();
 
     const labels = await getDomainRuleLabels(helpers);
@@ -70,7 +74,7 @@ test.describe('Drag-and-drop reordering', () => {
 
     // Type in the search box to activate a filter
     await page.getByTestId('page-rules-search').fill('git');
-    await page.waitForTimeout(200);
+    await expect(page.locator('[data-testid$="-drag-handle"]').first()).toHaveAttribute('aria-disabled', 'true');
 
     // All visible rule drag handles should be aria-disabled
     const dragHandles = page.locator('[data-testid$="-drag-handle"]');

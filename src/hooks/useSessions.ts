@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { browser } from 'wxt/browser';
+import { browser, Browser } from 'wxt/browser';
 import {
   loadSessions,
   addSession,
   updateSession,
   deleteSession,
   saveSessions,
-} from '../utils/sessionStorage';
-import type { Session } from '../types/session';
+} from '@/utils/sessionStorage';
+import type { Session } from '@/types/session';
 
 export interface UseSessionsReturn {
   sessions: Session[];
@@ -37,7 +37,7 @@ export function useSessions(): UseSessionsReturn {
 
   // Listen for storage changes
   useEffect(() => {
-    const listener = (changes: any, areaName: string) => {
+    const listener = (changes: Record<string, Browser.storage.StorageChange>, areaName: string) => {
       if (areaName === 'local' && changes.sessions) {
         reload();
       }

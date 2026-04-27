@@ -37,11 +37,6 @@ test.describe('Group Naming Modes', () => {
     await new Promise<void>(resolve => localServer.listen(FAKE_PORT, resolve));
   });
 
-  test.afterAll(async () => {
-    localServer.closeAllConnections();
-    await new Promise<void>(resolve => localServer.close(() => resolve()));
-  });
-
   test.beforeEach(async ({ helpers }) => {
     await helpers.closeAllTestTabs();
     await helpers.clearAllTabGroups();
@@ -49,6 +44,11 @@ test.describe('Group Naming Modes', () => {
     await helpers.setGlobalGroupingEnabled(true);
     await helpers.setGlobalDeduplicationEnabled(false);
     await helpers.resetStatistics();
+  });
+
+  test.afterAll(async () => {
+    localServer.closeAllConnections();
+    await new Promise<void>(resolve => localServer.close(() => resolve()));
   });
 
   // ── US-G011: manual mode ──────────────────────────────────────────────────
@@ -77,7 +77,7 @@ test.describe('Group Naming Modes', () => {
 
       const groups = await helpers.getTabGroups();
       // Group should have been ungrouped because the user cancelled the prompt
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
 
     test('manual mode with no content script: falls back to null (ungroup) [US-G011]', async ({
@@ -100,7 +100,7 @@ test.describe('Group Naming Modes', () => {
       await new Promise(r => setTimeout(r, 2000));
 
       const groups = await helpers.getTabGroups();
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
   });
 
@@ -204,7 +204,7 @@ test.describe('Group Naming Modes', () => {
       await helpers.waitForGrouping();
       const groups = await helpers.getTabGroups();
       // Smart mode without fallback: no grouping when extraction fails
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
 
     test('smart mode: ne groupe pas quand les deux regex échouent [US-G012]', async ({
@@ -228,7 +228,7 @@ test.describe('Group Naming Modes', () => {
       await helpers.waitForGrouping();
       const groups = await helpers.getTabGroups();
       // Smart mode without fallback: no grouping when extraction fails
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
   });
 
@@ -286,7 +286,7 @@ test.describe('Group Naming Modes', () => {
 
       const groups = await helpers.getTabGroups();
       // Extraction fails → prompt shown → Playwright dismisses → ungroup
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
   });
 
@@ -429,7 +429,7 @@ test.describe('Group Naming Modes', () => {
       // Should not crash; smart mode without fallback → no grouping when extraction fails
       await helpers.waitForGrouping();
       const groups = await helpers.getTabGroups();
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
   });
 
@@ -446,14 +446,14 @@ test.describe('Group Naming Modes', () => {
           const resp = await fetch(chrome.runtime.getURL('/data/presets.json'));
           const data = await resp.json();
           return data;
-        } catch (e) {
+        } catch (_e) {
           return null;
         }
       });
 
       expect(presets).not.toBeNull();
       // The presets file should have a top-level array or object with entries
-      const presetList = Array.isArray(presets) ? presets : Object.values(presets).flat();
+      const presetList = (Object.values(presets as object) as unknown[]).flat();
       expect((presetList as any[]).length).toBeGreaterThanOrEqual(1);
     });
 
@@ -468,7 +468,7 @@ test.describe('Group Naming Modes', () => {
 
       // Navigate to Import/Export section where regex preset UI lives
       await page.getByRole('button', { name: /import.*export/i }).click();
-      await page.waitForTimeout(300);
+      await page.getByTestId('page-import-export-card-import-rules').waitFor({ state: 'visible' });
 
       // The Import/Export page should show export and import buttons
       await expect(page.getByRole('button', { name: /export/i }).first()).toBeVisible();
@@ -544,7 +544,7 @@ test.describe('Group Naming Modes', () => {
       // Extension should not crash; title mode without fallback → no grouping when extraction fails
       await helpers.waitForGrouping();
       const groups = await helpers.getTabGroups();
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
 
     test('regex without capture group: ne groupe pas (title, sans fallback) [US-G017]', async ({ helpers }) => {
@@ -568,7 +568,7 @@ test.describe('Group Naming Modes', () => {
       // Without capture group, extraction returns null → title mode has no fallback → no grouping
       await helpers.waitForGrouping();
       const groups = await helpers.getTabGroups();
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
   });
 });

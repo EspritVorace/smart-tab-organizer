@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { PageLayout } from './PageLayout';
 import { Text, Box, Button, Flex } from '@radix-ui/themes';
 import { Shield, FileText, BarChart3 } from 'lucide-react';
-import { defaultSyncSettings } from '../../../types/syncSettings';
+import { defaultAppSettings } from '@/types/syncSettings';
 
 const meta: Meta<typeof PageLayout> = {
   title: 'Components/UI/PageLayout/PageLayout',
@@ -12,11 +12,10 @@ const meta: Meta<typeof PageLayout> = {
   },
   tags: ['autodocs'],
   argTypes: {
-    theme: {
-      control: 'select',
-      options: ['DOMAIN_RULES', 'IMPORT', 'STATISTICS'],
-    },
     titleKey: {
+      control: 'text',
+    },
+    descriptionKey: {
       control: 'text',
     },
   },
@@ -25,13 +24,12 @@ const meta: Meta<typeof PageLayout> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Domain Rules theme
 export const PageLayoutDomainRules: Story = {
   args: {
     titleKey: 'domainRulesTab',
-    theme: 'DOMAIN_RULES',
+    descriptionKey: 'domainRulesPageDescription',
     icon: Shield,
-    syncSettings: defaultSyncSettings,
+    syncSettings: defaultAppSettings,
     children: (settings) => (
       <Box>
         <Text size="3" style={{ marginBottom: '16px', display: 'block' }}>
@@ -50,13 +48,12 @@ export const PageLayoutDomainRules: Story = {
   },
 };
 
-// Import/Export theme
 export const PageLayoutImportExport: Story = {
   args: {
     titleKey: 'importExportTab',
-    theme: 'IMPORT',
+    descriptionKey: 'importExportPageDescription',
     icon: FileText,
-    syncSettings: defaultSyncSettings,
+    syncSettings: defaultAppSettings,
     children: () => (
       <Box>
         <Text size="3" style={{ marginBottom: '16px', display: 'block' }}>
@@ -71,13 +68,12 @@ export const PageLayoutImportExport: Story = {
   },
 };
 
-// Statistics theme
 export const PageLayoutStatistics: Story = {
   args: {
     titleKey: 'statisticsTab',
-    theme: 'STATISTICS',
+    descriptionKey: 'statisticsPageDescription',
     icon: BarChart3,
-    syncSettings: defaultSyncSettings,
+    syncSettings: defaultAppSettings,
     children: (settings) => (
       <Box>
         <Text size="3" style={{ marginBottom: '16px', display: 'block' }}>

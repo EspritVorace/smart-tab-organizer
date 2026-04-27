@@ -1,18 +1,19 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Dialog, Flex, Button, Text, Separator, Box, TextField,
+  Dialog, Flex, Button, Text,
   TextArea, Callout,
 } from '@radix-ui/themes';
 import { Camera, AlertCircle } from 'lucide-react';
-import { SessionsTheme } from '../../Form/themes';
-import { TabTree } from '../../Core/TabTree/TabTree';
-import { CategoryPicker } from '../../Core/DomainRule/CategoryPicker';
-import { getMessage } from '../../../utils/i18n';
-import { showSuccessNotification } from '../../../utils/notifications';
-import { captureCurrentTabs } from '../../../utils/tabCapture';
-import { createSessionFromSelection, formatSessionDate } from '../../../utils/sessionUtils';
-import type { Session, SavedTab, SavedTabGroup } from '../../../types/session';
-import type { TabTreeData } from '../../../types/tabTree';
+import { TabTree } from '@/components/Core/TabTree/TabTree';
+import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
+import { WizardModal } from '@/components/UI/WizardModal';
+import { getMessage } from '@/utils/i18n';
+import { showSuccessToast } from '@/utils/toast';
+import { captureCurrentTabs } from '@/utils/tabCapture';
+import { createSessionFromSelection, formatSessionDate, resolveTabUuids } from '@/utils/sessionUtils';
+import type { Session, SavedTab, SavedTabGroup } from '@/types/session';
+import type { TabTreeData } from '@/types/tabTree';
+import type { RuleCategoryId } from '@/schemas/enums';
 
 interface SnapshotWizardProps {
   open: boolean;
@@ -83,17 +84,13 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
       .catch(() => {
         setIsCapturing(false);
       });
-  }, [open]);
+  }, [open, initialGroupId]);
 
   // Derive selected SavedTab UUIDs from selected numeric IDs
-  const selectedSavedTabIds = useMemo(() => {
-    const ids = new Set<string>();
-    for (const numId of selectedTabIds) {
-      const uuid = numericIdToSavedTabId.get(numId);
-      if (uuid) ids.add(uuid);
-    }
-    return ids;
-  }, [selectedTabIds, numericIdToSavedTabId]);
+  const selectedSavedTabIds = useMemo(
+    () => resolveTabUuids(selectedTabIds, numericIdToSavedTabId),
+    [selectedTabIds, numericIdToSavedTabId],
+  );
 
   const handleSave = useCallback(async () => {
     const trimmed = sessionName.trim();
@@ -117,7 +114,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
       );
       await onSave(session);
       onOpenChange(false);
-      showSuccessNotification(
+      showSuccessToast(
         getMessage('snapshotNotificationTitle'),
         getMessage('sessionNotificationMessage', [trimmed]),
       );
@@ -126,117 +123,96 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
     } finally {
       setIsSaving(false);
     }
-  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, categoryId, note, onSave, existingSessions]);
+  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, categoryId, note, onSave, onOpenChange, existingSessions]);
 
   return (
-    <SessionsTheme>
-      <Dialog.Root open={open} onOpenChange={onOpenChange}>
-        <Dialog.Content
-          data-testid="wizard-snapshot"
-          style={{ maxWidth: 580 }}
-          onOpenAutoFocus={(e) => {
-            e.preventDefault();
-            const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[aria-label]');
-            input?.focus();
-          }}
-        >
-          <Dialog.Title>
-            <Flex align="center" gap="2">
-              <Camera size={18} aria-hidden="true" />
-              {getMessage('snapshotTitle')}
-            </Flex>
-          </Dialog.Title>
-          <Dialog.Description size="2" color="gray">
-            {getMessage('snapshotDescription')}
-          </Dialog.Description>
+    <WizardModal
+      open={open}
+      onOpenChange={onOpenChange}
+      data-testid="wizard-snapshot"
+      icon={Camera}
+      title={getMessage('snapshotTitle')}
+      description={getMessage('snapshotDescription')}
+      onOpenAutoFocus={(e) => {
+        e.preventDefault();
+        const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[aria-label]');
+        input?.focus();
+      }}
+    >
+      <WizardModal.Body>
+        <Flex direction="column" gap="3">
+          <Flex direction="column" gap="1">
+            <Text size="2" weight="medium">
+              {getMessage('sessionNameLabel')}
+            </Text>
+            <TextFieldWithCategory
+              data-testid="wizard-snapshot-field-name"
+              value={sessionName}
+              onChange={setSessionName}
+              placeholder={getMessage('sessionNamePlaceholder')}
+              maxLength={100}
+              aria-label={getMessage('sessionNameLabel')}
+              categoryId={categoryId as RuleCategoryId | null}
+              onCategoryChange={setCategoryId}
+            />
+          </Flex>
 
-          <Box mt="4">
-            <Flex direction="column" gap="3">
-              {/* Name + category inline (category icon left of the input) */}
-              <Flex direction="column" gap="1">
-                <Text size="2" weight="medium">
-                  {getMessage('sessionNameLabel')}
-                </Text>
-                <Flex align="center" gap="2">
-                  <CategoryPicker value={categoryId as any} onChange={setCategoryId} />
-                  <Box style={{ flex: 1 }}>
-                    <TextField.Root
-                      data-testid="wizard-snapshot-field-name"
-                      value={sessionName}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                        setSessionName(e.target.value)
-                      }
-                      placeholder={getMessage('sessionNamePlaceholder')}
-                      maxLength={100}
-                      aria-label={getMessage('sessionNameLabel')}
-                      style={{ width: '100%' }}
-                    />
-                  </Box>
-                </Flex>
-              </Flex>
+          <Text size="2" weight="medium">
+            {getMessage('snapshotSelectTabs')}
+          </Text>
+          {isCapturing ? (
+            <Text size="2" color="gray">
+              {getMessage('loadingText')}
+            </Text>
+          ) : treeData ? (
+            <TabTree
+              data={treeData}
+              selectedTabIds={selectedTabIds}
+              onSelectionChange={setSelectedTabIds}
+              maxHeight={280}
+            />
+          ) : null}
 
-              <Text size="2" weight="medium">
-                {getMessage('snapshotSelectTabs')}
-              </Text>
-              {isCapturing ? (
-                <Text size="2" color="gray">
-                  {getMessage('loadingText')}
-                </Text>
-              ) : treeData ? (
-                <TabTree
-                  data={treeData}
-                  selectedTabIds={selectedTabIds}
-                  onSelectionChange={setSelectedTabIds}
-                  maxHeight={280}
-                />
-              ) : null}
-
-              {/* Note */}
-              <Flex direction="column" gap="1">
-                <Text size="2" weight="medium">
-                  {getMessage('sessionNoteLabel')}
-                </Text>
-                <TextArea
-                  data-testid="wizard-snapshot-field-notes"
-                  value={note}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNote(e.target.value)}
-                  placeholder={getMessage('sessionNotePlaceholder')}
-                  resize="vertical"
-                  rows={3}
-                />
-              </Flex>
-            </Flex>
-          </Box>
+          <Flex direction="column" gap="1">
+            <Text size="2" weight="medium">
+              {getMessage('sessionNoteLabel')}
+            </Text>
+            <TextArea
+              data-testid="wizard-snapshot-field-notes"
+              value={note}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNote(e.target.value)}
+              placeholder={getMessage('sessionNotePlaceholder')}
+              resize="vertical"
+              rows={3}
+            />
+          </Flex>
 
           {saveError && (
-            <Callout.Root color="red" variant="soft" mt="3">
+            <Callout.Root color="red" variant="soft">
               <Callout.Icon>
                 <AlertCircle size={16} />
               </Callout.Icon>
               <Callout.Text>{saveError}</Callout.Text>
             </Callout.Root>
           )}
+        </Flex>
+      </WizardModal.Body>
 
-          <Separator size="4" mt="4" style={{ opacity: 0.3 }} />
-
-          {/* Footer */}
-          <Flex gap="3" justify="end" mt="3">
-            <Dialog.Close>
-              <Button data-testid="wizard-snapshot-btn-cancel" variant="soft" color="gray" disabled={isSaving}>
-                {getMessage('cancel')}
-              </Button>
-            </Dialog.Close>
-            <Button
-              data-testid="wizard-snapshot-btn-save"
-              onClick={handleSave}
-              disabled={!sessionName.trim() || selectedTabIds.size === 0 || isCapturing || isSaving}
-            >
-              <Camera size={14} aria-hidden="true" />
-              {getMessage('snapshotSaveButton')}
-            </Button>
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
-    </SessionsTheme>
+      <WizardModal.Footer>
+        <Dialog.Close>
+          <Button data-testid="wizard-snapshot-btn-cancel" variant="soft" color="gray" disabled={isSaving}>
+            {getMessage('cancel')}
+          </Button>
+        </Dialog.Close>
+        <Button
+          data-testid="wizard-snapshot-btn-save"
+          onClick={handleSave}
+          disabled={!sessionName.trim() || selectedTabIds.size === 0 || isCapturing || isSaving}
+        >
+          <Camera size={14} aria-hidden="true" />
+          {getMessage('snapshotSaveButton')}
+        </Button>
+      </WizardModal.Footer>
+    </WizardModal>
   );
 }

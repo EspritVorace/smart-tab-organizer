@@ -95,12 +95,6 @@ const Welcome = () => {
               <li style={{ marginBottom: '0.3rem', color: 'var(--color-text, #333)' }}>
                 <strong>Form/FormFields/</strong> - Form field components
               </li>
-              <li style={{ marginBottom: '0.3rem', color: 'var(--color-text, #333)' }}>
-                <strong>Form/themed-callouts/</strong> - Themed callouts
-              </li>
-              <li style={{ marginBottom: '0.3rem', color: 'var(--color-text, #333)' }}>
-                <strong>Form/themes/</strong> - Theme components
-              </li>
             </ul>
           </div>
         </div>

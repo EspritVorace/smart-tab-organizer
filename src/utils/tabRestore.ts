@@ -1,6 +1,9 @@
 import { browser } from 'wxt/browser';
-import type { SavedTab, SavedTabGroup } from '../types/session';
+import { logger } from '@/utils/logger';
+import type { SavedTab, SavedTabGroup, Session } from '@/types/session';
 import type { ConflictAnalysis, ConflictResolution, GroupConflictAction } from './conflictDetection';
+
+export type RestoreTarget = 'current' | 'new' | 'replace';
 
 export interface RestoreOptions {
   /** Ungrouped tabs to restore */
@@ -8,11 +11,17 @@ export interface RestoreOptions {
   /** Groups to restore with their tabs */
   groups: SavedTabGroup[];
   /** Restore target */
-  target: 'current' | 'new';
+  target: RestoreTarget;
   /** Conflict resolution (only used when target === 'current') */
   conflictResolution?: ConflictResolution;
   /** Conflict analysis (only used when target === 'current') */
   conflictAnalysis?: ConflictAnalysis;
+  /**
+   * Tab to preserve when target === 'replace'. Used when the action is
+   * triggered from the options page so the host tab doesn't get closed.
+   * Pinned tabs are always preserved regardless of this value.
+   */
+  protectedTabId?: number;
 }
 
 export interface RestoreResult {
@@ -25,9 +34,47 @@ export interface RestoreResult {
   windowId?: number;
 }
 
+/**
+ * Quick restore of a whole session (no conflict resolution wizard, no filtering).
+ * Thin wrapper around {@link restoreTabs} that maps a Session to RestoreOptions.
+ * Shared by SessionsPage quick actions and PopupProfilesList.
+ * The RestoreWizard uses {@link restoreTabs} directly because it needs to pass
+ * a filtered subset of tabs/groups plus conflict resolution data.
+ */
+export async function restoreSessionTabs(
+  session: Pick<Session, 'ungroupedTabs' | 'groups'>,
+  target: RestoreTarget,
+  protectedTabId?: number,
+): Promise<RestoreResult> {
+  return restoreTabs({
+    tabs: session.ungroupedTabs,
+    groups: session.groups,
+    target,
+    protectedTabId,
+  });
+}
+
+/**
+ * Tell the background script to skip automatic deduplication for the URLs
+ * we are about to restore. Without this, pinned tabs or other kept tabs
+ * whose URL matches a session tab would cause the freshly created tab to
+ * be closed by the background dedup handler.
+ */
+async function requestSkipDeduplication(urls: string[]): Promise<void> {
+  if (urls.length === 0) return;
+  try {
+    await browser.runtime.sendMessage({
+      type: 'SESSION_RESTORE_SKIP_DEDUP',
+      urls,
+    });
+  } catch {
+    // Non-blocking: if the background is unreachable, restore proceeds anyway.
+  }
+}
+
 /** Restore tabs and groups in Chrome */
 export async function restoreTabs(options: RestoreOptions): Promise<RestoreResult> {
-  const { tabs, groups, target, conflictResolution, conflictAnalysis } = options;
+  const { tabs, groups, target, conflictResolution, conflictAnalysis, protectedTabId } = options;
   const result: RestoreResult = {
     tabsCreated: 0,
     duplicatesSkipped: 0,
@@ -36,8 +83,18 @@ export async function restoreTabs(options: RestoreOptions): Promise<RestoreResul
     errors: [],
   };
 
+  const allUrls = [
+    ...tabs.map(t => t.url),
+    ...groups.flatMap(g => g.tabs.map(t => t.url)),
+  ];
+  await requestSkipDeduplication(allUrls);
+
   if (target === 'new') {
     return restoreInNewWindow(tabs, groups, result);
+  }
+
+  if (target === 'replace') {
+    return restoreReplaceInCurrentWindow(tabs, groups, protectedTabId, result);
   }
 
   return restoreInCurrentWindow(tabs, groups, conflictResolution, conflictAnalysis, result);
@@ -70,6 +127,7 @@ async function restoreInNewWindow(
       await browser.tabs.create({ url: tabs[i].url, windowId });
       result.tabsCreated++;
     } catch (e) {
+      logger.debug('[TAB_RESTORE] Failed to create tab:', e);
       result.errors.push(`Failed to create tab: ${tabs[i].url}`);
     }
   }
@@ -91,15 +149,17 @@ async function restoreInNewWindow(
         if (created.id != null) tabIds.push(created.id);
         result.tabsCreated++;
       } catch (e) {
+        logger.debug('[TAB_RESTORE] Failed to create tab:', e);
         result.errors.push(`Failed to create tab: ${tab.url}`);
       }
     }
     if (tabIds.length > 0) {
       try {
-        const groupId = await (browser.tabs as any).group({ tabIds, createProperties: { windowId } });
-        await (browser.tabGroups as any).update(groupId, { title: group.title, color: group.color, collapsed: group.collapsed ?? false });
+        const groupId = await browser.tabs.group({ tabIds: tabIds as [number, ...number[]], createProperties: { windowId } }) as unknown as number;
+        await browser.tabGroups.update(groupId, { title: group.title, color: group.color, collapsed: group.collapsed ?? false });
         result.groupsCreated++;
       } catch (e) {
+        logger.debug('[TAB_RESTORE] Failed to create group:', e);
         result.errors.push(`Failed to create group: ${group.title}`);
       }
     }
@@ -111,6 +171,35 @@ async function restoreInNewWindow(
       await browser.tabs.remove(firstTabId);
     } catch {
       // Ignore — tab may have been reused
+    }
+  }
+
+  return result;
+}
+
+async function restoreReplaceInCurrentWindow(
+  tabs: SavedTab[],
+  groups: SavedTabGroup[],
+  protectedTabId: number | undefined,
+  result: RestoreResult,
+): Promise<RestoreResult> {
+  // Snapshot tabs to close before creating new ones. Keep pinned tabs and
+  // the optional protectedTabId (the options page tab hosting the action).
+  const existingTabs = await browser.tabs.query({ currentWindow: true });
+  const tabIdsToClose = existingTabs
+    .filter(t => t.id != null && !t.pinned && t.id !== protectedTabId)
+    .map(t => t.id as number);
+
+  // Create new tabs first (no conflict resolution: kept tabs are pinned or
+  // the options page, neither participates in group merging).
+  await restoreInCurrentWindow(tabs, groups, undefined, undefined, result);
+
+  // Close the previous tabs afterwards so the window never becomes empty.
+  if (tabIdsToClose.length > 0) {
+    try {
+      await browser.tabs.remove(tabIdsToClose);
+    } catch (e) {
+      result.errors.push(`Failed to close existing tabs: ${String(e)}`);
     }
   }
 
@@ -139,6 +228,7 @@ async function restoreInCurrentWindow(
       await browser.tabs.create({ url: tab.url });
       result.tabsCreated++;
     } catch (e) {
+      logger.debug('[TAB_RESTORE] Failed to create tab:', e);
       result.errors.push(`Failed to create tab: ${tab.url}`);
     }
   }
@@ -173,7 +263,7 @@ async function restoreInCurrentWindow(
       try {
         const existingGroupTabs = await browser.tabs.query({
           groupId: existingConflict.existingGroupId,
-        } as any);
+        } as unknown as Parameters<typeof browser.tabs.query>[0]);
         const existingGroupUrls = new Set(
           existingGroupTabs.map(t => t.url).filter(Boolean) as string[],
         );
@@ -198,6 +288,7 @@ async function restoreInCurrentWindow(
         if (created.id != null) newTabIds.push(created.id);
         result.tabsCreated++;
       } catch (e) {
+        logger.debug('[TAB_RESTORE] Failed to create tab:', e);
         result.errors.push(`Failed to create tab: ${tab.url}`);
       }
     }
@@ -206,25 +297,27 @@ async function restoreInCurrentWindow(
 
     if (groupAction === 'merge' && existingConflict) {
       try {
-        await (browser.tabs as any).group({
-          tabIds: newTabIds,
+        await browser.tabs.group({
+          tabIds: newTabIds as [number, ...number[]],
           groupId: existingConflict.existingGroupId,
         });
         result.groupsMerged++;
       } catch (e) {
+        logger.debug('[TAB_RESTORE] Failed to merge into group:', e);
         result.errors.push(`Failed to merge into group: ${group.title}`);
       }
     } else {
       // Create new group
       try {
-        const groupId = await (browser.tabs as any).group({ tabIds: newTabIds });
-        await (browser.tabGroups as any).update(groupId, {
+        const groupId = await browser.tabs.group({ tabIds: newTabIds as [number, ...number[]] }) as unknown as number;
+        await browser.tabGroups.update(groupId, {
           title: group.title,
           color: group.color,
           collapsed: group.collapsed ?? false,
         });
         result.groupsCreated++;
       } catch (e) {
+        logger.debug('[TAB_RESTORE] Failed to create group:', e);
         result.errors.push(`Failed to create group: ${group.title}`);
       }
     }

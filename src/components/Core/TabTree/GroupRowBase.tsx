@@ -1,10 +1,10 @@
 import React from 'react';
 import { Flex, Text } from '@radix-ui/themes';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
-import { chromeGroupColors } from '../../../utils/tabTreeUtils';
-import { AccessibleHighlight } from '../../UI/AccessibleHighlight/AccessibleHighlight';
-import type { ChromeGroupColor } from '../../../types/tabTree';
+import { getMessage } from '@/utils/i18n';
+import { chromeGroupColors } from '@/utils/tabTreeUtils';
+import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
+import type { ChromeGroupColor } from '@/types/tabTree';
 
 export interface GroupRowBaseProps {
   /** Chrome tab group color */

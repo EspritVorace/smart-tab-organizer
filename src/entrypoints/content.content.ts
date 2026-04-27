@@ -1,8 +1,8 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import { browser, Browser } from 'wxt/browser';
-import { getMessage } from '../utils/i18n';
-import type { MiddleClickMessage, AskGroupNameMessage, GroupNameResponse, ContentMessage } from '../types/messages.js';
-import { logger } from '../utils/logger';
+import { getMessage } from '@/utils/i18n';
+import type { MiddleClickMessage, AskGroupNameMessage, GroupNameResponse, ContentMessage } from '@/types/messages.js';
+import { logger } from '@/utils/logger';
 
 export default defineContentScript({
   matches: ['<all_urls>'],

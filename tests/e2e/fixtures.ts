@@ -22,6 +22,8 @@ export interface ExtensionHelpers {
   // Settings management
   setGlobalGroupingEnabled: (enabled: boolean) => Promise<void>;
   setGlobalDeduplicationEnabled: (enabled: boolean) => Promise<void>;
+  setDeduplicateUnmatchedDomains: (enabled: boolean) => Promise<void>;
+  setDeduplicationKeepStrategy: (strategy: 'keep-old' | 'keep-new' | 'keep-grouped' | 'keep-grouped-or-new') => Promise<void>;
   addDomainRule: (rule: DomainRuleConfig) => Promise<void>;
   clearDomainRules: () => Promise<void>;
   getSettings: () => Promise<any>;
@@ -65,7 +67,8 @@ export interface DomainRuleConfig {
   enabled?: boolean;
   groupingEnabled?: boolean;
   deduplicationEnabled?: boolean;
-  deduplicationMatchMode?: 'exact' | 'includes';
+  deduplicationMatchMode?: 'exact' | 'includes' | 'exact_ignore_params';
+  ignoredQueryParams?: string[];
   color?: string;
   groupNameSource?: 'label' | 'title' | 'url' | 'manual' | 'smart' | 'smart_label' | 'smart_preset' | 'smart_manual';
   titleParsingRegEx?: string;
@@ -86,27 +89,11 @@ export interface Statistics {
   tabsDeduplicatedCount: number;
 }
 
-/**
- * Writes to chrome.storage.sync, retrying with backoff on quota errors.
- * Tests run fast enough on a single worker that MAX_WRITE_OPERATIONS_PER_MINUTE
- * (120/min) can be exceeded when many tests each call addDomainRule + clearDomainRules.
- */
-async function syncSet(sw: Page, data: Record<string, unknown>): Promise<void> {
-  const delays = [1000, 2000, 4000, 8000];
-  for (let i = 0; i <= delays.length; i++) {
-    try {
-      await sw.evaluate(async (d: Record<string, unknown>) => {
-        await chrome.storage.sync.set(d);
-      }, data as Record<string, unknown>);
-      return;
-    } catch (e: unknown) {
-      if (i < delays.length && String(e).includes('MAX_WRITE_OPERATIONS')) {
-        await new Promise(r => setTimeout(r, delays[i]));
-      } else {
-        throw e;
-      }
-    }
-  }
+/** Writes to chrome.storage.local (settings are no longer in storage.sync). */
+async function localSet(sw: Page, data: Record<string, unknown>): Promise<void> {
+  await sw.evaluate(async (d: Record<string, unknown>) => {
+    await chrome.storage.local.set(d);
+  }, data as Record<string, unknown>);
 }
 
 // Create a temporary user data directory for each test run
@@ -180,7 +167,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
     // Clean up temp directory
     try {
       fs.rmSync(userDataDir, { recursive: true, force: true });
-    } catch (e) {
+    } catch (_e) {
       // Ignore cleanup errors
     }
   }, { scope: 'worker' }],
@@ -215,6 +202,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
 
   // Helper functions for test operations
   helpers: async ({ extensionContext, extensionId }, use) => {
+    void extensionId; // injected to guarantee fixture setup order, not used directly
     /**
      * Returns the extension service worker, retrying up to 5 s if it has been
      * terminated by the browser (idle termination between tests).
@@ -238,20 +226,32 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       // Set global grouping enabled/disabled
       setGlobalGroupingEnabled: async (enabled: boolean) => {
         const sw = await getServiceWorker();
-        await syncSet(sw, { globalGroupingEnabled: enabled });
+        await localSet(sw, { globalGroupingEnabled: enabled });
       },
 
       // Set global deduplication enabled/disabled
       setGlobalDeduplicationEnabled: async (enabled: boolean) => {
         const sw = await getServiceWorker();
-        await syncSet(sw, { globalDeduplicationEnabled: enabled });
+        await localSet(sw, { globalDeduplicationEnabled: enabled });
+      },
+
+      // Set deduplication scope for tabs without matching rule
+      setDeduplicateUnmatchedDomains: async (enabled: boolean) => {
+        const sw = await getServiceWorker();
+        await localSet(sw, { deduplicateUnmatchedDomains: enabled });
+      },
+
+      // Set which tab survives when a duplicate is detected
+      setDeduplicationKeepStrategy: async (strategy: 'keep-old' | 'keep-new' | 'keep-grouped' | 'keep-grouped-or-new') => {
+        const sw = await getServiceWorker();
+        await localSet(sw, { deduplicationKeepStrategy: strategy });
       },
 
       // Add a domain rule
       addDomainRule: async (rule: DomainRuleConfig) => {
         const sw = await getServiceWorker();
         const updatedRules = await sw.evaluate(async (ruleConfig) => {
-          const result = await chrome.storage.sync.get({ domainRules: [] });
+          const result = await chrome.storage.local.get({ domainRules: [] });
           const rules: unknown[] = result.domainRules || [];
           rules.push({
             id: `rule-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -261,6 +261,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
             groupingEnabled: ruleConfig.groupingEnabled !== false,
             deduplicationEnabled: ruleConfig.deduplicationEnabled !== false,
             deduplicationMatchMode: ruleConfig.deduplicationMatchMode || 'exact',
+            ignoredQueryParams: ruleConfig.ignoredQueryParams || [],
             color: ruleConfig.color || '',
             groupNameSource: ruleConfig.groupNameSource || 'label',
             titleParsingRegEx: ruleConfig.titleParsingRegEx || '',
@@ -270,7 +271,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
           });
           return rules;
         }, rule);
-        await syncSet(sw, { domainRules: updatedRules });
+        await localSet(sw, { domainRules: updatedRules });
         // Wait for storage to propagate
         await new Promise(resolve => setTimeout(resolve, 100));
       },
@@ -278,7 +279,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       // Clear all domain rules
       clearDomainRules: async () => {
         const sw = await getServiceWorker();
-        await syncSet(sw, { domainRules: [] });
+        await localSet(sw, { domainRules: [] });
         await new Promise(resolve => setTimeout(resolve, 100));
       },
 
@@ -286,9 +287,11 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
       getSettings: async () => {
         const sw = await getServiceWorker();
         return await sw.evaluate(async () => {
-          return await chrome.storage.sync.get({
+          return await chrome.storage.local.get({
             globalGroupingEnabled: true,
             globalDeduplicationEnabled: true,
+            deduplicateUnmatchedDomains: true,
+            deduplicationKeepStrategy: 'keep-old',
             domainRules: [],
             notifyOnGrouping: true,
             notifyOnDeduplication: true,
@@ -311,7 +314,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
         const page = await extensionContext.newPage();
         try {
           await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 10000 });
-        } catch (e) {
+        } catch (_e) {
           // Navigation might fail for some test URLs, but the tab is still created
           // which is what we need for testing the extension
         }
@@ -423,7 +426,7 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
           ]);
           try {
             await newPage.waitForLoadState('domcontentloaded', { timeout: 10000 });
-          } catch (e) {
+          } catch (_e) {
             // Ignore timeout
           }
           return newPage;

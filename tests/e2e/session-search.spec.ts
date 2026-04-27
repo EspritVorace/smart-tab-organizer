@@ -14,7 +14,6 @@ import { goToSessionsSection } from './helpers/navigation';
 import {
   seedSessions,
   clearSessions,
-  clearHelpPrefs,
   createTestSession,
 } from './helpers/seed';
 import type { TestSession } from './helpers/seed';
@@ -74,7 +73,6 @@ function sessionWithGroup(
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
-  await clearHelpPrefs(extensionContext);
 });
 
 // ---------------------------------------------------------------------------
@@ -254,7 +252,7 @@ test.describe('[US-S-SEARCH-03] Search by group title', () => {
     // Use regex because 'Jira' is highlighted, splitting the text in the DOM
     await expect(page.getByText(/Jira.*Board/)).toBeVisible();
     // News tab should NOT be visible (Personal group is collapsed)
-    await expect(page.getByText('News')).not.toBeVisible();
+    await expect(page.getByText('News')).toBeHidden();
     await page.close();
   });
 });
@@ -280,7 +278,7 @@ test.describe('[US-S-SEARCH-04] Name-only match keeps preview closed', () => {
     await expect(page.getByText('My Work Session')).toBeVisible();
 
     // Preview should NOT be open: the tab title inside the group ('Example') should not be visible
-    await expect(page.getByText('Example')).not.toBeVisible();
+    await expect(page.getByText('Example')).toBeHidden();
     await page.close();
   });
 });
@@ -310,7 +308,7 @@ test.describe('[US-S-SEARCH-05] Forced-open preview is user-closeable', () => {
     await page.getByText(/1 tab/i).click();
 
     // Tab title should no longer be visible in the preview
-    await expect(page.getByText(/GitHub.*Repository/)).not.toBeVisible();
+    await expect(page.getByText(/GitHub.*Repository/)).toBeHidden();
     await page.close();
   });
 });
@@ -431,7 +429,7 @@ test.describe('[US-S-SEARCH] Cross-session filtering', () => {
     // 'Rust' is highlighted in 'Rust Project Notes', splitting the DOM text node — use regex
     await expect(page.getByText(/Rust.*Project Notes/)).toBeVisible();
     // Non-matching session hidden
-    await expect(page.getByText('Python Tutorial')).not.toBeVisible();
+    await expect(page.getByText('Python Tutorial')).toBeHidden();
     await page.close();
   });
 
@@ -452,7 +450,7 @@ test.describe('[US-S-SEARCH] Cross-session filtering', () => {
     await input.fill('alpha');
     // 'Alpha' is highlighted in 'Session Alpha', splitting the DOM — use regex
     await expect(page.getByText(/Session.*Alpha/)).toBeVisible();
-    await expect(page.getByText('Session Beta', { exact: true })).not.toBeVisible();
+    await expect(page.getByText('Session Beta', { exact: true })).toBeHidden();
 
     // Clear the search — no highlighting, both names are plain text again
     await input.fill('');

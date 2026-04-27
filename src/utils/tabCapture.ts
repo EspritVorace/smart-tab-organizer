@@ -1,7 +1,8 @@
 import { browser } from 'wxt/browser';
 import { generateUUID } from './utils';
-import type { SavedTab, SavedTabGroup } from '../types/session';
-import type { TabTreeData, TabItem, TabGroupItem, ChromeGroupColor } from '../types/tabTree';
+import type { SavedTab, SavedTabGroup } from '@/types/session';
+import type { TabTreeData, TabItem, TabGroupItem, ChromeGroupColor } from '@/types/tabTree';
+import type { ChromeTab, ChromeTabGroupsExtended } from '@/types/chromeApi';
 
 const SYSTEM_URL_PREFIXES = ['chrome://', 'chrome-extension://', 'moz-extension://', 'about:', 'edge://'];
 
@@ -56,7 +57,7 @@ export async function captureCurrentTabs(): Promise<CaptureResult> {
   const seenGroupIds = new Set<number>();
 
   for (const tab of tabs) {
-    const groupId = (tab as any).groupId;
+    const groupId = (tab as ChromeTab).groupId;
     if (typeof groupId === 'number' && groupId >= 0) {
       seenGroupIds.add(groupId);
     }
@@ -68,7 +69,7 @@ export async function captureCurrentTabs(): Promise<CaptureResult> {
   // Fetch group metadata
   for (const groupId of seenGroupIds) {
     try {
-      const group = await (browser.tabGroups as any).get(groupId);
+      const group = await (browser.tabGroups as unknown as ChromeTabGroupsExtended).get(groupId);
       const savedGroupId = generateUUID();
       const treeGroupId = numericCounter++;
       groupMap.set(groupId, {
@@ -115,7 +116,7 @@ export async function captureCurrentTabs(): Promise<CaptureResult> {
       favIconUrl: tab.favIconUrl || undefined,
     };
 
-    const groupId = (tab as any).groupId;
+    const groupId = (tab as ChromeTab).groupId;
     if (typeof groupId === 'number' && groupId >= 0 && groupMap.has(groupId)) {
       const entry = groupMap.get(groupId)!;
       entry.savedGroup.tabs.push(savedTab);

@@ -12,7 +12,9 @@ vi.mock('../../src/utils/i18n', () => ({
       badge_warning: 'Attention',
       badge_deleted: 'Supprimé',
       enableGrouping: 'Activer le groupage',
-      enableDeduplication: 'Activer la déduplication'
+      enableDeduplication: 'Activer la déduplication',
+      popupAutoGroup: 'Regroupement auto',
+      popupDedup: 'Déduplication'
     };
     return messages[key] || key;
   })
@@ -89,7 +91,7 @@ describe('UI Components', () => {
   });
 
   describe('SettingsToggles', () => {
-    it('devrait afficher les deux toggles', () => {
+    it('affiche les deux toggles en état désactivé', () => {
       render(
         <TestWrapper>
           <SettingsToggles
@@ -99,8 +101,14 @@ describe('UI Components', () => {
         </TestWrapper>
       );
 
-      expect(screen.getByText('Activer le groupage')).toBeInTheDocument();
-      expect(screen.getByText('Activer la déduplication')).toBeInTheDocument();
+      // Short labels shown inline in the footer
+      expect(screen.getByText('Regroupement auto')).toBeInTheDocument();
+      expect(screen.getByText('Déduplication')).toBeInTheDocument();
+
+      // State reflected on switches
+      const switches = screen.getAllByRole('switch');
+      expect(switches[0]).toHaveAttribute('data-state', 'unchecked');
+      expect(switches[1]).toHaveAttribute('data-state', 'unchecked');
     });
 
     it('devrait afficher un skeleton en mode loading', () => {
@@ -168,21 +176,6 @@ describe('UI Components', () => {
       const switches = screen.getAllByRole('switch');
       expect(switches[0]).toHaveAttribute('data-state', 'checked');
       expect(switches[1]).toHaveAttribute('data-state', 'checked');
-    });
-
-    it('devrait refléter l\'état désactivé des toggles', () => {
-      render(
-        <TestWrapper>
-          <SettingsToggles
-            globalGroupingEnabled={false}
-            globalDeduplicationEnabled={false}
-          />
-        </TestWrapper>
-      );
-
-      const switches = screen.getAllByRole('switch');
-      expect(switches[0]).toHaveAttribute('data-state', 'unchecked');
-      expect(switches[1]).toHaveAttribute('data-state', 'unchecked');
     });
   });
 });

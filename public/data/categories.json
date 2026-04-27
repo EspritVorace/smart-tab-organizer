@@ -1,0 +1,14 @@
+{
+  "categories": [
+    { "id": "development",  "emoji": "💻", "color": "blue",   "labelKey": "category_development",  "builtIn": true },
+    { "id": "productivity", "emoji": "📋", "color": "purple", "labelKey": "category_productivity", "builtIn": true },
+    { "id": "commerce",     "emoji": "🛍️", "color": "orange", "labelKey": "category_commerce",     "builtIn": true },
+    { "id": "travel",       "emoji": "✈️",  "color": "cyan",   "labelKey": "category_travel",       "builtIn": true },
+    { "id": "search",       "emoji": "🔍", "color": "yellow", "labelKey": "category_search",       "builtIn": true },
+    { "id": "social",       "emoji": "💬", "color": "pink",   "labelKey": "category_social",       "builtIn": true },
+    { "id": "media",        "emoji": "🎬", "color": "red",    "labelKey": "category_media",        "builtIn": true },
+    { "id": "cloud",        "emoji": "☁️",  "color": "blue",   "labelKey": "category_cloud",        "builtIn": true },
+    { "id": "finance",      "emoji": "💰", "color": "green",  "labelKey": "category_finance",      "builtIn": true },
+    { "id": "education",    "emoji": "🎓", "color": "yellow", "labelKey": "category_education",    "builtIn": true }
+  ]
+}

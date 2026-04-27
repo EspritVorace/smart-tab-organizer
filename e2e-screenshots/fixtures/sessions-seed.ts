@@ -303,14 +303,3 @@ export async function clearSessions(context: BrowserContext): Promise<void> {
   await new Promise((r) => setTimeout(r, 100));
 }
 
-/**
- * Reset the sessions help preferences so that the onboarding dialog can appear.
- * (sessionsHelpPrefs: { sessionsIntroHidden: false, profileOnboardingShown: false })
- */
-export async function clearHelpPrefs(context: BrowserContext): Promise<void> {
-  const sw = await getServiceWorker(context);
-  await sw.evaluate(async () => {
-    await chrome.storage.local.remove('sessionsHelpPrefs');
-  });
-  await new Promise((r) => setTimeout(r, 100));
-}

@@ -176,7 +176,7 @@ async function preparePage(
 
         for (const [name, placeholder] of Object.entries(entry.placeholders)) {
           // Resolve positional references ($1, $2…) inside the placeholder content
-          let content = placeholder.content.replace(
+          const content = placeholder.content.replace(
             /\$(\d+)/g,
             (_, n: string) => subs[parseInt(n, 10) - 1] ?? '',
           );

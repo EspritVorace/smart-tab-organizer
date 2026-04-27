@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge } from '@radix-ui/themes';
-import { getMessage } from '../../../utils/i18n';
-import { badgeOptions, type BadgeType } from '../../../schemas/enums';
+import { getMessage } from '@/utils/i18n';
+import { badgeOptions, type BadgeType } from '@/schemas/enums';
 
 interface StatusBadgeProps {
     type: BadgeType;
@@ -16,7 +16,7 @@ export function StatusBadge({ type, size = '1' }: StatusBadgeProps) {
     }
 
     return (
-        <Badge color={badgeOption.color} size={size}>
+        <Badge color={badgeOption.color} size={size} highContrast>
             {getMessage(badgeOption.keyLabel)}
         </Badge>
     );

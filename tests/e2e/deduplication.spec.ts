@@ -17,6 +17,11 @@ test.describe('Deduplication', () => {
     await helpers.clearDomainRules();
     await helpers.setGlobalDeduplicationEnabled(true);
     await helpers.setGlobalGroupingEnabled(false); // Isolate deduplication tests
+    // Pin explicit values so "no rule" dedup fires and directionless
+    // count-based tests keep their semantics. Individual describes override
+    // when they target a specific strategy.
+    await helpers.setDeduplicateUnmatchedDomains(true);
+    await helpers.setDeduplicationKeepStrategy('keep-old');
     await helpers.resetStatistics();
   });
 
@@ -24,11 +29,11 @@ test.describe('Deduplication', () => {
 
   test.describe('Global Settings', () => {
     test('deduplicates when global deduplication is enabled (no rule) [US-D001]', async ({ helpers }) => {
-      const tab1 = await helpers.createTab('https://example.com/page');
+      const _tab1 = await helpers.createTab('https://example.com/page');
       await helpers.waitForDeduplication();
       const initialCount = await helpers.getTabCount();
 
-      const tab2 = await helpers.createTab('https://example.com/page');
+      const _tab2 = await helpers.createTab('https://example.com/page');
       await helpers.waitForDeduplication();
 
       const finalCount = await helpers.getTabCount();
@@ -41,11 +46,11 @@ test.describe('Deduplication', () => {
     test('does NOT deduplicate when global deduplication is disabled [US-D001]', async ({ helpers }) => {
       await helpers.setGlobalDeduplicationEnabled(false);
 
-      const tab1 = await helpers.createTab('https://example.com/page');
+      const _tab1 = await helpers.createTab('https://example.com/page');
       await helpers.waitForDeduplication();
       const initialCount = await helpers.getTabCount();
 
-      const tab2 = await helpers.createTab('https://example.com/page');
+      const _tab2 = await helpers.createTab('https://example.com/page');
       await helpers.waitForDeduplication();
 
       const finalCount = await helpers.getTabCount();
@@ -56,11 +61,11 @@ test.describe('Deduplication', () => {
     });
 
     test('does NOT deduplicate different URLs [US-D001]', async ({ helpers }) => {
-      const tab1 = await helpers.createTab('https://example.com/page1');
+      const _tab1 = await helpers.createTab('https://example.com/page1');
       await helpers.waitForDeduplication();
       const initialCount = await helpers.getTabCount();
 
-      const tab2 = await helpers.createTab('https://example.com/page2');
+      const _tab2 = await helpers.createTab('https://example.com/page2');
       await helpers.waitForDeduplication();
 
       const finalCount = await helpers.getTabCount();
@@ -83,11 +88,11 @@ test.describe('Deduplication', () => {
         deduplicationMatchMode: 'exact',
       });
 
-      const tab1 = await helpers.createTab('https://example.com/specific-page');
+      const _tab1 = await helpers.createTab('https://example.com/specific-page');
       await helpers.waitForDeduplication();
       const initialCount = await helpers.getTabCount();
 
-      const tab2 = await helpers.createTab('https://example.com/specific-page');
+      const _tab2 = await helpers.createTab('https://example.com/specific-page');
       await helpers.waitForDeduplication();
 
       const finalCount = await helpers.getTabCount();
@@ -105,11 +110,11 @@ test.describe('Deduplication', () => {
         deduplicationEnabled: false,
       });
 
-      const tab1 = await helpers.createTab('https://example.com/page');
+      const _tab1 = await helpers.createTab('https://example.com/page');
       await helpers.waitForDeduplication();
       const initialCount = await helpers.getTabCount();
 
-      const tab2 = await helpers.createTab('https://example.com/page');
+      const _tab2 = await helpers.createTab('https://example.com/page');
       await helpers.waitForDeduplication();
 
       const finalCount = await helpers.getTabCount();
@@ -129,11 +134,11 @@ test.describe('Deduplication', () => {
       });
       // Global deduplication is enabled (set in beforeEach)
 
-      const tab1 = await helpers.createTab('https://example.com/page');
+      const _tab1 = await helpers.createTab('https://example.com/page');
       await helpers.waitForDeduplication();
       const initialCount = await helpers.getTabCount();
 
-      const tab2 = await helpers.createTab('https://example.com/page');
+      const _tab2 = await helpers.createTab('https://example.com/page');
       await helpers.waitForDeduplication();
 
       const stats = await helpers.getStatistics();
@@ -156,18 +161,18 @@ test.describe('Deduplication', () => {
         deduplicationMatchMode: 'exact',
       });
 
-      const tab1 = await helpers.createTab('https://example.com/page?param=value');
+      const _tab1 = await helpers.createTab('https://example.com/page?param=value');
       await helpers.waitForDeduplication();
       const initialCount = await helpers.getTabCount();
 
       // Different query — should NOT be deduped
-      const tab2 = await helpers.createTab('https://example.com/page?param=different');
+      const _tab2 = await helpers.createTab('https://example.com/page?param=different');
       await helpers.waitForDeduplication();
       const afterDifferent = await helpers.getTabCount();
       expect(afterDifferent).toBe(initialCount + 1);
 
       // Exact duplicate — SHOULD be deduped
-      const tab3 = await helpers.createTab('https://example.com/page?param=value');
+      const _tab3 = await helpers.createTab('https://example.com/page?param=value');
       await helpers.waitForDeduplication();
 
       const stats = await helpers.getStatistics();
@@ -183,11 +188,11 @@ test.describe('Deduplication', () => {
       });
 
       // existing: …/products/item/123
-      const tab1 = await helpers.createTab('https://example.com/products/item/123');
+      const _tab1 = await helpers.createTab('https://example.com/products/item/123');
       await helpers.waitForDeduplication();
 
       // new: …/products/item — is a substring of the existing URL → should deduplicate
-      const tab2 = await helpers.createTab('https://example.com/products/item');
+      const _tab2 = await helpers.createTab('https://example.com/products/item');
       await helpers.waitForDeduplication();
 
       const stats = await helpers.getStatistics();
@@ -203,11 +208,11 @@ test.describe('Deduplication', () => {
         deduplicationMatchMode: 'includes',
       });
 
-      const tab1 = await helpers.createTab('https://example.com/products');
+      const _tab1 = await helpers.createTab('https://example.com/products');
       await helpers.waitForDeduplication();
       const initialCount = await helpers.getTabCount();
 
-      const tab2 = await helpers.createTab('https://example.com/about');
+      const _tab2 = await helpers.createTab('https://example.com/about');
       await helpers.waitForDeduplication();
 
       const finalCount = await helpers.getTabCount();
@@ -222,18 +227,18 @@ test.describe('Deduplication', () => {
         deduplicationMatchMode: 'exact',
       });
 
-      const tab1 = await helpers.createTab('https://example.com/page#section1');
+      const _tab1 = await helpers.createTab('https://example.com/page#section1');
       await helpers.waitForDeduplication();
       const initialCount = await helpers.getTabCount();
 
       // Different fragment → different URL in exact mode → no dedup
-      const tab2 = await helpers.createTab('https://example.com/page#section2');
+      const _tab2 = await helpers.createTab('https://example.com/page#section2');
       await helpers.waitForDeduplication();
       const afterDifferentFragment = await helpers.getTabCount();
       expect(afterDifferentFragment).toBe(initialCount + 1);
 
       // Same fragment → deduplicated
-      const tab3 = await helpers.createTab('https://example.com/page#section1');
+      const _tab3 = await helpers.createTab('https://example.com/page#section1');
       await helpers.waitForDeduplication();
 
       const stats = await helpers.getStatistics();
@@ -258,22 +263,22 @@ test.describe('Deduplication', () => {
       });
 
       // example.com — should deduplicate
-      const ex1 = await helpers.createTab('https://example.com/page');
+      const _ex1 = await helpers.createTab('https://example.com/page');
       await helpers.waitForDeduplication();
       const countAfterEx1 = await helpers.getTabCount();
 
-      const ex2 = await helpers.createTab('https://example.com/page');
+      const _ex2 = await helpers.createTab('https://example.com/page');
       await helpers.waitForDeduplication();
       const countAfterEx2 = await helpers.getTabCount();
 
       expect(countAfterEx2).toBeLessThanOrEqual(countAfterEx1);
 
       // httpbin.org — should NOT deduplicate (rule disables it)
-      const t1 = await helpers.createTab('https://httpbin.org/page');
+      const _t1 = await helpers.createTab('https://httpbin.org/page');
       await helpers.waitForDeduplication();
       const countAfterT1 = await helpers.getTabCount();
 
-      const t2 = await helpers.createTab('https://httpbin.org/page');
+      const _t2 = await helpers.createTab('https://httpbin.org/page');
       await helpers.waitForDeduplication();
       const countAfterT2 = await helpers.getTabCount();
 
@@ -289,10 +294,10 @@ test.describe('Deduplication', () => {
       });
       // Global is enabled → example.org (no rule) uses global → should dedup
 
-      const tab1 = await helpers.createTab('https://example.org/page');
+      const _tab1 = await helpers.createTab('https://example.org/page');
       await helpers.waitForDeduplication();
 
-      const tab2 = await helpers.createTab('https://example.org/page');
+      const _tab2 = await helpers.createTab('https://example.org/page');
       await helpers.waitForDeduplication();
 
       const stats = await helpers.getStatistics();
@@ -317,7 +322,7 @@ test.describe('Deduplication', () => {
         deduplicationMatchMode: 'exact',
       });
 
-      const tab1 = await helpers.createTab('https://example.com/rapid-test');
+      const _tab1 = await helpers.createTab('https://example.com/rapid-test');
       await helpers.waitForDeduplication(500);
 
       await Promise.all([
@@ -339,10 +344,10 @@ test.describe('Deduplication', () => {
         deduplicationMatchMode: 'exact',
       });
 
-      const tab1 = await helpers.createTab('https://www.example.com/page');
+      const _tab1 = await helpers.createTab('https://www.example.com/page');
       await helpers.waitForDeduplication();
 
-      const tab2 = await helpers.createTab('https://www.example.com/page');
+      const _tab2 = await helpers.createTab('https://www.example.com/page');
       await helpers.waitForDeduplication();
 
       const stats = await helpers.getStatistics();
@@ -350,7 +355,104 @@ test.describe('Deduplication', () => {
     });
   });
 
+  // ── 5bis. Deduplication scope for unmatched domains ──────────────────────
+
+  test.describe('Unmatched-domain scope [US-D008]', () => {
+    test('does NOT deduplicate domains without a rule when deduplicateUnmatchedDomains=false', async ({ helpers }) => {
+      await helpers.setDeduplicateUnmatchedDomains(false);
+
+      const _tab1 = await helpers.createTab('https://unmatched.example.org/page');
+      await helpers.waitForDeduplication();
+      const initialCount = await helpers.getTabCount();
+
+      const _tab2 = await helpers.createTab('https://unmatched.example.org/page');
+      await helpers.waitForDeduplication();
+
+      const finalCount = await helpers.getTabCount();
+      const stats = await helpers.getStatistics();
+
+      expect(finalCount).toBe(initialCount + 1);
+      expect(stats.tabsDeduplicatedCount).toBe(0);
+    });
+
+    test('STILL deduplicates rule-matched domains when deduplicateUnmatchedDomains=false', async ({ helpers }) => {
+      await helpers.setDeduplicateUnmatchedDomains(false);
+      await helpers.addDomainRule({
+        label: 'Matched Rule',
+        domainFilter: 'example.com',
+        enabled: true,
+        deduplicationEnabled: true,
+        deduplicationMatchMode: 'exact',
+      });
+
+      const _tab1 = await helpers.createTab('https://example.com/rule-match');
+      await helpers.waitForDeduplication();
+      const initialCount = await helpers.getTabCount();
+
+      const _tab2 = await helpers.createTab('https://example.com/rule-match');
+      await helpers.waitForDeduplication();
+
+      const finalCount = await helpers.getTabCount();
+      const stats = await helpers.getStatistics();
+
+      expect(finalCount).toBeLessThanOrEqual(initialCount);
+      expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
+    });
+  });
+
   // ── 6. Statistics ─────────────────────────────────────────────────────────
+
+  // ── Ignored query params ──────────────────────────────────────────────────
+
+  test.describe('Exact ignoring query params', () => {
+    test('deduplicates when only an ignored param differs [US-D008]', async ({ helpers }) => {
+      await helpers.addDomainRule({
+        label: 'Ignore UTM',
+        domainFilter: 'example.com',
+        enabled: true,
+        deduplicationEnabled: true,
+        deduplicationMatchMode: 'exact_ignore_params',
+        ignoredQueryParams: ['utm_*', 'fbclid'],
+      });
+
+      const _tab1 = await helpers.createTab('https://example.com/page?utm_source=newsletter&ref=home');
+      await helpers.waitForDeduplication();
+      const initialCount = await helpers.getTabCount();
+
+      const _tab2 = await helpers.createTab('https://example.com/page?utm_source=twitter&ref=home');
+      await helpers.waitForDeduplication();
+
+      const finalCount = await helpers.getTabCount();
+      const stats = await helpers.getStatistics();
+
+      expect(finalCount).toBeLessThanOrEqual(initialCount);
+      expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
+    });
+
+    test('does NOT deduplicate when a non-ignored param differs [US-D008]', async ({ helpers }) => {
+      await helpers.addDomainRule({
+        label: 'Ignore UTM only',
+        domainFilter: 'example.com',
+        enabled: true,
+        deduplicationEnabled: true,
+        deduplicationMatchMode: 'exact_ignore_params',
+        ignoredQueryParams: ['utm_*'],
+      });
+
+      const _tab1 = await helpers.createTab('https://example.com/page?utm_source=a&ref=home');
+      await helpers.waitForDeduplication();
+      const initialCount = await helpers.getTabCount();
+
+      const _tab2 = await helpers.createTab('https://example.com/page?utm_source=b&ref=other');
+      await helpers.waitForDeduplication();
+
+      const finalCount = await helpers.getTabCount();
+      const stats = await helpers.getStatistics();
+
+      expect(finalCount).toBe(initialCount + 1);
+      expect(stats.tabsDeduplicatedCount).toBe(0);
+    });
+  });
 
   test.describe('Statistics', () => {
     test('tabsDeduplicatedCount increments exactly once per deduplication [US-D007]', async ({ helpers }) => {
@@ -361,23 +463,100 @@ test.describe('Deduplication', () => {
       });
       await helpers.resetStatistics();
 
-      const tab1 = await helpers.createTab('https://example.com/stats-test');
+      const _tab1 = await helpers.createTab('https://example.com/stats-test');
       await helpers.waitForDeduplication();
 
       let stats = await helpers.getStatistics();
       expect(stats.tabsDeduplicatedCount).toBe(0);
 
       // First duplicate
-      const tab2 = await helpers.createTab('https://example.com/stats-test');
+      const _tab2 = await helpers.createTab('https://example.com/stats-test');
       await helpers.waitForDeduplication();
       stats = await helpers.getStatistics();
       expect(stats.tabsDeduplicatedCount).toBe(1);
 
       // Second duplicate
-      const tab3 = await helpers.createTab('https://example.com/stats-test');
+      const _tab3 = await helpers.createTab('https://example.com/stats-test');
       await helpers.waitForDeduplication();
       stats = await helpers.getStatistics();
       expect(stats.tabsDeduplicatedCount).toBe(2);
+    });
+  });
+
+  // ── 7. Keep strategy ──────────────────────────────────────────────────────
+
+  test.describe('Keep strategy [US-D009]', () => {
+    test('keep-old (default) closes the newly opened tab', async ({ helpers }) => {
+      await helpers.setDeduplicationKeepStrategy('keep-old');
+
+      const tab1 = await helpers.createTab('https://example.com/keep-old');
+      await helpers.waitForDeduplication();
+      const tab2 = await helpers.createTab('https://example.com/keep-old');
+      await helpers.waitForDeduplication();
+
+      expect(tab1.isClosed()).toBe(false);
+      expect(tab2.isClosed()).toBe(true);
+    });
+
+    test('keep-new closes the existing tab instead', async ({ helpers }) => {
+      await helpers.setDeduplicationKeepStrategy('keep-new');
+
+      const tab1 = await helpers.createTab('https://example.com/keep-new');
+      await helpers.waitForDeduplication();
+      const tab2 = await helpers.createTab('https://example.com/keep-new');
+      await helpers.waitForDeduplication();
+
+      expect(tab1.isClosed()).toBe(true);
+      expect(tab2.isClosed()).toBe(false);
+    });
+
+    test('keep-grouped keeps the grouped tab when only the existing one is grouped', async ({ helpers }) => {
+      await helpers.setDeduplicationKeepStrategy('keep-grouped');
+      await helpers.setGlobalGroupingEnabled(true);
+      await helpers.addDomainRule({
+        label: 'Grouped Rule',
+        domainFilter: 'example.com',
+        enabled: true,
+        deduplicationEnabled: true,
+        deduplicationMatchMode: 'exact',
+        groupNameSource: 'label',
+      });
+
+      const opener = await helpers.createTab('https://example.com/opener');
+      const tab1 = await helpers.createTabNaturally(opener, 'https://example.com/grouped-target');
+      await helpers.waitForGrouping();
+
+      // New ungrouped duplicate via plain chrome.tabs.create (no opener).
+      const tab2 = await helpers.createTab('https://example.com/grouped-target');
+      await helpers.waitForDeduplication();
+
+      // The grouped (existing) tab survives, the fresh ungrouped one is closed.
+      expect(tab1.isClosed()).toBe(false);
+      expect(tab2.isClosed()).toBe(true);
+    });
+
+    test('keep-grouped falls back to keep-old when neither tab is grouped', async ({ helpers }) => {
+      await helpers.setDeduplicationKeepStrategy('keep-grouped');
+
+      const tab1 = await helpers.createTab('https://example.com/ungrouped');
+      await helpers.waitForDeduplication();
+      const tab2 = await helpers.createTab('https://example.com/ungrouped');
+      await helpers.waitForDeduplication();
+
+      expect(tab1.isClosed()).toBe(false);
+      expect(tab2.isClosed()).toBe(true);
+    });
+
+    test('keep-grouped-or-new falls back to keep-new when neither tab is grouped', async ({ helpers }) => {
+      await helpers.setDeduplicationKeepStrategy('keep-grouped-or-new');
+
+      const tab1 = await helpers.createTab('https://example.com/grouped-or-new');
+      await helpers.waitForDeduplication();
+      const tab2 = await helpers.createTab('https://example.com/grouped-or-new');
+      await helpers.waitForDeduplication();
+
+      expect(tab1.isClosed()).toBe(true);
+      expect(tab2.isClosed()).toBe(false);
     });
   });
 });

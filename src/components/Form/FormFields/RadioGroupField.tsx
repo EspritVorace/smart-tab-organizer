@@ -1,7 +1,7 @@
 import { Flex, Text, RadioGroup } from '@radix-ui/themes';
-import { Controller } from 'react-hook-form';
+import { Controller, type Control, type FieldValues } from 'react-hook-form';
 import { FieldLabel } from './FieldLabel';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 interface RadioOption {
   readonly value: string;
@@ -12,7 +12,7 @@ interface RadioGroupFieldProps {
   label: string;
   name: string;
   options: readonly RadioOption[];
-  control: any;
+  control: Control<FieldValues>;
   required?: boolean;
   onChange?: (value: string) => void;
 }
@@ -42,10 +42,12 @@ export function RadioGroupField({
           >
             <Flex direction="row" gap="4" wrap="wrap">
               {options.map((option) => (
-                <Flex key={option.value} align="center" gap="2">
-                  <RadioGroup.Item value={option.value} />
-                  <Text size="2">{getMessage(option.keyLabel)}</Text>
-                </Flex>
+                <Text key={option.value} as="label" size="2">
+                  <Flex align="center" gap="2">
+                    <RadioGroup.Item value={option.value} />
+                    {getMessage(option.keyLabel)}
+                  </Flex>
+                </Text>
               ))}
             </Flex>
           </RadioGroup.Root>

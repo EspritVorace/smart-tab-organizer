@@ -12,7 +12,8 @@
           "titleRegex": "ID[:\\s]*(\\d+)",
           "urlRegex": "id[=/](\\d+)",
           "groupNameSource": "smart_preset",
-          "example": "Titre: 'Ticket ID 12345' → Groupe: '12345' OU si échec → 'ID Numérique'",
+          "titleExample": "Titre: 'Ticket ID 12345' → Groupe: '12345'",
+          "urlExample": "URL: '/resource?id=12345' → Groupe: '12345'",
           "description": "Extrait un identifiant numérique"
         },
         {
@@ -22,7 +23,8 @@
           "titleRegex": "\\[([A-Z0-9-]+)\\]",
           "urlRegex": "([A-Z0-9-]{3,})",
           "groupNameSource": "smart_preset",
-          "example": "Titre: '[PROJ-123]' → Groupe: 'PROJ-123' OU si échec → 'ID Alphanumérique'",
+          "titleExample": "Titre: '[PROJ-123] Fix bug' → Groupe: 'PROJ-123'",
+          "urlExample": "URL: '/path/PROJ-123' → Groupe: 'PROJ-123'",
           "description": "Extrait un code alphanumérique"
         },
         {
@@ -31,7 +33,7 @@
           "domainFilters": ["*"],
           "titleRegex": "\\(([^)]+)\\)",
           "groupNameSource": "title",
-          "example": "Titre: 'Article (Catégorie)' → Groupe: 'Catégorie'",
+          "titleExample": "Titre: 'Article (Catégorie)' → Groupe: 'Catégorie'",
           "description": "Extrait le texte entre parenthèses"
         },
         {
@@ -40,7 +42,7 @@
           "domainFilters": ["*"],
           "titleRegex": "\\[([^\\]]+)\\]",
           "groupNameSource": "title",
-          "example": "Titre: 'Document [Version 2.0]' → Groupe: 'Version 2.0'",
+          "titleExample": "Titre: 'Document [Version 2.0]' → Groupe: 'Version 2.0'",
           "description": "Extrait le texte entre crochets"
         },
         {
@@ -49,7 +51,7 @@
           "domainFilters": ["*"],
           "urlRegex": "(\\d{4}-\\d{2}-\\d{2})",
           "groupNameSource": "url",
-          "example": "URL: '/reports/2024-03-15' → Groupe: '2024-03-15'",
+          "urlExample": "URL: '/reports/2024-03-15' → Groupe: '2024-03-15'",
           "description": "Extrait une date au format ISO"
         },
         {
@@ -59,7 +61,8 @@
           "titleRegex": "Projet:\\s*([^\\s]+)",
           "urlRegex": "project/([^/]+)",
           "groupNameSource": "smart_label",
-          "example": "Titre: 'Projet: WebApp' → Groupe: 'WebApp'",
+          "titleExample": "Titre: 'Projet: WebApp' → Groupe: 'WebApp'",
+          "urlExample": "URL: '/project/webapp' → Groupe: 'webapp'",
           "description": "Extrait le mot après un mot-clé"
         },
         {
@@ -68,7 +71,7 @@
           "domainFilters": ["*"],
           "titleRegex": "^([^\\s]+)",
           "groupNameSource": "title",
-          "example": "Titre: 'Marketing Dashboard' → Groupe: 'Marketing'",
+          "titleExample": "Titre: 'Marketing Dashboard' → Groupe: 'Marketing'",
           "description": "Extrait le premier mot du titre"
         },
         {
@@ -78,7 +81,8 @@
           "titleRegex": "[vV](\\d+(?:\\.\\d+)*)",
           "urlRegex": "[vV](\\d+(?:\\.\\d+)*)",
           "groupNameSource": "smart",
-          "example": "Titre: 'API v2.1.3' → Groupe: '2.1.3'",
+          "titleExample": "Titre: 'API v2.1.3' → Groupe: '2.1.3'",
+          "urlExample": "URL: '/docs/v2.1' → Groupe: '2.1'",
           "description": "Extrait un numéro de version"
         },
         {
@@ -87,7 +91,7 @@
           "domainFilters": ["*"],
           "urlRegex": "([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})",
           "groupNameSource": "url",
-          "example": "URL: '/object/550e8400...' → Groupe: '550e8400...'",
+          "urlExample": "URL: '/object/550e8400-e29b-41d4-a716-446655440000' → Groupe: '550e8400-...'",
           "description": "Extrait un identifiant UUID"
         },
         {
@@ -96,7 +100,7 @@
           "domainFilters": ["*"],
           "urlRegex": "/@([a-zA-Z0-9_]+)",
           "groupNameSource": "url",
-          "example": "URL: '/@username/posts' → Groupe: 'username'",
+          "urlExample": "URL: '/@username/posts' → Groupe: 'username'",
           "description": "Extrait un nom d'utilisateur après @"
         }
       ]
@@ -112,7 +116,7 @@
           "domainFilters": ["github.com"],
           "urlRegex": "github\\.com/([^/]+/[^/]+)",
           "groupNameSource": "url",
-          "example": "URL: '/microsoft/vscode' → Groupe: 'microsoft/vscode'",
+          "urlExample": "URL: '/microsoft/vscode' → Groupe: 'microsoft/vscode'",
           "description": "Regroupe par repository"
         },
         {
@@ -122,7 +126,8 @@
           "titleRegex": "·\\s*Issue\\s*#(\\d+)",
           "urlRegex": "issues/(\\d+)",
           "groupNameSource": "smart_preset",
-          "example": "Titre: 'Bug fix · Issue #123' → Groupe: '123' OU si échec → 'GitHub - Issues'",
+          "titleExample": "Titre: 'Fix memory leak · Issue #1234 · microsoft/vscode' → Groupe: '1234'",
+          "urlExample": "URL: '/microsoft/vscode/issues/1234' → Groupe: '1234'",
           "description": "Regroupe par numéro d'issue"
         },
         {
@@ -131,7 +136,7 @@
           "domainFilters": ["stackoverflow.com", "serverfault.com", "superuser.com", "*.stackexchange.com"],
           "urlRegex": "questions/(\\d+)",
           "groupNameSource": "smart_preset",
-          "example": "URL: '/questions/12345' → Groupe: '12345' OU si échec → 'Stack Overflow - Questions'",
+          "urlExample": "URL: '/questions/12345' → Groupe: '12345'",
           "description": "Regroupe par ID de question"
         },
         {
@@ -140,7 +145,7 @@
           "domainFilters": ["gitlab.com", "*.gitlab.io"],
           "urlRegex": "gitlab\\.com/([^/]+/[^/]+)",
           "groupNameSource": "url",
-          "example": "URL: '/gitlab-org/gitlab' → Groupe: 'gitlab-org/gitlab'",
+          "urlExample": "URL: '/gitlab-org/gitlab' → Groupe: 'gitlab-org/gitlab'",
           "description": "Regroupe par projet GitLab"
         },
         {
@@ -150,7 +155,8 @@
           "titleRegex": "(.+?)\\s*–\\s*Figma",
           "urlRegex": "figma\\.com/(?:file|design)/[^/]+/([^?/]+)",
           "groupNameSource": "smart",
-          "example": "Titre: 'Design System – Figma' → Groupe: 'Design System'",
+          "titleExample": "Titre: 'Design System – Figma' → Groupe: 'Design System'",
+          "urlExample": "URL: '/design/abc123/Mobile-App-Mockups' → Groupe: 'Mobile-App-Mockups'",
           "description": "Regroupe par nom de fichier"
         },
         {
@@ -159,7 +165,7 @@
           "domainFilters": ["*.npmjs.com"],
           "urlRegex": "npmjs\\.com/package/([^/]+)",
           "groupNameSource": "url",
-          "example": "URL: '/package/react' → Groupe: 'react'",
+          "urlExample": "URL: '/package/react' → Groupe: 'react'",
           "description": "Regroupe par nom de package"
         }
       ]
@@ -176,8 +182,27 @@
           "titleRegex": "([A-Z]+-\\d+)",
           "urlRegex": "browse/([A-Z]+-\\d+)",
           "groupNameSource": "smart_label",
-          "example": "Titre: '[PROJ-123]' → Groupe: 'PROJ-123' OU si échec → Label de la règle",
+          "titleExample": "Titre: 'PROJ-123: Fix the login bug | Jira' → Groupe: 'PROJ-123'",
+          "urlExample": "URL: '/browse/PROJ-123' → Groupe: 'PROJ-123'",
           "description": "Regroupe par ID de ticket Jira"
+        },
+        {
+          "id": "jira-ticket-in-title",
+          "name": "Jira - Ticket dans le titre (cross-domaine)",
+          "domainFilters": ["*"],
+          "titleRegex": "([A-Z][A-Z0-9_]+-\\d+)",
+          "groupNameSource": "smart_preset",
+          "titleExample": "Titre: 'Fix login bug (PROJ-123)' ou '[PROJ-123] Fix...' ou 'PROJ-123: Fix...' → Groupe: 'PROJ-123'",
+          "description": "Extrait un ID de ticket Jira (PROJ-123) dans le titre, quel que soit le domaine. Utile pour les PR GitHub/GitLab, commits, reviews qui référencent un ticket Jira."
+        },
+        {
+          "id": "github-issue-in-title",
+          "name": "GitHub - Issue dans le titre (cross-domaine)",
+          "domainFilters": ["*"],
+          "titleRegex": "#(\\d+)\\b",
+          "groupNameSource": "smart_preset",
+          "titleExample": "Titre: 'Fix bug (#123)' ou '[#123] Fix...' ou '#123: Fix...' → Groupe: '123'",
+          "description": "Extrait une référence d'issue GitHub (#123) dans le titre, quel que soit le domaine. Utile pour les onglets qui référencent une issue par son numéro."
         },
         {
           "id": "trello-board",
@@ -186,7 +211,8 @@
           "titleRegex": "(.+?)\\s*\\|\\s*Trello",
           "urlRegex": "trello\\.com/b/[^/]+/(.+)",
           "groupNameSource": "smart_label",
-          "example": "Titre: 'Project Board | Trello' → Groupe: 'Project Board'",
+          "titleExample": "Titre: 'Project Board | Trello' → Groupe: 'Project Board'",
+          "urlExample": "URL: '/b/abc123/project-board' → Groupe: 'project-board'",
           "description": "Regroupe par nom de board"
         },
         {
@@ -195,7 +221,7 @@
           "domainFilters": ["*.notion.so", "*.notion.site"],
           "titleRegex": "(.+?)\\s*\\|\\s*Notion",
           "groupNameSource": "smart_label",
-          "example": "Titre: 'Project Planning | Notion' → Groupe: 'Project Planning'",
+          "titleExample": "Titre: 'Project Planning | Notion' → Groupe: 'Project Planning'",
           "description": "Regroupe par titre de page"
         },
         {
@@ -204,7 +230,7 @@
           "domainFilters": ["app.asana.com"],
           "urlRegex": "app\\.asana\\.com/0/([^/]+)",
           "groupNameSource": "smart_label",
-          "example": "URL: '/0/123456/789012' → Groupe basé sur le contexte projet",
+          "urlExample": "URL: '/0/123456/789012' → Groupe: '123456'",
           "description": "Regroupe par projet Asana"
         },
         {
@@ -213,7 +239,7 @@
           "domainFilters": ["*.salesforce.com", "*.force.com"],
           "urlRegex": "https?://([^.]+)\\.",
           "groupNameSource": "smart_label",
-          "example": "URL: 'mycompany.salesforce.com' → Groupe: 'mycompany'",
+          "urlExample": "URL: 'https://mycompany.salesforce.com' → Groupe: 'mycompany'",
           "description": "Regroupe par organisation"
         },
         {
@@ -222,7 +248,7 @@
           "domainFilters": ["miro.com"],
           "titleRegex": "(.+?)\\s*\\|\\s*Miro",
           "groupNameSource": "smart_label",
-          "example": "Titre: 'Sprint Planning | Miro' → Groupe: 'Sprint Planning'",
+          "titleExample": "Titre: 'Sprint Planning | Miro' → Groupe: 'Sprint Planning'",
           "description": "Regroupe par nom de board"
         }
       ]
@@ -238,7 +264,7 @@
           "domainFilters": ["*.amazon.*"],
           "urlRegex": "/dp/([A-Z0-9]{10})",
           "groupNameSource": "url",
-          "example": "URL: '/dp/B08N5WRWNW' → Groupe: 'B08N5WRWNW'",
+          "urlExample": "URL: '/dp/B08N5WRWNW' → Groupe: 'B08N5WRWNW'",
           "description": "Regroupe par ASIN produit"
         },
         {
@@ -247,7 +273,7 @@
           "domainFilters": ["*.ebay.*"],
           "urlRegex": "ebay\\.[^/]+/itm/(\\d+)",
           "groupNameSource": "url",
-          "example": "URL: '/itm/123456789' → Groupe: '123456789'",
+          "urlExample": "URL: '/itm/123456789' → Groupe: '123456789'",
           "description": "Regroupe par ID d'article"
         },
         {
@@ -256,7 +282,7 @@
           "domainFilters": ["*.myshopify.com", "admin.shopify.com"],
           "urlRegex": "://([^.]+)\\.myshopify\\.com",
           "groupNameSource": "url",
-          "example": "URL: 'mystore.myshopify.com' → Groupe: 'mystore'",
+          "urlExample": "URL: 'https://mystore.myshopify.com' → Groupe: 'mystore'",
           "description": "Regroupe par boutique"
         }
       ]
@@ -273,17 +299,19 @@
           "titleRegex": "(?:.+?)\\s*-\\s*(.+?)\\s*-\\s*Airbnb",
           "urlRegex": "rooms/(\\d+)",
           "groupNameSource": "smart_manual",
-          "example": "Titre: 'Apartment - Paris - Airbnb' → Groupe: 'Paris' OU si échec → Demande manuelle",
+          "titleExample": "Titre: 'Apartment - Paris - Airbnb' → Groupe: 'Paris'",
+          "urlExample": "URL: '/rooms/12345678' → Groupe: '12345678'",
           "description": "Regroupe par destination (demande si non trouvée)"
         },
         {
           "id": "booking-hotel",
           "name": "Booking.com - Hôtels",
           "domainFilters": ["*.booking.com"],
-          "titleRegex": "(?:.+?)\\s*,\\s*(.+?)\\s*[-–]",
+          "titleRegex": "(?:.+?),\\s*(.+?)\\s*[-–]",
           "urlRegex": "city=([^&]+)",
           "groupNameSource": "smart_manual",
-          "example": "Titre: 'Hotel, Paris -' → Groupe: 'Paris' OU si échec → Demande destination",
+          "titleExample": "Titre: 'Hilton London Bankside, London - Booking.com' → Groupe: 'London'",
+          "urlExample": "URL: '?city=Paris&checkin=2024-06-01' → Groupe: 'Paris'",
           "description": "Regroupe par ville (demande si non trouvée)"
         },
         {
@@ -292,7 +320,7 @@
           "domainFilters": ["*.expedia.*"],
           "urlRegex": "destination=([^&]+)",
           "groupNameSource": "smart_manual",
-          "example": "URL: '?destination=Paris' → Groupe: 'Paris'",
+          "urlExample": "URL: '?destination=Paris' → Groupe: 'Paris'",
           "description": "Regroupe par destination"
         },
         {
@@ -302,7 +330,8 @@
           "titleRegex": "(?:.+?)\\s*to\\s*(.+?)\\s*[-–]",
           "urlRegex": "(?:flights|vols)/(?:[^/]+)/([^/]+)",
           "groupNameSource": "smart_manual",
-          "example": "Titre: 'Paris to London' → Groupe: 'London'",
+          "titleExample": "Titre: 'Flights from Paris to London - Skyscanner' → Groupe: 'London'",
+          "urlExample": "URL: '/transport/flights/cdg/lhr/' → Groupe: 'lhr'",
           "description": "Regroupe par destination"
         }
       ]
@@ -319,7 +348,8 @@
           "titleRegex": "(.+?)\\s*-\\s*(?:Recherche Google|Google Search)",
           "urlRegex": "search\\?.*q=([^&]+)",
           "groupNameSource": "smart",
-          "example": "Titre: 'javascript tutorial - Recherche Google' → Groupe: 'javascript tutorial'",
+          "titleExample": "Titre: 'javascript tutorial - Google Search' → Groupe: 'javascript tutorial'",
+          "urlExample": "URL: '/search?q=javascript+tutorial' → Groupe: 'javascript+tutorial'",
           "description": "Regroupe par termes de recherche"
         },
         {
@@ -329,7 +359,8 @@
           "titleRegex": "(.+?)\\s*-\\s*Wikipedia",
           "urlRegex": "wiki/([^#]+)",
           "groupNameSource": "smart",
-          "example": "Titre: 'JavaScript - Wikipedia' → Groupe: 'JavaScript'",
+          "titleExample": "Titre: 'JavaScript - Wikipedia' → Groupe: 'JavaScript'",
+          "urlExample": "URL: '/wiki/JavaScript' → Groupe: 'JavaScript'",
           "description": "Regroupe par article"
         },
         {
@@ -338,7 +369,7 @@
           "domainFilters": ["developer.mozilla.org"],
           "urlRegex": "docs/Web/([^/]+)",
           "groupNameSource": "url",
-          "example": "URL: '/docs/Web/JavaScript' → Groupe: 'JavaScript'",
+          "urlExample": "URL: '/docs/Web/JavaScript' → Groupe: 'JavaScript'",
           "description": "Regroupe par technologie"
         },
         {
@@ -347,7 +378,7 @@
           "domainFilters": ["*.medium.com", "medium.com"],
           "urlRegex": "@([^/]+)",
           "groupNameSource": "url",
-          "example": "URL: '/@author_name/article' → Groupe: 'author_name'",
+          "urlExample": "URL: '/@author_name/article' → Groupe: 'author_name'",
           "description": "Regroupe par auteur"
         }
       ]
@@ -363,7 +394,7 @@
           "domainFilters": ["*.linkedin.com"],
           "urlRegex": "linkedin\\.com/in/([^/]+)",
           "groupNameSource": "url",
-          "example": "URL: '/in/john-doe-123' → Groupe: 'john-doe-123'",
+          "urlExample": "URL: '/in/john-doe-123' → Groupe: 'john-doe-123'",
           "description": "Regroupe par profil"
         },
         {
@@ -372,7 +403,7 @@
           "domainFilters": ["*.twitter.com", "*.x.com"],
           "urlRegex": "(?:twitter|x)\\.com/([^/?#]+)",
           "groupNameSource": "url",
-          "example": "URL: '/elonmusk' → Groupe: 'elonmusk'",
+          "urlExample": "URL: '/elonmusk' → Groupe: 'elonmusk'",
           "description": "Regroupe par utilisateur"
         },
         {
@@ -381,7 +412,7 @@
           "domainFilters": ["*.reddit.com"],
           "urlRegex": "reddit\\.com/r/([^/]+)",
           "groupNameSource": "url",
-          "example": "URL: '/r/programming' → Groupe: 'programming'",
+          "urlExample": "URL: '/r/programming' → Groupe: 'programming'",
           "description": "Regroupe par subreddit"
         },
         {
@@ -390,7 +421,7 @@
           "domainFilters": ["*.slack.com"],
           "urlRegex": "://([^.]+)\\.slack\\.com",
           "groupNameSource": "url",
-          "example": "URL: 'myteam.slack.com' → Groupe: 'myteam'",
+          "urlExample": "URL: 'https://myteam.slack.com' → Groupe: 'myteam'",
           "description": "Regroupe par workspace"
         },
         {
@@ -400,7 +431,8 @@
           "titleRegex": "Zoom Meeting ID: (\\d+)",
           "urlRegex": "zoom\\.us/j/(\\d+)",
           "groupNameSource": "smart",
-          "example": "Titre: 'Zoom Meeting ID: 123456789' → Groupe: '123456789'",
+          "titleExample": "Titre: 'Zoom Meeting ID: 123456789' → Groupe: '123456789'",
+          "urlExample": "URL: '/j/98765432100' → Groupe: '98765432100'",
           "description": "Regroupe par ID de meeting"
         }
       ]
@@ -416,7 +448,7 @@
           "domainFilters": ["*.youtube.com", "youtu.be"],
           "urlRegex": "(?:watch\\?v=|youtu\\.be/)([^&?]+)",
           "groupNameSource": "url",
-          "example": "URL: '/watch?v=dQw4w9WgXcQ' → Groupe: 'dQw4w9WgXcQ'",
+          "urlExample": "URL: '/watch?v=dQw4w9WgXcQ' → Groupe: 'dQw4w9WgXcQ'",
           "description": "Regroupe par ID de vidéo"
         },
         {
@@ -426,7 +458,8 @@
           "titleRegex": "(.+?)\\s*-\\s*YouTube",
           "urlRegex": "youtube\\.com/(?:(?:c|channel|user)/|@)([^/?]+)",
           "groupNameSource": "smart",
-          "example": "Titre: 'TechChannel - YouTube' → Groupe: 'TechChannel'",
+          "titleExample": "Titre: 'TechChannel - YouTube' → Groupe: 'TechChannel'",
+          "urlExample": "URL: '/c/Fireship' → Groupe: 'Fireship'",
           "description": "Regroupe par chaîne"
         },
         {
@@ -435,7 +468,7 @@
           "domainFilters": ["*.netflix.com"],
           "urlRegex": "netflix\\.com/(?:[a-z-]+/)?title/(\\d+)",
           "groupNameSource": "url",
-          "example": "URL: '/title/80018499' → Groupe: '80018499'",
+          "urlExample": "URL: '/title/80018499' → Groupe: '80018499'",
           "description": "Regroupe par ID de contenu"
         },
         {
@@ -444,7 +477,7 @@
           "domainFilters": ["open.spotify.com"],
           "urlRegex": "spotify\\.com/track/([^?]+)",
           "groupNameSource": "url",
-          "example": "URL: '/track/4iV5W9u...' → Groupe: '4iV5W9u...'",
+          "urlExample": "URL: '/track/4iV5W9uYEdYUVa79Axb7Rh' → Groupe: '4iV5W9uYEdYUVa79Axb7Rh'",
           "description": "Regroupe par ID de piste"
         },
         {
@@ -453,7 +486,7 @@
           "domainFilters": ["*.twitch.tv"],
           "urlRegex": "twitch\\.tv/([^/]+)",
           "groupNameSource": "url",
-          "example": "URL: '/ninja' → Groupe: 'ninja'",
+          "urlExample": "URL: '/ninja' → Groupe: 'ninja'",
           "description": "Regroupe par chaîne"
         }
       ]
@@ -469,7 +502,7 @@
           "domainFilters": ["*.aws.amazon.com"],
           "urlRegex": "console\\.aws\\.amazon\\.com/([^/]+)",
           "groupNameSource": "url",
-          "example": "URL: '/ec2/home' → Groupe: 'EC2'",
+          "urlExample": "URL: '/ec2/home' → Groupe: 'ec2'",
           "description": "Regroupe par service AWS"
         },
         {
@@ -478,7 +511,7 @@
           "domainFilters": ["portal.azure.com", "*.azure.com"],
           "urlRegex": "resourceGroups/([^/]+)",
           "groupNameSource": "url",
-          "example": "URL: '/resourceGroups/mygroup' → Groupe: 'mygroup'",
+          "urlExample": "URL: '/resourceGroups/mygroup' → Groupe: 'mygroup'",
           "description": "Regroupe par resource group"
         },
         {
@@ -488,7 +521,8 @@
           "titleRegex": "(.+?)\\s*–\\s*Vercel",
           "urlRegex": "vercel\\.com/[^/]+/([^/]+)",
           "groupNameSource": "smart",
-          "example": "Titre: 'myproject – Vercel' → Groupe: 'myproject'",
+          "titleExample": "Titre: 'myproject – Vercel' → Groupe: 'myproject'",
+          "urlExample": "URL: '/myteam/my-project' → Groupe: 'my-project'",
           "description": "Regroupe par projet"
         }
       ]
@@ -504,7 +538,7 @@
           "domainFilters": ["*.coinbase.com"],
           "urlRegex": "coinbase\\.com/price/([^/]+)",
           "groupNameSource": "url",
-          "example": "URL: '/price/bitcoin' → Groupe: 'bitcoin'",
+          "urlExample": "URL: '/price/bitcoin' → Groupe: 'bitcoin'",
           "description": "Regroupe par crypto"
         },
         {
@@ -513,7 +547,7 @@
           "domainFilters": ["*.tradingview.com"],
           "urlRegex": "symbol=([^&]+)",
           "groupNameSource": "url",
-          "example": "URL: '?symbol=NASDAQ:AAPL' → Groupe: 'NASDAQ:AAPL'",
+          "urlExample": "URL: '?symbol=NASDAQ:AAPL' → Groupe: 'NASDAQ:AAPL'",
           "description": "Regroupe par symbole"
         }
       ]
@@ -530,7 +564,8 @@
           "titleRegex": "(.+?)\\s*\\|\\s*Udemy",
           "urlRegex": "udemy\\.com/course/([^/]+)",
           "groupNameSource": "smart",
-          "example": "Titre: 'JavaScript Guide | Udemy' → Groupe: 'JavaScript Guide'",
+          "titleExample": "Titre: 'JavaScript Guide | Udemy' → Groupe: 'JavaScript Guide'",
+          "urlExample": "URL: '/course/the-complete-javascript-course' → Groupe: 'the-complete-javascript-course'",
           "description": "Regroupe par cours"
         },
         {
@@ -540,7 +575,8 @@
           "titleRegex": "(.+?)\\s*\\|\\s*Coursera",
           "urlRegex": "coursera\\.org/learn/([^/]+)",
           "groupNameSource": "smart",
-          "example": "Titre: 'Machine Learning | Coursera' → Groupe: 'Machine Learning'",
+          "titleExample": "Titre: 'Machine Learning | Coursera' → Groupe: 'Machine Learning'",
+          "urlExample": "URL: '/learn/machine-learning' → Groupe: 'machine-learning'",
           "description": "Regroupe par cours"
         }
       ]

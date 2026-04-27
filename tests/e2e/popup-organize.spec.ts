@@ -8,7 +8,7 @@
  * - US-PO009: Existing auto-grouping behaviour unaffected
  */
 
-import { test, expect, type ExtensionFixtures } from './fixtures';
+import { test, expect } from './fixtures';
 import { goToPopup } from './helpers/navigation';
 import type { BrowserContext, Page } from '@playwright/test';
 
@@ -158,13 +158,35 @@ test.describe('[US-PO007] Batch deduplication', () => {
     await firstTab.close().catch(() => {});
   });
 
-  test('tabs without matching rule are not deduped [US-PO007]', async ({
+  test('tabs without matching rule ARE deduped when deduplicateUnmatchedDomains=true [US-PO007]', async ({
     extensionContext,
     helpers,
   }) => {
     const sw = await getServiceWorker(extensionContext);
+    await helpers.setDeduplicateUnmatchedDomains(true);
 
-    // No domain rules — no dedup should occur
+    // No domain rules — batch dedup still handles unmatched tabs (exact match).
+    await helpers.createTab('https://example.org/page');
+    await helpers.createTab('https://example.org/page');
+    await new Promise(r => setTimeout(r, 500));
+
+    const beforeCount = await helpers.getTabCount();
+    await triggerOrganize(sw);
+    const afterCount = await helpers.getTabCount();
+    const stats = await helpers.getStatistics();
+
+    expect(afterCount).toBeLessThan(beforeCount);
+    expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
+  });
+
+  test('tabs without matching rule are NOT deduped when deduplicateUnmatchedDomains=false [US-PO007]', async ({
+    extensionContext,
+    helpers,
+  }) => {
+    const sw = await getServiceWorker(extensionContext);
+    await helpers.setDeduplicateUnmatchedDomains(false);
+
+    // No domain rules and unmatched-scope opt-out → nothing should be closed.
     await helpers.createTab('https://example.org/page');
     await helpers.createTab('https://example.org/page');
     await new Promise(r => setTimeout(r, 500));
@@ -184,7 +206,7 @@ test.describe('[US-PO007] Batch deduplication', () => {
   }) => {
     const sw = await getServiceWorker(extensionContext);
     await sw.evaluate(async () => {
-      await chrome.storage.sync.set({ notifyOnDeduplication: true, notifyOnGrouping: false });
+      await chrome.storage.local.set({ notifyOnDeduplication: true, notifyOnGrouping: false });
     });
     await clearNotifications(sw);
 
@@ -206,7 +228,7 @@ test.describe('[US-PO007] Batch deduplication', () => {
 
     const ids = await getNotificationIds(sw);
     // One notification for all duplicates (not one per duplicate)
-    expect(ids.length).toBe(1);
+    expect(ids).toHaveLength(1);
   });
 
   test('no notification when no duplicates found [US-PO007]', async ({
@@ -215,7 +237,7 @@ test.describe('[US-PO007] Batch deduplication', () => {
   }) => {
     const sw = await getServiceWorker(extensionContext);
     await sw.evaluate(async () => {
-      await chrome.storage.sync.set({ notifyOnDeduplication: true, notifyOnGrouping: false });
+      await chrome.storage.local.set({ notifyOnDeduplication: true, notifyOnGrouping: false });
     });
     await clearNotifications(sw);
 
@@ -233,7 +255,7 @@ test.describe('[US-PO007] Batch deduplication', () => {
     await triggerOrganize(sw);
 
     const ids = await getNotificationIds(sw);
-    expect(ids.length).toBe(0);
+    expect(ids).toHaveLength(0);
   });
 });
 
@@ -444,7 +466,7 @@ test.describe('[US-PO008] Batch grouping', () => {
   }) => {
     const sw = await getServiceWorker(extensionContext);
     await sw.evaluate(async () => {
-      await chrome.storage.sync.set({ notifyOnGrouping: true, notifyOnDeduplication: false });
+      await chrome.storage.local.set({ notifyOnGrouping: true, notifyOnDeduplication: false });
     });
     await clearNotifications(sw);
 
@@ -463,7 +485,7 @@ test.describe('[US-PO008] Batch grouping', () => {
     await triggerOrganize(sw);
 
     const ids = await getNotificationIds(sw);
-    expect(ids.length).toBe(1);
+    expect(ids).toHaveLength(1);
   });
 
   test('no grouping notification when no tabs are grouped [US-PO008]', async ({
@@ -472,7 +494,7 @@ test.describe('[US-PO008] Batch grouping', () => {
   }) => {
     const sw = await getServiceWorker(extensionContext);
     await sw.evaluate(async () => {
-      await chrome.storage.sync.set({ notifyOnGrouping: true, notifyOnDeduplication: false });
+      await chrome.storage.local.set({ notifyOnGrouping: true, notifyOnDeduplication: false });
     });
     await clearNotifications(sw);
 
@@ -490,7 +512,7 @@ test.describe('[US-PO008] Batch grouping', () => {
     await triggerOrganize(sw);
 
     const ids = await getNotificationIds(sw);
-    expect(ids.length).toBe(0);
+    expect(ids).toHaveLength(0);
   });
 
   test('tabGroupsCreatedCount incremented for new groups [US-PO008]', async ({
@@ -535,6 +557,7 @@ test.describe('[US-PO009] Automatic grouping unaffected by organize rules', () =
     extensionContext,
     helpers,
   }) => {
+    void extensionContext; // injected to guarantee fixture setup order, not used directly
     await helpers.addDomainRule({
       label: 'AutoGroup',
       domainFilter: 'example.com',

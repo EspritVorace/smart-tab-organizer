@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import { waitFor } from '@testing-library/react';
 import { fakeBrowser } from 'wxt/testing';
 import {
   getStatisticsData,
@@ -8,6 +9,7 @@ import {
   incrementTabGroupsCreated,
   incrementTabsDeduplicated,
   resetStatisticsData,
+  watchStatisticsData,
 } from '../../src/utils/statisticsUtils';
 import { defaultStatistics } from '../../src/types/statistics';
 
@@ -130,6 +132,42 @@ describe('statisticsUtils', () => {
       await resetStatisticsData();
       const stats = await getStatisticsData();
       expect(stats).toEqual(defaultStatistics);
+    });
+
+    it("ne lance pas d'erreur si setStatisticsData échoue", async () => {
+      vi.spyOn(fakeBrowser.storage.local, 'set').mockRejectedValueOnce(
+        new Error('Storage write error'),
+      );
+      await expect(resetStatisticsData()).resolves.toBeUndefined();
+    });
+  });
+
+  describe('watchStatisticsData', () => {
+    it('retourne une fonction de cleanup', () => {
+      const unwatch = watchStatisticsData(() => {});
+      expect(typeof unwatch).toBe('function');
+      unwatch();
+    });
+
+    it('la fonction de cleanup peut être appelée sans erreur', () => {
+      const unwatch = watchStatisticsData(vi.fn());
+      expect(() => unwatch()).not.toThrow();
+    });
+
+    it('invoque le callback avec les données fusionnées aux défauts quand le storage change', async () => {
+      const callback = vi.fn();
+      const unwatch = watchStatisticsData(callback);
+
+      await setStatisticsData({ tabGroupsCreatedCount: 3, tabsDeduplicatedCount: 1 });
+
+      await waitFor(() => {
+        expect(callback).toHaveBeenCalled();
+      });
+
+      expect(callback).toHaveBeenCalledWith(
+        expect.objectContaining({ tabGroupsCreatedCount: 3, tabsDeduplicatedCount: 1 }),
+      );
+      unwatch();
     });
   });
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Flex, Text, Tooltip } from '@radix-ui/themes';
 import { Globe } from 'lucide-react';
-import { AccessibleHighlight } from '../../UI/AccessibleHighlight/AccessibleHighlight';
+import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 
 export interface TabRowBaseProps {
   /** Favicon URL or undefined to show the Globe fallback */
@@ -47,6 +47,7 @@ export function TabRowBase({
     <img
       src={favIconUrl}
       alt=""
+      aria-hidden="true"
       width={16}
       height={16}
       style={{ flexShrink: 0, borderRadius: 2 }}

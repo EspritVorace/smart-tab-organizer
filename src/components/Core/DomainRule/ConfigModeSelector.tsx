@@ -1,6 +1,7 @@
+import { useId } from 'react';
 import { Box, Flex, HoverCard, SegmentedControl, Text } from '@radix-ui/themes';
 import { Info } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 export type ConfigMode = 'preset' | 'ask' | 'manual';
 
@@ -29,13 +30,15 @@ interface ConfigModeSelectorProps {
  * Shared between ConfigEditModal and WizardStep2Config.
  */
 export function ConfigModeSelector({ value, onValueChange }: ConfigModeSelectorProps) {
+  const labelId = useId();
   return (
     <Flex direction="column" gap="1">
-      <Text as="label" size="2" weight="bold">
+      <Text id={labelId} size="2" weight="bold">
         {getMessage('configurationMode')}
       </Text>
       <SegmentedControl.Root
         data-testid="wizard-rule-segmented-config"
+        aria-labelledby={labelId}
         value={value}
         onValueChange={(v) => onValueChange(v as ConfigMode)}
         size="2"

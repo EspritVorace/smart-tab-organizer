@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, DropdownMenu, Flex } from '@radix-ui/themes';
 import { ChevronDown } from 'lucide-react';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 export interface SplitButtonMenuItem {
   label: string;
@@ -10,11 +10,13 @@ export interface SplitButtonMenuItem {
   disabled?: boolean;
   /** If true, a separator is rendered before this item */
   separator?: boolean;
+  /** data-testid forwarded to the DropdownMenu.Item */
+  'data-testid'?: string;
 }
 
 export interface SplitButtonProps {
-  /** Label of the primary button */
-  label: string;
+  /** Label of the primary button. Accepts text or any ReactNode (e.g. icon) */
+  label: React.ReactNode;
   /** Action on primary button click */
   onClick: () => void;
   /** Dropdown menu items */
@@ -27,6 +29,8 @@ export interface SplitButtonProps {
   disabled?: boolean;
   /** Aria-label for the chevron dropdown trigger */
   ariaLabel?: string;
+  /** Aria-label for the primary button. Required when label is not textual */
+  primaryAriaLabel?: string;
   /** data-testid forwarded to the primary button */
   'data-testid'?: string;
 }
@@ -39,6 +43,7 @@ export function SplitButton({
   size = '2',
   disabled = false,
   ariaLabel,
+  primaryAriaLabel,
   'data-testid': testId,
 }: SplitButtonProps) {
   return (
@@ -49,6 +54,7 @@ export function SplitButton({
         size={size}
         onClick={onClick}
         disabled={disabled}
+        aria-label={typeof label === 'string' ? undefined : primaryAriaLabel}
         style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
       >
         {label}
@@ -96,6 +102,7 @@ export function SplitButton({
                 <DropdownMenu.Item
                   onClick={item.onClick}
                   disabled={item.disabled}
+                  data-testid={item['data-testid']}
                 >
                   {item.icon}
                   {item.label}

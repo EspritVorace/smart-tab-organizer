@@ -1,24 +1,29 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Dialog, Flex, Button, Text, Separator, Box, RadioGroup, Callout } from '@radix-ui/themes';
 import { RotateCcw, AlertCircle } from 'lucide-react';
-import { SessionsTheme } from '../../Form/themes';
-import { TabTree } from '../../Core/TabTree/TabTree';
+import { browser } from 'wxt/browser';
+import { TabTree } from '@/components/Core/TabTree/TabTree';
+import { WizardModal } from '@/components/UI/WizardModal';
 import { ConflictResolutionStep } from './ConflictResolutionStep';
-import { getMessage } from '../../../utils/i18n';
-import { showSuccessNotification, showNotification } from '../../../utils/notifications';
-import { sessionToTabTreeData } from '../../../utils/sessionUtils';
+import { getMessage } from '@/utils/i18n';
+import { showSuccessToast, showErrorToast } from '@/utils/toast';
+import { showSuccessNotification } from '@/utils/notifications';
+import { sessionToTabTreeData, resolveTabUuids } from '@/utils/sessionUtils';
 import {
   analyzeConflicts,
   type ConflictAnalysis,
   type DuplicateTabAction,
   type GroupConflictAction,
   type ConflictResolution,
-} from '../../../utils/conflictDetection';
-import { restoreTabs } from '../../../utils/tabRestore';
-import type { Session } from '../../../types/session';
-import type { TabTreeData } from '../../../types/tabTree';
+} from '@/utils/conflictDetection';
+import { restoreTabs, type RestoreTarget } from '@/utils/tabRestore';
+import type { Session } from '@/types/session';
+import type { TabTreeData } from '@/types/tabTree';
 
-type RestoreTarget = 'current' | 'new';
+const STEP_DESCRIPTION_KEYS = [
+  'restoreStepSelectionDescription',
+  'restoreStepConflictDescription',
+] as const;
 
 interface RestoreWizardProps {
   open: boolean;
@@ -67,14 +72,10 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
   }, [open, session]);
 
   // Derive selected SavedTab UUIDs
-  const selectedSavedTabIds = useMemo(() => {
-    const ids = new Set<string>();
-    for (const numId of selectedTabIds) {
-      const uuid = numericIdToSavedTabId.get(numId);
-      if (uuid) ids.add(uuid);
-    }
-    return ids;
-  }, [selectedTabIds, numericIdToSavedTabId]);
+  const selectedSavedTabIds = useMemo(
+    () => resolveTabUuids(selectedTabIds, numericIdToSavedTabId),
+    [selectedTabIds, numericIdToSavedTabId],
+  );
 
   // Get the selected tabs and groups from the session
   const getSelectedData = useCallback(() => {
@@ -105,46 +106,62 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
         groupActions: grpActions,
       };
 
+      // In 'replace' mode, keep the options page tab hosting the wizard so
+      // the user doesn't see their page vanish. The wizard only ever opens
+      // from the options page, so getCurrent() resolves to that tab.
+      let protectedTabId: number | undefined;
+      if (target === 'replace') {
+        const currentTab = await browser.tabs.getCurrent();
+        protectedTabId = currentTab?.id;
+      }
+
       const result = await restoreTabs({
         tabs,
         groups,
         target,
         conflictResolution: target === 'current' ? conflictResolution : undefined,
         conflictAnalysis: target === 'current' ? analysis ?? undefined : undefined,
+        protectedTabId,
       });
 
       onOpenChange(false);
 
       if (result.errors.length > 0) {
-        showNotification({
-          title: getMessage('restoreNotificationTitle'),
-          message: getMessage('restoreNotificationError', [String(result.errors.length)]),
-          type: 'error',
-        });
+        showErrorToast(
+          getMessage('restoreNotificationTitle'),
+          getMessage('restoreNotificationError', [String(result.errors.length)]),
+        );
       } else {
-        showSuccessNotification(
+        showSuccessToast(
           getMessage('restoreNotificationTitle'),
           getMessage('restoreNotificationMessage', [
             String(result.tabsCreated),
             String(result.duplicatesSkipped),
           ]),
         );
+        if (target === 'replace') {
+          void showSuccessNotification(
+            getMessage('sessionSwitchedNotificationTitle'),
+            getMessage('sessionSwitchedNotificationMessage', [session.name]),
+          );
+        }
       }
     } catch {
       setRestoreError(getMessage('restoreError'));
     } finally {
       setIsRestoring(false);
     }
-  }, [session, getSelectedData, target]);
+  }, [session, getSelectedData, target, onOpenChange]);
 
   // Step 0 button: analyze conflicts (if current window), then restore or show conflict step
   const handleRestoreOrNext = useCallback(async () => {
-    if (target === 'new') {
+    if (target === 'new' || target === 'replace') {
+      // Replace mode clears existing tabs, so nothing to merge or skip.
       await executeRestore(null, duplicateTabAction, groupActions);
       return;
     }
 
-    // Current window — analyze conflicts first
+    // Current window, analyze conflicts first
     setIsAnalyzing(true);
     setRestoreError(null);
     try {
@@ -185,136 +202,132 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
   if (!session) return null;
 
   return (
-    <SessionsTheme>
-      <Dialog.Root open={open} onOpenChange={onOpenChange}>
-        <Dialog.Content data-testid="wizard-restore" style={{ maxWidth: 600 }}>
-          <Dialog.Title>
-            <Flex align="center" gap="2">
-              <RotateCcw size={18} aria-hidden="true" />
-              {getMessage('restoreTitle', [session.name])}
+    <WizardModal
+      open={open}
+      onOpenChange={onOpenChange}
+      data-testid="wizard-restore"
+      icon={RotateCcw}
+      title={getMessage('restoreTitle', [session.name])}
+      description={getMessage(STEP_DESCRIPTION_KEYS[step])}
+    >
+      <WizardModal.Body>
+        {step === 0 && (
+          <Box data-testid="wizard-restore-step-0">
+            <Flex direction="column" gap="3">
+              <Text size="2" weight="medium">
+                {getMessage('restoreSelectTabs')}
+              </Text>
+              {treeData && (
+                <TabTree
+                  data={treeData}
+                  selectedTabIds={selectedTabIds}
+                  onSelectionChange={setSelectedTabIds}
+                  maxHeight={280}
+                />
+              )}
+
+              <Separator size="4" style={{ opacity: 0.3 }} />
+
+              <Text size="2" weight="medium">
+                {getMessage('restoreDestination')}
+              </Text>
+              <RadioGroup.Root
+                data-testid="wizard-restore-radio-destination"
+                value={target}
+                onValueChange={v => setTarget(v as RestoreTarget)}
+              >
+                <Flex direction="column" gap="2">
+                  <Text size="2" asChild>
+                    <label>
+                      <Flex align="center" gap="2">
+                        <RadioGroup.Item data-testid="wizard-restore-radio-current-window" value="current" />
+                        {getMessage('restoreTargetCurrent')}
+                      </Flex>
+                    </label>
+                  </Text>
+                  <Text size="2" asChild>
+                    <label>
+                      <Flex align="center" gap="2">
+                        <RadioGroup.Item data-testid="wizard-restore-radio-new-window" value="new" />
+                        {getMessage('restoreTargetNew')}
+                      </Flex>
+                    </label>
+                  </Text>
+                  <Text size="2" asChild>
+                    <label>
+                      <Flex align="center" gap="2">
+                        <RadioGroup.Item data-testid="wizard-restore-radio-replace-window" value="replace" />
+                        {getMessage('restoreTargetReplace')}
+                      </Flex>
+                    </label>
+                  </Text>
+                </Flex>
+              </RadioGroup.Root>
             </Flex>
-          </Dialog.Title>
-          <Dialog.Description size="2" color="gray">
-            {getMessage('restoreDescription')}
-          </Dialog.Description>
+          </Box>
+        )}
 
-          <Separator size="4" mt="3" style={{ opacity: 0.3 }} />
+        {step === 1 && hasConflicts && conflictAnalysis && (
+          <Box data-testid="wizard-restore-step-1">
+            <ConflictResolutionStep
+              analysis={conflictAnalysis}
+              duplicateTabAction={duplicateTabAction}
+              onDuplicateTabActionChange={setDuplicateTabAction}
+              groupActions={groupActions}
+              onGroupActionChange={handleGroupActionChange}
+            />
+          </Box>
+        )}
 
-          {/* Step 0: Selection + Destination */}
-          {step === 0 && (
-            <Box data-testid="wizard-restore-step-0" mt="4">
-              <Flex direction="column" gap="3">
-                <Text size="2" weight="medium">
-                  {getMessage('restoreSelectTabs')}
-                </Text>
-                {treeData && (
-                  <TabTree
-                    data={treeData}
-                    selectedTabIds={selectedTabIds}
-                    onSelectionChange={setSelectedTabIds}
-                    maxHeight={280}
-                  />
-                )}
+        {restoreError && (
+          <Callout.Root color="red" variant="soft" mt="3">
+            <Callout.Icon>
+              <AlertCircle size={16} />
+            </Callout.Icon>
+            <Callout.Text>{restoreError}</Callout.Text>
+          </Callout.Root>
+        )}
+      </WizardModal.Body>
 
-                <Separator size="4" style={{ opacity: 0.3 }} />
+      <WizardModal.Footer>
+        {step === 0 && (
+          <>
+            <Dialog.Close>
+              <Button variant="soft" color="gray" disabled={isAnalyzing || isRestoring}>
+                {getMessage('cancel')}
+              </Button>
+            </Dialog.Close>
+            <Button
+              data-testid="wizard-restore-btn-restore"
+              onClick={handleRestoreOrNext}
+              disabled={selectedTabIds.size === 0 || isAnalyzing || isRestoring}
+            >
+              <RotateCcw size={14} aria-hidden="true" />
+              {isAnalyzing ? getMessage('loadingText') : getMessage('sessionRestore')}
+            </Button>
+          </>
+        )}
 
-                <Text size="2" weight="medium">
-                  {getMessage('restoreDestination')}
-                </Text>
-                <RadioGroup.Root
-                  data-testid="wizard-restore-radio-destination"
-                  value={target}
-                  onValueChange={v => setTarget(v as RestoreTarget)}
-                >
-                  <Flex direction="column" gap="2">
-                    <Text size="2" asChild>
-                      <label>
-                        <Flex align="center" gap="2">
-                          <RadioGroup.Item data-testid="wizard-restore-radio-current-window" value="current" />
-                          {getMessage('restoreTargetCurrent')}
-                        </Flex>
-                      </label>
-                    </Text>
-                    <Text size="2" asChild>
-                      <label>
-                        <Flex align="center" gap="2">
-                          <RadioGroup.Item data-testid="wizard-restore-radio-new-window" value="new" />
-                          {getMessage('restoreTargetNew')}
-                        </Flex>
-                      </label>
-                    </Text>
-                  </Flex>
-                </RadioGroup.Root>
-              </Flex>
-            </Box>
-          )}
-
-          {/* Step 1: Conflict resolution */}
-          {step === 1 && hasConflicts && conflictAnalysis && (
-            <Box data-testid="wizard-restore-step-1" mt="4">
-              <ConflictResolutionStep
-                analysis={conflictAnalysis}
-                duplicateTabAction={duplicateTabAction}
-                onDuplicateTabActionChange={setDuplicateTabAction}
-                groupActions={groupActions}
-                onGroupActionChange={handleGroupActionChange}
-              />
-            </Box>
-          )}
-
-          {restoreError && (
-            <Callout.Root color="red" variant="soft" mt="3">
-              <Callout.Icon>
-                <AlertCircle size={16} />
-              </Callout.Icon>
-              <Callout.Text>{restoreError}</Callout.Text>
-            </Callout.Root>
-          )}
-
-          <Separator size="4" mt="4" style={{ opacity: 0.3 }} />
-
-          {/* Footer */}
-          <Flex gap="3" justify="end" mt="3">
-            {step === 0 && (
-              <>
-                <Dialog.Close>
-                  <Button variant="soft" color="gray" disabled={isAnalyzing || isRestoring}>
-                    {getMessage('cancel')}
-                  </Button>
-                </Dialog.Close>
-                <Button
-                  data-testid="wizard-restore-btn-restore"
-                  onClick={handleRestoreOrNext}
-                  disabled={selectedTabIds.size === 0 || isAnalyzing || isRestoring}
-                >
-                  <RotateCcw size={14} aria-hidden="true" />
-                  {isAnalyzing ? getMessage('loadingText') : getMessage('sessionRestore')}
-                </Button>
-              </>
-            )}
-
-            {step === 1 && (
-              <>
-                <Button
-                  variant="soft"
-                  color="gray"
-                  onClick={() => setStep(0)}
-                  disabled={isRestoring}
-                >
-                  {getMessage('previous')}
-                </Button>
-                <Button
-                  onClick={() => executeRestore(conflictAnalysis, duplicateTabAction, groupActions)}
-                  disabled={isRestoring}
-                >
-                  <RotateCcw size={14} aria-hidden="true" />
-                  {getMessage('sessionRestore')}
-                </Button>
-              </>
-            )}
-          </Flex>
-        </Dialog.Content>
-      </Dialog.Root>
-    </SessionsTheme>
+        {step === 1 && (
+          <>
+            <Button
+              variant="soft"
+              color="gray"
+              onClick={() => setStep(0)}
+              disabled={isRestoring}
+            >
+              {getMessage('previous')}
+            </Button>
+            <Button
+              onClick={() => executeRestore(conflictAnalysis, duplicateTabAction, groupActions)}
+              disabled={isRestoring}
+            >
+              <RotateCcw size={14} aria-hidden="true" />
+              {getMessage('sessionRestore')}
+            </Button>
+          </>
+        )}
+      </WizardModal.Footer>
+    </WizardModal>
   );
 }

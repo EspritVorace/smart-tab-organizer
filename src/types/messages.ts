@@ -23,6 +23,14 @@ export interface OrganizeAllTabsMessage {
   type: 'ORGANIZE_ALL_TABS';
 }
 
+export interface SessionRestoreSkipDedupMessage {
+  type: 'SESSION_RESTORE_SKIP_DEDUP';
+  urls: string[];
+}
+
 // Union types for different contexts
 export type ContentMessage = MiddleClickMessage | AskGroupNameMessage;
-export type BackgroundMessage = MiddleClickMessage | OrganizeAllTabsMessage;
+export type BackgroundMessage =
+  | MiddleClickMessage
+  | OrganizeAllTabsMessage
+  | SessionRestoreSkipDedupMessage;

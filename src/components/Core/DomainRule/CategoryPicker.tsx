@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Popover, Tooltip } from '@radix-ui/themes';
-import { getMessage } from '../../../utils/i18n';
-import { RULE_CATEGORIES, getRuleCategory } from '../../../schemas/enums';
-import type { RuleCategoryId } from '../../../schemas/enums';
-import { chromeGroupColors } from '../../../utils/tabTreeUtils';
+import { getMessage } from '@/utils/i18n';
+import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
+import type { RuleCategoryId } from '@/schemas/enums';
+import { useSettings } from '@/hooks/useSettings';
+import { chromeGroupColors } from '@/utils/tabTreeUtils';
 import styles from './CategoryPicker.module.css';
 
 export interface CategoryPickerProps {
@@ -13,7 +14,10 @@ export interface CategoryPickerProps {
 
 export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
   const [open, setOpen] = useState(false);
+  const { settings } = useSettings();
+  const categories = settings?.categories ?? [];
   const selectedCategory = getRuleCategory(value);
+  const selectedLabel = selectedCategory ? getCategoryLabel(selectedCategory) : getMessage('categoryNone');
 
   function handleSelect(id: RuleCategoryId | null) {
     onChange(id);
@@ -25,8 +29,8 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
       <Popover.Trigger>
         <button
           type="button"
-          aria-label={selectedCategory ? getMessage(selectedCategory.labelKey as any) : getMessage('categoryNone')}
-          title={selectedCategory ? getMessage(selectedCategory.labelKey as any) : getMessage('categoryNone')}
+          aria-label={selectedLabel}
+          title={selectedLabel}
           className={`${styles.trigger} ${!selectedCategory ? styles.triggerNone : ''}`}
           style={selectedCategory ? { backgroundColor: chromeGroupColors[selectedCategory.color] } : undefined}
         >
@@ -52,21 +56,24 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
           </Tooltip>
 
           {/* Category options */}
-          {RULE_CATEGORIES.map((category) => (
-            <Tooltip key={category.id} content={getMessage(category.labelKey as any)}>
-              <button
-                type="button"
-                role="radio"
-                aria-checked={value === category.id}
-                aria-label={getMessage(category.labelKey as any)}
-                className={`${styles.swatch} ${value === category.id ? styles.swatchActive : ''}`}
-                style={{ backgroundColor: chromeGroupColors[category.color] }}
-                onClick={() => handleSelect(category.id as RuleCategoryId)}
-              >
-                {category.emoji}
-              </button>
-            </Tooltip>
-          ))}
+          {categories.map((category) => {
+            const label = getCategoryLabel(category);
+            return (
+              <Tooltip key={category.id} content={label}>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={value === category.id}
+                  aria-label={label}
+                  className={`${styles.swatch} ${value === category.id ? styles.swatchActive : ''}`}
+                  style={{ backgroundColor: chromeGroupColors[category.color] }}
+                  onClick={() => handleSelect(category.id)}
+                >
+                  {category.emoji}
+                </button>
+              </Tooltip>
+            );
+          })}
         </div>
       </Popover.Content>
     </Popover.Root>

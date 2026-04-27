@@ -28,6 +28,7 @@ export const importDomainRuleSchema = z.object({
   ).optional(),
   categoryId: z.string().optional().nullable(),
   deduplicationEnabled: z.boolean().default(true),
+  ignoredQueryParams: z.array(z.string()).max(50).optional().default([]),
   presetId: z.string().nullable(),
   enabled: z.boolean(),
   badge: z.string().optional()

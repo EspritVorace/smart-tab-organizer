@@ -1,21 +1,44 @@
 import { browser, Browser } from 'wxt/browser';
-import { logger } from '../utils/logger.js';
+import { logger } from '@/utils/logger.js';
+import { markUrlToSkipDeduplication } from '@/utils/deduplicationSkip.js';
+import type {
+    MiddleClickMessage,
+    MessageResponse,
+    SessionRestoreSkipDedupMessage,
+} from '@/types/messages.js';
 
 export const middleClickedTabs = new Map<string, number>();
 
 export function handleMiddleClickMessage(
-    request: any, 
-    sender: Browser.runtime.MessageSender, 
-    sendResponse: (response?: any) => void
+    request: MiddleClickMessage,
+    sender: Browser.runtime.MessageSender,
+    sendResponse: (response?: MessageResponse) => void
 ): void {
-    if (request.type === "middleClickLink") {
-        if (sender.tab && sender.tab.id) {
-            middleClickedTabs.set(request.url, sender.tab.id);
-            logger.debug(`[GROUPING_DEBUG] Middle click registered: URL ${request.url} from tab ${sender.tab.id}`);
-            sendResponse({ status: "received" });
-        } else {
-            logger.warn("[GROUPING_DEBUG] Middle click message received without valid sender.tab.id");
-            sendResponse({ status: "error", message: "Missing sender tab ID" });
+    if (sender.tab && sender.tab.id) {
+        middleClickedTabs.set(request.url, sender.tab.id);
+        logger.debug(`[GROUPING_DEBUG] Middle click registered: URL ${request.url} from tab ${sender.tab.id}`);
+        sendResponse({ status: "received" });
+    } else {
+        logger.warn("[GROUPING_DEBUG] Middle click message received without valid sender.tab.id");
+        sendResponse({ status: "error", message: "Missing sender tab ID" });
+    }
+}
+
+export function handleSessionRestoreSkipDedupMessage(
+    request: SessionRestoreSkipDedupMessage,
+    sendResponse: (response?: MessageResponse) => void,
+): void {
+    for (const url of request.urls) {
+        markUrlToSkipDeduplication(url);
+    }
+    logger.debug(`[SESSION_RESTORE] Marked ${request.urls.length} URL(s) to skip deduplication`);
+    sendResponse({ status: 'received' });
+}
+
+export function cleanupMiddleClickedTabsForTab(tabId: number): void {
+    for (const [url, id] of middleClickedTabs.entries()) {
+        if (id === tabId) {
+            middleClickedTabs.delete(url);
         }
     }
 }

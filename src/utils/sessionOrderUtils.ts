@@ -1,5 +1,5 @@
 import { arrayMove } from '@dnd-kit/helpers';
-import type { Session } from '../types/session';
+import type { Session } from '@/types/session';
 
 /**
  * Move a session to the first position.
@@ -45,4 +45,115 @@ export function moveSessionToLastInGroup(sessions: Session[], sessionId: string)
   const group = session.isPinned ? pinned : unpinned;
   const reordered = moveSessionToLast(group, sessionId);
   return session.isPinned ? [...reordered, ...unpinned] : [...pinned, ...reordered];
+}
+
+/**
+ * Move a tab up or down within its context (ungrouped list or a specific group).
+ *
+ * - When `groupId` is `null`, the tab is moved within the ungrouped list.
+ * - When `groupId` is a non-null string, the tab is moved within that group.
+ * - When `groupId` is `undefined` (omitted), the function auto-detects the
+ *   container of the tab (ungrouped list first, then each group in order).
+ *
+ * Returns the original session unchanged if the tab is not found or is already
+ * at the boundary in the requested direction.
+ */
+export function moveTabInGroup(
+  session: Session,
+  tabId: string,
+  direction: 'up' | 'down',
+  groupId?: string | null,
+): Session {
+  // Resolve whether the tab lives in the ungrouped list or in a specific group.
+  const resolvedInUngrouped =
+    groupId === null ||
+    (groupId === undefined && session.ungroupedTabs.some((t) => t.id === tabId));
+
+  if (resolvedInUngrouped) {
+    const idx = session.ungroupedTabs.findIndex((t) => t.id === tabId);
+    if (idx === -1) return session;
+    const newIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (newIdx < 0 || newIdx >= session.ungroupedTabs.length) return session;
+    const tabs = [...session.ungroupedTabs];
+    [tabs[idx], tabs[newIdx]] = [tabs[newIdx], tabs[idx]];
+    return { ...session, ungroupedTabs: tabs };
+  }
+
+  // Tab is in a group: either the explicitly provided one or the auto-detected one.
+  const groups = session.groups.map((g) => {
+    if (groupId !== undefined && g.id !== groupId) return g;
+    const idx = g.tabs.findIndex((t) => t.id === tabId);
+    if (idx === -1) return g;
+    const newIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (newIdx < 0 || newIdx >= g.tabs.length) return g;
+    const tabs = [...g.tabs];
+    [tabs[idx], tabs[newIdx]] = [tabs[newIdx], tabs[idx]];
+    return { ...g, tabs };
+  });
+
+  return { ...session, groups };
+}
+
+/**
+ * Reassign a tab from its source location to a target group (or to ungrouped).
+ *
+ * - `sourceGroupId === null` means the tab is currently ungrouped.
+ * - `sourceGroupId === undefined` means the source is auto-detected (ungrouped
+ *   list first, then each group in order).
+ * - `targetGroupId === null` means the tab should become ungrouped.
+ * - `targetGroupId` being a string moves the tab into that group.
+ *
+ * Returns the original session unchanged if the tab is not found.
+ */
+export function reassignTabToGroup(
+  session: Session,
+  tabId: string,
+  sourceGroupId: string | null | undefined,
+  targetGroupId: string | null,
+): Session {
+  let tab: Session['ungroupedTabs'][number] | undefined;
+  let newUngrouped = session.ungroupedTabs;
+  let newGroups = session.groups;
+
+  if (sourceGroupId === null) {
+    tab = session.ungroupedTabs.find((t) => t.id === tabId);
+    newUngrouped = session.ungroupedTabs.filter((t) => t.id !== tabId);
+  } else if (sourceGroupId !== undefined) {
+    const group = session.groups.find((g) => g.id === sourceGroupId);
+    tab = group?.tabs.find((t) => t.id === tabId);
+    newGroups = session.groups.map((g) =>
+      g.id === sourceGroupId ? { ...g, tabs: g.tabs.filter((t) => t.id !== tabId) } : g
+    );
+  } else {
+    // Auto-detect source
+    const ungroupedIdx = session.ungroupedTabs.findIndex((t) => t.id === tabId);
+    if (ungroupedIdx !== -1) {
+      tab = session.ungroupedTabs[ungroupedIdx];
+      newUngrouped = session.ungroupedTabs.filter((t) => t.id !== tabId);
+    } else {
+      for (const g of session.groups) {
+        const found = g.tabs.find((t) => t.id === tabId);
+        if (found) {
+          tab = found;
+          break;
+        }
+      }
+      newGroups = session.groups.map((g) => ({
+        ...g,
+        tabs: g.tabs.filter((t) => t.id !== tabId),
+      }));
+    }
+  }
+
+  if (!tab) return session;
+
+  if (targetGroupId === null) {
+    newUngrouped = [...newUngrouped, tab];
+  } else {
+    newGroups = newGroups.map((g) =>
+      g.id === targetGroupId ? { ...g, tabs: [...g.tabs, tab!] } : g
+    );
+  }
+
+  return { ...session, ungroupedTabs: newUngrouped, groups: newGroups };
 }

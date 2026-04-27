@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Theme } from '@radix-ui/themes';
 import { FieldLabel } from '../../src/components/Form/FormFields/FieldLabel';
@@ -12,7 +12,7 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 
 describe('Form Components', () => {
   describe('FieldLabel', () => {
-    it('devrait afficher le label', () => {
+    it('affiche le label sans astérisque par défaut', () => {
       render(
         <TestWrapper>
           <FieldLabel>Mon Label</FieldLabel>
@@ -20,6 +20,7 @@ describe('Form Components', () => {
       );
 
       expect(screen.getByText('Mon Label')).toBeInTheDocument();
+      expect(screen.queryByText('*')).not.toBeInTheDocument();
     });
 
     it('devrait afficher un astérisque rouge si required', () => {
@@ -31,16 +32,6 @@ describe('Form Components', () => {
 
       expect(screen.getByText('Champ requis')).toBeInTheDocument();
       expect(screen.getByText('*')).toBeInTheDocument();
-    });
-
-    it('ne devrait pas afficher d\'astérisque par défaut', () => {
-      render(
-        <TestWrapper>
-          <FieldLabel>Champ optionnel</FieldLabel>
-        </TestWrapper>
-      );
-
-      expect(screen.queryByText('*')).not.toBeInTheDocument();
     });
   });
 

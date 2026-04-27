@@ -4,11 +4,11 @@
  */
 import { test, expect } from './fixtures';
 import { goToSessionsSection } from './helpers/navigation';
-import { seedSessions, clearSessions, clearHelpPrefs, getSessionsFromStorage, createTestSession } from './helpers/seed';
+import { seedSessions, clearSessions, getSessionsFromStorage, createTestSession } from './helpers/seed';
+import { auditPage } from './helpers/a11y';
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
-  await clearHelpPrefs(extensionContext);
 });
 
 // ---------------------------------------------------------------------------
@@ -30,6 +30,7 @@ test.describe('[US-E01] Opening', () => {
 
     await expect(page.getByTestId('dialog-session-edit')).toBeVisible();
     await expect(page.getByText('Edit Session')).toBeVisible();
+    await auditPage(page, 'session-editor-dialog-open', { include: '[role="dialog"]' });
     await page.close();
   });
 
@@ -89,7 +90,7 @@ test.describe('[US-E01] Name editing', () => {
 
     await page.getByTestId('dialog-session-edit-btn-save').click();
 
-    await expect(page.getByTestId('dialog-session-edit')).not.toBeVisible();
+    await expect(page.getByTestId('dialog-session-edit')).toBeHidden();
     await expect(page.getByText('After Edit')).toBeVisible();
 
     const sessions = await getSessionsFromStorage(extensionContext);
@@ -117,7 +118,7 @@ test.describe('[US-E01] Cancel and unsaved changes', () => {
 
     await page.getByTestId('dialog-session-edit-btn-cancel').click();
 
-    await expect(page.getByTestId('dialog-session-edit')).not.toBeVisible();
+    await expect(page.getByTestId('dialog-session-edit')).toBeHidden();
     await page.close();
   });
 
@@ -163,10 +164,10 @@ test.describe('[US-E01] Cancel and unsaved changes', () => {
     await page.getByRole('button', { name: /leave/i }).click();
 
     // Both dialogs should be closed
-    await expect(page.getByRole('dialog')).not.toBeVisible();
+    await expect(page.getByRole('dialog')).toBeHidden();
     // The session name should be unchanged
     await expect(page.getByText('Original')).toBeVisible();
-    await expect(page.getByText('Will Not Save')).not.toBeVisible();
+    await expect(page.getByText('Will Not Save')).toBeHidden();
     await page.close();
   });
 });
@@ -207,15 +208,12 @@ test.describe('[US-E01] Tab tree', () => {
     const githubRow = dialog.getByRole('listitem').filter({ hasText: 'GitHub' });
     // Hover the right edge of the row (not just the title text) to verify the full row width is hoverable
     const box = await githubRow.boundingBox();
-    if (box) {
-      await page.mouse.move(box.x + box.width - 8, box.y + box.height / 2);
-    } else {
-      await githubRow.hover();
-    }
+    expect(box).not.toBeNull();
+    await page.mouse.move(box!.x + box!.width - 8, box!.y + box!.height / 2);
     await githubRow.getByRole('button', { name: 'Delete tab' }).click();
 
     // GitHub tab should be gone
-    await expect(dialog.getByText('GitHub', { exact: true })).not.toBeVisible();
+    await expect(dialog.getByText('GitHub', { exact: true })).toBeHidden();
     await page.close();
   });
 
@@ -243,7 +241,7 @@ test.describe('[US-E01] Tab tree', () => {
 
     // Save the session
     await page.getByTestId('dialog-session-edit-btn-save').click();
-    await expect(page.getByRole('dialog')).not.toBeVisible();
+    await expect(page.getByRole('dialog')).toBeHidden();
 
     // Verify storage updated
     const sessions = await getSessionsFromStorage(extensionContext);
@@ -277,7 +275,7 @@ test.describe('[US-E01] Tab tree', () => {
     await nameInput.press('Enter');
 
     await expect(dialog.getByText('Renamed Group', { exact: true })).toBeVisible();
-    await expect(dialog.getByText('Work', { exact: true })).not.toBeVisible();
+    await expect(dialog.getByText('Work', { exact: true })).toBeHidden();
     await page.close();
   });
 
@@ -412,7 +410,7 @@ test.describe('[US-E02] Delete group', () => {
     await page.getByRole('button', { name: /delete group and/i }).click();
 
     // Group 'Work' should no longer appear in the editor
-    await expect(dialog.getByText('Work', { exact: true })).not.toBeVisible();
+    await expect(dialog.getByText('Work', { exact: true })).toBeHidden();
     await page.close();
   });
 
@@ -437,7 +435,7 @@ test.describe('[US-E02] Delete group', () => {
     await page.getByRole('button', { name: /ungroup/i }).click();
 
     // Group 'Work' is gone, but its tabs remain (now ungrouped)
-    await expect(dialog.getByText('Work', { exact: true })).not.toBeVisible();
+    await expect(dialog.getByText('Work', { exact: true })).toBeHidden();
     await expect(dialog.getByText('Example', { exact: true })).toBeVisible();
     await page.close();
   });
@@ -465,8 +463,8 @@ test.describe('[US-S018] Collapsed group state in editor', () => {
     // Group header should be visible
     await expect(dialog.getByText('Work', { exact: true })).toBeVisible();
     // Tabs inside the collapsed group should NOT be visible
-    await expect(dialog.getByText('Example', { exact: true })).not.toBeVisible();
-    await expect(dialog.getByText('Google', { exact: true })).not.toBeVisible();
+    await expect(dialog.getByText('Example', { exact: true })).toBeHidden();
+    await expect(dialog.getByText('Google', { exact: true })).toBeHidden();
     await page.close();
   });
 
@@ -512,11 +510,11 @@ test.describe('[US-S018] Collapsed group state in editor', () => {
     await dialog.getByRole('button', { name: /collapse group/i }).click();
 
     // Tabs should now be hidden
-    await expect(dialog.getByText('Example', { exact: true })).not.toBeVisible();
+    await expect(dialog.getByText('Example', { exact: true })).toBeHidden();
 
     // Save
     await page.getByTestId('dialog-session-edit-btn-save').click();
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
 
     // Verify storage
     const sessions = await getSessionsFromStorage(extensionContext);

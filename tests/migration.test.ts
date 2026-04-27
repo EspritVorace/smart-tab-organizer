@@ -1,12 +1,15 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { fakeBrowser } from 'wxt/testing';
-import type { SyncSettings, DomainRuleSetting } from '../src/types/syncSettings';
+import type { AppSettings, DomainRuleSetting } from '../src/types/syncSettings';
 
 // The fetch response body returned by loadDefaultSettings() when the
 // extension is first installed or upgraded.
-const TEST_DEFAULTS: SyncSettings = {
+const TEST_DEFAULTS: AppSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,
+  deduplicateUnmatchedDomains: false,
+  deduplicationKeepStrategy: 'keep-grouped-or-new',
+  categories: [],
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
   domainRules: [
@@ -47,11 +50,11 @@ describe('initializeDefaults — fresh install', () => {
   it('writes default settings when domainRules is absent from storage', async () => {
     vi.stubGlobal('fetch', mockOkFetch(TEST_DEFAULTS));
     const { initializeDefaults } = await import('../src/utils/migration');
-    const { getSyncSettings } = await import('../src/utils/settingsUtils');
+    const { getSettings } = await import('../src/utils/settingsUtils');
 
     await initializeDefaults();
 
-    const stored = await getSyncSettings();
+    const stored = await getSettings();
     expect(stored.globalGroupingEnabled).toBe(true);
     expect(stored.domainRules).toHaveLength(1);
     expect(stored.domainRules[0].id).toBe('default-rule-1');
@@ -74,7 +77,7 @@ describe('initializeDefaults — upgrade path', () => {
   it('preserves existing settings and merges with defaults (existing wins)', async () => {
     vi.stubGlobal('fetch', mockOkFetch(TEST_DEFAULTS));
     // Seed an existing rule with a distinct label — merge should keep it.
-    await fakeBrowser.storage.sync.set({
+    await fakeBrowser.storage.local.set({
       domainRules: [
         {
           id: 'existing-rule',
@@ -91,11 +94,11 @@ describe('initializeDefaults — upgrade path', () => {
     });
 
     const { initializeDefaults } = await import('../src/utils/migration');
-    const { getSyncSettings } = await import('../src/utils/settingsUtils');
+    const { getSettings } = await import('../src/utils/settingsUtils');
 
     await initializeDefaults();
 
-    const merged = await getSyncSettings();
+    const merged = await getSettings();
     expect(merged.globalGroupingEnabled).toBe(false); // existing preserved
     expect(merged.domainRules).toHaveLength(1);
     expect(merged.domainRules[0].label).toBe('My Custom Label');
@@ -104,7 +107,7 @@ describe('initializeDefaults — upgrade path', () => {
 
   it('injects a label on a rule missing it, using the matching default rule', async () => {
     vi.stubGlobal('fetch', mockOkFetch(TEST_DEFAULTS));
-    await fakeBrowser.storage.sync.set({
+    await fakeBrowser.storage.local.set({
       domainRules: [
         {
           id: 'default-rule-1', // matches TEST_DEFAULTS
@@ -116,17 +119,17 @@ describe('initializeDefaults — upgrade path', () => {
     });
 
     const { initializeDefaults } = await import('../src/utils/migration');
-    const { getSyncSettings } = await import('../src/utils/settingsUtils');
+    const { getSettings } = await import('../src/utils/settingsUtils');
 
     await initializeDefaults();
 
-    const merged = await getSyncSettings();
+    const merged = await getSettings();
     expect(merged.domainRules[0].label).toBe('Default Label');
   });
 
   it('falls back to domainFilter for a label when no default rule matches', async () => {
     vi.stubGlobal('fetch', mockOkFetch(TEST_DEFAULTS));
-    await fakeBrowser.storage.sync.set({
+    await fakeBrowser.storage.local.set({
       domainRules: [
         {
           id: 'unknown-id',
@@ -138,30 +141,30 @@ describe('initializeDefaults — upgrade path', () => {
     });
 
     const { initializeDefaults } = await import('../src/utils/migration');
-    const { getSyncSettings } = await import('../src/utils/settingsUtils');
+    const { getSettings } = await import('../src/utils/settingsUtils');
 
     await initializeDefaults();
 
-    expect((await getSyncSettings()).domainRules[0].label).toBe('custom.com');
+    expect((await getSettings()).domainRules[0].label).toBe('custom.com');
   });
 
   it('falls back to "Untitled Rule" when both default and domainFilter are missing', async () => {
     vi.stubGlobal('fetch', mockOkFetch(TEST_DEFAULTS));
-    await fakeBrowser.storage.sync.set({
+    await fakeBrowser.storage.local.set({
       domainRules: [{ id: 'orphan', enabled: true, color: 'grey' }],
     });
 
     const { initializeDefaults } = await import('../src/utils/migration');
-    const { getSyncSettings } = await import('../src/utils/settingsUtils');
+    const { getSettings } = await import('../src/utils/settingsUtils');
 
     await initializeDefaults();
 
-    expect((await getSyncSettings()).domainRules[0].label).toBe('Untitled Rule');
+    expect((await getSettings()).domainRules[0].label).toBe('Untitled Rule');
   });
 
   it('removes the legacy groupId field from existing rules', async () => {
     vi.stubGlobal('fetch', mockOkFetch(TEST_DEFAULTS));
-    await fakeBrowser.storage.sync.set({
+    await fakeBrowser.storage.local.set({
       domainRules: [
         {
           id: 'legacy',
@@ -178,29 +181,29 @@ describe('initializeDefaults — upgrade path', () => {
 
     await initializeDefaults();
 
-    const { domainRules } = await fakeBrowser.storage.sync.get('domainRules');
+    const { domainRules } = await fakeBrowser.storage.local.get('domainRules');
     expect(domainRules).toBeDefined();
     expect((domainRules as any)[0].groupId).toBeUndefined();
   });
 
   it('injects default color "grey" when the rule has no color', async () => {
     vi.stubGlobal('fetch', mockOkFetch(TEST_DEFAULTS));
-    await fakeBrowser.storage.sync.set({
+    await fakeBrowser.storage.local.set({
       domainRules: [
         { id: 'no-color', label: 'X', domainFilter: 'x.com', enabled: true },
       ],
     });
 
     const { initializeDefaults } = await import('../src/utils/migration');
-    const { getSyncSettings } = await import('../src/utils/settingsUtils');
+    const { getSettings } = await import('../src/utils/settingsUtils');
 
     await initializeDefaults();
-    expect((await getSyncSettings()).domainRules[0].color).toBe('grey');
+    expect((await getSettings()).domainRules[0].color).toBe('grey');
   });
 
   it('injects default urlParsingRegEx = "" when missing', async () => {
     vi.stubGlobal('fetch', mockOkFetch(TEST_DEFAULTS));
-    await fakeBrowser.storage.sync.set({
+    await fakeBrowser.storage.local.set({
       domainRules: [
         {
           id: 'no-url-regex',
@@ -213,15 +216,15 @@ describe('initializeDefaults — upgrade path', () => {
     });
 
     const { initializeDefaults } = await import('../src/utils/migration');
-    const { getSyncSettings } = await import('../src/utils/settingsUtils');
+    const { getSettings } = await import('../src/utils/settingsUtils');
 
     await initializeDefaults();
-    expect((await getSyncSettings()).domainRules[0].urlParsingRegEx).toBe('');
+    expect((await getSettings()).domainRules[0].urlParsingRegEx).toBe('');
   });
 
   it('injects default groupNameSource = "title" when missing', async () => {
     vi.stubGlobal('fetch', mockOkFetch(TEST_DEFAULTS));
-    await fakeBrowser.storage.sync.set({
+    await fakeBrowser.storage.local.set({
       domainRules: [
         {
           id: 'no-source',
@@ -234,15 +237,33 @@ describe('initializeDefaults — upgrade path', () => {
     });
 
     const { initializeDefaults } = await import('../src/utils/migration');
-    const { getSyncSettings } = await import('../src/utils/settingsUtils');
+    const { getSettings } = await import('../src/utils/settingsUtils');
 
     await initializeDefaults();
-    expect((await getSyncSettings()).domainRules[0].groupNameSource).toBe('title');
+    expect((await getSettings()).domainRules[0].groupNameSource).toBe('title');
+  });
+
+  it('does not overwrite an explicit user choice for deduplicationKeepStrategy on upgrade', async () => {
+    vi.stubGlobal('fetch', mockOkFetch(TEST_DEFAULTS));
+    await fakeBrowser.storage.local.set({
+      domainRules: [
+        { id: 'r1', label: 'R', domainFilter: 'r.com', enabled: true, color: 'blue' },
+      ],
+      deduplicationKeepStrategy: 'keep-old',
+    });
+
+    const { initializeDefaults } = await import('../src/utils/migration');
+    const { getSettings } = await import('../src/utils/settingsUtils');
+
+    await initializeDefaults();
+
+    const merged = await getSettings();
+    expect(merged.deduplicationKeepStrategy).toBe('keep-old');
   });
 
   it('does not overwrite existing statistics on upgrade', async () => {
     vi.stubGlobal('fetch', mockOkFetch(TEST_DEFAULTS));
-    await fakeBrowser.storage.sync.set({
+    await fakeBrowser.storage.local.set({
       domainRules: [
         { id: 'existing', label: 'X', domainFilter: 'x.com', enabled: true, color: 'blue' },
       ],
@@ -262,15 +283,15 @@ describe('initializeDefaults — upgrade path', () => {
 });
 
 describe('initializeDefaults — fetch failures', () => {
-  it('falls back to defaultSyncSettings when fetch throws', async () => {
+  it('falls back to defaultAppSettings when fetch throws', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network down')));
     const { initializeDefaults } = await import('../src/utils/migration');
-    const { getSyncSettings } = await import('../src/utils/settingsUtils');
+    const { getSettings } = await import('../src/utils/settingsUtils');
 
     await initializeDefaults();
 
     // defaultSyncSettings.domainRules is empty — migration wrote that.
-    const stored = await getSyncSettings();
+    const stored = await getSettings();
     expect(stored.domainRules).toEqual([]);
     expect(stored.globalGroupingEnabled).toBe(true);
   });
@@ -281,11 +302,11 @@ describe('initializeDefaults — fetch failures', () => {
       vi.fn().mockResolvedValue({ ok: false, statusText: 'Not Found', json: async () => ({}) }),
     );
     const { initializeDefaults } = await import('../src/utils/migration');
-    const { getSyncSettings } = await import('../src/utils/settingsUtils');
+    const { getSettings } = await import('../src/utils/settingsUtils');
 
     await initializeDefaults();
 
-    const stored = await getSyncSettings();
+    const stored = await getSettings();
     expect(stored.domainRules).toEqual([]);
   });
 });

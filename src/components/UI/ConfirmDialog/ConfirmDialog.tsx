@@ -1,5 +1,5 @@
 import { AlertDialog, Button, Flex } from '@radix-ui/themes';
-import { getMessage } from '../../../utils/i18n';
+import { getMessage } from '@/utils/i18n';
 
 interface ConfirmDialogProps {
   open: boolean;

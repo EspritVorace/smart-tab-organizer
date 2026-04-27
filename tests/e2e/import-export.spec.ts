@@ -14,6 +14,7 @@
  */
 
 import { test, expect } from './fixtures';
+import { auditPage } from './helpers/a11y';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -32,7 +33,7 @@ async function goToImportExportSection(page: any, extensionId: string): Promise<
 
   // Click the "Import / Export" sidebar item
   await page.getByRole('button', { name: /import.*export/i }).click();
-  await page.waitForTimeout(300);
+  await page.getByTestId('page-import-export-card-import-rules').waitFor({ state: 'visible' });
 }
 
 /** A minimal valid rule JSON for import testing. */
@@ -61,7 +62,7 @@ function makeRuleJson(label: string, domainFilter: string): string {
 async function seedDomainRules(extensionContext: any, rules: any[]): Promise<void> {
   const sw = extensionContext.serviceWorkers()[0];
   await sw.evaluate(async (r: any[]) => {
-    await chrome.storage.sync.set({ domainRules: r });
+    await chrome.storage.local.set({ domainRules: r });
   }, rules);
   await new Promise(r => setTimeout(r, 200));
 }
@@ -70,20 +71,20 @@ async function seedDomainRules(extensionContext: any, rules: any[]): Promise<voi
 async function clearDomainRules(extensionContext: any): Promise<void> {
   const sw = extensionContext.serviceWorkers()[0];
   await sw.evaluate(async () => {
-    await chrome.storage.sync.set({ domainRules: [] });
+    await chrome.storage.local.set({ domainRules: [] });
   });
   await new Promise(r => setTimeout(r, 200));
 }
 
 /** Open the Import wizard dialog from the Import/Export page. */
 async function openImportWizard(page: any): Promise<void> {
-  await page.getByRole('button', { name: /^import$/i }).click();
+  await page.getByTestId('page-import-export-card-import-rules').getByRole('button', { name: /^import$/i }).click();
   await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
 }
 
 /** Open the Export wizard dialog from the Import/Export page. */
 async function openExportWizard(page: any): Promise<void> {
-  await page.getByRole('button', { name: /^export$/i }).click();
+  await page.getByTestId('page-import-export-card-export-rules').getByRole('button', { name: /^export$/i }).click();
   await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
 }
 
@@ -103,12 +104,14 @@ test.describe('Import / Export', () => {
     }) => {
       const page = await extensionContext.newPage();
       await goToImportExportSection(page, extensionId);
+      await auditPage(page, 'import-export-landing');
       await openImportWizard(page);
 
       const dialog = page.getByRole('dialog');
       // Both mode tabs should be visible
       await expect(dialog.getByRole('radio', { name: 'File' }).locator('..')).toBeVisible();
       await expect(dialog.getByRole('radio', { name: 'Text' }).locator('..')).toBeVisible();
+      await auditPage(page, 'import-wizard-source-step', { include: '[role="dialog"]' });
 
       await page.close();
     });
@@ -140,7 +143,7 @@ test.describe('Import / Export', () => {
       const dialog = page.getByRole('dialog');
       // Switch to Text mode
       await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
-      await page.waitForTimeout(200);
+      await dialog.locator('textarea').waitFor({ state: 'visible' });
 
       await expect(dialog.locator('textarea')).toBeVisible();
 
@@ -176,11 +179,10 @@ test.describe('Import / Export', () => {
 
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
-      await page.waitForTimeout(200);
+      await dialog.locator('textarea').waitFor({ state: 'visible' });
 
       // Enter invalid JSON
       await dialog.locator('textarea').fill('{ invalid json }');
-      await page.waitForTimeout(300);
 
       // Should show an error indicator
       await expect(dialog.getByText('Invalid JSON format')).toBeVisible();
@@ -198,11 +200,10 @@ test.describe('Import / Export', () => {
 
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
-      await page.waitForTimeout(200);
+      await dialog.locator('textarea').waitFor({ state: 'visible' });
 
       const validJson = makeRuleJson('Valid Rule', 'valid.com');
       await dialog.locator('textarea').fill(validJson);
-      await page.waitForTimeout(300);
 
       // Should show success: "1 rule(s) found"
       await expect(dialog.getByText(/1 rule/i)).toBeVisible();
@@ -222,19 +223,17 @@ test.describe('Import / Export', () => {
 
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
-      await page.waitForTimeout(200);
+      await dialog.locator('textarea').waitFor({ state: 'visible' });
 
       await dialog.locator('textarea').fill('{ invalid }');
-      await page.waitForTimeout(200);
       await expect(dialog.getByText('Invalid JSON format')).toBeVisible();
 
       // Clear the textarea
       await dialog.locator('textarea').fill('');
-      await page.waitForTimeout(200);
 
       // No error and no success indicator
-      await expect(dialog.getByText('Invalid JSON format')).not.toBeVisible();
-      await expect(dialog.getByText(/rule.*found/i)).not.toBeVisible();
+      await expect(dialog.getByText('Invalid JSON format')).toBeHidden();
+      await expect(dialog.getByText(/rule.*found/i)).toBeHidden();
 
       await page.close();
     });
@@ -253,13 +252,11 @@ test.describe('Import / Export', () => {
 
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
-      await page.waitForTimeout(200);
+      await dialog.locator('textarea').waitFor({ state: 'visible' });
 
       await dialog.locator('textarea').fill(makeRuleJson('Brand New Rule', 'brandnew.com'));
-      await page.waitForTimeout(300);
 
       await dialog.getByRole('button', { name: /next/i }).click();
-      await page.waitForTimeout(300);
 
       // Should show "New rules (1)"
       await expect(dialog.getByText(/new rules.*1/i)).toBeVisible();
@@ -294,16 +291,14 @@ test.describe('Import / Export', () => {
 
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
-      await page.waitForTimeout(200);
+      await dialog.locator('textarea').waitFor({ state: 'visible' });
 
       // Import same rule (same label + same properties)
       await dialog.locator('textarea').fill(
         JSON.stringify({ domainRules: [existing] }),
       );
-      await page.waitForTimeout(300);
 
       await dialog.getByRole('button', { name: /next/i }).click();
-      await page.waitForTimeout(300);
 
       // Should show identical rules group
       await expect(dialog.getByText(/identical rules.*1/i)).toBeVisible();
@@ -342,13 +337,11 @@ test.describe('Import / Export', () => {
 
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
-      await page.waitForTimeout(200);
+      await dialog.locator('textarea').waitFor({ state: 'visible' });
 
       await dialog.locator('textarea').fill(JSON.stringify({ domainRules: [imported] }));
-      await page.waitForTimeout(300);
 
       await dialog.getByRole('button', { name: /next/i }).click();
-      await page.waitForTimeout(300);
 
       // Should show conflicting rules group
       await expect(dialog.getByText(/conflicting rules.*1/i)).toBeVisible();
@@ -370,13 +363,11 @@ test.describe('Import / Export', () => {
 
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
-      await page.waitForTimeout(200);
+      await dialog.locator('textarea').waitFor({ state: 'visible' });
 
       await dialog.locator('textarea').fill(makeRuleJson('Pre-Selected Rule', 'preselect.com'));
-      await page.waitForTimeout(300);
 
       await dialog.getByRole('button', { name: /next/i }).click();
-      await page.waitForTimeout(300);
 
       // The rule row's checkbox should be checked (role=checkbox)
       const checkboxes = dialog.getByRole('checkbox');
@@ -401,17 +392,14 @@ test.describe('Import / Export', () => {
 
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
-      await page.waitForTimeout(200);
+      await dialog.locator('textarea').waitFor({ state: 'visible' });
 
       await dialog.locator('textarea').fill(makeRuleJson('Deselect Rule', 'deselect.com'));
-      await page.waitForTimeout(300);
 
       await dialog.getByRole('button', { name: /next/i }).click();
-      await page.waitForTimeout(300);
 
       // Deselect the rule
       await dialog.getByRole('checkbox').first().click();
-      await page.waitForTimeout(200);
 
       // "0 rule(s) to import" and Confirm Import disabled
       await expect(dialog.getByText(/0 rule.*import/i)).toBeVisible();
@@ -452,13 +440,11 @@ test.describe('Import / Export', () => {
 
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
-      await page.waitForTimeout(200);
+      await dialog.locator('textarea').waitFor({ state: 'visible' });
 
       await dialog.locator('textarea').fill(JSON.stringify({ domainRules: [imported] }));
-      await page.waitForTimeout(300);
 
       await dialog.getByRole('button', { name: /next/i }).click();
-      await page.waitForTimeout(300);
 
       // The conflict resolution segmented control should be visible
       await expect(dialog.getByRole('radio', { name: 'Overwrite' })).toBeAttached();
@@ -496,18 +482,15 @@ test.describe('Import / Export', () => {
 
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
-      await page.waitForTimeout(200);
+      await dialog.locator('textarea').waitFor({ state: 'visible' });
 
       await dialog.locator('textarea').fill(JSON.stringify({ domainRules: [imported] }));
-      await page.waitForTimeout(300);
 
       await dialog.getByRole('button', { name: /next/i }).click();
-      await page.waitForTimeout(300);
 
       // Switch to Ignore mode (SegmentedControl item — use class selector to avoid strict-mode issues
       // with duplicate spans and rule-card text that also contains "Ignore")
       await dialog.locator('.rt-SegmentedControlItem').filter({ hasText: 'Ignore' }).first().click();
-      await page.waitForTimeout(200);
 
       // Import count should be 0 (conflict ignored, no new rules)
       await expect(dialog.getByText(/0 rule.*import/i)).toBeVisible();
@@ -547,13 +530,11 @@ test.describe('Import / Export', () => {
 
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
-      await page.waitForTimeout(200);
+      await dialog.locator('textarea').waitFor({ state: 'visible' });
 
       await dialog.locator('textarea').fill(JSON.stringify({ domainRules: [imported] }));
-      await page.waitForTimeout(300);
 
       await dialog.getByRole('button', { name: /next/i }).click();
-      await page.waitForTimeout(300);
 
       // There should be a button to view differences (aria-label or title containing "diff" / "view")
       // The Eye icon button may have an accessible label
@@ -577,13 +558,11 @@ test.describe('Import / Export', () => {
 
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
-      await page.waitForTimeout(200);
+      await dialog.locator('textarea').waitFor({ state: 'visible' });
 
       await dialog.locator('textarea').fill(makeRuleJson('Confirm Rule', 'confirm.com'));
-      await page.waitForTimeout(300);
 
       await dialog.getByRole('button', { name: /next/i }).click();
-      await page.waitForTimeout(300);
 
       // Selection step shows rule count and enabled Confirm Import button
       await expect(dialog.getByText(/1 rule.*import/i)).toBeVisible();
@@ -602,19 +581,16 @@ test.describe('Import / Export', () => {
 
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
-      await page.waitForTimeout(200);
+      await dialog.locator('textarea').waitFor({ state: 'visible' });
 
       await dialog.locator('textarea').fill(makeRuleJson('Import Close Rule', 'importclose.com'));
-      await page.waitForTimeout(300);
 
       await dialog.getByRole('button', { name: /next/i }).click();
-      await page.waitForTimeout(300);
 
       await dialog.getByRole('button', { name: /confirm import/i }).click();
-      await page.waitForTimeout(1000);
 
       // Dialog should close after import
-      await expect(page.getByRole('dialog')).not.toBeVisible();
+      await expect(page.getByRole('dialog')).toBeHidden();
 
       await page.close();
     });
@@ -630,13 +606,11 @@ test.describe('Import / Export', () => {
       await openImportWizard(page);
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
-      await page.waitForTimeout(200);
+      await dialog.locator('textarea').waitFor({ state: 'visible' });
       await dialog.locator('textarea').fill(makeRuleJson('First Import', 'firstimport.com'));
-      await page.waitForTimeout(300);
       await dialog.getByRole('button', { name: /next/i }).click();
-      await page.waitForTimeout(300);
       await dialog.getByRole('button', { name: /confirm import/i }).click();
-      await page.waitForTimeout(1000);
+      await expect(page.getByRole('dialog')).toBeHidden();
 
       // Reopen wizard — should start fresh at step 0 (source)
       await openImportWizard(page);
@@ -726,7 +700,6 @@ test.describe('Import / Export', () => {
 
       // Deselect All
       await dialog.getByRole('button', { name: /deselect all/i }).click();
-      await page.waitForTimeout(200);
       await expect(dialog.getByText(/0 rule.*selected/i)).toBeVisible();
 
       // Export button should be disabled when nothing is selected
@@ -734,7 +707,6 @@ test.describe('Import / Export', () => {
 
       // Select All
       await dialog.getByRole('button', { name: 'Select All', exact: true }).click();
-      await page.waitForTimeout(200);
       await expect(dialog.getByText(/1 rule.*selected/i)).toBeVisible();
       await expect(dialog.getByRole('button', { name: /^export$/i })).toBeEnabled();
 
@@ -768,7 +740,6 @@ test.describe('Import / Export', () => {
 
       const dialog = page.getByRole('dialog');
       await dialog.getByRole('button', { name: /deselect all/i }).click();
-      await page.waitForTimeout(200);
 
       await expect(dialog.getByRole('button', { name: /^export$/i })).toBeDisabled();
 
@@ -784,7 +755,7 @@ test.describe('Import / Export', () => {
       await goToImportExportSection(page, extensionId);
 
       // Export button should be disabled when domainRules is empty
-      const exportBtn = page.getByRole('button', { name: /^export$/i });
+      const exportBtn = page.getByTestId('page-import-export-card-export-rules').getByRole('button', { name: /^export$/i });
       await expect(exportBtn).toBeDisabled();
 
       await page.close();
@@ -894,7 +865,6 @@ test.describe('Import / Export', () => {
 
       // Open the export options dropdown
       await dialog.getByRole('button', { name: /export.*option|chevron/i }).click();
-      await page.waitForTimeout(200);
 
       // Should show clipboard option
       await expect(page.getByRole('menuitem', { name: /clipboard/i })).toBeVisible();

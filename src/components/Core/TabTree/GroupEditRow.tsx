@@ -1,8 +1,9 @@
 import React from 'react';
-import { Flex, Box, TextField, Button } from '@radix-ui/themes';
-import { getMessage } from '../../../utils/i18n';
+import { Flex, TextField } from '@radix-ui/themes';
+import { getMessage } from '@/utils/i18n';
+import { EditRowShell } from './EditRowShell';
 import { ChromeColorPicker } from './ChromeColorPicker';
-import type { ChromeGroupColor } from '../../../types/tabTree';
+import type { ChromeGroupColor } from '@/types/tabTree';
 
 export interface GroupEditRowProps {
   name: string;
@@ -24,17 +25,11 @@ export function GroupEditRow({
   onCancel,
 }: GroupEditRowProps) {
   return (
-    <Box
-      style={{
-        paddingLeft: (level - 1) * 20 + 8,
-        paddingRight: 'var(--space-2)',
-        paddingTop: 'var(--space-2)',
-        paddingBottom: 'var(--space-2)',
-      }}
-    >
-      <Flex direction="column" gap="2">
+    <EditRowShell level={level} onSave={onSave} onCancel={onCancel}>
+      {(inputRef) => (
         <Flex align="center" gap="2">
           <TextField.Root
+            ref={inputRef}
             value={name}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => onNameChange(e.target.value)}
             onKeyDown={(e: React.KeyboardEvent) => {
@@ -45,19 +40,10 @@ export function GroupEditRow({
             style={{ flex: 1 }}
             placeholder={getMessage('tabEditorGroupNameLabel')}
             aria-label={getMessage('tabEditorGroupNameLabel')}
-            autoFocus
           />
           <ChromeColorPicker value={color} onChange={onColorChange} />
         </Flex>
-        <Flex gap="2" justify="end">
-          <Button size="1" variant="soft" color="gray" onClick={onCancel}>
-            {getMessage('cancel')}
-          </Button>
-          <Button size="1" onClick={onSave}>
-            {getMessage('save')}
-          </Button>
-        </Flex>
-      </Flex>
-    </Box>
+      )}
+    </EditRowShell>
   );
 }

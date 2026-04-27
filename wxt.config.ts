@@ -1,5 +1,6 @@
 import { defineConfig } from 'wxt';
 import react from '@vitejs/plugin-react';
+import tsconfigPaths from 'vite-tsconfig-paths';
 import { resolve } from 'path';
 
 export default defineConfig({
@@ -8,7 +9,7 @@ export default defineConfig({
   manifest: {
     name: '__MSG_extensionName__',
     description: '__MSG_extensionDescription__',
-    version: '1.1.3',
+    version: '1.1.4',
     author: 'EspritVorace',
     homepage_url: 'https://github.com/EspritVorace/smart-tab-organizer',
     default_locale: 'en',
@@ -18,7 +19,7 @@ export default defineConfig({
         strict_min_version: '109.0',
         // Required by AMO since 2025: declare that the extension does not
         // collect or transmit any user data. SmartTab Organizer only reads
-        // /writes user preferences via browser.storage (local + sync) — no
+        // /writes user preferences via browser.storage (local) — no
         // telemetry, no analytics, no external network calls.
           data_collection_permissions: {
             required: ['none']
@@ -48,7 +49,7 @@ export default defineConfig({
     profileCreateIfMissing: true,
   },
   vite: () => ({
-    plugins: [react()],
+    plugins: [react(), tsconfigPaths({ projects: ['./tsconfig.json'] })],
     build: {
       emptyOutDir: true,
       rollupOptions: {

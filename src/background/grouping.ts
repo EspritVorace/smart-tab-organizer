@@ -1,13 +1,13 @@
 import { browser, Browser } from 'wxt/browser';
-import { incrementStat } from '../utils/statisticsUtils.js';
-import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from '../utils/utils';
+import { incrementStat } from '@/utils/statisticsUtils.js';
+import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from '@/utils/utils';
 import { getSettings } from './settings.js';
 import { promptForGroupName } from './messaging.js';
-import { showNotification, type UndoAction } from '../utils/notifications.js';
-import { getMessage } from '../utils/i18n.js';
-import type { DomainRuleSetting, SyncSettings } from '../types/syncSettings.js';
-import { getRuleCategory } from '../schemas/enums.js';
-import { logger } from '../utils/logger.js';
+import { showNotification, type UndoAction } from '@/utils/notifications.js';
+import { getMessage } from '@/utils/i18n.js';
+import type { DomainRuleSetting, AppSettings } from '@/types/syncSettings.js';
+import { getRuleCategory } from '@/utils/categoriesStore.js';
+import { logger } from '@/utils/logger.js';
 
 export interface GroupingContext {
     rule: DomainRuleSetting;
@@ -21,7 +21,7 @@ export function findMatchingRule(url: string, domainRules: DomainRuleSetting[]):
     return domainRules.find(r => r.enabled && matchesDomain(url, r.domainFilter));
 }
 
-export function determineGroupColor(rule: DomainRuleSetting, settings?: any): string | null {
+export function determineGroupColor(rule: DomainRuleSetting, _settings?: AppSettings): string | null {
     const category = getRuleCategory(rule.categoryId);
     if (category) {
         logger.debug(`[GROUPING_DEBUG] Using category "${rule.categoryId}" color: "${category.color}".`);
@@ -164,7 +164,7 @@ export function createGroupingContext(
     rule: DomainRuleSetting,
     openerTab: Browser.tabs.Tab,
     newTab: Browser.tabs.Tab,
-    settings: any
+    settings: AppSettings
 ): GroupingContext | null {
     const groupName = extractGroupNameFromRule(rule, openerTab);
     if (groupName === null) return null;
@@ -187,11 +187,11 @@ export async function createNewGroup(
     logger.debug(`[GROUPING_DEBUG] Calling browser.tabs.group to create new group with tabs [${tabsToGroup.join(', ')}]`);
     const newGroupId = await browser.tabs.group({ tabIds: tabsToGroup as [number, ...number[]] });
     
-    const updatePayload: any = { title: groupName, collapsed: false };
+    const updatePayload: { title: string; collapsed: boolean; color?: string } = { title: groupName, collapsed: false };
     if (groupColor) updatePayload.color = groupColor;
     
     logger.debug(`[GROUPING_DEBUG] New group created with ID: ${newGroupId}. Calling browser.tabGroups.update with payload:`, updatePayload);
-    await browser.tabGroups.update(newGroupId, updatePayload);
+    await browser.tabGroups.update(newGroupId, updatePayload as Parameters<typeof browser.tabGroups.update>[1]);
     await incrementStat('tabGroupsCreatedCount');
     
     return newGroupId;
@@ -204,7 +204,7 @@ export async function addToExistingGroup(
     logger.debug(`[GROUPING_DEBUG] Adding tab ${tabId} to existing group ${groupId}`);
     await browser.tabs.group({ groupId: groupId, tabIds: [tabId] });
     
-    const updatePayload: any = { collapsed: false };
+    const updatePayload: { collapsed: boolean } = { collapsed: false };
     logger.debug(`[GROUPING_DEBUG] Updating group ${groupId} with payload:`, updatePayload);
     await browser.tabGroups.update(groupId, updatePayload);
 }

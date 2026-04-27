@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
+import tsconfigPaths from 'vite-tsconfig-paths';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -10,7 +11,7 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const mockBrowserPath = path.resolve(__dirname, 'node_modules/wxt/dist/virtual/mock-browser.mjs');
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tsconfigPaths({ projects: ['./tsconfig.json'] })],
   resolve: {
     alias: [{ find: 'wxt/browser', replacement: mockBrowserPath }],
   },
@@ -22,9 +23,10 @@ export default defineConfig({
       'tests/**/*.test.tsx'
     ],
     exclude: [],
-    setupFiles: ['./tests/setup.ts', './tests/setup-ui.ts'],
-    // Désactiver le parallélisme pour éviter les conflits de state
-    fileParallelism: false,
+    setupFiles: ['./tests/setup.ts', './tests/setup-ui.ts', './tests/setup-storybook.ts'],
+    // Le parallélisme au niveau fichier est sûr : chaque worker Vitest a son
+    // propre contexte de modules, donc fakeBrowser et i18n sont isolés par worker.
+    fileParallelism: true,
     reporters: [
       'default',
       ['vitest-ctrf-json-reporter', { outputDir: 'ctrf', outputFile: 'unit-ctrf-report.json' }],

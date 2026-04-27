@@ -1,20 +1,18 @@
 import React, { useCallback } from 'react';
-import { createRoot } from 'react-dom/client';
 import { browser } from 'wxt/browser';
-import { Box, Flex, Theme } from '@radix-ui/themes';
+import { mountExtensionApp } from '@/utils/mountExtensionApp.js';
+import { Box, Flex, Separator, Theme } from '@radix-ui/themes';
 import { ThemeProvider } from 'next-themes';
 
-import { getMessage } from '../utils/i18n';
-import { PopupHeader } from '../components/UI/PopupHeader/PopupHeader';
-import { SettingsToggles } from '../components/UI/SettingsToggles/SettingsToggles';
-import { PopupToolbar } from '../components/UI/PopupToolbar/PopupToolbar';
-import { PopupProfilesList } from '../components/UI/PopupProfilesList/PopupProfilesList';
-import { useSyncedSettings } from '../hooks/useSyncedSettings';
+import { getMessage } from '@/utils/i18n';
+import { PopupHeader } from '@/components/UI/PopupHeader/PopupHeader';
+import { SettingsToggles } from '@/components/UI/SettingsToggles/SettingsToggles';
+import { PopupToolbar } from '@/components/UI/PopupToolbar/PopupToolbar';
+import { PopupProfilesList } from '@/components/UI/PopupProfilesList/PopupProfilesList';
+import { useSettings } from '@/hooks/useSettings';
 
-(() => {
-
-function PopupContent() {
-  const { settings, isLoaded, setGlobalGroupingEnabled, setGlobalDeduplicationEnabled } = useSyncedSettings();
+export function PopupContent() {
+  const { settings, isLoaded, setGlobalGroupingEnabled, setGlobalDeduplicationEnabled } = useSettings();
 
   const openOptionsPage = useCallback(() => {
     browser.runtime.openOptionsPage();
@@ -35,29 +33,41 @@ function PopupContent() {
   const hasRules = isLoaded && (settings?.domainRules?.length ?? 0) > 0;
 
   return (
-    <Box data-testid="popup" width="350px" p="4" style={{ background: "var(--gray-a2)", borderRadius: "var(--radius-3)" }} aria-label={getMessage('popupTitle')}>
+    <Box data-testid="popup" role="main" aria-label={getMessage('popupTitle')} width="400px" p="4" style={{ background: "var(--gray-a2)", borderRadius: "var(--radius-3)" }}>
       <Flex gap="3" direction="column" width="100%">
         <PopupHeader title={getMessage('popupTitle')} onSettingsOpen={openOptionsPage} />
 
         <PopupToolbar />
 
+        {isLoaded && !hasRules ? (
+          <SettingsToggles
+            isLoading={false}
+            hasRules={false}
+            onOpenRules={openRulesPage}
+          />
+        ) : null}
+
         <PopupProfilesList />
 
-        <SettingsToggles
-          globalGroupingEnabled={settings?.globalGroupingEnabled}
-          globalDeduplicationEnabled={settings?.globalDeduplicationEnabled}
-          onGroupingChange={setGlobalGroupingEnabled}
-          onDeduplicationChange={setGlobalDeduplicationEnabled}
-          isLoading={!isLoaded}
-          hasRules={hasRules}
-          onOpenRules={openRulesPage}
-        />
+        {hasRules ? (
+          <>
+            <Separator size="4" />
+            <SettingsToggles
+              globalGroupingEnabled={settings?.globalGroupingEnabled}
+              globalDeduplicationEnabled={settings?.globalDeduplicationEnabled}
+              onGroupingChange={setGlobalGroupingEnabled}
+              onDeduplicationChange={setGlobalDeduplicationEnabled}
+              isLoading={!isLoaded}
+              hasRules={true}
+            />
+          </>
+        ) : null}
       </Flex>
     </Box>
   );
 }
 
-function PopupApp() {
+export function PopupApp() {
   return (
     <ThemeProvider
       attribute="class"
@@ -72,12 +82,4 @@ function PopupApp() {
   );
 }
 
-// Set document lang to match browser locale for screen readers
-try {
-  const uiLang = browser.i18n.getUILanguage();
-  if (uiLang) document.documentElement.lang = uiLang;
-} catch (_) { /* fallback to HTML default */ }
-
-const root = createRoot(document.getElementById('popup-app')!);
-root.render(<PopupApp />);
-})();
+mountExtensionApp('popup-app', <PopupApp />);

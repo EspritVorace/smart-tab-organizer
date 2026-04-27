@@ -1,4 +1,4 @@
-import type { DomainRuleSetting } from '../types/syncSettings';
+import type { DomainRuleSetting } from '@/types/syncSettings';
 
 export interface PropertyDiff {
   property: string;
@@ -28,11 +28,30 @@ const COMPARABLE_PROPERTIES: (keyof DomainRuleSetting)[] = [
   'deduplicationMatchMode',
   'color',
   'deduplicationEnabled',
+  'ignoredQueryParams',
   'groupingEnabled',
   'categoryId',
   'presetId',
   'enabled'
 ];
+
+function arePropertyValuesEqual(a: unknown, b: unknown): boolean {
+  const aIsArr = Array.isArray(a);
+  const bIsArr = Array.isArray(b);
+  // When either side is an array, treat null/undefined on the other side as an
+  // empty array. This mirrors the Zod default and lets us compare rules that
+  // were stored before a new array field existed.
+  if (aIsArr || bIsArr) {
+    const arrA: unknown[] = aIsArr ? (a as unknown[]) : (a == null ? [] : [a]);
+    const arrB: unknown[] = bIsArr ? (b as unknown[]) : (b == null ? [] : [b]);
+    if (arrA.length !== arrB.length) return false;
+    for (let i = 0; i < arrA.length; i++) {
+      if (arrA[i] !== arrB[i]) return false;
+    }
+    return true;
+  }
+  return a === b;
+}
 
 /** Compare two domain rules ignoring id and badge */
 export function areDomainRulesEqual(
@@ -40,7 +59,7 @@ export function areDomainRulesEqual(
   ruleB: DomainRuleSetting
 ): boolean {
   return COMPARABLE_PROPERTIES.every(
-    prop => ruleA[prop] === ruleB[prop]
+    prop => arePropertyValuesEqual(ruleA[prop], ruleB[prop])
   );
 }
 
@@ -52,7 +71,7 @@ export function getRuleDifferences(
   const diffs: PropertyDiff[] = [];
   for (const prop of COMPARABLE_PROPERTIES) {
     if (prop === 'label') continue; // Label is the matching key, skip it
-    if (ruleA[prop] !== ruleB[prop]) {
+    if (!arePropertyValuesEqual(ruleA[prop], ruleB[prop])) {
       diffs.push({
         property: prop,
         currentValue: ruleA[prop],

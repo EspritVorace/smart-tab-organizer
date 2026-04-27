@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { Theme } from '@radix-ui/themes';
 import { TabTree } from '../../src/components/Core/TabTree/TabTree';
 import type { TabTreeData } from '../../src/types/tabTree';
@@ -65,7 +65,7 @@ describe('TabTree', () => {
   });
 
   describe('rendering', () => {
-    it('devrait afficher les noms des groupes', () => {
+    it('affiche groupes, onglets, domaines et compteur d\'enfants', () => {
       render(
         <TestWrapper>
           <TabTree
@@ -76,52 +76,16 @@ describe('TabTree', () => {
         </TestWrapper>
       );
 
+      // Group name
       expect(screen.getByText('Jira Tickets')).toBeInTheDocument();
-    });
-
-    it('devrait afficher les titres des onglets', () => {
-      render(
-        <TestWrapper>
-          <TabTree
-            data={createSampleData()}
-            selectedTabIds={new Set()}
-            onSelectionChange={mockOnSelectionChange}
-          />
-        </TestWrapper>
-      );
-
+      // Tab titles
       expect(screen.getByText('PROJ-123 - Fix bug')).toBeInTheDocument();
       expect(screen.getByText('PROJ-456 - Add feature')).toBeInTheDocument();
       expect(screen.getByText('Claude.ai')).toBeInTheDocument();
-    });
-
-    it('devrait afficher les domaines des onglets', () => {
-      render(
-        <TestWrapper>
-          <TabTree
-            data={createSampleData()}
-            selectedTabIds={new Set()}
-            onSelectionChange={mockOnSelectionChange}
-          />
-        </TestWrapper>
-      );
-
-      // Two Jira tabs share the same domain
+      // Domains (two Jira tabs share the same domain)
       expect(screen.getAllByText('jira.company.com')).toHaveLength(2);
       expect(screen.getByText('claude.ai')).toBeInTheDocument();
-    });
-
-    it('devrait afficher le nombre d\'enfants du groupe', () => {
-      render(
-        <TestWrapper>
-          <TabTree
-            data={createSampleData()}
-            selectedTabIds={new Set()}
-            onSelectionChange={mockOnSelectionChange}
-          />
-        </TestWrapper>
-      );
-
+      // Group children count
       expect(screen.getByText('(2)')).toBeInTheDocument();
     });
 
@@ -226,7 +190,7 @@ describe('TabTree', () => {
   });
 
   describe('accessibility', () => {
-    it('devrait avoir un rôle tree sur le conteneur', () => {
+    it('expose les rôles ARIA tree/treeitem et les aria-labels groupes/onglets', () => {
       const { container } = render(
         <TestWrapper>
           <TabTree
@@ -237,49 +201,14 @@ describe('TabTree', () => {
         </TestWrapper>
       );
 
+      // Tree container role
       expect(container.querySelector('[role="tree"]')).toBeInTheDocument();
-    });
-
-    it('devrait avoir des rôles treeitem sur les nœuds', () => {
-      const { container } = render(
-        <TestWrapper>
-          <TabTree
-            data={createSampleData()}
-            selectedTabIds={new Set()}
-            onSelectionChange={mockOnSelectionChange}
-          />
-        </TestWrapper>
-      );
-
+      // Treeitem roles on nodes
       const treeitems = container.querySelectorAll('[role="treeitem"]');
       expect(treeitems.length).toBeGreaterThan(0);
-    });
-
-    it('devrait avoir des aria-label sur les checkboxes des groupes', () => {
-      render(
-        <TestWrapper>
-          <TabTree
-            data={createSampleData()}
-            selectedTabIds={new Set()}
-            onSelectionChange={mockOnSelectionChange}
-          />
-        </TestWrapper>
-      );
-
+      // Group checkbox aria-label
       expect(screen.getByLabelText('Select group Jira Tickets')).toBeInTheDocument();
-    });
-
-    it('devrait avoir des aria-label sur les checkboxes des onglets', () => {
-      render(
-        <TestWrapper>
-          <TabTree
-            data={createSampleData()}
-            selectedTabIds={new Set()}
-            onSelectionChange={mockOnSelectionChange}
-          />
-        </TestWrapper>
-      );
-
+      // Tab checkbox aria-labels
       expect(screen.getByLabelText('Select tab PROJ-123 - Fix bug')).toBeInTheDocument();
       expect(screen.getByLabelText('Select tab Claude.ai')).toBeInTheDocument();
     });

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Theme, Box, Flex } from '@radix-ui/themes';
 import { DragDropProvider } from '@dnd-kit/react';
 import { DomainRuleCard } from './DomainRuleCard';
-import type { DomainRuleSetting } from '../../../types/syncSettings';
+import type { DomainRuleSetting } from '@/types/syncSettings';
 
 /* ── Mock data ──────────────────────────────────────────────────────────────── */
 
@@ -62,7 +62,9 @@ const meta: Meta<typeof DomainRuleCard> = {
       <Theme>
         <Box style={{ maxWidth: 680 }}>
           <DndWrapper>
-            <Story />
+            <Flex direction="column" role="list">
+              <Story />
+            </Flex>
           </DndWrapper>
         </Box>
       </Theme>
@@ -128,23 +130,17 @@ export const DomainRuleCardListSortable: Story = {
       { ...baseRule, id: 'rule-3', label: 'Bitbucket', domainFilter: 'bitbucket.org', categoryId: null, enabled: false },
     ];
     return (
-      <Theme>
-        <Box style={{ maxWidth: 680 }}>
-          <DragDropProvider>
-            <Flex direction="column" gap="3">
-              {rules.map((rule, index) => (
-                <DomainRuleCard
-                  key={rule.id}
-                  {...defaultProps}
-                  rule={rule}
-                  index={index}
-                  isDomainActionDisabled={false}
-                />
-              ))}
-            </Flex>
-          </DragDropProvider>
-        </Box>
-      </Theme>
+      <>
+        {rules.map((rule, index) => (
+          <DomainRuleCard
+            key={rule.id}
+            {...defaultProps}
+            rule={rule}
+            index={index}
+            isDomainActionDisabled={false}
+          />
+        ))}
+      </>
     );
   },
 };

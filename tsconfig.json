@@ -13,6 +13,5 @@
     },
     "skipLibCheck": true
   },
-  "include": ["src/**/*", ".wxt/wxt.d.ts"],
-  "exclude": ["src/**/*.stories.tsx", "src/stories/**/*"]
+  "include": ["src/**/*", ".wxt/wxt.d.ts"]
 }

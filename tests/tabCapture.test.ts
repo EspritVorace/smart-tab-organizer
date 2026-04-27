@@ -182,6 +182,51 @@ describe('captureCurrentTabs', () => {
     expect(result.groups[0].collapsed).toBe(false);
   });
 
+  it('normalizeColor : retourne la couleur inchangée si elle est valide', async () => {
+    mockTabsQuery.mockResolvedValue([
+      { id: 10, index: 0, url: 'https://a.com', title: 'A', groupId: 5 },
+    ]);
+    mockTabGroupsGet.mockResolvedValue({ title: 'Work', color: 'blue' });
+
+    const result = await captureCurrentTabs();
+
+    expect(result.groups[0].color).toBe('blue');
+  });
+
+  it('normalizeColor : retourne "grey" quand la couleur est invalide ou absente', async () => {
+    mockTabsQuery.mockResolvedValue([
+      { id: 10, index: 0, url: 'https://a.com', title: 'A', groupId: 5 },
+    ]);
+    mockTabGroupsGet.mockResolvedValue({ title: 'Work', color: 'not-a-valid-color' });
+
+    const result = await captureCurrentTabs();
+
+    expect(result.groups[0].color).toBe('grey');
+  });
+
+  it('ignore silencieusement un groupe si tabGroups.get rejette', async () => {
+    mockTabsQuery.mockResolvedValue([
+      { id: 10, index: 0, url: 'https://a.com', title: 'A', groupId: 5 },
+    ]);
+    mockTabGroupsGet.mockRejectedValue(new Error('Group no longer exists'));
+
+    const result = await captureCurrentTabs();
+
+    expect(result.groups).toHaveLength(0);
+    expect(result.ungroupedTabs).toHaveLength(1);
+    expect(result.ungroupedTabs[0].url).toBe('https://a.com');
+  });
+
+  it('utilise url comme title quand title est absent', async () => {
+    mockTabsQuery.mockResolvedValue([
+      { id: 10, index: 0, url: 'https://a.com', title: undefined, groupId: -1 },
+    ]);
+
+    const result = await captureCurrentTabs();
+
+    expect(result.ungroupedTabs[0].title).toBe('https://a.com');
+  });
+
   it('excludes Firefox extension Options page from captured tabs', async () => {
     // Regression: moz-extension:// URLs were previously kept, so the Options
     // page itself showed up in the snapshot wizard and got auto-selected.

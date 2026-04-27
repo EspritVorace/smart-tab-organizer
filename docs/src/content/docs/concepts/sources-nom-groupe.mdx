@@ -1,9 +1,15 @@
 ---
 title: Sources de nom de groupe
-description: Comment SmartTab Organizer détermine le nom d'un groupe à partir du titre de l'onglet, de l'URL ou d'une valeur personnalisée, et comportement de chaque mode en cas d'échec.
+description: Comment SmartTab Organizer détermine le nom d'un groupe à partir du titre de l'onglet, de l'URL ou d'une valeur personnalisée.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="En bref">
+- Chaque règle configure un **mode de nommage** qui décide comment le nom du groupe est calculé.
+- Trois familles de modes : **Preset** (recommandé), **Demander**, **Manuel**.
+- Les modes extractifs utilisent une expression régulière sur le titre ou l'URL de l'onglet parent.
+</Aside>
 
 Quand SmartTab Organizer crée un groupe Chrome, il lui attribue un nom. Ce nom est déterminé par le **mode de nommage** configuré dans la règle de domaine. Certains modes extraient le nom depuis le contenu de l'onglet, d'autres demandent votre avis.
 
@@ -13,59 +19,29 @@ Les modes qui extraient un nom depuis l'onglet parent utilisent une expression r
 
 Par exemple, la regex `^([^·]+)` appliquée au titre `PROJ-42 · Mon projet Jira` retourne `PROJ-42`.
 
+<Aside type="tip" title="Découvrir les expressions régulières">
+Pas familier avec les regex ? Le [guide MDN sur les expressions régulières](https://developer.mozilla.org/fr/docs/Web/JavaScript/Guide/Regular_expressions) présente la syntaxe et les groupes de capture en français.
+</Aside>
+
+<Aside type="note">
 Une regex syntaxiquement invalide est ignorée sans faire planter l'extension. La tentative passe à l'étape suivante dans la chaîne de repli du mode concerné.
+</Aside>
 
 ## Comment le mode est choisi
 
-Lors de la création ou de l'édition d'une règle, trois segments sont proposés : **Preset**, **Demander** et **Manuel**.
+Lors de la création ou de l'édition d'une règle, trois segments sont proposés.
 
-**Preset** délègue entièrement le choix du mode au preset sélectionné. Chaque preset embarque un mode de nommage recommandé adapté au site visé. Ce mode peut être n'importe lequel des modes disponibles (Titre, URL, Intelligent, Intelligent + Label ou Intelligent + Demander). C'est l'approche recommandée pour les sites courants car le preset configure aussi les regex automatiquement.
+### Preset
 
-**Demander** fixe le mode à "Demander" : une invite de saisie apparait à chaque création de groupe.
-
-**Manuel** vous laisse choisir explicitement le mode parmi les cinq options disponibles, et saisir vous-même les expressions régulières si nécessaire.
-
-## Les modes de nommage
+Délègue entièrement le choix du mode au preset sélectionné. Chaque preset embarque un mode de nommage recommandé adapté au site visé (Titre, URL, Intelligent, Intelligent + Label ou Intelligent + Demander) et configure aussi les regex automatiquement. C'est l'approche recommandée pour les sites courants.
 
 ### Demander
 
-Une invite de saisie apparait à chaque création de groupe. Le label de la règle est proposé comme valeur par défaut.
+Fixe le mode à "Demander" : une invite de saisie apparait à chaque création de groupe.
 
-Si vous validez avec un nom, le groupe est renommé avec ce nom. Si vous annulez l'invite, les onglets qui venaient d'être regroupés sont immédiatement dégroupés.
+### Manuel
 
-### Titre
-
-L'extension tente d'extraire le nom depuis le **titre de la page** parente. En cas d'échec, elle tente l'extraction depuis l'**URL**.
-
-Si les deux extractions échouent, l'onglet n'est **pas groupé**.
-
-<Aside type="caution">
-En mode Titre (et en mode URL ci-dessous), l'absence de correspondance regex empêche totalement le groupage. Vérifiez vos expressions régulières avant d'enregistrer la règle.
-</Aside>
-
-### URL
-
-L'extension tente d'extraire le nom depuis l'**URL** de l'onglet parent. En cas d'échec, elle tente l'extraction depuis le **titre**.
-
-Si les deux extractions échouent, l'onglet n'est **pas groupé**.
-
-### Intelligent
-
-L'extension tente l'extraction depuis le titre puis depuis l'URL, en utilisant les regex du preset sélectionné.
-
-Si les deux extractions échouent, l'onglet n'est **pas groupé**.
-
-### Intelligent + Label
-
-Même stratégie d'extraction que le mode Intelligent. En cas d'échec, le **label de la règle** est utilisé comme nom de repli.
-
-Ce mode garantit qu'un groupe est toujours créé, même quand la regex ne correspond pas.
-
-### Intelligent + Demander
-
-Même stratégie d'extraction que le mode Intelligent. En cas d'échec, une invite de saisie est présentée, comme en mode Demander. Si vous annulez l'invite, les onglets sont dégroupés.
-
-Ce mode combine l'extraction automatique et la saisie manuelle comme filet de sécurité.
+Vous laisse choisir explicitement le mode parmi les six options disponibles, et saisir vous-même les expressions régulières si nécessaire.
 
 ## Tableau de synthèse
 
@@ -78,10 +54,14 @@ Ce mode combine l'extraction automatique et la saisie manuelle comme filet de s�
 | Intelligent + Label | Extraction titre (preset) | Extraction URL (preset) | Label de la règle |
 | Intelligent + Demander | Extraction titre (preset) | Extraction URL (preset) | Invite utilisateur, dégroupage si annulation |
 
----
+<CardGrid>
+  <LinkCard title="Détail des modes de nommage" href="/concepts/modes-nommage" description="Catalogue complet des six modes, avec les cas limites et les comportements de repli." />
+</CardGrid>
 
 ## Voir aussi
 
-- [Comment fonctionne le groupement](/concepts/groupement) : conditions de déclenchement et comportement général
-- [Presets regex](/fonctionnalites/regles/presets-regex) : utiliser les patterns intégrés pour configurer automatiquement le mode et les regex
-- [Liste des presets](/annexes/presets-regex) : tableau de référence des 50 presets disponibles
+<CardGrid>
+  <LinkCard title="Comment fonctionne le groupement" href="/concepts/groupement" description="Conditions de déclenchement et comportement général." />
+  <LinkCard title="Presets regex" href="/fonctionnalites/regles/presets-regex" description="Utiliser les patterns intégrés pour configurer automatiquement le mode et les regex." />
+  <LinkCard title="Liste des presets" href="/annexes/presets-regex" description="Tableau de référence des presets disponibles." />
+</CardGrid>

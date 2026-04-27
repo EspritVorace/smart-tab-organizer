@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { useSortable } from '@dnd-kit/react/sortable';
 import {
@@ -8,16 +8,17 @@ import {
 import {
   MoreHorizontal, Pencil, Trash2, Check, X,
   Pin, PinOff, ChevronDown, ChevronRight,
-  Monitor, Square, Wrench, GripVertical,
+  GripVertical,
 } from 'lucide-react';
-import { getMessage, getPluralMessage } from '../../../utils/i18n';
-import { countSessionTabs, formatSessionDate } from '../../../utils/sessionUtils';
-import { AccessibleHighlight } from '../../UI/AccessibleHighlight/AccessibleHighlight';
-import { chromeGroupColors } from '../../../utils/tabTreeUtils';
-import { getRuleCategory } from '../../../schemas/enums';
-import { getRadixColor } from '../../../utils/utils';
+import { getMessage, getPluralMessage } from '@/utils/i18n';
+import { countSessionTabs, formatSessionDate } from '@/utils/sessionUtils';
+import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
+import { chromeGroupColors } from '@/utils/tabTreeUtils';
+import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
+import { getRadixColor } from '@/utils/utils';
 import { SessionPreviewTree } from './SessionPreviewTree';
-import type { Session } from '../../../types/session';
+import { SessionRestoreButton } from './SessionRestoreButton/SessionRestoreButton';
+import type { Session } from '@/types/session';
 
 interface SessionCardProps {
   session: Session;
@@ -25,6 +26,7 @@ interface SessionCardProps {
   onRestore: (session: Session) => void;
   onRestoreCurrentWindow: (session: Session) => void;
   onRestoreNewWindow: (session: Session) => void;
+  onReplaceCurrentWindow: (session: Session) => void;
   onRename: (id: string, newName: string) => Promise<void>;
   onEdit: (session: Session) => void;
   onDelete: (session: Session) => void;
@@ -50,6 +52,8 @@ interface SessionCardProps {
   onMoveToFirst?: () => void;
   /** Called when user clicks "Move to Last" in menu */
   onMoveLast?: () => void;
+  /** Keyboard handler forwarded to the card root for up/down navigation between cards */
+  onCardKeyDown?: (e: React.KeyboardEvent<HTMLElement>) => void;
 }
 
 export function SessionCard({
@@ -58,6 +62,7 @@ export function SessionCard({
   onRestore,
   onRestoreCurrentWindow,
   onRestoreNewWindow,
+  onReplaceCurrentWindow,
   onRename,
   onEdit,
   onDelete,
@@ -70,11 +75,20 @@ export function SessionCard({
   isDragDisabled = false,
   onMoveToFirst,
   onMoveLast,
+  onCardKeyDown,
 }: SessionCardProps) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [nameValue, setNameValue] = useState(session.name);
   const [renameError, setRenameError] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const renameInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus the rename input when entering rename mode (replaces autoFocus).
+  useEffect(() => {
+    if (isRenaming) {
+      renameInputRef.current?.focus();
+    }
+  }, [isRenaming]);
 
   // Drag-and-drop sortable hook
   const { ref, handleRef, isDragging } = useSortable({
@@ -160,6 +174,9 @@ export function SessionCard({
     <Card
       ref={ref}
       data-testid={`session-card-${session.id}`}
+      data-session-card="true"
+      tabIndex={0}
+      onKeyDown={onCardKeyDown}
       size="2"
       style={dragStyle}
     >
@@ -172,6 +189,7 @@ export function SessionCard({
               ref={handleRef}
               data-testid={`session-card-${session.id}-drag-handle`}
               aria-disabled={isDragDisabled}
+              aria-label={getMessage('dragHandle')}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -212,13 +230,13 @@ export function SessionCard({
               <>
                 <Flex direction="column" style={{ flex: 1 }}>
                   <TextField.Root
+                    ref={renameInputRef}
                     value={nameValue}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                       setNameValue(e.target.value);
                       setRenameError(null);
                     }}
                     onKeyDown={handleKeyDown}
-                    autoFocus
                     size="2"
                     aria-label={getMessage('sessionRenameLabel')}
                   />
@@ -288,13 +306,25 @@ export function SessionCard({
                   <Pencil size={14} aria-hidden="true" />
                 </IconButton>
                 {category && (
-                  <Badge color={getRadixColor(category.color) as any} size="1" style={{ flexShrink: 0 }}>
-                    {category.emoji} {getMessage(category.labelKey as any)}
+                  <Badge color={getRadixColor(category.color)} size="1" style={{ flexShrink: 0 }}>
+                    {category.emoji} {getCategoryLabel(category)}
                   </Badge>
                 )}
               </>
             )}
           </Flex>
+
+          {/* Restore split button */}
+          {!isRenaming && (
+            <SessionRestoreButton
+              session={session}
+              onRestoreCurrentWindow={onRestoreCurrentWindow}
+              onRestoreNewWindow={onRestoreNewWindow}
+              onReplaceCurrentWindow={onReplaceCurrentWindow}
+              onCustomize={onRestore}
+              data-testid={`session-card-${session.id}-btn-restore`}
+            />
+          )}
 
           {/* More menu */}
           {!isRenaming && (
@@ -316,7 +346,7 @@ export function SessionCard({
                   {getMessage('sessionEdit')}
                 </DropdownMenu.Item>
 
-                <DropdownMenu.Separator />
+                {(onMoveToFirst || onMoveLast) && <DropdownMenu.Separator />}
 
                 {onMoveToFirst && (
                   <DropdownMenu.Item onClick={onMoveToFirst} disabled={isDragDisabled}>
@@ -328,21 +358,6 @@ export function SessionCard({
                     {getMessage('sessionMoveLast')}
                   </DropdownMenu.Item>
                 )}
-
-                <DropdownMenu.Separator />
-
-                <DropdownMenu.Item onClick={() => onRestoreCurrentWindow(session)}>
-                  <Monitor size={14} aria-hidden="true" />
-                  {getMessage('sessionRestoreCurrentWindow')}
-                </DropdownMenu.Item>
-                <DropdownMenu.Item onClick={() => onRestoreNewWindow(session)}>
-                  <Square size={14} aria-hidden="true" />
-                  {getMessage('sessionRestoreNewWindow')}
-                </DropdownMenu.Item>
-                <DropdownMenu.Item onClick={() => onRestore(session)}>
-                  <Wrench size={14} aria-hidden="true" />
-                  {getMessage('sessionRestoreCustomize')}
-                </DropdownMenu.Item>
 
                 <DropdownMenu.Separator />
                 <DropdownMenu.Item color="red" onClick={() => onDelete(session)}>

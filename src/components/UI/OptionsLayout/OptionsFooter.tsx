@@ -38,7 +38,8 @@ export function OptionsFooter() {
     >
       <img
         src="/icons/ev.png"
-        alt="EspritVorace"
+        alt=""
+        aria-hidden="true"
         style={{ width: '24px', height: '24px', borderRadius: '50%', flexShrink: 0 }}
       />
       <Flex align="center" gap="2">
@@ -72,7 +73,8 @@ export function OptionsFooterCollapsed() {
     >
       <img
         src="/icons/ev.png"
-        alt="EspritVorace"
+        alt=""
+        aria-hidden="true"
         style={{ width: '24px', height: '24px', borderRadius: '50%' }}
       />
     </Flex>

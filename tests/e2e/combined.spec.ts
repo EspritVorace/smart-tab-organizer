@@ -13,6 +13,10 @@ test.describe('Combined Deduplication and Grouping', () => {
     await helpers.clearDomainRules();
     await helpers.setGlobalGroupingEnabled(true);
     await helpers.setGlobalDeduplicationEnabled(true);
+    // Pin the legacy dedup defaults these combined scenarios were written
+    // against (unmatched-domain dedup on, keep-old tie-breaker).
+    await helpers.setDeduplicateUnmatchedDomains(true);
+    await helpers.setDeduplicationKeepStrategy('keep-old');
     await helpers.resetStatistics();
   });
 
@@ -56,7 +60,7 @@ test.describe('Combined Deduplication and Grouping', () => {
         groupingEnabled: true,
       });
 
-      const tab1 = await helpers.createTab('https://example.com/page');
+      const _tab1 = await helpers.createTab('https://example.com/page');
       await helpers.waitForDeduplication();
       const initialTabCount = await helpers.getTabCount();
 
@@ -123,7 +127,7 @@ test.describe('Combined Deduplication and Grouping', () => {
       const groups = await helpers.getTabGroups();
 
       expect(stats.tabGroupsCreatedCount).toBe(0);
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
       expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
     });
   });
@@ -164,9 +168,9 @@ test.describe('Combined Deduplication and Grouping', () => {
       await helpers.waitForDeduplication();
 
       // Test httpbin.org: no group, but dedup
-      const t1 = await helpers.createTab('https://httpbin.org/page');
+      const _t1 = await helpers.createTab('https://httpbin.org/page');
       await helpers.waitForDeduplication();
-      const t2 = await helpers.createTab('https://httpbin.org/page');
+      const _t2 = await helpers.createTab('https://httpbin.org/page');
       await helpers.waitForDeduplication();
 
       stats = await helpers.getStatistics();
@@ -216,10 +220,10 @@ test.describe('Combined Deduplication and Grouping', () => {
       });
 
       // example.net has no rule → global (enabled) applies
-      const tab1 = await helpers.createTab('https://example.net/page');
+      const _tab1 = await helpers.createTab('https://example.net/page');
       await helpers.waitForDeduplication();
 
-      const tab2 = await helpers.createTab('https://example.net/page');
+      const _tab2 = await helpers.createTab('https://example.net/page');
       await helpers.waitForDeduplication();
 
       const stats = await helpers.getStatistics();
@@ -263,7 +267,7 @@ test.describe('Combined Deduplication and Grouping', () => {
 
       expect(stats.tabGroupsCreatedCount).toBe(1);
       expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
-      expect(groups.length).toBe(1);
+      expect(groups).toHaveLength(1);
     });
 
     test('simulate two projects each getting their own group [US-C005]', async ({ helpers }) => {
@@ -292,7 +296,7 @@ test.describe('Combined Deduplication and Grouping', () => {
       const groups = await helpers.getTabGroups();
       const stats = await helpers.getStatistics();
 
-      expect(groups.length).toBe(2);
+      expect(groups).toHaveLength(2);
       expect(stats.tabGroupsCreatedCount).toBe(2);
     });
   });

@@ -1,17 +1,17 @@
 import * as Collapsible from '@radix-ui/react-collapsible';
-import { Box, Button, Flex, IconButton, Separator, Text, TextField, Grid } from '@radix-ui/themes';
+import { Box, Button, Flex, IconButton, Separator, Text, TextField } from '@radix-ui/themes';
 import { ChevronDown, ChevronRight, Pencil } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, type Control, type FieldErrors } from 'react-hook-form';
-import { getMessage } from '../../../utils/i18n';
-import { CategoryPicker } from './CategoryPicker';
-import { FormField } from '../../Form/FormFields';
+import { getMessage } from '@/utils/i18n';
+import { FormField } from '@/components/Form/FormFields';
+import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
 import { ConfigEditModal, type ConfigEditValues } from './ConfigEditModal';
 import { WizardStep3Options } from './WizardStep3Options';
-import { getRuleCategory, groupNameSourceOptions, deduplicationMatchModeOptions } from '../../../schemas/enums';
-import type { DomainRule } from '../../../schemas/domainRule';
-import type { PresetCategory } from '../../../utils/presetUtils';
-import type { GroupNameSourceValue } from '../../../schemas/enums';
+import { groupNameSourceOptions, deduplicationMatchModeOptions } from '@/schemas/enums';
+import type { DomainRule } from '@/schemas/domainRule';
+import type { PresetCategory } from '@/utils/presetUtils';
+import type { GroupNameSourceValue, RuleCategoryId } from '@/schemas/enums';
 
 interface EditSummaryViewProps {
   control: Control<DomainRule>;
@@ -79,29 +79,34 @@ export function EditSummaryView({
             required={true}
             error={errors.label}
           >
-            <Flex align="center" gap="2" style={{ marginTop: '4px' }}>
-              <Controller
-                name="categoryId"
-                control={control}
-                render={({ field }) => (
-                  <CategoryPicker value={field.value as any} onChange={field.onChange} />
-                )}
-              />
-              <Box style={{ flex: 1 }}>
+            {(fieldId) => (
+              <div style={{ marginTop: '4px' }}>
                 <Controller
                   name="label"
                   control={control}
-                  render={({ field }) => (
-                    <TextField.Root
-                      {...field}
-                      name="label"
-                      data-testid="wizard-rule-field-label"
-                      placeholder={getMessage('labelPlaceholder')}
+                  render={({ field: labelField }) => (
+                    <Controller
+                      name="categoryId"
+                      control={control}
+                      render={({ field: catField }) => (
+                        <TextFieldWithCategory
+                          id={fieldId}
+                          ref={labelField.ref}
+                          name={labelField.name}
+                          value={labelField.value ?? ''}
+                          onChange={labelField.onChange}
+                          onBlur={labelField.onBlur}
+                          data-testid="wizard-rule-field-label"
+                          placeholder={getMessage('labelPlaceholder')}
+                          categoryId={catField.value as RuleCategoryId | null | undefined}
+                          onCategoryChange={catField.onChange}
+                        />
+                      )}
                     />
                   )}
                 />
-              </Box>
-            </Flex>
+              </div>
+            )}
           </FormField>
 
           <FormField
@@ -109,19 +114,22 @@ export function EditSummaryView({
             required={true}
             error={errors.domainFilter}
           >
-            <Controller
-              name="domainFilter"
-              control={control}
-              render={({ field }) => (
-                <TextField.Root
-                  {...field}
-                  name="domainFilter"
-                  data-testid="wizard-rule-field-domain"
-                  placeholder={getMessage('domainFilterPlaceholder')}
-                  style={{ marginTop: '4px' }}
-                />
-              )}
-            />
+            {(fieldId) => (
+              <Controller
+                name="domainFilter"
+                control={control}
+                render={({ field }) => (
+                  <TextField.Root
+                    {...field}
+                    id={fieldId}
+                    name="domainFilter"
+                    data-testid="wizard-rule-field-domain"
+                    placeholder={getMessage('domainFilterPlaceholder')}
+                    style={{ marginTop: '4px' }}
+                  />
+                )}
+              />
+            )}
           </FormField>
         </Flex>
       </Box>
@@ -177,7 +185,7 @@ export function EditSummaryView({
         </Collapsible.Trigger>
         <Collapsible.Content>
           <Box pt="3">
-            <WizardStep3Options control={control} deduplicationEnabled={deduplicationEnabled} />
+            <WizardStep3Options control={control} deduplicationEnabled={deduplicationEnabled} errors={errors} />
           </Box>
         </Collapsible.Content>
       </Collapsible.Root>

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Theme, Box, Flex, TextField } from '@radix-ui/themes';
 import { Search } from 'lucide-react';
 import { SessionCard } from './SessionCard';
-import type { Session } from '../../../types/session';
+import type { Session } from '@/types/session';
 
 const baseSession: Session = {
   id: 'session-1',
@@ -67,6 +67,7 @@ export const SessionCardDefault: Story = {
     onRestore: noop,
     onRestoreCurrentWindow: asyncNoop,
     onRestoreNewWindow: asyncNoop,
+    onReplaceCurrentWindow: asyncNoop,
     onRename: asyncNoop,
     onEdit: noop,
     onDelete: noop,
@@ -101,7 +102,7 @@ export const SessionCardDeepSearchMatch: Story = {
           {/* Simulated search bar — purely decorative in this story */}
           <Flex mb="4">
             <Box style={{ flex: 1 }}>
-              <TextField.Root defaultValue="github" readOnly>
+              <TextField.Root defaultValue="github" readOnly aria-label="Search sessions">
                 <TextField.Slot>
                   <Search size={16} aria-hidden="true" />
                 </TextField.Slot>
@@ -118,6 +119,7 @@ export const SessionCardDeepSearchMatch: Story = {
     onRestore: noop,
     onRestoreCurrentWindow: asyncNoop,
     onRestoreNewWindow: asyncNoop,
+    onReplaceCurrentWindow: asyncNoop,
     onRename: asyncNoop,
     onEdit: noop,
     onDelete: noop,

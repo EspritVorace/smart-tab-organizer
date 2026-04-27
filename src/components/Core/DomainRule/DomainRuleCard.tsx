@@ -1,13 +1,13 @@
 import React from 'react';
-import { Button, Switch, Text, HoverCard, Flex, Badge, Card, Checkbox, IconButton, DropdownMenu, Box } from '@radix-ui/themes';
+import { Switch, Text, HoverCard, Flex, Badge, Card, Checkbox, IconButton, DropdownMenu, Box } from '@radix-ui/themes';
 import { Pencil, Trash2, MoreHorizontal, GripVertical } from 'lucide-react';
 import { useSortable } from '@dnd-kit/react/sortable';
 import { RuleDetailPopover } from './RuleDetailPopover';
-import { AccessibleHighlight } from '../../UI/AccessibleHighlight/AccessibleHighlight';
-import { getMessage } from '../../../utils/i18n';
-import { getRadixColor } from '../../../utils/utils';
-import { getRuleCategory } from '../../../schemas/enums';
-import type { DomainRuleSetting } from '../../../types/syncSettings';
+import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
+import { getMessage } from '@/utils/i18n';
+import { getRadixColor } from '@/utils/utils';
+import { getRuleCategory } from '@/utils/categoriesStore';
+import type { DomainRuleSetting } from '@/types/syncSettings';
 
 export interface DomainRuleCardProps {
   rule: DomainRuleSetting;
@@ -60,10 +60,9 @@ export function DomainRuleCard({
       data-testid={`rule-card-${rule.id}`}
       variant="surface"
       size="2"
-      role="row"
+      role="listitem"
       tabIndex={0}
-      aria-selected={isSelected}
-      aria-label={`${rule.label} — ${rule.domainFilter}`}
+      aria-label={`${rule.label} (${rule.domainFilter})`}
       onKeyDown={onKeyDown}
       style={style}
     >
@@ -73,6 +72,7 @@ export function DomainRuleCard({
           ref={handleRef}
           data-testid={`rule-card-${rule.id}-drag-handle`}
           aria-disabled={isDragDisabled}
+          aria-label={getMessage('dragHandle')}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -87,27 +87,30 @@ export function DomainRuleCard({
         </Box>
 
         {/* Left: Selection + Toggle */}
-        <Flex align="center" gap="3" role="gridcell">
+        <Flex align="center" gap="3">
           <Checkbox
             checked={isSelected}
             onCheckedChange={(checked) => onSelect(rule.id, checked as boolean)}
+            aria-label={getMessage('ruleSelectAriaLabel')}
           />
           <Switch
             size="1"
             checked={rule.enabled}
             onCheckedChange={(checked) => onToggleEnabled(rule.id, checked)}
+            aria-label={getMessage('ruleToggleEnabledAriaLabel')}
           />
         </Flex>
 
         {/* Center: Badge + Domain */}
-        <Flex align="center" gap="3" role="gridcell" style={{ flex: 1, minWidth: 0 }}>
+        <Flex align="center" gap="3" style={{ flex: 1, minWidth: 0 }}>
           <HoverCard.Root>
             <HoverCard.Trigger>
               <Badge
-                color={(category ? getRadixColor(category.color) : 'gray') as any}
+                color={category ? getRadixColor(category.color) : 'gray'}
                 variant="solid"
                 size="2"
                 style={{ cursor: 'pointer', flexShrink: 0 }}
+                aria-label={getMessage('ruleDetailsAriaLabel')}
               >
                 {category ? `${category.emoji} ` : ''}
                 <AccessibleHighlight text={rule.label} searchTerm={searchTerm} />
@@ -124,7 +127,7 @@ export function DomainRuleCard({
         </Flex>
 
         {/* Right: Actions */}
-        <Flex align="center" role="gridcell" style={{ flexShrink: 0 }}>
+        <Flex align="center" style={{ flexShrink: 0 }}>
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
               <IconButton

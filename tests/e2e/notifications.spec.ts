@@ -33,7 +33,7 @@ async function setNotificationPrefs(
   prefs: { notifyOnGrouping?: boolean; notifyOnDeduplication?: boolean },
 ) {
   await sw.evaluate(async (p: { notifyOnGrouping?: boolean; notifyOnDeduplication?: boolean }) => {
-    await chrome.storage.sync.set(p);
+    await chrome.storage.local.set(p);
   }, prefs);
   await new Promise(r => setTimeout(r, 100));
 }
@@ -67,6 +67,11 @@ test.describe('Notifications', () => {
     await helpers.clearDomainRules();
     await helpers.setGlobalGroupingEnabled(true);
     await helpers.setGlobalDeduplicationEnabled(false);
+    // Pin the legacy dedup defaults these scenarios were written against
+    // (unmatched-domain dedup on, keep-old tie-breaker) so notification-count
+    // assertions stay stable regardless of production default changes.
+    await helpers.setDeduplicateUnmatchedDomains(true);
+    await helpers.setDeduplicationKeepStrategy('keep-old');
     await helpers.resetStatistics();
   });
 
@@ -136,7 +141,7 @@ test.describe('Notifications', () => {
 
       const notificationIds = await getNotificationIds(sw);
       const smartTabNotifs = notificationIds.filter(id => id.startsWith('smarttab-'));
-      expect(smartTabNotifs.length).toBe(0);
+      expect(smartTabNotifs).toHaveLength(0);
     });
 
     test('clicking Undo on a grouping notification ungroups the tabs [US-N001]', async ({
@@ -175,7 +180,7 @@ test.describe('Notifications', () => {
 
       const groups = await helpers.getTabGroups();
       // Undo should have ungrouped the tabs
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
   });
 
@@ -201,7 +206,7 @@ test.describe('Notifications', () => {
         }
       });
 
-      const tab1 = await helpers.createTab('https://example.com/page-dedup');
+      const _tab1 = await helpers.createTab('https://example.com/page-dedup');
       await helpers.waitForDeduplication();
       const initialCount = await helpers.getTabCount();
 
@@ -238,7 +243,7 @@ test.describe('Notifications', () => {
         }
       });
 
-      const tab1 = await helpers.createTab('https://example.com/page-nodedup');
+      const _tab1 = await helpers.createTab('https://example.com/page-nodedup');
       await helpers.waitForDeduplication();
 
       await helpers.createTab('https://example.com/page-nodedup');
@@ -248,7 +253,7 @@ test.describe('Notifications', () => {
 
       const notificationIds = await getNotificationIds(sw);
       const smartTabNotifs = notificationIds.filter(id => id.startsWith('smarttab-'));
-      expect(smartTabNotifs.length).toBe(0);
+      expect(smartTabNotifs).toHaveLength(0);
     });
 
     test('clicking Undo on a deduplication notification reopens the closed tab [US-N002]', async ({
@@ -350,18 +355,12 @@ test.describe('Notifications', () => {
       // The tab should have been reopened (count increased by at least 1)
       expect(countAfterUndo).toBeGreaterThan(countBeforeUndo);
 
-      // The URL should be in the skip-deduplication list for 10 seconds
-      const isProtected = await sw.evaluate(async (url: string) => {
-        const shouldSkip = (globalThis as any).shouldSkipDeduplication;
-        if (typeof shouldSkip === 'function') {
-          return shouldSkip(url);
-        }
-        return null; // Function not exposed, skip the check
+      // The URL should be in the skip-deduplication list for 10 seconds.
+      // Use undoSw (same SW instance that ran the undo and owns the in-memory skip list).
+      const isProtected = await undoSw.evaluate((url: string) => {
+        return globalThis.shouldSkipDeduplication(url);
       }, testUrl);
-
-      if (isProtected !== null) {
-        expect(isProtected).toBe(true);
-      }
+      expect(isProtected).toBe(true);
     });
   });
 
@@ -502,7 +501,7 @@ test.describe('Notifications', () => {
       await new Promise(r => setTimeout(r, 500));
       const afterDedup = await getNotificationIds(sw);
       const smartTabAfterDedup = afterDedup.filter(id => id.startsWith('smarttab-'));
-      expect(smartTabAfterDedup.length).toBe(0);
+      expect(smartTabAfterDedup).toHaveLength(0);
 
       // Now trigger grouping (SHOULD generate a notification)
       await helpers.clearDomainRules();
@@ -561,7 +560,7 @@ test.describe('Notifications', () => {
       await new Promise(r => setTimeout(r, 500));
       const afterGrouping = await getNotificationIds(sw);
       const smartTabAfterGrouping = afterGrouping.filter(id => id.startsWith('smarttab-'));
-      expect(smartTabAfterGrouping.length).toBe(0);
+      expect(smartTabAfterGrouping).toHaveLength(0);
 
       // Now trigger deduplication (SHOULD generate a notification)
       await helpers.clearAllTabGroups();

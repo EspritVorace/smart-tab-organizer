@@ -9,6 +9,7 @@
  */
 import { test, expect } from './fixtures';
 import { goToDomainRulesSection } from './helpers/navigation';
+import { auditPage } from './helpers/a11y';
 
 test.beforeEach(async ({ helpers }) => {
   await helpers.clearDomainRules();
@@ -25,8 +26,9 @@ test.describe('Domain rule more-actions menu', () => {
     await goToDomainRulesSection(page, extensionId);
 
     await expect(
-      page.getByRole('row', { name: /Jira\/Atlassian/i }).getByLabel('More actions'),
+      page.getByRole('listitem', { name: /Jira\/Atlassian/i }).getByLabel('More actions'),
     ).toBeVisible();
+    await auditPage(page, 'domain-rules-list-populated');
     await page.close();
   });
 
@@ -40,7 +42,7 @@ test.describe('Domain rule more-actions menu', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    await page.getByRole('row', { name: /GitHub/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /GitHub/i }).getByLabel('More actions').click();
 
     await expect(page.getByRole('menuitem', { name: /edit/i })).toBeVisible();
     await expect(page.getByRole('menuitem', { name: /delete/i })).toBeVisible();
@@ -57,7 +59,7 @@ test.describe('Domain rule more-actions menu', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    await page.getByRole('row', { name: /Google/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Google/i }).getByLabel('More actions').click();
 
     await expect(page.getByRole('menuitem', { name: /rename/i })).not.toBeAttached();
     await page.close();
@@ -75,10 +77,10 @@ test.describe('Domain rule more-actions menu', () => {
     await goToDomainRulesSection(page, extensionId);
 
     await expect(
-      page.getByRole('row', { name: /Rule A/i }).getByLabel('More actions'),
+      page.getByRole('listitem', { name: /Rule A/i }).getByLabel('More actions'),
     ).toBeVisible();
     await expect(
-      page.getByRole('row', { name: /Rule B/i }).getByLabel('More actions'),
+      page.getByRole('listitem', { name: /Rule B/i }).getByLabel('More actions'),
     ).toBeVisible();
     await page.close();
   });
@@ -98,7 +100,7 @@ test.describe('Edit rule via dropdown', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    await page.getByRole('row', { name: /Slack/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Slack/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
     await expect(page.getByRole('dialog')).toBeVisible();
@@ -116,7 +118,7 @@ test.describe('Edit rule via dropdown', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    await page.getByRole('row', { name: /Notion/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Notion/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
     const dialog = page.getByRole('dialog');
@@ -142,7 +144,7 @@ test.describe('Delete rule via dropdown', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    await page.getByRole('row', { name: /Linear/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Linear/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /delete/i }).click();
 
     await expect(page.getByRole('alertdialog')).toBeVisible();
@@ -159,12 +161,12 @@ test.describe('Delete rule via dropdown', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    await page.getByRole('row', { name: /Figma/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Figma/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /delete/i }).click();
     // Click the red "Delete" confirm button
     await page.getByRole('button', { name: /delete/i }).last().click();
 
-    await expect(page.getByRole('row', { name: /Figma/i })).not.toBeAttached();
+    await expect(page.getByRole('listitem', { name: /Figma/i })).not.toBeAttached();
     await page.close();
   });
 
@@ -179,9 +181,9 @@ test.describe('Delete rule via dropdown', () => {
     await goToDomainRulesSection(page, extensionId);
 
     // Wait for the rule to be rendered before interacting
-    await expect(page.getByRole('row', { name: /Vercel/i })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('listitem', { name: /Vercel/i })).toBeVisible({ timeout: 5000 });
 
-    await page.getByRole('row', { name: /Vercel/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Vercel/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /delete/i }).click();
 
     // Confirm dialog is open before cancelling
@@ -190,7 +192,7 @@ test.describe('Delete rule via dropdown', () => {
     await expect(page.getByTestId('confirm-dialog')).not.toBeAttached();
 
     await expect(
-      page.getByRole('row', { name: /Vercel/i }).getByLabel('More actions'),
+      page.getByRole('listitem', { name: /Vercel/i }).getByLabel('More actions'),
     ).toBeVisible();
     await page.close();
   });

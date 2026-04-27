@@ -1,5 +1,5 @@
-import type { Session, SavedTab, SavedTabGroup } from '../types/session';
-import type { TabTreeData, TabItem, TabGroupItem } from '../types/tabTree';
+import type { Session, SavedTab, SavedTabGroup } from '@/types/session';
+import type { TabTreeData, TabItem, TabGroupItem } from '@/types/tabTree';
 import { generateUUID } from './utils';
 import { foldAccents } from './stringUtils';
 import { getMessage } from './i18n';
@@ -151,6 +151,28 @@ export function splitByPinned<T extends { isPinned: boolean }>(items: T[]): { pi
     pinned: items.filter(i => i.isPinned),
     unpinned: items.filter(i => !i.isPinned),
   };
+}
+
+/**
+ * Resolve a set of numeric TabTree IDs to their corresponding SavedTab UUIDs.
+ * Used by wizards that maintain a numericIdToSavedTabId mapping between the
+ * TabTree component (which operates with sequential integer IDs) and the
+ * underlying SavedTab objects (which use UUIDs).
+ *
+ * @param selectedNumericIds - The numeric IDs currently selected in TabTree
+ * @param numericIdToSavedTabId - Mapping produced by sessionToTabTreeData or tabCapture
+ * @returns A set of SavedTab UUIDs corresponding to the selected numeric IDs
+ */
+export function resolveTabUuids(
+  selectedNumericIds: Set<number>,
+  numericIdToSavedTabId: Map<number, string>,
+): Set<string> {
+  const ids = new Set<string>();
+  for (const numId of selectedNumericIds) {
+    const uuid = numericIdToSavedTabId.get(numId);
+    if (uuid) ids.add(uuid);
+  }
+  return ids;
 }
 
 /** Create a Session object from TabTreeData and selected tab IDs */

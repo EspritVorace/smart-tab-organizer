@@ -7,6 +7,7 @@
  */
 import { test, expect } from './fixtures';
 import { goToDomainRulesSection } from './helpers/navigation';
+import { auditPage } from './helpers/a11y';
 
 test.beforeEach(async ({ helpers }) => {
   await helpers.clearDomainRules();
@@ -20,7 +21,7 @@ test.beforeEach(async ({ helpers }) => {
 async function openCreateWizard(page: import('@playwright/test').Page, extensionId: string) {
   await goToDomainRulesSection(page, extensionId);
   await page.getByTestId('page-rules-btn-add').click();
-  await page.waitForTimeout(300);
+  await page.getByTestId('wizard-rule').waitFor({ state: 'visible' });
   return page.getByTestId('wizard-rule');
 }
 
@@ -48,6 +49,7 @@ test.describe('Creation wizard — Step 1: Identity', () => {
     await expect(dialog.getByTestId('wizard-rule-field-domain')).toBeVisible();
     // WizardStepper visible with 4 steps
     await expect(dialog.getByTestId('wizard-rule-stepper')).toBeVisible();
+    await auditPage(page, 'rule-wizard-step-1-identity', { include: '[role="dialog"]' });
     await page.close();
   });
 
@@ -60,7 +62,6 @@ test.describe('Creation wizard — Step 1: Identity', () => {
     // Fill domain but leave label empty
     await dialog.getByTestId('wizard-rule-field-domain').fill('test.com');
     await dialog.getByRole('button', { name: /next/i }).click();
-    await page.waitForTimeout(200);
 
     // Still on step 1 (label input still visible)
     await expect(dialog.getByTestId('wizard-rule-field-label')).toBeVisible();
@@ -76,7 +77,6 @@ test.describe('Creation wizard — Step 1: Identity', () => {
     await dialog.getByTestId('wizard-rule-field-label').fill('Test');
     await dialog.getByTestId('wizard-rule-field-domain').fill('not a domain!!!');
     await dialog.getByRole('button', { name: /next/i }).click();
-    await page.waitForTimeout(200);
 
     // Still on step 1
     await expect(dialog.getByTestId('wizard-rule-field-label')).toBeVisible();
@@ -94,7 +94,6 @@ test.describe('Creation wizard — Step 1: Identity', () => {
     await dialog.getByTestId('wizard-rule-field-label').fill('existing'); // case-insensitive duplicate
     await dialog.getByTestId('wizard-rule-field-domain').fill('new.com');
     await dialog.getByRole('button', { name: /next/i }).click();
-    await page.waitForTimeout(200);
 
     // Still on step 1
     await expect(dialog.getByTestId('wizard-rule-field-label')).toBeVisible();
@@ -110,7 +109,6 @@ test.describe('Creation wizard — Step 1: Identity', () => {
     await dialog.getByTestId('wizard-rule-field-label').fill('Valid Rule');
     await dialog.getByTestId('wizard-rule-field-domain').fill('valid.com');
     await dialog.getByRole('button', { name: /next/i }).click();
-    await page.waitForTimeout(300);
 
     // Config mode selector is visible at step 2
     await expect(dialog.getByTestId('wizard-rule-step-2')).toBeVisible();
@@ -143,6 +141,7 @@ test.describe('Creation wizard — Step 2: Configuration', () => {
     // (it renders a trigger button with the placeholder text)
     const presetTrigger = dialog.locator('#presetId');
     await expect(presetTrigger).toBeVisible();
+    await auditPage(page, 'rule-wizard-step-2-configuration', { include: '[role="dialog"]' });
     await page.close();
   });
 
@@ -155,7 +154,6 @@ test.describe('Creation wizard — Step 2: Configuration', () => {
 
     // Click Ask segment
     await dialog.getByTestId('config-mode-ask').click();
-    await page.waitForTimeout(200);
 
     // Explanatory text in a Callout
     await expect(dialog.locator('.rt-CalloutText')).toBeVisible();
@@ -174,7 +172,6 @@ test.describe('Creation wizard — Step 2: Configuration', () => {
 
     // Click Manual segment
     await dialog.getByTestId('config-mode-manual').click();
-    await page.waitForTimeout(200);
 
     // Group name source select trigger visible
     const selectTrigger = dialog.locator('.rt-SelectTrigger');
@@ -190,10 +187,9 @@ test.describe('Creation wizard — Step 2: Configuration', () => {
     await dialog.getByTestId('wizard-rule-field-label').fill('Preserved Label');
     await dialog.getByTestId('wizard-rule-field-domain').fill('preserved.com');
     await dialog.getByRole('button', { name: /next/i }).click();
-    await page.waitForTimeout(300);
+    await dialog.getByTestId('wizard-rule-step-2').waitFor({ state: 'visible' });
 
     await dialog.getByRole('button', { name: /previous/i }).click();
-    await page.waitForTimeout(200);
 
     await expect(dialog.getByTestId('wizard-rule-field-label')).toHaveValue('Preserved Label');
     await expect(dialog.getByTestId('wizard-rule-field-domain')).toHaveValue('preserved.com');
@@ -222,6 +218,7 @@ test.describe('Creation wizard — Step 3: Options', () => {
     await expect(switchEl).toBeVisible();
     // Switch is checked (dedup enabled by default)
     await expect(switchEl).toHaveAttribute('data-state', 'checked');
+    await auditPage(page, 'rule-wizard-step-3-options', { include: '[role="dialog"]' });
     await page.close();
   });
 
@@ -234,7 +231,6 @@ test.describe('Creation wizard — Step 3: Options', () => {
 
     // Click switch to disable dedup
     await dialog.locator('[role="switch"]').click();
-    await page.waitForTimeout(200);
 
     // RadioGroup not visible
     await expect(dialog.locator('[role="radiogroup"]')).not.toBeAttached();
@@ -249,7 +245,6 @@ test.describe('Creation wizard — Step 3: Options', () => {
     await goToStep3(dialog);
 
     await dialog.getByRole('button', { name: /previous/i }).click();
-    await page.waitForTimeout(200);
 
     // Back at step 2 — config mode selector visible
     await expect(dialog.getByTestId('wizard-rule-step-2')).toBeVisible();
@@ -264,7 +259,6 @@ test.describe('Creation wizard — Step 3: Options', () => {
     await goToStep3(dialog);
 
     await dialog.getByRole('button', { name: /next/i }).click();
-    await page.waitForTimeout(300);
 
     // Step 4: "Create" button visible
     await expect(dialog.getByRole('button', { name: /create/i })).toBeVisible();
@@ -294,6 +288,7 @@ test.describe('Creation wizard — Step 4: Summary', () => {
     // Three "Modify" buttons (one per section)
     const modifyButtons = dialog.getByRole('button', { name: /modify/i });
     await expect(modifyButtons).toHaveCount(3);
+    await auditPage(page, 'rule-wizard-step-4-summary', { include: '[role="dialog"]' });
     await page.close();
   });
 
@@ -306,7 +301,6 @@ test.describe('Creation wizard — Step 4: Summary', () => {
 
     // Click first Modify button (Identity section)
     await dialog.getByRole('button', { name: /modify/i }).first().click();
-    await page.waitForTimeout(200);
 
     // Back at step 1 — label input visible
     await expect(dialog.locator('input[name="label"]')).toBeVisible();
@@ -322,7 +316,6 @@ test.describe('Creation wizard — Step 4: Summary', () => {
     await dialog.locator('input[name="label"]').fill('Brand New Rule');
     await dialog.locator('input[name="domainFilter"]').fill('brandnew.com');
     await dialog.getByRole('button', { name: /next/i }).click();
-    await page.waitForTimeout(300);
     // Switch to Ask mode so no preset is required
     await dialog.getByTestId('config-mode-ask').click();
     await dialog.getByRole('button', { name: /next/i }).click();
@@ -331,12 +324,11 @@ test.describe('Creation wizard — Step 4: Summary', () => {
     await dialog.getByRole('button', { name: /create/i }).waitFor({ state: 'visible' });
 
     await dialog.getByRole('button', { name: /create/i }).click();
-    await page.waitForTimeout(400);
 
     // Dialog closed
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     // Rule appears in list
-    await expect(page.getByRole('row', { name: /Brand New Rule/i })).toBeVisible();
+    await expect(page.getByRole('listitem', { name: /Brand New Rule/i })).toBeVisible();
     await page.close();
   });
 });
@@ -353,7 +345,7 @@ test.describe('Edit mode — Summary View', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    await page.getByRole('row', { name: /Edit Me/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Edit Me/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
     const dialog = page.getByTestId('wizard-rule');
@@ -374,16 +366,15 @@ test.describe('Edit mode — Summary View', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    await page.getByRole('row', { name: /Rename Me/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Rename Me/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
     const dialog = page.getByTestId('wizard-rule');
     await dialog.getByTestId('wizard-rule-field-label').fill('Renamed Rule');
     await dialog.getByRole('button', { name: /save/i }).click();
-    await page.waitForTimeout(400);
 
-    await expect(dialog).not.toBeVisible();
-    await expect(page.getByRole('row', { name: /Renamed Rule/i })).toBeVisible();
+    await expect(dialog).toBeHidden();
+    await expect(page.getByRole('listitem', { name: /Renamed Rule/i })).toBeVisible();
     await page.close();
   });
 
@@ -395,7 +386,7 @@ test.describe('Edit mode — Summary View', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    await page.getByRole('row', { name: /Config Test/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Config Test/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
     const dialog = page.getByTestId('wizard-rule');
@@ -403,7 +394,6 @@ test.describe('Edit mode — Summary View', () => {
 
     // Click pencil button (aria-label contains "Edit configuration" or similar)
     await dialog.getByRole('button', { name: /edit configuration/i }).click();
-    await page.waitForTimeout(300);
 
     // A second dialog opens
     const dialogs = page.locator('[role="dialog"]');
@@ -419,19 +409,18 @@ test.describe('Edit mode — Summary View', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    await page.getByRole('row', { name: /Options Test/i }).getByLabel('More actions').click();
+    await page.getByRole('listitem', { name: /Options Test/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
     const dialog = page.getByTestId('wizard-rule');
     await dialog.waitFor({ state: 'visible' });
 
     // Dedup switch not visible (options collapsed)
-    await expect(dialog.locator('[role="switch"]')).not.toBeVisible();
+    await expect(dialog.locator('[role="switch"]')).toBeHidden();
 
     // Click the collapsible trigger to expand
     const optionsTrigger = dialog.getByRole('button', { name: /options/i });
     await optionsTrigger.click();
-    await page.waitForTimeout(200);
 
     // Dedup switch now visible
     await expect(dialog.locator('[role="switch"]')).toBeVisible();
@@ -451,9 +440,8 @@ test.describe('Keyboard navigation', () => {
     await expect(dialog).toBeVisible();
 
     await page.keyboard.press('Escape');
-    await page.waitForTimeout(300);
 
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeHidden();
     await page.close();
   });
 });

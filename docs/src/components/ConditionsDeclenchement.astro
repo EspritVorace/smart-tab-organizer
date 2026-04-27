@@ -1,0 +1,24 @@
+---
+import { Steps } from '@astrojs/starlight/components';
+
+interface Props {
+  feature: 'groupement' | 'deduplication';
+}
+
+const { feature } = Astro.props;
+
+const labels = {
+  groupement: 'Groupement',
+  deduplication: 'Déduplication',
+};
+const label = labels[feature];
+const toggleName = label.toLowerCase();
+---
+
+<Steps>
+  <ol>
+    <li>Le <strong>toggle de {toggleName} global</strong> est activé (popup ou page Paramètres).</li>
+    <li>Une <strong>règle de domaine</strong> correspond au domaine de l'onglet ouvert.</li>
+    <li>Cette règle a son option <strong>{label}</strong> activée.</li>
+  </ol>
+</Steps>

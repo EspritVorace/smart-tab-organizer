@@ -7,14 +7,13 @@ import { goToPopup, goToSessionsSection } from './helpers/navigation';
 import {
   seedSessions,
   clearSessions,
-  clearHelpPrefs,
   createTestSession,
   createPinnedSession,
 } from './helpers/seed';
+import { auditPage } from './helpers/a11y';
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
-  await clearHelpPrefs(extensionContext);
 });
 
 // ---------------------------------------------------------------------------
@@ -40,8 +39,15 @@ test.describe('[US-PO01] Toolbar', () => {
     extensionContext,
     extensionId,
   }) => {
+    // Save button is disabled when no capturable tab exists; open a real tab first
+    // (hasCapturableTabs() filters out chrome-extension:// and about: URLs)
+    const realTab = await extensionContext.newPage();
+    await realTab.goto('data:text/html,<p>capturable tab</p>');
+
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
+
+    await expect(page.getByTestId('popup-toolbar-btn-save')).toBeEnabled({ timeout: 5000 });
 
     const [newPage] = await Promise.all([
       extensionContext.waitForEvent('page'),
@@ -81,7 +87,17 @@ test.describe('[US-PO01] Toolbar', () => {
 // Pinned sessions list
 // ---------------------------------------------------------------------------
 test.describe('[US-PO02] Pinned sessions list', () => {
-  test('pinned sessions section is hidden when no pinned sessions exist', async ({ extensionContext, extensionId }) => {
+  test('pinned sections is fully hidden when no sessions exist at all', async ({ extensionContext, extensionId }) => {
+    const page = await extensionContext.newPage();
+    await goToPopup(page, extensionId);
+
+    await expect(page.getByText('Pinned sessions')).toBeHidden();
+    await expect(page.getByTestId('popup-pinned-empty-toggle')).toBeHidden();
+    await auditPage(page, 'popup-empty-state');
+    await page.close();
+  });
+
+  test('collapsible empty hint shows when sessions exist but none are pinned', async ({ extensionContext, extensionId }) => {
     // Only snapshots, no pinned sessions
     const snapshot = createTestSession({ name: 'Just A Snapshot' });
     await seedSessions(extensionContext, [snapshot]);
@@ -89,7 +105,9 @@ test.describe('[US-PO02] Pinned sessions list', () => {
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
-    await expect(page.getByText('Pinned sessions')).not.toBeVisible();
+    await expect(page.getByTestId('popup-pinned-empty-toggle')).toBeVisible();
+    await expect(page.getByText('Pinned sessions')).toBeVisible();
+    await expect(page.getByTestId('popup-pinned-empty')).toBeVisible();
     await page.close();
   });
 
@@ -99,6 +117,7 @@ test.describe('[US-PO02] Pinned sessions list', () => {
 
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
+    await auditPage(page, 'popup-with-pinned-sessions');
 
     await expect(page.getByText('Pinned sessions')).toBeVisible();
     await expect(page.getByText('My Pinned Session')).toBeVisible();
@@ -132,7 +151,7 @@ test.describe('[US-PO02] Pinned sessions list', () => {
     await goToPopup(page, extensionId);
 
     await expect(page.getByText('Visible Pinned')).toBeVisible();
-    await expect(page.getByText('Hidden Snapshot')).not.toBeVisible();
+    await expect(page.getByText('Hidden Snapshot')).toBeHidden();
     await page.close();
   });
 
@@ -147,7 +166,7 @@ test.describe('[US-PO02] Pinned sessions list', () => {
     await page.close();
   });
 
-  test('pinned session row dropdown offers current window and new window options', async ({
+  test('pinned session row dropdown offers current window, new window, replace and customized restoration', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -159,8 +178,10 @@ test.describe('[US-PO02] Pinned sessions list', () => {
 
     await page.getByRole('button', { name: 'Restore options' }).click();
 
-    await expect(page.getByRole('menuitem', { name: /current window/i })).toBeVisible();
-    await expect(page.getByRole('menuitem', { name: /new window/i })).toBeVisible();
+    await expect(page.getByTestId('session-restore-menu-current-window')).toBeVisible();
+    await expect(page.getByTestId('session-restore-menu-new-window')).toBeVisible();
+    await expect(page.getByTestId('session-restore-menu-replace-window')).toBeVisible();
+    await expect(page.getByTestId('session-restore-menu-customize')).toBeVisible();
     await page.close();
   });
 });
@@ -186,9 +207,8 @@ test.describe('[US-PO01] Deep linking', () => {
     const page = await extensionContext.newPage();
     await page.goto(`chrome-extension://${extensionId}/options.html#sessions?action=snapshot`);
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(500);
 
-    await expect(page.getByTestId('wizard-snapshot')).toBeVisible();
+    await expect(page.getByTestId('wizard-snapshot')).toBeVisible({ timeout: 10_000 });
     await expect(page.getByText('Save Session Snapshot')).toBeVisible();
     await page.close();
   });

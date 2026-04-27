@@ -9,12 +9,11 @@
  */
 import { test, expect } from './fixtures';
 import { goToPopup } from './helpers/navigation';
-import { clearSessions, clearHelpPrefs } from './helpers/seed';
+import { clearSessions } from './helpers/seed';
 import type { BrowserContext } from '@playwright/test';
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
-  await clearHelpPrefs(extensionContext);
 });
 
 // A non-system URL that captures correctly (about: is filtered by isSystemUrl)
@@ -64,7 +63,7 @@ test.describe('[US-PO006] Popup save button', () => {
     // The popup page itself is the active tab (not in any group) → plain button
     await expect(page.getByRole('button', { name: /save session/i })).toBeVisible();
     // The dropdown trigger (chevron for group options) should NOT be present
-    await expect(page.getByRole('button', { name: /more save options/i })).not.toBeVisible();
+    await expect(page.getByRole('button', { name: /more save options/i })).toBeHidden();
     await page.close();
   });
 

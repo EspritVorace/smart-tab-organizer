@@ -1,0 +1,20 @@
+{
+  "pattern": "src/{components,pages,hooks}/**/*.{ts,tsx}",
+  "ignore": [
+    "**/*.stories.tsx",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.output/**",
+    "**/.wxt/**"
+  ],
+  "format": "typescript,tsx",
+  "minTokens": 50,
+  "minLines": 5,
+  "gitignore": true,
+  "reporters": ["console", "json"],
+  "output": ".jscpd-report"
+}

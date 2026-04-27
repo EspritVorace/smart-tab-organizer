@@ -14,7 +14,7 @@ const meta: Meta<typeof PopupHeader> = {
   },
   decorators: [
     (Story) => (
-      <Box style={{ width: 350 }}>
+      <Box style={{ width: 400 }}>
         <Story />
       </Box>
     ),

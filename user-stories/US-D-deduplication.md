@@ -12,7 +12,7 @@
 
 ### Critères d'acceptation
 
-- [ ] Quand la déduplication globale est **activée**, ouvrir un onglet avec une URL déjà ouverte ferme l'onglet en double et focus l'onglet existant.
+- [ ] Quand la déduplication globale est **activée**, ouvrir un onglet avec une URL déjà ouverte conserve un seul onglet selon la stratégie configurée (voir US-D009) et ferme l'autre.
 - [ ] Quand la déduplication globale est **désactivée**, les onglets en double sont conservés; `tabsDeduplicatedCount` reste à 0.
 - [ ] Deux onglets avec des **URLs différentes** ne sont jamais dédupliqués, même si la déduplication globale est activée.
 - [ ] Le compteur `tabsDeduplicatedCount` s'incrémente uniquement quand une déduplication a lieu.
@@ -72,7 +72,7 @@
 
 - [ ] Un domaine avec une règle `deduplicationEnabled = true` voit ses doublons supprimés.
 - [ ] Un domaine avec une règle `deduplicationEnabled = false` conserve ses doublons, même si le global est activé.
-- [ ] Un domaine **sans règle** utilise le paramètre de déduplication global.
+- [ ] Un domaine **sans règle** suit le paramètre `deduplicateUnmatchedDomains` tant que la déduplication globale est activée (voir US-D008).
 
 ---
 
@@ -101,3 +101,66 @@
 - [ ] `tabsDeduplicatedCount` commence à 0 après une réinitialisation des statistiques.
 - [ ] Le compteur s'incrémente de **1** exactement à chaque fermeture d'un onglet doublon.
 - [ ] Après deux déduplications successives pour la même URL, le compteur vaut 2.
+
+---
+
+## US-D008 — Portée de la déduplication pour les domaines sans règle
+
+**En tant qu'** utilisateur,
+**je veux** choisir depuis la page Options si la déduplication automatique s'applique aux onglets des sites qui ne correspondent à aucune règle de domaine,
+**afin de** limiter la déduplication aux seuls domaines que j'ai explicitement configurés.
+
+### Critères d'acceptation
+
+- [ ] Un paramètre `deduplicateUnmatchedDomains` (booléen) est exposé dans la page Options, dans une section dédiée à la portée de la déduplication.
+- [ ] La valeur par défaut est `false` : les domaines sans règle ne sont pas dédupliqués automatiquement tant que l'utilisateur n'active pas le paramètre.
+- [ ] Quand `deduplicateUnmatchedDomains = false` et que la déduplication globale est activée, les onglets d'un domaine sans règle **ne sont pas** dédupliqués; `tabsDeduplicatedCount` reste inchangé pour ces URLs.
+- [ ] Quand `deduplicateUnmatchedDomains = false`, une règle de domaine avec `deduplicationEnabled = true` continue de dédupliquer ses onglets (la règle prévaut).
+- [ ] Quand la déduplication globale est désactivée, le paramètre `deduplicateUnmatchedDomains` n'a aucun effet (le kill-switch global reste prioritaire).
+- [ ] Le libellé UI précise la portée: s'applique uniquement aux sites sans règle de domaine, et les règles restent prioritaires.
+
+---
+
+## US-D009 — Stratégie "quel onglet garder lors d'une déduplication"
+
+**En tant qu'** utilisateur,
+**je veux** choisir quel onglet survit lorsqu'un doublon est détecté,
+**afin de** préserver l'état ou l'appartenance à un groupe selon mes besoins.
+
+### Contexte
+
+Historiquement, la déduplication gardait toujours l'onglet existant (le plus ancien) et fermait le nouvel onglet. Ce comportement pose problème lors d'une restauration de session : si la session sauvegardée contient un onglet **groupé** à l'URL X et qu'un onglet **non groupé** est déjà ouvert à cette URL, c'est le tab non groupé qui survit et l'appartenance au groupe restauré est perdue.
+
+### Critères d'acceptation
+
+- [ ] Un paramètre `deduplicationKeepStrategy` est exposé dans la page Options, section "Portée de la déduplication", sous forme de radio à quatre valeurs :
+  - `keep-old` : conserver l'onglet existant.
+  - `keep-new` : conserver le nouvel onglet et fermer l'existant.
+  - `keep-grouped` : conserver celui qui est dans un groupe, sinon retomber sur `keep-old`.
+  - `keep-grouped-or-new` : conserver celui qui est dans un groupe, sinon retomber sur `keep-new`.
+- [ ] La valeur par défaut est `keep-grouped-or-new` : le tab groupé est toujours protégé, et quand l'heuristique ne tranche pas (aucun ou les deux onglets groupés) on privilégie la version fraîchement chargée.
+- [ ] Le radio est désactivé visuellement quand la déduplication globale est off.
+- [ ] En mode `keep-grouped`, si les deux onglets sont groupés ou aucun, on garde l'ancien (fallback explicite).
+- [ ] En mode `keep-new`, l'onglet fermé capture son `groupId`, `title` et `index` avant fermeture ; l'action "Annuler" de la notification rouvre l'onglet et tente de le rattacher à son groupe d'origine (fallback : nouveau groupe si l'original n'existe plus).
+- [ ] Lors d'une restauration de session contenant un onglet groupé à l'URL X, si un onglet non groupé à X existe déjà dans la fenêtre et que `deduplicationKeepStrategy = 'keep-grouped'`, le tab restauré (groupé) survit et conserve son appartenance au groupe.
+- [ ] Le compteur `tabsDeduplicatedCount` s'incrémente exactement une fois par déduplication, quelle que soit la stratégie.
+
+---
+
+## US-D — Neutralisation de la déduplication pendant la restauration de session
+
+**En tant qu'** utilisateur qui restaure une session,
+**je veux** que la déduplication automatique ne ferme pas les onglets fraîchement créés par la restauration,
+**afin de** retrouver intégralement le contenu de la session même lorsque des onglets conservés (épinglés, onglet hôte de la page options) partagent une URL avec un onglet de la session.
+
+### Contexte
+
+Le mode « Replace tabs in current window » conserve les onglets épinglés et éventuellement l'onglet hôte de la page options. Sans garde-fou, le handler de déduplication du background fermerait l'un des deux onglets partageant une URL (celui restauré ou celui conservé) dès qu'ils coexistent dans la fenêtre, faisant perdre du contenu à la session ou brisant la référence épinglée.
+
+### Critères d'acceptation
+
+- [ ] Avant toute création d'onglet via `restoreTabs` (cibles `current`, `new` ou `replace`), les URLs issues de la session sont envoyées au background via un message `SESSION_RESTORE_SKIP_DEDUP`.
+- [ ] Le handler background appelle `markUrlToSkipDeduplication` pour chaque URL reçue. Le TTL de 10 s du registre skip-dedup couvre la création des onglets d'une session typique.
+- [ ] Le handler de déduplication (`src/background/deduplication.ts`) consulte `shouldSkipDeduplication` avant d'agir et n'opère pas sur les URLs en sursis.
+- [ ] Cas testé : onglet épinglé à l'URL X + session contenant également X. Après « Replace tabs in current window », les deux onglets coexistent dans la fenêtre.
+- [ ] Cas testé : la page options reste ouverte après « Replace » même si la session contient une URL identique à celle de la page options.

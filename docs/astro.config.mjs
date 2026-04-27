@@ -28,6 +28,7 @@ export default defineConfig({
             { slug: 'concepts/groupement' },
             { slug: 'concepts/deduplication' },
             { slug: 'concepts/sources-nom-groupe' },
+            { slug: 'concepts/modes-nommage' },
             { slug: 'concepts/sessions-epinglees' },
           ],
         },

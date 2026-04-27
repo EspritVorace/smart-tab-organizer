@@ -8,10 +8,11 @@ import {
     addToExistingGroup,
 } from './grouping.js';
 import { getMatchMode, isUrlMatch } from './deduplication.js';
-import { getStatisticsData, updateStatisticsData } from '../utils/statisticsUtils.js';
-import { getMessage } from '../utils/i18n.js';
-import { logger } from '../utils/logger.js';
-import type { DomainRuleSetting, SyncSettings } from '../types/syncSettings.js';
+import { getStatisticsData, updateStatisticsData } from '@/utils/statisticsUtils.js';
+import { getMessage } from '@/utils/i18n.js';
+import { logger } from '@/utils/logger.js';
+import type { DomainRuleSetting, AppSettings } from '@/types/syncSettings.js';
+import type { ChromeTabGroupsExtended, ChromeNotificationsAPI } from '@/types/chromeApi.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -44,25 +45,40 @@ function isOrganizableUrl(url: string | undefined): url is string {
 /**
  * Deduplicates all tabs in the window according to their matching domain rule.
  * Independent of the global deduplication toggle (manual action per US-PO006).
+ * Honors `deduplicateUnmatchedDomains` to decide whether tabs without a
+ * matching rule are included (bucketed together under exact-match mode).
  * Returns the number of duplicate tabs removed.
  */
-async function batchDeduplicateTabs(windowId: number, settings: SyncSettings): Promise<number> {
+async function batchDeduplicateTabs(windowId: number, settings: AppSettings): Promise<number> {
     const allTabs = await browser.tabs.query({ windowId });
     const organizable = allTabs
         .filter(t => isOrganizableUrl(t.url))
         .sort((a, b) => a.index - b.index);
 
-    // Group tabs by rule + matchMode bucket
-    const buckets = new Map<string, { rule: DomainRuleSetting; tabs: Browser.tabs.Tab[] }>();
+    // Group tabs by rule + matchMode bucket (unmatched tabs share a single
+    // `__unmatched__:exact` bucket when settings.deduplicateUnmatchedDomains
+    // is true).
+    const UNMATCHED_KEY = '__unmatched__:exact';
+    const buckets = new Map<string, { rule: DomainRuleSetting | undefined; tabs: Browser.tabs.Tab[] }>();
 
     for (const tab of organizable) {
         const rule = findMatchingRule(tab.url!, settings.domainRules);
-        if (!rule || !rule.enabled || !rule.deduplicationEnabled) continue;
+        let bucketKey: string;
+        let bucketRule: DomainRuleSetting | undefined;
 
-        const mode = getMatchMode(rule);
-        const key = `${rule.id}:${mode}`;
-        if (!buckets.has(key)) buckets.set(key, { rule, tabs: [] });
-        buckets.get(key)!.tabs.push(tab);
+        if (rule) {
+            if (!rule.enabled || !rule.deduplicationEnabled) continue;
+            bucketKey = `${rule.id}:${getMatchMode(rule)}`;
+            bucketRule = rule;
+        } else if (settings.deduplicateUnmatchedDomains) {
+            bucketKey = UNMATCHED_KEY;
+            bucketRule = undefined;
+        } else {
+            continue;
+        }
+
+        if (!buckets.has(bucketKey)) buckets.set(bucketKey, { rule: bucketRule, tabs: [] });
+        buckets.get(bucketKey)!.tabs.push(tab);
     }
 
     const toRemove = new Set<number>();
@@ -132,7 +148,7 @@ async function batchDeduplicateTabs(windowId: number, settings: SyncSettings): P
  * Returns only entries whose target group has ≥ 2 members.
  * Per US-PO008: single-member target groups are excluded.
  */
-async function buildOrganizePlan(windowId: number, settings: SyncSettings): Promise<PlanEntry[]> {
+async function buildOrganizePlan(windowId: number, settings: AppSettings): Promise<PlanEntry[]> {
     // Re-query after dedup so removed tabs are no longer present
     const allTabs = await browser.tabs.query({ windowId });
     const organizable = allTabs.filter(t => isOrganizableUrl(t.url));
@@ -183,7 +199,7 @@ async function applyOrganizePlan(
     if (plan.length === 0) return { tabsGrouped: 0, groupCount: 0 };
 
     // Fetch current groups to detect existing ones by title
-    const existingGroups = await (browser.tabGroups as any).query({ windowId }) as Array<{ id: number; title: string }>;
+    const existingGroups = await (browser.tabGroups as unknown as ChromeTabGroupsExtended).query({ windowId });
     const existingByTitle = new Map<string, number>(); // title → groupId
     for (const g of existingGroups) {
         if (g.title) existingByTitle.set(g.title, g.id);
@@ -252,7 +268,7 @@ async function applyOrganizePlan(
  * preserving their relative order, then collapses them all.
  */
 async function repositionAndCollapseGroups(windowId: number): Promise<void> {
-    const allGroups = await (browser.tabGroups as any).query({ windowId }) as Array<{ id: number }>;
+    const allGroups = await (browser.tabGroups as unknown as ChromeTabGroupsExtended).query({ windowId });
     if (allGroups.length === 0) return;
 
     // Find first-tab index for each group to establish current L→R order
@@ -269,12 +285,12 @@ async function repositionAndCollapseGroups(windowId: number): Promise<void> {
     // Example: groups [A@2, B@7, C@15] sorted → reversed [C, B, A]
     // Move C to 0 → [C,...], Move B to 0 → [B, C,...], Move A to 0 → [A, B, C,...]
     for (const { g } of [...grouped].reverse()) {
-        await (browser.tabGroups as any).move(g.id, { index: 0 }).catch(() => {});
+        await (browser.tabGroups as unknown as ChromeTabGroupsExtended).move(g.id, { index: 0 }).catch(() => {});
     }
 
     // Collapse all groups
     for (const { g } of grouped) {
-        await (browser.tabGroups as any).update(g.id, { collapsed: true }).catch(() => {});
+        await browser.tabGroups.update(g.id, { collapsed: true }).catch(() => {});
     }
 
     logger.debug(`[ORGANIZE] Repositioned and collapsed ${allGroups.length} group(s).`);
@@ -301,7 +317,7 @@ export async function handleOrganizeAllTabs(windowId: number): Promise<void> {
     const removedCount = await batchDeduplicateTabs(windowId, settings);
 
     if (removedCount > 0 && settings.notifyOnDeduplication) {
-        (browser.notifications as any).create({
+        (browser as unknown as { notifications: ChromeNotificationsAPI }).notifications.create({
             type: 'basic',
             iconUrl: browser.runtime.getURL('/icons/icon128.png'),
             title: getMessage('extensionName'),
@@ -320,7 +336,7 @@ export async function handleOrganizeAllTabs(windowId: number): Promise<void> {
 
     // ── 5. Grouping notification ────────────────────────────────────────────
     if (tabsGrouped > 0 && settings.notifyOnGrouping) {
-        (browser.notifications as any).create({
+        (browser as unknown as { notifications: ChromeNotificationsAPI }).notifications.create({
             type: 'basic',
             iconUrl: browser.runtime.getURL('/icons/icon128.png'),
             title: getMessage('extensionName'),

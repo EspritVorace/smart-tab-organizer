@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.1.4 — since 1.1.3
+
+### New Features
+- Keep-strategy setting for deduplication with group-aware undo
+- "Replace tabs" restore mode to switch session context in one click
+- Per-rule dedup mode that ignores configured query params
+- Opt-out for deduplication on domains without a matching rule
+- In-page toasts for user-triggered options actions
+
+### Improvements
+- Migrate all storage from browser.storage.sync to storage.local (full 5-lot migration with runtime sync-to-local converter)
+- Accessibility auditing pipeline with axe-core (Storybook + Playwright, consolidated reports, CI integration)
+- ESLint configuration with blocking pre-commit hook, path alias @/ for src imports, no-explicit-any enforcement
+- Popup visual rework: wider layout, rounded toolbar buttons, emoji icons, improved hierarchy
+- Replace dismissible intro callout with permanent page descriptions
+- Comprehensive test coverage additions (unit tests, stories with play functions, portable stories)
+- Handle notifications gracefully in browsers without action buttons
+
+### Bug Fixes
+- Restore inset gutter and accent border on active sidebar item
+- Fix critical button-name and serious color-contrast a11y violations
+- Clear baseline a11y violations
+
 ## 1.1.3 — since 1.1.2
 
 ### New Features

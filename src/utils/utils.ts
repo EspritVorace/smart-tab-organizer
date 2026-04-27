@@ -1,3 +1,4 @@
+import type { BadgeProps } from '@radix-ui/themes';
 import { logger } from './logger';
 
 export function generateUUID(): string {
@@ -57,7 +58,7 @@ export function isValidRegex(regex: string): boolean {
   try {
     new RegExp(regex);
     return regex.includes('(') && regex.includes(')');
-  } catch (e) {
+  } catch (_e) {
     return false;
   }
 }
@@ -67,8 +68,8 @@ export function isValidDomain(domain: string | null): boolean {
   return domain ? /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(domain.trim()) : false;
 }
 
-export function getRadixColor(groupColor: string): string {
-  const colorMap: Record<string, string> = {
+export function getRadixColor(groupColor: string): NonNullable<BadgeProps['color']> {
+  const colorMap: Record<string, NonNullable<BadgeProps['color']>> = {
     'grey': 'gray',
     'blue': 'blue',
     'red': 'red',
@@ -79,5 +80,5 @@ export function getRadixColor(groupColor: string): string {
     'cyan': 'cyan',
     'orange': 'orange',
   };
-  return colorMap[groupColor] || 'gray';
+  return colorMap[groupColor] ?? 'gray';
 }

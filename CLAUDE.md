@@ -35,16 +35,15 @@ pnpm screenshots                          # Deterministic multi-locale/theme scr
 - `src/entrypoints/popup.html` / `options.html`
 
 ### Background Modules (`src/background/`)
-`index.ts` · `grouping.ts` · `deduplication.ts` · `event-handlers.ts` · `messaging.ts` · `settings.ts` · `organize.ts`
+`index.ts` · `grouping.ts` · `deduplication.ts` · `event-handlers.ts` · `messaging.ts` · `migration.ts` · `settings.ts` · `organize.ts`
 
 ### Storage
 | Backend | Contents |
 |---|---|
-| `browser.storage.sync` | Domain rules, grouping/dedup toggles, notification prefs |
-| `browser.storage.local` | Sessions, UI prefs (e.g. `popupStatsCollapsed`), help prefs |
-| `browser.storage.session` | Profile–window map, sync drafts, editing guard |
+| `browser.storage.local` | Domain rules, grouping/dedup toggles, notification prefs, sessions, UI prefs (e.g. `popupStatsCollapsed`), help prefs |
+| `browser.storage.session` | Profile-window map, session drafts, editing guard |
 
-`useSyncedSettings` hook uses refs to prevent race conditions. `useSyncedState` unifies synchronized storage access for settings and statistics.
+`useSettings` hook uses refs to prevent race conditions. `useStorageState` unifies storage access for settings and statistics.
 
 ### Schemas & Types
 - `src/schemas/` — Zod schemas: `common`, `domainRule`, `enums`, `importExport`, `session`
@@ -67,8 +66,8 @@ src/
                    # SessionWizards/ · SettingsPage/ · SettingsToggles/ · WizardStepper/
                    # SplitButton/ · ConfirmDialog/ · StatusBadge/ · ThemeToggle/
                    # DataTable/ · OptionsLayout/
-    Form/          # FormFields/ · themed-callouts/ · themes/
-  hooks/           # useSyncedState · useSyncedSettings · useStatistics · useSessions
+    Form/          # FormFields/
+  hooks/           # useStorageState · useSettings · useStatistics · useSessions
                    # useSessionEditor · useDeepLinking
   pages/           # DomainRulesPage · SessionsPage · StatisticsPage · ImportExportPage · options.tsx · popup.tsx
   schemas/         # Zod schemas
@@ -77,8 +76,8 @@ src/
                    # conflictDetection · deduplicationSkip · importClassification
                    # sessionClassification · sessionOrderUtils · ruleOrderUtils
                    # presetsToSearchableGroups · stringUtils · migration · tabTreeUtils
-                   # storageItems · sessionsHelpPrefs · settingsUtils · statisticsUtils
-                   # themeConstants · notifications · utils
+                   # storageItems · settingsUtils · statisticsUtils
+                   # notifications · utils
   styles/          # radix-themes.css (custom focus for non-Radix markup only)
 tests/             # Vitest unit tests
 tests/e2e/         # Playwright E2E tests
@@ -86,16 +85,14 @@ tests/e2e/         # Playwright E2E tests
 
 ### Features
 1. **Automatic Grouping** : domain rules + regex presets (middle-click / right-click new tab)
-2. **Deduplication** : exact URL / hostname+path / hostname / includes modes
+2. **Deduplication** : exact URL / URL without ignored params / includes modes; keep strategy (`keep-grouped-or-new` default, `keep-grouped`, `keep-old`, `keep-new`) to decide which of the two matching tabs survives; undo action captures `groupId` and tries to restore group membership of the closed tab
 3. **Rule Management** : CRUD for domain rules; built-in & custom regex presets; drag-and-drop reordering
 4. **Import/Export Wizard** : Zod-validated JSON for rules and sessions; rule/session classification (new/conflicting/identical); conflict resolution; optional note field
 5. **Statistics** : grouping & dedup counters
-6. **Sessions & Profiles** : snapshots of open tabs with optional note; pinned profiles with icon, auto-sync, window exclusivity; restore wizard with conflict resolution; interactive session editor; collapsed/expanded group state persistence; drag-and-drop session reordering; session card with HoverCard metadata and inline rename
+6. **Sessions & Profiles** : snapshots of open tabs with optional note; pinned profiles with icon, window exclusivity; restore wizard with conflict resolution; interactive session editor; collapsed/expanded group state persistence; drag-and-drop session reordering; session card with HoverCard metadata and inline rename
 
-### Feature Themes (`src/utils/themeConstants.ts`)
-`DOMAIN_RULES` purple · `REGEX_PRESETS` cyan · `IMPORT` jade · `EXPORT` teal · `STATISTICS` orange · `SETTINGS` gray · `SESSIONS` indigo
-
-Theme wrappers in `src/components/Form/themes/` apply accent colors contextually.
+### Theming
+Accent unique `indigo` (défaut Radix Themes). Préférer les tokens Radix (`var(--accent-a3)`, `var(--gray-a2)`, etc.) aux couleurs hardcodées.
 
 ### Internationalization
 Always use `getMessage()` from `src/utils/i18n.ts` — for UI text, `aria-label`, and `title` attributes. Never hardcode strings.
@@ -124,11 +121,38 @@ logger.debug('[MY_MODULE] Something happened:', value);
 ### Component Organization
 - **Core/** — business logic tied to a domain concept
 - **UI/** — layout and cross-feature interface components
-- **Form/** — reusable form fields, themed callouts, theme providers
+- **Form/** — reusable form fields
 
 ### Storybook
 - Story titles mirror folder: `Components/Core/Session/SessionCard`
 - Prefix all exports with component name: `SessionCardDefault`, `SessionCardDisabled` (avoids conflicts)
+
+### Accessibility audits (axe-core)
+Two layers run axe-core et partagent le même rapport consolidé :
+
+- **Storybook** : `@storybook/addon-a11y` (panel live en dev) plus `@storybook/test-runner` qui exécute axe sur chaque story. En CI un job dédié `a11y-storybook` tourne dans `tests.yml`.
+- **Playwright E2E** : helper `tests/e2e/helpers/a11y.ts` (`auditPage`) instrumente les specs existantes aux points clés. No-op tant que `A11Y_ENABLED=true` n'est pas dans l'environnement. En CI, `A11Y_ENABLED=true` est activé sur les 3 shards E2E existants (pas de run Playwright en double).
+
+Le job `report` de `tests.yml` télécharge les artefacts, consolide les shards, produit `summary.md` et publie un commentaire sticky PR (marker `<!-- a11y-report -->`).
+
+Scripts :
+```bash
+pnpm a11y:storybook   # build Storybook, lance test-runner + axe, consolide le shard JSONL
+pnpm a11y:e2e         # build extension, lance Playwright avec A11Y_ENABLED=true
+pnpm a11y             # enchaîne storybook, e2e, puis consolidation
+pnpm a11y:report      # lit les deux rapports et génère reports/a11y/summary.md
+```
+
+Rapports (gitignorés, dossier `reports/a11y/`) :
+- `storybook-shards.jsonl` (shard brut) puis `storybook-a11y.json` (consolidé).
+- `e2e-shards/*.jsonl` (shards brut per-worker) puis `e2e-a11y.json` (consolidé par globalTeardown).
+- `summary.md`, `summary.json` : synthèse consolidée (tableau, top 10, diff baseline si `reports/a11y/baseline.json` existe).
+
+Seuil d'échec configurable via `A11Y_FAIL_LEVEL` (valeurs : `minor`, `moderate`, `serious` (défaut), `critical`, `none`).
+
+Pour désactiver une règle axe localement (à accompagner d'un commentaire justificatif) :
+- Story : `parameters.a11y.config.rules = [{ id: 'aria-allowed-attr', enabled: false }]`.
+- E2E : `await auditPage(page, 'label', { disableRules: ['region'] });`.
 
 ### Style d'écriture
 - **Ne jamais utiliser de tiret cadratin (`—`, U+2014) ni de tiret demi-cadratin (`–`, U+2013)** dans les contenus textuels (docs, UI, commentaires, commit messages, PR descriptions, frontmatter, etc.).
@@ -156,7 +180,26 @@ identifier et résoudre les zones floues de la user story concernée.
 ### Ne pas sauter cette étape si
 
 - La US référence une entité dont les champs ne sont pas tous explicites.
-- La US interagit avec `chrome.storage.sync` ou `browser.storage.local`.
+- La US interagit avec `browser.storage.local` ou `browser.storage.session`.
 - La US introduit un nouveau composant UI sans préciser le comportement
   responsive, les états vides, ou les états d'erreur.
 - La US touche au système i18n (nouvelles clés à ajouter dans les 3 locales).
+
+## Agents Claude disponibles
+
+- **`e2e-flaky-detector`** : analyse les tests Playwright pour repérer
+  les patterns de fragilité (race conditions, assertions fragiles,
+  storage async sans await).
+- **`code-deduplicator`** : scanne `src/` via le skill `jscpd`,
+  présente un top 10 des duplications les plus douloureuses, applique
+  le refacto choisi par l'utilisateur (extraction de hook/composant/util)
+  avec garde-fous (compile, tests, revert si échec, commit atomique).
+  L'agent lance lui-même `npx skills experimental_install` à chaque appel
+  pour rester synchronisé sur `skills-lock.json`.
+
+### Skill jscpd
+- Installé via `npx skills add kucherenko/jscpd` (une fois, lockfile
+  versionné dans `skills-lock.json`).
+- Config projet dans `.jscpd.json` (pattern, ignore, formats).
+- Le skill source est sous `.agents/skills/jscpd/` (gitignored), recréé
+  à la demande par `npx skills experimental_install`.

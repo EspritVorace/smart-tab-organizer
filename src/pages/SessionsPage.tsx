@@ -1,29 +1,33 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Box, Flex, Button, Text, Callout, TextField, Separator, Badge } from '@radix-ui/themes';
-import { Camera, Archive, CheckCircle, Pin, Search, type LucideIcon } from 'lucide-react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { Box, Flex, Button, Text, Callout, Separator, Badge } from '@radix-ui/themes';
+import { Camera, Archive, CheckCircle, Pin, Upload, type LucideIcon } from 'lucide-react';
 import { DragDropProvider, type DragOverEvent, type DragEndEvent } from '@dnd-kit/react';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { move } from '@dnd-kit/helpers';
-import { PageLayout } from '../components/UI/PageLayout/PageLayout';
-import { SessionCard } from '../components/Core/Session/SessionCard';
-import { SessionEditDialog } from '../components/Core/Session/SessionEditDialog';
-import { SessionsIntroCallout } from '../components/Core/Session/SessionsIntroCallout';
-import { SnapshotWizard } from '../components/UI/SessionWizards/SnapshotWizard';
-import { RestoreWizard } from '../components/UI/SessionWizards/RestoreWizard';
-import { ConfirmDialog } from '../components/UI/ConfirmDialog/ConfirmDialog';
-import { getMessage } from '../utils/i18n';
-import { foldAccents } from '../utils/stringUtils';
-import { matchSessionSearch, splitByPinned } from '../utils/sessionUtils';
-import { moveSessionToFirstInGroup, moveSessionToLastInGroup } from '../utils/sessionOrderUtils';
-import { useSessions } from '../hooks/useSessions';
-import { restoreTabs } from '../utils/tabRestore';
-import { updateSession } from '../utils/sessionStorage';
-import type { Session } from '../types/session';
-import type { SessionSearchMatch } from '../utils/sessionUtils';
-import type { SyncSettings } from '../types/syncSettings';
+import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
+import { EmptyState } from '@/components/UI/EmptyState';
+import { ImportSessionsWizard } from '@/components/UI/ImportExportWizards/ImportSessionsWizard';
+import { SessionCard } from '@/components/Core/Session/SessionCard';
+import { SessionEditDialog } from '@/components/Core/Session/SessionEditDialog';
+import { SnapshotWizard } from '@/components/UI/SessionWizards/SnapshotWizard';
+import { RestoreWizard } from '@/components/UI/SessionWizards/RestoreWizard';
+import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
+import { ListToolbar } from '@/components/UI/ListToolbar';
+import { getMessage } from '@/utils/i18n';
+import { foldAccents } from '@/utils/stringUtils';
+import { matchSessionSearch, splitByPinned } from '@/utils/sessionUtils';
+import { moveSessionToFirstInGroup, moveSessionToLastInGroup } from '@/utils/sessionOrderUtils';
+import { useSessions } from '@/hooks/useSessions';
+import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
+import { updateSession } from '@/utils/sessionStorage';
+import { showSuccessNotification } from '@/utils/notifications';
+import { browser } from 'wxt/browser';
+import type { Session } from '@/types/session';
+import type { SessionSearchMatch } from '@/utils/sessionUtils';
+import type { AppSettings } from '@/types/syncSettings';
 
 interface SessionsPageProps {
-  syncSettings: SyncSettings;
+  syncSettings: AppSettings;
   /** Controlled by options.tsx: true when a deep-link requests the snapshot wizard. */
   snapshotWizardOpen?: boolean;
   /** Called by SessionsPage to let options.tsx know the wizard closed (or page unmounted). */
@@ -32,6 +36,10 @@ interface SessionsPageProps {
   snapshotGroupId?: number | null;
   /** Called when the snapshot wizard closes to reset the group context. */
   onSnapshotGroupIdChange?: (id: number | null) => void;
+  /** Session id for which a deep-link requests the restore wizard to open. */
+  restoreSessionId?: string | null;
+  /** Called to clear the restore deep-link once consumed. */
+  onRestoreSessionIdChange?: (id: string | null) => void;
 }
 
 function SectionHeader({ icon: Icon, titleKey, count }: { icon: LucideIcon; titleKey: string; count: number }) {
@@ -44,16 +52,224 @@ function SectionHeader({ icon: Icon, titleKey, count }: { icon: LucideIcon; titl
   );
 }
 
+interface SessionSectionProps {
+  icon: LucideIcon;
+  titleKey: string;
+  emptyTitleKey: string;
+  emptyDescriptionKey?: string;
+  /** Whether this section lists the pinned sessions (drives drag reorder layout). */
+  isPinned: boolean;
+  /** Sessions displayed in this section (already filtered by search + split by pinned state). */
+  sessions: Session[];
+  /** Full ordered session list, used to recompute the global order after a drag and for move-to-first/last. */
+  allSessions: Session[];
+  searchQuery: string;
+  searchMatches: Map<string, SessionSearchMatch> | null;
+  /** Persist a new global session order. */
+  updateOrder: (sessions: Session[]) => Promise<void>;
+  /** Rename a session (forwarded straight to SessionCard). */
+  renameSession: (id: string, newName: string) => Promise<void>;
+  /** Reload sessions after a mutation (used for pin/unpin). */
+  reload: () => Promise<void>;
+  /** Open the RestoreWizard (owned by the parent). */
+  onOpenRestoreWizard: (session: Session) => void;
+  /** Open the SessionEditDialog (owned by the parent). */
+  onOpenEditDialog: (session: Session) => void;
+  /** Open the delete ConfirmDialog (owned by the parent). */
+  onOpenDeleteDialog: (session: Session) => void;
+  /** Emit a transient feedback message (single callout shared between both sections). */
+  onRestoreFeedback: (message: string | null) => void;
+}
+
+function SessionSection({
+  icon,
+  titleKey,
+  emptyTitleKey,
+  emptyDescriptionKey,
+  isPinned,
+  sessions,
+  allSessions,
+  searchQuery,
+  searchMatches,
+  updateOrder,
+  renameSession,
+  reload,
+  onOpenRestoreWizard,
+  onOpenEditDialog,
+  onOpenDeleteDialog,
+  onRestoreFeedback,
+}: SessionSectionProps) {
+  const [dragItems, setDragItems] = useState<Session[] | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  const handleCardKeyDown = useCallback((e: React.KeyboardEvent<HTMLElement>, index: number) => {
+    // Only act when the card element itself has focus (not a child input/button).
+    if (e.target !== e.currentTarget) return;
+    const cards = listRef.current?.querySelectorAll<HTMLElement>('[data-session-card]');
+    if (!cards) return;
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        cards[index + 1]?.focus();
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        cards[index - 1]?.focus();
+        break;
+      case 'Home':
+        e.preventDefault();
+        cards[0]?.focus();
+        break;
+      case 'End':
+        e.preventDefault();
+        cards[cards.length - 1]?.focus();
+        break;
+    }
+  }, []);
+
+  // Drag: reorder within this section, then splice back into the global order.
+  const handleDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
+    setDragItems(prev => move(prev ?? sessions, event));
+  }, [sessions]);
+
+  const handleDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
+    if (!event.canceled) {
+      const source = dragItems ?? sessions;
+      const reordered = move(source, event) as Session[];
+      const others = allSessions.filter(s => s.isPinned !== isPinned);
+      const buildOrder = (section: Session[]) =>
+        isPinned ? [...section, ...others] : [...others, ...section];
+      if (reordered !== source) {
+        void updateOrder(buildOrder(reordered));
+      } else if (dragItems) {
+        void updateOrder(buildOrder(dragItems));
+      }
+    }
+    setDragItems(null);
+  }, [dragItems, sessions, allSessions, isPinned, updateOrder]);
+
+  // Quick restore: full session content, no conflict resolution wizard.
+  const handleQuickRestore = useCallback(async (session: Session, target: RestoreTarget) => {
+    try {
+      let protectedTabId: number | undefined;
+      if (target === 'replace') {
+        const currentTab = await browser.tabs.getCurrent();
+        protectedTabId = currentTab?.id;
+      }
+      const result = await restoreSessionTabs(session, target, protectedTabId);
+      onRestoreFeedback(getMessage('restoreResultTabsCreated', [String(result.tabsCreated)]));
+      if (target === 'replace') {
+        void showSuccessNotification(
+          getMessage('sessionSwitchedNotificationTitle'),
+          getMessage('sessionSwitchedNotificationMessage', [session.name]),
+        );
+      }
+    } catch {
+      onRestoreFeedback(getMessage('restoreError'));
+    }
+    setTimeout(() => onRestoreFeedback(null), 4000);
+  }, [onRestoreFeedback]);
+
+  const handleRestoreCurrentWindow = useCallback(
+    (session: Session) => handleQuickRestore(session, 'current'),
+    [handleQuickRestore],
+  );
+
+  const handleRestoreNewWindow = useCallback(
+    (session: Session) => handleQuickRestore(session, 'new'),
+    [handleQuickRestore],
+  );
+
+  const handleReplaceCurrentWindow = useCallback(
+    (session: Session) => handleQuickRestore(session, 'replace'),
+    [handleQuickRestore],
+  );
+
+  const handlePin = useCallback(async (session: Session) => {
+    await updateSession(session.id, { isPinned: true });
+    await reload();
+  }, [reload]);
+
+  const handleUnpin = useCallback(async (session: Session) => {
+    await updateSession(session.id, { isPinned: false });
+    await reload();
+  }, [reload]);
+
+  const handleMoveToFirst = useCallback((session: Session) => {
+    void updateOrder(moveSessionToFirstInGroup(allSessions, session.id));
+  }, [allSessions, updateOrder]);
+
+  const handleMoveLast = useCallback((session: Session) => {
+    void updateOrder(moveSessionToLastInGroup(allSessions, session.id));
+  }, [allSessions, updateOrder]);
+
+  // When a search is active, hide the whole section if it matched nothing.
+  if (sessions.length === 0 && searchQuery) return null;
+  return (
+    <Box>
+      <SectionHeader icon={icon} titleKey={titleKey} count={sessions.length} />
+      {sessions.length === 0 ? (
+        <EmptyState
+          icon={icon}
+          title={getMessage(emptyTitleKey)}
+          description={emptyDescriptionKey ? getMessage(emptyDescriptionKey) : undefined}
+          descriptionMaxWidth="none"
+          minHeight={100}
+        />
+      ) : (
+        <DragDropProvider
+          modifiers={[RestrictToVerticalAxis]}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          <Flex ref={listRef} direction="column" gap="3" mt="3">
+            {(dragItems ?? sessions).map((session, index) => {
+              const searchMatch = searchMatches?.get(session.id);
+              return (
+                <SessionCard
+                  key={session.id}
+                  session={session}
+                  existingSessions={allSessions}
+                  onRestore={onOpenRestoreWizard}
+                  onRestoreCurrentWindow={handleRestoreCurrentWindow}
+                  onRestoreNewWindow={handleRestoreNewWindow}
+                  onReplaceCurrentWindow={handleReplaceCurrentWindow}
+                  onRename={renameSession}
+                  onEdit={onOpenEditDialog}
+                  onDelete={onOpenDeleteDialog}
+                  onPin={handlePin}
+                  onUnpin={handleUnpin}
+                  forcePreviewOpen={searchMatch?.matchesTabs === true || searchMatch?.matchesNote === true}
+                  searchMatchingGroupIds={searchMatch?.matchingGroupIds}
+                  searchQuery={searchQuery || undefined}
+                  index={index}
+                  isDragDisabled={!!searchQuery}
+                  onMoveToFirst={() => handleMoveToFirst(session)}
+                  onMoveLast={() => handleMoveLast(session)}
+                  onCardKeyDown={(e) => handleCardKeyDown(e, index)}
+                />
+              );
+            })}
+          </Flex>
+        </DragDropProvider>
+      )}
+    </Box>
+  );
+}
+
 export function SessionsPage({
   syncSettings,
   snapshotWizardOpen = false,
   onSnapshotWizardOpenChange,
   snapshotGroupId,
   onSnapshotGroupIdChange,
+  restoreSessionId,
+  onRestoreSessionIdChange,
 }: SessionsPageProps) {
   const { sessions, isLoaded, createSession, renameSession, removeSession, reload, updateOrder } = useSessions();
   // Internal open state; initialized from external prop so the wizard opens immediately on mount.
   const [snapshotOpen, setSnapshotOpen] = useState(snapshotWizardOpen);
+  const [importSessionsOpen, setImportSessionsOpen] = useState(false);
 
   // Sync: if the external prop becomes true after mount (e.g. user already on sessions tab),
   // open the wizard.
@@ -65,15 +281,24 @@ export function SessionsPage({
   // future mount doesn't re-open the wizard unexpectedly.
   useEffect(() => {
     return () => onSnapshotWizardOpenChange?.(false);
-  }, []);
+  }, [onSnapshotWizardOpenChange]);
 
   const [restoreSession, setRestoreSession] = useState<Session | null>(null);
   const [editTarget, setEditTarget] = useState<Session | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Session | null>(null);
   const [quickRestoreMessage, setQuickRestoreMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [dragPinnedItems, setDragPinnedItems] = useState<Session[] | null>(null);
-  const [dragUnpinnedItems, setDragUnpinnedItems] = useState<Session[] | null>(null);
+
+  // Deep-link: open the RestoreWizard when a sessionId has been provided via
+  // URL hash (e.g. from the popup's customize restore action).
+  useEffect(() => {
+    if (!restoreSessionId || !isLoaded) return;
+    const found = sessions.find((s) => s.id === restoreSessionId);
+    if (found) {
+      setRestoreSession(found);
+      onRestoreSessionIdChange?.(null);
+    }
+  }, [restoreSessionId, isLoaded, sessions, onRestoreSessionIdChange]);
 
   // Order: use storage order directly (reorderSessions saves them in the correct order)
   const sortedSessions = sessions;
@@ -128,137 +353,37 @@ export function SessionsPage({
     setDeleteTarget(null);
   }, [deleteTarget, removeSession]);
 
-  // Quick restore in current window (no wizard)
-  const handleRestoreCurrentWindow = useCallback(async (session: Session) => {
-    try {
-      const result = await restoreTabs({
-        tabs: session.ungroupedTabs,
-        groups: session.groups,
-        target: 'current',
-      });
-      setQuickRestoreMessage(
-        getMessage('restoreResultTabsCreated', [String(result.tabsCreated)]),
-      );
-      setTimeout(() => setQuickRestoreMessage(null), 4000);
-    } catch {
-      setQuickRestoreMessage(getMessage('restoreError'));
-      setTimeout(() => setQuickRestoreMessage(null), 4000);
-    }
-  }, []);
-
-  // Quick restore in new window (no wizard)
-  const handleRestoreNewWindow = useCallback(async (session: Session) => {
-    try {
-      const result = await restoreTabs({
-        tabs: session.ungroupedTabs,
-        groups: session.groups,
-        target: 'new',
-      });
-      setQuickRestoreMessage(
-        getMessage('restoreResultTabsCreated', [String(result.tabsCreated)]),
-      );
-      setTimeout(() => setQuickRestoreMessage(null), 4000);
-    } catch {
-      setQuickRestoreMessage(getMessage('restoreError'));
-      setTimeout(() => setQuickRestoreMessage(null), 4000);
-    }
-  }, []);
-
-  const handlePin = useCallback(async (session: Session) => {
-    await updateSession(session.id, { isPinned: true });
-    await reload();
-  }, [reload]);
-
-  const handleUnpin = useCallback(async (session: Session) => {
-    await updateSession(session.id, { isPinned: false });
-    await reload();
-  }, [reload]);
-
-  // Drag-and-drop handlers (pinned group)
-  const handlePinnedDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
-    setDragPinnedItems(prev => move(prev ?? pinnedSessions, event));
-  }, [pinnedSessions]);
-
-  const handlePinnedDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
-    if (!event.canceled) {
-      const source = dragPinnedItems ?? pinnedSessions;
-      const reordered = move(source, event) as Session[];
-      const allUnpinned = sortedSessions.filter(s => !s.isPinned);
-      if (reordered !== source) {
-        void updateOrder([...reordered, ...allUnpinned]);
-      } else if (dragPinnedItems) {
-        void updateOrder([...dragPinnedItems, ...allUnpinned]);
-      }
-    }
-    setDragPinnedItems(null);
-  }, [dragPinnedItems, pinnedSessions, sortedSessions, updateOrder]);
-
-  // Drag-and-drop handlers (unpinned group)
-  const handleUnpinnedDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
-    setDragUnpinnedItems(prev => move(prev ?? unpinnedSessions, event));
-  }, [unpinnedSessions]);
-
-  const handleUnpinnedDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
-    if (!event.canceled) {
-      const source = dragUnpinnedItems ?? unpinnedSessions;
-      const reordered = move(source, event) as Session[];
-      const allPinned = sortedSessions.filter(s => s.isPinned);
-      if (reordered !== source) {
-        void updateOrder([...allPinned, ...reordered]);
-      } else if (dragUnpinnedItems) {
-        void updateOrder([...allPinned, ...dragUnpinnedItems]);
-      }
-    }
-    setDragUnpinnedItems(null);
-  }, [dragUnpinnedItems, unpinnedSessions, sortedSessions, updateOrder]);
-
-  const handleMoveToFirst = useCallback((session: Session) => {
-    const reordered = moveSessionToFirstInGroup(sortedSessions, session.id);
-    void updateOrder(reordered);
-  }, [sortedSessions, updateOrder]);
-
-  const handleMoveLast = useCallback((session: Session) => {
-    const reordered = moveSessionToLastInGroup(sortedSessions, session.id);
-    void updateOrder(reordered);
-  }, [sortedSessions, updateOrder]);
-
   return (
     <PageLayout
       titleKey="sessionsTab"
-      theme="SESSIONS"
+      descriptionKey="sessionsPageDescription"
       icon={Archive}
       syncSettings={syncSettings}
     >
       {() => (
         <Box data-testid="page-sessions">
-          {/* Intro callout (dismissable) */}
-          <SessionsIntroCallout />
-
-          {/* Toolbar: Search + Actions */}
-          <Flex data-testid="page-sessions-toolbar" gap="3" mb="4" align="center">
-            <Box style={{ flex: 1 }}>
-              <TextField.Root
-                data-testid="page-sessions-search"
-                placeholder={getMessage('searchSessions')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              >
-                <TextField.Slot>
-                  <Search size={16} aria-hidden="true" />
-                </TextField.Slot>
-              </TextField.Root>
-            </Box>
-            <Button
-              data-testid="page-sessions-btn-snapshot"
-              variant="solid"
-              size="2"
-              onClick={() => setSnapshotOpen(true)}
-              style={{ color: 'white' }}
-            >
-              <Camera size={16} aria-hidden="true" />
-              {getMessage('sessionSnapshotButton')}
-            </Button>
-          </Flex>
+          {/* Toolbar: Search + Actions (hidden when no sessions exist) */}
+          {isLoaded && sessions.length > 0 && (
+            <ListToolbar
+              testId="page-sessions-toolbar"
+              searchTestId="page-sessions-search"
+              searchPlaceholder={getMessage('searchSessions')}
+              searchValue={searchQuery}
+              onSearchChange={setSearchQuery}
+              action={
+                <Button
+                  data-testid="page-sessions-btn-snapshot"
+                  variant="solid"
+                  size="2"
+                  onClick={() => setSnapshotOpen(true)}
+                  style={{ color: 'white' }}
+                >
+                  <Camera size={16} aria-hidden="true" />
+                  {getMessage('sessionSnapshotButton')}
+                </Button>
+              }
+            />
+          )}
 
           {/* Quick restore feedback */}
           {quickRestoreMessage && (
@@ -276,135 +401,79 @@ export function SessionsPage({
             </Text>
           ) : sessions.length === 0 && !searchQuery ? (
             // True empty state
-            <Flex
+            <EmptyState
               data-testid="page-sessions-empty"
-              direction="column"
-              align="center"
-              justify="center"
-              gap="3"
-              style={{ minHeight: 200 }}
-            >
-              <Archive
-                size={40}
-                style={{ color: 'var(--gray-8)' }}
-                aria-hidden="true"
-              />
-              <Text size="3" weight="medium" color="gray" align="center">
-                {getMessage('sessionsEmptyStateTitle')}
-              </Text>
-              <Text size="2" color="gray" align="center" style={{ maxWidth: 340 }}>
-                {getMessage('sessionsEmptyStateDescription')}
-              </Text>
-              <Button variant="soft" onClick={() => setSnapshotOpen(true)}>
-                <Camera size={14} aria-hidden="true" />
-                {getMessage('sessionSnapshotButton')}
-              </Button>
-            </Flex>
+              icon={Archive}
+              title={getMessage('sessionsEmptyStateTitle')}
+              description={getMessage('sessionsEmptyStateDescription')}
+              actions={
+                <Flex gap="2">
+                  <Button
+                    data-testid="page-sessions-btn-snapshot"
+                    variant="soft"
+                    onClick={() => setSnapshotOpen(true)}
+                  >
+                    <Camera size={14} aria-hidden="true" />
+                    {getMessage('sessionSnapshotButton')}
+                  </Button>
+                  <Button variant="soft" onClick={() => setImportSessionsOpen(true)}>
+                    <Upload size={14} aria-hidden="true" />
+                    {getMessage('importSessionsButton')}
+                  </Button>
+                </Flex>
+              }
+            />
           ) : displayedSessions.length === 0 && searchQuery ? (
             // Search no results
-            <Flex
-              direction="column"
-              align="center"
-              justify="center"
-              gap="2"
-              style={{ minHeight: 120 }}
-            >
-              <Archive size={32} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
-              <Text color="gray">{getMessage('noSessionsFound')}</Text>
-            </Flex>
+            <EmptyState compact icon={Archive} message={getMessage('noSessionsFound')} />
           ) : (
             <Flex data-testid="page-sessions-list" direction="column" gap="3">
-              {/* Pinned sessions section */}
-              {(pinnedSessions.length > 0 || !searchQuery) && (
-                <Box>
-                  <SectionHeader icon={Pin} titleKey="pinnedSessionsSection" count={pinnedSessions.length} />
-                  {pinnedSessions.length === 0 ? (
-                    <Text size="2" color="gray" mt="2">{getMessage('pinnedSessionsEmpty')}</Text>
-                  ) : (
-                    <DragDropProvider
-                      modifiers={[RestrictToVerticalAxis]}
-                      onDragOver={handlePinnedDragOver}
-                      onDragEnd={handlePinnedDragEnd}
-                    >
-                      <Flex direction="column" gap="3" mt="3">
-                        {(dragPinnedItems ?? pinnedSessions).map((session, index) => {
-                          const searchMatch = sessionSearchMatches?.get(session.id);
-                          return (
-                            <SessionCard
-                              key={session.id}
-                              session={session}
-                              existingSessions={sessions}
-                              onRestore={s => setRestoreSession(s)}
-                              onRestoreCurrentWindow={handleRestoreCurrentWindow}
-                              onRestoreNewWindow={handleRestoreNewWindow}
-                              onRename={renameSession}
-                              onEdit={s => setEditTarget(s)}
-                              onDelete={s => setDeleteTarget(s)}
-                              onPin={handlePin}
-                              onUnpin={handleUnpin}
-                              forcePreviewOpen={searchMatch?.matchesTabs === true || searchMatch?.matchesNote === true}
-                              searchMatchingGroupIds={searchMatch?.matchingGroupIds}
-                              searchQuery={searchQuery || undefined}
-                              index={index}
-                              isDragDisabled={!!searchQuery}
-                              onMoveToFirst={() => handleMoveToFirst(session)}
-                              onMoveLast={() => handleMoveLast(session)}
-                            />
-                          );
-                        })}
-                      </Flex>
-                    </DragDropProvider>
-                  )}
-                </Box>
-              )}
+              <SessionSection
+                icon={Pin}
+                titleKey="pinnedSessionsSection"
+                emptyTitleKey="pinnedSessionsEmptyTitle"
+                emptyDescriptionKey="pinnedSessionsEmptyDescription"
+                isPinned={true}
+                sessions={pinnedSessions}
+                allSessions={sortedSessions}
+                searchQuery={searchQuery}
+                searchMatches={sessionSearchMatches}
+                updateOrder={updateOrder}
+                renameSession={renameSession}
+                reload={reload}
+                onOpenRestoreWizard={setRestoreSession}
+                onOpenEditDialog={setEditTarget}
+                onOpenDeleteDialog={setDeleteTarget}
+                onRestoreFeedback={setQuickRestoreMessage}
+              />
 
               <Separator size="4" />
 
-              {/* Unpinned sessions section */}
-              {(unpinnedSessions.length > 0 || !searchQuery) && (
-                <Box>
-                  <SectionHeader icon={Archive} titleKey="sessionsSection" count={unpinnedSessions.length} />
-                  {unpinnedSessions.length === 0 ? (
-                    <Text size="2" color="gray" mt="2">{getMessage('unpinnedSessionsEmpty')}</Text>
-                  ) : (
-                    <DragDropProvider
-                      modifiers={[RestrictToVerticalAxis]}
-                      onDragOver={handleUnpinnedDragOver}
-                      onDragEnd={handleUnpinnedDragEnd}
-                    >
-                      <Flex direction="column" gap="3" mt="3">
-                        {(dragUnpinnedItems ?? unpinnedSessions).map((session, index) => {
-                          const searchMatch = sessionSearchMatches?.get(session.id);
-                          return (
-                            <SessionCard
-                              key={session.id}
-                              session={session}
-                              existingSessions={sessions}
-                              onRestore={s => setRestoreSession(s)}
-                              onRestoreCurrentWindow={handleRestoreCurrentWindow}
-                              onRestoreNewWindow={handleRestoreNewWindow}
-                              onRename={renameSession}
-                              onEdit={s => setEditTarget(s)}
-                              onDelete={s => setDeleteTarget(s)}
-                              onPin={handlePin}
-                              onUnpin={handleUnpin}
-                              forcePreviewOpen={searchMatch?.matchesTabs === true || searchMatch?.matchesNote === true}
-                              searchMatchingGroupIds={searchMatch?.matchingGroupIds}
-                              searchQuery={searchQuery || undefined}
-                              index={index}
-                              isDragDisabled={!!searchQuery}
-                              onMoveToFirst={() => handleMoveToFirst(session)}
-                              onMoveLast={() => handleMoveLast(session)}
-                            />
-                          );
-                        })}
-                      </Flex>
-                    </DragDropProvider>
-                  )}
-                </Box>
-              )}
+              <SessionSection
+                icon={Archive}
+                titleKey="sessionsSection"
+                emptyTitleKey="unpinnedSessionsEmptyTitle"
+                emptyDescriptionKey="unpinnedSessionsEmptyDescription"
+                isPinned={false}
+                sessions={unpinnedSessions}
+                allSessions={sortedSessions}
+                searchQuery={searchQuery}
+                searchMatches={sessionSearchMatches}
+                updateOrder={updateOrder}
+                renameSession={renameSession}
+                reload={reload}
+                onOpenRestoreWizard={setRestoreSession}
+                onOpenEditDialog={setEditTarget}
+                onOpenDeleteDialog={setDeleteTarget}
+                onRestoreFeedback={setQuickRestoreMessage}
+              />
             </Flex>
           )}
+
+          <ImportSessionsWizard
+            open={importSessionsOpen}
+            onOpenChange={setImportSessionsOpen}
+          />
 
           <SnapshotWizard
             open={snapshotOpen}

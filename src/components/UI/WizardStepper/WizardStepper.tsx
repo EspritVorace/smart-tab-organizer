@@ -37,53 +37,56 @@ export function WizardStepper({ steps, currentStep, disableFutureNavigation = fa
                 }}
               />
             )}
-            <Flex
-              align="center"
-              gap="2"
+            <Box
               role="listitem"
               aria-current={isActive ? 'step' : undefined}
-              aria-disabled={disableFutureNavigation && isFuture ? 'true' : undefined}
             >
               <Flex
                 align="center"
-                justify="center"
-                aria-hidden="true"
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: '50%',
-                  backgroundColor: isActive
-                    ? 'var(--accent-9)'
-                    : isCompleted
+                gap="2"
+                aria-disabled={disableFutureNavigation && isFuture ? 'true' : undefined}
+              >
+                <Flex
+                  align="center"
+                  justify="center"
+                  aria-hidden="true"
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: '50%',
+                    backgroundColor: isActive
                       ? 'var(--accent-9)'
-                      : 'var(--gray-a4)',
-                  color: isActive || isCompleted ? 'white' : 'var(--gray-11)',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  flexShrink: 0,
-                }}
-              >
-                {isCompleted ? (
-                  <Check size={14} aria-hidden="true" />
-                ) : (
-                  index + 1
-                )}
-              </Flex>
-              <Text
-                size="2"
-                weight={isActive ? 'bold' : 'regular'}
-                style={{
-                  color: isActive
-                    ? 'var(--accent-11)'
-                    : isCompleted
+                      : isCompleted
+                        ? 'var(--accent-9)'
+                        : 'var(--gray-a4)',
+                    color: isActive || isCompleted ? 'white' : 'var(--gray-11)',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    flexShrink: 0,
+                  }}
+                >
+                  {isCompleted ? (
+                    <Check size={14} aria-hidden="true" />
+                  ) : (
+                    index + 1
+                  )}
+                </Flex>
+                <Text
+                  size="2"
+                  weight={isActive ? 'bold' : 'regular'}
+                  style={{
+                    color: isActive
                       ? 'var(--accent-11)'
-                      : 'var(--gray-9)',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {step.label}
-              </Text>
-            </Flex>
+                      : isCompleted
+                        ? 'var(--accent-11)'
+                        : 'var(--gray-11)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {step.label}
+                </Text>
+              </Flex>
+            </Box>
           </React.Fragment>
         );
       })}

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Button, DropdownMenu, Flex, Text } from '@radix-ui/themes';
-import { Camera, ChevronDown, RotateCcw, Wand2 } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { browser } from 'wxt/browser';
-import { getMessage } from '../../../utils/i18n';
-import { loadSessions } from '../../../utils/sessionStorage';
-import { hasCapturableTabs } from '../../../utils/tabCapture';
+import { getMessage } from '@/utils/i18n';
+import { loadSessions } from '@/utils/sessionStorage';
+import { hasCapturableTabs } from '@/utils/tabCapture';
 
 /** Focus an existing Options tab or open a new one with the given hash. */
 async function openOptionsWithHash(hash: string) {
@@ -22,6 +22,24 @@ async function openOptionsWithHash(hash: string) {
   }
 }
 
+const actionButtonStyle: React.CSSProperties = {
+  flex: 1,
+  flexDirection: 'column',
+  height: 'auto',
+  gap: 4,
+  paddingTop: 10,
+  paddingBottom: 10,
+  borderRadius: 'var(--radius-5)',
+};
+
+const actionEmojiStyle: React.CSSProperties = {
+  fontSize: 18,
+  lineHeight: 1,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
+
 export function PopupToolbar() {
   const [hasSessions, setHasSessions] = useState(false);
   const [canSave, setCanSave] = useState(false);
@@ -32,7 +50,7 @@ export function PopupToolbar() {
     loadSessions().then((sessions) => setHasSessions(sessions.length > 0));
     hasCapturableTabs().then(setCanSave);
     browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-      const groupId = (tabs[0] as any)?.groupId;
+      const groupId = (tabs[0] as { groupId?: number } | undefined)?.groupId;
       setActiveTabGroupId(typeof groupId === 'number' && groupId >= 0 ? groupId : null);
     });
   }, []);
@@ -43,13 +61,15 @@ export function PopupToolbar() {
     window.close();
   };
 
+  const saveDisabledHint = !canSave ? getMessage('popupSaveDisabledHint') : undefined;
+
   return (
     <Box
       data-testid="popup-toolbar"
       p="1"
       style={{
         background: 'var(--gray-a3)',
-        borderRadius: 'var(--radius-3)',
+        borderRadius: 'var(--radius-5)',
       }}
     >
       <Flex gap="1">
@@ -57,21 +77,18 @@ export function PopupToolbar() {
           <Flex style={{ flex: 1 }}>
             <Button
               data-testid="popup-toolbar-btn-save"
-              variant="ghost"
+              variant="soft"
               onClick={() => void openOptionsWithHash('#sessions?action=snapshot')}
               aria-label={getMessage('popupSaveSession')}
               style={{
-                flex: 1,
-                flexDirection: 'column',
-                height: 'auto',
-                gap: 3,
-                paddingTop: 8,
-                paddingBottom: 8,
+                ...actionButtonStyle,
                 borderTopRightRadius: 0,
                 borderBottomRightRadius: 0,
               }}
             >
-              <Camera size={17} aria-hidden="true" />
+              <span aria-hidden="true" style={actionEmojiStyle}>
+                📸
+              </span>
               <Text as="span" size="1">
                 {getMessage('popupSave')}
               </Text>
@@ -79,19 +96,20 @@ export function PopupToolbar() {
             <DropdownMenu.Root>
               <DropdownMenu.Trigger>
                 <Button
-                  variant="ghost"
+                  variant="soft"
                   aria-label={getMessage('popupSaveGroupOptions')}
                   title={getMessage('popupSaveGroupOptions')}
                   style={{
                     borderTopLeftRadius: 0,
                     borderBottomLeftRadius: 0,
-                    borderLeft: '1px solid var(--gray-a6)',
+                    borderTopRightRadius: 'var(--radius-5)',
+                    borderBottomRightRadius: 'var(--radius-5)',
                     paddingLeft: 4,
                     paddingRight: 4,
                     minWidth: 20,
                     height: 'auto',
-                    paddingTop: 8,
-                    paddingBottom: 8,
+                    paddingTop: 10,
+                    paddingBottom: 10,
                   }}
                 >
                   <ChevronDown size={12} aria-hidden="true" />
@@ -118,20 +136,16 @@ export function PopupToolbar() {
         ) : (
           <Button
             data-testid="popup-toolbar-btn-save"
-            variant="ghost"
+            variant="soft"
             disabled={!canSave}
             onClick={() => void openOptionsWithHash('#sessions?action=snapshot')}
             aria-label={getMessage('popupSaveSession')}
-            style={{
-              flex: 1,
-              flexDirection: 'column',
-              height: 'auto',
-              gap: 3,
-              paddingTop: 8,
-              paddingBottom: 8,
-            }}
+            title={saveDisabledHint}
+            style={actionButtonStyle}
           >
-            <Camera size={17} aria-hidden="true" />
+            <span aria-hidden="true" style={actionEmojiStyle}>
+              📸
+            </span>
             <Text as="span" size="1">
               {getMessage('popupSave')}
             </Text>
@@ -140,20 +154,15 @@ export function PopupToolbar() {
 
         <Button
           data-testid="popup-toolbar-btn-restore"
-          variant="ghost"
+          variant="soft"
           disabled={!hasSessions}
           onClick={() => void openOptionsWithHash('#sessions')}
           aria-label={getMessage('popupRestoreSession')}
-          style={{
-            flex: 1,
-            flexDirection: 'column',
-            height: 'auto',
-            gap: 3,
-            paddingTop: 8,
-            paddingBottom: 8,
-          }}
+          style={actionButtonStyle}
         >
-          <RotateCcw size={17} aria-hidden="true" />
+          <span aria-hidden="true" style={actionEmojiStyle}>
+            🔄
+          </span>
           <Text as="span" size="1">
             {getMessage('popupRestore')}
           </Text>
@@ -161,21 +170,16 @@ export function PopupToolbar() {
 
         <Button
           data-testid="popup-toolbar-btn-organize"
-          variant="ghost"
+          variant="soft"
           disabled={isOrganizing}
           onClick={() => void handleOrganize()}
           aria-label={getMessage('organizeAllTabs')}
           title={getMessage('organizeAllTabs')}
-          style={{
-            flex: 1,
-            flexDirection: 'column',
-            height: 'auto',
-            gap: 3,
-            paddingTop: 8,
-            paddingBottom: 8,
-          }}
+          style={actionButtonStyle}
         >
-          <Wand2 size={17} aria-hidden="true" />
+          <span aria-hidden="true" style={actionEmojiStyle}>
+            🪄
+          </span>
           <Text as="span" size="1">
             {isOrganizing ? getMessage('organizingTabs') : getMessage('organizeAllTabs')}
           </Text>

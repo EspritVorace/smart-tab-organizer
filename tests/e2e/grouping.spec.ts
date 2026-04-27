@@ -16,8 +16,8 @@
  *    the exact UI path a user takes when middle-clicking a link.
  */
 
-import { test, expect, type TabGroupInfo } from './fixtures';
-import type { BrowserContext, Route, Request } from '@playwright/test';
+import { test, expect } from './fixtures';
+import type { BrowserContext } from '@playwright/test';
 import * as http from 'http';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -71,11 +71,6 @@ test.describe('Tab Grouping', () => {
     await new Promise<void>(resolve => localServer.listen(FAKE_PORT, resolve));
   });
 
-  test.afterAll(async () => {
-    localServer.closeAllConnections();
-    await new Promise<void>(resolve => localServer.close(() => resolve()));
-  });
-
   test.beforeEach(async ({ helpers }) => {
     // Clean up any tabs/groups left by the previous test before configuring state
     await helpers.closeAllTestTabs();
@@ -84,6 +79,11 @@ test.describe('Tab Grouping', () => {
     await helpers.setGlobalGroupingEnabled(true);
     await helpers.setGlobalDeduplicationEnabled(false);
     await helpers.resetStatistics();
+  });
+
+  test.afterAll(async () => {
+    localServer.closeAllConnections();
+    await new Promise<void>(resolve => localServer.close(() => resolve()));
   });
 
   // ── 1. Global Settings ────────────────────────────────────────────────────
@@ -129,7 +129,7 @@ test.describe('Tab Grouping', () => {
       const groups = await helpers.getTabGroups();
 
       expect(stats.tabGroupsCreatedCount).toBe(0);
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
 
     test('does NOT group when no matching rule exists [US-G001]', async ({ helpers }) => {
@@ -286,7 +286,7 @@ test.describe('Tab Grouping', () => {
       // Should not crash; title mode without fallback → no grouping when extraction fails
       await helpers.waitForGrouping();
       const groups = await helpers.getTabGroups();
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
   });
 
@@ -376,7 +376,7 @@ test.describe('Tab Grouping', () => {
       // First child — creates the group
       await helpers.createTabFromOpener(opener, 'https://example.com/child1');
       const groups1 = await helpers.waitForTabGrouped('Existing Group Test');
-      expect(groups1.length).toBe(1);
+      expect(groups1).toHaveLength(1);
       const firstTabCount = groups1[0].tabCount;
 
       // Second child — should be added to the SAME group, not create a new one
@@ -386,7 +386,7 @@ test.describe('Tab Grouping', () => {
       const groups2 = await helpers.getTabGroups();
       const stats = await helpers.getStatistics();
 
-      expect(groups2.length).toBe(1);
+      expect(groups2).toHaveLength(1);
       expect(groups2[0].tabCount).toBeGreaterThan(firstTabCount);
       expect(stats.tabGroupsCreatedCount).toBe(1); // Only one group was ever created
     });
@@ -448,7 +448,7 @@ test.describe('Tab Grouping', () => {
       await helpers.waitForGrouping();
 
       const groups = await helpers.getTabGroups();
-      expect(groups.length).toBe(2);
+      expect(groups).toHaveLength(2);
 
       const blueGroup = groups.find(g => g.color === 'blue');
       const redGroup = groups.find(g => g.color === 'red');
@@ -635,7 +635,7 @@ test.describe('Tab Grouping', () => {
 
       // findMiddleClickOpener returns null → no grouping
       expect(stats.tabGroupsCreatedCount).toBe(0);
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
 
     test('adds second child to existing group via natural flow [US-G009]', async ({ extensionContext, helpers }) => {
@@ -655,7 +655,7 @@ test.describe('Tab Grouping', () => {
       // First child — creates the group naturally
       await helpers.createTabNaturally(opener, `http://localhost:${FAKE_PORT}/child.html`);
       const groups1 = await helpers.waitForTabGrouped('Natural Existing', 10000);
-      expect(groups1.length).toBe(1);
+      expect(groups1).toHaveLength(1);
       const firstCount = groups1[0].tabCount;
 
       // Second child — should join the same group
@@ -665,7 +665,7 @@ test.describe('Tab Grouping', () => {
       const groups2 = await helpers.getTabGroups();
       const stats = await helpers.getStatistics();
 
-      expect(groups2.length).toBe(1);
+      expect(groups2).toHaveLength(1);
       expect(groups2[0].tabCount).toBeGreaterThan(firstCount);
       expect(stats.tabGroupsCreatedCount).toBe(1);
     });
@@ -689,7 +689,7 @@ test.describe('Tab Grouping', () => {
       const groups = await helpers.getTabGroups();
 
       expect(stats.tabGroupsCreatedCount).toBe(0);
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
   });
 
@@ -750,10 +750,8 @@ test.describe('Tab Grouping', () => {
       await sw.evaluate(async ({ url, openerTabId }: { url: string; openerTabId: number }) => {
         return chrome.tabs.create({ url, openerTabId, active: true });
       }, { url: childUrl, openerTabId: openerTabId! });
-      const childPage = await childPagePromise.catch(() => null);
-      if (childPage) {
-        await childPage.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
-      }
+      const childPage = await childPagePromise;
+      await childPage.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
 
       // Wait for the full event chain to complete
       const groups = await helpers.waitForTabGrouped('LocalTest', 12000);
@@ -797,7 +795,7 @@ test.describe('Tab Grouping', () => {
 
       // No middleClickLink was sent → findMiddleClickOpener returns null → no grouping
       expect(stats.tabGroupsCreatedCount).toBe(0);
-      expect(groups.length).toBe(0);
+      expect(groups).toHaveLength(0);
     });
 
     // ── contextmenu path (right-click → "Open in new tab") ───────────────
@@ -850,10 +848,8 @@ test.describe('Tab Grouping', () => {
       await sw.evaluate(async ({ url, openerTabId }: { url: string; openerTabId: number }) => {
         return chrome.tabs.create({ url, openerTabId, active: true });
       }, { url: childUrl, openerTabId: openerTabId! });
-      const childPage = await childPagePromise.catch(() => null);
-      if (childPage) {
-        await childPage.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
-      }
+      const childPage = await childPagePromise;
+      await childPage.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
 
       // Full event chain: onTabCreated → findMiddleClickOpener (contextmenu entry) →
       // handleGroupingWithRetry → onUpdated(complete) → processGroupingForNewTab
