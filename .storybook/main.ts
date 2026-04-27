@@ -39,12 +39,27 @@ const config: StorybookConfig = {
       load(id) {
         if (id === '/virtual:wxt-browser') {
           return `
+            function resolveMessage(entry, substitutions) {
+              let msg = entry.message;
+              if (entry.placeholders) {
+                for (const [name, p] of Object.entries(entry.placeholders)) {
+                  msg = msg.split('$' + name + '$').join(p.content);
+                }
+              }
+              if (substitutions !== undefined) {
+                const subs = Array.isArray(substitutions) ? substitutions : [substitutions];
+                msg = msg.replace(/\\$(\\d+)/g, (m, n) => subs[Number(n) - 1] ?? m);
+              }
+              return msg;
+            }
             const mockBrowser = {
               i18n: {
-                getMessage: (key) => {
+                getMessage: (key, substitutions) => {
                   const locale = globalThis.currentLocale || 'en';
                   const messages = globalThis.messagesCache?.[locale] || {};
-                  return messages[key]?.message || key;
+                  const entry = messages[key];
+                  if (!entry) return key;
+                  return resolveMessage(entry, substitutions);
                 }
               }
             };
