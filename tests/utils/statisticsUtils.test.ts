@@ -6,14 +6,11 @@ import {
   setStatisticsData,
   updateStatisticsData,
   incrementStat,
-  incrementTabGroupsCreated,
-  incrementTabsDeduplicated,
   resetStatisticsData,
   watchStatisticsData,
+  purgeOldBuckets,
 } from '../../src/utils/statisticsUtils';
 import { defaultStatistics } from '../../src/types/statistics';
-
-// fakeBrowser.reset() est appelé avant chaque test via tests/setup.ts
 
 describe('statisticsUtils', () => {
   describe('getStatisticsData', () => {
@@ -24,7 +21,7 @@ describe('statisticsUtils', () => {
 
     it('retourne les données stockées', async () => {
       await fakeBrowser.storage.local.set({
-        statistics: { tabGroupsCreatedCount: 5, tabsDeduplicatedCount: 10 },
+        statistics: { tabGroupsCreatedCount: 5, tabsDeduplicatedCount: 10, dailyBuckets: {} },
       });
       const stats = await getStatisticsData();
       expect(stats.tabGroupsCreatedCount).toBe(5);
@@ -37,10 +34,11 @@ describe('statisticsUtils', () => {
       });
       const stats = await getStatisticsData();
       expect(stats.tabGroupsCreatedCount).toBe(42);
-      expect(stats.tabsDeduplicatedCount).toBe(0); // valeur par défaut
+      expect(stats.tabsDeduplicatedCount).toBe(0);
+      expect(stats.dailyBuckets).toEqual({});
     });
 
-    it('retourne les valeurs par défaut en cas d\'erreur', async () => {
+    it("retourne les valeurs par défaut en cas d'erreur", async () => {
       vi.spyOn(fakeBrowser.storage.local, 'get').mockRejectedValueOnce(
         new Error('Storage error'),
       );
@@ -51,7 +49,7 @@ describe('statisticsUtils', () => {
 
   describe('setStatisticsData', () => {
     it('écrit les statistiques dans le storage', async () => {
-      const data = { tabGroupsCreatedCount: 7, tabsDeduplicatedCount: 3 };
+      const data = { tabGroupsCreatedCount: 7, tabsDeduplicatedCount: 3, dailyBuckets: {} };
       await setStatisticsData(data);
       const stored = await fakeBrowser.storage.local.get('statistics');
       expect(stored.statistics).toEqual(data);
@@ -61,77 +59,88 @@ describe('statisticsUtils', () => {
   describe('updateStatisticsData', () => {
     it('met à jour partiellement les statistiques', async () => {
       await fakeBrowser.storage.local.set({
-        statistics: { tabGroupsCreatedCount: 5, tabsDeduplicatedCount: 10 },
+        statistics: { tabGroupsCreatedCount: 5, tabsDeduplicatedCount: 10, dailyBuckets: {} },
       });
       await updateStatisticsData({ tabGroupsCreatedCount: 20 });
       const stats = await getStatisticsData();
       expect(stats.tabGroupsCreatedCount).toBe(20);
-      expect(stats.tabsDeduplicatedCount).toBe(10); // inchangé
+      expect(stats.tabsDeduplicatedCount).toBe(10);
     });
   });
 
   describe('incrementStat', () => {
-    it('incrémente tabGroupsCreatedCount de 1', async () => {
+    it("incrémente tabGroupsCreatedCount pour type 'grouping'", async () => {
       await fakeBrowser.storage.local.set({
-        statistics: { tabGroupsCreatedCount: 3, tabsDeduplicatedCount: 0 },
+        statistics: { tabGroupsCreatedCount: 3, tabsDeduplicatedCount: 0, dailyBuckets: {} },
       });
-      const updated = await incrementStat('tabGroupsCreatedCount');
-      expect(updated.tabGroupsCreatedCount).toBe(4);
-    });
-
-    it('incrémente tabsDeduplicatedCount de 1', async () => {
-      await fakeBrowser.storage.local.set({
-        statistics: { tabGroupsCreatedCount: 0, tabsDeduplicatedCount: 7 },
-      });
-      const updated = await incrementStat('tabsDeduplicatedCount');
-      expect(updated.tabsDeduplicatedCount).toBe(8);
-    });
-
-    it('persiste la valeur incrémentée dans le storage', async () => {
-      await fakeBrowser.storage.local.set({
-        statistics: { tabGroupsCreatedCount: 2, tabsDeduplicatedCount: 0 },
-      });
-      await incrementStat('tabGroupsCreatedCount');
+      await incrementStat('grouping', 'rule-1');
       const stats = await getStatisticsData();
-      expect(stats.tabGroupsCreatedCount).toBe(3);
+      expect(stats.tabGroupsCreatedCount).toBe(4);
+      expect(stats.tabsDeduplicatedCount).toBe(0);
     });
 
-    it('part de 0 si la clé est absente', async () => {
-      const updated = await incrementStat('tabGroupsCreatedCount');
-      expect(updated.tabGroupsCreatedCount).toBe(1);
-    });
-  });
-
-  describe('incrementTabGroupsCreated', () => {
-    it('incrémente tabGroupsCreatedCount', async () => {
+    it("incrémente tabsDeduplicatedCount pour type 'dedup'", async () => {
       await fakeBrowser.storage.local.set({
-        statistics: { tabGroupsCreatedCount: 1, tabsDeduplicatedCount: 0 },
+        statistics: { tabGroupsCreatedCount: 0, tabsDeduplicatedCount: 7, dailyBuckets: {} },
       });
-      await incrementTabGroupsCreated();
+      await incrementStat('dedup', 'rule-2');
       const stats = await getStatisticsData();
-      expect(stats.tabGroupsCreatedCount).toBe(2);
+      expect(stats.tabsDeduplicatedCount).toBe(8);
+      expect(stats.tabGroupsCreatedCount).toBe(0);
     });
-  });
 
-  describe('incrementTabsDeduplicated', () => {
-    it('incrémente tabsDeduplicatedCount', async () => {
-      await fakeBrowser.storage.local.set({
-        statistics: { tabGroupsCreatedCount: 0, tabsDeduplicatedCount: 4 },
-      });
-      await incrementTabsDeduplicated();
+    it('écrit dans le bucket journalier pour la règle', async () => {
+      await incrementStat('grouping', 'rule-abc');
       const stats = await getStatisticsData();
-      expect(stats.tabsDeduplicatedCount).toBe(5);
+      const today = new Date().toISOString().slice(0, 10);
+      expect(stats.dailyBuckets[today]?.['rule-abc']?.grouping).toBe(1);
+      expect(stats.dailyBuckets[today]?.['rule-abc']?.dedup).toBe(0);
+    });
+
+    it('cumule les appels successifs dans le bucket', async () => {
+      await incrementStat('grouping', 'rule-x');
+      await incrementStat('grouping', 'rule-x');
+      await incrementStat('dedup', 'rule-x');
+      const stats = await getStatisticsData();
+      const today = new Date().toISOString().slice(0, 10);
+      expect(stats.dailyBuckets[today]?.['rule-x']?.grouping).toBe(2);
+      expect(stats.dailyBuckets[today]?.['rule-x']?.dedup).toBe(1);
+    });
+
+    it('initialise firstUsedAt au premier incrément', async () => {
+      const stats = await getStatisticsData();
+      expect(stats.firstUsedAt).toBeUndefined();
+      await incrementStat('grouping', 'rule-1');
+      const updated = await getStatisticsData();
+      expect(updated.firstUsedAt).toBeDefined();
+    });
+
+    it('ne modifie pas firstUsedAt si déjà défini', async () => {
+      const existingDate = '2026-01-01T00:00:00.000Z';
+      await fakeBrowser.storage.local.set({
+        statistics: { tabGroupsCreatedCount: 1, tabsDeduplicatedCount: 0, dailyBuckets: {}, firstUsedAt: existingDate },
+      });
+      await incrementStat('grouping', 'rule-1');
+      const stats = await getStatisticsData();
+      expect(stats.firstUsedAt).toBe(existingDate);
     });
   });
 
   describe('resetStatisticsData', () => {
     it('remet les statistiques aux valeurs par défaut', async () => {
       await fakeBrowser.storage.local.set({
-        statistics: { tabGroupsCreatedCount: 100, tabsDeduplicatedCount: 200 },
+        statistics: {
+          tabGroupsCreatedCount: 100,
+          tabsDeduplicatedCount: 200,
+          dailyBuckets: { '2026-01-01': { 'rule-1': { grouping: 5, dedup: 2 } } },
+          firstUsedAt: '2026-01-01T00:00:00.000Z',
+        },
       });
       await resetStatisticsData();
       const stats = await getStatisticsData();
       expect(stats).toEqual(defaultStatistics);
+      expect(stats.firstUsedAt).toBeUndefined();
+      expect(stats.dailyBuckets).toEqual({});
     });
 
     it("ne lance pas d'erreur si setStatisticsData échoue", async () => {
@@ -149,16 +158,11 @@ describe('statisticsUtils', () => {
       unwatch();
     });
 
-    it('la fonction de cleanup peut être appelée sans erreur', () => {
-      const unwatch = watchStatisticsData(vi.fn());
-      expect(() => unwatch()).not.toThrow();
-    });
-
     it('invoque le callback avec les données fusionnées aux défauts quand le storage change', async () => {
       const callback = vi.fn();
       const unwatch = watchStatisticsData(callback);
 
-      await setStatisticsData({ tabGroupsCreatedCount: 3, tabsDeduplicatedCount: 1 });
+      await setStatisticsData({ tabGroupsCreatedCount: 3, tabsDeduplicatedCount: 1, dailyBuckets: {} });
 
       await waitFor(() => {
         expect(callback).toHaveBeenCalled();
@@ -169,5 +173,49 @@ describe('statisticsUtils', () => {
       );
       unwatch();
     });
+  });
+});
+
+describe('purgeOldBuckets', () => {
+  it('conserve les entrées récentes', () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const buckets = { [today]: { 'rule-1': { grouping: 1, dedup: 0 } } };
+    expect(purgeOldBuckets(buckets)).toEqual(buckets);
+  });
+
+  it('supprime les entrées antérieures à maxDays jours', () => {
+    const old = new Date();
+    old.setDate(old.getDate() - 91);
+    const oldDate = old.toISOString().slice(0, 10);
+    const today = new Date().toISOString().slice(0, 10);
+    const buckets = {
+      [oldDate]: { 'rule-1': { grouping: 5, dedup: 2 } },
+      [today]: { 'rule-2': { grouping: 1, dedup: 0 } },
+    };
+    const result = purgeOldBuckets(buckets);
+    expect(result[oldDate]).toBeUndefined();
+    expect(result[today]).toBeDefined();
+  });
+
+  it('conserve les entrées à exactement maxDays jours', () => {
+    const boundary = new Date();
+    boundary.setDate(boundary.getDate() - 90);
+    const boundaryDate = boundary.toISOString().slice(0, 10);
+    const buckets = { [boundaryDate]: { 'rule-1': { grouping: 1, dedup: 0 } } };
+    const result = purgeOldBuckets(buckets);
+    expect(result[boundaryDate]).toBeDefined();
+  });
+
+  it('retourne un objet vide si buckets est vide', () => {
+    expect(purgeOldBuckets({})).toEqual({});
+  });
+
+  it('respecte un maxDays personnalisé', () => {
+    const old = new Date();
+    old.setDate(old.getDate() - 8);
+    const oldDate = old.toISOString().slice(0, 10);
+    const buckets = { [oldDate]: { 'rule-1': { grouping: 1, dedup: 0 } } };
+    expect(purgeOldBuckets(buckets, 7)[oldDate]).toBeUndefined();
+    expect(purgeOldBuckets(buckets, 30)[oldDate]).toBeDefined();
   });
 });

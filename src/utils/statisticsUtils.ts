@@ -1,12 +1,16 @@
-import type { Statistics } from '@/types/statistics.js';
+import type { Statistics, DailyBuckets } from '@/types/statistics.js';
 import { defaultStatistics } from '@/types/statistics.js';
 import { logger } from './logger.js';
 import { statisticsItem } from './storageItems.js';
 
-/**
- * Utilitaires pour les statistiques utilisables dans tous les contextes
- * (background, content scripts, popup, options)
- */
+export function purgeOldBuckets(buckets: DailyBuckets, maxDays = 90): DailyBuckets {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - maxDays);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
+  return Object.fromEntries(
+    Object.entries(buckets).filter(([date]) => date >= cutoffStr),
+  );
+}
 
 export async function getStatisticsData(): Promise<Statistics> {
   try {
@@ -29,44 +33,41 @@ export async function setStatisticsData(statistics: Statistics): Promise<void> {
 export async function updateStatisticsData(updates: Partial<Statistics>): Promise<void> {
   try {
     const current = await getStatisticsData();
-    const updated = { ...current, ...updates };
-    await setStatisticsData(updated);
+    await setStatisticsData({ ...current, ...updates });
   } catch (error) {
     logger.error('Error updating statistics:', error);
   }
 }
 
-export async function incrementTabGroupsCreated(): Promise<void> {
+export async function incrementStat(type: 'grouping' | 'dedup', ruleId: string): Promise<void> {
   try {
     const current = await getStatisticsData();
-    await updateStatisticsData({
-      tabGroupsCreatedCount: current.tabGroupsCreatedCount + 1,
-    });
-  } catch (error) {
-    logger.error('Error incrementing tab groups created:', error);
-  }
-}
+    const today = new Date().toISOString().slice(0, 10);
 
-export async function incrementTabsDeduplicated(): Promise<void> {
-  try {
-    const current = await getStatisticsData();
-    await updateStatisticsData({
-      tabsDeduplicatedCount: current.tabsDeduplicatedCount + 1,
-    });
-  } catch (error) {
-    logger.error('Error incrementing tabs deduplicated:', error);
-  }
-}
+    const buckets = current.dailyBuckets ?? {};
+    const dayBucket = buckets[today] ?? {};
+    const ruleBucket = dayBucket[ruleId] ?? { grouping: 0, dedup: 0 };
 
-export async function incrementStat(key: keyof Statistics): Promise<Statistics> {
-  try {
-    const current = await getStatisticsData();
-    const updated = { ...current, [key]: (current[key] || 0) + 1 };
+    const updatedDayBucket = {
+      ...dayBucket,
+      [ruleId]: { ...ruleBucket, [type]: ruleBucket[type] + 1 },
+    };
+
+    const updated: Statistics = {
+      ...current,
+      tabGroupsCreatedCount: type === 'grouping'
+        ? current.tabGroupsCreatedCount + 1
+        : current.tabGroupsCreatedCount,
+      tabsDeduplicatedCount: type === 'dedup'
+        ? current.tabsDeduplicatedCount + 1
+        : current.tabsDeduplicatedCount,
+      dailyBuckets: purgeOldBuckets({ ...buckets, [today]: updatedDayBucket }),
+      firstUsedAt: current.firstUsedAt ?? new Date().toISOString(),
+    };
+
     await setStatisticsData(updated);
-    return updated;
   } catch (error) {
-    logger.error(`Error incrementing stat ${key}:`, error);
-    return await getStatisticsData();
+    logger.error(`Error incrementing stat ${type} for rule ${ruleId}:`, error);
   }
 }
 
@@ -78,10 +79,6 @@ export async function resetStatisticsData(): Promise<void> {
   }
 }
 
-/**
- * Écouter les changements de statistiques
- * Retourne une fonction de cleanup
- */
 export function watchStatisticsData(
   callback: (statistics: Statistics) => void,
 ): () => void {

@@ -185,6 +185,7 @@ export async function checkAndDeduplicateTab(
     windowId: number,
     settings: AppSettings,
     ignoredParams: string[] = [],
+    ruleId: string = '__unmatched__',
 ): Promise<void> {
     try {
         const duplicateTab = await findDuplicateTab(currentTabId, newUrl, matchMode, windowId, ignoredParams);
@@ -219,7 +220,7 @@ export async function checkAndDeduplicateTab(
             `[DEDUPLICATION] Duplicate found for ${newUrl} (strategy=${strategy}, keeping ${tabToKeep.id}, closing ${tabToClose.id})`,
         );
 
-        await incrementStat('tabsDeduplicatedCount');
+        await incrementStat('dedup', ruleId);
 
         const keepIsExisting = tabToKeep.id === duplicateTab.id;
         if (keepIsExisting) {
@@ -284,9 +285,10 @@ export async function processTabForDeduplication(
 
     const matchMode = getMatchMode(rule);
     const ignoredParams = rule?.ignoredQueryParams ?? [];
+    const ruleId = rule?.id ?? '__unmatched__';
 
     try {
-        await checkAndDeduplicateTab(tabId, urlToCheck, matchMode, windowId, settings, ignoredParams);
+        await checkAndDeduplicateTab(tabId, urlToCheck, matchMode, windowId, settings, ignoredParams, ruleId);
     } catch (error) {
         logger.error("Deduplication error:", error);
     }

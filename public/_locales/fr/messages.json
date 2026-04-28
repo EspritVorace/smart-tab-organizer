@@ -527,5 +527,20 @@
   "ruleMoveToLastOfDomain": { "message": "Dernière du domaine" },
   "sidebarCollapse": { "message": "Réduire la barre latérale" },
   "sidebarExpand": { "message": "Développer la barre latérale" },
-  "mainNavigation": { "message": "Navigation principale" }
+  "mainNavigation": { "message": "Navigation principale" },
+
+  "statsHistoricalTotals": { "message": "Totaux" },
+  "statsUsageSince": { "message": "Utilisation depuis le {date}" },
+  "statsActiveRulesCount": { "message": "{count} règle(s) active(s)" },
+  "statsThisWeekTitle": { "message": "Cette semaine" },
+  "statsGroupings": { "message": "Groupages" },
+  "statsDeduplications": { "message": "Déduplications" },
+  "statsTrendNewActivity": { "message": "Nouvelle activité" },
+  "statsTrendUp": { "message": "+{count} vs sem. préc." },
+  "statsTrendDown": { "message": "-{count} vs sem. préc." },
+  "statsTrendStable": { "message": "Stable" },
+  "statsTrendUpAria": { "message": "En hausse" },
+  "statsTrendDownAria": { "message": "En baisse" },
+  "statsTopRulesTitle": { "message": "Règles les plus actives (30 jours)" },
+  "statsGroupingsAndDedup": { "message": "{grouping} groupages, {dedup} déduplications" }
 }

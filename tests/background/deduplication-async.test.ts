@@ -149,7 +149,7 @@ describe('checkAndDeduplicateTab', () => {
 
     await checkAndDeduplicateTab(2, 'https://x.com/a', 'exact', 5, makeSettings());
 
-    expect(mockedIncrementStat).toHaveBeenCalledWith('tabsDeduplicatedCount');
+    expect(mockedIncrementStat).toHaveBeenCalledWith('dedup', '__unmatched__');
     expect(mockedBrowser.tabs.update).toHaveBeenCalledWith(1, { active: true });
     expect(mockedBrowser.tabs.remove).toHaveBeenCalledWith(2);
     expect(mockedShowNotif).toHaveBeenCalledWith(

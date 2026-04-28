@@ -194,7 +194,8 @@ export function createGroupingContext(
 export async function createNewGroup(
     tabsToGroup: number[],
     groupName: string,
-    groupColor: string | null
+    groupColor: string | null,
+    ruleId: string
 ): Promise<number> {
     logger.debug(`[GROUPING_DEBUG] Calling browser.tabs.group to create new group with tabs [${tabsToGroup.join(', ')}]`);
     const newGroupId = await browser.tabs.group({ tabIds: tabsToGroup as [number, ...number[]] });
@@ -204,7 +205,7 @@ export async function createNewGroup(
 
     logger.debug(`[GROUPING_DEBUG] New group created with ID: ${newGroupId}. Calling browser.tabGroups.update with payload:`, updatePayload);
     await browser.tabGroups.update(newGroupId, updatePayload as Parameters<typeof browser.tabGroups.update>[1]);
-    await incrementStat('tabGroupsCreatedCount');
+    await incrementStat('grouping', ruleId);
 
     return newGroupId;
 }
@@ -259,7 +260,7 @@ export async function performGroupingOperation(context: GroupingContext): Promis
         logger.debug(`[GROUPING_DEBUG] Opener tab ${currentOpenerTab.id} is not in a group. Creating new group.`);
         const tabsToGroup = [currentOpenerTab.id, context.newTab.id];
         groupedTabIds = tabsToGroup.slice();
-        targetGroupId = await createNewGroup(tabsToGroup, context.groupName, context.groupColor);
+        targetGroupId = await createNewGroup(tabsToGroup, context.groupName, context.groupColor, context.rule.id);
     } else {
         logger.debug(`[GROUPING_DEBUG] Opener tab ${currentOpenerTab.id} already in group ${openerGroupId}.`);
         targetGroupId = openerGroupId;
