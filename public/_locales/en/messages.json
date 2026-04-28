@@ -526,5 +526,20 @@
   "ruleMoveToLastOfDomain": { "message": "Last of domain" },
   "sidebarCollapse": { "message": "Collapse sidebar" },
   "sidebarExpand": { "message": "Expand sidebar" },
-  "mainNavigation": { "message": "Main navigation" }
+  "mainNavigation": { "message": "Main navigation" },
+
+  "statsHistoricalTotals": { "message": "Totals" },
+  "statsUsageSince": { "message": "In use since {date}" },
+  "statsActiveRulesCount": { "message": "{count} active rule(s)" },
+  "statsThisWeekTitle": { "message": "This week" },
+  "statsGroupings": { "message": "Groupings" },
+  "statsDeduplications": { "message": "Deduplications" },
+  "statsTrendNewActivity": { "message": "New activity" },
+  "statsTrendUp": { "message": "+{count} vs last week" },
+  "statsTrendDown": { "message": "-{count} vs last week" },
+  "statsTrendStable": { "message": "Stable" },
+  "statsTrendUpAria": { "message": "Trending up" },
+  "statsTrendDownAria": { "message": "Trending down" },
+  "statsTopRulesTitle": { "message": "Most active rules (30 days)" },
+  "statsGroupingsAndDedup": { "message": "{grouping} groupings, {dedup} deduplications" }
 }

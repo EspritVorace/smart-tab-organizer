@@ -221,7 +221,7 @@ describe('handleOrganizeAllTabs', () => {
 
       await handleOrganizeAllTabs(1);
 
-      expect(mockedCreateGroup).toHaveBeenCalledWith([10, 11], 'My Group', 'blue');
+      expect(mockedCreateGroup).toHaveBeenCalledWith([10, 11], 'My Group', 'blue', 'rule-1');
       expect(mockedAddToGroup).not.toHaveBeenCalled();
       expect(mockedBrowser.notifications.create).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'notifGrouping' }),
