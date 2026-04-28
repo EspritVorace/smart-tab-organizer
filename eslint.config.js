@@ -68,8 +68,6 @@ export default tseslint.config(
       'ctrf/**',
       'docs/**',
       'storybook-static/**',
-      'src/**/*.stories.{ts,tsx}',
-      'src/stories/**',
     ],
   },
 
@@ -102,6 +100,14 @@ export default tseslint.config(
   {
     files: ['src/**/*.tsx'],
     ...jsxA11y.flatConfigs.recommended,
+  },
+
+  {
+    files: ['src/**/*.tsx'],
+    rules: {
+      'jsx-a11y/no-aria-hidden-on-focusable': 'error',
+      'jsx-a11y/lang': 'error',
+    },
   },
 
   {

@@ -42,7 +42,7 @@ export function RuleRow({ rule, checkbox, checked, onToggle, dimmed, statusBadge
         <Text size="1" color="gray">{rule.domainFilter}</Text>
       </Flex>
       {category && (
-        <Badge color={getRadixColor(category.color) as RadixAccentColor} variant="soft" size="1">
+        <Badge color={getRadixColor(category.color) as RadixAccentColor} variant="soft" size="1" highContrast>
           {category.emoji} {getCategoryLabel(category)}
         </Badge>
       )}
@@ -66,7 +66,7 @@ export function ConflictRuleRow({ conflict }: ConflictRuleRowProps) {
         <Text size="2" weight="medium">{conflict.imported.label}</Text>
         <Text size="1" color="gray">{conflict.imported.domainFilter}</Text>
       </Flex>
-      <Badge color={conflict.imported.color as RadixAccentColor} variant="soft" size="1">
+      <Badge color={conflict.imported.color as RadixAccentColor} variant="soft" size="1" highContrast>
         {getMessage(`color_${conflict.imported.color}`)}
       </Badge>
       <DiffPopover entityLabel={conflict.imported.label}>

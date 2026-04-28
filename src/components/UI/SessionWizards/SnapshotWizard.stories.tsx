@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent, expect } from 'storybook/test';
+import { within, userEvent, expect, waitFor } from 'storybook/test';
 import { SnapshotWizard } from './SnapshotWizard';
 import type { Session } from '@/types/session';
 
@@ -30,7 +30,11 @@ export const SnapshotWizardFillName: Story = {
   args: { open: true },
   play: async ({ canvasElement }) => {
     const body = within(canvasElement.ownerDocument.body);
-    const nameInput = await body.findByTestId('wizard-snapshot-field-name');
+    const nameInput = await body.findByTestId<HTMLInputElement>('wizard-snapshot-field-name');
+    // The wizard's open useEffect populates the name with "Snapshot {date}"
+    // asynchronously: wait for that to land before clearing, otherwise the
+    // effect runs after clear() and we end up appending to the seeded value.
+    await waitFor(() => expect(nameInput.value.length).toBeGreaterThan(0));
     await userEvent.clear(nameInput);
     await userEvent.type(nameInput, 'My Work Session');
     await expect(nameInput).toHaveValue('My Work Session');
@@ -79,7 +83,8 @@ export const SnapshotWizardDuplicateName: Story = {
   },
   play: async ({ canvasElement }) => {
     const body = within(canvasElement.ownerDocument.body);
-    const nameInput = await body.findByTestId('wizard-snapshot-field-name');
+    const nameInput = await body.findByTestId<HTMLInputElement>('wizard-snapshot-field-name');
+    await waitFor(() => expect(nameInput.value.length).toBeGreaterThan(0));
     await userEvent.clear(nameInput);
     await userEvent.type(nameInput, 'Work tabs');
     const saveBtn = body.getByTestId('wizard-snapshot-btn-save');

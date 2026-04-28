@@ -1,5 +1,11 @@
 import type { StorybookConfig } from '@storybook/react-vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { resolve } from 'node:path';
+
+// Resolved relative to this file's directory at runtime. Storybook loads main.ts
+// through esbuild-register (CJS), so `import.meta.url` is unavailable; using
+// process.cwd() + the known relative path is the portable workaround.
+const browserMockPath = resolve(process.cwd(), '.storybook/browser-mock.ts');
 
 const config: StorybookConfig = {
   "stories": [
@@ -22,54 +28,20 @@ const config: StorybookConfig = {
     // twice during the build.
     config.publicDir = false;
 
-    // Mock pour wxt/browser dans Storybook
+    // Both `wxt/browser` (used by app code) and `@wxt-dev/browser` (used
+    // internally by `@wxt-dev/storage`) must resolve to the SAME singleton,
+    // otherwise wxt's storage helpers fall back to `globalThis.chrome` and
+    // crash with "Cannot read properties of undefined (reading 'runtime')".
     config.resolve = config.resolve || {};
     config.resolve.alias = {
       ...config.resolve.alias,
-      'wxt/browser': '/virtual:wxt-browser',
+      'wxt/browser': browserMockPath,
+      '@wxt-dev/browser': browserMockPath,
     };
-    
+
     config.plugins = config.plugins || [];
     config.plugins.push(tsconfigPaths({ projects: ['./tsconfig.json'] }));
-    config.plugins.push({
-      name: 'mock-wxt-browser',
-      resolveId(id) {
-        if (id === '/virtual:wxt-browser') return id;
-      },
-      load(id) {
-        if (id === '/virtual:wxt-browser') {
-          return `
-            function resolveMessage(entry, substitutions) {
-              let msg = entry.message;
-              if (entry.placeholders) {
-                for (const [name, p] of Object.entries(entry.placeholders)) {
-                  msg = msg.split('$' + name + '$').join(p.content);
-                }
-              }
-              if (substitutions !== undefined) {
-                const subs = Array.isArray(substitutions) ? substitutions : [substitutions];
-                msg = msg.replace(/\\$(\\d+)/g, (m, n) => subs[Number(n) - 1] ?? m);
-              }
-              return msg;
-            }
-            const mockBrowser = {
-              i18n: {
-                getMessage: (key, substitutions) => {
-                  const locale = globalThis.currentLocale || 'en';
-                  const messages = globalThis.messagesCache?.[locale] || {};
-                  const entry = messages[key];
-                  if (!entry) return key;
-                  return resolveMessage(entry, substitutions);
-                }
-              }
-            };
-            export { mockBrowser as browser };
-            export default mockBrowser;
-          `;
-        }
-      },
-    });
-    
+
     return config;
   },
 };
