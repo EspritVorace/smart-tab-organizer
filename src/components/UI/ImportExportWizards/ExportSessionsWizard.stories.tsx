@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent } from 'storybook/test';
 import { ExportSessionsWizard } from './ExportSessionsWizard';
@@ -47,18 +46,6 @@ const mockSessions: Session[] = [
   },
 ];
 
-/** Seeds the fake browser local storage with sessions BEFORE the story mounts. */
-function withSeededSessions(sessions: Session[]) {
-  return function SessionSeeder(Story: React.ComponentType) {
-    const [ready, setReady] = useState(false);
-    useEffect(() => {
-      sessionsItem.setValue(sessions).then(() => setReady(true));
-    }, []);
-    if (!ready) return null;
-    return <Story />;
-  };
-}
-
 const meta: Meta<typeof ExportSessionsWizard> = {
   title: 'Components/UI/ImportExportWizards/ExportSessionsWizard',
   component: ExportSessionsWizard,
@@ -82,13 +69,17 @@ export const ExportSessionsWizardClosed: Story = {
 // With sessions seeded in storage: the wizard loads them and lists pinned + unpinned.
 export const ExportSessionsWizardWithSessions: Story = {
   args: { open: true },
-  decorators: [withSeededSessions(mockSessions)],
+  beforeEach: async () => {
+    await sessionsItem.setValue(mockSessions);
+  },
 };
 
 // Deselect all sessions to cover the disabled-export state.
 export const ExportSessionsWizardDeselectAll: Story = {
   args: { open: true },
-  decorators: [withSeededSessions(mockSessions)],
+  beforeEach: async () => {
+    await sessionsItem.setValue(mockSessions);
+  },
   play: async ({ canvasElement }) => {
     const body = within(canvasElement.ownerDocument.body);
     await userEvent.click(body.getByText('Deselect All'));
