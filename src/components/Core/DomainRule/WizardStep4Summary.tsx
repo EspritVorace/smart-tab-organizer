@@ -47,13 +47,15 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+const URL_SOURCE_MODES = ['url', 'smart', 'smart_label', 'smart_preset', 'smart_manual'];
+
 function buildConfigSummary(
   configMode: 'preset' | 'ask' | 'manual',
   presetName: string | null,
   values: DomainRule,
 ): string {
   if (configMode === 'preset') {
-    return getMessage('configSummaryPreset').replace('{name}', presetName ?? '—');
+    return getMessage('configSummaryPreset').replace('{name}', presetName ?? '...');
   }
   if (configMode === 'ask') {
     return getMessage('configSummaryAsk');
@@ -61,7 +63,17 @@ function buildConfigSummary(
   // manual
   const sourceOption = groupNameSourceOptions.find(o => o.value === values.groupNameSource);
   const sourceName = sourceOption ? getMessage(sourceOption.keyLabel) : values.groupNameSource;
-  return getMessage('configSummaryManual').replace('{source}', sourceName);
+  let summary = getMessage('configSummaryManual').replace('{source}', sourceName);
+  if (URL_SOURCE_MODES.includes(values.groupNameSource)) {
+    if (values.urlExtractionMode === 'query_param') {
+      summary += ' ' + getMessage('urlExtractionSummaryQueryParam')
+        .replace('$PARAM$', values.urlQueryParamName ?? '');
+    } else if (values.urlParsingRegEx) {
+      summary += ' ' + getMessage('urlExtractionSummaryRegex')
+        .replace('$REGEX$', values.urlParsingRegEx);
+    }
+  }
+  return summary;
 }
 
 function buildOptionsSummary(values: DomainRule): string {
