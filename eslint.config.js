@@ -105,6 +105,14 @@ export default tseslint.config(
   },
 
   {
+    files: ['src/**/*.tsx'],
+    rules: {
+      'jsx-a11y/no-aria-hidden-on-focusable': 'error',
+      'jsx-a11y/lang': 'error',
+    },
+  },
+
+  {
     files: ['tests/**/*.{ts,tsx}'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
