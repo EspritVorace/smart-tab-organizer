@@ -44,9 +44,10 @@ export const domainRuleSchema = z.object({
   urlExtractionMode: z.enum(
     urlExtractionModeOptions.map(opt => opt.value) as [UrlExtractionModeValue, ...UrlExtractionModeValue[]]
   ).default('regex'),
-  urlQueryParamName: z.string().max(64).regex(queryParamNamePattern, {
-    message: getMessage('errorInvalidQueryParamName'),
-  }).optional()
+  urlQueryParamName: z.string().max(64).refine(
+    (val) => val === '' || queryParamNamePattern.test(val),
+    () => ({ message: getMessage('errorInvalidQueryParamName') })
+  ).optional()
 }).refine((data) => {
   // Si presetId est null, les validations conditionnelles s'appliquent
   if (data.presetId === null) {
