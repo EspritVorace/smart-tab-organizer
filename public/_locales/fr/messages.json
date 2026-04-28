@@ -56,7 +56,7 @@
   "errorInvalidParamName": { "message": "Nom de paramètre invalide. Autorisés : lettres, chiffres, _, -, ., *." },
   "errorQueryParamNameRequired": { "message": "Le nom du paramètre est obligatoire" },
   "errorInvalidQueryParamName": { "message": "Nom de paramètre invalide (autorisés : lettres, chiffres, _ - .)" },
-  "urlExtractionModeLabel": { "message": "Méthode d'extraction" },
+  "urlExtractionModeLabel": { "message": "Méthode d'extraction URL" },
   "urlExtractionModeRegex": { "message": "Regex" },
   "urlExtractionModeQueryParam": { "message": "Paramètre de requête" },
   "urlQueryParamNameLabel": { "message": "Nom du paramètre" },

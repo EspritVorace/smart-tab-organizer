@@ -56,7 +56,7 @@
   "errorInvalidParamName": { "message": "Invalid parameter name. Allowed: letters, digits, _, -, ., *." },
   "errorQueryParamNameRequired": { "message": "Query parameter name is required" },
   "errorInvalidQueryParamName": { "message": "Invalid parameter name (allowed: letters, digits, _ - .)" },
-  "urlExtractionModeLabel": { "message": "Extraction method" },
+  "urlExtractionModeLabel": { "message": "URL extraction method" },
   "urlExtractionModeRegex": { "message": "Regex" },
   "urlExtractionModeQueryParam": { "message": "Query parameter" },
   "urlQueryParamNameLabel": { "message": "Query parameter name" },
