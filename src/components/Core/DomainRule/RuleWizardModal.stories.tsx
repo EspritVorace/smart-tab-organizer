@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent, expect } from 'storybook/test';
 import { RuleWizardModal } from './RuleWizardModal';
-const action = (name: string) => (...args: any[]) => console.log(name, ...args);
+const action = (name: string) => (...args: unknown[]) => console.log(name, ...args);
 import type { DomainRule } from '@/schemas/domainRule';
 import type { AppSettings } from '@/types/syncSettings';
 

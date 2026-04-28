@@ -68,8 +68,6 @@ export default tseslint.config(
       'ctrf/**',
       'docs/**',
       'storybook-static/**',
-      'src/**/*.stories.{ts,tsx}',
-      'src/stories/**',
     ],
   },
 

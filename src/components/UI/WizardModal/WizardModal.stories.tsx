@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Button, Theme, Text, Flex } from '@radix-ui/themes';
 import { FileUp, Plus } from 'lucide-react';
 import { WizardModal } from './WizardModal';
-import { WizardStepper } from '../WizardStepper/WizardStepper';
+import { WizardStepper } from '@/components/UI/WizardStepper/WizardStepper';
 
 const meta: Meta<typeof WizardModal> = {
   title: 'Components/UI/WizardModal/WizardModal',
