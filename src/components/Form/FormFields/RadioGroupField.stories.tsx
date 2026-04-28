@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useForm } from 'react-hook-form';
+import type { ComponentProps } from 'react';
+import { useForm, type Control, type FieldValues } from 'react-hook-form';
 import { RadioGroupField } from './RadioGroupField';
+
+type RadioGroupFieldArgs = Omit<ComponentProps<typeof RadioGroupField>, 'name' | 'control'>;
 
 const meta: Meta<typeof RadioGroupField> = {
   title: 'Components/Form/FormFields/RadioGroupField',
@@ -19,7 +22,7 @@ const mockOptions = [
   { value: 'option3', keyLabel: 'groupNameSourceManual' },
 ] as const;
 
-function RadioGroupFieldWrapper(args: any) {
+function RadioGroupFieldWrapper({ label, options, required, onChange }: RadioGroupFieldArgs) {
   const { control } = useForm({
     defaultValues: {
       testField: 'option1'
@@ -28,9 +31,12 @@ function RadioGroupFieldWrapper(args: any) {
 
   return (
     <RadioGroupField
-      {...args}
+      label={label}
+      options={options}
+      required={required}
+      onChange={onChange}
       name="testField"
-      control={control}
+      control={control as unknown as Control<FieldValues>}
     />
   );
 }

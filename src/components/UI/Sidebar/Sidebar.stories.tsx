@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Sidebar } from './Sidebar';
 import { Theme, Card, Flex, Avatar, Text, Button, Box, SegmentedControl } from '@radix-ui/themes';
-import { 
-  Home, 
-  Settings, 
-  BarChart3, 
-  FileText, 
-  Users, 
+import {
+  Home,
+  Settings,
+  BarChart3,
+  FileText,
+  Users,
   HelpCircle,
   Bell,
   Search,
@@ -15,9 +15,7 @@ import {
   Menu,
   Shield,
   Regex,
-  Group
 } from 'lucide-react';
-import { SidebarFooter } from './SidebarFooter';
 import { ThemeToggle } from '@/components/UI/ThemeToggle/ThemeToggle';
 
 const meta: Meta<typeof Sidebar> = {

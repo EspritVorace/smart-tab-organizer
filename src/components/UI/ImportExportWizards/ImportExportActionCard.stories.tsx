@@ -1,4 +1,3 @@
-import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { Download, Upload } from 'lucide-react';
 import { ImportExportActionCard } from './ImportExportActionCard';

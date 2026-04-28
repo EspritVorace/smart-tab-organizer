@@ -45,10 +45,12 @@ function normaliseImpact(impact: string | null | undefined): Severity | null {
   return severityOrder.includes(impact as Severity) ? (impact as Severity) : null;
 }
 
-// Page-level rules that never fire meaningfully on an isolated component in a
-// Storybook iframe (no <main>, no <h1>, no enclosing landmark). They remain
-// active in the Playwright E2E audit where full page layouts are exercised.
-const DISABLED_RULES_FOR_STORYBOOK = ['region', 'landmark-one-main', 'page-has-heading-one'] as const;
+// All page-level rules now run: the global decorator in preview.tsx wraps
+// each story in a <main> landmark with a visually hidden <h1>, satisfying
+// region / landmark-one-main / page-has-heading-one. Stories that render
+// their own <main> opt out via parameters.layout = 'fullscreen' or
+// parameters.landmark = false.
+const DISABLED_RULES_FOR_STORYBOOK = [] as const;
 
 const config: TestRunnerConfig = {
   async preVisit(page) {
@@ -79,6 +81,11 @@ const config: TestRunnerConfig = {
     const storyContext = await getStoryContext(page, context);
     type AxeParameters = {
       options?: Record<string, unknown>;
+      // The addon-a11y panel reads `config.rules` as an array of
+      // { id, enabled } entries (see https://storybook.js.org/docs/writing-tests/accessibility-testing).
+      // Mirror that format here so a single per-story override works for both
+      // the live panel and CI.
+      config?: { rules?: Array<{ id: string; enabled: boolean }> };
       disable?: boolean;
     };
     const a11yParameters = (storyContext.parameters?.a11y ?? {}) as AxeParameters;
@@ -90,9 +97,13 @@ const config: TestRunnerConfig = {
     // case where axe.configure (in preVisit) would be reset by another caller.
     type RunOptions = Parameters<typeof getViolations>[2];
     const storyOptions = (a11yParameters.options ?? {}) as RunOptions;
+    const configRules = Object.fromEntries(
+      (a11yParameters.config?.rules ?? []).map((r) => [r.id, { enabled: r.enabled }]),
+    );
     const mergedOptions: RunOptions = {
       ...storyOptions,
       rules: {
+        ...configRules,
         ...(storyOptions?.rules ?? {}),
         ...Object.fromEntries(
           DISABLED_RULES_FOR_STORYBOOK.map((id) => [id, { enabled: false }]),

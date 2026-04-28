@@ -2,67 +2,38 @@ import React from 'react';
 import type { Preview } from '@storybook/react'
 import { Theme } from '@radix-ui/themes'
 import '../src/styles/radix-themes.css'
+// Side-effect import: assigns the singleton browser mock to globalThis so
+// stories can call `browser.storage.local.set(...)` directly. The same mock
+// is also returned to wxt/browser and @wxt-dev/browser via Vite aliases
+// configured in main.ts, keeping every consumer on the same instance.
+import './browser-mock';
 
-type LocalePlaceholder = { content: string };
-type LocaleMessage = { message: string; placeholders?: Record<string, LocalePlaceholder> };
+interface LocalePlaceholder { content: string }
+interface LocaleMessage { message: string; placeholders?: Record<string, LocalePlaceholder> }
 type LocaleMessages = Record<string, LocaleMessage>;
 type MessagesCache = Record<string, LocaleMessages>;
-interface MockBrowser {
-  i18n: { getMessage: (key: string, substitutions?: string | string[]) => string };
-}
 interface StorybookGlobals {
   messagesCache?: MessagesCache;
   currentLocale?: string;
-  browser?: MockBrowser;
 }
 
 const globals = globalThis as typeof globalThis & StorybookGlobals;
 globals.messagesCache = globals.messagesCache ?? {};
 const messagesCache = globals.messagesCache;
 
-async function loadMessages(locale: string): Promise<LocaleMessages> {
-  if (!messagesCache[locale]) {
-    try {
-      const response = await fetch(`/_locales/${locale}/messages.json`);
-      messagesCache[locale] = await response.json();
-    } catch (_error) {
-      console.warn(`Could not load messages for locale ${locale}`);
-      messagesCache[locale] = {};
-    }
-  }
-  return messagesCache[locale];
-}
-
-function resolveMessage(entry: LocaleMessage, substitutions?: string | string[]): string {
-  let msg = entry.message;
-  if (entry.placeholders) {
-    for (const [name, p] of Object.entries(entry.placeholders)) {
-      msg = msg.split(`$${name}$`).join(p.content);
-    }
-  }
-  if (substitutions !== undefined) {
-    const subs = Array.isArray(substitutions) ? substitutions : [substitutions];
-    msg = msg.replace(/\$(\d+)/g, (m, n) => subs[Number(n) - 1] ?? m);
-  }
-  return msg;
-}
-
-const mockBrowser: MockBrowser = {
-  i18n: {
-    getMessage: (key: string, substitutions?: string | string[]) => {
-      const locale = globals.currentLocale ?? 'en';
-      const messages = messagesCache[locale] ?? {};
-      const entry = messages[key];
-      if (!entry) return key;
-      return resolveMessage(entry, substitutions);
-    }
-  }
-};
-
-globals.browser = mockBrowser;
-
-if (typeof window !== 'undefined') {
-  (window as typeof window & { browser?: MockBrowser }).browser = mockBrowser;
+// Load every locale synchronously at module evaluation. Using fetch() inside
+// a useEffect made the decorator render a "Loading translations..." skeleton
+// for the first few microseconds of every story, racing against play()
+// functions in the test-runner (which fires before postVisit). Eager glob
+// bundles the JSON files directly so messagesCache is populated before any
+// decorator runs.
+const messageModules = import.meta.glob<LocaleMessages>(
+  '../public/_locales/*/messages.json',
+  { eager: true, import: 'default' },
+);
+for (const [path, messages] of Object.entries(messageModules)) {
+  const match = path.match(/_locales\/([^/]+)\//);
+  if (match) messagesCache[match[1]] = messages;
 }
 
 // Fonction pour détecter la langue du navigateur
@@ -80,12 +51,9 @@ function getBrowserTheme(): string {
   return 'light';
 }
 
-// Précharger les messages pour la locale par défaut
 const defaultLocale = getBrowserLanguage();
 const defaultTheme = getBrowserTheme();
-loadMessages(defaultLocale);
-
-// La gestion du changement de locale se fait via le decorator
+globals.currentLocale = defaultLocale;
 
 const preview: Preview = {
   initialGlobals: {
@@ -152,34 +120,41 @@ const preview: Preview = {
   },
   decorators: [
     (Story, context) => {
-      const [messagesLoaded, setMessagesLoaded] = React.useState(false);
-      
-      React.useEffect(() => {
-        if (context.globals.locale) {
-          globals.currentLocale = context.globals.locale;
-          setMessagesLoaded(false);
-          loadMessages(context.globals.locale).then(() => {
-            setMessagesLoaded(true);
-          });
-        }
-      }, [context.globals.locale]);
-      
-      // Afficher un skeleton pendant le chargement des messages
-      if (!messagesLoaded) {
-        return (
-          <Theme appearance={context.globals.theme || 'light'}>
-            <div style={{ padding: '20px', maxWidth: '400px' }}>
-              <div>Loading translations...</div>
-            </div>
-          </Theme>
-        );
-      }
-      
+      // messagesCache is populated synchronously at module load (eager glob),
+      // so we just sync the active locale and render. No skeleton, no race
+      // with play() functions.
+      globals.currentLocale = context.globals.locale ?? defaultLocale;
+
+      // Wrap each story in a <main> landmark with a visually hidden <h1> so
+      // page-level axe rules (region, landmark-one-main, page-has-heading-one)
+      // pass on isolated components. Stories that render their own <main>
+      // (full-page layouts) set parameters.landmark = false to skip the wrap.
+      const wantsLandmark = context.parameters?.landmark !== false;
+      const storyTitle = `${context.title}${context.name ? ` - ${context.name}` : ''}`;
+      const visuallyHidden: React.CSSProperties = {
+        position: 'absolute',
+        width: '1px',
+        height: '1px',
+        padding: 0,
+        margin: '-1px',
+        overflow: 'hidden',
+        clip: 'rect(0, 0, 0, 0)',
+        whiteSpace: 'nowrap',
+        border: 0,
+      };
+
+      const content = <Story key={context.globals.locale} />;
+
       return (
         <Theme appearance={context.globals.theme || 'light'}>
-          <div style={{ padding: '20px', maxWidth: '400px' }}>
-            <Story key={context.globals.locale} />
-          </div>
+          {wantsLandmark ? (
+            <main style={{ padding: '20px', maxWidth: '400px' }}>
+              <h1 style={visuallyHidden}>{storyTitle}</h1>
+              {content}
+            </main>
+          ) : (
+            <div style={{ padding: '20px', maxWidth: '400px' }}>{content}</div>
+          )}
         </Theme>
       );
     },
