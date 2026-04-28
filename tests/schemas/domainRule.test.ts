@@ -117,6 +117,78 @@ describe('domainRuleSchema', () => {
       expect(domainRuleSchema.safeParse(rule).success).toBe(true);
     });
   });
+
+  describe('urlExtractionMode + urlQueryParamName', () => {
+    it('defaults urlExtractionMode to "regex" when missing', () => {
+      const partial = { ...validRule };
+      // @ts-expect-error testing runtime defaults
+      delete partial.urlExtractionMode;
+      const result = domainRuleSchema.safeParse(partial);
+      expect(result.success).toBe(true);
+      expect((result as { success: true; data: DomainRule }).data.urlExtractionMode).toBe('regex');
+    });
+
+    it('rejects an invalid urlExtractionMode value', () => {
+      const result = domainRuleSchema.safeParse({ ...validRule, urlExtractionMode: 'unknown' });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects urlQueryParamName containing a wildcard', () => {
+      const result = domainRuleSchema.safeParse({ ...validRule, urlQueryParamName: 'q*' });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts a valid urlQueryParamName (letters, digits, _-.)', () => {
+      const result = domainRuleSchema.safeParse({ ...validRule, urlQueryParamName: 'search_query' });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects urlQueryParamName longer than 64 chars', () => {
+      const tooLong = 'a'.repeat(65);
+      const result = domainRuleSchema.safeParse({ ...validRule, urlQueryParamName: tooLong });
+      expect(result.success).toBe(false);
+    });
+
+    it('requires urlQueryParamName when extraction mode is query_param and source is url', () => {
+      const rule = {
+        ...validRule,
+        presetId: null,
+        groupNameSource: 'url' as const,
+        urlExtractionMode: 'query_param' as const,
+        urlQueryParamName: undefined,
+      };
+      const result = domainRuleSchema.safeParse(rule);
+      expect(result.success).toBe(false);
+      const issue = (result as { success: false; error: { issues: Array<{ path: (string | number)[] }> } }).error.issues
+        .find(i => i.path.includes('urlQueryParamName'));
+      expect(issue).toBeDefined();
+    });
+
+    it('does not require urlParsingRegEx when extraction mode is query_param', () => {
+      const rule = {
+        ...validRule,
+        presetId: null,
+        groupNameSource: 'url' as const,
+        urlExtractionMode: 'query_param' as const,
+        urlQueryParamName: 'q',
+        urlParsingRegEx: '',
+      };
+      expect(domainRuleSchema.safeParse(rule).success).toBe(true);
+    });
+
+    it('accepts a smart_label rule with query_param extraction', () => {
+      const rule = {
+        ...validRule,
+        presetId: null,
+        groupNameSource: 'smart_label' as const,
+        urlExtractionMode: 'query_param' as const,
+        urlQueryParamName: 'q',
+        titleParsingRegEx: 'Title (.+)',
+        urlParsingRegEx: '',
+      };
+      expect(domainRuleSchema.safeParse(rule).success).toBe(true);
+    });
+  });
 });
 
 describe('createDomainRuleSchemaWithUniqueness', () => {

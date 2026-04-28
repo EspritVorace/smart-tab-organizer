@@ -425,4 +425,100 @@ describe('grouping', () => {
       expect(context).toBeNull();
     });
   });
+
+  describe('urlExtractionMode: query_param', () => {
+    it('extrait le nom de groupe depuis le paramètre q (Google SERP)', () => {
+      const rule = createMockRule({
+        groupNameSource: 'url',
+        urlExtractionMode: 'query_param',
+        urlQueryParamName: 'q',
+      });
+      const tab = createMockTab({ url: 'https://google.com/search?q=hello+world' });
+
+      const result = extractGroupNameFromRule(rule, tab);
+      expect(result).toBe('hello world');
+    });
+
+    it('utilise le param search_query (YouTube SERP)', () => {
+      const rule = createMockRule({
+        groupNameSource: 'url',
+        urlExtractionMode: 'query_param',
+        urlQueryParamName: 'search_query',
+      });
+      const tab = createMockTab({ url: 'https://www.youtube.com/results?search_query=hello%20world' });
+
+      const result = extractGroupNameFromRule(rule, tab);
+      expect(result).toBe('hello world');
+    });
+
+    it('retourne null en mode url strict quand le paramètre est absent', () => {
+      const rule = createMockRule({
+        groupNameSource: 'url',
+        urlExtractionMode: 'query_param',
+        urlQueryParamName: 'q',
+      });
+      const tab = createMockTab({ url: 'https://google.com/search', title: '' });
+
+      const result = extractGroupNameFromRule(rule, tab);
+      expect(result).toBeNull();
+    });
+
+    it('fallback sur le label en mode smart_label quand le paramètre est vide', () => {
+      const rule = createMockRule({
+        label: 'My Label',
+        groupNameSource: 'smart_label',
+        urlExtractionMode: 'query_param',
+        urlQueryParamName: 'q',
+      });
+      const tab = createMockTab({ url: 'https://google.com/search?q=', title: '' });
+
+      const result = extractGroupNameFromRule(rule, tab);
+      expect(result).toBe('My Label');
+    });
+
+    it('fallback sur le label en mode smart_label quand l\'URL est invalide', () => {
+      const rule = createMockRule({
+        label: 'My Label',
+        groupNameSource: 'smart_label',
+        urlExtractionMode: 'query_param',
+        urlQueryParamName: 'q',
+      });
+      const tab = createMockTab({ url: 'not-a-url', title: '' });
+
+      const result = extractGroupNameFromRule(rule, tab);
+      expect(result).toBe('My Label');
+    });
+
+    it('priorise le titre puis l\'URL en mode smart (titre regex avant query param)', () => {
+      const rule = createMockRule({
+        groupNameSource: 'smart',
+        urlExtractionMode: 'query_param',
+        urlQueryParamName: 'q',
+        titleParsingRegEx: 'Title (.+)',
+      });
+      const tab = createMockTab({
+        url: 'https://google.com/search?q=fallback+value',
+        title: 'Title from-title',
+      });
+
+      const result = extractGroupNameFromRule(rule, tab);
+      expect(result).toBe('from-title');
+    });
+
+    it('utilise le query param en fallback en mode smart quand le titre regex échoue', () => {
+      const rule = createMockRule({
+        groupNameSource: 'smart',
+        urlExtractionMode: 'query_param',
+        urlQueryParamName: 'q',
+        titleParsingRegEx: 'NoMatch (.+)',
+      });
+      const tab = createMockTab({
+        url: 'https://google.com/search?q=from+url',
+        title: 'No regex match here',
+      });
+
+      const result = extractGroupNameFromRule(rule, tab);
+      expect(result).toBe('from url');
+    });
+  });
 });

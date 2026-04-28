@@ -4,6 +4,8 @@ import {
   matchesDomain,
   extractGroupNameFromTitle,
   extractGroupNameFromUrl,
+  extractFromQueryParam,
+  extractGroupNameFromUrlByMode,
   isValidRegex,
   isValidDomain,
   getRadixColor,
@@ -113,4 +115,69 @@ test('getRadixColor falls back to gray for unknown color', () => {
 test('domainToRegex returns null for null/empty input', () => {
   assert.strictEqual(domainToRegex(null), null);
   assert.strictEqual(domainToRegex(''), null);
+});
+
+test('extractFromQueryParam returns the param value when present', () => {
+  assert.strictEqual(
+    extractFromQueryParam('https://google.com/search?q=hello+world', 'q'),
+    'hello world'
+  );
+});
+
+test('extractFromQueryParam decodes percent-encoded values', () => {
+  assert.strictEqual(
+    extractFromQueryParam('https://youtube.com/results?search_query=hello%20world', 'search_query'),
+    'hello world'
+  );
+});
+
+test('extractFromQueryParam returns null when param is missing', () => {
+  assert.strictEqual(
+    extractFromQueryParam('https://google.com/search?other=1', 'q'),
+    null
+  );
+});
+
+test('extractFromQueryParam returns null when param is empty', () => {
+  assert.strictEqual(
+    extractFromQueryParam('https://google.com/search?q=', 'q'),
+    null
+  );
+});
+
+test('extractFromQueryParam returns null on invalid URL', () => {
+  assert.strictEqual(extractFromQueryParam('not a url', 'q'), null);
+});
+
+test('extractFromQueryParam returns null when paramName is null/empty', () => {
+  assert.strictEqual(extractFromQueryParam('https://example.com?q=foo', null), null);
+  assert.strictEqual(extractFromQueryParam('https://example.com?q=foo', ''), null);
+});
+
+test('extractFromQueryParam returns null when url is null', () => {
+  assert.strictEqual(extractFromQueryParam(null, 'q'), null);
+});
+
+test('extractGroupNameFromUrlByMode dispatches to query_param mode', () => {
+  const result = extractGroupNameFromUrlByMode('https://google.com/search?q=test+query', {
+    urlExtractionMode: 'query_param',
+    urlQueryParamName: 'q',
+  });
+  assert.strictEqual(result, 'test query');
+});
+
+test('extractGroupNameFromUrlByMode dispatches to regex mode by default', () => {
+  const result = extractGroupNameFromUrlByMode('https://github.com/repo/issues/42', {
+    urlParsingRegEx: 'issues/(\\d+)',
+  });
+  assert.strictEqual(result, '42');
+});
+
+test('extractGroupNameFromUrlByMode prefers query_param when both are configured', () => {
+  const result = extractGroupNameFromUrlByMode('https://google.com/search?q=foo', {
+    urlExtractionMode: 'query_param',
+    urlQueryParamName: 'q',
+    urlParsingRegEx: 'search\\?(.+)',
+  });
+  assert.strictEqual(result, 'foo');
 });

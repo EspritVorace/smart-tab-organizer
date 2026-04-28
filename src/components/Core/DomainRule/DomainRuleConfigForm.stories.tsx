@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent, expect } from 'storybook/test';
 import { DomainRuleConfigForm, type DomainRuleConfigFormProps } from './DomainRuleConfigForm';
 import type { ConfigMode } from './ConfigModeSelector';
-import type { GroupNameSourceValue } from '@/schemas/enums';
+import type { GroupNameSourceValue, UrlExtractionModeValue } from '@/schemas/enums';
 
 type WrapperProps = Omit<
   DomainRuleConfigFormProps,
@@ -11,6 +11,8 @@ type WrapperProps = Omit<
   | 'groupNameSource' | 'onGroupNameSourceChange'
   | 'titleParsingRegEx' | 'onTitleParsingRegExChange'
   | 'urlParsingRegEx' | 'onUrlParsingRegExChange'
+  | 'urlExtractionMode' | 'onUrlExtractionModeChange'
+  | 'urlQueryParamName' | 'onUrlQueryParamNameChange'
 > & { initialMode?: ConfigMode };
 
 function Wrapper(props: WrapperProps) {
@@ -19,6 +21,8 @@ function Wrapper(props: WrapperProps) {
   const [groupNameSource, setGroupNameSource] = useState<GroupNameSourceValue>('title');
   const [titleRegex, setTitleRegex] = useState('');
   const [urlRegex, setUrlRegex] = useState('');
+  const [extractionMode, setExtractionMode] = useState<UrlExtractionModeValue>('regex');
+  const [queryParamName, setQueryParamName] = useState('');
 
   return (
     <div style={{ width: 400, padding: 16 }}>
@@ -32,6 +36,10 @@ function Wrapper(props: WrapperProps) {
         onTitleParsingRegExChange={setTitleRegex}
         urlParsingRegEx={urlRegex}
         onUrlParsingRegExChange={setUrlRegex}
+        urlExtractionMode={extractionMode}
+        onUrlExtractionModeChange={setExtractionMode}
+        urlQueryParamName={queryParamName}
+        onUrlQueryParamNameChange={setQueryParamName}
       />
     </div>
   );

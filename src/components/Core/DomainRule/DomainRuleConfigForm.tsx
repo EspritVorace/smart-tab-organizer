@@ -4,7 +4,12 @@ import { Info } from 'lucide-react';
 import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
 import { FormField, SearchableSelect } from '@/components/Form/FormFields';
-import { groupNameSourceOptions, type GroupNameSourceValue } from '@/schemas/enums';
+import {
+  groupNameSourceOptions,
+  urlExtractionModeOptions,
+  type GroupNameSourceValue,
+  type UrlExtractionModeValue,
+} from '@/schemas/enums';
 import type { PresetCategory } from '@/utils/presetUtils';
 import { presetsToSearchableGroups } from '@/utils/presetsToSearchableGroups';
 import { ConfigModeSelector, type ConfigMode } from './ConfigModeSelector';
@@ -34,6 +39,11 @@ export interface DomainRuleConfigFormProps {
   urlParsingRegEx: string;
   onUrlParsingRegExChange: (value: string) => void;
   urlParsingRegExError?: FieldError;
+  urlExtractionMode: UrlExtractionModeValue;
+  onUrlExtractionModeChange: (mode: UrlExtractionModeValue) => void;
+  urlQueryParamName: string;
+  onUrlQueryParamNameChange: (value: string) => void;
+  urlQueryParamNameError?: FieldError;
   /** Optional prefix for field IDs to avoid collisions when multiple instances coexist. */
   idPrefix?: string;
 }
@@ -57,11 +67,20 @@ export function DomainRuleConfigForm({
   urlParsingRegEx,
   onUrlParsingRegExChange,
   urlParsingRegExError,
+  urlExtractionMode,
+  onUrlExtractionModeChange,
+  urlQueryParamName,
+  onUrlQueryParamNameChange,
+  urlQueryParamNameError,
   idPrefix,
 }: DomainRuleConfigFormProps) {
   const prefix = idPrefix ? `${idPrefix}-` : '';
   const presetInputId = `${prefix}presetId`;
   const groupNameSourceInputId = `${prefix}groupNameSource`;
+  const urlExtractionModeInputId = `${prefix}urlExtractionMode`;
+
+  const showUrlSection =
+    configMode === 'manual' && (groupNameSource === 'url' || groupNameSource.startsWith('smart'));
 
   return (
     <Flex direction="column" gap="4">
@@ -169,24 +188,72 @@ export function DomainRuleConfigForm({
         </FormField>
       )}
 
-      {/* URL parsing regex (manual mode with URL-based source) */}
-      {configMode === 'manual' && (groupNameSource === 'url' || groupNameSource.startsWith('smart')) && (
-        <FormField
-          label={getMessage('urlRegex')}
-          required={true}
-          error={urlParsingRegExError}
-        >
-          {(fieldId) => (
-            <TextField.Root
-              id={fieldId}
-              value={urlParsingRegEx}
-              onChange={(e) => onUrlParsingRegExChange(e.target.value)}
-              name="urlParsingRegEx"
-              placeholder="(.+)"
-              style={{ marginTop: '4px' }}
-            />
+      {/* URL extraction (manual mode with URL-based source) : extraction mode selector + conditional field */}
+      {showUrlSection && (
+        <Flex direction="column" gap="3">
+          <Flex direction="column">
+            <Text size="2" weight="bold" asChild>
+              <Label.Root htmlFor={urlExtractionModeInputId}>
+                {getMessage('urlExtractionModeLabel')}
+              </Label.Root>
+            </Text>
+            <Select.Root
+              value={urlExtractionMode}
+              onValueChange={(v) => onUrlExtractionModeChange(v as UrlExtractionModeValue)}
+            >
+              <Select.Trigger
+                id={urlExtractionModeInputId}
+                style={{ marginTop: '4px' }}
+              />
+              <Select.Content>
+                {urlExtractionModeOptions.map((option) => (
+                  <Select.Item key={option.value} value={option.value}>
+                    {getMessage(option.keyLabel)}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Root>
+          </Flex>
+
+          {urlExtractionMode === 'regex' ? (
+            <FormField
+              label={getMessage('urlRegex')}
+              required={true}
+              error={urlParsingRegExError}
+            >
+              {(fieldId) => (
+                <TextField.Root
+                  id={fieldId}
+                  value={urlParsingRegEx}
+                  onChange={(e) => onUrlParsingRegExChange(e.target.value)}
+                  name="urlParsingRegEx"
+                  placeholder="(.+)"
+                  style={{ marginTop: '4px' }}
+                />
+              )}
+            </FormField>
+          ) : (
+            <FormField
+              label={getMessage('urlQueryParamNameLabel')}
+              required={true}
+              error={urlQueryParamNameError}
+            >
+              {(fieldId) => (
+                <Flex direction="column" gap="1" style={{ marginTop: '4px' }}>
+                  <TextField.Root
+                    id={fieldId}
+                    value={urlQueryParamName}
+                    onChange={(e) => onUrlQueryParamNameChange(e.target.value)}
+                    name="urlQueryParamName"
+                    placeholder={getMessage('urlQueryParamNamePlaceholder')}
+                    maxLength={64}
+                  />
+                  <Text size="1" color="gray">{getMessage('urlQueryParamNameHelper')}</Text>
+                </Flex>
+              )}
+            </FormField>
           )}
-        </FormField>
+        </Flex>
       )}
     </Flex>
   );

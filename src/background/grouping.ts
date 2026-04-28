@@ -1,6 +1,6 @@
 import { browser, Browser } from 'wxt/browser';
 import { incrementStat } from '@/utils/statisticsUtils.js';
-import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrl } from '@/utils/utils';
+import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrlByMode } from '@/utils/utils';
 import { getSettings } from './settings.js';
 import { promptForGroupName } from './messaging.js';
 import { showNotification, type UndoAction } from '@/utils/notifications.js';
@@ -15,6 +15,18 @@ export interface GroupingContext {
     groupColor: string | null;
     openerTab: Browser.tabs.Tab;
     newTab: Browser.tabs.Tab;
+}
+
+function describeUrlExtraction(rule: DomainRuleSetting): string {
+    return rule.urlExtractionMode === 'query_param'
+        ? `query param "${rule.urlQueryParamName ?? ''}"`
+        : `regex "${rule.urlParsingRegEx ?? ''}"`;
+}
+
+function hasUrlExtractor(rule: DomainRuleSetting): boolean {
+    return rule.urlExtractionMode === 'query_param'
+        ? !!rule.urlQueryParamName
+        : !!rule.urlParsingRegEx;
 }
 
 export function findMatchingRule(url: string, domainRules: DomainRuleSetting[]): DomainRuleSetting | undefined {
@@ -49,12 +61,12 @@ export function extractGroupNameFromRule(rule: DomainRuleSetting, openerTab: Bro
                 logger.warn(`[GROUPING_DEBUG] Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}".`, e.message);
             }
         }
-        if (!extracted?.trim() && openerTab.url && rule.urlParsingRegEx) {
+        if (!extracted?.trim() && openerTab.url && hasUrlExtractor(rule)) {
             try {
-                extracted = extractGroupNameFromUrl(openerTab.url, rule.urlParsingRegEx);
-                if (extracted?.trim()) logger.debug(`[GROUPING_DEBUG] Group name extracted from opener URL "${openerTab.url}" using regex "${rule.urlParsingRegEx}" (title fallback): "${extracted.trim()}".`);
+                extracted = extractGroupNameFromUrlByMode(openerTab.url, rule);
+                if (extracted?.trim()) logger.debug(`[GROUPING_DEBUG] Group name extracted from opener URL "${openerTab.url}" using ${describeUrlExtraction(rule)} (title fallback): "${extracted.trim()}".`);
             } catch (e) {
-                logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with regex "${rule.urlParsingRegEx}".`, e.message);
+                logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with ${describeUrlExtraction(rule)}.`, e.message);
             }
         }
         if (extracted?.trim()) {
@@ -65,12 +77,12 @@ export function extractGroupNameFromRule(rule: DomainRuleSetting, openerTab: Bro
     } else if (rule.groupNameSource === 'url') {
         // Essaie l'URL en priorité, puis le titre si l'URL ne donne rien
         let extracted: string | null = null;
-        if (openerTab.url && rule.urlParsingRegEx) {
+        if (openerTab.url && hasUrlExtractor(rule)) {
             try {
-                extracted = extractGroupNameFromUrl(openerTab.url, rule.urlParsingRegEx);
-                if (extracted?.trim()) logger.debug(`[GROUPING_DEBUG] Group name extracted from opener URL "${openerTab.url}" using regex "${rule.urlParsingRegEx}": "${extracted.trim()}".`);
+                extracted = extractGroupNameFromUrlByMode(openerTab.url, rule);
+                if (extracted?.trim()) logger.debug(`[GROUPING_DEBUG] Group name extracted from opener URL "${openerTab.url}" using ${describeUrlExtraction(rule)}: "${extracted.trim()}".`);
             } catch (e) {
-                logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with regex "${rule.urlParsingRegEx}".`, e.message);
+                logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with ${describeUrlExtraction(rule)}.`, e.message);
             }
         }
         if (!extracted?.trim() && openerTab.title && rule.titleParsingRegEx) {
@@ -122,7 +134,7 @@ export function extractGroupNameFromRule(rule: DomainRuleSetting, openerTab: Bro
         }
         groupName = extracted;
     }
-    
+
     const category = getRuleCategory(rule.categoryId);
     if (category) groupName = `${category.emoji} ${groupName}`;
 
@@ -143,16 +155,16 @@ function tryExtractGroupNameFromPresetOrFallback(rule: DomainRuleSetting, opener
         }
     }
 
-    // Essayer d'extraire depuis l'URL avec la regex de la règle (copiée depuis le preset)
-    if (openerTab.url && rule.urlParsingRegEx) {
+    // Essayer d'extraire depuis l'URL via le mode configuré (regex ou query_param)
+    if (openerTab.url && hasUrlExtractor(rule)) {
         try {
-            const extracted = extractGroupNameFromUrl(openerTab.url, rule.urlParsingRegEx);
+            const extracted = extractGroupNameFromUrlByMode(openerTab.url, rule);
             if (extracted && extracted.trim()) {
-                logger.debug(`[GROUPING_DEBUG] Group name extracted from opener URL "${openerTab.url}" using regex "${rule.urlParsingRegEx}": "${extracted.trim()}".`);
+                logger.debug(`[GROUPING_DEBUG] Group name extracted from opener URL "${openerTab.url}" using ${describeUrlExtraction(rule)}: "${extracted.trim()}".`);
                 return extracted.trim();
             }
         } catch (e) {
-            logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with regex "${rule.urlParsingRegEx}".`, e.message);
+            logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with ${describeUrlExtraction(rule)}.`, e.message);
         }
     }
 
@@ -180,30 +192,30 @@ export function createGroupingContext(
 }
 
 export async function createNewGroup(
-    tabsToGroup: number[], 
-    groupName: string, 
+    tabsToGroup: number[],
+    groupName: string,
     groupColor: string | null
 ): Promise<number> {
     logger.debug(`[GROUPING_DEBUG] Calling browser.tabs.group to create new group with tabs [${tabsToGroup.join(', ')}]`);
     const newGroupId = await browser.tabs.group({ tabIds: tabsToGroup as [number, ...number[]] });
-    
+
     const updatePayload: { title: string; collapsed: boolean; color?: string } = { title: groupName, collapsed: false };
     if (groupColor) updatePayload.color = groupColor;
-    
+
     logger.debug(`[GROUPING_DEBUG] New group created with ID: ${newGroupId}. Calling browser.tabGroups.update with payload:`, updatePayload);
     await browser.tabGroups.update(newGroupId, updatePayload as Parameters<typeof browser.tabGroups.update>[1]);
     await incrementStat('tabGroupsCreatedCount');
-    
+
     return newGroupId;
 }
 
 export async function addToExistingGroup(
-    groupId: number, 
+    groupId: number,
     tabId: number
 ): Promise<void> {
     logger.debug(`[GROUPING_DEBUG] Adding tab ${tabId} to existing group ${groupId}`);
     await browser.tabs.group({ groupId: groupId, tabIds: [tabId] });
-    
+
     const updatePayload: { collapsed: boolean } = { collapsed: false };
     logger.debug(`[GROUPING_DEBUG] Updating group ${groupId} with payload:`, updatePayload);
     await browser.tabGroups.update(groupId, updatePayload);
@@ -219,7 +231,7 @@ export async function handleManualGroupNaming(
     if ((rule.groupNameSource !== 'manual' && rule.groupNameSource !== 'smart_manual') || !targetGroupId) {
         return;
     }
-    
+
     const manualName = await promptForGroupName(groupName, openerTabId);
     if (manualName && manualName !== groupName) {
         await browser.tabGroups.update(targetGroupId, { title: manualName });
@@ -237,7 +249,7 @@ export async function handleManualGroupNaming(
 export async function performGroupingOperation(context: GroupingContext): Promise<{targetGroupId: number, groupedTabIds: number[]}> {
     const currentOpenerTab = await browser.tabs.get(context.openerTab.id);
     const openerGroupId = currentOpenerTab.groupId;
-    
+
     logger.debug(`[GROUPING_DEBUG] Refreshed openerTab ${currentOpenerTab.id} ("${currentOpenerTab.url}"), current groupId: ${openerGroupId}. Using groupName "${context.groupName}".`);
 
     let targetGroupId: number;
@@ -260,7 +272,7 @@ export async function performGroupingOperation(context: GroupingContext): Promis
 
 export async function processGroupingForNewTab(openerTab: Browser.tabs.Tab, newTab: Browser.tabs.Tab): Promise<void> {
     logger.debug(`[GROUPING_DEBUG] Processing grouping for openerTab ${openerTab.id} and newTab ${newTab.id}.`);
-    
+
     const settings = await getSettings();
     if (!settings.globalGroupingEnabled || !openerTab?.url) {
         logger.debug(`[GROUPING_DEBUG] Grouping disabled or opener URL missing.`);

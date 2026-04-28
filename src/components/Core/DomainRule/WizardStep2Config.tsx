@@ -1,7 +1,7 @@
 import { useController, type Control, type FieldErrors } from 'react-hook-form';
 import type { DomainRule } from '@/schemas/domainRule';
 import type { PresetCategory } from '@/utils/presetUtils';
-import { type GroupNameSourceValue } from '@/schemas/enums';
+import { type GroupNameSourceValue, type UrlExtractionModeValue } from '@/schemas/enums';
 import { DomainRuleConfigForm } from './DomainRuleConfigForm';
 import type { ConfigMode } from './ConfigModeSelector';
 
@@ -34,6 +34,8 @@ export function WizardStep2Config({
   const { field: groupNameSourceField } = useController({ name: 'groupNameSource', control });
   const { field: titleField } = useController({ name: 'titleParsingRegEx', control });
   const { field: urlField } = useController({ name: 'urlParsingRegEx', control });
+  const { field: extractionModeField } = useController({ name: 'urlExtractionMode', control });
+  const { field: queryParamNameField } = useController({ name: 'urlQueryParamName', control });
 
   return (
     <DomainRuleConfigForm
@@ -51,6 +53,11 @@ export function WizardStep2Config({
       urlParsingRegEx={urlField.value ?? ''}
       onUrlParsingRegExChange={(value) => urlField.onChange(value)}
       urlParsingRegExError={errors.urlParsingRegEx}
+      urlExtractionMode={(extractionModeField.value as UrlExtractionModeValue | undefined) ?? 'regex'}
+      onUrlExtractionModeChange={(value) => extractionModeField.onChange(value)}
+      urlQueryParamName={queryParamNameField.value ?? ''}
+      onUrlQueryParamNameChange={(value) => queryParamNameField.onChange(value)}
+      urlQueryParamNameError={errors.urlQueryParamName}
     />
   );
 }

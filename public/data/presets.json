@@ -102,6 +102,126 @@
           "groupNameSource": "url",
           "urlExample": "URL: '/@username/posts' → Groupe: 'username'",
           "description": "Extrait un nom d'utilisateur après @"
+        },
+        {
+          "id": "serp-google",
+          "name": "Google Search",
+          "domainFilters": ["google.com", "google.fr", "google.es"],
+          "groupNameSource": "smart_label",
+          "urlExtractionMode": "query_param",
+          "urlQueryParamName": "q",
+          "urlExample": "https://www.google.com/search?q=tab+organizer",
+          "description": "Groupe les recherches Google par requête (paramètre q)"
+        },
+        {
+          "id": "serp-bing",
+          "name": "Bing Search",
+          "domainFilters": ["bing.com"],
+          "groupNameSource": "smart_label",
+          "urlExtractionMode": "query_param",
+          "urlQueryParamName": "q",
+          "urlExample": "https://www.bing.com/search?q=tab+organizer",
+          "description": "Groupe les recherches Bing par requête (paramètre q)"
+        },
+        {
+          "id": "serp-duckduckgo",
+          "name": "DuckDuckGo",
+          "domainFilters": ["duckduckgo.com"],
+          "groupNameSource": "smart_label",
+          "urlExtractionMode": "query_param",
+          "urlQueryParamName": "q",
+          "urlExample": "https://duckduckgo.com/?q=tab+organizer",
+          "description": "Groupe les recherches DuckDuckGo par requête (paramètre q)"
+        },
+        {
+          "id": "serp-youtube",
+          "name": "YouTube Search",
+          "domainFilters": ["youtube.com"],
+          "groupNameSource": "smart_label",
+          "urlExtractionMode": "query_param",
+          "urlQueryParamName": "search_query",
+          "urlExample": "https://www.youtube.com/results?search_query=tab+organizer",
+          "description": "Groupe les recherches YouTube par requête (paramètre search_query)"
+        },
+        {
+          "id": "serp-amazon",
+          "name": "Amazon Search",
+          "domainFilters": ["amazon.com", "amazon.fr", "amazon.es"],
+          "groupNameSource": "smart_label",
+          "urlExtractionMode": "query_param",
+          "urlQueryParamName": "k",
+          "urlExample": "https://www.amazon.com/s?k=tab+organizer",
+          "description": "Groupe les recherches Amazon par requête (paramètre k)"
+        },
+        {
+          "id": "serp-ebay",
+          "name": "eBay Search",
+          "domainFilters": ["ebay.com", "ebay.fr"],
+          "groupNameSource": "smart_label",
+          "urlExtractionMode": "query_param",
+          "urlQueryParamName": "_nkw",
+          "urlExample": "https://www.ebay.com/sch/i.html?_nkw=tab+organizer",
+          "description": "Groupe les recherches eBay par requête (paramètre _nkw)"
+        },
+        {
+          "id": "serp-stackoverflow",
+          "name": "Stack Overflow Search",
+          "domainFilters": ["stackoverflow.com"],
+          "groupNameSource": "smart_label",
+          "urlExtractionMode": "query_param",
+          "urlQueryParamName": "q",
+          "urlExample": "https://stackoverflow.com/search?q=tab+organizer",
+          "description": "Groupe les recherches Stack Overflow par requête (paramètre q)"
+        },
+        {
+          "id": "serp-reddit",
+          "name": "Reddit Search",
+          "domainFilters": ["reddit.com"],
+          "groupNameSource": "smart_label",
+          "urlExtractionMode": "query_param",
+          "urlQueryParamName": "q",
+          "urlExample": "https://www.reddit.com/search/?q=tab+organizer",
+          "description": "Groupe les recherches Reddit par requête (paramètre q)"
+        },
+        {
+          "id": "serp-github",
+          "name": "GitHub Search",
+          "domainFilters": ["github.com"],
+          "groupNameSource": "smart_label",
+          "urlExtractionMode": "query_param",
+          "urlQueryParamName": "q",
+          "urlExample": "https://github.com/search?q=tab+organizer",
+          "description": "Groupe les recherches GitHub par requête (paramètre q)"
+        },
+        {
+          "id": "serp-npm",
+          "name": "npm Search",
+          "domainFilters": ["npmjs.com"],
+          "groupNameSource": "smart_label",
+          "urlExtractionMode": "query_param",
+          "urlQueryParamName": "q",
+          "urlExample": "https://www.npmjs.com/search?q=tab+organizer",
+          "description": "Groupe les recherches npm par requête (paramètre q)"
+        },
+        {
+          "id": "serp-mdn",
+          "name": "MDN Search",
+          "domainFilters": ["developer.mozilla.org"],
+          "groupNameSource": "smart_label",
+          "urlExtractionMode": "query_param",
+          "urlQueryParamName": "q",
+          "urlExample": "https://developer.mozilla.org/en-US/search?q=tab+organizer",
+          "description": "Groupe les recherches MDN par requête (paramètre q)"
+        },
+        {
+          "id": "serp-wikipedia",
+          "name": "Wikipedia Search",
+          "domainFilters": ["wikipedia.org"],
+          "groupNameSource": "smart_label",
+          "urlExtractionMode": "query_param",
+          "urlQueryParamName": "search",
+          "urlExample": "https://en.wikipedia.org/wiki/Special:Search?search=tab+organizer",
+          "description": "Groupe les recherches Wikipedia par requête (paramètre search)"
         }
       ]
     },
