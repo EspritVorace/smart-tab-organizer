@@ -12,7 +12,7 @@ vi.mock('../../src/background/settings.js', () => ({
 
 vi.mock('../../src/background/grouping.js', () => ({
   findMatchingRule: vi.fn(),
-  extractGroupNameFromRule: vi.fn(),
+  findGroupingRuleForTab: vi.fn(),
   determineGroupColor: vi.fn(),
   createNewGroup: vi.fn(),
   addToExistingGroup: vi.fn(),
@@ -44,7 +44,7 @@ import { browser } from 'wxt/browser';
 import { getSettings } from '../../src/background/settings';
 import {
   findMatchingRule,
-  extractGroupNameFromRule,
+  findGroupingRuleForTab,
   determineGroupColor,
   createNewGroup,
   addToExistingGroup,
@@ -59,7 +59,7 @@ import {
 const mockedBrowser = browser as unknown as MockedBrowser;
 const mockedGetSettings = getSettings as ReturnType<typeof vi.fn>;
 const mockedFindMatchingRule = findMatchingRule as ReturnType<typeof vi.fn>;
-const mockedExtractGroupName = extractGroupNameFromRule as ReturnType<typeof vi.fn>;
+const mockedFindGroupingRule = findGroupingRuleForTab as ReturnType<typeof vi.fn>;
 const mockedDetermineColor = determineGroupColor as ReturnType<typeof vi.fn>;
 const mockedCreateGroup = createNewGroup as ReturnType<typeof vi.fn>;
 const mockedAddToGroup = addToExistingGroup as ReturnType<typeof vi.fn>;
@@ -214,8 +214,7 @@ describe('handleOrganizeAllTabs', () => {
         makeTab(11, 'https://x.com/b'),
       ]);
 
-      mockedFindMatchingRule.mockReturnValue(rule);
-      mockedExtractGroupName.mockReturnValue('My Group');
+      mockedFindGroupingRule.mockReturnValue({ rule, groupName: 'My Group' });
       mockedDetermineColor.mockReturnValue('blue');
       mockedBrowser.tabGroups.query.mockResolvedValue([]);
 
@@ -238,8 +237,7 @@ describe('handleOrganizeAllTabs', () => {
         makeTab(21, 'https://x.com/b'),
       ]);
 
-      mockedFindMatchingRule.mockReturnValue(rule);
-      mockedExtractGroupName.mockReturnValue('Existing');
+      mockedFindGroupingRule.mockReturnValue({ rule, groupName: 'Existing' });
       mockedDetermineColor.mockReturnValue('purple');
       mockedBrowser.tabGroups.query
         .mockResolvedValueOnce([{ id: 99, title: 'Existing' }])
@@ -262,8 +260,7 @@ describe('handleOrganizeAllTabs', () => {
         makeTab(30, 'https://x.com/a'),
       ]);
 
-      mockedFindMatchingRule.mockReturnValue(rule);
-      mockedExtractGroupName.mockReturnValue('Solo');
+      mockedFindGroupingRule.mockReturnValue({ rule, groupName: 'Solo' });
       mockedDetermineColor.mockReturnValue('red');
       mockedBrowser.tabGroups.query.mockResolvedValue([]);
 
@@ -284,7 +281,7 @@ describe('handleOrganizeAllTabs', () => {
         makeTab(41, 'https://x.com/b'),
       ]);
 
-      mockedFindMatchingRule.mockReturnValue(rule);
+      mockedFindGroupingRule.mockReturnValue(null);
       mockedBrowser.tabGroups.query.mockResolvedValue([]);
 
       await handleOrganizeAllTabs(1);
@@ -292,7 +289,7 @@ describe('handleOrganizeAllTabs', () => {
       expect(mockedCreateGroup).not.toHaveBeenCalled();
     });
 
-    it('overrides "manual" groupNameSource to "smart_label"', async () => {
+    it('passes coerceManualToLabel: true so manual sources fall back to the rule label', async () => {
       const rule = makeRule({ groupNameSource: 'manual' });
       mockedGetSettings.mockResolvedValue(makeSettings({ domainRules: [rule] }));
 
@@ -302,15 +299,14 @@ describe('handleOrganizeAllTabs', () => {
         makeTab(51, 'https://x.com/b'),
       ]);
 
-      mockedFindMatchingRule.mockReturnValue(rule);
-      mockedExtractGroupName.mockReturnValue('Example');
+      mockedFindGroupingRule.mockReturnValue({ rule, groupName: 'Example' });
       mockedDetermineColor.mockReturnValue('blue');
       mockedBrowser.tabGroups.query.mockResolvedValue([]);
 
       await handleOrganizeAllTabs(1);
 
-      const [passedRule] = mockedExtractGroupName.mock.calls[0];
-      expect(passedRule.groupNameSource).toBe('smart_label');
+      const callArgs = mockedFindGroupingRule.mock.calls[0];
+      expect(callArgs[2]).toEqual({ coerceManualToLabel: true });
     });
 
     it('does not re-move tabs that are already in the target group', async () => {
@@ -323,8 +319,7 @@ describe('handleOrganizeAllTabs', () => {
         makeTab(61, 'https://x.com/b', { groupId: 77 }),
       ]);
 
-      mockedFindMatchingRule.mockReturnValue(rule);
-      mockedExtractGroupName.mockReturnValue('Already There');
+      mockedFindGroupingRule.mockReturnValue({ rule, groupName: 'Already There' });
       mockedDetermineColor.mockReturnValue('blue');
       mockedBrowser.tabGroups.query
         .mockResolvedValueOnce([{ id: 77, title: 'Already There' }])
@@ -349,8 +344,7 @@ describe('handleOrganizeAllTabs', () => {
         makeTab(71, 'https://x.com/b'),
       ]);
 
-      mockedFindMatchingRule.mockReturnValue(rule);
-      mockedExtractGroupName.mockReturnValue('Work');
+      mockedFindGroupingRule.mockReturnValue({ rule, groupName: 'Work' });
       mockedDetermineColor.mockReturnValue('blue');
       mockedBrowser.tabGroups.query.mockResolvedValue([]);
 
@@ -370,8 +364,7 @@ describe('handleOrganizeAllTabs', () => {
         makeTab(81, 'https://x.com/b'),
       ]);
 
-      mockedFindMatchingRule.mockReturnValue(rule);
-      mockedExtractGroupName.mockReturnValue('Fails');
+      mockedFindGroupingRule.mockReturnValue({ rule, groupName: 'Fails' });
       mockedDetermineColor.mockReturnValue('blue');
       mockedBrowser.tabGroups.query.mockResolvedValue([]);
       mockedCreateGroup.mockRejectedValueOnce(new Error('api error'));
@@ -437,6 +430,7 @@ describe('handleOrganizeAllTabs', () => {
       await handleOrganizeAllTabs(1);
 
       expect(mockedFindMatchingRule).not.toHaveBeenCalled();
+      expect(mockedFindGroupingRule).not.toHaveBeenCalled();
       expect(mockedBrowser.tabs.remove).not.toHaveBeenCalled();
     });
 

@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   findMatchingRule,
+  findMatchingRules,
+  findGroupingRuleForTab,
   determineGroupColor,
   extractGroupNameFromRule,
   createGroupingContext
@@ -151,6 +153,169 @@ describe('grouping', () => {
       const result = findMatchingRule('https://example.com/page', rules);
 
       expect(result?.label).toBe('First');
+    });
+  });
+
+  describe('findMatchingRules', () => {
+    it('retourne toutes les règles activées correspondant au domaine, dans l\'ordre', () => {
+      const rules: DomainRuleSetting[] = [
+        createMockRule({ domainFilter: 'example.com', label: 'First' }),
+        createMockRule({ domainFilter: 'example.com', label: 'Second' }),
+        createMockRule({ domainFilter: 'other.com', label: 'Other' }),
+      ];
+
+      const result = findMatchingRules('https://example.com/page', rules);
+
+      expect(result.map(r => r.label)).toEqual(['First', 'Second']);
+    });
+
+    it('ignore les règles désactivées', () => {
+      const rules: DomainRuleSetting[] = [
+        createMockRule({ domainFilter: 'example.com', label: 'Off', enabled: false }),
+        createMockRule({ domainFilter: 'example.com', label: 'On' }),
+      ];
+
+      const result = findMatchingRules('https://example.com/page', rules);
+
+      expect(result.map(r => r.label)).toEqual(['On']);
+    });
+
+    it('retourne un tableau vide quand aucune règle ne correspond', () => {
+      const rules: DomainRuleSetting[] = [
+        createMockRule({ domainFilter: 'other.com' }),
+      ];
+
+      expect(findMatchingRules('https://example.com/page', rules)).toEqual([]);
+    });
+  });
+
+  describe('findGroupingRuleForTab', () => {
+    it('saute la première règle si son extraction échoue et utilise la suivante', () => {
+      const rules: DomainRuleSetting[] = [
+        createMockRule({
+          id: '1',
+          domainFilter: 'example.com',
+          label: 'First',
+          groupingEnabled: true,
+          groupNameSource: 'title',
+          titleParsingRegEx: 'NoMatch - (\\w+)',
+        }),
+        createMockRule({
+          id: '2',
+          domainFilter: 'example.com',
+          label: 'Second',
+          groupingEnabled: true,
+          groupNameSource: 'title',
+          titleParsingRegEx: 'Test Page - (\\w+)',
+        }),
+      ];
+      const tab = createMockTab({ title: 'Test Page - Example' });
+
+      const result = findGroupingRuleForTab(tab, rules);
+
+      expect(result?.rule.label).toBe('Second');
+      expect(result?.groupName).toBe('Example');
+    });
+
+    it('retourne null si aucune règle ne produit un nom de groupe', () => {
+      const rules: DomainRuleSetting[] = [
+        createMockRule({
+          id: '1',
+          domainFilter: 'example.com',
+          label: 'First',
+          groupingEnabled: true,
+          groupNameSource: 'title',
+          titleParsingRegEx: 'NoMatch - (\\w+)',
+        }),
+        createMockRule({
+          id: '2',
+          domainFilter: 'example.com',
+          label: 'Second',
+          groupingEnabled: true,
+          groupNameSource: 'title',
+          titleParsingRegEx: 'AlsoNoMatch (\\w+)',
+        }),
+      ];
+      const tab = createMockTab({ title: 'Test Page - Example' });
+
+      expect(findGroupingRuleForTab(tab, rules)).toBeNull();
+    });
+
+    it('saute les règles dont groupingEnabled est faux', () => {
+      const rules: DomainRuleSetting[] = [
+        createMockRule({
+          id: '1',
+          domainFilter: 'example.com',
+          label: 'GroupingDisabled',
+          groupingEnabled: false,
+          groupNameSource: 'title',
+          titleParsingRegEx: 'Test Page - (\\w+)',
+        }),
+        createMockRule({
+          id: '2',
+          domainFilter: 'example.com',
+          label: 'Active',
+          groupingEnabled: true,
+          groupNameSource: 'title',
+          titleParsingRegEx: 'Test Page - (\\w+)',
+        }),
+      ];
+      const tab = createMockTab({ title: 'Test Page - Example' });
+
+      const result = findGroupingRuleForTab(tab, rules);
+
+      expect(result?.rule.label).toBe('Active');
+    });
+
+    it('retourne la première règle qui réussit (ordre préservé)', () => {
+      const rules: DomainRuleSetting[] = [
+        createMockRule({
+          id: '1',
+          domainFilter: 'example.com',
+          label: 'First',
+          groupingEnabled: true,
+          groupNameSource: 'title',
+          titleParsingRegEx: 'Test Page - (\\w+)',
+        }),
+        createMockRule({
+          id: '2',
+          domainFilter: 'example.com',
+          label: 'Second',
+          groupingEnabled: true,
+          groupNameSource: 'title',
+          titleParsingRegEx: 'Test Page - (\\w+)',
+        }),
+      ];
+      const tab = createMockTab({ title: 'Test Page - Example' });
+
+      const result = findGroupingRuleForTab(tab, rules);
+
+      expect(result?.rule.label).toBe('First');
+    });
+
+    it('coerce manual et smart_manual en smart_label quand demandé', () => {
+      const rules: DomainRuleSetting[] = [
+        createMockRule({
+          domainFilter: 'example.com',
+          label: 'My Label',
+          groupingEnabled: true,
+          groupNameSource: 'manual',
+        }),
+      ];
+      const tab = createMockTab({ url: 'https://example.com/page', title: 'No regex match' });
+
+      const result = findGroupingRuleForTab(tab, rules, { coerceManualToLabel: true });
+
+      expect(result?.groupName).toBe('My Label');
+    });
+
+    it('retourne null quand l\'URL est absente', () => {
+      const rules: DomainRuleSetting[] = [
+        createMockRule({ domainFilter: 'example.com', groupingEnabled: true }),
+      ];
+      const tab = createMockTab({ url: undefined });
+
+      expect(findGroupingRuleForTab(tab, rules)).toBeNull();
     });
   });
 
