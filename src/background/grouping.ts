@@ -33,6 +33,43 @@ export function findMatchingRule(url: string, domainRules: DomainRuleSetting[]):
     return domainRules.find(r => r.enabled && matchesDomain(url, r.domainFilter));
 }
 
+export function findMatchingRules(url: string, domainRules: DomainRuleSetting[]): DomainRuleSetting[] {
+    return domainRules.filter(r => r.enabled && matchesDomain(url, r.domainFilter));
+}
+
+// Returns the first enabled rule matching the URL's domain whose
+// groupingEnabled is true AND that produces a non-null group name.
+// Skips rules whose groupingEnabled=false or whose extraction returns null,
+// so that a later rule on the same domain can apply.
+export function findGroupingRuleForTab(
+    openerTab: Browser.tabs.Tab,
+    domainRules: DomainRuleSetting[],
+    options: { coerceManualToLabel?: boolean } = {}
+): { rule: DomainRuleSetting; groupName: string } | null {
+    if (!openerTab.url) return null;
+
+    for (const rule of findMatchingRules(openerTab.url, domainRules)) {
+        if (!rule.groupingEnabled) {
+            logger.debug(`[GROUPING_DEBUG] Rule "${rule.label}" has groupingEnabled=false. Trying next matching rule.`);
+            continue;
+        }
+
+        const effectiveRule: DomainRuleSetting =
+            options.coerceManualToLabel &&
+            (rule.groupNameSource === 'manual' || rule.groupNameSource === 'smart_manual')
+                ? { ...rule, groupNameSource: 'smart_label' as const }
+                : rule;
+
+        const groupName = extractGroupNameFromRule(effectiveRule, openerTab);
+        if (groupName !== null) {
+            return { rule, groupName };
+        }
+        logger.debug(`[GROUPING_DEBUG] Rule "${rule.label}" matched the domain but produced no group name. Trying next.`);
+    }
+
+    return null;
+}
+
 export function determineGroupColor(rule: DomainRuleSetting, _settings?: AppSettings): string | null {
     const category = getRuleCategory(rule.categoryId);
     if (category) {
@@ -289,22 +326,15 @@ export async function processGroupingForNewTab(openerTab: Browser.tabs.Tab, newT
         }
     }
 
-    const rule = findMatchingRule(openerTab.url, settings.domainRules);
-    if (!rule) {
-        logger.debug(`[GROUPING_DEBUG] No matching rule for opener tab URL: ${openerTab.url}`);
+    const grouping = findGroupingRuleForTab(openerTab, settings.domainRules);
+    if (!grouping) {
+        logger.debug(`[GROUPING_DEBUG] No applicable grouping rule for opener tab URL: ${openerTab.url}`);
         return;
     }
 
-    if (!rule.groupingEnabled) {
-        logger.debug(`[GROUPING_DEBUG] Rule "${rule.label}" has groupingEnabled=false. No grouping.`);
-        return;
-    }
-
-    const context = createGroupingContext(rule, openerTab, newTab, settings);
-    if (context === null) {
-        logger.debug(`[GROUPING_DEBUG] Skipping grouping: no name could be extracted for rule "${rule.label}".`);
-        return;
-    }
+    const { rule, groupName } = grouping;
+    const groupColor = determineGroupColor(rule, settings);
+    const context: GroupingContext = { rule, groupName, groupColor, openerTab, newTab };
     logger.debug(`[GROUPING_DEBUG] Rule found: "${rule.label}", groupName: "${context.groupName}"`);
 
     try {
