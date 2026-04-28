@@ -33,6 +33,11 @@ export const deduplicationMatchModeOptions = [
   { value: 'exact_ignore_params', keyLabel: 'exactIgnoreParamsMatch' }
 ] as const;
 
+export const urlExtractionModeOptions = [
+  { value: 'regex', keyLabel: 'urlExtractionModeRegex' },
+  { value: 'query_param', keyLabel: 'urlExtractionModeQueryParam' }
+] as const;
+
 export const deduplicationKeepStrategyOptions = [
   { value: 'keep-old', keyLabel: 'deduplicationKeepStrategyOldLabel' },
   { value: 'keep-new', keyLabel: 'deduplicationKeepStrategyNewLabel' },
@@ -52,3 +57,4 @@ export type GroupNameSourceValue = typeof groupNameSourceOptions[number]['value'
 export type DeduplicationMatchModeValue = typeof deduplicationMatchModeOptions[number]['value'];
 export type DeduplicationKeepStrategyValue = typeof deduplicationKeepStrategyOptions[number]['value'];
 export type BadgeType = typeof badgeOptions[number]['value'];
+export type UrlExtractionModeValue = typeof urlExtractionModeOptions[number]['value'];

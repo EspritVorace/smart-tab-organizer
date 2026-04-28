@@ -14,7 +14,7 @@ import { EditSummaryView } from './EditSummaryView';
 import { type ConfigEditValues } from './ConfigEditModal';
 import { generateUUID } from '@/utils/utils';
 import { createDomainRuleSchemaWithUniqueness, type DomainRule } from '@/schemas/domainRule';
-import { groupNameSourceOptions, type GroupNameSourceValue } from '@/schemas/enums';
+import { groupNameSourceOptions, type GroupNameSourceValue, type UrlExtractionModeValue } from '@/schemas/enums';
 import { getPresetById, loadPresets, type PresetCategory } from '@/utils/presetUtils';
 import type { AppSettings } from '@/types/syncSettings';
 import { logger } from '@/utils/logger';
@@ -28,6 +28,31 @@ interface RuleWizardModalProps {
 }
 
 const VALID_GROUP_NAME_SOURCES = groupNameSourceOptions.map(o => o.value) as GroupNameSourceValue[];
+
+interface ModeStateSnapshot {
+  groupNameSource: GroupNameSourceValue;
+  titleParsingRegEx: string;
+  urlParsingRegEx: string;
+  urlExtractionMode: UrlExtractionModeValue;
+  urlQueryParamName: string;
+}
+
+interface PresetStateSnapshot extends ModeStateSnapshot {
+  presetId: string | null;
+}
+
+const emptyModeState: ModeStateSnapshot = {
+  groupNameSource: 'title',
+  titleParsingRegEx: '',
+  urlParsingRegEx: '',
+  urlExtractionMode: 'regex',
+  urlQueryParamName: '',
+};
+
+const emptyPresetState: PresetStateSnapshot = {
+  presetId: null,
+  ...emptyModeState,
+};
 
 const getDefaultValues = (rule?: DomainRule): Partial<DomainRule> => {
   return rule ? {
@@ -43,6 +68,8 @@ const getDefaultValues = (rule?: DomainRule): Partial<DomainRule> => {
     deduplicationEnabled: rule.deduplicationEnabled,
     ignoredQueryParams: rule.ignoredQueryParams ?? [],
     presetId: rule.presetId,
+    urlExtractionMode: rule.urlExtractionMode ?? 'regex',
+    urlQueryParamName: rule.urlQueryParamName ?? '',
   } : {
     id: generateUUID(),
     domainFilter: '',
@@ -55,6 +82,8 @@ const getDefaultValues = (rule?: DomainRule): Partial<DomainRule> => {
     deduplicationEnabled: true,
     ignoredQueryParams: [],
     presetId: null,
+    urlExtractionMode: 'regex',
+    urlQueryParamName: '',
   };
 };
 
@@ -98,12 +127,8 @@ export function RuleWizardModal({
   const [stepAnnouncement, setStepAnnouncement] = useState('');
 
   // State preservation refs for mode switching
-  const lastManualState = useRef<{ groupNameSource: GroupNameSourceValue; titleParsingRegEx: string; urlParsingRegEx: string }>({
-    groupNameSource: 'title', titleParsingRegEx: '', urlParsingRegEx: '',
-  });
-  const lastPresetState = useRef<{ presetId: string | null; groupNameSource: GroupNameSourceValue; titleParsingRegEx: string; urlParsingRegEx: string }>({
-    presetId: null, groupNameSource: 'title', titleParsingRegEx: '', urlParsingRegEx: '',
-  });
+  const lastManualState = useRef<ModeStateSnapshot>({ ...emptyModeState });
+  const lastPresetState = useRef<PresetStateSnapshot>({ ...emptyPresetState });
 
   const {
     control,
@@ -152,30 +177,30 @@ export function RuleWizardModal({
     const mode = inferConfigMode(domainRule);
     setConfigMode(mode);
     if (!domainRule) {
-      lastManualState.current = { groupNameSource: 'title', titleParsingRegEx: '', urlParsingRegEx: '' };
-      lastPresetState.current = { presetId: null, groupNameSource: 'title', titleParsingRegEx: '', urlParsingRegEx: '' };
+      lastManualState.current = { ...emptyModeState };
+      lastPresetState.current = { ...emptyPresetState };
     } else if (domainRule.presetId) {
-      lastPresetState.current = {
-        presetId: domainRule.presetId,
+      const snapshot: ModeStateSnapshot = {
         groupNameSource: domainRule.groupNameSource,
         titleParsingRegEx: domainRule.titleParsingRegEx ?? '',
         urlParsingRegEx: domainRule.urlParsingRegEx ?? '',
+        urlExtractionMode: domainRule.urlExtractionMode ?? 'regex',
+        urlQueryParamName: domainRule.urlQueryParamName ?? '',
       };
-      lastManualState.current = {
-        groupNameSource: domainRule.groupNameSource,
-        titleParsingRegEx: domainRule.titleParsingRegEx ?? '',
-        urlParsingRegEx: domainRule.urlParsingRegEx ?? '',
-      };
+      lastPresetState.current = { presetId: domainRule.presetId, ...snapshot };
+      lastManualState.current = { ...snapshot };
     } else if (domainRule.groupNameSource === 'manual') {
-      lastManualState.current = { groupNameSource: 'title', titleParsingRegEx: '', urlParsingRegEx: '' };
-      lastPresetState.current = { presetId: null, groupNameSource: 'title', titleParsingRegEx: '', urlParsingRegEx: '' };
+      lastManualState.current = { ...emptyModeState };
+      lastPresetState.current = { ...emptyPresetState };
     } else {
       lastManualState.current = {
         groupNameSource: domainRule.groupNameSource as GroupNameSourceValue,
         titleParsingRegEx: domainRule.titleParsingRegEx ?? '',
         urlParsingRegEx: domainRule.urlParsingRegEx ?? '',
+        urlExtractionMode: domainRule.urlExtractionMode ?? 'regex',
+        urlQueryParamName: domainRule.urlQueryParamName ?? '',
       };
-      lastPresetState.current = { presetId: null, groupNameSource: 'title', titleParsingRegEx: '', urlParsingRegEx: '' };
+      lastPresetState.current = { ...emptyPresetState };
     }
   }, [domainRule, isOpen, reset]);
 
@@ -187,71 +212,74 @@ export function RuleWizardModal({
       setValue('groupNameSource', preset.groupNameSource);
       if (preset.titleRegex) setValue('titleParsingRegEx', preset.titleRegex);
       if (preset.urlRegex) setValue('urlParsingRegEx', preset.urlRegex);
+      const presetExtractionMode = (preset.urlExtractionMode ?? 'regex') as UrlExtractionModeValue;
+      setValue('urlExtractionMode', presetExtractionMode);
+      if (preset.urlQueryParamName) setValue('urlQueryParamName', preset.urlQueryParamName);
       setPresetName(preset.name);
-      lastPresetState.current = {
-        presetId: selectedPresetId,
+      const snapshot: ModeStateSnapshot = {
         groupNameSource: preset.groupNameSource,
         titleParsingRegEx: preset.titleRegex ?? '',
         urlParsingRegEx: preset.urlRegex ?? '',
+        urlExtractionMode: presetExtractionMode,
+        urlQueryParamName: preset.urlQueryParamName ?? '',
       };
-      lastManualState.current = {
-        groupNameSource: preset.groupNameSource,
-        titleParsingRegEx: preset.titleRegex ?? '',
-        urlParsingRegEx: preset.urlRegex ?? '',
-      };
+      lastPresetState.current = { presetId: selectedPresetId, ...snapshot };
+      lastManualState.current = { ...snapshot };
       trigger();
     }
   }, [setValue, trigger]);
 
+  const captureSnapshot = useCallback((): ModeStateSnapshot => ({
+    groupNameSource: getValues('groupNameSource') as GroupNameSourceValue,
+    titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
+    urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
+    urlExtractionMode: (getValues('urlExtractionMode') ?? 'regex') as UrlExtractionModeValue,
+    urlQueryParamName: getValues('urlQueryParamName') ?? '',
+  }), [getValues]);
+
+  const applySnapshot = useCallback((snapshot: ModeStateSnapshot) => {
+    setValue('groupNameSource', snapshot.groupNameSource);
+    setValue('titleParsingRegEx', snapshot.titleParsingRegEx);
+    setValue('urlParsingRegEx', snapshot.urlParsingRegEx);
+    setValue('urlExtractionMode', snapshot.urlExtractionMode);
+    setValue('urlQueryParamName', snapshot.urlQueryParamName);
+  }, [setValue]);
+
   const saveCurrentModeState = useCallback((prevMode: 'preset' | 'ask' | 'manual') => {
     if (prevMode === 'manual') {
-      lastManualState.current = {
-        groupNameSource: getValues('groupNameSource') as GroupNameSourceValue,
-        titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
-        urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
-      };
+      lastManualState.current = captureSnapshot();
     } else if (prevMode === 'preset') {
       lastPresetState.current = {
         presetId: getValues('presetId') ?? null,
-        groupNameSource: getValues('groupNameSource') as GroupNameSourceValue,
-        titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
-        urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
+        ...captureSnapshot(),
       };
     }
-  }, [getValues]);
+  }, [captureSnapshot, getValues]);
 
   const handleConfigModeChange = useCallback((newMode: 'preset' | 'ask' | 'manual') => {
     const prevMode = configMode;
     if (prevMode === 'manual' && newMode === 'preset') {
       saveCurrentModeState(prevMode);
       setValue('presetId', lastPresetState.current.presetId);
-      setValue('groupNameSource', lastPresetState.current.groupNameSource);
-      setValue('titleParsingRegEx', lastPresetState.current.titleParsingRegEx);
-      setValue('urlParsingRegEx', lastPresetState.current.urlParsingRegEx);
+      applySnapshot(lastPresetState.current);
     } else if (prevMode === 'preset' && newMode === 'manual') {
       saveCurrentModeState(prevMode);
       setValue('presetId', null);
-      setValue('groupNameSource', lastManualState.current.groupNameSource);
-      setValue('titleParsingRegEx', lastManualState.current.titleParsingRegEx);
-      setValue('urlParsingRegEx', lastManualState.current.urlParsingRegEx);
+      applySnapshot(lastManualState.current);
     } else if (newMode === 'ask') {
       saveCurrentModeState(prevMode);
       setValue('presetId', null);
       setValue('groupNameSource', 'manual');
     } else if (prevMode === 'ask' && newMode === 'preset') {
       setValue('presetId', lastPresetState.current.presetId);
-      setValue('groupNameSource', lastPresetState.current.groupNameSource);
-      setValue('titleParsingRegEx', lastPresetState.current.titleParsingRegEx);
-      setValue('urlParsingRegEx', lastPresetState.current.urlParsingRegEx);
+      applySnapshot(lastPresetState.current);
     } else if (prevMode === 'ask' && newMode === 'manual') {
       setValue('presetId', null);
-      setValue('groupNameSource', lastManualState.current.groupNameSource);
-      setValue('titleParsingRegEx', lastManualState.current.titleParsingRegEx);
-      setValue('urlParsingRegEx', lastManualState.current.urlParsingRegEx);
+      applySnapshot(lastManualState.current);
     }
     setConfigMode(newMode);
     trigger();
-  }, [configMode, saveCurrentModeState, setValue, trigger]);
+  }, [configMode, saveCurrentModeState, setValue, applySnapshot, trigger]);
 
   const announceStep = (newStep: number) => {
     const label = getMessage(STEP_LABELS_KEYS[newStep]);
@@ -269,8 +297,15 @@ export function RuleWizardModal({
       if (configMode === 'preset') fieldsToValidate = ['presetId'];
       else if (configMode === 'manual') {
         const src = getValues('groupNameSource');
+        const extractionMode = (getValues('urlExtractionMode') ?? 'regex') as UrlExtractionModeValue;
         if (src === 'title' || src.startsWith('smart')) fieldsToValidate.push('titleParsingRegEx');
-        if (src === 'url' || src.startsWith('smart')) fieldsToValidate.push('urlParsingRegEx');
+        if (src === 'url' || src.startsWith('smart')) {
+          if (extractionMode === 'query_param') {
+            fieldsToValidate.push('urlQueryParamName');
+          } else {
+            fieldsToValidate.push('urlParsingRegEx');
+          }
+        }
       }
     } else if (step === 2) {
       const dedupEnabled = getValues('deduplicationEnabled');
@@ -304,6 +339,8 @@ export function RuleWizardModal({
     setValue('groupNameSource', values.groupNameSource);
     setValue('titleParsingRegEx', values.titleParsingRegEx);
     setValue('urlParsingRegEx', values.urlParsingRegEx);
+    setValue('urlExtractionMode', values.urlExtractionMode);
+    setValue('urlQueryParamName', values.urlQueryParamName);
     if (values.configMode === 'ask') {
       setValue('groupNameSource', 'manual');
     }
@@ -347,6 +384,8 @@ export function RuleWizardModal({
     groupNameSource: groupNameSource as GroupNameSourceValue,
     titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
     urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
+    urlExtractionMode: (getValues('urlExtractionMode') ?? 'regex') as UrlExtractionModeValue,
+    urlQueryParamName: getValues('urlQueryParamName') ?? '',
   };
 
   const description = isEditing

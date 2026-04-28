@@ -54,6 +54,28 @@ export function extractGroupNameFromUrl(url: string | null, regexString: string 
   }
 }
 
+export function extractFromQueryParam(url: string | null, paramName: string | null | undefined): string | null {
+  if (!url || !paramName) return null;
+  try {
+    const parsed = new URL(url);
+    const value = parsed.searchParams.get(paramName);
+    return value && value.length > 0 ? value : null;
+  } catch (e) {
+    logger.debug('[GROUPING] Invalid URL for query param extraction:', url, e);
+    return null;
+  }
+}
+
+export function extractGroupNameFromUrlByMode(
+  url: string | null,
+  rule: { urlExtractionMode?: 'regex' | 'query_param'; urlParsingRegEx?: string | null; urlQueryParamName?: string | null }
+): string | null {
+  if (rule.urlExtractionMode === 'query_param') {
+    return extractFromQueryParam(url, rule.urlQueryParamName ?? null);
+  }
+  return extractGroupNameFromUrl(url, rule.urlParsingRegEx ?? null);
+}
+
 export function isValidRegex(regex: string): boolean {
   try {
     new RegExp(regex);

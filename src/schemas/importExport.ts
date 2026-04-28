@@ -30,6 +30,8 @@ export const importDomainRuleSchema = z.object({
   deduplicationEnabled: z.boolean().default(true),
   ignoredQueryParams: z.array(z.string()).max(50).optional().default([]),
   presetId: z.string().nullable(),
+  urlExtractionMode: z.enum(['regex', 'query_param']).optional().default('regex'),
+  urlQueryParamName: z.string().max(64).optional(),
   enabled: z.boolean(),
   badge: z.string().optional()
 });
