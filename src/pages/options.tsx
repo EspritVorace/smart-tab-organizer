@@ -29,7 +29,7 @@ export function OptionsContent() {
     const version = browser.runtime.getManifest().version;
 
     const { settings, updateSettings } = useSettings();
-    const { statistics: stats, resetStatistics } = useStatistics();
+    const { statisticsAggregates, resetStatistics } = useStatistics(settings?.domainRules ?? []);
     const {
         currentTab, setCurrentTab,
         openSnapshotWizard, setOpenSnapshotWizard,
@@ -102,7 +102,7 @@ export function OptionsContent() {
                         />
                     )}
                     {currentTab === 'stats' && (
-                        <StatisticsPage syncSettings={settings} stats={stats} onReset={handleResetStats} />
+                        <StatisticsPage syncSettings={settings} statisticsData={statisticsAggregates} onReset={handleResetStats} />
                     )}
                     {currentTab === 'settings' && (
                         <SettingsPage syncSettings={settings} updateSettings={updateSettings} />

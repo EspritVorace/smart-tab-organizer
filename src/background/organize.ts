@@ -245,7 +245,7 @@ async function applyOrganizePlan(
             } else {
                 // Create new group with all planned tab IDs
                 const tabIds = tabsToMove.map(e => e.tab.id!);
-                await createNewGroup(tabIds, targetName, groupColor);
+                await createNewGroup(tabIds, targetName, groupColor, entries[0].rule.id);
                 groupCount += 1;
             }
 

@@ -69,7 +69,7 @@ beforeEach(() => {
 
 describe('createNewGroup', () => {
   it('groups the given tabs and updates title + color + collapsed=false', async () => {
-    const id = await createNewGroup([10, 11], 'Work', 'blue');
+    const id = await createNewGroup([10, 11], 'Work', 'blue', 'rule-1');
 
     expect(id).toBe(99);
     expect(mockedBrowser.tabs.group).toHaveBeenCalledWith({ tabIds: [10, 11] });
@@ -78,11 +78,11 @@ describe('createNewGroup', () => {
       collapsed: false,
       color: 'blue',
     });
-    expect(mockedIncrementStat).toHaveBeenCalledWith('tabGroupsCreatedCount');
+    expect(mockedIncrementStat).toHaveBeenCalledWith('grouping', 'rule-1');
   });
 
   it('omits color from the update payload when groupColor is null', async () => {
-    await createNewGroup([12], 'NoColor', null);
+    await createNewGroup([12], 'NoColor', null, 'rule-2');
 
     expect(mockedBrowser.tabGroups.update).toHaveBeenCalledWith(99, {
       title: 'NoColor',
