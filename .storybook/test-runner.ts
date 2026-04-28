@@ -79,6 +79,11 @@ const config: TestRunnerConfig = {
     const storyContext = await getStoryContext(page, context);
     type AxeParameters = {
       options?: Record<string, unknown>;
+      // The addon-a11y panel reads `config.rules` as an array of
+      // { id, enabled } entries (see https://storybook.js.org/docs/writing-tests/accessibility-testing).
+      // Mirror that format here so a single per-story override works for both
+      // the live panel and CI.
+      config?: { rules?: Array<{ id: string; enabled: boolean }> };
       disable?: boolean;
     };
     const a11yParameters = (storyContext.parameters?.a11y ?? {}) as AxeParameters;
@@ -90,9 +95,13 @@ const config: TestRunnerConfig = {
     // case where axe.configure (in preVisit) would be reset by another caller.
     type RunOptions = Parameters<typeof getViolations>[2];
     const storyOptions = (a11yParameters.options ?? {}) as RunOptions;
+    const configRules = Object.fromEntries(
+      (a11yParameters.config?.rules ?? []).map((r) => [r.id, { enabled: r.enabled }]),
+    );
     const mergedOptions: RunOptions = {
       ...storyOptions,
       rules: {
+        ...configRules,
         ...(storyOptions?.rules ?? {}),
         ...Object.fromEntries(
           DISABLED_RULES_FOR_STORYBOOK.map((id) => [id, { enabled: false }]),

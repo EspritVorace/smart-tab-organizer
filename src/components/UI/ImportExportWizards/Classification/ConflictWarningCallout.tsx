@@ -13,7 +13,7 @@ interface ConflictWarningCalloutProps {
 export function ConflictWarningCallout({ when, messageKey }: ConflictWarningCalloutProps) {
   if (!when) return null;
   return (
-    <Callout.Root color="orange" variant="soft" mt="3">
+    <Callout.Root color="orange" variant="soft" highContrast mt="3">
       <Callout.Icon>
         <AlertTriangle size={16} />
       </Callout.Icon>
