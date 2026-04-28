@@ -45,10 +45,12 @@ function normaliseImpact(impact: string | null | undefined): Severity | null {
   return severityOrder.includes(impact as Severity) ? (impact as Severity) : null;
 }
 
-// Page-level rules that never fire meaningfully on an isolated component in a
-// Storybook iframe (no <main>, no <h1>, no enclosing landmark). They remain
-// active in the Playwright E2E audit where full page layouts are exercised.
-const DISABLED_RULES_FOR_STORYBOOK = ['region', 'landmark-one-main', 'page-has-heading-one'] as const;
+// All page-level rules now run: the global decorator in preview.tsx wraps
+// each story in a <main> landmark with a visually hidden <h1>, satisfying
+// region / landmark-one-main / page-has-heading-one. Stories that render
+// their own <main> opt out via parameters.layout = 'fullscreen' or
+// parameters.landmark = false.
+const DISABLED_RULES_FOR_STORYBOOK = [] as const;
 
 const config: TestRunnerConfig = {
   async preVisit(page) {

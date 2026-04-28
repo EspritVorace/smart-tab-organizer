@@ -125,11 +125,36 @@ const preview: Preview = {
       // with play() functions.
       globals.currentLocale = context.globals.locale ?? defaultLocale;
 
+      // Wrap each story in a <main> landmark with a visually hidden <h1> so
+      // page-level axe rules (region, landmark-one-main, page-has-heading-one)
+      // pass on isolated components. Stories that render their own <main>
+      // (full-page layouts) set parameters.landmark = false to skip the wrap.
+      const wantsLandmark = context.parameters?.landmark !== false;
+      const storyTitle = `${context.title}${context.name ? ` - ${context.name}` : ''}`;
+      const visuallyHidden: React.CSSProperties = {
+        position: 'absolute',
+        width: '1px',
+        height: '1px',
+        padding: 0,
+        margin: '-1px',
+        overflow: 'hidden',
+        clip: 'rect(0, 0, 0, 0)',
+        whiteSpace: 'nowrap',
+        border: 0,
+      };
+
+      const content = <Story key={context.globals.locale} />;
+
       return (
         <Theme appearance={context.globals.theme || 'light'}>
-          <div style={{ padding: '20px', maxWidth: '400px' }}>
-            <Story key={context.globals.locale} />
-          </div>
+          {wantsLandmark ? (
+            <main style={{ padding: '20px', maxWidth: '400px' }}>
+              <h1 style={visuallyHidden}>{storyTitle}</h1>
+              {content}
+            </main>
+          ) : (
+            <div style={{ padding: '20px', maxWidth: '400px' }}>{content}</div>
+          )}
         </Theme>
       );
     },
