@@ -2,7 +2,7 @@ import { browser, Browser } from 'wxt/browser';
 import { getSettings } from './settings.js';
 import {
     findMatchingRule,
-    extractGroupNameFromRule,
+    findGroupingRuleForTab,
     determineGroupColor,
     createNewGroup,
     addToExistingGroup,
@@ -156,20 +156,19 @@ async function buildOrganizePlan(windowId: number, settings: AppSettings): Promi
     const allEntries: PlanEntry[] = [];
 
     for (const tab of organizable) {
-        const rule = findMatchingRule(tab.url!, settings.domainRules);
-        if (!rule || !rule.enabled || !rule.groupingEnabled) continue;
+        // Pass the tab itself as "openerTab": safe for label/url/title/smart sources.
+        // coerceManualToLabel maps manual / smart_manual sources to smart_label so
+        // bulk organize falls back to the rule label without prompting the user.
+        const grouping = findGroupingRuleForTab(
+            tab as Browser.tabs.Tab,
+            settings.domainRules,
+            { coerceManualToLabel: true },
+        );
+        if (!grouping) continue;
 
-        // Skip sources that require user interaction — fall back to rule.label via smart_label
-        const effectiveRule: DomainRuleSetting =
-            rule.groupNameSource === 'manual' || rule.groupNameSource === 'smart_manual'
-                ? { ...rule, groupNameSource: 'smart_label' as const }
-                : rule;
-
-        // Pass the tab itself as "openerTab" — safe for label/url/title/smart sources
-        const targetGroupName = extractGroupNameFromRule(effectiveRule, tab as Browser.tabs.Tab);
+        const { rule, groupName } = grouping;
         const groupColor = determineGroupColor(rule);
-
-        allEntries.push({ tab, targetGroupName, groupColor, rule });
+        allEntries.push({ tab, targetGroupName: groupName, groupColor, rule });
     }
 
     // Count members per target group name
