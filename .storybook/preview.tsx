@@ -21,17 +21,19 @@ const globals = globalThis as typeof globalThis & StorybookGlobals;
 globals.messagesCache = globals.messagesCache ?? {};
 const messagesCache = globals.messagesCache;
 
-async function loadMessages(locale: string): Promise<LocaleMessages> {
-  if (!messagesCache[locale]) {
-    try {
-      const response = await fetch(`/_locales/${locale}/messages.json`);
-      messagesCache[locale] = await response.json();
-    } catch (_error) {
-      console.warn(`Could not load messages for locale ${locale}`);
-      messagesCache[locale] = {};
-    }
-  }
-  return messagesCache[locale];
+// Load every locale synchronously at module evaluation. Using fetch() inside
+// a useEffect made the decorator render a "Loading translations..." skeleton
+// for the first few microseconds of every story, racing against play()
+// functions in the test-runner (which fires before postVisit). Eager glob
+// bundles the JSON files directly so messagesCache is populated before any
+// decorator runs.
+const messageModules = import.meta.glob<LocaleMessages>(
+  '../public/_locales/*/messages.json',
+  { eager: true, import: 'default' },
+);
+for (const [path, messages] of Object.entries(messageModules)) {
+  const match = path.match(/_locales\/([^/]+)\//);
+  if (match) messagesCache[match[1]] = messages;
 }
 
 // Fonction pour détecter la langue du navigateur
@@ -49,12 +51,9 @@ function getBrowserTheme(): string {
   return 'light';
 }
 
-// Précharger les messages pour la locale par défaut
 const defaultLocale = getBrowserLanguage();
 const defaultTheme = getBrowserTheme();
-loadMessages(defaultLocale);
-
-// La gestion du changement de locale se fait via le decorator
+globals.currentLocale = defaultLocale;
 
 const preview: Preview = {
   initialGlobals: {
@@ -121,28 +120,10 @@ const preview: Preview = {
   },
   decorators: [
     (Story, context) => {
-      const [messagesLoaded, setMessagesLoaded] = React.useState(false);
-
-      React.useEffect(() => {
-        if (context.globals.locale) {
-          globals.currentLocale = context.globals.locale;
-          setMessagesLoaded(false);
-          loadMessages(context.globals.locale).then(() => {
-            setMessagesLoaded(true);
-          });
-        }
-      }, [context.globals.locale]);
-
-      // Afficher un skeleton pendant le chargement des messages
-      if (!messagesLoaded) {
-        return (
-          <Theme appearance={context.globals.theme || 'light'}>
-            <div style={{ padding: '20px', maxWidth: '400px' }}>
-              <div>Loading translations...</div>
-            </div>
-          </Theme>
-        );
-      }
+      // messagesCache is populated synchronously at module load (eager glob),
+      // so we just sync the active locale and render. No skeleton, no race
+      // with play() functions.
+      globals.currentLocale = context.globals.locale ?? defaultLocale;
 
       return (
         <Theme appearance={context.globals.theme || 'light'}>
