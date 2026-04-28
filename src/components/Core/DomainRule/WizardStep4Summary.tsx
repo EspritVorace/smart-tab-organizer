@@ -67,10 +67,10 @@ function buildConfigSummary(
   if (URL_SOURCE_MODES.includes(values.groupNameSource)) {
     if (values.urlExtractionMode === 'query_param') {
       summary += ' ' + getMessage('urlExtractionSummaryQueryParam')
-        .replace('$PARAM$', values.urlQueryParamName ?? '');
+        .replace('{param}', values.urlQueryParamName ?? '');
     } else if (values.urlParsingRegEx) {
       summary += ' ' + getMessage('urlExtractionSummaryRegex')
-        .replace('$REGEX$', values.urlParsingRegEx);
+        .replace('{regex}', values.urlParsingRegEx);
     }
   }
   return summary;
