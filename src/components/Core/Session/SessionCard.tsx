@@ -379,7 +379,7 @@ export function SessionCard({
 
         {/* Separator between header and preview */}
         <Box
-          my="2"
+          mb="2"
           style={{
             marginLeft: 'calc(-1 * var(--card-padding, var(--space-4)))',
             marginRight: 'calc(-1 * var(--card-padding, var(--space-4)))',
