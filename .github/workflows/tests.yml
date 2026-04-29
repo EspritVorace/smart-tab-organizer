@@ -131,18 +131,46 @@ jobs:
         continue-on-error: true
         run: pnpm lint:ctrf
 
-      - name: Publish lint CTRF results
-        uses: ctrf-io/github-actions-ctrf@v1
+      - name: Generate lint markdown summary
         if: always()
-        continue-on-error: true
+        run: node scripts/lint-markdown.mjs > ctrf/lint.md
+
+      - name: Publish lint summary to job output
+        if: always()
+        run: cat ctrf/lint.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post sticky lint comment on PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
         with:
-          report-path: 'ctrf/lint-ctrf-report.json'
-          pull-request: true
-          summary: false
-          summary-report: true
-          failed-report: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('ctrf/lint.md', 'utf8');
+            const marker = '<!-- lint-sticky-comment -->';
+            const fullBody = `${marker}\n${body}`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find((c) => c.body && c.body.startsWith(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: fullBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: fullBody,
+              });
+            }
 
       - name: Upload lint CTRF report
         uses: actions/upload-artifact@v4
