@@ -35,20 +35,23 @@ const COMPARABLE_PROPERTIES: (keyof DomainRuleSetting)[] = [
   'enabled'
 ];
 
+// When either side is an array, treat null/undefined on the other side as an
+// empty array. This mirrors the Zod default and lets us compare rules that
+// were stored before a new array field existed.
+function coerceToArray(value: unknown): unknown[] {
+  if (Array.isArray(value)) return value;
+  if (value == null) return [];
+  return [value];
+}
+
+function arrayValuesEqual(arrA: unknown[], arrB: unknown[]): boolean {
+  if (arrA.length !== arrB.length) return false;
+  return arrA.every((v, i) => v === arrB[i]);
+}
+
 function arePropertyValuesEqual(a: unknown, b: unknown): boolean {
-  const aIsArr = Array.isArray(a);
-  const bIsArr = Array.isArray(b);
-  // When either side is an array, treat null/undefined on the other side as an
-  // empty array. This mirrors the Zod default and lets us compare rules that
-  // were stored before a new array field existed.
-  if (aIsArr || bIsArr) {
-    const arrA: unknown[] = aIsArr ? (a as unknown[]) : (a == null ? [] : [a]);
-    const arrB: unknown[] = bIsArr ? (b as unknown[]) : (b == null ? [] : [b]);
-    if (arrA.length !== arrB.length) return false;
-    for (let i = 0; i < arrA.length; i++) {
-      if (arrA[i] !== arrB[i]) return false;
-    }
-    return true;
+  if (Array.isArray(a) || Array.isArray(b)) {
+    return arrayValuesEqual(coerceToArray(a), coerceToArray(b));
   }
   return a === b;
 }

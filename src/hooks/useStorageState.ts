@@ -1,6 +1,35 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { logger } from '@/utils/logger';
 
+type ChangeCallbacks<T> = { [K in keyof T]?: Set<(v: T[K]) => void> };
+
+function fireFieldCallback<T>(
+  field: keyof T,
+  prev: T,
+  next: T,
+  callbacks: ChangeCallbacks<T>,
+): void {
+  if (next[field] === prev[field]) return;
+  const cbs = callbacks[field];
+  if (!cbs) return;
+  for (const cb of cbs) cb(next[field] as T[typeof field]);
+}
+
+function applyWatchUpdate<T extends object>(
+  prev: T | null,
+  update: Partial<T>,
+  valueRef: React.MutableRefObject<T | null>,
+  callbacks: ChangeCallbacks<T>,
+): T | null {
+  if (!prev) return prev;
+  const next = { ...prev, ...update };
+  valueRef.current = next;
+  for (const field of Object.keys(update) as (keyof T)[]) {
+    fireFieldCallback(field, prev, next, callbacks);
+  }
+  return next;
+}
+
 /**
  * Configuration for useStorageState.
  *
@@ -130,19 +159,7 @@ export function useStorageState<T extends object>({
   useEffect(() => {
     return setupWatchRef.current((update) => {
       if (isLocalUpdate.current) return;
-      _setValue(prev => {
-        if (!prev) return prev;
-        const next = { ...prev, ...update };
-        valueRef.current = next;
-        // Fire per-field callbacks for fields that actually changed.
-        (Object.keys(update) as (keyof T)[]).forEach((field) => {
-          if ((update as T)[field] !== prev[field]) {
-            const cbs = changeCallbacksRef.current[field];
-            if (cbs) cbs.forEach(cb => cb(next[field] as T[typeof field]));
-          }
-        });
-        return next;
-      });
+      _setValue(prev => applyWatchUpdate(prev, update, valueRef, changeCallbacksRef.current));
     });
   }, []);
 

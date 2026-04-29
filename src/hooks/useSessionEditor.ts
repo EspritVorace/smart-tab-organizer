@@ -58,26 +58,34 @@ export function useSessionEditor(initialSession: Session): UseSessionEditorRetur
   }
 
   function removeTab(tabId: string) {
+    const tabMatches = (t: { id: string }) => t.id === tabId;
+    const groupContainsTab = (g: { tabs: { id: string }[] }) => g.tabs.some(tabMatches);
+    const stripTab = <G extends { tabs: { id: string }[] }>(g: G): G => ({
+      ...g,
+      tabs: g.tabs.filter((t) => !tabMatches(t)),
+    });
     setEditedSession((prev) => {
-      const inUngrouped = prev.ungroupedTabs.some((t) => t.id === tabId);
-      const inGroup = prev.groups.some((g) => g.tabs.some((t) => t.id === tabId));
+      const inUngrouped = prev.ungroupedTabs.some(tabMatches);
+      const inGroup = prev.groups.some(groupContainsTab);
       if (!inUngrouped && !inGroup) return prev;
       return {
         ...prev,
-        ungroupedTabs: prev.ungroupedTabs.filter((t) => t.id !== tabId),
-        groups: prev.groups.map((g) => ({ ...g, tabs: g.tabs.filter((t) => t.id !== tabId) })),
+        ungroupedTabs: prev.ungroupedTabs.filter((t) => !tabMatches(t)),
+        groups: prev.groups.map(stripTab),
       };
     });
   }
 
   function updateTabUrl(tabId: string, url: string) {
+    const updateIfMatch = <T extends { id: string }>(t: T): T => (t.id === tabId ? { ...t, url } : t);
+    const updateGroupTabs = <G extends { tabs: { id: string }[] }>(g: G): G => ({
+      ...g,
+      tabs: g.tabs.map(updateIfMatch),
+    });
     setEditedSession((prev) => ({
       ...prev,
-      ungroupedTabs: prev.ungroupedTabs.map((t) => (t.id === tabId ? { ...t, url } : t)),
-      groups: prev.groups.map((g) => ({
-        ...g,
-        tabs: g.tabs.map((t) => (t.id === tabId ? { ...t, url } : t)),
-      })),
+      ungroupedTabs: prev.ungroupedTabs.map(updateIfMatch),
+      groups: prev.groups.map(updateGroupTabs),
     }));
   }
 

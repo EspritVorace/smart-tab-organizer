@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import { Box } from '@radix-ui/themes';
 import { TextFieldWithCategory } from './TextFieldWithCategory';
-import type { RuleCategoryId } from '@/schemas/enums';
 
 const meta: Meta<typeof TextFieldWithCategory> = {
   title: 'Components/Form/FormFields/TextFieldWithCategory',
@@ -24,17 +23,17 @@ type Story = StoryObj<typeof meta>;
 
 function ControlledExample({
   initialValue = '',
-  initialCategoryId = null as RuleCategoryId | null,
+  initialCategoryId = null as string | null,
   ...rest
 }: {
   initialValue?: string;
-  initialCategoryId?: RuleCategoryId | null;
+  initialCategoryId?: string | null;
   placeholder?: string;
   maxLength?: number;
   'aria-label'?: string;
 }) {
   const [value, setValue] = useState(initialValue);
-  const [categoryId, setCategoryId] = useState<RuleCategoryId | null>(initialCategoryId);
+  const [categoryId, setCategoryId] = useState<string | null>(initialCategoryId);
   return (
     <TextFieldWithCategory
       value={value}
@@ -54,7 +53,7 @@ export const TextFieldWithCategoryFilled: Story = {
   render: () => (
     <ControlledExample
       initialValue="My work session"
-      initialCategoryId={'productivity' as RuleCategoryId}
+      initialCategoryId={'productivity'}
       aria-label="Label"
     />
   ),

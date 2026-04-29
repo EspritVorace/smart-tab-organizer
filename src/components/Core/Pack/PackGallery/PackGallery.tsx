@@ -150,7 +150,7 @@ export function PackGallery({ packs, categories, source }: PackGalleryProps) {
         </TextField.Slot>
       </TextField.Root>
 
-      {filteredPacks.length === 0 ? (
+      {filteredPacks.length === 0 && (
         <Flex
           direction="column"
           align="center"
@@ -162,11 +162,13 @@ export function PackGallery({ packs, categories, source }: PackGalleryProps) {
             {getMessage('packGallerySearchNoResult')}
           </Text>
         </Flex>
-      ) : isSearching ? (
+      )}
+      {filteredPacks.length > 0 && isSearching && (
         <Flex direction="column" gap="2">
           {filteredPacks.map(renderPack)}
         </Flex>
-      ) : (
+      )}
+      {filteredPacks.length > 0 && !isSearching && (
         grouped && (
           <Flex direction="column" gap="1">
             {[

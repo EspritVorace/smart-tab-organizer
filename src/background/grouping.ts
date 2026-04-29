@@ -84,98 +84,80 @@ export function determineGroupColor(rule: DomainRuleSetting, _settings?: AppSett
     return null;
 }
 
-export function extractGroupNameFromRule(rule: DomainRuleSetting, openerTab: Browser.tabs.Tab): string | null {
-    let groupName = rule.label || "SmartGroup";
-
-    if (rule.groupNameSource === 'title') {
-        // Essaie le titre en priorité, puis l'URL si le titre ne donne rien
-        let extracted: string | null = null;
-        if (openerTab.title && rule.titleParsingRegEx) {
-            try {
-                extracted = extractGroupNameFromTitle(openerTab.title, rule.titleParsingRegEx);
-                if (extracted?.trim()) logger.debug(`[GROUPING_DEBUG] Group name extracted from opener title "${openerTab.title}" using regex "${rule.titleParsingRegEx}": "${extracted.trim()}".`);
-            } catch (e) {
-                logger.warn(`[GROUPING_DEBUG] Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}".`, e.message);
-            }
-        }
-        if (!extracted?.trim() && openerTab.url && hasUrlExtractor(rule)) {
-            try {
-                extracted = extractGroupNameFromUrlByMode(openerTab.url, rule);
-                if (extracted?.trim()) logger.debug(`[GROUPING_DEBUG] Group name extracted from opener URL "${openerTab.url}" using ${describeUrlExtraction(rule)} (title fallback): "${extracted.trim()}".`);
-            } catch (e) {
-                logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with ${describeUrlExtraction(rule)}.`, e.message);
-            }
-        }
+function tryExtractFromTitle(rule: DomainRuleSetting, openerTab: Browser.tabs.Tab, fallbackContext = ''): string | null {
+    if (!openerTab.title || !rule.titleParsingRegEx) return null;
+    try {
+        const extracted = extractGroupNameFromTitle(openerTab.title, rule.titleParsingRegEx);
         if (extracted?.trim()) {
-            groupName = extracted.trim();
-        } else {
-            return null;
+            const suffix = fallbackContext ? ` ${fallbackContext}` : '';
+            logger.debug(`[GROUPING_DEBUG] Group name extracted from opener title "${openerTab.title}" using regex "${rule.titleParsingRegEx}"${suffix}: "${extracted.trim()}".`);
+            return extracted.trim();
         }
-    } else if (rule.groupNameSource === 'url') {
-        // Essaie l'URL en priorité, puis le titre si l'URL ne donne rien
-        let extracted: string | null = null;
-        if (openerTab.url && hasUrlExtractor(rule)) {
-            try {
-                extracted = extractGroupNameFromUrlByMode(openerTab.url, rule);
-                if (extracted?.trim()) logger.debug(`[GROUPING_DEBUG] Group name extracted from opener URL "${openerTab.url}" using ${describeUrlExtraction(rule)}: "${extracted.trim()}".`);
-            } catch (e) {
-                logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with ${describeUrlExtraction(rule)}.`, e.message);
-            }
-        }
-        if (!extracted?.trim() && openerTab.title && rule.titleParsingRegEx) {
-            try {
-                extracted = extractGroupNameFromTitle(openerTab.title, rule.titleParsingRegEx);
-                if (extracted?.trim()) logger.debug(`[GROUPING_DEBUG] Group name extracted from opener title "${openerTab.title}" using regex "${rule.titleParsingRegEx}" (url fallback): "${extracted.trim()}".`);
-            } catch (e) {
-                logger.warn(`[GROUPING_DEBUG] Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}".`, e.message);
-            }
-        }
-        if (extracted?.trim()) {
-            groupName = extracted.trim();
-        } else {
-            return null;
-        }
-    } else if (rule.groupNameSource === 'smart_manual') {
-        // smart_manual: Si on ne trouve pas de nom de groupe, le demander à l'utilisateur
-        const extracted = tryExtractGroupNameFromPresetOrFallback(rule, openerTab);
-        if (extracted) {
-            groupName = extracted;
-        }
-        // Note: la demande manuelle à l'utilisateur sera gérée dans handleManualGroupNaming
-    } else if (rule.groupNameSource === 'smart_preset') {
-        // smart_preset: Si pas d'ID trouvé, prendre le nom du preset comme nom de groupe
-        const extracted = tryExtractGroupNameFromPresetOrFallback(rule, openerTab);
-        if (extracted) {
-            groupName = extracted;
-        } else if (rule.presetId) {
-            // Fallback: utiliser l'ID du preset
-            groupName = rule.presetId;
-            logger.debug(`[GROUPING_DEBUG] Using preset ID as fallback: "${groupName}".`);
-        }
-    } else if (rule.groupNameSource === 'smart_label') {
-        // smart_label: Si pas d'id trouvé, prendre le nom du domainRule comme nom de groupe
-        const extracted = tryExtractGroupNameFromPresetOrFallback(rule, openerTab);
-        if (extracted) {
-            groupName = extracted;
-        } else {
-            // Fallback: utiliser le label de la règle
-            groupName = rule.label || "SmartGroup";
-            logger.debug(`[GROUPING_DEBUG] Using rule label as fallback: "${groupName}".`);
-        }
-    } else if (rule.groupNameSource === 'smart') {
-        // smart: Essayer d'extraire intelligemment avec les regex de la règle ; pas de fallback
-        const extracted = tryExtractGroupNameFromPresetOrFallback(rule, openerTab);
-        if (!extracted) {
-            logger.debug(`[GROUPING_DEBUG] Smart mode: no name could be extracted for rule "${rule.label}". Skipping grouping.`);
-            return null;
-        }
-        groupName = extracted;
+    } catch (e) {
+        logger.warn(`[GROUPING_DEBUG] Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}".`, e.message);
     }
+    return null;
+}
 
+function tryExtractFromUrl(rule: DomainRuleSetting, openerTab: Browser.tabs.Tab, fallbackContext = ''): string | null {
+    if (!openerTab.url || !hasUrlExtractor(rule)) return null;
+    try {
+        const extracted = extractGroupNameFromUrlByMode(openerTab.url, rule);
+        if (extracted?.trim()) {
+            const suffix = fallbackContext ? ` ${fallbackContext}` : '';
+            logger.debug(`[GROUPING_DEBUG] Group name extracted from opener URL "${openerTab.url}" using ${describeUrlExtraction(rule)}${suffix}: "${extracted.trim()}".`);
+            return extracted.trim();
+        }
+    } catch (e) {
+        logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with ${describeUrlExtraction(rule)}.`, e.message);
+    }
+    return null;
+}
+
+function extractRawGroupName(rule: DomainRuleSetting, openerTab: Browser.tabs.Tab): string | null {
+    const fallbackLabel = rule.label || 'SmartGroup';
+
+    switch (rule.groupNameSource) {
+        case 'title':
+            return tryExtractFromTitle(rule, openerTab) ?? tryExtractFromUrl(rule, openerTab, '(title fallback)');
+        case 'url':
+            return tryExtractFromUrl(rule, openerTab) ?? tryExtractFromTitle(rule, openerTab, '(url fallback)');
+        case 'smart_manual':
+            // Si pas d'extraction, le nom sera demandé à l'utilisateur via handleManualGroupNaming.
+            return tryExtractGroupNameFromPresetOrFallback(rule, openerTab) ?? fallbackLabel;
+        case 'smart_preset': {
+            const extracted = tryExtractGroupNameFromPresetOrFallback(rule, openerTab);
+            if (extracted) return extracted;
+            if (rule.presetId) {
+                logger.debug(`[GROUPING_DEBUG] Using preset ID as fallback: "${rule.presetId}".`);
+                return rule.presetId;
+            }
+            return fallbackLabel;
+        }
+        case 'smart_label': {
+            const extracted = tryExtractGroupNameFromPresetOrFallback(rule, openerTab);
+            if (extracted) return extracted;
+            logger.debug(`[GROUPING_DEBUG] Using rule label as fallback: "${fallbackLabel}".`);
+            return fallbackLabel;
+        }
+        case 'smart': {
+            const extracted = tryExtractGroupNameFromPresetOrFallback(rule, openerTab);
+            if (!extracted) {
+                logger.debug(`[GROUPING_DEBUG] Smart mode: no name could be extracted for rule "${rule.label}". Skipping grouping.`);
+                return null;
+            }
+            return extracted;
+        }
+        default:
+            return fallbackLabel;
+    }
+}
+
+export function extractGroupNameFromRule(rule: DomainRuleSetting, openerTab: Browser.tabs.Tab): string | null {
+    const rawName = extractRawGroupName(rule, openerTab);
+    if (rawName === null) return null;
     const category = getRuleCategory(rule.categoryId);
-    if (category) groupName = `${category.emoji} ${groupName}`;
-
-    return groupName;
+    return category ? `${category.emoji} ${rawName}` : rawName;
 }
 
 function tryExtractGroupNameFromPresetOrFallback(rule: DomainRuleSetting, openerTab: Browser.tabs.Tab): string | null {

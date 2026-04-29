@@ -11,12 +11,6 @@ export const colorOptions = [
   { value: 'orange', keyLabel: 'color_orange' }
 ] as const;
 
-// Category IDs are stored loosely as strings (built-ins seeded from
-// public/data/categories.json, customs will be added by the user later).
-// The actual catalog lives in browser.storage.local, accessed via
-// src/utils/categoriesStore.ts.
-export type RuleCategoryId = string;
-
 export const groupNameSourceOptions = [
   { value: 'title', keyLabel: 'groupNameSourceTitle' },
   { value: 'url', keyLabel: 'groupNameSourceUrl' },

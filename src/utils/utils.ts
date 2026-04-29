@@ -2,10 +2,7 @@ import type { BadgeProps } from '@radix-ui/themes';
 import { logger } from './logger';
 
 export function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
+  return crypto.randomUUID();
 }
 
 export function domainToRegex(domainFilter: string | null): RegExp | null {
@@ -80,7 +77,8 @@ export function isValidRegex(regex: string): boolean {
   try {
     new RegExp(regex);
     return regex.includes('(') && regex.includes(')');
-  } catch (_e) {
+  } catch (err) {
+    logger.debug('[isValidRegex] Invalid regex pattern:', regex, err);
     return false;
   }
 }

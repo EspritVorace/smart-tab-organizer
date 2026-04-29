@@ -395,12 +395,12 @@ export function SessionsPage({
             </Callout.Root>
           )}
 
-          {!isLoaded ? (
+          {!isLoaded && (
             <Text size="2" color="gray">
               {getMessage('loadingText')}
             </Text>
-          ) : sessions.length === 0 && !searchQuery ? (
-            // True empty state
+          )}
+          {isLoaded && sessions.length === 0 && !searchQuery && (
             <EmptyState
               data-testid="page-sessions-empty"
               icon={Archive}
@@ -423,10 +423,11 @@ export function SessionsPage({
                 </Flex>
               }
             />
-          ) : displayedSessions.length === 0 && searchQuery ? (
-            // Search no results
+          )}
+          {isLoaded && sessions.length > 0 && displayedSessions.length === 0 && searchQuery && (
             <EmptyState compact icon={Archive} message={getMessage('noSessionsFound')} />
-          ) : (
+          )}
+          {isLoaded && displayedSessions.length > 0 && (
             <Flex data-testid="page-sessions-list" direction="column" gap="3">
               <SessionSection
                 icon={Pin}
