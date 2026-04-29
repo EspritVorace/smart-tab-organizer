@@ -43,47 +43,54 @@ export async function hasCapturableTabs(): Promise<boolean> {
   return tabs.some(tab => !isSystemUrl(tab.url));
 }
 
-/**
- * Capture the current window's tabs and groups.
- * Returns both TabTreeData (for display) and Session-ready data (for saving).
- */
-export async function captureCurrentTabs(): Promise<CaptureResult> {
-  const tabs = await browser.tabs.query({ currentWindow: true });
-  // Sort by index to preserve tab order
-  tabs.sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
+interface GroupEntry {
+  savedGroup: SavedTabGroup;
+  treeGroup: TabGroupItem;
+}
 
-  // Fetch tab groups
-  const groupMap = new Map<number, { savedGroup: SavedTabGroup; treeGroup: TabGroupItem }>();
-  const seenGroupIds = new Set<number>();
-
+function collectChromeGroupIds(tabs: ChromeTab[]): Set<number> {
+  const seen = new Set<number>();
   for (const tab of tabs) {
-    const groupId = (tab as ChromeTab).groupId;
+    const groupId = tab.groupId;
     if (typeof groupId === 'number' && groupId >= 0) {
-      seenGroupIds.add(groupId);
+      seen.add(groupId);
     }
   }
+  return seen;
+}
 
-  let numericCounter = 1;
-  const numericIdToSavedTabId = new Map<number, string>();
+/**
+ * Fetch metadata for each Chrome group referenced by `tabs` and build
+ * matching saved/tree group entries. Numeric tree IDs start at
+ * `startingNumericId` and increment by one per successfully fetched group.
+ * Groups that no longer exist are silently skipped.
+ */
+async function fetchChromeGroups(
+  tabs: ChromeTab[],
+  startingNumericId: number,
+): Promise<{ groupMap: Map<number, GroupEntry>; nextNumericId: number }> {
+  const groupMap = new Map<number, GroupEntry>();
+  let numericCounter = startingNumericId;
 
-  // Fetch group metadata
-  for (const groupId of seenGroupIds) {
+  for (const groupId of collectChromeGroupIds(tabs)) {
     try {
       const group = await (browser.tabGroups as unknown as ChromeTabGroupsExtended).get(groupId);
       const savedGroupId = generateUUID();
       const treeGroupId = numericCounter++;
+      const color = normalizeColor(group.color);
+      const title = group.title || '';
       groupMap.set(groupId, {
         savedGroup: {
           id: savedGroupId,
-          title: group.title || '',
-          color: normalizeColor(group.color),
+          title,
+          color,
           tabs: [],
           collapsed: group.collapsed || false,
         },
         treeGroup: {
           id: treeGroupId,
-          title: group.title || '',
-          color: normalizeColor(group.color),
+          title,
+          color,
           tabs: [],
         },
       });
@@ -92,8 +99,54 @@ export async function captureCurrentTabs(): Promise<CaptureResult> {
     }
   }
 
+  return { groupMap, nextNumericId: numericCounter };
+}
+
+/**
+ * Build a SavedTab and a parallel TabItem from a single Chrome tab,
+ * sharing title/url/favIconUrl while keeping their respective ID schemes.
+ */
+function mapBrowserTabToSavedTab(
+  tab: ChromeTab,
+  savedTabId: string,
+  numericId: number,
+): { savedTab: SavedTab; treeTab: TabItem } {
+  const title = tab.title || tab.url || '';
+  const url = tab.url || '';
+  const favIconUrl = tab.favIconUrl || undefined;
+  return {
+    savedTab: { id: savedTabId, title, url, favIconUrl },
+    treeTab: { id: numericId, title, url, favIconUrl },
+  };
+}
+
+function resolveGroupEntry(
+  tab: ChromeTab,
+  groupMap: Map<number, GroupEntry>,
+): GroupEntry | undefined {
+  const groupId = tab.groupId;
+  if (typeof groupId !== 'number' || groupId < 0) return undefined;
+  return groupMap.get(groupId);
+}
+
+/**
+ * Distribute non-system tabs into their resolved Chrome groups (mutating
+ * each entry's `tabs` array) and accumulate the ungrouped ones plus the
+ * numeric→UUID mapping needed by the TabTree component.
+ */
+function groupTabsByChromeGroup(
+  tabs: ChromeTab[],
+  groupMap: Map<number, GroupEntry>,
+  startingNumericId: number,
+): {
+  ungroupedSavedTabs: SavedTab[];
+  ungroupedTreeTabs: TabItem[];
+  numericIdToSavedTabId: Map<number, string>;
+} {
   const ungroupedSavedTabs: SavedTab[] = [];
   const ungroupedTreeTabs: TabItem[] = [];
+  const numericIdToSavedTabId = new Map<number, string>();
+  let numericCounter = startingNumericId;
 
   for (const tab of tabs) {
     if (isSystemUrl(tab.url)) continue;
@@ -102,23 +155,9 @@ export async function captureCurrentTabs(): Promise<CaptureResult> {
     const numericId = numericCounter++;
     numericIdToSavedTabId.set(numericId, savedTabId);
 
-    const savedTab: SavedTab = {
-      id: savedTabId,
-      title: tab.title || tab.url || '',
-      url: tab.url || '',
-      favIconUrl: tab.favIconUrl || undefined,
-    };
-
-    const treeTab: TabItem = {
-      id: numericId,
-      title: tab.title || tab.url || '',
-      url: tab.url || '',
-      favIconUrl: tab.favIconUrl || undefined,
-    };
-
-    const groupId = (tab as ChromeTab).groupId;
-    if (typeof groupId === 'number' && groupId >= 0 && groupMap.has(groupId)) {
-      const entry = groupMap.get(groupId)!;
+    const { savedTab, treeTab } = mapBrowserTabToSavedTab(tab, savedTabId, numericId);
+    const entry = resolveGroupEntry(tab, groupMap);
+    if (entry) {
       entry.savedGroup.tabs.push(savedTab);
       entry.treeGroup.tabs.push(treeTab);
     } else {
@@ -127,7 +166,18 @@ export async function captureCurrentTabs(): Promise<CaptureResult> {
     }
   }
 
-  // Filter out groups with no tabs (all were system URLs)
+  return { ungroupedSavedTabs, ungroupedTreeTabs, numericIdToSavedTabId };
+}
+
+/**
+ * Filter out groups whose tabs were all system URLs and return the
+ * surviving saved/tree groups plus the chrome→saved id mapping.
+ */
+function collectNonEmptyGroups(groupMap: Map<number, GroupEntry>): {
+  savedGroups: SavedTabGroup[];
+  treeGroups: TabGroupItem[];
+  chromeGroupIdToSavedGroupId: Map<number, string>;
+} {
   const savedGroups: SavedTabGroup[] = [];
   const treeGroups: TabGroupItem[] = [];
   const chromeGroupIdToSavedGroupId = new Map<number, string>();
@@ -138,6 +188,21 @@ export async function captureCurrentTabs(): Promise<CaptureResult> {
       chromeGroupIdToSavedGroupId.set(chromeId, entry.savedGroup.id);
     }
   }
+  return { savedGroups, treeGroups, chromeGroupIdToSavedGroupId };
+}
+
+/**
+ * Capture the current window's tabs and groups.
+ * Returns both TabTreeData (for display) and Session-ready data (for saving).
+ */
+export async function captureCurrentTabs(): Promise<CaptureResult> {
+  const tabs = (await browser.tabs.query({ currentWindow: true })) as ChromeTab[];
+  tabs.sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
+
+  const { groupMap, nextNumericId } = await fetchChromeGroups(tabs, 1);
+  const { ungroupedSavedTabs, ungroupedTreeTabs, numericIdToSavedTabId } =
+    groupTabsByChromeGroup(tabs, groupMap, nextNumericId);
+  const { savedGroups, treeGroups, chromeGroupIdToSavedGroupId } = collectNonEmptyGroups(groupMap);
 
   return {
     treeData: { ungroupedTabs: ungroupedTreeTabs, groups: treeGroups },
