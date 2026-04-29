@@ -29,13 +29,10 @@ export function getMatchMode(rule: DomainRuleSetting | undefined): string {
 }
 
 export function shouldProcessTab(urlToCheck: string, tabId: number): boolean {
-    if (!urlToCheck ||
-        urlToCheck.startsWith('about:') ||
-        urlToCheck.startsWith('chrome:') ||
-        processedTabs.has(`${tabId}-${urlToCheck}`)) {
-        return false;
-    }
-    return true;
+    return !!urlToCheck
+        && !urlToCheck.startsWith('about:')
+        && !urlToCheck.startsWith('chrome:')
+        && !processedTabs.has(`${tabId}-${urlToCheck}`);
 }
 
 export function markTabAsProcessed(tabId: number, url: string): void {

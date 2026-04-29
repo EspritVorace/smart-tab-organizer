@@ -37,13 +37,15 @@ export function Toaster() {
     return unsubscribe;
   }, []);
 
+  const removeToastById = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
   const handleOpenChange = useCallback((id: string, open: boolean) => {
     if (open) return;
     setToasts((prev) => prev.map((t) => (t.id === id ? { ...t, open: false } : t)));
-    window.setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 200);
-  }, []);
+    window.setTimeout(() => removeToastById(id), 200);
+  }, [removeToastById]);
 
   return (
     <Toast.Provider swipeDirection="right" duration={TOAST_DURATION_MS} label={getMessage('toastViewportLabel')}>

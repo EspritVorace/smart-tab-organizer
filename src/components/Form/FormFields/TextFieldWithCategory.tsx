@@ -1,7 +1,6 @@
 import { forwardRef } from 'react';
 import { Box, Flex, TextField } from '@radix-ui/themes';
 import { CategoryPicker } from '@/components/Core/DomainRule/CategoryPicker';
-import type { RuleCategoryId } from '@/schemas/enums';
 
 export interface TextFieldWithCategoryProps {
   value: string;
@@ -14,8 +13,8 @@ export interface TextFieldWithCategoryProps {
   'data-testid'?: string;
   'aria-label'?: string;
   disabled?: boolean;
-  categoryId: RuleCategoryId | null | undefined;
-  onCategoryChange: (id: RuleCategoryId | null) => void;
+  categoryId: string | null | undefined;
+  onCategoryChange: (id: string | null) => void;
 }
 
 export const TextFieldWithCategory = forwardRef<HTMLInputElement, TextFieldWithCategoryProps>(
