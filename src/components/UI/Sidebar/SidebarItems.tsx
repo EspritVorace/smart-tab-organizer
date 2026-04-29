@@ -41,13 +41,16 @@ export function SidebarItems({
             style={{
               justifyContent: isCollapsed ? 'center' : 'flex-start',
               width: '100%',
+              boxSizing: 'border-box',
               position: 'relative',
               backgroundColor: isActive ? (item.accentColor ? `var(--${item.accentColor}-a3)` : 'var(--accent-a3)') : 'transparent',
               borderRadius: 'var(--radius-2)',
               color: 'var(--gray-12)',
               minHeight: '44px',
               height: '44px',
-              borderLeft: isActive && item.accentColor
+              borderLeft: isCollapsed
+                ? 'none'
+                : isActive && item.accentColor
                 ? `3px solid var(--${item.accentColor}-9)`
                 : '3px solid transparent',
               display: 'flex',
