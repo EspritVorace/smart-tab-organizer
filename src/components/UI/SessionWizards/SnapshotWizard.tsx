@@ -3,7 +3,7 @@ import {
   Dialog, Flex, Button, Text,
   TextArea, Callout,
 } from '@radix-ui/themes';
-import { Camera, AlertCircle } from 'lucide-react';
+import { Camera, AlertCircle, Info } from 'lucide-react';
 import { TabTree } from '@/components/Core/TabTree/TabTree';
 import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
 import { WizardModal } from '@/components/UI/WizardModal';
@@ -38,6 +38,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
   const [saveError, setSaveError] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [note, setNote] = useState('');
+  const [cameFromActiveGroup, setCameFromActiveGroup] = useState(false);
 
   // Reset and capture on open
   useEffect(() => {
@@ -51,6 +52,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
     setIsCapturing(true);
     setCategoryId(null);
     setNote('');
+    setCameFromActiveGroup(false);
 
     captureCurrentTabs()
       .then(data => {
@@ -72,6 +74,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
             if (targetGroup.title) {
               setSessionName(targetGroup.title);
             }
+            setCameFromActiveGroup(true);
             setIsCapturing(false);
             return;
           }
@@ -85,6 +88,9 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
         setIsCapturing(false);
       });
   }, [open, initialGroupId]);
+
+  const showGroupCallout =
+    cameFromActiveGroup && selectedTabIds.size < numericIdToSavedTabId.size;
 
   // Derive selected SavedTab UUIDs from selected numeric IDs
   const selectedSavedTabIds = useMemo(
@@ -141,6 +147,19 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
     >
       <WizardModal.Body>
         <Flex direction="column" gap="3">
+          {showGroupCallout && (
+            <Callout.Root
+              color="blue"
+              variant="soft"
+              highContrast
+              data-testid="wizard-snapshot-group-callout"
+            >
+              <Callout.Icon>
+                <Info size={16} />
+              </Callout.Icon>
+              <Callout.Text>{getMessage('snapshotActiveGroupCallout')}</Callout.Text>
+            </Callout.Root>
+          )}
           <Flex direction="column" gap="1">
             <Text size="2" weight="medium">
               {getMessage('sessionNameLabel')}

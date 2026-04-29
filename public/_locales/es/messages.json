@@ -386,6 +386,7 @@
   "snapshotConfirmMessage": { "message": "¿Guardar \"$1\" con $2 pestaña(s)?" },
   "snapshotSaveButton": { "message": "Guardar sesión" },
   "snapshotSaveSuccess": { "message": "¡Sesión \"$1\" guardada con éxito!" },
+  "snapshotActiveGroupCallout": { "message": "Selección limitada al grupo activo. Puedes ampliarla antes de guardar." },
 
   "restoreTitle": { "message": "Restaurar \"$1\"" },
   "restoreDescription": { "message": "Elige qué pestañas restaurar de esta sesión." },
@@ -459,8 +460,6 @@
   "popupRestore": { "message": "Restaurar" },
   "popupSaveSession": { "message": "Guardar sesión" },
   "popupSaveActiveGroup": { "message": "Guardar grupo activo" },
-  "popupSaveAllTabs": { "message": "Guardar todas las pestañas" },
-  "popupSaveGroupOptions": { "message": "Más opciones de guardado" },
   "popupRestoreSession": { "message": "Restaurar sesión" },
   "popupPinnedSessionsLabel": { "message": "Sesiones fijadas" },
   "popupPinnedEmptyHint": { "message": "Fija una sesión para acceder en un clic desde aquí." },
