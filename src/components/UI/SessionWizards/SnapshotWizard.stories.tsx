@@ -3,6 +3,41 @@ import { within, userEvent, expect, waitFor } from 'storybook/test';
 import { SnapshotWizard } from './SnapshotWizard';
 import type { Session } from '@/types/session';
 
+interface FakeTab {
+  id: number;
+  index: number;
+  url: string;
+  title: string;
+  groupId?: number;
+}
+interface FakeGroup {
+  title: string;
+  color: string;
+  collapsed?: boolean;
+}
+
+/**
+ * Patch the storybook browser mock with synthetic tabs/tabGroups so the
+ * wizard's `captureCurrentTabs()` resolves with deterministic data.
+ * Mutates the shared singleton; subsequent stories that need a different
+ * snapshot must redefine the mock through their own decorator.
+ */
+function patchTabsMock(tabs: FakeTab[], groups: Record<number, FakeGroup>): void {
+  const slot = globalThis as typeof globalThis & {
+    browser?: Record<string, unknown>;
+  };
+  const browser = (slot.browser ?? {}) as Record<string, unknown>;
+  browser.tabs = { query: async () => tabs };
+  browser.tabGroups = {
+    get: async (id: number) => {
+      const group = groups[id];
+      if (!group) throw new Error(`Group ${id} not found`);
+      return group;
+    },
+  };
+  slot.browser = browser;
+}
+
 const meta: Meta<typeof SnapshotWizard> = {
   title: 'Components/UI/SessionWizards/SnapshotWizard',
   component: SnapshotWizard,
@@ -61,6 +96,55 @@ export const SnapshotWizardCancel: Story = {
     const body = within(canvasElement.ownerDocument.body);
     const cancelBtn = await body.findByTestId('wizard-snapshot-btn-cancel');
     await userEvent.click(cancelBtn);
+  },
+};
+
+// Window contains a group + an ungrouped tab. Pre-selecting only the group
+// triggers the partial selection callout at the top of the wizard body.
+export const SnapshotWizardWithGroupCallout: Story = {
+  args: { open: true, initialGroupId: 42 },
+  decorators: [
+    (Story) => {
+      patchTabsMock(
+        [
+          { id: 1, index: 0, url: 'https://example.com/a', title: 'Group tab A', groupId: 42 },
+          { id: 2, index: 1, url: 'https://example.com/b', title: 'Group tab B', groupId: 42 },
+          { id: 3, index: 2, url: 'https://example.org', title: 'Ungrouped tab' },
+        ],
+        { 42: { title: 'Active group', color: 'green', collapsed: false } },
+      );
+      return <Story />;
+    },
+  ],
+  play: async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body);
+    await waitFor(() =>
+      expect(body.getByTestId('wizard-snapshot-group-callout')).toBeVisible(),
+    );
+  },
+};
+
+// Window contains only the active group: pre-selection covers everything,
+// so the callout must NOT be displayed.
+export const SnapshotWizardSingleGroupNoCallout: Story = {
+  args: { open: true, initialGroupId: 7 },
+  decorators: [
+    (Story) => {
+      patchTabsMock(
+        [
+          { id: 10, index: 0, url: 'https://example.com/x', title: 'Solo group tab', groupId: 7 },
+        ],
+        { 7: { title: 'Solo group', color: 'orange', collapsed: false } },
+      );
+      return <Story />;
+    },
+  ],
+  play: async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body);
+    // Wait for capture to land (name input populated with group title)
+    const nameInput = await body.findByTestId<HTMLInputElement>('wizard-snapshot-field-name');
+    await waitFor(() => expect(nameInput.value).toBe('Solo group'));
+    expect(body.queryByTestId('wizard-snapshot-group-callout')).toBeNull();
   },
 };
 

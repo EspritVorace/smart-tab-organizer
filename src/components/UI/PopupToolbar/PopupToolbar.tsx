@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, DropdownMenu, Flex, Text } from '@radix-ui/themes';
-import { ChevronDown } from 'lucide-react';
+import { Box, Button, Flex, Text } from '@radix-ui/themes';
 import { browser } from 'wxt/browser';
 import { getMessage } from '@/utils/i18n';
 import { loadSessions } from '@/utils/sessionStorage';
@@ -62,6 +61,13 @@ export function PopupToolbar() {
   };
 
   const saveDisabledHint = !canSave ? getMessage('popupSaveDisabledHint') : undefined;
+  const isInGroup = activeTabGroupId !== null && canSave;
+  const saveHash = isInGroup
+    ? `#sessions?action=snapshot&groupId=${activeTabGroupId}`
+    : '#sessions?action=snapshot';
+  const saveAriaLabel = isInGroup
+    ? getMessage('popupSaveActiveGroup')
+    : getMessage('popupSaveSession');
 
   return (
     <Box
@@ -73,84 +79,22 @@ export function PopupToolbar() {
       }}
     >
       <Flex gap="1">
-        {activeTabGroupId !== null && canSave ? (
-          <Flex style={{ flex: 1 }}>
-            <Button
-              data-testid="popup-toolbar-btn-save"
-              variant="soft"
-              onClick={() => void openOptionsWithHash('#sessions?action=snapshot')}
-              aria-label={getMessage('popupSaveSession')}
-              style={{
-                ...actionButtonStyle,
-                borderTopRightRadius: 0,
-                borderBottomRightRadius: 0,
-              }}
-            >
-              <span aria-hidden="true" style={actionEmojiStyle}>
-                📸
-              </span>
-              <Text as="span" size="1">
-                {getMessage('popupSave')}
-              </Text>
-            </Button>
-            <DropdownMenu.Root>
-              <DropdownMenu.Trigger>
-                <Button
-                  variant="soft"
-                  aria-label={getMessage('popupSaveGroupOptions')}
-                  title={getMessage('popupSaveGroupOptions')}
-                  style={{
-                    borderTopLeftRadius: 0,
-                    borderBottomLeftRadius: 0,
-                    borderTopRightRadius: 'var(--radius-5)',
-                    borderBottomRightRadius: 'var(--radius-5)',
-                    paddingLeft: 4,
-                    paddingRight: 4,
-                    minWidth: 20,
-                    height: 'auto',
-                    paddingTop: 10,
-                    paddingBottom: 10,
-                  }}
-                >
-                  <ChevronDown size={12} aria-hidden="true" />
-                </Button>
-              </DropdownMenu.Trigger>
-              <DropdownMenu.Content>
-                <DropdownMenu.Item
-                  onClick={() =>
-                    void openOptionsWithHash(
-                      `#sessions?action=snapshot&groupId=${activeTabGroupId}`,
-                    )
-                  }
-                >
-                  {getMessage('popupSaveActiveGroup')}
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  onClick={() => void openOptionsWithHash('#sessions?action=snapshot')}
-                >
-                  {getMessage('popupSaveAllTabs')}
-                </DropdownMenu.Item>
-              </DropdownMenu.Content>
-            </DropdownMenu.Root>
-          </Flex>
-        ) : (
-          <Button
-            data-testid="popup-toolbar-btn-save"
-            variant="soft"
-            disabled={!canSave}
-            onClick={() => void openOptionsWithHash('#sessions?action=snapshot')}
-            aria-label={getMessage('popupSaveSession')}
-            title={saveDisabledHint}
-            style={actionButtonStyle}
-          >
-            <span aria-hidden="true" style={actionEmojiStyle}>
-              📸
-            </span>
-            <Text as="span" size="1">
-              {getMessage('popupSave')}
-            </Text>
-          </Button>
-        )}
+        <Button
+          data-testid="popup-toolbar-btn-save"
+          variant="soft"
+          disabled={!canSave}
+          onClick={() => void openOptionsWithHash(saveHash)}
+          aria-label={saveAriaLabel}
+          title={saveDisabledHint}
+          style={actionButtonStyle}
+        >
+          <span aria-hidden="true" style={actionEmojiStyle}>
+            📸
+          </span>
+          <Text as="span" size="1">
+            {getMessage('popupSave')}
+          </Text>
+        </Button>
 
         <Button
           data-testid="popup-toolbar-btn-restore"
