@@ -2,6 +2,7 @@ import React from 'react';
 import { Dialog, Flex, IconButton, Separator } from '@radix-ui/themes';
 import { X, type LucideIcon } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
+import { IconBox } from '@/components/UI/IconBox/IconBox';
 
 type DialogContentProps = React.ComponentProps<typeof Dialog.Content>;
 
@@ -84,7 +85,7 @@ export function DialogShell({
         <div style={{ flexShrink: 0 }}>
           <Dialog.Title>
             <Flex align="center" gap="2">
-              {Icon && <Icon size={18} aria-hidden="true" />}
+              {Icon && <IconBox icon={Icon} size="sm" variant="gradient" />}
               {title}
             </Flex>
           </Dialog.Title>

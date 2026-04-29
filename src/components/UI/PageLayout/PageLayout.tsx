@@ -2,6 +2,7 @@ import { Heading, Box, Flex, Separator, Text } from '@radix-ui/themes';
 import type { LucideIcon } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import type { AppSettings } from '@/types/syncSettings.js';
+import { IconBox } from '@/components/UI/IconBox/IconBox';
 
 interface PageLayoutProps {
   titleKey: string;
@@ -30,22 +31,7 @@ export function PageLayout({ titleKey, descriptionKey, icon: Icon, syncSettings,
           }}
         >
           <Flex align="center" gap="3">
-            {Icon && (
-              <Box
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 'var(--radius-2)',
-                  background: 'var(--accent-a3)',
-                  border: '1px solid var(--accent-a6)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Icon size={20} aria-hidden="true" style={{ color: 'var(--accent-11)' }} />
-              </Box>
-            )}
+            {Icon && <IconBox icon={Icon} size="md" variant="gradient" />}
             <Heading size="5" weight="bold" as="h1">
               {getMessage(titleKey)}
             </Heading>
