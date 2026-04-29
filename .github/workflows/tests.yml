@@ -109,6 +109,77 @@ jobs:
           name: coverage-summary
           path: coverage/coverage-summary.json
 
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.code == 'true' || github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run ESLint with CTRF reporter
+        continue-on-error: true
+        run: pnpm lint:ctrf
+
+      - name: Generate lint markdown summary
+        if: always()
+        run: node scripts/lint-markdown.mjs > ctrf/lint.md
+
+      - name: Publish lint summary to job output
+        if: always()
+        run: cat ctrf/lint.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post sticky lint comment on PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('ctrf/lint.md', 'utf8');
+            const marker = '<!-- lint-sticky-comment -->';
+            const fullBody = `${marker}\n${body}`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find((c) => c.body && c.body.startsWith(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: fullBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: fullBody,
+              });
+            }
+
+      - name: Upload lint CTRF report
+        uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with:
+          name: lint-ctrf-report
+          path: ctrf/lint-ctrf-report.json
+
   e2e-tests:
     name: E2E Tests (shard ${{ matrix.shard }}/3)
     runs-on: ubuntu-latest
