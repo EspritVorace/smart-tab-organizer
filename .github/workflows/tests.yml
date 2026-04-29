@@ -109,6 +109,36 @@ jobs:
           name: coverage-summary
           path: coverage/coverage-summary.json
 
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.code == 'true' || github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Run ESLint with CTRF reporter
+        continue-on-error: true
+        run: pnpm lint:ctrf
+
+      - name: Upload lint CTRF report
+        uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with:
+          name: lint-ctrf-report
+          path: ctrf/lint-ctrf-report.json
+
   e2e-tests:
     name: E2E Tests (shard ${{ matrix.shard }}/3)
     runs-on: ubuntu-latest
@@ -203,7 +233,7 @@ jobs:
   report:
     name: Publish Test Reports
     runs-on: ubuntu-latest
-    needs: [changes, unit-tests, e2e-tests, a11y-storybook]
+    needs: [changes, unit-tests, e2e-tests, a11y-storybook, lint]
     if: always() && (needs.changes.outputs.code == 'true' || github.event_name == 'push')
     steps:
       - uses: actions/checkout@v4
@@ -272,6 +302,26 @@ jobs:
           summary-report: true
           failed-report: true
           flaky-report: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download lint CTRF report
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: lint-ctrf-report
+          path: ctrf/
+
+      - name: Publish lint CTRF results
+        uses: ctrf-io/github-actions-ctrf@v1
+        if: always()
+        continue-on-error: true
+        with:
+          report-path: 'ctrf/lint-ctrf-report.json'
+          pull-request: true
+          summary: false
+          summary-report: true
+          failed-report: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
