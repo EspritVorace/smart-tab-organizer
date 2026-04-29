@@ -87,6 +87,76 @@ export const SessionCardPinned: Story = {
 };
 
 // ---------------------------------------------------------------------------
+// Relative dates: cards staggered across multiple time ranges to validate
+// the "modifiée il y a X" / "créée il y a Y" rendering on the right of the
+// counters line, and the wrap behavior on narrow widths.
+// ---------------------------------------------------------------------------
+const SECOND = 1_000;
+const MINUTE = 60 * SECOND;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+const WEEK = 7 * DAY;
+const MONTH = 30 * DAY;
+const YEAR = 365 * DAY;
+
+const buildSession = (
+  id: string,
+  name: string,
+  createdOffsetMs: number,
+  updatedOffsetMs: number | null,
+): Session => {
+  const reference = new Date('2026-04-29T12:00:00.000Z').getTime();
+  const createdAt = new Date(reference - createdOffsetMs).toISOString();
+  const updatedAt = new Date(
+    reference - (updatedOffsetMs ?? createdOffsetMs),
+  ).toISOString();
+  return {
+    ...baseSession,
+    id,
+    name,
+    createdAt,
+    updatedAt,
+  };
+};
+
+export const SessionCardWithRelativeDates: Story = {
+  render: () => {
+    const sessions: Session[] = [
+      buildSession('rt-just-now', 'Vient de naître', 1 * SECOND, null),
+      buildSession('rt-5min-modified', 'Sprint en cours', 30 * MINUTE, 5 * MINUTE),
+      buildSession('rt-2h-created', 'Recherches du matin', 2 * HOUR, null),
+      buildSession('rt-yesterday', 'Veille technologique', 2 * DAY, 1 * DAY),
+      buildSession('rt-3-days', 'Documentation API', 3 * DAY, null),
+      buildSession('rt-2-weeks', 'Refonte UI', 3 * WEEK, 2 * WEEK),
+      buildSession('rt-1-month', 'Release Q1', 1 * MONTH, null),
+      buildSession('rt-1-year', 'Archives 2025', 1 * YEAR, null),
+    ];
+    return (
+      <Theme>
+        <Flex direction="column" gap="2" style={{ maxWidth: 680 }}>
+          {sessions.map((session) => (
+            <SessionCard
+              key={session.id}
+              session={session}
+              existingSessions={sessions}
+              onRestore={noop}
+              onRestoreCurrentWindow={asyncNoop}
+              onRestoreNewWindow={asyncNoop}
+              onReplaceCurrentWindow={asyncNoop}
+              onRename={asyncNoop}
+              onEdit={noop}
+              onDelete={noop}
+              onPin={asyncNoop}
+              onUnpin={asyncNoop}
+            />
+          ))}
+        </Flex>
+      </Theme>
+    );
+  },
+};
+
+// ---------------------------------------------------------------------------
 // Deep search — preview auto-expanded, only matching group shown
 //
 // Simulates a user typing "github" in the search bar:
