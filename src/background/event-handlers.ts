@@ -80,6 +80,45 @@ export function setupTabRemovedHandler(): void {
     });
 }
 
+function isProcessableUrl(url: string | undefined): url is string {
+    return !!url && !url.startsWith('about:') && !url.startsWith('chrome:');
+}
+
+// Fast-load race: the tab may have already reached status=complete before
+// pendingGroupings.set() ran (e.g. for local/Playwright-served pages).
+async function tryProcessFastLoadGrouping(newTabId: number): Promise<void> {
+    try {
+        const currentNewTab = await browser.tabs.get(newTabId);
+        if (currentNewTab.status !== 'complete' || !isProcessableUrl(currentNewTab.url)) return;
+        const pending = pendingGroupings.get(newTabId);
+        if (!pending) return;
+        pendingGroupings.delete(newTabId);
+        logger.debug(`[GROUPING_DEBUG] onCreated: Tab ${newTabId} already complete, processing grouping immediately.`);
+        await processGroupingForNewTab(pending.openerTab, pending.newTab);
+    } catch (e) {
+        logger.debug(`[GROUPING_DEBUG] onCreated: fast-load status check failed for tab ${newTabId} (likely closed):`, e);
+    }
+}
+
+async function registerPendingGroupingForNewTab(newTab: Browser.tabs.Tab, openerIdFromMap: number): Promise<void> {
+    try {
+        const openerTab = await browser.tabs.get(openerIdFromMap);
+        if (!openerTab) {
+            logger.debug(`[GROUPING_DEBUG] onCreated: Opener tab ${openerIdFromMap} not found.`);
+            return;
+        }
+        logger.debug(`[GROUPING_DEBUG] onCreated: Registering pending grouping for new tab ${newTab.id}.`);
+        pendingGroupings.set(newTab.id!, { openerTab, newTab });
+        await tryProcessFastLoadGrouping(newTab.id!);
+    } catch (e) {
+        if (e.message && e.message.toLowerCase().includes("no tab with id")) {
+            logger.debug(`[GROUPING_DEBUG] onCreated: Opener tab ${openerIdFromMap} was closed.`);
+        } else {
+            logger.error(`[GROUPING_DEBUG] onCreated: Error getting opener tab ${openerIdFromMap}:`, e);
+        }
+    }
+}
+
 export function setupTabCreatedHandler(): void {
     browser.tabs.onCreated.addListener(async (newTab: Browser.tabs.Tab) => {
         const urlToCheck = newTab.pendingUrl || newTab.url;
@@ -97,40 +136,7 @@ export function setupTabCreatedHandler(): void {
         }
 
         logger.debug(`[GROUPING_DEBUG] onCreated: Opener ${openerIdFromMap} found for new tab ${newTab.id}.`);
-
-        try {
-            const openerTab = await browser.tabs.get(openerIdFromMap);
-            if (openerTab) {
-                logger.debug(`[GROUPING_DEBUG] onCreated: Registering pending grouping for new tab ${newTab.id}.`);
-                pendingGroupings.set(newTab.id!, { openerTab, newTab });
-
-                // Fast-load race: the tab may have already reached status=complete before
-                // pendingGroupings.set() ran (e.g. for local/Playwright-served pages).
-                // Detect and process immediately in that case.
-                try {
-                    const currentNewTab = await browser.tabs.get(newTab.id!);
-                    if (currentNewTab.status === 'complete' && currentNewTab.url &&
-                        !currentNewTab.url.startsWith('about:') && !currentNewTab.url.startsWith('chrome:')) {
-                        const pending = pendingGroupings.get(newTab.id!);
-                        if (pending) {
-                            pendingGroupings.delete(newTab.id!);
-                            logger.debug(`[GROUPING_DEBUG] onCreated: Tab ${newTab.id} already complete, processing grouping immediately.`);
-                            await processGroupingForNewTab(pending.openerTab, pending.newTab);
-                        }
-                    }
-                } catch (e) {
-                    logger.debug(`[GROUPING_DEBUG] onCreated: fast-load status check failed for tab ${newTab.id} (likely closed):`, e);
-                }
-            } else {
-                logger.debug(`[GROUPING_DEBUG] onCreated: Opener tab ${openerIdFromMap} not found.`);
-            }
-        } catch (e) {
-            if (e.message && e.message.toLowerCase().includes("no tab with id")) {
-                logger.debug(`[GROUPING_DEBUG] onCreated: Opener tab ${openerIdFromMap} was closed.`);
-            } else {
-                logger.error(`[GROUPING_DEBUG] onCreated: Error getting opener tab ${openerIdFromMap}:`, e);
-            }
-        }
+        await registerPendingGroupingForNewTab(newTab, openerIdFromMap);
     });
 }
 
@@ -142,64 +148,84 @@ export function setupTabUpdatedHandler(): void {
             await processTabForDeduplication(tabId, urlToCheck, tab.windowId);
         }
 
-        // URL-based fallback: when the browser doesn't expose openerTabId in onTabCreated
-        // (e.g. tabs opened via browser.tabs.create from the extension), look up
-        // middleClickedTabs by the navigated URL instead.
-        // openerTabId-based fallback: handles the combination of SW timing race
-        // (message arrives after onTabCreated) + URL mismatch (e.g. Chrome transparently
-        // resolves Google's redirect URL so the tab never navigates through it).
-        const navUrl = changeInfo.url || tab.url;
-        if (navUrl && !navUrl.startsWith('about:') && !navUrl.startsWith('chrome:') && !pendingGroupings.has(tabId)) {
-            const middleClickedTabs = globalThis.middleClickedTabs;
-
-            let matchedOpenerTabId: number | undefined;
-
-            if (middleClickedTabs?.has(navUrl)) {
-                matchedOpenerTabId = middleClickedTabs.get(navUrl)!;
-                middleClickedTabs.delete(navUrl);
-                logger.debug(`[GROUPING_DEBUG] onUpdated: URL-based match for tab ${tabId} (URL: "${navUrl}"), openerTabId: ${matchedOpenerTabId}.`);
-            } else if (tab.openerTabId && middleClickedTabs) {
-                for (const [clickedUrl, id] of middleClickedTabs.entries()) {
-                    if (id === tab.openerTabId) {
-                        matchedOpenerTabId = id;
-                        middleClickedTabs.delete(clickedUrl);
-                        logger.debug(`[GROUPING_DEBUG] onUpdated: openerTabId-based match for tab ${tabId} (openerTabId: ${tab.openerTabId}, registered URL was "${clickedUrl}").`);
-                        break;
-                    }
-                }
-            }
-
-            if (matchedOpenerTabId !== undefined) {
-                try {
-                    const openerTab = await browser.tabs.get(matchedOpenerTabId);
-                    // Re-fetch the new tab to get its current status (may have changed while awaiting).
-                    const currentNewTab = await browser.tabs.get(tabId).catch(() => null);
-                    if (!currentNewTab) return; // tab was closed
-                    if (currentNewTab.status === 'complete' && currentNewTab.url && !currentNewTab.url.startsWith('about:')) {
-                        // Tab already complete — process grouping immediately.
-                        logger.debug(`[GROUPING_DEBUG] onUpdated: Tab ${tabId} already complete. Processing now.`);
-                        await processGroupingForNewTab(openerTab, currentNewTab);
-                    } else {
-                        // Tab still loading — register pending grouping for onTabUpdated(complete).
-                        pendingGroupings.set(tabId, { openerTab, newTab: currentNewTab });
-                        logger.debug(`[GROUPING_DEBUG] onUpdated: Registered pending grouping for tab ${tabId}.`);
-                    }
-                } catch (e) {
-                    logger.warn(`[GROUPING_DEBUG] onUpdated: Opener tab ${matchedOpenerTabId} not found.`, e);
-                }
-            }
-        }
-
-        // Process any pending grouping for this tab once it finishes loading.
-        if (changeInfo.status === 'complete' && tab.url && !tab.url.startsWith('about:')) {
-            const pending = pendingGroupings.get(tabId);
-            if (pending) {
-                pendingGroupings.delete(tabId);
-                logger.debug(`[GROUPING_DEBUG] onUpdated: Processing pending grouping for tab ${tabId} with URL: "${tab.url}".`);
-                await processGroupingForNewTab(pending.openerTab, pending.newTab);
-            }
-        }
+        await tryRegisterFallbackGrouping(tabId, changeInfo, tab);
+        await flushPendingGroupingOnComplete(tabId, changeInfo, tab);
     });
+}
+
+// URL-based fallback: when the browser doesn't expose openerTabId in onTabCreated
+// (e.g. tabs opened via browser.tabs.create from the extension), look up
+// middleClickedTabs by the navigated URL instead.
+// openerTabId-based fallback: handles the combination of SW timing race
+// (message arrives after onTabCreated) + URL mismatch (e.g. Chrome transparently
+// resolves Google's redirect URL so the tab never navigates through it).
+function findMatchedOpenerForUpdate(navUrl: string, openerTabId: number | undefined, tabId: number): number | undefined {
+    const middleClickedTabs = globalThis.middleClickedTabs;
+    if (!middleClickedTabs) return undefined;
+
+    if (middleClickedTabs.has(navUrl)) {
+        const matched = middleClickedTabs.get(navUrl)!;
+        middleClickedTabs.delete(navUrl);
+        logger.debug(`[GROUPING_DEBUG] onUpdated: URL-based match for tab ${tabId} (URL: "${navUrl}"), openerTabId: ${matched}.`);
+        return matched;
+    }
+    if (openerTabId == null) return undefined;
+    for (const [clickedUrl, id] of middleClickedTabs.entries()) {
+        if (id === openerTabId) {
+            middleClickedTabs.delete(clickedUrl);
+            logger.debug(`[GROUPING_DEBUG] onUpdated: openerTabId-based match for tab ${tabId} (openerTabId: ${openerTabId}, registered URL was "${clickedUrl}").`);
+            return id;
+        }
+    }
+    return undefined;
+}
+
+async function processMatchedOpenerForUpdate(tabId: number, matchedOpenerTabId: number): Promise<void> {
+    try {
+        const openerTab = await browser.tabs.get(matchedOpenerTabId);
+        // Re-fetch the new tab to get its current status (may have changed while awaiting).
+        const currentNewTab = await browser.tabs.get(tabId).catch(() => null);
+        if (!currentNewTab) return; // tab was closed
+        if (currentNewTab.status === 'complete' && currentNewTab.url && !currentNewTab.url.startsWith('about:')) {
+            // Tab already complete: process grouping immediately.
+            logger.debug(`[GROUPING_DEBUG] onUpdated: Tab ${tabId} already complete. Processing now.`);
+            await processGroupingForNewTab(openerTab, currentNewTab);
+            return;
+        }
+        // Tab still loading: register pending grouping for onTabUpdated(complete).
+        pendingGroupings.set(tabId, { openerTab, newTab: currentNewTab });
+        logger.debug(`[GROUPING_DEBUG] onUpdated: Registered pending grouping for tab ${tabId}.`);
+    } catch (e) {
+        logger.warn(`[GROUPING_DEBUG] onUpdated: Opener tab ${matchedOpenerTabId} not found.`, e);
+    }
+}
+
+async function tryRegisterFallbackGrouping(
+    tabId: number,
+    changeInfo: Browser.tabs.OnUpdatedInfo,
+    tab: Browser.tabs.Tab,
+): Promise<void> {
+    const navUrl = changeInfo.url || tab.url;
+    if (!navUrl || navUrl.startsWith('about:') || navUrl.startsWith('chrome:')) return;
+    if (pendingGroupings.has(tabId)) return;
+
+    const matchedOpenerTabId = findMatchedOpenerForUpdate(navUrl, tab.openerTabId, tabId);
+    if (matchedOpenerTabId === undefined) return;
+
+    await processMatchedOpenerForUpdate(tabId, matchedOpenerTabId);
+}
+
+async function flushPendingGroupingOnComplete(
+    tabId: number,
+    changeInfo: Browser.tabs.OnUpdatedInfo,
+    tab: Browser.tabs.Tab,
+): Promise<void> {
+    if (changeInfo.status !== 'complete' || !tab.url || tab.url.startsWith('about:')) return;
+    const pending = pendingGroupings.get(tabId);
+    if (!pending) return;
+    pendingGroupings.delete(tabId);
+    logger.debug(`[GROUPING_DEBUG] onUpdated: Processing pending grouping for tab ${tabId} with URL: "${tab.url}".`);
+    await processGroupingForNewTab(pending.openerTab, pending.newTab);
 }
 
 export function setupAllEventHandlers(): void {

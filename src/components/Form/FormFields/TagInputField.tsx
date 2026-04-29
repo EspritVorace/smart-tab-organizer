@@ -7,6 +7,25 @@ import { getMessage } from '@/utils/i18n.js';
 import { FieldLabel } from './FieldLabel';
 import { FieldError } from './FieldError';
 
+function parseTagAdditions(
+  rawValue: string,
+  existingTags: string[],
+  validateTag: RegExp | undefined,
+  maxTags: number | undefined,
+): string[] {
+  const parts = rawValue.split(',').map(p => p.trim()).filter(Boolean);
+  const additions: string[] = [];
+  for (const part of parts) {
+    if (validateTag && !validateTag.test(part)) continue;
+    if (existingTags.includes(part) || additions.includes(part)) continue;
+    if (typeof maxTags === 'number' && existingTags.length + additions.length >= maxTags) {
+      break;
+    }
+    additions.push(part);
+  }
+  return additions;
+}
+
 interface TagInputFieldProps<T extends FieldValues> {
   name: Path<T>;
   control: Control<T>;
@@ -93,29 +112,20 @@ export function TagInputField<T extends FieldValues>({
 
           const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
             const value = event.target.value;
-            if (value.includes(',')) {
-              const parts = value.split(',').map(p => p.trim()).filter(Boolean);
-              const additions: string[] = [];
-              for (const part of parts) {
-                if (validateTag && !validateTag.test(part)) continue;
-                if (tags.includes(part) || additions.includes(part)) continue;
-                if (typeof maxTags === 'number' && tags.length + additions.length >= maxTags) {
-                  break;
-                }
-                additions.push(part);
-              }
-              if (additions.length > 0) {
-                field.onChange([...tags, ...additions]);
-                setAnnouncement(
-                  additions.length === 1
-                    ? getMessage('tagInputAdded', additions[0])
-                    : getMessage('tagInputMultipleAdded', String(additions.length)),
-                );
-              }
-              setDraft('');
+            if (!value.includes(',')) {
+              setDraft(value);
               return;
             }
-            setDraft(value);
+            const additions = parseTagAdditions(value, tags, validateTag, maxTags);
+            if (additions.length > 0) {
+              field.onChange([...tags, ...additions]);
+              setAnnouncement(
+                additions.length === 1
+                  ? getMessage('tagInputAdded', additions[0])
+                  : getMessage('tagInputMultipleAdded', String(additions.length)),
+              );
+            }
+            setDraft('');
           };
 
           const removeTag = (index: number) => {

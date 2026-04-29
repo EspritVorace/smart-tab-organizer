@@ -54,11 +54,9 @@ export function WizardStepper({ steps, currentStep, disableFutureNavigation = fa
                     width: 28,
                     height: 28,
                     borderRadius: '50%',
-                    backgroundColor: isActive
+                    backgroundColor: isActive || isCompleted
                       ? 'var(--accent-9)'
-                      : isCompleted
-                        ? 'var(--accent-9)'
-                        : 'var(--gray-a4)',
+                      : 'var(--gray-a4)',
                     color: isActive || isCompleted ? 'white' : 'var(--gray-11)',
                     fontSize: 12,
                     fontWeight: 600,
@@ -75,11 +73,7 @@ export function WizardStepper({ steps, currentStep, disableFutureNavigation = fa
                   size="2"
                   weight={isActive ? 'bold' : 'regular'}
                   style={{
-                    color: isActive
-                      ? 'var(--accent-11)'
-                      : isCompleted
-                        ? 'var(--accent-11)'
-                        : 'var(--gray-11)',
+                    color: isActive || isCompleted ? 'var(--accent-11)' : 'var(--gray-11)',
                     whiteSpace: 'nowrap',
                   }}
                 >

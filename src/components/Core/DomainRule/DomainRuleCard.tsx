@@ -46,8 +46,9 @@ export function DomainRuleCard({
 }: DomainRuleCardProps) {
   const { ref, handleRef, isDragging } = useSortable({ id: rule.id, index, disabled: isDragDisabled });
 
+  const enabledOpacity = rule.enabled ? 1 : 0.6;
   const style: React.CSSProperties = {
-    opacity: isDragging ? 0.4 : rule.enabled ? 1 : 0.6,
+    opacity: isDragging ? 0.4 : enabledOpacity,
     zIndex: isDragging ? 10 : undefined,
     position: isDragging ? 'relative' : undefined,
   };
