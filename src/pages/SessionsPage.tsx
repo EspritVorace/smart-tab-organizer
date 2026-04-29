@@ -222,7 +222,7 @@ function SessionSection({
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <Flex ref={listRef} direction="column" gap="3" mt="3">
+          <Flex ref={listRef} direction="column" gap="3" mt="3" pl="6">
             {(dragItems ?? sessions).map((session, index) => {
               const searchMatch = searchMatches?.get(session.id);
               return (

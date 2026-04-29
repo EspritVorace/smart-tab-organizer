@@ -186,7 +186,7 @@ export function SessionCard({
       tabIndex={0}
       onKeyDown={onCardKeyDown}
       size="2"
-      style={dragStyle}
+      style={{ ...dragStyle, paddingTop: 'var(--space-2)', paddingBottom: 'var(--space-2)' }}
     >
       <Flex direction="column" gap="2">
         {/* Top row: drag handle + pin btn + name + category badge + restore + more menu */}
@@ -218,15 +218,15 @@ export function SessionCard({
               content={session.isPinned ? getMessage('sessionUnpin') : getMessage('sessionPin')}
             >
               <IconButton
-                size="3"
+                size="1"
                 variant={session.isPinned ? 'soft' : 'ghost'}
                 color={session.isPinned ? 'indigo' : 'gray'}
                 onClick={() => session.isPinned ? onUnpin(session) : onPin(session)}
                 aria-label={session.isPinned ? getMessage('sessionUnpin') : getMessage('sessionPin')}
               >
                 {session.isPinned
-                  ? <PinOff size={16} aria-hidden="true" />
-                  : <Pin size={16} aria-hidden="true" />
+                  ? <PinOff size={14} aria-hidden="true" />
+                  : <Pin size={14} aria-hidden="true" />
                 }
               </IconButton>
             </Tooltip>
@@ -401,7 +401,7 @@ export function SessionCard({
                 all: 'unset',
                 display: 'flex',
                 alignItems: 'center',
-                flexWrap: 'wrap',
+                width: '100%',
                 gap: 'var(--space-1)',
                 cursor: 'pointer',
                 color: 'var(--gray-11)',
