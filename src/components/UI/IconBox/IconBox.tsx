@@ -44,7 +44,7 @@ export function IconBox({
     variant === 'gradient'
       ? {
           background:
-            'linear-gradient(135deg, var(--accent-9) 0%, var(--accent-11) 100%)',
+            'linear-gradient(135deg, var(--accent-9) 0%, var(--accent-12) 100%)',
           color: 'white',
           boxShadow: '0 1px 2px var(--accent-a5)',
         }
