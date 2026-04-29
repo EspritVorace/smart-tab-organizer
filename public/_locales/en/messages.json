@@ -386,6 +386,7 @@
   "snapshotConfirmMessage": { "message": "Save \"$1\" with $2 tab(s)?" },
   "snapshotSaveButton": { "message": "Save Session" },
   "snapshotSaveSuccess": { "message": "Session \"$1\" saved successfully!" },
+  "snapshotActiveGroupCallout": { "message": "Selection limited to the active group. You can extend it before saving." },
 
   "restoreTitle": { "message": "Restore \"$1\"" },
   "restoreDescription": { "message": "Choose which tabs to restore from this session." },
@@ -458,8 +459,6 @@
   "popupRestore": { "message": "Restore" },
   "popupSaveSession": { "message": "Save session" },
   "popupSaveActiveGroup": { "message": "Save active tab group" },
-  "popupSaveAllTabs": { "message": "Save all tabs" },
-  "popupSaveGroupOptions": { "message": "More save options" },
   "popupRestoreSession": { "message": "Restore session" },
   "popupPinnedSessionsLabel": { "message": "Pinned sessions" },
   "popupPinnedEmptyHint": { "message": "Pin a session for one-click access from here." },

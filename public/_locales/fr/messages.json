@@ -386,6 +386,7 @@
   "snapshotConfirmMessage": { "message": "Sauvegarder « $1 » avec $2 onglet(s) ?" },
   "snapshotSaveButton": { "message": "Sauvegarder la session" },
   "snapshotSaveSuccess": { "message": "Session « $1 » sauvegardée avec succès !" },
+  "snapshotActiveGroupCallout": { "message": "Sélection restreinte au groupe actif. Vous pouvez l'étendre avant de sauvegarder." },
 
   "restoreTitle": { "message": "Restaurer « $1 »" },
   "restoreDescription": { "message": "Choisissez les onglets à restaurer depuis cette session." },
@@ -459,8 +460,6 @@
   "popupRestore": { "message": "Restaurer" },
   "popupSaveSession": { "message": "Sauvegarder la session" },
   "popupSaveActiveGroup": { "message": "Sauvegarder le groupe actif" },
-  "popupSaveAllTabs": { "message": "Sauvegarder tous les onglets" },
-  "popupSaveGroupOptions": { "message": "Plus d'options de sauvegarde" },
   "popupRestoreSession": { "message": "Restaurer une session" },
   "popupPinnedSessionsLabel": { "message": "Sessions épinglées" },
   "popupPinnedEmptyHint": { "message": "Épinglez une session pour y accéder en un clic depuis ici." },

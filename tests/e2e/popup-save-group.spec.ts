@@ -1,11 +1,11 @@
 /**
- * E2E tests for the "Save active tab group" SplitButton feature.
- * Covers: US-PO006 (SplitButton rendering) and US-PO007 (group snapshot deep link).
+ * E2E tests for the contextual Save button in the popup.
+ * Covers: US-PO006 (single contextual button) and US-PO007 (group snapshot deep link + callout).
  *
- * Note: The popup SplitButton rendering depends on the active tab being in a Chrome
+ * Note: The popup Save button action depends on the active tab being in a Chrome
  * tab group at the moment the popup opens. In Playwright, opening popup.html as a
  * new tab makes itself the active tab (not in any group), so we test that case directly.
- * The group pre-selection flow is tested via the options page deep link.
+ * The group pre-selection flow and callout are tested via the options page deep link.
  */
 import { test, expect } from './fixtures';
 import { goToPopup } from './helpers/navigation';
@@ -42,6 +42,15 @@ async function createTabGroupWithTitle(
   return result;
 }
 
+async function createTab(extensionContext: BrowserContext, url: string): Promise<number> {
+  const sw = extensionContext.serviceWorkers()[0];
+  const tabId = await sw.evaluate(async (u: string) => {
+    const tab = await chrome.tabs.create({ url: u, active: false });
+    return tab.id!;
+  }, url);
+  return tabId;
+}
+
 async function closeTab(extensionContext: BrowserContext, tabId: number): Promise<void> {
   const sw = extensionContext.serviceWorkers()[0];
   await sw.evaluate(async (id: number) => {
@@ -50,33 +59,31 @@ async function closeTab(extensionContext: BrowserContext, tabId: number): Promis
 }
 
 // ---------------------------------------------------------------------------
-// US-PO006 — Popup save button: plain button when active tab is not in a group
+// US-PO006 — Popup Save button stays a simple button (no SplitButton anymore)
 // ---------------------------------------------------------------------------
 test.describe('[US-PO006] Popup save button', () => {
-  test('shows plain save button when active tab is not in a group', async ({
+  test('shows a single Save button when active tab is not in a group', async ({
     extensionContext,
     extensionId,
   }) => {
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
-    // The popup page itself is the active tab (not in any group) → plain button
+    // The popup page itself is the active tab (not in any group)
     await expect(page.getByRole('button', { name: /save session/i })).toBeVisible();
-    // The dropdown trigger (chevron for group options) should NOT be present
-    await expect(page.getByRole('button', { name: /more save options/i })).toBeHidden();
+    // The legacy SplitButton chevron must never be present anymore
+    await expect(page.getByRole('button', { name: /more save options/i })).toHaveCount(0);
+    // No "Save all tabs" / dropdown menu items either
+    await expect(page.getByRole('menuitem', { name: /save all tabs/i })).toHaveCount(0);
     await page.close();
   });
 
-  test('plain save button click navigates to snapshot wizard', async ({
+  test('Save button click navigates to snapshot wizard without groupId when not in a group', async ({
     extensionContext,
     extensionId,
   }) => {
     // Create a capturable (non-system) tab so canSave becomes true
-    const sw = extensionContext.serviceWorkers()[0];
-    const tabId = await sw.evaluate(async (url: string) => {
-      const tab = await chrome.tabs.create({ url, active: false });
-      return tab.id!;
-    }, CAPTURABLE_URL);
+    const tabId = await createTab(extensionContext, CAPTURABLE_URL);
 
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
@@ -95,7 +102,7 @@ test.describe('[US-PO006] Popup save button', () => {
 
     await page.close();
     await newPage.close();
-    await sw.evaluate(async (id: number) => chrome.tabs.remove(id), tabId);
+    await closeTab(extensionContext, tabId);
   });
 });
 
@@ -174,6 +181,9 @@ test.describe('[US-PO007] Save active tab group via deep link', () => {
     const value = await nameInput.inputValue();
     expect(value).toMatch(/^Snapshot /);
 
+    // Fallback path: no callout
+    await expect(page.getByTestId('wizard-snapshot-group-callout')).toHaveCount(0);
+
     await page.close();
   });
 
@@ -195,6 +205,67 @@ test.describe('[US-PO007] Save active tab group via deep link', () => {
     const value = await nameInput.inputValue();
     expect(value).toMatch(/^Snapshot /);
 
+    // "Save all" path: no callout
+    await expect(page.getByTestId('wizard-snapshot-group-callout')).toHaveCount(0);
+
     await page.close();
+  });
+
+  test('shows the group callout when preselection is strictly partial', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    // Window contains: 1 group with 1 tab + 1 ungrouped capturable tab.
+    // The wizard will pre-select only the group tab → strictly partial → callout visible.
+    const { groupId, tabId: groupTabId } = await createTabGroupWithTitle(
+      extensionContext,
+      'Active group',
+      'green',
+    );
+    const ungroupedTabId = await createTab(extensionContext, 'https://example.org');
+
+    try {
+      const page = await extensionContext.newPage();
+      await page.goto(
+        `chrome-extension://${extensionId}/options.html#sessions?action=snapshot&groupId=${groupId}`,
+      );
+      await page.waitForLoadState('domcontentloaded');
+
+      await page.getByTestId('wizard-snapshot').waitFor({ state: 'visible', timeout: 10_000 });
+      await expect(page.getByTestId('wizard-snapshot-group-callout')).toBeVisible();
+
+      await page.close();
+    } finally {
+      await closeTab(extensionContext, groupTabId);
+      await closeTab(extensionContext, ungroupedTabId);
+    }
+  });
+
+  test('hides the group callout when window only contains the active group', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    // Window contains only the group tab → preselection covers everything → no callout.
+    // (Plus the wizard tab itself, but it is a chrome-extension URL filtered by isSystemUrl.)
+    const { groupId, tabId } = await createTabGroupWithTitle(
+      extensionContext,
+      'Solo group',
+      'orange',
+    );
+
+    try {
+      const page = await extensionContext.newPage();
+      await page.goto(
+        `chrome-extension://${extensionId}/options.html#sessions?action=snapshot&groupId=${groupId}`,
+      );
+      await page.waitForLoadState('domcontentloaded');
+
+      await page.getByTestId('wizard-snapshot').waitFor({ state: 'visible', timeout: 10_000 });
+      await expect(page.getByTestId('wizard-snapshot-group-callout')).toHaveCount(0);
+
+      await page.close();
+    } finally {
+      await closeTab(extensionContext, tabId);
+    }
   });
 });
