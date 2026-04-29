@@ -1,5 +1,6 @@
 import { Flex, Text, Button, Box } from '@radix-ui/themes';
 import { SidebarItem } from './Sidebar';
+import { IconBox } from '@/components/UI/IconBox/IconBox';
 
 interface SidebarItemsProps {
   isCollapsed?: boolean;
@@ -57,13 +58,7 @@ export function SidebarItems({
           >
             {isCollapsed ? (
               <Flex align="center" justify="center" position="relative">
-                <Box style={{ 
-                  color: item.accentColor ? `var(--${item.accentColor}-9)` : undefined,
-                  display: 'flex',
-                  alignItems: 'center'
-                }}>
-                  <Icon size={18} />
-                </Box>
+                <IconBox icon={Icon} size="sm" variant="gradient" />
                 {item.badge && (
                   <Box
                     style={{
@@ -90,14 +85,8 @@ export function SidebarItems({
               </Flex>
             ) : (
               <Flex align="center" gap="3" width="100%">
-                <Box style={{ 
-                  color: item.accentColor ? `var(--${item.accentColor}-9)` : undefined,
-                  display: 'flex',
-                  alignItems: 'center'
-                }}>
-                  <Icon size={18} />
-                </Box>
-                <Text size="2" style={{ 
+                <IconBox icon={Icon} size="sm" variant="gradient" />
+                <Text size="2" style={{
                   flex: 1, 
                   textAlign: 'left',
                   display: 'flex',

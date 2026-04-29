@@ -65,7 +65,7 @@ describe('IconBox', () => {
       <IconBox icon={Settings} className="custom-class" />
     );
     const span = container.querySelector('span') as HTMLSpanElement;
-    expect(span.className).toBe('custom-class');
+    expect(span.className).toContain('custom-class');
     expect(span.style.width).toBe('32px');
     expect(span.style.height).toBe('32px');
   });

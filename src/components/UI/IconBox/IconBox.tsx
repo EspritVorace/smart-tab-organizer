@@ -1,3 +1,4 @@
+import { Theme } from '@radix-ui/themes';
 import type { LucideIcon } from 'lucide-react';
 
 export type IconBoxSize = 'sm' | 'md' | 'lg';
@@ -29,7 +30,10 @@ const SIZE_CONFIG: Record<IconBoxSize, { box: number; icon: number; radius: stri
  * d'un sous-thème si l'IconBox est rendu dans un wrapper).
  *
  * Variantes :
- * - `gradient` (défaut) : dégradé accent-9 → accent-11 avec icône blanche
+ * - `gradient` (défaut) : dégradé accent-9 → accent-11 avec icône blanche.
+ *   Force l'échelle dark via un sous-thème Radix pour garantir un contraste
+ *   identique en light et dark (sinon les stops 9 et 11 sont trop proches
+ *   en light et le gradient devient invisible).
  * - `soft` : fond accent-a3 avec icône en accent-11
  */
 export function IconBox({
@@ -40,35 +44,47 @@ export function IconBox({
 }: IconBoxProps) {
   const config = SIZE_CONFIG[size];
 
-  const variantStyle: React.CSSProperties =
-    variant === 'gradient'
-      ? {
+  const baseStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: config.box,
+    height: config.box,
+    borderRadius: config.radius,
+    flexShrink: 0,
+  };
+
+  if (variant === 'soft') {
+    return (
+      <span
+        aria-hidden="true"
+        className={className}
+        style={{
+          ...baseStyle,
+          backgroundColor: 'var(--accent-a3)',
+          color: 'var(--accent-11)',
+        }}
+      >
+        <Icon size={config.icon} strokeWidth={2} />
+      </span>
+    );
+  }
+
+  return (
+    <Theme appearance="dark" hasBackground={false} asChild>
+      <span
+        aria-hidden="true"
+        className={className}
+        style={{
+          ...baseStyle,
           background:
             'linear-gradient(135deg, var(--accent-9) 0%, var(--accent-11) 100%)',
           color: 'white',
           boxShadow: '0 1px 2px var(--accent-a5)',
-        }
-      : {
-          backgroundColor: 'var(--accent-a3)',
-          color: 'var(--accent-11)',
-        };
-
-  return (
-    <span
-      aria-hidden="true"
-      className={className}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: config.box,
-        height: config.box,
-        borderRadius: config.radius,
-        flexShrink: 0,
-        ...variantStyle,
-      }}
-    >
-      <Icon size={config.icon} strokeWidth={variant === 'gradient' ? 2.25 : 2} />
-    </span>
+        }}
+      >
+        <Icon size={config.icon} strokeWidth={2.25} />
+      </span>
+    </Theme>
   );
 }

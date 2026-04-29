@@ -166,23 +166,32 @@ async function preparePage(
         if (!entry) return orig(messageId, substitutions);
 
         let msg = entry.message;
-        if (!entry.placeholders) return msg;
-
         const subs = substitutions
           ? Array.isArray(substitutions)
             ? substitutions
             : [substitutions]
           : [];
 
-        for (const [name, placeholder] of Object.entries(entry.placeholders)) {
-          // Resolve positional references ($1, $2…) inside the placeholder content
-          const content = placeholder.content.replace(
-            /\$(\d+)/g,
-            (_, n: string) => subs[parseInt(n, 10) - 1] ?? '',
-          );
-          // Replace $PLACEHOLDER_NAME$ in the message (case-insensitive)
-          msg = msg.replace(new RegExp(`\\$${name}\\$`, 'gi'), content);
+        if (entry.placeholders) {
+          for (const [name, placeholder] of Object.entries(entry.placeholders)) {
+            // Resolve positional references ($1, $2…) inside the placeholder content
+            const content = placeholder.content.replace(
+              /\$(\d+)/g,
+              (_, n: string) => subs[parseInt(n, 10) - 1] ?? '',
+            );
+            // Replace $PLACEHOLDER_NAME$ in the message (case-insensitive)
+            msg = msg.replace(new RegExp(`\\$${name}\\$`, 'gi'), content);
+          }
         }
+
+        // Resolve any remaining positional substitutions ($1, $2…) directly in the
+        // message. Native chrome.i18n.getMessage supports this even without a
+        // `placeholders` block, and many of our messages rely on it (e.g.
+        // restoreTitle, sessionTabCount, restoreConflictingGroups).
+        msg = msg.replace(
+          /\$(\d+)/g,
+          (_, n: string) => subs[parseInt(n, 10) - 1] ?? '',
+        );
 
         return msg;
       };
