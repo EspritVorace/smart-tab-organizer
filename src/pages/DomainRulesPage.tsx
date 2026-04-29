@@ -28,6 +28,23 @@ type DeleteTarget =
   | { type: 'single'; ruleId: string; focusIndex?: number }
   | { type: 'bulk'; ruleIds: string[] };
 
+function stripUiOnlyFields(rule: DomainRuleSetting): DomainRule {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { enabled, badge, ...domainRule } = rule;
+  return domainRule;
+}
+
+function confirmDeleteDescription(
+  target: DeleteTarget | null,
+  domainRules: DomainRuleSetting[],
+): string {
+  if (target?.type === 'bulk') return getMessage('confirmDeleteSelectedDescription');
+  const ruleLabel = target?.type === 'single'
+    ? domainRules.find(r => r.id === target.ruleId)?.label ?? ''
+    : '';
+  return getMessage('confirmDeleteDescription').replace('{item}', ruleLabel);
+}
+
 interface DomainRulesPageProps {
   syncSettings: AppSettings;
   updateRules: (rules: DomainRuleSetting[]) => void;
@@ -157,8 +174,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
   const isIndeterminate = selectedIds.size > 0 && selectedIds.size < filteredRules.length;
 
   const handleEditRule = useCallback((rule: DomainRuleSetting) => {
-    const { enabled: _enabled, badge: _badge, ...domainRule } = rule;
-    setEditingRule(domainRule);
+    setEditingRule(stripUiOnlyFields(rule));
     setIsModalOpen(true);
   }, []);
 
@@ -330,30 +346,30 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
               />
             )}
 
-            {filteredRules.length === 0 ? (
-              syncSettings.domainRules.length === 0 && !searchTerm ? (
-                <EmptyState
-                  data-testid="page-rules-empty"
-                  icon={Shield}
-                  title={getMessage('rulesEmptyTitle')}
-                  description={getMessage('rulesEmptyDescription')}
-                  actions={
-                    <Flex gap="2">
-                      <Button data-testid="page-rules-btn-add" variant="soft" onClick={handleAddRule}>
-                        <Plus size={14} aria-hidden="true" />
-                        {getMessage('addRule')}
-                      </Button>
-                      <Button variant="soft" onClick={() => setIsImportOpen(true)}>
-                        <Upload size={14} aria-hidden="true" />
-                        {getMessage('importRulesButton')}
-                      </Button>
-                    </Flex>
-                  }
-                />
-              ) : (
-                <EmptyState compact icon={AlertCircle} message={getMessage('noRulesFound')} />
-              )
-            ) : (
+            {filteredRules.length === 0 && syncSettings.domainRules.length === 0 && !searchTerm && (
+              <EmptyState
+                data-testid="page-rules-empty"
+                icon={Shield}
+                title={getMessage('rulesEmptyTitle')}
+                description={getMessage('rulesEmptyDescription')}
+                actions={
+                  <Flex gap="2">
+                    <Button data-testid="page-rules-btn-add" variant="soft" onClick={handleAddRule}>
+                      <Plus size={14} aria-hidden="true" />
+                      {getMessage('addRule')}
+                    </Button>
+                    <Button variant="soft" onClick={() => setIsImportOpen(true)}>
+                      <Upload size={14} aria-hidden="true" />
+                      {getMessage('importRulesButton')}
+                    </Button>
+                  </Flex>
+                }
+              />
+            )}
+            {filteredRules.length === 0 && (syncSettings.domainRules.length > 0 || searchTerm) && (
+              <EmptyState compact icon={AlertCircle} message={getMessage('noRulesFound')} />
+            )}
+            {filteredRules.length > 0 && (
               <DragDropProvider modifiers={[RestrictToVerticalAxis]} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
                 <Flex data-testid="page-rules-list" direction="column" gap="3" role="list" aria-label={getMessage('domainRulesTab')} ref={listRef}>
                   {(dragItems ?? filteredRules).map((rule, index) => (
@@ -400,15 +416,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
             ? getMessage('confirmDeleteSelected')
             : getMessage('confirmDeleteRule')
         }
-        description={
-          deleteTarget?.type === 'bulk'
-            ? getMessage('confirmDeleteSelectedDescription')
-            : getMessage('confirmDeleteDescription').replace('{item}',
-                deleteTarget?.type === 'single'
-                  ? syncSettings.domainRules.find(r => r.id === deleteTarget.ruleId)?.label ?? ''
-                  : ''
-              )
-        }
+        description={confirmDeleteDescription(deleteTarget, syncSettings.domainRules)}
       />
 
       <ImportWizard

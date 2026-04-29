@@ -21,7 +21,9 @@ export function mountExtensionApp(rootId: string, app: React.ReactElement): void
   try {
     const uiLang = browser.i18n.getUILanguage();
     if (uiLang) document.documentElement.lang = uiLang;
-  } catch (_) { /* fallback to HTML default */ }
+  } catch (err) {
+    logger.debug('[mountExtensionApp] getUILanguage unavailable, falling back to HTML default lang.', err);
+  }
 
   const container = document.getElementById(rootId);
   if (!container) {

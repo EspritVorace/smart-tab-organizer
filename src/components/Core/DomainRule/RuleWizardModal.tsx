@@ -12,6 +12,7 @@ import { WizardStep3Options } from './WizardStep3Options';
 import { WizardStep4Summary } from './WizardStep4Summary';
 import { EditSummaryView } from './EditSummaryView';
 import { type ConfigEditValues } from './ConfigEditModal';
+import type { ConfigMode } from './ConfigModeSelector';
 import { generateUUID } from '@/utils/utils';
 import { createDomainRuleSchemaWithUniqueness, type DomainRule } from '@/schemas/domainRule';
 import { groupNameSourceOptions, type GroupNameSourceValue, type UrlExtractionModeValue } from '@/schemas/enums';
@@ -87,11 +88,25 @@ const getDefaultValues = (rule?: DomainRule): Partial<DomainRule> => {
   };
 };
 
-function inferConfigMode(rule?: DomainRule): 'preset' | 'ask' | 'manual' {
+function inferConfigMode(rule?: DomainRule): ConfigMode {
   if (!rule) return 'preset';
   if (rule.presetId) return 'preset';
   if (rule.groupNameSource === 'manual') return 'ask';
   return 'manual';
+}
+
+function getManualModeFieldsToValidate(
+  groupNameSource: string,
+  extractionMode: UrlExtractionModeValue,
+): (keyof DomainRule)[] {
+  const fields: (keyof DomainRule)[] = [];
+  if (groupNameSource === 'title' || groupNameSource.startsWith('smart')) {
+    fields.push('titleParsingRegEx');
+  }
+  if (groupNameSource === 'url' || groupNameSource.startsWith('smart')) {
+    fields.push(extractionMode === 'query_param' ? 'urlQueryParamName' : 'urlParsingRegEx');
+  }
+  return fields;
 }
 
 const STEP_LABELS_KEYS = [
@@ -117,7 +132,7 @@ export function RuleWizardModal({
 }: RuleWizardModalProps) {
   const isEditing = !!domainRule;
   const [step, setStep] = useState(0);
-  const [configMode, setConfigMode] = useState<'preset' | 'ask' | 'manual'>(() => inferConfigMode(domainRule));
+  const [configMode, setConfigMode] = useState<ConfigMode>(() => inferConfigMode(domainRule));
   const [presetCategories, setPresetCategories] = useState<PresetCategory[]>([]);
   const [isLoadingPresets, setIsLoadingPresets] = useState(false);
   const [presetName, setPresetName] = useState<string | null>(null);
@@ -176,7 +191,7 @@ export function RuleWizardModal({
     setStepAnnouncement('');
     const mode = inferConfigMode(domainRule);
     setConfigMode(mode);
-    if (!domainRule) {
+    if (!domainRule || domainRule.groupNameSource === 'manual') {
       lastManualState.current = { ...emptyModeState };
       lastPresetState.current = { ...emptyPresetState };
     } else if (domainRule.presetId) {
@@ -189,9 +204,6 @@ export function RuleWizardModal({
       };
       lastPresetState.current = { presetId: domainRule.presetId, ...snapshot };
       lastManualState.current = { ...snapshot };
-    } else if (domainRule.groupNameSource === 'manual') {
-      lastManualState.current = { ...emptyModeState };
-      lastPresetState.current = { ...emptyPresetState };
     } else {
       lastManualState.current = {
         groupNameSource: domainRule.groupNameSource as GroupNameSourceValue,
@@ -245,7 +257,7 @@ export function RuleWizardModal({
     setValue('urlQueryParamName', snapshot.urlQueryParamName);
   }, [setValue]);
 
-  const saveCurrentModeState = useCallback((prevMode: 'preset' | 'ask' | 'manual') => {
+  const saveCurrentModeState = useCallback((prevMode: ConfigMode) => {
     if (prevMode === 'manual') {
       lastManualState.current = captureSnapshot();
     } else if (prevMode === 'preset') {
@@ -256,7 +268,7 @@ export function RuleWizardModal({
     }
   }, [captureSnapshot, getValues]);
 
-  const handleConfigModeChange = useCallback((newMode: 'preset' | 'ask' | 'manual') => {
+  const handleConfigModeChange = useCallback((newMode: ConfigMode) => {
     const prevMode = configMode;
     if (prevMode === 'manual' && newMode === 'preset') {
       saveCurrentModeState(prevMode);
@@ -288,32 +300,29 @@ export function RuleWizardModal({
       .replace('{label}', label));
   };
 
-  const handleNext = async () => {
-    setStepError(null);
-    let fieldsToValidate: (keyof DomainRule)[] = [];
-    if (step === 0) {
-      fieldsToValidate = ['label', 'domainFilter'];
-    } else if (step === 1) {
-      if (configMode === 'preset') fieldsToValidate = ['presetId'];
-      else if (configMode === 'manual') {
-        const src = getValues('groupNameSource');
-        const extractionMode = (getValues('urlExtractionMode') ?? 'regex') as UrlExtractionModeValue;
-        if (src === 'title' || src.startsWith('smart')) fieldsToValidate.push('titleParsingRegEx');
-        if (src === 'url' || src.startsWith('smart')) {
-          if (extractionMode === 'query_param') {
-            fieldsToValidate.push('urlQueryParamName');
-          } else {
-            fieldsToValidate.push('urlParsingRegEx');
-          }
-        }
+  const computeFieldsToValidate = (): (keyof DomainRule)[] => {
+    if (step === 0) return ['label', 'domainFilter'];
+    if (step === 1) {
+      if (configMode === 'preset') return ['presetId'];
+      if (configMode === 'manual') {
+        return getManualModeFieldsToValidate(
+          getValues('groupNameSource'),
+          (getValues('urlExtractionMode') ?? 'regex') as UrlExtractionModeValue,
+        );
       }
-    } else if (step === 2) {
+      return [];
+    }
+    if (step === 2) {
       const dedupEnabled = getValues('deduplicationEnabled');
       const mode = getValues('deduplicationMatchMode');
-      if (dedupEnabled && mode === 'exact_ignore_params') {
-        fieldsToValidate.push('ignoredQueryParams');
-      }
+      return dedupEnabled && mode === 'exact_ignore_params' ? ['ignoredQueryParams'] : [];
     }
+    return [];
+  };
+
+  const handleNext = async () => {
+    setStepError(null);
+    const fieldsToValidate = computeFieldsToValidate();
     const valid = fieldsToValidate.length === 0 || await trigger(fieldsToValidate);
     if (!valid) return;
     const newStep = step + 1;
