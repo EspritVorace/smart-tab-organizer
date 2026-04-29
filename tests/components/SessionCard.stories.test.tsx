@@ -3,8 +3,12 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { composeStories } from '@storybook/react';
 import * as stories from '../../src/components/Core/Session/SessionCard.stories';
 
-const { SessionCardDefault, SessionCardPinned, SessionCardDeepSearchMatch } =
-  composeStories(stories);
+const {
+  SessionCardDefault,
+  SessionCardPinned,
+  SessionCardDeepSearchMatch,
+  SessionCardWithRelativeDates,
+} = composeStories(stories);
 
 // Shared default for the required prop not covered by stories
 const existingSessions = [
@@ -62,6 +66,37 @@ describe('SessionCard (portable stories)', () => {
       expect(
         screen.queryByRole('button', { name: 'Pin' }),
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('SessionCardWithRelativeDates', () => {
+    it('renders a relative-time text with a <time> element on every card', () => {
+      const { container } = render(<SessionCardWithRelativeDates />);
+
+      const timeElements = container.querySelectorAll('time[datetime]');
+      // 8 staggered sessions = 8 <time> elements
+      expect(timeElements.length).toBe(8);
+
+      for (const el of Array.from(timeElements)) {
+        expect(el.getAttribute('datetime')).toMatch(
+          /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/,
+        );
+        expect(el.textContent?.trim().length).toBeGreaterThan(0);
+      }
+    });
+
+    it('uses the "modified" prefix when updatedAt differs from createdAt', () => {
+      render(<SessionCardWithRelativeDates />);
+      // "Sprint en cours" has updatedAt 5 min ago vs createdAt 30 min ago.
+      const node = screen.getByTestId('session-card-rt-5min-modified-relative-time');
+      expect(node.textContent).toMatch(/modified/);
+    });
+
+    it('uses the "created" prefix when updatedAt equals createdAt', () => {
+      render(<SessionCardWithRelativeDates />);
+      // "Recherches du matin" passes updatedOffset null -> createdAt === updatedAt.
+      const node = screen.getByTestId('session-card-rt-2h-created-relative-time');
+      expect(node.textContent).toMatch(/created/);
     });
   });
 
