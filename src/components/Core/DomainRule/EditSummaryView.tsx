@@ -11,7 +11,7 @@ import { WizardStep3Options } from './WizardStep3Options';
 import { groupNameSourceOptions, deduplicationMatchModeOptions } from '@/schemas/enums';
 import type { DomainRule } from '@/schemas/domainRule';
 import type { PresetCategory } from '@/utils/presetUtils';
-import type { GroupNameSourceValue, RuleCategoryId } from '@/schemas/enums';
+import type { GroupNameSourceValue } from '@/schemas/enums';
 
 interface EditSummaryViewProps {
   control: Control<DomainRule>;
@@ -98,7 +98,7 @@ export function EditSummaryView({
                           onBlur={labelField.onBlur}
                           data-testid="wizard-rule-field-label"
                           placeholder={getMessage('labelPlaceholder')}
-                          categoryId={catField.value as RuleCategoryId | null | undefined}
+                          categoryId={catField.value as string | null | undefined}
                           onCategoryChange={catField.onChange}
                         />
                       )}

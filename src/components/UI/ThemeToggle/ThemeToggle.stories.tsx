@@ -4,19 +4,21 @@ import { IconButton, Tooltip, Theme } from '@radix-ui/themes';
 import { Sun, Moon, Monitor, LucideProps } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 
+type ThemeMode = 'light' | 'dark' | 'system';
+
 interface ThemeOption {
-  value: 'light' | 'dark' | 'system';
+  value: ThemeMode;
   labelKey: string;
   icon: React.ComponentType<LucideProps>;
 }
 
 interface MockThemeToggleProps {
-  initialTheme?: 'light' | 'dark' | 'system';
+  initialTheme?: ThemeMode;
 }
 
 // Version mock du ThemeToggle pour Storybook
 function MockThemeToggle({ initialTheme = 'light' }: MockThemeToggleProps) {
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>(initialTheme);
+  const [theme, setTheme] = useState<ThemeMode>(initialTheme);
 
   const themeOptions: ThemeOption[] = [
     { value: 'light', labelKey: 'lightMode', icon: Sun },

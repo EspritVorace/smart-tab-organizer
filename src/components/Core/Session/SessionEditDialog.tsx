@@ -17,7 +17,6 @@ import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWit
 import { useSessionEditor } from '@/hooks/useSessionEditor';
 import { countSessionTabs } from '@/utils/sessionUtils';
 import type { Session } from '@/types/session';
-import type { RuleCategoryId } from '@/schemas/enums';
 
 interface SessionEditDialogProps {
   /** The session to edit, or null when the dialog is closed */
@@ -157,7 +156,7 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingS
               editor.updateSessionName(nextValue);
               setSaveNameError(null);
             }}
-            categoryId={categoryId as RuleCategoryId | null}
+            categoryId={categoryId}
             onCategoryChange={setCategoryId}
           />
           {saveNameError && (
