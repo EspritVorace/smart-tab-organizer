@@ -2,14 +2,13 @@ import React, { useState } from 'react';
 import { Popover, Tooltip } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
-import type { RuleCategoryId } from '@/schemas/enums';
 import { useSettings } from '@/hooks/useSettings';
 import { chromeGroupColors } from '@/utils/tabTreeUtils';
 import styles from './CategoryPicker.module.css';
 
 export interface CategoryPickerProps {
-  value: RuleCategoryId | null | undefined;
-  onChange: (value: RuleCategoryId | null) => void;
+  value: string | null | undefined;
+  onChange: (value: string | null) => void;
 }
 
 export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
@@ -19,7 +18,7 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
   const selectedCategory = getRuleCategory(value);
   const selectedLabel = selectedCategory ? getCategoryLabel(selectedCategory) : getMessage('categoryNone');
 
-  function handleSelect(id: RuleCategoryId | null) {
+  function handleSelect(id: string | null) {
     onChange(id);
     setOpen(false);
   }

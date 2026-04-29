@@ -18,6 +18,16 @@ interface PackCardProps {
   onSelectionChange: (next: { selected: boolean; rules: ImportDomainRule[] }) => void;
 }
 
+function computeRuleCountLabel(isConfigurable: boolean, ruleCount: number): string {
+  if (!isConfigurable) {
+    return getPluralMessage(ruleCount, 'packGalleryRuleCountOne', 'packGalleryRuleCount');
+  }
+  if (ruleCount === 0) {
+    return getMessage('packGalleryNoRuleConfigured');
+  }
+  return getPluralMessage(ruleCount, 'packGalleryConfiguredRuleCountOne', 'packGalleryConfiguredRuleCount');
+}
+
 function buildInitialSelection(pack: PackFile): PackParamSelection {
   if (!pack.pack.configurable) return {};
   return Object.fromEntries(
@@ -62,19 +72,7 @@ export function PackCard({ pack, selected, onSelectionChange }: PackCardProps) {
   const name = resolvePackName(pack.pack);
   const description = resolvePackDescription(pack.pack);
 
-  const ruleCountLabel = isConfigurable
-    ? ruleCount === 0
-      ? getMessage('packGalleryNoRuleConfigured')
-      : getPluralMessage(
-          ruleCount,
-          'packGalleryConfiguredRuleCountOne',
-          'packGalleryConfiguredRuleCount',
-        )
-    : getPluralMessage(
-        ruleCount,
-        'packGalleryRuleCountOne',
-        'packGalleryRuleCount',
-      );
+  const ruleCountLabel = computeRuleCountLabel(isConfigurable, ruleCount);
 
   return (
     <Card

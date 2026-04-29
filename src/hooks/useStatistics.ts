@@ -13,6 +13,73 @@ function getMondayOfWeek(date: Date): Date {
   return d;
 }
 
+interface PeriodTotals { grouping: number; dedup: number }
+interface DateWindows {
+  thisWeekStart: Date;
+  lastWeekStart: Date;
+  lastWeekEnd: Date;
+  thirtyDaysAgo: Date;
+}
+
+function computeDateWindows(today: Date): DateWindows {
+  const thisWeekStart = getMondayOfWeek(today);
+  const lastWeekStart = new Date(thisWeekStart);
+  lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+  const lastWeekEnd = new Date(thisWeekStart);
+  lastWeekEnd.setDate(lastWeekEnd.getDate() - 1);
+  const thirtyDaysAgo = new Date(today);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  thirtyDaysAgo.setHours(0, 0, 0, 0);
+  return { thisWeekStart, lastWeekStart, lastWeekEnd, thirtyDaysAgo };
+}
+
+interface BucketAccumulators {
+  thisWeek: PeriodTotals;
+  lastWeek: PeriodTotals;
+  thisMonth: PeriodTotals;
+  ruleAgg: Record<string, PeriodTotals>;
+}
+
+function accumulateRuleBucket(
+  acc: BucketAccumulators,
+  windows: DateWindows,
+  date: Date,
+  ruleId: string,
+  ruleBucket: { grouping: number; dedup: number },
+): void {
+  const { grouping: g, dedup: d } = ruleBucket;
+  if (date >= windows.thisWeekStart) {
+    acc.thisWeek.grouping += g;
+    acc.thisWeek.dedup += d;
+  }
+  if (date >= windows.lastWeekStart && date <= windows.lastWeekEnd) {
+    acc.lastWeek.grouping += g;
+    acc.lastWeek.dedup += d;
+  }
+  if (date >= windows.thirtyDaysAgo) {
+    acc.thisMonth.grouping += g;
+    acc.thisMonth.dedup += d;
+    if (!acc.ruleAgg[ruleId]) acc.ruleAgg[ruleId] = { grouping: 0, dedup: 0 };
+    acc.ruleAgg[ruleId].grouping += g;
+    acc.ruleAgg[ruleId].dedup += d;
+  }
+}
+
+function buildTopRules(
+  ruleAgg: Record<string, PeriodTotals>,
+  domainRules: DomainRuleSetting[],
+): TopRuleStat[] {
+  const ruleMap = new Map(domainRules.map(r => [r.id, r]));
+  return Object.entries(ruleAgg)
+    .map(([ruleId, agg]) => {
+      const rule = ruleMap.get(ruleId);
+      const label = rule?.label || rule?.domainFilter || ruleId;
+      return { ruleId, label, grouping: agg.grouping, dedup: agg.dedup, total: agg.grouping + agg.dedup };
+    })
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 5);
+}
+
 function computeAggregates(
   statistics: Statistics | null,
   domainRules: DomainRuleSetting[],
@@ -29,66 +96,29 @@ function computeAggregates(
 
   if (!statistics) return empty;
 
-  const today = new Date();
-  const buckets = statistics.dailyBuckets ?? {};
+  const windows = computeDateWindows(new Date());
+  const acc: BucketAccumulators = {
+    thisWeek: { grouping: 0, dedup: 0 },
+    lastWeek: { grouping: 0, dedup: 0 },
+    thisMonth: { grouping: 0, dedup: 0 },
+    ruleAgg: {},
+  };
 
-  const thisWeekStart = getMondayOfWeek(today);
-  const lastWeekStart = new Date(thisWeekStart);
-  lastWeekStart.setDate(lastWeekStart.getDate() - 7);
-  const lastWeekEnd = new Date(thisWeekStart);
-  lastWeekEnd.setDate(lastWeekEnd.getDate() - 1);
-  const thirtyDaysAgo = new Date(today);
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  thirtyDaysAgo.setHours(0, 0, 0, 0);
-
-  const thisWeek = { grouping: 0, dedup: 0 };
-  const lastWeek = { grouping: 0, dedup: 0 };
-  const thisMonth = { grouping: 0, dedup: 0 };
-  const ruleAgg: Record<string, { grouping: number; dedup: number }> = {};
-
-  for (const [dateStr, dayBucket] of Object.entries(buckets)) {
+  for (const [dateStr, dayBucket] of Object.entries(statistics.dailyBuckets ?? {})) {
     const date = new Date(dateStr + 'T00:00:00');
     for (const [ruleId, ruleBucket] of Object.entries(dayBucket)) {
-      const g = ruleBucket.grouping;
-      const d = ruleBucket.dedup;
-
-      if (date >= thisWeekStart) {
-        thisWeek.grouping += g;
-        thisWeek.dedup += d;
-      }
-      if (date >= lastWeekStart && date <= lastWeekEnd) {
-        lastWeek.grouping += g;
-        lastWeek.dedup += d;
-      }
-      if (date >= thirtyDaysAgo) {
-        thisMonth.grouping += g;
-        thisMonth.dedup += d;
-        if (!ruleAgg[ruleId]) ruleAgg[ruleId] = { grouping: 0, dedup: 0 };
-        ruleAgg[ruleId].grouping += g;
-        ruleAgg[ruleId].dedup += d;
-      }
+      accumulateRuleBucket(acc, windows, date, ruleId, ruleBucket);
     }
   }
-
-  const ruleMap = new Map(domainRules.map(r => [r.id, r]));
-
-  const topRules: TopRuleStat[] = Object.entries(ruleAgg)
-    .map(([ruleId, agg]) => {
-      const rule = ruleMap.get(ruleId);
-      const label = rule?.label || rule?.domainFilter || ruleId;
-      return { ruleId, label, grouping: agg.grouping, dedup: agg.dedup, total: agg.grouping + agg.dedup };
-    })
-    .sort((a, b) => b.total - a.total)
-    .slice(0, 5);
 
   return {
     totalGrouping: statistics.tabGroupsCreatedCount,
     totalDedup: statistics.tabsDeduplicatedCount,
     firstUsedAt: statistics.firstUsedAt ? new Date(statistics.firstUsedAt) : null,
-    thisWeek,
-    lastWeek,
-    thisMonth,
-    topRules,
+    thisWeek: acc.thisWeek,
+    lastWeek: acc.lastWeek,
+    thisMonth: acc.thisMonth,
+    topRules: buildTopRules(acc.ruleAgg, domainRules),
   };
 }
 

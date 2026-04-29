@@ -70,15 +70,12 @@ export const domainRuleSchema = z.object({
   path: ['titleParsingRegEx']
 })).refine((data) => {
   // urlParsingRegEx requis seulement quand l'extraction se fait par regex
-  if (
+  return !(
     data.presetId === null
     && data.groupNameSource === 'url'
     && data.urlExtractionMode !== 'query_param'
     && (!data.urlParsingRegEx || data.urlParsingRegEx.trim() === '')
-  ) {
-    return false;
-  }
-  return true;
+  );
 }, () => ({
   message: getMessage('errorZodRequired'),
   path: ['urlParsingRegEx']

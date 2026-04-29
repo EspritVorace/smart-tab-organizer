@@ -49,94 +49,116 @@ function isOrganizableUrl(url: string | undefined): url is string {
  * matching rule are included (bucketed together under exact-match mode).
  * Returns the number of duplicate tabs removed.
  */
+interface DedupBucket {
+    rule: DomainRuleSetting | undefined;
+    tabs: Browser.tabs.Tab[];
+}
+
+const UNMATCHED_DEDUP_KEY = '__unmatched__:exact';
+
+function resolveDedupBucketKey(
+    tab: Browser.tabs.Tab,
+    settings: AppSettings,
+): { key: string; rule: DomainRuleSetting | undefined } | null {
+    const rule = findMatchingRule(tab.url!, settings.domainRules);
+    if (rule) {
+        if (!rule.enabled || !rule.deduplicationEnabled) return null;
+        return { key: `${rule.id}:${getMatchMode(rule)}`, rule };
+    }
+    if (settings.deduplicateUnmatchedDomains) {
+        return { key: UNMATCHED_DEDUP_KEY, rule: undefined };
+    }
+    return null;
+}
+
+function buildDeduplicationBuckets(
+    organizable: Browser.tabs.Tab[],
+    settings: AppSettings,
+): Map<string, DedupBucket> {
+    const buckets = new Map<string, DedupBucket>();
+    for (const tab of organizable) {
+        const resolved = resolveDedupBucketKey(tab, settings);
+        if (!resolved) continue;
+        let bucket = buckets.get(resolved.key);
+        if (!bucket) {
+            bucket = { rule: resolved.rule, tabs: [] };
+            buckets.set(resolved.key, bucket);
+        }
+        bucket.tabs.push(tab);
+    }
+    return buckets;
+}
+
+function markExactDuplicates(tabs: Browser.tabs.Tab[], toRemove: Set<number>, toReload: Set<number>): void {
+    const seen = new Map<string, number>();
+    for (const tab of tabs) {
+        if (toRemove.has(tab.id!)) continue;
+        if (seen.has(tab.url!)) {
+            toRemove.add(tab.id!);
+        } else {
+            seen.set(tab.url!, tab.id!);
+            toReload.add(tab.id!);
+        }
+    }
+}
+
+function markIncludesDuplicates(tabs: Browser.tabs.Tab[], toRemove: Set<number>, toReload: Set<number>): void {
+    const kept: Browser.tabs.Tab[] = [];
+    for (const tab of tabs) {
+        if (toRemove.has(tab.id!)) continue;
+        const isDup = kept.some(k => isUrlMatch(k.url!, tab.url!, 'includes'));
+        if (isDup) {
+            toRemove.add(tab.id!);
+        } else {
+            kept.push(tab);
+            toReload.add(tab.id!);
+        }
+    }
+}
+
+async function commitDeduplication(toRemove: Set<number>, toReload: Set<number>): Promise<number> {
+    for (const id of toRemove) toReload.delete(id);
+
+    for (const id of toReload) {
+        await browser.tabs.reload(id).catch(() => {});
+    }
+
+    const removeIds = [...toRemove];
+    if (removeIds.length === 0) return 0;
+
+    await browser.tabs.remove(removeIds as [number, ...number[]]).catch(e => {
+        logger.warn('[ORGANIZE] Error removing duplicate tabs:', e);
+    });
+
+    const stats = await getStatisticsData();
+    await updateStatisticsData({
+        tabsDeduplicatedCount: stats.tabsDeduplicatedCount + removeIds.length,
+    });
+    return removeIds.length;
+}
+
 async function batchDeduplicateTabs(windowId: number, settings: AppSettings): Promise<number> {
     const allTabs = await browser.tabs.query({ windowId });
     const organizable = allTabs
         .filter(t => isOrganizableUrl(t.url))
         .sort((a, b) => a.index - b.index);
 
-    // Group tabs by rule + matchMode bucket (unmatched tabs share a single
-    // `__unmatched__:exact` bucket when settings.deduplicateUnmatchedDomains
-    // is true).
-    const UNMATCHED_KEY = '__unmatched__:exact';
-    const buckets = new Map<string, { rule: DomainRuleSetting | undefined; tabs: Browser.tabs.Tab[] }>();
-
-    for (const tab of organizable) {
-        const rule = findMatchingRule(tab.url!, settings.domainRules);
-        let bucketKey: string;
-        let bucketRule: DomainRuleSetting | undefined;
-
-        if (rule) {
-            if (!rule.enabled || !rule.deduplicationEnabled) continue;
-            bucketKey = `${rule.id}:${getMatchMode(rule)}`;
-            bucketRule = rule;
-        } else if (settings.deduplicateUnmatchedDomains) {
-            bucketKey = UNMATCHED_KEY;
-            bucketRule = undefined;
-        } else {
-            continue;
-        }
-
-        if (!buckets.has(bucketKey)) buckets.set(bucketKey, { rule: bucketRule, tabs: [] });
-        buckets.get(bucketKey)!.tabs.push(tab);
-    }
+    const buckets = buildDeduplicationBuckets(organizable, settings);
 
     const toRemove = new Set<number>();
     const toReload = new Set<number>();
 
     for (const { rule, tabs } of buckets.values()) {
-        const mode = getMatchMode(rule);
-
-        if (mode === 'exact') {
-            const seen = new Map<string, number>(); // url → tabId
-            for (const tab of tabs) {
-                if (toRemove.has(tab.id!)) continue; // already marked
-                if (seen.has(tab.url!)) {
-                    toRemove.add(tab.id!);
-                } else {
-                    seen.set(tab.url!, tab.id!);
-                    toReload.add(tab.id!);
-                }
-            }
+        if (getMatchMode(rule) === 'exact') {
+            markExactDuplicates(tabs, toRemove, toReload);
         } else {
-            // includes mode
-            const kept: Browser.tabs.Tab[] = [];
-            for (const tab of tabs) {
-                if (toRemove.has(tab.id!)) continue;
-                const isDup = kept.some(k => isUrlMatch(k.url!, tab.url!, 'includes'));
-                if (isDup) {
-                    toRemove.add(tab.id!);
-                } else {
-                    kept.push(tab);
-                    toReload.add(tab.id!);
-                }
-            }
+            markIncludesDuplicates(tabs, toRemove, toReload);
         }
     }
 
-    // A tab can't be in both sets (e.g. matched by two different rule buckets)
-    for (const id of toRemove) toReload.delete(id);
-
-    // Reload keepers first (best-effort)
-    for (const id of toReload) {
-        await browser.tabs.reload(id).catch(() => {});
-    }
-
-    // Single batch remove
-    const removeIds = [...toRemove];
-    if (removeIds.length > 0) {
-        await browser.tabs.remove(removeIds as [number, ...number[]]).catch(e => {
-            logger.warn('[ORGANIZE] Error removing duplicate tabs:', e);
-        });
-
-        const stats = await getStatisticsData();
-        await updateStatisticsData({
-            tabsDeduplicatedCount: stats.tabsDeduplicatedCount + removeIds.length,
-        });
-    }
-
-    logger.debug(`[ORGANIZE] Dedup complete: ${removeIds.length} tab(s) removed.`);
-    return removeIds.length;
+    const removedCount = await commitDeduplication(toRemove, toReload);
+    logger.debug(`[ORGANIZE] Dedup complete: ${removedCount} tab(s) removed.`);
+    return removedCount;
 }
 
 // ---------------------------------------------------------------------------
@@ -177,19 +199,58 @@ async function buildOrganizePlan(windowId: number, settings: AppSettings): Promi
         countByName.set(entry.targetGroupName, (countByName.get(entry.targetGroupName) ?? 0) + 1);
     }
 
-    // Exclude single-member groups (US-PO008)
-    return allEntries.filter(entry => {
-        const count = countByName.get(entry.targetGroupName) ?? 0;
-        if (count >= 2) return true;
-        // count < 2: exclude regardless of whether the tab is already in a group
-        // (tab already in a group stays there untouched)
-        return false;
-    });
+    // Exclude single-member groups (US-PO008): a tab already in a group stays there untouched.
+    return allEntries.filter(entry => (countByName.get(entry.targetGroupName) ?? 0) >= 2);
 }
 
 // ---------------------------------------------------------------------------
 // Step 3 — Apply grouping plan
 // ---------------------------------------------------------------------------
+
+type ExistingGroup = { id: number; title?: string };
+
+function groupPlanByName(plan: PlanEntry[]): Map<string, PlanEntry[]> {
+    const byName = new Map<string, PlanEntry[]>();
+    for (const entry of plan) {
+        let bucket = byName.get(entry.targetGroupName);
+        if (!bucket) {
+            bucket = [];
+            byName.set(entry.targetGroupName, bucket);
+        }
+        bucket.push(entry);
+    }
+    return byName;
+}
+
+function selectTabsToMove(
+    entries: PlanEntry[],
+    targetName: string,
+    existingGroups: ExistingGroup[],
+): PlanEntry[] {
+    return entries.filter(e => {
+        const gid = e.tab.groupId;
+        if (gid == null || gid <= 0) return true;
+        const currentTitle = existingGroups.find(g => g.id === gid)?.title ?? '';
+        return currentTitle !== targetName;
+    });
+}
+
+async function moveEntriesIntoTargetGroup(
+    targetName: string,
+    entries: PlanEntry[],
+    tabsToMove: PlanEntry[],
+    existingGroupId: number | undefined,
+): Promise<{ created: boolean }> {
+    if (existingGroupId != null) {
+        for (const entry of tabsToMove) {
+            await addToExistingGroup(existingGroupId, entry.tab.id!);
+        }
+        return { created: false };
+    }
+    const tabIds = tabsToMove.map(e => e.tab.id!);
+    await createNewGroup(tabIds, targetName, entries[0].groupColor, entries[0].rule.id);
+    return { created: true };
+}
 
 async function applyOrganizePlan(
     plan: PlanEntry[],
@@ -197,36 +258,20 @@ async function applyOrganizePlan(
 ): Promise<{ tabsGrouped: number; groupCount: number }> {
     if (plan.length === 0) return { tabsGrouped: 0, groupCount: 0 };
 
-    // Fetch current groups to detect existing ones by title
     const existingGroups = await (browser.tabGroups as unknown as ChromeTabGroupsExtended).query({ windowId });
-    const existingByTitle = new Map<string, number>(); // title → groupId
+    const existingByTitle = new Map<string, number>();
     for (const g of existingGroups) {
         if (g.title) existingByTitle.set(g.title, g.id);
     }
 
-    // Group plan entries by targetGroupName
-    const byName = new Map<string, PlanEntry[]>();
-    for (const entry of plan) {
-        if (!byName.has(entry.targetGroupName)) byName.set(entry.targetGroupName, []);
-        byName.get(entry.targetGroupName)!.push(entry);
-    }
+    const byName = groupPlanByName(plan);
 
     let tabsGrouped = 0;
     let groupCount = 0;
 
     for (const [targetName, entries] of byName) {
         const existingGroupId = existingByTitle.get(targetName);
-        const groupColor = entries[0].groupColor;
-
-        // Determine which tabs actually need to move:
-        // - not in any group, OR
-        // - in a group whose title ≠ targetName
-        const tabsToMove = entries.filter(e => {
-            const gid = e.tab.groupId;
-            if (gid == null || gid <= 0) return true; // not grouped
-            const currentTitle = existingGroups.find(g => g.id === gid)?.title ?? '';
-            return currentTitle !== targetName;
-        });
+        const tabsToMove = selectTabsToMove(entries, targetName, existingGroups);
 
         if (tabsToMove.length === 0) {
             // All tabs already in the correct group — count them but skip API calls
@@ -236,18 +281,8 @@ async function applyOrganizePlan(
         }
 
         try {
-            if (existingGroupId != null) {
-                // Add to existing group
-                for (const entry of tabsToMove) {
-                    await addToExistingGroup(existingGroupId, entry.tab.id!);
-                }
-            } else {
-                // Create new group with all planned tab IDs
-                const tabIds = tabsToMove.map(e => e.tab.id!);
-                await createNewGroup(tabIds, targetName, groupColor, entries[0].rule.id);
-                groupCount += 1;
-            }
-
+            const { created } = await moveEntriesIntoTargetGroup(targetName, entries, tabsToMove, existingGroupId);
+            if (created) groupCount += 1;
             tabsGrouped += entries.length;
         } catch (e) {
             logger.error(`[ORGANIZE] Error grouping tabs for "${targetName}":`, e);
