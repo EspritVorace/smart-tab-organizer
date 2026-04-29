@@ -151,6 +151,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
             <Callout.Root
               color="blue"
               variant="soft"
+              highContrast
               data-testid="wizard-snapshot-group-callout"
             >
               <Callout.Icon>

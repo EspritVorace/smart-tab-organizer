@@ -14,10 +14,43 @@ import type { BrowserContext } from '@playwright/test';
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
+  await closeAllCapturableTabs(extensionContext);
 });
 
 // A non-system URL that captures correctly (about: is filtered by isSystemUrl)
 const CAPTURABLE_URL = 'https://example.com';
+
+/**
+ * Close every non-system tab in the extension context. Prevents pollution of
+ * `chrome.tabs.query({ currentWindow: true })` between tests, which is critical
+ * for callout-presence assertions in the SnapshotWizard tests.
+ */
+async function closeAllCapturableTabs(extensionContext: BrowserContext): Promise<void> {
+  const sw = extensionContext.serviceWorkers()[0];
+  if (!sw) return;
+  await sw.evaluate(async () => {
+    const SYSTEM_URL_PREFIXES = [
+      'chrome://',
+      'chrome-extension://',
+      'moz-extension://',
+      'about:',
+      'edge://',
+    ];
+    const tabs = await chrome.tabs.query({});
+    for (const tab of tabs) {
+      if (!tab.id) continue;
+      const url = tab.url ?? '';
+      const isSystem = !url || SYSTEM_URL_PREFIXES.some(p => url.startsWith(p));
+      if (!isSystem) {
+        try {
+          await chrome.tabs.remove(tab.id);
+        } catch {
+          // ignore: tab may have been removed concurrently
+        }
+      }
+    }
+  });
+}
 
 // ---------------------------------------------------------------------------
 // Helper: create a tab group in the browser via service worker
@@ -261,6 +294,9 @@ test.describe('[US-PO007] Save active tab group via deep link', () => {
       await page.waitForLoadState('domcontentloaded');
 
       await page.getByTestId('wizard-snapshot').waitFor({ state: 'visible', timeout: 10_000 });
+      // Wait for the async capture to settle (group title populated) before
+      // asserting on callout presence to avoid racing the initial render.
+      await expect(page.getByTestId('wizard-snapshot-field-name')).toHaveValue('Solo group');
       await expect(page.getByTestId('wizard-snapshot-group-callout')).toHaveCount(0);
 
       await page.close();
