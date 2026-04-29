@@ -57,76 +57,89 @@ interface SessionCardProps {
   onCardKeyDown?: (e: React.KeyboardEvent<HTMLElement>) => void;
 }
 
-export function SessionCard({
-  session,
-  existingSessions,
-  onRestore,
-  onRestoreCurrentWindow,
-  onRestoreNewWindow,
-  onReplaceCurrentWindow,
-  onRename,
-  onEdit,
-  onDelete,
-  onPin,
-  onUnpin,
-  forcePreviewOpen = false,
-  searchMatchingGroupIds,
-  searchQuery,
-  index = 0,
-  isDragDisabled = false,
-  onMoveToFirst,
-  onMoveLast,
-  onCardKeyDown,
-}: SessionCardProps) {
+interface SessionMoreMenuProps {
+  session: Session;
+  isDragDisabled: boolean;
+  onEdit: (session: Session) => void;
+  onDelete: (session: Session) => void;
+  onMoveToFirst?: () => void;
+  onMoveLast?: () => void;
+}
+
+function SessionMoreMenu({ session, isDragDisabled, onEdit, onDelete, onMoveToFirst, onMoveLast }: SessionMoreMenuProps) {
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger>
+        <IconButton
+          data-testid={`session-card-${session.id}-btn-dropdown`}
+          size="1"
+          variant="ghost"
+          color="gray"
+          aria-label={getMessage('sessionMoreActions')}
+        >
+          <MoreHorizontal size={16} aria-hidden="true" />
+        </IconButton>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Content>
+        <DropdownMenu.Item onClick={() => onEdit(session)}>
+          <Pencil size={14} aria-hidden="true" />
+          {getMessage('sessionEdit')}
+        </DropdownMenu.Item>
+
+        {(onMoveToFirst || onMoveLast) && <DropdownMenu.Separator />}
+
+        {onMoveToFirst && (
+          <DropdownMenu.Item onClick={onMoveToFirst} disabled={isDragDisabled}>
+            {getMessage('sessionMoveToFirst')}
+          </DropdownMenu.Item>
+        )}
+        {onMoveLast && (
+          <DropdownMenu.Item onClick={onMoveLast} disabled={isDragDisabled}>
+            {getMessage('sessionMoveLast')}
+          </DropdownMenu.Item>
+        )}
+
+        <DropdownMenu.Separator />
+        <DropdownMenu.Item color="red" onClick={() => onDelete(session)}>
+          <Trash2 size={14} aria-hidden="true" />
+          {getMessage('delete')}
+        </DropdownMenu.Item>
+      </DropdownMenu.Content>
+    </DropdownMenu.Root>
+  );
+}
+
+function SessionMetadataHoverContent({ session }: { session: Session }) {
+  return (
+    <Flex direction="column" gap="2">
+      <Text size="2" weight="bold" style={{ borderBottom: '1px solid var(--gray-5)', paddingBottom: 'var(--space-2)' }}>
+        {session.name}
+      </Text>
+      <Box style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '6px 12px', alignItems: 'baseline' }}>
+        <Text size="1" weight="bold" color="gray">{getMessage('sessionCreatedLabel')}</Text>
+        <Text size="2">{formatSessionDate(session.createdAt)}</Text>
+        <Text size="1" weight="bold" color="gray">{getMessage('sessionUpdatedLabel')}</Text>
+        <Text size="2">{formatSessionDate(session.updatedAt)}</Text>
+        {session.note && (
+          <>
+            <Text size="1" weight="bold" color="gray">{getMessage('sessionNoteLabel')}</Text>
+            <Text size="2" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{session.note}</Text>
+          </>
+        )}
+      </Box>
+    </Flex>
+  );
+}
+
+function useSessionRename(session: Session, existingSessions: Session[], onRename: (id: string, name: string) => Promise<void>) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [nameValue, setNameValue] = useState(session.name);
   const [renameError, setRenameError] = useState<string | null>(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
   const renameInputRef = useRef<HTMLInputElement>(null);
 
-  // Focus the rename input when entering rename mode (replaces autoFocus).
   useEffect(() => {
-    if (isRenaming) {
-      renameInputRef.current?.focus();
-    }
+    if (isRenaming) renameInputRef.current?.focus();
   }, [isRenaming]);
-
-  // Drag-and-drop sortable hook
-  const { ref, handleRef, isDragging } = useSortable({
-    id: session.id,
-    index,
-    disabled: isDragDisabled,
-  });
-
-  const dragStyle: React.CSSProperties = {
-    opacity: isDragging ? 0.4 : 1,
-    zIndex: isDragging ? 10 : undefined,
-    position: isDragging ? 'relative' : undefined,
-  };
-
-  // When a search match forces the preview open, open it.
-  // When the search is cleared (forcePreviewOpen becomes false), close it
-  // (unless the user opened it themselves, but we reset to closed to avoid
-  // leaving stale state across different search queries).
-  useEffect(() => {
-    if (forcePreviewOpen) {
-      setPreviewOpen(true);
-    } else {
-      setPreviewOpen(false);
-    }
-  }, [forcePreviewOpen]);
-
-  const tabCount = countSessionTabs(session);
-  const groupCount = session.groups.length;
-  const groupColors = session.groups.map(g => g.color);
-  const category = getRuleCategory(session.categoryId);
-
-  const isUpdated = !!session.updatedAt && session.updatedAt !== session.createdAt;
-  const relativeDate = isUpdated ? session.updatedAt : session.createdAt;
-  const relativePrefix = isUpdated
-    ? getMessage('sessionCardModifiedPrefix')
-    : getMessage('sessionCardCreatedPrefix');
-  const relativeText = useRelativeTime(relativeDate);
 
   const handleRenameSubmit = useCallback(async () => {
     const trimmed = nameValue.trim();
@@ -157,26 +170,78 @@ export function SessionCard({
     [handleRenameSubmit, handleRenameCancel],
   );
 
-  // HoverCard content for session metadata
-  const hoverCardContent = (
-    <Flex direction="column" gap="2">
-      <Text size="2" weight="bold" style={{ borderBottom: '1px solid var(--gray-5)', paddingBottom: 'var(--space-2)' }}>
-        {session.name}
-      </Text>
-      <Box style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '6px 12px', alignItems: 'baseline' }}>
-        <Text size="1" weight="bold" color="gray">{getMessage('sessionCreatedLabel')}</Text>
-        <Text size="2">{formatSessionDate(session.createdAt)}</Text>
-        <Text size="1" weight="bold" color="gray">{getMessage('sessionUpdatedLabel')}</Text>
-        <Text size="2">{formatSessionDate(session.updatedAt)}</Text>
-        {session.note && (
-          <>
-            <Text size="1" weight="bold" color="gray">{getMessage('sessionNoteLabel')}</Text>
-            <Text size="2" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{session.note}</Text>
-          </>
-        )}
-      </Box>
-    </Flex>
-  );
+  return {
+    isRenaming, setIsRenaming,
+    nameValue, setNameValue,
+    renameError, setRenameError,
+    renameInputRef,
+    handleRenameSubmit, handleRenameCancel, handleKeyDown,
+  };
+}
+
+export function SessionCard({
+  session,
+  existingSessions,
+  onRestore,
+  onRestoreCurrentWindow,
+  onRestoreNewWindow,
+  onReplaceCurrentWindow,
+  onRename,
+  onEdit,
+  onDelete,
+  onPin,
+  onUnpin,
+  forcePreviewOpen = false,
+  searchMatchingGroupIds,
+  searchQuery,
+  index = 0,
+  isDragDisabled = false,
+  onMoveToFirst,
+  onMoveLast,
+  onCardKeyDown,
+}: SessionCardProps) {
+  const {
+    isRenaming, setIsRenaming,
+    nameValue, setNameValue,
+    renameError, setRenameError,
+    renameInputRef,
+    handleRenameSubmit, handleRenameCancel, handleKeyDown,
+  } = useSessionRename(session, existingSessions, onRename);
+  const [previewOpen, setPreviewOpen] = useState(false);
+
+  // Drag-and-drop sortable hook
+  const { ref, handleRef, isDragging } = useSortable({
+    id: session.id,
+    index,
+    disabled: isDragDisabled,
+  });
+
+  const dragStyle: React.CSSProperties = {
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 10 : undefined,
+    position: isDragging ? 'relative' : undefined,
+  };
+
+  // When a search match forces the preview open, open it.
+  // When the search is cleared, close it (resets stale state across different
+  // search queries even if the user had opened it themselves).
+  useEffect(() => {
+    setPreviewOpen(forcePreviewOpen);
+  }, [forcePreviewOpen]);
+
+  const tabCount = countSessionTabs(session);
+  const groupCount = session.groups.length;
+  const groupColors = session.groups.map(g => g.color);
+  const category = getRuleCategory(session.categoryId);
+
+  const isUpdated = !!session.updatedAt && session.updatedAt !== session.createdAt;
+  const relativeDate = isUpdated ? session.updatedAt : session.createdAt;
+  const relativePrefix = isUpdated
+    ? getMessage('sessionCardModifiedPrefix')
+    : getMessage('sessionCardCreatedPrefix');
+  const relativeText = useRelativeTime(relativeDate);
+
+  const hoverCardContent = <SessionMetadataHoverContent session={session} />;
 
   return (
     <Card
@@ -334,46 +399,15 @@ export function SessionCard({
             />
           )}
 
-          {/* More menu */}
           {!isRenaming && (
-            <DropdownMenu.Root>
-              <DropdownMenu.Trigger>
-                <IconButton
-                  data-testid={`session-card-${session.id}-btn-dropdown`}
-                  size="1"
-                  variant="ghost"
-                  color="gray"
-                  aria-label={getMessage('sessionMoreActions')}
-                >
-                  <MoreHorizontal size={16} aria-hidden="true" />
-                </IconButton>
-              </DropdownMenu.Trigger>
-              <DropdownMenu.Content>
-                <DropdownMenu.Item onClick={() => onEdit(session)}>
-                  <Pencil size={14} aria-hidden="true" />
-                  {getMessage('sessionEdit')}
-                </DropdownMenu.Item>
-
-                {(onMoveToFirst || onMoveLast) && <DropdownMenu.Separator />}
-
-                {onMoveToFirst && (
-                  <DropdownMenu.Item onClick={onMoveToFirst} disabled={isDragDisabled}>
-                    {getMessage('sessionMoveToFirst')}
-                  </DropdownMenu.Item>
-                )}
-                {onMoveLast && (
-                  <DropdownMenu.Item onClick={onMoveLast} disabled={isDragDisabled}>
-                    {getMessage('sessionMoveLast')}
-                  </DropdownMenu.Item>
-                )}
-
-                <DropdownMenu.Separator />
-                <DropdownMenu.Item color="red" onClick={() => onDelete(session)}>
-                  <Trash2 size={14} aria-hidden="true" />
-                  {getMessage('delete')}
-                </DropdownMenu.Item>
-              </DropdownMenu.Content>
-            </DropdownMenu.Root>
+            <SessionMoreMenu
+              session={session}
+              isDragDisabled={isDragDisabled}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onMoveToFirst={onMoveToFirst}
+              onMoveLast={onMoveLast}
+            />
           )}
         </Flex>
 

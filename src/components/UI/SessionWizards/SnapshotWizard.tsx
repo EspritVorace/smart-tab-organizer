@@ -179,18 +179,19 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
           <Text size="2" weight="medium">
             {getMessage('snapshotSelectTabs')}
           </Text>
-          {isCapturing ? (
+          {isCapturing && (
             <Text size="2" color="gray">
               {getMessage('loadingText')}
             </Text>
-          ) : treeData ? (
+          )}
+          {!isCapturing && treeData && (
             <TabTree
               data={treeData}
               selectedTabIds={selectedTabIds}
               onSelectionChange={setSelectedTabIds}
               maxHeight={280}
             />
-          ) : null}
+          )}
 
           <Flex direction="column" gap="1">
             <Text size="2" weight="medium">
