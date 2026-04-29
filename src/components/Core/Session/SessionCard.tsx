@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { getMessage, getPluralMessage } from '@/utils/i18n';
 import { countSessionTabs, formatSessionDate } from '@/utils/sessionUtils';
+import { useRelativeTime } from '@/hooks/useRelativeTime';
 import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 import { chromeGroupColors } from '@/utils/tabTreeUtils';
 import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
@@ -119,6 +120,13 @@ export function SessionCard({
   const groupCount = session.groups.length;
   const groupColors = session.groups.map(g => g.color);
   const category = getRuleCategory(session.categoryId);
+
+  const isUpdated = !!session.updatedAt && session.updatedAt !== session.createdAt;
+  const relativeDate = isUpdated ? session.updatedAt : session.createdAt;
+  const relativePrefix = isUpdated
+    ? getMessage('sessionCardModifiedPrefix')
+    : getMessage('sessionCardCreatedPrefix');
+  const relativeText = useRelativeTime(relativeDate);
 
   const handleRenameSubmit = useCallback(async () => {
     const trimmed = nameValue.trim();
@@ -393,6 +401,7 @@ export function SessionCard({
                 all: 'unset',
                 display: 'flex',
                 alignItems: 'center',
+                flexWrap: 'wrap',
                 gap: 'var(--space-1)',
                 cursor: 'pointer',
                 color: 'var(--gray-11)',
@@ -422,6 +431,15 @@ export function SessionCard({
               <Text size="1" color="gray">
                 {getPluralMessage(tabCount, 'sessionTabOne', 'sessionTabCount')}
                 {groupCount > 0 && ` · ${getPluralMessage(groupCount, 'sessionGroupOne', 'sessionGroupCount')}`}
+              </Text>
+              <Text
+                size="1"
+                color="gray"
+                data-testid={`session-card-${session.id}-relative-time`}
+                style={{ marginLeft: 'auto' }}
+              >
+                {relativePrefix}{' '}
+                <time dateTime={relativeDate}>{relativeText}</time>
               </Text>
             </button>
           </Collapsible.Trigger>
