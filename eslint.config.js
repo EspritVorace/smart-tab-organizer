@@ -4,6 +4,18 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import vitest from '@vitest/eslint-plugin';
 import playwright from 'eslint-plugin-playwright';
+import sonarjs from 'eslint-plugin-sonarjs';
+
+// Toutes les règles "error" du recommended sonarjs sont rétrogradées en
+// "warn" pour publier un signal CTRF sans bloquer la CI le temps d'un audit.
+const sonarjsWarnRules = Object.fromEntries(
+  Object.entries(sonarjs.configs.recommended.rules).map(([rule, value]) => {
+    const severity = Array.isArray(value) ? value[0] : value;
+    const opts = Array.isArray(value) ? value.slice(1) : [];
+    const downgraded = severity === 'error' ? 'warn' : severity;
+    return [rule, opts.length ? [downgraded, ...opts] : downgraded];
+  }),
+);
 
 // Petite règle locale : interdit les imports remontants (../...) dans src/
 // et les remplace automatiquement par l'alias @/<chemin-relatif-à-src>.
@@ -85,6 +97,12 @@ export default tseslint.config(
       'local/prefer-alias-imports': 'error',
       'react-hooks/exhaustive-deps': 'warn',
     },
+  },
+
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    ...sonarjs.configs.recommended,
+    rules: sonarjsWarnRules,
   },
 
   {
