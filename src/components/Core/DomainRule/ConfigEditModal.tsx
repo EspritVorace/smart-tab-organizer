@@ -9,6 +9,7 @@ import type { PresetCategory } from '@/utils/presetUtils';
 import { getPresetById } from '@/utils/presetUtils';
 import { logger } from '@/utils/logger';
 import { DomainRuleConfigForm } from './DomainRuleConfigForm';
+import type { ConfigMode } from './ConfigModeSelector';
 
 const regexValidator = createRegexValidator(true);
 const QUERY_PARAM_NAME_PATTERN = /^[A-Za-z0-9_\-.]+$/;
@@ -29,7 +30,7 @@ function validateQueryParamName(value: string): FieldError | undefined {
 }
 
 export interface ConfigEditValues {
-  configMode: 'preset' | 'ask' | 'manual';
+  configMode: ConfigMode;
   presetId: string | null;
   groupNameSource: GroupNameSourceValue;
   titleParsingRegEx: string;
@@ -55,7 +56,7 @@ export function ConfigEditModal({
   presetCategories,
   isLoadingPresets,
 }: ConfigEditModalProps) {
-  const [configMode, setConfigMode] = useState<'preset' | 'ask' | 'manual'>(initial.configMode);
+  const [configMode, setConfigMode] = useState<ConfigMode>(initial.configMode);
   const [presetId, setPresetId] = useState<string | null>(initial.presetId);
   const [groupNameSource, setGroupNameSource] = useState<GroupNameSourceValue>(initial.groupNameSource);
   const [titleParsingRegEx, setTitleParsingRegEx] = useState(initial.titleParsingRegEx);
@@ -75,6 +76,20 @@ export function ConfigEditModal({
       setUrlQueryParamName(initial.urlQueryParamName);
     }
   }, [isOpen, initial]);
+
+  const handleConfigModeChange = useCallback((newMode: ConfigMode) => {
+    setConfigMode(newMode);
+    // Clear presetId when leaving preset mode: otherwise inferConfigMode silently
+    // re-classifies the rule as 'preset' on next open, undoing the user's mode change
+    // (presetId would also be persisted alongside a non-preset configMode — corrupt state).
+    if (newMode !== 'preset') {
+      setPresetId(null);
+    }
+    // Ask mode persists groupNameSource as 'manual' — matches RuleWizardModal convention.
+    if (newMode === 'ask') {
+      setGroupNameSource('manual');
+    }
+  }, []);
 
   const handlePresetChange = useCallback(async (selectedPresetId: string) => {
     if (!selectedPresetId) {
@@ -160,7 +175,7 @@ export function ConfigEditModal({
         <DomainRuleConfigForm
           idPrefix="edit"
           configMode={configMode}
-          onConfigModeChange={setConfigMode}
+          onConfigModeChange={handleConfigModeChange}
           presetId={presetId}
           onPresetChange={handlePresetChange}
           presetCategories={presetCategories}
