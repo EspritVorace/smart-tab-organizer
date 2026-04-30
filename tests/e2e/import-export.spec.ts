@@ -398,8 +398,8 @@ test.describe('Import / Export', () => {
 
       await dialog.getByRole('button', { name: /next/i }).click();
 
-      // Deselect the rule
-      await dialog.getByRole('checkbox').first().click();
+      // Deselect the rule (aria-label matches the rule label passed to makeRuleJson)
+      await dialog.getByRole('checkbox', { name: 'Deselect Rule' }).click();
 
       // "0 rule(s) to import" and Confirm Import disabled
       await expect(dialog.getByText(/0 rule.*import/i)).toBeVisible();

@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Box } from '@radix-ui/themes';
+import { Box, Checkbox, Badge } from '@radix-ui/themes';
 import { FileDown } from 'lucide-react';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 import { getMessage } from '@/utils/i18n';
@@ -12,7 +12,7 @@ import {
   SelectionToolbar,
   useExportActions,
 } from './Export';
-import { RuleRow } from './RuleImportRows';
+import { DomainRuleCard } from '@/components/Core/DomainRule/DomainRuleCard';
 
 interface ExportWizardProps {
   open: boolean;
@@ -66,15 +66,22 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
           <ExportNoteField value={exportNote} onChange={setExportNote} />
           <SelectionToolbar onSelectAll={selectAll} onDeselectAll={selection.clearAll} />
 
-          <SelectableListContainer>
+          <SelectableListContainer role="list">
             {rules.map((rule) => (
-              <RuleRow
+              <DomainRuleCard
                 key={rule.id}
                 rule={rule}
-                checkbox
-                checked={selection.has(rule.id)}
-                onToggle={() => selection.toggle(rule.id)}
-                statusBadge={rule.enabled ? undefined : getMessage('disabled')}
+                variant="summary"
+                leading={
+                  <Checkbox
+                    checked={selection.has(rule.id)}
+                    onCheckedChange={() => selection.toggle(rule.id)}
+                    aria-label={rule.label}
+                  />
+                }
+                trailing={rule.enabled ? undefined : (
+                  <Badge color="gray" variant="outline" size="1">{getMessage('disabled')}</Badge>
+                )}
               />
             ))}
           </SelectableListContainer>

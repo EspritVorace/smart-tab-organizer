@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Theme, Box, Flex, TextField } from '@radix-ui/themes';
+import { Theme, Box, Flex, TextField, Checkbox, Badge, Button } from '@radix-ui/themes';
 import { Search } from 'lucide-react';
 import { SessionCard } from './SessionCard';
 import type { Session } from '@/types/session';
@@ -154,6 +154,92 @@ export const SessionCardWithRelativeDates: Story = {
       </Theme>
     );
   },
+};
+
+// ---------------------------------------------------------------------------
+// Deep search — preview auto-expanded, only matching group shown
+//
+// Simulates a user typing "github" in the search bar:
+// - The card preview is forced open (forcePreviewOpen=true).
+// - Only the "Frontend" group (which contains the GitHub PR tab) is expanded.
+// - The "Backend APIs" group is collapsed because it has no match.
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Summary mode: base (no actions, no drag)
+// ---------------------------------------------------------------------------
+export const SessionCardSummary: Story = {
+  name: 'SessionCard — Summary (base)',
+  decorators: [(Story) => <div role="list"><Story /></div>],
+  args: {
+    session: baseSession,
+    variant: 'summary',
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Summary mode: with leading checkbox (export use case)
+// ---------------------------------------------------------------------------
+export const SessionCardSummaryWithCheckbox: Story = {
+  name: 'SessionCard — Summary + checkbox (export)',
+  render: () => (
+    <Theme>
+      <Box style={{ maxWidth: 680 }}>
+        <div role="list">
+          <SessionCard
+            session={baseSession}
+            variant="summary"
+            leading={<Checkbox defaultChecked aria-label={baseSession.name} />}
+          />
+        </div>
+      </Box>
+    </Theme>
+  ),
+};
+
+// ---------------------------------------------------------------------------
+// Summary mode: conflict state (import conflicting session)
+// ---------------------------------------------------------------------------
+export const SessionCardSummaryConflict: Story = {
+  name: 'SessionCard — Summary + conflict (import)',
+  render: () => (
+    <Theme>
+      <Box style={{ maxWidth: 680 }}>
+        <div role="list">
+          <SessionCard
+            session={baseSession}
+            variant="summary"
+            status="conflict"
+            trailing={
+              <Button size="1" variant="soft" color="orange">View diff</Button>
+            }
+          />
+        </div>
+      </Box>
+    </Theme>
+  ),
+};
+
+// ---------------------------------------------------------------------------
+// Summary mode: identical state (import already-existing session)
+// ---------------------------------------------------------------------------
+export const SessionCardSummaryIdentical: Story = {
+  name: 'SessionCard — Summary + identical (import)',
+  render: () => (
+    <Theme>
+      <Box style={{ maxWidth: 680 }}>
+        <div role="list">
+          <SessionCard
+            session={baseSession}
+            variant="summary"
+            status="identical"
+            trailing={
+              <Badge color="gray" variant="outline" size="1">Already exists</Badge>
+            }
+          />
+        </div>
+      </Box>
+    </Theme>
+  ),
 };
 
 // ---------------------------------------------------------------------------

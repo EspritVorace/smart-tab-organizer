@@ -2,13 +2,8 @@ import { Flex, Text, Box, Badge, Checkbox } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 import type { Session } from '@/types/session';
 import type { ConflictingSession, SessionDiff, GroupDiff } from '@/utils/sessionClassification';
-import {
-  ConflictRowShell,
-  DiffPopover,
-  DiffPropertyValues,
-  SelectableRowShell,
-  SessionSummary,
-} from './Shared';
+import { DiffPopover, DiffPropertyValues } from './Shared';
+import { SessionCard } from '@/components/Core/Session/SessionCard';
 
 /* ─── SessionRow ─────────────────────────────────────────────────────────── */
 
@@ -22,19 +17,27 @@ export interface SessionRowProps {
 }
 
 export function SessionRow({ session, checkbox, checked, onToggle, dimmed, statusBadge }: SessionRowProps) {
-  return (
-    <SelectableRowShell dimmed={dimmed}>
-      {checkbox && (
-        <Checkbox checked={checked} onCheckedChange={onToggle} aria-label={session.name} />
-      )}
-      <SessionSummary session={session} />
+  const trailingBadges = (session.isPinned || statusBadge) ? (
+    <Flex gap="1">
       {session.isPinned && (
         <Badge color="indigo" variant="soft" size="1">{getMessage('pinnedBadge')}</Badge>
       )}
       {statusBadge && (
         <Badge color="gray" variant="outline" size="1">{statusBadge}</Badge>
       )}
-    </SelectableRowShell>
+    </Flex>
+  ) : undefined;
+
+  return (
+    <SessionCard
+      session={session}
+      variant="summary"
+      status={dimmed ? 'identical' : 'default'}
+      leading={checkbox ? (
+        <Checkbox checked={checked} onCheckedChange={onToggle} aria-label={session.name} />
+      ) : undefined}
+      trailing={trailingBadges}
+    />
   );
 }
 
@@ -47,15 +50,21 @@ export interface ConflictSessionRowProps {
 export function ConflictSessionRow({ conflict }: ConflictSessionRowProps) {
   const session = conflict.imported;
   return (
-    <ConflictRowShell>
-      <SessionSummary session={session} />
-      {session.isPinned && (
-        <Badge color="indigo" variant="soft" size="1">{getMessage('pinnedBadge')}</Badge>
-      )}
-      <DiffPopover entityLabel={session.name} maxWidth={380}>
-        <SessionDiffView diff={conflict.diff} />
-      </DiffPopover>
-    </ConflictRowShell>
+    <SessionCard
+      session={session}
+      variant="summary"
+      status="conflict"
+      trailing={
+        <Flex gap="1" align="center">
+          {session.isPinned && (
+            <Badge color="indigo" variant="soft" size="1">{getMessage('pinnedBadge')}</Badge>
+          )}
+          <DiffPopover entityLabel={session.name} maxWidth={380}>
+            <SessionDiffView diff={conflict.diff} />
+          </DiffPopover>
+        </Flex>
+      }
+    />
   );
 }
 
