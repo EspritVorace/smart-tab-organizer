@@ -213,3 +213,28 @@
 .ss-item--selected .ss-item__check {
   opacity: 1;
 }
+
+/* ── Inline variant (no trigger, fills parent flex chain) ─ */
+.ss-inline {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-panel-solid);
+  border: 1px solid var(--gray-a6);
+  border-radius: var(--radius-3);
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+}
+
+.ss-inline > [cmdk-root] {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.ss-list--inline {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}

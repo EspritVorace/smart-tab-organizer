@@ -13,6 +13,11 @@ interface WizardModalProps {
   hideDescription?: boolean;
   /** Override the dialog max width (default 600). */
   maxWidth?: number | string;
+  /**
+   * When true, force the dialog to a fixed height (80vh) so inner flex chains
+   * (e.g. an inline scrollable list) can size deterministically. Default: false.
+   */
+  fillHeight?: boolean;
   children: React.ReactNode;
   'data-testid'?: string;
   /** Forwarded to Dialog.Content (e.g. to pre-focus an input on open). */
@@ -34,10 +39,14 @@ function WizardModalRoot({
   description,
   hideDescription,
   maxWidth = 600,
+  fillHeight = false,
   children,
   'data-testid': dataTestId,
   onOpenAutoFocus,
 }: WizardModalProps) {
+  const contentStyle: React.CSSProperties = fillHeight
+    ? { ...wizardContentStyle, height: '80vh' }
+    : wizardContentStyle;
   return (
     <DialogShell
       open={open}
@@ -50,9 +59,9 @@ function WizardModalRoot({
       onOpenAutoFocus={onOpenAutoFocus}
       preventOutsideClose
       maxWidth={maxWidth}
-      minHeight="min(480px, 80vh)"
-      maxHeight="80vh"
-      contentStyle={wizardContentStyle}
+      minHeight={fillHeight ? undefined : 'min(480px, 80vh)'}
+      maxHeight={fillHeight ? undefined : '80vh'}
+      contentStyle={contentStyle}
     >
       {children}
     </DialogShell>
@@ -61,15 +70,23 @@ function WizardModalRoot({
 
 interface BodyProps {
   children: React.ReactNode;
+  /**
+   * When true, body becomes a flex column with overflow hidden so inner content
+   * (e.g. an inline cmdk palette) can fill the available height via flex chain.
+   * Default: false (body scrolls naturally when content overflows).
+   */
+  fillHeight?: boolean;
 }
 
-function Body({ children }: BodyProps) {
+function Body({ children, fillHeight = false }: BodyProps) {
   return (
     <div
       style={{
         flex: 1,
         minHeight: 0,
-        overflowY: 'auto',
+        overflowY: fillHeight ? 'hidden' : 'auto',
+        display: fillHeight ? 'flex' : undefined,
+        flexDirection: fillHeight ? 'column' : undefined,
         paddingRight: 12,
         paddingTop: 'var(--space-4)',
       }}

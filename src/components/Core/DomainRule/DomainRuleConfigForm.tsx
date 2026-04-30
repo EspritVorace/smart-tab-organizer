@@ -1,9 +1,9 @@
-import { Callout, Flex, Grid, Select, Text, TextField } from '@radix-ui/themes';
+import { Box, Callout, Flex, Select, Text, TextField } from '@radix-ui/themes';
 import * as Label from '@radix-ui/react-label';
 import { Info } from 'lucide-react';
 import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
-import { FormField, SearchableSelect } from '@/components/Form/FormFields';
+import { FormField, SearchableInlineList } from '@/components/Form/FormFields';
 import {
   groupNameSourceOptions,
   urlExtractionModeOptions,
@@ -83,7 +83,7 @@ export function DomainRuleConfigForm({
     configMode === 'manual' && (groupNameSource === 'url' || groupNameSource.startsWith('smart'));
 
   return (
-    <Flex direction="column" gap="4">
+    <Flex direction="column" gap="4" style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
       {/* Info callout when presets are loading */}
       {isLoadingPresets && (
         <Callout.Root color="indigo" variant="soft">
@@ -94,30 +94,39 @@ export function DomainRuleConfigForm({
         </Callout.Root>
       )}
 
-      <Grid columns="240px 1fr" gap="4" align="start">
+      <Flex gap="4" style={{ flex: 1, minHeight: 0, overflow: 'hidden' }} align="stretch">
         {/* Left column: vertical radio list */}
-        <ConfigModeSelector value={configMode} onValueChange={onConfigModeChange} />
+        <Box style={{ width: 240, flexShrink: 0 }}>
+          <ConfigModeSelector value={configMode} onValueChange={onConfigModeChange} />
+        </Box>
 
         {/* Right column: active-mode description heading + mode-specific content */}
-        <Flex direction="column" gap="3">
+        <Flex
+          direction="column"
+          gap="3"
+          style={{ flex: 1, minWidth: 0, minHeight: 0, overflow: 'hidden' }}
+        >
           <Text size="2" color="gray" as="p" data-testid="config-mode-description">
             {getMessage(MODE_HELP_LABELS[configMode])}
           </Text>
 
-          {/* Preset mode: searchable preset selector */}
+          {/* Preset mode: inline cmdk palette filling the right column */}
           {configMode === 'preset' && presetCategories.length > 0 && !isLoadingPresets && (
-            <Flex direction="column" gap="1">
+            <Flex
+              direction="column"
+              gap="1"
+              style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
+            >
               <Text size="2" weight="bold" asChild>
                 <Label.Root htmlFor={presetInputId}>
                   {getMessage('presetRuleLabel')}
                 </Label.Root>
               </Text>
-              <SearchableSelect
+              <SearchableInlineList
                 id={presetInputId}
                 value={presetId ?? ''}
                 onValueChange={onPresetChange}
                 groups={presetsToSearchableGroups(presetCategories)}
-                placeholder={getMessage('selectPresetPlaceholder')}
                 searchPlaceholder={getMessage('searchPresetPlaceholder')}
                 emptyMessage={getMessage('noPresetFound')}
               />
@@ -252,7 +261,7 @@ export function DomainRuleConfigForm({
             </Flex>
           )}
         </Flex>
-      </Grid>
+      </Flex>
     </Flex>
   );
 }
