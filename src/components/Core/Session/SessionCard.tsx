@@ -509,7 +509,7 @@ export function SessionCard({
 
   return (
     <Card
-      ref={ref}
+      ref={isSummary ? null : ref}
       data-testid={`session-card-${session.id}`}
       data-session-card="true"
       tabIndex={isSummary ? undefined : 0}

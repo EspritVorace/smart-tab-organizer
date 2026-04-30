@@ -119,7 +119,7 @@ export function DomainRuleCard({
 
   return (
     <Card
-      ref={ref}
+      ref={isSummary ? null : ref}
       data-testid={`rule-card-${rule.id}`}
       variant="surface"
       size="2"
