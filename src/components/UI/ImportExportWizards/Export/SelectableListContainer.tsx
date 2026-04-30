@@ -7,7 +7,7 @@ interface SelectableListContainerProps {
 
 export function SelectableListContainer({ children }: SelectableListContainerProps) {
   return (
-    <Flex direction="column" gap="2">
+    <Flex direction="column" gap="2" role="list">
       {children}
     </Flex>
   );

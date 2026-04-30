@@ -32,7 +32,7 @@ export function ClassificationGroup<T>({
         {getMessage(titleKey).replace('{count}', String(items.length))}
       </Text>
       {beforeList}
-      <Flex direction="column" gap="2">
+      <Flex direction="column" gap="2" role="list">
         {items.map(renderItem)}
       </Flex>
     </>

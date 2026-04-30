@@ -123,7 +123,7 @@ export function DomainRuleCard({
       data-testid={`rule-card-${rule.id}`}
       variant="surface"
       size="2"
-      role="listitem"
+      role={isSummary ? undefined : 'listitem'}
       tabIndex={isSummary ? undefined : 0}
       aria-label={`${rule.label} (${rule.domainFilter})`}
       onKeyDown={isSummary ? undefined : onKeyDown}
