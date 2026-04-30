@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { mountExtensionApp } from '@/utils/mountExtensionApp.js';
 import { Box, Flex, Separator, Theme } from '@radix-ui/themes';
@@ -9,10 +9,15 @@ import { PopupHeader } from '@/components/UI/PopupHeader/PopupHeader';
 import { SettingsToggles } from '@/components/UI/SettingsToggles/SettingsToggles';
 import { PopupToolbar } from '@/components/UI/PopupToolbar/PopupToolbar';
 import { PopupProfilesList } from '@/components/UI/PopupProfilesList/PopupProfilesList';
+import { ShortcutsDrawer } from '@/components/UI/ShortcutsPanel';
+import { openOptionsWithHash } from '@/utils/openOptions';
 import { useSettings } from '@/hooks/useSettings';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import type { ShortcutDefinition } from '@/utils/keyboardShortcuts';
 
 export function PopupContent() {
   const { settings, isLoaded, setGlobalGroupingEnabled, setGlobalDeduplicationEnabled } = useSettings();
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
   const openOptionsPage = useCallback(() => {
     browser.runtime.openOptionsPage();
@@ -29,6 +34,27 @@ export function PopupContent() {
     }
     window.close();
   }, []);
+
+  const handlePopupSave = useCallback(() => {
+    void openOptionsWithHash('#sessions?action=snapshot');
+  }, []);
+
+  const handlePopupRestore = useCallback(() => {
+    void openOptionsWithHash('#sessions');
+  }, []);
+
+  const handlePopupOrganize = useCallback(() => {
+    browser.runtime.sendMessage({ type: 'ORGANIZE_ALL_TABS' }).finally(() => window.close());
+  }, []);
+
+  const shortcuts = useMemo<ShortcutDefinition[]>(() => [
+    { combo: 's', action: handlePopupSave, excludeIfTargetWithin: '[data-popup-pinned-card]' },
+    { combo: 'r', action: handlePopupRestore, excludeIfTargetWithin: '[data-popup-pinned-card]' },
+    { combo: 'o', action: handlePopupOrganize, excludeIfTargetWithin: '[data-popup-pinned-card]' },
+    { combo: '?', action: () => setShortcutsOpen(true), allowWhenDialogOpen: false },
+  ], [handlePopupSave, handlePopupRestore, handlePopupOrganize]);
+
+  useKeyboardShortcuts(shortcuts);
 
   const hasRules = isLoaded && (settings?.domainRules?.length ?? 0) > 0;
 
@@ -63,6 +89,7 @@ export function PopupContent() {
           </>
         ) : null}
       </Flex>
+      <ShortcutsDrawer open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
     </Box>
   );
 }
