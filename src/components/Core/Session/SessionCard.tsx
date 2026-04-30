@@ -33,7 +33,7 @@ interface SessionCardProps {
    * 'conflict' : fond orange + icône AlertTriangle.
    * 'identical' : opacité réduite.
    */
-  status?: 'default' | 'conflict' | 'identical';
+  status?: SessionCardStatus;
   /** Slot gauche en mode summary (ex. Checkbox de sélection). */
   leading?: React.ReactNode;
   /** Slot droit en mode summary (ex. Badge statut, DiffPopover). */
@@ -71,6 +71,19 @@ interface SessionCardProps {
   /** Keyboard handler forwarded to the card root for up/down navigation between cards */
   onCardKeyDown?: (e: React.KeyboardEvent<HTMLElement>) => void;
 }
+
+/** État visuel d'une SessionCard en mode summary. */
+export type SessionCardStatus = 'default' | 'conflict' | 'identical';
+
+/* ─── Helpers ────────────────────────────────────────────────────────────── */
+
+function getStatusStyle(status: SessionCardStatus): React.CSSProperties {
+  if (status === 'conflict') return { background: 'var(--orange-a2)' };
+  if (status === 'identical') return { opacity: 0.6 };
+  return {};
+}
+
+/* ─── SessionMoreMenu ─────────────────────────────────────────────────────── */
 
 interface SessionMoreMenuProps {
   session: Session;
@@ -124,6 +137,8 @@ function SessionMoreMenu({ session, isDragDisabled, onEdit, onDelete, onMoveToFi
   );
 }
 
+/* ─── SessionMetadataHoverContent ─────────────────────────────────────────── */
+
 function SessionMetadataHoverContent({ session }: { session: Session }) {
   return (
     <Flex direction="column" gap="2">
@@ -145,6 +160,8 @@ function SessionMetadataHoverContent({ session }: { session: Session }) {
     </Flex>
   );
 }
+
+/* ─── useSessionRename ────────────────────────────────────────────────────── */
 
 function useSessionRename(session: Session, existingSessions: Session[], onRename: (id: string, name: string) => Promise<void>) {
   const [isRenaming, setIsRenaming] = useState(false);
@@ -194,6 +211,232 @@ function useSessionRename(session: Session, existingSessions: Session[], onRenam
   };
 }
 
+/* ─── SessionCardSummaryHeader ────────────────────────────────────────────── */
+
+interface SessionCardSummaryHeaderProps {
+  session: Session;
+  status: SessionCardStatus;
+  leading: React.ReactNode;
+  trailing: React.ReactNode;
+  searchQuery: string | undefined;
+  category: ReturnType<typeof getRuleCategory>;
+  hoverCardContent: React.ReactNode;
+}
+
+function SessionCardSummaryHeader({
+  session, status, leading, trailing, searchQuery, category, hoverCardContent,
+}: SessionCardSummaryHeaderProps) {
+  return (
+    <>
+      {leading && <Flex align="center" style={{ flexShrink: 0 }}>{leading}</Flex>}
+      {status === 'conflict' && (
+        <AlertTriangle size={16} style={{ color: 'var(--orange-9)', flexShrink: 0 }} aria-hidden="true" />
+      )}
+      <Flex align="center" gap="2" style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
+        <HoverCard.Root>
+          <HoverCard.Trigger>
+            <Text
+              data-testid={`session-card-${session.id}-name`}
+              size="3"
+              weight="medium"
+              style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'default' }}
+            >
+              <AccessibleHighlight text={session.name} searchTerm={searchQuery ?? ''} />
+            </Text>
+          </HoverCard.Trigger>
+          <HoverCard.Content size="2" style={{ maxWidth: 360 }}>
+            {hoverCardContent}
+          </HoverCard.Content>
+        </HoverCard.Root>
+        {category && (
+          <Tooltip content={getCategoryLabel(category)}>
+            <Badge color={getRadixColor(category.color)} size="1" style={{ flexShrink: 0 }}>
+              {category.emoji}
+            </Badge>
+          </Tooltip>
+        )}
+      </Flex>
+      {trailing && <Flex align="center" style={{ flexShrink: 0 }}>{trailing}</Flex>}
+    </>
+  );
+}
+
+/* ─── SessionCardFullHeader ───────────────────────────────────────────────── */
+
+interface SessionCardFullHeaderProps {
+  session: Session;
+  handleRef: (element: HTMLElement | null) => void;
+  isDragDisabled: boolean;
+  isRenaming: boolean;
+  setIsRenaming: (v: boolean) => void;
+  nameValue: string;
+  setNameValue: (v: string) => void;
+  renameError: string | null;
+  setRenameError: (v: string | null) => void;
+  renameInputRef: React.RefObject<HTMLInputElement>;
+  handleRenameSubmit: () => void;
+  handleRenameCancel: () => void;
+  handleKeyDown: (e: React.KeyboardEvent) => void;
+  searchQuery: string | undefined;
+  category: ReturnType<typeof getRuleCategory>;
+  hoverCardContent: React.ReactNode;
+  onPin?: (session: Session) => void;
+  onUnpin?: (session: Session) => void;
+  onRestore?: (session: Session) => void;
+  onRestoreCurrentWindow?: (session: Session) => void;
+  onRestoreNewWindow?: (session: Session) => void;
+  onReplaceCurrentWindow?: (session: Session) => void;
+  onEdit?: (session: Session) => void;
+  onDelete?: (session: Session) => void;
+  onMoveToFirst?: () => void;
+  onMoveLast?: () => void;
+}
+
+function SessionCardFullHeader({
+  session, handleRef, isDragDisabled,
+  isRenaming, setIsRenaming, nameValue, setNameValue,
+  renameError, setRenameError, renameInputRef,
+  handleRenameSubmit, handleRenameCancel, handleKeyDown,
+  searchQuery, category, hoverCardContent,
+  onPin, onUnpin, onRestore, onRestoreCurrentWindow, onRestoreNewWindow, onReplaceCurrentWindow,
+  onEdit, onDelete, onMoveToFirst, onMoveLast,
+}: SessionCardFullHeaderProps) {
+  return (
+    <>
+      {/* Drag handle */}
+      {!isRenaming && (
+        <Box
+          ref={handleRef}
+          data-testid={`session-card-${session.id}-drag-handle`}
+          aria-disabled={isDragDisabled}
+          aria-label={getMessage('dragHandle')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: isDragDisabled ? 'not-allowed' : 'grab',
+            touchAction: 'none',
+            color: isDragDisabled ? 'var(--gray-6)' : 'var(--gray-9)',
+            flexShrink: 0,
+          }}
+        >
+          <GripVertical size={16} aria-hidden="true" />
+        </Box>
+      )}
+
+      {/* Pin / Unpin button */}
+      {!isRenaming && (
+        <Tooltip content={session.isPinned ? getMessage('sessionUnpin') : getMessage('sessionPin')}>
+          <IconButton
+            size="1"
+            variant={session.isPinned ? 'soft' : 'ghost'}
+            color={session.isPinned ? 'indigo' : 'gray'}
+            onClick={() => session.isPinned ? onUnpin?.(session) : onPin?.(session)}
+            aria-label={session.isPinned ? getMessage('sessionUnpin') : getMessage('sessionPin')}
+          >
+            {session.isPinned
+              ? <PinOff size={14} aria-hidden="true" />
+              : <Pin size={14} aria-hidden="true" />
+            }
+          </IconButton>
+        </Tooltip>
+      )}
+
+      {/* Session name + category badge */}
+      <Flex align="center" gap="2" style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
+        {isRenaming ? (
+          <>
+            <Flex direction="column" style={{ flex: 1 }}>
+              <TextField.Root
+                ref={renameInputRef}
+                value={nameValue}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setNameValue(e.target.value);
+                  setRenameError(null);
+                }}
+                onKeyDown={handleKeyDown}
+                size="2"
+                aria-label={getMessage('sessionRenameLabel')}
+              />
+              {renameError && (
+                <Text size="1" color="red" style={{ marginTop: 2 }}>
+                  {renameError}
+                </Text>
+              )}
+            </Flex>
+            <IconButton size="1" variant="soft" onClick={handleRenameSubmit} aria-label={getMessage('sessionConfirmRename')}>
+              <Check size={12} aria-hidden="true" />
+            </IconButton>
+            <IconButton size="1" variant="soft" color="gray" onClick={handleRenameCancel} aria-label={getMessage('cancel')}>
+              <X size={12} aria-hidden="true" />
+            </IconButton>
+          </>
+        ) : (
+          <>
+            <HoverCard.Root>
+              <HoverCard.Trigger>
+                <Text
+                  data-testid={`session-card-${session.id}-name`}
+                  size="3"
+                  weight="medium"
+                  onDoubleClick={() => { setNameValue(session.name); setRenameError(null); setIsRenaming(true); }}
+                  style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'default' }}
+                >
+                  <AccessibleHighlight text={session.name} searchTerm={searchQuery ?? ''} />
+                </Text>
+              </HoverCard.Trigger>
+              <HoverCard.Content size="2" style={{ maxWidth: 360 }}>
+                {hoverCardContent}
+              </HoverCard.Content>
+            </HoverCard.Root>
+            <IconButton
+              size="1"
+              variant="ghost"
+              color="gray"
+              onClick={() => { setNameValue(session.name); setRenameError(null); setIsRenaming(true); }}
+              aria-label={getMessage('sessionRename')}
+              style={{ flexShrink: 0 }}
+            >
+              <Pencil size={14} aria-hidden="true" />
+            </IconButton>
+            {category && (
+              <Badge color={getRadixColor(category.color)} size="1" style={{ flexShrink: 0 }}>
+                {category.emoji} {getCategoryLabel(category)}
+              </Badge>
+            )}
+          </>
+        )}
+      </Flex>
+
+      {/* Restore split button */}
+      {!isRenaming && onRestoreCurrentWindow && onRestoreNewWindow && onReplaceCurrentWindow && onRestore && (
+        <SessionRestoreButton
+          session={session}
+          onRestoreCurrentWindow={onRestoreCurrentWindow}
+          onRestoreNewWindow={onRestoreNewWindow}
+          onReplaceCurrentWindow={onReplaceCurrentWindow}
+          onCustomize={onRestore}
+          data-testid={`session-card-${session.id}-btn-restore`}
+        />
+      )}
+
+      {/* More menu */}
+      {!isRenaming && onEdit && onDelete && (
+        <SessionMoreMenu
+          session={session}
+          isDragDisabled={isDragDisabled}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onMoveToFirst={onMoveToFirst}
+          onMoveLast={onMoveLast}
+        />
+      )}
+    </>
+  );
+}
+
+/* ─── SessionCard ─────────────────────────────────────────────────────────── */
+
 export function SessionCard({
   session,
   variant = 'full',
@@ -230,18 +473,12 @@ export function SessionCard({
   } = useSessionRename(session, existingSessions, onRename ?? (() => Promise.resolve()));
   const [previewOpen, setPreviewOpen] = useState(false);
 
-  // Drag-and-drop sortable hook (toujours appelé pour respecter les règles des hooks React)
+  // Toujours appelé pour respecter les règles des hooks React
   const { ref, handleRef, isDragging } = useSortable({
     id: session.id,
     index,
     disabled: isSummary || isDragDisabled,
   });
-
-  const statusStyle: React.CSSProperties = status === 'conflict'
-    ? { background: 'var(--orange-a2)' }
-    : status === 'identical'
-      ? { opacity: 0.6 }
-      : {};
 
   const dragStyle: React.CSSProperties = {
     opacity: isDragging ? 0.4 : 1,
@@ -280,7 +517,7 @@ export function SessionCard({
       size="2"
       style={{
         ...dragStyle,
-        ...statusStyle,
+        ...getStatusStyle(status),
         paddingTop: 'var(--space-2)',
         paddingBottom: 'var(--space-2)',
       }}
@@ -289,204 +526,44 @@ export function SessionCard({
         {/* Top row */}
         <Flex align="center" gap="2">
           {isSummary ? (
-            /* ── MODE SUMMARY ── */
-            <>
-              {leading && <Flex align="center" style={{ flexShrink: 0 }}>{leading}</Flex>}
-              {status === 'conflict' && (
-                <AlertTriangle
-                  size={16}
-                  style={{ color: 'var(--orange-9)', flexShrink: 0 }}
-                  aria-hidden="true"
-                />
-              )}
-              <Flex align="center" gap="2" style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
-                <HoverCard.Root>
-                  <HoverCard.Trigger>
-                    <Text
-                      data-testid={`session-card-${session.id}-name`}
-                      size="3"
-                      weight="medium"
-                      style={{
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        cursor: 'default',
-                      }}
-                    >
-                      <AccessibleHighlight text={session.name} searchTerm={searchQuery ?? ''} />
-                    </Text>
-                  </HoverCard.Trigger>
-                  <HoverCard.Content size="2" style={{ maxWidth: 360 }}>
-                    {hoverCardContent}
-                  </HoverCard.Content>
-                </HoverCard.Root>
-                {category && (
-                  <Tooltip content={getCategoryLabel(category)}>
-                    <Badge color={getRadixColor(category.color)} size="1" style={{ flexShrink: 0 }}>
-                      {category.emoji}
-                    </Badge>
-                  </Tooltip>
-                )}
-              </Flex>
-              {trailing && <Flex align="center" style={{ flexShrink: 0 }}>{trailing}</Flex>}
-            </>
+            <SessionCardSummaryHeader
+              session={session}
+              status={status}
+              leading={leading}
+              trailing={trailing}
+              searchQuery={searchQuery}
+              category={category}
+              hoverCardContent={hoverCardContent}
+            />
           ) : (
-            /* ── MODE FULL ── */
-            <>
-              {/* Drag handle */}
-              {!isRenaming && (
-                <Box
-                  ref={handleRef}
-                  data-testid={`session-card-${session.id}-drag-handle`}
-                  aria-disabled={isDragDisabled}
-                  aria-label={getMessage('dragHandle')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: isDragDisabled ? 'not-allowed' : 'grab',
-                    touchAction: 'none',
-                    color: isDragDisabled ? 'var(--gray-6)' : 'var(--gray-9)',
-                    flexShrink: 0,
-                  }}
-                >
-                  <GripVertical size={16} aria-hidden="true" />
-                </Box>
-              )}
-
-              {/* Pin / Unpin button */}
-              {!isRenaming && (
-                <Tooltip
-                  content={session.isPinned ? getMessage('sessionUnpin') : getMessage('sessionPin')}
-                >
-                  <IconButton
-                    size="1"
-                    variant={session.isPinned ? 'soft' : 'ghost'}
-                    color={session.isPinned ? 'indigo' : 'gray'}
-                    onClick={() => session.isPinned ? onUnpin?.(session) : onPin?.(session)}
-                    aria-label={session.isPinned ? getMessage('sessionUnpin') : getMessage('sessionPin')}
-                  >
-                    {session.isPinned
-                      ? <PinOff size={14} aria-hidden="true" />
-                      : <Pin size={14} aria-hidden="true" />
-                    }
-                  </IconButton>
-                </Tooltip>
-              )}
-
-              {/* Session name + category badge */}
-              <Flex align="center" gap="2" style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
-                {isRenaming ? (
-                  <>
-                    <Flex direction="column" style={{ flex: 1 }}>
-                      <TextField.Root
-                        ref={renameInputRef}
-                        value={nameValue}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          setNameValue(e.target.value);
-                          setRenameError(null);
-                        }}
-                        onKeyDown={handleKeyDown}
-                        size="2"
-                        aria-label={getMessage('sessionRenameLabel')}
-                      />
-                      {renameError && (
-                        <Text size="1" color="red" style={{ marginTop: 2 }}>
-                          {renameError}
-                        </Text>
-                      )}
-                    </Flex>
-                    <IconButton
-                      size="1"
-                      variant="soft"
-                      onClick={handleRenameSubmit}
-                      aria-label={getMessage('sessionConfirmRename')}
-                    >
-                      <Check size={12} aria-hidden="true" />
-                    </IconButton>
-                    <IconButton
-                      size="1"
-                      variant="soft"
-                      color="gray"
-                      onClick={handleRenameCancel}
-                      aria-label={getMessage('cancel')}
-                    >
-                      <X size={12} aria-hidden="true" />
-                    </IconButton>
-                  </>
-                ) : (
-                  <>
-                    <HoverCard.Root>
-                      <HoverCard.Trigger>
-                        <Text
-                          data-testid={`session-card-${session.id}-name`}
-                          size="3"
-                          weight="medium"
-                          onDoubleClick={() => {
-                            setNameValue(session.name);
-                            setRenameError(null);
-                            setIsRenaming(true);
-                          }}
-                          style={{
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            cursor: 'default',
-                          }}
-                        >
-                          <AccessibleHighlight text={session.name} searchTerm={searchQuery ?? ''} />
-                        </Text>
-                      </HoverCard.Trigger>
-                      <HoverCard.Content size="2" style={{ maxWidth: 360 }}>
-                        {hoverCardContent}
-                      </HoverCard.Content>
-                    </HoverCard.Root>
-                    <IconButton
-                      size="1"
-                      variant="ghost"
-                      color="gray"
-                      onClick={() => {
-                        setNameValue(session.name);
-                        setRenameError(null);
-                        setIsRenaming(true);
-                      }}
-                      aria-label={getMessage('sessionRename')}
-                      style={{ flexShrink: 0 }}
-                    >
-                      <Pencil size={14} aria-hidden="true" />
-                    </IconButton>
-                    {category && (
-                      <Badge color={getRadixColor(category.color)} size="1" style={{ flexShrink: 0 }}>
-                        {category.emoji} {getCategoryLabel(category)}
-                      </Badge>
-                    )}
-                  </>
-                )}
-              </Flex>
-
-              {/* Restore split button */}
-              {!isRenaming && onRestoreCurrentWindow && onRestoreNewWindow && onReplaceCurrentWindow && onRestore && (
-                <SessionRestoreButton
-                  session={session}
-                  onRestoreCurrentWindow={onRestoreCurrentWindow}
-                  onRestoreNewWindow={onRestoreNewWindow}
-                  onReplaceCurrentWindow={onReplaceCurrentWindow}
-                  onCustomize={onRestore}
-                  data-testid={`session-card-${session.id}-btn-restore`}
-                />
-              )}
-
-              {!isRenaming && onEdit && onDelete && (
-                <SessionMoreMenu
-                  session={session}
-                  isDragDisabled={isDragDisabled}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onMoveToFirst={onMoveToFirst}
-                  onMoveLast={onMoveLast}
-                />
-              )}
-            </>
+            <SessionCardFullHeader
+              session={session}
+              handleRef={handleRef}
+              isDragDisabled={isDragDisabled}
+              isRenaming={isRenaming}
+              setIsRenaming={setIsRenaming}
+              nameValue={nameValue}
+              setNameValue={setNameValue}
+              renameError={renameError}
+              setRenameError={setRenameError}
+              renameInputRef={renameInputRef}
+              handleRenameSubmit={handleRenameSubmit}
+              handleRenameCancel={handleRenameCancel}
+              handleKeyDown={handleKeyDown}
+              searchQuery={searchQuery}
+              category={category}
+              hoverCardContent={hoverCardContent}
+              onPin={onPin}
+              onUnpin={onUnpin}
+              onRestore={onRestore}
+              onRestoreCurrentWindow={onRestoreCurrentWindow}
+              onRestoreNewWindow={onRestoreNewWindow}
+              onReplaceCurrentWindow={onReplaceCurrentWindow}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onMoveToFirst={onMoveToFirst}
+              onMoveLast={onMoveLast}
+            />
           )}
         </Flex>
 

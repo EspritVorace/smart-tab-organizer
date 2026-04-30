@@ -2,6 +2,12 @@ import React from 'react';
 import { Switch, Text, HoverCard, Flex, Badge, Card, Checkbox, IconButton, DropdownMenu, Box } from '@radix-ui/themes';
 import { Pencil, Trash2, MoreHorizontal, GripVertical, AlertTriangle } from 'lucide-react';
 import { useSortable } from '@dnd-kit/react/sortable';
+
+function getStatusStyle(status: 'default' | 'conflict' | 'identical'): React.CSSProperties {
+  if (status === 'conflict') return { background: 'var(--orange-a2)' };
+  if (status === 'identical') return { opacity: 0.6 };
+  return {};
+}
 import { RuleDetailPopover } from './RuleDetailPopover';
 import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 import { getMessage } from '@/utils/i18n';
@@ -74,17 +80,13 @@ export function DomainRuleCard({
   });
 
   const enabledOpacity = rule.enabled ? 1 : 0.6;
-  const statusStyle: React.CSSProperties = status === 'conflict'
-    ? { background: 'var(--orange-a2)' }
-    : status === 'identical'
-      ? { opacity: 0.6 }
-      : {};
+  const baseOpacity = isSummary ? 1 : enabledOpacity;
 
   const style: React.CSSProperties = {
-    opacity: isDragging ? 0.4 : (isSummary ? 1 : enabledOpacity),
+    opacity: isDragging ? 0.4 : baseOpacity,
     zIndex: isDragging ? 10 : undefined,
     position: isDragging ? 'relative' : undefined,
-    ...statusStyle,
+    ...getStatusStyle(status),
   };
 
   const category = getRuleCategory(rule.categoryId);
