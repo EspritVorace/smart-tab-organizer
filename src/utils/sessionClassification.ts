@@ -70,14 +70,95 @@ export function areSessionsEqual(a: Session, b: Session): boolean {
   );
 }
 
+interface UngroupedTabsDiff {
+  added: string[];
+  removed: string[];
+}
+
+interface GroupContentDiff {
+  tabsAdded: string[];
+  tabsRemoved: string[];
+  colorChanged?: { current: string; imported: string };
+}
+
+interface GroupsDiff {
+  added: string[];
+  removed: string[];
+  changed: GroupDiff[];
+}
+
+function diffUngroupedTabs(existing: SavedTab[], imported: SavedTab[]): UngroupedTabsDiff {
+  const existingUrls = getTabUrls(existing);
+  const importedUrls = getTabUrls(imported);
+  const added: string[] = [];
+  const removed: string[] = [];
+  for (const url of importedUrls) {
+    if (!existingUrls.has(url)) added.push(url);
+  }
+  for (const url of existingUrls) {
+    if (!importedUrls.has(url)) removed.push(url);
+  }
+  return { added, removed };
+}
+
+function compareGroupContents(existing: SavedTabGroup, imported: SavedTabGroup): GroupContentDiff {
+  const tabsDiff = diffUngroupedTabs(existing.tabs, imported.tabs);
+  const result: GroupContentDiff = { tabsAdded: tabsDiff.added, tabsRemoved: tabsDiff.removed };
+  if (existing.color !== imported.color) {
+    result.colorChanged = { current: existing.color, imported: imported.color };
+  }
+  return result;
+}
+
+function isGroupContentChanged(content: GroupContentDiff): boolean {
+  return Boolean(content.colorChanged) || content.tabsAdded.length > 0 || content.tabsRemoved.length > 0;
+}
+
+function diffGroups(existing: SavedTabGroup[], imported: SavedTabGroup[]): GroupsDiff {
+  const existingByTitle = new Map(existing.map(g => [g.title.toLowerCase(), g]));
+  const importedByTitle = new Map(imported.map(g => [g.title.toLowerCase(), g]));
+
+  const added: string[] = [];
+  const changed: GroupDiff[] = [];
+
+  for (const [title, importedGroup] of importedByTitle) {
+    const existingGroup = existingByTitle.get(title);
+    if (!existingGroup) {
+      added.push(importedGroup.title);
+      continue;
+    }
+    const content = compareGroupContents(existingGroup, importedGroup);
+    if (isGroupContentChanged(content)) {
+      changed.push({
+        title: importedGroup.title,
+        tabsAdded: content.tabsAdded,
+        tabsRemoved: content.tabsRemoved,
+        ...(content.colorChanged ? { colorChanged: content.colorChanged } : {}),
+      });
+    }
+  }
+
+  const removed: string[] = [];
+  for (const [title, existingGroup] of existingByTitle) {
+    if (!importedByTitle.has(title)) {
+      removed.push(existingGroup.title);
+    }
+  }
+
+  return { added, removed, changed };
+}
+
 /** Compute the structured diff between an existing and an imported session */
 export function getSessionDiff(existing: Session, imported: Session): SessionDiff {
+  const groups = diffGroups(existing.groups, imported.groups);
+  const ungrouped = diffUngroupedTabs(existing.ungroupedTabs, imported.ungroupedTabs);
+
   const diff: SessionDiff = {
-    groupsAdded: [],
-    groupsRemoved: [],
-    groupsChanged: [],
-    ungroupedTabsAdded: [],
-    ungroupedTabsRemoved: [],
+    groupsAdded: groups.added,
+    groupsRemoved: groups.removed,
+    groupsChanged: groups.changed,
+    ungroupedTabsAdded: ungrouped.added,
+    ungroupedTabsRemoved: ungrouped.removed,
   };
 
   if (existing.isPinned !== imported.isPinned) {
@@ -93,49 +174,6 @@ export function getSessionDiff(existing: Session, imported: Session): SessionDif
   // Empty string and undefined are treated as equivalent (no note set).
   if ((existing.note ?? '') !== (imported.note ?? '')) {
     diff.note = { current: existing.note, imported: imported.note };
-  }
-
-  // Groups diff
-  const existingGroups = new Map(existing.groups.map(g => [g.title.toLowerCase(), g]));
-  const importedGroups = new Map(imported.groups.map(g => [g.title.toLowerCase(), g]));
-
-  for (const [title, importedGroup] of importedGroups) {
-    const existingGroup = existingGroups.get(title);
-    if (!existingGroup) {
-      diff.groupsAdded.push(importedGroup.title);
-    } else {
-      const groupDiff: GroupDiff = { title: importedGroup.title, tabsAdded: [], tabsRemoved: [] };
-      if (existingGroup.color !== importedGroup.color) {
-        groupDiff.colorChanged = { current: existingGroup.color, imported: importedGroup.color };
-      }
-      const existingUrls = getTabUrls(existingGroup.tabs);
-      const importedUrls = getTabUrls(importedGroup.tabs);
-      for (const url of importedUrls) {
-        if (!existingUrls.has(url)) groupDiff.tabsAdded.push(url);
-      }
-      for (const url of existingUrls) {
-        if (!importedUrls.has(url)) groupDiff.tabsRemoved.push(url);
-      }
-      if (groupDiff.colorChanged || groupDiff.tabsAdded.length > 0 || groupDiff.tabsRemoved.length > 0) {
-        diff.groupsChanged.push(groupDiff);
-      }
-    }
-  }
-
-  for (const [title, existingGroup] of existingGroups) {
-    if (!importedGroups.has(title)) {
-      diff.groupsRemoved.push(existingGroup.title);
-    }
-  }
-
-  // Ungrouped tabs diff
-  const existingUngroupedUrls = getTabUrls(existing.ungroupedTabs);
-  const importedUngroupedUrls = getTabUrls(imported.ungroupedTabs);
-  for (const url of importedUngroupedUrls) {
-    if (!existingUngroupedUrls.has(url)) diff.ungroupedTabsAdded.push(url);
-  }
-  for (const url of existingUngroupedUrls) {
-    if (!importedUngroupedUrls.has(url)) diff.ungroupedTabsRemoved.push(url);
   }
 
   return diff;
