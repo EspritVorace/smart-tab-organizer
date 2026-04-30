@@ -6,16 +6,12 @@ import vitest from '@vitest/eslint-plugin';
 import playwright from 'eslint-plugin-playwright';
 import sonarjs from 'eslint-plugin-sonarjs';
 
-// Toutes les règles "error" du recommended sonarjs sont rétrogradées en
-// "warn" pour publier un signal CTRF sans bloquer la CI le temps d'un audit.
-const sonarjsWarnRules = Object.fromEntries(
-  Object.entries(sonarjs.configs.recommended.rules).map(([rule, value]) => {
-    const severity = Array.isArray(value) ? value[0] : value;
-    const opts = Array.isArray(value) ? value.slice(1) : [];
-    const downgraded = severity === 'error' ? 'warn' : severity;
-    return [rule, opts.length ? [downgraded, ...opts] : downgraded];
-  }),
-);
+// Liste explicite des règles SonarJS conservées en "warn" (signal CTRF sans
+// blocage). Vide par défaut depuis #200 : la dette historique a été résorbée
+// (voir #191 et #192) et toute nouvelle violation doit échouer le build.
+// Ajouter une entrée ici uniquement avec un commentaire justifiant pourquoi
+// la règle est trop stricte pour le projet (lien vers le ticket dédié).
+const sonarjsWarnOverrides = {};
 
 // Petite règle locale : interdit les imports remontants (../...) dans src/
 // et les remplace automatiquement par l'alias @/<chemin-relatif-à-src>.
@@ -102,7 +98,10 @@ export default tseslint.config(
   {
     files: ['src/**/*.{ts,tsx}'],
     ...sonarjs.configs.recommended,
-    rules: sonarjsWarnRules,
+    rules: {
+      ...sonarjs.configs.recommended.rules,
+      ...sonarjsWarnOverrides,
+    },
   },
 
   {

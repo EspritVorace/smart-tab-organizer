@@ -128,7 +128,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - name: Run ESLint with CTRF reporter
-        continue-on-error: true
         run: pnpm lint:ctrf
 
       - name: Generate lint markdown summary
