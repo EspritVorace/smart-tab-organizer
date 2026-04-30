@@ -152,11 +152,11 @@ test.describe('Creation wizard — Step 2: Configuration', () => {
     const dialog = await openCreateWizard(page, extensionId);
     await goToStep2(dialog);
 
-    // Click Ask segment
+    // Click Ask radio
     await dialog.getByTestId('config-mode-ask').click();
 
-    // Explanatory text in a Callout
-    await expect(dialog.locator('.rt-CalloutText')).toBeVisible();
+    // Explanatory text shown as right-column heading
+    await expect(dialog.getByTestId('config-mode-description')).toBeVisible();
     // No regex input fields
     await expect(dialog.locator('input[name="titleParsingRegEx"]')).not.toBeAttached();
     await expect(dialog.locator('input[name="urlParsingRegEx"]')).not.toBeAttached();

@@ -1,4 +1,4 @@
-import { Box, Callout, Flex, Grid, Select, Text, TextField } from '@radix-ui/themes';
+import { Callout, Flex, Grid, Select, Text, TextField } from '@radix-ui/themes';
 import * as Label from '@radix-ui/react-label';
 import { Info } from 'lucide-react';
 import type { FieldError } from 'react-hook-form';
@@ -12,7 +12,7 @@ import {
 } from '@/schemas/enums';
 import type { PresetCategory } from '@/utils/presetUtils';
 import { presetsToSearchableGroups } from '@/utils/presetsToSearchableGroups';
-import { ConfigModeSelector, type ConfigMode } from './ConfigModeSelector';
+import { ConfigModeSelector, MODE_HELP_LABELS, type ConfigMode } from './ConfigModeSelector';
 
 const GROUP_NAME_SOURCE_HELP_KEYS: Record<GroupNameSourceValue, Parameters<typeof getMessage>[0]> = {
   title: 'groupNameSourceTitleHelp',
@@ -94,167 +94,165 @@ export function DomainRuleConfigForm({
         </Callout.Root>
       )}
 
-      {/* Configuration mode selector */}
-      <ConfigModeSelector value={configMode} onValueChange={onConfigModeChange} />
+      <Grid columns="240px 1fr" gap="4" align="start">
+        {/* Left column: vertical radio list */}
+        <ConfigModeSelector value={configMode} onValueChange={onConfigModeChange} />
 
-      {/* Preset selection */}
-      {configMode === 'preset' && presetCategories.length > 0 && !isLoadingPresets && (
-        <Grid columns="2" gap="4">
-          <Flex direction="column" gap="1">
-            <Text size="2" weight="bold" asChild>
-              <Label.Root htmlFor={presetInputId}>
-                {getMessage('presetRuleLabel')}
-              </Label.Root>
-            </Text>
-            <SearchableSelect
-              id={presetInputId}
-              value={presetId ?? ''}
-              onValueChange={onPresetChange}
-              groups={presetsToSearchableGroups(presetCategories)}
-              placeholder={getMessage('selectPresetPlaceholder')}
-              searchPlaceholder={getMessage('searchPresetPlaceholder')}
-              emptyMessage={getMessage('noPresetFound')}
-            />
-          </Flex>
-          <Box />
-        </Grid>
-      )}
-
-      {/* Ask mode : explanatory callout */}
-      {configMode === 'ask' && (
-        <Callout.Root size="1" color="gray" variant="surface">
-          <Callout.Icon><Info size={14} aria-hidden="true" /></Callout.Icon>
-          <Callout.Text>{getMessage('configModeAskHelp')}</Callout.Text>
-        </Callout.Root>
-      )}
-
-      {/* Manual mode : groupNameSource selector + contextual help */}
-      {configMode === 'manual' && (
-        <Grid columns="2" gap="4">
-          <Flex direction="column">
-            <Text size="2" weight="bold" asChild>
-              <Label.Root htmlFor={groupNameSourceInputId}>
-                {getMessage('groupNameSource')}
-              </Label.Root>
-            </Text>
-            <Select.Root
-              value={groupNameSource}
-              onValueChange={(v) => onGroupNameSourceChange(v as GroupNameSourceValue)}
-            >
-              <Select.Trigger
-                id={groupNameSourceInputId}
-                placeholder={getMessage('selectGroupNameSource')}
-                style={{ marginTop: '4px' }}
-              />
-              <Select.Content>
-                {groupNameSourceOptions
-                  .filter((option) => option.value !== 'manual' && option.value !== 'smart_preset')
-                  .map((option) => (
-                    <Select.Item key={option.value} value={option.value}>
-                      {getMessage(option.keyLabel)}
-                    </Select.Item>
-                  ))}
-              </Select.Content>
-            </Select.Root>
-          </Flex>
-          <Flex align="end">
-            <Callout.Root size="1" color="gray" variant="surface">
-              <Callout.Icon><Info size={14} aria-hidden="true" /></Callout.Icon>
-              <Callout.Text>
-                {getMessage(GROUP_NAME_SOURCE_HELP_KEYS[groupNameSource])}
-              </Callout.Text>
-            </Callout.Root>
-          </Flex>
-        </Grid>
-      )}
-
-      {/* Title parsing regex (manual mode with title-based source) */}
-      {configMode === 'manual' && (groupNameSource === 'title' || groupNameSource.startsWith('smart')) && (
-        <FormField
-          label={getMessage('titleRegex')}
-          required={true}
-          error={titleParsingRegExError}
-        >
-          {(fieldId) => (
-            <TextField.Root
-              id={fieldId}
-              value={titleParsingRegEx}
-              onChange={(e) => onTitleParsingRegExChange(e.target.value)}
-              name="titleParsingRegEx"
-              placeholder="(.+)"
-              style={{ marginTop: '4px' }}
-            />
-          )}
-        </FormField>
-      )}
-
-      {/* URL extraction (manual mode with URL-based source) : extraction mode selector + conditional field */}
-      {showUrlSection && (
+        {/* Right column: active-mode description heading + mode-specific content */}
         <Flex direction="column" gap="3">
-          <Flex direction="column">
-            <Text size="2" weight="bold" asChild>
-              <Label.Root htmlFor={urlExtractionModeInputId}>
-                {getMessage('urlExtractionModeLabel')}
-              </Label.Root>
-            </Text>
-            <Select.Root
-              value={urlExtractionMode}
-              onValueChange={(v) => onUrlExtractionModeChange(v as UrlExtractionModeValue)}
-            >
-              <Select.Trigger
-                id={urlExtractionModeInputId}
-                style={{ marginTop: '4px' }}
-              />
-              <Select.Content>
-                {urlExtractionModeOptions.map((option) => (
-                  <Select.Item key={option.value} value={option.value}>
-                    {getMessage(option.keyLabel)}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
-          </Flex>
+          <Text size="2" color="gray" as="p" data-testid="config-mode-description">
+            {getMessage(MODE_HELP_LABELS[configMode])}
+          </Text>
 
-          {urlExtractionMode === 'regex' ? (
+          {/* Preset mode: searchable preset selector */}
+          {configMode === 'preset' && presetCategories.length > 0 && !isLoadingPresets && (
+            <Flex direction="column" gap="1">
+              <Text size="2" weight="bold" asChild>
+                <Label.Root htmlFor={presetInputId}>
+                  {getMessage('presetRuleLabel')}
+                </Label.Root>
+              </Text>
+              <SearchableSelect
+                id={presetInputId}
+                value={presetId ?? ''}
+                onValueChange={onPresetChange}
+                groups={presetsToSearchableGroups(presetCategories)}
+                placeholder={getMessage('selectPresetPlaceholder')}
+                searchPlaceholder={getMessage('searchPresetPlaceholder')}
+                emptyMessage={getMessage('noPresetFound')}
+              />
+            </Flex>
+          )}
+
+          {/* Ask mode: nothing extra — description above is sufficient. */}
+
+          {/* Manual mode: groupNameSource selector + contextual help, stacked vertically */}
+          {configMode === 'manual' && (
+            <Flex direction="column" gap="3">
+              <Flex direction="column">
+                <Text size="2" weight="bold" asChild>
+                  <Label.Root htmlFor={groupNameSourceInputId}>
+                    {getMessage('groupNameSource')}
+                  </Label.Root>
+                </Text>
+                <Select.Root
+                  value={groupNameSource}
+                  onValueChange={(v) => onGroupNameSourceChange(v as GroupNameSourceValue)}
+                >
+                  <Select.Trigger
+                    id={groupNameSourceInputId}
+                    placeholder={getMessage('selectGroupNameSource')}
+                    style={{ marginTop: '4px' }}
+                  />
+                  <Select.Content>
+                    {groupNameSourceOptions
+                      .filter((option) => option.value !== 'manual' && option.value !== 'smart_preset')
+                      .map((option) => (
+                        <Select.Item key={option.value} value={option.value}>
+                          {getMessage(option.keyLabel)}
+                        </Select.Item>
+                      ))}
+                  </Select.Content>
+                </Select.Root>
+              </Flex>
+              <Callout.Root size="1" color="gray" variant="surface">
+                <Callout.Icon><Info size={14} aria-hidden="true" /></Callout.Icon>
+                <Callout.Text>
+                  {getMessage(GROUP_NAME_SOURCE_HELP_KEYS[groupNameSource])}
+                </Callout.Text>
+              </Callout.Root>
+            </Flex>
+          )}
+
+          {/* Title parsing regex (manual mode with title-based source) */}
+          {configMode === 'manual' && (groupNameSource === 'title' || groupNameSource.startsWith('smart')) && (
             <FormField
-              label={getMessage('urlRegex')}
+              label={getMessage('titleRegex')}
               required={true}
-              error={urlParsingRegExError}
+              error={titleParsingRegExError}
             >
               {(fieldId) => (
                 <TextField.Root
                   id={fieldId}
-                  value={urlParsingRegEx}
-                  onChange={(e) => onUrlParsingRegExChange(e.target.value)}
-                  name="urlParsingRegEx"
+                  value={titleParsingRegEx}
+                  onChange={(e) => onTitleParsingRegExChange(e.target.value)}
+                  name="titleParsingRegEx"
                   placeholder="(.+)"
                   style={{ marginTop: '4px' }}
                 />
               )}
             </FormField>
-          ) : (
-            <FormField
-              label={getMessage('urlQueryParamNameLabel')}
-              required={true}
-              error={urlQueryParamNameError}
-            >
-              {(fieldId) => (
-                <Flex direction="column" gap="1" style={{ marginTop: '4px' }}>
-                  <TextField.Root
-                    id={fieldId}
-                    value={urlQueryParamName}
-                    onChange={(e) => onUrlQueryParamNameChange(e.target.value)}
-                    name="urlQueryParamName"
-                    placeholder={getMessage('urlQueryParamNamePlaceholder')}
-                    maxLength={64}
+          )}
+
+          {/* URL extraction (manual mode with URL-based source) */}
+          {showUrlSection && (
+            <Flex direction="column" gap="3">
+              <Flex direction="column">
+                <Text size="2" weight="bold" asChild>
+                  <Label.Root htmlFor={urlExtractionModeInputId}>
+                    {getMessage('urlExtractionModeLabel')}
+                  </Label.Root>
+                </Text>
+                <Select.Root
+                  value={urlExtractionMode}
+                  onValueChange={(v) => onUrlExtractionModeChange(v as UrlExtractionModeValue)}
+                >
+                  <Select.Trigger
+                    id={urlExtractionModeInputId}
+                    style={{ marginTop: '4px' }}
                   />
-                  <Text size="1" color="gray">{getMessage('urlQueryParamNameHelper')}</Text>
-                </Flex>
+                  <Select.Content>
+                    {urlExtractionModeOptions.map((option) => (
+                      <Select.Item key={option.value} value={option.value}>
+                        {getMessage(option.keyLabel)}
+                      </Select.Item>
+                    ))}
+                  </Select.Content>
+                </Select.Root>
+              </Flex>
+
+              {urlExtractionMode === 'regex' ? (
+                <FormField
+                  label={getMessage('urlRegex')}
+                  required={true}
+                  error={urlParsingRegExError}
+                >
+                  {(fieldId) => (
+                    <TextField.Root
+                      id={fieldId}
+                      value={urlParsingRegEx}
+                      onChange={(e) => onUrlParsingRegExChange(e.target.value)}
+                      name="urlParsingRegEx"
+                      placeholder="(.+)"
+                      style={{ marginTop: '4px' }}
+                    />
+                  )}
+                </FormField>
+              ) : (
+                <FormField
+                  label={getMessage('urlQueryParamNameLabel')}
+                  required={true}
+                  error={urlQueryParamNameError}
+                >
+                  {(fieldId) => (
+                    <Flex direction="column" gap="1" style={{ marginTop: '4px' }}>
+                      <TextField.Root
+                        id={fieldId}
+                        value={urlQueryParamName}
+                        onChange={(e) => onUrlQueryParamNameChange(e.target.value)}
+                        name="urlQueryParamName"
+                        placeholder={getMessage('urlQueryParamNamePlaceholder')}
+                        maxLength={64}
+                      />
+                      <Text size="1" color="gray">{getMessage('urlQueryParamNameHelper')}</Text>
+                    </Flex>
+                  )}
+                </FormField>
               )}
-            </FormField>
+            </Flex>
           )}
         </Flex>
-      )}
+      </Grid>
     </Flex>
   );
 }

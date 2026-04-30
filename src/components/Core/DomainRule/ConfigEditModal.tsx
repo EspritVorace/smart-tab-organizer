@@ -141,7 +141,7 @@ export function ConfigEditModal({
       title={getMessage('editConfigTitle')}
       description={getMessage('editConfigTitle')}
       hideDescription
-      maxWidth={480}
+      maxWidth={820}
       showHeaderSeparator={false}
     >
       <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '55vh' }}>

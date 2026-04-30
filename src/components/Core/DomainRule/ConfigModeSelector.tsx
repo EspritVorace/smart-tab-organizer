@@ -1,6 +1,5 @@
 import { useId } from 'react';
-import { Box, Flex, HoverCard, SegmentedControl, Text } from '@radix-ui/themes';
-import { Info } from 'lucide-react';
+import { Flex, RadioGroup, Text } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 
 export type ConfigMode = 'preset' | 'ask' | 'manual';
@@ -13,7 +12,13 @@ const MODE_LABELS: Record<ConfigMode, Parameters<typeof getMessage>[0]> = {
   manual: 'configModeManual',
 };
 
-const MODE_HELP_LABELS: Record<ConfigMode, Parameters<typeof getMessage>[0]> = {
+const MODE_TAGLINES: Record<ConfigMode, Parameters<typeof getMessage>[0]> = {
+  preset: 'configModePresetTagline',
+  ask: 'configModeAskTagline',
+  manual: 'configModeManualTagline',
+};
+
+export const MODE_HELP_LABELS: Record<ConfigMode, Parameters<typeof getMessage>[0]> = {
   preset: 'configModePresetHelp',
   ask: 'configModeAskHelp',
   manual: 'configModeManualHelp',
@@ -25,51 +30,61 @@ interface ConfigModeSelectorProps {
 }
 
 /**
- * Segmented control for choosing between preset / ask / manual config modes.
- * Each item shows a HoverCard tooltip with the mode description.
+ * Vertical list of radio cards (label + tagline) for choosing the config mode.
+ * The active mode's full description is rendered by the parent (right column).
  * Shared between ConfigEditModal and WizardStep2Config.
  */
 export function ConfigModeSelector({ value, onValueChange }: ConfigModeSelectorProps) {
   const labelId = useId();
   return (
-    <Flex direction="column" gap="1">
+    <Flex direction="column" gap="2">
       <Text id={labelId} size="2" weight="bold">
         {getMessage('configurationMode')}
       </Text>
-      <SegmentedControl.Root
+      <RadioGroup.Root
         data-testid="wizard-rule-segmented-config"
         aria-labelledby={labelId}
         value={value}
         onValueChange={(v) => onValueChange(v as ConfigMode)}
-        size="2"
       >
-        {CONFIG_MODES.map((mode) => (
-          <SegmentedControl.Item key={mode} value={mode} data-testid={`config-mode-${mode}`}>
-            <Flex align="center" gap="1">
-              {getMessage(MODE_LABELS[mode])}
-              <HoverCard.Root openDelay={300} closeDelay={100}>
-                <HoverCard.Trigger>
-                  <Box
-                    as="span"
-                    style={{ display: 'inline-flex', alignItems: 'center', cursor: 'default', lineHeight: 0 }}
-                  >
-                    <Info size={12} aria-hidden="true" />
-                  </Box>
-                </HoverCard.Trigger>
-                <HoverCard.Content
-                  size="1"
-                  maxWidth="240px"
-                  side="top"
-                  sideOffset={4}
-                  align={mode === 'manual' ? 'end' : 'center'}
-                >
-                  <Text size="2">{getMessage(MODE_HELP_LABELS[mode])}</Text>
-                </HoverCard.Content>
-              </HoverCard.Root>
-            </Flex>
-          </SegmentedControl.Item>
-        ))}
-      </SegmentedControl.Root>
+        <Flex direction="column" gap="2">
+          {CONFIG_MODES.map((mode) => {
+            const isSelected = value === mode;
+            return (
+              <Text
+                key={mode}
+                as="label"
+                size="2"
+                style={{
+                  display: 'block',
+                  padding: 'var(--space-3)',
+                  borderRadius: 'var(--radius-3)',
+                  cursor: 'pointer',
+                  border: `1px solid ${isSelected ? 'var(--accent-a7)' : 'var(--gray-a5)'}`,
+                  backgroundColor: isSelected ? 'var(--accent-a3)' : 'transparent',
+                  transition: 'background-color 120ms ease, border-color 120ms ease',
+                }}
+              >
+                <Flex align="start" gap="2">
+                  <RadioGroup.Item
+                    value={mode}
+                    data-testid={`config-mode-${mode}`}
+                    style={{ marginTop: '2px' }}
+                  />
+                  <Flex direction="column" gap="1">
+                    <Text size="2" weight="bold">
+                      {getMessage(MODE_LABELS[mode])}
+                    </Text>
+                    <Text size="1" color="gray">
+                      {getMessage(MODE_TAGLINES[mode])}
+                    </Text>
+                  </Flex>
+                </Flex>
+              </Text>
+            );
+          })}
+        </Flex>
+      </RadioGroup.Root>
     </Flex>
   );
 }

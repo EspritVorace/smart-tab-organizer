@@ -11,6 +11,8 @@ interface WizardModalProps {
   description?: string;
   /** When true, render description for screen readers only. */
   hideDescription?: boolean;
+  /** Override the dialog max width (default 600). */
+  maxWidth?: number | string;
   children: React.ReactNode;
   'data-testid'?: string;
   /** Forwarded to Dialog.Content (e.g. to pre-focus an input on open). */
@@ -31,6 +33,7 @@ function WizardModalRoot({
   icon,
   description,
   hideDescription,
+  maxWidth = 600,
   children,
   'data-testid': dataTestId,
   onOpenAutoFocus,
@@ -46,7 +49,7 @@ function WizardModalRoot({
       data-testid={dataTestId}
       onOpenAutoFocus={onOpenAutoFocus}
       preventOutsideClose
-      maxWidth={600}
+      maxWidth={maxWidth}
       minHeight="min(480px, 80vh)"
       maxHeight="80vh"
       contentStyle={wizardContentStyle}

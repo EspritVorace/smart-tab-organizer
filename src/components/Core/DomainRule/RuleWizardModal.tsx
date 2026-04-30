@@ -409,6 +409,7 @@ export function RuleWizardModal({
       icon={isEditing ? Edit2 : Plus}
       title={title}
       description={description}
+      maxWidth={820}
       onOpenAutoFocus={(e) => {
         e.preventDefault();
         const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[name="label"]');
