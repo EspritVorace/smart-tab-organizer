@@ -4,22 +4,7 @@ import { browser } from 'wxt/browser';
 import { getMessage } from '@/utils/i18n';
 import { loadSessions } from '@/utils/sessionStorage';
 import { hasCapturableTabs } from '@/utils/tabCapture';
-
-/** Focus an existing Options tab or open a new one with the given hash. */
-async function openOptionsWithHash(hash: string) {
-  const optionsUrl = browser.runtime.getURL('/options.html');
-  const allTabs = await browser.tabs.query({});
-  const existing = allTabs.find((t) => t.url?.startsWith(optionsUrl));
-
-  if (existing?.id != null) {
-    await browser.tabs.update(existing.id, { url: optionsUrl + hash, active: true });
-    if (existing.windowId != null) {
-      await browser.windows.update(existing.windowId, { focused: true });
-    }
-  } else {
-    await browser.tabs.create({ url: optionsUrl + hash });
-  }
-}
+import { openOptionsWithHash } from '@/utils/openOptions';
 
 const actionButtonStyle: React.CSSProperties = {
   flex: 1,
