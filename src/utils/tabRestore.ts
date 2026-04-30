@@ -1,7 +1,12 @@
 import { browser } from 'wxt/browser';
 import { logger } from '@/utils/logger';
 import type { SavedTab, SavedTabGroup, Session } from '@/types/session';
-import type { ConflictAnalysis, ConflictResolution, GroupConflictAction } from './conflictDetection';
+import type {
+  ConflictAnalysis,
+  ConflictResolution,
+  DuplicateTabAction,
+  GroupConflictAction,
+} from './conflictDetection';
 
 export type RestoreTarget = 'current' | 'new' | 'replace';
 
@@ -90,38 +95,45 @@ export async function restoreTabs(options: RestoreOptions): Promise<RestoreResul
   await requestSkipDeduplication(allUrls);
 
   if (target === 'new') {
-    return restoreInNewWindow(tabs, groups, result);
+    await restoreInNewWindow(tabs, groups, result);
+  } else if (target === 'replace') {
+    await restoreReplaceInCurrentWindow(tabs, groups, protectedTabId, result);
+  } else {
+    await restoreInCurrentWindow(tabs, groups, conflictResolution, conflictAnalysis, result);
   }
 
-  if (target === 'replace') {
-    return restoreReplaceInCurrentWindow(tabs, groups, protectedTabId, result);
-  }
-
-  return restoreInCurrentWindow(tabs, groups, conflictResolution, conflictAnalysis, result);
+  return result;
 }
 
-async function restoreInNewWindow(
-  tabs: SavedTab[],
-  groups: SavedTabGroup[],
+/** Mutable seed context shared with createGroupInWindow so the first window
+ *  tab created by `windows.create` can be reused by the matching group tab. */
+interface SeedContext {
+  firstTabId: number | undefined;
+  firstUrl: string | undefined;
+  firstWindowTabConsumed: boolean;
+}
+
+async function seedNewWindow(
+  firstUrl: string | undefined,
   result: RestoreResult,
-): Promise<RestoreResult> {
-  // Create a new window with the first tab (or a blank one)
-  const firstUrl = tabs[0]?.url || groups[0]?.tabs[0]?.url;
+): Promise<{ windowId: number; firstTabId: number | undefined } | null> {
   const newWindow = await browser.windows.create({ url: firstUrl || undefined });
   const windowId = newWindow.id;
   if (!windowId) {
     result.errors.push('Failed to create new window');
-    return result;
+    return null;
   }
   result.windowId = windowId;
-
-  // Track the first tab created by windows.create (to avoid duplicating it)
-  const firstTabId = newWindow.tabs?.[0]?.id;
-  let firstWindowTabConsumed = false;
   if (firstUrl) result.tabsCreated++;
+  return { windowId, firstTabId: newWindow.tabs?.[0]?.id };
+}
 
-  // Create remaining ungrouped tabs (skip the first one already created)
-  const startIndex = firstUrl && tabs.length > 0 && tabs[0].url === firstUrl ? 1 : 0;
+async function createUngroupedTabsInWindow(
+  tabs: SavedTab[],
+  windowId: number,
+  startIndex: number,
+  result: RestoreResult,
+): Promise<void> {
   for (let i = startIndex; i < tabs.length; i++) {
     try {
       await browser.tabs.create({ url: tabs[i].url, windowId });
@@ -131,50 +143,83 @@ async function restoreInNewWindow(
       result.errors.push(`Failed to create tab: ${tabs[i].url}`);
     }
   }
+}
 
-  // Create groups
-  for (const group of groups) {
-    const tabIds: number[] = [];
-    for (const tab of group.tabs) {
-      // Reuse the tab already created by windows.create instead of creating a duplicate.
-      // Without this, when firstUrl comes from a group tab, that URL would be created
-      // twice in the same window, triggering deduplication on the still-loading tab.
-      if (!firstWindowTabConsumed && firstTabId != null && tab.url === firstUrl) {
-        tabIds.push(firstTabId);
-        firstWindowTabConsumed = true;
-        continue;
-      }
-      try {
-        const created = await browser.tabs.create({ url: tab.url, windowId });
-        if (created.id != null) tabIds.push(created.id);
-        result.tabsCreated++;
-      } catch (e) {
-        logger.debug('[TAB_RESTORE] Failed to create tab:', e);
-        result.errors.push(`Failed to create tab: ${tab.url}`);
-      }
+async function createGroupInWindow(
+  group: SavedTabGroup,
+  windowId: number,
+  seed: SeedContext,
+  result: RestoreResult,
+): Promise<void> {
+  const tabIds: number[] = [];
+  for (const tab of group.tabs) {
+    // Reuse the tab already created by windows.create instead of creating a duplicate.
+    // Without this, when firstUrl comes from a group tab, that URL would be created
+    // twice in the same window, triggering deduplication on the still-loading tab.
+    if (!seed.firstWindowTabConsumed && seed.firstTabId != null && tab.url === seed.firstUrl) {
+      tabIds.push(seed.firstTabId);
+      seed.firstWindowTabConsumed = true;
+      continue;
     }
-    if (tabIds.length > 0) {
-      try {
-        const groupId = await browser.tabs.group({ tabIds: tabIds as [number, ...number[]], createProperties: { windowId } }) as unknown as number;
-        await browser.tabGroups.update(groupId, { title: group.title, color: group.color, collapsed: group.collapsed ?? false });
-        result.groupsCreated++;
-      } catch (e) {
-        logger.debug('[TAB_RESTORE] Failed to create group:', e);
-        result.errors.push(`Failed to create group: ${group.title}`);
-      }
-    }
-  }
-
-  // Close the default empty tab if we created other tabs
-  if (firstTabId && !firstUrl && result.tabsCreated > 0) {
     try {
-      await browser.tabs.remove(firstTabId);
-    } catch {
-      // Ignore — tab may have been reused
+      const created = await browser.tabs.create({ url: tab.url, windowId });
+      if (created.id != null) tabIds.push(created.id);
+      result.tabsCreated++;
+    } catch (e) {
+      logger.debug('[TAB_RESTORE] Failed to create tab:', e);
+      result.errors.push(`Failed to create tab: ${tab.url}`);
     }
   }
+  if (tabIds.length === 0) return;
+  try {
+    const groupId = (await browser.tabs.group({
+      tabIds: tabIds as [number, ...number[]],
+      createProperties: { windowId },
+    })) as unknown as number;
+    await browser.tabGroups.update(groupId, {
+      title: group.title,
+      color: group.color,
+      collapsed: group.collapsed ?? false,
+    });
+    result.groupsCreated++;
+  } catch (e) {
+    logger.debug('[TAB_RESTORE] Failed to create group:', e);
+    result.errors.push(`Failed to create group: ${group.title}`);
+  }
+}
 
-  return result;
+async function cleanupDefaultEmptyTab(
+  firstTabId: number | undefined,
+  firstUrl: string | undefined,
+  tabsCreated: number,
+): Promise<void> {
+  if (!firstTabId || firstUrl || tabsCreated === 0) return;
+  try {
+    await browser.tabs.remove(firstTabId);
+  } catch {
+    // Ignore — tab may have been reused
+  }
+}
+
+async function restoreInNewWindow(
+  tabs: SavedTab[],
+  groups: SavedTabGroup[],
+  result: RestoreResult,
+): Promise<void> {
+  const firstUrl = tabs[0]?.url || groups[0]?.tabs[0]?.url;
+  const seed = await seedNewWindow(firstUrl, result);
+  if (!seed) return;
+  const { windowId, firstTabId } = seed;
+
+  const startIndex = firstUrl && tabs.length > 0 && tabs[0].url === firstUrl ? 1 : 0;
+  await createUngroupedTabsInWindow(tabs, windowId, startIndex, result);
+
+  const seedCtx: SeedContext = { firstTabId, firstUrl, firstWindowTabConsumed: false };
+  for (const group of groups) {
+    await createGroupInWindow(group, windowId, seedCtx, result);
+  }
+
+  await cleanupDefaultEmptyTab(firstTabId, firstUrl, result.tabsCreated);
 }
 
 async function restoreReplaceInCurrentWindow(
@@ -182,7 +227,7 @@ async function restoreReplaceInCurrentWindow(
   groups: SavedTabGroup[],
   protectedTabId: number | undefined,
   result: RestoreResult,
-): Promise<RestoreResult> {
+): Promise<void> {
   // Snapshot tabs to close before creating new ones. Keep pinned tabs and
   // the optional protectedTabId (the options page tab hosting the action).
   const existingTabs = await browser.tabs.query({ currentWindow: true });
@@ -195,30 +240,20 @@ async function restoreReplaceInCurrentWindow(
   await restoreInCurrentWindow(tabs, groups, undefined, undefined, result);
 
   // Close the previous tabs afterwards so the window never becomes empty.
-  if (tabIdsToClose.length > 0) {
-    try {
-      await browser.tabs.remove(tabIdsToClose);
-    } catch (e) {
-      result.errors.push(`Failed to close existing tabs: ${String(e)}`);
-    }
+  if (tabIdsToClose.length === 0) return;
+  try {
+    await browser.tabs.remove(tabIdsToClose);
+  } catch (e) {
+    result.errors.push(`Failed to close existing tabs: ${String(e)}`);
   }
-
-  return result;
 }
 
-async function restoreInCurrentWindow(
+async function restoreUngroupedTabsToCurrentWindow(
   tabs: SavedTab[],
-  groups: SavedTabGroup[],
-  conflictResolution: ConflictResolution | undefined,
-  conflictAnalysis: ConflictAnalysis | undefined,
+  dupAction: DuplicateTabAction,
+  duplicateUrls: ReadonlySet<string>,
   result: RestoreResult,
-): Promise<RestoreResult> {
-  const dupAction = conflictResolution?.duplicateTabAction ?? 'skip';
-  const duplicateUrls = new Set(
-    (conflictAnalysis?.duplicateTabs ?? []).map(d => d.savedTab.url),
-  );
-
-  // Restore ungrouped tabs
+): Promise<void> {
   for (const tab of tabs) {
     if (dupAction === 'skip' && duplicateUrls.has(tab.url)) {
       result.duplicatesSkipped++;
@@ -232,96 +267,161 @@ async function restoreInCurrentWindow(
       result.errors.push(`Failed to create tab: ${tab.url}`);
     }
   }
+}
 
-  // Restore groups
+async function createTabsForGroup(
+  tabsToCreate: SavedTab[],
+  result: RestoreResult,
+): Promise<number[]> {
+  const newTabIds: number[] = [];
+  for (const tab of tabsToCreate) {
+    try {
+      const created = await browser.tabs.create({ url: tab.url });
+      if (created.id != null) newTabIds.push(created.id);
+      result.tabsCreated++;
+    } catch (e) {
+      logger.debug('[TAB_RESTORE] Failed to create tab:', e);
+      result.errors.push(`Failed to create tab: ${tab.url}`);
+    }
+  }
+  return newTabIds;
+}
+
+async function mergeIntoExistingGroup(
+  group: SavedTabGroup,
+  existingGroupId: number,
+  dupAction: DuplicateTabAction,
+  duplicateUrls: ReadonlySet<string>,
+  result: RestoreResult,
+): Promise<void> {
+  let tabsToCreate =
+    dupAction === 'skip' ? group.tabs.filter(t => !duplicateUrls.has(t.url)) : group.tabs;
+  result.duplicatesSkipped += group.tabs.length - tabsToCreate.length;
+
+  // Filter out tabs already present in the target group.
+  // This must happen BEFORE creating tabs to avoid race conditions with
+  // the background deduplication system that would remove them immediately.
+  try {
+    const existingGroupTabs = await browser.tabs.query({
+      groupId: existingGroupId,
+    } as unknown as Parameters<typeof browser.tabs.query>[0]);
+    const existingGroupUrls = new Set(
+      existingGroupTabs.map(t => t.url).filter(Boolean) as string[],
+    );
+    const beforeCount = tabsToCreate.length;
+    tabsToCreate = tabsToCreate.filter(t => !existingGroupUrls.has(t.url));
+    result.duplicatesSkipped += beforeCount - tabsToCreate.length;
+  } catch {
+    // If we can't query existing group tabs, proceed with all tabs
+  }
+
+  if (tabsToCreate.length === 0) {
+    result.groupsMerged++;
+    return;
+  }
+
+  const newTabIds = await createTabsForGroup(tabsToCreate, result);
+  if (newTabIds.length === 0) return;
+
+  try {
+    await browser.tabs.group({
+      tabIds: newTabIds as [number, ...number[]],
+      groupId: existingGroupId,
+    });
+    result.groupsMerged++;
+  } catch (e) {
+    logger.debug('[TAB_RESTORE] Failed to merge into group:', e);
+    result.errors.push(`Failed to merge into group: ${group.title}`);
+  }
+}
+
+async function createNewGroupInCurrentWindow(
+  group: SavedTabGroup,
+  dupAction: DuplicateTabAction,
+  duplicateUrls: ReadonlySet<string>,
+  result: RestoreResult,
+): Promise<void> {
+  const tabsToCreate =
+    dupAction === 'skip' ? group.tabs.filter(t => !duplicateUrls.has(t.url)) : group.tabs;
+  result.duplicatesSkipped += group.tabs.length - tabsToCreate.length;
+
+  if (tabsToCreate.length === 0) return;
+
+  const newTabIds = await createTabsForGroup(tabsToCreate, result);
+  if (newTabIds.length === 0) return;
+
+  try {
+    const groupId = (await browser.tabs.group({
+      tabIds: newTabIds as [number, ...number[]],
+    })) as unknown as number;
+    await browser.tabGroups.update(groupId, {
+      title: group.title,
+      color: group.color,
+      collapsed: group.collapsed ?? false,
+    });
+    result.groupsCreated++;
+  } catch (e) {
+    logger.debug('[TAB_RESTORE] Failed to create group:', e);
+    result.errors.push(`Failed to create group: ${group.title}`);
+  }
+}
+
+async function restoreGroupToCurrentWindow(
+  group: SavedTabGroup,
+  groupAction: GroupConflictAction,
+  conflictAnalysis: ConflictAnalysis | undefined,
+  dupAction: DuplicateTabAction,
+  duplicateUrls: ReadonlySet<string>,
+  result: RestoreResult,
+): Promise<void> {
+  if (groupAction === 'skip') {
+    result.duplicatesSkipped += group.tabs.length;
+    return;
+  }
+
+  const existingConflict = conflictAnalysis?.conflictingGroups.find(
+    c => c.savedGroup.id === group.id,
+  );
+
+  if (groupAction === 'merge' && existingConflict) {
+    await mergeIntoExistingGroup(
+      group,
+      existingConflict.existingGroupId,
+      dupAction,
+      duplicateUrls,
+      result,
+    );
+    return;
+  }
+
+  // Fallback: 'create_new', or 'merge' without a matching existingConflict
+  await createNewGroupInCurrentWindow(group, dupAction, duplicateUrls, result);
+}
+
+async function restoreInCurrentWindow(
+  tabs: SavedTab[],
+  groups: SavedTabGroup[],
+  conflictResolution: ConflictResolution | undefined,
+  conflictAnalysis: ConflictAnalysis | undefined,
+  result: RestoreResult,
+): Promise<void> {
+  const dupAction = conflictResolution?.duplicateTabAction ?? 'skip';
+  const duplicateUrls = new Set(
+    (conflictAnalysis?.duplicateTabs ?? []).map(d => d.savedTab.url),
+  );
+
+  await restoreUngroupedTabsToCurrentWindow(tabs, dupAction, duplicateUrls, result);
+
   for (const group of groups) {
     const groupAction: GroupConflictAction =
       conflictResolution?.groupActions.get(group.id) ?? 'create_new';
-
-    if (groupAction === 'skip') {
-      result.duplicatesSkipped += group.tabs.length;
-      continue;
-    }
-
-    // Find existing group for merge
-    const existingConflict = conflictAnalysis?.conflictingGroups.find(
-      c => c.savedGroup.id === group.id,
+    await restoreGroupToCurrentWindow(
+      group,
+      groupAction,
+      conflictAnalysis,
+      dupAction,
+      duplicateUrls,
+      result,
     );
-
-    // Filter tabs based on duplicate action (global duplicate check)
-    let tabsToCreate =
-      dupAction === 'skip'
-        ? group.tabs.filter(t => !duplicateUrls.has(t.url))
-        : group.tabs;
-
-    result.duplicatesSkipped += group.tabs.length - tabsToCreate.length;
-
-    // For merge: also filter out tabs already present in the target group
-    // This must happen BEFORE creating tabs to avoid race conditions with
-    // the background deduplication system that would remove them immediately
-    if (groupAction === 'merge' && existingConflict) {
-      try {
-        const existingGroupTabs = await browser.tabs.query({
-          groupId: existingConflict.existingGroupId,
-        } as unknown as Parameters<typeof browser.tabs.query>[0]);
-        const existingGroupUrls = new Set(
-          existingGroupTabs.map(t => t.url).filter(Boolean) as string[],
-        );
-        const beforeCount = tabsToCreate.length;
-        tabsToCreate = tabsToCreate.filter(t => !existingGroupUrls.has(t.url));
-        result.duplicatesSkipped += beforeCount - tabsToCreate.length;
-      } catch {
-        // If we can't query existing group tabs, proceed with all tabs
-      }
-    }
-
-    if (tabsToCreate.length === 0) {
-      if (groupAction === 'merge' && existingConflict) result.groupsMerged++;
-      continue;
-    }
-
-    // Create the tabs
-    const newTabIds: number[] = [];
-    for (const tab of tabsToCreate) {
-      try {
-        const created = await browser.tabs.create({ url: tab.url });
-        if (created.id != null) newTabIds.push(created.id);
-        result.tabsCreated++;
-      } catch (e) {
-        logger.debug('[TAB_RESTORE] Failed to create tab:', e);
-        result.errors.push(`Failed to create tab: ${tab.url}`);
-      }
-    }
-
-    if (newTabIds.length === 0) continue;
-
-    if (groupAction === 'merge' && existingConflict) {
-      try {
-        await browser.tabs.group({
-          tabIds: newTabIds as [number, ...number[]],
-          groupId: existingConflict.existingGroupId,
-        });
-        result.groupsMerged++;
-      } catch (e) {
-        logger.debug('[TAB_RESTORE] Failed to merge into group:', e);
-        result.errors.push(`Failed to merge into group: ${group.title}`);
-      }
-    } else {
-      // Create new group
-      try {
-        const groupId = await browser.tabs.group({ tabIds: newTabIds as [number, ...number[]] }) as unknown as number;
-        await browser.tabGroups.update(groupId, {
-          title: group.title,
-          color: group.color,
-          collapsed: group.collapsed ?? false,
-        });
-        result.groupsCreated++;
-      } catch (e) {
-        logger.debug('[TAB_RESTORE] Failed to create group:', e);
-        result.errors.push(`Failed to create group: ${group.title}`);
-      }
-    }
   }
-
-  return result;
 }
