@@ -152,11 +152,15 @@ test.describe('Creation wizard — Step 2: Configuration', () => {
     const dialog = await openCreateWizard(page, extensionId);
     await goToStep2(dialog);
 
-    // Click Ask segment
+    // Click Ask radio and assert the Ask radio is now checked (locale-agnostic).
+    // The description text and absence of regex inputs are NOT Ask-specific
+    // (description renders for all modes; regex inputs are also absent in default Preset),
+    // so we anchor the test on the radio's data-state.
     await dialog.getByTestId('config-mode-ask').click();
+    await expect(dialog.getByTestId('config-mode-ask')).toHaveAttribute('data-state', 'checked');
 
-    // Explanatory text in a Callout
-    await expect(dialog.locator('.rt-CalloutText')).toBeVisible();
+    // Description heading visible (sanity check)
+    await expect(dialog.getByTestId('config-mode-description')).toBeVisible();
     // No regex input fields
     await expect(dialog.locator('input[name="titleParsingRegEx"]')).not.toBeAttached();
     await expect(dialog.locator('input[name="urlParsingRegEx"]')).not.toBeAttached();

@@ -34,3 +34,23 @@
   outline-offset: -2px;
   border-radius: var(--radius-3);
 }
+
+/* Item description shown only in dropdown items, hidden when portaled into a Select trigger. */
+.rt-SelectTriggerInner [data-select-item-description] {
+  display: none;
+}
+
+/* Select.Item with a rich description: drop the fixed height + add vertical padding. */
+.rt-SelectItem:has([data-select-item-description]) {
+  height: auto;
+  align-items: flex-start;
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
+/* Align the check indicator with the label (first line) when item is multiline. */
+.rt-SelectItem:has([data-select-item-description]) .rt-SelectItemIndicator {
+  top: var(--space-2);
+  bottom: auto;
+  height: var(--line-height-2);
+}

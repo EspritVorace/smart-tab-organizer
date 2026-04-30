@@ -409,6 +409,8 @@ export function RuleWizardModal({
       icon={isEditing ? Edit2 : Plus}
       title={title}
       description={description}
+      maxWidth={820}
+      fillHeight={!isEditing && step === 1}
       onOpenAutoFocus={(e) => {
         e.preventDefault();
         const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[name="label"]');
@@ -435,8 +437,16 @@ export function RuleWizardModal({
           />
         )}
 
-        <WizardModal.Body>
-          <Flex direction="column" gap="4">
+        <WizardModal.Body fillHeight={!isEditing && step === 1}>
+          <Flex
+            direction="column"
+            gap="4"
+            style={
+              !isEditing && step === 1
+                ? { flex: 1, minHeight: 0, overflow: 'hidden' }
+                : undefined
+            }
+          >
             {isEditing ? (
               <EditSummaryView
                 control={control}
@@ -458,7 +468,16 @@ export function RuleWizardModal({
                   </Box>
                 )}
                 {step === 1 && (
-                  <Box data-testid="wizard-rule-step-2">
+                  <Box
+                    data-testid="wizard-rule-step-2"
+                    style={{
+                      flex: 1,
+                      minHeight: 0,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      overflow: 'hidden',
+                    }}
+                  >
                     <WizardStep2Config
                       control={control}
                       errors={errors}
