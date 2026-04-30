@@ -69,11 +69,21 @@ export interface ShortcutDefinition {
   allowInTypingTarget?: boolean;
   /** When true, fires even if a Radix dialog is currently open. */
   allowWhenDialogOpen?: boolean;
+  /**
+   * CSS selector. When the event target is within an element matching this
+   * selector, the shortcut is skipped so the inner element's own handler can
+   * take over (e.g. global popup `R` skips when focus is on a pinned card so
+   * the card's per-session R/Shift+R/Alt+R bindings stay authoritative).
+   */
+  excludeIfTargetWithin?: string;
 }
 
 export function shouldFire(event: KeyboardEvent, def: ShortcutDefinition): boolean {
   if (!matchesShortcut(event, def.combo)) return false;
   if (!def.allowInTypingTarget && isTypingTarget(event.target)) return false;
   if (!def.allowWhenDialogOpen && isDialogOpen()) return false;
+  if (def.excludeIfTargetWithin && event.target instanceof Element) {
+    if (event.target.closest(def.excludeIfTargetWithin)) return false;
+  }
   return true;
 }

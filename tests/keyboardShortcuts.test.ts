@@ -117,6 +117,26 @@ test('shouldFire: allows in input when allowInTypingTarget=true', () => {
   document.body.innerHTML = '';
 });
 
+test('shouldFire: skips when target is within excludeIfTargetWithin selector', () => {
+  document.body.innerHTML = '';
+  const card = document.createElement('div');
+  card.setAttribute('data-popup-pinned-card', '');
+  const inner = document.createElement('span');
+  card.appendChild(inner);
+  document.body.appendChild(card);
+  const event = makeEvent({ key: 'r', target: inner });
+  assert.strictEqual(
+    shouldFire(event, { combo: 'r', excludeIfTargetWithin: '[data-popup-pinned-card]', action: () => {} }),
+    false,
+  );
+  // Same shortcut without the exclusion fires.
+  assert.strictEqual(
+    shouldFire(event, { combo: 'r', action: () => {} }),
+    true,
+  );
+  document.body.innerHTML = '';
+});
+
 test('shouldFire: skips when dialog is open unless allowWhenDialogOpen', () => {
   document.body.innerHTML = '';
   const dialog = document.createElement('div');

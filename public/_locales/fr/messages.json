@@ -547,5 +547,41 @@
   "statsTrendUpAria": { "message": "En hausse" },
   "statsTrendDownAria": { "message": "En baisse" },
   "statsTopRulesTitle": { "message": "Règles les plus actives (30 jours)" },
-  "statsGroupingsAndDedup": { "message": "{grouping} groupages, {dedup} déduplications" }
+  "statsGroupingsAndDedup": { "message": "{grouping} groupages, {dedup} déduplications" },
+
+  "cmdOrganizeAllTabs": { "message": "Organiser tous les onglets de la fenêtre" },
+  "cmdSaveSession": { "message": "Enregistrer la fenêtre courante en session" },
+
+  "shortcutsPanelTitle": { "message": "Raccourcis clavier" },
+  "shortcutsPanelDescription": { "message": "Référence rapide de tous les raccourcis disponibles." },
+  "shortcutsPanelClose": { "message": "Fermer le panneau des raccourcis" },
+  "shortcutsPanelToggleAria": { "message": "Afficher les raccourcis clavier" },
+  "shortcutsCustomize": { "message": "Personnaliser les raccourcis du navigateur" },
+  "shortcutsCustomizeFirefoxHint": { "message": "Firefox : ouvrez le menu d'engrenage, puis 'Gérer les raccourcis des extensions'." },
+
+  "shortcutsGroupGlobal": { "message": "Globaux navigateur" },
+  "shortcutsGroupPopup": { "message": "Popup" },
+  "shortcutsGroupOptions": { "message": "Page d'options" },
+  "shortcutsGroupLists": { "message": "Listes (règles et sessions)" },
+  "shortcutsGroupSessionCard": { "message": "Carte session (focus)" },
+
+  "shortcutDescOrganize": { "message": "Organiser tous les onglets" },
+  "shortcutDescSaveSession": { "message": "Enregistrer la fenêtre comme session" },
+  "shortcutDescOpenPopup": { "message": "Ouvrir la popup de l'extension" },
+  "shortcutDescPopupSave": { "message": "Enregistrer un snapshot" },
+  "shortcutDescPopupRestore": { "message": "Ouvrir les sessions" },
+  "shortcutDescPopupOrganize": { "message": "Organiser tous les onglets" },
+  "shortcutDescOpenShortcutsHelp": { "message": "Afficher ce panneau de raccourcis" },
+  "shortcutDescNavigateTabs": { "message": "Changer d'onglet de la barre latérale" },
+  "shortcutDescFocusSearch": { "message": "Focus sur le champ de recherche" },
+  "shortcutDescClearSearch": { "message": "Effacer la recherche ou fermer le panneau" },
+  "shortcutDescListNavigate": { "message": "Déplacer le focus entre les cartes" },
+  "shortcutDescListNew": { "message": "Créer un nouvel élément" },
+  "shortcutDescListEdit": { "message": "Modifier l'élément focus" },
+  "shortcutDescListDelete": { "message": "Supprimer l'élément focus" },
+  "shortcutDescListPin": { "message": "Épingler ou désépingler la session focus" },
+  "shortcutDescSessionRestoreCustom": { "message": "Restauration personnalisée (assistant)" },
+  "shortcutDescSessionRestoreCurrent": { "message": "Ajouter la session à la fenêtre courante" },
+  "shortcutDescSessionReplaceCurrent": { "message": "Remplacer les onglets de la fenêtre" },
+  "shortcutDescSessionRestoreNew": { "message": "Ouvrir la session dans une nouvelle fenêtre" }
 }

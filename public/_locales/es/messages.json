@@ -547,5 +547,41 @@
   "statsTrendUpAria": { "message": "En alza" },
   "statsTrendDownAria": { "message": "En baja" },
   "statsTopRulesTitle": { "message": "Reglas más activas (30 días)" },
-  "statsGroupingsAndDedup": { "message": "{grouping} agrupaciones, {dedup} deduplicaciones" }
+  "statsGroupingsAndDedup": { "message": "{grouping} agrupaciones, {dedup} deduplicaciones" },
+
+  "cmdOrganizeAllTabs": { "message": "Organizar todas las pestañas de la ventana" },
+  "cmdSaveSession": { "message": "Guardar la ventana actual como sesión" },
+
+  "shortcutsPanelTitle": { "message": "Atajos de teclado" },
+  "shortcutsPanelDescription": { "message": "Referencia rápida de todos los atajos disponibles." },
+  "shortcutsPanelClose": { "message": "Cerrar el panel de atajos" },
+  "shortcutsPanelToggleAria": { "message": "Mostrar atajos de teclado" },
+  "shortcutsCustomize": { "message": "Personalizar atajos del navegador" },
+  "shortcutsCustomizeFirefoxHint": { "message": "Firefox: abre el menú de engranaje y luego 'Administrar atajos de extensiones'." },
+
+  "shortcutsGroupGlobal": { "message": "Globales (navegador)" },
+  "shortcutsGroupPopup": { "message": "Popup" },
+  "shortcutsGroupOptions": { "message": "Página de opciones" },
+  "shortcutsGroupLists": { "message": "Listas (reglas y sesiones)" },
+  "shortcutsGroupSessionCard": { "message": "Tarjeta de sesión (con foco)" },
+
+  "shortcutDescOrganize": { "message": "Organizar todas las pestañas" },
+  "shortcutDescSaveSession": { "message": "Guardar la ventana como sesión" },
+  "shortcutDescOpenPopup": { "message": "Abrir el popup de la extensión" },
+  "shortcutDescPopupSave": { "message": "Guardar instantánea" },
+  "shortcutDescPopupRestore": { "message": "Abrir sesiones" },
+  "shortcutDescPopupOrganize": { "message": "Organizar todas las pestañas" },
+  "shortcutDescOpenShortcutsHelp": { "message": "Mostrar este panel de atajos" },
+  "shortcutDescNavigateTabs": { "message": "Cambiar de pestaña en la barra lateral" },
+  "shortcutDescFocusSearch": { "message": "Enfocar el campo de búsqueda" },
+  "shortcutDescClearSearch": { "message": "Borrar la búsqueda o cerrar el panel" },
+  "shortcutDescListNavigate": { "message": "Mover el foco entre tarjetas" },
+  "shortcutDescListNew": { "message": "Crear nuevo elemento" },
+  "shortcutDescListEdit": { "message": "Editar el elemento con foco" },
+  "shortcutDescListDelete": { "message": "Eliminar el elemento con foco" },
+  "shortcutDescListPin": { "message": "Anclar o desanclar la sesión con foco" },
+  "shortcutDescSessionRestoreCustom": { "message": "Restauración personalizada (asistente)" },
+  "shortcutDescSessionRestoreCurrent": { "message": "Añadir la sesión a la ventana actual" },
+  "shortcutDescSessionReplaceCurrent": { "message": "Reemplazar las pestañas de la ventana" },
+  "shortcutDescSessionRestoreNew": { "message": "Abrir la sesión en una nueva ventana" }
 }
