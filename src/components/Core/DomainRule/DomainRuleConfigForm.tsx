@@ -154,19 +154,32 @@ export function DomainRuleConfigForm({
                 />
                 <Select.Content>
                   {groupNameSourceOptions
-                    .filter((option) => option.value !== 'manual' && option.value !== 'smart_preset')
+                    .filter((option) => {
+                      // Always keep the currently selected value visible so the trigger renders it,
+                      // even if it would normally be excluded (e.g. 'smart_preset' inherited from a preset rule).
+                      if (option.value === groupNameSource) return true;
+                      return option.value !== 'manual' && option.value !== 'smart_preset';
+                    })
                     .map((option) => (
                       <Select.Item key={option.value} value={option.value}>
-                        <Flex direction="column" gap="1" align="start">
-                          <Text size="2">{getMessage(option.keyLabel)}</Text>
+                        <span
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-start',
+                            gap: 'var(--space-1)',
+                          }}
+                        >
+                          <Text size="2" as="span">{getMessage(option.keyLabel)}</Text>
                           <Text
                             size="1"
                             color="gray"
+                            as="span"
                             data-select-item-description
                           >
                             {getMessage(GROUP_NAME_SOURCE_HELP_KEYS[option.value])}
                           </Text>
-                        </Flex>
+                        </span>
                       </Select.Item>
                     ))}
                 </Select.Content>
