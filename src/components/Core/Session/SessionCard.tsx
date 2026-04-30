@@ -512,6 +512,7 @@ export function SessionCard({
       ref={isSummary ? null : ref}
       data-testid={`session-card-${session.id}`}
       data-session-card="true"
+      role={isSummary ? 'listitem' : undefined}
       tabIndex={isSummary ? undefined : 0}
       onKeyDown={isSummary ? undefined : onCardKeyDown}
       size="2"

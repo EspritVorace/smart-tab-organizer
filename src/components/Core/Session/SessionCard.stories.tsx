@@ -169,6 +169,7 @@ export const SessionCardWithRelativeDates: Story = {
 // ---------------------------------------------------------------------------
 export const SessionCardSummary: Story = {
   name: 'SessionCard — Summary (base)',
+  decorators: [(Story) => <div role="list"><Story /></div>],
   args: {
     session: baseSession,
     variant: 'summary',
@@ -183,11 +184,13 @@ export const SessionCardSummaryWithCheckbox: Story = {
   render: () => (
     <Theme>
       <Box style={{ maxWidth: 680 }}>
-        <SessionCard
-          session={baseSession}
-          variant="summary"
-          leading={<Checkbox defaultChecked aria-label={baseSession.name} />}
-        />
+        <div role="list">
+          <SessionCard
+            session={baseSession}
+            variant="summary"
+            leading={<Checkbox defaultChecked aria-label={baseSession.name} />}
+          />
+        </div>
       </Box>
     </Theme>
   ),
@@ -201,14 +204,16 @@ export const SessionCardSummaryConflict: Story = {
   render: () => (
     <Theme>
       <Box style={{ maxWidth: 680 }}>
-        <SessionCard
-          session={baseSession}
-          variant="summary"
-          status="conflict"
-          trailing={
-            <Button size="1" variant="soft" color="orange">View diff</Button>
-          }
-        />
+        <div role="list">
+          <SessionCard
+            session={baseSession}
+            variant="summary"
+            status="conflict"
+            trailing={
+              <Button size="1" variant="soft" color="orange">View diff</Button>
+            }
+          />
+        </div>
       </Box>
     </Theme>
   ),
@@ -222,14 +227,16 @@ export const SessionCardSummaryIdentical: Story = {
   render: () => (
     <Theme>
       <Box style={{ maxWidth: 680 }}>
-        <SessionCard
-          session={baseSession}
-          variant="summary"
-          status="identical"
-          trailing={
-            <Badge color="gray" variant="outline" size="1">Already exists</Badge>
-          }
-        />
+        <div role="list">
+          <SessionCard
+            session={baseSession}
+            variant="summary"
+            status="identical"
+            trailing={
+              <Badge color="gray" variant="outline" size="1">Already exists</Badge>
+            }
+          />
+        </div>
       </Box>
     </Theme>
   ),
