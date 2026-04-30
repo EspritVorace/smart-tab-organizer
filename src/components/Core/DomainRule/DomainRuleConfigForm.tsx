@@ -135,41 +135,45 @@ export function DomainRuleConfigForm({
 
           {/* Ask mode: nothing extra — description above is sufficient. */}
 
-          {/* Manual mode: groupNameSource selector + contextual help, stacked vertically */}
+          {/* Manual mode: groupNameSource selector + contextual help below the field */}
           {configMode === 'manual' && (
-            <Flex direction="column" gap="3">
-              <Flex direction="column">
-                <Text size="2" weight="bold" asChild>
-                  <Label.Root htmlFor={groupNameSourceInputId}>
-                    {getMessage('groupNameSource')}
-                  </Label.Root>
-                </Text>
-                <Select.Root
-                  value={groupNameSource}
-                  onValueChange={(v) => onGroupNameSourceChange(v as GroupNameSourceValue)}
-                >
-                  <Select.Trigger
-                    id={groupNameSourceInputId}
-                    placeholder={getMessage('selectGroupNameSource')}
-                    style={{ marginTop: '4px' }}
-                  />
-                  <Select.Content>
-                    {groupNameSourceOptions
-                      .filter((option) => option.value !== 'manual' && option.value !== 'smart_preset')
-                      .map((option) => (
-                        <Select.Item key={option.value} value={option.value}>
-                          {getMessage(option.keyLabel)}
-                        </Select.Item>
-                      ))}
-                  </Select.Content>
-                </Select.Root>
-              </Flex>
-              <Callout.Root size="1" color="gray" variant="surface">
-                <Callout.Icon><Info size={14} aria-hidden="true" /></Callout.Icon>
-                <Callout.Text>
-                  {getMessage(GROUP_NAME_SOURCE_HELP_KEYS[groupNameSource])}
-                </Callout.Text>
-              </Callout.Root>
+            <Flex direction="column">
+              <Text size="2" weight="bold" asChild>
+                <Label.Root htmlFor={groupNameSourceInputId}>
+                  {getMessage('groupNameSource')}
+                </Label.Root>
+              </Text>
+              <Select.Root
+                value={groupNameSource}
+                onValueChange={(v) => onGroupNameSourceChange(v as GroupNameSourceValue)}
+              >
+                <Select.Trigger
+                  id={groupNameSourceInputId}
+                  placeholder={getMessage('selectGroupNameSource')}
+                  style={{ marginTop: '4px' }}
+                />
+                <Select.Content>
+                  {groupNameSourceOptions
+                    .filter((option) => option.value !== 'manual' && option.value !== 'smart_preset')
+                    .map((option) => (
+                      <Select.Item key={option.value} value={option.value}>
+                        <Flex direction="column" gap="1" align="start">
+                          <Text size="2">{getMessage(option.keyLabel)}</Text>
+                          <Text
+                            size="1"
+                            color="gray"
+                            data-select-item-description
+                          >
+                            {getMessage(GROUP_NAME_SOURCE_HELP_KEYS[option.value])}
+                          </Text>
+                        </Flex>
+                      </Select.Item>
+                    ))}
+                </Select.Content>
+              </Select.Root>
+              <Text size="1" color="gray" mt="1">
+                {getMessage(GROUP_NAME_SOURCE_HELP_KEYS[groupNameSource])}
+              </Text>
             </Flex>
           )}
 
