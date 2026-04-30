@@ -8,6 +8,18 @@ function getStatusStyle(status: 'default' | 'conflict' | 'identical'): React.CSS
   if (status === 'identical') return { opacity: 0.6 };
   return {};
 }
+
+function getDragHandleStyle(disabled: boolean): React.CSSProperties {
+  return {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: disabled ? 'not-allowed' : 'grab',
+    touchAction: 'none',
+    color: disabled ? 'var(--gray-6)' : 'var(--gray-9)',
+    flexShrink: 0,
+  };
+}
 import { RuleDetailPopover } from './RuleDetailPopover';
 import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 import { getMessage } from '@/utils/i18n';
@@ -152,15 +164,7 @@ export function DomainRuleCard({
             data-testid={`rule-card-${rule.id}-drag-handle`}
             aria-disabled={isDragDisabled}
             aria-label={getMessage('dragHandle')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: isDragDisabled ? 'not-allowed' : 'grab',
-              touchAction: 'none',
-              color: isDragDisabled ? 'var(--gray-6)' : 'var(--gray-9)',
-              flexShrink: 0,
-            }}
+            style={getDragHandleStyle(isDragDisabled)}
           >
             <GripVertical size={16} aria-hidden="true" />
           </Box>
