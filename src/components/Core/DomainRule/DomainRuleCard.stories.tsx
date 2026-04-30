@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Theme, Box, Flex } from '@radix-ui/themes';
+import { Theme, Box, Flex, Checkbox, Badge, Button } from '@radix-ui/themes';
 import { DragDropProvider } from '@dnd-kit/react';
 import { DomainRuleCard } from './DomainRuleCard';
 import type { DomainRuleSetting } from '@/types/syncSettings';
@@ -119,6 +119,73 @@ export const DomainRuleCardWithSearch: Story = {
     searchTerm: 'git',
     isDragDisabled: true,
   },
+};
+
+/* ── Summary mode stories ────────────────────────────────────────────────────── */
+
+export const DomainRuleCardSummary: Story = {
+  name: 'DomainRuleCard — Summary (base)',
+  args: {
+    rule: baseRule,
+    variant: 'summary',
+  },
+};
+
+export const DomainRuleCardSummaryWithCheckbox: Story = {
+  name: 'DomainRuleCard — Summary + checkbox (export)',
+  render: () => (
+    <Theme>
+      <Box style={{ maxWidth: 680 }}>
+        <DragDropProvider>
+          <DomainRuleCard
+            rule={baseRule}
+            variant="summary"
+            leading={<Checkbox defaultChecked aria-label={baseRule.label} />}
+          />
+        </DragDropProvider>
+      </Box>
+    </Theme>
+  ),
+};
+
+export const DomainRuleCardSummaryConflict: Story = {
+  name: 'DomainRuleCard — Summary + conflict (import)',
+  render: () => (
+    <Theme>
+      <Box style={{ maxWidth: 680 }}>
+        <DragDropProvider>
+          <DomainRuleCard
+            rule={baseRule}
+            variant="summary"
+            status="conflict"
+            trailing={
+              <Button size="1" variant="soft" color="orange">View diff</Button>
+            }
+          />
+        </DragDropProvider>
+      </Box>
+    </Theme>
+  ),
+};
+
+export const DomainRuleCardSummaryIdentical: Story = {
+  name: 'DomainRuleCard — Summary + identical (import)',
+  render: () => (
+    <Theme>
+      <Box style={{ maxWidth: 680 }}>
+        <DragDropProvider>
+          <DomainRuleCard
+            rule={baseRule}
+            variant="summary"
+            status="identical"
+            trailing={
+              <Badge color="gray" variant="outline" size="1">Already exists</Badge>
+            }
+          />
+        </DragDropProvider>
+      </Box>
+    </Theme>
+  ),
 };
 
 export const DomainRuleCardListSortable: Story = {
