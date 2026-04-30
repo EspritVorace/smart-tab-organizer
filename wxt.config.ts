@@ -28,6 +28,19 @@ export default defineConfig({
     },
     permissions: ['tabs', 'tabGroups', 'storage', 'notifications'],
     host_permissions: ['<all_urls>'],
+    commands: {
+      'organize-all-tabs': {
+        suggested_key: { default: 'Alt+Shift+O' },
+        description: '__MSG_cmdOrganizeAllTabs__',
+      },
+      'save-current-window-session': {
+        suggested_key: { default: 'Alt+Shift+S' },
+        description: '__MSG_cmdSaveSession__',
+      },
+      _execute_action: {
+        suggested_key: { default: 'Alt+Shift+P' },
+      },
+    },
     action: {
       default_icon: {
         '16': 'icons/icon16.png',

@@ -12,6 +12,7 @@ import {
 import { processTabForDeduplication } from './deduplication.js';
 import { processGroupingForNewTab } from './grouping.js';
 import { handleOrganizeAllTabs } from './organize.js';
+import { openOptionsWithHash } from '@/utils/openOptions.js';
 import type { BackgroundMessage, MessageResponse } from '@/types/messages.js';
 
 function isBackgroundMessage(value: unknown): value is BackgroundMessage {
@@ -26,6 +27,27 @@ export function setupInstallationHandler(): void {
         await initializeDefaults();
         await seedBuiltInCategories();
         await initCategoriesStore();
+    });
+}
+
+export function setupCommandHandler(): void {
+    const commands = (browser as unknown as { commands?: { onCommand?: { addListener: (cb: (name: string) => void) => void } } }).commands;
+    if (!commands?.onCommand) {
+        logger.debug('[COMMANDS] browser.commands.onCommand unavailable, skipping handler.');
+        return;
+    }
+    commands.onCommand.addListener((name: string) => {
+        logger.debug('[COMMANDS] received', name);
+        if (name === 'organize-all-tabs') {
+            browser.windows.getCurrent()
+                .then(win => { if (win.id != null) return handleOrganizeAllTabs(win.id); })
+                .catch(e => logger.error('[COMMANDS] organize-all-tabs failed:', e));
+            return;
+        }
+        if (name === 'save-current-window-session') {
+            openOptionsWithHash('#sessions?action=snapshot')
+                .catch(e => logger.error('[COMMANDS] save-current-window-session failed:', e));
+        }
     });
 }
 
@@ -231,6 +253,7 @@ async function flushPendingGroupingOnComplete(
 export function setupAllEventHandlers(): void {
     setupInstallationHandler();
     setupMessageHandler();
+    setupCommandHandler();
     setupTabCreatedHandler();
     setupTabUpdatedHandler();
     setupTabRemovedHandler();
