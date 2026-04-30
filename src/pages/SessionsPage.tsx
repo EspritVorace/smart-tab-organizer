@@ -102,31 +102,6 @@ function SessionSection({
   const [dragItems, setDragItems] = useState<Session[] | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const handleCardKeyDown = useCallback((e: React.KeyboardEvent<HTMLElement>, index: number) => {
-    // Only act when the card element itself has focus (not a child input/button).
-    if (e.target !== e.currentTarget) return;
-    const cards = listRef.current?.querySelectorAll<HTMLElement>('[data-session-card]');
-    if (!cards) return;
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        cards[index + 1]?.focus();
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        cards[index - 1]?.focus();
-        break;
-      case 'Home':
-        e.preventDefault();
-        cards[0]?.focus();
-        break;
-      case 'End':
-        e.preventDefault();
-        cards[cards.length - 1]?.focus();
-        break;
-    }
-  }, []);
-
   // Drag: reorder within this section, then splice back into the global order.
   const handleDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
     setDragItems(prev => move(prev ?? sessions, event));
@@ -184,6 +159,43 @@ function SessionSection({
     (session: Session) => handleQuickRestore(session, 'replace'),
     [handleQuickRestore],
   );
+
+  const handleCardKeyDown = useCallback((e: React.KeyboardEvent<HTMLElement>, index: number, session: Session) => {
+    // Only act when the card element itself has focus (not a child input/button).
+    if (e.target !== e.currentTarget) return;
+    const cards = listRef.current?.querySelectorAll<HTMLElement>('[data-session-card]');
+    if (!cards) return;
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        cards[index + 1]?.focus();
+        return;
+      case 'ArrowUp':
+        e.preventDefault();
+        cards[index - 1]?.focus();
+        return;
+      case 'Home':
+        e.preventDefault();
+        cards[0]?.focus();
+        return;
+      case 'End':
+        e.preventDefault();
+        cards[cards.length - 1]?.focus();
+        return;
+    }
+    if (e.key.toLowerCase() === 'r' && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      if (e.altKey && e.shiftKey) {
+        void handleRestoreNewWindow(session);
+      } else if (e.altKey) {
+        void handleReplaceCurrentWindow(session);
+      } else if (e.shiftKey) {
+        void handleRestoreCurrentWindow(session);
+      } else {
+        onOpenRestoreWizard(session);
+      }
+    }
+  }, [handleRestoreCurrentWindow, handleRestoreNewWindow, handleReplaceCurrentWindow, onOpenRestoreWizard]);
 
   const handlePin = useCallback(async (session: Session) => {
     await updateSession(session.id, { isPinned: true });
@@ -246,7 +258,7 @@ function SessionSection({
                   isDragDisabled={!!searchQuery}
                   onMoveToFirst={() => handleMoveToFirst(session)}
                   onMoveLast={() => handleMoveLast(session)}
-                  onCardKeyDown={(e) => handleCardKeyDown(e, index)}
+                  onCardKeyDown={(e) => handleCardKeyDown(e, index, session)}
                 />
               );
             })}

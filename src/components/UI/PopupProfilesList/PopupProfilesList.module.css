@@ -1,0 +1,9 @@
+.pinnedCard {
+  cursor: default;
+  outline: none;
+}
+
+.pinnedCard:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 1px;
+}
