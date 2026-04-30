@@ -40,8 +40,8 @@ async function advanceToStep2(page: import('@playwright/test').Page, label = 'Sc
   await dialog.locator('input[name="domainFilter"]').fill('screenshot.com');
   // Click Next button — match all 3 locale texts (Next / Suivant / Siguiente)
   await dialog.getByRole('button', { name: /^(next|suivant|siguiente)$/i }).click();
-  // Wait for step 2 content (SegmentedControl) rather than a fixed timeout
-  await dialog.locator('button.rt-SegmentedControlItem').first().waitFor({ state: 'visible' });
+  // Wait for step 2 content (RadioGroup with config-mode cards) rather than a fixed timeout
+  await dialog.getByTestId('config-mode-preset').waitFor({ state: 'visible' });
 }
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
@@ -84,7 +84,7 @@ test.describe('Rules screenshots', () => {
 
   /**
    * rules-create-preset
-   * Wizard step 2 open, Preset mode selected (default), info HoverCard visible.
+   * Wizard step 2 open, Preset mode selected (default radio), inline preset palette visible.
    */
   test('rules-create-preset', async ({ extensionContext, extensionId }, testInfo) => {
     const locale = testInfo.project.name;
@@ -99,19 +99,15 @@ test.describe('Rules screenshots', () => {
       async (page) => {
         await openAddRuleDialog(page);
         await advanceToStep2(page);
-
-        // Preset is the default mode (index 0). Hover over its (i) icon to
-        // reveal the HoverCard description.
-        const items = page.locator('[role="dialog"] button.rt-SegmentedControlItem');
-        await items.nth(0).locator('svg').first().hover();
-        await page.waitForTimeout(500);
+        // Preset is the default mode — its card is highlighted, description and inline list visible.
+        await page.waitForTimeout(300);
       },
     );
   });
 
   /**
    * rules-create-ask
-   * Wizard step 2 open, Ask mode selected, info HoverCard visible.
+   * Wizard step 2 open, Ask mode selected, mode description visible.
    */
   test('rules-create-ask', async ({ extensionContext, extensionId }, testInfo) => {
     const locale = testInfo.project.name;
@@ -127,19 +123,15 @@ test.describe('Rules screenshots', () => {
         await openAddRuleDialog(page);
         await advanceToStep2(page);
 
-        // SegmentedControl order: preset(0) · ask(1) · manual(2)
-        const items = page.locator('[role="dialog"] button.rt-SegmentedControlItem');
-        await items.nth(1).click();
-        await page.waitForTimeout(200);
-        await items.nth(1).locator('svg').first().hover();
-        await page.waitForTimeout(500);
+        await page.locator('[role="dialog"]').getByTestId('config-mode-ask').click();
+        await page.waitForTimeout(300);
       },
     );
   });
 
   /**
    * rules-create-manual
-   * Wizard step 2 open, Manual mode selected, info HoverCard visible.
+   * Wizard step 2 open, Manual mode selected, source select visible.
    */
   test('rules-create-manual', async ({ extensionContext, extensionId }, testInfo) => {
     const locale = testInfo.project.name;
@@ -155,11 +147,8 @@ test.describe('Rules screenshots', () => {
         await openAddRuleDialog(page);
         await advanceToStep2(page);
 
-        const items = page.locator('[role="dialog"] button.rt-SegmentedControlItem');
-        await items.last().click();
-        await page.waitForTimeout(200);
-        await items.last().locator('svg').first().hover();
-        await page.waitForTimeout(500);
+        await page.locator('[role="dialog"]').getByTestId('config-mode-manual').click();
+        await page.waitForTimeout(300);
       },
     );
   });
@@ -185,7 +174,7 @@ test.describe('Rules screenshots', () => {
 
         const dialog = page.locator('[role="dialog"]');
         // Switch to Ask mode so no preset selection is required
-        await dialog.locator('button.rt-SegmentedControlItem').nth(1).click();
+        await dialog.getByTestId('config-mode-ask').click();
         await page.waitForTimeout(200);
 
         // Step 2 → step 3 (Next: Suivant / Siguiente)
