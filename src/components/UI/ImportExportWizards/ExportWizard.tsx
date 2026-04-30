@@ -66,7 +66,7 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
           <ExportNoteField value={exportNote} onChange={setExportNote} />
           <SelectionToolbar onSelectAll={selectAll} onDeselectAll={selection.clearAll} />
 
-          <SelectableListContainer>
+          <SelectableListContainer role="list">
             {rules.map((rule) => (
               <DomainRuleCard
                 key={rule.id}
