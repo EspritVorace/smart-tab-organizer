@@ -1,4 +1,4 @@
-import { Button, Flex, ScrollArea } from '@radix-ui/themes';
+import { Button, Flex } from '@radix-ui/themes';
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
@@ -143,35 +143,45 @@ export function ConfigEditModal({
       hideDescription
       maxWidth={820}
       showHeaderSeparator={false}
+      contentStyle={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '80vh',
+        overflow: 'hidden',
+      }}
     >
-      <ScrollArea type="auto" scrollbars="vertical" style={{ maxHeight: '55vh' }}>
-        <Flex direction="column" gap="4" mt="4" pr="3">
-          <DomainRuleConfigForm
-            idPrefix="edit"
-            configMode={configMode}
-            onConfigModeChange={setConfigMode}
-            presetId={presetId}
-            onPresetChange={handlePresetChange}
-            presetCategories={presetCategories}
-            isLoadingPresets={isLoadingPresets}
-            groupNameSource={groupNameSource}
-            onGroupNameSourceChange={setGroupNameSource}
-            titleParsingRegEx={titleParsingRegEx}
-            onTitleParsingRegExChange={setTitleParsingRegEx}
-            titleParsingRegExError={titleRegexError}
-            urlParsingRegEx={urlParsingRegEx}
-            onUrlParsingRegExChange={setUrlParsingRegEx}
-            urlParsingRegExError={urlRegexError}
-            urlExtractionMode={urlExtractionMode}
-            onUrlExtractionModeChange={setUrlExtractionMode}
-            urlQueryParamName={urlQueryParamName}
-            onUrlQueryParamNameChange={setUrlQueryParamName}
-            urlQueryParamNameError={queryParamNameError}
-          />
-        </Flex>
-      </ScrollArea>
+      <Flex
+        direction="column"
+        gap="4"
+        mt="4"
+        pr="3"
+        style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}
+      >
+        <DomainRuleConfigForm
+          idPrefix="edit"
+          configMode={configMode}
+          onConfigModeChange={setConfigMode}
+          presetId={presetId}
+          onPresetChange={handlePresetChange}
+          presetCategories={presetCategories}
+          isLoadingPresets={isLoadingPresets}
+          groupNameSource={groupNameSource}
+          onGroupNameSourceChange={setGroupNameSource}
+          titleParsingRegEx={titleParsingRegEx}
+          onTitleParsingRegExChange={setTitleParsingRegEx}
+          titleParsingRegExError={titleRegexError}
+          urlParsingRegEx={urlParsingRegEx}
+          onUrlParsingRegExChange={setUrlParsingRegEx}
+          urlParsingRegExError={urlRegexError}
+          urlExtractionMode={urlExtractionMode}
+          onUrlExtractionModeChange={setUrlExtractionMode}
+          urlQueryParamName={urlQueryParamName}
+          onUrlQueryParamNameChange={setUrlQueryParamName}
+          urlQueryParamNameError={queryParamNameError}
+        />
+      </Flex>
 
-      <Flex gap="3" justify="end" mt="4">
+      <Flex gap="3" justify="end" mt="4" style={{ flexShrink: 0 }}>
         <Button variant="soft" color="gray" onClick={onClose}>
           {getMessage('cancel')}
         </Button>
