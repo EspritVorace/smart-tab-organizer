@@ -223,7 +223,14 @@ export function PopupProfilesList() {
     <Flex direction="column" gap="2">
       <Box style={{ paddingLeft: 4 }}>{sectionLabel}</Box>
 
-      <Flex ref={listRef} data-testid="popup-profiles-list" direction="column" gap="2">
+      <Flex
+        ref={listRef}
+        data-testid="popup-profiles-list"
+        direction="column"
+        gap="2"
+        role="list"
+        aria-label={getMessage('popupPinnedSessionsLabel')}
+      >
         {pinnedSessions.map((session, index) => (
           <Card
             key={session.id}

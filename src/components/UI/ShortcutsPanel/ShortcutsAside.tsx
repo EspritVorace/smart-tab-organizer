@@ -19,6 +19,7 @@ interface ShortcutsAsideProps {
  * and the close button takes focus. On close, focus is restored.
  */
 export function ShortcutsAside({ open, onClose }: ShortcutsAsideProps) {
+  const asideRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousActiveElementRef = useRef<HTMLElement | null>(null);
   const wasOpenRef = useRef(false);
@@ -35,12 +36,26 @@ export function ShortcutsAside({ open, onClose }: ShortcutsAsideProps) {
     wasOpenRef.current = open;
   }, [open]);
 
+  // Use the inert attribute (rather than aria-hidden + tabindex=-1) when closed,
+  // so the panel and its children are removed from interaction and the AT tree
+  // without triggering the aria-hidden-focus axe rule. React 18 typings do not
+  // expose inert as a prop, so we toggle it via the ref.
+  useEffect(() => {
+    const node = asideRef.current;
+    if (!node) return;
+    if (open) {
+      node.removeAttribute('inert');
+    } else {
+      node.setAttribute('inert', '');
+    }
+  }, [open]);
+
   return (
     <aside
+      ref={asideRef}
       data-testid="shortcuts-aside"
       data-state={open ? 'open' : 'closed'}
       aria-label={getMessage('shortcutsPanelTitle')}
-      aria-hidden={!open}
       className={`${styles.aside} ${open ? styles.asideOpen : styles.asideClosed}`}
     >
       <div className={styles.header}>
@@ -58,7 +73,6 @@ export function ShortcutsAside({ open, onClose }: ShortcutsAsideProps) {
           aria-label={getMessage('shortcutsPanelClose')}
           title={getMessage('shortcutsPanelClose')}
           onClick={onClose}
-          tabIndex={open ? 0 : -1}
           data-testid="shortcuts-aside-close"
         >
           <X size={14} aria-hidden="true" />

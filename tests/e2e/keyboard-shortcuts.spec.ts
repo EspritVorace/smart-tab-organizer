@@ -31,16 +31,26 @@ test.describe('[US-KB-popup] Popup shortcuts', () => {
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
-    // Make sure no input is focused so the global handler fires
-    await page.locator('body').click();
+    // Wait for the toolbar to mount: this guarantees the popup-level
+    // useKeyboardShortcuts effect has run and the document keydown listener
+    // is attached before we send the key.
+    await expect(page.getByTestId('popup-toolbar')).toBeVisible();
+
+    // Move focus to the popup wrapper (data-testid="popup") so the keydown
+    // bubbles to document without being intercepted by an inner input.
+    await page.getByTestId('popup').click({ position: { x: 5, y: 5 } });
 
     await page.keyboard.press('Shift+Slash'); // produces "?"
 
-    await expect(page.getByTestId('shortcuts-drawer')).toBeVisible();
+    await expect(page.getByTestId('shortcuts-drawer')).toBeVisible({
+      timeout: 5000,
+    });
     await expect(page.getByTestId('shortcuts-content')).toBeVisible();
 
     await page.keyboard.press('Escape');
-    await expect(page.getByTestId('shortcuts-drawer')).toBeHidden();
+    await expect(page.getByTestId('shortcuts-drawer')).toBeHidden({
+      timeout: 5000,
+    });
 
     await page.close();
   });
