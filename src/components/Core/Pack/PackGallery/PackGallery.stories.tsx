@@ -17,6 +17,7 @@ const baseRule = (overrides: Partial<ImportDomainRule>): ImportDomainRule => ({
   deduplicationEnabled: true,
   ignoredQueryParams: [],
   presetId: null,
+  urlExtractionMode: 'regex',
   enabled: true,
   ...overrides,
 });

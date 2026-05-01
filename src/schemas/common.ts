@@ -5,28 +5,28 @@ import { getMessage } from '@/utils/i18n';
 export const idSchema = z.string().min(1);
 
 // Custom error map pour utiliser les traductions
-const customErrorMap: z.ZodErrorMap = (issue, ctx) => {
+const customErrorMap: z.core.$ZodErrorMap = (issue) => {
   switch (issue.code) {
-    case z.ZodIssueCode.too_small:
-      if (issue.type === 'string') {
+    case 'too_small':
+      if (issue.origin === 'string') {
         return { message: getMessage('errorZodRequired') };
       }
       break;
-    case z.ZodIssueCode.too_big:
-      if (issue.type === 'string') {
+    case 'too_big':
+      if (issue.origin === 'string') {
         return { message: getMessage('errorZodMaxLength') };
       }
       break;
-    case z.ZodIssueCode.custom:
+    case 'custom':
       return { message: issue.message || getMessage('errorZodInvalid') };
-    case z.ZodIssueCode.invalid_enum_value:
+    case 'invalid_value':
       return { message: getMessage('errorZodInvalidValue') };
   }
-  return { message: ctx.defaultError };
+  return undefined;
 };
 
 // Appliquer la error map personnalisée
-z.setErrorMap(customErrorMap);
+z.config({ customError: customErrorMap });
 
 // Helper pour valider les expressions régulières
 export const createRegexValidator = (allowEmpty = false) => {
@@ -39,9 +39,7 @@ export const createRegexValidator = (allowEmpty = false) => {
     } catch {
       return false;
     }
-  }, () => ({
-    message: getMessage('errorInvalidRegex')
-  }));
+  }, { error: () => getMessage('errorInvalidRegex') });
 };
 
 // Helper pour valider les filtres de domaine
@@ -69,7 +67,5 @@ export const createDomainFilterValidator = () => {
     }
     
     return false;
-  }, () => ({
-    message: getMessage('errorInvalidDomain')
-  }));
+  }, { error: () => getMessage('errorInvalidDomain') });
 };
