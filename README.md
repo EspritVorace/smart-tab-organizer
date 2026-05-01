@@ -17,6 +17,11 @@
 
 [![](https://img.shields.io/chrome-web-store/v/ijnpdkkcbmfikocmboibffjgbohhlmah?style=for-the-badge&label=version)](https://chromewebstore.google.com/detail/smarttab-organizer/ijnpdkkcbmfikocmboibffjgbohhlmah)
 
+## 🦊 Firefox Add-ons ##
+
+
+[![](https://img.shields.io/amo/v/smarttab-organizer?style=for-the-badge&label=version)](https://addons.mozilla.org/firefox/addon/smarttab-organizer/)
+
 ## Features
 
 ### ⚙️ Rule Management
