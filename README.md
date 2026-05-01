@@ -114,14 +114,19 @@ For development with auto-reload: `pnpm dev` (Chrome) or `pnpm dev:firefox`.
 | Layer | Technology |
 |---|---|
 | Extension framework | [WXT](https://wxt.dev/) |
-| UI | [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
+| UI | [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
 | Component library | [Radix UI Themes](https://www.radix-ui.com/themes) + [Lucide](https://lucide.dev/) icons |
 | Forms & validation | [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) |
+| Tab tree | [react-accessible-treeview](https://github.com/dgreene1/react-accessible-treeview) |
+| Command palette | [cmdk](https://cmdk.paco.me/) |
 | Drag-and-drop | [@dnd-kit](https://dndkit.com/) |
 | Theming | [next-themes](https://github.com/pacocoursey/next-themes) |
-| Unit tests | [Vitest](https://vitest.dev/) |
+| Unit tests | [Vitest](https://vitest.dev/) + [Testing Library](https://testing-library.com/) |
 | E2E tests | [Playwright](https://playwright.dev/) |
+| Accessibility audits | [axe-core](https://github.com/dequelabs/axe-core) (Storybook + Playwright) |
+| Linting | [ESLint](https://eslint.org/) + [SonarJS](https://github.com/SonarSource/SonarJS) |
 | Component explorer | [Storybook](https://storybook.js.org/) |
+| Documentation site | [Astro Starlight](https://starlight.astro.build/) |
 | Package manager | [pnpm](https://pnpm.io/) |
 
 ## 🤝 Contributing

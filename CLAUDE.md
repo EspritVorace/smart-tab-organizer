@@ -112,6 +112,10 @@ logger.debug('[MY_MODULE] Something happened:', value);
 ### Type Safety
 - No `any` — use precise types or unknown with narrowing.
 
+### React
+- React 19. Les function components reçoivent `ref` directement comme prop, pas via `forwardRef`. Pour exposer une ref, ajouter `ref?: Ref<T>` aux props et la transférer au noeud DOM cible.
+- Ne pas réintroduire `forwardRef` dans du nouveau code (déprécié dans une release future de React).
+
 ### Accessibility
 - Prefer Radix primitives over hand-rolled ARIA (Dialog, Collapsible, Toolbar, RadioGroup…).
 - Radix Themes components (Switch, IconButton…) handle focus/keyboard/ARIA natively — don't override.
