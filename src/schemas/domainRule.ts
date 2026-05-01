@@ -46,7 +46,7 @@ export const domainRuleSchema = z.object({
   ).default('regex'),
   urlQueryParamName: z.string().max(64).refine(
     (val) => val === '' || queryParamNamePattern.test(val),
-    () => ({ message: getMessage('errorInvalidQueryParamName') })
+    { error: () => getMessage('errorInvalidQueryParamName') }
   ).optional()
 }).refine((data) => {
   // Si presetId est null, les validations conditionnelles s'appliquent
@@ -65,10 +65,10 @@ export const domainRuleSchema = z.object({
     }
   }
   return true;
-}, () => ({
-  message: getMessage('errorZodRequired'),
+}, {
+  error: () => getMessage('errorZodRequired'),
   path: ['titleParsingRegEx']
-})).refine((data) => {
+}).refine((data) => {
   // urlParsingRegEx requis seulement quand l'extraction se fait par regex
   return !(
     data.presetId === null
@@ -76,29 +76,29 @@ export const domainRuleSchema = z.object({
     && data.urlExtractionMode !== 'query_param'
     && (!data.urlParsingRegEx || data.urlParsingRegEx.trim() === '')
   );
-}, () => ({
-  message: getMessage('errorZodRequired'),
+}, {
+  error: () => getMessage('errorZodRequired'),
   path: ['urlParsingRegEx']
-})).refine((data) => {
+}).refine((data) => {
   // urlQueryParamName requis quand mode = query_param et source URL impliquée
   if (data.presetId !== null) return true;
   if (data.urlExtractionMode !== 'query_param') return true;
   if (!URL_SOURCE_MODES.includes(data.groupNameSource)) return true;
   return !!data.urlQueryParamName && data.urlQueryParamName.trim() !== '';
-}, () => ({
-  message: getMessage('errorQueryParamNameRequired'),
+}, {
+  error: () => getMessage('errorQueryParamNameRequired'),
   path: ['urlQueryParamName']
-})).refine((data) => {
+}).refine((data) => {
   // En mode `exact_ignore_params`, au moins un paramètre doit être déclaré,
   // sinon le mode est équivalent à `exact` et on évite la confusion.
   if (data.deduplicationEnabled && data.deduplicationMatchMode === 'exact_ignore_params') {
     return Array.isArray(data.ignoredQueryParams) && data.ignoredQueryParams.length > 0;
   }
   return true;
-}, () => ({
-  message: getMessage('errorIgnoredParamsRequired'),
+}, {
+  error: () => getMessage('errorIgnoredParamsRequired'),
   path: ['ignoredQueryParams']
-}));
+});
 
 // Type inféré
 export type DomainRule = z.infer<typeof domainRuleSchema>;
@@ -111,10 +111,10 @@ export const createDomainRuleSchemaWithUniqueness = (existingRules: DomainRule[]
       .map(rule => rule.label.toLowerCase());
     
     return !existingLabels.includes(data.label.toLowerCase());
-  }, () => ({
-    message: getMessage('errorLabelUnique'),
+  }, {
+    error: () => getMessage('errorLabelUnique'),
     path: ['label']
-  }));
+  });
 };
 
 // Schéma pour les tableaux avec validation d'unicité des labels
@@ -122,9 +122,9 @@ export const domainRulesSchema = z.array(domainRuleSchema).refine((rules) => {
   const labels = rules.map(rule => rule.label.toLowerCase());
   const uniqueLabels = new Set(labels);
   return labels.length === uniqueLabels.size;
-}, () => ({
-  message: getMessage('errorLabelUnique'),
+}, {
+  error: () => getMessage('errorLabelUnique'),
   path: ['label']
-}));
+});
 
 export type DomainRules = z.infer<typeof domainRulesSchema>;

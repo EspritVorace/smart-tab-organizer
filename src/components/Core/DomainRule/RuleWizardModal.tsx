@@ -1,7 +1,7 @@
 import { Box, Button, Dialog, Flex } from '@radix-ui/themes';
 import { Edit2, Plus } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getMessage } from '@/utils/i18n';
 import { WizardModal } from '@/components/UI/WizardModal';
@@ -155,7 +155,9 @@ export function RuleWizardModal({
     getValues,
     trigger,
   } = useForm<DomainRule>({
-    resolver: zodResolver(createDomainRuleSchemaWithUniqueness(syncSettings.domainRules, domainRule?.id)),
+    resolver: zodResolver(
+      createDomainRuleSchemaWithUniqueness(syncSettings.domainRules, domainRule?.id),
+    ) as Resolver<DomainRule>,
     defaultValues: getDefaultValues(domainRule),
     mode: 'onChange',
   });

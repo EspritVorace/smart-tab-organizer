@@ -24,7 +24,9 @@ const mockAppSettings: AppSettings = {
       deduplicationMatchMode: 'exact',
       color: 'grey',
       deduplicationEnabled: true,
+      ignoredQueryParams: [],
       presetId: null,
+      urlExtractionMode: 'regex',
       enabled: true
     }
   ]
@@ -40,7 +42,9 @@ const mockDomainRule: DomainRule = {
   deduplicationMatchMode: 'exact',
   color: 'purple',
   deduplicationEnabled: true,
-  presetId: null
+  ignoredQueryParams: [],
+  presetId: null,
+  urlExtractionMode: 'regex'
 };
 
 const meta: Meta<typeof RuleWizardModal> = {
@@ -223,7 +227,9 @@ export const RuleWizardModalLabelUniqueness: Story = {
           deduplicationMatchMode: 'exact',
           color: 'grey',
           deduplicationEnabled: true,
+          ignoredQueryParams: [],
           presetId: null,
+          urlExtractionMode: 'regex',
           enabled: true
         }
       ]

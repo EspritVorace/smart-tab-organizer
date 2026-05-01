@@ -46,8 +46,8 @@ export const createSessionSchemaWithUniqueness = (existingSessions: SessionForUn
       .filter(s => editingSessionId ? s.id !== editingSessionId : true)
       .map(s => s.name.toLowerCase());
     return !existingNames.includes(data.name.toLowerCase());
-  }, () => ({
-    message: getMessage('errorSessionNameUnique'),
+  }, {
+    error: () => getMessage('errorSessionNameUnique'),
     path: ['name'],
-  }));
+  });
 };

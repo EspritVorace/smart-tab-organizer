@@ -28,9 +28,9 @@ export const importDomainRuleSchema = z.object({
   ).optional(),
   categoryId: z.string().optional().nullable(),
   deduplicationEnabled: z.boolean().default(true),
-  ignoredQueryParams: z.array(z.string()).max(50).optional().default([]),
+  ignoredQueryParams: z.array(z.string()).max(50).default([]),
   presetId: z.string().nullable(),
-  urlExtractionMode: z.enum(['regex', 'query_param']).optional().default('regex'),
+  urlExtractionMode: z.enum(['regex', 'query_param']).default('regex'),
   urlQueryParamName: z.string().max(64).optional(),
   enabled: z.boolean(),
   badge: z.string().optional()

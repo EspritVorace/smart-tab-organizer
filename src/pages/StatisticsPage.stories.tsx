@@ -8,9 +8,9 @@ import type { StatisticsAggregates } from '@/types/statistics';
 const mockSettings: AppSettings = {
   ...defaultAppSettings,
   domainRules: [
-    { id: 'rule-1', enabled: true, domainFilter: 'github.com', label: 'GitHub', groupingEnabled: true, titleParsingRegEx: '', urlParsingRegEx: '', groupNameSource: 'title', deduplicationMatchMode: 'exact', deduplicationEnabled: true },
-    { id: 'rule-2', enabled: true, domainFilter: 'jira.atlassian.net', label: 'Jira', groupingEnabled: true, titleParsingRegEx: '', urlParsingRegEx: '', groupNameSource: 'title', deduplicationMatchMode: 'exact', deduplicationEnabled: true },
-    { id: 'rule-3', enabled: false, domainFilter: 'notion.so', label: 'Notion', groupingEnabled: false, titleParsingRegEx: '', urlParsingRegEx: '', groupNameSource: 'title', deduplicationMatchMode: 'exact', deduplicationEnabled: false },
+    { id: 'rule-1', enabled: true, domainFilter: 'github.com', label: 'GitHub', groupingEnabled: true, titleParsingRegEx: '', urlParsingRegEx: '', groupNameSource: 'title', deduplicationMatchMode: 'exact', deduplicationEnabled: true, ignoredQueryParams: [], presetId: null, urlExtractionMode: 'regex' },
+    { id: 'rule-2', enabled: true, domainFilter: 'jira.atlassian.net', label: 'Jira', groupingEnabled: true, titleParsingRegEx: '', urlParsingRegEx: '', groupNameSource: 'title', deduplicationMatchMode: 'exact', deduplicationEnabled: true, ignoredQueryParams: [], presetId: null, urlExtractionMode: 'regex' },
+    { id: 'rule-3', enabled: false, domainFilter: 'notion.so', label: 'Notion', groupingEnabled: false, titleParsingRegEx: '', urlParsingRegEx: '', groupNameSource: 'title', deduplicationMatchMode: 'exact', deduplicationEnabled: false, ignoredQueryParams: [], presetId: null, urlExtractionMode: 'regex' },
   ],
 };
 

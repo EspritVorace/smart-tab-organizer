@@ -16,7 +16,9 @@ const baseRule: DomainRuleSetting = {
   groupNameSource: 'title',
   deduplicationMatchMode: 'exact',
   deduplicationEnabled: true,
+  ignoredQueryParams: [],
   presetId: null,
+  urlExtractionMode: 'regex',
   categoryId: 'development',
   enabled: true,
 };

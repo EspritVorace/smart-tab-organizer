@@ -14,7 +14,9 @@ const existingRules: DomainRuleSetting[] = [
     deduplicationMatchMode: 'exact',
     color: 'purple',
     deduplicationEnabled: true,
+    ignoredQueryParams: [],
     presetId: null,
+    urlExtractionMode: 'regex',
     enabled: true,
   },
 ];
