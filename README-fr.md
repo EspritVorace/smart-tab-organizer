@@ -114,14 +114,20 @@ Pour le développement avec rechargement automatique : `pnpm dev` (Chrome) ou `p
 | Couche | Technologie |
 |---|---|
 | Framework d'extension | [WXT](https://wxt.dev/) |
-| Interface | [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
+| Interface | [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
 | Bibliothèque de composants | [Radix UI Themes](https://www.radix-ui.com/themes) + icônes [Lucide](https://lucide.dev/) |
 | Formulaires & validation | [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) |
+| Arbre d'onglets | [react-accessible-treeview](https://github.com/dgreene1/react-accessible-treeview) |
+| Palette de commandes | [cmdk](https://cmdk.paco.me/) |
 | Drag-and-drop | [@dnd-kit](https://dndkit.com/) |
 | Thèmes | [next-themes](https://github.com/pacocoursey/next-themes) |
-| Tests unitaires | [Vitest](https://vitest.dev/) |
+| Tests unitaires | [Vitest](https://vitest.dev/) + [Testing Library](https://testing-library.com/) |
 | Tests E2E | [Playwright](https://playwright.dev/) |
+| Audits accessibilité | [axe-core](https://github.com/dequelabs/axe-core) (Storybook + Playwright) |
+| Qualité du code | [ESLint](https://eslint.org/) + [SonarJS](https://github.com/SonarSource/SonarJS) + [jscpd](https://github.com/kucherenko/jscpd) (duplication) |
+| Rapports de tests | [CTRF](https://ctrf.io/) (format unifié de rapport de tests) |
 | Explorateur de composants | [Storybook](https://storybook.js.org/) |
+| Site de documentation | [Astro Starlight](https://starlight.astro.build/) |
 | Gestionnaire de paquets | [pnpm](https://pnpm.io/) |
 
 ## 🤝 Contribuer

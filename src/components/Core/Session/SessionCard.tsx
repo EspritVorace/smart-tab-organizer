@@ -273,7 +273,7 @@ interface SessionCardFullHeaderProps {
   setNameValue: (v: string) => void;
   renameError: string | null;
   setRenameError: (v: string | null) => void;
-  renameInputRef: React.RefObject<HTMLInputElement>;
+  renameInputRef: React.RefObject<HTMLInputElement | null>;
   handleRenameSubmit: () => void;
   handleRenameCancel: () => void;
   handleKeyDown: (e: React.KeyboardEvent) => void;

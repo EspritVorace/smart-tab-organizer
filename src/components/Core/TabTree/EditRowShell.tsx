@@ -7,7 +7,7 @@ export interface EditRowShellProps {
   onSave: () => void;
   onCancel: () => void;
   /** Render prop receiving the inputRef to attach to the focusable field */
-  children: (inputRef: React.RefObject<HTMLInputElement>) => React.ReactNode;
+  children: (inputRef: React.RefObject<HTMLInputElement | null>) => React.ReactNode;
 }
 
 /**

@@ -31,7 +31,7 @@ function makeMockSource(
     importedNote: null,
     fileName: null,
     isDragOver: false,
-    fileInputRef: { current: null } as React.RefObject<HTMLInputElement>,
+    fileInputRef: { current: null } as React.RefObject<HTMLInputElement | null>,
     handleTextChange: () => {},
     handleDrop: () => {},
     handleDragOver: () => {},
