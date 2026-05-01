@@ -124,7 +124,8 @@ For development with auto-reload: `pnpm dev` (Chrome) or `pnpm dev:firefox`.
 | Unit tests | [Vitest](https://vitest.dev/) + [Testing Library](https://testing-library.com/) |
 | E2E tests | [Playwright](https://playwright.dev/) |
 | Accessibility audits | [axe-core](https://github.com/dequelabs/axe-core) (Storybook + Playwright) |
-| Linting | [ESLint](https://eslint.org/) + [SonarJS](https://github.com/SonarSource/SonarJS) |
+| Code quality | [ESLint](https://eslint.org/) + [SonarJS](https://github.com/SonarSource/SonarJS) + [jscpd](https://github.com/kucherenko/jscpd) (code duplication) |
+| Test reports | [CTRF](https://ctrf.io/) (unified test report format) |
 | Component explorer | [Storybook](https://storybook.js.org/) |
 | Documentation site | [Astro Starlight](https://starlight.astro.build/) |
 | Package manager | [pnpm](https://pnpm.io/) |

@@ -123,7 +123,8 @@ Para desarrollo con recarga automática: `pnpm dev` (Chrome) o `pnpm dev:firefox
 | Tests unitarios | [Vitest](https://vitest.dev/) + [Testing Library](https://testing-library.com/) |
 | Tests E2E | [Playwright](https://playwright.dev/) |
 | Auditorías de accesibilidad | [axe-core](https://github.com/dequelabs/axe-core) (Storybook + Playwright) |
-| Linting | [ESLint](https://eslint.org/) + [SonarJS](https://github.com/SonarSource/SonarJS) |
+| Calidad del código | [ESLint](https://eslint.org/) + [SonarJS](https://github.com/SonarSource/SonarJS) + [jscpd](https://github.com/kucherenko/jscpd) (duplicación) |
+| Informes de tests | [CTRF](https://ctrf.io/) (formato unificado de informe de tests) |
 | Explorador de componentes | [Storybook](https://storybook.js.org/) |
 | Sitio de documentación | [Astro Starlight](https://starlight.astro.build/) |
 | Gestor de paquetes | [pnpm](https://pnpm.io/) |

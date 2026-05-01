@@ -124,7 +124,8 @@ Pour le développement avec rechargement automatique : `pnpm dev` (Chrome) ou `p
 | Tests unitaires | [Vitest](https://vitest.dev/) + [Testing Library](https://testing-library.com/) |
 | Tests E2E | [Playwright](https://playwright.dev/) |
 | Audits accessibilité | [axe-core](https://github.com/dequelabs/axe-core) (Storybook + Playwright) |
-| Linting | [ESLint](https://eslint.org/) + [SonarJS](https://github.com/SonarSource/SonarJS) |
+| Qualité du code | [ESLint](https://eslint.org/) + [SonarJS](https://github.com/SonarSource/SonarJS) + [jscpd](https://github.com/kucherenko/jscpd) (duplication) |
+| Rapports de tests | [CTRF](https://ctrf.io/) (format unifié de rapport de tests) |
 | Explorateur de composants | [Storybook](https://storybook.js.org/) |
 | Site de documentation | [Astro Starlight](https://starlight.astro.build/) |
 | Gestionnaire de paquets | [pnpm](https://pnpm.io/) |
