@@ -18,7 +18,7 @@ export interface JsonSourceInputState<T> {
   importedNote: string | null;
   fileName: string | null;
   isDragOver: boolean;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
   handleTextChange: (text: string) => void;
   handleDrop: (e: React.DragEvent) => void;
   handleDragOver: (e: React.DragEvent) => void;
