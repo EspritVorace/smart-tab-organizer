@@ -105,11 +105,11 @@ function SessionSection({
   const listRef = useRef<HTMLDivElement>(null);
 
   // Drag: reorder within this section, then splice back into the global order.
-  const handleDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
+  const handleDragOver = useCallback((event: DragOverEvent) => {
     setDragItems(prev => move(prev ?? sessions, event));
   }, [sessions]);
 
-  const handleDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     if (!event.canceled) {
       const source = dragItems ?? sessions;
       const reordered = move(source, event) as Session[];
