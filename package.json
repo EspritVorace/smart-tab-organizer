@@ -78,9 +78,9 @@
     "xvfb-maybe": "^0.2.1"
   },
   "dependencies": {
-    "@dnd-kit/abstract": "^0.3.2",
-    "@dnd-kit/helpers": "0.3.2",
-    "@dnd-kit/react": "^0.3.2",
+    "@dnd-kit/abstract": "^0.4.0",
+    "@dnd-kit/helpers": "0.4.0",
+    "@dnd-kit/react": "^0.4.0",
     "@hookform/resolvers": "^5.1.1",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-label": "^2.1.8",

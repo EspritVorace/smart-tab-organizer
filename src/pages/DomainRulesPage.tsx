@@ -187,18 +187,18 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
   // unknown-cast and rely on the helper for the rest.
   const moveRules = (
     rules: DomainRuleSetting[],
-    event: Parameters<DragOverEvent>[0] | Parameters<DragEndEvent>[0],
+    event: DragOverEvent | DragEndEvent,
   ): DomainRuleSetting[] =>
     (move as unknown as (
       r: DomainRuleSetting[],
       e: typeof event,
     ) => DomainRuleSetting[])(rules, event);
 
-  const handleDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
+  const handleDragOver = useCallback((event: DragOverEvent) => {
     setDragItems(prev => moveRules(prev ?? syncSettings.domainRules, event));
   }, [syncSettings.domainRules]);
 
-  const handleDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     if (!event.canceled) {
       const reordered = moveRules(dragItems ?? syncSettings.domainRules, event);
       if (reordered !== (dragItems ?? syncSettings.domainRules)) {
