@@ -18,9 +18,11 @@ import { foldAccents } from '@/utils/stringUtils';
 import { matchSessionSearch, splitByPinned } from '@/utils/sessionUtils';
 import { moveSessionToFirstInGroup, moveSessionToLastInGroup } from '@/utils/sessionOrderUtils';
 import { useSessions } from '@/hooks/useSessions';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { updateSession } from '@/utils/sessionStorage';
 import { showSuccessNotification } from '@/utils/notifications';
+import type { ShortcutDefinition } from '@/utils/keyboardShortcuts';
 import { browser } from 'wxt/browser';
 import type { Session } from '@/types/session';
 import type { SessionSearchMatch } from '@/utils/sessionUtils';
@@ -102,31 +104,6 @@ function SessionSection({
   const [dragItems, setDragItems] = useState<Session[] | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const handleCardKeyDown = useCallback((e: React.KeyboardEvent<HTMLElement>, index: number) => {
-    // Only act when the card element itself has focus (not a child input/button).
-    if (e.target !== e.currentTarget) return;
-    const cards = listRef.current?.querySelectorAll<HTMLElement>('[data-session-card]');
-    if (!cards) return;
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        cards[index + 1]?.focus();
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        cards[index - 1]?.focus();
-        break;
-      case 'Home':
-        e.preventDefault();
-        cards[0]?.focus();
-        break;
-      case 'End':
-        e.preventDefault();
-        cards[cards.length - 1]?.focus();
-        break;
-    }
-  }, []);
-
   // Drag: reorder within this section, then splice back into the global order.
   const handleDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
     setDragItems(prev => move(prev ?? sessions, event));
@@ -195,6 +172,79 @@ function SessionSection({
     await reload();
   }, [reload]);
 
+  const handleRestoreCombo = useCallback((session: Session, shiftKey: boolean, altKey: boolean) => {
+    if (altKey && shiftKey) {
+      void handleRestoreNewWindow(session);
+    } else if (altKey) {
+      void handleReplaceCurrentWindow(session);
+    } else if (shiftKey) {
+      void handleRestoreCurrentWindow(session);
+    } else {
+      onOpenRestoreWizard(session);
+    }
+  }, [handleRestoreCurrentWindow, handleRestoreNewWindow, handleReplaceCurrentWindow, onOpenRestoreWizard]);
+
+  const handleNavigationKey = useCallback((e: React.KeyboardEvent<HTMLElement>, index: number): boolean => {
+    const cards = listRef.current?.querySelectorAll<HTMLElement>('[data-session-card]');
+    if (!cards) return false;
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        cards[index + 1]?.focus();
+        return true;
+      case 'ArrowUp':
+        e.preventDefault();
+        cards[index - 1]?.focus();
+        return true;
+      case 'Home':
+        e.preventDefault();
+        cards[0]?.focus();
+        return true;
+      case 'End':
+        e.preventDefault();
+        cards[cards.length - 1]?.focus();
+        return true;
+      default:
+        return false;
+    }
+  }, []);
+
+  const handleCardKeyDown = useCallback((e: React.KeyboardEvent<HTMLElement>, index: number, session: Session) => {
+    // Only act when the card element itself has focus (not a child input/button).
+    if (e.target !== e.currentTarget) return;
+    if (handleNavigationKey(e, index)) return;
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      e.preventDefault();
+      onOpenDeleteDialog(session);
+      return;
+    }
+    const lower = e.key.toLowerCase();
+    if (e.ctrlKey || e.metaKey) return;
+    if (lower === 'r') {
+      e.preventDefault();
+      handleRestoreCombo(session, e.shiftKey, e.altKey);
+      return;
+    }
+    if (e.altKey || e.shiftKey) return;
+    if (lower === 'e') {
+      e.preventDefault();
+      onOpenEditDialog(session);
+      return;
+    }
+    if (lower === 'p') {
+      e.preventDefault();
+      const togglePin = session.isPinned ? handleUnpin : handlePin;
+      void togglePin(session);
+    }
+  }, [
+    handleNavigationKey,
+    handleRestoreCombo,
+    onOpenEditDialog,
+    onOpenDeleteDialog,
+    handlePin,
+    handleUnpin,
+  ]);
+
   const handleMoveToFirst = useCallback((session: Session) => {
     void updateOrder(moveSessionToFirstInGroup(allSessions, session.id));
   }, [allSessions, updateOrder]);
@@ -246,7 +296,7 @@ function SessionSection({
                   isDragDisabled={!!searchQuery}
                   onMoveToFirst={() => handleMoveToFirst(session)}
                   onMoveLast={() => handleMoveLast(session)}
-                  onCardKeyDown={(e) => handleCardKeyDown(e, index)}
+                  onCardKeyDown={(e) => handleCardKeyDown(e, index, session)}
                 />
               );
             })}
@@ -288,6 +338,12 @@ export function SessionsPage({
   const [deleteTarget, setDeleteTarget] = useState<Session | null>(null);
   const [quickRestoreMessage, setQuickRestoreMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const handleOpenSnapshotWizard = useCallback(() => setSnapshotOpen(true), []);
+  const pageShortcuts = useMemo<ShortcutDefinition[]>(() => [
+    { combo: 'n', action: handleOpenSnapshotWizard },
+  ], [handleOpenSnapshotWizard]);
+  useKeyboardShortcuts(pageShortcuts);
 
   // Deep-link: open the RestoreWizard when a sessionId has been provided via
   // URL hash (e.g. from the popup's customize restore action).

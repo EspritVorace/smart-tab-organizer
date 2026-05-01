@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Box, Button, Card, Flex, Text } from '@radix-ui/themes';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { browser } from 'wxt/browser';
@@ -12,6 +12,7 @@ import { getRuleCategory } from '@/utils/categoriesStore';
 import { chromeGroupColors } from '@/utils/tabTreeUtils';
 import { popupPinnedEmptyCollapsedItem } from '@/utils/storageItems';
 import type { Session } from '@/types/session';
+import styles from './PopupProfilesList.module.css';
 
 function getCategoryIcon(categoryId: string | null | undefined): React.ReactNode {
   const cat = getRuleCategory(categoryId);
@@ -78,6 +79,7 @@ export function PopupProfilesList() {
   const [hasAnySession, setHasAnySession] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [emptyCollapsed, setEmptyCollapsed] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadSessions().then((all) => {
@@ -88,7 +90,7 @@ export function PopupProfilesList() {
     popupPinnedEmptyCollapsedItem.getValue().then(setEmptyCollapsed);
   }, []);
 
-  function handleRestore(session: Session, target: RestoreTarget) {
+  const handleRestore = useCallback((session: Session, target: RestoreTarget) => {
     // The popup is not a tab, so browser.tabs.getCurrent() returns undefined,
     // which means every non-pinned tab in the active window is replaced.
     restoreSessionTabs(session, target)
@@ -102,7 +104,46 @@ export function PopupProfilesList() {
         }
       })
       .catch(() => {});
-  }
+  }, []);
+
+  const handleCardKeyDown = useCallback((e: React.KeyboardEvent<HTMLElement>, session: Session, index: number) => {
+    if (e.target !== e.currentTarget) return;
+    const cards = listRef.current?.querySelectorAll<HTMLElement>('[data-popup-pinned-card]');
+    if (!cards) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      cards[index + 1]?.focus();
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      cards[index - 1]?.focus();
+      return;
+    }
+    if (e.key === 'Home') {
+      e.preventDefault();
+      cards[0]?.focus();
+      return;
+    }
+    if (e.key === 'End') {
+      e.preventDefault();
+      cards[cards.length - 1]?.focus();
+      return;
+    }
+    if (e.key.toLowerCase() === 'r' && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.altKey && e.shiftKey) {
+        handleRestore(session, 'new');
+      } else if (e.altKey) {
+        handleRestore(session, 'replace');
+      } else if (e.shiftKey) {
+        handleRestore(session, 'current');
+      } else {
+        void openCustomizeRestore(session);
+      }
+    }
+  }, [handleRestore]);
 
   function handleToggleEmptyCollapsed(nextOpen: boolean) {
     const nextCollapsed = !nextOpen;
@@ -182,12 +223,25 @@ export function PopupProfilesList() {
     <Flex direction="column" gap="2">
       <Box style={{ paddingLeft: 4 }}>{sectionLabel}</Box>
 
-      <Flex data-testid="popup-profiles-list" direction="column" gap="2">
-        {pinnedSessions.map((session) => (
+      <Flex
+        ref={listRef}
+        data-testid="popup-profiles-list"
+        direction="column"
+        gap="2"
+        role="list"
+        aria-label={getMessage('popupPinnedSessionsLabel')}
+      >
+        {pinnedSessions.map((session, index) => (
           <Card
             key={session.id}
             data-testid={`popup-profile-item-${session.id}`}
+            data-popup-pinned-card=""
             size="1"
+            tabIndex={0}
+            role="listitem"
+            aria-label={session.name}
+            className={styles.pinnedCard}
+            onKeyDown={(e) => handleCardKeyDown(e, session, index)}
           >
             <Flex align="center" gap="3" style={{ minWidth: 0 }}>
               <Flex align="center" style={{ flexShrink: 0 }}>

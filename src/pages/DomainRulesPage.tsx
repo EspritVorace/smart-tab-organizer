@@ -14,6 +14,8 @@ import { getMessage } from '@/utils/i18n';
 import { foldAccents } from '@/utils/stringUtils';
 import { generateUUID } from '@/utils/utils';
 import { DomainRuleCard } from '@/components/Core/DomainRule/DomainRuleCard';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import type { ShortcutDefinition } from '@/utils/keyboardShortcuts';
 import {
   moveToFirst,
   moveToLast,
@@ -262,10 +264,15 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
     }
   }, [handleRowSelect, handleEditRule, selectedIds]);
 
-  const handleAddRule = () => {
+  const handleAddRule = useCallback(() => {
     setEditingRule(undefined);
     setIsModalOpen(true);
-  };
+  }, []);
+
+  const pageShortcuts = useMemo<ShortcutDefinition[]>(() => [
+    { combo: 'n', action: handleAddRule },
+  ], [handleAddRule]);
+  useKeyboardShortcuts(pageShortcuts);
 
   const handleSubmitRule = (rule: DomainRule) => {
     if (editingRule) {
