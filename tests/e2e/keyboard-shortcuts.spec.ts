@@ -47,6 +47,16 @@ test.describe('[US-KB-popup] Popup shortcuts', () => {
     });
     await expect(page.getByTestId('shortcuts-content')).toBeVisible();
 
+    // Regression guard: the popup.html `.radix-themes` selector used to also
+    // match the Theme that Radix Themes wraps around the portaled overlay,
+    // forcing it to `height: 0; overflow: hidden`. The drawer kept its own
+    // box (so toBeVisible passed) but was clipped to nothing on screen.
+    // Assert the overlay actually covers a real area.
+    const overlayHeight = await page
+      .locator('.rt-BaseDialogOverlay')
+      .evaluate((el) => (el as HTMLElement).getBoundingClientRect().height);
+    expect(overlayHeight).toBeGreaterThan(100);
+
     await page.keyboard.press('Escape');
     await expect(page.getByTestId('shortcuts-drawer')).toBeHidden({
       timeout: 5000,
