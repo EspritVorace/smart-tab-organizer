@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Box, Grid } from '@radix-ui/themes';
-import { Download, Upload, FileText } from 'lucide-react';
+import { Download, Upload, FileText, Layers } from 'lucide-react';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { getMessage } from '@/utils/i18n';
 import { ExportWizard } from '@/components/UI/ImportExportWizards/ExportWizard';
@@ -8,6 +8,8 @@ import { ImportWizard } from '@/components/UI/ImportExportWizards/ImportWizard';
 import { ExportSessionsWizard } from '@/components/UI/ImportExportWizards/ExportSessionsWizard';
 import { ImportSessionsWizard } from '@/components/UI/ImportExportWizards/ImportSessionsWizard';
 import { ImportExportActionCard } from '@/components/UI/ImportExportWizards/ImportExportActionCard';
+import { ExportWorkspaceDialog } from '@/components/UI/Workspace/ExportWorkspaceDialog';
+import { ImportWorkspaceDialog } from '@/components/UI/Workspace/ImportWorkspaceDialog';
 import { useSessions } from '@/hooks/useSessions';
 import type { AppSettings, DomainRuleSetting } from '@/types/syncSettings';
 
@@ -21,6 +23,8 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
   const [importOpen, setImportOpen] = useState(false);
   const [exportSessionsOpen, setExportSessionsOpen] = useState(false);
   const [importSessionsOpen, setImportSessionsOpen] = useState(false);
+  const [exportWorkspaceOpen, setExportWorkspaceOpen] = useState(false);
+  const [importWorkspaceOpen, setImportWorkspaceOpen] = useState(false);
 
   const { sessions } = useSessions();
 
@@ -81,6 +85,24 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
               buttonLabel={getMessage('importButton')}
               onClick={() => setImportSessionsOpen(true)}
             />
+
+            <ImportExportActionCard
+              testId="page-import-export-card-export-workspace"
+              icon={Layers}
+              title={getMessage('exportWorkspaceTitle')}
+              description={getMessage('exportWorkspaceDescription')}
+              buttonLabel={getMessage('exportButton')}
+              onClick={() => setExportWorkspaceOpen(true)}
+            />
+
+            <ImportExportActionCard
+              testId="page-import-export-card-import-workspace"
+              icon={Layers}
+              title={getMessage('importWorkspaceTitle')}
+              description={getMessage('importWorkspaceDescription')}
+              buttonLabel={getMessage('importButton')}
+              onClick={() => setImportWorkspaceOpen(true)}
+            />
           </Grid>
 
           <ExportWizard
@@ -104,6 +126,16 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
           <ImportSessionsWizard
             open={importSessionsOpen}
             onOpenChange={setImportSessionsOpen}
+          />
+
+          <ExportWorkspaceDialog
+            open={exportWorkspaceOpen}
+            onOpenChange={setExportWorkspaceOpen}
+          />
+
+          <ImportWorkspaceDialog
+            open={importWorkspaceOpen}
+            onOpenChange={setImportWorkspaceOpen}
           />
         </Box>
       )}
