@@ -34,12 +34,24 @@ export function parseCombo(combo: string): ParsedCombo {
 
 export function matchesShortcut(event: KeyboardEvent, combo: string): boolean {
   const parsed = parseCombo(combo);
-  if (event.key.toLowerCase() !== parsed.key) return false;
+  if (!keyMatches(event, parsed.key)) return false;
   if (event.altKey !== parsed.alt) return false;
   if (event.ctrlKey !== parsed.ctrl) return false;
   if (event.metaKey !== parsed.meta) return false;
   if (parsed.key !== '?' && event.shiftKey !== parsed.shift) return false;
   return true;
+}
+
+/**
+ * `event.key` is layout-dependent: on AZERTY for example, the physical "1"
+ * key emits "&" without shift, so an `Alt+1` combo would never match if we
+ * only compared `event.key`. Fall back to `event.code` for digits, which is
+ * stable across layouts (`Digit0` to `Digit9`).
+ */
+function keyMatches(event: KeyboardEvent, parsedKey: string): boolean {
+  if (event.key.toLowerCase() === parsedKey) return true;
+  if (/^\d$/.test(parsedKey) && event.code === `Digit${parsedKey}`) return true;
+  return false;
 }
 
 export function isTypingTarget(target: EventTarget | null): boolean {

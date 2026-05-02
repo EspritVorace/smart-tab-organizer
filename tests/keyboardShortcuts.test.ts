@@ -7,9 +7,10 @@ import {
   shouldFire,
 } from '../src/utils/keyboardShortcuts';
 
-function makeEvent(init: Partial<KeyboardEventInit> & { key: string; target?: EventTarget }): KeyboardEvent {
+function makeEvent(init: Partial<KeyboardEventInit> & { key: string; code?: string; target?: EventTarget }): KeyboardEvent {
   const event = new KeyboardEvent('keydown', {
     key: init.key,
+    code: init.code,
     shiftKey: init.shiftKey ?? false,
     altKey: init.altKey ?? false,
     ctrlKey: init.ctrlKey ?? false,
@@ -51,6 +52,24 @@ test('matchesShortcut: Alt+r and Alt+Shift+r', () => {
 test('matchesShortcut: Alt+1 number keys', () => {
   assert.strictEqual(matchesShortcut(makeEvent({ key: '1', altKey: true }), 'Alt+1'), true);
   assert.strictEqual(matchesShortcut(makeEvent({ key: '1' }), 'Alt+1'), false);
+});
+
+test('matchesShortcut: digit shortcuts work on layouts where the key emits a different character (AZERTY Alt+1 -> "&")', () => {
+  // On French AZERTY, Alt+1 dispatches event.key = "&" with event.code = "Digit1".
+  assert.strictEqual(
+    matchesShortcut(makeEvent({ key: '&', code: 'Digit1', altKey: true }), 'Alt+1'),
+    true,
+  );
+  // The fallback only kicks in for the matching code: Digit2 must not match Alt+1.
+  assert.strictEqual(
+    matchesShortcut(makeEvent({ key: 'é', code: 'Digit2', altKey: true }), 'Alt+1'),
+    false,
+  );
+  // Modifiers still required: pressing the same physical key without Alt does not match.
+  assert.strictEqual(
+    matchesShortcut(makeEvent({ key: '&', code: 'Digit1' }), 'Alt+1'),
+    false,
+  );
 });
 
 test('matchesShortcut: ? ignores shift since most layouts require shift to type it', () => {

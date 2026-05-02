@@ -5,7 +5,11 @@
     <title>SmartTab Organizer</title>
     <link rel="stylesheet" href="../styles/radix-themes.css">
     <style>
-        html, body, #popup-app, .radix-themes {
+        /* Constrain only the popup root subtree. The bare `.radix-themes`
+           selector also matched the Theme that Radix Themes wraps around
+           portaled Dialog content (asChild), forcing the overlay to
+           `height: min-content` and collapsing the cheatsheet drawer. */
+        html, body, #popup-app, #popup-app .radix-themes {
             height: min-content !important;
             min-height: 0 !important;
             overflow: hidden;

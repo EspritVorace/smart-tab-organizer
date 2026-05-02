@@ -558,6 +558,8 @@
   "shortcutsPanelToggleAria": { "message": "Mostrar atajos de teclado" },
   "shortcutsCustomize": { "message": "Personalizar atajos del navegador" },
   "shortcutsCustomizeFirefoxHint": { "message": "Firefox: abre el menú de engranaje y luego 'Administrar atajos de extensiones'." },
+  "shortcutsUnboundWarning": { "message": "Algunos atajos del navegador no están definidos. El navegador no aplica automáticamente los atajos sugeridos después de una actualización de la extensión; defínelos en 'Personalizar atajos' abajo." },
+  "shortcutNotSet": { "message": "Sin definir" },
 
   "shortcutsGroupGlobal": { "message": "Globales (navegador)" },
   "shortcutsGroupPopup": { "message": "Popup" },

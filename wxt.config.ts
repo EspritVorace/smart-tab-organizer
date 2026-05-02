@@ -5,6 +5,17 @@ import { resolve } from 'path';
 export default defineConfig({
   srcDir: 'src',
   outDir: '.output',
+  hooks: {
+    'build:manifestGenerated': (wxt, manifest) => {
+      // Firefox MV2 uses `_execute_browser_action`; only Chromium MV3 accepts
+      // `_execute_action`. Without this rename the popup hotkey (and on some
+      // validators the whole `commands` object) is silently dropped on Firefox.
+      if (manifest.manifest_version === 2 && manifest.commands?._execute_action) {
+        manifest.commands._execute_browser_action = manifest.commands._execute_action;
+        delete manifest.commands._execute_action;
+      }
+    },
+  },
   manifest: {
     name: '__MSG_extensionName__',
     description: '__MSG_extensionDescription__',

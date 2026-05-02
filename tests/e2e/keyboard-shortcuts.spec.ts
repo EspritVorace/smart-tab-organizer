@@ -47,6 +47,16 @@ test.describe('[US-KB-popup] Popup shortcuts', () => {
     });
     await expect(page.getByTestId('shortcuts-content')).toBeVisible();
 
+    // Regression guard: the popup.html `.radix-themes` selector used to also
+    // match the Theme that Radix Themes wraps around the portaled overlay,
+    // forcing it to `height: 0; overflow: hidden`. The drawer kept its own
+    // box (so toBeVisible passed) but was clipped to nothing on screen.
+    // Assert the overlay actually covers a real area.
+    const overlayHeight = await page
+      .locator('.rt-BaseDialogOverlay')
+      .evaluate((el) => (el as HTMLElement).getBoundingClientRect().height);
+    expect(overlayHeight).toBeGreaterThan(100);
+
     await page.keyboard.press('Escape');
     await expect(page.getByTestId('shortcuts-drawer')).toBeHidden({
       timeout: 5000,
@@ -96,6 +106,40 @@ test.describe('[US-KB-options] Options shortcuts', () => {
     await page.keyboard.press('Alt+2');
 
     // SessionsPage marker
+    await page.getByTestId('page-sessions-btn-snapshot').waitFor({
+      state: 'visible',
+      timeout: 5000,
+    });
+    expect(page.url()).toContain('#sessions');
+
+    await page.close();
+  });
+
+  test('Alt+digit also switches tabs on a non-US layout (where event.key is not the digit)', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    await goToOptionsPage(page, extensionId);
+    await page.locator('body').click();
+
+    // page.keyboard.press always uses the US layout (event.key === event.code's
+    // digit), so it cannot reproduce the AZERTY case where Alt+1 dispatches
+    // event.key = "&" while event.code stays "Digit1". Synthesise the event
+    // directly: what matters for the matcher is that event.key is *not* the
+    // digit but event.code is the matching DigitN.
+    await page.evaluate(() => {
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          code: 'Digit2',
+          key: 'layout-specific',
+          altKey: true,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+    });
+
     await page.getByTestId('page-sessions-btn-snapshot').waitFor({
       state: 'visible',
       timeout: 5000,

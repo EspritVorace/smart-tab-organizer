@@ -31,12 +31,11 @@ export function setupInstallationHandler(): void {
 }
 
 export function setupCommandHandler(): void {
-    const commands = (browser as unknown as { commands?: { onCommand?: { addListener: (cb: (name: string) => void) => void } } }).commands;
-    if (!commands?.onCommand) {
+    if (!browser.commands?.onCommand) {
         logger.debug('[COMMANDS] browser.commands.onCommand unavailable, skipping handler.');
         return;
     }
-    commands.onCommand.addListener((name: string) => {
+    browser.commands.onCommand.addListener((name: string) => {
         logger.debug('[COMMANDS] received', name);
         if (name === 'organize-all-tabs') {
             browser.windows.getCurrent()

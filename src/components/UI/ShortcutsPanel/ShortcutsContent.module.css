@@ -18,15 +18,16 @@
 
 .row {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-2) var(--space-3);
   padding: 4px 0;
 }
 
 .rowDescription {
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 140px;
+  min-width: 140px;
 }
 
 .rowKeys {
@@ -36,6 +37,7 @@
   justify-content: flex-end;
   gap: 4px;
   flex-shrink: 0;
+  max-width: 100%;
 }
 
 .altSeparator {
@@ -56,4 +58,18 @@
 .firefoxHint {
   margin-top: 4px;
   color: var(--gray-11);
+}
+
+.unboundBanner {
+  padding: 8px 10px;
+  background: var(--amber-a3);
+  border: 1px solid var(--amber-a5);
+  border-radius: var(--radius-2);
+  color: var(--amber-12);
+}
+
+.unboundLabel {
+  font-size: 11px;
+  font-style: italic;
+  color: var(--amber-11);
 }
