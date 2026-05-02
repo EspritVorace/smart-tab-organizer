@@ -2,6 +2,9 @@ import { browser } from 'wxt/browser';
 import { logger } from '@/utils/logger.js';
 import { categoriesItem, categoriesSeededItem } from '@/utils/storageItems.js';
 import { fetchBuiltInCategories } from '@/utils/categoriesStore.js';
+import { DEFAULT_WORKSPACE_ID } from '@/utils/workspaceStorage.js';
+import type { WorkspaceMeta, WorkspaceAccentColor } from '@/schemas/workspace.js';
+import { getMessage } from '@/utils/i18n.js';
 
 const SETTINGS_KEYS = [
   'globalGroupingEnabled',
@@ -15,6 +18,9 @@ const SETTINGS_KEYS = [
 
 const MIGRATION_FLAG = 'settingsMigratedToLocal';
 const URL_EXTRACTION_MODE_MIGRATION_FLAG = 'urlExtractionModeMigrated';
+const WORKSPACES_MIGRATION_FLAG = 'workspacesMigrated';
+
+const DEFAULT_WORKSPACE_ACCENT: WorkspaceAccentColor = 'indigo';
 
 /**
  * Copies settings from storage.sync into storage.local once per installation.
@@ -88,6 +94,53 @@ export async function migrateRulesAddUrlExtractionMode(): Promise<void> {
     await browser.storage.local.set({ [URL_EXTRACTION_MODE_MIGRATION_FLAG]: true });
   } catch (error) {
     logger.error('[MIGRATION] urlExtractionMode migration failed:', error);
+  }
+}
+
+/**
+ * Initializes the workspace runtime. The default workspace uses the legacy
+ * unprefixed storage keys (`local:domainRules`, `local:statistics`, ...), so
+ * no data moves: existing settings, sessions and statistics remain in place
+ * and stay rollback-compatible with prior versions.
+ *
+ * The migration only ensures `local:workspaces` contains at least the default
+ * workspace entry and that `local:activeWorkspaceId` points to it. Idempotent:
+ * guarded by `workspacesMigrated`. Runs on both fresh installs and upgrades.
+ */
+export async function migrateToWorkspaces(): Promise<void> {
+  try {
+    const flagState = await browser.storage.local.get(WORKSPACES_MIGRATION_FLAG);
+    if (flagState[WORKSPACES_MIGRATION_FLAG]) {
+      logger.debug('[MIGRATION] Workspaces already initialized.');
+      return;
+    }
+
+    const indexState = await browser.storage.local.get(['workspaces', 'activeWorkspaceId']);
+    const toWrite: Record<string, unknown> = {};
+
+    if (!Array.isArray(indexState.workspaces) || indexState.workspaces.length === 0) {
+      const now = new Date().toISOString();
+      const defaultWorkspace: WorkspaceMeta = {
+        id: DEFAULT_WORKSPACE_ID,
+        name: getMessage('workspaceDefaultName') || 'Default',
+        accentColor: DEFAULT_WORKSPACE_ACCENT,
+        createdAt: now,
+        updatedAt: now,
+      };
+      toWrite['workspaces'] = [defaultWorkspace];
+    }
+    if (typeof indexState.activeWorkspaceId !== 'string') {
+      toWrite['activeWorkspaceId'] = DEFAULT_WORKSPACE_ID;
+    }
+
+    if (Object.keys(toWrite).length > 0) {
+      await browser.storage.local.set(toWrite);
+      logger.debug(`[MIGRATION] Workspaces: wrote ${Object.keys(toWrite).length} keys.`);
+    }
+
+    await browser.storage.local.set({ [WORKSPACES_MIGRATION_FLAG]: true });
+  } catch (error) {
+    logger.error('[MIGRATION] Workspaces migration failed, will retry on next startup:', error);
   }
 }
 

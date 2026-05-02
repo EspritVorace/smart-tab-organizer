@@ -1,6 +1,6 @@
 import { browser, Browser } from 'wxt/browser';
 import { initializeDefaults } from '@/utils/migration.js';
-import { migrateSettingsFromSyncToLocal, migrateRulesAddUrlExtractionMode, seedBuiltInCategories } from './migration.js';
+import { migrateSettingsFromSyncToLocal, migrateRulesAddUrlExtractionMode, migrateToWorkspaces, seedBuiltInCategories } from './migration.js';
 import { initCategoriesStore } from '@/utils/categoriesStore.js';
 import { logger } from '@/utils/logger.js';
 import {
@@ -24,6 +24,7 @@ export function setupInstallationHandler(): void {
         logger.debug("SmartTab Organizer installed/updated.", details.reason);
         await migrateSettingsFromSyncToLocal();
         await migrateRulesAddUrlExtractionMode();
+        await migrateToWorkspaces();
         await initializeDefaults();
         await seedBuiltInCategories();
         await initCategoriesStore();
