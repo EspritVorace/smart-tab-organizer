@@ -59,7 +59,7 @@ test.describe('Workspaces — create + switch + delete', () => {
 
     // The new workspace should appear and become the active one.
     await expect(optionsPage.getByText('Personal').first()).toBeVisible();
-    await expect(optionsPage.locator('html, body, [data-accent-color]').first()).toHaveAttribute(
+    await expect(optionsPage.locator('[data-accent-color]').first()).toHaveAttribute(
       'data-accent-color',
       'jade',
       { timeout: 5_000 },

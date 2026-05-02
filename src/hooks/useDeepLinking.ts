@@ -7,7 +7,7 @@ interface DeepLinkState {
   restoreSessionId: string | null;
 }
 
-const VALID_SECTIONS = ['rules', 'importexport', 'sessions', 'stats', 'settings'] as const;
+const VALID_SECTIONS = ['rules', 'importexport', 'sessions', 'stats', 'settings', 'workspaces'] as const;
 
 /**
  * Handles hash-based deep linking for the options page.
