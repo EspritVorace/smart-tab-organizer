@@ -2,6 +2,8 @@
   "extensionName": { "message": "SmartTab Organizer" },
   "extensionDescription": { "message": "Organisez automatiquement vos onglets Chrome : regroupement intelligent, déduplication, gestion des sessions. Sans IA, sans suivi. Respect de votre vie privée avant tout." },
   "workspaceDefaultName": { "message": "Par défaut" },
+  "workspaceSwitcherLabel": { "message": "Changer d'espace de travail" },
+  "workspaceManageLabel": { "message": "Gérer les espaces de travail" },
   "yes": { "message": "Oui" },
   "no": { "message": "Non" },
   "popupTitle": { "message": "SmartTab Organizer" },

@@ -2,6 +2,8 @@
   "extensionName": { "message": "SmartTab Organizer" },
   "extensionDescription": { "message": "Organize Chrome tabs automatically: smart grouping, deduplication, session management. No AI, no tracking. Privacy-first." },
   "workspaceDefaultName": { "message": "Default" },
+  "workspaceSwitcherLabel": { "message": "Switch workspace" },
+  "workspaceManageLabel": { "message": "Manage workspaces" },
   "yes": { "message": "Yes" },
   "no": { "message": "No" },
   "popupTitle": { "message": "SmartTab Organizer" },

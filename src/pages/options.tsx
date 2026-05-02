@@ -19,7 +19,7 @@ import type { ShortcutDefinition } from '@/utils/keyboardShortcuts';
 import { Sidebar } from '@/components/UI/Sidebar/Sidebar';
 import type { SidebarItem } from '@/components/UI/Sidebar/Sidebar';
 import { OptionsHeader, OptionsHeaderCollapsed } from '@/components/UI/OptionsLayout/OptionsHeader';
-import { OptionsFooter, OptionsFooterCollapsed } from '@/components/UI/OptionsLayout/OptionsFooter';
+import { WorkspaceFooter, WorkspaceFooterCollapsed } from '@/components/UI/Workspace/WorkspaceFooter';
 import { ShortcutsAside } from '@/components/UI/ShortcutsPanel';
 import { DomainRulesPage } from './DomainRulesPage';
 import { StatisticsPage } from './StatisticsPage';
@@ -114,8 +114,8 @@ export function OptionsContent() {
                 headerContent={<OptionsHeader version={version} />}
                 headerCollapsedContent={<OptionsHeaderCollapsed />}
                 showFooter={true}
-                footerContent={<OptionsFooter />}
-                footerCollapsedContent={<OptionsFooterCollapsed />}
+                footerContent={<WorkspaceFooter />}
+                footerCollapsedContent={<WorkspaceFooterCollapsed />}
             />
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
