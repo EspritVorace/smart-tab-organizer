@@ -29,6 +29,7 @@
   "workspaceDeleteDisabledLast": { "message": "At least one workspace must remain." },
   "workspaceActiveBadge": { "message": "Active" },
   "workspaceDefaultBadge": { "message": "Default" },
+  "popupWorkspaceLabel": { "message": "Workspace" },
   "yes": { "message": "Yes" },
   "no": { "message": "No" },
   "popupTitle": { "message": "SmartTab Organizer" },

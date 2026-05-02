@@ -29,6 +29,7 @@
   "workspaceDeleteDisabledLast": { "message": "Debe quedar al menos un espacio de trabajo." },
   "workspaceActiveBadge": { "message": "Activo" },
   "workspaceDefaultBadge": { "message": "Predeterminado" },
+  "popupWorkspaceLabel": { "message": "Espacio de trabajo" },
   "yes": { "message": "Sí" },
   "no": { "message": "No" },
   "popupTitle": { "message": "SmartTab Organizer" },

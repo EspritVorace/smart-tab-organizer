@@ -9,6 +9,7 @@ import { PopupHeader } from '@/components/UI/PopupHeader/PopupHeader';
 import { SettingsToggles } from '@/components/UI/SettingsToggles/SettingsToggles';
 import { PopupToolbar } from '@/components/UI/PopupToolbar/PopupToolbar';
 import { PopupProfilesList } from '@/components/UI/PopupProfilesList/PopupProfilesList';
+import { PopupWorkspaceFooter } from '@/components/UI/Workspace/PopupWorkspaceFooter';
 import { ShortcutsDrawer } from '@/components/UI/ShortcutsPanel';
 import { openOptionsWithHash } from '@/utils/openOptions';
 import { useSettings } from '@/hooks/useSettings';
@@ -49,6 +50,11 @@ export function PopupContent() {
 
   const handlePopupOrganize = useCallback(() => {
     browser.runtime.sendMessage({ type: 'ORGANIZE_ALL_TABS' }).finally(() => window.close());
+  }, []);
+
+  const handleManageWorkspaces = useCallback(() => {
+    void openOptionsWithHash('#workspaces');
+    window.close();
   }, []);
 
   const shortcuts = useMemo<ShortcutDefinition[]>(() => [
@@ -92,6 +98,9 @@ export function PopupContent() {
             />
           </>
         ) : null}
+
+        <Separator size="4" />
+        <PopupWorkspaceFooter onManage={handleManageWorkspaces} />
       </Flex>
       <ShortcutsDrawer open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
     </Box>
