@@ -2,34 +2,30 @@ import { storage } from 'wxt/utils/storage';
 import type { AppSettings } from '@/types/syncSettings.js';
 import { defaultAppSettings } from '@/types/syncSettings.js';
 import { logger } from './logger.js';
-import {
-  globalGroupingEnabledItem,
-  globalDeduplicationEnabledItem,
-  deduplicateUnmatchedDomainsItem,
-  deduplicationKeepStrategyItem,
-  domainRulesItem,
-  categoriesItem,
-  notifyOnGroupingItem,
-  notifyOnDeduplicationItem,
-  settingsItemMap,
-} from './storageItems.js';
+import { getActiveScopedItems, getActiveScopedItemsSync } from './workspaceContext.js';
 
 /**
  * Utilitaires pour les settings utilisables dans tous les contextes
- * (background, content scripts, popup, options)
+ * (background, content scripts, popup, options).
+ *
+ * Tous les accès passent par `getActiveScopedItems()` pour cibler le workspace
+ * actif. En l'absence d'initialisation explicite (ex. tests unitaires), les
+ * items résolvent vers le workspace par défaut, qui réutilise les clés
+ * legacy non-préfixées.
  */
 
 export async function getSettings(): Promise<AppSettings> {
   try {
+    const items = await getActiveScopedItems();
     const results = await storage.getItems([
-      globalGroupingEnabledItem,
-      globalDeduplicationEnabledItem,
-      deduplicateUnmatchedDomainsItem,
-      deduplicationKeepStrategyItem,
-      domainRulesItem,
-      categoriesItem,
-      notifyOnGroupingItem,
-      notifyOnDeduplicationItem,
+      items.globalGroupingEnabledItem,
+      items.globalDeduplicationEnabledItem,
+      items.deduplicateUnmatchedDomainsItem,
+      items.deduplicationKeepStrategyItem,
+      items.domainRulesItem,
+      items.categoriesItem,
+      items.notifyOnGroupingItem,
+      items.notifyOnDeduplicationItem,
     ]);
     return {
       globalGroupingEnabled: results[0].value as boolean,
@@ -49,15 +45,16 @@ export async function getSettings(): Promise<AppSettings> {
 
 export async function setSettings(settings: AppSettings): Promise<void> {
   try {
+    const items = await getActiveScopedItems();
     await storage.setItems([
-      { item: globalGroupingEnabledItem, value: settings.globalGroupingEnabled },
-      { item: globalDeduplicationEnabledItem, value: settings.globalDeduplicationEnabled },
-      { item: deduplicateUnmatchedDomainsItem, value: settings.deduplicateUnmatchedDomains },
-      { item: deduplicationKeepStrategyItem, value: settings.deduplicationKeepStrategy },
-      { item: domainRulesItem, value: settings.domainRules },
-      { item: categoriesItem, value: settings.categories },
-      { item: notifyOnGroupingItem, value: settings.notifyOnGrouping },
-      { item: notifyOnDeduplicationItem, value: settings.notifyOnDeduplication },
+      { item: items.globalGroupingEnabledItem, value: settings.globalGroupingEnabled },
+      { item: items.globalDeduplicationEnabledItem, value: settings.globalDeduplicationEnabled },
+      { item: items.deduplicateUnmatchedDomainsItem, value: settings.deduplicateUnmatchedDomains },
+      { item: items.deduplicationKeepStrategyItem, value: settings.deduplicationKeepStrategy },
+      { item: items.domainRulesItem, value: settings.domainRules },
+      { item: items.categoriesItem, value: settings.categories },
+      { item: items.notifyOnGroupingItem, value: settings.notifyOnGrouping },
+      { item: items.notifyOnDeduplicationItem, value: settings.notifyOnDeduplication },
     ]);
   } catch (error) {
     logger.error('Error setting settings:', error);
@@ -66,58 +63,65 @@ export async function setSettings(settings: AppSettings): Promise<void> {
 
 export async function updateSettings(updates: Partial<AppSettings>): Promise<void> {
   try {
-    const items: Parameters<typeof storage.setItems>[0] = [];
+    const items = await getActiveScopedItems();
+    const writes: Parameters<typeof storage.setItems>[0] = [];
     if ('globalGroupingEnabled' in updates)
-      items.push({ item: globalGroupingEnabledItem, value: updates.globalGroupingEnabled! });
+      writes.push({ item: items.globalGroupingEnabledItem, value: updates.globalGroupingEnabled! });
     if ('globalDeduplicationEnabled' in updates)
-      items.push({ item: globalDeduplicationEnabledItem, value: updates.globalDeduplicationEnabled! });
+      writes.push({ item: items.globalDeduplicationEnabledItem, value: updates.globalDeduplicationEnabled! });
     if ('deduplicateUnmatchedDomains' in updates)
-      items.push({ item: deduplicateUnmatchedDomainsItem, value: updates.deduplicateUnmatchedDomains! });
+      writes.push({ item: items.deduplicateUnmatchedDomainsItem, value: updates.deduplicateUnmatchedDomains! });
     if ('deduplicationKeepStrategy' in updates)
-      items.push({ item: deduplicationKeepStrategyItem, value: updates.deduplicationKeepStrategy! });
+      writes.push({ item: items.deduplicationKeepStrategyItem, value: updates.deduplicationKeepStrategy! });
     if ('domainRules' in updates)
-      items.push({ item: domainRulesItem, value: updates.domainRules! });
+      writes.push({ item: items.domainRulesItem, value: updates.domainRules! });
     if ('categories' in updates)
-      items.push({ item: categoriesItem, value: updates.categories! });
+      writes.push({ item: items.categoriesItem, value: updates.categories! });
     if ('notifyOnGrouping' in updates)
-      items.push({ item: notifyOnGroupingItem, value: updates.notifyOnGrouping! });
+      writes.push({ item: items.notifyOnGroupingItem, value: updates.notifyOnGrouping! });
     if ('notifyOnDeduplication' in updates)
-      items.push({ item: notifyOnDeduplicationItem, value: updates.notifyOnDeduplication! });
-    if (items.length > 0) await storage.setItems(items);
+      writes.push({ item: items.notifyOnDeduplicationItem, value: updates.notifyOnDeduplication! });
+    if (writes.length > 0) await storage.setItems(writes);
   } catch (error) {
     logger.error('Error updating settings:', error);
   }
 }
 
-
 /**
- * Ecouter les changements de settings.
- * Retourne une fonction de cleanup.
+ * Listen to settings changes for the currently active workspace at the time
+ * the watcher is installed. Switching workspace requires re-subscribing.
  */
 export function watchSettings(
   callback: (settings: AppSettings) => void,
 ): () => void {
+  const items = getActiveScopedItemsSync();
   const unwatchers = [
-    globalGroupingEnabledItem.watch(() => getSettings().then(callback)),
-    globalDeduplicationEnabledItem.watch(() => getSettings().then(callback)),
-    deduplicateUnmatchedDomainsItem.watch(() => getSettings().then(callback)),
-    deduplicationKeepStrategyItem.watch(() => getSettings().then(callback)),
-    domainRulesItem.watch(() => getSettings().then(callback)),
-    categoriesItem.watch(() => getSettings().then(callback)),
-    notifyOnGroupingItem.watch(() => getSettings().then(callback)),
-    notifyOnDeduplicationItem.watch(() => getSettings().then(callback)),
+    items.globalGroupingEnabledItem.watch(() => getSettings().then(callback)),
+    items.globalDeduplicationEnabledItem.watch(() => getSettings().then(callback)),
+    items.deduplicateUnmatchedDomainsItem.watch(() => getSettings().then(callback)),
+    items.deduplicationKeepStrategyItem.watch(() => getSettings().then(callback)),
+    items.domainRulesItem.watch(() => getSettings().then(callback)),
+    items.categoriesItem.watch(() => getSettings().then(callback)),
+    items.notifyOnGroupingItem.watch(() => getSettings().then(callback)),
+    items.notifyOnDeduplicationItem.watch(() => getSettings().then(callback)),
   ];
   return () => unwatchers.forEach(u => u());
 }
 
-/**
- * Ecouter un champ spécifique des settings.
- */
 export function watchSettingsField<K extends keyof AppSettings>(
   field: K,
   callback: (value: AppSettings[K]) => void,
 ): () => void {
-  return (settingsItemMap[field] as unknown as { watch: (cb: (v: AppSettings[K]) => void) => () => void }).watch(
-    (newValue: AppSettings[K]) => callback(newValue),
-  );
+  const items = getActiveScopedItemsSync();
+  const fieldToItem: Record<keyof AppSettings, { watch: (cb: (v: unknown) => void) => () => void }> = {
+    globalGroupingEnabled: items.globalGroupingEnabledItem,
+    globalDeduplicationEnabled: items.globalDeduplicationEnabledItem,
+    deduplicateUnmatchedDomains: items.deduplicateUnmatchedDomainsItem,
+    deduplicationKeepStrategy: items.deduplicationKeepStrategyItem,
+    domainRules: items.domainRulesItem,
+    categories: items.categoriesItem,
+    notifyOnGrouping: items.notifyOnGroupingItem,
+    notifyOnDeduplication: items.notifyOnDeduplicationItem,
+  };
+  return fieldToItem[field].watch((newValue) => callback(newValue as AppSettings[K]));
 }

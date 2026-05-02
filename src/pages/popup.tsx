@@ -14,6 +14,10 @@ import { openOptionsWithHash } from '@/utils/openOptions';
 import { useSettings } from '@/hooks/useSettings';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import type { ShortcutDefinition } from '@/utils/keyboardShortcuts';
+import {
+  ActiveWorkspaceProvider,
+  useActiveWorkspaceContext,
+} from '@/contexts/ActiveWorkspaceContext.js';
 
 export function PopupContent() {
   const { settings, isLoaded, setGlobalGroupingEnabled, setGlobalDeduplicationEnabled } = useSettings();
@@ -94,6 +98,17 @@ export function PopupContent() {
   );
 }
 
+function PopupThemed() {
+  const { accentColor, activeId } = useActiveWorkspaceContext();
+  return (
+    <Theme accentColor={accentColor}>
+      <div key={activeId} style={{ display: 'contents' }}>
+        <PopupContent />
+      </div>
+    </Theme>
+  );
+}
+
 export function PopupApp() {
   return (
     <ThemeProvider
@@ -102,9 +117,9 @@ export function PopupApp() {
       enableSystem
       disableTransitionOnChange
     >
-      <Theme>
-        <PopupContent />
-      </Theme>
+      <ActiveWorkspaceProvider>
+        <PopupThemed />
+      </ActiveWorkspaceProvider>
     </ThemeProvider>
   );
 }

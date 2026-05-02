@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { Statistics, StatisticsAggregates, TopRuleStat } from '@/types/statistics.js';
 import { defaultStatistics } from '@/types/statistics.js';
-import { statisticsItem } from '@/utils/storageItems.js';
+import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext.js';
 import { useStorageState } from './useStorageState.js';
 import type { DomainRuleSetting } from '@/types/syncSettings.js';
 
@@ -135,16 +135,27 @@ export interface UseStatisticsReturn {
 }
 
 export function useStatistics(domainRules: DomainRuleSetting[] = []): UseStatisticsReturn {
+  const { scopedItems } = useActiveWorkspaceContext();
+  const statisticsItem = scopedItems.statisticsItem;
+
+  const load = useCallback(
+    async () => mergeWithDefaults(await statisticsItem.getValue()),
+    [statisticsItem],
+  );
+  const watch = useCallback(
+    (onChanged: (u: Partial<Statistics>) => void) =>
+      statisticsItem.watch((v) => onChanged(mergeWithDefaults(v))),
+    [statisticsItem],
+  );
+  const save = useCallback(
+    async (_updates: Partial<Statistics>, current: Statistics) => {
+      await statisticsItem.setValue(current);
+    },
+    [statisticsItem],
+  );
+
   const { value: statistics, isLoaded, reset, reload } =
-    useStorageState<Statistics>({
-      load: async () => mergeWithDefaults(await statisticsItem.getValue()),
-      watch: (onChanged) =>
-        statisticsItem.watch(v => onChanged(mergeWithDefaults(v))),
-      save: async (_updates, current) => {
-        await statisticsItem.setValue(current);
-      },
-      defaults: defaultStatistics,
-    });
+    useStorageState<Statistics>({ load, watch, save, defaults: defaultStatistics });
 
   const statisticsAggregates = useMemo(
     () => computeAggregates(statistics, domainRules),

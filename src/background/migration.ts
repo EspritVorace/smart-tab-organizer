@@ -1,8 +1,8 @@
 import { browser } from 'wxt/browser';
 import { logger } from '@/utils/logger.js';
-import { categoriesItem, categoriesSeededItem } from '@/utils/storageItems.js';
 import { fetchBuiltInCategories } from '@/utils/categoriesStore.js';
 import { DEFAULT_WORKSPACE_ID } from '@/utils/workspaceStorage.js';
+import { getActiveScopedItems } from '@/utils/workspaceContext.js';
 import type { WorkspaceMeta, WorkspaceAccentColor } from '@/schemas/workspace.js';
 import { getMessage } from '@/utils/i18n.js';
 
@@ -151,6 +151,7 @@ export async function migrateToWorkspaces(): Promise<void> {
  */
 export async function seedBuiltInCategories(): Promise<void> {
   try {
+    const { categoriesItem, categoriesSeededItem } = await getActiveScopedItems();
     if (await categoriesSeededItem.getValue()) {
       logger.debug('[MIGRATION] Categories already seeded.');
       return;

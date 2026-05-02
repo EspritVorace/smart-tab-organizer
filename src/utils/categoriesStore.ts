@@ -1,5 +1,5 @@
 import { categoriesFileSchema, type RuleCategory } from '@/schemas/category.js';
-import { categoriesItem } from './storageItems.js';
+import { getActiveScopedItems } from './workspaceContext.js';
 import { getMessage } from './i18n.js';
 import { logger } from './logger.js';
 
@@ -11,14 +11,15 @@ export async function initCategoriesStore(): Promise<void> {
   if (initialized) return;
   initialized = true;
   try {
+    const { categoriesItem } = await getActiveScopedItems();
     cache = (await categoriesItem.getValue()) ?? [];
+    unwatch = categoriesItem.watch((next) => {
+      cache = next ?? [];
+    });
   } catch (error) {
     logger.error('[CATEGORIES] Failed to read categories from storage:', error);
     cache = [];
   }
-  unwatch = categoriesItem.watch((next) => {
-    cache = next ?? [];
-  });
 }
 
 export function getAllCategories(): RuleCategory[] {

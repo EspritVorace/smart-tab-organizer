@@ -4,6 +4,10 @@ import { browser } from 'wxt/browser';
 import { mountExtensionApp } from '@/utils/mountExtensionApp.js';
 import { Flex, Spinner, Text, Theme } from '@radix-ui/themes';
 import { ThemeProvider } from 'next-themes';
+import {
+    ActiveWorkspaceProvider,
+    useActiveWorkspaceContext,
+} from '@/contexts/ActiveWorkspaceContext.js';
 
 import { useSettings } from '@/hooks/useSettings.js';
 import { useStatistics } from '@/hooks/useStatistics.js';
@@ -159,13 +163,24 @@ export function OptionsContent() {
     );
 }
 
+function OptionsThemed() {
+    const { accentColor, activeId } = useActiveWorkspaceContext();
+    return (
+        <Theme accentColor={accentColor}>
+            <div key={activeId} style={{ display: 'contents' }}>
+                <OptionsContent />
+                <Toaster />
+            </div>
+        </Theme>
+    );
+}
+
 export function OptionsApp() {
     return (
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            <Theme>
-                <OptionsContent />
-                <Toaster />
-            </Theme>
+            <ActiveWorkspaceProvider>
+                <OptionsThemed />
+            </ActiveWorkspaceProvider>
         </ThemeProvider>
     );
 }
