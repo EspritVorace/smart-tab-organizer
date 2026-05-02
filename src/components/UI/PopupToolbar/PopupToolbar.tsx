@@ -1,43 +1,58 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Button, Flex, Text } from '@radix-ui/themes';
+import React, { useEffect, useMemo, useState } from 'react';
 import { browser } from 'wxt/browser';
-import { getMessage } from '@/utils/i18n';
+import { Camera, RotateCcw, Wand2 } from 'lucide-react';
+import { getMessage, getPluralMessage } from '@/utils/i18n';
 import { loadSessions } from '@/utils/sessionStorage';
 import { hasCapturableTabs } from '@/utils/tabCapture';
 import { openOptionsWithHash } from '@/utils/openOptions';
+import { useSettings } from '@/hooks/useSettings';
+import styles from './PopupToolbar.module.css';
 
-const actionButtonStyle: React.CSSProperties = {
-  flex: 1,
-  flexDirection: 'column',
-  height: 'auto',
-  gap: 4,
-  paddingTop: 10,
-  paddingBottom: 10,
-  borderRadius: 'var(--radius-5)',
-};
+export interface PopupToolbarProps {
+  tabCount?: number;
+  activeRulesCount?: number;
+  hasSessions?: boolean;
+  canSave?: boolean;
+  isOrganizing?: boolean;
+  activeTabGroupId?: number | null;
+}
 
-const actionEmojiStyle: React.CSSProperties = {
-  fontSize: 18,
-  lineHeight: 1,
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-};
+export function PopupToolbar(props: PopupToolbarProps = {}) {
+  const [tabCount, setTabCount] = useState(props.tabCount ?? 0);
+  const [hasSessions, setHasSessions] = useState(props.hasSessions ?? false);
+  const [canSave, setCanSave] = useState(props.canSave ?? false);
+  const [isOrganizing, setIsOrganizing] = useState(props.isOrganizing ?? false);
+  const [activeTabGroupId, setActiveTabGroupId] = useState<number | null>(
+    props.activeTabGroupId ?? null
+  );
 
-export function PopupToolbar() {
-  const [hasSessions, setHasSessions] = useState(false);
-  const [canSave, setCanSave] = useState(false);
-  const [isOrganizing, setIsOrganizing] = useState(false);
-  const [activeTabGroupId, setActiveTabGroupId] = useState<number | null>(null);
+  const { settings } = useSettings();
+
+  const activeRulesCount = useMemo(() => {
+    if (props.activeRulesCount != null) return props.activeRulesCount;
+    return settings?.domainRules?.filter((r) => r.enabled).length ?? 0;
+  }, [props.activeRulesCount, settings?.domainRules]);
 
   useEffect(() => {
-    loadSessions().then((sessions) => setHasSessions(sessions.length > 0));
-    hasCapturableTabs().then(setCanSave);
-    browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-      const groupId = (tabs[0] as { groupId?: number } | undefined)?.groupId;
-      setActiveTabGroupId(typeof groupId === 'number' && groupId >= 0 ? groupId : null);
-    });
-  }, []);
+    if (props.tabCount != null && props.hasSessions != null && props.canSave != null) {
+      return;
+    }
+    if (props.hasSessions == null) {
+      loadSessions().then((sessions) => setHasSessions(sessions.length > 0));
+    }
+    if (props.canSave == null) {
+      hasCapturableTabs().then(setCanSave);
+    }
+    if (props.tabCount == null) {
+      browser.tabs.query({ currentWindow: true }).then((tabs) => setTabCount(tabs.length));
+    }
+    if (props.activeTabGroupId === undefined) {
+      browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+        const groupId = (tabs[0] as { groupId?: number } | undefined)?.groupId;
+        setActiveTabGroupId(typeof groupId === 'number' && groupId >= 0 ? groupId : null);
+      });
+    }
+  }, [props.tabCount, props.hasSessions, props.canSave, props.activeTabGroupId]);
 
   const handleOrganize = async () => {
     setIsOrganizing(true);
@@ -54,66 +69,66 @@ export function PopupToolbar() {
     ? getMessage('popupSaveActiveGroup')
     : getMessage('popupSaveSession');
 
+  const heroTitle = isOrganizing
+    ? getMessage('organizingTabs')
+    : getPluralMessage(tabCount, 'popupOrganizeTabsCountOne', 'popupOrganizeTabsCount');
+
+  const heroSubtitle = getPluralMessage(
+    activeRulesCount,
+    'popupActiveRulesCountOne',
+    'popupActiveRulesCount',
+    'popupActiveRulesCountZero'
+  );
+
   return (
-    <Box
-      data-testid="popup-toolbar"
-      p="1"
-      style={{
-        background: 'var(--gray-a3)',
-        borderRadius: 'var(--radius-5)',
-      }}
-    >
-      <Flex gap="1">
-        <Button
+    <div data-testid="popup-toolbar" className={styles.toolbar}>
+      <button
+        type="button"
+        data-testid="popup-toolbar-btn-organize"
+        className={styles.hero}
+        disabled={isOrganizing}
+        onClick={() => void handleOrganize()}
+        aria-label={getMessage('organizeAllTabs')}
+        title={getMessage('organizeAllTabs')}
+      >
+        <span className={styles.heroIcon} aria-hidden="true">
+          <Wand2 size={16} />
+        </span>
+        <span className={styles.heroBody}>
+          <strong className={styles.heroTitle}>{heroTitle}</strong>
+          <span className={styles.heroSubtitle}>{heroSubtitle}</span>
+        </span>
+        <kbd className={styles.heroKbd} aria-label={getMessage('popupOrganizeShortcut')}>
+          O
+        </kbd>
+      </button>
+
+      <div className={styles.metaRow}>
+        <button
+          type="button"
           data-testid="popup-toolbar-btn-save"
-          variant="soft"
+          className={styles.metaButton}
           disabled={!canSave}
           onClick={() => void openOptionsWithHash(saveHash)}
           aria-label={saveAriaLabel}
           title={saveDisabledHint}
-          style={actionButtonStyle}
         >
-          <span aria-hidden="true" style={actionEmojiStyle}>
-            📸
-          </span>
-          <Text as="span" size="1">
-            {getMessage('popupSave')}
-          </Text>
-        </Button>
+          <Camera size={13} aria-hidden="true" className={styles.metaIcon} />
+          <span className={styles.metaLabel}>{getMessage('popupSaveSession')}</span>
+        </button>
 
-        <Button
+        <button
+          type="button"
           data-testid="popup-toolbar-btn-restore"
-          variant="soft"
+          className={styles.metaButton}
           disabled={!hasSessions}
           onClick={() => void openOptionsWithHash('#sessions')}
           aria-label={getMessage('popupRestoreSession')}
-          style={actionButtonStyle}
         >
-          <span aria-hidden="true" style={actionEmojiStyle}>
-            🔄
-          </span>
-          <Text as="span" size="1">
-            {getMessage('popupRestore')}
-          </Text>
-        </Button>
-
-        <Button
-          data-testid="popup-toolbar-btn-organize"
-          variant="soft"
-          disabled={isOrganizing}
-          onClick={() => void handleOrganize()}
-          aria-label={getMessage('organizeAllTabs')}
-          title={getMessage('organizeAllTabs')}
-          style={actionButtonStyle}
-        >
-          <span aria-hidden="true" style={actionEmojiStyle}>
-            🪄
-          </span>
-          <Text as="span" size="1">
-            {isOrganizing ? getMessage('organizingTabs') : getMessage('organizeAllTabs')}
-          </Text>
-        </Button>
-      </Flex>
-    </Box>
+          <RotateCcw size={13} aria-hidden="true" className={styles.metaIcon} />
+          <span className={styles.metaLabel}>{getMessage('popupRestoreSession')}</span>
+        </button>
+      </div>
+    </div>
   );
 }

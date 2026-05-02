@@ -529,6 +529,12 @@
   "popupGoToSessions": { "message": "Gérer les sessions" },
   "popupPinnedEmptyToggleAria": { "message": "Afficher ou masquer l'aide sessions épinglées" },
   "popupSaveDisabledHint": { "message": "Aucun groupe actif à sauvegarder" },
+  "popupOrganizeTabsCount": { "message": "Organiser $1 onglets" },
+  "popupOrganizeTabsCountOne": { "message": "Organiser 1 onglet" },
+  "popupActiveRulesCount": { "message": "$1 règles actives" },
+  "popupActiveRulesCountOne": { "message": "1 règle active" },
+  "popupActiveRulesCountZero": { "message": "Aucune règle active" },
+  "popupOrganizeShortcut": { "message": "Raccourci : O" },
   "popupAutoGroup": { "message": "Regroupement auto" },
   "popupDedup": { "message": "Déduplication" },
 

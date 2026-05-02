@@ -19,8 +19,15 @@ export function getMessage(key: string, substitutions?: string | string[]): stri
 /**
  * Return the singular message when count === 1, plural otherwise.
  * Plural key receives [String(count)] as substitution.
+ * Optionally supports a dedicated zero-key when count === 0.
  */
-export function getPluralMessage(count: number, oneKey: string, manyKey: string): string {
+export function getPluralMessage(
+  count: number,
+  oneKey: string,
+  manyKey: string,
+  zeroKey?: string
+): string {
+  if (count === 0 && zeroKey) return getMessage(zeroKey);
   return count === 1
     ? getMessage(oneKey)
     : getMessage(manyKey, [String(count)]);
