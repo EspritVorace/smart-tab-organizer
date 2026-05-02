@@ -8,6 +8,12 @@ export interface ShortcutDisplay {
   /** Multiple combos for the same action display as comma-separated rows. */
   keys: string[];
   descriptionKey: string;
+  /**
+   * When set, the panel reads the live binding from `browser.commands.getAll()`
+   * and displays it instead of `keys`. `keys` is kept as a fallback for
+   * Storybook and for the moment before the async read resolves.
+   */
+  commandName?: string;
 }
 
 export interface ShortcutGroup {
@@ -19,9 +25,9 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
   {
     titleKey: 'shortcutsGroupGlobal',
     shortcuts: [
-      { keys: ['Alt+Shift+O'], descriptionKey: 'shortcutDescOrganize' },
-      { keys: ['Alt+Shift+S'], descriptionKey: 'shortcutDescSaveSession' },
-      { keys: ['Alt+Shift+P'], descriptionKey: 'shortcutDescOpenPopup' },
+      { keys: ['Alt+Shift+O'], descriptionKey: 'shortcutDescOrganize', commandName: 'organize-all-tabs' },
+      { keys: ['Alt+Shift+S'], descriptionKey: 'shortcutDescSaveSession', commandName: 'save-current-window-session' },
+      { keys: ['Alt+Shift+P'], descriptionKey: 'shortcutDescOpenPopup', commandName: '_execute_action' },
     ],
   },
   {
