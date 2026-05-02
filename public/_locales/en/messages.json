@@ -468,7 +468,6 @@
   "popupGoToSessions": { "message": "Manage sessions" },
   "popupPinnedEmptyToggleAria": { "message": "Toggle pinned sessions hint" },
   "popupSaveDisabledHint": { "message": "No active tab group to save" },
-  "popupRestoreLast": { "message": "Restore last" },
   "popupOrganizeTabsCount": { "message": "Organize $1 tabs" },
   "popupOrganizeTabsCountOne": { "message": "Organize 1 tab" },
   "popupActiveRulesCount": { "message": "$1 active rules" },

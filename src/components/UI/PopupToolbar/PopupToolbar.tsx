@@ -114,7 +114,7 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
           title={saveDisabledHint}
         >
           <Camera size={13} aria-hidden="true" className={styles.metaIcon} />
-          <span className={styles.metaLabel}>{getMessage('popupSave')}</span>
+          <span className={styles.metaLabel}>{getMessage('popupSaveSession')}</span>
         </button>
 
         <button
@@ -126,7 +126,7 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
           aria-label={getMessage('popupRestoreSession')}
         >
           <RotateCcw size={13} aria-hidden="true" className={styles.metaIcon} />
-          <span className={styles.metaLabel}>{getMessage('popupRestoreLast')}</span>
+          <span className={styles.metaLabel}>{getMessage('popupRestoreSession')}</span>
         </button>
       </div>
     </div>
