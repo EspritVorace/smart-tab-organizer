@@ -115,7 +115,7 @@ test.describe('[US-KB-options] Options shortcuts', () => {
     await page.close();
   });
 
-  test('Alt+digit also switches tabs on a non-US layout (AZERTY emits event.key="&" for Digit1)', async ({
+  test('Alt+digit also switches tabs on a non-US layout (where event.key is not the digit)', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -123,15 +123,21 @@ test.describe('[US-KB-options] Options shortcuts', () => {
     await goToOptionsPage(page, extensionId);
     await page.locator('body').click();
 
-    // page.keyboard.press fakes both code and key from the US layout, so it
-    // never reproduces the AZERTY case. Send a raw CDP event with the
-    // AZERTY mapping (event.code = "Digit2", event.key = "é").
-    const cdp = await page.context().newCDPSession(page);
-    await cdp.send('Input.dispatchKeyEvent', {
-      type: 'keyDown',
-      code: 'Digit2',
-      key: 'é',
-      modifiers: 1, // Alt
+    // page.keyboard.press always uses the US layout (event.key === event.code's
+    // digit), so it cannot reproduce the AZERTY case where Alt+1 dispatches
+    // event.key = "&" while event.code stays "Digit1". Synthesise the event
+    // directly: what matters for the matcher is that event.key is *not* the
+    // digit but event.code is the matching DigitN.
+    await page.evaluate(() => {
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          code: 'Digit2',
+          key: 'layout-specific',
+          altKey: true,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
     });
 
     await page.getByTestId('page-sessions-btn-snapshot').waitFor({
