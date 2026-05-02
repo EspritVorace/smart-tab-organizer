@@ -1,32 +1,43 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
+import { browser } from 'wxt/browser';
 import {
   DEFAULT_WORKSPACE_ID,
+  WORKSPACE_SCOPED_KEYS,
   activeWorkspaceIdItem,
   defineWorkspaceItems,
   workspacesIndexItem,
+  workspaceStorageKey,
   type ScopedItems,
 } from '@/utils/workspaceStorage.js';
 import type { WorkspaceMeta, WorkspaceAccentColor } from '@/schemas/workspace.js';
 import { logger } from '@/utils/logger.js';
 
 export interface ActiveWorkspaceContextValue {
-  /** All known workspaces, in storage order. Always at least one entry. */
   workspaces: WorkspaceMeta[];
-  /** The active workspace id (defaults to DEFAULT_WORKSPACE_ID before load completes). */
   activeId: string;
-  /** Resolved metadata for the active workspace, or null if not yet loaded. */
   active: WorkspaceMeta | null;
-  /** Effective accent color for the Radix Theme; falls back to indigo. */
   accentColor: WorkspaceAccentColor;
-  /** Storage items scoped to the active workspace. Stable for a given activeId. */
   scopedItems: ScopedItems;
-  /** True once the initial load from storage completed. */
   isLoaded: boolean;
-  /** Switch the active workspace (persists to storage; consumers remount via key={activeId}). */
   switchTo: (id: string) => Promise<void>;
+  /** Create a new workspace and return its metadata. Auto-switches to it. */
+  createWorkspace: (name: string, accentColor: WorkspaceAccentColor) => Promise<WorkspaceMeta>;
+  renameWorkspace: (id: string, name: string) => Promise<void>;
+  setWorkspaceColor: (id: string, accentColor: WorkspaceAccentColor) => Promise<void>;
+  /**
+   * Delete a workspace and wipe its scoped data. Throws when:
+   * - it is the default workspace (immovable, holds legacy data),
+   * - it is the only remaining workspace.
+   * If the deleted workspace was active, the next available one becomes active.
+   */
+  removeWorkspace: (id: string) => Promise<void>;
 }
 
 const FALLBACK_ACCENT: WorkspaceAccentColor = 'indigo';
+
+function asyncNoop<T>(): Promise<T> {
+  return Promise.resolve(undefined as T);
+}
 
 const defaultValue: ActiveWorkspaceContextValue = {
   workspaces: [],
@@ -36,12 +47,28 @@ const defaultValue: ActiveWorkspaceContextValue = {
   scopedItems: defineWorkspaceItems(DEFAULT_WORKSPACE_ID),
   isLoaded: false,
   switchTo: async () => undefined,
+  createWorkspace: () => asyncNoop(),
+  renameWorkspace: async () => undefined,
+  setWorkspaceColor: async () => undefined,
+  removeWorkspace: async () => undefined,
 };
 
 export const ActiveWorkspaceContext = createContext<ActiveWorkspaceContextValue>(defaultValue);
 
 export function useActiveWorkspaceContext(): ActiveWorkspaceContextValue {
   return useContext(ActiveWorkspaceContext);
+}
+
+function generateWorkspaceId(): string {
+  return crypto.randomUUID();
+}
+
+async function deleteScopedKeys(wsId: string): Promise<void> {
+  if (wsId === DEFAULT_WORKSPACE_ID) return;
+  const keys = WORKSPACE_SCOPED_KEYS.map((field) =>
+    workspaceStorageKey(wsId, field).slice('local:'.length),
+  );
+  await browser.storage.local.remove(keys);
 }
 
 interface ActiveWorkspaceProviderProps {
@@ -80,6 +107,65 @@ export function ActiveWorkspaceProvider({ children }: ActiveWorkspaceProviderPro
     await activeWorkspaceIdItem.setValue(id);
   }, []);
 
+  const createWorkspace = useCallback(
+    async (name: string, accentColor: WorkspaceAccentColor): Promise<WorkspaceMeta> => {
+      const now = new Date().toISOString();
+      const meta: WorkspaceMeta = {
+        id: generateWorkspaceId(),
+        name: name.trim(),
+        accentColor,
+        createdAt: now,
+        updatedAt: now,
+      };
+      const current = (await workspacesIndexItem.getValue()) ?? [];
+      await workspacesIndexItem.setValue([...current, meta]);
+      await activeWorkspaceIdItem.setValue(meta.id);
+      return meta;
+    },
+    [],
+  );
+
+  const renameWorkspace = useCallback(async (id: string, name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    const current = (await workspacesIndexItem.getValue()) ?? [];
+    const next = current.map((w) =>
+      w.id === id ? { ...w, name: trimmed, updatedAt: new Date().toISOString() } : w,
+    );
+    await workspacesIndexItem.setValue(next);
+  }, []);
+
+  const setWorkspaceColor = useCallback(
+    async (id: string, accentColor: WorkspaceAccentColor) => {
+      const current = (await workspacesIndexItem.getValue()) ?? [];
+      const next = current.map((w) =>
+        w.id === id ? { ...w, accentColor, updatedAt: new Date().toISOString() } : w,
+      );
+      await workspacesIndexItem.setValue(next);
+    },
+    [],
+  );
+
+  const removeWorkspace = useCallback(async (id: string) => {
+    if (id === DEFAULT_WORKSPACE_ID) {
+      throw new Error('The default workspace cannot be removed.');
+    }
+    const current = (await workspacesIndexItem.getValue()) ?? [];
+    if (current.length <= 1) {
+      throw new Error('Cannot remove the last workspace.');
+    }
+    const next = current.filter((w) => w.id !== id);
+    await workspacesIndexItem.setValue(next);
+
+    const currentActive = (await activeWorkspaceIdItem.getValue()) ?? DEFAULT_WORKSPACE_ID;
+    if (currentActive === id) {
+      const fallback = next.find((w) => w.id === DEFAULT_WORKSPACE_ID) ?? next[0];
+      await activeWorkspaceIdItem.setValue(fallback.id);
+    }
+
+    await deleteScopedKeys(id);
+  }, []);
+
   const value = useMemo<ActiveWorkspaceContextValue>(() => {
     const active = workspaces.find((w) => w.id === activeId) ?? null;
     return {
@@ -90,8 +176,21 @@ export function ActiveWorkspaceProvider({ children }: ActiveWorkspaceProviderPro
       scopedItems: defineWorkspaceItems(activeId),
       isLoaded,
       switchTo,
+      createWorkspace,
+      renameWorkspace,
+      setWorkspaceColor,
+      removeWorkspace,
     };
-  }, [workspaces, activeId, isLoaded, switchTo]);
+  }, [
+    workspaces,
+    activeId,
+    isLoaded,
+    switchTo,
+    createWorkspace,
+    renameWorkspace,
+    setWorkspaceColor,
+    removeWorkspace,
+  ]);
 
   return (
     <ActiveWorkspaceContext.Provider value={value}>{children}</ActiveWorkspaceContext.Provider>
