@@ -115,6 +115,34 @@ test.describe('[US-KB-options] Options shortcuts', () => {
     await page.close();
   });
 
+  test('Alt+digit also switches tabs on a non-US layout (AZERTY emits event.key="&" for Digit1)', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    await goToOptionsPage(page, extensionId);
+    await page.locator('body').click();
+
+    // page.keyboard.press fakes both code and key from the US layout, so it
+    // never reproduces the AZERTY case. Send a raw CDP event with the
+    // AZERTY mapping (event.code = "Digit2", event.key = "é").
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('Input.dispatchKeyEvent', {
+      type: 'keyDown',
+      code: 'Digit2',
+      key: 'é',
+      modifiers: 1, // Alt
+    });
+
+    await page.getByTestId('page-sessions-btn-snapshot').waitFor({
+      state: 'visible',
+      timeout: 5000,
+    });
+    expect(page.url()).toContain('#sessions');
+
+    await page.close();
+  });
+
   test('? opens the shortcuts aside (non-modal); Escape closes it; the page stays interactive', async ({
     extensionContext,
     extensionId,
