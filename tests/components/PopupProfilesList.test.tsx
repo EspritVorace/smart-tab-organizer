@@ -23,11 +23,15 @@ vi.mock('../../src/utils/i18n', () => ({
 // Mock popupPinnedEmptyCollapsedItem to avoid hitting real storage in tests
 const mockGetValue = vi.fn(async () => false);
 const mockSetValue = vi.fn(async () => {});
-vi.mock('../../src/utils/storageItems', () => ({
-  popupPinnedEmptyCollapsedItem: {
-    getValue: () => mockGetValue(),
-    setValue: (value: boolean) => mockSetValue(value),
-  },
+vi.mock('../../src/contexts/ActiveWorkspaceContext', () => ({
+  useActiveWorkspaceContext: () => ({
+    scopedItems: {
+      popupPinnedEmptyCollapsedItem: {
+        getValue: () => mockGetValue(),
+        setValue: (value: boolean) => mockSetValue(value),
+      },
+    },
+  }),
 }));
 
 // Mock sessionStorage

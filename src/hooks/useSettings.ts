@@ -1,18 +1,10 @@
+import { useCallback, useMemo } from 'react';
 import { storage } from 'wxt/utils/storage';
 import type { AppSettings, DomainRuleSettings } from '@/types/syncSettings.js';
 import type { DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
 import type { RuleCategory } from '@/schemas/category.js';
-import {
-  globalGroupingEnabledItem,
-  globalDeduplicationEnabledItem,
-  deduplicateUnmatchedDomainsItem,
-  deduplicationKeepStrategyItem,
-  domainRulesItem,
-  categoriesItem,
-  notifyOnGroupingItem,
-  notifyOnDeduplicationItem,
-  settingsItemMap,
-} from '@/utils/storageItems.js';
+import type { ScopedItems } from '@/utils/workspaceStorage.js';
+import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext.js';
 import { useStorageState } from './useStorageState.js';
 
 export interface UseSettingsReturn {
@@ -39,18 +31,33 @@ export interface UseSettingsReturn {
   reloadSettings: () => Promise<void>;
 }
 
-// --- Storage helpers (module-level, stable references) ---
+type SettingsItemMap = {
+  [K in keyof AppSettings]: { watch: (cb: (v: AppSettings[K]) => void) => () => void };
+};
 
-async function loadSettingsFromStorage(): Promise<AppSettings> {
+function buildSettingsItemMap(items: ScopedItems): SettingsItemMap {
+  return {
+    globalGroupingEnabled: items.globalGroupingEnabledItem,
+    globalDeduplicationEnabled: items.globalDeduplicationEnabledItem,
+    deduplicateUnmatchedDomains: items.deduplicateUnmatchedDomainsItem,
+    deduplicationKeepStrategy: items.deduplicationKeepStrategyItem,
+    domainRules: items.domainRulesItem,
+    categories: items.categoriesItem,
+    notifyOnGrouping: items.notifyOnGroupingItem,
+    notifyOnDeduplication: items.notifyOnDeduplicationItem,
+  } as SettingsItemMap;
+}
+
+async function loadSettingsFromStorage(items: ScopedItems): Promise<AppSettings> {
   const results = await storage.getItems([
-    globalGroupingEnabledItem,
-    globalDeduplicationEnabledItem,
-    deduplicateUnmatchedDomainsItem,
-    deduplicationKeepStrategyItem,
-    domainRulesItem,
-    categoriesItem,
-    notifyOnGroupingItem,
-    notifyOnDeduplicationItem,
+    items.globalGroupingEnabledItem,
+    items.globalDeduplicationEnabledItem,
+    items.deduplicateUnmatchedDomainsItem,
+    items.deduplicationKeepStrategyItem,
+    items.domainRulesItem,
+    items.categoriesItem,
+    items.notifyOnGroupingItem,
+    items.notifyOnDeduplicationItem,
   ]);
 
   const rawRules = results[4].value as DomainRuleSettings;
@@ -63,8 +70,7 @@ async function loadSettingsFromStorage(): Promise<AppSettings> {
       }))
     : rawRules;
   if (hasWildcards) {
-    // Persist the migrated rules so migration only runs once
-    await storage.setItems([{ item: domainRulesItem, value: domainRules }]);
+    await storage.setItems([{ item: items.domainRulesItem, value: domainRules }]);
   }
 
   return {
@@ -79,38 +85,42 @@ async function loadSettingsFromStorage(): Promise<AppSettings> {
   };
 }
 
-/**
- * Register one watcher per storage item.
- * Each watcher fires `onChanged` with a single-field partial so the generic
- * hook can merge it into state and invoke per-field callbacks.
- */
-function watchAppSettings(onChanged: (update: Partial<AppSettings>) => void): () => void {
+function watchAppSettings(
+  settingsItemMap: SettingsItemMap,
+  onChanged: (update: Partial<AppSettings>) => void,
+): () => void {
   const unwatchers = (
     Object.entries(settingsItemMap) as [keyof AppSettings, { watch: (cb: (v: unknown) => void) => () => void }][]
   ).map(([field, item]) => item.watch((v) => onChanged({ [field]: v })));
   return () => unwatchers.forEach(u => u());
 }
 
-/**
- * Persist only the fields present in `updates` to their respective storage items.
- */
-async function saveSettingsToStorage(updates: Partial<AppSettings>): Promise<void> {
-  const items = (Object.entries(updates) as [keyof typeof settingsItemMap, AppSettings[keyof AppSettings]][])
+async function saveSettingsToStorage(
+  settingsItemMap: SettingsItemMap,
+  updates: Partial<AppSettings>,
+): Promise<void> {
+  const items = (Object.entries(updates) as [keyof AppSettings, AppSettings[keyof AppSettings]][])
     .filter(([key]) => key in settingsItemMap)
-    .map(([key, value]) => ({ item: settingsItemMap[key], value }));
+    .map(([key, value]) => ({ item: settingsItemMap[key] as never, value }));
   if (items.length > 0) await storage.setItems(items);
 }
 
-// --- Hook ---
-
 export function useSettings(): UseSettingsReturn {
+  const { scopedItems } = useActiveWorkspaceContext();
+  const settingsItemMap = useMemo(() => buildSettingsItemMap(scopedItems), [scopedItems]);
+
+  const load = useCallback(() => loadSettingsFromStorage(scopedItems), [scopedItems]);
+  const watch = useCallback(
+    (onChanged: (u: Partial<AppSettings>) => void) => watchAppSettings(settingsItemMap, onChanged),
+    [settingsItemMap],
+  );
+  const save = useCallback(
+    (updates: Partial<AppSettings>) => saveSettingsToStorage(settingsItemMap, updates),
+    [settingsItemMap],
+  );
+
   const { value: settings, isLoaded, update, onFieldChange, reload } =
-    useStorageState<AppSettings>({
-      load: loadSettingsFromStorage,
-      watch: watchAppSettings,
-      // Only save changed fields; `current` is not needed here.
-      save: (updates) => saveSettingsToStorage(updates),
-    });
+    useStorageState<AppSettings>({ load, watch, save });
 
   return {
     settings,

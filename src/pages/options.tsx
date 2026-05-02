@@ -4,6 +4,10 @@ import { browser } from 'wxt/browser';
 import { mountExtensionApp } from '@/utils/mountExtensionApp.js';
 import { Flex, Spinner, Text, Theme } from '@radix-ui/themes';
 import { ThemeProvider } from 'next-themes';
+import {
+    ActiveWorkspaceProvider,
+    useActiveWorkspaceContext,
+} from '@/contexts/ActiveWorkspaceContext.js';
 
 import { useSettings } from '@/hooks/useSettings.js';
 import { useStatistics } from '@/hooks/useStatistics.js';
@@ -15,15 +19,16 @@ import type { ShortcutDefinition } from '@/utils/keyboardShortcuts';
 import { Sidebar } from '@/components/UI/Sidebar/Sidebar';
 import type { SidebarItem } from '@/components/UI/Sidebar/Sidebar';
 import { OptionsHeader, OptionsHeaderCollapsed } from '@/components/UI/OptionsLayout/OptionsHeader';
-import { OptionsFooter, OptionsFooterCollapsed } from '@/components/UI/OptionsLayout/OptionsFooter';
+import { WorkspaceFooter, WorkspaceFooterCollapsed } from '@/components/UI/Workspace/WorkspaceFooter';
 import { ShortcutsAside } from '@/components/UI/ShortcutsPanel';
 import { DomainRulesPage } from './DomainRulesPage';
 import { StatisticsPage } from './StatisticsPage';
 import { SettingsPage } from '@/components/UI/SettingsPage/SettingsPage';
 import { ImportExportPage } from './ImportExportPage';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
-import { Shield, FileText, BarChart3, Settings, Archive } from 'lucide-react';
+import { Shield, FileText, BarChart3, Settings, Archive, Layers } from 'lucide-react';
 import { SessionsPage } from './SessionsPage';
+import { WorkspacesPage } from './WorkspacesPage';
 import { Toaster } from '@/components/UI/Toaster/Toaster';
 import type { DomainRuleSettings } from '@/types/syncSettings';
 
@@ -60,7 +65,9 @@ export function OptionsContent() {
         { id: 'importexport', label: getMessage('importExportTab'), icon: FileText, accentColor: 'indigo' },
         { id: 'stats', label: getMessage('statisticsTab'), icon: BarChart3, accentColor: 'indigo' },
         { id: 'settings', label: getMessage('settingsTab'), icon: Settings, accentColor: 'indigo' },
+        { id: 'workspaces', label: getMessage('workspacesTab'), icon: Layers, accentColor: 'indigo' },
     ], []);
+
 
     const focusActiveSearch = useCallback(() => {
         const node = document.querySelector<HTMLInputElement>(
@@ -110,8 +117,8 @@ export function OptionsContent() {
                 headerContent={<OptionsHeader version={version} />}
                 headerCollapsedContent={<OptionsHeaderCollapsed />}
                 showFooter={true}
-                footerContent={<OptionsFooter />}
-                footerCollapsedContent={<OptionsFooterCollapsed />}
+                footerContent={<WorkspaceFooter onManage={() => handleTabChange('workspaces')} />}
+                footerCollapsedContent={<WorkspaceFooterCollapsed onManage={() => handleTabChange('workspaces')} />}
             />
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
@@ -139,6 +146,9 @@ export function OptionsContent() {
                         {currentTab === 'settings' && (
                             <SettingsPage syncSettings={settings} updateSettings={updateSettings} />
                         )}
+                        {currentTab === 'workspaces' && (
+                            <WorkspacesPage syncSettings={settings} />
+                        )}
                     </main>
                     <ShortcutsAside open={shortcutsAsideOpen} onClose={() => setShortcutsAsideOpen(false)} />
                 </div>
@@ -159,13 +169,24 @@ export function OptionsContent() {
     );
 }
 
+function OptionsThemed() {
+    const { accentColor, activeId } = useActiveWorkspaceContext();
+    return (
+        <Theme accentColor={accentColor}>
+            <div key={activeId} style={{ display: 'contents' }}>
+                <OptionsContent />
+                <Toaster />
+            </div>
+        </Theme>
+    );
+}
+
 export function OptionsApp() {
     return (
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            <Theme>
-                <OptionsContent />
-                <Toaster />
-            </Theme>
+            <ActiveWorkspaceProvider>
+                <OptionsThemed />
+            </ActiveWorkspaceProvider>
         </ThemeProvider>
     );
 }

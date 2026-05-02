@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { browser, Browser } from 'wxt/browser';
 import {
   loadSessions,
   addSession,
@@ -7,6 +6,7 @@ import {
   deleteSession,
   saveSessions,
 } from '@/utils/sessionStorage';
+import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
 import type { Session } from '@/types/session';
 
 export interface UseSessionsReturn {
@@ -21,6 +21,8 @@ export interface UseSessionsReturn {
 }
 
 export function useSessions(): UseSessionsReturn {
+  const { scopedItems } = useActiveWorkspaceContext();
+  const sessionsItem = scopedItems.sessionsItem;
   const [sessions, setSessions] = useState<Session[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -35,16 +37,12 @@ export function useSessions(): UseSessionsReturn {
     reload();
   }, [reload]);
 
-  // Listen for storage changes
+  // Watch changes to the active workspace's sessions item
   useEffect(() => {
-    const listener = (changes: Record<string, Browser.storage.StorageChange>, areaName: string) => {
-      if (areaName === 'local' && changes.sessions) {
-        reload();
-      }
-    };
-    browser.storage.onChanged.addListener(listener);
-    return () => browser.storage.onChanged.removeListener(listener);
-  }, [reload]);
+    return sessionsItem.watch(() => {
+      reload();
+    });
+  }, [sessionsItem, reload]);
 
   const createSession = useCallback(
     async (session: Session) => {

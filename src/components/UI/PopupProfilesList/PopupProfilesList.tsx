@@ -10,7 +10,7 @@ import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { showSuccessNotification } from '@/utils/notifications';
 import { getRuleCategory } from '@/utils/categoriesStore';
 import { chromeGroupColors } from '@/utils/tabTreeUtils';
-import { popupPinnedEmptyCollapsedItem } from '@/utils/storageItems';
+import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
 import type { Session } from '@/types/session';
 import styles from './PopupProfilesList.module.css';
 
@@ -75,6 +75,8 @@ async function openCustomizeRestore(session: Session) {
 }
 
 export function PopupProfilesList() {
+  const { scopedItems } = useActiveWorkspaceContext();
+  const popupPinnedEmptyCollapsedItem = scopedItems.popupPinnedEmptyCollapsedItem;
   const [pinnedSessions, setPinnedSessions] = useState<Session[]>([]);
   const [hasAnySession, setHasAnySession] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -87,8 +89,8 @@ export function PopupProfilesList() {
       setHasAnySession(all.length > 0);
       setLoaded(true);
     });
-    popupPinnedEmptyCollapsedItem.getValue().then(setEmptyCollapsed);
-  }, []);
+    popupPinnedEmptyCollapsedItem.getValue().then((v) => setEmptyCollapsed(v ?? false));
+  }, [popupPinnedEmptyCollapsedItem]);
 
   const handleRestore = useCallback((session: Session, target: RestoreTarget) => {
     // The popup is not a tab, so browser.tabs.getCurrent() returns undefined,
@@ -145,11 +147,11 @@ export function PopupProfilesList() {
     }
   }, [handleRestore]);
 
-  function handleToggleEmptyCollapsed(nextOpen: boolean) {
+  const handleToggleEmptyCollapsed = useCallback((nextOpen: boolean) => {
     const nextCollapsed = !nextOpen;
     setEmptyCollapsed(nextCollapsed);
     popupPinnedEmptyCollapsedItem.setValue(nextCollapsed).catch(() => {});
-  }
+  }, [popupPinnedEmptyCollapsedItem]);
 
   if (!loaded) return null;
 

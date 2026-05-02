@@ -8,10 +8,15 @@ import { processGroupingForNewTab } from '@/background/grouping.js';
 import { handleOrganizeAllTabs } from '@/background/organize.js';
 import { shouldSkipDeduplication } from '@/utils/deduplicationSkip.js';
 import { initCategoriesStore } from '@/utils/categoriesStore.js';
+import { initWorkspaceContext } from '@/utils/workspaceContext.js';
 
 export default defineBackground(() => {
     // Initialize all event handlers
     setupAllEventHandlers();
+
+    // Resolve the active workspace early so getSettings/incrementStat target
+    // the correct scoped items even before onInstalled has fired migrations.
+    initWorkspaceContext().catch(e => logger.error('[WORKSPACE] init failed:', e));
 
     // Populate the categories cache so grouping.ts (sync) can resolve colors.
     // Fire-and-forget: the watcher will keep the cache in sync afterwards.
