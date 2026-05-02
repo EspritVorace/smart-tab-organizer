@@ -469,6 +469,13 @@
   "popupGoToSessions": { "message": "Administrar sesiones" },
   "popupPinnedEmptyToggleAria": { "message": "Mostrar u ocultar la ayuda de sesiones fijadas" },
   "popupSaveDisabledHint": { "message": "No hay grupo activo que guardar" },
+  "popupRestoreLast": { "message": "Restaurar última" },
+  "popupOrganizeTabsCount": { "message": "Organizar $1 pestañas" },
+  "popupOrganizeTabsCountOne": { "message": "Organizar 1 pestaña" },
+  "popupActiveRulesCount": { "message": "$1 reglas activas" },
+  "popupActiveRulesCountOne": { "message": "1 regla activa" },
+  "popupActiveRulesCountZero": { "message": "Sin reglas activas" },
+  "popupOrganizeShortcut": { "message": "Atajo: O" },
   "popupAutoGroup": { "message": "Agrupación auto" },
   "popupDedup": { "message": "Deduplicar" },
 
