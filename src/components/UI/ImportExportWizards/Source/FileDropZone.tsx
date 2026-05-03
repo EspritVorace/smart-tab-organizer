@@ -37,7 +37,7 @@ export function FileDropZone<T>({ source }: FileDropZoneProps<T>) {
           minHeight: 120,
         }}
       >
-        <FileUp size={32} style={{ color: 'var(--gray-9)' }} aria-hidden="true" />
+        <FileUp size={32} style={{ color: 'var(--gray-9)' }} />
         <Text size="2" color="gray" highContrast>{getMessage('dragDropZone')}</Text>
         <Button
           variant="soft"

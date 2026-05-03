@@ -146,7 +146,7 @@ export function PackGallery({ packs, categories, source }: PackGalleryProps) {
         aria-label={getMessage('packGallerySearchPlaceholder')}
       >
         <TextField.Slot>
-          <Search size={14} aria-hidden="true" />
+          <Search size={14} />
         </TextField.Slot>
       </TextField.Root>
 

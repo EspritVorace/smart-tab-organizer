@@ -35,12 +35,12 @@ export function SettingsToggles({
     return (
       <Card role="group" aria-label={getMessage('settingsTab')}>
         <Flex direction="column" align="center" gap="3" py="2">
-          <Shield size={28} style={{ color: 'var(--gray-8)' }} aria-hidden="true" />
+          <Shield size={28} style={{ color: 'var(--gray-8)' }} />
           <Text size="2" color="gray" align="center">
             {getMessage('popupNoRulesTitle')}
           </Text>
           <Button variant="soft" size="2" onClick={onOpenRules}>
-            <ExternalLink size={14} aria-hidden="true" />
+            <ExternalLink size={14} />
             {getMessage('popupGoToRules')}
           </Button>
         </Flex>
@@ -61,7 +61,7 @@ export function SettingsToggles({
     >
       <Text as="label" size="1">
         <Flex gap="2" align="center">
-          <Layers size={14} aria-hidden="true" style={{ color: 'var(--gray-11)' }} />
+          <Layers size={14} style={{ color: 'var(--gray-11)' }} />
           <Text as="span" title={getMessage('enableGrouping')}>
             {getMessage('popupAutoGroup')}
           </Text>
@@ -75,7 +75,7 @@ export function SettingsToggles({
       </Text>
       <Text as="label" size="1">
         <Flex gap="2" align="center">
-          <Copy size={14} aria-hidden="true" style={{ color: 'var(--gray-11)' }} />
+          <Copy size={14} style={{ color: 'var(--gray-11)' }} />
           <Text as="span" title={getMessage('enableDeduplication')}>
             {getMessage('popupDedup')}
           </Text>

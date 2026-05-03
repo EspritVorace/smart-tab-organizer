@@ -41,7 +41,7 @@ export function WorkspaceFooter({ onManage }: WorkspaceFooterProps) {
       <Text size="2" weight="medium" style={{ color: 'var(--gray-12)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {name}
       </Text>
-      <ChevronDown size={14} aria-hidden="true" style={{ color: 'var(--gray-11)', flexShrink: 0 }} />
+      <ChevronDown size={14} style={{ color: 'var(--gray-11)', flexShrink: 0 }} />
     </Flex>
   );
 
@@ -62,7 +62,7 @@ export function WorkspaceFooter({ onManage }: WorkspaceFooterProps) {
         title={getMessage('workspaceManageLabel')}
         onClick={onManage}
       >
-        <Settings2 size={16} aria-hidden="true" />
+        <Settings2 size={16} />
       </IconButton>
     </Flex>
   );

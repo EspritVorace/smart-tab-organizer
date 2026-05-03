@@ -56,7 +56,7 @@ export function ShortcutsDrawer({ open, onOpenChange }: ShortcutsDrawerProps) {
       >
         <div className={styles.drawerHeader}>
           <Flex align="center" gap="2" className={styles.drawerHeaderTitle}>
-            <Keyboard size={16} aria-hidden="true" />
+            <Keyboard size={16} />
             <Dialog.Title size="3" mb="0">
               {getMessage('shortcutsPanelTitle')}
             </Dialog.Title>

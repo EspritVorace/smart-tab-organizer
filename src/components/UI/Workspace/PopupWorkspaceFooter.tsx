@@ -57,7 +57,7 @@ export function PopupWorkspaceFooter({ onManage }: PopupWorkspaceFooterProps) {
           {name}
         </Text>
       </Flex>
-      <ChevronDown size={14} aria-hidden="true" style={{ color: 'var(--gray-11)', flexShrink: 0 }} />
+      <ChevronDown size={14} style={{ color: 'var(--gray-11)', flexShrink: 0 }} />
     </Flex>
   );
 

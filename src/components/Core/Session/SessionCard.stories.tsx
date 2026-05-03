@@ -260,7 +260,7 @@ export const SessionCardDeepSearchMatch: Story = {
             <Box style={{ flex: 1 }}>
               <TextField.Root defaultValue="github" readOnly aria-label="Search sessions">
                 <TextField.Slot>
-                  <Search size={16} aria-hidden="true" />
+                  <Search size={16} />
                 </TextField.Slot>
               </TextField.Root>
             </Box>

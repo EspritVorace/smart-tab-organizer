@@ -302,7 +302,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
               onClick={handleRestoreOrNext}
               disabled={selectedTabIds.size === 0 || isAnalyzing || isRestoring}
             >
-              <RotateCcw size={14} aria-hidden="true" />
+              <RotateCcw size={14} />
               {isAnalyzing ? getMessage('loadingText') : getMessage('sessionRestore')}
             </Button>
           </>
@@ -322,7 +322,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
               onClick={() => executeRestore(conflictAnalysis, duplicateTabAction, groupActions)}
               disabled={isRestoring}
             >
-              <RotateCcw size={14} aria-hidden="true" />
+              <RotateCcw size={14} />
               {getMessage('sessionRestore')}
             </Button>
           </>

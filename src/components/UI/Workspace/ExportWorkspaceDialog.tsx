@@ -75,7 +75,7 @@ export function ExportWorkspaceDialog({ open, onOpenChange }: ExportWorkspaceDia
       <Dialog.Content data-testid="workspace-export-dialog" maxWidth="520px">
         <Dialog.Title>
           <Flex align="center" gap="2">
-            <Download size={18} aria-hidden="true" />
+            <Download size={18} />
             {getMessage('workspaceExportTitle')}
           </Flex>
         </Dialog.Title>

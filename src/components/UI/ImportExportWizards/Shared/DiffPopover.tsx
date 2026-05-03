@@ -26,7 +26,7 @@ export function DiffPopover({ entityLabel, maxWidth = 350, children }: DiffPopov
           aria-label={getMessage('viewDiff')}
           title={getMessage('viewDiff')}
         >
-          <Eye size={14} aria-hidden="true" />
+          <Eye size={14} />
         </Button>
       </Popover.Trigger>
       <Popover.Content style={{ maxWidth }}>

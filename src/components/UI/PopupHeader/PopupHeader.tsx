@@ -45,7 +45,7 @@ export function PopupHeader({ title, onSettingsOpen }: PopupHeaderProps) {
         title={getMessage('openOptions')}
         aria-label={getMessage('openOptions')}
       >
-        <Settings size={18} aria-hidden="true" />
+        <Settings size={18} />
       </IconButton>
     </Flex>
   );

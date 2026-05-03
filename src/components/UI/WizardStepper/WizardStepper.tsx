@@ -64,7 +64,7 @@ export function WizardStepper({ steps, currentStep, disableFutureNavigation = fa
                   }}
                 >
                   {isCompleted ? (
-                    <Check size={14} aria-hidden="true" />
+                    <Check size={14} />
                   ) : (
                     index + 1
                   )}

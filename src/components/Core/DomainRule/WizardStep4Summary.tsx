@@ -29,7 +29,7 @@ function SummarySection({ title, onEdit, stepIndex, children }: {
           onClick={() => onEdit(stepIndex)}
           aria-label={`${getMessage('summaryModify')} — ${title}`}
         >
-          <Pencil size={12} aria-hidden="true" />
+          <Pencil size={12} />
           {getMessage('summaryModify')}
         </Button>
       </Flex>

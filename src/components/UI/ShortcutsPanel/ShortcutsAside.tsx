@@ -66,7 +66,7 @@ export function ShortcutsAside({ open, onClose, pageContext }: ShortcutsAsidePro
     >
       <div className={styles.header}>
         <div className={styles.headerTitle}>
-          <Keyboard size={16} aria-hidden="true" />
+          <Keyboard size={16} />
           <Text size="2" weight="bold">
             {getMessage('shortcutsPanelTitle')}
           </Text>
@@ -80,7 +80,7 @@ export function ShortcutsAside({ open, onClose, pageContext }: ShortcutsAsidePro
           onClick={onClose}
           data-testid="shortcuts-aside-close"
         >
-          <X size={14} aria-hidden="true" />
+          <X size={14} />
         </IconButton>
       </div>
       <Flex direction="column" className={styles.body}>

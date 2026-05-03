@@ -56,7 +56,7 @@ export function TabRowBase({
       }}
     />
   ) : (
-    <Globe size={16} aria-hidden="true" style={{ flexShrink: 0, color: 'var(--gray-8)' }} />
+    <Globe size={16} style={{ flexShrink: 0, color: 'var(--gray-8)' }} />
   );
 
   const titleContent = (

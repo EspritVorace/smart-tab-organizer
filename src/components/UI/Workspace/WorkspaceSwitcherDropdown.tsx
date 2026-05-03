@@ -44,7 +44,7 @@ export function WorkspaceSwitcherDropdown({ trigger, onManage }: WorkspaceSwitch
               <Flex align="center" gap="2" style={{ width: '100%' }}>
                 <WorkspaceAvatar name={ws.name} accentColor={ws.accentColor} size="sm" />
                 <Text size="2" style={{ flex: 1 }}>{ws.name}</Text>
-                {isActive ? <Check size={14} aria-hidden="true" /> : null}
+                {isActive ? <Check size={14} /> : null}
               </Flex>
             </DropdownMenu.Item>
           );

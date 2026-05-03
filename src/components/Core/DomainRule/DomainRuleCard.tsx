@@ -139,7 +139,6 @@ export function DomainRuleCard({
             <AlertTriangle
               size={16}
               style={{ color: 'var(--orange-9)', flexShrink: 0 }}
-              aria-hidden="true"
             />
           )}
           {centerContent}
@@ -162,7 +161,7 @@ export function DomainRuleCard({
             aria-keyshortcuts="Space Enter ArrowUp ArrowDown Escape"
             style={getDragHandleStyle(isDragDisabled)}
           >
-            <GripVertical size={16} aria-hidden="true" />
+            <GripVertical size={16} />
           </IconButton>
 
           {/* Left: Selection + Toggle */}
@@ -193,7 +192,7 @@ export function DomainRuleCard({
                   color="gray"
                   aria-label={getMessage('ruleMoreActions')}
                 >
-                  <MoreHorizontal size={16} aria-hidden="true" />
+                  <MoreHorizontal size={16} />
                 </IconButton>
               </DropdownMenu.Trigger>
               <DropdownMenu.Content>
@@ -201,7 +200,7 @@ export function DomainRuleCard({
                   data-testid={`rule-card-${rule.id}-menu-edit`}
                   onClick={() => onEdit?.(rule)}
                 >
-                  <Pencil size={14} aria-hidden="true" />
+                  <Pencil size={14} />
                   {getMessage('edit')}
                 </DropdownMenu.Item>
                 <DropdownMenu.Separator />
@@ -237,7 +236,7 @@ export function DomainRuleCard({
                   color="red"
                   onClick={() => onDeleteRequest?.(rule.id, index)}
                 >
-                  <Trash2 size={14} aria-hidden="true" />
+                  <Trash2 size={14} />
                   {getMessage('delete')}
                 </DropdownMenu.Item>
               </DropdownMenu.Content>

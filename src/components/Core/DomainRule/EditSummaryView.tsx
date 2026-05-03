@@ -148,7 +148,7 @@ export function EditSummaryView({
             title={getMessage('editConfigAriaLabel')}
             aria-label={getMessage('editConfigAriaLabel')}
           >
-            <Pencil size={14} aria-hidden="true" />
+            <Pencil size={14} />
           </IconButton>
         </Flex>
         <Text size="2">
@@ -164,8 +164,8 @@ export function EditSummaryView({
           <Button type="button" variant="ghost" size="2" style={{ width: '100%', justifyContent: 'flex-start', '--button-ghost-padding-x': '0px' } as React.CSSProperties}>
             <Flex align="center" gap="2" style={{ width: '100%' }}>
               {isOptionsOpen
-                ? <ChevronDown size={14} aria-hidden="true" />
-                : <ChevronRight size={14} aria-hidden="true" />}
+                ? <ChevronDown size={14} />
+                : <ChevronRight size={14} />}
               <Flex direction="column" align="start" gap="1" style={{ flex: 1 }}>
                 <Text size="2" weight="bold" color="gray">{getMessage('wizardStepOptions')}</Text>
                 {!isOptionsOpen && (

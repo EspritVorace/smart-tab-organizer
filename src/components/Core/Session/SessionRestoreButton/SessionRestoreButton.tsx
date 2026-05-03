@@ -28,7 +28,7 @@ export function SessionRestoreButton({
   return (
     <SplitButton
       data-testid={testId}
-      label={<Play size={12} aria-hidden="true" fill="currentColor" />}
+      label={<Play size={12} fill="currentColor" />}
       primaryAriaLabel={getMessage('sessionRestoreCurrentWindow')}
       onClick={() => onRestoreCurrentWindow(session)}
       size={size}
@@ -36,28 +36,28 @@ export function SessionRestoreButton({
       menuItems={[
         {
           label: getMessage('sessionRestoreCurrentWindow'),
-          icon: <Monitor size={14} aria-hidden="true" />,
+          icon: <Monitor size={14} />,
           onClick: () => onRestoreCurrentWindow(session),
           shortcut: 'Shift+R',
           'data-testid': 'session-restore-menu-current-window',
         },
         {
           label: getMessage('sessionRestoreNewWindow'),
-          icon: <Square size={14} aria-hidden="true" />,
+          icon: <Square size={14} />,
           onClick: () => onRestoreNewWindow(session),
           shortcut: 'Alt+Shift+R',
           'data-testid': 'session-restore-menu-new-window',
         },
         {
           label: getMessage('sessionRestoreReplaceCurrentWindow'),
-          icon: <Replace size={14} aria-hidden="true" />,
+          icon: <Replace size={14} />,
           onClick: () => onReplaceCurrentWindow(session),
           shortcut: 'Alt+R',
           'data-testid': 'session-restore-menu-replace-window',
         },
         {
           label: getMessage('sessionRestoreCustomize'),
-          icon: <Wrench size={14} aria-hidden="true" />,
+          icon: <Wrench size={14} />,
           onClick: () => onCustomize(session),
           shortcut: 'R',
           'data-testid': 'session-restore-menu-customize',

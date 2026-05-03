@@ -62,7 +62,7 @@ export function SidebarHeader({
             title={isCollapsed ? getMessage('sidebarExpand') : getMessage('sidebarCollapse')}
             style={{ color: 'var(--gray-11)', margin: 0, padding: 'var(--space-1) var(--space-2)' }}
           >
-            {isCollapsed ? <PanelLeftOpen size={16} aria-hidden="true" /> : <PanelLeftClose size={16} aria-hidden="true" />}
+            {isCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
           </Button>
         </>
       )}

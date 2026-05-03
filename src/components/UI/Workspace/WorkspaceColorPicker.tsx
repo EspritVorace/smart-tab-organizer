@@ -53,7 +53,7 @@ export function WorkspaceColorPicker({ value, onChange, ariaLabel }: WorkspaceCo
               color: `var(--${color}-contrast)`,
             }}
           >
-            {isActive ? <Check size={14} aria-hidden="true" /> : null}
+            {isActive ? <Check size={14} /> : null}
           </button>
         );
       })}

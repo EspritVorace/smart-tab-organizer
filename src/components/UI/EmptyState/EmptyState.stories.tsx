@@ -33,11 +33,11 @@ export const EmptyStateWithActions: Story = {
     actions: (
       <Flex gap="2">
         <Button variant="soft">
-          <Plus size={14} aria-hidden="true" />
+          <Plus size={14} />
           Add rule
         </Button>
         <Button variant="soft">
-          <Upload size={14} aria-hidden="true" />
+          <Upload size={14} />
           Import
         </Button>
       </Flex>
@@ -63,11 +63,11 @@ export const EmptyStateSessions: Story = {
     actions: (
       <Flex gap="2">
         <Button variant="soft">
-          <Archive size={14} aria-hidden="true" />
+          <Archive size={14} />
           Take a snapshot
         </Button>
         <Button variant="soft">
-          <Upload size={14} aria-hidden="true" />
+          <Upload size={14} />
           Import sessions
         </Button>
       </Flex>

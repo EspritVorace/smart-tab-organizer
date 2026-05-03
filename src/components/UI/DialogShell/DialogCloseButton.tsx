@@ -26,7 +26,7 @@ export function DialogCloseButton({ iconSize = 16, style }: DialogCloseButtonPro
         title={getMessage('close')}
         style={style}
       >
-        <X size={iconSize} aria-hidden="true" />
+        <X size={iconSize} />
       </IconButton>
     </Dialog.Close>
   );

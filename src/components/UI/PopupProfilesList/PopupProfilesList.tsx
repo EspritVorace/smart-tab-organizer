@@ -189,7 +189,6 @@ export function PopupProfilesList() {
             >
               <ChevronDown
                 size={14}
-                aria-hidden="true"
                 style={{
                   color: 'var(--gray-9)',
                   transition: 'transform 0.2s ease',
@@ -210,7 +209,7 @@ export function PopupProfilesList() {
                   size="1"
                   onClick={() => void openSessionsPage()}
                 >
-                  <ExternalLink size={12} aria-hidden="true" />
+                  <ExternalLink size={12} />
                   {getMessage('popupGoToSessions')}
                 </Button>
               </Flex>

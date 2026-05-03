@@ -25,7 +25,7 @@ export function MoveTabDropdown({ currentGroupId, groups, onMove }: MoveTabDropd
           aria-label={getMessage('tabEditorMoveTab')}
           title={getMessage('tabEditorMoveTab')}
         >
-          <ArrowUpRight size={12} aria-hidden="true" />
+          <ArrowUpRight size={12} />
         </IconButton>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content>

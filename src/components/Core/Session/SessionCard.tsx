@@ -106,12 +106,12 @@ function SessionMoreMenu({ session, isDragDisabled, onEdit, onDelete, onMoveToFi
           color="gray"
           aria-label={getMessage('sessionMoreActions')}
         >
-          <MoreHorizontal size={16} aria-hidden="true" />
+          <MoreHorizontal size={16} />
         </IconButton>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content>
         <DropdownMenu.Item onClick={() => onEdit(session)}>
-          <Pencil size={14} aria-hidden="true" />
+          <Pencil size={14} />
           {getMessage('sessionEdit')}
         </DropdownMenu.Item>
 
@@ -130,7 +130,7 @@ function SessionMoreMenu({ session, isDragDisabled, onEdit, onDelete, onMoveToFi
 
         <DropdownMenu.Separator />
         <DropdownMenu.Item color="red" onClick={() => onDelete(session)}>
-          <Trash2 size={14} aria-hidden="true" />
+          <Trash2 size={14} />
           {getMessage('delete')}
         </DropdownMenu.Item>
       </DropdownMenu.Content>
@@ -263,7 +263,7 @@ function SessionCardSummaryHeader({
     <>
       {leading && <Flex align="center" style={{ flexShrink: 0 }}>{leading}</Flex>}
       {status === 'conflict' && (
-        <AlertTriangle size={16} style={{ color: 'var(--orange-9)', flexShrink: 0 }} aria-hidden="true" />
+        <AlertTriangle size={16} style={{ color: 'var(--orange-9)', flexShrink: 0 }} />
       )}
       <Flex align="center" gap="2" style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
         <SessionNameHoverCard
@@ -341,7 +341,7 @@ function SessionCardFullHeader({
           aria-keyshortcuts="Space Enter ArrowUp ArrowDown Escape"
           style={getDragHandleStyle(isDragDisabled)}
         >
-          <GripVertical size={16} aria-hidden="true" />
+          <GripVertical size={16} />
         </IconButton>
       )}
 
@@ -356,8 +356,8 @@ function SessionCardFullHeader({
             aria-label={session.isPinned ? getMessage('sessionUnpin') : getMessage('sessionPin')}
           >
             {session.isPinned
-              ? <PinOff size={14} aria-hidden="true" />
-              : <Pin size={14} aria-hidden="true" />
+              ? <PinOff size={14} />
+              : <Pin size={14} />
             }
           </IconButton>
         </Tooltip>
@@ -386,10 +386,10 @@ function SessionCardFullHeader({
               )}
             </Flex>
             <IconButton size="1" variant="soft" onClick={handleRenameSubmit} aria-label={getMessage('sessionConfirmRename')}>
-              <Check size={12} aria-hidden="true" />
+              <Check size={12} />
             </IconButton>
             <IconButton size="1" variant="soft" color="gray" onClick={handleRenameCancel} aria-label={getMessage('cancel')}>
-              <X size={12} aria-hidden="true" />
+              <X size={12} />
             </IconButton>
           </>
         ) : (
@@ -408,7 +408,7 @@ function SessionCardFullHeader({
               aria-label={getMessage('sessionRename')}
               style={{ flexShrink: 0 }}
             >
-              <Pencil size={14} aria-hidden="true" />
+              <Pencil size={14} />
             </IconButton>
             {category && (
               <Badge color={getRadixColor(category.color)} size="1" style={{ flexShrink: 0 }}>
@@ -610,8 +610,8 @@ export function SessionCard({
               }}
             >
               {previewOpen
-                ? <ChevronDown size={13} aria-hidden="true" />
-                : <ChevronRight size={13} aria-hidden="true" />
+                ? <ChevronDown size={13} />
+                : <ChevronRight size={13} />
               }
               {groupColors.length > 0 && (
                 <Flex align="center" gap="1">

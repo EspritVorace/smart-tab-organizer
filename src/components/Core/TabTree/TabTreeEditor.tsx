@@ -94,7 +94,7 @@ export function TabTreeEditor({ session, onSessionChange, maxHeight }: TabTreeEd
                         aria-label={getMessage('tabEditorMoveUp')}
                         title={getMessage('tabEditorMoveUp')}
                       >
-                        <ChevronUp size={12} aria-hidden="true" />
+                        <ChevronUp size={12} />
                       </IconButton>
                       <IconButton
                         size="1"
@@ -105,7 +105,7 @@ export function TabTreeEditor({ session, onSessionChange, maxHeight }: TabTreeEd
                         aria-label={getMessage('tabEditorMoveDown')}
                         title={getMessage('tabEditorMoveDown')}
                       >
-                        <ChevronDown size={12} aria-hidden="true" />
+                        <ChevronDown size={12} />
                       </IconButton>
                       <IconButton
                         size="1"
@@ -115,7 +115,7 @@ export function TabTreeEditor({ session, onSessionChange, maxHeight }: TabTreeEd
                         aria-label={getMessage('tabEditorEditGroup')}
                         title={getMessage('tabEditorEditGroup')}
                       >
-                        <Pencil size={12} aria-hidden="true" />
+                        <Pencil size={12} />
                       </IconButton>
                       <IconButton
                         size="1"
@@ -132,7 +132,7 @@ export function TabTreeEditor({ session, onSessionChange, maxHeight }: TabTreeEd
                         aria-label={getMessage('tabEditorDeleteGroup')}
                         title={getMessage('tabEditorDeleteGroup')}
                       >
-                        <Trash2 size={12} aria-hidden="true" />
+                        <Trash2 size={12} />
                       </IconButton>
                     </div>
                   }
@@ -177,7 +177,7 @@ export function TabTreeEditor({ session, onSessionChange, maxHeight }: TabTreeEd
                               aria-label={getMessage('tabEditorMoveUp')}
                               title={getMessage('tabEditorMoveUp')}
                             >
-                              <ChevronUp size={12} aria-hidden="true" />
+                              <ChevronUp size={12} />
                             </IconButton>
                             <IconButton
                               size="1"
@@ -188,7 +188,7 @@ export function TabTreeEditor({ session, onSessionChange, maxHeight }: TabTreeEd
                               aria-label={getMessage('tabEditorMoveDown')}
                               title={getMessage('tabEditorMoveDown')}
                             >
-                              <ChevronDown size={12} aria-hidden="true" />
+                              <ChevronDown size={12} />
                             </IconButton>
                             <IconButton
                               size="1"
@@ -198,7 +198,7 @@ export function TabTreeEditor({ session, onSessionChange, maxHeight }: TabTreeEd
                               aria-label={getMessage('tabEditorEditTab')}
                               title={getMessage('tabEditorEditTab')}
                             >
-                              <Pencil size={12} aria-hidden="true" />
+                              <Pencil size={12} />
                             </IconButton>
                             <MoveTabDropdown
                               currentGroupId={group.id}
@@ -215,7 +215,7 @@ export function TabTreeEditor({ session, onSessionChange, maxHeight }: TabTreeEd
                               aria-label={getMessage('tabEditorDeleteTab')}
                               title={getMessage('tabEditorDeleteTab')}
                             >
-                              <Trash2 size={12} aria-hidden="true" />
+                              <Trash2 size={12} />
                             </IconButton>
                           </div>
                         }
@@ -265,7 +265,7 @@ export function TabTreeEditor({ session, onSessionChange, maxHeight }: TabTreeEd
                       aria-label={getMessage('tabEditorMoveUp')}
                       title={getMessage('tabEditorMoveUp')}
                     >
-                      <ChevronUp size={12} aria-hidden="true" />
+                      <ChevronUp size={12} />
                     </IconButton>
                     <IconButton
                       size="1"
@@ -276,7 +276,7 @@ export function TabTreeEditor({ session, onSessionChange, maxHeight }: TabTreeEd
                       aria-label={getMessage('tabEditorMoveDown')}
                       title={getMessage('tabEditorMoveDown')}
                     >
-                      <ChevronDown size={12} aria-hidden="true" />
+                      <ChevronDown size={12} />
                     </IconButton>
                     <IconButton
                       size="1"
@@ -286,7 +286,7 @@ export function TabTreeEditor({ session, onSessionChange, maxHeight }: TabTreeEd
                       aria-label={getMessage('tabEditorEditTab')}
                       title={getMessage('tabEditorEditTab')}
                     >
-                      <Pencil size={12} aria-hidden="true" />
+                      <Pencil size={12} />
                     </IconButton>
                     {hasMoveTargets && (
                       <MoveTabDropdown
@@ -305,7 +305,7 @@ export function TabTreeEditor({ session, onSessionChange, maxHeight }: TabTreeEd
                       aria-label={getMessage('tabEditorDeleteTab')}
                       title={getMessage('tabEditorDeleteTab')}
                     >
-                      <Trash2 size={12} aria-hidden="true" />
+                      <Trash2 size={12} />
                     </IconButton>
                   </div>
                 }
