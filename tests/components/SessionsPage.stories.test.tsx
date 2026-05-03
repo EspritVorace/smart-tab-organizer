@@ -7,6 +7,7 @@ const {
   SessionsPageDefault,
   SessionsPageAllPinned,
   SessionsPageNonePinned,
+  SessionsPageWithSnapshotOpen,
 } = composeStories(stories);
 
 describe('SessionsPage (portable stories)', () => {
@@ -38,6 +39,13 @@ describe('SessionsPage (portable stories)', () => {
     await waitFor(() => {
       expect(screen.getByText('No pinned sessions.')).toBeInTheDocument();
       expect(screen.getByText('Pin a session to access it quickly from the popup.')).toBeInTheDocument();
+    });
+  });
+
+  it('renders with the snapshot wizard open variant', async () => {
+    await SessionsPageWithSnapshotOpen.run();
+    await waitFor(() => {
+      expect(screen.getByTestId('page-sessions')).toBeInTheDocument();
     });
   });
 });
