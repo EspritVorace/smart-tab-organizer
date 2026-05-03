@@ -652,6 +652,7 @@
   "shortcutDescListToggleEnabled": { "message": "Enable or disable focused rule" },
   "shortcutDescListDelete": { "message": "Delete focused item" },
   "shortcutDescListPin": { "message": "Pin or unpin focused session" },
+  "shortcutDescListReorderKeyboard": { "message": "Reorder via drag handle (then arrows to move, Esc to cancel)" },
   "shortcutDescSessionRestoreCustom": { "message": "Custom restore (wizard)" },
   "shortcutDescSessionRestoreCurrent": { "message": "Add session to current window" },
   "shortcutDescSessionReplaceCurrent": { "message": "Replace current window tabs" },
