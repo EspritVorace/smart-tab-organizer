@@ -211,6 +211,38 @@ function useSessionRename(session: Session, existingSessions: Session[], onRenam
   };
 }
 
+/* ─── SessionNameHoverCard ────────────────────────────────────────────────── */
+
+interface SessionNameHoverCardProps {
+  session: Session;
+  searchQuery: string | undefined;
+  hoverCardContent: React.ReactNode;
+  onDoubleClick?: () => void;
+}
+
+function SessionNameHoverCard({
+  session, searchQuery, hoverCardContent, onDoubleClick,
+}: SessionNameHoverCardProps) {
+  return (
+    <HoverCard.Root>
+      <HoverCard.Trigger>
+        <Text
+          data-testid={`session-card-${session.id}-name`}
+          size="3"
+          weight="medium"
+          onDoubleClick={onDoubleClick}
+          style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'default' }}
+        >
+          <AccessibleHighlight text={session.name} searchTerm={searchQuery ?? ''} />
+        </Text>
+      </HoverCard.Trigger>
+      <HoverCard.Content size="2" style={{ maxWidth: 360 }}>
+        {hoverCardContent}
+      </HoverCard.Content>
+    </HoverCard.Root>
+  );
+}
+
 /* ─── SessionCardSummaryHeader ────────────────────────────────────────────── */
 
 interface SessionCardSummaryHeaderProps {
@@ -233,21 +265,11 @@ function SessionCardSummaryHeader({
         <AlertTriangle size={16} style={{ color: 'var(--orange-9)', flexShrink: 0 }} aria-hidden="true" />
       )}
       <Flex align="center" gap="2" style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
-        <HoverCard.Root>
-          <HoverCard.Trigger>
-            <Text
-              data-testid={`session-card-${session.id}-name`}
-              size="3"
-              weight="medium"
-              style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'default' }}
-            >
-              <AccessibleHighlight text={session.name} searchTerm={searchQuery ?? ''} />
-            </Text>
-          </HoverCard.Trigger>
-          <HoverCard.Content size="2" style={{ maxWidth: 360 }}>
-            {hoverCardContent}
-          </HoverCard.Content>
-        </HoverCard.Root>
+        <SessionNameHoverCard
+          session={session}
+          searchQuery={searchQuery}
+          hoverCardContent={hoverCardContent}
+        />
         {category && (
           <Tooltip content={getCategoryLabel(category)}>
             <Badge color={getRadixColor(category.color)} size="1" style={{ flexShrink: 0 }}>
@@ -373,22 +395,12 @@ function SessionCardFullHeader({
           </>
         ) : (
           <>
-            <HoverCard.Root>
-              <HoverCard.Trigger>
-                <Text
-                  data-testid={`session-card-${session.id}-name`}
-                  size="3"
-                  weight="medium"
-                  onDoubleClick={() => { setNameValue(session.name); setRenameError(null); setIsRenaming(true); }}
-                  style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', cursor: 'default' }}
-                >
-                  <AccessibleHighlight text={session.name} searchTerm={searchQuery ?? ''} />
-                </Text>
-              </HoverCard.Trigger>
-              <HoverCard.Content size="2" style={{ maxWidth: 360 }}>
-                {hoverCardContent}
-              </HoverCard.Content>
-            </HoverCard.Root>
+            <SessionNameHoverCard
+              session={session}
+              searchQuery={searchQuery}
+              hoverCardContent={hoverCardContent}
+              onDoubleClick={() => { setNameValue(session.name); setRenameError(null); setIsRenaming(true); }}
+            />
             <IconButton
               size="1"
               variant="ghost"
