@@ -646,6 +646,8 @@
   "shortcutDescListNavigate": { "message": "Move focus between cards" },
   "shortcutDescListNew": { "message": "Create new item" },
   "shortcutDescListEdit": { "message": "Edit focused item" },
+  "shortcutDescListToggleSelection": { "message": "Toggle selection on focused rule" },
+  "shortcutDescListToggleEnabled": { "message": "Enable or disable focused rule" },
   "shortcutDescListDelete": { "message": "Delete focused item" },
   "shortcutDescListPin": { "message": "Pin or unpin focused session" },
   "shortcutDescSessionRestoreCustom": { "message": "Custom restore (wizard)" },

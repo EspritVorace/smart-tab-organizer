@@ -647,6 +647,8 @@
   "shortcutDescListNavigate": { "message": "Déplacer le focus entre les cartes" },
   "shortcutDescListNew": { "message": "Créer un nouvel élément" },
   "shortcutDescListEdit": { "message": "Modifier l'élément focus" },
+  "shortcutDescListToggleSelection": { "message": "Cocher ou décocher la règle focus" },
+  "shortcutDescListToggleEnabled": { "message": "Activer ou désactiver la règle focus" },
   "shortcutDescListDelete": { "message": "Supprimer l'élément focus" },
   "shortcutDescListPin": { "message": "Épingler ou désépingler la session focus" },
   "shortcutDescSessionRestoreCustom": { "message": "Restauration personnalisée (assistant)" },

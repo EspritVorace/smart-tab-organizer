@@ -647,6 +647,8 @@
   "shortcutDescListNavigate": { "message": "Mover el foco entre tarjetas" },
   "shortcutDescListNew": { "message": "Crear nuevo elemento" },
   "shortcutDescListEdit": { "message": "Editar el elemento con foco" },
+  "shortcutDescListToggleSelection": { "message": "Marcar o desmarcar la regla con foco" },
+  "shortcutDescListToggleEnabled": { "message": "Activar o desactivar la regla con foco" },
   "shortcutDescListDelete": { "message": "Eliminar el elemento con foco" },
   "shortcutDescListPin": { "message": "Anclar o desanclar la sesión con foco" },
   "shortcutDescSessionRestoreCustom": { "message": "Restauración personalizada (asistente)" },
