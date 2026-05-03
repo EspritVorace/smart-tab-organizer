@@ -1,9 +1,10 @@
 import { useEffect, useRef, useId } from 'react';
 import { Command } from 'cmdk';
-import { Check, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import './SearchableSelect.css';
 import type { SearchableSelectGroup, SearchableSelectOption } from './SearchableSelect';
+import { SearchableSelectItem } from './SearchableSelectItem';
 
 export interface SearchableInlineListProps {
   value: string;
@@ -55,32 +56,14 @@ export function SearchableInlineList({
     return () => clearTimeout(t);
   }, [autoFocus]);
 
-  const renderItem = (option: SearchableSelectOption) => {
-    const isSelected = option.value === value;
-    return (
-      <Command.Item
-        key={option.value}
-        value={`${option.value} ${option.label}`}
-        onSelect={() => {
-          if (!option.disabled) onValueChange(option.value);
-        }}
-        disabled={option.disabled}
-        className={[
-          'ss-item',
-          isSelected ? 'ss-item--selected' : '',
-          option.disabled ? 'ss-item--disabled' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        aria-selected={isSelected}
-      >
-        <span className="ss-item__check">
-          <Check size={14} aria-hidden="true" />
-        </span>
-        <span className="ss-item__label">{option.label}</span>
-      </Command.Item>
-    );
-  };
+  const renderItem = (option: SearchableSelectOption) => (
+    <SearchableSelectItem
+      key={option.value}
+      option={option}
+      selectedValue={value}
+      onSelect={onValueChange}
+    />
+  );
 
   return (
     <div
