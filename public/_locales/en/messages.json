@@ -630,7 +630,8 @@
   "shortcutsGroupGlobal": { "message": "Browser-wide" },
   "shortcutsGroupPopup": { "message": "Popup" },
   "shortcutsGroupOptions": { "message": "Options page" },
-  "shortcutsGroupLists": { "message": "Lists (rules and sessions)" },
+  "shortcutsGroupListRules": { "message": "Rules list" },
+  "shortcutsGroupListSessions": { "message": "Sessions list" },
   "shortcutsGroupSessionCard": { "message": "Session card (focused)" },
 
   "shortcutDescOrganize": { "message": "Organize all tabs" },

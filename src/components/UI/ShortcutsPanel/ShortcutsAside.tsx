@@ -3,11 +3,18 @@ import { Flex, IconButton, Text } from '@radix-ui/themes';
 import { Keyboard, X } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { ShortcutsContent } from './ShortcutsContent';
+import type { PageContext } from './shortcuts';
 import styles from './ShortcutsAside.module.css';
 
 interface ShortcutsAsideProps {
   open: boolean;
   onClose: () => void;
+  /**
+   * Active page in the options surface. Forwarded to ShortcutsContent so
+   * groups irrelevant to the current page start collapsed. Changing the
+   * context resets the open/closed state of every group.
+   */
+  pageContext?: PageContext;
 }
 
 /**
@@ -18,7 +25,7 @@ interface ShortcutsAsideProps {
  * Focus management: when opening, the previously-focused element is captured
  * and the close button takes focus. On close, focus is restored.
  */
-export function ShortcutsAside({ open, onClose }: ShortcutsAsideProps) {
+export function ShortcutsAside({ open, onClose, pageContext }: ShortcutsAsideProps) {
   const asideRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousActiveElementRef = useRef<HTMLElement | null>(null);
@@ -79,7 +86,7 @@ export function ShortcutsAside({ open, onClose }: ShortcutsAsideProps) {
         </IconButton>
       </div>
       <Flex direction="column" className={styles.body}>
-        <ShortcutsContent />
+        <ShortcutsContent key={pageContext} pageContext={pageContext} />
       </Flex>
     </aside>
   );

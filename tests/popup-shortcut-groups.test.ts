@@ -14,10 +14,11 @@ describe('POPUP_SHORTCUT_GROUPS', () => {
     ]);
   });
 
-  it('does not include Options or Lists groups', () => {
+  it('does not include Options or List groups', () => {
     const titleKeys = POPUP_SHORTCUT_GROUPS.map((g) => g.titleKey);
     expect(titleKeys).not.toContain('shortcutsGroupOptions');
-    expect(titleKeys).not.toContain('shortcutsGroupLists');
+    expect(titleKeys).not.toContain('shortcutsGroupListRules');
+    expect(titleKeys).not.toContain('shortcutsGroupListSessions');
   });
 
   it('preserves the full shortcuts list of each retained group', () => {

@@ -33,3 +33,19 @@ export const ShortcutsAsideClosed: Story = {
     onClose: () => {},
   },
 };
+
+export const ShortcutsAsideOnRules: Story = {
+  args: {
+    open: true,
+    onClose: () => {},
+    pageContext: 'rules',
+  },
+};
+
+export const ShortcutsAsideOnSessions: Story = {
+  args: {
+    open: true,
+    onClose: () => {},
+    pageContext: 'sessions',
+  },
+};

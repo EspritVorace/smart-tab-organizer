@@ -49,13 +49,22 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
     ],
   },
   {
-    titleKey: 'shortcutsGroupLists',
+    titleKey: 'shortcutsGroupListRules',
     shortcuts: [
       { keys: ['↑', '↓'], descriptionKey: 'shortcutDescListNavigate' },
       { keys: ['n'], descriptionKey: 'shortcutDescListNew' },
       { keys: ['e'], descriptionKey: 'shortcutDescListEdit' },
       { keys: ['Space'], descriptionKey: 'shortcutDescListToggleSelection' },
       { keys: ['t'], descriptionKey: 'shortcutDescListToggleEnabled' },
+      { keys: ['Del'], descriptionKey: 'shortcutDescListDelete' },
+    ],
+  },
+  {
+    titleKey: 'shortcutsGroupListSessions',
+    shortcuts: [
+      { keys: ['↑', '↓'], descriptionKey: 'shortcutDescListNavigate' },
+      { keys: ['n'], descriptionKey: 'shortcutDescListNew' },
+      { keys: ['e'], descriptionKey: 'shortcutDescListEdit' },
       { keys: ['Del'], descriptionKey: 'shortcutDescListDelete' },
       { keys: ['p'], descriptionKey: 'shortcutDescListPin' },
     ],
@@ -70,6 +79,39 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
     ],
   },
 ];
+
+export type PageContext =
+  | 'rules'
+  | 'sessions'
+  | 'importexport'
+  | 'stats'
+  | 'settings'
+  | 'workspaces';
+
+/**
+ * Defines whether a group is expanded by default given the current page.
+ * Global and Options groups are always open. List/SessionCard groups only
+ * open on the page they pertain to. Popup is implicitly always open since
+ * it is only ever rendered in the popup drawer.
+ */
+export function isGroupOpenByDefault(
+  titleKey: string,
+  pageContext?: PageContext,
+): boolean {
+  switch (titleKey) {
+    case 'shortcutsGroupGlobal':
+    case 'shortcutsGroupOptions':
+    case 'shortcutsGroupPopup':
+      return true;
+    case 'shortcutsGroupListRules':
+      return pageContext === 'rules';
+    case 'shortcutsGroupListSessions':
+    case 'shortcutsGroupSessionCard':
+      return pageContext === 'sessions';
+    default:
+      return false;
+  }
+}
 
 const POPUP_GROUP_KEYS = [
   'shortcutsGroupGlobal',
