@@ -65,7 +65,7 @@ export function PopupContent() {
     { combo: 's', action: handlePopupSave, excludeIfTargetWithin: '[data-popup-pinned-card]' },
     { combo: 'r', action: handlePopupRestore, excludeIfTargetWithin: '[data-popup-pinned-card]' },
     { combo: 'o', action: handlePopupOrganize, excludeIfTargetWithin: '[data-popup-pinned-card]' },
-    { combo: '?', action: () => setShortcutsOpen(true), allowWhenDialogOpen: false },
+    { combo: '?', action: () => setShortcutsOpen((open) => !open), allowWhenDialogOpen: false },
   ], [handlePopupSave, handlePopupRestore, handlePopupOrganize]);
 
   useKeyboardShortcuts(shortcuts);
