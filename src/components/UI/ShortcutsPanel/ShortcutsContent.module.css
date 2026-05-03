@@ -37,6 +37,33 @@
   margin-bottom: 4px;
 }
 
+.groupTrigger {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 4px 0;
+  cursor: pointer;
+  border-radius: var(--radius-2);
+}
+
+.groupTrigger:focus-visible {
+  outline: 2px solid var(--focus-8);
+  outline-offset: 2px;
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: var(--gray-11);
+  transition: transform 150ms ease;
+}
+
+.groupTrigger[data-state="open"] .chevron {
+  transform: rotate(180deg);
+}
+
 .firefoxHint {
   margin-top: 4px;
   color: var(--gray-11);

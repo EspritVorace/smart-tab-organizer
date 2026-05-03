@@ -21,7 +21,7 @@ import { Sidebar } from '@/components/UI/Sidebar/Sidebar';
 import type { SidebarItem } from '@/components/UI/Sidebar/Sidebar';
 import { OptionsHeader, OptionsHeaderCollapsed } from '@/components/UI/OptionsLayout/OptionsHeader';
 import { WorkspaceFooter, WorkspaceFooterCollapsed } from '@/components/UI/Workspace/WorkspaceFooter';
-import { ShortcutsAside } from '@/components/UI/ShortcutsPanel';
+import { ShortcutsAside, type PageContext } from '@/components/UI/ShortcutsPanel';
 import { DomainRulesPage } from './DomainRulesPage';
 import { StatisticsPage } from './StatisticsPage';
 import { SettingsPage } from '@/components/UI/SettingsPage/SettingsPage';
@@ -154,7 +154,11 @@ export function OptionsContent() {
                             <WorkspacesPage syncSettings={settings} />
                         )}
                     </main>
-                    <ShortcutsAside open={shortcutsAsideOpen} onClose={() => setShortcutsAsideOpen(false)} />
+                    <ShortcutsAside
+                        open={shortcutsAsideOpen}
+                        onClose={() => setShortcutsAsideOpen(false)}
+                        pageContext={currentTab as PageContext}
+                    />
                 </div>
             </div>
             <ConfirmDialog

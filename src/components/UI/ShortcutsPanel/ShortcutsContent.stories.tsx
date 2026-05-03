@@ -21,6 +21,18 @@ type Story = StoryObj<typeof meta>;
 
 export const ShortcutsContentDefault: Story = {};
 
+export const ShortcutsContentOnRules: Story = {
+  args: { pageContext: 'rules' },
+};
+
+export const ShortcutsContentOnSessions: Story = {
+  args: { pageContext: 'sessions' },
+};
+
+export const ShortcutsContentOnStats: Story = {
+  args: { pageContext: 'stats' },
+};
+
 export const ShortcutsContentSingleGroup: Story = {
   args: {
     groups: [

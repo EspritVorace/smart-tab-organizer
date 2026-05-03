@@ -631,7 +631,8 @@
   "shortcutsGroupGlobal": { "message": "Globaux navigateur" },
   "shortcutsGroupPopup": { "message": "Popup" },
   "shortcutsGroupOptions": { "message": "Page d'options" },
-  "shortcutsGroupLists": { "message": "Listes (règles et sessions)" },
+  "shortcutsGroupListRules": { "message": "Liste des règles" },
+  "shortcutsGroupListSessions": { "message": "Liste des sessions" },
   "shortcutsGroupSessionCard": { "message": "Carte session (focus)" },
 
   "shortcutDescOrganize": { "message": "Organiser tous les onglets" },

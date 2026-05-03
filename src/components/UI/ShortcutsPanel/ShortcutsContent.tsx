@@ -1,15 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
+import * as Collapsible from '@radix-ui/react-collapsible';
 import { Box, Button, Flex, Kbd, Text } from '@radix-ui/themes';
-import { ExternalLink } from 'lucide-react';
+import { ChevronDown, ExternalLink } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { getShortcutsCustomizeInfo, openShortcutsCustomizePage } from '@/utils/browserUrls';
 import { useBrowserCommands, type BrowserCommandsMap } from '@/hooks/useBrowserCommands';
-import { SHORTCUT_GROUPS, type ShortcutDisplay, type ShortcutGroup } from './shortcuts';
+import {
+  SHORTCUT_GROUPS,
+  isGroupOpenByDefault,
+  type PageContext,
+  type ShortcutDisplay,
+  type ShortcutGroup,
+} from './shortcuts';
 import styles from './ShortcutsContent.module.css';
 
 interface ShortcutsContentProps {
   /** Optional override of the groups to display (defaults to SHORTCUT_GROUPS). */
   groups?: ShortcutGroup[];
+  /**
+   * When provided, each group's initial expanded state is derived from the
+   * page context (see `isGroupOpenByDefault`). When omitted, all groups start
+   * expanded so non-contextual surfaces (Storybook, popup drawer) keep their
+   * historical behaviour.
+   */
+  pageContext?: PageContext;
 }
 
 function resolveKeys(
@@ -25,7 +39,7 @@ function resolveKeys(
   return { keys: [live], unbound: false };
 }
 
-export function ShortcutsContent({ groups = SHORTCUT_GROUPS }: ShortcutsContentProps) {
+export function ShortcutsContent({ groups = SHORTCUT_GROUPS, pageContext }: ShortcutsContentProps) {
   const { isDirect } = getShortcutsCustomizeInfo();
   const liveCommands = useBrowserCommands();
   const hasUnbound = !!liveCommands && groups.some((group) =>
@@ -41,20 +55,12 @@ export function ShortcutsContent({ groups = SHORTCUT_GROUPS }: ShortcutsContentP
         </Box>
       )}
       {groups.map((group) => (
-        <Box key={group.titleKey} data-group-title={group.titleKey}>
-          <Text size="2" weight="bold" highContrast className={styles.groupTitle} as="div">
-            {getMessage(group.titleKey)}
-          </Text>
-          <Flex direction="column">
-            {group.shortcuts.map((shortcut) => (
-              <ShortcutRow
-                key={shortcut.descriptionKey}
-                shortcut={shortcut}
-                liveCommands={liveCommands}
-              />
-            ))}
-          </Flex>
-        </Box>
+        <CollapsibleGroup
+          key={group.titleKey}
+          group={group}
+          pageContext={pageContext}
+          liveCommands={liveCommands}
+        />
       ))}
       <Box>
         <Button
@@ -73,6 +79,43 @@ export function ShortcutsContent({ groups = SHORTCUT_GROUPS }: ShortcutsContentP
         )}
       </Box>
     </Flex>
+  );
+}
+
+function CollapsibleGroup({
+  group,
+  pageContext,
+  liveCommands,
+}: {
+  group: ShortcutGroup;
+  pageContext?: PageContext;
+  liveCommands: BrowserCommandsMap | null;
+}) {
+  const [open, setOpen] = useState(() =>
+    pageContext === undefined ? true : isGroupOpenByDefault(group.titleKey, pageContext),
+  );
+  return (
+    <Collapsible.Root open={open} onOpenChange={setOpen} data-group-title={group.titleKey}>
+      <Collapsible.Trigger asChild>
+        <button type="button" className={styles.groupTrigger} data-state={open ? 'open' : 'closed'}>
+          <Text size="2" weight="bold" highContrast className={styles.groupTitle} as="div">
+            {getMessage(group.titleKey)}
+          </Text>
+          <ChevronDown size={14} aria-hidden="true" className={styles.chevron} />
+        </button>
+      </Collapsible.Trigger>
+      <Collapsible.Content>
+        <Flex direction="column">
+          {group.shortcuts.map((shortcut) => (
+            <ShortcutRow
+              key={shortcut.descriptionKey}
+              shortcut={shortcut}
+              liveCommands={liveCommands}
+            />
+          ))}
+        </Flex>
+      </Collapsible.Content>
+    </Collapsible.Root>
   );
 }
 
