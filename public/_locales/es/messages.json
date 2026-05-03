@@ -653,6 +653,7 @@
   "shortcutDescListToggleEnabled": { "message": "Activar o desactivar la regla con foco" },
   "shortcutDescListDelete": { "message": "Eliminar el elemento con foco" },
   "shortcutDescListPin": { "message": "Anclar o desanclar la sesión con foco" },
+  "shortcutDescListReorderKeyboard": { "message": "Reordenar con el asa (luego flechas para mover, Esc para cancelar)" },
   "shortcutDescSessionRestoreCustom": { "message": "Restauración personalizada (asistente)" },
   "shortcutDescSessionRestoreCurrent": { "message": "Añadir la sesión a la ventana actual" },
   "shortcutDescSessionReplaceCurrent": { "message": "Reemplazar las pestañas de la ventana" },

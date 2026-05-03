@@ -653,6 +653,7 @@
   "shortcutDescListToggleEnabled": { "message": "Activer ou désactiver la règle focus" },
   "shortcutDescListDelete": { "message": "Supprimer l'élément focus" },
   "shortcutDescListPin": { "message": "Épingler ou désépingler la session focus" },
+  "shortcutDescListReorderKeyboard": { "message": "Réorganiser via la poignée (puis flèches pour déplacer, Échap pour annuler)" },
   "shortcutDescSessionRestoreCustom": { "message": "Restauration personnalisée (assistant)" },
   "shortcutDescSessionRestoreCurrent": { "message": "Ajouter la session à la fenêtre courante" },
   "shortcutDescSessionReplaceCurrent": { "message": "Remplacer les onglets de la fenêtre" },
