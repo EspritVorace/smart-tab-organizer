@@ -17,6 +17,7 @@ import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/Accessi
 import { chromeGroupColors } from '@/utils/tabTreeUtils';
 import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
 import { getRadixColor } from '@/utils/utils';
+import { getDragHandleStyle } from '@/utils/dragHandleStyle';
 import { SessionPreviewTree } from './SessionPreviewTree';
 import { SessionRestoreButton } from './SessionRestoreButton/SessionRestoreButton';
 import type { Session } from '@/types/session';
@@ -327,23 +328,21 @@ function SessionCardFullHeader({
     <>
       {/* Drag handle */}
       {!isRenaming && (
-        <Box
+        <IconButton
           ref={handleRef}
+          type="button"
+          variant="ghost"
+          size="1"
+          color="gray"
+          disabled={isDragDisabled}
           data-testid={`session-card-${session.id}-drag-handle`}
           aria-disabled={isDragDisabled}
           aria-label={getMessage('dragHandle')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: isDragDisabled ? 'not-allowed' : 'grab',
-            touchAction: 'none',
-            color: isDragDisabled ? 'var(--gray-6)' : 'var(--gray-9)',
-            flexShrink: 0,
-          }}
+          aria-keyshortcuts="Space Enter ArrowUp ArrowDown Escape"
+          style={getDragHandleStyle(isDragDisabled)}
         >
           <GripVertical size={16} aria-hidden="true" />
-        </Box>
+        </IconButton>
       )}
 
       {/* Pin / Unpin button */}

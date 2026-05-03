@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, Text, HoverCard, Flex, Badge, Card, Checkbox, IconButton, DropdownMenu, Box } from '@radix-ui/themes';
+import { Switch, Text, HoverCard, Flex, Badge, Card, Checkbox, IconButton, DropdownMenu } from '@radix-ui/themes';
 import { Pencil, Trash2, MoreHorizontal, GripVertical, AlertTriangle } from 'lucide-react';
 import { useSortable } from '@dnd-kit/react/sortable';
 
@@ -9,22 +9,12 @@ function getStatusStyle(status: 'default' | 'conflict' | 'identical'): React.CSS
   return {};
 }
 
-function getDragHandleStyle(disabled: boolean): React.CSSProperties {
-  return {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: disabled ? 'not-allowed' : 'grab',
-    touchAction: 'none',
-    color: disabled ? 'var(--gray-6)' : 'var(--gray-9)',
-    flexShrink: 0,
-  };
-}
 import { RuleDetailPopover } from './RuleDetailPopover';
 import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 import { getMessage } from '@/utils/i18n';
 import { getRadixColor } from '@/utils/utils';
 import { getRuleCategory } from '@/utils/categoriesStore';
+import { getDragHandleStyle } from '@/utils/dragHandleStyle';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 
 export interface DomainRuleCardProps {
@@ -159,15 +149,21 @@ export function DomainRuleCard({
         /* ── MODE FULL ── */
         <Flex align="center" justify="between" gap="4">
           {/* Drag handle */}
-          <Box
+          <IconButton
             ref={handleRef}
+            type="button"
+            variant="ghost"
+            size="1"
+            color="gray"
+            disabled={isDragDisabled}
             data-testid={`rule-card-${rule.id}-drag-handle`}
             aria-disabled={isDragDisabled}
             aria-label={getMessage('dragHandle')}
+            aria-keyshortcuts="Space Enter ArrowUp ArrowDown Escape"
             style={getDragHandleStyle(isDragDisabled)}
           >
             <GripVertical size={16} aria-hidden="true" />
-          </Box>
+          </IconButton>
 
           {/* Left: Selection + Toggle */}
           <Flex align="center" gap="3">
