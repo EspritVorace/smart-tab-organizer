@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, DropdownMenu, Flex } from '@radix-ui/themes';
+import { Button, DropdownMenu, Flex, Kbd } from '@radix-ui/themes';
 import { ChevronDown } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 
@@ -10,6 +10,8 @@ export interface SplitButtonMenuItem {
   disabled?: boolean;
   /** If true, a separator is rendered before this item */
   separator?: boolean;
+  /** Optional keyboard hint rendered on the right side (e.g. "Shift+R"). */
+  shortcut?: string;
   /** data-testid forwarded to the DropdownMenu.Item */
   'data-testid'?: string;
 }
@@ -104,8 +106,15 @@ export function SplitButton({
                   disabled={item.disabled}
                   data-testid={item['data-testid']}
                 >
-                  {item.icon}
-                  {item.label}
+                  <Flex align="center" justify="between" gap="3" width="100%">
+                    <Flex align="center" gap="2">
+                      {item.icon}
+                      {item.label}
+                    </Flex>
+                    {item.shortcut && (
+                      <Kbd size="1">{item.shortcut}</Kbd>
+                    )}
+                  </Flex>
                 </DropdownMenu.Item>
               </React.Fragment>
             ))}
