@@ -126,7 +126,7 @@ export function OptionsContent() {
             />
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
-                    <main data-testid="options-content" style={{ flex: 1, overflow: 'auto', padding: '20px', minWidth: 0 }}>
+                    <main data-testid="options-content" style={{ flex: 1, overflow: 'auto', padding: '20px 20px 0 20px', minWidth: 0 }}>
                         {currentTab === 'rules' && (
                             <DomainRulesPage syncSettings={settings} updateRules={updateRules} />
                         )}

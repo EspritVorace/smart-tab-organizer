@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
-  padding: 4px var(--space-3);
+  padding: 4px var(--space-4);
   border-top: 1px solid var(--gray-a4);
   background: var(--gray-a1);
 }

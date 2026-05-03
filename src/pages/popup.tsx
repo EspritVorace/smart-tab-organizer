@@ -74,39 +74,41 @@ export function PopupContent() {
 
   return (
     <ShortcutsControlProvider openShortcuts={openShortcuts} version={version}>
-    <Box data-testid="popup" role="main" aria-label={getMessage('popupTitle')} width="400px" p="4" style={{ background: "var(--gray-a2)", borderRadius: "var(--radius-3)" }}>
-      <Flex gap="3" direction="column" width="100%">
-        <PopupHeader title={getMessage('popupTitle')} onSettingsOpen={openOptionsPage} />
+    <Box data-testid="popup" role="main" aria-label={getMessage('popupTitle')} width="400px" style={{ background: "var(--gray-a2)", borderRadius: "var(--radius-3)", overflow: "hidden" }}>
+      <Box p="4">
+        <Flex gap="3" direction="column" width="100%">
+          <PopupHeader title={getMessage('popupTitle')} onSettingsOpen={openOptionsPage} />
 
-        <PopupToolbar />
+          <PopupToolbar />
 
-        {isLoaded && !hasRules ? (
-          <SettingsToggles
-            isLoading={false}
-            hasRules={false}
-            onOpenRules={openRulesPage}
-          />
-        ) : null}
-
-        <PopupProfilesList />
-
-        {hasRules ? (
-          <>
-            <Separator size="4" />
+          {isLoaded && !hasRules ? (
             <SettingsToggles
-              globalGroupingEnabled={settings?.globalGroupingEnabled}
-              globalDeduplicationEnabled={settings?.globalDeduplicationEnabled}
-              onGroupingChange={setGlobalGroupingEnabled}
-              onDeduplicationChange={setGlobalDeduplicationEnabled}
-              isLoading={!isLoaded}
-              hasRules={true}
+              isLoading={false}
+              hasRules={false}
+              onOpenRules={openRulesPage}
             />
-          </>
-        ) : null}
+          ) : null}
 
-        <Separator size="4" />
-        <PopupWorkspaceFooter onManage={handleManageWorkspaces} />
-      </Flex>
+          <PopupProfilesList />
+
+          {hasRules ? (
+            <>
+              <Separator size="4" />
+              <SettingsToggles
+                globalGroupingEnabled={settings?.globalGroupingEnabled}
+                globalDeduplicationEnabled={settings?.globalDeduplicationEnabled}
+                onGroupingChange={setGlobalGroupingEnabled}
+                onDeduplicationChange={setGlobalDeduplicationEnabled}
+                isLoading={!isLoaded}
+                hasRules={true}
+              />
+            </>
+          ) : null}
+
+          <Separator size="4" />
+          <PopupWorkspaceFooter onManage={handleManageWorkspaces} />
+        </Flex>
+      </Box>
       <StatusBar />
       <ShortcutsDrawer open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
     </Box>
