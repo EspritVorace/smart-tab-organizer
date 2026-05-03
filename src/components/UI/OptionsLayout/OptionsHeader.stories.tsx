@@ -11,11 +11,7 @@ const metaExpanded: Meta<typeof OptionsHeader> = {
 export default metaExpanded;
 type Story = StoryObj<typeof metaExpanded>;
 
-export const OptionsHeaderDefault: Story = {
-  args: {
-    version: '1.1.3',
-  },
-};
+export const OptionsHeaderDefault: Story = {};
 
 export const OptionsHeaderCollapsedStory: Story = {
   render: () => React.createElement(OptionsHeaderCollapsed),

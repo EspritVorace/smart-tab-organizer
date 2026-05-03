@@ -19,10 +19,14 @@ import {
   ActiveWorkspaceProvider,
   useActiveWorkspaceContext,
 } from '@/contexts/ActiveWorkspaceContext.js';
+import { ShortcutsControlProvider } from '@/contexts/ShortcutsControlContext';
+import { StatusBar } from '@/components/UI/StatusBar/StatusBar';
 
 export function PopupContent() {
   const { settings, isLoaded, setGlobalGroupingEnabled, setGlobalDeduplicationEnabled } = useSettings();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const version = browser.runtime.getManifest().version;
+  const openShortcuts = useCallback(() => setShortcutsOpen(true), []);
 
   const openOptionsPage = useCallback(() => {
     browser.runtime.openOptionsPage();
@@ -69,6 +73,7 @@ export function PopupContent() {
   const hasRules = isLoaded && (settings?.domainRules?.length ?? 0) > 0;
 
   return (
+    <ShortcutsControlProvider openShortcuts={openShortcuts} version={version}>
     <Box data-testid="popup" role="main" aria-label={getMessage('popupTitle')} width="400px" p="4" style={{ background: "var(--gray-a2)", borderRadius: "var(--radius-3)" }}>
       <Flex gap="3" direction="column" width="100%">
         <PopupHeader title={getMessage('popupTitle')} onSettingsOpen={openOptionsPage} />
@@ -102,8 +107,10 @@ export function PopupContent() {
         <Separator size="4" />
         <PopupWorkspaceFooter onManage={handleManageWorkspaces} />
       </Flex>
+      <StatusBar />
       <ShortcutsDrawer open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
     </Box>
+    </ShortcutsControlProvider>
   );
 }
 

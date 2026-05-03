@@ -6,10 +6,9 @@ import * as stories from '../../src/components/UI/OptionsLayout/OptionsHeader.st
 const { OptionsHeaderDefault, OptionsHeaderCollapsedStory } = composeStories(stories);
 
 describe('OptionsHeader (portable stories)', () => {
-  it('renders the expanded header with version and theme toggle', () => {
+  it('renders the expanded header with theme toggle', () => {
     render(<OptionsHeaderDefault />);
     expect(screen.getByTestId('options-header')).toBeInTheDocument();
-    expect(screen.getByText('(v1.1.3)')).toBeInTheDocument();
     expect(screen.getByTestId('theme-toggle')).toBeInTheDocument();
   });
 

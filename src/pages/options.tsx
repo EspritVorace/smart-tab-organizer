@@ -8,6 +8,7 @@ import {
     ActiveWorkspaceProvider,
     useActiveWorkspaceContext,
 } from '@/contexts/ActiveWorkspaceContext.js';
+import { ShortcutsControlProvider } from '@/contexts/ShortcutsControlContext';
 
 import { useSettings } from '@/hooks/useSettings.js';
 import { useStatistics } from '@/hooks/useStatistics.js';
@@ -97,6 +98,8 @@ export function OptionsContent() {
 
     useKeyboardShortcuts(shortcuts);
 
+    const openShortcuts = useCallback(() => setShortcutsAsideOpen(true), []);
+
     if (!settings) {
         return (
             <Flex align="center" justify="center" gap="2" style={{ height: '100vh' }}>
@@ -107,6 +110,7 @@ export function OptionsContent() {
     }
 
     return (
+        <ShortcutsControlProvider openShortcuts={openShortcuts} version={version}>
         <div id="options-inner" data-testid="options" style={{ display: 'flex', height: '100vh' }}>
             <Sidebar
                 isCollapsed={sidebarCollapsed}
@@ -114,7 +118,7 @@ export function OptionsContent() {
                 activeItem={currentTab}
                 onItemClick={handleTabChange}
                 items={sidebarItems}
-                headerContent={<OptionsHeader version={version} />}
+                headerContent={<OptionsHeader />}
                 headerCollapsedContent={<OptionsHeaderCollapsed />}
                 showFooter={true}
                 footerContent={<WorkspaceFooter onManage={() => handleTabChange('workspaces')} />}
@@ -166,6 +170,7 @@ export function OptionsContent() {
                 color="orange"
             />
         </div>
+        </ShortcutsControlProvider>
     );
 }
 

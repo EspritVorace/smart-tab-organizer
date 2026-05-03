@@ -622,6 +622,7 @@
   "shortcutsPanelDescription": { "message": "Referencia rápida de todos los atajos disponibles." },
   "shortcutsPanelClose": { "message": "Cerrar el panel de atajos" },
   "shortcutsPanelToggleAria": { "message": "Mostrar atajos de teclado" },
+  "statusBarShortcutsLabel": { "message": "Mostrar atajos" },
   "shortcutsCustomize": { "message": "Personalizar atajos del navegador" },
   "shortcutsCustomizeFirefoxHint": { "message": "Firefox: abre el menú de engranaje y luego 'Administrar atajos de extensiones'." },
   "shortcutsUnboundWarning": { "message": "Algunos atajos del navegador no están definidos. El navegador no aplica automáticamente los atajos sugeridos después de una actualización de la extensión; defínelos en 'Personalizar atajos' abajo." },
