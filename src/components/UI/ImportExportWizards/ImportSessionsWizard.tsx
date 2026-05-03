@@ -1,5 +1,4 @@
-import React, { useState, useCallback } from 'react';
-import { Box } from '@radix-ui/themes';
+import React, { useCallback, useState } from 'react';
 import { Upload } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast } from '@/utils/toast';
@@ -7,35 +6,22 @@ import { sessionsArraySchema } from '@/schemas/session';
 import { importSessionsDataSchema } from '@/schemas/importExport';
 import {
   classifyImportedSessions,
-  type SessionClassification,
+  type ConflictingSession,
 } from '@/utils/sessionClassification';
 import { generateUUID } from '@/utils/utils';
 import { loadSessions, saveSessions } from '@/utils/sessionStorage';
 import { SessionRow, ConflictSessionRow } from './SessionImportRows';
 import type { Session } from '@/types/session';
-import { WizardModal } from '@/components/UI/WizardModal';
-import { useDialogReset } from './Shared';
-import { SourceStep, ImportedNoteCallout, useJsonSourceInput } from './Source';
-import { ImportWizardFooter } from './ImportWizardFooter';
+import { ImportWizardShell } from './ImportWizardShell';
 import {
-  useImportClassification,
-  computeImportCount,
-  ClassificationGroup,
-  ClassificationScrollArea,
-  ConflictModeSelector,
-  ConflictWarningCallout,
-  ImportCountLabel,
-} from './Classification';
+  useImportWizardState,
+  type NormalizedClassification,
+} from './useImportWizardState';
 
 interface ImportSessionsWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const STEP_DESCRIPTION_KEYS = [
-  'importSessionsStepSourceDescription',
-  'importSessionsStepReviewDescription',
-] as const;
 
 function getUniqueName(base: string, takenNames: Set<string>): string {
   if (!takenNames.has(base.toLowerCase())) return base;
@@ -57,37 +43,32 @@ const validateSessionsPayload = (raw: unknown) => {
   };
 };
 
+const classifySessions = (
+  imported: Session[],
+  existing: Session[],
+): NormalizedClassification<Session, ConflictingSession> => {
+  const result = classifyImportedSessions(imported, existing);
+  return {
+    newItems: result.newSessions,
+    conflictingItems: result.conflictingSessions,
+    identicalItems: result.identicalSessions,
+  };
+};
+
 export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizardProps) {
-  const [step, setStep] = useState(0);
-  const source = useJsonSourceInput<Session[]>(validateSessionsPayload);
   const [existingSessions, setExistingSessions] = useState<Session[]>([]);
 
-  const classificationState = useImportClassification<SessionClassification>();
-  const { classification, conflictMode, newSelection: newSessionSelection } = classificationState;
-
-  useDialogReset(open, () => {
-    loadSessions().then((loaded) => setExistingSessions(loaded));
-    setStep(0);
-    source.reset();
-    classificationState.reset();
+  const state = useImportWizardState<Session, ConflictingSession>({
+    open,
+    existingItems: existingSessions,
+    validatePayload: validateSessionsPayload,
+    classify: classifySessions,
+    onReset: () => {
+      loadSessions().then((loaded) => setExistingSessions(loaded));
+    },
   });
 
-  const goToStep1 = useCallback(() => {
-    if (!source.parsedData) return;
-    const result = classifyImportedSessions(source.parsedData, existingSessions);
-    classificationState.setClassification(result);
-    newSessionSelection.setAll(result.newSessions.map((s) => s.id));
-    setStep(1);
-  }, [source.parsedData, existingSessions, classificationState, newSessionSelection]);
-
-  const importCount = classification
-    ? computeImportCount(
-        classification.newSessions,
-        classification.conflictingSessions.length,
-        newSessionSelection,
-        conflictMode,
-      )
-    : 0;
+  const { classification, conflictMode, newSelection } = state;
 
   const executeImport = useCallback(async () => {
     if (!classification) return;
@@ -98,15 +79,15 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
 
     const takenNames = new Set<string>(existingSessions.map(s => s.name.toLowerCase()));
 
-    for (const session of classification.newSessions) {
-      if (newSessionSelection.has(session.id)) {
+    for (const session of classification.newItems) {
+      if (newSelection.has(session.id)) {
         updatedSessions.push(session);
         takenNames.add(session.name.toLowerCase());
         added++;
       }
     }
 
-    for (const conflict of classification.conflictingSessions) {
+    for (const conflict of classification.conflictingItems) {
       if (conflictMode === 'overwrite') {
         const idx = updatedSessions.findIndex(
           s => s.name.toLowerCase() === conflict.existing.name.toLowerCase()
@@ -129,95 +110,44 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
       getMessage('importSessionsNotificationTitle'),
       getMessage('importSessionsNotificationMessage', [String(added), String(overwritten)]),
     );
-  }, [classification, existingSessions, newSessionSelection, conflictMode, onOpenChange]);
-
-  const hasConflicts = (classification?.conflictingSessions.length ?? 0) > 0;
+  }, [classification, existingSessions, newSelection, conflictMode, onOpenChange]);
 
   return (
-    <WizardModal
+    <ImportWizardShell<Session, ConflictingSession>
       open={open}
       onOpenChange={onOpenChange}
       icon={Upload}
       title={getMessage('importSessionsTitle')}
-      description={getMessage(STEP_DESCRIPTION_KEYS[step])}
-    >
-      <WizardModal.Body>
-        {step === 0 && (
-          <SourceStep
-            source={source}
-            textareaPlaceholder='{"sessions": [{"id": "...", "name": "My Session", ...}]}'
-            successCountMessageKey="sessionsFoundCount"
-          />
-        )}
-
-        {step === 1 && classification && (
-          <Box>
-            <ImportedNoteCallout note={source.importedNote} />
-            <ClassificationScrollArea>
-              <ClassificationGroup
-                titleKey="newSessionsGroup"
-                items={classification.newSessions}
-                renderItem={(session) => (
-                  <SessionRow
-                    key={session.id}
-                    session={session}
-                    checkbox
-                    checked={newSessionSelection.has(session.id)}
-                    onToggle={() => newSessionSelection.toggle(session.id)}
-                  />
-                )}
-              />
-              <ClassificationGroup
-                titleKey="conflictingSessionsGroup"
-                items={classification.conflictingSessions}
-                showSeparator={classification.newSessions.length > 0}
-                beforeList={
-                  <ConflictModeSelector
-                    value={conflictMode}
-                    onChange={classificationState.setConflictMode}
-                  />
-                }
-                renderItem={(conflict) => (
-                  <ConflictSessionRow key={conflict.imported.id} conflict={conflict} />
-                )}
-              />
-              <ClassificationGroup
-                titleKey="identicalSessionsGroup"
-                items={classification.identicalSessions}
-                showSeparator={
-                  classification.newSessions.length > 0
-                  || classification.conflictingSessions.length > 0
-                }
-                renderItem={(session) => (
-                  <SessionRow
-                    key={session.id}
-                    session={session}
-                    dimmed
-                    statusBadge={getMessage('alreadyExists')}
-                  />
-                )}
-              />
-            </ClassificationScrollArea>
-
-            <ImportCountLabel messageKey="sessionsToImportCount" count={importCount} />
-            <ConflictWarningCallout
-              when={hasConflicts && conflictMode === 'overwrite'}
-              messageKey="sessionImportOverwriteWarning"
-            />
-          </Box>
-        )}
-      </WizardModal.Body>
-
-      <WizardModal.Footer>
-        <ImportWizardFooter
-          step={step as 0 | 1}
-          hasParsedData={!!source.parsedData}
-          importCount={importCount}
-          onNext={goToStep1}
-          onBack={() => setStep(0)}
-          onConfirm={executeImport}
+      stepDescriptionKeys={['importSessionsStepSourceDescription', 'importSessionsStepReviewDescription']}
+      textareaPlaceholder='{"sessions": [{"id": "...", "name": "My Session", ...}]}'
+      successCountMessageKey="sessionsFoundCount"
+      newGroupTitleKey="newSessionsGroup"
+      conflictingGroupTitleKey="conflictingSessionsGroup"
+      identicalGroupTitleKey="identicalSessionsGroup"
+      countLabelKey="sessionsToImportCount"
+      overwriteWarningKey="sessionImportOverwriteWarning"
+      state={state}
+      renderNewItem={(session) => (
+        <SessionRow
+          key={session.id}
+          session={session}
+          checkbox
+          checked={newSelection.has(session.id)}
+          onToggle={() => newSelection.toggle(session.id)}
         />
-      </WizardModal.Footer>
-    </WizardModal>
+      )}
+      renderConflictingItem={(conflict) => (
+        <ConflictSessionRow key={conflict.imported.id} conflict={conflict} />
+      )}
+      renderIdenticalItem={(session) => (
+        <SessionRow
+          key={session.id}
+          session={session}
+          dimmed
+          statusBadge={getMessage('alreadyExists')}
+        />
+      )}
+      onConfirm={executeImport}
+    />
   );
 }
