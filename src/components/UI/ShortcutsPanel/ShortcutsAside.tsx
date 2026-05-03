@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Flex, IconButton, Text } from '@radix-ui/themes';
 import { Keyboard, X } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
-import { ShortcutsContent } from './ShortcutsContent';
+import { ShortcutsContent, focusFirstOpenTrigger } from './ShortcutsContent';
 import type { PageContext } from './shortcuts';
 import styles from './ShortcutsAside.module.css';
 
@@ -27,7 +27,6 @@ interface ShortcutsAsideProps {
  */
 export function ShortcutsAside({ open, onClose, pageContext }: ShortcutsAsideProps) {
   const asideRef = useRef<HTMLElement>(null);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const previousActiveElementRef = useRef<HTMLElement | null>(null);
   const wasOpenRef = useRef(false);
 
@@ -35,7 +34,7 @@ export function ShortcutsAside({ open, onClose, pageContext }: ShortcutsAsidePro
     if (open && !wasOpenRef.current) {
       previousActiveElementRef.current = document.activeElement as HTMLElement | null;
       // Wait one frame so the panel is in the DOM and visible.
-      requestAnimationFrame(() => closeButtonRef.current?.focus());
+      requestAnimationFrame(() => focusFirstOpenTrigger(asideRef.current));
     } else if (!open && wasOpenRef.current) {
       previousActiveElementRef.current?.focus?.();
       previousActiveElementRef.current = null;
@@ -73,7 +72,6 @@ export function ShortcutsAside({ open, onClose, pageContext }: ShortcutsAsidePro
           </Text>
         </div>
         <IconButton
-          ref={closeButtonRef}
           size="1"
           variant="ghost"
           color="gray"
