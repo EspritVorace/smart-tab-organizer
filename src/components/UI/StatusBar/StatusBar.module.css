@@ -31,26 +31,8 @@
   outline-offset: 1px;
 }
 
-.kbd {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  padding: 1px 5px;
-  font-family: var(--default-font-family);
-  font-size: 11px;
-  font-weight: 500;
-  line-height: 1;
-  color: var(--gray-12);
-  background: var(--gray-a3);
-  border: 1px solid var(--gray-a5);
-  border-bottom-width: 2px;
-  border-radius: var(--radius-2);
-  white-space: nowrap;
-}
-
 .version {
-  color: var(--gray-10);
+  color: var(--gray-11);
   font-variant-numeric: tabular-nums;
   font-size: 11px;
 }

@@ -50,7 +50,7 @@ export function WorkspaceColorPicker({ value, onChange, ariaLabel }: WorkspaceCo
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: 'var(--accent-contrast)',
+              color: `var(--${color}-contrast)`,
             }}
           >
             {isActive ? <Check size={14} aria-hidden="true" /> : null}
