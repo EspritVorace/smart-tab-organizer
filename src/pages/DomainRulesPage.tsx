@@ -213,56 +213,53 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
   const listRef = useRef<HTMLDivElement>(null);
 
   const handleCardKeyDown = useCallback((e: React.KeyboardEvent, rule: DomainRuleSetting, index: number) => {
+    // Only act when the card element itself has focus (not a child input/button).
+    if (e.target !== e.currentTarget) return;
+
     const cards = listRef.current?.querySelectorAll<HTMLElement>('[role="listitem"]');
     if (!cards) return;
 
     switch (e.key) {
-      case 'ArrowDown': {
+      case 'ArrowDown':
         e.preventDefault();
         cards[index + 1]?.focus();
-        break;
-      }
-      case 'ArrowUp': {
+        return;
+      case 'ArrowUp':
         e.preventDefault();
         cards[index - 1]?.focus();
-        break;
-      }
-      case 'Home': {
+        return;
+      case 'Home':
         e.preventDefault();
         cards[0]?.focus();
-        break;
-      }
-      case 'End': {
+        return;
+      case 'End':
         e.preventDefault();
         cards[cards.length - 1]?.focus();
-        break;
-      }
-      case ' ': {
-        const target = e.target as HTMLElement;
-        if (target.getAttribute('role') === 'row') {
-          e.preventDefault();
-          handleRowSelect(rule.id, !selectedIds.has(rule.id));
-        }
-        break;
-      }
-      case 'Enter': {
-        const target = e.target as HTMLElement;
-        if (target.getAttribute('role') === 'row') {
-          e.preventDefault();
-          handleEditRule(rule);
-        }
-        break;
-      }
-      case 'Delete': {
-        const target = e.target as HTMLElement;
-        if (target.getAttribute('role') === 'row') {
-          e.preventDefault();
-          setDeleteTarget({ type: 'single', ruleId: rule.id, focusIndex: index });
-        }
-        break;
-      }
+        return;
+      case ' ':
+        e.preventDefault();
+        handleRowSelect(rule.id, !selectedIds.has(rule.id));
+        return;
+      case 'Enter':
+        e.preventDefault();
+        handleEditRule(rule);
+        return;
+      case 'Delete':
+        e.preventDefault();
+        setDeleteTarget({ type: 'single', ruleId: rule.id, focusIndex: index });
+        return;
     }
-  }, [handleRowSelect, handleEditRule, selectedIds]);
+
+    if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+    const lower = e.key.toLowerCase();
+    if (lower === 'e') {
+      e.preventDefault();
+      handleEditRule(rule);
+    } else if (lower === 't') {
+      e.preventDefault();
+      handleToggleEnabled(rule.id, !rule.enabled);
+    }
+  }, [handleRowSelect, handleEditRule, handleToggleEnabled, selectedIds]);
 
   const handleAddRule = useCallback(() => {
     setEditingRule(undefined);

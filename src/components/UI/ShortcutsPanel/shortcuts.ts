@@ -54,6 +54,8 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
       { keys: ['↑', '↓'], descriptionKey: 'shortcutDescListNavigate' },
       { keys: ['n'], descriptionKey: 'shortcutDescListNew' },
       { keys: ['e'], descriptionKey: 'shortcutDescListEdit' },
+      { keys: ['Space'], descriptionKey: 'shortcutDescListToggleSelection' },
+      { keys: ['t'], descriptionKey: 'shortcutDescListToggleEnabled' },
       { keys: ['Del'], descriptionKey: 'shortcutDescListDelete' },
       { keys: ['p'], descriptionKey: 'shortcutDescListPin' },
     ],
