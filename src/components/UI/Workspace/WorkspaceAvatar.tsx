@@ -1,14 +1,14 @@
 import React from 'react';
-import { Flex, Text } from '@radix-ui/themes';
+import { Avatar } from '@radix-ui/themes';
 import type { WorkspaceAccentColor } from '@/schemas/workspace.js';
 
-const SIZE_TO_PX = {
-  sm: { box: 24, font: '11px' },
-  md: { box: 32, font: '13px' },
-  lg: { box: 44, font: '17px' },
-} as const;
+const SIZE_TO_RADIX = {
+  sm: '1',
+  md: '2',
+  lg: '4',
+} as const satisfies Record<AvatarSize, '1' | '2' | '4'>;
 
-type AvatarSize = keyof typeof SIZE_TO_PX;
+type AvatarSize = 'sm' | 'md' | 'lg';
 
 export function getInitials(name: string): string {
   if (!name) return '?';
@@ -29,35 +29,23 @@ interface WorkspaceAvatarProps {
 }
 
 /**
- * Round badge displaying 1-2 initials of a workspace name on a filled circle
- * tinted with the workspace's Radix accent color. Purely visual; consumers
- * decide whether the avatar acts as a button via wrappers.
+ * Round badge displaying 1-2 initials of a workspace name on a Radix Avatar
+ * tinted with the workspace's accent color. The `soft` variant pairs a tinted
+ * background with `<color>-12` text, guaranteeing WCAG AA contrast for normal
+ * text across every Radix accent (the `solid` variant only meets large-text
+ * thresholds for some scales).
  */
 export function WorkspaceAvatar({ name, accentColor, size = 'md', ariaLabel }: WorkspaceAvatarProps) {
-  const { box, font } = SIZE_TO_PX[size];
   return (
-    <Flex
-      align="center"
-      justify="center"
+    <Avatar
       role={ariaLabel ? 'img' : undefined}
       aria-label={ariaLabel}
-      style={{
-        width: box,
-        height: box,
-        flexShrink: 0,
-        borderRadius: '50%',
-        background: `var(--${accentColor}-9)`,
-        color: 'var(--accent-contrast)',
-        userSelect: 'none',
-      }}
-    >
-      <Text
-        size="2"
-        weight="bold"
-        style={{ fontSize: font, color: 'var(--accent-contrast)', lineHeight: 1 }}
-      >
-        {getInitials(name)}
-      </Text>
-    </Flex>
+      color={accentColor}
+      variant="soft"
+      radius="full"
+      size={SIZE_TO_RADIX[size]}
+      fallback={getInitials(name)}
+      style={{ flexShrink: 0, userSelect: 'none' }}
+    />
   );
 }

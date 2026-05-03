@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button, Flex, Text } from '@radix-ui/themes';
+import { Box, Button, Flex, Kbd, Text } from '@radix-ui/themes';
 import { ExternalLink } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { getShortcutsCustomizeInfo, openShortcutsCustomizePage } from '@/utils/browserUrls';
@@ -114,7 +114,7 @@ function KeyCombo({ combo }: { combo: string }) {
       {tokens.map((token, i) => (
         <React.Fragment key={`${token}-${i}`}>
           {i > 0 && <span className={styles.plus} aria-hidden="true">+</span>}
-          <kbd className={styles.kbd}>{token}</kbd>
+          <Kbd size="1">{token}</Kbd>
         </React.Fragment>
       ))}
     </Flex>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text } from '@radix-ui/themes';
+import { Kbd, Text } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 import { useShortcutsControl } from '@/contexts/ShortcutsControlContext';
 import styles from './StatusBar.module.css';
@@ -17,7 +17,7 @@ export function StatusBar() {
         title={getMessage('shortcutsPanelToggleAria')}
         onClick={openShortcuts}
       >
-        <kbd className={styles.kbd}>?</kbd>
+        <Kbd size="1">?</Kbd>
         <Text size="1">{getMessage('statusBarShortcutsLabel')}</Text>
       </button>
       <span data-testid="status-bar-version" className={styles.version}>
