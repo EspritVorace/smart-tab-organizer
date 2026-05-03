@@ -1,7 +1,8 @@
 import React from 'react';
-import { Box, Dialog, Flex, IconButton } from '@radix-ui/themes';
-import { Keyboard, X } from 'lucide-react';
+import { Box, Dialog, Flex } from '@radix-ui/themes';
+import { Keyboard } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
+import { DialogCloseButton } from '@/components/UI/DialogShell';
 import { ShortcutsContent } from './ShortcutsContent';
 
 interface ShortcutsDrawerProps {
@@ -32,18 +33,7 @@ export function ShortcutsDrawer({ open, onOpenChange }: ShortcutsDrawerProps) {
         <Dialog.Description size="1" color="gray" mb="3">
           {getMessage('shortcutsPanelDescription')}
         </Dialog.Description>
-        <Dialog.Close>
-          <IconButton
-            size="1"
-            variant="ghost"
-            color="gray"
-            aria-label={getMessage('close')}
-            title={getMessage('close')}
-            style={{ position: 'absolute', top: 12, right: 12 }}
-          >
-            <X size={14} aria-hidden="true" />
-          </IconButton>
-        </Dialog.Close>
+        <DialogCloseButton iconSize={14} style={{ position: 'absolute', top: 12, right: 12 }} />
         <Box>
           <ShortcutsContent />
         </Box>

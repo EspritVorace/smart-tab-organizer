@@ -1,8 +1,8 @@
 import React from 'react';
-import { Dialog, Flex, IconButton, Separator } from '@radix-ui/themes';
-import { X, type LucideIcon } from 'lucide-react';
-import { getMessage } from '@/utils/i18n';
+import { Dialog, Flex, Separator } from '@radix-ui/themes';
+import { type LucideIcon } from 'lucide-react';
 import { IconBox } from '@/components/UI/IconBox/IconBox';
+import { DialogCloseButton } from './DialogCloseButton';
 
 type DialogContentProps = React.ComponentProps<typeof Dialog.Content>;
 
@@ -102,18 +102,7 @@ export function DialogShell({
           {showHeaderSeparator && <Separator size="4" mt="3" style={{ opacity: 0.3 }} />}
         </div>
 
-        <Dialog.Close>
-          <IconButton
-            size="1"
-            variant="ghost"
-            color="gray"
-            aria-label={getMessage('close')}
-            title={getMessage('close')}
-            style={closeButtonStyle}
-          >
-            <X size={16} aria-hidden="true" />
-          </IconButton>
-        </Dialog.Close>
+        <DialogCloseButton style={closeButtonStyle} />
 
         {children}
       </Dialog.Content>
