@@ -303,6 +303,38 @@ describe('PopupProfilesList', () => {
     expect(screen.getByRole('button', { name: /Restore options/i })).toBeInTheDocument();
   });
 
+  it('should call restoreSessionTabs when clicking the primary restore button', async () => {
+    const { fireEvent } = await import('@testing-library/react');
+    const tabRestoreModule = await import('../../src/utils/tabRestore');
+    const restoreSpy = vi.mocked(tabRestoreModule.restoreSessionTabs);
+
+    const sessions: Session[] = [
+      {
+        id: 'p-restore',
+        isPinned: true,
+        updatedAt: '2026-04-10T00:00:00Z',
+        name: 'Restorable',
+        createdAt: '2026-04-10T00:00:00Z',
+        ungroupedTabs: [],
+        groups: [],
+      },
+    ];
+    mockLoadSessions.mockResolvedValue(sessions);
+
+    render(
+      <TestWrapper>
+        <PopupProfilesList />
+      </TestWrapper>,
+    );
+
+    const primary = await screen.findByRole('button', { name: /Restore in current window/i });
+    fireEvent.click(primary);
+
+    await waitFor(() => {
+      expect(restoreSpy).toHaveBeenCalled();
+    });
+  });
+
   it('should display pinned sessions label when pinned sessions exist', async () => {
     const sessions: Session[] = [
       {

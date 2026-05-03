@@ -110,6 +110,44 @@ describe('getCategoryLabel', () => {
   });
 });
 
+describe('initCategoriesStore: external storage updates + reset', () => {
+  it('updates the cache when storage changes after init', async () => {
+    await fakeBrowser.storage.local.set({ categories: SAMPLE_CATEGORIES });
+    const { initCategoriesStore, getAllCategories, _resetCategoriesStoreForTests } =
+      await import('../../src/utils/categoriesStore');
+
+    await initCategoriesStore();
+    expect(getAllCategories()).toHaveLength(3);
+
+    // External update
+    const next: RuleCategory[] = [
+      { id: 'gaming', emoji: '🎮', color: 'purple', label: 'Gaming', builtIn: false },
+    ];
+    await fakeBrowser.storage.local.set({ categories: next });
+
+    // Watcher should refresh the cache.
+    await new Promise((r) => setTimeout(r, 10));
+    expect(getAllCategories()).toHaveLength(1);
+    expect(getAllCategories()[0].id).toBe('gaming');
+
+    _resetCategoriesStoreForTests();
+    expect(getAllCategories()).toEqual([]);
+  });
+
+  it('falls back to an empty cache when getValue throws', async () => {
+    const mod = await import('../../src/utils/categoriesStore');
+    const { initCategoriesStore, getAllCategories, _resetCategoriesStoreForTests } = mod;
+    const { getActiveScopedItems } = await import('../../src/utils/workspaceContext');
+    const items = await getActiveScopedItems();
+
+    _resetCategoriesStoreForTests();
+    vi.spyOn(items.categoriesItem, 'getValue').mockRejectedValueOnce(new Error('boom'));
+
+    await initCategoriesStore();
+    expect(getAllCategories()).toEqual([]);
+  });
+});
+
 describe('fetchBuiltInCategories', () => {
   it('télécharge et valide le fichier categories.json', async () => {
     vi.stubGlobal(
