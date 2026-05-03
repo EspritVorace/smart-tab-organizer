@@ -36,6 +36,7 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
       { keys: ['S'], descriptionKey: 'shortcutDescPopupSave' },
       { keys: ['R'], descriptionKey: 'shortcutDescPopupRestore' },
       { keys: ['O'], descriptionKey: 'shortcutDescPopupOrganize' },
+      { keys: ['P'], descriptionKey: 'shortcutDescPopupOptions' },
       { keys: ['?'], descriptionKey: 'shortcutDescOpenShortcutsHelp' },
     ],
   },
@@ -114,7 +115,6 @@ export function isGroupOpenByDefault(
 }
 
 const POPUP_GROUP_KEYS = [
-  'shortcutsGroupGlobal',
   'shortcutsGroupPopup',
   'shortcutsGroupSessionCard',
 ] as const;

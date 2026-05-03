@@ -5,17 +5,17 @@ import {
 } from '../src/components/UI/ShortcutsPanel/shortcuts';
 
 describe('POPUP_SHORTCUT_GROUPS', () => {
-  it('contains exactly 3 groups in the expected order', () => {
+  it('contains exactly 2 groups in the expected order', () => {
     const titleKeys = POPUP_SHORTCUT_GROUPS.map((g) => g.titleKey);
     expect(titleKeys).toEqual([
-      'shortcutsGroupGlobal',
       'shortcutsGroupPopup',
       'shortcutsGroupSessionCard',
     ]);
   });
 
-  it('does not include Options or List groups', () => {
+  it('does not include Global, Options or List groups', () => {
     const titleKeys = POPUP_SHORTCUT_GROUPS.map((g) => g.titleKey);
+    expect(titleKeys).not.toContain('shortcutsGroupGlobal');
     expect(titleKeys).not.toContain('shortcutsGroupOptions');
     expect(titleKeys).not.toContain('shortcutsGroupListRules');
     expect(titleKeys).not.toContain('shortcutsGroupListSessions');

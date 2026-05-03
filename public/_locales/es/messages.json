@@ -641,6 +641,7 @@
   "shortcutDescPopupSave": { "message": "Guardar instantánea" },
   "shortcutDescPopupRestore": { "message": "Abrir sesiones" },
   "shortcutDescPopupOrganize": { "message": "Organizar todas las pestañas" },
+  "shortcutDescPopupOptions": { "message": "Abrir las opciones de la extensión" },
   "shortcutDescOpenShortcutsHelp": { "message": "Mostrar este panel de atajos" },
   "shortcutDescNavigateTabs": { "message": "Cambiar de pestaña en la barra lateral" },
   "shortcutDescFocusSearch": { "message": "Enfocar el campo de búsqueda" },

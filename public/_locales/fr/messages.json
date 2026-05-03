@@ -641,6 +641,7 @@
   "shortcutDescPopupSave": { "message": "Enregistrer un snapshot" },
   "shortcutDescPopupRestore": { "message": "Ouvrir les sessions" },
   "shortcutDescPopupOrganize": { "message": "Organiser tous les onglets" },
+  "shortcutDescPopupOptions": { "message": "Ouvrir les options de l'extension" },
   "shortcutDescOpenShortcutsHelp": { "message": "Afficher ce panneau de raccourcis" },
   "shortcutDescNavigateTabs": { "message": "Changer d'onglet de la barre latérale" },
   "shortcutDescFocusSearch": { "message": "Focus sur le champ de recherche" },
