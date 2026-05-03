@@ -3,7 +3,7 @@ import { Box, Dialog, Flex } from '@radix-ui/themes';
 import { Keyboard } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { DialogCloseButton } from '@/components/UI/DialogShell';
-import { ShortcutsContent } from './ShortcutsContent';
+import { ShortcutsContent, focusFirstOpenTrigger } from './ShortcutsContent';
 import { POPUP_SHORTCUT_GROUPS } from './shortcuts';
 import styles from './ShortcutsDrawer.module.css';
 
@@ -46,6 +46,13 @@ export function ShortcutsDrawer({ open, onOpenChange }: ShortcutsDrawerProps) {
         className={styles.drawerContent}
         onPointerDownOutside={preventClose}
         onInteractOutside={preventClose}
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+          requestAnimationFrame(() => {
+            const root = document.querySelector('[data-testid="shortcuts-drawer"]');
+            focusFirstOpenTrigger(root as HTMLElement | null);
+          });
+        }}
       >
         <div className={styles.drawerHeader}>
           <Flex align="center" gap="2" className={styles.drawerHeaderTitle}>

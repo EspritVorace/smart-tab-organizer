@@ -209,6 +209,82 @@ test.describe('[US-KB-options] Options shortcuts', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Shortcuts panel keyboard navigation
+// ---------------------------------------------------------------------------
+test.describe('[US-KB-panel] Shortcuts panel keyboard navigation', () => {
+  test('drawer opens with focus on the contextual open trigger; Arrow keys roam between triggers', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    await goToPopup(page, extensionId);
+
+    await expect(page.getByTestId('popup-toolbar')).toBeVisible();
+    await page.getByTestId('popup').click({ position: { x: 5, y: 5 } });
+    await page.keyboard.press('Shift+Slash');
+
+    const drawer = page.getByTestId('shortcuts-drawer');
+    await expect(drawer).toBeVisible({ timeout: 5000 });
+
+    const triggers = drawer.locator('[data-shortcut-group-trigger]');
+    await expect(triggers).toHaveCount(2);
+
+    // Initial focus must be on a group trigger (the first open one), not the
+    // close button.
+    await expect(triggers.first()).toBeFocused({ timeout: 2000 });
+
+    // ArrowDown moves focus to the next trigger.
+    await page.keyboard.press('ArrowDown');
+    await expect(triggers.nth(1)).toBeFocused();
+
+    // ArrowDown at the last trigger clamps (no wrap).
+    await page.keyboard.press('ArrowDown');
+    await expect(triggers.nth(1)).toBeFocused();
+
+    // ArrowUp goes back.
+    await page.keyboard.press('ArrowUp');
+    await expect(triggers.first()).toBeFocused();
+
+    // Home / End jump to first / last.
+    await page.keyboard.press('End');
+    await expect(triggers.nth(1)).toBeFocused();
+    await page.keyboard.press('Home');
+    await expect(triggers.first()).toBeFocused();
+
+    await page.close();
+  });
+
+  test('aside opens with focus on the first open group trigger, not the close button', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    await page.locator('body').click();
+    await page.keyboard.press('Shift+Slash');
+
+    const aside = page.getByTestId('shortcuts-aside');
+    await expect(aside).toHaveAttribute('data-state', 'open');
+
+    const firstOpenTrigger = aside
+      .locator('[data-shortcut-group-trigger][data-state="open"]')
+      .first();
+    await expect(firstOpenTrigger).toBeFocused({ timeout: 2000 });
+
+    // ArrowDown moves to the next trigger.
+    const allTriggers = aside.locator('[data-shortcut-group-trigger]');
+    await page.keyboard.press('ArrowDown');
+    const movedFocus = await allTriggers.evaluateAll(
+      (els) => els.findIndex((el) => el === document.activeElement),
+    );
+    expect(movedFocus).toBeGreaterThan(0);
+
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Session card restore shortcuts (the user-requested ones)
 // ---------------------------------------------------------------------------
 test.describe('[US-KB-sessions] SessionCard restore shortcuts', () => {

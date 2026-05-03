@@ -39,6 +39,60 @@ function resolveKeys(
   return { keys: [live], unbound: false };
 }
 
+const TRIGGER_SELECTOR = '[data-shortcut-group-trigger]';
+
+function getTriggers(container: HTMLElement | null): HTMLButtonElement[] {
+  if (!container) return [];
+  return Array.from(container.querySelectorAll<HTMLButtonElement>(TRIGGER_SELECTOR));
+}
+
+/**
+ * Focus the first group trigger that is currently open. Falls back to the
+ * very first trigger when no section is open. No-op when the container is
+ * empty or null.
+ */
+export function focusFirstOpenTrigger(container: HTMLElement | null): void {
+  const triggers = getTriggers(container);
+  if (triggers.length === 0) return;
+  const open = triggers.find((t) => t.getAttribute('data-state') === 'open');
+  (open ?? triggers[0]).focus();
+}
+
+function handleTriggerKeyDown(event: React.KeyboardEvent<HTMLDivElement>): void {
+  const target = event.target as HTMLElement | null;
+  if (!target?.matches(TRIGGER_SELECTOR)) return;
+
+  const triggers = getTriggers(event.currentTarget);
+  if (triggers.length === 0) return;
+  const currentIndex = triggers.indexOf(target as HTMLButtonElement);
+  if (currentIndex === -1) return;
+
+  let nextIndex: number | null = null;
+  switch (event.key) {
+    case 'ArrowDown':
+      nextIndex = Math.min(currentIndex + 1, triggers.length - 1);
+      break;
+    case 'ArrowUp':
+      nextIndex = Math.max(currentIndex - 1, 0);
+      break;
+    case 'Home':
+      nextIndex = 0;
+      break;
+    case 'End':
+      nextIndex = triggers.length - 1;
+      break;
+    default:
+      return;
+  }
+
+  if (nextIndex !== null && nextIndex !== currentIndex) {
+    event.preventDefault();
+    triggers[nextIndex].focus();
+  } else if (nextIndex === currentIndex) {
+    event.preventDefault();
+  }
+}
+
 export function ShortcutsContent({ groups = SHORTCUT_GROUPS, pageContext }: ShortcutsContentProps) {
   const { isDirect } = getShortcutsCustomizeInfo();
   const liveCommands = useBrowserCommands();
@@ -46,7 +100,7 @@ export function ShortcutsContent({ groups = SHORTCUT_GROUPS, pageContext }: Shor
     group.shortcuts.some((s) => resolveKeys(s, liveCommands).unbound),
   );
   return (
-    <Flex direction="column" gap="4" data-testid="shortcuts-content">
+    <Flex direction="column" gap="4" data-testid="shortcuts-content" onKeyDown={handleTriggerKeyDown}>
       {hasUnbound && (
         <Box className={styles.unboundBanner} data-testid="shortcuts-unbound-banner">
           <Text size="1" as="p">
@@ -97,7 +151,12 @@ function CollapsibleGroup({
   return (
     <Collapsible.Root open={open} onOpenChange={setOpen} data-group-title={group.titleKey}>
       <Collapsible.Trigger asChild>
-        <button type="button" className={styles.groupTrigger} data-state={open ? 'open' : 'closed'}>
+        <button
+          type="button"
+          className={styles.groupTrigger}
+          data-state={open ? 'open' : 'closed'}
+          data-shortcut-group-trigger=""
+        >
           <Text size="2" weight="bold" highContrast className={styles.groupTitle} as="div">
             {getMessage(group.titleKey)}
           </Text>
