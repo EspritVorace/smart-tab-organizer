@@ -621,6 +621,7 @@
   "shortcutsPanelDescription": { "message": "Quick reference for all available shortcuts." },
   "shortcutsPanelClose": { "message": "Close shortcuts panel" },
   "shortcutsPanelToggleAria": { "message": "Show keyboard shortcuts" },
+  "statusBarShortcutsLabel": { "message": "Show shortcuts" },
   "shortcutsCustomize": { "message": "Customize browser shortcuts" },
   "shortcutsCustomizeFirefoxHint": { "message": "Firefox: open the gear menu, then 'Manage Extension Shortcuts'." },
   "shortcutsUnboundWarning": { "message": "Some browser shortcuts are not bound. The browser does not auto-apply suggested keys after an extension update; bind them via 'Customize browser shortcuts' below." },

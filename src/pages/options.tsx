@@ -8,6 +8,7 @@ import {
     ActiveWorkspaceProvider,
     useActiveWorkspaceContext,
 } from '@/contexts/ActiveWorkspaceContext.js';
+import { ShortcutsControlProvider } from '@/contexts/ShortcutsControlContext';
 
 import { useSettings } from '@/hooks/useSettings.js';
 import { useStatistics } from '@/hooks/useStatistics.js';
@@ -97,6 +98,8 @@ export function OptionsContent() {
 
     useKeyboardShortcuts(shortcuts);
 
+    const openShortcuts = useCallback(() => setShortcutsAsideOpen(true), []);
+
     if (!settings) {
         return (
             <Flex align="center" justify="center" gap="2" style={{ height: '100vh' }}>
@@ -107,6 +110,7 @@ export function OptionsContent() {
     }
 
     return (
+        <ShortcutsControlProvider openShortcuts={openShortcuts} version={version}>
         <div id="options-inner" data-testid="options" style={{ display: 'flex', height: '100vh' }}>
             <Sidebar
                 isCollapsed={sidebarCollapsed}
@@ -114,7 +118,7 @@ export function OptionsContent() {
                 activeItem={currentTab}
                 onItemClick={handleTabChange}
                 items={sidebarItems}
-                headerContent={<OptionsHeader version={version} />}
+                headerContent={<OptionsHeader />}
                 headerCollapsedContent={<OptionsHeaderCollapsed />}
                 showFooter={true}
                 footerContent={<WorkspaceFooter onManage={() => handleTabChange('workspaces')} />}
@@ -122,7 +126,7 @@ export function OptionsContent() {
             />
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
-                    <main data-testid="options-content" style={{ flex: 1, overflow: 'auto', padding: '20px', minWidth: 0 }}>
+                    <main data-testid="options-content" style={{ flex: 1, overflow: 'auto', padding: '20px 20px 0 20px', minWidth: 0 }}>
                         {currentTab === 'rules' && (
                             <DomainRulesPage syncSettings={settings} updateRules={updateRules} />
                         )}
@@ -166,6 +170,7 @@ export function OptionsContent() {
                 color="orange"
             />
         </div>
+        </ShortcutsControlProvider>
     );
 }
 

@@ -8,6 +8,7 @@ vi.mock('wxt/browser', () => ({
     runtime: {
       openOptionsPage: vi.fn(),
       getURL: vi.fn((path: string) => `chrome-extension://fakeid${path}`),
+      getManifest: vi.fn(() => ({ version: '1.1.4' })),
     },
     tabs: {
       query: vi.fn(() => Promise.resolve([])),
