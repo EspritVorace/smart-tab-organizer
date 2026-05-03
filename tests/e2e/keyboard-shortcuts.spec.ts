@@ -47,11 +47,11 @@ test.describe('[US-KB-popup] Popup shortcuts', () => {
     });
     await expect(page.getByTestId('shortcuts-content')).toBeVisible();
 
-    // Only the 3 popup-relevant groups must be displayed (Global, Popup,
-    // Session card). Options and Lists groups are hidden in the popup drawer.
+    // Only the 2 popup-relevant groups must be displayed (Popup, Session
+    // card). Global, Options and Lists groups are hidden in the popup drawer.
     await expect(
       page.locator('[data-testid="shortcuts-content"] [data-group-title]'),
-    ).toHaveCount(3);
+    ).toHaveCount(2);
 
     // Regression guard: the popup.html `.radix-themes` selector used to also
     // match the Theme that Radix Themes wraps around the portaled overlay,
