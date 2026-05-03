@@ -123,7 +123,7 @@ export function ShortcutsContent({ groups = SHORTCUT_GROUPS, pageContext }: Shor
           onClick={() => void openShortcutsCustomizePage()}
           data-testid="shortcuts-customize-button"
         >
-          <ExternalLink size={12} aria-hidden="true" />
+          <ExternalLink size={12} />
           {getMessage('shortcutsCustomize')}
         </Button>
         {!isDirect && (
@@ -160,7 +160,7 @@ function CollapsibleGroup({
           <Text size="2" weight="bold" highContrast className={styles.groupTitle} as="div">
             {getMessage(group.titleKey)}
           </Text>
-          <ChevronDown size={14} aria-hidden="true" className={styles.chevron} />
+          <ChevronDown size={14} className={styles.chevron} />
         </button>
       </Collapsible.Trigger>
       <Collapsible.Content>

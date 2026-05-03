@@ -27,7 +27,7 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
             <Card>
               <Box p="4">
                 <Flex align="center" gap="2" mb="4">
-                  <Bell size={20} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />
+                  <Bell size={20} style={{ color: 'var(--accent-9)' }} />
                   <Text size="3" weight="bold">{getMessage('notificationsSection')}</Text>
                 </Flex>
 
@@ -58,7 +58,7 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
             <Card>
               <Box p="4">
                 <Flex align="center" gap="2" mb="4">
-                  <Copy size={20} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />
+                  <Copy size={20} style={{ color: 'var(--accent-9)' }} />
                   <Text size="3" weight="bold">{getMessage('deduplicationScopeSection')}</Text>
                 </Flex>
 

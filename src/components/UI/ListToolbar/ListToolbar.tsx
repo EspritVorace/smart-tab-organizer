@@ -34,7 +34,7 @@ export function ListToolbar({
           onChange={(e) => onSearchChange(e.target.value)}
         >
           <TextField.Slot>
-            <Search size={16} aria-hidden="true" />
+            <Search size={16} />
           </TextField.Slot>
         </TextField.Root>
       </Box>

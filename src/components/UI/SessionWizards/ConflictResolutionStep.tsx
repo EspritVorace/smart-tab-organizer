@@ -73,7 +73,6 @@ export function ConflictResolutionStep({
                   <AlertTriangle
                     size={14}
                     style={{ color: 'var(--orange-9)', flexShrink: 0 }}
-                    aria-hidden="true"
                   />
                   <Flex
                     direction="column"

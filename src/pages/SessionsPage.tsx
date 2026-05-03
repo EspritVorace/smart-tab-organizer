@@ -434,7 +434,7 @@ export function SessionsPage({
                   onClick={() => setSnapshotOpen(true)}
                   style={{ color: 'white' }}
                 >
-                  <Camera size={16} aria-hidden="true" />
+                  <Camera size={16} />
                   {getMessage('sessionSnapshotButton')}
                 </Button>
               }
@@ -469,11 +469,11 @@ export function SessionsPage({
                     variant="soft"
                     onClick={() => setSnapshotOpen(true)}
                   >
-                    <Camera size={14} aria-hidden="true" />
+                    <Camera size={14} />
                     {getMessage('sessionSnapshotButton')}
                   </Button>
                   <Button variant="soft" onClick={() => setImportSessionsOpen(true)}>
-                    <Upload size={14} aria-hidden="true" />
+                    <Upload size={14} />
                     {getMessage('importSessionsButton')}
                   </Button>
                 </Flex>

@@ -169,7 +169,7 @@ export function TagInputField<T extends FieldValues>({
                       aria-label={`${removeTagAriaLabel}: ${tag}`}
                       onClick={(e) => { e.stopPropagation(); removeTag(index); }}
                     >
-                      <X size={12} aria-hidden="true" />
+                      <X size={12} />
                     </IconButton>
                   </Flex>
                 </Badge>

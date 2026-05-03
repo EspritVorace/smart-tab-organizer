@@ -36,7 +36,7 @@ export const ListToolbarAddRule: Story = {
     onSearchChange: () => {},
     action: (
       <Button onClick={() => {}}>
-        <Plus size={16} aria-hidden="true" />
+        <Plus size={16} />
         Add Rule
       </Button>
     ),
@@ -53,7 +53,7 @@ export const ListToolbarTakeSnapshot: Story = {
     onSearchChange: () => {},
     action: (
       <Button variant="solid" size="2" onClick={() => {}} style={{ color: 'white' }}>
-        <Camera size={16} aria-hidden="true" />
+        <Camera size={16} />
         Take Snapshot
       </Button>
     ),
@@ -70,7 +70,7 @@ export const ListToolbarWithSearchValue: Story = {
     onSearchChange: () => {},
     action: (
       <Button onClick={() => {}}>
-        <Plus size={16} aria-hidden="true" />
+        <Plus size={16} />
         Add Rule
       </Button>
     ),

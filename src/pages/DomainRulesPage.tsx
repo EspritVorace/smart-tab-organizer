@@ -331,7 +331,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                 onSearchChange={setSearchTerm}
                 action={
                   <Button data-testid="page-rules-btn-add" onClick={handleAddRule}>
-                    <Plus size={16} aria-hidden="true" />
+                    <Plus size={16} />
                     {getMessage('addRule')}
                   </Button>
                 }
@@ -359,11 +359,11 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                 actions={
                   <Flex gap="2">
                     <Button data-testid="page-rules-btn-add" variant="soft" onClick={handleAddRule}>
-                      <Plus size={14} aria-hidden="true" />
+                      <Plus size={14} />
                       {getMessage('addRule')}
                     </Button>
                     <Button variant="soft" onClick={() => setIsImportOpen(true)}>
-                      <Upload size={14} aria-hidden="true" />
+                      <Upload size={14} />
                       {getMessage('importRulesButton')}
                     </Button>
                   </Flex>

@@ -36,7 +36,7 @@ export function SearchableSelectItem({
       aria-selected={isSelected}
     >
       <span className="ss-item__check">
-        <Check size={14} aria-hidden="true" />
+        <Check size={14} />
       </span>
       <span className="ss-item__label">{option.label}</span>
     </Command.Item>

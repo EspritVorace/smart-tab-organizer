@@ -119,7 +119,7 @@ export function ImportWorkspaceDialog({ open, onOpenChange }: ImportWorkspaceDia
       <Dialog.Content data-testid="workspace-import-dialog" maxWidth="560px">
         <Dialog.Title>
           <Flex align="center" gap="2">
-            <Upload size={18} aria-hidden="true" />
+            <Upload size={18} />
             {getMessage('workspaceImportTitle')}
           </Flex>
         </Dialog.Title>
@@ -135,7 +135,7 @@ export function ImportWorkspaceDialog({ open, onOpenChange }: ImportWorkspaceDia
             <Flex align="center" gap="2">
               <Button asChild variant="soft">
                 <label htmlFor="workspace-import-file">
-                  <FileUp size={16} aria-hidden="true" />
+                  <FileUp size={16} />
                   {getMessage('workspaceImportFileBtn')}
                 </label>
               </Button>
@@ -186,7 +186,7 @@ export function ImportWorkspaceDialog({ open, onOpenChange }: ImportWorkspaceDia
           {parsed.status === 'error' ? (
             <Callout.Root color="red" data-testid="workspace-import-error">
               <Callout.Icon>
-                <AlertCircle size={16} aria-hidden="true" />
+                <AlertCircle size={16} />
               </Callout.Icon>
               <Callout.Text>{parsed.errorMessage}</Callout.Text>
             </Callout.Root>

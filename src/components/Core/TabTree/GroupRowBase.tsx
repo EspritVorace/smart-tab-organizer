@@ -74,9 +74,9 @@ export function GroupRowBase({
         }
       >
         {isExpanded ? (
-          <ChevronDown size={14} aria-hidden="true" style={{ color: 'var(--gray-9)' }} />
+          <ChevronDown size={14} style={{ color: 'var(--gray-9)' }} />
         ) : (
-          <ChevronRight size={14} aria-hidden="true" style={{ color: 'var(--gray-9)' }} />
+          <ChevronRight size={14} style={{ color: 'var(--gray-9)' }} />
         )}
       </button>
       <span

@@ -83,7 +83,7 @@ const HeaderExpanded = ({ title }: { title: string }) => (
 const HeaderCollapsed = () => (
   <Flex justify="center">
     <Box style={{ color: 'var(--gray-11)' }}>
-      <Menu size={20} aria-hidden="true" />
+      <Menu size={20} />
     </Box>
   </Flex>
 );

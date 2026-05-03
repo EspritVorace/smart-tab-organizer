@@ -77,7 +77,7 @@ function WorkspaceRow({ workspace, isActive, isDefault, isOnly, onSwitch, onEdit
               aria-label={getMessage('workspaceEditLabel')}
               onClick={onEdit}
             >
-              <Pencil size={16} aria-hidden="true" />
+              <Pencil size={16} />
             </IconButton>
           </Tooltip>
           <Tooltip content={deleteTooltip}>
@@ -90,7 +90,7 @@ function WorkspaceRow({ workspace, isActive, isDefault, isOnly, onSwitch, onEdit
               aria-label={getMessage('workspaceDeleteLabel')}
               onClick={onDelete}
             >
-              <Trash2 size={16} aria-hidden="true" />
+              <Trash2 size={16} />
             </IconButton>
           </Tooltip>
         </Flex>
@@ -164,7 +164,7 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
               variant="solid"
               onClick={() => setCreateOpen(true)}
             >
-              <Plus size={16} aria-hidden="true" />
+              <Plus size={16} />
               {getMessage('workspaceCreateLabel')}
             </Button>
           </Flex>

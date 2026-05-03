@@ -25,12 +25,12 @@ export function ExportSplitButton({ labelKey, actions, disabled }: ExportSplitBu
       menuItems={[
         {
           label: getMessage('exportToFile'),
-          icon: <FileDown size={14} aria-hidden="true" />,
+          icon: <FileDown size={14} />,
           onClick: actions.exportToFile,
         },
         {
           label: getMessage('exportToClipboard'),
-          icon: <ClipboardCopy size={14} aria-hidden="true" />,
+          icon: <ClipboardCopy size={14} />,
           onClick: actions.exportToClipboard,
         },
       ]}

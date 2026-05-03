@@ -73,7 +73,7 @@ export function SearchableInlineList({
     >
       <Command>
         <div className="ss-search">
-          <Search size={14} aria-hidden="true" className="ss-search__icon" />
+          <Search size={14} className="ss-search__icon" />
           <Command.Input
             ref={inputRef}
             placeholder={searchPlaceholder}

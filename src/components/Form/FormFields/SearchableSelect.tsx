@@ -179,7 +179,6 @@ export function SearchableSelect({
         </span>
         <ChevronDown
           size={16}
-          aria-hidden="true"
           className={['ss-trigger__icon', open ? 'ss-trigger__icon--open' : '']
             .filter(Boolean)
             .join(' ')}
@@ -190,7 +189,7 @@ export function SearchableSelect({
         <div className="ss-dropdown" style={dropdownStyle}>
           <Command>
             <div className="ss-search">
-              <Search size={14} aria-hidden="true" className="ss-search__icon" />
+              <Search size={14} className="ss-search__icon" />
               <Command.Input
                 ref={inputRef}
                 placeholder={searchPlaceholder}

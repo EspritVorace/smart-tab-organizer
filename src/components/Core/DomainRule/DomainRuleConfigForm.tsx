@@ -88,7 +88,7 @@ export function DomainRuleConfigForm({
       {isLoadingPresets && (
         <Callout.Root color="indigo" variant="soft">
           <Callout.Icon>
-            <Info aria-hidden="true" />
+            <Info />
           </Callout.Icon>
           <Callout.Text>{getMessage('loadingPresets')}</Callout.Text>
         </Callout.Root>

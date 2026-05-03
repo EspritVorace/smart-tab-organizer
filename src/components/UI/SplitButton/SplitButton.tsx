@@ -76,7 +76,7 @@ export function SplitButton({
             minWidth: 28,
           }}
         >
-          <ChevronDown size={14} aria-hidden="true" />
+          <ChevronDown size={14} />
         </Button>
       ) : (
         <DropdownMenu.Root>
@@ -94,7 +94,7 @@ export function SplitButton({
                 minWidth: 28,
               }}
             >
-              <ChevronDown size={14} aria-hidden="true" />
+              <ChevronDown size={14} />
             </Button>
           </DropdownMenu.Trigger>
           <DropdownMenu.Content>
