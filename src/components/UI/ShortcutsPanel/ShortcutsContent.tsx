@@ -41,7 +41,7 @@ export function ShortcutsContent({ groups = SHORTCUT_GROUPS }: ShortcutsContentP
         </Box>
       )}
       {groups.map((group) => (
-        <Box key={group.titleKey}>
+        <Box key={group.titleKey} data-group-title={group.titleKey}>
           <Text size="2" weight="bold" highContrast className={styles.groupTitle} as="div">
             {getMessage(group.titleKey)}
           </Text>

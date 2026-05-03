@@ -47,6 +47,12 @@ test.describe('[US-KB-popup] Popup shortcuts', () => {
     });
     await expect(page.getByTestId('shortcuts-content')).toBeVisible();
 
+    // Only the 3 popup-relevant groups must be displayed (Global, Popup,
+    // Session card). Options and Lists groups are hidden in the popup drawer.
+    await expect(
+      page.locator('[data-testid="shortcuts-content"] [data-group-title]'),
+    ).toHaveCount(3);
+
     // Regression guard: the popup.html `.radix-themes` selector used to also
     // match the Theme that Radix Themes wraps around the portaled overlay,
     // forcing it to `height: 0; overflow: hidden`. The drawer kept its own
@@ -58,6 +64,30 @@ test.describe('[US-KB-popup] Popup shortcuts', () => {
     expect(overlayHeight).toBeGreaterThan(100);
 
     await page.keyboard.press('Escape');
+    await expect(page.getByTestId('shortcuts-drawer')).toBeHidden({
+      timeout: 5000,
+    });
+
+    await page.close();
+  });
+
+  test('? toggles the shortcuts drawer (re-press closes)', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    await goToPopup(page, extensionId);
+
+    await expect(page.getByTestId('popup-toolbar')).toBeVisible();
+    await page.getByTestId('popup').click({ position: { x: 5, y: 5 } });
+
+    await page.keyboard.press('Shift+Slash');
+    await expect(page.getByTestId('shortcuts-drawer')).toBeVisible({
+      timeout: 5000,
+    });
+
+    // Re-pressing ? while the drawer is focused must close it.
+    await page.keyboard.press('Shift+Slash');
     await expect(page.getByTestId('shortcuts-drawer')).toBeHidden({
       timeout: 5000,
     });

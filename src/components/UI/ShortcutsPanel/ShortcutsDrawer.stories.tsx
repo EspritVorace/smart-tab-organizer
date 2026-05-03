@@ -9,7 +9,17 @@ const meta = {
   tags: ['autodocs'],
   decorators: [
     (Story) => (
-      <Box style={{ width: 400, minHeight: 500, background: 'var(--gray-a2)', position: 'relative' }}>
+      <Box
+        style={{
+          width: 400,
+          height: 600,
+          background: 'var(--gray-a2)',
+          position: 'relative',
+          overflow: 'hidden',
+          border: '1px solid var(--gray-a4)',
+          borderRadius: 'var(--radius-3)',
+        }}
+      >
         <Story />
       </Box>
     ),
@@ -22,6 +32,13 @@ type Story = StoryObj<typeof meta>;
 export const ShortcutsDrawerOpenInPopup: Story = {
   args: {
     open: true,
+    onOpenChange: () => {},
+  },
+};
+
+export const ShortcutsDrawerClosed: Story = {
+  args: {
+    open: false,
     onOpenChange: () => {},
   },
 };

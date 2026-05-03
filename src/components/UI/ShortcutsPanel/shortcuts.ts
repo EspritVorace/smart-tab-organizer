@@ -68,3 +68,13 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
     ],
   },
 ];
+
+const POPUP_GROUP_KEYS = [
+  'shortcutsGroupGlobal',
+  'shortcutsGroupPopup',
+  'shortcutsGroupSessionCard',
+] as const;
+
+export const POPUP_SHORTCUT_GROUPS: ShortcutGroup[] = POPUP_GROUP_KEYS
+  .map((key) => SHORTCUT_GROUPS.find((g) => g.titleKey === key))
+  .filter((g): g is ShortcutGroup => g !== undefined);
