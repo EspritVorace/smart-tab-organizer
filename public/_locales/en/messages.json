@@ -640,6 +640,7 @@
   "shortcutDescPopupSave": { "message": "Save snapshot" },
   "shortcutDescPopupRestore": { "message": "Open sessions" },
   "shortcutDescPopupOrganize": { "message": "Organize all tabs" },
+  "shortcutDescPopupOptions": { "message": "Open extension options" },
   "shortcutDescOpenShortcutsHelp": { "message": "Show this shortcuts panel" },
   "shortcutDescNavigateTabs": { "message": "Switch sidebar tab" },
   "shortcutDescFocusSearch": { "message": "Focus the search field" },
