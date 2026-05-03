@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Box, Dialog, Flex } from '@radix-ui/themes';
 import { Keyboard } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
@@ -19,19 +19,25 @@ interface ShortcutsDrawerProps {
  * itself. Only popup-relevant shortcut groups are displayed.
  */
 export function ShortcutsDrawer({ open, onOpenChange }: ShortcutsDrawerProps) {
-  const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent) => {
-      if (event.key === '?' && !event.altKey && !event.ctrlKey && !event.metaKey) {
-        event.preventDefault();
-        onOpenChange(false);
-      }
-    },
-    [onOpenChange],
-  );
-
   const preventClose = useCallback((event: Event) => {
     event.preventDefault();
   }, []);
+
+  // Toggle close on `?` while the drawer is open. Attached at the document
+  // level (capture phase) because the popup-level useKeyboardShortcuts has
+  // `allowWhenDialogOpen: false` and Radix Themes' Dialog.Content can swallow
+  // some bubbling keydowns from focused descendants.
+  useEffect(() => {
+    if (!open) return;
+    const handler = (event: KeyboardEvent) => {
+      if (event.key !== '?' || event.altKey || event.ctrlKey || event.metaKey) return;
+      event.preventDefault();
+      event.stopPropagation();
+      onOpenChange(false);
+    };
+    document.addEventListener('keydown', handler, true);
+    return () => document.removeEventListener('keydown', handler, true);
+  }, [open, onOpenChange]);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -40,7 +46,6 @@ export function ShortcutsDrawer({ open, onOpenChange }: ShortcutsDrawerProps) {
         className={styles.drawerContent}
         onPointerDownOutside={preventClose}
         onInteractOutside={preventClose}
-        onKeyDown={handleKeyDown}
       >
         <div className={styles.drawerHeader}>
           <Flex align="center" gap="2" className={styles.drawerHeaderTitle}>
