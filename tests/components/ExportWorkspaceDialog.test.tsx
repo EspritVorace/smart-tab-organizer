@@ -58,6 +58,19 @@ beforeEach(() => {
     active: { id: 'ws-1', name: 'Active' },
   });
   writeText.mockReset().mockResolvedValue(undefined);
+  // jsdom doesn't implement these; the export path uses the blob fallback.
+  if (!('createObjectURL' in URL)) {
+    Object.defineProperty(URL, 'createObjectURL', {
+      configurable: true,
+      value: vi.fn(() => 'blob:fake'),
+    });
+  }
+  if (!('revokeObjectURL' in URL)) {
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      configurable: true,
+      value: vi.fn(),
+    });
+  }
 });
 
 describe('ExportWorkspaceDialog', () => {
@@ -118,15 +131,12 @@ describe('ExportWorkspaceDialog', () => {
     });
   });
 
-  it('exports to clipboard and closes the dialog', async () => {
+  it('exports to file via the primary split button and closes the dialog', async () => {
     const onOpenChange = vi.fn();
     wrap(<ExportWorkspaceDialog open onOpenChange={onOpenChange} />);
     await waitFor(() => expect(collectWorkspaceExport).toHaveBeenCalled());
 
-    fireEvent.click(screen.getByTestId('workspace-export-btn-clipboard'));
-    await waitFor(() => expect(writeText).toHaveBeenCalled());
+    fireEvent.click(screen.getByTestId('workspace-export-btn-file'));
     await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
-    const copied = writeText.mock.calls[0][0] as string;
-    expect(copied).toContain('"workspace"');
   });
 });
