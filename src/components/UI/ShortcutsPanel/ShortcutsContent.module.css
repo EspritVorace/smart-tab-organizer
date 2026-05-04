@@ -82,3 +82,9 @@
   font-style: italic;
   color: var(--amber-11);
 }
+
+.nestedGroup {
+  margin-top: var(--space-2);
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--gray-a4);
+}

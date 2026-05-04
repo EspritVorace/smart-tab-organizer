@@ -19,68 +19,86 @@ export interface ShortcutDisplay {
 export interface ShortcutGroup {
   titleKey: string;
   shortcuts: ShortcutDisplay[];
+  /**
+   * Optional nested groups, rendered as a collapsible inside the parent's
+   * content. Used on the options-page cheatsheet to scope the focused-card
+   * shortcuts under their list.
+   */
+  subgroups?: ShortcutGroup[];
 }
 
+const groupGlobal: ShortcutGroup = {
+  titleKey: 'shortcutsGroupGlobal',
+  shortcuts: [
+    { keys: ['Alt+Shift+O'], descriptionKey: 'shortcutDescOrganize', commandName: 'organize-all-tabs' },
+    { keys: ['Alt+Shift+S'], descriptionKey: 'shortcutDescSaveSession', commandName: 'save-current-window-session' },
+    { keys: ['Alt+Shift+P'], descriptionKey: 'shortcutDescOpenPopup', commandName: '_execute_action' },
+  ],
+};
+
+const groupListRules: ShortcutGroup = {
+  titleKey: 'shortcutsGroupListRules',
+  shortcuts: [
+    { keys: ['↑', '↓'], descriptionKey: 'shortcutDescListNavigate' },
+    { keys: ['n'], descriptionKey: 'shortcutDescListNew' },
+    { keys: ['e'], descriptionKey: 'shortcutDescListEdit' },
+    { keys: ['Space'], descriptionKey: 'shortcutDescListToggleSelection' },
+    { keys: ['t'], descriptionKey: 'shortcutDescListToggleEnabled' },
+    { keys: ['Del'], descriptionKey: 'shortcutDescListDelete' },
+    { keys: ['Space'], descriptionKey: 'shortcutDescListReorderKeyboard' },
+  ],
+};
+
+const groupSessionCard: ShortcutGroup = {
+  titleKey: 'shortcutsGroupSessionCard',
+  shortcuts: [
+    { keys: ['R'], descriptionKey: 'shortcutDescSessionRestoreCustom' },
+    { keys: ['Shift+R'], descriptionKey: 'shortcutDescSessionRestoreCurrent' },
+    { keys: ['Alt+R'], descriptionKey: 'shortcutDescSessionReplaceCurrent' },
+    { keys: ['Alt+Shift+R'], descriptionKey: 'shortcutDescSessionRestoreNew' },
+  ],
+};
+
+const groupListSessions: ShortcutGroup = {
+  titleKey: 'shortcutsGroupListSessions',
+  shortcuts: [
+    { keys: ['↑', '↓'], descriptionKey: 'shortcutDescListNavigate' },
+    { keys: ['n'], descriptionKey: 'shortcutDescListNew' },
+    { keys: ['e'], descriptionKey: 'shortcutDescListEdit' },
+    { keys: ['Del'], descriptionKey: 'shortcutDescListDelete' },
+    { keys: ['p'], descriptionKey: 'shortcutDescListPin' },
+    { keys: ['Space'], descriptionKey: 'shortcutDescListReorderKeyboard' },
+  ],
+  subgroups: [groupSessionCard],
+};
+
+const groupOptions: ShortcutGroup = {
+  titleKey: 'shortcutsGroupOptions',
+  shortcuts: [
+    { keys: ['Alt+1', 'Alt+2', 'Alt+3', 'Alt+4', 'Alt+5'], descriptionKey: 'shortcutDescNavigateTabs' },
+    { keys: ['/'], descriptionKey: 'shortcutDescFocusSearch' },
+    { keys: ['Esc'], descriptionKey: 'shortcutDescClearSearch' },
+    { keys: ['?'], descriptionKey: 'shortcutDescOpenShortcutsHelp' },
+  ],
+};
+
+const groupPopup: ShortcutGroup = {
+  titleKey: 'shortcutsGroupPopup',
+  shortcuts: [
+    { keys: ['S'], descriptionKey: 'shortcutDescPopupSave' },
+    { keys: ['R'], descriptionKey: 'shortcutDescPopupRestore' },
+    { keys: ['O'], descriptionKey: 'shortcutDescPopupOrganize' },
+    { keys: ['P'], descriptionKey: 'shortcutDescPopupOptions' },
+    { keys: ['?'], descriptionKey: 'shortcutDescOpenShortcutsHelp' },
+  ],
+};
+
 export const SHORTCUT_GROUPS: ShortcutGroup[] = [
-  {
-    titleKey: 'shortcutsGroupGlobal',
-    shortcuts: [
-      { keys: ['Alt+Shift+O'], descriptionKey: 'shortcutDescOrganize', commandName: 'organize-all-tabs' },
-      { keys: ['Alt+Shift+S'], descriptionKey: 'shortcutDescSaveSession', commandName: 'save-current-window-session' },
-      { keys: ['Alt+Shift+P'], descriptionKey: 'shortcutDescOpenPopup', commandName: '_execute_action' },
-    ],
-  },
-  {
-    titleKey: 'shortcutsGroupPopup',
-    shortcuts: [
-      { keys: ['S'], descriptionKey: 'shortcutDescPopupSave' },
-      { keys: ['R'], descriptionKey: 'shortcutDescPopupRestore' },
-      { keys: ['O'], descriptionKey: 'shortcutDescPopupOrganize' },
-      { keys: ['P'], descriptionKey: 'shortcutDescPopupOptions' },
-      { keys: ['?'], descriptionKey: 'shortcutDescOpenShortcutsHelp' },
-    ],
-  },
-  {
-    titleKey: 'shortcutsGroupOptions',
-    shortcuts: [
-      { keys: ['Alt+1', 'Alt+2', 'Alt+3', 'Alt+4', 'Alt+5'], descriptionKey: 'shortcutDescNavigateTabs' },
-      { keys: ['/'], descriptionKey: 'shortcutDescFocusSearch' },
-      { keys: ['Esc'], descriptionKey: 'shortcutDescClearSearch' },
-      { keys: ['?'], descriptionKey: 'shortcutDescOpenShortcutsHelp' },
-    ],
-  },
-  {
-    titleKey: 'shortcutsGroupListRules',
-    shortcuts: [
-      { keys: ['↑', '↓'], descriptionKey: 'shortcutDescListNavigate' },
-      { keys: ['n'], descriptionKey: 'shortcutDescListNew' },
-      { keys: ['e'], descriptionKey: 'shortcutDescListEdit' },
-      { keys: ['Space'], descriptionKey: 'shortcutDescListToggleSelection' },
-      { keys: ['t'], descriptionKey: 'shortcutDescListToggleEnabled' },
-      { keys: ['Del'], descriptionKey: 'shortcutDescListDelete' },
-      { keys: ['Space'], descriptionKey: 'shortcutDescListReorderKeyboard' },
-    ],
-  },
-  {
-    titleKey: 'shortcutsGroupListSessions',
-    shortcuts: [
-      { keys: ['↑', '↓'], descriptionKey: 'shortcutDescListNavigate' },
-      { keys: ['n'], descriptionKey: 'shortcutDescListNew' },
-      { keys: ['e'], descriptionKey: 'shortcutDescListEdit' },
-      { keys: ['Del'], descriptionKey: 'shortcutDescListDelete' },
-      { keys: ['p'], descriptionKey: 'shortcutDescListPin' },
-      { keys: ['Space'], descriptionKey: 'shortcutDescListReorderKeyboard' },
-    ],
-  },
-  {
-    titleKey: 'shortcutsGroupSessionCard',
-    shortcuts: [
-      { keys: ['R'], descriptionKey: 'shortcutDescSessionRestoreCustom' },
-      { keys: ['Shift+R'], descriptionKey: 'shortcutDescSessionRestoreCurrent' },
-      { keys: ['Alt+R'], descriptionKey: 'shortcutDescSessionReplaceCurrent' },
-      { keys: ['Alt+Shift+R'], descriptionKey: 'shortcutDescSessionRestoreNew' },
-    ],
-  },
+  groupGlobal,
+  groupListRules,
+  groupListSessions,
+  groupOptions,
+  groupPopup,
 ];
 
 export type PageContext =
@@ -93,9 +111,10 @@ export type PageContext =
 
 /**
  * Defines whether a group is expanded by default given the current page.
- * Global and Options groups are always open. List/SessionCard groups only
- * open on the page they pertain to. Popup is implicitly always open since
- * it is only ever rendered in the popup drawer.
+ * Global and Options groups are always open on the options cheatsheet.
+ * List/SessionCard groups only open on the page they pertain to. Popup is
+ * collapsed on the options cheatsheet (rarely needed there) but open by
+ * default in the popup drawer / Storybook (where `pageContext` is undefined).
  */
 export function isGroupOpenByDefault(
   titleKey: string,
@@ -104,8 +123,9 @@ export function isGroupOpenByDefault(
   switch (titleKey) {
     case 'shortcutsGroupGlobal':
     case 'shortcutsGroupOptions':
-    case 'shortcutsGroupPopup':
       return true;
+    case 'shortcutsGroupPopup':
+      return pageContext === undefined;
     case 'shortcutsGroupListRules':
       return pageContext === 'rules';
     case 'shortcutsGroupListSessions':
@@ -116,11 +136,4 @@ export function isGroupOpenByDefault(
   }
 }
 
-const POPUP_GROUP_KEYS = [
-  'shortcutsGroupPopup',
-  'shortcutsGroupSessionCard',
-] as const;
-
-export const POPUP_SHORTCUT_GROUPS: ShortcutGroup[] = POPUP_GROUP_KEYS
-  .map((key) => SHORTCUT_GROUPS.find((g) => g.titleKey === key))
-  .filter((g): g is ShortcutGroup => g !== undefined);
+export const POPUP_SHORTCUT_GROUPS: ShortcutGroup[] = [groupPopup, groupSessionCard];

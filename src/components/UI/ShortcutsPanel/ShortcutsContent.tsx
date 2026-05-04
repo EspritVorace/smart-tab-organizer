@@ -43,7 +43,9 @@ const TRIGGER_SELECTOR = '[data-shortcut-group-trigger]';
 
 function getTriggers(container: HTMLElement | null): HTMLButtonElement[] {
   if (!container) return [];
-  return Array.from(container.querySelectorAll<HTMLButtonElement>(TRIGGER_SELECTOR));
+  return Array.from(container.querySelectorAll<HTMLButtonElement>(TRIGGER_SELECTOR)).filter(
+    (el) => el.offsetParent !== null,
+  );
 }
 
 /**
@@ -114,6 +116,7 @@ export function ShortcutsContent({ groups = SHORTCUT_GROUPS, pageContext }: Shor
           group={group}
           pageContext={pageContext}
           liveCommands={liveCommands}
+          nested={false}
         />
       ))}
       <Box>
@@ -140,16 +143,23 @@ function CollapsibleGroup({
   group,
   pageContext,
   liveCommands,
+  nested,
 }: {
   group: ShortcutGroup;
   pageContext?: PageContext;
   liveCommands: BrowserCommandsMap | null;
+  nested: boolean;
 }) {
   const [open, setOpen] = useState(() =>
     pageContext === undefined ? true : isGroupOpenByDefault(group.titleKey, pageContext),
   );
   return (
-    <Collapsible.Root open={open} onOpenChange={setOpen} data-group-title={group.titleKey}>
+    <Collapsible.Root
+      open={open}
+      onOpenChange={setOpen}
+      data-group-title={group.titleKey}
+      className={nested ? styles.nestedGroup : undefined}
+    >
       <Collapsible.Trigger asChild>
         <button
           type="button"
@@ -157,7 +167,14 @@ function CollapsibleGroup({
           data-state={open ? 'open' : 'closed'}
           data-shortcut-group-trigger=""
         >
-          <Text size="2" weight="bold" highContrast className={styles.groupTitle} as="div">
+          <Text
+            size={nested ? '1' : '2'}
+            weight="bold"
+            highContrast={!nested}
+            color={nested ? 'gray' : undefined}
+            className={styles.groupTitle}
+            as="div"
+          >
             {getMessage(group.titleKey)}
           </Text>
           <ChevronDown size={14} className={styles.chevron} />
@@ -170,6 +187,15 @@ function CollapsibleGroup({
               key={shortcut.descriptionKey}
               shortcut={shortcut}
               liveCommands={liveCommands}
+            />
+          ))}
+          {group.subgroups?.map((sub) => (
+            <CollapsibleGroup
+              key={sub.titleKey}
+              group={sub}
+              pageContext={pageContext}
+              liveCommands={liveCommands}
+              nested
             />
           ))}
         </Flex>

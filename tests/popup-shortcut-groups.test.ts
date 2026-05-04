@@ -2,7 +2,12 @@ import { describe, it, expect } from 'vitest';
 import {
   POPUP_SHORTCUT_GROUPS,
   SHORTCUT_GROUPS,
+  type ShortcutGroup,
 } from '../src/components/UI/ShortcutsPanel/shortcuts';
+
+function flattenGroups(groups: ShortcutGroup[]): ShortcutGroup[] {
+  return groups.flatMap((g) => [g, ...flattenGroups(g.subgroups ?? [])]);
+}
 
 describe('POPUP_SHORTCUT_GROUPS', () => {
   it('contains exactly 2 groups in the expected order', () => {
@@ -22,8 +27,9 @@ describe('POPUP_SHORTCUT_GROUPS', () => {
   });
 
   it('preserves the full shortcuts list of each retained group', () => {
+    const allOptionsGroups = flattenGroups(SHORTCUT_GROUPS);
     for (const popupGroup of POPUP_SHORTCUT_GROUPS) {
-      const source = SHORTCUT_GROUPS.find((g) => g.titleKey === popupGroup.titleKey);
+      const source = allOptionsGroups.find((g) => g.titleKey === popupGroup.titleKey);
       expect(source).toBeDefined();
       expect(popupGroup.shortcuts).toEqual(source!.shortcuts);
     }
