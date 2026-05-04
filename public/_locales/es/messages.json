@@ -46,6 +46,8 @@
   "workspaceExportBtnClipboard": { "message": "Copiar al portapapeles" },
   "workspaceExportSuccessTitle": { "message": "Espacio exportado" },
   "workspaceExportSuccessMessage": { "message": "El espacio activo se exportó correctamente." },
+  "workspaceImportTitle": { "message": "Importar espacio de trabajo" },
+  "workspaceImportDescription": { "message": "Restaura un espacio desde un archivo JSON o pegando JSON." },
   "workspaceImportFileLabel": { "message": "Elige un archivo JSON" },
   "workspaceImportFileBtn": { "message": "Elegir archivo" },
   "workspaceImportFileHint": { "message": "JSON exportado desde otro espacio" },

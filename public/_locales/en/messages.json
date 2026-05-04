@@ -46,6 +46,8 @@
   "workspaceExportBtnClipboard": { "message": "Copy to clipboard" },
   "workspaceExportSuccessTitle": { "message": "Workspace exported" },
   "workspaceExportSuccessMessage": { "message": "The active workspace was exported successfully." },
+  "workspaceImportTitle": { "message": "Import workspace" },
+  "workspaceImportDescription": { "message": "Restore a workspace from a JSON file or pasted JSON." },
   "workspaceImportFileLabel": { "message": "Pick a JSON file" },
   "workspaceImportFileBtn": { "message": "Choose file" },
   "workspaceImportFileHint": { "message": "JSON exported from another workspace" },
