@@ -77,6 +77,11 @@ test('matchesShortcut: ? ignores shift since most layouts require shift to type 
   assert.strictEqual(matchesShortcut(makeEvent({ key: '?', shiftKey: true }), '?'), true);
 });
 
+test('matchesShortcut: / ignores shift (French AZERTY emits / via Shift+:)', () => {
+  assert.strictEqual(matchesShortcut(makeEvent({ key: '/' }), '/'), true);
+  assert.strictEqual(matchesShortcut(makeEvent({ key: '/', shiftKey: true }), '/'), true);
+});
+
 test('matchesShortcut: Escape and / and named keys', () => {
   assert.strictEqual(matchesShortcut(makeEvent({ key: 'Escape' }), 'Escape'), true);
   assert.strictEqual(matchesShortcut(makeEvent({ key: '/' }), '/'), true);

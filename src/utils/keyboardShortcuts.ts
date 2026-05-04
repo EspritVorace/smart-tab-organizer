@@ -6,9 +6,10 @@
  * `Escape`, `?`, `/`. Modifier order does not matter, casing on the key does
  * not matter.
  *
- * For the literal key `?` shift is ignored (most layouts require shift to type
- * it). All other keys require strict modifier match so that `r` and `Shift+r`
- * are distinguishable.
+ * For the literal keys `?` and `/`, shift is ignored: many layouts require
+ * shift to produce them (`?` on QWERTY, `/` on French AZERTY where Shift+: is
+ * the only way to type a slash). All other keys require strict modifier match
+ * so that `r` and `Shift+r` are distinguishable.
  */
 
 export interface ParsedCombo {
@@ -32,13 +33,15 @@ export function parseCombo(combo: string): ParsedCombo {
   };
 }
 
+const SHIFT_INSENSITIVE_KEYS = new Set(['?', '/']);
+
 export function matchesShortcut(event: KeyboardEvent, combo: string): boolean {
   const parsed = parseCombo(combo);
   if (!keyMatches(event, parsed.key)) return false;
   if (event.altKey !== parsed.alt) return false;
   if (event.ctrlKey !== parsed.ctrl) return false;
   if (event.metaKey !== parsed.meta) return false;
-  if (parsed.key !== '?' && event.shiftKey !== parsed.shift) return false;
+  if (!SHIFT_INSENSITIVE_KEYS.has(parsed.key) && event.shiftKey !== parsed.shift) return false;
   return true;
 }
 
