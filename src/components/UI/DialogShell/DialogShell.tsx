@@ -40,6 +40,25 @@ const closeButtonStyle: React.CSSProperties = {
   right: 16,
 };
 
+/**
+ * Radix's default focuses the first focusable element, which in our shell is
+ * the close X button: pressing Enter then dismisses the dialog instead of
+ * triggering the primary action. When a child marks an element with the
+ * `data-autofocus` attribute (typically the primary action button), focus it
+ * instead. Disabled elements fall through to Radix's default so we never park
+ * focus on something that swallows Enter.
+ */
+function defaultOnOpenAutoFocus(event: Event) {
+  const root = event.currentTarget;
+  if (!(root instanceof HTMLElement)) return;
+  const target = root.querySelector<HTMLElement>('[data-autofocus]');
+  if (!target) return;
+  if (target instanceof HTMLButtonElement && target.disabled) return;
+  if (target.getAttribute('aria-disabled') === 'true') return;
+  event.preventDefault();
+  target.focus();
+}
+
 export function DialogShell({
   open,
   onOpenChange,
@@ -71,6 +90,7 @@ export function DialogShell({
     onInteractOutside ?? (preventOutsideClose ? (event) => event.preventDefault() : undefined);
   const resolvedPointerDownOutside =
     onPointerDownOutside ?? (preventOutsideClose ? (event) => event.preventDefault() : undefined);
+  const resolvedOnOpenAutoFocus = onOpenAutoFocus ?? defaultOnOpenAutoFocus;
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -80,7 +100,7 @@ export function DialogShell({
         onInteractOutside={resolvedInteractOutside}
         onPointerDownOutside={resolvedPointerDownOutside}
         onEscapeKeyDown={onEscapeKeyDown}
-        onOpenAutoFocus={onOpenAutoFocus}
+        onOpenAutoFocus={resolvedOnOpenAutoFocus}
       >
         <div style={{ flexShrink: 0 }}>
           <Dialog.Title>

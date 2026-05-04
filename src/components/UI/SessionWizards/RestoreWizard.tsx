@@ -299,6 +299,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
             </Dialog.Close>
             <Button
               data-testid="wizard-restore-btn-restore"
+              data-autofocus="true"
               onClick={handleRestoreOrNext}
               disabled={selectedTabIds.size === 0 || isAnalyzing || isRestoring}
             >
