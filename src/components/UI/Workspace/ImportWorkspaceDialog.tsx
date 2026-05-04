@@ -1,12 +1,23 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Button, Callout, Checkbox, Dialog, Flex, RadioGroup, Text, TextArea, TextField } from '@radix-ui/themes';
-import { AlertCircle, Upload, FileUp } from 'lucide-react';
+import { Box, Button, Callout, Checkbox, Dialog, Flex, RadioGroup, Text, TextField } from '@radix-ui/themes';
+import { AlertCircle, Upload } from 'lucide-react';
 import { importWorkspaceDataSchema, type ImportWorkspaceData } from '@/schemas/importExport.js';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext.js';
 import {
   applyWorkspaceImportAsNew,
   applyWorkspaceImportToExisting,
 } from '@/utils/workspaceImportExport.js';
+import { WizardModal } from '@/components/UI/WizardModal';
+import {
+  FileDropZone,
+  ImportErrorCallout,
+  ImportedNoteCallout,
+  JsonTextArea,
+  SourceModeSegmented,
+  useJsonSourceInput,
+  type JsonSourceValidationResult,
+} from '@/components/UI/ImportExportWizards/Source';
+import { useDialogReset } from '@/components/UI/ImportExportWizards/Shared';
 import { getMessage } from '@/utils/i18n.js';
 import { logger } from '@/utils/logger.js';
 
@@ -17,186 +28,101 @@ interface ImportWorkspaceDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-interface ParsedState {
-  status: 'idle' | 'parsing' | 'ready' | 'error';
-  data?: ImportWorkspaceData;
-  errorMessage?: string;
-}
-
-async function readFileAsText(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(reader.error ?? new Error('FileReader error'));
-    reader.readAsText(file);
-  });
-}
-
-function parseWorkspaceJson(raw: string): ParsedState {
-  try {
-    const json = JSON.parse(raw);
-    const result = importWorkspaceDataSchema.safeParse(json);
-    if (!result.success) {
-      return { status: 'error', errorMessage: getMessage('workspaceImportErrorInvalid') };
-    }
-    return { status: 'ready', data: result.data };
-  } catch {
-    return { status: 'error', errorMessage: getMessage('workspaceImportErrorJson') };
-  }
-}
+const validateWorkspacePayload = (raw: unknown): JsonSourceValidationResult<ImportWorkspaceData> => {
+  const validated = importWorkspaceDataSchema.parse(raw);
+  return { data: validated, note: validated.note ?? null };
+};
 
 export function ImportWorkspaceDialog({ open, onOpenChange }: ImportWorkspaceDialogProps) {
   const { active } = useActiveWorkspaceContext();
-  const [parsed, setParsed] = useState<ParsedState>({ status: 'idle' });
+  const source = useJsonSourceInput<ImportWorkspaceData>(validateWorkspacePayload);
   const [mode, setMode] = useState<ImportMode>('new');
   const [includeStatistics, setIncludeStatistics] = useState(false);
   const [nameOverride, setNameOverride] = useState('');
-  const [pasted, setPasted] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [applyError, setApplyError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    setParsed({ status: 'idle' });
+  useDialogReset(open, () => {
+    source.reset();
     setMode('new');
     setIncludeStatistics(false);
     setNameOverride('');
-    setPasted('');
     setSubmitting(false);
-  }, [open]);
+    setApplyError(null);
+  });
 
-  const handleFile = useCallback(async (file: File) => {
-    setParsed({ status: 'parsing' });
-    try {
-      const raw = await readFileAsText(file);
-      const next = parseWorkspaceJson(raw);
-      setParsed(next);
-      if (next.status === 'ready' && next.data) {
-        setNameOverride(next.data.workspace.name);
-      }
-    } catch (error) {
-      logger.error('[ImportWorkspaceDialog] file read failed:', error);
-      setParsed({ status: 'error', errorMessage: getMessage('workspaceImportErrorJson') });
-    }
-  }, []);
-
-  const handlePastedSubmit = useCallback(() => {
-    if (!pasted.trim()) return;
-    const next = parseWorkspaceJson(pasted);
-    setParsed(next);
-    if (next.status === 'ready' && next.data) {
-      setNameOverride(next.data.workspace.name);
-    }
-  }, [pasted]);
+  const parsedName = source.parsedData?.workspace.name;
+  useEffect(() => {
+    if (parsedName) setNameOverride(parsedName);
+  }, [parsedName]);
 
   const handleConfirm = useCallback(async () => {
-    if (parsed.status !== 'ready' || !parsed.data) return;
+    if (!source.parsedData) return;
     setSubmitting(true);
+    setApplyError(null);
     try {
       if (mode === 'new') {
-        await applyWorkspaceImportAsNew(parsed.data, {
+        await applyWorkspaceImportAsNew(source.parsedData, {
           includeStatistics,
           nameOverride: nameOverride || undefined,
         });
       } else if (active) {
-        await applyWorkspaceImportToExisting(active.id, parsed.data, { includeStatistics });
+        await applyWorkspaceImportToExisting(active.id, source.parsedData, { includeStatistics });
       }
       onOpenChange(false);
     } catch (error) {
       logger.error('[ImportWorkspaceDialog] apply failed:', error);
-      setParsed({ status: 'error', errorMessage: getMessage('workspaceImportErrorApply') });
+      setApplyError(getMessage('workspaceImportErrorApply'));
     } finally {
       setSubmitting(false);
     }
-  }, [parsed, mode, includeStatistics, nameOverride, active, onOpenChange]);
+  }, [source.parsedData, mode, includeStatistics, nameOverride, active, onOpenChange]);
 
-  const ready = parsed.status === 'ready' && !!parsed.data;
-  const ruleCount = parsed.data?.domainRules.length ?? 0;
-  const sessionCount = parsed.data?.sessions.length ?? 0;
-  const hasStats = !!parsed.data?.statistics;
+  const ready = !!source.parsedData;
+  const ruleCount = source.parsedData?.domainRules.length ?? 0;
+  const sessionCount = source.parsedData?.sessions.length ?? 0;
+  const hasStats = !!source.parsedData?.statistics;
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Content data-testid="workspace-import-dialog" maxWidth="560px">
-        <Dialog.Title>
-          <Flex align="center" gap="2">
-            <Upload size={18} />
-            {getMessage('workspaceImportTitle')}
-          </Flex>
-        </Dialog.Title>
-        <Dialog.Description size="2" mb="3">
-          {getMessage('workspaceImportDescription')}
-        </Dialog.Description>
+    <WizardModal
+      open={open}
+      onOpenChange={onOpenChange}
+      icon={Upload}
+      title={getMessage('workspaceImportTitle')}
+      description={getMessage('workspaceImportDescription')}
+      data-testid="workspace-import-dialog"
+      maxWidth={560}
+    >
+      <WizardModal.Body>
+        <Box>
+          <SourceModeSegmented source={source} />
 
-        <Flex direction="column" gap="3">
-          <Flex direction="column" gap="2">
-            <Text as="label" size="2" weight="medium">
-              {getMessage('workspaceImportFileLabel')}
-            </Text>
-            <Flex align="center" gap="2">
-              <Button asChild variant="soft">
-                <label htmlFor="workspace-import-file">
-                  <FileUp size={16} />
-                  {getMessage('workspaceImportFileBtn')}
-                </label>
-              </Button>
-              <input
-                id="workspace-import-file"
-                data-testid="workspace-import-file"
-                type="file"
-                accept="application/json,.json"
-                style={{ display: 'none' }}
-                onChange={(e) => {
-                  const file = e.currentTarget.files?.[0];
-                  if (file) {
-                    handleFile(file).catch((err) =>
-                      logger.error('[ImportWorkspaceDialog] handleFile:', err),
-                    );
-                  }
-                }}
-              />
-              <Text size="1" color="gray">{getMessage('workspaceImportFileHint')}</Text>
-            </Flex>
-          </Flex>
+          <Box mt="3">
+            {source.sourceMode === 'file' ? (
+              <FileDropZone source={source} />
+            ) : (
+              <JsonTextArea source={source} placeholder='{"workspace": {...}, ...}' />
+            )}
+          </Box>
 
-          <Flex direction="column" gap="2">
-            <Text as="label" size="2" weight="medium" htmlFor="workspace-import-paste">
-              {getMessage('workspaceImportPasteLabel')}
-            </Text>
-            <TextArea
-              id="workspace-import-paste"
-              data-testid="workspace-import-paste"
-              value={pasted}
-              onChange={(e) => setPasted(e.currentTarget.value)}
-              placeholder="{ ... }"
-              rows={3}
-            />
-            <Flex justify="end">
-              <Button
-                size="1"
-                variant="soft"
-                data-testid="workspace-import-paste-btn"
-                onClick={handlePastedSubmit}
-                disabled={!pasted.trim()}
-              >
-                {getMessage('workspaceImportPasteBtn')}
-              </Button>
-            </Flex>
-          </Flex>
+          <ImportErrorCallout source={source} />
 
-          {parsed.status === 'error' ? (
-            <Callout.Root color="red" data-testid="workspace-import-error">
+          {applyError ? (
+            <Callout.Root color="red" variant="soft" mt="3" data-testid="workspace-import-error">
               <Callout.Icon>
                 <AlertCircle size={16} />
               </Callout.Icon>
-              <Callout.Text>{parsed.errorMessage}</Callout.Text>
+              <Callout.Text>{applyError}</Callout.Text>
             </Callout.Root>
           ) : null}
 
+          <ImportedNoteCallout note={source.importedNote} />
+
           {ready ? (
-            <Flex direction="column" gap="2" data-testid="workspace-import-summary">
+            <Flex direction="column" gap="2" mt="3" data-testid="workspace-import-summary">
               <Text size="2" color="gray">
                 {getMessage('workspaceImportSummary', [
-                  parsed.data!.workspace.name,
+                  source.parsedData!.workspace.name,
                   String(ruleCount),
                   String(sessionCount),
                 ])}
@@ -252,29 +178,29 @@ export function ImportWorkspaceDialog({ open, onOpenChange }: ImportWorkspaceDia
               ) : null}
             </Flex>
           ) : null}
-        </Flex>
+        </Box>
+      </WizardModal.Body>
 
-        <Flex gap="3" mt="4" justify="end">
-          <Dialog.Close>
-            <Button variant="soft" color="gray" data-testid="workspace-import-btn-cancel">
-              {getMessage('cancel')}
-            </Button>
-          </Dialog.Close>
-          <Button
-            data-testid="workspace-import-btn-confirm"
-            disabled={!ready || submitting}
-            onClick={() => {
-              handleConfirm().catch((e) =>
-                logger.error('[ImportWorkspaceDialog] confirm:', e),
-              );
-            }}
-          >
-            {mode === 'new'
-              ? getMessage('workspaceImportBtnNew')
-              : getMessage('workspaceImportBtnMerge')}
+      <WizardModal.Footer>
+        <Dialog.Close>
+          <Button variant="soft" color="gray" data-testid="workspace-import-btn-cancel">
+            {getMessage('cancel')}
           </Button>
-        </Flex>
-      </Dialog.Content>
-    </Dialog.Root>
+        </Dialog.Close>
+        <Button
+          data-testid="workspace-import-btn-confirm"
+          disabled={!ready || submitting}
+          onClick={() => {
+            handleConfirm().catch((e) =>
+              logger.error('[ImportWorkspaceDialog] confirm:', e),
+            );
+          }}
+        >
+          {mode === 'new'
+            ? getMessage('workspaceImportBtnNew')
+            : getMessage('workspaceImportBtnMerge')}
+        </Button>
+      </WizardModal.Footer>
+    </WizardModal>
   );
 }

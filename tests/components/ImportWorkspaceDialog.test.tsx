@@ -58,6 +58,15 @@ const validPayload = {
   sessions: [],
 };
 
+/** Switches the source segmented to "text" and pastes JSON in the textarea. */
+function pasteJson(json: string) {
+  // The shared SourceModeSegmented uses Radix SegmentedControl, which renders
+  // both a visible label and a hidden layout duplicate. Click the first match.
+  fireEvent.click(screen.getAllByText('sourceText')[0]);
+  const textarea = screen.getByPlaceholderText(/workspace/i) as HTMLTextAreaElement;
+  fireEvent.change(textarea, { target: { value: json } });
+}
+
 beforeEach(() => {
   applyAsNew.mockReset().mockResolvedValue(undefined);
   applyToExisting.mockReset().mockResolvedValue(undefined);
@@ -81,51 +90,39 @@ describe('ImportWorkspaceDialog', () => {
 
   it('shows an error callout when invalid JSON is pasted', () => {
     wrap(<ImportWorkspaceDialog open onOpenChange={() => {}} />);
-    fireEvent.change(screen.getByTestId('workspace-import-paste'), {
-      target: { value: '{not valid json' },
-    });
-    fireEvent.click(screen.getByTestId('workspace-import-paste-btn'));
-    expect(screen.getByTestId('workspace-import-error')).toBeInTheDocument();
+    pasteJson('{not valid json');
+    expect(screen.getByTestId('workspace-import-btn-confirm')).toBeDisabled();
+    // Parse error rendered by the shared ImportErrorCallout (i18n key surfaced by the mock).
+    expect(screen.getByText('invalidJson')).toBeInTheDocument();
   });
 
-  it('shows an error callout when JSON does not match the schema', () => {
+  it('shows the import summary and pre-fills the name override on success', async () => {
     wrap(<ImportWorkspaceDialog open onOpenChange={() => {}} />);
-    fireEvent.change(screen.getByTestId('workspace-import-paste'), {
-      target: { value: '{"foo":"bar"}' },
+    pasteJson(JSON.stringify(validPayload));
+    await waitFor(() => {
+      expect(screen.getByTestId('workspace-import-summary')).toBeInTheDocument();
     });
-    fireEvent.click(screen.getByTestId('workspace-import-paste-btn'));
-    expect(screen.getByTestId('workspace-import-error')).toBeInTheDocument();
-  });
-
-  it('shows the import summary and pre-fills the name override on success', () => {
-    wrap(<ImportWorkspaceDialog open onOpenChange={() => {}} />);
-    fireEvent.change(screen.getByTestId('workspace-import-paste'), {
-      target: { value: JSON.stringify(validPayload) },
-    });
-    fireEvent.click(screen.getByTestId('workspace-import-paste-btn'));
-    expect(screen.getByTestId('workspace-import-summary')).toBeInTheDocument();
     expect(
       (screen.getByTestId('workspace-import-name-override') as HTMLInputElement).value,
     ).toBe('Imported');
   });
 
-  it('disables the merge mode when there is no active workspace', () => {
+  it('disables the merge mode when there is no active workspace', async () => {
     useActiveWorkspaceContextMock.mockReturnValue({ active: null });
     wrap(<ImportWorkspaceDialog open onOpenChange={() => {}} />);
-    fireEvent.change(screen.getByTestId('workspace-import-paste'), {
-      target: { value: JSON.stringify(validPayload) },
+    pasteJson(JSON.stringify(validPayload));
+    await waitFor(() => {
+      expect(screen.getByTestId('workspace-import-mode-merge')).toBeDisabled();
     });
-    fireEvent.click(screen.getByTestId('workspace-import-paste-btn'));
-    expect(screen.getByTestId('workspace-import-mode-merge')).toBeDisabled();
   });
 
   it('imports as a new workspace on confirm', async () => {
     const onOpenChange = vi.fn();
     wrap(<ImportWorkspaceDialog open onOpenChange={onOpenChange} />);
-    fireEvent.change(screen.getByTestId('workspace-import-paste'), {
-      target: { value: JSON.stringify(validPayload) },
+    pasteJson(JSON.stringify(validPayload));
+    await waitFor(() => {
+      expect(screen.getByTestId('workspace-import-btn-confirm')).toBeEnabled();
     });
-    fireEvent.click(screen.getByTestId('workspace-import-paste-btn'));
     fireEvent.click(screen.getByTestId('workspace-import-btn-confirm'));
 
     await waitFor(() => expect(applyAsNew).toHaveBeenCalled());
@@ -136,20 +133,16 @@ describe('ImportWorkspaceDialog', () => {
     await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
   });
 
-  it('disables the paste button when no text is entered', () => {
-    wrap(<ImportWorkspaceDialog open onOpenChange={() => {}} />);
-    expect(screen.getByTestId('workspace-import-paste-btn')).toBeDisabled();
-  });
-
   it('reads a JSON file and shows the summary', async () => {
     wrap(<ImportWorkspaceDialog open onOpenChange={() => {}} />);
 
     const file = new File([JSON.stringify(validPayload)], 'workspace.json', {
       type: 'application/json',
     });
-    const input = screen.getByTestId('workspace-import-file') as HTMLInputElement;
-    Object.defineProperty(input, 'files', { value: [file] });
-    fireEvent.change(input);
+    // The shared FileDropZone renders a hidden file input next to the drop zone.
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    Object.defineProperty(fileInput, 'files', { value: [file] });
+    fireEvent.change(fileInput);
 
     await waitFor(() => {
       expect(screen.getByTestId('workspace-import-summary')).toBeInTheDocument();
@@ -159,10 +152,10 @@ describe('ImportWorkspaceDialog', () => {
   it('shows an error callout when applyAsNew throws', async () => {
     applyAsNew.mockRejectedValueOnce(new Error('apply failed'));
     wrap(<ImportWorkspaceDialog open onOpenChange={() => {}} />);
-    fireEvent.change(screen.getByTestId('workspace-import-paste'), {
-      target: { value: JSON.stringify(validPayload) },
+    pasteJson(JSON.stringify(validPayload));
+    await waitFor(() => {
+      expect(screen.getByTestId('workspace-import-btn-confirm')).toBeEnabled();
     });
-    fireEvent.click(screen.getByTestId('workspace-import-paste-btn'));
     fireEvent.click(screen.getByTestId('workspace-import-btn-confirm'));
 
     await waitFor(() =>

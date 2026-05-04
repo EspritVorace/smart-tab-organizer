@@ -9,6 +9,9 @@ interface ExportWizardFooterProps {
   labelKey: string;
   actions: ExportActions;
   disabled: boolean;
+  cancelTestId?: string;
+  primaryTestId?: string;
+  clipboardTestId?: string;
 }
 
 /**
@@ -17,13 +20,26 @@ interface ExportWizardFooterProps {
  * Renders a Cancel button (wrapped in Dialog.Close) and the primary
  * ExportSplitButton offering file and clipboard export options.
  */
-export function ExportWizardFooter({ labelKey, actions, disabled }: ExportWizardFooterProps) {
+export function ExportWizardFooter({
+  labelKey,
+  actions,
+  disabled,
+  cancelTestId,
+  primaryTestId,
+  clipboardTestId,
+}: ExportWizardFooterProps) {
   return (
     <>
       <Dialog.Close>
-        <Button variant="soft" color="gray">{getMessage('cancel')}</Button>
+        <Button variant="soft" color="gray" data-testid={cancelTestId}>{getMessage('cancel')}</Button>
       </Dialog.Close>
-      <ExportSplitButton labelKey={labelKey} actions={actions} disabled={disabled} />
+      <ExportSplitButton
+        labelKey={labelKey}
+        actions={actions}
+        disabled={disabled}
+        primaryTestId={primaryTestId}
+        clipboardTestId={clipboardTestId}
+      />
     </>
   );
 }
