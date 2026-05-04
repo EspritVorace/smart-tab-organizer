@@ -9,7 +9,7 @@ import { PopupHeader } from '@/components/UI/PopupHeader/PopupHeader';
 import { SettingsToggles } from '@/components/UI/SettingsToggles/SettingsToggles';
 import { PopupToolbar } from '@/components/UI/PopupToolbar/PopupToolbar';
 import { PopupProfilesList } from '@/components/UI/PopupProfilesList/PopupProfilesList';
-import { PopupWorkspaceFooter } from '@/components/UI/Workspace/PopupWorkspaceFooter';
+import { PopupWorkspaceSwitcher } from '@/components/UI/Workspace/PopupWorkspaceSwitcher';
 import { ShortcutsDrawer } from '@/components/UI/ShortcutsPanel';
 import { openOptionsWithHash } from '@/utils/openOptions';
 import { useSettings } from '@/hooks/useSettings';
@@ -82,6 +82,8 @@ export function PopupContent() {
 
           <PopupToolbar />
 
+          <PopupWorkspaceSwitcher onManage={handleManageWorkspaces} />
+
           {isLoaded && !hasRules ? (
             <SettingsToggles
               isLoading={false}
@@ -105,9 +107,6 @@ export function PopupContent() {
               />
             </>
           ) : null}
-
-          <Separator size="4" />
-          <PopupWorkspaceFooter onManage={handleManageWorkspaces} />
         </Flex>
       </Box>
       <StatusBar />

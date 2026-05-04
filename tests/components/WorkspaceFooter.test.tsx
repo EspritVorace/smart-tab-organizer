@@ -29,7 +29,7 @@ import {
   WorkspaceFooter,
   WorkspaceFooterCollapsed,
 } from '../../src/components/UI/Workspace/WorkspaceFooter';
-import { PopupWorkspaceFooter } from '../../src/components/UI/Workspace/PopupWorkspaceFooter';
+import { PopupWorkspaceSwitcher } from '../../src/components/UI/Workspace/PopupWorkspaceSwitcher';
 
 const wrap = (ui: React.ReactNode) => render(<Theme>{ui}</Theme>);
 
@@ -94,10 +94,10 @@ describe('WorkspaceFooterCollapsed', () => {
   });
 });
 
-describe('PopupWorkspaceFooter', () => {
-  it('renders the popup-specific footer with trigger', () => {
-    wrap(<PopupWorkspaceFooter />);
-    expect(screen.getByTestId('popup-workspace-footer')).toBeInTheDocument();
+describe('PopupWorkspaceSwitcher', () => {
+  it('renders the popup-specific switcher with trigger', () => {
+    wrap(<PopupWorkspaceSwitcher />);
+    expect(screen.getByTestId('popup-workspace-switcher')).toBeInTheDocument();
     expect(screen.getByTestId('popup-workspace-trigger')).toBeInTheDocument();
   });
 
@@ -109,7 +109,7 @@ describe('PopupWorkspaceFooter', () => {
       createdAt: '2025-01-01T00:00:00.000Z',
       updatedAt: '2025-01-01T00:00:00.000Z',
     };
-    wrap(<PopupWorkspaceFooter />);
+    wrap(<PopupWorkspaceSwitcher />);
     expect(screen.getByText('Important')).toBeInTheDocument();
   });
 });
