@@ -6,17 +6,17 @@ import { getMessage } from '@/utils/i18n.js';
 import { WorkspaceAvatar } from '@/components/UI/Workspace/WorkspaceAvatar.js';
 import { WorkspaceSwitcherDropdown } from '@/components/UI/Workspace/WorkspaceSwitcherDropdown.js';
 
-interface PopupWorkspaceFooterProps {
+interface PopupWorkspaceSwitcherProps {
   /** Open the manage page; the popup typically closes itself afterwards. */
   onManage?: () => void;
 }
 
 /**
- * Compact workspace switcher rendered at the bottom of the popup so the user
+ * Compact workspace switcher rendered near the top of the popup so the user
  * always sees which workspace their popup actions target. Mirrors the options
  * sidebar footer but adapted for the 400px popup width.
  */
-export function PopupWorkspaceFooter({ onManage }: PopupWorkspaceFooterProps) {
+export function PopupWorkspaceSwitcher({ onManage }: PopupWorkspaceSwitcherProps) {
   const { active, accentColor } = useActiveWorkspaceContext();
   const name = active?.name ?? getMessage('workspaceDefaultName');
 
@@ -62,7 +62,7 @@ export function PopupWorkspaceFooter({ onManage }: PopupWorkspaceFooterProps) {
   );
 
   return (
-    <Flex data-testid="popup-workspace-footer" align="center" style={{ width: '100%' }}>
+    <Flex data-testid="popup-workspace-switcher" align="center" style={{ width: '100%' }}>
       <WorkspaceSwitcherDropdown trigger={trigger} onManage={onManage} />
     </Flex>
   );
