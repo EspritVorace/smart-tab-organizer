@@ -3,6 +3,7 @@ import {
   isGroupOpenByDefault,
   SHORTCUT_GROUPS,
   type PageContext,
+  type ShortcutGroup,
 } from '../src/components/UI/ShortcutsPanel/shortcuts';
 
 const ALL_CONTEXTS: PageContext[] = [
@@ -13,6 +14,12 @@ const ALL_CONTEXTS: PageContext[] = [
   'settings',
   'workspaces',
 ];
+
+const ALL_CONTEXTS_AND_DRAWER: (PageContext | undefined)[] = [...ALL_CONTEXTS, undefined];
+
+function flattenGroups(groups: ShortcutGroup[]): ShortcutGroup[] {
+  return groups.flatMap((g) => [g, ...flattenGroups(g.subgroups ?? [])]);
+}
 
 describe('isGroupOpenByDefault', () => {
   it('keeps Global and Options groups open in every context', () => {
@@ -36,14 +43,21 @@ describe('isGroupOpenByDefault', () => {
     }
   });
 
+  it('keeps the popup group collapsed on every options page but open in the popup drawer', () => {
+    for (const ctx of ALL_CONTEXTS) {
+      expect(isGroupOpenByDefault('shortcutsGroupPopup', ctx)).toBe(false);
+    }
+    expect(isGroupOpenByDefault('shortcutsGroupPopup', undefined)).toBe(true);
+  });
+
   it('returns false for an unknown title without a context', () => {
     expect(isGroupOpenByDefault('shortcutsGroupListRules', undefined)).toBe(false);
     expect(isGroupOpenByDefault('unknown-group', 'rules')).toBe(false);
   });
 
-  it('covers every group declared in SHORTCUT_GROUPS', () => {
-    for (const group of SHORTCUT_GROUPS) {
-      const opensSomewhere = ALL_CONTEXTS.some((ctx) =>
+  it('covers every group declared in SHORTCUT_GROUPS (including subgroups)', () => {
+    for (const group of flattenGroups(SHORTCUT_GROUPS)) {
+      const opensSomewhere = ALL_CONTEXTS_AND_DRAWER.some((ctx) =>
         isGroupOpenByDefault(group.titleKey, ctx),
       );
       expect(opensSomewhere, `group ${group.titleKey} never opens`).toBe(true);
