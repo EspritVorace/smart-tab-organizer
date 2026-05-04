@@ -23,6 +23,17 @@ export function ListToolbar({
   onSearchChange,
   action,
 }: ListToolbarProps) {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Escape') return;
+    if (searchValue.length > 0) {
+      event.preventDefault();
+      event.stopPropagation();
+      onSearchChange('');
+      return;
+    }
+    event.currentTarget.blur();
+  };
+
   return (
     <Flex data-testid={testId} gap="3" mb="4" align="center">
       <Box style={{ flex: 1 }}>
@@ -32,6 +43,7 @@ export function ListToolbar({
           aria-label={searchPlaceholder}
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
+          onKeyDown={handleKeyDown}
         >
           <TextField.Slot>
             <Search size={16} />
