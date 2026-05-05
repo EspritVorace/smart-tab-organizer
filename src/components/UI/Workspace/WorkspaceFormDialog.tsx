@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Dialog, Flex, Text, TextField } from '@radix-ui/themes';
+import { Button, Flex, Text, TextField } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n.js';
 import type { WorkspaceAccentColor, WorkspaceMeta } from '@/schemas/workspace.js';
+import { DialogShell } from '@/components/UI/DialogShell';
 import { WorkspaceColorPicker } from './WorkspaceColorPicker.js';
 import { WorkspaceAvatar } from './WorkspaceAvatar.js';
 
@@ -56,69 +57,71 @@ export function WorkspaceFormDialog({
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Content data-testid="workspace-form-dialog" maxWidth="460px">
-        <Dialog.Title>
-          {isEdit ? getMessage('workspaceEditTitle') : getMessage('workspaceCreateTitle')}
-        </Dialog.Title>
-        <Dialog.Description size="2" mb="3">
-          {isEdit ? getMessage('workspaceEditDescription') : getMessage('workspaceCreateDescription')}
-        </Dialog.Description>
-
-        <Flex direction="column" gap="3">
-          <Flex align="center" gap="3">
-            <WorkspaceAvatar name={trimmed || '?'} accentColor={accentColor} size="lg" />
-            <Flex direction="column" gap="1" style={{ flex: 1, minWidth: 0 }}>
-              <Text as="label" size="2" weight="medium" htmlFor="workspace-form-name">
-                {getMessage('workspaceFormNameLabel')}
-              </Text>
-              <TextField.Root
-                id="workspace-form-name"
-                data-testid="workspace-form-name"
-                value={name}
-                onChange={(e) => setName(e.currentTarget.value)}
-                placeholder={getMessage('workspaceFormNamePlaceholder')}
-                maxLength={40}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && canSubmit) {
-                    e.preventDefault();
-                    void handleSubmit();
-                  }
-                }}
-              />
-              {duplicate ? (
-                <Text size="1" color="red" data-testid="workspace-form-error-duplicate">
-                  {getMessage('workspaceFormErrorDuplicate')}
-                </Text>
-              ) : null}
-            </Flex>
-          </Flex>
-
-          <Flex direction="column" gap="2">
-            <Text size="2" weight="medium">{getMessage('workspaceFormColorLabel')}</Text>
-            <WorkspaceColorPicker
-              value={accentColor}
-              onChange={setAccentColor}
-              ariaLabel={getMessage('workspaceFormColorLabel')}
+    <DialogShell
+      open={open}
+      onOpenChange={onOpenChange}
+      data-testid="workspace-form-dialog"
+      maxWidth="460px"
+      title={isEdit ? getMessage('workspaceEditTitle') : getMessage('workspaceCreateTitle')}
+      description={isEdit ? getMessage('workspaceEditDescription') : getMessage('workspaceCreateDescription')}
+    >
+      <Flex direction="column" gap="3" mt="3">
+        <Flex align="center" gap="3">
+          <WorkspaceAvatar name={trimmed || '?'} accentColor={accentColor} size="lg" />
+          <Flex direction="column" gap="1" style={{ flex: 1, minWidth: 0 }}>
+            <Text as="label" size="2" weight="medium" htmlFor="workspace-form-name">
+              {getMessage('workspaceFormNameLabel')}
+            </Text>
+            <TextField.Root
+              id="workspace-form-name"
+              data-testid="workspace-form-name"
+              data-autofocus="true"
+              value={name}
+              onChange={(e) => setName(e.currentTarget.value)}
+              placeholder={getMessage('workspaceFormNamePlaceholder')}
+              maxLength={40}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && canSubmit) {
+                  e.preventDefault();
+                  void handleSubmit();
+                }
+              }}
             />
+            {duplicate ? (
+              <Text size="1" color="red" data-testid="workspace-form-error-duplicate">
+                {getMessage('workspaceFormErrorDuplicate')}
+              </Text>
+            ) : null}
           </Flex>
         </Flex>
 
-        <Flex gap="3" mt="4" justify="end">
-          <Dialog.Close>
-            <Button data-testid="workspace-form-btn-cancel" variant="soft" color="gray">
-              {getMessage('cancel')}
-            </Button>
-          </Dialog.Close>
-          <Button
-            data-testid="workspace-form-btn-submit"
-            disabled={!canSubmit}
-            onClick={handleSubmit}
-          >
-            {isEdit ? getMessage('save') : getMessage('workspaceFormBtnCreate')}
-          </Button>
+        <Flex direction="column" gap="2">
+          <Text size="2" weight="medium">{getMessage('workspaceFormColorLabel')}</Text>
+          <WorkspaceColorPicker
+            value={accentColor}
+            onChange={setAccentColor}
+            ariaLabel={getMessage('workspaceFormColorLabel')}
+          />
         </Flex>
-      </Dialog.Content>
-    </Dialog.Root>
+      </Flex>
+
+      <Flex gap="3" mt="4" justify="end">
+        <Button
+          data-testid="workspace-form-btn-cancel"
+          variant="soft"
+          color="gray"
+          onClick={() => onOpenChange(false)}
+        >
+          {getMessage('cancel')}
+        </Button>
+        <Button
+          data-testid="workspace-form-btn-submit"
+          disabled={!canSubmit}
+          onClick={handleSubmit}
+        >
+          {isEdit ? getMessage('save') : getMessage('workspaceFormBtnCreate')}
+        </Button>
+      </Flex>
+    </DialogShell>
   );
 }

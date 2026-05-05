@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { AlertDialog, Button, Flex, Text, TextField } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n.js';
 import type { WorkspaceMeta } from '@/schemas/workspace.js';
+import { focusAutoFocusTarget } from '@/components/UI/DialogShell';
 
 interface WorkspaceDeleteConfirmDialogProps {
   open: boolean;
@@ -13,6 +14,8 @@ interface WorkspaceDeleteConfirmDialogProps {
 /**
  * Destructive confirmation that asks the user to retype the workspace name.
  * The button stays disabled until the typed string matches exactly.
+ * Focus lands on the input (not Cancel) because Confirm is disabled until
+ * the name matches, making accidental deletion impossible.
  */
 export function WorkspaceDeleteConfirmDialog({
   open,
@@ -39,7 +42,11 @@ export function WorkspaceDeleteConfirmDialog({
 
   return (
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
-      <AlertDialog.Content data-testid="workspace-delete-dialog" maxWidth="460px">
+      <AlertDialog.Content
+        data-testid="workspace-delete-dialog"
+        maxWidth="460px"
+        onOpenAutoFocus={focusAutoFocusTarget}
+      >
         <AlertDialog.Title>
           {getMessage('workspaceDeleteTitle')}
         </AlertDialog.Title>
@@ -54,6 +61,7 @@ export function WorkspaceDeleteConfirmDialog({
           <TextField.Root
             id="workspace-delete-confirm-input"
             data-testid="workspace-delete-confirm-input"
+            data-autofocus="true"
             value={confirmText}
             onChange={(e) => setConfirmText(e.currentTarget.value)}
             placeholder={workspace.name}

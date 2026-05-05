@@ -11,7 +11,7 @@ import {
 import * as Label from '@radix-ui/react-label';
 import { Pencil } from 'lucide-react';
 import { getMessage, getPluralMessage } from '@/utils/i18n';
-import { DialogShell } from '@/components/UI/DialogShell';
+import { DialogShell, focusAutoFocusTarget } from '@/components/UI/DialogShell';
 import { TabTreeEditor } from '@/components/Core/TabTree/TabTreeEditor';
 import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
 import { useSessionEditor } from '@/hooks/useSessionEditor';
@@ -227,14 +227,14 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingS
 
       {/* Unsaved changes confirmation */}
       <AlertDialog.Root open={showUnsavedAlert} onOpenChange={setShowUnsavedAlert}>
-        <AlertDialog.Content maxWidth="420px">
+        <AlertDialog.Content maxWidth="420px" onOpenAutoFocus={focusAutoFocusTarget}>
           <AlertDialog.Title>{getMessage('sessionEditorUnsavedTitle')}</AlertDialog.Title>
           <AlertDialog.Description size="2">
             {getMessage('sessionEditorUnsavedChanges')}
           </AlertDialog.Description>
           <Flex gap="2" mt="4" justify="end">
             <AlertDialog.Cancel>
-              <Button variant="soft" color="gray">
+              <Button variant="soft" color="gray" data-autofocus="true">
                 {getMessage('cancel')}
               </Button>
             </AlertDialog.Cancel>
