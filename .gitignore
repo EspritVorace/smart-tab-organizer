@@ -18,6 +18,7 @@ design-system-bundle.zip
 /.idea
 .chrome-profile/
 .firefox-profile/
+design-system-pack.zip
 docs/node_modules/
 docs/dist/
 docs/.astro/
