@@ -87,6 +87,12 @@ test.describe('[US-PO01] Toolbar', () => {
     extensionContext,
     extensionId,
   }) => {
+    // Close all existing pages so hasCapturableTabs() sees no capturable tab
+    // (extension pages like chrome-extension:// are already filtered by hasCapturableTabs)
+    for (const p of extensionContext.pages()) {
+      await p.close().catch(() => {});
+    }
+
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
@@ -95,8 +101,6 @@ test.describe('[US-PO01] Toolbar', () => {
 
     // Must NOT have native disabled so it stays in the tab order
     await expect(saveBtn).not.toHaveAttribute('disabled');
-    const isFocusable = await saveBtn.evaluate((el) => !el.hasAttribute('disabled'));
-    expect(isFocusable).toBe(true);
 
     await page.close();
   });
