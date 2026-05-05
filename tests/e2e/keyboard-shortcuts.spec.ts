@@ -124,16 +124,17 @@ test.describe('[US-KB-popup] Popup shortcuts', () => {
 // Options shortcuts
 // ---------------------------------------------------------------------------
 test.describe('[US-KB-options] Options shortcuts', () => {
-  test('Alt+2 switches to the Sessions sidebar tab', async ({
+  test('Alt+3 switches to the Sessions sidebar tab', async ({
     extensionContext,
     extensionId,
   }) => {
     const page = await extensionContext.newPage();
     await goToOptionsPage(page, extensionId);
 
-    // First focus the document (sidebar may default to rules)
+    // First focus the document (sidebar may default to home)
     await page.locator('body').click();
-    await page.keyboard.press('Alt+2');
+    // Sidebar order is home, rules, sessions, ... so Alt+3 selects Sessions.
+    await page.keyboard.press('Alt+3');
 
     // SessionsPage marker
     await page.getByTestId('page-sessions-btn-snapshot').waitFor({
@@ -161,7 +162,7 @@ test.describe('[US-KB-options] Options shortcuts', () => {
     await page.evaluate(() => {
       document.dispatchEvent(
         new KeyboardEvent('keydown', {
-          code: 'Digit2',
+          code: 'Digit3',
           key: 'layout-specific',
           altKey: true,
           bubbles: true,

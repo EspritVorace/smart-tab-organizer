@@ -49,6 +49,28 @@ function TipBody({ icon, titleKey, textKey, compact = false }: TipBodyProps) {
   );
 }
 
+interface TipsHeaderProps {
+  /** Optional right-aligned controls (e.g. carousel chevrons). */
+  trailing?: React.ReactNode;
+}
+
+function TipsHeader({ trailing }: TipsHeaderProps) {
+  return (
+    <Flex align="center" gap="2">
+      <IconBox icon={Lightbulb} size="sm" variant="soft" />
+      <Heading id="home-tips-heading" as="h2" size="4" weight="bold">
+        {getMessage('homepageTipsTitle')}
+      </Heading>
+      {trailing && (
+        <>
+          <Box flexGrow="1" />
+          {trailing}
+        </>
+      )}
+    </Flex>
+  );
+}
+
 function TipsCardsVariant({ tips }: { tips: ReadonlyArray<TipDef> }) {
   const [active, setActive] = useState(0);
 
@@ -75,33 +97,30 @@ function TipsCardsVariant({ tips }: { tips: ReadonlyArray<TipDef> }) {
   return (
     <Box tabIndex={0} onKeyDown={handleKey} aria-label={getMessage('homepageTipsNavLabel')}>
       <Flex direction="column" gap="3">
-        <Flex align="center" gap="2">
-          <IconBox icon={Lightbulb} size="sm" variant="soft" />
-          <Heading id="home-tips-heading" as="h2" size="4" weight="bold">
-            {getMessage('homepageTipsTitle')}
-          </Heading>
-          <Box flexGrow="1" />
-          <Flex gap="1">
-            <IconButton
-              variant="ghost"
-              size="2"
-              onClick={goPrev}
-              aria-label={getMessage('homepageTipsPrev')}
-              data-testid="home-tips-prev"
-            >
-              <ChevronLeft size={16} aria-hidden="true" />
-            </IconButton>
-            <IconButton
-              variant="ghost"
-              size="2"
-              onClick={goNext}
-              aria-label={getMessage('homepageTipsNext')}
-              data-testid="home-tips-next"
-            >
-              <ChevronRight size={16} aria-hidden="true" />
-            </IconButton>
-          </Flex>
-        </Flex>
+        <TipsHeader
+          trailing={
+            <Flex gap="1">
+              <IconButton
+                variant="ghost"
+                size="2"
+                onClick={goPrev}
+                aria-label={getMessage('homepageTipsPrev')}
+                data-testid="home-tips-prev"
+              >
+                <ChevronLeft size={16} aria-hidden="true" />
+              </IconButton>
+              <IconButton
+                variant="ghost"
+                size="2"
+                onClick={goNext}
+                aria-label={getMessage('homepageTipsNext')}
+                data-testid="home-tips-next"
+              >
+                <ChevronRight size={16} aria-hidden="true" />
+              </IconButton>
+            </Flex>
+          }
+        />
         <Box aria-live="polite" data-testid="home-tips-current">
           <TipBody icon={current.icon} titleKey={current.titleKey} textKey={current.textKey} />
         </Box>
@@ -127,12 +146,7 @@ function TipsCardsVariant({ tips }: { tips: ReadonlyArray<TipDef> }) {
 function TipsListVariant({ tips }: { tips: ReadonlyArray<TipDef> }) {
   return (
     <Flex direction="column" gap="3">
-      <Flex align="center" gap="2">
-        <IconBox icon={Lightbulb} size="sm" variant="soft" />
-        <Heading id="home-tips-heading" as="h2" size="4" weight="bold">
-          {getMessage('homepageTipsTitle')}
-        </Heading>
-      </Flex>
+      <TipsHeader />
       <Flex direction="column" gap="2">
         {tips.map((t) => (
           <TipBody
@@ -190,12 +204,7 @@ function TipsAccordionVariant({ tips }: { tips: ReadonlyArray<TipDef> }) {
 
   return (
     <Flex direction="column" gap="3">
-      <Flex align="center" gap="2">
-        <IconBox icon={Lightbulb} size="sm" variant="soft" />
-        <Heading id="home-tips-heading" as="h2" size="4" weight="bold">
-          {getMessage('homepageTipsTitle')}
-        </Heading>
-      </Flex>
+      <TipsHeader />
       <Box>
         {tips.map((tip) => (
           <TipsAccordionItem

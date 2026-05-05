@@ -27,7 +27,7 @@ async function goToImportExportSection(page: any, extensionId: string): Promise<
     null,
     { timeout: 10_000 },
   );
-  await page.getByRole('button', { name: /import.*export/i }).click();
+  await page.getByTestId('sidebar-nav-item-importexport').click();
   await page.getByTestId('page-import-export-card-import-rules').waitFor({ state: 'visible' });
 }
 
