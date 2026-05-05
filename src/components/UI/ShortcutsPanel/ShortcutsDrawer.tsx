@@ -48,9 +48,9 @@ export function ShortcutsDrawer({ open, onOpenChange }: ShortcutsDrawerProps) {
         onInteractOutside={preventClose}
         onOpenAutoFocus={(e) => {
           e.preventDefault();
+          const root = e.currentTarget as HTMLElement;
           requestAnimationFrame(() => {
-            const root = document.querySelector('[data-testid="shortcuts-drawer"]');
-            focusFirstOpenTrigger(root as HTMLElement | null);
+            focusFirstOpenTrigger(root);
           });
         }}
       >

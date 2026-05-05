@@ -320,6 +320,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
               {getMessage('previous')}
             </Button>
             <Button
+              data-autofocus="true"
               onClick={() => executeRestore(conflictAnalysis, duplicateTabAction, groupActions)}
               disabled={isRestoring}
             >

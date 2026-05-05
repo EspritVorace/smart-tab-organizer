@@ -43,20 +43,37 @@ const closeButtonStyle: React.CSSProperties = {
 /**
  * Radix's default focuses the first focusable element, which in our shell is
  * the close X button: pressing Enter then dismisses the dialog instead of
- * triggering the primary action. When a child marks an element with the
- * `data-autofocus` attribute (typically the primary action button), focus it
- * instead. Disabled elements fall through to Radix's default so we never park
- * focus on something that swallows Enter.
+ * triggering the primary action.
+ *
+ * Priority order (WAI-ARIA APG Modal Dialog Pattern):
+ * 1. Element marked [data-autofocus] and not disabled -> focus it.
+ * 2. Disabled [data-autofocus] -> fall through to title.
+ * 3. No [data-autofocus] -> focus the dialog title ([data-dialog-title]).
+ *
+ * The title receives tabIndex={-1} so it is programmatically focusable but
+ * stays out of the Tab order. Screen readers announce it on open, which is
+ * the expected WAI-ARIA behaviour for informational dialogs.
  */
 function defaultOnOpenAutoFocus(event: Event) {
   const root = event.currentTarget;
   if (!(root instanceof HTMLElement)) return;
   const target = root.querySelector<HTMLElement>('[data-autofocus]');
-  if (!target) return;
-  if (target instanceof HTMLButtonElement && target.disabled) return;
-  if (target.getAttribute('aria-disabled') === 'true') return;
-  event.preventDefault();
-  target.focus();
+  if (target) {
+    const isDisabled =
+      (target instanceof HTMLButtonElement && target.disabled) ||
+      target.getAttribute('aria-disabled') === 'true';
+    if (!isDisabled) {
+      event.preventDefault();
+      target.focus();
+      return;
+    }
+  }
+  // Fallback: focus the dialog title so the close button is never the initial target.
+  const titleEl = root.querySelector<HTMLElement>('[data-dialog-title]');
+  if (titleEl) {
+    event.preventDefault();
+    titleEl.focus();
+  }
 }
 
 export function DialogShell({
@@ -103,7 +120,7 @@ export function DialogShell({
         onOpenAutoFocus={resolvedOnOpenAutoFocus}
       >
         <div style={{ flexShrink: 0 }}>
-          <Dialog.Title>
+          <Dialog.Title tabIndex={-1} data-dialog-title style={{ outline: 'none' }}>
             <Flex align="center" gap="2">
               {Icon && <IconBox icon={Icon} size="sm" variant="gradient" />}
               {title}
