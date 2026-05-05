@@ -23,6 +23,7 @@ vi.mock('../../src/hooks/useSettings', () => ({ useSettings: vi.fn() }));
 vi.mock('../../src/hooks/useStatistics', () => ({ useStatistics: vi.fn() }));
 vi.mock('../../src/hooks/useDeepLinking', () => ({ useDeepLinking: vi.fn() }));
 
+vi.mock('../../src/pages/HomePage', () => ({ HomePage: () => <div data-testid="page-home-mock" /> }));
 vi.mock('../../src/pages/DomainRulesPage', () => ({ DomainRulesPage: () => <div data-testid="page-rules-mock" /> }));
 vi.mock('../../src/pages/SessionsPage', () => ({ SessionsPage: () => <div data-testid="page-sessions-mock" /> }));
 vi.mock('../../src/pages/ImportExportPage', () => ({ ImportExportPage: () => <div data-testid="page-importexport-mock" /> }));
@@ -55,12 +56,14 @@ const mockSettings = {
 
 const mockStats = { tabGroupsCreatedCount: 0, tabsDeduplicatedCount: 0 };
 
-function makeDeepLinking(currentTab = 'rules') {
+function makeDeepLinking(currentTab = 'home') {
   return {
     currentTab,
     setCurrentTab: vi.fn(),
     openSnapshotWizard: false,
     setOpenSnapshotWizard: vi.fn(),
+    openRuleWizard: false,
+    setOpenRuleWizard: vi.fn(),
     snapshotGroupId: null,
     setSnapshotGroupId: vi.fn(),
     restoreSessionId: null,
@@ -72,7 +75,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockedUseSettings.mockReturnValue({ settings: mockSettings, updateSettings: vi.fn() });
   mockedUseStatistics.mockReturnValue({ statistics: mockStats, resetStatistics: vi.fn() });
-  mockedUseDeepLinking.mockReturnValue(makeDeepLinking('rules'));
+  mockedUseDeepLinking.mockReturnValue(makeDeepLinking('home'));
 });
 
 // ── Tests ─────────────────────────────────────────────────────────────────
@@ -91,7 +94,13 @@ describe('OptionsApp rendu', () => {
     expect(screen.getByTestId('options-header')).toBeInTheDocument();
   });
 
-  it('affiche la page rules par défaut (currentTab=rules)', () => {
+  it('affiche la page home par défaut (currentTab=home)', () => {
+    render(<OptionsApp />);
+    expect(screen.getByTestId('page-home-mock')).toBeInTheDocument();
+  });
+
+  it('affiche la page rules quand currentTab=rules', () => {
+    mockedUseDeepLinking.mockReturnValue(makeDeepLinking('rules'));
     render(<OptionsApp />);
     expect(screen.getByTestId('page-rules-mock')).toBeInTheDocument();
   });
@@ -124,7 +133,7 @@ describe('OptionsApp rendu', () => {
 describe('OptionsContent callbacks', () => {
   it('handleTabChange appelle setCurrentTab et met à jour le hash', () => {
     const setCurrentTab = vi.fn();
-    mockedUseDeepLinking.mockReturnValue({ ...makeDeepLinking('rules'), setCurrentTab });
+    mockedUseDeepLinking.mockReturnValue({ ...makeDeepLinking('home'), setCurrentTab });
     render(<OptionsApp />);
 
     fireEvent.click(screen.getByTestId('sidebar-nav-item-sessions'));
