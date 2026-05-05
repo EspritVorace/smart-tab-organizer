@@ -12,15 +12,12 @@ const {
 } = composed;
 
 describe('PackCard (stories)', () => {
-  it('renders the simple pack with name, description and rule count badge', () => {
+  it('renders the simple pack with metadata and toggles selection on click', () => {
     render(<PackCardSimple />);
     expect(screen.getByText('GitHub')).toBeInTheDocument();
     expect(screen.getByText('GitHub & GitLab grouping')).toBeInTheDocument();
     expect(screen.getByLabelText('GitHub')).toBeInTheDocument();
-  });
 
-  it('toggles selection when the checkbox is clicked', () => {
-    render(<PackCardSimple />);
     const checkbox = screen.getByTestId('pack-card-pk-github-checkbox');
     expect(checkbox.getAttribute('aria-checked')).toBe('false');
     fireEvent.click(checkbox);

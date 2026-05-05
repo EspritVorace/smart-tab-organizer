@@ -6,7 +6,7 @@ import * as stories from '../../src/pages/ImportExportPage.stories';
 const { ImportExportPageDefault, ImportExportPageWithRules } = composeStories(stories);
 
 describe('ImportExportPage (portable stories)', () => {
-  it('renders the page with four action cards', async () => {
+  it('renders four action cards, disables export-rules without rules, and opens the import dialog', async () => {
     render(<ImportExportPageDefault />);
     await waitFor(() => {
       expect(screen.getByTestId('page-import-export')).toBeInTheDocument();
@@ -15,45 +15,29 @@ describe('ImportExportPage (portable stories)', () => {
     expect(screen.getByTestId('page-import-export-card-import-rules')).toBeInTheDocument();
     expect(screen.getByTestId('page-import-export-card-export-sessions')).toBeInTheDocument();
     expect(screen.getByTestId('page-import-export-card-import-sessions')).toBeInTheDocument();
-  });
 
-  it('désactive le bouton export-rules quand il n\'y a aucune règle', async () => {
-    render(<ImportExportPageDefault />);
-    await waitFor(() => {
-      expect(screen.getByTestId('page-import-export')).toBeInTheDocument();
-    });
-    const card = screen.getByTestId('page-import-export-card-export-rules');
-    expect(card.querySelector('button')).toBeDisabled();
-  });
+    const exportCard = screen.getByTestId('page-import-export-card-export-rules');
+    expect(exportCard.querySelector('button')).toBeDisabled();
 
-  it('active le bouton export-rules quand des règles existent', async () => {
-    render(<ImportExportPageWithRules />);
-    await waitFor(() => {
-      expect(screen.getByTestId('page-import-export')).toBeInTheDocument();
-    });
-    const card = screen.getByTestId('page-import-export-card-export-rules');
-    expect(card.querySelector('button')).not.toBeDisabled();
-  });
-
-  it('ouvre le dialog d\'export de règles au clic', async () => {
-    render(<ImportExportPageWithRules />);
-    await waitFor(() => {
-      expect(screen.getByTestId('page-import-export-card-export-rules')).toBeInTheDocument();
-    });
-    const exportBtn = screen.getByTestId('page-import-export-card-export-rules').querySelector('button')!;
-    fireEvent.click(exportBtn);
+    const importBtn = screen
+      .getByTestId('page-import-export-card-import-rules')
+      .querySelector('button')!;
+    fireEvent.click(importBtn);
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
   });
 
-  it('ouvre le dialog d\'import de règles au clic', async () => {
-    render(<ImportExportPageDefault />);
+  it('active le bouton export-rules quand des règles existent et ouvre le dialog au clic', async () => {
+    render(<ImportExportPageWithRules />);
     await waitFor(() => {
-      expect(screen.getByTestId('page-import-export-card-import-rules')).toBeInTheDocument();
+      expect(screen.getByTestId('page-import-export')).toBeInTheDocument();
     });
-    const importBtn = screen.getByTestId('page-import-export-card-import-rules').querySelector('button')!;
-    fireEvent.click(importBtn);
+    const card = screen.getByTestId('page-import-export-card-export-rules');
+    const exportBtn = card.querySelector('button')!;
+    expect(exportBtn).not.toBeDisabled();
+
+    fireEvent.click(exportBtn);
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
