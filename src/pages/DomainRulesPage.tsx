@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button, Text, Flex, Box, Checkbox, Separator } from '@radix-ui/themes';
 import { Plus, Eye, EyeOff, Shield, AlertCircle, Upload, Trash2 } from 'lucide-react';
 import { DragDropProvider, type DragEndEvent, type DragOverEvent } from '@dnd-kit/react';
@@ -50,6 +50,10 @@ function confirmDeleteDescription(
 interface DomainRulesPageProps {
   syncSettings: AppSettings;
   updateRules: (rules: DomainRuleSetting[]) => void;
+  /** When true, opens the create-rule wizard from outside the page (e.g. HomePage). */
+  openRuleWizard?: boolean;
+  /** Notifies the parent when the modal opens or closes. */
+  onOpenRuleWizardChange?: (open: boolean) => void;
 }
 
 /* ─── Local presentation components ──────────────────────────────────────── */
@@ -104,11 +108,23 @@ function BulkActionsBar({
 
 /* ─── Page component ──────────────────────────────────────────────────────── */
 
-export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPageProps) {
+export function DomainRulesPage({
+  syncSettings,
+  updateRules,
+  openRuleWizard,
+  onOpenRuleWizardChange,
+}: DomainRulesPageProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<DomainRule | undefined>(undefined);
   const [dragItems, setDragItems] = useState<DomainRuleSetting[] | null>(null);
+
+  useEffect(() => {
+    if (openRuleWizard) {
+      setEditingRule(undefined);
+      setIsModalOpen(true);
+    }
+  }, [openRuleWizard]);
 
   const handleToggleEnabled = useCallback((ruleId: string, enabled: boolean) => {
     updateRules(syncSettings.domainRules.map(rule =>
@@ -286,11 +302,13 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
     }
     setIsModalOpen(false);
     setEditingRule(undefined);
+    onOpenRuleWizardChange?.(false);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingRule(undefined);
+    onOpenRuleWizardChange?.(false);
   };
 
   const handleConfirmDelete = useCallback(() => {

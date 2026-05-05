@@ -467,7 +467,7 @@ test.describe('Group Naming Modes', () => {
       await page.waitForFunction(() => !document.body.textContent?.includes('Chargement'));
 
       // Navigate to Import/Export section where regex preset UI lives
-      await page.getByRole('button', { name: /import.*export/i }).click();
+      await page.getByTestId('sidebar-nav-item-importexport').click();
       await page.getByTestId('page-import-export-card-import-rules').waitFor({ state: 'visible' });
 
       // The Import/Export page should show export and import buttons

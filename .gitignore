@@ -8,6 +8,7 @@ dist/
 storybook-static
 playwright-report/
 .playwright-mcp/
+.screenshots/
 test-results/
 ctrf/
 coverage/

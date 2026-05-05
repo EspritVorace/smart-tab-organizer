@@ -31,8 +31,10 @@ async function goToImportExportSection(page: any, extensionId: string): Promise<
     { timeout: 10_000 },
   );
 
-  // Click the "Import / Export" sidebar item
-  await page.getByRole('button', { name: /import.*export/i }).click();
+  // Click the "Import / Export" sidebar item (use the test id since the
+  // accessible name now matches both the sidebar nav item and the home
+  // quick-action card with the same label).
+  await page.getByTestId('sidebar-nav-item-importexport').click();
   await page.getByTestId('page-import-export-card-import-rules').waitFor({ state: 'visible' });
 }
 

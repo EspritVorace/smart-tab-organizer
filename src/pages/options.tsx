@@ -23,13 +23,17 @@ import { OptionsHeader, OptionsHeaderCollapsed } from '@/components/UI/OptionsLa
 import { WorkspaceFooter, WorkspaceFooterCollapsed } from '@/components/UI/Workspace/WorkspaceFooter';
 import { ShortcutsAside, type PageContext } from '@/components/UI/ShortcutsPanel';
 import { DomainRulesPage } from './DomainRulesPage';
+import { HomePage } from './HomePage';
 import { StatisticsPage } from './StatisticsPage';
 import { SettingsPage } from '@/components/UI/SettingsPage/SettingsPage';
 import { ImportExportPage } from './ImportExportPage';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
-import { Shield, FileText, BarChart3, Settings, Archive, Layers } from 'lucide-react';
+import { Home, Shield, FileText, BarChart3, Settings, Archive, Layers } from 'lucide-react';
 import { SessionsPage } from './SessionsPage';
 import { WorkspacesPage } from './WorkspacesPage';
+import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
+import type { Session } from '@/types/session';
+import type { HomeRestoreTarget } from '@/components/HomePage/types';
 import { Toaster } from '@/components/UI/Toaster/Toaster';
 import type { DomainRuleSettings } from '@/types/syncSettings';
 
@@ -41,6 +45,7 @@ export function OptionsContent() {
     const {
         currentTab, setCurrentTab,
         openSnapshotWizard, setOpenSnapshotWizard,
+        openRuleWizard, setOpenRuleWizard,
         snapshotGroupId, setSnapshotGroupId,
         restoreSessionId, setRestoreSessionId,
     } = useDeepLinking();
@@ -60,7 +65,27 @@ export function OptionsContent() {
         setCurrentTab(tab);
     }, [setCurrentTab]);
 
+    const handleOpenRuleWizardFromHome = useCallback(() => {
+        setOpenRuleWizard(true);
+        handleTabChange('rules');
+    }, [setOpenRuleWizard, handleTabChange]);
+
+    const handleOpenSnapshotWizardFromHome = useCallback(() => {
+        setOpenSnapshotWizard(true);
+        handleTabChange('sessions');
+    }, [setOpenSnapshotWizard, handleTabChange]);
+
+    const handleRestoreFromHome = useCallback(async (session: Session, target: HomeRestoreTarget) => {
+        if (target === 'custom') {
+            setRestoreSessionId(session.id);
+            handleTabChange('sessions');
+            return;
+        }
+        await restoreSessionTabs(session, target as RestoreTarget);
+    }, [setRestoreSessionId, handleTabChange]);
+
     const sidebarItems: SidebarItem[] = useMemo(() => [
+        { id: 'home', label: getMessage('homeTab'), icon: Home, accentColor: 'indigo' },
         { id: 'rules', label: getMessage('domainRulesTab'), icon: Shield, accentColor: 'indigo' },
         { id: 'sessions', label: getMessage('sessionsTab'), icon: Archive, accentColor: 'indigo' },
         { id: 'importexport', label: getMessage('importExportTab'), icon: FileText, accentColor: 'indigo' },
@@ -127,8 +152,24 @@ export function OptionsContent() {
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
                     <main data-testid="options-content" style={{ flex: 1, overflow: 'auto', padding: '20px 20px 0 20px', minWidth: 0 }}>
+                        {currentTab === 'home' && (
+                            <HomePage
+                                syncSettings={settings}
+                                statisticsAggregates={statisticsAggregates}
+                                onNavigate={handleTabChange}
+                                onOpenSnapshotWizard={handleOpenSnapshotWizardFromHome}
+                                onOpenRuleWizard={handleOpenRuleWizardFromHome}
+                                onOpenShortcutsAside={openShortcuts}
+                                onRestore={handleRestoreFromHome}
+                            />
+                        )}
                         {currentTab === 'rules' && (
-                            <DomainRulesPage syncSettings={settings} updateRules={updateRules} />
+                            <DomainRulesPage
+                                syncSettings={settings}
+                                updateRules={updateRules}
+                                openRuleWizard={openRuleWizard}
+                                onOpenRuleWizardChange={setOpenRuleWizard}
+                            />
                         )}
                         {currentTab === 'importexport' && (
                             <ImportExportPage syncSettings={settings} onSettingsUpdate={updateSettings} />

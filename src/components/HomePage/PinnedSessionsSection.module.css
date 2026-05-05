@@ -1,0 +1,18 @@
+.tile {
+  min-height: 116px;
+  transition: box-shadow 0.12s ease;
+}
+
+.tile:hover {
+  box-shadow: var(--shadow-3);
+}
+
+.tile:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+}

@@ -18,10 +18,11 @@ afterEach(() => {
 });
 
 describe('useDeepLinking — defaults', () => {
-  it('starts on the "rules" tab when there is no hash', () => {
+  it('starts on the "home" tab when there is no hash', () => {
     const { result } = renderHook(() => useDeepLinking());
-    expect(result.current.currentTab).toBe('rules');
+    expect(result.current.currentTab).toBe('home');
     expect(result.current.openSnapshotWizard).toBe(false);
+    expect(result.current.openRuleWizard).toBe(false);
     expect(result.current.snapshotGroupId).toBeNull();
   });
 });
@@ -39,7 +40,7 @@ describe('useDeepLinking — hash on mount', () => {
     expect(result.current.currentTab).toBe('importexport');
   });
 
-  it.each(['rules', 'sessions', 'stats', 'settings', 'importexport'])(
+  it.each(['home', 'rules', 'sessions', 'stats', 'settings', 'importexport'])(
     'accepts the valid section %s',
     (section) => {
       window.location.hash = `#${section}`;
@@ -51,7 +52,7 @@ describe('useDeepLinking — hash on mount', () => {
   it('ignores an unknown section and keeps the default', () => {
     window.location.hash = '#unknown-section';
     const { result } = renderHook(() => useDeepLinking());
-    expect(result.current.currentTab).toBe('rules');
+    expect(result.current.currentTab).toBe('home');
   });
 
   it('ignores a malformed hash that does not start with "#"', () => {
@@ -59,7 +60,7 @@ describe('useDeepLinking — hash on mount', () => {
     // Force the hash directly via replaceState so it stays empty.
     window.history.replaceState(null, '', window.location.pathname);
     const { result } = renderHook(() => useDeepLinking());
-    expect(result.current.currentTab).toBe('rules');
+    expect(result.current.currentTab).toBe('home');
   });
 });
 
@@ -97,7 +98,7 @@ describe('useDeepLinking — snapshot deep link', () => {
 describe('useDeepLinking — hashchange listener', () => {
   it('reacts to a hashchange event after mount', () => {
     const { result } = renderHook(() => useDeepLinking());
-    expect(result.current.currentTab).toBe('rules');
+    expect(result.current.currentTab).toBe('home');
 
     act(() => setHash('#stats'));
 
@@ -123,7 +124,31 @@ describe('useDeepLinking — hashchange listener', () => {
     // NOT update the (unmounted) state. We just assert that no error fires
     // by triggering the event after unmount.
     expect(() => setHash('#stats')).not.toThrow();
+    expect(result.current.currentTab).toBe('home');
+  });
+});
+
+describe('useDeepLinking — rule wizard deep link', () => {
+  it('opens the rule wizard when hash is #rules?action=create', () => {
+    window.location.hash = '#rules?action=create';
+    const { result } = renderHook(() => useDeepLinking());
     expect(result.current.currentTab).toBe('rules');
+    expect(result.current.openRuleWizard).toBe(true);
+  });
+
+  it('does not open the rule wizard when action is not "create"', () => {
+    window.location.hash = '#rules?action=other';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.currentTab).toBe('rules');
+    expect(result.current.openRuleWizard).toBe(false);
+  });
+
+  it('exposes setOpenRuleWizard to close the wizard', () => {
+    window.location.hash = '#rules?action=create';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.openRuleWizard).toBe(true);
+    act(() => result.current.setOpenRuleWizard(false));
+    expect(result.current.openRuleWizard).toBe(false);
   });
 });
 
