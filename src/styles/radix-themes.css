@@ -35,6 +35,19 @@
   border-radius: var(--radius-3);
 }
 
+/* Focusable controls using aria-disabled instead of native disabled (keeps element in tab order). */
+[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (forced-colors: active) {
+  [aria-disabled="true"] {
+    border-color: GrayText;
+    color: GrayText;
+  }
+}
+
 /* Item description shown only in dropdown items, hidden when portaled into a Select trigger. */
 .rt-SelectTriggerInner [data-select-item-description] {
   display: none;

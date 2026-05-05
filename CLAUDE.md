@@ -158,6 +158,22 @@ Pour désactiver une règle axe localement (à accompagner d'un commentaire just
 - Story : `parameters.a11y.config.rules = [{ id: 'aria-allowed-attr', enabled: false }]`.
 - E2E : `await auditPage(page, 'label', { disableRules: ['region'] });`.
 
+### Etat désactivé des contrôles focusables
+
+Tout `Button`, `IconButton`, ou élément interactif qui doit afficher une raison
+de son état désactivé utilise `aria-disabled="true"` plutôt que `disabled`. Le
+composant doit :
+1. Court-circuiter son `onClick` quand `aria-disabled` est vrai.
+2. Conserver son `tabIndex` pour rester focusable.
+3. Toujours fournir une explication via Tooltip Radix ou `aria-describedby`.
+
+Utiliser `AriaButton` (`src/components/UI/AriaButton/AriaButton.tsx`) pour les
+boutons Radix, ou appliquer le pattern directement sur les `<button>` natifs.
+
+L'attribut `disabled` natif reste réservé aux inputs de formulaire dont la
+valeur ne doit pas être soumise, et aux états de chargement transitoires (ex.
+`isRestoring`, `isAnalyzing`) où aucun tooltip explicatif n'est pertinent.
+
 ### Style d'écriture
 - **Ne jamais utiliser de tiret cadratin (`—`, U+2014) ni de tiret demi-cadratin (`–`, U+2013)** dans les contenus textuels (docs, UI, commentaires, commit messages, PR descriptions, frontmatter, etc.).
 - Préférer une reformulation : parenthèses `(...)`, virgules, deux-points `:`, ou phrases séparées.

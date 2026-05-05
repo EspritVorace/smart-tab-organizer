@@ -22,7 +22,7 @@
   transition: background-color 0.12s ease, opacity 0.12s ease;
 }
 
-.hero:hover:not(:disabled) {
+.hero:hover:not([aria-disabled="true"]) {
   background: var(--accent-10, var(--accent-9));
 }
 
@@ -31,7 +31,7 @@
   box-shadow: 0 0 0 3px var(--accent-a4);
 }
 
-.hero:disabled {
+.hero[aria-disabled="true"] {
   cursor: not-allowed;
   opacity: 0.7;
 }
@@ -106,7 +106,7 @@
   transition: background-color 0.12s ease, border-color 0.12s ease, opacity 0.12s ease;
 }
 
-.metaButton:hover:not(:disabled) {
+.metaButton:hover:not([aria-disabled="true"]) {
   background: var(--gray-a2);
 }
 
@@ -116,7 +116,7 @@
   box-shadow: 0 0 0 3px var(--accent-a3);
 }
 
-.metaButton:disabled {
+.metaButton[aria-disabled="true"] {
   cursor: not-allowed;
   opacity: 0.5;
 }

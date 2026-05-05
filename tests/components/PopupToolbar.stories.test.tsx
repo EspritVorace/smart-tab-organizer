@@ -25,24 +25,27 @@ describe('PopupToolbar (stories)', () => {
     await waitFor(() => {
       expect(screen.getByTestId('popup-toolbar')).toBeInTheDocument();
     });
-    expect(screen.getByTestId('popup-toolbar-btn-organize')).not.toBeDisabled();
-    expect(screen.getByTestId('popup-toolbar-btn-save')).not.toBeDisabled();
-    expect(screen.getByTestId('popup-toolbar-btn-restore')).not.toBeDisabled();
+    expect(screen.getByTestId('popup-toolbar-btn-organize')).not.toHaveAttribute('aria-disabled');
+    expect(screen.getByTestId('popup-toolbar-btn-save')).not.toHaveAttribute('aria-disabled');
+    expect(screen.getByTestId('popup-toolbar-btn-restore')).not.toHaveAttribute('aria-disabled');
   });
 
-  it('disables the organize button while organizing', () => {
+  it('marks the organize button aria-disabled while organizing', () => {
     render(<PopupToolbarOrganizing />);
-    expect(screen.getByTestId('popup-toolbar-btn-organize')).toBeDisabled();
+    expect(screen.getByTestId('popup-toolbar-btn-organize')).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByTestId('popup-toolbar-btn-organize')).not.toHaveAttribute('disabled');
   });
 
-  it('disables the restore button when there are no sessions', () => {
+  it('marks the restore button aria-disabled when there are no sessions', () => {
     render(<PopupToolbarNoSessions />);
-    expect(screen.getByTestId('popup-toolbar-btn-restore')).toBeDisabled();
+    expect(screen.getByTestId('popup-toolbar-btn-restore')).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByTestId('popup-toolbar-btn-restore')).not.toHaveAttribute('disabled');
   });
 
-  it('disables the save button when canSave is false', () => {
+  it('marks the save button aria-disabled when canSave is false', () => {
     render(<PopupToolbarSaveDisabled />);
-    expect(screen.getByTestId('popup-toolbar-btn-save')).toBeDisabled();
+    expect(screen.getByTestId('popup-toolbar-btn-save')).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByTestId('popup-toolbar-btn-save')).not.toHaveAttribute('disabled');
   });
 
   it('renders without crashing when there are no active rules', () => {
