@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { Tooltip } from '@radix-ui/themes';
 import { browser } from 'wxt/browser';
 import { Camera, RotateCcw, Wand2 } from 'lucide-react';
 import { getMessage, getPluralMessage } from '@/utils/i18n';
@@ -15,6 +16,10 @@ export interface PopupToolbarProps {
   canSave?: boolean;
   isOrganizing?: boolean;
   activeTabGroupId?: number | null;
+}
+
+function withOptionalTooltip(reason: string | undefined, node: React.ReactElement) {
+  return reason ? <Tooltip content={reason}>{node}</Tooltip> : node;
 }
 
 export function PopupToolbar(props: PopupToolbarProps = {}) {
@@ -61,6 +66,8 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
   };
 
   const saveDisabledHint = !canSave ? getMessage('popupSaveDisabledHint') : undefined;
+  const restoreDisabledHint = !hasSessions ? getMessage('popupRestoreDisabledHint') : undefined;
+
   const isInGroup = activeTabGroupId !== null && canSave;
   const saveHash = isInGroup
     ? `#sessions?action=snapshot&groupId=${activeTabGroupId}`
@@ -80,14 +87,42 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
     'popupActiveRulesCountZero'
   );
 
+  const saveButton = (
+    <button
+      type="button"
+      data-testid="popup-toolbar-btn-save"
+      className={styles.metaButton}
+      aria-disabled={!canSave || undefined}
+      onClick={canSave ? () => void openOptionsWithHash(saveHash) : undefined}
+      aria-label={saveAriaLabel}
+    >
+      <Camera size={13} className={styles.metaIcon} aria-hidden="true" />
+      <span className={styles.metaLabel}>{getMessage('popupSaveSession')}</span>
+    </button>
+  );
+
+  const restoreButton = (
+    <button
+      type="button"
+      data-testid="popup-toolbar-btn-restore"
+      className={styles.metaButton}
+      aria-disabled={!hasSessions || undefined}
+      onClick={hasSessions ? () => void openOptionsWithHash('#sessions') : undefined}
+      aria-label={getMessage('popupRestoreSession')}
+    >
+      <RotateCcw size={13} className={styles.metaIcon} aria-hidden="true" />
+      <span className={styles.metaLabel}>{getMessage('popupRestoreSession')}</span>
+    </button>
+  );
+
   return (
     <div data-testid="popup-toolbar" className={styles.toolbar}>
       <button
         type="button"
         data-testid="popup-toolbar-btn-organize"
         className={styles.hero}
-        disabled={isOrganizing}
-        onClick={() => void handleOrganize()}
+        aria-disabled={isOrganizing || undefined}
+        onClick={isOrganizing ? undefined : () => void handleOrganize()}
         aria-label={getMessage('organizeAllTabs')}
         title={getMessage('organizeAllTabs')}
       >
@@ -104,30 +139,8 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
       </button>
 
       <div className={styles.metaRow}>
-        <button
-          type="button"
-          data-testid="popup-toolbar-btn-save"
-          className={styles.metaButton}
-          disabled={!canSave}
-          onClick={() => void openOptionsWithHash(saveHash)}
-          aria-label={saveAriaLabel}
-          title={saveDisabledHint}
-        >
-          <Camera size={13} className={styles.metaIcon} />
-          <span className={styles.metaLabel}>{getMessage('popupSaveSession')}</span>
-        </button>
-
-        <button
-          type="button"
-          data-testid="popup-toolbar-btn-restore"
-          className={styles.metaButton}
-          disabled={!hasSessions}
-          onClick={() => void openOptionsWithHash('#sessions')}
-          aria-label={getMessage('popupRestoreSession')}
-        >
-          <RotateCcw size={13} className={styles.metaIcon} />
-          <span className={styles.metaLabel}>{getMessage('popupRestoreSession')}</span>
-        </button>
+        {withOptionalTooltip(saveDisabledHint, saveButton)}
+        {withOptionalTooltip(restoreDisabledHint, restoreButton)}
       </div>
     </div>
   );

@@ -9,6 +9,8 @@ interface ExportSplitButtonProps {
   labelKey: string;
   actions: ExportActions;
   disabled: boolean;
+  /** Explanation shown in a Tooltip when the button is disabled. */
+  disabledReason?: string;
   /** data-testid forwarded to the primary (file) button. */
   primaryTestId?: string;
   /** data-testid forwarded to the clipboard menu item. */
@@ -23,6 +25,7 @@ export function ExportSplitButton({
   labelKey,
   actions,
   disabled,
+  disabledReason,
   primaryTestId,
   clipboardTestId,
 }: ExportSplitButtonProps) {
@@ -32,6 +35,7 @@ export function ExportSplitButton({
       onClick={actions.exportToFile}
       ariaLabel={getMessage('exportOptions')}
       disabled={disabled}
+      disabledReason={disabledReason}
       data-testid={primaryTestId}
       menuItems={[
         {
