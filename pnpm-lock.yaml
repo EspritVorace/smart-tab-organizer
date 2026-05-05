@@ -125,8 +125,8 @@ importers:
         specifier: 9.2.1
         version: 9.2.1
       esbuild-wasm:
-        specifier: ^0.25.6
-        version: 0.25.12
+        specifier: ^0.28.0
+        version: 0.28.0
       eslint:
         specifier: ^10.3.0
         version: 10.3.0(jiti@2.6.1)
@@ -3403,8 +3403,8 @@ packages:
     peerDependencies:
       esbuild: '>=0.12 <1'
 
-  esbuild-wasm@0.25.12:
-    resolution: {integrity: sha512-rZqkjL3Y6FwLpSHzLnaEy8Ps6veCNo1kZa9EOfJvmWtBq5dJH4iVjfmOO6Mlkv9B0tt9WFPFmb/VxlgJOnueNg==}
+  esbuild-wasm@0.28.0:
+    resolution: {integrity: sha512-5TRVKExcEmeMkccIZMzUq+Az6X2RoMAJyfl6SMMO1dMVhmvt0I2mx7gAb6zYi42n4d1ETcatFXazGKzA+aW7fg==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -9477,7 +9477,7 @@ snapshots:
       - supports-color
     optional: true
 
-  esbuild-wasm@0.25.12: {}
+  esbuild-wasm@0.28.0: {}
 
   esbuild@0.27.4:
     optionalDependencies:
