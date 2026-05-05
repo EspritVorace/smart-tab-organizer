@@ -6,27 +6,15 @@ import * as stories from '../../src/pages/DomainRulesPage.stories';
 const { DomainRulesPageDefault, DomainRulesPageEmpty } = composeStories(stories);
 
 describe('DomainRulesPage (portable stories)', () => {
-  it('renders the page with toolbar and rules list', () => {
+  it('renders the page with toolbar, list, and search empty state', async () => {
     render(<DomainRulesPageDefault />);
 
     expect(screen.getByTestId('page-rules')).toBeInTheDocument();
     expect(screen.getByTestId('page-rules-toolbar')).toBeInTheDocument();
     expect(screen.getByTestId('page-rules-btn-add')).toBeInTheDocument();
     expect(screen.getByTestId('page-rules-list')).toBeInTheDocument();
-  });
 
-  it('shows empty state when no rules and hides the toolbar', () => {
-    render(<DomainRulesPageEmpty />);
-    expect(screen.getByTestId('page-rules-empty')).toBeInTheDocument();
-    // Add button is present in the empty placeholder (same testid as the toolbar button, mutually exclusive).
-    expect(screen.getByTestId('page-rules-btn-add')).toBeInTheDocument();
-    // Toolbar is hidden when there are no rules (search is useless, add is already in the placeholder).
-    expect(screen.queryByTestId('page-rules-toolbar')).not.toBeInTheDocument();
-  });
-
-  it("affiche l'état vide compact quand la recherche ne retourne aucun résultat", async () => {
-    render(<DomainRulesPageDefault />);
-
+    // État vide compact quand la recherche ne retourne aucun résultat.
     const searchInput = screen.getByTestId('page-rules-search');
     fireEvent.change(searchInput, { target: { value: 'xyznotexist' } });
 
@@ -39,7 +27,16 @@ describe('DomainRulesPage (portable stories)', () => {
     expect(screen.getByText('No rules found')).toBeInTheDocument();
   });
 
-  it("ouvre la boite de dialogue de suppression unique avec le bon titre", async () => {
+  it('shows empty state when no rules and hides the toolbar', () => {
+    render(<DomainRulesPageEmpty />);
+    expect(screen.getByTestId('page-rules-empty')).toBeInTheDocument();
+    // Add button is present in the empty placeholder (same testid as the toolbar button, mutually exclusive).
+    expect(screen.getByTestId('page-rules-btn-add')).toBeInTheDocument();
+    // Toolbar is hidden when there are no rules (search is useless, add is already in the placeholder).
+    expect(screen.queryByTestId('page-rules-toolbar')).not.toBeInTheDocument();
+  });
+
+  it('single delete: opens dialog with correct title and confirms (handleConfirmDelete - single)', async () => {
     render(<DomainRulesPageDefault />);
 
     // Radix UI DropdownMenu s'ouvre sur pointerDown (pas click)
@@ -54,9 +51,17 @@ describe('DomainRulesPage (portable stories)', () => {
     await waitFor(() => {
       expect(screen.getByText('Delete this rule?')).toBeInTheDocument();
     });
+
+    const confirmBtn = await screen.findByTestId('confirm-dialog-btn-confirm');
+    fireEvent.click(confirmBtn);
+
+    // Le dialog se ferme après confirmation
+    await waitFor(() => {
+      expect(screen.queryByTestId('confirm-dialog')).not.toBeInTheDocument();
+    });
   });
 
-  it("ouvre la boite de dialogue de suppression en masse avec le bon titre", async () => {
+  it('bulk delete: opens dialog with correct title and confirms (handleConfirmDelete - bulk)', async () => {
     render(<DomainRulesPageDefault />);
 
     // Cocher la première règle pour faire apparaître la BulkActionsBar
@@ -71,34 +76,6 @@ describe('DomainRulesPage (portable stories)', () => {
     await waitFor(() => {
       expect(screen.getByText('Delete the selected rules?')).toBeInTheDocument();
     });
-  });
-
-  it('confirme la suppression unique (handleConfirmDelete - single)', async () => {
-    render(<DomainRulesPageDefault />);
-
-    const trigger = screen.getByTestId('rule-card-rule-1-btn-dropdown');
-    fireEvent.pointerDown(trigger, { button: 0, ctrlKey: false });
-
-    const deleteItem = await screen.findByTestId('rule-card-rule-1-menu-delete');
-    fireEvent.click(deleteItem);
-
-    const confirmBtn = await screen.findByTestId('confirm-dialog-btn-confirm');
-    fireEvent.click(confirmBtn);
-
-    // Le dialog se ferme après confirmation
-    await waitFor(() => {
-      expect(screen.queryByTestId('confirm-dialog')).not.toBeInTheDocument();
-    });
-  });
-
-  it('confirme la suppression en masse (handleConfirmDelete - bulk)', async () => {
-    render(<DomainRulesPageDefault />);
-
-    const checkboxes = screen.getAllByRole('checkbox');
-    fireEvent.click(checkboxes[0]);
-
-    const deleteSelectedBtn = await screen.findByText('Delete Selected');
-    fireEvent.click(deleteSelectedBtn);
 
     const confirmBtn = await screen.findByTestId('confirm-dialog-btn-confirm');
     fireEvent.click(confirmBtn);
