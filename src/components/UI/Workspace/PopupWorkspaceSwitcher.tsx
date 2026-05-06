@@ -17,7 +17,12 @@ interface PopupWorkspaceSwitcherProps {
  * sidebar footer but adapted for the 400px popup width.
  */
 export function PopupWorkspaceSwitcher({ onManage }: PopupWorkspaceSwitcherProps) {
-  const { active, accentColor } = useActiveWorkspaceContext();
+  const { active, accentColor, workspaces, isLoaded } = useActiveWorkspaceContext();
+
+  if (!isLoaded || workspaces.length <= 1) {
+    return null;
+  }
+
   const name = active?.name ?? getMessage('workspaceDefaultName');
 
   const trigger = (
