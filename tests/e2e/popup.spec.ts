@@ -87,13 +87,17 @@ test.describe('[US-PO01] Toolbar', () => {
     extensionContext,
     extensionId,
   }) => {
-    // Close all existing pages so hasCapturableTabs() sees no capturable tab
-    // (extension pages like chrome-extension:// are already filtered by hasCapturableTabs)
-    for (const p of extensionContext.pages()) {
-      await p.close().catch(() => {});
-    }
-
+    // Snapshot existing pages BEFORE opening the new one. Chromium persistent
+    // contexts with --load-extension can shut down (or refuse subsequent
+    // newPage() calls with "Failed to open a new tab") once their last page
+    // closes, so we keep the new page alive while we close the others.
+    const stalePages = extensionContext.pages();
     const page = await extensionContext.newPage();
+
+    // Close stale pages so hasCapturableTabs() sees no capturable tab.
+    // Extension pages (chrome-extension://) are already filtered by hasCapturableTabs.
+    await Promise.all(stalePages.map((p) => p.close().catch(() => {})));
+
     await goToPopup(page, extensionId);
 
     const saveBtn = page.getByTestId('popup-toolbar-btn-save');
