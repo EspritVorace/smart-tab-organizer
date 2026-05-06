@@ -36,6 +36,17 @@ const wrap = (ui: React.ReactNode) => render(<Theme>{ui}</Theme>);
 beforeEach(() => {
   ctx.active = null;
   ctx.accentColor = 'indigo';
+  ctx.workspaces = [];
+  ctx.isLoaded = true;
+});
+
+const makeWorkspace = (overrides: Partial<WorkspaceMeta> = {}): WorkspaceMeta => ({
+  id: 'ws-default',
+  name: 'Default',
+  accentColor: 'indigo',
+  createdAt: '2025-01-01T00:00:00.000Z',
+  updatedAt: '2025-01-01T00:00:00.000Z',
+  ...overrides,
 });
 
 describe('WorkspaceFooter', () => {
@@ -95,6 +106,13 @@ describe('WorkspaceFooterCollapsed', () => {
 });
 
 describe('PopupWorkspaceSwitcher', () => {
+  beforeEach(() => {
+    ctx.workspaces = [
+      makeWorkspace({ id: 'default', name: 'Default' }),
+      makeWorkspace({ id: 'ws-2', name: 'Side project', accentColor: 'jade' }),
+    ];
+  });
+
   it('renders the popup-specific switcher with trigger', () => {
     wrap(<PopupWorkspaceSwitcher />);
     expect(screen.getByTestId('popup-workspace-switcher')).toBeInTheDocument();
@@ -111,5 +129,25 @@ describe('PopupWorkspaceSwitcher', () => {
     };
     wrap(<PopupWorkspaceSwitcher />);
     expect(screen.getByText('Important')).toBeInTheDocument();
+  });
+
+  it('renders nothing when only the default workspace exists', () => {
+    ctx.workspaces = [makeWorkspace({ id: 'default', name: 'Default' })];
+    wrap(<PopupWorkspaceSwitcher />);
+    expect(screen.queryByTestId('popup-workspace-switcher')).toBeNull();
+    expect(screen.queryByTestId('popup-workspace-trigger')).toBeNull();
+  });
+
+  it('renders nothing when the workspace list is empty (pre-migration)', () => {
+    ctx.workspaces = [];
+    wrap(<PopupWorkspaceSwitcher />);
+    expect(screen.queryByTestId('popup-workspace-switcher')).toBeNull();
+  });
+
+  it('renders nothing while the workspace list is loading', () => {
+    ctx.isLoaded = false;
+    ctx.workspaces = [];
+    wrap(<PopupWorkspaceSwitcher />);
+    expect(screen.queryByTestId('popup-workspace-switcher')).toBeNull();
   });
 });
