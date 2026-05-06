@@ -565,7 +565,6 @@
   "homepageHeroOnboardingSubtitle": { "message": "Group your tabs by domain, deduplicate automatically, and save your work sessions. Everything stays on your machine, with no cloud and no AI." },
   "homepageHeroOnboardingImportPack": { "message": "Import a rules pack" },
   "homepageHeroOnboardingCreateRule": { "message": "Create my first rule" },
-  "homepageHeroCompactTitle": { "message": "Dashboard" },
   "homepagePinnedSessionsTitle": { "message": "Pinned sessions" },
   "homepagePinnedSessionsSeeAll": { "message": "View all sessions" },
   "homepagePinnedSessionsTileMeta": { "message": "$1$ groups · $2$ tabs", "placeholders": { "1": { "content": "$1", "example": "3" }, "2": { "content": "$2", "example": "12" } } },

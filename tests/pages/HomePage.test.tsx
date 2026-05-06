@@ -132,7 +132,7 @@ describe('HomePage rendering', () => {
     expect(screen.getByTestId('home-hero-create-rule')).toBeInTheDocument();
   });
 
-  it('shows the compact hero when there is at least one rule', () => {
+  it('hides the onboarding hero when there is at least one rule', () => {
     const settings: AppSettings = {
       ...baseSettings,
       domainRules: [{ id: 'r1', label: 'Test', enabled: true } as DomainRuleSetting],
@@ -145,7 +145,7 @@ describe('HomePage rendering', () => {
       />,
     );
     expect(screen.queryByTestId('home-hero-import')).not.toBeInTheDocument();
-    expect(screen.getByText('homepageHeroCompactTitle')).toBeInTheDocument();
+    expect(screen.queryByTestId('home-hero-create-rule')).not.toBeInTheDocument();
   });
 
   it('renders the pinned-sessions section only when at least one session is pinned', () => {
