@@ -566,7 +566,6 @@
   "homepageHeroOnboardingSubtitle": { "message": "Groupez vos onglets par domaine, dédupliquez automatiquement et sauvegardez vos sessions de travail. Tout reste sur votre machine, sans cloud ni IA." },
   "homepageHeroOnboardingImportPack": { "message": "Importer un pack de règles" },
   "homepageHeroOnboardingCreateRule": { "message": "Créer ma première règle" },
-  "homepageHeroCompactTitle": { "message": "Tableau de bord" },
   "homepagePinnedSessionsTitle": { "message": "Sessions épinglées" },
   "homepagePinnedSessionsSeeAll": { "message": "Voir toutes les sessions" },
   "homepagePinnedSessionsTileMeta": { "message": "$1$ groupes · $2$ onglets", "placeholders": { "1": { "content": "$1", "example": "3" }, "2": { "content": "$2", "example": "12" } } },

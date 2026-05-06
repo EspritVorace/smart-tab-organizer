@@ -566,7 +566,6 @@
   "homepageHeroOnboardingSubtitle": { "message": "Agrupa tus pestañas por dominio, elimina duplicados automáticamente y guarda tus sesiones de trabajo. Todo se queda en tu equipo, sin nube y sin IA." },
   "homepageHeroOnboardingImportPack": { "message": "Importar un paquete de reglas" },
   "homepageHeroOnboardingCreateRule": { "message": "Crear mi primera regla" },
-  "homepageHeroCompactTitle": { "message": "Panel de control" },
   "homepagePinnedSessionsTitle": { "message": "Sesiones ancladas" },
   "homepagePinnedSessionsSeeAll": { "message": "Ver todas las sesiones" },
   "homepagePinnedSessionsTileMeta": { "message": "$1$ grupos · $2$ pestañas", "placeholders": { "1": { "content": "$1", "example": "3" }, "2": { "content": "$2", "example": "12" } } },

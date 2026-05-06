@@ -1,12 +1,13 @@
 import { useMemo } from 'react';
 import { browser } from 'wxt/browser';
-import { Box } from '@radix-ui/themes';
+import { Box, Flex } from '@radix-ui/themes';
+import { Home } from 'lucide-react';
 import { useSessions } from '@/hooks/useSessions';
 import type { AppSettings } from '@/types/syncSettings';
 import type { Session } from '@/types/session';
 import type { StatisticsAggregates } from '@/types/statistics';
+import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { HeroOnboarding } from '@/components/HomePage/HeroOnboarding';
-import { HeroCompact } from '@/components/HomePage/HeroCompact';
 import { PinnedSessionsSection } from '@/components/HomePage/PinnedSessionsSection';
 import { QuickActionsSection } from '@/components/HomePage/QuickActionsSection';
 import { TipsSection } from '@/components/HomePage/TipsSection';
@@ -17,7 +18,6 @@ import {
 import { HomePageSkeleton } from '@/components/HomePage/HomePageSkeleton';
 import type { QuickActionId } from '@/components/HomePage/data';
 import type { HomeRestoreTarget } from '@/components/HomePage/types';
-import styles from './HomePage.module.css';
 
 export interface HomePageProps {
   syncSettings: AppSettings;
@@ -104,46 +104,47 @@ export function HomePage({
     onNavigate('sessions');
   };
 
-  if (isLoading) {
-    return (
-      <Box asChild className={styles.home}>
-        <main data-testid="page-home">
-          <HomePageSkeleton />
-        </main>
-      </Box>
-    );
-  }
-
   return (
-    <Box asChild className={styles.home}>
-      <main data-testid="page-home">
-        {isEmpty ? (
-          <HeroOnboarding
-            onImportPack={() => onNavigate('importexport')}
-            onCreateRule={onOpenRuleWizard}
-          />
-        ) : (
-          <HeroCompact />
-        )}
+    <PageLayout
+      titleKey="homeTab"
+      descriptionKey="homePageDescription"
+      icon={Home}
+      syncSettings={syncSettings}
+    >
+      {() => (
+        <Box data-testid="page-home">
+          {isLoading ? (
+            <HomePageSkeleton />
+          ) : (
+            <Flex direction="column" gap="5">
+              {isEmpty && (
+                <HeroOnboarding
+                  onImportPack={() => onNavigate('importexport')}
+                  onCreateRule={onOpenRuleWizard}
+                />
+              )}
 
-        <PinnedSessionsSection
-          sessions={pinnedSessions}
-          onSeeAll={handleSeeAllSessions}
-          onRestore={onRestore}
-        />
+              <PinnedSessionsSection
+                sessions={pinnedSessions}
+                onSeeAll={handleSeeAllSessions}
+                onRestore={onRestore}
+              />
 
-        <QuickActionsSection count={QUICK_COUNT_DEFAULT} onAction={handleQuickAction} />
+              <QuickActionsSection count={QUICK_COUNT_DEFAULT} onAction={handleQuickAction} />
 
-        <TipsSection variant="cards" />
+              <TipsSection variant="cards" />
 
-        {showStats && (
-          <MiniStatsSection
-            stats={{ groups: totalGrouping, dedup: totalDedup, sessions: totalSessions }}
-            onNavigate={handleMiniStatNavigate}
-            locale={locale}
-          />
-        )}
-      </main>
-    </Box>
+              {showStats && (
+                <MiniStatsSection
+                  stats={{ groups: totalGrouping, dedup: totalDedup, sessions: totalSessions }}
+                  onNavigate={handleMiniStatNavigate}
+                  locale={locale}
+                />
+              )}
+            </Flex>
+          )}
+        </Box>
+      )}
+    </PageLayout>
   );
 }
