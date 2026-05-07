@@ -3,14 +3,14 @@
   "pack": {
     "id": "pk-dev-cross-tool-tickets",
     "name": {
-      "en": "Cross-tool Jira references",
-      "fr": "Références Jira inter-outils",
-      "es": "Referencias Jira entre herramientas"
+      "en": "Cross-tool ticket references",
+      "fr": "Références ticket inter-outils",
+      "es": "Referencias de ticket entre herramientas"
     },
     "description": {
-      "en": "Group tabs across GitHub, GitLab, Gitea, Bitbucket, Trello and Asana by the Jira ticket key (PROJ-123) referenced in their title. Pull requests, merge requests, cards and tasks that mention the same ticket end up in the same group as the Jira ticket itself.",
-      "fr": "Regroupe les onglets GitHub, GitLab, Gitea, Bitbucket, Trello et Asana par la clé de ticket Jira (PROJ-123) référencée dans leur titre. Les pull requests, merge requests, cartes et tâches qui mentionnent le même ticket atterrissent dans le même groupe que le ticket Jira lui-même.",
-      "es": "Agrupa las pestañas de GitHub, GitLab, Gitea, Bitbucket, Trello y Asana por la clave de ticket Jira (PROJ-123) referenciada en su título. Las pull requests, merge requests, tarjetas y tareas que mencionan el mismo ticket acaban en el mismo grupo que el ticket Jira."
+      "en": "Group tabs across GitHub, GitLab, Gitea, Bitbucket, Trello and Asana by the ticket key (PROJ-123) referenced in their title. Works with any tracker that uses a PREFIX-NUMBER scheme: Jira, Linear, Shortcut, YouTrack, Plane, ClickUp custom IDs. Pull requests, merge requests, cards and tasks that mention the same ticket land in the same group as the ticket itself.",
+      "fr": "Regroupe les onglets GitHub, GitLab, Gitea, Bitbucket, Trello et Asana par la clé de ticket (PROJ-123) référencée dans leur titre. Fonctionne avec tout gestionnaire qui utilise un schéma PRÉFIXE-NUMÉRO : Jira, Linear, Shortcut, YouTrack, Plane, identifiants personnalisés ClickUp. Les pull requests, merge requests, cartes et tâches qui mentionnent le même ticket atterrissent dans le même groupe que le ticket lui-même.",
+      "es": "Agrupa las pestañas de GitHub, GitLab, Gitea, Bitbucket, Trello y Asana por la clave de ticket (PROJ-123) referenciada en su título. Compatible con cualquier gestor que use un esquema PREFIJO-NÚMERO: Jira, Linear, Shortcut, YouTrack, Plane, identificadores personalizados de ClickUp. Las pull requests, merge requests, tarjetas y tareas que mencionan el mismo ticket acaban en el mismo grupo que el ticket."
     },
     "categoryId": "development"
   },
@@ -19,7 +19,7 @@
       "id": "pk-dev-cross-github",
       "enabled": true,
       "domainFilter": "github.com",
-      "label": "GitHub: Jira ref in title",
+      "label": "GitHub: Ticket ref in title",
       "titleParsingRegEx": "([A-Z][A-Z0-9_]+-\\d+)",
       "urlParsingRegEx": "",
       "groupNameSource": "smart_preset",
@@ -35,7 +35,7 @@
       "id": "pk-dev-cross-gitlab",
       "enabled": true,
       "domainFilter": "gitlab.com",
-      "label": "GitLab: Jira ref in title",
+      "label": "GitLab: Ticket ref in title",
       "titleParsingRegEx": "([A-Z][A-Z0-9_]+-\\d+)",
       "urlParsingRegEx": "",
       "groupNameSource": "smart_preset",
@@ -51,7 +51,7 @@
       "id": "pk-dev-cross-gitea",
       "enabled": true,
       "domainFilter": "*.gitea.io",
-      "label": "Gitea: Jira ref in title",
+      "label": "Gitea: Ticket ref in title",
       "titleParsingRegEx": "([A-Z][A-Z0-9_]+-\\d+)",
       "urlParsingRegEx": "",
       "groupNameSource": "smart_preset",
@@ -67,7 +67,7 @@
       "id": "pk-dev-cross-bitbucket",
       "enabled": true,
       "domainFilter": "*.bitbucket.org",
-      "label": "Bitbucket: Jira ref in title",
+      "label": "Bitbucket: Ticket ref in title",
       "titleParsingRegEx": "([A-Z][A-Z0-9_]+-\\d+)",
       "urlParsingRegEx": "",
       "groupNameSource": "smart_preset",
@@ -83,7 +83,7 @@
       "id": "pk-dev-cross-trello",
       "enabled": true,
       "domainFilter": "trello.com",
-      "label": "Trello: Jira ref in title",
+      "label": "Trello: Ticket ref in title",
       "titleParsingRegEx": "([A-Z][A-Z0-9_]+-\\d+)",
       "urlParsingRegEx": "",
       "groupNameSource": "smart_preset",
@@ -99,7 +99,7 @@
       "id": "pk-dev-cross-asana",
       "enabled": true,
       "domainFilter": "app.asana.com",
-      "label": "Asana: Jira ref in title",
+      "label": "Asana: Ticket ref in title",
       "titleParsingRegEx": "([A-Z][A-Z0-9_]+-\\d+)",
       "urlParsingRegEx": "",
       "groupNameSource": "smart_preset",
