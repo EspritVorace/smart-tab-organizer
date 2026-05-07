@@ -19,6 +19,7 @@ import { matchSessionSearch, splitByPinned } from '@/utils/sessionUtils';
 import { moveSessionToFirstInGroup, moveSessionToLastInGroup } from '@/utils/sessionOrderUtils';
 import { useSessions } from '@/hooks/useSessions';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useListNavigation } from '@/hooks/useListNavigation';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { updateSession } from '@/utils/sessionStorage';
 import { showSuccessNotification } from '@/utils/notifications';
@@ -184,30 +185,7 @@ function SessionSection({
     }
   }, [handleRestoreCurrentWindow, handleRestoreNewWindow, handleReplaceCurrentWindow, onOpenRestoreWizard]);
 
-  const handleNavigationKey = useCallback((e: React.KeyboardEvent<HTMLElement>, index: number): boolean => {
-    const cards = listRef.current?.querySelectorAll<HTMLElement>('[data-session-card]');
-    if (!cards) return false;
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        cards[index + 1]?.focus();
-        return true;
-      case 'ArrowUp':
-        e.preventDefault();
-        cards[index - 1]?.focus();
-        return true;
-      case 'Home':
-        e.preventDefault();
-        cards[0]?.focus();
-        return true;
-      case 'End':
-        e.preventDefault();
-        cards[cards.length - 1]?.focus();
-        return true;
-      default:
-        return false;
-    }
-  }, []);
+  const { handleNavigationKey } = useListNavigation(listRef, '[data-session-card]');
 
   const handleCardKeyDown = useCallback((e: React.KeyboardEvent<HTMLElement>, index: number, session: Session) => {
     // Only act when the card element itself has focus (not a child input/button).

@@ -72,6 +72,17 @@ const groupListSessions: ShortcutGroup = {
   subgroups: [groupSessionCard],
 };
 
+const groupListHome: ShortcutGroup = {
+  titleKey: 'shortcutsGroupListHome',
+  shortcuts: [
+    { keys: ['←', '→'], descriptionKey: 'shortcutDescListNavigate' },
+    { keys: ['Home', 'End'], descriptionKey: 'shortcutDescHomeFirstLast' },
+    { keys: ['Tab'], descriptionKey: 'shortcutDescHomeNextSection' },
+    { keys: ['Enter'], descriptionKey: 'shortcutDescHomeActivate' },
+  ],
+  subgroups: [groupSessionCard],
+};
+
 const groupOptions: ShortcutGroup = {
   titleKey: 'shortcutsGroupOptions',
   shortcuts: [
@@ -95,6 +106,7 @@ const groupPopup: ShortcutGroup = {
 
 export const SHORTCUT_GROUPS: ShortcutGroup[] = [
   groupGlobal,
+  groupListHome,
   groupListRules,
   groupListSessions,
   groupOptions,
@@ -102,6 +114,7 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
 ];
 
 export type PageContext =
+  | 'home'
   | 'rules'
   | 'sessions'
   | 'importexport'
@@ -126,11 +139,14 @@ export function isGroupOpenByDefault(
       return true;
     case 'shortcutsGroupPopup':
       return pageContext === undefined;
+    case 'shortcutsGroupListHome':
+      return pageContext === 'home';
     case 'shortcutsGroupListRules':
       return pageContext === 'rules';
     case 'shortcutsGroupListSessions':
-    case 'shortcutsGroupSessionCard':
       return pageContext === 'sessions';
+    case 'shortcutsGroupSessionCard':
+      return pageContext === 'sessions' || pageContext === 'home';
     default:
       return false;
   }

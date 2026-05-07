@@ -531,6 +531,7 @@
   "shortcutsGroupGlobal": { "message": "Browser-wide" },
   "shortcutsGroupPopup": { "message": "Popup" },
   "shortcutsGroupOptions": { "message": "Options page" },
+  "shortcutsGroupListHome": { "message": "Home page" },
   "shortcutsGroupListRules": { "message": "Rules list" },
   "shortcutsGroupListSessions": { "message": "Sessions list" },
   "shortcutsGroupSessionCard": { "message": "Session card (focused)" },
@@ -558,6 +559,9 @@
   "shortcutDescSessionRestoreCurrent": { "message": "Add session to current window" },
   "shortcutDescSessionReplaceCurrent": { "message": "Replace current window tabs" },
   "shortcutDescSessionRestoreNew": { "message": "Open session in a new window" },
+  "shortcutDescHomeFirstLast": { "message": "Move focus to first or last item" },
+  "shortcutDescHomeNextSection": { "message": "Move focus to the next section" },
+  "shortcutDescHomeActivate": { "message": "Activate the focused item" },
 
   "homeTab": { "message": "Home" },
   "homePageDescription": { "message": "Your SmartTab Organizer dashboard: pinned sessions, shortcuts, and activity." },
