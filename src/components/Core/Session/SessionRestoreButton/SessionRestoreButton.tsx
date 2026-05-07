@@ -1,5 +1,6 @@
 import React from 'react';
-import { Monitor, Play, Replace, Square, Wrench } from 'lucide-react';
+import { Flex } from '@radix-ui/themes';
+import { Monitor, Play, Replace, RotateCcw, Square, Wrench } from 'lucide-react';
 import { SplitButton } from '@/components/UI/SplitButton/SplitButton';
 import { getMessage } from '@/utils/i18n';
 import type { Session } from '@/types/session';
@@ -12,6 +13,7 @@ export interface SessionRestoreButtonProps {
   onCustomize: (session: Session) => void;
   size?: '1' | '2' | '3';
   variant?: 'solid' | 'soft' | 'outline';
+  presentation?: 'default' | 'tile';
   'data-testid'?: string;
 }
 
@@ -23,12 +25,23 @@ export function SessionRestoreButton({
   onCustomize,
   size = '1',
   variant = 'soft',
+  presentation = 'default',
   'data-testid': testId,
 }: SessionRestoreButtonProps) {
+  const isTile = presentation === 'tile';
+  const label = isTile ? (
+    <Flex align="center" gap="1">
+      <RotateCcw size={14} aria-hidden="true" />
+      {getMessage('sessionRestore')}
+    </Flex>
+  ) : (
+    <Play size={12} fill="currentColor" />
+  );
+
   return (
     <SplitButton
       data-testid={testId}
-      label={<Play size={12} fill="currentColor" />}
+      label={label}
       primaryAriaLabel={getMessage('sessionRestoreCurrentWindow')}
       onClick={() => onRestoreCurrentWindow(session)}
       size={size}
@@ -60,6 +73,7 @@ export function SessionRestoreButton({
           icon: <Wrench size={14} />,
           onClick: () => onCustomize(session),
           shortcut: 'R',
+          separator: isTile,
           'data-testid': 'session-restore-menu-customize',
         },
       ]}

@@ -1,8 +1,8 @@
 import type { KeyboardEvent } from 'react';
 import { Box, Card, Flex, Text } from '@radix-ui/themes';
-import { Pin, RotateCcw } from 'lucide-react';
+import { Pin } from 'lucide-react';
 import type { Session } from '@/types/session';
-import { SplitButton } from '@/components/UI/SplitButton/SplitButton';
+import { SessionRestoreButton } from '@/components/Core/Session/SessionRestoreButton/SessionRestoreButton';
 import { getMessage } from '@/utils/i18n';
 import type { HomeRestoreTarget } from './types';
 import styles from './PinnedSessionsSection.module.css';
@@ -51,22 +51,13 @@ export function PinnedSessionTile({
           {getMessage('homepagePinnedSessionsTileMeta', [String(groups), String(tabs)])}
         </Text>
         <Box mt="auto">
-          <SplitButton
-            label={
-              <Flex align="center" gap="1">
-                <RotateCcw size={14} aria-hidden="true" />
-                {getMessage('homepagePinnedSessionsRestore')}
-              </Flex>
-            }
-            onClick={() => onRestore(session, 'current')}
-            menuItems={[
-              { label: getMessage('homepagePinnedSessionsRestoreCurrent'), onClick: () => onRestore(session, 'current') },
-              { label: getMessage('homepagePinnedSessionsRestoreNew'), onClick: () => onRestore(session, 'new') },
-              { label: getMessage('homepagePinnedSessionsRestoreReplace'), onClick: () => onRestore(session, 'replace') },
-              { label: getMessage('homepagePinnedSessionsRestoreCustom'), onClick: () => onRestore(session, 'custom'), separator: true },
-            ]}
-            ariaLabel={getMessage('homepagePinnedSessionsRestoreOptions')}
-            primaryAriaLabel={getMessage('homepagePinnedSessionsRestore')}
+          <SessionRestoreButton
+            session={session}
+            onRestoreCurrentWindow={(s) => onRestore(s, 'current')}
+            onRestoreNewWindow={(s) => onRestore(s, 'new')}
+            onReplaceCurrentWindow={(s) => onRestore(s, 'replace')}
+            onCustomize={(s) => onRestore(s, 'custom')}
+            presentation="tile"
             size="2"
             data-testid={`home-pinned-tile-restore-${session.id}`}
           />
