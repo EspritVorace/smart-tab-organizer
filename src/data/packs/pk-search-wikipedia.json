@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-search-wikipedia",
+    "name": {
+      "en": "Wikipedia",
+      "fr": "Wikipédia",
+      "es": "Wikipedia"
+    },
+    "description": {
+      "en": "Group Wikipedia tabs by article title across language editions.",
+      "fr": "Regroupe les onglets Wikipédia par titre d'article toutes langues confondues.",
+      "es": "Agrupa las pestañas de Wikipedia por título de artículo en todas las ediciones lingüísticas."
+    },
+    "categoryId": "search"
+  },
+  "domainRules": [
+    {
+      "id": "pk-search-wikipedia-article",
+      "enabled": true,
+      "domainFilter": "*.wikipedia.org",
+      "label": "Wikipedia: Article",
+      "titleParsingRegEx": "(.+?)\\s*-\\s*Wikipedia",
+      "urlParsingRegEx": "wiki/([^#?]+)",
+      "groupNameSource": "smart",
+      "deduplicationMatchMode": "exact",
+      "color": "grey",
+      "categoryId": "search",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "wikipedia-article",
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

@@ -17,6 +17,105 @@
         "es": "Cloud y DevOps"
       },
       "icon": "☁️"
+    },
+    {
+      "id": "productivity",
+      "label": {
+        "en": "Productivity",
+        "fr": "Productivité",
+        "es": "Productividad"
+      },
+      "icon": "📋"
+    },
+    {
+      "id": "communication",
+      "label": {
+        "en": "Communication",
+        "fr": "Communication",
+        "es": "Comunicación"
+      },
+      "icon": "💬"
+    },
+    {
+      "id": "ai",
+      "label": {
+        "en": "AI assistants",
+        "fr": "Assistants IA",
+        "es": "Asistentes de IA"
+      },
+      "icon": "🤖"
+    },
+    {
+      "id": "search",
+      "label": {
+        "en": "Search",
+        "fr": "Recherche",
+        "es": "Búsqueda"
+      },
+      "icon": "🔍"
+    },
+    {
+      "id": "media",
+      "label": {
+        "en": "Media & Streaming",
+        "fr": "Médias & Streaming",
+        "es": "Medios y Streaming"
+      },
+      "icon": "🎬"
+    },
+    {
+      "id": "social",
+      "label": {
+        "en": "Social",
+        "fr": "Réseaux sociaux",
+        "es": "Redes sociales"
+      },
+      "icon": "🗣️"
+    },
+    {
+      "id": "commerce",
+      "label": {
+        "en": "Commerce",
+        "fr": "Commerce",
+        "es": "Comercio"
+      },
+      "icon": "🛍️"
+    },
+    {
+      "id": "travel",
+      "label": {
+        "en": "Travel",
+        "fr": "Voyage",
+        "es": "Viajes"
+      },
+      "icon": "✈️"
+    },
+    {
+      "id": "finance",
+      "label": {
+        "en": "Finance",
+        "fr": "Finance",
+        "es": "Finanzas"
+      },
+      "icon": "💰"
+    },
+    {
+      "id": "news",
+      "label": {
+        "en": "News",
+        "fr": "Actualités",
+        "es": "Actualidad"
+      },
+      "icon": "📰"
+    },
+    {
+      "id": "education",
+      "label": {
+        "en": "Learning",
+        "fr": "Apprentissage",
+        "es": "Aprendizaje"
+      },
+      "icon": "🎓"
     }
   ]
 }

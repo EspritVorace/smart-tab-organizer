@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-search-engines",
+    "name": {
+      "en": "Search engines",
+      "fr": "Moteurs de recherche",
+      "es": "Motores de búsqueda"
+    },
+    "description": {
+      "en": "Group search result tabs by query across Google, Bing, DuckDuckGo, Brave and Kagi.",
+      "fr": "Regroupe les onglets de résultats par requête sur Google, Bing, DuckDuckGo, Brave et Kagi.",
+      "es": "Agrupa las pestañas de resultados por consulta en Google, Bing, DuckDuckGo, Brave y Kagi."
+    },
+    "categoryId": "search"
+  },
+  "domainRules": [
+    {
+      "id": "pk-search-google",
+      "enabled": true,
+      "domainFilter": "*.google.com",
+      "label": "Google: Search",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "search",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "serp-google",
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "q"
+    },
+    {
+      "id": "pk-search-bing",
+      "enabled": true,
+      "domainFilter": "bing.com",
+      "label": "Bing: Search",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "cyan",
+      "categoryId": "search",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "serp-bing",
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "q"
+    },
+    {
+      "id": "pk-search-ddg",
+      "enabled": true,
+      "domainFilter": "duckduckgo.com",
+      "label": "DuckDuckGo: Search",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "search",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "serp-duckduckgo",
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "q"
+    },
+    {
+      "id": "pk-search-brave",
+      "enabled": true,
+      "domainFilter": "search.brave.com",
+      "label": "Brave: Search",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "search",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "q"
+    },
+    {
+      "id": "pk-search-kagi",
+      "enabled": true,
+      "domainFilter": "kagi.com",
+      "label": "Kagi: Search",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "yellow",
+      "categoryId": "search",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "q"
+    }
+  ]
+}

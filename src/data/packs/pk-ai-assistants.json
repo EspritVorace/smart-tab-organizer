@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-ai-assistants",
+    "name": {
+      "en": "AI assistants",
+      "fr": "Assistants IA",
+      "es": "Asistentes de IA"
+    },
+    "description": {
+      "en": "Keep ChatGPT, Claude and Gemini conversations grouped together by tool.",
+      "fr": "Regroupe les conversations ChatGPT, Claude et Gemini par outil.",
+      "es": "Agrupa las conversaciones de ChatGPT, Claude y Gemini por herramienta."
+    },
+    "categoryId": "ai"
+  },
+  "domainRules": [
+    {
+      "id": "pk-ai-chatgpt",
+      "enabled": true,
+      "domainFilter": "chatgpt.com",
+      "label": "ChatGPT",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "green",
+      "categoryId": null,
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-ai-claude",
+      "enabled": true,
+      "domainFilter": "claude.ai",
+      "label": "Claude",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": null,
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-ai-gemini",
+      "enabled": true,
+      "domainFilter": "gemini.google.com",
+      "label": "Gemini",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": null,
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}
