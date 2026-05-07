@@ -1,6 +1,8 @@
+import { useEffect, useRef, useState } from 'react';
 import { Flex, Text, Button, Box } from '@radix-ui/themes';
 import { SidebarItem } from './Sidebar';
 import { IconBox } from '@/components/UI/IconBox/IconBox';
+import { useListNavigation } from '@/hooks/useListNavigation';
 
 interface SidebarItemsProps {
   isCollapsed?: boolean;
@@ -131,6 +133,20 @@ export function SidebarItems({
   onItemClick,
   items
 }: SidebarItemsProps) {
+  const listRef = useRef<HTMLDivElement>(null);
+  const activeIndex = items.findIndex((it) => it.id === activeItem);
+  const [focusIndex, setFocusIndex] = useState(activeIndex >= 0 ? activeIndex : 0);
+  const { handleNavigationKey } = useListNavigation(listRef, '[data-sidebar-nav-item]', {
+    axis: 'vertical',
+    rovingTabIndex: true,
+  });
+
+  // Keep the roving tabstop aligned with the active route so a fresh Tab into
+  // the sidebar lands on the current page rather than on a stale position.
+  useEffect(() => {
+    if (activeIndex >= 0) setFocusIndex(activeIndex);
+  }, [activeIndex]);
+
   const handleItemClick = (itemId: string, onClick?: () => void) => {
     if (onClick) {
       onClick();
@@ -140,8 +156,8 @@ export function SidebarItems({
   };
 
   return (
-    <Flex direction="column" gap="2">
-      {items.map((item) => {
+    <Flex direction="column" gap="2" ref={listRef}>
+      {items.map((item, index) => {
         const isActive = activeItem === item.id;
         const accent = resolveAccentTokens(item.accentColor);
 
@@ -149,9 +165,13 @@ export function SidebarItems({
           <Button
             key={item.id}
             data-testid={`sidebar-nav-item-${item.id}`}
+            data-sidebar-nav-item=""
             variant="ghost"
             size="3"
             onClick={() => handleItemClick(item.id, item.onClick)}
+            onFocus={() => setFocusIndex(index)}
+            onKeyDown={(e) => handleNavigationKey(e, index)}
+            tabIndex={index === focusIndex ? 0 : -1}
             aria-label={isCollapsed ? item.label : undefined}
             title={isCollapsed ? item.label : undefined}
             style={computeButtonStyle(isCollapsed, isActive, accent, item.accentColor)}
