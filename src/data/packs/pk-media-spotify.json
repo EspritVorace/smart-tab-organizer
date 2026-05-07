@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-media-spotify",
+    "name": {
+      "en": "Spotify",
+      "fr": "Spotify",
+      "es": "Spotify"
+    },
+    "description": {
+      "en": "Group Spotify tabs by artist, album and playlist.",
+      "fr": "Regroupe les onglets Spotify par artiste, album et playlist.",
+      "es": "Agrupa las pestañas de Spotify por artista, álbum y lista de reproducción."
+    },
+    "categoryId": "media"
+  },
+  "domainRules": [
+    {
+      "id": "pk-media-spotify-artist",
+      "enabled": true,
+      "domainFilter": "open.spotify.com",
+      "label": "Spotify: Artist",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "spotify\\.com/artist/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "green",
+      "categoryId": "media",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-media-spotify-album",
+      "enabled": true,
+      "domainFilter": "open.spotify.com",
+      "label": "Spotify: Album",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "spotify\\.com/album/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "green",
+      "categoryId": "media",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-media-spotify-playlist",
+      "enabled": true,
+      "domainFilter": "open.spotify.com",
+      "label": "Spotify: Playlist",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "spotify\\.com/playlist/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "green",
+      "categoryId": "media",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

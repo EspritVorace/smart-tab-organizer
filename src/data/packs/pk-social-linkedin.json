@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-social-linkedin",
+    "name": {
+      "en": "LinkedIn",
+      "fr": "LinkedIn",
+      "es": "LinkedIn"
+    },
+    "description": {
+      "en": "Group LinkedIn tabs by profile, company and job search query.",
+      "fr": "Regroupe les onglets LinkedIn par profil, entreprise et requête d'offre d'emploi.",
+      "es": "Agrupa las pestañas de LinkedIn por perfil, empresa y consulta de oferta de empleo."
+    },
+    "categoryId": "social"
+  },
+  "domainRules": [
+    {
+      "id": "pk-social-linkedin-profile",
+      "enabled": true,
+      "domainFilter": "*.linkedin.com",
+      "label": "LinkedIn: Profile",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "linkedin\\.com/in/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "social",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "linkedin-profile",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-social-linkedin-company",
+      "enabled": true,
+      "domainFilter": "*.linkedin.com",
+      "label": "LinkedIn: Company",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "linkedin\\.com/company/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "social",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-social-linkedin-jobs",
+      "enabled": true,
+      "domainFilter": "*.linkedin.com",
+      "label": "LinkedIn: Jobs search",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "cyan",
+      "categoryId": "social",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "keywords"
+    }
+  ]
+}

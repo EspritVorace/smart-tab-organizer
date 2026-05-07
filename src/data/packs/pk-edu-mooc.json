@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-edu-mooc",
+    "name": {
+      "en": "Online courses & docs",
+      "fr": "Cours en ligne & docs",
+      "es": "Cursos en línea y documentación"
+    },
+    "description": {
+      "en": "Group Coursera, Udemy, edX and MDN Web Docs tabs by course or section.",
+      "fr": "Regroupe les onglets Coursera, Udemy, edX et MDN Web Docs par cours ou section.",
+      "es": "Agrupa las pestañas de Coursera, Udemy, edX y MDN Web Docs por curso o sección."
+    },
+    "categoryId": "education"
+  },
+  "domainRules": [
+    {
+      "id": "pk-edu-coursera",
+      "enabled": true,
+      "domainFilter": "*.coursera.org",
+      "label": "Coursera: Course",
+      "titleParsingRegEx": "(.+?)\\s*\\|\\s*Coursera",
+      "urlParsingRegEx": "coursera\\.org/learn/([^/?#]+)",
+      "groupNameSource": "smart",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "education",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "coursera-course",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-edu-udemy",
+      "enabled": true,
+      "domainFilter": "*.udemy.com",
+      "label": "Udemy: Course",
+      "titleParsingRegEx": "(.+?)\\s*\\|\\s*Udemy",
+      "urlParsingRegEx": "udemy\\.com/course/([^/?#]+)",
+      "groupNameSource": "smart",
+      "deduplicationMatchMode": "exact",
+      "color": "purple",
+      "categoryId": "education",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "udemy-course",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-edu-edx",
+      "enabled": true,
+      "domainFilter": "*.edx.org",
+      "label": "edX: Course",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "edx\\.org/(?:learn|course)/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "cyan",
+      "categoryId": "education",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-edu-mdn",
+      "enabled": true,
+      "domainFilter": "developer.mozilla.org",
+      "label": "MDN: Web docs section",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "docs/Web/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "yellow",
+      "categoryId": "education",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "mdn-docs",
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

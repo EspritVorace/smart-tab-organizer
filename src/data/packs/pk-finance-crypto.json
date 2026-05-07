@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-finance-crypto",
+    "name": {
+      "en": "Crypto exchanges",
+      "fr": "Plateformes crypto",
+      "es": "Exchanges crypto"
+    },
+    "description": {
+      "en": "Group Coinbase and Binance tabs by crypto asset or trading pair.",
+      "fr": "Regroupe les onglets Coinbase et Binance par actif crypto ou paire de trading.",
+      "es": "Agrupa las pestañas de Coinbase y Binance por activo crypto o par de trading."
+    },
+    "categoryId": "finance"
+  },
+  "domainRules": [
+    {
+      "id": "pk-finance-coinbase",
+      "enabled": true,
+      "domainFilter": "*.coinbase.com",
+      "label": "Coinbase: Price",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "coinbase\\.com/price/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "finance",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "coinbase-crypto",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-finance-binance",
+      "enabled": true,
+      "domainFilter": "*.binance.com",
+      "label": "Binance: Trading pair",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/trade/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "yellow",
+      "categoryId": "finance",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

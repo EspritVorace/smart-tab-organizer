@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-social-reddit",
+    "name": {
+      "en": "Reddit",
+      "fr": "Reddit",
+      "es": "Reddit"
+    },
+    "description": {
+      "en": "Group Reddit tabs by subreddit and by search query.",
+      "fr": "Regroupe les onglets Reddit par subreddit et par requête de recherche.",
+      "es": "Agrupa las pestañas de Reddit por subreddit y por consulta de búsqueda."
+    },
+    "categoryId": "social"
+  },
+  "domainRules": [
+    {
+      "id": "pk-social-reddit-subreddit",
+      "enabled": true,
+      "domainFilter": "*.reddit.com",
+      "label": "Reddit: Subreddit",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "reddit\\.com/r/([^/]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "social",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "reddit-subreddit",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-social-reddit-search",
+      "enabled": true,
+      "domainFilter": "*.reddit.com",
+      "label": "Reddit: Search",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "social",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "serp-reddit",
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "q"
+    }
+  ]
+}

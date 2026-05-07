@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-media-svod",
+    "name": {
+      "en": "SVOD platforms",
+      "fr": "Plateformes SVOD",
+      "es": "Plataformas SVOD"
+    },
+    "description": {
+      "en": "Group Netflix, Disney+ and Prime Video tabs by title.",
+      "fr": "Regroupe les onglets Netflix, Disney+ et Prime Video par titre.",
+      "es": "Agrupa las pestañas de Netflix, Disney+ y Prime Video por título."
+    },
+    "categoryId": "media"
+  },
+  "domainRules": [
+    {
+      "id": "pk-media-netflix",
+      "enabled": true,
+      "domainFilter": "*.netflix.com",
+      "label": "Netflix: Title",
+      "titleParsingRegEx": "(.+?)\\s*\\|\\s*Netflix",
+      "urlParsingRegEx": "netflix\\.com/(?:[a-z-]+/)?title/(\\d+)",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "media",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "netflix-title",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-media-disney",
+      "enabled": true,
+      "domainFilter": "*.disneyplus.com",
+      "label": "Disney+: Title",
+      "titleParsingRegEx": "(.+?)\\s*\\|\\s*Disney\\+?",
+      "urlParsingRegEx": "/(?:movies|series|browse)/[^/]+/([^/?#]+)",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "media",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-media-prime",
+      "enabled": true,
+      "domainFilter": "*.primevideo.com",
+      "label": "Prime Video: Title",
+      "titleParsingRegEx": "(.+?)\\s*[-|]\\s*Prime Video",
+      "urlParsingRegEx": "/(?:detail|gp/video)/([^/?#]+)",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "cyan",
+      "categoryId": "media",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}
