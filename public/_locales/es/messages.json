@@ -532,6 +532,7 @@
   "shortcutsGroupGlobal": { "message": "Globales (navegador)" },
   "shortcutsGroupPopup": { "message": "Popup" },
   "shortcutsGroupOptions": { "message": "Página de opciones" },
+  "shortcutsGroupListHome": { "message": "Página de inicio" },
   "shortcutsGroupListRules": { "message": "Lista de reglas" },
   "shortcutsGroupListSessions": { "message": "Lista de sesiones" },
   "shortcutsGroupSessionCard": { "message": "Tarjeta de sesión (con foco)" },
@@ -559,6 +560,9 @@
   "shortcutDescSessionRestoreCurrent": { "message": "Añadir la sesión a la ventana actual" },
   "shortcutDescSessionReplaceCurrent": { "message": "Reemplazar las pestañas de la ventana" },
   "shortcutDescSessionRestoreNew": { "message": "Abrir la sesión en una nueva ventana" },
+  "shortcutDescHomeFirstLast": { "message": "Mover el foco al primer o último elemento" },
+  "shortcutDescHomeNextSection": { "message": "Mover el foco a la sección siguiente" },
+  "shortcutDescHomeActivate": { "message": "Activar el elemento con foco" },
 
   "homeTab": { "message": "Inicio" },
   "homePageDescription": { "message": "Tu panel de SmartTab Organizer: sesiones ancladas, accesos rápidos y actividad." },

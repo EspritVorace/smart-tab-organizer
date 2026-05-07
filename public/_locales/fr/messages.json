@@ -532,6 +532,7 @@
   "shortcutsGroupGlobal": { "message": "Globaux navigateur" },
   "shortcutsGroupPopup": { "message": "Popup" },
   "shortcutsGroupOptions": { "message": "Page d'options" },
+  "shortcutsGroupListHome": { "message": "Page d'accueil" },
   "shortcutsGroupListRules": { "message": "Liste des règles" },
   "shortcutsGroupListSessions": { "message": "Liste des sessions" },
   "shortcutsGroupSessionCard": { "message": "Carte session (focus)" },
@@ -559,6 +560,9 @@
   "shortcutDescSessionRestoreCurrent": { "message": "Ajouter la session à la fenêtre courante" },
   "shortcutDescSessionReplaceCurrent": { "message": "Remplacer les onglets de la fenêtre" },
   "shortcutDescSessionRestoreNew": { "message": "Ouvrir la session dans une nouvelle fenêtre" },
+  "shortcutDescHomeFirstLast": { "message": "Aller au premier ou au dernier élément" },
+  "shortcutDescHomeNextSection": { "message": "Aller à la section suivante" },
+  "shortcutDescHomeActivate": { "message": "Activer l'élément focus" },
 
   "homeTab": { "message": "Accueil" },
   "homePageDescription": { "message": "Votre tableau de bord SmartTab Organizer : sessions épinglées, raccourcis et activité." },

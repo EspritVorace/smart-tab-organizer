@@ -11,6 +11,7 @@ import { showSuccessNotification } from '@/utils/notifications';
 import { getRuleCategory } from '@/utils/categoriesStore';
 import { chromeGroupColors } from '@/utils/tabTreeUtils';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
+import { useListNavigation } from '@/hooks/useListNavigation';
 import type { Session } from '@/types/session';
 import styles from './PopupProfilesList.module.css';
 
@@ -108,30 +109,11 @@ export function PopupProfilesList() {
       .catch(() => {});
   }, []);
 
+  const { handleNavigationKey } = useListNavigation(listRef, '[data-popup-pinned-card]');
+
   const handleCardKeyDown = useCallback((e: React.KeyboardEvent<HTMLElement>, session: Session, index: number) => {
     if (e.target !== e.currentTarget) return;
-    const cards = listRef.current?.querySelectorAll<HTMLElement>('[data-popup-pinned-card]');
-    if (!cards) return;
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      cards[index + 1]?.focus();
-      return;
-    }
-    if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      cards[index - 1]?.focus();
-      return;
-    }
-    if (e.key === 'Home') {
-      e.preventDefault();
-      cards[0]?.focus();
-      return;
-    }
-    if (e.key === 'End') {
-      e.preventDefault();
-      cards[cards.length - 1]?.focus();
-      return;
-    }
+    if (handleNavigationKey(e, index)) return;
     if (e.key.toLowerCase() === 'r' && !e.ctrlKey && !e.metaKey) {
       e.preventDefault();
       e.stopPropagation();
@@ -145,7 +127,7 @@ export function PopupProfilesList() {
         void openCustomizeRestore(session);
       }
     }
-  }, [handleRestore]);
+  }, [handleNavigationKey, handleRestore]);
 
   const handleToggleEmptyCollapsed = useCallback((nextOpen: boolean) => {
     const nextCollapsed = !nextOpen;

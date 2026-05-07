@@ -7,6 +7,7 @@ import {
 } from '../src/components/UI/ShortcutsPanel/shortcuts';
 
 const ALL_CONTEXTS: PageContext[] = [
+  'home',
   'rules',
   'sessions',
   'importexport',
@@ -35,11 +36,22 @@ describe('isGroupOpenByDefault', () => {
     }
   });
 
-  it('opens the sessions list and session card groups only on the sessions page', () => {
+  it('opens the sessions list group only on the sessions page', () => {
     for (const ctx of ALL_CONTEXTS) {
-      const expected = ctx === 'sessions';
-      expect(isGroupOpenByDefault('shortcutsGroupListSessions', ctx)).toBe(expected);
+      expect(isGroupOpenByDefault('shortcutsGroupListSessions', ctx)).toBe(ctx === 'sessions');
+    }
+  });
+
+  it('opens the session card group on both the sessions page and the home page', () => {
+    for (const ctx of ALL_CONTEXTS) {
+      const expected = ctx === 'sessions' || ctx === 'home';
       expect(isGroupOpenByDefault('shortcutsGroupSessionCard', ctx)).toBe(expected);
+    }
+  });
+
+  it('opens the home list group only on the home page', () => {
+    for (const ctx of ALL_CONTEXTS) {
+      expect(isGroupOpenByDefault('shortcutsGroupListHome', ctx)).toBe(ctx === 'home');
     }
   });
 

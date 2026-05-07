@@ -15,6 +15,7 @@ import { foldAccents } from '@/utils/stringUtils';
 import { generateUUID } from '@/utils/utils';
 import { DomainRuleCard } from '@/components/Core/DomainRule/DomainRuleCard';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useListNavigation } from '@/hooks/useListNavigation';
 import type { ShortcutDefinition } from '@/utils/keyboardShortcuts';
 import {
   moveToFirst,
@@ -228,30 +229,15 @@ export function DomainRulesPage({
 
   const listRef = useRef<HTMLDivElement>(null);
 
+  const { handleNavigationKey } = useListNavigation(listRef, '[role="listitem"]');
+
   const handleCardKeyDown = useCallback((e: React.KeyboardEvent, rule: DomainRuleSetting, index: number) => {
     // Only act when the card element itself has focus (not a child input/button).
     if (e.target !== e.currentTarget) return;
 
-    const cards = listRef.current?.querySelectorAll<HTMLElement>('[role="listitem"]');
-    if (!cards) return;
+    if (handleNavigationKey(e as React.KeyboardEvent<HTMLElement>, index)) return;
 
     switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        cards[index + 1]?.focus();
-        return;
-      case 'ArrowUp':
-        e.preventDefault();
-        cards[index - 1]?.focus();
-        return;
-      case 'Home':
-        e.preventDefault();
-        cards[0]?.focus();
-        return;
-      case 'End':
-        e.preventDefault();
-        cards[cards.length - 1]?.focus();
-        return;
       case ' ':
         e.preventDefault();
         handleRowSelect(rule.id, !selectedIds.has(rule.id));
@@ -275,7 +261,7 @@ export function DomainRulesPage({
       e.preventDefault();
       handleToggleEnabled(rule.id, !rule.enabled);
     }
-  }, [handleRowSelect, handleEditRule, handleToggleEnabled, selectedIds]);
+  }, [handleNavigationKey, handleRowSelect, handleEditRule, handleToggleEnabled, selectedIds]);
 
   const handleAddRule = useCallback(() => {
     setEditingRule(undefined);

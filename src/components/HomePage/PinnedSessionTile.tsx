@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react';
 import { Box, Card, Flex, Text } from '@radix-ui/themes';
 import { Pin, RotateCcw } from 'lucide-react';
 import type { Session } from '@/types/session';
@@ -9,6 +10,9 @@ import styles from './PinnedSessionsSection.module.css';
 export interface PinnedSessionTileProps {
   session: Session;
   onRestore: (session: Session, target: HomeRestoreTarget) => void;
+  tabIndex?: number;
+  onKeyDown?: (e: KeyboardEvent<HTMLElement>) => void;
+  onFocus?: () => void;
 }
 
 function getCounts(session: Session): { groups: number; tabs: number } {
@@ -17,11 +21,25 @@ function getCounts(session: Session): { groups: number; tabs: number } {
   return { groups, tabs: grouped + session.ungroupedTabs.length };
 }
 
-export function PinnedSessionTile({ session, onRestore }: PinnedSessionTileProps) {
+export function PinnedSessionTile({
+  session,
+  onRestore,
+  tabIndex = 0,
+  onKeyDown,
+  onFocus,
+}: PinnedSessionTileProps) {
   const { groups, tabs } = getCounts(session);
 
   return (
-    <Card className={styles.tile} data-testid={`home-pinned-tile-${session.id}`}>
+    <Card
+      className={styles.tile}
+      data-testid={`home-pinned-tile-${session.id}`}
+      data-home-pinned-tile=""
+      tabIndex={tabIndex}
+      onKeyDown={onKeyDown}
+      onFocus={onFocus}
+      aria-label={getMessage('homepagePinnedSessionsTileAriaLabel', [session.name])}
+    >
       <Flex direction="column" gap="2" height="100%">
         <Flex align="center" gap="2">
           <Text size="2" weight="medium" truncate className={styles.name}>
