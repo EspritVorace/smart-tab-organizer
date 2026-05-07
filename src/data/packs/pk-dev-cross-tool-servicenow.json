@@ -1,0 +1,131 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-dev-cross-tool-servicenow",
+    "name": {
+      "en": "Cross-tool ServiceNow records",
+      "fr": "Enregistrements ServiceNow inter-outils",
+      "es": "Registros ServiceNow entre herramientas"
+    },
+    "description": {
+      "en": "Group tabs across ServiceNow, GitHub, GitLab, Gitea, Bitbucket, Trello and Asana by the ServiceNow record identifier (INC, CHG, REQ, RITM, PRB) referenced in their title. Pull requests, merge requests, cards and tasks that mention the same incident or change land in the same group as the ServiceNow record itself.",
+      "fr": "Regroupe les onglets ServiceNow, GitHub, GitLab, Gitea, Bitbucket, Trello et Asana par l'identifiant de record ServiceNow (INC, CHG, REQ, RITM, PRB) référencé dans leur titre. Les pull requests, merge requests, cartes et tâches qui mentionnent le même incident ou changement atterrissent dans le même groupe que le record ServiceNow lui-même.",
+      "es": "Agrupa las pestañas de ServiceNow, GitHub, GitLab, Gitea, Bitbucket, Trello y Asana por el identificador de registro ServiceNow (INC, CHG, REQ, RITM, PRB) referenciado en su título. Las pull requests, merge requests, tarjetas y tareas que mencionan el mismo incidente o cambio acaban en el mismo grupo que el registro ServiceNow."
+    },
+    "categoryId": "development"
+  },
+  "domainRules": [
+    {
+      "id": "pk-dev-snow-self",
+      "enabled": true,
+      "domainFilter": "*.service-now.com",
+      "label": "ServiceNow: Record",
+      "titleParsingRegEx": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+|PRB\\d+)",
+      "urlParsingRegEx": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+|PRB\\d+)",
+      "groupNameSource": "smart_preset",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "servicenow-record-in-title",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-dev-snow-github",
+      "enabled": true,
+      "domainFilter": "github.com",
+      "label": "GitHub: ServiceNow ref in title",
+      "titleParsingRegEx": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+|PRB\\d+)",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_preset",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "servicenow-record-in-title",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-dev-snow-gitlab",
+      "enabled": true,
+      "domainFilter": "gitlab.com",
+      "label": "GitLab: ServiceNow ref in title",
+      "titleParsingRegEx": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+|PRB\\d+)",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_preset",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "servicenow-record-in-title",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-dev-snow-gitea",
+      "enabled": true,
+      "domainFilter": "*.gitea.io",
+      "label": "Gitea: ServiceNow ref in title",
+      "titleParsingRegEx": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+|PRB\\d+)",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_preset",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "servicenow-record-in-title",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-dev-snow-bitbucket",
+      "enabled": true,
+      "domainFilter": "*.bitbucket.org",
+      "label": "Bitbucket: ServiceNow ref in title",
+      "titleParsingRegEx": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+|PRB\\d+)",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_preset",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "servicenow-record-in-title",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-dev-snow-trello",
+      "enabled": true,
+      "domainFilter": "trello.com",
+      "label": "Trello: ServiceNow ref in title",
+      "titleParsingRegEx": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+|PRB\\d+)",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_preset",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "servicenow-record-in-title",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-dev-snow-asana",
+      "enabled": true,
+      "domainFilter": "app.asana.com",
+      "label": "Asana: ServiceNow ref in title",
+      "titleParsingRegEx": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+|PRB\\d+)",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_preset",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "servicenow-record-in-title",
+      "urlExtractionMode": "regex"
+    }
+  ]
+}
