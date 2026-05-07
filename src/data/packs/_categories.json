@@ -8,6 +8,15 @@
         "es": "Desarrollo"
       },
       "icon": "💻"
+    },
+    {
+      "id": "cloud",
+      "label": {
+        "en": "Cloud & DevOps",
+        "fr": "Cloud & DevOps",
+        "es": "Cloud y DevOps"
+      },
+      "icon": "☁️"
     }
   ]
 }
