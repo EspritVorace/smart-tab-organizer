@@ -58,3 +58,11 @@ export const SessionRestoreButtonOutline: Story = {
     variant: 'outline',
   },
 };
+
+export const SessionRestoreButtonTile: Story = {
+  args: {
+    ...SessionRestoreButtonDefault.args,
+    presentation: 'tile',
+    size: '2',
+  },
+};
