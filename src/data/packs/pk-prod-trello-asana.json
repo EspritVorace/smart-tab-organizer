@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-prod-trello-asana",
+    "name": {
+      "en": "Trello, Asana & ClickUp",
+      "fr": "Trello, Asana & ClickUp",
+      "es": "Trello, Asana y ClickUp"
+    },
+    "description": {
+      "en": "Group project boards across Trello, Asana and ClickUp.",
+      "fr": "Regroupe les tableaux de projet sur Trello, Asana et ClickUp.",
+      "es": "Agrupa los tableros de proyecto en Trello, Asana y ClickUp."
+    },
+    "categoryId": "productivity"
+  },
+  "domainRules": [
+    {
+      "id": "pk-prod-trello-board",
+      "enabled": true,
+      "domainFilter": "trello.com",
+      "label": "Trello: Board",
+      "titleParsingRegEx": "(.+?)\\s*\\|\\s*Trello",
+      "urlParsingRegEx": "trello\\.com/b/[^/]+/(.+)",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "cyan",
+      "categoryId": "productivity",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "trello-board",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-prod-asana-task",
+      "enabled": true,
+      "domainFilter": "app.asana.com",
+      "label": "Asana: Project",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "app\\.asana\\.com/0/([^/]+)",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "pink",
+      "categoryId": "productivity",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "asana-task",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-prod-clickup-task",
+      "enabled": true,
+      "domainFilter": "app.clickup.com",
+      "label": "ClickUp: Workspace",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "app\\.clickup\\.com/(\\d+)",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "purple",
+      "categoryId": "productivity",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

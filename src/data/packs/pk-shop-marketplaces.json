@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-shop-marketplaces",
+    "name": {
+      "en": "Marketplaces",
+      "fr": "Places de marché",
+      "es": "Marketplaces"
+    },
+    "description": {
+      "en": "Group eBay, AliExpress, Etsy and Vinted tabs by item ID or search query.",
+      "fr": "Regroupe les onglets eBay, AliExpress, Etsy et Vinted par identifiant d'article ou requête.",
+      "es": "Agrupa las pestañas de eBay, AliExpress, Etsy y Vinted por identificador o consulta."
+    },
+    "categoryId": "commerce"
+  },
+  "domainRules": [
+    {
+      "id": "pk-shop-ebay-item",
+      "enabled": true,
+      "domainFilter": "*.ebay.*",
+      "label": "eBay: Item",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/itm/(?:[^/]+/)?(\\d+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "commerce",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["hash", "_trkparms"],
+      "presetId": "ebay-item",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-shop-ebay-search",
+      "enabled": true,
+      "domainFilter": "*.ebay.*",
+      "label": "eBay: Search",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "commerce",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "serp-ebay",
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "_nkw"
+    },
+    {
+      "id": "pk-shop-aliexpress-item",
+      "enabled": true,
+      "domainFilter": "*.aliexpress.com",
+      "label": "AliExpress: Item",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/item/(\\d+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "commerce",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["spm", "scm"],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-shop-etsy-search",
+      "enabled": true,
+      "domainFilter": "*.etsy.com",
+      "label": "Etsy: Search",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "commerce",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "q"
+    },
+    {
+      "id": "pk-shop-vinted",
+      "enabled": true,
+      "domainFilter": "*.vinted.*",
+      "label": "Vinted: Item",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/items/(\\d+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "cyan",
+      "categoryId": "commerce",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

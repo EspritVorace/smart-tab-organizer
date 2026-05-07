@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-social-x",
+    "name": {
+      "en": "X (Twitter)",
+      "fr": "X (Twitter)",
+      "es": "X (Twitter)"
+    },
+    "description": {
+      "en": "Group X / Twitter tabs by handle.",
+      "fr": "Regroupe les onglets X / Twitter par identifiant.",
+      "es": "Agrupa las pestañas de X / Twitter por identificador."
+    },
+    "categoryId": "social"
+  },
+  "domainRules": [
+    {
+      "id": "pk-social-x-user",
+      "enabled": true,
+      "domainFilter": "*.x.com",
+      "label": "X: User",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "(?:twitter|x)\\.com/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "grey",
+      "categoryId": "social",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "twitter-user",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-social-twitter-user",
+      "enabled": true,
+      "domainFilter": "*.twitter.com",
+      "label": "Twitter: User",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "(?:twitter|x)\\.com/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "grey",
+      "categoryId": "social",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "twitter-user",
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

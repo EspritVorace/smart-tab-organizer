@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-prod-linear",
+    "name": {
+      "en": "Linear",
+      "fr": "Linear",
+      "es": "Linear"
+    },
+    "description": {
+      "en": "Group Linear tabs by issue identifier (TEAM-123).",
+      "fr": "Regroupe les onglets Linear par identifiant d'issue (TEAM-123).",
+      "es": "Agrupa las pestañas de Linear por identificador de issue (TEAM-123)."
+    },
+    "categoryId": "productivity"
+  },
+  "domainRules": [
+    {
+      "id": "pk-prod-linear-issue",
+      "enabled": true,
+      "domainFilter": "linear.app",
+      "label": "Linear: Issue",
+      "titleParsingRegEx": "([A-Z]+-\\d+)",
+      "urlParsingRegEx": "/issue/([A-Z]+-\\d+)",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "purple",
+      "categoryId": "productivity",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

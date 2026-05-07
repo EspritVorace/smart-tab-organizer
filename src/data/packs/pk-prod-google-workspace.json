@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-prod-google-workspace",
+    "name": {
+      "en": "Google Workspace",
+      "fr": "Google Workspace",
+      "es": "Google Workspace"
+    },
+    "description": {
+      "en": "Group Google Docs, Sheets and Slides tabs by document title.",
+      "fr": "Regroupe les onglets Google Docs, Sheets et Slides par titre de document.",
+      "es": "Agrupa las pestañas de Google Docs, Sheets y Slides por título de documento."
+    },
+    "categoryId": "productivity"
+  },
+  "domainRules": [
+    {
+      "id": "pk-prod-google-docs",
+      "enabled": true,
+      "domainFilter": "docs.google.com",
+      "label": "Google Docs: Document",
+      "titleParsingRegEx": "(.+?)\\s*-\\s*Google Docs",
+      "urlParsingRegEx": "",
+      "groupNameSource": "title",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "productivity",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-prod-google-sheets",
+      "enabled": true,
+      "domainFilter": "docs.google.com",
+      "label": "Google Sheets: Spreadsheet",
+      "titleParsingRegEx": "(.+?)\\s*-\\s*Google Sheets",
+      "urlParsingRegEx": "",
+      "groupNameSource": "title",
+      "deduplicationMatchMode": "exact",
+      "color": "green",
+      "categoryId": "productivity",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-prod-google-slides",
+      "enabled": true,
+      "domainFilter": "docs.google.com",
+      "label": "Google Slides: Presentation",
+      "titleParsingRegEx": "(.+?)\\s*-\\s*Google Slides",
+      "urlParsingRegEx": "",
+      "groupNameSource": "title",
+      "deduplicationMatchMode": "exact",
+      "color": "yellow",
+      "categoryId": "productivity",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

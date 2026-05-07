@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-shop-amazon",
+    "name": {
+      "en": "Amazon",
+      "fr": "Amazon",
+      "es": "Amazon"
+    },
+    "description": {
+      "en": "Group Amazon tabs by ASIN product code and search query (FR, COM, ES, DE).",
+      "fr": "Regroupe les onglets Amazon par code produit ASIN et par requête (FR, COM, ES, DE).",
+      "es": "Agrupa las pestañas de Amazon por código de producto ASIN y por consulta (FR, COM, ES, DE)."
+    },
+    "categoryId": "commerce"
+  },
+  "domainRules": [
+    {
+      "id": "pk-shop-amazon-product",
+      "enabled": true,
+      "domainFilter": "*.amazon.*",
+      "label": "Amazon: Product",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/dp/([A-Z0-9]{10})",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "commerce",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["ref", "ref_", "tag", "linkCode"],
+      "presetId": "amazon-product",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-shop-amazon-search",
+      "enabled": true,
+      "domainFilter": "*.amazon.*",
+      "label": "Amazon: Search",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "commerce",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["ref", "ref_"],
+      "presetId": "serp-amazon",
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "k"
+    }
+  ]
+}

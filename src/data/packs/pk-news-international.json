@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-news-international",
+    "name": {
+      "en": "International press",
+      "fr": "Presse internationale",
+      "es": "Prensa internacional"
+    },
+    "description": {
+      "en": "Group The Guardian, NYT and BBC News tabs by section.",
+      "fr": "Regroupe les onglets The Guardian, NYT et BBC News par rubrique.",
+      "es": "Agrupa las pestañas de The Guardian, NYT y BBC News por sección."
+    },
+    "categoryId": "news"
+  },
+  "domainRules": [
+    {
+      "id": "pk-news-guardian",
+      "enabled": true,
+      "domainFilter": "*.theguardian.com",
+      "label": "The Guardian: Section",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "theguardian\\.com/([^/?#]+)/",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": null,
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["CMP"],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-news-nytimes",
+      "enabled": true,
+      "domainFilter": "*.nytimes.com",
+      "label": "The New York Times: Section",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "nytimes\\.com/(?:section|topic|by)/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "grey",
+      "categoryId": null,
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["smid", "smtyp"],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-news-bbc",
+      "enabled": true,
+      "domainFilter": "*.bbc.com",
+      "label": "BBC News: Section",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "bbc\\.com/(?:news/)?([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": null,
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-ai-huggingface",
+    "name": {
+      "en": "Hugging Face",
+      "fr": "Hugging Face",
+      "es": "Hugging Face"
+    },
+    "description": {
+      "en": "Group Hugging Face tabs by model or dataset slug.",
+      "fr": "Regroupe les onglets Hugging Face par slug de modèle ou de dataset.",
+      "es": "Agrupa las pestañas de Hugging Face por slug de modelo o conjunto de datos."
+    },
+    "categoryId": "ai"
+  },
+  "domainRules": [
+    {
+      "id": "pk-ai-hf-model",
+      "enabled": true,
+      "domainFilter": "huggingface.co",
+      "label": "Hugging Face: Model",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "huggingface\\.co/(?!datasets|spaces)([^/?#]+/[^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "yellow",
+      "categoryId": null,
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-ai-hf-dataset",
+      "enabled": true,
+      "domainFilter": "huggingface.co",
+      "label": "Hugging Face: Dataset",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "huggingface\\.co/datasets/([^/?#]+/[^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": null,
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

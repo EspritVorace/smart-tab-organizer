@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-ai-search",
+    "name": {
+      "en": "AI search engines",
+      "fr": "Moteurs de recherche IA",
+      "es": "Motores de búsqueda con IA"
+    },
+    "description": {
+      "en": "Group AI search tabs by query on Perplexity, Phind and You.com.",
+      "fr": "Regroupe les onglets de recherche IA par requête sur Perplexity, Phind et You.com.",
+      "es": "Agrupa las pestañas de búsqueda IA por consulta en Perplexity, Phind y You.com."
+    },
+    "categoryId": "ai"
+  },
+  "domainRules": [
+    {
+      "id": "pk-ai-perplexity",
+      "enabled": true,
+      "domainFilter": "*.perplexity.ai",
+      "label": "Perplexity: Thread",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/search/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "cyan",
+      "categoryId": null,
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-ai-phind",
+      "enabled": true,
+      "domainFilter": "*.phind.com",
+      "label": "Phind: Search",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "purple",
+      "categoryId": null,
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "q"
+    },
+    {
+      "id": "pk-ai-youcom",
+      "enabled": true,
+      "domainFilter": "you.com",
+      "label": "You.com: Search",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "pink",
+      "categoryId": "search",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "q"
+    }
+  ]
+}

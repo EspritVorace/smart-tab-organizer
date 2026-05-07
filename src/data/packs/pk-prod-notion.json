@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-prod-notion",
+    "name": {
+      "en": "Notion",
+      "fr": "Notion",
+      "es": "Notion"
+    },
+    "description": {
+      "en": "Group Notion tabs by page title.",
+      "fr": "Regroupe les onglets Notion par titre de page.",
+      "es": "Agrupa las pestañas de Notion por título de página."
+    },
+    "categoryId": "productivity"
+  },
+  "domainRules": [
+    {
+      "id": "pk-prod-notion-page",
+      "enabled": true,
+      "domainFilter": "*.notion.so",
+      "label": "Notion: Page",
+      "titleParsingRegEx": "(.+?)\\s*\\|\\s*Notion",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "grey",
+      "categoryId": "productivity",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "notion-page",
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

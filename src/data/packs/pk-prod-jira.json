@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-prod-jira",
+    "name": {
+      "en": "Jira",
+      "fr": "Jira",
+      "es": "Jira"
+    },
+    "description": {
+      "en": "Group Jira tabs by ticket key (PROJ-123) across all Atlassian Cloud workspaces.",
+      "fr": "Regroupe les onglets Jira par clé de ticket (PROJ-123) sur tous les espaces Atlassian Cloud.",
+      "es": "Agrupa las pestañas de Jira por clave de ticket (PROJ-123) en todos los espacios Atlassian Cloud."
+    },
+    "categoryId": "productivity"
+  },
+  "domainRules": [
+    {
+      "id": "pk-prod-jira-ticket",
+      "enabled": true,
+      "domainFilter": "*.atlassian.net",
+      "label": "Jira: Ticket",
+      "titleParsingRegEx": "([A-Z]+-\\d+)",
+      "urlParsingRegEx": "browse/([A-Z]+-\\d+)",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "productivity",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "jira-ticket",
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

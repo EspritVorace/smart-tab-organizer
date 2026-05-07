@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-dev-package-registries",
+    "name": {
+      "en": "Package registries",
+      "fr": "Registres de paquets",
+      "es": "Registros de paquetes"
+    },
+    "description": {
+      "en": "Group package pages on npm, PyPI and Docker Hub by package name.",
+      "fr": "Regroupe les pages de paquets sur npm, PyPI et Docker Hub par nom de paquet.",
+      "es": "Agrupa las páginas de paquetes en npm, PyPI y Docker Hub por nombre de paquete."
+    },
+    "categoryId": "development"
+  },
+  "domainRules": [
+    {
+      "id": "pk-dev-pkg-npm",
+      "enabled": true,
+      "domainFilter": "*.npmjs.com",
+      "label": "npm: Package",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "red",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["utm_*", "activeTab"],
+      "presetId": "npm-package",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-dev-pkg-pypi",
+      "enabled": true,
+      "domainFilter": "pypi.org",
+      "label": "PyPI: Package",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "pypi\\.org/project/([^/?#]+)",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "red",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["utm_*"],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-dev-pkg-docker-hub",
+      "enabled": true,
+      "domainFilter": "hub.docker.com",
+      "label": "Docker Hub: Image",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "hub\\.docker\\.com/(?:r|_)/([^/?#]+(?:/[^/?#]+)?)",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "red",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["utm_*"],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

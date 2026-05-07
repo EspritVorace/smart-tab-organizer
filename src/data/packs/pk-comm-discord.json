@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-comm-discord",
+    "name": {
+      "en": "Discord",
+      "fr": "Discord",
+      "es": "Discord"
+    },
+    "description": {
+      "en": "Group Discord tabs by server identifier.",
+      "fr": "Regroupe les onglets Discord par identifiant de serveur.",
+      "es": "Agrupa las pestañas de Discord por identificador de servidor."
+    },
+    "categoryId": "communication"
+  },
+  "domainRules": [
+    {
+      "id": "pk-comm-discord-server",
+      "enabled": true,
+      "domainFilter": "discord.com",
+      "label": "Discord: Server",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/channels/(\\d+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "purple",
+      "categoryId": null,
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

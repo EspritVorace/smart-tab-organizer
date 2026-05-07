@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-travel-trains-fr",
+    "name": {
+      "en": "Train tickets (FR/EU)",
+      "fr": "Billets de train (FR/EU)",
+      "es": "Billetes de tren (FR/EU)"
+    },
+    "description": {
+      "en": "Group SNCF Connect and Trainline tabs by route or destination.",
+      "fr": "Regroupe les onglets SNCF Connect et Trainline par itinéraire ou destination.",
+      "es": "Agrupa las pestañas de SNCF Connect y Trainline por ruta o destino."
+    },
+    "categoryId": "travel"
+  },
+  "domainRules": [
+    {
+      "id": "pk-travel-sncf-connect",
+      "enabled": true,
+      "domainFilter": "*.sncf-connect.com",
+      "label": "SNCF Connect",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "purple",
+      "categoryId": "travel",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-travel-trainline",
+      "enabled": true,
+      "domainFilter": "*.trainline.*",
+      "label": "Trainline: Route",
+      "titleParsingRegEx": "(.+?)\\s*[-|]\\s*Trainline",
+      "urlParsingRegEx": "/trains?/([^/?#]+)",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "green",
+      "categoryId": "travel",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

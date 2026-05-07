@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-dev-github",
+    "name": {
+      "en": "GitHub",
+      "fr": "GitHub",
+      "es": "GitHub"
+    },
+    "description": {
+      "en": "Group GitHub tabs by repository, issue, pull request and discussion.",
+      "fr": "Regroupe les onglets GitHub par dépôt, issue, pull request et discussion.",
+      "es": "Agrupa las pestañas de GitHub por repositorio, issue, pull request y discusión."
+    },
+    "categoryId": "development"
+  },
+  "domainRules": [
+    {
+      "id": "pk-dev-github-repo",
+      "enabled": true,
+      "domainFilter": "github.com",
+      "label": "GitHub: Repository",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_preset",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "blue",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["utm_*", "ref", "ref_src"],
+      "presetId": "github-repo",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-dev-github-issue",
+      "enabled": true,
+      "domainFilter": "github.com",
+      "label": "GitHub: Issue",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_preset",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "blue",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["utm_*"],
+      "presetId": "github-issue",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-dev-github-pr",
+      "enabled": true,
+      "domainFilter": "github.com",
+      "label": "GitHub: Pull Request",
+      "titleParsingRegEx": "·\\s*Pull Request\\s*#(\\d+)",
+      "urlParsingRegEx": "pull/(\\d+)",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "blue",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["utm_*"],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-dev-github-discussion",
+      "enabled": true,
+      "domainFilter": "github.com",
+      "label": "GitHub: Discussion",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "discussions/(\\d+)",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "blue",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["utm_*"],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

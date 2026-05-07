@@ -325,6 +325,15 @@
           "description": "Extrait une référence d'issue GitHub (#123) dans le titre, quel que soit le domaine. Utile pour les onglets qui référencent une issue par son numéro."
         },
         {
+          "id": "servicenow-record-in-title",
+          "name": "ServiceNow - Record dans le titre (cross-domaine)",
+          "domainFilters": ["*"],
+          "titleRegex": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+|PRB\\d+)",
+          "groupNameSource": "smart_preset",
+          "titleExample": "Titre: 'Fix login outage INC0012345' ou '[CHG0006789] Deploy update' → Groupe: 'INC0012345'",
+          "description": "Extrait un identifiant d'enregistrement ServiceNow (INC, CHG, REQ, RITM, PRB) dans le titre, quel que soit le domaine. Utile pour les PR GitHub/GitLab, cartes Trello ou tâches Asana qui référencent un incident ou changement ServiceNow."
+        },
+        {
           "id": "trello-board",
           "name": "Trello - Boards",
           "domainFilters": ["trello.com"],

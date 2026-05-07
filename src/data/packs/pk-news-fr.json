@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-news-fr",
+    "name": {
+      "en": "French press",
+      "fr": "Presse française",
+      "es": "Prensa francesa"
+    },
+    "description": {
+      "en": "Group Le Monde, Le Figaro and Libération tabs by section.",
+      "fr": "Regroupe les onglets Le Monde, Le Figaro et Libération par rubrique.",
+      "es": "Agrupa las pestañas de Le Monde, Le Figaro y Libération por sección."
+    },
+    "categoryId": "news"
+  },
+  "domainRules": [
+    {
+      "id": "pk-news-lemonde",
+      "enabled": true,
+      "domainFilter": "*.lemonde.fr",
+      "label": "Le Monde: Section",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "lemonde\\.fr/([^/?#]+)/",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": null,
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["xtor"],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-news-lefigaro",
+      "enabled": true,
+      "domainFilter": "*.lefigaro.fr",
+      "label": "Le Figaro: Section",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "lefigaro\\.fr/([^/?#]+)/",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": null,
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-news-liberation",
+      "enabled": true,
+      "domainFilter": "*.liberation.fr",
+      "label": "Libération: Section",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "liberation\\.fr/([^/?#]+)/",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "grey",
+      "categoryId": null,
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}
