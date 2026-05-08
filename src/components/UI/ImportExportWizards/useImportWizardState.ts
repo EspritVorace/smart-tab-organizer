@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   computeImportCount,
   useImportClassification,
@@ -9,6 +9,7 @@ import {
   useJsonSourceInput,
   type JsonSourceInputState,
   type JsonSourceValidationResult,
+  type SourceMode,
 } from './Source';
 
 /**
@@ -32,6 +33,8 @@ interface UseImportWizardStateOptions<TItem extends { id: string }, TConflict> {
   ) => NormalizedClassification<TItem, TConflict>;
   /** Extra reset action triggered when the dialog is opened (e.g. async data load). */
   onReset?: () => void;
+  /** Initial source mode forwarded to `useJsonSourceInput`. Defaults to `'file'`. */
+  initialSourceMode?: SourceMode;
 }
 
 export interface ImportWizardState<TItem extends { id: string }, TConflict> {
@@ -60,16 +63,20 @@ export function useImportWizardState<TItem extends { id: string }, TConflict>({
   validatePayload,
   classify,
   onReset,
+  initialSourceMode,
 }: UseImportWizardStateOptions<TItem, TConflict>): ImportWizardState<TItem, TConflict> {
   const [step, setStep] = useState<0 | 1>(0);
-  const source = useJsonSourceInput<TItem[]>(validatePayload);
+  const source = useJsonSourceInput<TItem[]>(validatePayload, initialSourceMode);
   const classificationState = useImportClassification<NormalizedClassification<TItem, TConflict>>();
   const { classification, conflictMode, newSelection } = classificationState;
+
+  const previousParsedDataRef = useRef<TItem[] | null>(null);
 
   useDialogReset(open, () => {
     setStep(0);
     source.reset();
     classificationState.reset();
+    previousParsedDataRef.current = null;
     onReset?.();
   });
 
@@ -82,6 +89,16 @@ export function useImportWizardState<TItem extends { id: string }, TConflict>({
   }, [source.parsedData, existingItems, classify, classificationState, newSelection]);
 
   const goToStep0 = useCallback(() => setStep(0), []);
+
+  useEffect(() => {
+    const previousParsedData = previousParsedDataRef.current;
+    previousParsedDataRef.current = source.parsedData;
+    if (source.sourceMode !== 'pack') return;
+    if (!source.parsedData) return;
+    if (step !== 0) return;
+    if (previousParsedData === source.parsedData) return;
+    goToStep1();
+  }, [source.sourceMode, source.parsedData, step, goToStep1]);
 
   const importCount = classification
     ? computeImportCount(

@@ -11,7 +11,7 @@ import {
   ImportCountLabel,
 } from './Classification';
 import { ImportWizardFooter } from './ImportWizardFooter';
-import { ImportedNoteCallout, SourceStep } from './Source';
+import { ImportedNoteCallout, SourceStep, type SourceMode } from './Source';
 import type { ImportWizardState } from './useImportWizardState';
 
 export interface ImportWizardShellLabels {
@@ -37,6 +37,14 @@ interface ImportWizardShellProps<TItem extends { id: string }, TConflict>
   renderConflictingItem: (conflict: TConflict) => React.ReactNode;
   renderIdenticalItem: (item: TItem) => React.ReactNode;
   onConfirm: () => void;
+  /** Override the dialog max width forwarded to `WizardModal`. */
+  maxWidth?: number | string;
+  /** When true, force the dialog to a fixed height so inner content can size deterministically. */
+  fillHeight?: boolean;
+  /** Source modes exposed in the segmented control. Defaults to `['file', 'text']`. */
+  availableModes?: readonly SourceMode[];
+  /** Optional gallery node rendered when `sourceMode === 'pack'`. */
+  packGalleryNode?: React.ReactNode;
 }
 
 /**
@@ -63,6 +71,10 @@ export function ImportWizardShell<TItem extends { id: string }, TConflict>({
   renderConflictingItem,
   renderIdenticalItem,
   onConfirm,
+  maxWidth,
+  fillHeight,
+  availableModes,
+  packGalleryNode,
 }: ImportWizardShellProps<TItem, TConflict>) {
   const {
     step,
@@ -82,6 +94,8 @@ export function ImportWizardShell<TItem extends { id: string }, TConflict>({
       icon={icon}
       title={title}
       description={getMessage(stepDescriptionKeys[step])}
+      maxWidth={maxWidth}
+      fillHeight={fillHeight}
     >
       <WizardModal.Body>
         {step === 0 && (
@@ -89,6 +103,8 @@ export function ImportWizardShell<TItem extends { id: string }, TConflict>({
             source={source}
             textareaPlaceholder={textareaPlaceholder}
             successCountMessageKey={successCountMessageKey}
+            availableModes={availableModes}
+            packGalleryNode={packGalleryNode}
           />
         )}
 

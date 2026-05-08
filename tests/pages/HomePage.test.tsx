@@ -219,7 +219,7 @@ describe('HomePage interactions', () => {
     expect(baseHandlers.onOpenRuleWizard).toHaveBeenCalledTimes(1);
   });
 
-  it('opens the rules import wizard when "import pack" is clicked from the onboarding hero', () => {
+  it('opens the rules import wizard with initialSourceMode=pack from the onboarding hero', () => {
     wrap(
       <HomePage
         syncSettings={baseSettings}
@@ -229,6 +229,7 @@ describe('HomePage interactions', () => {
     );
     fireEvent.click(screen.getByTestId('home-hero-import'));
     expect(baseHandlers.onOpenImportRules).toHaveBeenCalledTimes(1);
+    expect(baseHandlers.onOpenImportRules).toHaveBeenCalledWith('pack');
     expect(baseHandlers.onNavigate).not.toHaveBeenCalled();
   });
 

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { browser } from 'wxt/browser';
 import { Box, Flex } from '@radix-ui/themes';
 import { Home } from 'lucide-react';
@@ -6,6 +6,7 @@ import { useSessions } from '@/hooks/useSessions';
 import type { AppSettings } from '@/types/syncSettings';
 import type { Session } from '@/types/session';
 import type { StatisticsAggregates } from '@/types/statistics';
+import type { SourceMode } from '@/components/UI/ImportExportWizards/Source';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { HeroOnboarding } from '@/components/HomePage/HeroOnboarding';
 import { PinnedSessionsSection } from '@/components/HomePage/PinnedSessionsSection';
@@ -26,7 +27,7 @@ export interface HomePageProps {
   onOpenSnapshotWizard: () => void;
   onOpenRuleWizard: () => void;
   /** Opens the rules import wizard via deep-link with from=home. */
-  onOpenImportRules: () => void;
+  onOpenImportRules: (initialSourceMode?: SourceMode) => void;
   onOpenShortcutsAside: () => void;
   onRestore: (session: Session, target: HomeRestoreTarget) => void;
   /** Locale used by mini-stats for thousand-separator formatting. */
@@ -107,6 +108,10 @@ export function HomePage({
     onNavigate('sessions');
   };
 
+  const handleHeroImportPack = useCallback(() => {
+    onOpenImportRules('pack');
+  }, [onOpenImportRules]);
+
   return (
     <PageLayout
       titleKey="homeTab"
@@ -122,7 +127,7 @@ export function HomePage({
             <Flex direction="column" gap="5">
               {isEmpty && (
                 <HeroOnboarding
-                  onImportPack={onOpenImportRules}
+                  onImportPack={handleHeroImportPack}
                   onCreateRule={onOpenRuleWizard}
                 />
               )}

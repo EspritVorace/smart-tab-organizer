@@ -1,0 +1,121 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { Theme } from '@radix-ui/themes';
+import type { DomainRuleSetting } from '../../src/types/syncSettings';
+
+vi.mock('@/utils/i18n', () => ({
+  getMessage: vi.fn((key: string, subs?: string[]) =>
+    subs?.length ? `${key}(${subs.join(',')})` : key,
+  ),
+  getPluralMessage: vi.fn((count: number, oneKey: string, manyKey: string) =>
+    count === 1 ? oneKey : manyKey,
+  ),
+}));
+
+vi.mock('@/utils/toast', () => ({
+  showSuccessToast: vi.fn(),
+}));
+
+const samplePackRule = {
+  id: 'pack-rule-1',
+  domainFilter: 'example.com',
+  label: 'Sample',
+  titleParsingRegEx: '(.+)',
+  urlParsingRegEx: '',
+  groupNameSource: 'title',
+  deduplicationMatchMode: 'exact',
+  presetId: null,
+  enabled: true,
+};
+
+const samplePack = {
+  version: 1,
+  pack: { id: 'pack-sample', name: 'Sample pack', categoryId: 'cloud' },
+  domainRules: [samplePackRule],
+};
+
+vi.mock('../../src/hooks/packDataSource', () => ({
+  getPackSourceEntries: () => [
+    { path: '/src/data/packs/sample.json', data: samplePack },
+  ],
+  getCategoriesSource: () => ({
+    categories: [{ id: 'cloud', label: 'Cloud' }],
+  }),
+}));
+
+import { ImportWizard } from '../../src/components/UI/ImportExportWizards/ImportWizard';
+
+const wrap = (ui: React.ReactNode) => render(<Theme>{ui}</Theme>);
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+
+describe('ImportWizard integration : mode pack', () => {
+  it('rend la PackGallery quand initialSourceMode=pack', () => {
+    wrap(
+      <ImportWizard
+        open
+        onOpenChange={vi.fn()}
+        existingRules={[] as DomainRuleSetting[]}
+        onImport={vi.fn()}
+        initialSourceMode="pack"
+      />,
+    );
+    expect(screen.getByTestId('pack-gallery')).toBeInTheDocument();
+  });
+
+  it("avance à l'étape 1 quand l'utilisateur sélectionne un pack et confirme", () => {
+    wrap(
+      <ImportWizard
+        open
+        onOpenChange={vi.fn()}
+        existingRules={[] as DomainRuleSetting[]}
+        onImport={vi.fn()}
+        initialSourceMode="pack"
+      />,
+    );
+
+    const checkbox = screen.getByTestId('pack-card-pack-sample-checkbox');
+    fireEvent.click(checkbox);
+
+    const confirmBtn = screen.getByTestId('pack-gallery-confirm');
+    fireEvent.click(confirmBtn);
+
+    expect(screen.getByText('newRulesGroup')).toBeInTheDocument();
+    expect(screen.queryByTestId('pack-gallery')).not.toBeInTheDocument();
+  });
+
+  it("permet de revenir à l'étape 0 via Précédent en gardant la galerie visible", () => {
+    wrap(
+      <ImportWizard
+        open
+        onOpenChange={vi.fn()}
+        existingRules={[] as DomainRuleSetting[]}
+        onImport={vi.fn()}
+        initialSourceMode="pack"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId('pack-card-pack-sample-checkbox'));
+    fireEvent.click(screen.getByTestId('pack-gallery-confirm'));
+    expect(screen.getByText('newRulesGroup')).toBeInTheDocument();
+
+    const previousBtn = screen.getByText('previous').closest('button')!;
+    fireEvent.click(previousBtn);
+
+    expect(screen.getByTestId('pack-gallery')).toBeInTheDocument();
+  });
+
+  it('ne touche pas au mode par défaut quand initialSourceMode est absent', () => {
+    wrap(
+      <ImportWizard
+        open
+        onOpenChange={vi.fn()}
+        existingRules={[] as DomainRuleSetting[]}
+        onImport={vi.fn()}
+      />,
+    );
+    expect(screen.queryByTestId('pack-gallery')).not.toBeInTheDocument();
+  });
+});

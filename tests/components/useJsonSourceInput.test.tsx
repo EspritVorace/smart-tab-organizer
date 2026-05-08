@@ -129,4 +129,17 @@ describe('useJsonSourceInput', () => {
     act(() => result.current.setSourceMode('pack'));
     expect(result.current.sourceMode).toBe('pack');
   });
+
+  it('initialSourceMode positionne le mode initial', () => {
+    const { result } = renderHook(() => useJsonSourceInput(validate, 'pack'));
+    expect(result.current.sourceMode).toBe('pack');
+  });
+
+  it('reset() restaure initialSourceMode et non file en dur', () => {
+    const { result } = renderHook(() => useJsonSourceInput(validate, 'pack'));
+    act(() => result.current.setSourceMode('text'));
+    expect(result.current.sourceMode).toBe('text');
+    act(() => result.current.reset());
+    expect(result.current.sourceMode).toBe('pack');
+  });
 });

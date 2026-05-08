@@ -255,6 +255,8 @@
 
   "sourceFile": { "message": "Fichier" },
   "sourceText": { "message": "Texte" },
+  "sourcePack": { "message": "Pack" },
+  "importRulesStepSourcePackDescription": { "message": "Sélectionnez un ou plusieurs packs depuis le catalogue intégré." },
   "packGallerySearchPlaceholder": { "message": "Rechercher un pack..." },
   "packGalleryEmptyState": { "message": "Aucun pack disponible" },
   "packGallerySearchNoResult": { "message": "Aucun pack ne correspond à votre recherche" },
