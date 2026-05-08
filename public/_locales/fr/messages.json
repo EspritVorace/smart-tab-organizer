@@ -139,7 +139,9 @@
   "confirmDeleteSelectedDescription": { "message": "Les règles sélectionnées seront définitivement supprimées. Cette action est irréversible." },
   "searchRules": { "message": "Rechercher des règles..." },
   "searchSessions": { "message": "Rechercher des sessions..." },
+  "searchWorkspaces": { "message": "Rechercher des espaces..." },
   "noRulesFound": { "message": "Aucune règle trouvée" },
+  "noWorkspacesFound": { "message": "Aucun espace trouvé" },
   "popupNoRulesTitle": { "message": "Aucune règle paramétrée" },
   "popupGoToRules": { "message": "Gérer les règles" },
   "rulesEmptyTitle": { "message": "Aucune règle de domaine" },
@@ -537,6 +539,7 @@
   "shortcutsGroupListHome": { "message": "Page d'accueil" },
   "shortcutsGroupListRules": { "message": "Liste des règles" },
   "shortcutsGroupListSessions": { "message": "Liste des sessions" },
+  "shortcutsGroupListWorkspaces": { "message": "Liste des espaces" },
   "shortcutsGroupSessionCard": { "message": "Carte session (focus)" },
 
   "shortcutDescOrganize": { "message": "Organiser tous les onglets" },
