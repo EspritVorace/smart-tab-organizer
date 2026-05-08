@@ -9,19 +9,23 @@
  *                   The locale comes from the Playwright project name.
  *
  * After each capture, screenshots are:
- *   - saved to doc/documentation/ (primary, all screenshots)
- *   - copied to doc/readme/       (screenshots used in READMEs)
- *   - copied to doc/chrome-web-store/ (screenshots for the Chrome Web Store)
+ *   - saved to docs/src/assets/screenshots/ (primary, all screenshots)
+ *   - copied to doc/readme/  and  doc/chrome-web-store/  via the routing manifest
+ *     declared in `e2e-screenshots/routing.ts`.
  *
- * All PNG files are re-encoded through sharp to strip embedded metadata
- * (tIME, tEXt, iTXt…), ensuring stable binary output across runs so that
- * git does not report spurious changes.
+ * All PNG files are re-encoded through sharp (in `e2e-shared/sharp-save.ts`)
+ * to strip embedded metadata, ensuring stable binary output across runs so
+ * that git does not report spurious changes.
  */
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import * as fs from 'fs';
-import sharp from 'sharp';
 import type { BrowserContext, Page } from '@playwright/test';
+import { savePng } from '../../e2e-shared/sharp-save.js';
+import { injectLocaleOverride } from '../../e2e-shared/locale-injector.js';
+import { applyTheme, type Theme } from '../../e2e-shared/theme.js';
+import { waitForServiceWorker } from '../../e2e-shared/extension-id.js';
+import type { Locale } from '../../e2e-shared/routing/types.js';
+import { SCREENSHOTS_MANIFEST } from '../routing.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,107 +33,17 @@ const __dirname = path.dirname(__filename);
 /** Absolute path to the documentation screenshots folder (all screenshots) */
 const DOCS_DIR = path.resolve(__dirname, '../../docs/src/assets/screenshots');
 
-/** Absolute path to the readme screenshots folder */
-const README_DIR = path.resolve(__dirname, '../../doc/readme');
-
-/** Absolute path to the Chrome Web Store screenshots folder */
-const CHROME_STORE_DIR = path.resolve(__dirname, '../../doc/chrome-web-store');
-
-/** Absolute path to the built extension's _locales directory */
-const LOCALES_DIR = path.resolve(__dirname, '../../.output/chrome-mv3/_locales');
-
-// ---------------------------------------------------------------------------
-// Copy-destination patterns
-// ---------------------------------------------------------------------------
-
-/**
- * Screenshots that are referenced in the README files (all 3 locales, dark theme only).
- * Matched against the full filename without extension, e.g. 'en-dark-rules-create-summary'.
- */
-const README_PATTERNS: RegExp[] = [
-  /^(?:en|fr|es)-dark-rules-create-summary$/,
-  /^(?:en|fr|es)-dark-sessions-list$/,
-  /^(?:en|fr|es)-dark-sessions-search-deep$/,
-  /^(?:en|fr|es)-dark-rules-import-text-conflicts$/,
-  /^(?:en|fr|es)-dark-popup-content$/,
-];
-
-/**
- * Screenshots to include in the Chrome Web Store listing.
- * Per the store's requirements: 4 specific screens × 3 locales = 12 files.
- */
-const CHROME_STORE_PATTERNS: RegExp[] = [
-  /^(?:en|fr|es)-dark-rules-bulk-actions$/,
-  /^(?:en|fr|es)-dark-sessions-search-deep$/,
-  /^(?:en|fr|es)-dark-sessions-restore-conflict$/,
-  /^(?:en|fr|es)-light-rules-bulk-actions$/,
-];
-
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-type MessageEntry = {
-  message: string;
-  placeholders?: Record<string, { content: string }>;
-};
-
 /**
- * Load messages.json for a locale, or null for 'en' (Chrome's default).
- * These messages are injected via addInitScript to override chrome.i18n.getMessage,
- * because the Playwright Chromium binary on Linux ignores --lang and always
- * reports en-US from chrome.i18n.getUILanguage().
+ * Wait for the service worker, retrying up to 5 s.
+ * Re-exported for backwards compatibility with fixture seed helpers
+ * (`fixtures/rules-seed.ts` etc. import this).
  */
-function loadLocaleMessages(locale: string): Record<string, MessageEntry> | null {
-  if (locale === 'en') return null;
-  const filePath = path.join(LOCALES_DIR, locale, 'messages.json');
-  try {
-    return JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Record<string, MessageEntry>;
-  } catch {
-    return null;
-  }
-}
-
-/** Wait for the service worker, retrying up to 5 s */
 export async function getServiceWorker(context: BrowserContext) {
-  let sw = context.serviceWorkers()[0];
-  if (sw) return sw;
-  const deadline = Date.now() + 5_000;
-  while (!sw && Date.now() < deadline) {
-    await new Promise((r) => setTimeout(r, 200));
-    sw = context.serviceWorkers()[0];
-  }
-  if (!sw) throw new Error('Service worker not found');
-  return sw;
-}
-
-/**
- * Save a PNG buffer to disk, stripping all metadata in the process.
- * sharp re-encodes the PNG without tIME, tEXt, iTXt or other ancillary
- * chunks, producing stable binary output across runs.
- *
- * Copies are also written to readme/ and chrome-web-store/ when the
- * filename matches the corresponding patterns.
- */
-async function savePng(buffer: Buffer, filename: string): Promise<void> {
-  fs.mkdirSync(DOCS_DIR, { recursive: true });
-  const filePath = path.join(DOCS_DIR, `${filename}.png`);
-
-  // Re-encode through sharp — metadata is stripped by default (no withMetadata() call)
-  await sharp(buffer).png().toFile(filePath);
-  console.log(`  ✓ ${filename}.png`);
-
-  // Copy to readme/ if this screenshot is referenced by a README
-  if (README_PATTERNS.some((p) => p.test(filename))) {
-    fs.mkdirSync(README_DIR, { recursive: true });
-    fs.copyFileSync(filePath, path.join(README_DIR, `${filename}.png`));
-  }
-
-  // Copy to chrome-web-store/ if this screenshot is for the store listing
-  if (CHROME_STORE_PATTERNS.some((p) => p.test(filename))) {
-    fs.mkdirSync(CHROME_STORE_DIR, { recursive: true });
-    fs.copyFileSync(filePath, path.join(CHROME_STORE_DIR, `${filename}.png`));
-  }
+  return waitForServiceWorker(context, 5_000);
 }
 
 /**
@@ -141,7 +55,7 @@ async function preparePage(
   context: BrowserContext,
   extensionId: string,
   section: string,
-  theme: 'light' | 'dark',
+  theme: Theme,
   locale: string,
   setup?: (page: Page) => Promise<void>,
 ): Promise<Page> {
@@ -149,54 +63,10 @@ async function preparePage(
   const base = `chrome-extension://${extensionId}`;
   const isPopup = section === 'popup';
 
-  // 1. Inject locale override before first navigation.
-  //    The Playwright Chromium binary on Linux ignores --lang and always uses en-US
-  //    for chrome.i18n, so we override getMessage() directly in the page context.
-  //    addInitScript re-runs on every navigation (including page.reload() below),
-  //    ensuring React always receives translated strings on mount.
-  const messages = loadLocaleMessages(locale);
-  if (messages) {
-    await page.addInitScript((msgs: Record<string, MessageEntry>) => {
-      const orig = chrome.i18n.getMessage.bind(chrome.i18n);
-      chrome.i18n.getMessage = function (
-        messageId: string,
-        substitutions?: string | string[],
-      ): string {
-        const entry = msgs[messageId];
-        if (!entry) return orig(messageId, substitutions);
-
-        let msg = entry.message;
-        const subs = substitutions
-          ? Array.isArray(substitutions)
-            ? substitutions
-            : [substitutions]
-          : [];
-
-        if (entry.placeholders) {
-          for (const [name, placeholder] of Object.entries(entry.placeholders)) {
-            // Resolve positional references ($1, $2…) inside the placeholder content
-            const content = placeholder.content.replace(
-              /\$(\d+)/g,
-              (_, n: string) => subs[parseInt(n, 10) - 1] ?? '',
-            );
-            // Replace $PLACEHOLDER_NAME$ in the message (case-insensitive)
-            msg = msg.replace(new RegExp(`\\$${name}\\$`, 'gi'), content);
-          }
-        }
-
-        // Resolve any remaining positional substitutions ($1, $2…) directly in the
-        // message. Native chrome.i18n.getMessage supports this even without a
-        // `placeholders` block, and many of our messages rely on it (e.g.
-        // restoreTitle, sessionTabCount, restoreConflictingGroups).
-        msg = msg.replace(
-          /\$(\d+)/g,
-          (_, n: string) => subs[parseInt(n, 10) - 1] ?? '',
-        );
-
-        return msg;
-      };
-    }, messages as Parameters<typeof page.addInitScript>[1]);
-  }
+  // 1. Inject locale override before first navigation. addInitScript re-runs on
+  //    every navigation (including page.reload() below), so React always sees
+  //    translated strings.
+  await injectLocaleOverride(page, locale);
 
   // 2. Navigate directly to the target URL (correct origin for localStorage)
   const targetUrl = isPopup
@@ -207,18 +77,12 @@ async function preparePage(
   await page.goto(targetUrl);
   await page.waitForLoadState('domcontentloaded');
 
-  // 3. Set theme via localStorage (next-themes reads 'theme' key on mount)
-  await page.evaluate((t) => localStorage.setItem('theme', t), theme);
+  // 3. Set theme via localStorage and reload so next-themes re-reads it.
+  //    A simple hash navigation does NOT trigger a full page reload, so
+  //    next-themes would keep the stale theme from its initial mount.
+  await applyTheme(page, theme);
 
-  // 4. Reload so next-themes re-reads localStorage and applies the correct theme.
-  //    A simple hash navigation (e.g. options.html → options.html#rules) does NOT
-  //    trigger a full page reload, so next-themes would keep the stale theme from
-  //    its initial mount. page.reload() forces a clean remount at the target URL.
-  //    The addInitScript locale override also re-runs on this reload.
-  await page.reload();
-  await page.waitForLoadState('domcontentloaded');
-
-  // 5. Wait for the app to finish loading (useSyncedSettings resolves)
+  // 4. Wait for the app to finish loading (useSyncedSettings resolves)
   await page.waitForFunction(
     () => {
       const body = document.body?.textContent ?? '';
@@ -227,17 +91,35 @@ async function preparePage(
     { timeout: 10_000 },
   );
 
-  // 6. Short stabilisation pause (theme class applied, React committed)
+  // 5. Short stabilisation pause (theme class applied, React committed)
   await page.waitForTimeout(600);
 
-  // 7. Run optional setup callback
+  // 6. Run optional setup callback
   if (setup) {
     await setup(page);
-    // Extra pause after interactions
     await page.waitForTimeout(400);
   }
 
   return page;
+}
+
+/**
+ * Persist a buffer as `<filename>.png` in the canonical docs directory and
+ * fan out to manifest-declared destinations.
+ */
+async function saveCapture(
+  buffer: Buffer,
+  filename: string,
+  locale: Locale,
+  theme: Theme,
+): Promise<void> {
+  await savePng(buffer, filename, {
+    outputDir: DOCS_DIR,
+    locale,
+    theme,
+    manifests: [SCREENSHOTS_MANIFEST],
+  });
+  console.log(`  ✓ ${filename}.png`);
 }
 
 // ---------------------------------------------------------------------------
@@ -260,7 +142,7 @@ export async function captureScreen(
   context: BrowserContext,
   extensionId: string,
   section: string,
-  theme: 'light' | 'dark',
+  theme: Theme,
   locale: string,
   filename: string,
   setup?: (page: Page) => Promise<void>,
@@ -270,7 +152,7 @@ export async function captureScreen(
     const buffer = await page.screenshot({
       clip: { x: 0, y: 0, width: 1280, height: 800 },
     });
-    await savePng(buffer, filename);
+    await saveCapture(buffer, filename, locale as Locale, theme);
   } finally {
     await page.close();
   }
@@ -293,7 +175,7 @@ export async function captureScreenElement(
   context: BrowserContext,
   extensionId: string,
   section: string,
-  theme: 'light' | 'dark',
+  theme: Theme,
   locale: string,
   filename: string,
   elementSelector: string,
@@ -324,7 +206,7 @@ export async function captureScreenElement(
         height: Math.round(clip.height),
       },
     });
-    await savePng(buffer, filename);
+    await saveCapture(buffer, filename, locale as Locale, theme);
   } finally {
     await page.close();
   }
@@ -349,7 +231,7 @@ export async function captureAll(
   baseName: string,
   setup?: (page: Page) => Promise<void>,
 ): Promise<void> {
-  const themes: Array<'light' | 'dark'> = ['light', 'dark'];
+  const themes: Theme[] = ['light', 'dark'];
   for (const theme of themes) {
     const filename = `${locale}-${theme}-${baseName}`;
     await captureScreen(context, extensionId, section, theme, locale, filename, setup);
@@ -378,7 +260,7 @@ export async function captureAllElement(
   elementSelector: string,
   setup?: (page: Page) => Promise<void>,
 ): Promise<void> {
-  const themes: Array<'light' | 'dark'> = ['light', 'dark'];
+  const themes: Theme[] = ['light', 'dark'];
   for (const theme of themes) {
     const filename = `${locale}-${theme}-${baseName}`;
     await captureScreenElement(context, extensionId, section, theme, locale, filename, elementSelector, setup);

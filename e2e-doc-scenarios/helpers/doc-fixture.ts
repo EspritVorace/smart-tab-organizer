@@ -1,14 +1,10 @@
 /**
- * Playwright fixture for Chrome extension screenshot tests.
+ * Playwright fixture for the narrative documentation pipeline.
  *
- * Provides:
- *   - extensionContext  — worker-scoped BrowserContext with the extension loaded
- *   - extensionId       — extension ID derived from the service worker URL
- *
- * The browser is launched once per locale (Playwright project name).
- * Theme switching is handled inside captureAll() via localStorage.
- *
- * Backed by the shared launcher in `e2e-shared/extension-loader.ts`.
+ * Worker-scoped: launches one Chromium with the extension loaded and the
+ * host-resolver mapped to the local mimetic-sites server, so tabs opened by
+ * the scenario towards `http://github.com/...`, `http://youtube.com/...` etc.
+ * are served from disk and the extension's domain rules match real-looking URLs.
  */
 import { test as base, type BrowserContext } from '@playwright/test';
 import {
@@ -16,32 +12,31 @@ import {
   cleanupUserDataDir,
 } from '../../e2e-shared/extension-loader.js';
 import { getExtensionId } from '../../e2e-shared/extension-id.js';
+import { getHostResolverRules } from '../fixtures/sites-server.js';
 
-/** Maps Playwright project name → Chrome --lang value */
+export interface DocScenarioFixtures {
+  extensionContext: BrowserContext;
+  extensionId: string;
+}
+
 const LOCALE_LANG: Record<string, string> = {
   en: 'en-US',
   fr: 'fr-FR',
   es: 'es-ES',
 };
 
-export interface ScreenshotFixtures {
-  /** BrowserContext with the extension loaded (worker-scoped) */
-  extensionContext: BrowserContext;
-  /** Chrome extension ID from the service worker URL */
-  extensionId: string;
-}
-
-export const test = base.extend<ScreenshotFixtures>({
+export const test = base.extend<DocScenarioFixtures>({
   extensionContext: [
     async ({}, use, testInfo) => {
       const locale = testInfo.project.name;
       const lang = LOCALE_LANG[locale] ?? 'en-US';
 
       const { context, userDataDir } = await launchExtension({
-        label: `screenshots-${locale}`,
+        label: `doc-scenarios-${locale}`,
         lang,
         deterministicRendering: true,
         viewport: { width: 1280, height: 800 },
+        hostResolverRules: getHostResolverRules(),
       });
 
       await use(context);

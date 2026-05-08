@@ -1,15 +1,9 @@
-import { test as base, chromium, type BrowserContext, type Page } from '@playwright/test';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
-import * as fs from 'fs';
-import * as os from 'os';
-
-// ES module equivalent of __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Extension path relative to project root
-const EXTENSION_PATH = path.join(__dirname, '../../.output/chrome-mv3');
+import { test as base, type BrowserContext, type Page } from '@playwright/test';
+import {
+  launchExtension,
+  cleanupUserDataDir,
+} from '../../e2e-shared/extension-loader.js';
+import { getExtensionId } from '../../e2e-shared/extension-id.js';
 
 export interface ExtensionFixtures {
   extensionContext: BrowserContext;
@@ -96,90 +90,25 @@ async function localSet(sw: Page, data: Record<string, unknown>): Promise<void> 
   }, data as Record<string, unknown>);
 }
 
-// Create a temporary user data directory for each test run
-function createTempUserDataDir(): string {
-  const tmpDir = path.join(os.tmpdir(), `playwright-chrome-${Date.now()}`);
-  if (!fs.existsSync(tmpDir)) {
-    fs.mkdirSync(tmpDir, { recursive: true });
-  }
-  return tmpDir;
-}
-
 export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers }>({
   // Custom browser extensionContext with extension loaded — worker-scoped so the browser
   // is launched once per worker instead of once per test.
   extensionContext: [async ({}, use) => {
-    const userDataDir = createTempUserDataDir();
-
-    // Verify extension path exists
-    if (!fs.existsSync(EXTENSION_PATH)) {
-      throw new Error(`Extension not found at ${EXTENSION_PATH}. Run 'npm run build' first.`);
-    }
-
-    // Resolve Chromium executable: prefer a "chromium-custom" build (CI),
-    // then fall back to any versioned Playwright Chromium already on disk.
-    function findChrome(): string | undefined {
-      const candidates = [
-        // CI / manually pre-installed custom build
-        path.join(os.homedir(), '.cache/ms-playwright/chromium-custom/chrome-linux64/chrome'),
-        // /opt/pw-browsers layout (alternative CI install path)
-        '/opt/pw-browsers/chromium-custom/chrome-linux64/chrome',
-        '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
-        // Playwright 1.58 expected version
-        path.join(os.homedir(), '.cache/ms-playwright/chromium-1208/chrome-linux64/chrome'),
-        '/opt/pw-browsers/chromium-1208/chrome-linux64/chrome',
-        // Playwright 1.57 expected version
-        path.join(os.homedir(), '.cache/ms-playwright/chromium-1200/chrome-linux64/chrome'),
-        '/opt/pw-browsers/chromium-1200/chrome-linux64/chrome',
-        // Older Playwright version that may already be present
-        path.join(os.homedir(), '.cache/ms-playwright/chromium-1194/chrome-linux/chrome'),
-      ];
-      return candidates.find((p) => fs.existsSync(p));
-    }
-    const executablePath = findChrome();
-
-    const extensionContext = await chromium.launchPersistentContext(userDataDir, {
-      headless: false, // Extensions require headed mode
-      executablePath,
-      args: [
-        `--disable-extensions-except=${EXTENSION_PATH}`,
-        `--load-extension=${EXTENSION_PATH}`,
-        '--lang=en-US',
-        '--no-first-run',
-        '--no-default-browser-check',
-        '--disable-popup-blocking',
-      ],
+    const { context, userDataDir } = await launchExtension({
+      label: 'chrome',
+      headless: false,
+      lang: 'en-US',
     });
 
-    // Wait for service worker to register before yielding the extensionContext
-    const swDeadline = Date.now() + 10000;
-    while (!extensionContext.serviceWorkers()[0] && Date.now() < swDeadline) {
-      await new Promise(resolve => setTimeout(resolve, 200));
-    }
-    if (!extensionContext.serviceWorkers()[0]) {
-      throw new Error('Service worker did not start within timeout');
-    }
+    await use(context);
 
-    await use(extensionContext);
-
-    await extensionContext.close();
-
-    // Clean up temp directory
-    try {
-      fs.rmSync(userDataDir, { recursive: true, force: true });
-    } catch (_e) {
-      // Ignore cleanup errors
-    }
+    await context.close();
+    cleanupUserDataDir(userDataDir);
   }, { scope: 'worker' }],
 
   // Get extension ID from service worker — worker-scoped, resolved once per worker.
   extensionId: [async ({ extensionContext }, use) => {
-    const serviceWorker = extensionContext.serviceWorkers()[0];
-    if (!serviceWorker) {
-      throw new Error('Service worker not available (should have been awaited in extensionContext fixture)');
-    }
-    const extensionId = new URL(serviceWorker.url()).hostname;
-    await use(extensionId);
+    await use(getExtensionId(extensionContext));
   }, { scope: 'worker' }],
 
   // Popup page fixture
