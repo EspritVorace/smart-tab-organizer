@@ -970,7 +970,9 @@ test.describe('Import / Export', () => {
       await page.goto(`chrome-extension://${extensionId}/options.html#rules`);
       await page.waitForLoadState('domcontentloaded');
 
-      const importBtn = page.getByTestId('page-rules-empty').getByRole('button', { name: /import/i });
+      const emptyState = page.getByTestId('page-rules-empty');
+      await emptyState.waitFor({ state: 'visible', timeout: 10_000 });
+      const importBtn = emptyState.getByRole('button', { name: /import/i });
       await importBtn.click();
 
       await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
@@ -991,7 +993,9 @@ test.describe('Import / Export', () => {
       await page.goto(`chrome-extension://${extensionId}/options.html#sessions`);
       await page.waitForLoadState('domcontentloaded');
 
-      const importBtn = page.getByTestId('page-sessions-empty').getByRole('button', { name: /import/i });
+      const emptyState = page.getByTestId('page-sessions-empty');
+      await emptyState.waitFor({ state: 'visible', timeout: 10_000 });
+      const importBtn = emptyState.getByRole('button', { name: /import/i });
       await importBtn.click();
 
       await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
@@ -1013,7 +1017,9 @@ test.describe('Import / Export', () => {
       await page.goto(`chrome-extension://${extensionId}/options.html#home`);
       await page.waitForLoadState('domcontentloaded');
 
-      await page.getByTestId('home-hero-import').click();
+      const heroImport = page.getByTestId('home-hero-import');
+      await heroImport.waitFor({ state: 'visible', timeout: 10_000 });
+      await heroImport.click();
 
       await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
       await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#importexport');
