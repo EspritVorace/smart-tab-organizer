@@ -354,6 +354,7 @@ function SessionCardFullHeader({
             color={session.isPinned ? 'indigo' : 'gray'}
             onClick={() => session.isPinned ? onUnpin?.(session) : onPin?.(session)}
             aria-label={session.isPinned ? getMessage('sessionUnpin') : getMessage('sessionPin')}
+            data-testid={`session-card-${session.id}-btn-${session.isPinned ? 'unpin' : 'pin'}`}
           >
             {session.isPinned
               ? <PinOff size={14} />

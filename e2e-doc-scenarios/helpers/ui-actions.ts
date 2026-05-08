@@ -5,7 +5,7 @@
  * (no direct storage seeding). Avoids `waitForTimeout` in favour of explicit
  * waits, so scenarios remain deterministic on CI.
  */
-import type { BrowserContext, Page } from '@playwright/test';
+import type { BrowserContext, Locator, Page } from '@playwright/test';
 import { injectLocaleOverride } from '../../e2e-shared/locale-injector.js';
 import { applyTheme, type Theme } from '../../e2e-shared/theme.js';
 import { waitForServiceWorker } from '../../e2e-shared/extension-id.js';
@@ -176,4 +176,158 @@ export async function waitForGroupingSettled(
     }
     await new Promise((r) => setTimeout(r, 200));
   }
+}
+
+/**
+ * Wait for an in-app toast to appear in the current page.
+ *
+ * Defaults to the Radix toast-viewport selector (data-testid="toast-viewport"),
+ * then waits for at least one toast root to be visible. Optionally narrow to a
+ * given variant ("success" | "error" | "info") via the `variant` argument.
+ */
+export async function waitForToast(
+  page: Page,
+  options: { variant?: 'success' | 'error' | 'info'; timeoutMs?: number } = {},
+): Promise<Locator> {
+  const { variant, timeoutMs = 5_000 } = options;
+  await page
+    .getByTestId('toast-viewport')
+    .waitFor({ state: 'attached', timeout: timeoutMs });
+  const toast = variant
+    ? page.getByTestId(`toast-${variant}`)
+    : page.locator('[data-testid^="toast-"][data-variant]');
+  await toast.first().waitFor({ state: 'visible', timeout: timeoutMs });
+  return toast.first();
+}
+
+/**
+ * Hover a session card's name (HoverCard trigger) and wait for the HoverCard
+ * panel to appear so the resulting capture is stable.
+ */
+export async function hoverSessionCardName(
+  page: Page,
+  sessionId: string,
+): Promise<void> {
+  const trigger = page.getByTestId(`session-card-${sessionId}-name`);
+  await trigger.scrollIntoViewIfNeeded();
+  await trigger.hover();
+  await page.locator('[data-radix-hover-card-content], [role="dialog"][data-state="open"]').first().waitFor({
+    state: 'visible',
+    timeout: 3_000,
+  }).catch(async () => {
+    // Some Radix builds expose the content with a different attribute set;
+    // fall back to a short stabilisation pause so the screenshot still picks
+    // up the freshly-rendered panel.
+    await page.waitForTimeout(400);
+  });
+}
+
+/**
+ * Toggle a domain rule's "enabled" Switch by rule id.
+ *
+ * The Switch lives inside the rule card and is targeted via aria-label since
+ * it currently has no dedicated data-testid.
+ */
+export async function toggleRuleEnabled(page: Page, ruleId: string): Promise<void> {
+  const card = page.getByTestId(`rule-card-${ruleId}`);
+  const toggle = card.getByRole('switch').first();
+  await toggle.click();
+}
+
+/**
+ * Click the pin button on a session card. Best-effort: relies on the card
+ * being currently visible and not in the renaming state.
+ */
+export async function pinSession(page: Page, sessionId: string): Promise<void> {
+  await page.getByTestId(`session-card-${sessionId}-btn-pin`).click();
+  await page.getByTestId(`session-card-${sessionId}-btn-unpin`).waitFor({
+    state: 'visible',
+    timeout: 3_000,
+  });
+}
+
+/**
+ * Resolve the testid suffix (uuid) of the first session card visible on the
+ * sessions list. Walks from the `-name` element, whose testid is
+ * `session-card-{uuid}-name`, and strips the suffix.
+ */
+export async function getFirstSessionId(page: Page): Promise<string> {
+  const nameEl = page.locator('[data-testid^="session-card-"][data-testid$="-name"]').first();
+  await nameEl.waitFor({ state: 'visible' });
+  const testid = await nameEl.getAttribute('data-testid');
+  if (!testid) {
+    throw new Error('Could not read data-testid from the first session card name');
+  }
+  return testid.replace(/^session-card-/, '').replace(/-name$/, '');
+}
+
+/**
+ * Type a query into the sessions list search input and wait for the filtered
+ * list to update.
+ */
+export async function fillSessionsSearch(
+  page: Page,
+  query: string,
+): Promise<void> {
+  const input = page.getByTestId('page-sessions-search');
+  await input.click();
+  await input.fill(query);
+  // Search filtering is purely client-side: a single animation frame is
+  // enough for the React re-render to commit before we capture.
+  await page.waitForTimeout(150);
+}
+
+/** Open the rules export wizard from the Import/Export page. */
+export async function openExportRulesWizard(page: Page): Promise<void> {
+  const card = page.getByTestId('page-import-export-card-export-rules');
+  await card.getByRole('button').first().click();
+  // Both export wizards share the WizardModal frame: wait for the dialog title.
+  await page.getByRole('dialog').first().waitFor({ state: 'visible' });
+}
+
+/** Open the rules import wizard from the Import/Export page. */
+export async function openImportRulesWizard(page: Page): Promise<void> {
+  const card = page.getByTestId('page-import-export-card-import-rules');
+  await card.getByRole('button').first().click();
+  await page.getByRole('dialog').first().waitFor({ state: 'visible' });
+}
+
+/**
+ * Switch the active import wizard from File mode to Text mode and paste the
+ * supplied JSON into the textarea.
+ */
+export async function pasteImportJson(page: Page, json: string): Promise<void> {
+  const dialog = page.getByRole('dialog').first();
+  // Segmented control item labelled "Text" (i18n-driven, so query by role).
+  await dialog
+    .locator('[role="radiogroup"], [role="tablist"], [data-radix-segmented-control-root]')
+    .first()
+    .waitFor({ state: 'visible' })
+    .catch(() => {});
+  // The segmented control items use role="radio" or "tab" depending on
+  // Radix internals; querying by visible text via the radiogroup labels is
+  // brittle, so we click the second SegmentedControl item directly.
+  const segmentedItems = dialog.locator('button, [role="tab"], [role="radio"]').filter({
+    hasText: /./,
+  });
+  // Heuristic: the first two items are "File" and "Text" (others optional).
+  await segmentedItems.nth(1).click();
+  const textarea = dialog.locator('textarea').first();
+  await textarea.waitFor({ state: 'visible' });
+  await textarea.fill(json);
+  // Validation runs on each input change; small breath so the success
+  // callout is rendered before capture.
+  await page.waitForTimeout(200);
+}
+
+/**
+ * Advance the import wizard from step 0 (source) to step 1 (classification)
+ * by clicking the "Next" button in the dialog footer.
+ */
+export async function importWizardNextToClassification(page: Page): Promise<void> {
+  const dialog = page.getByRole('dialog').first();
+  await dialog.getByRole('button').last().click();
+  // Radix renders step 1 inside the same dialog; wait for the
+  // classification scroll area to appear.
+  await page.waitForTimeout(300);
 }
