@@ -118,14 +118,14 @@ async function seedNewWindow(
   result: RestoreResult,
 ): Promise<{ windowId: number; firstTabId: number | undefined } | null> {
   const newWindow = await browser.windows.create({ url: firstUrl || undefined });
-  const windowId = newWindow.id;
+  const windowId = newWindow?.id;
   if (!windowId) {
     result.errors.push('Failed to create new window');
     return null;
   }
   result.windowId = windowId;
   if (firstUrl) result.tabsCreated++;
-  return { windowId, firstTabId: newWindow.tabs?.[0]?.id };
+  return { windowId, firstTabId: newWindow?.tabs?.[0]?.id };
 }
 
 async function createUngroupedTabsInWindow(

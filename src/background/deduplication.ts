@@ -145,10 +145,12 @@ export async function focusAndReloadTab(duplicateTab: Browser.tabs.Tab): Promise
         }
 
         // Recharger l'onglet existant (optionnel)
-        try {
-            await browser.tabs.reload(duplicateTab.id);
-        } catch (e) {
-            logger.debug('[DEDUP] Tab reload failed:', e);
+        if (duplicateTab.id !== undefined) {
+            try {
+                await browser.tabs.reload(duplicateTab.id);
+            } catch (e) {
+                logger.debug('[DEDUP] Tab reload failed:', e);
+            }
         }
     } catch (e) {
         logger.warn("Could not focus duplicate tab:", e);

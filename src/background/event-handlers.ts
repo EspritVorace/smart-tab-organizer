@@ -133,7 +133,8 @@ async function registerPendingGroupingForNewTab(newTab: Browser.tabs.Tab, opener
         pendingGroupings.set(newTab.id!, { openerTab, newTab });
         await tryProcessFastLoadGrouping(newTab.id!);
     } catch (e) {
-        if (e.message && e.message.toLowerCase().includes("no tab with id")) {
+        const message = e instanceof Error ? e.message : '';
+        if (message && message.toLowerCase().includes("no tab with id")) {
             logger.debug(`[GROUPING_DEBUG] onCreated: Opener tab ${openerIdFromMap} was closed.`);
         } else {
             logger.error(`[GROUPING_DEBUG] onCreated: Error getting opener tab ${openerIdFromMap}:`, e);

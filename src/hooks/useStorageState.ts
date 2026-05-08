@@ -194,9 +194,10 @@ export function useStorageState<T extends object>({
     return () => {
       setChangeCallbacks(prev => {
         const next = { ...prev };
-        if (next[field]) {
-          (next[field] as Set<(value: T[keyof T]) => void>).delete(callback);
-          if ((next[field] as Set<(value: T[keyof T]) => void>).size === 0) delete next[field];
+        const set = next[field] as Set<(value: T[K]) => void> | undefined;
+        if (set) {
+          set.delete(callback);
+          if (set.size === 0) delete next[field];
         }
         return next;
       });

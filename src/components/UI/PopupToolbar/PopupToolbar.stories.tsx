@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Box } from '@radix-ui/themes';
-import { PopupToolbar } from './PopupToolbar';
+import { PopupToolbar, type PopupToolbarProps } from './PopupToolbar';
 
-const meta: Meta<typeof PopupToolbar> = {
+const meta: Meta<PopupToolbarProps> = {
   title: 'Components/UI/PopupToolbar',
   component: PopupToolbar,
   parameters: {
@@ -24,10 +24,10 @@ const meta: Meta<typeof PopupToolbar> = {
       </Box>
     ),
   ],
-} satisfies Meta<typeof PopupToolbar>;
+} satisfies Meta<PopupToolbarProps>;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<PopupToolbarProps>;
 
 export const PopupToolbarDefault: Story = {
   name: 'Default',
