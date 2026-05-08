@@ -3,4 +3,34 @@ title: Tour de l'interface
 description: Un aperçu rapide des deux surfaces principales (la popup et la page Options) pour prendre en main l'extension en quelques minutes.
 ---
 
-{/* TODO: contenu à rédiger */}
+import { Aside } from '@astrojs/starlight/components';
+import ThemeImage from '../../../components/ThemeImage.astro';
+import popupEmptyLight from '../../../assets/screenshots/fr-light-journey-popup-empty.png';
+import popupEmptyDark from '../../../assets/screenshots/fr-dark-journey-popup-empty.png';
+
+SmartTab Organizer expose deux surfaces principales : la **popup**, accessible depuis la barre d'outils, et la **page Options**, ouverte dans un onglet dédié.
+
+## La popup au premier lancement
+
+Juste après l'installation, la popup affiche un état vierge : aucune règle n'est encore configurée et toutes les statistiques sont à zéro.
+
+<ThemeImage
+  lightSrc={popupEmptyLight}
+  darkSrc={popupEmptyDark}
+  alt="Popup de SmartTab Organizer au premier lancement, sans règle configurée."
+/>
+
+Depuis cet écran vous accédez aux toggles de groupement et de déduplication, aux statistiques globales, et aux pages Options pour configurer vos règles, vos sessions et vos paramètres.
+
+## La page Options
+
+La page Options regroupe quatre sections principales :
+
+- **Règles de domaine** : créer, modifier et organiser les règles qui pilotent le groupement et la déduplication.
+- **Sessions** : capturer un instantané des onglets ouverts, l'éditer, ou en restaurer un précédent.
+- **Statistiques** : suivre l'activité de groupement et de déduplication dans le temps.
+- **Import / Export** : sauvegarder ou restaurer votre configuration et vos sessions au format JSON.
+
+<Aside type="note">
+La capture ci-dessus est extraite du parcours narratif `00-main-journey` du pipeline `e2e-doc-scenarios/`. Elle est régénérée à chaque exécution de `pnpm doc:scenarios` pour rester synchronisée avec l'UI.
+</Aside>
