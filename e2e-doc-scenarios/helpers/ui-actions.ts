@@ -26,6 +26,13 @@ export async function openExtensionPage(
   const page = await context.newPage();
   await injectLocaleOverride(page, locale);
 
+  // The popup is a small floating panel (`#popup-app` is 400px wide with
+  // `overflow: hidden`). Match the viewport so screenshots don't include the
+  // surrounding empty 1280x800 canvas.
+  if (section === 'popup') {
+    await page.setViewportSize({ width: 402, height: 800 });
+  }
+
   const base = `chrome-extension://${extensionId}`;
   const targetUrl =
     section === 'popup'
