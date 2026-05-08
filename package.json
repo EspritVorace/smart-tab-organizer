@@ -34,6 +34,7 @@
     "screenshots": "pnpm build && xvfb-maybe playwright test --config=e2e-screenshots/playwright.screenshots.config.ts",
     "doc:scenarios": "pnpm build && xvfb-maybe playwright test --config=e2e-doc-scenarios/playwright.doc.config.ts",
     "doc:scenarios:audit": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/doc-scenarios-audit.mjs",
+    "doc:scenarios:sync": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/doc-scenarios-sync.mjs",
     "docs:dev": "pnpm --dir docs dev",
     "docs:build": "pnpm --dir docs build",
     "docs:preview": "pnpm --dir docs preview",
