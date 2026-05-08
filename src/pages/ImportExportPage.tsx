@@ -12,6 +12,7 @@ import { ExportWorkspaceDialog } from '@/components/UI/Workspace/ExportWorkspace
 import { ImportWorkspaceDialog } from '@/components/UI/Workspace/ImportWorkspaceDialog';
 import { useSessions } from '@/hooks/useSessions';
 import type { ImportExportAction, ImportExportFrom } from '@/hooks/useDeepLinking';
+import type { SourceMode } from '@/components/UI/ImportExportWizards/Source';
 import type { AppSettings, DomainRuleSetting } from '@/types/syncSettings';
 
 interface ImportExportPageProps {
@@ -25,6 +26,10 @@ interface ImportExportPageProps {
   onDeepLinkConsumed?: () => void;
   /** Section navigator used to return to the referrer once the wizard closes. */
   onNavigate?: (tab: string) => void;
+  /** Initial source mode forwarded to the rules import wizard (e.g. `'pack'` from the home hero). */
+  importRulesInitialMode?: SourceMode | null;
+  /** Called when the rules import wizard closes so the parent can clear `importRulesInitialMode`. */
+  onImportRulesClosed?: () => void;
 }
 
 export function ImportExportPage({
@@ -34,6 +39,8 @@ export function ImportExportPage({
   deepLinkFrom,
   onDeepLinkConsumed,
   onNavigate,
+  importRulesInitialMode,
+  onImportRulesClosed,
 }: ImportExportPageProps) {
   const [exportOpen, setExportOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
@@ -167,9 +174,13 @@ export function ImportExportPage({
 
           <ImportWizard
             open={importOpen}
-            onOpenChange={makeCloseHandler(setImportOpen)}
+            onOpenChange={(open) => {
+              makeCloseHandler(setImportOpen)(open);
+              if (!open) onImportRulesClosed?.();
+            }}
             existingRules={syncSettings.domainRules}
             onImport={handleImport}
+            initialSourceMode={importRulesInitialMode ?? undefined}
           />
 
           <ExportSessionsWizard

@@ -7,7 +7,7 @@ import categoriesData from '@/data/packs/_categories.json';
  * Files matching `_*.json` (notably `_categories.json`) are filtered out by
  * convention so they never show up as packs.
  */
-const rawPackModules = import.meta.glob('@/data/packs/*.json', {
+const rawPackModules = import.meta.glob('../data/packs/*.json', {
   eager: true,
   import: 'default',
 }) as Record<string, unknown>;

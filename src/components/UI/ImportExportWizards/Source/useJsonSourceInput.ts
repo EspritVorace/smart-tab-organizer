@@ -35,8 +35,9 @@ export interface JsonSourceInputState<T> {
  */
 export function useJsonSourceInput<T>(
   validate: (raw: unknown) => JsonSourceValidationResult<T>,
+  initialSourceMode: SourceMode = 'file',
 ): JsonSourceInputState<T> {
-  const [sourceMode, setSourceMode] = useState<SourceMode>('file');
+  const [sourceMode, setSourceMode] = useState<SourceMode>(initialSourceMode);
   const [jsonText, setJsonText] = useState('');
   const [parsedData, setParsedData] = useState<T | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
@@ -121,14 +122,14 @@ export function useJsonSourceInput<T>(
   }, [handleFileRead]);
 
   const reset = useCallback(() => {
-    setSourceMode('file');
+    setSourceMode(initialSourceMode);
     setJsonText('');
     setParsedData(null);
     setParseError(null);
     setImportedNote(null);
     setFileName(null);
     setIsDragOver(false);
-  }, []);
+  }, [initialSourceMode]);
 
   return {
     sourceMode,

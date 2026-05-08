@@ -17,6 +17,7 @@ import type { ImportExportAction, ImportExportFrom } from '@/hooks/useDeepLinkin
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts.js';
 import { getMessage } from '@/utils/i18n';
 import type { ShortcutDefinition } from '@/utils/keyboardShortcuts';
+import type { SourceMode } from '@/components/UI/ImportExportWizards/Source';
 
 import { Sidebar } from '@/components/UI/Sidebar/Sidebar';
 import type { SidebarItem } from '@/components/UI/Sidebar/Sidebar';
@@ -56,6 +57,7 @@ export function OptionsContent() {
     const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
     const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
     const [shortcutsAsideOpen, setShortcutsAsideOpen] = useState(false);
+    const [importInitialMode, setImportInitialMode] = useState<SourceMode | null>(null);
 
     const updateRules = useCallback((newRules: DomainRuleSettings) => {
         updateSettings({ domainRules: newRules });
@@ -83,11 +85,13 @@ export function OptionsContent() {
         setCurrentTab('importexport');
     }, [setCurrentTab]);
 
-    const handleOpenImportRulesFromHome = useCallback(() => {
+    const handleOpenImportRulesFromHome = useCallback((initialSourceMode?: SourceMode) => {
+        setImportInitialMode(initialSourceMode ?? null);
         navigateToImportExportAction('import-rules', 'home');
     }, [navigateToImportExportAction]);
 
     const handleOpenImportRulesFromRules = useCallback(() => {
+        setImportInitialMode(null);
         navigateToImportExportAction('import-rules', 'rules');
     }, [navigateToImportExportAction]);
 
@@ -99,6 +103,10 @@ export function OptionsContent() {
         setImportExportAction(null);
         setImportExportFrom(null);
     }, [setImportExportAction, setImportExportFrom]);
+
+    const handleImportRulesClosed = useCallback(() => {
+        setImportInitialMode(null);
+    }, []);
 
     const handleRestoreFromHome = useCallback(async (session: Session, target: HomeRestoreTarget) => {
         if (target === 'custom') {
@@ -206,6 +214,8 @@ export function OptionsContent() {
                                 deepLinkFrom={importExportFrom}
                                 onDeepLinkConsumed={handleImportExportConsumed}
                                 onNavigate={handleTabChange}
+                                importRulesInitialMode={importInitialMode}
+                                onImportRulesClosed={handleImportRulesClosed}
                             />
                         )}
                         {currentTab === 'sessions' && (

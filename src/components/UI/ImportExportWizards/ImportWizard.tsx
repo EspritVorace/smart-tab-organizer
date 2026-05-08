@@ -9,18 +9,25 @@ import {
 } from '@/utils/importClassification';
 import { generateUUID } from '@/utils/utils';
 import type { DomainRuleSetting } from '@/types/syncSettings';
+import { PackGallery } from '@/components/Core/Pack/PackGallery/PackGallery';
+import { usePacks } from '@/hooks/usePacks';
 import { ImportWizardShell } from './ImportWizardShell';
 import {
   useImportWizardState,
   type NormalizedClassification,
 } from './useImportWizardState';
+import type { SourceMode } from './Source';
 import { RuleRow, ConflictRuleRow } from './RuleImportRows';
+
+const RULES_AVAILABLE_MODES: readonly SourceMode[] = ['file', 'text', 'pack'];
 
 interface ImportWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   existingRules: DomainRuleSetting[];
   onImport: (updatedRules: DomainRuleSetting[]) => void;
+  /** When provided, the wizard opens on this source mode instead of `'file'`. */
+  initialSourceMode?: SourceMode;
 }
 
 const validateRulesPayload = (raw: unknown) => {
@@ -43,15 +50,23 @@ const classifyRules = (
   };
 };
 
-export function ImportWizard({ open, onOpenChange, existingRules, onImport }: ImportWizardProps) {
+export function ImportWizard({
+  open,
+  onOpenChange,
+  existingRules,
+  onImport,
+  initialSourceMode,
+}: ImportWizardProps) {
   const state = useImportWizardState<DomainRuleSetting, ConflictingRule>({
     open,
     existingItems: existingRules,
     validatePayload: validateRulesPayload,
     classify: classifyRules,
+    initialSourceMode,
   });
 
-  const { classification, conflictMode, newSelection } = state;
+  const { packs, categories } = usePacks();
+  const { classification, conflictMode, newSelection, source } = state;
 
   const executeImport = useCallback(() => {
     if (!classification) return;
@@ -105,6 +120,12 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
       countLabelKey="rulesToImportCount"
       overwriteWarningKey="overwriteWarning"
       state={state}
+      maxWidth="min(960px, 95vw)"
+      fillHeight
+      availableModes={RULES_AVAILABLE_MODES}
+      packGalleryNode={
+        <PackGallery packs={packs} categories={categories} source={source} />
+      }
       renderNewItem={(rule) => (
         <RuleRow
           key={rule.id}
