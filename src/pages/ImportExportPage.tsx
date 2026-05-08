@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Box, Grid } from '@radix-ui/themes';
 import { Download, Upload, FileText, Layers } from 'lucide-react';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
@@ -11,20 +11,39 @@ import { ImportExportActionCard } from '@/components/UI/ImportExportWizards/Impo
 import { ExportWorkspaceDialog } from '@/components/UI/Workspace/ExportWorkspaceDialog';
 import { ImportWorkspaceDialog } from '@/components/UI/Workspace/ImportWorkspaceDialog';
 import { useSessions } from '@/hooks/useSessions';
+import type { ImportExportAction, ImportExportFrom } from '@/hooks/useDeepLinking';
 import type { AppSettings, DomainRuleSetting } from '@/types/syncSettings';
 
 interface ImportExportPageProps {
   syncSettings: AppSettings;
   onSettingsUpdate: (settings: AppSettings) => void;
+  /** When set, opens the matching wizard automatically (deep-link entry). */
+  deepLinkAction?: ImportExportAction | null;
+  /** Origin of the deep-link, used to navigate back when the wizard closes. */
+  deepLinkFrom?: ImportExportFrom | null;
+  /** Called once the deep-link has been consumed so the parent can clear its state. */
+  onDeepLinkConsumed?: () => void;
+  /** Section navigator used to return to the referrer once the wizard closes. */
+  onNavigate?: (tab: string) => void;
 }
 
-export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExportPageProps) {
+export function ImportExportPage({
+  syncSettings,
+  onSettingsUpdate,
+  deepLinkAction,
+  deepLinkFrom,
+  onDeepLinkConsumed,
+  onNavigate,
+}: ImportExportPageProps) {
   const [exportOpen, setExportOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [exportSessionsOpen, setExportSessionsOpen] = useState(false);
   const [importSessionsOpen, setImportSessionsOpen] = useState(false);
   const [exportWorkspaceOpen, setExportWorkspaceOpen] = useState(false);
   const [importWorkspaceOpen, setImportWorkspaceOpen] = useState(false);
+
+  const [triggeredByDeepLink, setTriggeredByDeepLink] = useState(false);
+  const [pendingFrom, setPendingFrom] = useState<ImportExportFrom | null>(null);
 
   const { sessions } = useSessions();
 
@@ -34,6 +53,41 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
       domainRules: updatedRules
     });
   }, [syncSettings, onSettingsUpdate]);
+
+  useEffect(() => {
+    if (!deepLinkAction) return;
+
+    setPendingFrom(deepLinkFrom ?? null);
+    setTriggeredByDeepLink(true);
+
+    const action: ImportExportAction = deepLinkAction;
+    if (action === 'import-rules') setImportOpen(true);
+    else if (action === 'export-rules') setExportOpen(true);
+    else if (action === 'import-sessions') setImportSessionsOpen(true);
+    else if (action === 'export-sessions') setExportSessionsOpen(true);
+    else if (action === 'import-workspace') setImportWorkspaceOpen(true);
+    else if (action === 'export-workspace') setExportWorkspaceOpen(true);
+
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', `${window.location.pathname}#importexport`);
+    }
+    onDeepLinkConsumed?.();
+  }, [deepLinkAction, deepLinkFrom, onDeepLinkConsumed]);
+
+  const makeCloseHandler = useCallback(
+    (setter: (open: boolean) => void) => (open: boolean) => {
+      setter(open);
+      if (open) return;
+      if (!triggeredByDeepLink) return;
+      const from = pendingFrom;
+      setTriggeredByDeepLink(false);
+      setPendingFrom(null);
+      if (from && from !== 'popup' && onNavigate) {
+        onNavigate(from);
+      }
+    },
+    [triggeredByDeepLink, pendingFrom, onNavigate],
+  );
 
   return (
     <PageLayout
@@ -107,35 +161,35 @@ export function ImportExportPage({ syncSettings, onSettingsUpdate }: ImportExpor
 
           <ExportWizard
             open={exportOpen}
-            onOpenChange={setExportOpen}
+            onOpenChange={makeCloseHandler(setExportOpen)}
             rules={syncSettings.domainRules}
           />
 
           <ImportWizard
             open={importOpen}
-            onOpenChange={setImportOpen}
+            onOpenChange={makeCloseHandler(setImportOpen)}
             existingRules={syncSettings.domainRules}
             onImport={handleImport}
           />
 
           <ExportSessionsWizard
             open={exportSessionsOpen}
-            onOpenChange={setExportSessionsOpen}
+            onOpenChange={makeCloseHandler(setExportSessionsOpen)}
           />
 
           <ImportSessionsWizard
             open={importSessionsOpen}
-            onOpenChange={setImportSessionsOpen}
+            onOpenChange={makeCloseHandler(setImportSessionsOpen)}
           />
 
           <ExportWorkspaceDialog
             open={exportWorkspaceOpen}
-            onOpenChange={setExportWorkspaceOpen}
+            onOpenChange={makeCloseHandler(setExportWorkspaceOpen)}
           />
 
           <ImportWorkspaceDialog
             open={importWorkspaceOpen}
-            onOpenChange={setImportWorkspaceOpen}
+            onOpenChange={makeCloseHandler(setImportWorkspaceOpen)}
           />
         </Box>
       )}

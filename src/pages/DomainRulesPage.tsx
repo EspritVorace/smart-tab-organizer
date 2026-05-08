@@ -7,7 +7,6 @@ import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { EmptyState } from '@/components/UI/EmptyState';
 import { RuleWizardModal } from '@/components/Core/DomainRule/RuleWizardModal';
-import { ImportWizard } from '@/components/UI/ImportExportWizards/ImportWizard';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
 import { ListToolbar } from '@/components/UI/ListToolbar';
 import { getMessage } from '@/utils/i18n';
@@ -55,6 +54,8 @@ interface DomainRulesPageProps {
   openRuleWizard?: boolean;
   /** Notifies the parent when the modal opens or closes. */
   onOpenRuleWizardChange?: (open: boolean) => void;
+  /** Opens the rules import wizard via deep-link with from=rules. */
+  onOpenImportRules: () => void;
 }
 
 /* ─── Local presentation components ──────────────────────────────────────── */
@@ -114,9 +115,9 @@ export function DomainRulesPage({
   updateRules,
   openRuleWizard,
   onOpenRuleWizardChange,
+  onOpenImportRules,
 }: DomainRulesPageProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isImportOpen, setIsImportOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<DomainRule | undefined>(undefined);
   const [dragItems, setDragItems] = useState<DomainRuleSetting[] | null>(null);
 
@@ -366,7 +367,7 @@ export function DomainRulesPage({
                       <Plus size={14} />
                       {getMessage('addRule')}
                     </Button>
-                    <Button variant="soft" onClick={() => setIsImportOpen(true)}>
+                    <Button variant="soft" onClick={onOpenImportRules}>
                       <Upload size={14} />
                       {getMessage('importRulesButton')}
                     </Button>
@@ -427,12 +428,6 @@ export function DomainRulesPage({
         description={confirmDeleteDescription(deleteTarget, syncSettings.domainRules)}
       />
 
-      <ImportWizard
-        open={isImportOpen}
-        onOpenChange={setIsImportOpen}
-        existingRules={syncSettings.domainRules}
-        onImport={updateRules}
-      />
     </>
   );
 }

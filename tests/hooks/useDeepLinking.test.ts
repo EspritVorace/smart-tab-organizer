@@ -40,7 +40,7 @@ describe('useDeepLinking — hash on mount', () => {
     expect(result.current.currentTab).toBe('importexport');
   });
 
-  it.each(['home', 'rules', 'sessions', 'stats', 'settings', 'importexport'])(
+  it.each(['home', 'rules', 'sessions', 'stats', 'settings', 'importexport', 'workspaces'])(
     'accepts the valid section %s',
     (section) => {
       window.location.hash = `#${section}`;
@@ -179,6 +179,81 @@ describe('useDeepLinking — restore deep link', () => {
     expect(result.current.restoreSessionId).toBe('s-1');
     act(() => result.current.setRestoreSessionId(null));
     expect(result.current.restoreSessionId).toBeNull();
+  });
+});
+
+describe('useDeepLinking — import/export deep link', () => {
+  it('starts with both fields null when there is no hash', () => {
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.importExportAction).toBeNull();
+    expect(result.current.importExportFrom).toBeNull();
+  });
+
+  it.each([
+    'import-rules',
+    'export-rules',
+    'import-sessions',
+    'export-sessions',
+    'import-workspace',
+    'export-workspace',
+  ] as const)('parses valid action %s', (action) => {
+    window.location.hash = `#importexport?action=${action}&from=home`;
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.currentTab).toBe('importexport');
+    expect(result.current.importExportAction).toBe(action);
+    expect(result.current.importExportFrom).toBe('home');
+  });
+
+  it.each(['home', 'rules', 'sessions', 'workspaces', 'popup'] as const)(
+    'parses valid from %s',
+    (from) => {
+      window.location.hash = `#importexport?action=import-rules&from=${from}`;
+      const { result } = renderHook(() => useDeepLinking());
+      expect(result.current.importExportFrom).toBe(from);
+    },
+  );
+
+  it('treats an unknown action as null', () => {
+    window.location.hash = '#importexport?action=bogus&from=home';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.importExportAction).toBeNull();
+    expect(result.current.importExportFrom).toBe('home');
+  });
+
+  it('treats a spoofed from as null', () => {
+    window.location.hash = '#importexport?action=import-rules&from=evil';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.importExportAction).toBe('import-rules');
+    expect(result.current.importExportFrom).toBeNull();
+  });
+
+  it('returns both fields null when params are missing', () => {
+    window.location.hash = '#importexport';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.currentTab).toBe('importexport');
+    expect(result.current.importExportAction).toBeNull();
+    expect(result.current.importExportFrom).toBeNull();
+  });
+
+  it('reacts to a hashchange after mount', () => {
+    const { result } = renderHook(() => useDeepLinking());
+    act(() => setHash('#importexport?action=export-sessions&from=sessions'));
+    expect(result.current.currentTab).toBe('importexport');
+    expect(result.current.importExportAction).toBe('export-sessions');
+    expect(result.current.importExportFrom).toBe('sessions');
+  });
+
+  it('exposes setters to clear both fields', () => {
+    window.location.hash = '#importexport?action=import-rules&from=home';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.importExportAction).toBe('import-rules');
+    expect(result.current.importExportFrom).toBe('home');
+    act(() => {
+      result.current.setImportExportAction(null);
+      result.current.setImportExportFrom(null);
+    });
+    expect(result.current.importExportAction).toBeNull();
+    expect(result.current.importExportFrom).toBeNull();
   });
 });
 

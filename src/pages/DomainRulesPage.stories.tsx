@@ -53,6 +53,7 @@ const meta: Meta<typeof DomainRulesPage> = {
   args: {
     syncSettings: mockSyncSettings,
     updateRules: () => {},
+    onOpenImportRules: () => {},
   },
 };
 
