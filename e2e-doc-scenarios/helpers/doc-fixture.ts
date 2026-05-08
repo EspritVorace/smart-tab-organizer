@@ -22,8 +22,8 @@ import type { Locale, Theme } from '../../e2e-shared/routing/types.js';
 export interface DocScenarioFixtures {
   extensionContext: BrowserContext;
   extensionId: string;
-  locale: Locale;
-  theme: Theme;
+  docLocale: Locale;
+  docTheme: Theme;
 }
 
 const LOCALE_LANG: Record<Locale, string> = {
@@ -48,7 +48,7 @@ function readProjectMetadata(metadata: unknown): { locale: Locale; theme: Theme 
 }
 
 export const test = base.extend<DocScenarioFixtures>({
-  locale: [
+  docLocale: [
     async ({}, use, testInfo) => {
       const { locale } = readProjectMetadata(testInfo.project.metadata);
       await use(locale);
@@ -56,7 +56,7 @@ export const test = base.extend<DocScenarioFixtures>({
     { scope: 'worker' },
   ],
 
-  theme: [
+  docTheme: [
     async ({}, use, testInfo) => {
       const { theme } = readProjectMetadata(testInfo.project.metadata);
       await use(theme);

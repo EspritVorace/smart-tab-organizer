@@ -325,22 +325,15 @@ export async function openImportRulesWizard(page: Page): Promise<void> {
 /**
  * Switch the active import wizard from File mode to Text mode and paste the
  * supplied JSON into the textarea.
+ *
+ * Targets the Radix Themes SegmentedControl items via their stable
+ * `.rt-SegmentedControlItem` class. The wizard exposes File / Text (and
+ * optionally Pack); "Text" is always the second item.
  */
 export async function pasteImportJson(page: Page, json: string): Promise<void> {
   const dialog = page.getByRole('dialog').first();
-  // Segmented control item labelled "Text" (i18n-driven, so query by role).
-  await dialog
-    .locator('[role="radiogroup"], [role="tablist"], [data-radix-segmented-control-root]')
-    .first()
-    .waitFor({ state: 'visible' })
-    .catch(() => {});
-  // The segmented control items use role="radio" or "tab" depending on
-  // Radix internals; querying by visible text via the radiogroup labels is
-  // brittle, so we click the second SegmentedControl item directly.
-  const segmentedItems = dialog.locator('button, [role="tab"], [role="radio"]').filter({
-    hasText: /./,
-  });
-  // Heuristic: the first two items are "File" and "Text" (others optional).
+  const segmentedItems = dialog.locator('button.rt-SegmentedControlItem');
+  await segmentedItems.first().waitFor({ state: 'visible' });
   await segmentedItems.nth(1).click();
   const textarea = dialog.locator('textarea').first();
   await textarea.waitFor({ state: 'visible' });
@@ -360,4 +353,158 @@ export async function importWizardNextToClassification(page: Page): Promise<void
   // Radix renders step 1 inside the same dialog; wait for the
   // classification scroll area to appear.
   await page.waitForTimeout(300);
+}
+
+// ─── Storage seeding ──────────────────────────────────────────────────────────
+
+/** Reset extension storage before a satellite scenario starts. */
+export async function clearExtensionStorage(context: BrowserContext): Promise<void> {
+  const sw = await waitForServiceWorker(context);
+  await sw.evaluate(async () => {
+    await chrome.storage.local.clear();
+  });
+}
+
+/** Seed `domainRules` directly into chrome.storage.local. */
+export async function seedDomainRules<T>(
+  context: BrowserContext,
+  rules: T[],
+): Promise<void> {
+  const sw = await waitForServiceWorker(context);
+  await sw.evaluate(async (data) => {
+    await chrome.storage.local.set({ domainRules: data });
+  }, rules as unknown as Parameters<typeof sw.evaluate>[1]);
+}
+
+/** Seed `sessions` directly into chrome.storage.local. */
+export async function seedSessions<T>(
+  context: BrowserContext,
+  sessions: T[],
+): Promise<void> {
+  const sw = await waitForServiceWorker(context);
+  await sw.evaluate(async (data) => {
+    await chrome.storage.local.set({ sessions: data });
+  }, sessions as unknown as Parameters<typeof sw.evaluate>[1]);
+}
+
+// ─── Import wizard ───────────────────────────────────────────────────────────
+
+/**
+ * Click an item in the conflict-mode SegmentedControl on the import wizard's
+ * classification step. The control renders Radix `SegmentedControl.Item` as
+ * `button.rt-SegmentedControlItem` in the order overwrite / duplicate / ignore.
+ */
+export async function setImportConflictMode(
+  page: Page,
+  mode: 'overwrite' | 'duplicate' | 'ignore',
+): Promise<void> {
+  const dialog = page.getByRole('dialog').first();
+  const index = mode === 'overwrite' ? 0 : mode === 'duplicate' ? 1 : 2;
+  // Two SegmentedControls may exist in the wizard (source-mode on step 0, conflict-mode
+  // on step 1) but only one is visible at a time. Filter by visibility just in case.
+  const items = dialog.locator('.rt-SegmentedControlItem');
+  await items.nth(index).waitFor({ state: 'visible' });
+  await items.nth(index).click();
+  await page.waitForTimeout(150);
+}
+
+/** Dismiss the currently-open dialog (Escape closes any Radix dialog). */
+export async function dismissDialog(page: Page): Promise<void> {
+  await page.keyboard.press('Escape');
+  await page.getByRole('dialog').first().waitFor({ state: 'hidden' }).catch(() => {});
+}
+
+// ─── Edit rule wizard ────────────────────────────────────────────────────────
+
+/** Open the rule edit wizard via the rule card's dropdown menu. */
+export async function openEditRuleWizard(page: Page, ruleId: string): Promise<void> {
+  await page.getByTestId(`rule-card-${ruleId}-btn-dropdown`).click();
+  await page.getByTestId(`rule-card-${ruleId}-menu-edit`).click();
+  await page.getByTestId('wizard-rule').waitFor({ state: 'visible' });
+}
+
+/** Expand the Options collapsible inside the EditSummaryView, if not already. */
+export async function expandEditWizardOptions(page: Page): Promise<void> {
+  const trigger = page.getByTestId('wizard-rule-edit-toggle-options');
+  await trigger.waitFor({ state: 'visible' });
+  const state = await trigger.getAttribute('data-state');
+  if (state !== 'open') {
+    await trigger.click();
+    await page.waitForTimeout(200);
+  }
+}
+
+/** Pick a deduplication match mode in the Step 3 Options radio group. */
+export async function selectDeduplicationMode(
+  page: Page,
+  mode: 'exact' | 'includes' | 'exact_ignore_params',
+): Promise<void> {
+  // Radix RadioGroup.Item exposes its value via the `value` attribute on the
+  // rendered button[role="radio"]. Scope to the visible dialog so we never
+  // hit a hidden radio from a stale Collapsible state.
+  const dialog = page.getByRole('dialog').first();
+  await dialog.locator(`[role="radio"][value="${mode}"]`).first().click();
+  await page.waitForTimeout(100);
+}
+
+// ─── Restore wizard ──────────────────────────────────────────────────────────
+
+/**
+ * Open the customize-restore wizard for a given session by clicking the
+ * SplitButton chevron on its card and selecting the "Customize" item.
+ */
+export async function openCustomizeRestoreWizard(
+  page: Page,
+  sessionId: string,
+): Promise<void> {
+  const card = page.getByTestId(`session-card-${sessionId}`);
+  await card.locator('button:has(svg.lucide-chevron-down)').first().click();
+  await page.locator('[role="menu"]').waitFor({ state: 'visible', timeout: 5_000 });
+  await page.getByTestId('session-restore-menu-customize').click();
+  await page.getByTestId('wizard-restore').waitFor({ state: 'visible' });
+}
+
+/**
+ * Click the primary "Restore" button on step 0 of the restore wizard. When
+ * conflicts are detected the wizard advances to step 1 (ConflictResolutionStep);
+ * otherwise the dialog closes.
+ */
+export async function clickRestoreInWizard(page: Page): Promise<void> {
+  await page.getByTestId('wizard-restore-btn-restore').click();
+}
+
+/**
+ * Create a live tab group in the same window as the supplied page so that the
+ * RestoreWizard's `analyzeConflicts()` flags it as conflicting with a seeded
+ * session group sharing the same `(title, color)`.
+ */
+export async function createLiveTabGroup(
+  context: BrowserContext,
+  windowOwnerPage: Page,
+  title: string,
+  color: 'grey' | 'blue' | 'red' | 'yellow' | 'green' | 'pink' | 'purple' | 'cyan' | 'orange',
+): Promise<void> {
+  const sw = await waitForServiceWorker(context);
+  const windowId = await windowOwnerPage.evaluate(
+    () =>
+      new Promise<number>((resolve) => {
+        chrome.windows.getCurrent((w) => resolve(w.id!));
+      }),
+  );
+  await sw.evaluate(
+    async ({ wid, gtitle, gcolor }: { wid: number; gtitle: string; gcolor: string }) => {
+      const tab = await chrome.tabs.create({
+        url: 'about:blank',
+        windowId: wid,
+        active: false,
+      });
+      const groupId = await chrome.tabs.group({ tabIds: [tab.id!] });
+      await chrome.tabGroups.update(groupId, {
+        title: gtitle,
+        color: gcolor as chrome.tabGroups.ColorEnum,
+      });
+    },
+    { wid: windowId, gtitle: title, gcolor: color },
+  );
+  await windowOwnerPage.waitForTimeout(300);
 }

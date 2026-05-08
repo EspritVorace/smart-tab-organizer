@@ -119,7 +119,7 @@ const SCENARIO_ID = '00-main-journey';
 test.describe.configure({ mode: 'serial' });
 
 test('main journey', async (
-  { extensionContext, extensionId, locale, theme },
+  { extensionContext, extensionId, docLocale: locale, docTheme: theme },
 ) => {
   startScenario({
     id: SCENARIO_ID,
