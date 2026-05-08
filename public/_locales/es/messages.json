@@ -139,7 +139,9 @@
   "confirmDeleteSelectedDescription": { "message": "Las reglas seleccionadas se eliminarán permanentemente. Esta acción no se puede deshacer." },
   "searchRules": { "message": "Buscar reglas..." },
   "searchSessions": { "message": "Buscar sesiones..." },
+  "searchWorkspaces": { "message": "Buscar espacios..." },
   "noRulesFound": { "message": "No se encontraron reglas" },
+  "noWorkspacesFound": { "message": "No se encontraron espacios" },
   "popupNoRulesTitle": { "message": "No hay reglas configuradas" },
   "popupGoToRules": { "message": "Gestionar reglas" },
   "rulesEmptyTitle": { "message": "Aún no hay reglas de dominio" },
@@ -537,6 +539,7 @@
   "shortcutsGroupListHome": { "message": "Página de inicio" },
   "shortcutsGroupListRules": { "message": "Lista de reglas" },
   "shortcutsGroupListSessions": { "message": "Lista de sesiones" },
+  "shortcutsGroupListWorkspaces": { "message": "Lista de espacios" },
   "shortcutsGroupSessionCard": { "message": "Tarjeta de sesión (con foco)" },
 
   "shortcutDescOrganize": { "message": "Organizar todas las pestañas" },

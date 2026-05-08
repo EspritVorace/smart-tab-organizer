@@ -72,6 +72,13 @@ const groupListSessions: ShortcutGroup = {
   subgroups: [groupSessionCard],
 };
 
+const groupListWorkspaces: ShortcutGroup = {
+  titleKey: 'shortcutsGroupListWorkspaces',
+  shortcuts: [
+    { keys: ['n'], descriptionKey: 'shortcutDescListNew' },
+  ],
+};
+
 const groupListHome: ShortcutGroup = {
   titleKey: 'shortcutsGroupListHome',
   shortcuts: [
@@ -109,6 +116,7 @@ export const SHORTCUT_GROUPS: ShortcutGroup[] = [
   groupListHome,
   groupListRules,
   groupListSessions,
+  groupListWorkspaces,
   groupOptions,
   groupPopup,
 ];
@@ -145,6 +153,8 @@ export function isGroupOpenByDefault(
       return pageContext === 'rules';
     case 'shortcutsGroupListSessions':
       return pageContext === 'sessions';
+    case 'shortcutsGroupListWorkspaces':
+      return pageContext === 'workspaces';
     case 'shortcutsGroupSessionCard':
       return pageContext === 'sessions' || pageContext === 'home';
     default:

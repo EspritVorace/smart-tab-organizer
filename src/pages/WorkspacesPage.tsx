@@ -1,7 +1,10 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Box, Button, Card, Flex, IconButton, Text, Tooltip } from '@radix-ui/themes';
-import { Layers, Pencil, Plus, Trash2 } from 'lucide-react';
+import { AlertCircle, Layers, Pencil, Plus, Trash2 } from 'lucide-react';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
+import { ListToolbar } from '@/components/UI/ListToolbar';
+import { EmptyState } from '@/components/UI/EmptyState';
+import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
 import { WorkspaceAvatar } from '@/components/UI/Workspace/WorkspaceAvatar';
 import { WorkspaceFormDialog } from '@/components/UI/Workspace/WorkspaceFormDialog';
@@ -9,6 +12,9 @@ import { WorkspaceDeleteConfirmDialog } from '@/components/UI/Workspace/Workspac
 import { DEFAULT_WORKSPACE_ID } from '@/utils/workspaceStorage';
 import { getMessage } from '@/utils/i18n';
 import { logger } from '@/utils/logger';
+import { foldAccents } from '@/utils/stringUtils';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import type { ShortcutDefinition } from '@/utils/keyboardShortcuts';
 import type { AppSettings } from '@/types/syncSettings';
 import type { WorkspaceMeta } from '@/schemas/workspace';
 
@@ -21,6 +27,7 @@ interface WorkspaceRowProps {
   isActive: boolean;
   isDefault: boolean;
   isOnly: boolean;
+  searchTerm: string;
   onSwitch: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -32,7 +39,7 @@ function resolveDeleteTooltip(isDefault: boolean, isOnly: boolean): string {
   return getMessage('workspaceDeleteLabel');
 }
 
-function WorkspaceRow({ workspace, isActive, isDefault, isOnly, onSwitch, onEdit, onDelete }: WorkspaceRowProps) {
+function WorkspaceRow({ workspace, isActive, isDefault, isOnly, searchTerm, onSwitch, onEdit, onDelete }: WorkspaceRowProps) {
   const deleteBlocked = isDefault || isOnly;
   const deleteTooltip = resolveDeleteTooltip(isDefault, isOnly);
 
@@ -42,7 +49,9 @@ function WorkspaceRow({ workspace, isActive, isDefault, isOnly, onSwitch, onEdit
         <WorkspaceAvatar name={workspace.name} accentColor={workspace.accentColor} size="md" />
         <Flex direction="column" gap="1" style={{ flex: 1, minWidth: 0 }}>
           <Flex align="center" gap="2">
-            <Text size="3" weight="medium">{workspace.name}</Text>
+            <Text size="3" weight="medium">
+              <AccessibleHighlight text={workspace.name} searchTerm={searchTerm} />
+            </Text>
             {isActive ? (
               <Text size="1" color="gray" data-testid={`workspace-row-${workspace.id}-active`}>
                 {getMessage('workspaceActiveBadge')}
@@ -113,8 +122,22 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<WorkspaceMeta | null>(null);
   const [deleting, setDeleting] = useState<WorkspaceMeta | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const takenNames = workspaces.map((w) => w.name);
+
+  const filteredWorkspaces = useMemo(() => {
+    if (!searchTerm) return workspaces;
+    const term = foldAccents(searchTerm);
+    return workspaces.filter((ws) => foldAccents(ws.name).includes(term));
+  }, [workspaces, searchTerm]);
+
+  const handleOpenCreate = useCallback(() => setCreateOpen(true), []);
+
+  const pageShortcuts = useMemo<ShortcutDefinition[]>(() => [
+    { combo: 'n', action: handleOpenCreate },
+  ], [handleOpenCreate]);
+  useKeyboardShortcuts(pageShortcuts);
 
   const handleCreate = useCallback(
     async ({ name, accentColor }: { name: string; accentColor: WorkspaceMeta['accentColor'] }) => {
@@ -157,34 +180,50 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
       syncSettings={syncSettings}
     >
       {() => (
-        <Flex direction="column" gap="3">
-          <Flex justify="end">
-            <Button
-              data-testid="workspace-create-button"
-              variant="solid"
-              onClick={() => setCreateOpen(true)}
-            >
-              <Plus size={16} />
-              {getMessage('workspaceCreateLabel')}
-            </Button>
-          </Flex>
+        <Box data-testid="page-workspaces">
+          {workspaces.length > 0 && (
+            <ListToolbar
+              testId="page-workspaces-toolbar"
+              searchTestId="page-workspaces-search"
+              searchPlaceholder={getMessage('searchWorkspaces')}
+              searchValue={searchTerm}
+              onSearchChange={setSearchTerm}
+              action={
+                <Button
+                  data-testid="workspace-create-button"
+                  variant="solid"
+                  onClick={handleOpenCreate}
+                >
+                  <Plus size={16} />
+                  {getMessage('workspaceCreateLabel')}
+                </Button>
+              }
+            />
+          )}
 
-          <Box data-testid="workspace-list">
-            <Flex direction="column" gap="2">
-              {workspaces.map((ws) => (
-                <WorkspaceRow
-                  key={ws.id}
-                  workspace={ws}
-                  isActive={ws.id === activeId}
-                  isDefault={ws.id === DEFAULT_WORKSPACE_ID}
-                  isOnly={workspaces.length === 1}
-                  onSwitch={() => void switchTo(ws.id)}
-                  onEdit={() => setEditing(ws)}
-                  onDelete={() => setDeleting(ws)}
-                />
-              ))}
-            </Flex>
-          </Box>
+          {filteredWorkspaces.length === 0 && searchTerm && (
+            <EmptyState compact icon={AlertCircle} message={getMessage('noWorkspacesFound')} />
+          )}
+
+          {filteredWorkspaces.length > 0 && (
+            <Box data-testid="workspace-list">
+              <Flex direction="column" gap="2">
+                {filteredWorkspaces.map((ws) => (
+                  <WorkspaceRow
+                    key={ws.id}
+                    workspace={ws}
+                    isActive={ws.id === activeId}
+                    isDefault={ws.id === DEFAULT_WORKSPACE_ID}
+                    isOnly={workspaces.length === 1}
+                    searchTerm={searchTerm}
+                    onSwitch={() => void switchTo(ws.id)}
+                    onEdit={() => setEditing(ws)}
+                    onDelete={() => setDeleting(ws)}
+                  />
+                ))}
+              </Flex>
+            </Box>
+          )}
 
           <WorkspaceFormDialog
             open={createOpen}
@@ -205,7 +244,7 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
             workspace={deleting}
             onConfirm={handleDeleteConfirm}
           />
-        </Flex>
+        </Box>
       )}
     </PageLayout>
   );

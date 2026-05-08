@@ -139,7 +139,9 @@
   "confirmDeleteSelectedDescription": { "message": "This will permanently delete the selected rules. This action cannot be undone." },
   "searchRules": { "message": "Search rules..." },
   "searchSessions": { "message": "Search sessions..." },
+  "searchWorkspaces": { "message": "Search workspaces..." },
   "noRulesFound": { "message": "No rules found" },
+  "noWorkspacesFound": { "message": "No workspaces found" },
   "popupNoRulesTitle": { "message": "No rules configured" },
   "popupGoToRules": { "message": "Manage rules" },
   "rulesEmptyTitle": { "message": "No domain rules yet" },
@@ -536,6 +538,7 @@
   "shortcutsGroupListHome": { "message": "Home page" },
   "shortcutsGroupListRules": { "message": "Rules list" },
   "shortcutsGroupListSessions": { "message": "Sessions list" },
+  "shortcutsGroupListWorkspaces": { "message": "Workspaces list" },
   "shortcutsGroupSessionCard": { "message": "Session card (focused)" },
 
   "shortcutDescOrganize": { "message": "Organize all tabs" },
