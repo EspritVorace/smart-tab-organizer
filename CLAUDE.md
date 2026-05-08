@@ -23,6 +23,9 @@ pnpm test:e2e:headed          # build + Playwright headed
 pnpm storybook                            # Storybook (port 6006)
 pnpm docs:dev / docs:build / docs:preview # Astro Starlight (port 4321)
 pnpm screenshots                          # Deterministic multi-locale/theme screenshots
+pnpm doc:scenarios                        # Narrative captures (matrice 3 locales x 2 themes)
+pnpm doc:scenarios:audit                  # Audit routing manifests vs output / destinations
+pnpm doc:scenarios:sync                   # Re-route output to dest dirs (sans relancer Playwright)
 ```
 
 ## Architecture
@@ -130,6 +133,23 @@ logger.debug('[MY_MODULE] Something happened:', value);
 ### Storybook
 - Story titles mirror folder: `Components/Core/Session/SessionCard`
 - Prefix all exports with component name: `SessionCardDefault`, `SessionCardDisabled` (avoids conflicts)
+
+### Doc-scenarios (captures narratives)
+
+Pipeline `e2e-doc-scenarios/` distinct de `e2e-screenshots/` : il capture des
+parcours utilisateur complets (état initial, création, usage réel, sessions,
+import/export, états avancés) en 3 locales x 2 thèmes. Voir
+[`e2e-doc-scenarios/README.md`](./e2e-doc-scenarios/README.md) pour le détail.
+
+- Scénarios sous `e2e-doc-scenarios/scenarios/NN-name.scenario.ts` accompagnés
+  d'un `NN-name.routing.ts` qui décrit où copier chaque capture.
+- Sortie brute dans `e2e-doc-scenarios/output/{locale}/{theme}/{scenario}/`
+  (gitignored). Les routes copient ensuite vers `docs/src/assets/screenshots/`,
+  `doc/readme/` ou `doc/chrome-web-store/`.
+- Workflow CI dédié : `.github/workflows/doc-scenarios.yml`
+  (`workflow_dispatch` + tag push + cron hebdo). Pas déclenché sur les PR.
+- Pour une intégration Starlight, prefixer le `path` des routes par `journey-`
+  pour éviter les collisions avec les noms du pipeline `e2e-screenshots/`.
 
 ### Accessibility audits (axe-core)
 Two layers run axe-core et partagent le même rapport consolidé :

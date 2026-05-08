@@ -144,6 +144,7 @@ test('main journey', async (
     );
     await captureStep(popupPage, 'popup-empty', {
       description: 'Popup at first launch (no rules, statistics at zero).',
+      elementSelector: '#popup-app',
     });
     await popupPage.close();
 
@@ -295,6 +296,7 @@ test('main journey', async (
     );
     await captureStep(popupPage, 'popup-with-rules', {
       description: 'Popup with rules configured (statistics still at zero).',
+      elementSelector: '#popup-app',
     });
     await popupPage.close();
   });
@@ -327,6 +329,7 @@ test('main journey', async (
     await captureStep(popupPage, 'popup-stats-incremented', {
       force: 21,
       description: 'Popup after grouping/dedup of mimetic tabs.',
+      elementSelector: '#popup-app',
     });
     await popupPage.close();
 
@@ -419,6 +422,7 @@ test('main journey', async (
     await captureStep(popupPage, 'sessions-pin-onboarding', {
       force: 36,
       description: 'Popup pin onboarding hint (sessions exist but none pinned yet).',
+      elementSelector: '#popup-app',
     });
     await popupPage.close();
 

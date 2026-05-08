@@ -90,17 +90,17 @@ function extractCaptureName(filename: string): string | null {
 /**
  * Resolve `{locale}` / `{theme}` placeholders inside a destination path.
  * Bare destination paths (no placeholder) are prefixed with `{locale}-{theme}-`
- * to keep the existing `doc/readme/en-dark-foo.png` layout.
+ * to keep the existing `doc/readme/en-dark-foo.png` layout. The `.png`
+ * extension is appended when missing so manifests can stay terse
+ * (`path: 'foo'` → `en-dark-foo.png`).
  */
 function formatDestinationPath(
   templatePath: string,
   locale: Locale,
   theme: Theme,
 ): string {
-  if (templatePath.includes('{locale}') || templatePath.includes('{theme}')) {
-    return templatePath
-      .replace(/\{locale\}/g, locale)
-      .replace(/\{theme\}/g, theme);
-  }
-  return `${locale}-${theme}-${templatePath}`;
+  const resolved = templatePath.includes('{locale}') || templatePath.includes('{theme}')
+    ? templatePath.replace(/\{locale\}/g, locale).replace(/\{theme\}/g, theme)
+    : `${locale}-${theme}-${templatePath}`;
+  return resolved.endsWith('.png') ? resolved : `${resolved}.png`;
 }
