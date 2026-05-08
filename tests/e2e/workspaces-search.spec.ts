@@ -27,7 +27,7 @@ test.describe('Workspaces search filter', () => {
     await createWorkspace(optionsPage, 'Personal');
     await createWorkspace(optionsPage, 'Work');
 
-    const search = optionsPage.getByTestId('page-workspaces-search').locator('input');
+    const search = optionsPage.getByTestId('page-workspaces-search');
     await search.fill('Work');
 
     await expect(optionsPage.locator('[data-testid^="workspace-row-"]', { hasText: 'Work' })).toBeVisible();
@@ -38,7 +38,7 @@ test.describe('Workspaces search filter', () => {
     await goToWorkspaces(optionsPage, extensionId);
     await createWorkspace(optionsPage, 'Café');
 
-    const search = optionsPage.getByTestId('page-workspaces-search').locator('input');
+    const search = optionsPage.getByTestId('page-workspaces-search');
     await search.fill('cafe');
 
     await expect(optionsPage.locator('[data-testid^="workspace-row-"]', { hasText: 'Café' })).toBeVisible();
@@ -49,7 +49,7 @@ test.describe('Workspaces search filter', () => {
     await createWorkspace(optionsPage, 'Alpha');
     await createWorkspace(optionsPage, 'Beta');
 
-    const search = optionsPage.getByTestId('page-workspaces-search').locator('input');
+    const search = optionsPage.getByTestId('page-workspaces-search');
     await search.fill('Alpha');
     await expect(optionsPage.locator('[data-testid^="workspace-row-"]', { hasText: 'Beta' })).toHaveCount(0);
 
@@ -64,7 +64,7 @@ test.describe('Workspaces search filter', () => {
   }) => {
     await goToWorkspaces(optionsPage, extensionId);
 
-    const search = optionsPage.getByTestId('page-workspaces-search').locator('input');
+    const search = optionsPage.getByTestId('page-workspaces-search');
     await search.fill('zzz-no-such-workspace-xyz');
 
     await expect(optionsPage.getByText(/no workspaces found/i)).toBeVisible();
@@ -81,7 +81,7 @@ test.describe('Workspaces search highlight', () => {
     await goToWorkspaces(optionsPage, extensionId);
     await createWorkspace(optionsPage, 'Personal Hub');
 
-    const search = optionsPage.getByTestId('page-workspaces-search').locator('input');
+    const search = optionsPage.getByTestId('page-workspaces-search');
     await search.fill('Personal');
 
     await expect(optionsPage.locator('mark').filter({ hasText: 'Personal' }).first()).toBeVisible();
@@ -102,14 +102,14 @@ test.describe('Workspaces keyboard shortcuts', () => {
     await optionsPage.locator('body').click();
     await optionsPage.keyboard.press('/');
 
-    const search = optionsPage.getByTestId('page-workspaces-search').locator('input');
+    const search = optionsPage.getByTestId('page-workspaces-search');
     await expect(search).toBeFocused();
   });
 
   test('"Esc" clears the search input', async ({ optionsPage, extensionId }) => {
     await goToWorkspaces(optionsPage, extensionId);
 
-    const search = optionsPage.getByTestId('page-workspaces-search').locator('input');
+    const search = optionsPage.getByTestId('page-workspaces-search');
     await search.fill('something');
     await expect(search).toHaveValue('something');
 
