@@ -33,6 +33,7 @@ Cette phase étend la couverture :
   - `036-sessions-pin-onboarding.png` (popup pinned-empty hint)
   - `037-sessions-list-with-pinned.png`
   - `041-export-wizard-selection.png`
+  - `042-export-toast-success.png` (via stub de `window.showSaveFilePicker` côté page : faux handle dont `write` / `close` sont no-op, l'export passe par sa branche succès et émet le toast)
   - `043-import-wizard-paste.png`
   - `044-import-wizard-classification.png`
   - `050-rules-list-with-disabled.png`
@@ -41,13 +42,13 @@ Cette phase étend la couverture :
   - `060-rules-list-final.png` (renumérotation : laisse 050 disponible pour la version désactivée).
 - Helpers de stabilisation ajoutés : `waitForToast`, `hoverSessionCardName`, `pinSession`, `getFirstSessionId`, `toggleRuleEnabled`, `fillSessionsSearch`, `openExportRulesWizard`, `openImportRulesWizard`, `pasteImportJson`, `importWizardNextToClassification`.
 - Petit ajout source : `data-testid="session-card-{id}-btn-pin"` / `-btn-unpin` sur le bouton pin/unpin de `SessionCard`, pour fiabiliser la sélection sans recourir à un locator par aria-label i18n.
+- Wiring testid sur le footer de l'export wizard : `ExportWizardShell` propage désormais `primaryTestId` / `clipboardTestId` / `cancelTestId` à `ExportWizardFooter` (déjà supporté par `ExportSplitButton`). `ExportWizard` (rules) renseigne `wizard-export-rules-btn-{export,clipboard,cancel}` pour permettre à 042 de cliquer le bouton primaire de manière déterministe.
 
 ### Captures explicitement non livrées en Phase 2.1
 
 - `014-rules-toast-created.png` : aucun toast in-app n'est émis lors de la création d'une règle dans la base actuelle. À ré-évaluer si un `showSuccessToast` est ajouté à `handleSubmitRule` (`src/pages/DomainRulesPage.tsx`).
 - `023-toast-grouping-with-undo.png` : aucun toast in-app n'accompagne le groupage automatique. La notification système (`chrome.notifications`) avec bouton Annuler reste OS-level (cf. décision Phase 1) et ne peut pas être capturée par Playwright. À reprendre une fois un toast in-app ajouté.
 - `031-sessions-snapshot-wizard-step2.png` : `SnapshotWizard` est mono-étape (cf. décision Phase 1). Capture unique conservée (`030-sessions-snapshot-wizard-filled.png`).
-- `042-export-toast-success.png` : nécessite de piloter `showSaveFilePicker` (FileSystem Access API) ou `navigator.clipboard.writeText` ; les deux requièrent du tooling additionnel (interception de boîte de dialogue native ou octroi de permissions clipboard sur le persistent context). À reprendre conjointement avec un helper `captureToast()` dédié et un stub `showSaveFilePicker` ou un grant clipboard côté `extension-loader`.
 
 ## Décisions techniques
 
