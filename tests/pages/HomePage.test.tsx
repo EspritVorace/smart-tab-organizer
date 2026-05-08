@@ -81,6 +81,7 @@ const baseHandlers = {
   onNavigate: vi.fn(),
   onOpenSnapshotWizard: vi.fn(),
   onOpenRuleWizard: vi.fn(),
+  onOpenImportRules: vi.fn(),
   onOpenShortcutsAside: vi.fn(),
   onRestore: vi.fn(),
 };
@@ -216,6 +217,19 @@ describe('HomePage interactions', () => {
     );
     fireEvent.click(screen.getByTestId('home-hero-create-rule'));
     expect(baseHandlers.onOpenRuleWizard).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens the rules import wizard when "import pack" is clicked from the onboarding hero', () => {
+    wrap(
+      <HomePage
+        syncSettings={baseSettings}
+        statisticsAggregates={baseAggregates}
+        {...baseHandlers}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('home-hero-import'));
+    expect(baseHandlers.onOpenImportRules).toHaveBeenCalledTimes(1);
+    expect(baseHandlers.onNavigate).not.toHaveBeenCalled();
   });
 
   it('navigates to sessions when clicking on the sessions mini-stat', () => {

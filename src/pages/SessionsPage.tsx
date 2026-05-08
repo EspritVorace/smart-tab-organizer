@@ -6,7 +6,6 @@ import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { move } from '@dnd-kit/helpers';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { EmptyState } from '@/components/UI/EmptyState';
-import { ImportSessionsWizard } from '@/components/UI/ImportExportWizards/ImportSessionsWizard';
 import { SessionCard } from '@/components/Core/Session/SessionCard';
 import { SessionEditDialog } from '@/components/Core/Session/SessionEditDialog';
 import { SnapshotWizard } from '@/components/UI/SessionWizards/SnapshotWizard';
@@ -43,6 +42,8 @@ interface SessionsPageProps {
   restoreSessionId?: string | null;
   /** Called to clear the restore deep-link once consumed. */
   onRestoreSessionIdChange?: (id: string | null) => void;
+  /** Opens the sessions import wizard via deep-link with from=sessions. */
+  onOpenImportSessions: () => void;
 }
 
 function SectionHeader({ icon: Icon, titleKey, count }: { icon: LucideIcon; titleKey: string; count: number }) {
@@ -293,11 +294,11 @@ export function SessionsPage({
   onSnapshotGroupIdChange,
   restoreSessionId,
   onRestoreSessionIdChange,
+  onOpenImportSessions,
 }: SessionsPageProps) {
   const { sessions, isLoaded, createSession, renameSession, removeSession, reload, updateOrder } = useSessions();
   // Internal open state; initialized from external prop so the wizard opens immediately on mount.
   const [snapshotOpen, setSnapshotOpen] = useState(snapshotWizardOpen);
-  const [importSessionsOpen, setImportSessionsOpen] = useState(false);
 
   // Sync: if the external prop becomes true after mount (e.g. user already on sessions tab),
   // open the wizard.
@@ -450,7 +451,7 @@ export function SessionsPage({
                     <Camera size={14} />
                     {getMessage('sessionSnapshotButton')}
                   </Button>
-                  <Button variant="soft" onClick={() => setImportSessionsOpen(true)}>
+                  <Button variant="soft" onClick={onOpenImportSessions}>
                     <Upload size={14} />
                     {getMessage('importSessionsButton')}
                   </Button>
@@ -504,11 +505,6 @@ export function SessionsPage({
               />
             </Flex>
           )}
-
-          <ImportSessionsWizard
-            open={importSessionsOpen}
-            onOpenChange={setImportSessionsOpen}
-          />
 
           <SnapshotWizard
             open={snapshotOpen}

@@ -94,6 +94,7 @@ const meta: Meta<typeof HomePage> = {
     onNavigate: () => {},
     onOpenSnapshotWizard: () => {},
     onOpenRuleWizard: () => {},
+    onOpenImportRules: () => {},
     onOpenShortcutsAside: () => {},
     onRestore: () => {},
   },

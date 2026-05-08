@@ -13,6 +13,7 @@ import { ShortcutsControlProvider } from '@/contexts/ShortcutsControlContext';
 import { useSettings } from '@/hooks/useSettings.js';
 import { useStatistics } from '@/hooks/useStatistics.js';
 import { useDeepLinking } from '@/hooks/useDeepLinking.js';
+import type { ImportExportAction, ImportExportFrom } from '@/hooks/useDeepLinking.js';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts.js';
 import { getMessage } from '@/utils/i18n';
 import type { ShortcutDefinition } from '@/utils/keyboardShortcuts';
@@ -48,6 +49,8 @@ export function OptionsContent() {
         openRuleWizard, setOpenRuleWizard,
         snapshotGroupId, setSnapshotGroupId,
         restoreSessionId, setRestoreSessionId,
+        importExportAction, setImportExportAction,
+        importExportFrom, setImportExportFrom,
     } = useDeepLinking();
 
     const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
@@ -74,6 +77,28 @@ export function OptionsContent() {
         setOpenSnapshotWizard(true);
         handleTabChange('sessions');
     }, [setOpenSnapshotWizard, handleTabChange]);
+
+    const navigateToImportExportAction = useCallback((action: ImportExportAction, from: ImportExportFrom) => {
+        window.location.hash = `importexport?action=${action}&from=${from}`;
+        setCurrentTab('importexport');
+    }, [setCurrentTab]);
+
+    const handleOpenImportRulesFromHome = useCallback(() => {
+        navigateToImportExportAction('import-rules', 'home');
+    }, [navigateToImportExportAction]);
+
+    const handleOpenImportRulesFromRules = useCallback(() => {
+        navigateToImportExportAction('import-rules', 'rules');
+    }, [navigateToImportExportAction]);
+
+    const handleOpenImportSessionsFromSessions = useCallback(() => {
+        navigateToImportExportAction('import-sessions', 'sessions');
+    }, [navigateToImportExportAction]);
+
+    const handleImportExportConsumed = useCallback(() => {
+        setImportExportAction(null);
+        setImportExportFrom(null);
+    }, [setImportExportAction, setImportExportFrom]);
 
     const handleRestoreFromHome = useCallback(async (session: Session, target: HomeRestoreTarget) => {
         if (target === 'custom') {
@@ -159,6 +184,7 @@ export function OptionsContent() {
                                 onNavigate={handleTabChange}
                                 onOpenSnapshotWizard={handleOpenSnapshotWizardFromHome}
                                 onOpenRuleWizard={handleOpenRuleWizardFromHome}
+                                onOpenImportRules={handleOpenImportRulesFromHome}
                                 onOpenShortcutsAside={openShortcuts}
                                 onRestore={handleRestoreFromHome}
                             />
@@ -169,10 +195,18 @@ export function OptionsContent() {
                                 updateRules={updateRules}
                                 openRuleWizard={openRuleWizard}
                                 onOpenRuleWizardChange={setOpenRuleWizard}
+                                onOpenImportRules={handleOpenImportRulesFromRules}
                             />
                         )}
                         {currentTab === 'importexport' && (
-                            <ImportExportPage syncSettings={settings} onSettingsUpdate={updateSettings} />
+                            <ImportExportPage
+                                syncSettings={settings}
+                                onSettingsUpdate={updateSettings}
+                                deepLinkAction={importExportAction}
+                                deepLinkFrom={importExportFrom}
+                                onDeepLinkConsumed={handleImportExportConsumed}
+                                onNavigate={handleTabChange}
+                            />
                         )}
                         {currentTab === 'sessions' && (
                             <SessionsPage
@@ -183,6 +217,7 @@ export function OptionsContent() {
                                 onSnapshotGroupIdChange={setSnapshotGroupId}
                                 restoreSessionId={restoreSessionId}
                                 onRestoreSessionIdChange={setRestoreSessionId}
+                                onOpenImportSessions={handleOpenImportSessionsFromSessions}
                             />
                         )}
                         {currentTab === 'stats' && (

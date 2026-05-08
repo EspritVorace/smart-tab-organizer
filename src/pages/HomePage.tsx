@@ -25,6 +25,8 @@ export interface HomePageProps {
   onNavigate: (tab: string) => void;
   onOpenSnapshotWizard: () => void;
   onOpenRuleWizard: () => void;
+  /** Opens the rules import wizard via deep-link with from=home. */
+  onOpenImportRules: () => void;
   onOpenShortcutsAside: () => void;
   onRestore: (session: Session, target: HomeRestoreTarget) => void;
   /** Locale used by mini-stats for thousand-separator formatting. */
@@ -45,6 +47,7 @@ export function HomePage({
   onNavigate,
   onOpenSnapshotWizard,
   onOpenRuleWizard,
+  onOpenImportRules,
   onOpenShortcutsAside,
   onRestore,
   locale,
@@ -119,7 +122,7 @@ export function HomePage({
             <Flex direction="column" gap="5">
               {isEmpty && (
                 <HeroOnboarding
-                  onImportPack={() => onNavigate('importexport')}
+                  onImportPack={onOpenImportRules}
                   onCreateRule={onOpenRuleWizard}
                 />
               )}
