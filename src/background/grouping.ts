@@ -29,6 +29,22 @@ function hasUrlExtractor(rule: DomainRuleSetting): boolean {
         : !!rule.urlParsingRegEx;
 }
 
+function describeError(e: unknown): unknown {
+    return e instanceof Error ? e.message : e;
+}
+
+const TRANSIENT_TAB_ERROR_FRAGMENTS = [
+    "no tab with id",
+    "no tab group with id",
+    "cannot group tab in a closed window",
+    "invalid tab id",
+] as const;
+
+function isTransientTabError(error: unknown): boolean {
+    const message = error instanceof Error ? error.message.toLowerCase() : '';
+    return !!message && TRANSIENT_TAB_ERROR_FRAGMENTS.some(fragment => message.includes(fragment));
+}
+
 export function findMatchingRule(url: string, domainRules: DomainRuleSetting[]): DomainRuleSetting | undefined {
     return domainRules.find(r => r.enabled && matchesDomain(url, r.domainFilter));
 }
@@ -94,7 +110,7 @@ function tryExtractFromTitle(rule: DomainRuleSetting, openerTab: Browser.tabs.Ta
             return extracted.trim();
         }
     } catch (e) {
-        logger.warn(`[GROUPING_DEBUG] Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}".`, e.message);
+        logger.warn(`[GROUPING_DEBUG] Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}".`, describeError(e));
     }
     return null;
 }
@@ -109,7 +125,7 @@ function tryExtractFromUrl(rule: DomainRuleSetting, openerTab: Browser.tabs.Tab,
             return extracted.trim();
         }
     } catch (e) {
-        logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with ${describeUrlExtraction(rule)}.`, e.message);
+        logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with ${describeUrlExtraction(rule)}.`, describeError(e));
     }
     return null;
 }
@@ -161,31 +177,11 @@ export function extractGroupNameFromRule(rule: DomainRuleSetting, openerTab: Bro
 }
 
 function tryExtractGroupNameFromPresetOrFallback(rule: DomainRuleSetting, openerTab: Browser.tabs.Tab): string | null {
-    // Essayer d'extraire depuis le titre avec la regex de la règle (copiée depuis le preset)
-    if (openerTab.title && rule.titleParsingRegEx) {
-        try {
-            const extracted = extractGroupNameFromTitle(openerTab.title, rule.titleParsingRegEx);
-            if (extracted && extracted.trim()) {
-                logger.debug(`[GROUPING_DEBUG] Group name extracted from opener title "${openerTab.title}" using regex "${rule.titleParsingRegEx}": "${extracted.trim()}".`);
-                return extracted.trim();
-            }
-        } catch (e) {
-            logger.warn(`[GROUPING_DEBUG] Error parsing opener title "${openerTab.title}" with regex "${rule.titleParsingRegEx}".`, e.message);
-        }
-    }
+    const fromTitle = tryExtractFromTitle(rule, openerTab);
+    if (fromTitle) return fromTitle;
 
-    // Essayer d'extraire depuis l'URL via le mode configuré (regex ou query_param)
-    if (openerTab.url && hasUrlExtractor(rule)) {
-        try {
-            const extracted = extractGroupNameFromUrlByMode(openerTab.url, rule);
-            if (extracted && extracted.trim()) {
-                logger.debug(`[GROUPING_DEBUG] Group name extracted from opener URL "${openerTab.url}" using ${describeUrlExtraction(rule)}: "${extracted.trim()}".`);
-                return extracted.trim();
-            }
-        } catch (e) {
-            logger.warn(`[GROUPING_DEBUG] Error parsing opener URL "${openerTab.url}" with ${describeUrlExtraction(rule)}.`, e.message);
-        }
-    }
+    const fromUrl = tryExtractFromUrl(rule, openerTab);
+    if (fromUrl) return fromUrl;
 
     logger.debug(`[GROUPING_DEBUG] No group name could be extracted for rule "${rule.label}".`);
     return null;
@@ -267,24 +263,31 @@ export async function handleManualGroupNaming(
 }
 
 export async function performGroupingOperation(context: GroupingContext): Promise<{targetGroupId: number, groupedTabIds: number[]}> {
-    const currentOpenerTab = await browser.tabs.get(context.openerTab.id);
+    const openerTabId = context.openerTab.id;
+    const newTabId = context.newTab.id;
+    if (openerTabId === undefined || newTabId === undefined) {
+        throw new Error('performGroupingOperation: openerTab.id or newTab.id is undefined');
+    }
+
+    const currentOpenerTab = await browser.tabs.get(openerTabId);
+    const currentOpenerTabId = currentOpenerTab.id ?? openerTabId;
     const openerGroupId = currentOpenerTab.groupId;
 
-    logger.debug(`[GROUPING_DEBUG] Refreshed openerTab ${currentOpenerTab.id} ("${currentOpenerTab.url}"), current groupId: ${openerGroupId}. Using groupName "${context.groupName}".`);
+    logger.debug(`[GROUPING_DEBUG] Refreshed openerTab ${currentOpenerTabId} ("${currentOpenerTab.url}"), current groupId: ${openerGroupId}. Using groupName "${context.groupName}".`);
 
     let targetGroupId: number;
     let groupedTabIds: number[];
 
     if (openerGroupId === browser.tabs.TAB_ID_NONE || typeof openerGroupId !== 'number' || openerGroupId <= 0) {
-        logger.debug(`[GROUPING_DEBUG] Opener tab ${currentOpenerTab.id} is not in a group. Creating new group.`);
-        const tabsToGroup = [currentOpenerTab.id, context.newTab.id];
+        logger.debug(`[GROUPING_DEBUG] Opener tab ${currentOpenerTabId} is not in a group. Creating new group.`);
+        const tabsToGroup = [currentOpenerTabId, newTabId];
         groupedTabIds = tabsToGroup.slice();
         targetGroupId = await createNewGroup(tabsToGroup, context.groupName, context.groupColor, context.rule.id);
     } else {
-        logger.debug(`[GROUPING_DEBUG] Opener tab ${currentOpenerTab.id} already in group ${openerGroupId}.`);
+        logger.debug(`[GROUPING_DEBUG] Opener tab ${currentOpenerTabId} already in group ${openerGroupId}.`);
         targetGroupId = openerGroupId;
-        groupedTabIds = [context.newTab.id];
-        await addToExistingGroup(openerGroupId, context.newTab.id);
+        groupedTabIds = [newTabId];
+        await addToExistingGroup(openerGroupId, newTabId);
     }
 
     return { targetGroupId, groupedTabIds };
@@ -328,7 +331,7 @@ export async function processGroupingForNewTab(openerTab: Browser.tabs.Tab, newT
         const needsManualNaming =
             rule.groupNameSource === 'manual' ||
             (rule.groupNameSource === 'smart_manual' && !tryExtractGroupNameFromPresetOrFallback(rule, openerTab));
-        if (needsManualNaming) {
+        if (needsManualNaming && openerTab.id !== undefined) {
             await handleManualGroupNaming(rule, targetGroupId, context.groupName, groupedTabIds, openerTab.id);
         }
 
@@ -347,12 +350,7 @@ export async function processGroupingForNewTab(openerTab: Browser.tabs.Tab, newT
         }
     } catch (error) {
         logger.error(`[GROUPING_DEBUG] Error during grouping for new tab ${newTab.id}:`, error);
-        if (error.message && (
-            error.message.toLowerCase().includes("no tab with id") ||
-            error.message.toLowerCase().includes("no tab group with id") ||
-            error.message.toLowerCase().includes("cannot group tab in a closed window") ||
-            error.message.toLowerCase().includes("invalid tab id")
-        )) {
+        if (isTransientTabError(error)) {
             logger.warn(`[GROUPING_DEBUG] The error suggests a tab/group/window was closed or ID was invalid during operation.`);
         }
     }

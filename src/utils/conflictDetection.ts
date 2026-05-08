@@ -82,7 +82,7 @@ export async function analyzeConflicts(
       conflictingGroups.push({
         savedGroup: group,
         existingGroupId: match.id,
-        existingGroupTitle: match.title,
+        existingGroupTitle: match.title ?? '',
       });
     } else {
       newGroups.push(group);
