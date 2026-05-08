@@ -78,6 +78,17 @@ async function clearDomainRules(extensionContext: any): Promise<void> {
   await new Promise(r => setTimeout(r, 200));
 }
 
+/** Clear all sessions from storage. Used by deep-link tests that rely on the
+ *  sessions empty state appearing. Without this a prior spec may have left
+ *  sessions in chrome.storage.local. */
+async function clearSessions(extensionContext: any): Promise<void> {
+  const sw = extensionContext.serviceWorkers()[0];
+  await sw.evaluate(async () => {
+    await chrome.storage.local.set({ sessions: [] });
+  });
+  await new Promise(r => setTimeout(r, 200));
+}
+
 /** Open the Import wizard dialog from the Import/Export page. */
 async function openImportWizard(page: any): Promise<void> {
   await page.getByTestId('page-import-export-card-import-rules').getByRole('button', { name: /^import$/i }).click();
@@ -989,6 +1000,8 @@ test.describe('Import / Export', () => {
       extensionContext,
       extensionId,
     }) => {
+      await clearSessions(extensionContext);
+
       const page = await extensionContext.newPage();
       await page.goto(`chrome-extension://${extensionId}/options.html#sessions`);
       await page.waitForLoadState('domcontentloaded');
