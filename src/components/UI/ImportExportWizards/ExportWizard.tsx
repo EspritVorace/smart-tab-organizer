@@ -37,6 +37,9 @@ export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
       countLabelKey="rulesSelectedCount"
       buttonLabelKey="exportButton"
       listRole="list"
+      primaryTestId="wizard-export-rules-btn-export"
+      clipboardTestId="wizard-export-rules-btn-clipboard"
+      cancelTestId="wizard-export-rules-btn-cancel"
     >
       {rules.map((rule) => (
         <DomainRuleCard

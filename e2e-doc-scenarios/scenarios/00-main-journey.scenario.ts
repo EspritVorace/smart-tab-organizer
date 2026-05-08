@@ -24,6 +24,7 @@ import {
 import { writeScenarioReadme } from '../helpers/scenario-readme.js';
 import {
   dismissRuleWizard,
+  exportRulesToFile,
   fillRuleWizardStep1,
   fillSessionsSearch,
   fillSnapshotName,
@@ -43,8 +44,10 @@ import {
   ruleWizardNextToSummary,
   saveSnapshotWizard,
   selectConfigurationMode,
+  stubShowSaveFilePicker,
   toggleRuleEnabled,
   waitForGroupingSettled,
+  waitForToast,
 } from '../helpers/ui-actions.js';
 import { MAIN_JOURNEY_MANIFEST } from './00-main-journey.routing.js';
 
@@ -460,8 +463,18 @@ test('main journey', async (
       force: 41,
       description: 'Rules export wizard, selection step (all rules pre-selected).',
     });
-    await page.keyboard.press('Escape');
-    await page.getByRole('dialog').first().waitFor({ state: 'hidden' }).catch(() => {});
+
+    // Stub `showSaveFilePicker` so the file-export path resolves silently
+    // (no native save dialog), then trigger the export and capture the
+    // success toast that fires once the wizard auto-closes.
+    await stubShowSaveFilePicker(page);
+    await exportRulesToFile(page);
+    await page.getByRole('dialog').first().waitFor({ state: 'hidden' });
+    await waitForToast(page, { variant: 'success' });
+    await captureStep(page, 'export-toast-success', {
+      force: 42,
+      description: 'In-app success toast after the rules export completes.',
+    });
 
     // Open the import wizard, switch to Text mode, and paste a rules payload.
     await openImportRulesWizard(page);

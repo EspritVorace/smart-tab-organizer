@@ -285,6 +285,36 @@ export async function openExportRulesWizard(page: Page): Promise<void> {
   await page.getByRole('dialog').first().waitFor({ state: 'visible' });
 }
 
+/**
+ * Stub `window.showSaveFilePicker` (FileSystem Access API) so the export's
+ * file path resolves silently without opening a native save dialog. The fake
+ * handle's `write` / `close` are no-ops, so the export's success path runs
+ * to completion (toast shown, dialog closed) without any I/O or user input.
+ *
+ * Idempotent: re-calling on a page that already has the stub is safe.
+ */
+export async function stubShowSaveFilePicker(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    type FakeWritable = { write: (data: unknown) => Promise<void>; close: () => Promise<void> };
+    type FakeHandle = { createWritable: () => Promise<FakeWritable> };
+    (window as unknown as { showSaveFilePicker: () => Promise<FakeHandle> }).showSaveFilePicker = async () => ({
+      createWritable: async () => ({
+        write: async () => {},
+        close: async () => {},
+      }),
+    });
+  });
+}
+
+/**
+ * Click the rules export wizard's primary "Export" (file) button. Caller is
+ * expected to have stubbed `showSaveFilePicker` beforehand to avoid the
+ * native save-dialog blocking the test.
+ */
+export async function exportRulesToFile(page: Page): Promise<void> {
+  await page.getByTestId('wizard-export-rules-btn-export').click();
+}
+
 /** Open the rules import wizard from the Import/Export page. */
 export async function openImportRulesWizard(page: Page): Promise<void> {
   const card = page.getByTestId('page-import-export-card-import-rules');

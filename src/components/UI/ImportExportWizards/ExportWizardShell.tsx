@@ -24,6 +24,12 @@ interface ExportWizardShellProps<TItem extends { id: string }> {
   children: React.ReactNode;
   /** Forwarded to `SelectableListContainer` (use "list" when children are listitems). */
   listRole?: string;
+  /** data-testid forwarded to the primary (file) export button. */
+  primaryTestId?: string;
+  /** data-testid forwarded to the clipboard menu item in the split button. */
+  clipboardTestId?: string;
+  /** data-testid forwarded to the cancel button. */
+  cancelTestId?: string;
 }
 
 /**
@@ -45,6 +51,9 @@ export function ExportWizardShell<TItem extends { id: string }>({
   buttonLabelKey,
   children,
   listRole,
+  primaryTestId,
+  clipboardTestId,
+  cancelTestId,
 }: ExportWizardShellProps<TItem>) {
   const { selection, selectAll, exportNote, setExportNote, actions } = state;
 
@@ -74,6 +83,9 @@ export function ExportWizardShell<TItem extends { id: string }>({
           labelKey={buttonLabelKey}
           actions={actions}
           disabled={selection.size === 0}
+          primaryTestId={primaryTestId}
+          clipboardTestId={clipboardTestId}
+          cancelTestId={cancelTestId}
         />
       </WizardModal.Footer>
     </WizardModal>
