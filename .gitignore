@@ -14,6 +14,7 @@ e2e-doc-scenarios/output/
 ctrf/
 coverage/
 reports/a11y/
+reports/routing-audit.md
 .jscpd-report/
 design-system-bundle/
 design-system-bundle.zip
