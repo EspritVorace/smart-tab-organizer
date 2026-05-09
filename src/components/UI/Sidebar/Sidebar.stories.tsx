@@ -104,9 +104,40 @@ const defaultItems = [
   { id: 'help', label: 'Help & Support', icon: HelpCircle, accentColor: 'red' },
 ];
 
+const defaultSections = [
+  { id: 'main', label: 'Main', items: defaultItems },
+];
+
+const sectionedDefaultSections = [
+  {
+    id: 'workspace',
+    label: 'Workspace',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', icon: Home, accentColor: 'blue' },
+      { id: 'analytics', label: 'Analytics', icon: BarChart3, badge: '3', accentColor: 'green' },
+      { id: 'documents', label: 'Documents', icon: FileText, accentColor: 'orange' },
+    ],
+  },
+  {
+    id: 'people',
+    label: 'People',
+    items: [
+      { id: 'team', label: 'Team', icon: Users, accentColor: 'purple' },
+    ],
+  },
+  {
+    id: 'system',
+    label: 'System',
+    items: [
+      { id: 'settings', label: 'Settings', icon: Settings, accentColor: 'gray' },
+      { id: 'help', label: 'Help & Support', icon: HelpCircle, accentColor: 'red' },
+    ],
+  },
+];
+
 export const SidebarDefault: Story = {
   args: {
-    items: defaultItems,
+    sections: defaultSections,
     activeItem: 'dashboard',
     isCollapsed: false,
     showFooter: false,
@@ -117,7 +148,7 @@ export const SidebarDefault: Story = {
 
 export const SidebarCollapsed: Story = {
   args: {
-    items: defaultItems,
+    sections: defaultSections,
     activeItem: 'analytics',
     isCollapsed: true,
     showFooter: false,
@@ -128,7 +159,7 @@ export const SidebarCollapsed: Story = {
 
 export const SidebarWithFooter: Story = {
   args: {
-    items: defaultItems,
+    sections: defaultSections,
     activeItem: 'documents',
     isCollapsed: false,
     showFooter: true,
@@ -141,7 +172,7 @@ export const SidebarWithFooter: Story = {
 
 export const SidebarWithToggle: Story = {
   args: {
-    items: defaultItems,
+    sections: defaultSections,
     activeItem: 'team',
     isCollapsed: false,
     showFooter: false,
@@ -153,7 +184,7 @@ export const SidebarWithToggle: Story = {
 
 export const SidebarWithFooterCollapsed: Story = {
   args: {
-    items: defaultItems,
+    sections: defaultSections,
     activeItem: 'documents',
     isCollapsed: true,
     showFooter: true,
@@ -166,17 +197,23 @@ export const SidebarWithFooterCollapsed: Story = {
 
 export const SidebarManyItems: Story = {
   args: {
-    items: [
-      { id: 'dashboard', label: 'Dashboard', icon: Home, accentColor: 'blue' },
-      { id: 'search', label: 'Search', icon: Search, badge: 'New', accentColor: 'cyan' },
-      { id: 'notifications', label: 'Notifications', icon: Bell, badge: '12', accentColor: 'orange' },
-      { id: 'favorites', label: 'Favorites', icon: Star, accentColor: 'yellow' },
-      { id: 'analytics', label: 'Analytics', icon: BarChart3, badge: '3', accentColor: 'green' },
-      { id: 'documents', label: 'Documents', icon: FileText, accentColor: 'purple' },
-      { id: 'archive', label: 'Archive', icon: Archive, accentColor: 'gray' },
-      { id: 'team', label: 'Team', icon: Users, accentColor: 'pink' },
-      { id: 'settings', label: 'Settings', icon: Settings, accentColor: 'red' },
-      { id: 'help', label: 'Help & Support', icon: HelpCircle, accentColor: 'indigo' },
+    sections: [
+      {
+        id: 'all',
+        label: 'All items',
+        items: [
+          { id: 'dashboard', label: 'Dashboard', icon: Home, accentColor: 'blue' },
+          { id: 'search', label: 'Search', icon: Search, badge: 'New', accentColor: 'cyan' },
+          { id: 'notifications', label: 'Notifications', icon: Bell, badge: '12', accentColor: 'orange' },
+          { id: 'favorites', label: 'Favorites', icon: Star, accentColor: 'yellow' },
+          { id: 'analytics', label: 'Analytics', icon: BarChart3, badge: '3', accentColor: 'green' },
+          { id: 'documents', label: 'Documents', icon: FileText, accentColor: 'purple' },
+          { id: 'archive', label: 'Archive', icon: Archive, accentColor: 'gray' },
+          { id: 'team', label: 'Team', icon: Users, accentColor: 'pink' },
+          { id: 'settings', label: 'Settings', icon: Settings, accentColor: 'red' },
+          { id: 'help', label: 'Help & Support', icon: HelpCircle, accentColor: 'indigo' },
+        ],
+      },
     ],
     activeItem: 'notifications',
     isCollapsed: false,
@@ -190,7 +227,7 @@ export const SidebarManyItems: Story = {
 
 export const SidebarInteractive: Story = {
   args: {
-    items: defaultItems,
+    sections: defaultSections,
     activeItem: 'dashboard',
     isCollapsed: false,
     showFooter: false,
@@ -203,7 +240,7 @@ export const SidebarInteractive: Story = {
 
 export const SidebarWithToolbar: Story = {
   args: {
-    items: defaultItems,
+    sections: defaultSections,
     activeItem: 'dashboard',
     isCollapsed: false,
     showFooter: false,
@@ -216,7 +253,7 @@ export const SidebarWithToolbar: Story = {
 
 export const SidebarWithSearch: Story = {
   args: {
-    items: defaultItems,
+    sections: defaultSections,
     activeItem: 'documents',
     isCollapsed: false,
     showFooter: false,
@@ -229,9 +266,31 @@ export const SidebarWithSearch: Story = {
   },
 };
 
+export const SidebarWithSections: Story = {
+  args: {
+    sections: sectionedDefaultSections,
+    activeItem: 'analytics',
+    isCollapsed: false,
+    showFooter: false,
+    headerContent: <HeaderExpanded title="Sectioned Menu" />,
+    headerCollapsedContent: <HeaderCollapsed />,
+  },
+};
+
+export const SidebarWithSectionsCollapsed: Story = {
+  args: {
+    sections: sectionedDefaultSections,
+    activeItem: 'team',
+    isCollapsed: true,
+    showFooter: false,
+    headerContent: <HeaderExpanded title="Sectioned Menu" />,
+    headerCollapsedContent: <HeaderCollapsed />,
+  },
+};
+
 export const SidebarComplete: Story = {
   args: {
-    items: defaultItems,
+    sections: defaultSections,
     activeItem: 'analytics',
     isCollapsed: false,
     showFooter: true,
@@ -295,16 +354,28 @@ const SmartTabHeaderCollapsed = () => (
   </Flex>
 );
 
-const smartTabItems = [
-  { id: 'rules', label: 'Domain Rules', icon: Shield, accentColor: 'blue' },
-  { id: 'presets', label: 'Regex Presets', icon: Regex, accentColor: 'green' },
-  { id: 'importexport', label: 'Import/Export', icon: FileText, accentColor: 'orange' },
-  { id: 'stats', label: 'Statistics', icon: BarChart3, accentColor: 'red' },
+const smartTabSections = [
+  {
+    id: 'rules-group',
+    label: 'Rules',
+    items: [
+      { id: 'rules', label: 'Domain Rules', icon: Shield, accentColor: 'blue' },
+      { id: 'presets', label: 'Regex Presets', icon: Regex, accentColor: 'green' },
+    ],
+  },
+  {
+    id: 'data-group',
+    label: 'Data',
+    items: [
+      { id: 'importexport', label: 'Import/Export', icon: FileText, accentColor: 'orange' },
+      { id: 'stats', label: 'Statistics', icon: BarChart3, accentColor: 'red' },
+    ],
+  },
 ];
 
 export const SidebarSmartTabExpanded: Story = {
   args: {
-    items: smartTabItems,
+    sections: smartTabSections,
     activeItem: 'rules',
     isCollapsed: false,
     showFooter: true,
@@ -318,7 +389,7 @@ export const SidebarSmartTabExpanded: Story = {
 
 export const SidebarSmartTabCollapsed: Story = {
   args: {
-    items: smartTabItems,
+    sections: smartTabSections,
     activeItem: 'presets',
     isCollapsed: true,
     showFooter: true,

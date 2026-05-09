@@ -18,12 +18,18 @@ export interface SidebarItem {
   accentColor?: string;
 }
 
+export interface SidebarSection {
+  id: string;
+  label: string;
+  items: SidebarItem[];
+}
+
 interface SidebarProps {
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
   activeItem?: string;
   onItemClick?: (itemId: string) => void;
-  items: SidebarItem[];
+  sections: SidebarSection[];
   showFooter?: boolean;
   footerContent?: React.ReactNode;
   footerCollapsedContent?: React.ReactNode;
@@ -44,7 +50,7 @@ export function Sidebar({
   onToggleCollapse,
   activeItem,
   onItemClick,
-  items,
+  sections,
   showFooter = false,
   footerContent,
   footerCollapsedContent,
@@ -105,7 +111,7 @@ export function Sidebar({
           isCollapsed={isCollapsed}
           activeItem={activeItem}
           onItemClick={onItemClick}
-          items={items}
+          sections={sections}
         />
         
         {showFooter && (

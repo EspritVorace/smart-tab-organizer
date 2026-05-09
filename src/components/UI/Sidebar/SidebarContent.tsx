@@ -1,25 +1,24 @@
-import React from 'react';
 import { Box, ScrollArea } from '@radix-ui/themes';
 import { SidebarItems } from './SidebarItems';
-import { SidebarItem } from './Sidebar';
+import { SidebarSection } from './Sidebar';
 
 interface SidebarContentProps {
   isCollapsed?: boolean;
   activeItem?: string;
   onItemClick?: (itemId: string) => void;
-  items: SidebarItem[];
+  sections: SidebarSection[];
 }
 
 export function SidebarContent({
   isCollapsed = false,
   activeItem,
   onItemClick,
-  items
+  sections
 }: SidebarContentProps) {
   return (
-    <ScrollArea 
-      type="auto" 
-      scrollbars="vertical" 
+    <ScrollArea
+      type="auto"
+      scrollbars="vertical"
       style={{ flex: 1, overflowX: 'hidden' }}
     >
       <Box p="2">
@@ -27,7 +26,7 @@ export function SidebarContent({
           isCollapsed={isCollapsed}
           activeItem={activeItem}
           onItemClick={onItemClick}
-          items={items}
+          sections={sections}
         />
       </Box>
     </ScrollArea>

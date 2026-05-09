@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Flex, Text, Button, Box } from '@radix-ui/themes';
-import { SidebarItem } from './Sidebar';
+import { Flex, Text, Button, Box, Separator } from '@radix-ui/themes';
+import { SidebarItem, SidebarSection } from './Sidebar';
 import { IconBox } from '@/components/UI/IconBox/IconBox';
 import { useListNavigation } from '@/hooks/useListNavigation';
 
@@ -8,7 +8,7 @@ interface SidebarItemsProps {
   isCollapsed?: boolean;
   activeItem?: string;
   onItemClick?: (itemId: string) => void;
-  items: SidebarItem[];
+  sections: SidebarSection[];
 }
 
 interface AccentTokens {
@@ -131,18 +131,17 @@ export function SidebarItems({
   isCollapsed = false,
   activeItem,
   onItemClick,
-  items
+  sections
 }: SidebarItemsProps) {
   const listRef = useRef<HTMLDivElement>(null);
-  const activeIndex = items.findIndex((it) => it.id === activeItem);
+  const flatItems = sections.flatMap((s) => s.items);
+  const activeIndex = flatItems.findIndex((it) => it.id === activeItem);
   const [focusIndex, setFocusIndex] = useState(activeIndex >= 0 ? activeIndex : 0);
   const { handleNavigationKey } = useListNavigation(listRef, '[data-sidebar-nav-item]', {
     axis: 'vertical',
     rovingTabIndex: true,
   });
 
-  // Keep the roving tabstop aligned with the active route so a fresh Tab into
-  // the sidebar lands on the current page rather than on a stale position.
   useEffect(() => {
     if (activeIndex >= 0) setFocusIndex(activeIndex);
   }, [activeIndex]);
@@ -155,31 +154,69 @@ export function SidebarItems({
     }
   };
 
+  let flatIndex = 0;
+
   return (
     <Flex direction="column" gap="2" ref={listRef}>
-      {items.map((item, index) => {
-        const isActive = activeItem === item.id;
-        const accent = resolveAccentTokens(item.accentColor);
-
+      {sections.map((section, sectionIndex) => {
+        const labelId = `sidebar-section-${section.id}-label`;
         return (
-          <Button
-            key={item.id}
-            data-testid={`sidebar-nav-item-${item.id}`}
-            data-sidebar-nav-item=""
-            variant="ghost"
-            size="3"
-            onClick={() => handleItemClick(item.id, item.onClick)}
-            onFocus={() => setFocusIndex(index)}
-            onKeyDown={(e) => handleNavigationKey(e, index)}
-            tabIndex={index === focusIndex ? 0 : -1}
-            aria-label={isCollapsed ? item.label : undefined}
-            title={isCollapsed ? item.label : undefined}
-            style={computeButtonStyle(isCollapsed, isActive, accent, item.accentColor)}
+          <Box
+            key={section.id}
+            data-testid={`sidebar-section-${section.id}`}
+            role="group"
+            aria-labelledby={isCollapsed ? undefined : labelId}
+            aria-label={isCollapsed ? section.label : undefined}
+            mt={sectionIndex === 0 ? '0' : '3'}
           >
-            {isCollapsed
-              ? <CollapsedItemContent item={item} accent={accent} />
-              : <ExpandedItemContent item={item} accent={accent} />}
-          </Button>
+            {isCollapsed ? (
+              sectionIndex > 0 && <Separator size="4" my="2" />
+            ) : (
+              <Text
+                id={labelId}
+                as="div"
+                size="1"
+                weight="medium"
+                color="gray"
+                mb="1"
+                style={{
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  paddingLeft: 'var(--space-2)',
+                }}
+              >
+                {section.label}
+              </Text>
+            )}
+            <Flex direction="column" gap="2">
+              {section.items.map((item) => {
+                const isActive = activeItem === item.id;
+                const accent = resolveAccentTokens(item.accentColor);
+                const itemIndex = flatIndex++;
+
+                return (
+                  <Button
+                    key={item.id}
+                    data-testid={`sidebar-nav-item-${item.id}`}
+                    data-sidebar-nav-item=""
+                    variant="ghost"
+                    size="3"
+                    onClick={() => handleItemClick(item.id, item.onClick)}
+                    onFocus={() => setFocusIndex(itemIndex)}
+                    onKeyDown={(e) => handleNavigationKey(e, itemIndex)}
+                    tabIndex={itemIndex === focusIndex ? 0 : -1}
+                    aria-label={isCollapsed ? item.label : undefined}
+                    title={isCollapsed ? item.label : undefined}
+                    style={computeButtonStyle(isCollapsed, isActive, accent, item.accentColor)}
+                  >
+                    {isCollapsed
+                      ? <CollapsedItemContent item={item} accent={accent} />
+                      : <ExpandedItemContent item={item} accent={accent} />}
+                  </Button>
+                );
+              })}
+            </Flex>
+          </Box>
         );
       })}
     </Flex>
