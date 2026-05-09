@@ -112,11 +112,13 @@ describe('importClassification', () => {
       expect(props).toContain('deduplicationMatchMode');
     });
 
-    it('exclut label des différences (clé de correspondance)', () => {
+    it('inclut label dans les différences (rename surfacé)', () => {
       const current = makeRule({ label: 'A' });
       const imported = makeRule({ label: 'B' });
       const diffs = getRuleDifferences(current, imported);
-      expect(diffs.find(d => d.property === 'label')).toBeUndefined();
+      const labelDiff = diffs.find(d => d.property === 'label');
+      expect(labelDiff).toBeDefined();
+      expect(labelDiff).toMatchObject({ currentValue: 'A', importedValue: 'B' });
     });
 
     it('détecte une différence sur enabled', () => {
@@ -156,15 +158,58 @@ describe('importClassification', () => {
     });
 
     it('est insensible à la casse pour la correspondance des labels (lookup)', () => {
-      const existing = makeRule({ label: 'My Rule' });
-      const imported = makeRule({ label: 'MY RULE' }); // même label, casse différente
+      const existing = makeRule({ id: 'a', label: 'My Rule' });
+      const imported = makeRule({ id: 'b', label: 'MY RULE' }); // même label, casse différente, id différent
       const result = classifyImportedRules([imported], [existing]);
-      // Retrouvée dans la map (insensible à la casse) → pas nouvelle
+      // ID différent → fallback label (insensible à la casse) → match
       expect(result.newRules).toHaveLength(0);
-      // Mais areDomainRulesEqual compare label en === → considérée comme conflit
-      // (avec 0 différences visibles car label est ignoré dans getRuleDifferences)
+      // areDomainRulesEqual compare label en === → considérée comme conflit
+      // (label apparait dans les différences pour montrer le changement de casse)
       expect(result.conflictingRules).toHaveLength(1);
-      expect(result.conflictingRules[0].differences).toHaveLength(0);
+      expect(result.conflictingRules[0].differences).toHaveLength(1);
+      expect(result.conflictingRules[0].differences[0].property).toBe('label');
+    });
+
+    it('matche par id en priorité (catch rename)', () => {
+      const existing = makeRule({ id: 'stable-id', label: 'Old Label' });
+      const imported = makeRule({ id: 'stable-id', label: 'New Label' });
+      const result = classifyImportedRules([imported], [existing]);
+      expect(result.conflictingRules).toHaveLength(1);
+      expect(result.conflictingRules[0].existing).toBe(existing);
+      expect(result.conflictingRules[0].differences.map(d => d.property)).toContain('label');
+      expect(result.newRules).toHaveLength(0);
+      expect(result.identicalRules).toHaveLength(0);
+    });
+
+    it('classe une règle identique par id (même contenu, même label)', () => {
+      const rule = makeRule({ id: 'stable-id', label: 'Foo' });
+      const result = classifyImportedRules([rule], [{ ...rule }]);
+      expect(result.identicalRules).toHaveLength(1);
+      expect(result.conflictingRules).toHaveLength(0);
+      expect(result.newRules).toHaveLength(0);
+    });
+
+    it('utilise le fallback label quand l\'id ne match pas', () => {
+      const existing = makeRule({ id: 'aaa', label: 'Foo', domainFilter: 'foo.com' });
+      const imported = makeRule({ id: 'bbb', label: 'Foo', domainFilter: 'bar.com' });
+      const result = classifyImportedRules([imported], [existing]);
+      expect(result.conflictingRules).toHaveLength(1);
+      expect(result.conflictingRules[0].existing).toBe(existing);
+      expect(result.newRules).toHaveLength(0);
+    });
+
+    it('ne re-matche pas une règle existante déjà appariée par id', () => {
+      // Existing has rule "Foo" with id A. Two imports both have label "Foo":
+      // one with id A (matches by id), the other with id B (would fall back
+      // to label, but A is already taken, so it becomes new).
+      const existing = makeRule({ id: 'A', label: 'Foo' });
+      const importedById = makeRule({ id: 'A', label: 'Foo', domainFilter: 'changed.com' });
+      const importedByLabel = makeRule({ id: 'B', label: 'Foo' });
+      const result = classifyImportedRules([importedById, importedByLabel], [existing]);
+      expect(result.conflictingRules).toHaveLength(1);
+      expect(result.conflictingRules[0].imported).toBe(importedById);
+      expect(result.newRules).toHaveLength(1);
+      expect(result.newRules[0]).toBe(importedByLabel);
     });
 
     it('gère un mélange de classifications', () => {

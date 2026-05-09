@@ -38,10 +38,16 @@ function session(overrides: Partial<Session> = {}): Session {
 }
 
 describe('areSessionsEqual', () => {
-  it('ignores id, name, createdAt, updatedAt', async () => {
-    const a = session({ id: 'a', name: 'Alpha', createdAt: '2020', updatedAt: '2021' });
-    const b = session({ id: 'b', name: 'Beta', createdAt: '2030', updatedAt: '2031' });
+  it('ignores id, createdAt, updatedAt', async () => {
+    const a = session({ id: 'a', createdAt: '2020', updatedAt: '2021' });
+    const b = session({ id: 'b', createdAt: '2030', updatedAt: '2031' });
     expect(areSessionsEqual(a, b)).toBe(true);
+  });
+
+  it('returns false when name differs (rename surfaced)', () => {
+    const a = session({ name: 'Alpha' });
+    const b = session({ name: 'Beta' });
+    expect(areSessionsEqual(a, b)).toBe(false);
   });
 
   it('returns false when isPinned differs', () => {
@@ -145,6 +151,20 @@ describe('getSessionDiff', () => {
     expect(diff.ungroupedTabsRemoved).toHaveLength(0);
     expect(diff.isPinned).toBeUndefined();
     expect(diff.categoryId).toBeUndefined();
+  });
+
+  it('populates name diff when names differ (rename)', () => {
+    const existing = session({ name: 'Old name' });
+    const imported = session({ name: 'New name' });
+    const diff = getSessionDiff(existing, imported);
+    expect(diff.name).toEqual({ current: 'Old name', imported: 'New name' });
+  });
+
+  it('does not flag a name diff when names match', () => {
+    const existing = session({ name: 'Same' });
+    const imported = session({ name: 'Same' });
+    const diff = getSessionDiff(existing, imported);
+    expect(diff.name).toBeUndefined();
   });
 
   it('populates isPinned diff', () => {
@@ -303,17 +323,73 @@ describe('classifyImportedSessions', () => {
     expect(result.identicalSessions).toHaveLength(0);
   });
 
-  it('flags sessions as identical when structure matches (ignoring name casing)', () => {
+  it('flags sessions as conflicting when name casing differs (rename via fallback)', () => {
     const existing = [
-      session({ name: 'Work', groups: [group('G1', ['https://x.com'])] }),
+      session({ id: 'a', name: 'Work', groups: [group('G1', ['https://x.com'])] }),
     ];
     const imported = [
-      session({ name: 'WORK', groups: [group('G1', ['https://x.com'])] }),
+      session({ id: 'b', name: 'WORK', groups: [group('G1', ['https://x.com'])] }),
+    ];
+    const result = classifyImportedSessions(imported, existing);
+    // No id match, fallback to case-insensitive name → conflicting because
+    // names differ in casing (surfaced as a name diff).
+    expect(result.conflictingSessions).toHaveLength(1);
+    expect(result.conflictingSessions[0].diff.name).toEqual({ current: 'Work', imported: 'WORK' });
+    expect(result.identicalSessions).toHaveLength(0);
+    expect(result.newSessions).toHaveLength(0);
+  });
+
+  it('flags sessions as identical when same id, same name, same content', () => {
+    const existing = [
+      session({ id: 'a', name: 'Work', groups: [group('G1', ['https://x.com'])] }),
+    ];
+    const imported = [
+      session({ id: 'a', name: 'Work', groups: [group('G1', ['https://x.com'])] }),
     ];
     const result = classifyImportedSessions(imported, existing);
     expect(result.identicalSessions).toHaveLength(1);
     expect(result.conflictingSessions).toHaveLength(0);
     expect(result.newSessions).toHaveLength(0);
+  });
+
+  it('matches by id (catches rename) even when name has changed', () => {
+    const existing = [
+      session({ id: 'stable-id', name: 'Old name', groups: [group('G1', ['https://x.com'])] }),
+    ];
+    const imported = [
+      session({ id: 'stable-id', name: 'New name', groups: [group('G1', ['https://x.com'])] }),
+    ];
+    const result = classifyImportedSessions(imported, existing);
+    expect(result.conflictingSessions).toHaveLength(1);
+    expect(result.conflictingSessions[0].existing).toBe(existing[0]);
+    expect(result.conflictingSessions[0].diff.name).toEqual({ current: 'Old name', imported: 'New name' });
+    expect(result.newSessions).toHaveLength(0);
+  });
+
+  it('uses name fallback when id does not match', () => {
+    const existing = [
+      session({ id: 'aaa', name: 'Work', groups: [group('G1', ['https://x.com'])] }),
+    ];
+    const imported = [
+      session({ id: 'bbb', name: 'Work', groups: [group('G1', ['https://y.com'])] }),
+    ];
+    const result = classifyImportedSessions(imported, existing);
+    expect(result.conflictingSessions).toHaveLength(1);
+    expect(result.conflictingSessions[0].existing).toBe(existing[0]);
+    expect(result.newSessions).toHaveLength(0);
+  });
+
+  it('does not re-match an existing session already paired by id', () => {
+    const existing = [
+      session({ id: 'A', name: 'Work', groups: [group('G1', ['https://x.com'])] }),
+    ];
+    const importedById = session({ id: 'A', name: 'Work', groups: [group('G1', ['https://changed.com'])] });
+    const importedByName = session({ id: 'B', name: 'Work' });
+    const result = classifyImportedSessions([importedById, importedByName], existing);
+    expect(result.conflictingSessions).toHaveLength(1);
+    expect(result.conflictingSessions[0].imported).toBe(importedById);
+    expect(result.newSessions).toHaveLength(1);
+    expect(result.newSessions[0]).toBe(importedByName);
   });
 
   it('flags sessions as conflicting when name matches but content differs', () => {
@@ -332,13 +408,13 @@ describe('classifyImportedSessions', () => {
 
   it('splits a mixed import into new, identical, and conflicting buckets', () => {
     const existing = [
-      session({ name: 'Work', groups: [group('G1', ['https://a.com'])] }),
-      session({ name: 'Home', ungroupedTabs: [tab('https://h.com')] }),
+      session({ id: 'work-id', name: 'Work', groups: [group('G1', ['https://a.com'])] }),
+      session({ id: 'home-id', name: 'Home', ungroupedTabs: [tab('https://h.com')] }),
     ];
     const imported = [
-      session({ name: 'Work', groups: [group('G1', ['https://a.com'])] }), // identical
-      session({ name: 'Home', ungroupedTabs: [tab('https://h2.com')] }), // conflicting
-      session({ name: 'Research' }), // new
+      session({ id: 'work-id', name: 'Work', groups: [group('G1', ['https://a.com'])] }), // identical
+      session({ id: 'home-id', name: 'Home', ungroupedTabs: [tab('https://h2.com')] }), // conflicting
+      session({ id: 'research-id', name: 'Research' }), // new
     ];
     const result = classifyImportedSessions(imported, existing);
     expect(result.identicalSessions.map(s => s.name)).toEqual(['Work']);

@@ -89,9 +89,7 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
 
     for (const conflict of classification.conflictingItems) {
       if (conflictMode === 'overwrite') {
-        const idx = updatedSessions.findIndex(
-          s => s.name.toLowerCase() === conflict.existing.name.toLowerCase()
-        );
+        const idx = updatedSessions.findIndex(s => s.id === conflict.existing.id);
         if (idx !== -1) {
           updatedSessions[idx] = { ...conflict.imported, id: conflict.existing.id };
           overwritten++;
