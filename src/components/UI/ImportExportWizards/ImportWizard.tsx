@@ -84,9 +84,7 @@ export function ImportWizard({
 
     for (const conflict of classification.conflictingItems) {
       if (conflictMode === 'overwrite') {
-        const idx = updatedRules.findIndex(
-          r => r.label.toLowerCase() === conflict.existing.label.toLowerCase()
-        );
+        const idx = updatedRules.findIndex(r => r.id === conflict.existing.id);
         if (idx !== -1) {
           updatedRules[idx] = { ...conflict.imported, id: conflict.existing.id };
           overwritten++;

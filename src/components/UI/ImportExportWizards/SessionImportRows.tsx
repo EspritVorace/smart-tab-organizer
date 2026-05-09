@@ -76,6 +76,7 @@ interface SessionDiffViewProps {
 
 export function SessionDiffView({ diff }: SessionDiffViewProps) {
   const hasContent =
+    diff.name !== undefined ||
     diff.isPinned !== undefined ||
     diff.categoryId !== undefined ||
     diff.groupsAdded.length > 0 ||
@@ -88,6 +89,14 @@ export function SessionDiffView({ diff }: SessionDiffViewProps) {
 
   return (
     <Flex direction="column" gap="3">
+      {diff.name !== undefined && (
+        <DiffPropertyValues
+          label="name"
+          current={diff.name.current}
+          imported={diff.name.imported}
+        />
+      )}
+
       {diff.isPinned !== undefined && (
         <DiffPropertyValues
           label="isPinned"

@@ -8,6 +8,7 @@ export interface GroupDiff {
 }
 
 export interface SessionDiff {
+  name?: { current: string; imported: string };
   isPinned?: { current: boolean; imported: boolean };
   categoryId?: { current: string | null | undefined; imported: string | null | undefined };
   note?: { current: string | undefined; imported: string | undefined };
@@ -59,9 +60,10 @@ function areGroupArraysEqual(a: SavedTabGroup[], b: SavedTabGroup[]): boolean {
   return true;
 }
 
-/** Compare two sessions ignoring id, name, createdAt, updatedAt */
+/** Compare two sessions ignoring id, createdAt, updatedAt */
 export function areSessionsEqual(a: Session, b: Session): boolean {
   return (
+    a.name === b.name &&
     a.isPinned === b.isPinned &&
     (a.categoryId ?? null) === (b.categoryId ?? null) &&
     (a.note ?? '') === (b.note ?? '') &&
@@ -161,6 +163,10 @@ export function getSessionDiff(existing: Session, imported: Session): SessionDif
     ungroupedTabsRemoved: ungrouped.removed,
   };
 
+  if (existing.name !== imported.name) {
+    diff.name = { current: existing.name, imported: imported.name };
+  }
+
   if (existing.isPinned !== imported.isPinned) {
     diff.isPinned = { current: existing.isPinned, imported: imported.isPinned };
   }
@@ -179,25 +185,44 @@ export function getSessionDiff(existing: Session, imported: Session): SessionDif
   return diff;
 }
 
-/** Classify imported sessions into new, conflicting, and identical groups */
+/**
+ * Classify imported sessions into new, conflicting, and identical groups.
+ * Match by `id` first to catch renames; fall back to name match (case
+ * insensitive) so re-imports of the same content with a different id still
+ * dedupe.
+ */
 export function classifyImportedSessions(
   importedSessions: Session[],
   existingSessions: Session[]
 ): SessionClassification {
+  const existingById = new Map<string, Session>();
   const existingByName = new Map<string, Session>();
   for (const session of existingSessions) {
+    existingById.set(session.id, session);
     existingByName.set(session.name.toLowerCase(), session);
   }
 
+  const matchedExistingIds = new Set<string>();
   const newSessions: Session[] = [];
   const conflictingSessions: ConflictingSession[] = [];
   const identicalSessions: Session[] = [];
 
   for (const imported of importedSessions) {
-    const existing = existingByName.get(imported.name.toLowerCase());
+    let existing = existingById.get(imported.id);
+    if (!existing) {
+      const nameMatch = existingByName.get(imported.name.toLowerCase());
+      if (nameMatch && !matchedExistingIds.has(nameMatch.id)) {
+        existing = nameMatch;
+      }
+    }
+
     if (!existing) {
       newSessions.push(imported);
-    } else if (areSessionsEqual(existing, imported)) {
+      continue;
+    }
+
+    matchedExistingIds.add(existing.id);
+    if (areSessionsEqual(existing, imported)) {
       identicalSessions.push(imported);
     } else {
       conflictingSessions.push({

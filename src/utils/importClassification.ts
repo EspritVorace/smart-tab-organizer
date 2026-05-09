@@ -73,7 +73,6 @@ export function getRuleDifferences(
 ): PropertyDiff[] {
   const diffs: PropertyDiff[] = [];
   for (const prop of COMPARABLE_PROPERTIES) {
-    if (prop === 'label') continue; // Label is the matching key, skip it
     if (!arePropertyValuesEqual(ruleA[prop], ruleB[prop])) {
       diffs.push({
         property: prop,
@@ -85,26 +84,44 @@ export function getRuleDifferences(
   return diffs;
 }
 
-/** Classify imported rules into new, conflicting, and identical groups */
+/**
+ * Classify imported rules into new, conflicting, and identical groups.
+ * Match by `id` first to catch renames; fall back to label match (case
+ * insensitive) so re-imports of the same content with a different id still
+ * dedupe.
+ */
 export function classifyImportedRules(
   importedRules: DomainRuleSetting[],
   existingRules: DomainRuleSetting[]
 ): RuleClassification {
+  const existingById = new Map<string, DomainRuleSetting>();
   const existingByLabel = new Map<string, DomainRuleSetting>();
   for (const rule of existingRules) {
+    existingById.set(rule.id, rule);
     existingByLabel.set(rule.label.toLowerCase(), rule);
   }
 
+  const matchedExistingIds = new Set<string>();
   const newRules: DomainRuleSetting[] = [];
   const conflictingRules: ConflictingRule[] = [];
   const identicalRules: DomainRuleSetting[] = [];
 
   for (const imported of importedRules) {
-    const existing = existingByLabel.get(imported.label.toLowerCase());
+    let existing = existingById.get(imported.id);
+    if (!existing) {
+      const labelMatch = existingByLabel.get(imported.label.toLowerCase());
+      if (labelMatch && !matchedExistingIds.has(labelMatch.id)) {
+        existing = labelMatch;
+      }
+    }
 
     if (!existing) {
       newRules.push(imported);
-    } else if (areDomainRulesEqual(existing, imported)) {
+      continue;
+    }
+
+    matchedExistingIds.add(existing.id);
+    if (areDomainRulesEqual(existing, imported)) {
       identicalRules.push(imported);
     } else {
       conflictingRules.push({
