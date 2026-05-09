@@ -20,7 +20,7 @@ import type { ShortcutDefinition } from '@/utils/keyboardShortcuts';
 import type { SourceMode } from '@/components/UI/ImportExportWizards/Source';
 
 import { Sidebar } from '@/components/UI/Sidebar/Sidebar';
-import type { SidebarItem } from '@/components/UI/Sidebar/Sidebar';
+import type { SidebarSection } from '@/components/UI/Sidebar/Sidebar';
 import { OptionsHeader, OptionsHeaderCollapsed } from '@/components/UI/OptionsLayout/OptionsHeader';
 import { WorkspaceFooter, WorkspaceFooterCollapsed } from '@/components/UI/Workspace/WorkspaceFooter';
 import { ShortcutsAside, type PageContext } from '@/components/UI/ShortcutsPanel';
@@ -117,14 +117,32 @@ export function OptionsContent() {
         await restoreSessionTabs(session, target as RestoreTarget);
     }, [setRestoreSessionId, handleTabChange]);
 
-    const sidebarItems: SidebarItem[] = useMemo(() => [
-        { id: 'home', label: getMessage('homeTab'), icon: Home, accentColor: 'indigo' },
-        { id: 'rules', label: getMessage('domainRulesTab'), icon: Shield, accentColor: 'indigo' },
-        { id: 'sessions', label: getMessage('sessionsTab'), icon: Archive, accentColor: 'indigo' },
-        { id: 'importexport', label: getMessage('importExportTab'), icon: FileText, accentColor: 'indigo' },
-        { id: 'stats', label: getMessage('statisticsTab'), icon: BarChart3, accentColor: 'indigo' },
-        { id: 'settings', label: getMessage('settingsTab'), icon: Settings, accentColor: 'indigo' },
-        { id: 'workspaces', label: getMessage('workspacesTab'), icon: Layers, accentColor: 'indigo' },
+    const sidebarSections: SidebarSection[] = useMemo(() => [
+        {
+            id: 'tools',
+            label: getMessage('sidebarSectionTools'),
+            items: [
+                { id: 'home', label: getMessage('homeTab'), icon: Home, accentColor: 'indigo' },
+                { id: 'rules', label: getMessage('domainRulesTab'), icon: Shield, accentColor: 'indigo' },
+                { id: 'sessions', label: getMessage('sessionsTab'), icon: Archive, accentColor: 'indigo' },
+            ],
+        },
+        {
+            id: 'tracking',
+            label: getMessage('sidebarSectionTracking'),
+            items: [
+                { id: 'stats', label: getMessage('statisticsTab'), icon: BarChart3, accentColor: 'indigo' },
+            ],
+        },
+        {
+            id: 'configuration',
+            label: getMessage('sidebarSectionConfiguration'),
+            items: [
+                { id: 'importexport', label: getMessage('importExportTab'), icon: FileText, accentColor: 'indigo' },
+                { id: 'settings', label: getMessage('settingsTab'), icon: Settings, accentColor: 'indigo' },
+                { id: 'workspaces', label: getMessage('workspacesTab'), icon: Layers, accentColor: 'indigo' },
+            ],
+        },
     ], []);
 
 
@@ -142,7 +160,8 @@ export function OptionsContent() {
     }, [shortcutsAsideOpen]);
 
     const shortcuts = useMemo<ShortcutDefinition[]>(() => {
-        const tabShortcuts: ShortcutDefinition[] = sidebarItems.map((item, index) => ({
+        const flatItems = sidebarSections.flatMap((section) => section.items);
+        const tabShortcuts: ShortcutDefinition[] = flatItems.map((item, index) => ({
             combo: `Alt+${index + 1}`,
             action: () => handleTabChange(item.id),
         }));
@@ -152,7 +171,7 @@ export function OptionsContent() {
             { combo: '?', action: () => setShortcutsAsideOpen((open) => !open) },
             { combo: 'Escape', action: handleEscape, allowInTypingTarget: false },
         ];
-    }, [sidebarItems, handleTabChange, focusActiveSearch, handleEscape]);
+    }, [sidebarSections, handleTabChange, focusActiveSearch, handleEscape]);
 
     useKeyboardShortcuts(shortcuts);
 
@@ -175,7 +194,7 @@ export function OptionsContent() {
                 onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
                 activeItem={currentTab}
                 onItemClick={handleTabChange}
-                items={sidebarItems}
+                sections={sidebarSections}
                 headerContent={<OptionsHeader />}
                 headerCollapsedContent={<OptionsHeaderCollapsed />}
                 showFooter={true}
