@@ -5,13 +5,12 @@ import { logger } from './logger.js';
 import { getActiveScopedItems, getActiveScopedItemsSync } from './workspaceContext.js';
 
 /**
- * Utilitaires pour les settings utilisables dans tous les contextes
- * (background, content scripts, popup, options).
+ * Settings utilities usable from all contexts (background, content scripts,
+ * popup, options).
  *
- * Tous les accès passent par `getActiveScopedItems()` pour cibler le workspace
- * actif. En l'absence d'initialisation explicite (ex. tests unitaires), les
- * items résolvent vers le workspace par défaut, qui réutilise les clés
- * legacy non-préfixées.
+ * All accesses go through `getActiveScopedItems()` to target the active
+ * workspace. Without explicit initialization (e.g. in unit tests), items
+ * resolve to the default workspace, which reuses the legacy unprefixed keys.
  */
 
 export async function getSettings(): Promise<AppSettings> {

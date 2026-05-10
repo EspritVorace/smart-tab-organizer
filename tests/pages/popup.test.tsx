@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
-// ── Mocks (hoissés avant les imports) ──────────────────────────────────────
+// Mocks (hoisted before the imports).
 
 vi.mock('wxt/browser', () => ({
   browser: {
@@ -37,7 +37,7 @@ vi.mock('../../src/components/UI/PopupProfilesList/PopupProfilesList', () => ({
   PopupProfilesList: () => null,
 }));
 
-// ── Imports après mocks ───────────────────────────────────────────────────
+// Imports after the mocks.
 
 import { browser } from 'wxt/browser';
 import { useSettings } from '../../src/hooks/useSettings';
@@ -71,7 +71,7 @@ describe('PopupApp rendu', () => {
     expect(screen.getByTestId('popup-header')).toBeInTheDocument();
   });
 
-  it('affiche SettingsToggles sans règles (hasRules=false)', () => {
+  it('renders SettingsToggles without rules (hasRules=false)', () => {
     mockedUseSettings.mockReturnValue({
       settings: { ...defaultSettings, domainRules: [] },
       isLoaded: true,
@@ -83,7 +83,7 @@ describe('PopupApp rendu', () => {
     expect(screen.getByRole('button', { name: 'popupGoToRules' })).toBeInTheDocument();
   });
 
-  it('affiche SettingsToggles avec règles (hasRules=true)', () => {
+  it('renders SettingsToggles with rules (hasRules=true)', () => {
     mockedUseSettings.mockReturnValue({
       settings: { ...defaultSettings, domainRules: [{ id: '1' }] },
       isLoaded: true,
@@ -127,7 +127,7 @@ describe('openRulesPage', () => {
     vi.spyOn(window, 'close').mockImplementation(() => {});
   });
 
-  it("crée un nouvel onglet si aucun onglet n'est ouvert, ou met à jour l'onglet existant", async () => {
+  it('creates a new tab when none is open, otherwise updates the existing tab', async () => {
     // Scenario 1: no existing options tab -> creates a new one
     mockedTabsQuery.mockResolvedValue([]);
     const { unmount } = render(<PopupApp />);

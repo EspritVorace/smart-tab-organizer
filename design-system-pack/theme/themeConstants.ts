@@ -8,7 +8,7 @@ export const FEATURE_THEMES = {
   SESSIONS: 'indigo'
 } as const;
 
-// Couleurs de base par fonctionnalité
+// Base color per feature.
 export const FEATURE_BASE_COLORS = {
   DOMAIN_RULES: 'indigo',
   REGEX_PRESETS: 'indigo',

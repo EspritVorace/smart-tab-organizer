@@ -22,7 +22,7 @@ describe('mountExtensionApp', () => {
     }
   });
 
-  it('monte un élément React dans le container', async () => {
+  it('mounts a React element into the container', async () => {
     mountExtensionApp(
       'test-mount-root',
       React.createElement('div', { 'data-testid': 'mounted-content' }, 'hello'),
@@ -31,11 +31,11 @@ describe('mountExtensionApp', () => {
     expect(document.getElementById('test-mount-root')?.querySelector('[data-testid="mounted-content"]')).toBeTruthy();
   });
 
-  it('log une erreur et ne lance pas si le container est absent', () => {
+  it('logs an error and does not throw when the container is missing', () => {
     expect(() => mountExtensionApp('nonexistent-id', React.createElement('div'))).not.toThrow();
   });
 
-  it("ne lance pas même si browser.i18n.getUILanguage n'est pas disponible", () => {
+  it('does not throw when browser.i18n.getUILanguage is unavailable', () => {
     expect(() => mountExtensionApp('test-mount-root', React.createElement('div'))).not.toThrow();
   });
 });

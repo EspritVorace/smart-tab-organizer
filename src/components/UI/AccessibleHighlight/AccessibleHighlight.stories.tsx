@@ -55,13 +55,13 @@ export const AccessibleHighlightNoMatch: Story = {
 
 export const AccessibleHighlightWithClassName: Story = {
   args: {
-    text: 'Visual Studio Code — Editing evolved',
+    text: 'Visual Studio Code: editing evolved',
     searchTerm: 'code',
     className: 'rt-Text',
   },
 };
 
-/** "etude" trouve "étude", "e" trouve "é" — insensible aux accents dans les deux sens */
+/** "etude" matches "étude", "e" matches "é": accent-insensitive in both directions. */
 export const AccessibleHighlightAccentFolding: Story = {
   args: {
     text: 'Répertoire des règles de déduplication',
@@ -69,7 +69,7 @@ export const AccessibleHighlightAccentFolding: Story = {
   },
 };
 
-/** La recherche elle-même peut contenir des accents et trouver une version sans accent */
+/** The search term itself may carry accents and still find an unaccented version. */
 export const AccessibleHighlightAccentFoldingReverse: Story = {
   args: {
     text: 'Repertoire des regles de deduplication',

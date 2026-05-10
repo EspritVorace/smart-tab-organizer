@@ -9,7 +9,7 @@ describe('useStatistics', () => {
     cleanup();
   });
 
-  it('charge les statistiques par défaut', async () => {
+  it('loads the default statistics', async () => {
     const { result } = renderHook(() => useStatistics());
 
     await waitFor(() => {
@@ -19,7 +19,7 @@ describe('useStatistics', () => {
     expect(result.current.statistics).toEqual(defaultStatistics);
   });
 
-  it('charge les statistiques existantes', async () => {
+  it('loads the existing statistics', async () => {
     await fakeBrowser.storage.local.set({
       statistics: { tabGroupsCreatedCount: 5, tabsDeduplicatedCount: 10, dailyBuckets: {} },
     });
@@ -34,7 +34,7 @@ describe('useStatistics', () => {
     expect(result.current.statistics?.tabsDeduplicatedCount).toBe(10);
   });
 
-  it('réinitialise les statistiques', async () => {
+  it('resets the statistics', async () => {
     await fakeBrowser.storage.local.set({
       statistics: { tabGroupsCreatedCount: 50, tabsDeduplicatedCount: 100, dailyBuckets: {} },
     });
@@ -52,7 +52,7 @@ describe('useStatistics', () => {
     expect(result.current.statistics).toEqual(defaultStatistics);
   });
 
-  it('recharge les statistiques', async () => {
+  it('reloads the statistics', async () => {
     const { result } = renderHook(() => useStatistics());
 
     await waitFor(() => {
@@ -73,7 +73,7 @@ describe('useStatistics', () => {
     expect(result.current.statistics?.tabsDeduplicatedCount).toBe(888);
   });
 
-  it('gère les erreurs de chargement', async () => {
+  it('handles load errors', async () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     vi.spyOn(fakeBrowser.storage.local, 'get').mockRejectedValueOnce(new Error('Storage error'));
@@ -88,7 +88,7 @@ describe('useStatistics', () => {
     consoleSpy.mockRestore();
   });
 
-  it('merge avec les valeurs par défaut en cas de données partielles', async () => {
+  it('merges with default values when stored data is partial', async () => {
     await fakeBrowser.storage.local.set({
       statistics: { tabGroupsCreatedCount: 42 },
     });
@@ -105,7 +105,7 @@ describe('useStatistics', () => {
   });
 
   describe('statisticsAggregates', () => {
-    it('retourne des zéros par défaut', async () => {
+    it('returns zeros by default', async () => {
       const { result } = renderHook(() => useStatistics());
 
       await waitFor(() => {
@@ -120,7 +120,7 @@ describe('useStatistics', () => {
       expect(agg.topRules).toEqual([]);
     });
 
-    it('calcule totalGrouping et totalDedup depuis les compteurs historiques', async () => {
+    it('computes totalGrouping and totalDedup from the historical counters', async () => {
       await fakeBrowser.storage.local.set({
         statistics: { tabGroupsCreatedCount: 42, tabsDeduplicatedCount: 17, dailyBuckets: {} },
       });
@@ -135,7 +135,7 @@ describe('useStatistics', () => {
       expect(result.current.statisticsAggregates.totalDedup).toBe(17);
     });
 
-    it('parse firstUsedAt en Date', async () => {
+    it('parses firstUsedAt into a Date', async () => {
       await fakeBrowser.storage.local.set({
         statistics: {
           tabGroupsCreatedCount: 1,
@@ -154,7 +154,7 @@ describe('useStatistics', () => {
       expect(result.current.statisticsAggregates.firstUsedAt).toBeInstanceOf(Date);
     });
 
-    it("calcule thisWeek depuis les buckets du jour courant", async () => {
+    it('computes thisWeek from the current day buckets', async () => {
       const today = new Date().toISOString().slice(0, 10);
       await fakeBrowser.storage.local.set({
         statistics: {
@@ -176,7 +176,7 @@ describe('useStatistics', () => {
       expect(result.current.statisticsAggregates.thisWeek.dedup).toBe(1);
     });
 
-    it('utilise les domainRules pour les labels des topRules', async () => {
+    it('uses domainRules for the topRules labels', async () => {
       const today = new Date().toISOString().slice(0, 10);
       await fakeBrowser.storage.local.set({
         statistics: {

@@ -1,13 +1,12 @@
 /**
- * Supprime les diacritiques et met en minuscules.
- * Permet une comparaison insensible à la casse ET aux accents :
- * "etude" trouve "étude", "règle" trouve "regle".
+ * Strips diacritics and lowercases the input. Enables case- and
+ * accent-insensitive comparison: "etude" finds "étude", "règle" finds "regle".
  *
- * Fonctionne par décomposition NFD (chaque caractère précomposé devient
- * base + marque combinante) puis suppression des marques diacritiques.
- * Les indices du résultat correspondent à ceux du texte NFC d'origine,
- * car chaque caractère NFC précomposé produit exactement un caractère
- * après normalisation.
+ * Uses NFD decomposition (each precomposed character becomes base +
+ * combining mark) followed by removal of the combining diacritic marks.
+ * The resulting indices align with the original NFC text, because each
+ * precomposed NFC character produces exactly one character after
+ * normalization.
  */
 export function foldAccents(s: string): string {
   return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();

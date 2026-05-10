@@ -31,7 +31,7 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <Theme>{children}</Theme>
 );
 
-/* ─── Test data ─── */
+/* Test data */
 
 const createSampleData = (): TabTreeData => ({
   groups: [
@@ -55,7 +55,7 @@ const createEmptyData = (): TabTreeData => ({
   ungroupedTabs: [],
 });
 
-/* ─── Tests ─── */
+/* Tests */
 
 describe('TabTree', () => {
   const mockOnSelectionChange = vi.fn();
@@ -65,7 +65,7 @@ describe('TabTree', () => {
   });
 
   describe('rendering', () => {
-    it('affiche groupes, onglets, domaines et compteur d\'enfants', () => {
+    it('renders groups, tabs, domains, and the children count', () => {
       render(
         <TestWrapper>
           <TabTree
@@ -89,7 +89,7 @@ describe('TabTree', () => {
       expect(screen.getByText('(2)')).toBeInTheDocument();
     });
 
-    it('devrait afficher le compteur de sélection', () => {
+    it('renders the selection counter', () => {
       render(
         <TestWrapper>
           <TabTree
@@ -105,7 +105,7 @@ describe('TabTree', () => {
   });
 
   describe('action bar', () => {
-    it('devrait afficher "Select All" quand rien n\'est sélectionné', () => {
+    it('renders "Select All" when nothing is selected', () => {
       render(
         <TestWrapper>
           <TabTree
@@ -119,7 +119,7 @@ describe('TabTree', () => {
       expect(screen.getByText('Select All')).toBeInTheDocument();
     });
 
-    it('devrait afficher "Deselect All" quand tout est sélectionné', () => {
+    it('renders "Deselect All" when everything is selected', () => {
       render(
         <TestWrapper>
           <TabTree
@@ -133,7 +133,7 @@ describe('TabTree', () => {
       expect(screen.getByText('Deselect All')).toBeInTheDocument();
     });
 
-    it('devrait appeler onSelectionChange avec tous les IDs au clic sur Select All', () => {
+    it('calls onSelectionChange with every ID when Select All is clicked', () => {
       render(
         <TestWrapper>
           <TabTree
@@ -153,7 +153,7 @@ describe('TabTree', () => {
       expect(args.has(99)).toBe(true);
     });
 
-    it('devrait appeler onSelectionChange avec un Set vide au clic sur Deselect All', () => {
+    it('calls onSelectionChange with an empty Set when Deselect All is clicked', () => {
       render(
         <TestWrapper>
           <TabTree
@@ -174,7 +174,7 @@ describe('TabTree', () => {
   });
 
   describe('empty state', () => {
-    it('devrait gérer des données vides sans erreur', () => {
+    it('handles empty data without errors', () => {
       render(
         <TestWrapper>
           <TabTree
@@ -190,7 +190,7 @@ describe('TabTree', () => {
   });
 
   describe('accessibility', () => {
-    it('expose les rôles ARIA tree/treeitem et les aria-labels groupes/onglets', () => {
+    it('exposes the tree/treeitem ARIA roles and group/tab aria-labels', () => {
       const { container } = render(
         <TestWrapper>
           <TabTree
@@ -215,7 +215,7 @@ describe('TabTree', () => {
   });
 
   describe('maxHeight', () => {
-    it('devrait rendre un ScrollArea quand maxHeight est défini', () => {
+    it('renders a ScrollArea when maxHeight is defined', () => {
       const { container } = render(
         <TestWrapper>
           <TabTree
@@ -232,7 +232,7 @@ describe('TabTree', () => {
       expect(scrollArea).toBeInTheDocument();
     });
 
-    it('ne devrait pas rendre un ScrollArea quand maxHeight n\'est pas défini', () => {
+    it('does not render a ScrollArea when maxHeight is not defined', () => {
       const { container } = render(
         <TestWrapper>
           <TabTree
@@ -249,7 +249,7 @@ describe('TabTree', () => {
   });
 
   describe('onTabClick', () => {
-    it('devrait appeler onTabClick quand on clique sur le titre d\'un onglet', () => {
+    it('calls onTabClick when a tab title is clicked', () => {
       const mockTabClick = vi.fn();
       render(
         <TestWrapper>

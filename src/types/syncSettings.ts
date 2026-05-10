@@ -2,17 +2,16 @@ import type { DomainRule } from '@/schemas/domainRule.js';
 import { type BadgeType, type DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
 import type { RuleCategory } from '@/schemas/category.js';
 
-// Types Settings qui étendent les types Zod inférés
+// Settings types that extend the Zod-inferred types.
 export interface DomainRuleSetting extends DomainRule {
   enabled: boolean;
   badge?: BadgeType;
   groupingEnabled?: boolean;
 }
 
-// Types pour les arrays
 export type DomainRuleSettings = DomainRuleSetting[];
 
-// Interface AppSettings qui étend les types Zod inférés
+// AppSettings shape exposed to the rest of the app.
 export interface AppSettings {
   globalGroupingEnabled: boolean;
   globalDeduplicationEnabled: boolean;
@@ -25,7 +24,7 @@ export interface AppSettings {
   notifyOnDeduplication: boolean;
 }
 
-// Valeurs par défaut pour AppSettings
+// Default values for AppSettings.
 export const defaultAppSettings: AppSettings = {
   globalGroupingEnabled: true,
   globalDeduplicationEnabled: true,

@@ -8,19 +8,19 @@ import { SettingsToggles } from '../../src/components/UI/SettingsToggles/Setting
 vi.mock('../../src/utils/i18n', () => ({
   getMessage: vi.fn((key: string) => {
     const messages: Record<string, string> = {
-      badge_new: 'Nouveau',
-      badge_warning: 'Attention',
-      badge_deleted: 'Supprimé',
-      enableGrouping: 'Activer le groupage',
-      enableDeduplication: 'Activer la déduplication',
-      popupAutoGroup: 'Regroupement auto',
-      popupDedup: 'Déduplication'
+      badge_new: 'New',
+      badge_warning: 'Warning',
+      badge_deleted: 'Deleted',
+      enableGrouping: 'Enable grouping',
+      enableDeduplication: 'Enable deduplication',
+      popupAutoGroup: 'Auto-group',
+      popupDedup: 'Deduplication'
     };
     return messages[key] || key;
   })
 }));
 
-// Wrapper pour les composants Radix UI
+// Wrapper for Radix UI components.
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <Theme>{children}</Theme>
 );
@@ -31,37 +31,37 @@ describe('UI Components', () => {
   });
 
   describe('StatusBadge', () => {
-    it('devrait afficher un badge NEW en vert', () => {
+    it('renders a green NEW badge', () => {
       render(
         <TestWrapper>
           <StatusBadge type="NEW" />
         </TestWrapper>
       );
 
-      expect(screen.getByText('Nouveau')).toBeInTheDocument();
+      expect(screen.getByText('New')).toBeInTheDocument();
     });
 
-    it('devrait afficher un badge WARNING en orange', () => {
+    it('renders an orange WARNING badge', () => {
       render(
         <TestWrapper>
           <StatusBadge type="WARNING" />
         </TestWrapper>
       );
 
-      expect(screen.getByText('Attention')).toBeInTheDocument();
+      expect(screen.getByText('Warning')).toBeInTheDocument();
     });
 
-    it('devrait afficher un badge DELETED en rouge', () => {
+    it('renders a red DELETED badge', () => {
       render(
         <TestWrapper>
           <StatusBadge type="DELETED" />
         </TestWrapper>
       );
 
-      expect(screen.getByText('Supprimé')).toBeInTheDocument();
+      expect(screen.getByText('Deleted')).toBeInTheDocument();
     });
 
-    it('ne devrait rien afficher pour un type invalide', () => {
+    it('renders nothing for an invalid type', () => {
       const { container } = render(
         <TestWrapper>
           <StatusBadge type={'INVALID' as any} />
@@ -71,14 +71,14 @@ describe('UI Components', () => {
       expect(container.firstChild?.firstChild).toBeNull();
     });
 
-    it('devrait supporter différentes tailles', () => {
+    it('supports different sizes', () => {
       const { rerender } = render(
         <TestWrapper>
           <StatusBadge type="NEW" size="1" />
         </TestWrapper>
       );
 
-      expect(screen.getByText('Nouveau')).toBeInTheDocument();
+      expect(screen.getByText('New')).toBeInTheDocument();
 
       rerender(
         <TestWrapper>
@@ -86,12 +86,12 @@ describe('UI Components', () => {
         </TestWrapper>
       );
 
-      expect(screen.getByText('Nouveau')).toBeInTheDocument();
+      expect(screen.getByText('New')).toBeInTheDocument();
     });
   });
 
   describe('SettingsToggles', () => {
-    it('affiche les deux toggles en état désactivé', () => {
+    it('renders both toggles in the disabled state', () => {
       render(
         <TestWrapper>
           <SettingsToggles
@@ -102,8 +102,8 @@ describe('UI Components', () => {
       );
 
       // Short labels shown inline in the footer
-      expect(screen.getByText('Regroupement auto')).toBeInTheDocument();
-      expect(screen.getByText('Déduplication')).toBeInTheDocument();
+      expect(screen.getByText('Auto-group')).toBeInTheDocument();
+      expect(screen.getByText('Deduplication')).toBeInTheDocument();
 
       // State reflected on switches
       const switches = screen.getAllByRole('switch');
@@ -111,19 +111,19 @@ describe('UI Components', () => {
       expect(switches[1]).toHaveAttribute('data-state', 'unchecked');
     });
 
-    it('devrait afficher un skeleton en mode loading', () => {
+    it('renders a skeleton in loading mode', () => {
       const { container } = render(
         <TestWrapper>
           <SettingsToggles isLoading={true} />
         </TestWrapper>
       );
 
-      // Le skeleton utilise des divs avec data-* attributes
+      // The skeleton uses divs with data-* attributes.
       const skeletons = container.querySelectorAll('[data-state]');
-      expect(skeletons.length).toBeGreaterThanOrEqual(0); // Au moins quelques skeletons
+      expect(skeletons.length).toBeGreaterThanOrEqual(0); // at least a few skeletons
     });
 
-    it('devrait appeler onGroupingChange lors du click', () => {
+    it('calls onGroupingChange on click', () => {
       const onGroupingChange = vi.fn();
 
       render(
@@ -136,14 +136,14 @@ describe('UI Components', () => {
         </TestWrapper>
       );
 
-      // Trouver le switch pour le groupage (premier switch)
+      // Find the grouping switch (the first one).
       const switches = screen.getAllByRole('switch');
       fireEvent.click(switches[0]);
 
       expect(onGroupingChange).toHaveBeenCalledWith(true);
     });
 
-    it('devrait appeler onDeduplicationChange lors du click', () => {
+    it('calls onDeduplicationChange on click', () => {
       const onDeduplicationChange = vi.fn();
 
       render(
@@ -156,14 +156,14 @@ describe('UI Components', () => {
         </TestWrapper>
       );
 
-      // Trouver le switch pour la déduplication (deuxième switch)
+      // Find the deduplication switch (the second one).
       const switches = screen.getAllByRole('switch');
       fireEvent.click(switches[1]);
 
       expect(onDeduplicationChange).toHaveBeenCalledWith(true);
     });
 
-    it('devrait refléter l\'état activé des toggles', () => {
+    it('reflects the enabled state of the toggles', () => {
       render(
         <TestWrapper>
           <SettingsToggles

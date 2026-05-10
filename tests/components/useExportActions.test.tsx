@@ -69,7 +69,7 @@ describe('useExportActions', () => {
       });
 
     const onFinish = vi.fn();
-    const messageFactory = vi.fn((count: number) => `${count} sessions exportées`);
+    const messageFactory = vi.fn((count: number) => `${count} sessions exported`);
     const { result } = renderHook(() =>
       useExportActions({
         ...baseConfig,
@@ -83,7 +83,7 @@ describe('useExportActions', () => {
     });
 
     expect(messageFactory).toHaveBeenCalledWith(2);
-    expect(showSuccessToast).toHaveBeenCalledWith('i18n(exportTitle)', '2 sessions exportées');
+    expect(showSuccessToast).toHaveBeenCalledWith('i18n(exportTitle)', '2 sessions exported');
   });
 
   it('avale silencieusement les AbortError de la file picker', async () => {

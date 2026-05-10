@@ -79,7 +79,7 @@ describe('usePacks', () => {
     warnSpy.mockClear();
   });
 
-  it('expose seulement les packs valides + warn pour chaque rejet', () => {
+  it('exposes only valid packs and warns for each rejection', () => {
     const { result } = renderHook(() => usePacks());
 
     expect(result.current.packs).toHaveLength(1);
@@ -89,20 +89,20 @@ describe('usePacks', () => {
     expect(warnSpy).toHaveBeenCalledTimes(2);
   });
 
-  it('trie les packs par ordre de categorie puis par nom', () => {
+  it('sorts packs by category then by name', () => {
     const { result } = renderHook(() => usePacks());
     const ids = result.current.packs.map((p) => p.pack.id);
     expect(ids).toEqual(['pack-cloud']);
   });
 });
 
-describe('usePacks (catégories invalides)', () => {
+describe('usePacks (invalid categories)', () => {
   beforeEach(() => {
     warnSpy.mockClear();
     vi.resetModules();
   });
 
-  it('expose loadError quand le fichier de catégories est invalide', async () => {
+  it('exposes loadError when the categories file is invalid', async () => {
     vi.doMock('../../src/hooks/packDataSource', () => ({
       getPackSourceEntries: () => [],
       getCategoriesSource: () => ({ wrong: 'shape' }),
@@ -114,7 +114,7 @@ describe('usePacks (catégories invalides)', () => {
     expect(warnSpy).toHaveBeenCalled();
   });
 
-  it('trie deux packs partageant la même catégorie par nom', async () => {
+  it('sorts two packs that share a category by name', async () => {
     vi.doMock('../../src/hooks/packDataSource', () => ({
       getPackSourceEntries: () => [
         {
@@ -144,7 +144,7 @@ describe('usePacks (catégories invalides)', () => {
     expect(result.current.packs.map((p) => p.pack.id)).toEqual(['a-pack', 'b-pack']);
   });
 
-  it('classe en dernier les packs sans categoryId', async () => {
+  it('places packs without categoryId last', async () => {
     vi.doMock('../../src/hooks/packDataSource', () => ({
       getPackSourceEntries: () => [
         {

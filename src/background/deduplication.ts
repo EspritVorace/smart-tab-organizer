@@ -10,7 +10,7 @@ import { normalizeUrlIgnoringParams } from '@/utils/urlNormalization.js';
 import type { DomainRuleSetting, AppSettings } from '@/types/syncSettings.js';
 import type { DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
 
-// Cache pour éviter de traiter plusieurs fois le même onglet
+// Cache to avoid processing the same tab more than once.
 const processedTabs = new Set<string>();
 
 // Chrome uses -1 (TAB_GROUP_ID_NONE) to denote an ungrouped tab.
@@ -135,16 +135,13 @@ export function decideDedupDirection(
 
 export async function focusAndReloadTab(duplicateTab: Browser.tabs.Tab): Promise<void> {
     try {
-        // Activer l'onglet existant
         await browser.tabs.update(duplicateTab.id, { active: true });
 
-        // S'assurer que la fenêtre est focusée
         const dupTabWindow = await browser.windows.get(duplicateTab.windowId);
         if (!dupTabWindow.focused) {
             await browser.windows.update(duplicateTab.windowId, { focused: true });
         }
 
-        // Recharger l'onglet existant (optionnel)
         if (duplicateTab.id !== undefined) {
             try {
                 await browser.tabs.reload(duplicateTab.id);
@@ -293,7 +290,7 @@ export async function processTabForDeduplication(
     }
 }
 
-// Nettoyage périodique du cache pour éviter l'accumulation
+// Periodic cache cleanup to avoid unbounded accumulation.
 export function startPeriodicCleanup(intervalMs: number = 5 * 60 * 1000): void {
     setInterval(() => {
         clearProcessedTabsCache();

@@ -28,7 +28,7 @@ describe('ImportExportPage (portable stories)', () => {
     });
   });
 
-  it('active le bouton export-rules quand des règles existent et ouvre le dialog au clic', async () => {
+  it('enables the export-rules button when rules exist and opens the dialog on click', async () => {
     render(<ImportExportPageWithRules />);
     await waitFor(() => {
       expect(screen.getByTestId('page-import-export')).toBeInTheDocument();

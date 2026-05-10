@@ -12,7 +12,7 @@ import {
 import type { DomainRuleSetting } from '../src/types/syncSettings';
 import type { Browser } from 'wxt/browser';
 
-// Mock du module wxt/browser - doit être avant les imports
+// Mock the wxt/browser module - must run before imports.
 vi.mock('wxt/browser', () => {
   const mockTabsQuery = vi.fn();
   return {
@@ -32,7 +32,7 @@ vi.mock('wxt/browser', () => {
   };
 });
 
-// Mock des dépendances
+// Mock dependencies.
 vi.mock('../src/utils/statisticsUtils.js', () => ({
   incrementStat: vi.fn()
 }));
@@ -62,14 +62,14 @@ describe('deduplication', () => {
   });
 
   describe('isDeduplicationEnabled', () => {
-    it('devrait retourner global && deduplicateUnmatched si aucune règle', () => {
+    it('returns global && deduplicateUnmatched when no rule applies', () => {
       expect(isDeduplicationEnabled(undefined, true, true)).toBe(true);
       expect(isDeduplicationEnabled(undefined, false, true)).toBe(false);
       expect(isDeduplicationEnabled(undefined, true, false)).toBe(false);
       expect(isDeduplicationEnabled(undefined, false, false)).toBe(false);
     });
 
-    it('devrait retourner la valeur de la règle si présente, indépendamment du flag unmatched', () => {
+    it("returns the rule's value when present, independently of the unmatched flag", () => {
       const ruleEnabled: DomainRuleSetting = {
         id: '1',
         enabled: true,
@@ -96,11 +96,11 @@ describe('deduplication', () => {
   });
 
   describe('getMatchMode', () => {
-    it('devrait retourner exact par défaut sans règle', () => {
+    it('returns exact by default when no rule applies', () => {
       expect(getMatchMode(undefined)).toBe('exact');
     });
 
-    it('devrait retourner le mode de la règle', () => {
+    it("returns the rule's mode", () => {
       const ruleExact: DomainRuleSetting = {
         id: '1',
         enabled: true,
@@ -127,25 +127,25 @@ describe('deduplication', () => {
   });
 
   describe('shouldProcessTab', () => {
-    it('devrait retourner false pour une URL vide', () => {
+    it('returns false for an empty URL', () => {
       expect(shouldProcessTab('', 1)).toBe(false);
     });
 
-    it('devrait retourner false pour les URLs about:', () => {
+    it('returns false for about: URLs', () => {
       expect(shouldProcessTab('about:blank', 1)).toBe(false);
       expect(shouldProcessTab('about:newtab', 1)).toBe(false);
     });
 
-    it('devrait retourner false pour les URLs chrome:', () => {
+    it('returns false for chrome: URLs', () => {
       expect(shouldProcessTab('chrome://extensions', 1)).toBe(false);
       expect(shouldProcessTab('chrome://settings', 1)).toBe(false);
     });
 
-    it('devrait retourner true pour une URL web normale', () => {
+    it('returns true for a regular web URL', () => {
       expect(shouldProcessTab('https://example.com', 1)).toBe(true);
     });
 
-    it('devrait retourner false pour un onglet déjà traité', () => {
+    it('returns false for an already-processed tab', () => {
       expect(shouldProcessTab('https://example.com', 1)).toBe(true);
       markTabAsProcessed(1, 'https://example.com');
       expect(shouldProcessTab('https://example.com', 1)).toBe(false);
@@ -153,18 +153,18 @@ describe('deduplication', () => {
   });
 
   describe('markTabAsProcessed / clearProcessedTabsCache', () => {
-    it('devrait marquer un onglet comme traité', () => {
+    it('marks a tab as processed', () => {
       expect(shouldProcessTab('https://example.com', 1)).toBe(true);
       markTabAsProcessed(1, 'https://example.com');
       expect(shouldProcessTab('https://example.com', 1)).toBe(false);
     });
 
-    it('devrait permettre le même onglet avec une URL différente', () => {
+    it('allows the same tab with a different URL', () => {
       markTabAsProcessed(1, 'https://example.com/page1');
       expect(shouldProcessTab('https://example.com/page2', 1)).toBe(true);
     });
 
-    it('devrait effacer le cache', () => {
+    it('clears the cache', () => {
       markTabAsProcessed(1, 'https://example.com');
       clearProcessedTabsCache();
       expect(shouldProcessTab('https://example.com', 1)).toBe(true);
@@ -172,36 +172,36 @@ describe('deduplication', () => {
   });
 
   describe('isUrlMatch', () => {
-    describe('mode exact', () => {
-      it('devrait matcher des URLs identiques', () => {
+    describe('exact mode', () => {
+      it('matches identical URLs', () => {
         expect(isUrlMatch('https://example.com/page', 'https://example.com/page', 'exact')).toBe(true);
       });
 
-      it('devrait ne pas matcher des URLs différentes', () => {
+      it('does not match different URLs', () => {
         expect(isUrlMatch('https://example.com/page1', 'https://example.com/page2', 'exact')).toBe(false);
       });
 
-      it('devrait être sensible aux query params', () => {
+      it('is sensitive to query params', () => {
         expect(isUrlMatch('https://example.com/page', 'https://example.com/page?foo=bar', 'exact')).toBe(false);
       });
     });
 
-    describe('mode includes', () => {
-      it('devrait matcher si la nouvelle URL contient l\'ancienne', () => {
+    describe('includes mode', () => {
+      it('matches when the new URL contains the old one', () => {
         expect(isUrlMatch('https://example.com', 'https://example.com/page', 'includes')).toBe(true);
       });
 
-      it('devrait matcher si l\'ancienne URL contient la nouvelle', () => {
+      it('matches when the old URL contains the new one', () => {
         expect(isUrlMatch('https://example.com/page', 'https://example.com', 'includes')).toBe(true);
       });
 
-      it('devrait ne pas matcher des URLs sans inclusion', () => {
+      it('does not match URLs without containment', () => {
         expect(isUrlMatch('https://foo.com', 'https://bar.com', 'includes')).toBe(false);
       });
     });
 
-    describe('mode exact_ignore_params', () => {
-      it('devrait matcher quand seul un param ignoré diffère', () => {
+    describe('exact_ignore_params mode', () => {
+      it('matches when only an ignored param differs', () => {
         expect(
           isUrlMatch(
             'https://example.com/page?utm_source=a&ref=x',
@@ -212,7 +212,7 @@ describe('deduplication', () => {
         ).toBe(true);
       });
 
-      it('devrait matcher avec un wildcard simple', () => {
+      it('matches with a simple wildcard', () => {
         expect(
           isUrlMatch(
             'https://example.com/page?utm_source=a&utm_medium=x&keep=1',
@@ -223,7 +223,7 @@ describe('deduplication', () => {
         ).toBe(true);
       });
 
-      it('ne devrait pas matcher quand un param non ignoré diffère', () => {
+      it('does not match when a non-ignored param differs', () => {
         expect(
           isUrlMatch(
             'https://example.com/page?utm_source=a&ref=x',
@@ -234,7 +234,7 @@ describe('deduplication', () => {
         ).toBe(false);
       });
 
-      it('ne devrait pas matcher quand le path diffère', () => {
+      it('does not match when the path differs', () => {
         expect(
           isUrlMatch(
             'https://example.com/a?utm_source=a',
@@ -245,7 +245,7 @@ describe('deduplication', () => {
         ).toBe(false);
       });
 
-      it('se comporte comme exact quand aucun param ignoré fourni', () => {
+      it('behaves like exact when no ignored params are provided', () => {
         expect(
           isUrlMatch(
             'https://example.com/page?a=1',
@@ -265,16 +265,16 @@ describe('deduplication', () => {
       });
     });
 
-    describe('mode inconnu', () => {
-      it('devrait retourner false pour un mode inconnu', () => {
+    describe('unknown mode', () => {
+      it('returns false for an unknown mode', () => {
         expect(isUrlMatch('https://example.com', 'https://example.com', 'unknown')).toBe(false);
       });
     });
   });
 
   describe('findDuplicateTab', () => {
-    it('devrait trouver un onglet dupliqué avec le mode exact', async () => {
-      // Configurer les onglets simulés
+    it('finds a duplicate tab with exact mode', async () => {
+      // Configure the simulated tabs.
       vi.mocked(browser.tabs.query).mockResolvedValue([
         { id: 1, url: 'https://example.com/page', windowId: 1 },
         { id: 2, url: 'https://other.com', windowId: 1 }
@@ -286,7 +286,7 @@ describe('deduplication', () => {
       expect(duplicate?.id).toBe(1);
     });
 
-    it('devrait ne pas trouver de dupliqué si l\'ID est le même', async () => {
+    it('does not find a duplicate when the ID matches the current tab', async () => {
       vi.mocked(browser.tabs.query).mockResolvedValue([
         { id: 1, url: 'https://example.com/page', windowId: 1 }
       ] as any);
@@ -296,7 +296,7 @@ describe('deduplication', () => {
       expect(duplicate).toBeUndefined();
     });
 
-    it('devrait ne pas trouver de dupliqué si aucune URL ne matche', async () => {
+    it('does not find a duplicate when no URL matches', async () => {
       vi.mocked(browser.tabs.query).mockResolvedValue([
         { id: 1, url: 'https://other.com', windowId: 1 }
       ] as any);
@@ -306,7 +306,7 @@ describe('deduplication', () => {
       expect(duplicate).toBeUndefined();
     });
 
-    it('devrait trouver un dupliqué avec le mode includes', async () => {
+    it('finds a duplicate with includes mode', async () => {
       vi.mocked(browser.tabs.query).mockResolvedValue([
         { id: 1, url: 'https://example.com/page/subpage', windowId: 1 }
       ] as any);
@@ -317,7 +317,7 @@ describe('deduplication', () => {
       expect(duplicate?.id).toBe(1);
     });
 
-    it('devrait trouver un dupliqué en mode exact_ignore_params (wildcard)', async () => {
+    it('finds a duplicate in exact_ignore_params mode (wildcard)', async () => {
       vi.mocked(browser.tabs.query).mockResolvedValue([
         { id: 1, url: 'https://example.com/page?utm_source=newsletter&ref=home', windowId: 1 }
       ] as any);
@@ -334,7 +334,7 @@ describe('deduplication', () => {
       expect(duplicate?.id).toBe(1);
     });
 
-    it('ne devrait pas trouver de dupliqué quand un param non ignoré diffère', async () => {
+    it('does not find a duplicate when a non-ignored param differs', async () => {
       vi.mocked(browser.tabs.query).mockResolvedValue([
         { id: 1, url: 'https://example.com/page?utm_source=a&ref=home', windowId: 1 }
       ] as any);
@@ -361,84 +361,84 @@ describe('deduplication', () => {
     const newGrouped = makeTab(2, 99);
 
     describe('keep-old', () => {
-      it('garde l\'ancien quand aucun n\'est groupé', () => {
+      it('keeps the old tab when neither is grouped', () => {
         const { tabToKeep, tabToClose } = decideDedupDirection(oldUngrouped, newUngrouped, 'keep-old');
         expect(tabToKeep.id).toBe(1);
         expect(tabToClose.id).toBe(2);
       });
 
-      it('garde l\'ancien quand l\'ancien est groupé', () => {
+      it('keeps the old tab when the old tab is grouped', () => {
         const { tabToKeep } = decideDedupDirection(oldGrouped, newUngrouped, 'keep-old');
         expect(tabToKeep.id).toBe(1);
       });
 
-      it('garde l\'ancien même quand le nouveau est groupé', () => {
+      it('keeps the old tab even when the new tab is grouped', () => {
         const { tabToKeep } = decideDedupDirection(oldUngrouped, newGrouped, 'keep-old');
         expect(tabToKeep.id).toBe(1);
       });
     });
 
     describe('keep-new', () => {
-      it('garde le nouveau quand aucun n\'est groupé', () => {
+      it('keeps the new tab when neither is grouped', () => {
         const { tabToKeep, tabToClose } = decideDedupDirection(oldUngrouped, newUngrouped, 'keep-new');
         expect(tabToKeep.id).toBe(2);
         expect(tabToClose.id).toBe(1);
       });
 
-      it('garde le nouveau même quand l\'ancien est groupé', () => {
+      it('keeps the new tab even when the old tab is grouped', () => {
         const { tabToKeep } = decideDedupDirection(oldGrouped, newUngrouped, 'keep-new');
         expect(tabToKeep.id).toBe(2);
       });
 
-      it('garde le nouveau quand le nouveau est groupé', () => {
+      it('keeps the new tab when the new tab is grouped', () => {
         const { tabToKeep } = decideDedupDirection(oldUngrouped, newGrouped, 'keep-new');
         expect(tabToKeep.id).toBe(2);
       });
     });
 
     describe('keep-grouped', () => {
-      it('garde celui qui est groupé (ancien groupé)', () => {
+      it('keeps whichever tab is grouped (old grouped)', () => {
         const { tabToKeep, tabToClose } = decideDedupDirection(oldGrouped, newUngrouped, 'keep-grouped');
         expect(tabToKeep.id).toBe(1);
         expect(tabToClose.id).toBe(2);
       });
 
-      it('garde celui qui est groupé (nouveau groupé)', () => {
+      it('keeps whichever tab is grouped (new grouped)', () => {
         const { tabToKeep, tabToClose } = decideDedupDirection(oldUngrouped, newGrouped, 'keep-grouped');
         expect(tabToKeep.id).toBe(2);
         expect(tabToClose.id).toBe(1);
       });
 
-      it('retombe sur keep-old quand aucun n\'est groupé', () => {
+      it('falls back to keep-old when neither is grouped', () => {
         const { tabToKeep } = decideDedupDirection(oldUngrouped, newUngrouped, 'keep-grouped');
         expect(tabToKeep.id).toBe(1);
       });
 
-      it('retombe sur keep-old quand les deux sont groupés', () => {
+      it('falls back to keep-old when both are grouped', () => {
         const { tabToKeep } = decideDedupDirection(oldGrouped, newGrouped, 'keep-grouped');
         expect(tabToKeep.id).toBe(1);
       });
     });
 
     describe('keep-grouped-or-new', () => {
-      it('garde celui qui est groupé (ancien groupé)', () => {
+      it('keeps whichever tab is grouped (old grouped)', () => {
         const { tabToKeep, tabToClose } = decideDedupDirection(oldGrouped, newUngrouped, 'keep-grouped-or-new');
         expect(tabToKeep.id).toBe(1);
         expect(tabToClose.id).toBe(2);
       });
 
-      it('garde celui qui est groupé (nouveau groupé)', () => {
+      it('keeps whichever tab is grouped (new grouped)', () => {
         const { tabToKeep, tabToClose } = decideDedupDirection(oldUngrouped, newGrouped, 'keep-grouped-or-new');
         expect(tabToKeep.id).toBe(2);
         expect(tabToClose.id).toBe(1);
       });
 
-      it('retombe sur keep-new quand aucun n\'est groupé', () => {
+      it('falls back to keep-new when neither is grouped', () => {
         const { tabToKeep } = decideDedupDirection(oldUngrouped, newUngrouped, 'keep-grouped-or-new');
         expect(tabToKeep.id).toBe(2);
       });
 
-      it('retombe sur keep-new quand les deux sont groupés', () => {
+      it('falls back to keep-new when both are grouped', () => {
         const { tabToKeep } = decideDedupDirection(oldGrouped, newGrouped, 'keep-grouped-or-new');
         expect(tabToKeep.id).toBe(2);
       });

@@ -1,101 +1,101 @@
-# Audit : Focus initial des dialogues
+# Audit: initial focus of dialogs
 
-Date : 2026-05-05  
-Branche : `claude/dialog-initial-focus-6R6oa`
+Date: 2026-05-05
+Branch: `claude/dialog-initial-focus-6R6oa`
 
-## Résumé
+## Summary
 
-15 dialogues identifiés dans l'extension. 5 ont déjà un focus management correct (custom `onOpenAutoFocus` ou `data-autofocus`). 10 nécessitent une action.
+15 dialogs identified in the extension. 5 already have correct focus management (custom `onOpenAutoFocus` or `data-autofocus`). 10 need an action.
 
-Le problème principal : `DialogShell.defaultOnOpenAutoFocus` ne fait rien quand aucun `[data-autofocus]` n'est présent. Radix donne alors le focus à la croix de fermeture (premier élément focusable du DOM). Appuyer sur `Enter` immédiatement après l'ouverture ferme le dialogue.
-
----
-
-## Inventaire complet
-
-### Catégorie A : `DialogShell` / `WizardModal`
-
-| # | Composant | Fichier | Type WAI-ARIA | Focus actuel | Cible recommandée | `data-autofocus` ? | `onOpenAutoFocus` custom ? | Action | Risque |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | DialogShell (base) | `src/components/UI/DialogShell/DialogShell.tsx` | Base | Croix si aucun `[data-autofocus]` | Titre (fallback) | N/A | Oui (defaultOnOpenAutoFocus) | Renforcer fallback vers titre (tabIndex=-1) | Faible |
-| 2 | WorkspaceFormDialog | `src/components/UI/Workspace/WorkspaceFormDialog.tsx` | Formulaire (création/édition workspace) | Input nom (Radix default : premier focusable dans Dialog.Content = probablement input car croix absente) | Input nom (`#workspace-form-name`) | Non | Non | Migrer vers DialogShell + `data-autofocus` sur input | Faible |
-| 3 | SessionEditDialog | `src/components/Core/Session/SessionEditDialog.tsx` | Formulaire (édition session) | Input nom (`#session-edit-name`) | Input nom | Non | Oui (target `#session-edit-name`) | Vérifier uniquement : OK | Faible |
-| 4 | RestoreWizard step 0 | `src/components/UI/SessionWizards/RestoreWizard.tsx` | Wizard | Bouton Restaurer | Bouton Restaurer | Oui (sur le bouton) | Non | OK. Ajouter `data-autofocus` au step 1 | Faible |
-| 5 | SnapshotWizard | `src/components/UI/SessionWizards/SnapshotWizard.tsx` | Wizard (capture session) | Input nom session | Input nom | Non | Oui (target `input[aria-label]`) | Vérifier uniquement : OK | Faible |
-| 6 | RuleWizardModal | `src/components/Core/DomainRule/RuleWizardModal.tsx` | Wizard multi-étapes (règle domaine) | Input label | Input label | Non | Oui (target `input[name="label"]`) | Vérifier uniquement : OK | Faible |
-| 7 | ConfigEditModal | `src/components/Core/DomainRule/ConfigEditModal.tsx` | Formulaire (config règle) | Croix (fallback Radix, aucun data-autofocus) | Titre (nouveau fallback DialogShell) | Non | Non | Fallback titre s'appliquera après Lot 1 | Faible |
-| 8 | ImportWorkspaceDialog | `src/components/UI/Workspace/ImportWorkspaceDialog.tsx` | Wizard (import workspace) | Croix (fallback Radix) | Source textarea ou premier input step 0 | Non | Non | Ajouter `data-autofocus` sur premier champ | Faible |
-| 9 | ExportWorkspaceDialog | `src/components/UI/Workspace/ExportWorkspaceDialog.tsx` | Wizard (export workspace) | Croix (fallback Radix) | Titre (fallback - contenu principalement informatif) | Non | Non | Fallback titre s'appliquera après Lot 1 | Faible |
-| 10 | ImportSessionsWizard / ExportSessionsWizard | `src/components/UI/ImportExportWizards/` | Wizard (import/export sessions et règles) | Croix (fallback Radix) | Titre (fallback) ou premier champ | Non | Non | Fallback titre s'appliquera après Lot 1 | Faible |
-
-### Catégorie B : `AlertDialog.Root` direct
-
-| # | Composant | Fichier | Type WAI-ARIA | Focus actuel | Cible recommandée | `data-autofocus` ? | `onOpenAutoFocus` custom ? | Action | Risque |
-|---|---|---|---|---|---|---|---|---|---|
-| 11 | ConfirmDialog | `src/components/UI/ConfirmDialog/ConfirmDialog.tsx` | Confirmation destructive (rouge) | Bouton Annuler (Radix AlertDialog default : premier focusable) | Bouton Annuler (explicite) | Non | Non | `data-autofocus` + `focusAutoFocusTarget` | Faible |
-| 12 | WorkspaceDeleteConfirmDialog | `src/components/UI/Workspace/WorkspaceDeleteConfirmDialog.tsx` | Destructif avec input obligatoire | Premier élément focusable (TextField ou Cancel) | Input saisie nom workspace | Non | Non | `data-autofocus` sur TextField + `focusAutoFocusTarget` | Faible |
-| 13 | AlertDialogShell | `src/components/Core/TabTree/AlertDialogShell.tsx` | Confirmation destructive 3-boutons | Bouton Annuler (Radix default) | Bouton Annuler (explicite) | Non | Non | `data-autofocus` + `focusAutoFocusTarget` | Faible |
-| 14 | SessionEditDialog sub-AlertDialog | `src/components/Core/Session/SessionEditDialog.tsx` (lignes 229-248) | Confirmation destructive (quitter sans sauver) | Premier élément focusable | Bouton Annuler | Non | Non | `data-autofocus` + `focusAutoFocusTarget` | Faible |
-
-### Catégorie C : `Dialog.Root` direct (hors DialogShell)
-
-| # | Composant | Fichier | Type WAI-ARIA | Focus actuel | Cible recommandée | `data-autofocus` ? | `onOpenAutoFocus` custom ? | Action | Risque |
-|---|---|---|---|---|---|---|---|---|---|
-| 15 | ShortcutsDrawer | `src/components/UI/ShortcutsPanel/ShortcutsDrawer.tsx` | Panneau navigation/aide (modal) | Premier trigger ouvert dans ShortcutsContent (via `focusFirstOpenTrigger`) | Premier trigger (comportement OK) | Non | Oui (requestAnimationFrame + document.querySelector fragile) | Harmoniser : remplacer `document.querySelector` par `e.currentTarget` | Faible |
+The main issue: `DialogShell.defaultOnOpenAutoFocus` does nothing when no `[data-autofocus]` element is present. Radix then gives focus to the close cross (the first focusable element of the DOM). Pressing `Enter` immediately after opening closes the dialog.
 
 ---
 
-## État détaillé par composant
+## Full inventory
+
+### Category A: `DialogShell` / `WizardModal`
+
+| # | Component | File | WAI-ARIA type | Current focus | Recommended target | `data-autofocus`? | Custom `onOpenAutoFocus`? | Action | Risk |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | DialogShell (base) | `src/components/UI/DialogShell/DialogShell.tsx` | Base | Cross when no `[data-autofocus]` | Title (fallback) | N/A | Yes (defaultOnOpenAutoFocus) | Strengthen fallback to the title (tabIndex=-1) | Low |
+| 2 | WorkspaceFormDialog | `src/components/UI/Workspace/WorkspaceFormDialog.tsx` | Form (workspace create/edit) | Name input (Radix default: first focusable in Dialog.Content = likely the input since the cross is missing) | Name input (`#workspace-form-name`) | No | No | Migrate to DialogShell + `data-autofocus` on the input | Low |
+| 3 | SessionEditDialog | `src/components/Core/Session/SessionEditDialog.tsx` | Form (session edit) | Name input (`#session-edit-name`) | Name input | No | Yes (target `#session-edit-name`) | Verify only: OK | Low |
+| 4 | RestoreWizard step 0 | `src/components/UI/SessionWizards/RestoreWizard.tsx` | Wizard | Restore button | Restore button | Yes (on the button) | No | OK. Add `data-autofocus` on step 1 | Low |
+| 5 | SnapshotWizard | `src/components/UI/SessionWizards/SnapshotWizard.tsx` | Wizard (session capture) | Session name input | Name input | No | Yes (target `input[aria-label]`) | Verify only: OK | Low |
+| 6 | RuleWizardModal | `src/components/Core/DomainRule/RuleWizardModal.tsx` | Multi-step wizard (domain rule) | Label input | Label input | No | Yes (target `input[name="label"]`) | Verify only: OK | Low |
+| 7 | ConfigEditModal | `src/components/Core/DomainRule/ConfigEditModal.tsx` | Form (rule config) | Cross (Radix fallback, no data-autofocus) | Title (new DialogShell fallback) | No | No | The title fallback applies after Lot 1 | Low |
+| 8 | ImportWorkspaceDialog | `src/components/UI/Workspace/ImportWorkspaceDialog.tsx` | Wizard (workspace import) | Cross (Radix fallback) | Source textarea or first input on step 0 | No | No | Add `data-autofocus` on the first field | Low |
+| 9 | ExportWorkspaceDialog | `src/components/UI/Workspace/ExportWorkspaceDialog.tsx` | Wizard (workspace export) | Cross (Radix fallback) | Title (fallback, content is mostly informational) | No | No | The title fallback applies after Lot 1 | Low |
+| 10 | ImportSessionsWizard / ExportSessionsWizard | `src/components/UI/ImportExportWizards/` | Wizard (sessions and rules import/export) | Cross (Radix fallback) | Title (fallback) or first field | No | No | The title fallback applies after Lot 1 | Low |
+
+### Category B: `AlertDialog.Root` direct
+
+| # | Component | File | WAI-ARIA type | Current focus | Recommended target | `data-autofocus`? | Custom `onOpenAutoFocus`? | Action | Risk |
+|---|---|---|---|---|---|---|---|---|---|
+| 11 | ConfirmDialog | `src/components/UI/ConfirmDialog/ConfirmDialog.tsx` | Destructive confirmation (red) | Cancel button (Radix AlertDialog default: first focusable) | Cancel button (explicit) | No | No | `data-autofocus` + `focusAutoFocusTarget` | Low |
+| 12 | WorkspaceDeleteConfirmDialog | `src/components/UI/Workspace/WorkspaceDeleteConfirmDialog.tsx` | Destructive with required input | First focusable element (TextField or Cancel) | Workspace name input | No | No | `data-autofocus` on the TextField + `focusAutoFocusTarget` | Low |
+| 13 | AlertDialogShell | `src/components/Core/TabTree/AlertDialogShell.tsx` | 3-button destructive confirmation | Cancel button (Radix default) | Cancel button (explicit) | No | No | `data-autofocus` + `focusAutoFocusTarget` | Low |
+| 14 | SessionEditDialog sub-AlertDialog | `src/components/Core/Session/SessionEditDialog.tsx` (lines 229-248) | Destructive confirmation (leave without saving) | First focusable element | Cancel button | No | No | `data-autofocus` + `focusAutoFocusTarget` | Low |
+
+### Category C: `Dialog.Root` direct (outside DialogShell)
+
+| # | Component | File | WAI-ARIA type | Current focus | Recommended target | `data-autofocus`? | Custom `onOpenAutoFocus`? | Action | Risk |
+|---|---|---|---|---|---|---|---|---|---|
+| 15 | ShortcutsDrawer | `src/components/UI/ShortcutsPanel/ShortcutsDrawer.tsx` | Navigation/help panel (modal) | First open trigger inside ShortcutsContent (via `focusFirstOpenTrigger`) | First trigger (behavior OK) | No | Yes (requestAnimationFrame + fragile document.querySelector) | Harmonize: replace `document.querySelector` with `e.currentTarget` | Low |
+
+---
+
+## Detailed status per component
 
 ### 1. DialogShell
-- **Problème :** `defaultOnOpenAutoFocus` retombe sur le comportement Radix (croix) quand aucun `[data-autofocus]` n'est présent.
-- **Correction :** Ajouter `tabIndex={-1}` et `data-dialog-title` sur `Dialog.Title`. Modifier le fallback pour cibler `[data-dialog-title]` avant de laisser Radix agir.
+- **Issue:** `defaultOnOpenAutoFocus` falls back to the Radix behavior (cross) when no `[data-autofocus]` is present.
+- **Fix:** Add `tabIndex={-1}` and `data-dialog-title` on `Dialog.Title`. Update the fallback to target `[data-dialog-title]` before letting Radix act.
 
 ### 2. WorkspaceFormDialog
-- **Problème :** Utilise `Dialog.Root` directement, pas `DialogShell`. Pas de `onOpenAutoFocus`. Le premier élément focusable est probablement l'input nom (pas de DialogCloseButton ici), mais c'est non garanti et non documenté.
-- **Correction :** Migrer vers `DialogShell`. Ajouter `data-autofocus` sur l'input nom.
+- **Issue:** Uses `Dialog.Root` directly, not `DialogShell`. No `onOpenAutoFocus`. The first focusable element is likely the name input (no DialogCloseButton here), but it is not guaranteed nor documented.
+- **Fix:** Migrate to `DialogShell`. Add `data-autofocus` on the name input.
 
 ### 11. ConfirmDialog
-- **Problème :** Pas de `onOpenAutoFocus`. Radix AlertDialog focase le premier focusable (Cancel en général), mais c'est implicite et non garanti si la structure change.
-- **Correction :** Rendre le comportement explicite avec `data-autofocus` + `focusAutoFocusTarget`.
+- **Issue:** No `onOpenAutoFocus`. Radix AlertDialog focuses the first focusable element (usually Cancel), but that is implicit and not guaranteed if the structure changes.
+- **Fix:** Make the behavior explicit with `data-autofocus` + `focusAutoFocusTarget`.
 
 ### 12. WorkspaceDeleteConfirmDialog
-- **Problème :** Pas de `onOpenAutoFocus`. L'input de saisie suit le titre et la description dans le DOM, avant les boutons. Radix pourrait focaliser un élément imprévu.
-- **Correction :** `data-autofocus` sur l'input + `focusAutoFocusTarget`. Justification : le bouton Confirmer est disabled jusqu'à la saisie correcte, donc aucun risque.
+- **Issue:** No `onOpenAutoFocus`. The input follows the title and the description in the DOM, before the buttons. Radix could focus an unexpected element.
+- **Fix:** `data-autofocus` on the input + `focusAutoFocusTarget`. Rationale: the Confirm button is disabled until the correct text is typed, so there is no risk.
 
 ### 13. AlertDialogShell
-- **Problème :** Pas de `onOpenAutoFocus`. Trois boutons : Cancel, SoftAction, DestructiveAction. Radix focalise Cancel (premier), OK par défaut mais implicite.
-- **Correction :** Rendre explicite avec `data-autofocus` + `focusAutoFocusTarget`.
+- **Issue:** No `onOpenAutoFocus`. Three buttons: Cancel, SoftAction, DestructiveAction. Radix focuses Cancel (first), OK by default but implicit.
+- **Fix:** Make it explicit with `data-autofocus` + `focusAutoFocusTarget`.
 
 ### 14. SessionEditDialog sub-AlertDialog
-- **Problème :** AlertDialog imbriqué "unsaved changes". Pas de `onOpenAutoFocus`. Boutons : Cancel, Leave (rouge).
-- **Correction :** `data-autofocus` sur Cancel + `focusAutoFocusTarget`.
+- **Issue:** Nested "unsaved changes" AlertDialog. No `onOpenAutoFocus`. Buttons: Cancel, Leave (red).
+- **Fix:** `data-autofocus` on Cancel + `focusAutoFocusTarget`.
 
 ### 15. ShortcutsDrawer
-- **Problème :** `document.querySelector('[data-testid="shortcuts-drawer"]')` est fragile (pourrait sélectionner un mauvais élément si plusieurs instances). Comportement fonctionnel mais non robuste.
-- **Correction :** Remplacer par `e.currentTarget as HTMLElement`.
+- **Issue:** `document.querySelector('[data-testid="shortcuts-drawer"]')` is fragile (it could match the wrong element if multiple instances exist). Functional but not robust.
+- **Fix:** Replace with `e.currentTarget as HTMLElement`.
 
 ---
 
-## Analyse des risques sur les tests E2E existants
+## Risk analysis on existing E2E tests
 
-| Test | Fichier | Interaction concernée | Impact |
+| Test | File | Interaction | Impact |
 |---|---|---|---|
-| "Escape closes the wizard modal" | `tests/e2e/rule-wizard.spec.ts` | Presse Escape après ouverture | Aucun : Escape != Enter |
-| `urlInput.press('Enter')` | `tests/e2e/session-editor.spec.ts` | Enter dans un input à l'intérieur du dialogue | Aucun : focus déjà sur l'input |
-| `nameInput.press('Enter')` | `tests/e2e/session-editor.spec.ts` | Enter dans un input group rename | Aucun : focus déjà sur l'input |
+| "Escape closes the wizard modal" | `tests/e2e/rule-wizard.spec.ts` | Presses Escape after opening | None: Escape != Enter |
+| `urlInput.press('Enter')` | `tests/e2e/session-editor.spec.ts` | Enter inside an input within the dialog | None: focus is already on the input |
+| `nameInput.press('Enter')` | `tests/e2e/session-editor.spec.ts` | Enter inside a group-rename input | None: focus is already on the input |
 
-Aucune spec existante ne s'appuie sur le focus initial sur la croix. Aucune correction requise sur les specs existantes.
+No existing spec relies on the initial focus being on the cross. No fix is required on the existing specs.
 
 ---
 
-## Plan d'action (lots)
+## Action plan (batches)
 
-| Lot | Description | Fichiers modifiés |
+| Batch | Description | Files modified |
 |---|---|---|
-| Lot 1 | Renforcer DialogShell fallback vers titre | `DialogShell.tsx`, `DialogShell.stories.tsx` (nouveau) |
-| Lot 2 | Créer `focusAutoFocusTarget` utilitaire | `autoFocusHandler.ts` (nouveau), `DialogShell/index.ts` |
-| Lot 3 | AlertDialogs sans focus management | `ConfirmDialog.tsx`, `AlertDialogShell.tsx`, `WorkspaceDeleteConfirmDialog.tsx`, `SessionEditDialog.tsx` |
+| Lot 1 | Strengthen DialogShell fallback to the title | `DialogShell.tsx`, `DialogShell.stories.tsx` (new) |
+| Lot 2 | Create `focusAutoFocusTarget` helper | `autoFocusHandler.ts` (new), `DialogShell/index.ts` |
+| Lot 3 | AlertDialogs without focus management | `ConfirmDialog.tsx`, `AlertDialogShell.tsx`, `WorkspaceDeleteConfirmDialog.tsx`, `SessionEditDialog.tsx` |
 | Lot 4 | Forms + WorkspaceFormDialog migration + ShortcutsDrawer | `WorkspaceFormDialog.tsx`, `ConfigEditModal.tsx`, `RestoreWizard.tsx`, `ImportWorkspaceDialog.tsx`, `ShortcutsDrawer.tsx` |
-| Lot 5 | Stories + test E2E | `DialogShell.stories.tsx`, `ConfirmDialog.stories.tsx`, `AlertDialogShell.stories.tsx`, `dialog-initial-focus.spec.ts` |
+| Lot 5 | Stories + E2E test | `DialogShell.stories.tsx`, `ConfirmDialog.stories.tsx`, `AlertDialogShell.stories.tsx`, `dialog-initial-focus.spec.ts` |
 | Lot 6 | User story US-A11Y001 | `user-stories/US-A11Y-focus-dialog.md` |

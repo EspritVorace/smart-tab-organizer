@@ -1,166 +1,166 @@
-# User Stories — Domaine D : Déduplication automatique d'onglets
+# User Stories - Domain D: Automatic tab deduplication
 
-> Comportements testés dans `tests/e2e/deduplication.spec.ts` non couverts par les US existantes (US-S001→S008, US-E001→E002, US-P001→P004, US-PO001→PO002, US-W001, US-O001).
-
----
-
-## US-D001 — Activation globale de la déduplication
-
-**En tant qu'** utilisateur de l'extension,
-**je veux** pouvoir activer ou désactiver la déduplication automatique de façon globale,
-**afin de** contrôler si les onglets en double sont fermés automatiquement.
-
-### Critères d'acceptation
-
-- [ ] Quand la déduplication globale est **activée**, ouvrir un onglet avec une URL déjà ouverte conserve un seul onglet selon la stratégie configurée (voir US-D009) et ferme l'autre.
-- [ ] Quand la déduplication globale est **désactivée**, les onglets en double sont conservés; `tabsDeduplicatedCount` reste à 0.
-- [ ] Deux onglets avec des **URLs différentes** ne sont jamais dédupliqués, même si la déduplication globale est activée.
-- [ ] Le compteur `tabsDeduplicatedCount` s'incrémente uniquement quand une déduplication a lieu.
+> Behaviors tested in `tests/e2e/deduplication.spec.ts` not covered by existing US (US-S001->S008, US-E001->E002, US-P001->P004, US-PO001->PO002, US-W001, US-O001).
 
 ---
 
-## US-D002 — Paramètres de déduplication par règle
+## US-D001 - Global deduplication toggle
 
-**En tant qu'** utilisateur,
-**je veux** que chaque règle de domaine puisse activer ou désactiver la déduplication indépendamment du paramètre global,
-**afin de** gérer finement les domaines où les doublons sont souhaitables.
+**As a** user of the extension,
+**I want** to be able to enable or disable automatic deduplication globally,
+**so that** I can control whether duplicate tabs are closed automatically.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Quand une règle a `deduplicationEnabled = true`, les onglets en double du domaine correspondant sont supprimés.
-- [ ] Quand une règle a `deduplicationEnabled = false`, les doublons du domaine correspondant sont conservés, même si le global est activé.
-- [ ] Quand une règle est **désactivée** (`enabled = false`), elle est ignorée et le paramètre global s'applique à ce domaine.
-
----
-
-## US-D003 — Mode de correspondance : exact
-
-**En tant qu'** utilisateur,
-**je veux** pouvoir configurer la déduplication en mode « exact »,
-**afin de** ne fermer un onglet que s'il pointe vers exactement la même URL.
-
-### Critères d'acceptation
-
-- [ ] En mode `exact`, deux URLs identiques (même protocole, domaine, chemin, query string, fragment) sont considérées comme doublons et l'une est fermée.
-- [ ] En mode `exact`, deux URLs qui diffèrent **uniquement par le query string** (`?param=a` vs `?param=b`) sont considérées comme distinctes et conservées.
-- [ ] En mode `exact`, deux URLs qui diffèrent **uniquement par le fragment** (`#section1` vs `#section2`) sont considérées comme distinctes et conservées.
-- [ ] Un onglet avec le même fragment qu'un onglet existant est correctement dédupliqué (`#section1` vs `#section1`).
+- [ ] When global deduplication is **enabled**, opening a tab with an already open URL keeps a single tab according to the configured strategy (see US-D009) and closes the other.
+- [ ] When global deduplication is **disabled**, duplicate tabs are kept; `tabsDeduplicatedCount` stays at 0.
+- [ ] Two tabs with **different URLs** are never deduplicated, even if global deduplication is enabled.
+- [ ] The `tabsDeduplicatedCount` counter is incremented only when a deduplication occurs.
 
 ---
 
-## US-D004 — Mode de correspondance : includes
+## US-D002 - Per-rule deduplication settings
 
-**En tant qu'** utilisateur,
-**je veux** pouvoir configurer la déduplication en mode « includes »,
-**afin de** fermer un onglet si son URL est contenue dans une URL déjà ouverte (ou vice-versa).
+**As a** user,
+**I want** each domain rule to be able to enable or disable deduplication independently of the global setting,
+**so that** I can finely manage domains where duplicates are desirable.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] En mode `includes`, si l'URL du nouvel onglet est une **sous-chaîne** de l'URL d'un onglet existant, le nouvel onglet est considéré comme doublon et fermé.
-  - Exemple : `/products/item` est contenu dans `/products/item/123` → dédupliqué.
-- [ ] En mode `includes`, deux URLs sans relation de sous-chaîne (ex. `/products` et `/about`) ne sont **pas** dédupliquées.
-
----
-
-## US-D005 — Règles multiples et domaines sans règle
-
-**En tant qu'** utilisateur,
-**je veux** que chaque domaine suive sa propre règle de déduplication,
-**afin de** maintenir des comportements différenciés selon les sites.
-
-### Critères d'acceptation
-
-- [ ] Un domaine avec une règle `deduplicationEnabled = true` voit ses doublons supprimés.
-- [ ] Un domaine avec une règle `deduplicationEnabled = false` conserve ses doublons, même si le global est activé.
-- [ ] Un domaine **sans règle** suit le paramètre `deduplicateUnmatchedDomains` tant que la déduplication globale est activée (voir US-D008).
+- [ ] When a rule has `deduplicationEnabled = true`, duplicate tabs of the matching domain are removed.
+- [ ] When a rule has `deduplicationEnabled = false`, duplicates of the matching domain are kept, even if global is enabled.
+- [ ] When a rule is **disabled** (`enabled = false`), it is ignored and the global setting applies to that domain.
 
 ---
 
-## US-D006 — Cas limites de la déduplication
+## US-D003 - Matching mode: exact
 
-**En tant que** développeur de l'extension,
-**je veux** que la déduplication soit robuste face aux cas limites,
-**afin de** garantir la stabilité de l'extension dans tous les scénarios.
+**As a** user,
+**I want** to be able to configure deduplication in "exact" mode,
+**so that** a tab is closed only if it points to exactly the same URL.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Les onglets avec des schémas spéciaux (`about:`, `chrome:`, `chrome-extension:`) ne provoquent pas de crash et sont ignorés par la déduplication.
-- [ ] Quand plusieurs onglets en double sont créés rapidement en parallèle, au moins quelques-uns sont dédupliqués (`tabsDeduplicatedCount > 0`).
-- [ ] Un filtre de domaine ciblant un sous-domaine (ex. `www.example.com`) matche correctement les URLs de ce sous-domaine.
-
----
-
-## US-D007 — Statistiques de déduplication
-
-**En tant qu'** utilisateur,
-**je veux** que le compteur de déduplications reflète précisément le nombre d'onglets fermés,
-**afin de** mesurer l'utilité de la fonctionnalité.
-
-### Critères d'acceptation
-
-- [ ] `tabsDeduplicatedCount` commence à 0 après une réinitialisation des statistiques.
-- [ ] Le compteur s'incrémente de **1** exactement à chaque fermeture d'un onglet doublon.
-- [ ] Après deux déduplications successives pour la même URL, le compteur vaut 2.
+- [ ] In `exact` mode, two identical URLs (same protocol, domain, path, query string, fragment) are considered duplicates and one is closed.
+- [ ] In `exact` mode, two URLs that differ **only by the query string** (`?param=a` vs `?param=b`) are considered distinct and kept.
+- [ ] In `exact` mode, two URLs that differ **only by the fragment** (`#section1` vs `#section2`) are considered distinct and kept.
+- [ ] A tab with the same fragment as an existing tab is correctly deduplicated (`#section1` vs `#section1`).
 
 ---
 
-## US-D008 — Portée de la déduplication pour les domaines sans règle
+## US-D004 - Matching mode: includes
 
-**En tant qu'** utilisateur,
-**je veux** choisir depuis la page Options si la déduplication automatique s'applique aux onglets des sites qui ne correspondent à aucune règle de domaine,
-**afin de** limiter la déduplication aux seuls domaines que j'ai explicitement configurés.
+**As a** user,
+**I want** to be able to configure deduplication in "includes" mode,
+**so that** a tab is closed if its URL is contained in an already open URL (or vice versa).
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Un paramètre `deduplicateUnmatchedDomains` (booléen) est exposé dans la page Options, dans une section dédiée à la portée de la déduplication.
-- [ ] La valeur par défaut est `false` : les domaines sans règle ne sont pas dédupliqués automatiquement tant que l'utilisateur n'active pas le paramètre.
-- [ ] Quand `deduplicateUnmatchedDomains = false` et que la déduplication globale est activée, les onglets d'un domaine sans règle **ne sont pas** dédupliqués; `tabsDeduplicatedCount` reste inchangé pour ces URLs.
-- [ ] Quand `deduplicateUnmatchedDomains = false`, une règle de domaine avec `deduplicationEnabled = true` continue de dédupliquer ses onglets (la règle prévaut).
-- [ ] Quand la déduplication globale est désactivée, le paramètre `deduplicateUnmatchedDomains` n'a aucun effet (le kill-switch global reste prioritaire).
-- [ ] Le libellé UI précise la portée: s'applique uniquement aux sites sans règle de domaine, et les règles restent prioritaires.
+- [ ] In `includes` mode, if the new tab's URL is a **substring** of an existing tab's URL, the new tab is considered a duplicate and closed.
+  - Example: `/products/item` is contained in `/products/item/123` -> deduplicated.
+- [ ] In `includes` mode, two URLs without a substring relationship (e.g. `/products` and `/about`) are **not** deduplicated.
 
 ---
 
-## US-D009 — Stratégie "quel onglet garder lors d'une déduplication"
+## US-D005 - Multiple rules and domains without rules
 
-**En tant qu'** utilisateur,
-**je veux** choisir quel onglet survit lorsqu'un doublon est détecté,
-**afin de** préserver l'état ou l'appartenance à un groupe selon mes besoins.
+**As a** user,
+**I want** each domain to follow its own deduplication rule,
+**so that** I can maintain different behaviors per site.
 
-### Contexte
+### Acceptance criteria
 
-Historiquement, la déduplication gardait toujours l'onglet existant (le plus ancien) et fermait le nouvel onglet. Ce comportement pose problème lors d'une restauration de session : si la session sauvegardée contient un onglet **groupé** à l'URL X et qu'un onglet **non groupé** est déjà ouvert à cette URL, c'est le tab non groupé qui survit et l'appartenance au groupe restauré est perdue.
-
-### Critères d'acceptation
-
-- [ ] Un paramètre `deduplicationKeepStrategy` est exposé dans la page Options, section "Portée de la déduplication", sous forme de radio à quatre valeurs :
-  - `keep-old` : conserver l'onglet existant.
-  - `keep-new` : conserver le nouvel onglet et fermer l'existant.
-  - `keep-grouped` : conserver celui qui est dans un groupe, sinon retomber sur `keep-old`.
-  - `keep-grouped-or-new` : conserver celui qui est dans un groupe, sinon retomber sur `keep-new`.
-- [ ] La valeur par défaut est `keep-grouped-or-new` : le tab groupé est toujours protégé, et quand l'heuristique ne tranche pas (aucun ou les deux onglets groupés) on privilégie la version fraîchement chargée.
-- [ ] Le radio est désactivé visuellement quand la déduplication globale est off.
-- [ ] En mode `keep-grouped`, si les deux onglets sont groupés ou aucun, on garde l'ancien (fallback explicite).
-- [ ] En mode `keep-new`, l'onglet fermé capture son `groupId`, `title` et `index` avant fermeture ; l'action "Annuler" de la notification rouvre l'onglet et tente de le rattacher à son groupe d'origine (fallback : nouveau groupe si l'original n'existe plus).
-- [ ] Lors d'une restauration de session contenant un onglet groupé à l'URL X, si un onglet non groupé à X existe déjà dans la fenêtre et que `deduplicationKeepStrategy = 'keep-grouped'`, le tab restauré (groupé) survit et conserve son appartenance au groupe.
-- [ ] Le compteur `tabsDeduplicatedCount` s'incrémente exactement une fois par déduplication, quelle que soit la stratégie.
+- [ ] A domain with a rule `deduplicationEnabled = true` has its duplicates removed.
+- [ ] A domain with a rule `deduplicationEnabled = false` keeps its duplicates, even if global is enabled.
+- [ ] A domain **without a rule** follows the `deduplicateUnmatchedDomains` setting as long as global deduplication is enabled (see US-D008).
 
 ---
 
-## US-D — Neutralisation de la déduplication pendant la restauration de session
+## US-D006 - Deduplication edge cases
 
-**En tant qu'** utilisateur qui restaure une session,
-**je veux** que la déduplication automatique ne ferme pas les onglets fraîchement créés par la restauration,
-**afin de** retrouver intégralement le contenu de la session même lorsque des onglets conservés (épinglés, onglet hôte de la page options) partagent une URL avec un onglet de la session.
+**As a** developer of the extension,
+**I want** deduplication to be robust against edge cases,
+**so that** I can guarantee the stability of the extension in all scenarios.
 
-### Contexte
+### Acceptance criteria
 
-Le mode « Replace tabs in current window » conserve les onglets épinglés et éventuellement l'onglet hôte de la page options. Sans garde-fou, le handler de déduplication du background fermerait l'un des deux onglets partageant une URL (celui restauré ou celui conservé) dès qu'ils coexistent dans la fenêtre, faisant perdre du contenu à la session ou brisant la référence épinglée.
+- [ ] Tabs with special schemes (`about:`, `chrome:`, `chrome-extension:`) do not cause a crash and are ignored by deduplication.
+- [ ] When several duplicate tabs are created quickly in parallel, at least some are deduplicated (`tabsDeduplicatedCount > 0`).
+- [ ] A domain filter targeting a subdomain (e.g. `www.example.com`) correctly matches URLs of that subdomain.
 
-### Critères d'acceptation
+---
 
-- [ ] Avant toute création d'onglet via `restoreTabs` (cibles `current`, `new` ou `replace`), les URLs issues de la session sont envoyées au background via un message `SESSION_RESTORE_SKIP_DEDUP`.
-- [ ] Le handler background appelle `markUrlToSkipDeduplication` pour chaque URL reçue. Le TTL de 10 s du registre skip-dedup couvre la création des onglets d'une session typique.
-- [ ] Le handler de déduplication (`src/background/deduplication.ts`) consulte `shouldSkipDeduplication` avant d'agir et n'opère pas sur les URLs en sursis.
-- [ ] Cas testé : onglet épinglé à l'URL X + session contenant également X. Après « Replace tabs in current window », les deux onglets coexistent dans la fenêtre.
-- [ ] Cas testé : la page options reste ouverte après « Replace » même si la session contient une URL identique à celle de la page options.
+## US-D007 - Deduplication statistics
+
+**As a** user,
+**I want** the deduplication counter to accurately reflect the number of closed tabs,
+**so that** I can measure the usefulness of the feature.
+
+### Acceptance criteria
+
+- [ ] `tabsDeduplicatedCount` starts at 0 after a statistics reset.
+- [ ] The counter is incremented by exactly **1** each time a duplicate tab is closed.
+- [ ] After two successive deduplications for the same URL, the counter is 2.
+
+---
+
+## US-D008 - Deduplication scope for domains without a rule
+
+**As a** user,
+**I want** to choose from the Options page whether automatic deduplication applies to tabs from sites that do not match any domain rule,
+**so that** I can limit deduplication to the domains I have explicitly configured.
+
+### Acceptance criteria
+
+- [ ] A `deduplicateUnmatchedDomains` (boolean) setting is exposed in the Options page, in a section dedicated to deduplication scope.
+- [ ] The default value is `false`: domains without a rule are not deduplicated automatically until the user enables the setting.
+- [ ] When `deduplicateUnmatchedDomains = false` and global deduplication is enabled, tabs from a domain without a rule are **not** deduplicated; `tabsDeduplicatedCount` remains unchanged for these URLs.
+- [ ] When `deduplicateUnmatchedDomains = false`, a domain rule with `deduplicationEnabled = true` continues to deduplicate its tabs (the rule prevails).
+- [ ] When global deduplication is disabled, the `deduplicateUnmatchedDomains` setting has no effect (the global kill-switch remains priority).
+- [ ] The UI label states the scope: applies only to sites without a domain rule, and rules remain priority.
+
+---
+
+## US-D009 - "Which tab to keep on deduplication" strategy
+
+**As a** user,
+**I want** to choose which tab survives when a duplicate is detected,
+**so that** I can preserve state or group membership according to my needs.
+
+### Context
+
+Historically, deduplication always kept the existing tab (the older one) and closed the new tab. This behavior is problematic during a session restore: if the saved session contains a **grouped** tab at URL X and an **ungrouped** tab is already open at this URL, the ungrouped tab survives and membership in the restored group is lost.
+
+### Acceptance criteria
+
+- [ ] A `deduplicationKeepStrategy` setting is exposed in the Options page, "Deduplication scope" section, as a radio with four values:
+  - `keep-old`: keep the existing tab.
+  - `keep-new`: keep the new tab and close the existing one.
+  - `keep-grouped`: keep the one that is in a group, otherwise fall back to `keep-old`.
+  - `keep-grouped-or-new`: keep the one that is in a group, otherwise fall back to `keep-new`.
+- [ ] The default value is `keep-grouped-or-new`: the grouped tab is always protected, and when the heuristic does not decide (neither or both tabs grouped) the freshly loaded version is preferred.
+- [ ] The radio is visually disabled when global deduplication is off.
+- [ ] In `keep-grouped` mode, if both tabs are grouped or neither, the older one is kept (explicit fallback).
+- [ ] In `keep-new` mode, the closed tab captures its `groupId`, `title` and `index` before closing; the "Undo" action of the notification reopens the tab and tries to re-attach it to its original group (fallback: new group if the original no longer exists).
+- [ ] When restoring a session containing a grouped tab at URL X, if an ungrouped tab at X already exists in the window and `deduplicationKeepStrategy = 'keep-grouped'`, the restored (grouped) tab survives and keeps its group membership.
+- [ ] The `tabsDeduplicatedCount` counter is incremented exactly once per deduplication, regardless of the strategy.
+
+---
+
+## US-D - Neutralizing deduplication during session restore
+
+**As a** user restoring a session,
+**I want** automatic deduplication not to close the freshly created tabs from the restore,
+**so that** I can fully recover the session content even when kept tabs (pinned, options page host tab) share a URL with a session tab.
+
+### Context
+
+The "Replace tabs in current window" mode keeps pinned tabs and possibly the host tab of the options page. Without a guard, the background's deduplication handler would close one of the two tabs sharing a URL (either the restored one or the kept one) as soon as they coexist in the window, causing the session to lose content or breaking the pinned reference.
+
+### Acceptance criteria
+
+- [ ] Before any tab creation via `restoreTabs` (`current`, `new` or `replace` targets), URLs from the session are sent to the background via a `SESSION_RESTORE_SKIP_DEDUP` message.
+- [ ] The background handler calls `markUrlToSkipDeduplication` for each URL received. The 10s TTL of the skip-dedup registry covers the tab creation of a typical session.
+- [ ] The deduplication handler (`src/background/deduplication.ts`) consults `shouldSkipDeduplication` before acting and does not operate on URLs in reprieve.
+- [ ] Tested case: pinned tab at URL X + session also containing X. After "Replace tabs in current window", both tabs coexist in the window.
+- [ ] Tested case: the options page stays open after "Replace" even if the session contains a URL identical to that of the options page.

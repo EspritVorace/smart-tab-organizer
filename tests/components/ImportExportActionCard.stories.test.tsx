@@ -24,7 +24,7 @@ describe('ImportExportActionCard (portable stories)', () => {
 });
 
 describe('ImportExportActionCard - branches', () => {
-  it('appelle onClick quand le bouton est cliqué', () => {
+  it('calls onClick when the button is clicked', () => {
     const onClick = vi.fn();
     render(
       <Theme>

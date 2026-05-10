@@ -1,5 +1,5 @@
 /**
- * Façade hook that lets callers wire keyboard actions by registry ID. Resolves
+ * Facade hook that lets callers wire keyboard actions by registry ID. Resolves
  * each binding against `SHORTCUTS_REGISTRY` and dispatches keydown events
  * directly. Supports both simple combos (`'Mod+K'`) and ordered key sequences
  * (`['i', 'r']`) declared on a registry entry's `defaultBindings`.

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
-// ── Mocks (hoissés avant les imports) ──────────────────────────────────────
+// Mocks (hoisted before the imports).
 
 vi.mock('wxt/browser', () => ({
   browser: {
@@ -37,7 +37,7 @@ vi.mock('../../src/pages/StatisticsPage', () => ({
 vi.mock('../../src/components/UI/SettingsPage/SettingsPage', () => ({ SettingsPage: () => <div data-testid="page-settings-mock" /> }));
 vi.mock('../../src/components/UI/Toaster/Toaster', () => ({ Toaster: () => null }));
 
-// ── Imports après mocks ───────────────────────────────────────────────────
+// Imports after the mocks.
 
 import { useSettings } from '../../src/hooks/useSettings';
 import { useStatistics } from '../../src/hooks/useStatistics';
@@ -88,13 +88,13 @@ describe('OptionsApp rendu', () => {
     expect(screen.queryByTestId('options')).not.toBeInTheDocument();
   });
 
-  it('affiche la sidebar et le header quand settings est chargé', () => {
+  it('renders the sidebar and the header once settings have loaded', () => {
     render(<OptionsApp />);
     expect(screen.getByTestId('options')).toBeInTheDocument();
     expect(screen.getByTestId('options-header')).toBeInTheDocument();
   });
 
-  it('affiche la page home par défaut (currentTab=home)', () => {
+  it('renders the home page by default (currentTab=home)', () => {
     render(<OptionsApp />);
     expect(screen.getByTestId('page-home-mock')).toBeInTheDocument();
   });
@@ -131,7 +131,7 @@ describe('OptionsApp rendu', () => {
 });
 
 describe('OptionsContent callbacks', () => {
-  it('handleTabChange appelle setCurrentTab et met à jour le hash', () => {
+  it('handleTabChange calls setCurrentTab and updates the hash', () => {
     const setCurrentTab = vi.fn();
     mockedUseDeepLinking.mockReturnValue({ ...makeDeepLinking('home'), setCurrentTab });
     render(<OptionsApp />);

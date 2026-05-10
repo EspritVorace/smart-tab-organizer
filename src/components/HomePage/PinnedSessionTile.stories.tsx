@@ -4,7 +4,7 @@ import { PinnedSessionTile } from './PinnedSessionTile';
 
 const baseSession: Session = {
   id: 's1',
-  name: 'Travail courant',
+  name: 'Current work',
   createdAt: '2025-01-01T10:00:00.000Z',
   updatedAt: '2025-04-12T08:30:00.000Z',
   groups: [
@@ -61,7 +61,7 @@ export const PinnedSessionTileLongName: Story = {
     session: {
       ...baseSession,
       id: 's-long',
-      name: 'Une session avec un nom particulièrement long pour tester la troncature',
+      name: 'A session with a deliberately long name to exercise truncation',
     },
   },
 };
@@ -72,7 +72,7 @@ export const PinnedSessionTileSingleTab: Story = {
       ...baseSession,
       id: 's-single',
       groups: [],
-      ungroupedTabs: [{ id: 't1', title: 'Tab seule', url: 'https://example.com' }],
+      ungroupedTabs: [{ id: 't1', title: 'Single tab', url: 'https://example.com' }],
     },
   },
 };

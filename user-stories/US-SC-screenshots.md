@@ -1,116 +1,116 @@
-# User Stories — Domaine SC : Génération automatique de captures d'écran
+# User Stories - Domain SC: Automatic screenshot generation
 
-> Script Playwright dédié à la production de captures d'écran pour la
-> documentation et les stores (Chrome Web Store, Firefox Add-ons).
-> Basé sur l'infrastructure E2E existante (`tests/e2e/fixtures.ts`,
+> Playwright script dedicated to producing screenshots for the
+> documentation and the stores (Chrome Web Store, Firefox Add-ons).
+> Based on the existing E2E infrastructure (`tests/e2e/fixtures.ts`,
 > `tests/e2e/helpers/seed.ts`).
 
 ---
 
-## US-SC001 — Script de génération de captures d'écran multi-locale et multi-thème
+## US-SC001 - Multi-locale and multi-theme screenshot generation script
 
-**En tant que** développeur ou responsable de la publication de l'extension,
-**je veux** lancer une commande unique qui génère des captures d'écran de toutes les fonctionnalités principales dans les 3 langues et en thème clair et sombre,
-**afin de** disposer d'illustrations à jour pour la documentation, les stores et les release notes, sans avoir à les produire manuellement.
+**As a** developer or extension release manager,
+**I want** to run a single command that generates screenshots of all main features in the 3 languages and in light and dark themes,
+**so that** I have up-to-date illustrations for the documentation, the stores, and the release notes, without producing them manually.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Une commande `npm run screenshots` lance le script de génération.
-- [ ] Le script itère sur les 3 locales supportées : **en**, **fr**, **es**.
-- [ ] Pour chaque locale, l'extension est lancée via `chromium.launchPersistentContext()` avec l'argument `--lang={locale}`.
-- [ ] Pour chaque locale, les captures sont prises en **thème clair** puis en **thème sombre** (bascule via le bouton ThemeToggle de l'interface).
-- [ ] Les captures sont enregistrées dans `screenshots/{locale}/{theme}/` avec un nom de fichier descriptif (ex. `popup.png`, `grouping-rules.png`).
-- [ ] Le script réutilise les helpers de seeding existants (`seedSessions`, `addDomainRule`, etc.) pour peupler l'extension avec des données réalistes avant chaque capture.
-- [ ] Le viewport est fixé à une résolution cohérente pour toutes les captures (ex. 1280 × 800 px).
-- [ ] Le script ne plante pas si une capture échoue : l'erreur est logguée et la capture suivante est tentée.
+- [ ] An `npm run screenshots` command runs the generation script.
+- [ ] The script iterates over the 3 supported locales: **en**, **fr**, **es**.
+- [ ] For each locale, the extension is launched via `chromium.launchPersistentContext()` with the `--lang={locale}` argument.
+- [ ] For each locale, captures are taken in **light theme** then in **dark theme** (toggling via the ThemeToggle button of the interface).
+- [ ] Captures are saved into `screenshots/{locale}/{theme}/` with a descriptive filename (e.g. `popup.png`, `grouping-rules.png`).
+- [ ] The script reuses the existing seeding helpers (`seedSessions`, `addDomainRule`, etc.) to populate the extension with realistic data before each capture.
+- [ ] The viewport is set to a consistent resolution for all captures (e.g. 1280 x 800 px).
+- [ ] The script does not crash if a capture fails: the error is logged and the next capture is attempted.
 
 ---
 
-## US-SC002 — Couverture des fonctionnalités principales
+## US-SC002 - Coverage of main features
 
-**En tant que** développeur,
-**je veux** que le script capture les écrans les plus représentatifs de chaque fonctionnalité principale,
-**afin que** chaque capture illustre clairement la valeur ajoutée de la fonctionnalité.
+**As a** developer,
+**I want** the script to capture the most representative screens of each main feature,
+**so that** each capture clearly illustrates the value added by the feature.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-Les captures suivantes sont produites pour chaque combinaison locale × thème :
+The following captures are produced for every locale x theme combination:
 
 #### Popup
-- [ ] `popup.png` — Popup avec règles de domaine actives et statistiques affichées.
+- [ ] `popup.png`: Popup with active domain rules and statistics shown.
 
-#### Groupage (options → Domain Rules)
-- [ ] `grouping-rules-list.png` — Liste des règles de domaine avec plusieurs règles configurées (couleurs, filtres variés).
-- [ ] `grouping-rule-form.png` — Modale d'ajout/édition d'une règle de domaine ouverte.
+#### Grouping (options -> Domain Rules)
+- [ ] `grouping-rules-list.png`: List of domain rules with multiple configured rules (varied colors, filters).
+- [ ] `grouping-rule-form.png`: Domain rule add/edit modal open.
 
-#### Déduplication (options → Domain Rules)
-- [ ] `deduplication-toggle.png` — Section des règles avec le toggle de déduplication activé sur au moins une règle.
+#### Deduplication (options -> Domain Rules)
+- [ ] `deduplication-toggle.png`: Rules section with the deduplication toggle enabled on at least one rule.
 
-#### Sessions (options → Sessions)
-- [ ] `sessions-list.png` — Liste de sessions avec au moins 2 sessions ordinaires et 1 profil épinglé.
-- [ ] `restore-wizard-conflicts.png` — Wizard de restauration ouvert à l'étape de résolution des conflits (données simulées avec doublons et groupes en conflit).
+#### Sessions (options -> Sessions)
+- [ ] `sessions-list.png`: List of sessions with at least 2 ordinary sessions and 1 pinned profile.
+- [ ] `restore-wizard-conflicts.png`: Restore wizard open at the conflict resolution step (simulated data with duplicates and conflicting groups).
 
-#### Import / Export (options → Domain Rules)
-- [ ] `import-wizard-step1.png` — Wizard d'import à l'étape de classification des règles (nouvelles + conflictuelles + identiques).
-- [ ] `import-wizard-step2.png` — Wizard d'import à l'étape de confirmation avec résumé.
-- [ ] `export-wizard.png` — Wizard d'export à l'étape de sélection des règles.
+#### Import / Export (options -> Domain Rules)
+- [ ] `import-wizard-step1.png`: Import wizard at the rule classification step (new + conflicting + identical).
+- [ ] `import-wizard-step2.png`: Import wizard at the confirmation step with a recap.
+- [ ] `export-wizard.png`: Export wizard at the rule selection step.
 
 ---
 
-## US-SC003 — Organisation et nommage des fichiers de sortie
+## US-SC003 - Organization and naming of output files
 
-**En tant que** développeur,
-**je veux** que les captures soient organisées dans une arborescence claire,
-**afin de** les retrouver et les utiliser facilement.
+**As a** developer,
+**I want** captures to be organized in a clear tree,
+**so that** I can find and use them easily.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Structure de sortie :
+- [ ] Output structure:
   ```
   screenshots/
-  ├── en/
-  │   ├── light/
-  │   │   ├── popup.png
-  │   │   ├── grouping-rules-list.png
-  │   │   └── ...
-  │   └── dark/
-  │       ├── popup.png
-  │       └── ...
-  ├── fr/
-  │   ├── light/
-  │   └── dark/
-  └── es/
-      ├── light/
-      └── dark/
+  |-- en/
+  |   |-- light/
+  |   |   |-- popup.png
+  |   |   |-- grouping-rules-list.png
+  |   |   `-- ...
+  |   `-- dark/
+  |       |-- popup.png
+  |       `-- ...
+  |-- fr/
+  |   |-- light/
+  |   `-- dark/
+  `-- es/
+      |-- light/
+      `-- dark/
   ```
-- [ ] Le dossier `screenshots/` est créé automatiquement s'il n'existe pas.
-- [ ] Les fichiers existants sont écrasés à chaque exécution (pas d'accumulation de captures obsolètes).
-- [ ] Le dossier `screenshots/` est listé dans `.gitignore` (les captures ne sont pas versionnées).
+- [ ] The `screenshots/` folder is created automatically if it does not exist.
+- [ ] Existing files are overwritten on each run (no accumulation of stale captures).
+- [ ] The `screenshots/` folder is listed in `.gitignore` (captures are not versioned).
 
 ---
 
-## US-SC004 — Données de démonstration réalistes
+## US-SC004 - Realistic demo data
 
-**En tant que** développeur,
-**je veux** que les captures soient alimentées par des données représentatives du cas d'usage réel,
-**afin que** les illustrations soient convaincantes pour les utilisateurs potentiels.
+**As a** developer,
+**I want** captures to be fed by data representative of real usage,
+**so that** illustrations are convincing for potential users.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-#### Règles de domaine (au moins 4 règles)
-- [ ] Une règle « Google » (filtre : `google.com`, couleur : blue, groupage + déduplication activés).
-- [ ] Une règle « GitHub » (filtre : `github.com`, couleur : purple, groupage activé).
-- [ ] Une règle « YouTube » (filtre : `youtube.com`, couleur : red, groupage activé, déduplication activée).
-- [ ] Une règle « Actualités » (filtre : `lemonde.fr|lefigaro.fr`, couleur : orange, groupage activé).
+#### Domain rules (at least 4 rules)
+- [ ] A "Google" rule (filter: `google.com`, color: blue, grouping + deduplication enabled).
+- [ ] A "GitHub" rule (filter: `github.com`, color: purple, grouping enabled).
+- [ ] A "YouTube" rule (filter: `youtube.com`, color: red, grouping enabled, deduplication enabled).
+- [ ] A "News" rule (filter: `lemonde.fr|lefigaro.fr`, color: orange, grouping enabled).
 
 #### Sessions
-- [ ] Un profil épinglé « Work » avec une icône `briefcase`, contenant 2 groupes (« GitHub », « Docs ») et 3 onglets.
-- [ ] Une session ordinaire « Research » avec 1 groupe et 4 onglets.
-- [ ] Une session ordinaire « Side Project » avec 2 groupes et 5 onglets.
+- [ ] A pinned profile "Work" with a `briefcase` icon, containing 2 groups ("GitHub", "Docs") and 3 tabs.
+- [ ] An ordinary session "Research" with 1 group and 4 tabs.
+- [ ] An ordinary session "Side Project" with 2 groups and 5 tabs.
 
-#### Conflits pour le wizard de restauration
-- [ ] Au moins 2 onglets en doublon simulés (même URL déjà ouverte dans la fenêtre).
-- [ ] Au moins 1 groupe en conflit (même titre + même couleur qu'un groupe existant).
+#### Conflicts for the restore wizard
+- [ ] At least 2 simulated duplicate tabs (same URL already open in the window).
+- [ ] At least 1 conflicting group (same title + same color as an existing group).
 
 #### Import
-- [ ] JSON d'import préparé contenant : 2 nouvelles règles, 1 règle conflictuelle (même label, domainFilter différent), 1 règle identique.
+- [ ] Prepared import JSON containing: 2 new rules, 1 conflicting rule (same label, different domainFilter), 1 identical rule.

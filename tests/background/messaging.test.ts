@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-// ---- Mocks (avant les imports) -----------------------------------------------
+// ---- Mocks (before the imports) ---------------------------------------------
 
 vi.mock('wxt/browser', () => ({
   browser: {
@@ -22,7 +22,7 @@ vi.mock('../../src/utils/deduplicationSkip.js', () => ({
   markUrlToSkipDeduplication: vi.fn(),
 }));
 
-// ---- Imports après mocks -------------------------------------------------------
+// ---- Imports after the mocks ------------------------------------------------
 
 import { browser } from 'wxt/browser';
 import { markUrlToSkipDeduplication } from '../../src/utils/deduplicationSkip.js';
@@ -46,7 +46,7 @@ beforeEach(() => {
 // ---- handleMiddleClickMessage ------------------------------------------------
 
 describe('handleMiddleClickMessage', () => {
-  it('enregistre l\'URL dans middleClickedTabs et répond "received" quand sender.tab.id est présent', () => {
+  it('records the URL in middleClickedTabs and replies "received" when sender.tab.id is present', () => {
     const sendResponse = vi.fn();
     handleMiddleClickMessage(
       { type: 'MIDDLE_CLICK', url: 'https://example.com' },
@@ -58,7 +58,7 @@ describe('handleMiddleClickMessage', () => {
     expect(sendResponse).toHaveBeenCalledWith({ status: 'received' });
   });
 
-  it('répond "error" quand sender.tab est absent', () => {
+  it('replies "error" when sender.tab is missing', () => {
     const sendResponse = vi.fn();
     handleMiddleClickMessage(
       { type: 'MIDDLE_CLICK', url: 'https://example.com' },
@@ -72,7 +72,7 @@ describe('handleMiddleClickMessage', () => {
     );
   });
 
-  it('répond "error" quand sender.tab.id est absent', () => {
+  it('replies "error" when sender.tab.id is missing', () => {
     const sendResponse = vi.fn();
     handleMiddleClickMessage(
       { type: 'MIDDLE_CLICK', url: 'https://example.com' },
@@ -90,7 +90,7 @@ describe('handleMiddleClickMessage', () => {
 // ---- handleSessionRestoreSkipDedupMessage ------------------------------------
 
 describe('handleSessionRestoreSkipDedupMessage', () => {
-  it('appelle markUrlToSkipDeduplication pour chaque URL et répond "received"', () => {
+  it('calls markUrlToSkipDeduplication for each URL and replies "received"', () => {
     const sendResponse = vi.fn();
     handleSessionRestoreSkipDedupMessage(
       { type: 'SESSION_RESTORE_SKIP_DEDUP', urls: ['https://a.com', 'https://b.com'] },
@@ -106,7 +106,7 @@ describe('handleSessionRestoreSkipDedupMessage', () => {
 // ---- cleanupMiddleClickedTabsForTab ------------------------------------------
 
 describe('cleanupMiddleClickedTabsForTab', () => {
-  it('supprime les entrées correspondant au tabId donné', () => {
+  it('removes entries matching the given tabId', () => {
     middleClickedTabs.set('https://a.com', 10);
     middleClickedTabs.set('https://b.com', 20);
     middleClickedTabs.set('https://c.com', 10);
@@ -118,7 +118,7 @@ describe('cleanupMiddleClickedTabsForTab', () => {
     expect(middleClickedTabs.has('https://b.com')).toBe(true);
   });
 
-  it('ne fait rien si aucune entrée ne correspond au tabId', () => {
+  it('does nothing when no entry matches the tabId', () => {
     middleClickedTabs.set('https://a.com', 10);
     cleanupMiddleClickedTabsForTab(99);
     expect(middleClickedTabs.size).toBe(1);
@@ -128,13 +128,13 @@ describe('cleanupMiddleClickedTabsForTab', () => {
 // ---- promptForGroupName ------------------------------------------------------
 
 describe('promptForGroupName', () => {
-  it('retourne le nom trimé quand la réponse est valide', async () => {
-    mockedSendMessage.mockResolvedValueOnce({ name: '  Mon groupe  ' });
+  it('returns the trimmed name when the response is valid', async () => {
+    mockedSendMessage.mockResolvedValueOnce({ name: '  My group  ' });
     const result = await promptForGroupName('Default', 5);
-    expect(result).toBe('Mon groupe');
+    expect(result).toBe('My group');
   });
 
-  it('retourne null quand la réponse name est vide ou absent', async () => {
+  it('returns null when the response name is empty or missing', async () => {
     mockedSendMessage.mockResolvedValueOnce({ name: '   ' });
     expect(await promptForGroupName('Default', 5)).toBeNull();
 
@@ -142,7 +142,7 @@ describe('promptForGroupName', () => {
     expect(await promptForGroupName('Default', 5)).toBeNull();
   });
 
-  it('retourne null et ne lève pas d\'erreur si sendMessage rejette', async () => {
+  it('returns null and does not throw when sendMessage rejects', async () => {
     mockedSendMessage.mockRejectedValueOnce(new Error('Tab gone'));
     const result = await promptForGroupName('Default', 5);
     expect(result).toBeNull();
@@ -152,12 +152,12 @@ describe('promptForGroupName', () => {
 // ---- findMiddleClickOpener ---------------------------------------------------
 
 describe('findMiddleClickOpener', () => {
-  it('retourne null quand openerTabId est absent', () => {
+  it('returns null when openerTabId is missing', () => {
     const tab = { id: 1, url: 'https://example.com' } as any;
     expect(findMiddleClickOpener(tab)).toBeNull();
   });
 
-  it('retourne l\'openerTabId via correspondance directe et nettoie la Map', () => {
+  it('returns the openerTabId via direct lookup and clears the Map entry', () => {
     middleClickedTabs.set('https://example.com', 10);
     const tab = { id: 1, url: 'https://example.com', openerTabId: 10 } as any;
 
@@ -167,7 +167,7 @@ describe('findMiddleClickOpener', () => {
     expect(middleClickedTabs.has('https://example.com')).toBe(false);
   });
 
-  it('retourne l\'openerTabId via la recherche de secours quand l\'URL ne correspond pas directement', () => {
+  it('returns the openerTabId via the fallback lookup when the URL does not match directly', () => {
     middleClickedTabs.set('https://other-url.com', 10);
     const tab = { id: 1, url: 'https://example.com', openerTabId: 10 } as any;
 
@@ -177,14 +177,14 @@ describe('findMiddleClickOpener', () => {
     expect(middleClickedTabs.has('https://other-url.com')).toBe(false);
   });
 
-  it('retourne null si aucune entrée ne correspond à l\'openerTabId', () => {
+  it('returns null when no entry matches the openerTabId', () => {
     middleClickedTabs.set('https://other.com', 99);
     const tab = { id: 1, url: 'https://example.com', openerTabId: 10 } as any;
 
     expect(findMiddleClickOpener(tab)).toBeNull();
   });
 
-  it('utilise pendingUrl en priorité sur url pour la correspondance directe', () => {
+  it('prefers pendingUrl over url for the direct lookup', () => {
     middleClickedTabs.set('https://pending.com', 10);
     const tab = { id: 1, pendingUrl: 'https://pending.com', url: 'about:blank', openerTabId: 10 } as any;
 

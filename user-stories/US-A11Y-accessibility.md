@@ -1,68 +1,68 @@
-# User Stories — Domaine A11Y : Etat désactivé des contrôles focusables
+# User Stories - Domain A11Y: Disabled state of focusable controls
 
 ---
 
-## US-A11Y001 — Pattern `aria-disabled` sur les boutons focusables
+## US-A11Y001 - `aria-disabled` pattern on focusable buttons
 
-**En tant qu'** utilisateur naviguant au clavier ou utilisant un lecteur d'ecran,
-**je veux** que les boutons désactivés restent accessibles via la touche Tab,
-**afin de** découvrir leur existence et comprendre pourquoi je ne peux pas les activer.
+**As a** user navigating with the keyboard or using a screen reader,
+**I want** disabled buttons to remain accessible via the Tab key,
+**so that** I can discover their existence and understand why I cannot activate them.
 
-### Contexte
+### Context
 
-L'attribut HTML `disabled` retire l'élément de l'ordre de tabulation et empêche
-tout événement de focus ou de hover. Un bouton `disabled` est invisible pour un
-utilisateur de technologies d'assistance : il n'est pas annoncé, sa raison d'etre
-désactivé n'est pas découvrable, et l'utilisateur ne sait pas comment le débloquer.
+The HTML `disabled` attribute removes the element from the tab order and prevents
+any focus or hover event. A `disabled` button is invisible to assistive technology
+users: it is not announced, the reason for its disabled state is not discoverable,
+and the user does not know how to unblock it.
 
-### Critères d'acceptance
+### Acceptance criteria
 
-- Les boutons utilisant `aria-disabled="true"` restent dans l'ordre de tabulation (Tab).
-- Le lecteur d'ecran annonce l'état `disabled` via `aria-disabled`.
-- Un clic ou un appui sur Entrée/Espace sur un bouton `aria-disabled` ne déclenche aucune action.
-- La valeur CSS `cursor: not-allowed` et `opacity: 0.5` signale visuellement l'état désactivé.
+- Buttons using `aria-disabled="true"` remain in the tab order (Tab).
+- The screen reader announces the `disabled` state via `aria-disabled`.
+- A click or Enter/Space press on an `aria-disabled` button does not trigger any action.
+- The CSS values `cursor: not-allowed` and `opacity: 0.5` visually signal the disabled state.
 
-### Composants concernés
+### Affected components
 
-- `src/components/UI/AriaButton/AriaButton.tsx` : wrapper Radix Button.
-- `src/components/UI/PopupToolbar/PopupToolbar.tsx` : boutons Save, Restore, Organize.
-- `src/components/UI/SplitButton/SplitButton.tsx` : bouton primaire et chevron.
+- `src/components/UI/AriaButton/AriaButton.tsx`: Radix Button wrapper.
+- `src/components/UI/PopupToolbar/PopupToolbar.tsx`: Save, Restore, Organize buttons.
+- `src/components/UI/SplitButton/SplitButton.tsx`: primary button and chevron.
 
 ---
 
-## US-A11Y002 — Surfaçage de la raison d'un état désactivé
+## US-A11Y002 - Surfacing the reason for a disabled state
 
-**En tant qu'** utilisateur naviguant au clavier ou utilisant un lecteur d'ecran,
-**je veux** voir ou entendre pourquoi un bouton est désactivé lorsque j'y place le focus,
-**afin de** savoir quelle action effectuer pour le débloquer.
+**As a** user navigating with the keyboard or using a screen reader,
+**I want** to see or hear why a button is disabled when I place focus on it,
+**so that** I know what action to take to unblock it.
 
-### Critères d'acceptance
+### Acceptance criteria
 
-- Un Tooltip Radix s'affiche au survol souris ET au focus clavier sur un bouton `aria-disabled`.
-- Le contenu du Tooltip est fourni via la prop `disabledReason` (composants Radix) ou
-  via un wrapping conditionnel `<Tooltip>` (boutons natifs).
-- Le Tooltip ne s'affiche pas quand le bouton est désactivé pour un état transitoire
-  de chargement (ex. `isRestoring`, `isAnalyzing`).
+- A Radix Tooltip appears on mouse hover AND on keyboard focus on an `aria-disabled` button.
+- The Tooltip content is provided via the `disabledReason` prop (Radix components) or
+  via a conditional `<Tooltip>` wrapping (native buttons).
+- The Tooltip does not appear when the button is disabled due to a transient loading
+  state (e.g. `isRestoring`, `isAnalyzing`).
 
-### Exemples de messages
+### Example messages
 
-| Bouton | Message |
+| Button | Message |
 |---|---|
-| Popup Save (pas de groupe actif) | `popupSaveDisabledHint` |
-| Popup Restore (pas de sessions) | `popupRestoreDisabledHint` |
-| Wizard Restore (aucun onglet sélectionné) | `wizardRestoreNoTabsHint` |
+| Popup Save (no active group) | `popupSaveDisabledHint` |
+| Popup Restore (no sessions) | `popupRestoreDisabledHint` |
+| Wizard Restore (no tab selected) | `wizardRestoreNoTabsHint` |
 
 ---
 
-## US-A11Y003 — Compatibilité avec le mode contraste élevé
+## US-A11Y003 - Compatibility with high contrast mode
 
-**En tant qu'** utilisateur en mode Windows High Contrast ou forced-colors,
-**je veux** que les boutons `aria-disabled` restent visuellement distinguables,
-**afin de** ne pas les confondre avec des boutons actifs.
+**As a** user in Windows High Contrast or forced-colors mode,
+**I want** `aria-disabled` buttons to remain visually distinguishable,
+**so that** I do not confuse them with active buttons.
 
-### Critères d'acceptance
+### Acceptance criteria
 
-- La règle CSS `@media (forced-colors: active)` applique `border-color: GrayText`
-  et `color: GrayText` sur `[aria-disabled="true"]`.
-- Les contrôles désactivés sont visuellement distincts des contrôles actifs en mode
-  contraste élevé Windows.
+- The CSS rule `@media (forced-colors: active)` applies `border-color: GrayText`
+  and `color: GrayText` to `[aria-disabled="true"]`.
+- Disabled controls are visually distinct from active controls in Windows high
+  contrast mode.

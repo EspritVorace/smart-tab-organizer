@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { extractDomain, countTotalTabs, buildTreeViewData, chromeGroupColors } from '../../src/utils/tabTreeUtils';
 import type { TabTreeData } from '../../src/types/tabTree';
 
-/* ─── Test data factories ─── */
+/* Test data factories */
 
 const createSampleData = (): TabTreeData => ({
   groups: [
@@ -58,64 +58,64 @@ const createGroupsOnlyData = (): TabTreeData => ({
   ungroupedTabs: [],
 });
 
-/* ─── extractDomain ─── */
+/* extractDomain */
 
 describe('extractDomain', () => {
-  it('devrait extraire le hostname d\'une URL valide', () => {
+  it('extracts the hostname from a valid URL', () => {
     expect(extractDomain('https://www.example.com/page?q=1')).toBe('www.example.com');
   });
 
-  it('devrait gérer les URLs sans www', () => {
+  it('handles URLs without www', () => {
     expect(extractDomain('https://example.com/path')).toBe('example.com');
   });
 
-  it('devrait gérer les URLs avec port', () => {
+  it('handles URLs with a port', () => {
     expect(extractDomain('http://localhost:3000/api')).toBe('localhost');
   });
 
-  it('devrait gérer les URLs avec sous-domaine', () => {
+  it('handles URLs with a subdomain', () => {
     expect(extractDomain('https://mail.google.com/mail/u/0/')).toBe('mail.google.com');
   });
 
-  it('devrait retourner la chaîne brute si l\'URL est invalide', () => {
+  it('returns the raw string when the URL is invalid', () => {
     expect(extractDomain('not-a-url')).toBe('not-a-url');
   });
 
-  it('devrait retourner la chaîne brute pour une chaîne vide', () => {
+  it('returns the raw string for an empty string', () => {
     expect(extractDomain('')).toBe('');
   });
 });
 
-/* ─── countTotalTabs ─── */
+/* countTotalTabs */
 
 describe('countTotalTabs', () => {
-  it('devrait compter tous les onglets (groupés + non groupés)', () => {
+  it('counts every tab (grouped and ungrouped)', () => {
     expect(countTotalTabs(createSampleData())).toBe(5);
   });
 
-  it('devrait retourner 0 pour des données vides', () => {
+  it('returns 0 for empty data', () => {
     expect(countTotalTabs(createEmptyData())).toBe(0);
   });
 
-  it('devrait compter uniquement les onglets non groupés', () => {
+  it('counts only ungrouped tabs', () => {
     expect(countTotalTabs(createUngroupedOnlyData())).toBe(2);
   });
 
-  it('devrait compter uniquement les onglets dans les groupes', () => {
+  it('counts only tabs inside groups', () => {
     expect(countTotalTabs(createGroupsOnlyData())).toBe(2);
   });
 
-  it('ne devrait pas compter les groupes eux-mêmes', () => {
+  it('does not count groups themselves', () => {
     const data = createSampleData();
-    // 2 groups + 5 tabs → should be 5, not 7
+    // 2 groups + 5 tabs -> should be 5, not 7.
     expect(countTotalTabs(data)).toBe(5);
   });
 });
 
-/* ─── chromeGroupColors ─── */
+/* chromeGroupColors */
 
 describe('chromeGroupColors', () => {
-  it('devrait avoir les 9 couleurs Chrome', () => {
+  it('exposes the 9 Chrome colors', () => {
     const expectedColors = ['grey', 'blue', 'red', 'yellow', 'green', 'pink', 'purple', 'cyan', 'orange'];
     for (const color of expectedColors) {
       expect(chromeGroupColors[color]).toBeDefined();
@@ -124,23 +124,23 @@ describe('chromeGroupColors', () => {
   });
 });
 
-/* ─── buildTreeViewData ─── */
+/* buildTreeViewData */
 
 describe('buildTreeViewData', () => {
   describe('flatData', () => {
-    it('devrait produire un nœud racine en première position', () => {
+    it('produces a root node in the first position', () => {
       const { flatData } = buildTreeViewData(createSampleData());
       expect(flatData[0].parent).toBeNull();
       expect(flatData[0].name).toBe('');
     });
 
-    it('devrait contenir tous les nœuds (root + groupes + onglets)', () => {
+    it('contains every node (root + groups + tabs)', () => {
       const { flatData } = buildTreeViewData(createSampleData());
       // 1 root + 2 groups + 3 tabs in groups + 2 ungrouped = 8
       expect(flatData).toHaveLength(8);
     });
 
-    it('devrait marquer les groupes avec metadata.type === "group"', () => {
+    it('marks groups with metadata.type === "group"', () => {
       const { flatData } = buildTreeViewData(createSampleData());
       const groups = flatData.filter((n) => n.metadata?.type === 'group');
       expect(groups).toHaveLength(2);
@@ -148,38 +148,38 @@ describe('buildTreeViewData', () => {
       expect(groups[1].name).toBe('Documentation');
     });
 
-    it('devrait stocker la couleur du groupe dans metadata.color', () => {
+    it('stores the group color in metadata.color', () => {
       const { flatData } = buildTreeViewData(createSampleData());
       const jiraGroup = flatData.find((n) => n.name === 'Jira Tickets');
       expect(jiraGroup?.metadata?.color).toBe('red');
     });
 
-    it('devrait stocker le groupId dans metadata.groupId', () => {
+    it('stores the groupId in metadata.groupId', () => {
       const { flatData } = buildTreeViewData(createSampleData());
       const jiraGroup = flatData.find((n) => n.name === 'Jira Tickets');
       expect(jiraGroup?.metadata?.groupId).toBe(1);
     });
 
-    it('devrait marquer les onglets avec metadata.type === "tab"', () => {
+    it('marks tabs with metadata.type === "tab"', () => {
       const { flatData } = buildTreeViewData(createSampleData());
       const tabs = flatData.filter((n) => n.metadata?.type === 'tab');
       expect(tabs).toHaveLength(5);
     });
 
-    it('devrait stocker l\'URL et favIconUrl dans metadata', () => {
+    it('stores the URL and favIconUrl in metadata', () => {
       const { flatData } = buildTreeViewData(createSampleData());
       const mdn = flatData.find((n) => n.name === 'MDN Web Docs');
       expect(mdn?.metadata?.url).toBe('https://developer.mozilla.org/');
       expect(mdn?.metadata?.favIconUrl).toBe('https://developer.mozilla.org/favicon.ico');
     });
 
-    it('devrait utiliser une chaîne vide pour favIconUrl si non fourni', () => {
+    it('uses an empty string for favIconUrl when none is provided', () => {
       const { flatData } = buildTreeViewData(createSampleData());
       const claude = flatData.find((n) => n.name === 'Claude.ai');
       expect(claude?.metadata?.favIconUrl).toBe('');
     });
 
-    it('devrait placer les onglets non groupés comme enfants de la racine', () => {
+    it('places ungrouped tabs as children of the root', () => {
       const { flatData } = buildTreeViewData(createSampleData());
       const rootId = flatData[0].id;
       const rootChildren = flatData.filter((n) => n.parent === rootId);
@@ -187,7 +187,7 @@ describe('buildTreeViewData', () => {
       expect(ungroupedTabs).toHaveLength(2);
     });
 
-    it('devrait placer les onglets groupés comme enfants de leur groupe', () => {
+    it('places grouped tabs as children of their group', () => {
       const { flatData } = buildTreeViewData(createSampleData());
       const jiraGroup = flatData.find((n) => n.name === 'Jira Tickets');
       const jiraChildren = flatData.filter((n) => n.parent === jiraGroup?.id);
@@ -197,7 +197,7 @@ describe('buildTreeViewData', () => {
   });
 
   describe('ID maps', () => {
-    it('devrait créer un mapping treeIdToTabId pour tous les onglets', () => {
+    it('creates a treeIdToTabId mapping for every tab', () => {
       const { treeIdToTabId } = buildTreeViewData(createSampleData());
       expect(treeIdToTabId.size).toBe(5);
       // Values should be our business tab IDs
@@ -209,16 +209,16 @@ describe('buildTreeViewData', () => {
       expect(tabIds.has(100)).toBe(true);
     });
 
-    it('devrait créer un mapping tabIdToTreeId inverse', () => {
+    it('creates an inverse tabIdToTreeId mapping', () => {
       const { treeIdToTabId, tabIdToTreeId } = buildTreeViewData(createSampleData());
       expect(tabIdToTreeId.size).toBe(5);
-      // Round-trip: tabId → treeId → tabId should return the original
+      // Round-trip: tabId -> treeId -> tabId should return the original.
       for (const [treeId, tabId] of treeIdToTabId) {
         expect(tabIdToTreeId.get(tabId)).toBe(treeId);
       }
     });
 
-    it('devrait peupler allTabTreeIds avec les IDs internes des onglets', () => {
+    it('populates allTabTreeIds with the internal tab IDs', () => {
       const { allTabTreeIds, treeIdToTabId } = buildTreeViewData(createSampleData());
       expect(allTabTreeIds.size).toBe(5);
       // allTabTreeIds should contain the same keys as treeIdToTabId
@@ -227,7 +227,7 @@ describe('buildTreeViewData', () => {
       }
     });
 
-    it('ne devrait pas inclure les groupes dans les maps d\'IDs', () => {
+    it('does not include groups in the ID maps', () => {
       const { treeIdToTabId, flatData } = buildTreeViewData(createSampleData());
       const groupTreeIds = flatData
         .filter((n) => n.metadata?.type === 'group')
@@ -239,7 +239,7 @@ describe('buildTreeViewData', () => {
   });
 
   describe('edge cases', () => {
-    it('devrait gérer des données vides', () => {
+    it('handles empty data', () => {
       const { flatData, treeIdToTabId, tabIdToTreeId, allTabTreeIds } = buildTreeViewData(createEmptyData());
       expect(flatData).toHaveLength(1); // root only
       expect(treeIdToTabId.size).toBe(0);
@@ -247,14 +247,14 @@ describe('buildTreeViewData', () => {
       expect(allTabTreeIds.size).toBe(0);
     });
 
-    it('devrait gérer uniquement des onglets non groupés', () => {
+    it('handles ungrouped tabs only', () => {
       const { flatData, treeIdToTabId } = buildTreeViewData(createUngroupedOnlyData());
       // 1 root + 2 ungrouped tabs = 3
       expect(flatData).toHaveLength(3);
       expect(treeIdToTabId.size).toBe(2);
     });
 
-    it('devrait gérer uniquement des groupes', () => {
+    it('handles groups only', () => {
       const { flatData, treeIdToTabId } = buildTreeViewData(createGroupsOnlyData());
       // 1 root + 1 group + 2 tabs = 4
       expect(flatData).toHaveLength(4);

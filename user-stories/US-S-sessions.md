@@ -1,234 +1,234 @@
-# User Stories — Domaine S : Sessions (compléments)
+# User Stories - Domain S: Sessions (additions)
 
-> Comportements testés dans `tests/e2e/sessions.spec.ts` non couverts par les US-S001→S008 existantes.
-> Les US numérotées ci-dessous reprennent la continuité à partir de US-S009.
-
----
-
-## US-S010 — Barre d'outils et champ de recherche
-
-**En tant qu'** utilisateur sur la page Sessions,
-**je veux** disposer d'un champ de recherche et des boutons d'action dans une barre d'outils en haut de la liste,
-**afin de** filtrer rapidement mes sessions et de lancer une action sans chercher les contrôles.
-
-### Critères d'acceptation
-
-- [ ] Un champ de recherche (icône loupe) est affiché en haut de la page Sessions, à gauche de la barre d'outils.
-- [ ] Saisir du texte dans ce champ filtre la liste des sessions en temps réel par correspondance sur le nom (insensible à la casse).
-- [ ] Le bouton « Take Snapshot » est affiché à droite du champ de recherche dans la même barre d'outils.
-- [ ] En l'absence de toute session, la zone d'état vide affiche le message « No saved sessions. ».
-- [ ] Le bouton « Take Snapshot » est également visible dans la zone d'état vide.
-- [ ] Pendant la recherche, les deux sections (epinglees / normales, cf. US-S020) restent visibles mais n'affichent que les sessions correspondantes. Une section sans resultat est masquee.
+> Behaviors tested in `tests/e2e/sessions.spec.ts` not covered by the existing US-S001 to S008.
+> The US numbered below continue from US-S009.
 
 ---
 
-## US-S011 — Options de restauration dans le menu d'actions
+## US-S010 - Toolbar and search field
 
-**En tant qu'** utilisateur,
-**je veux** pouvoir restaurer une session selon différentes modalités depuis la carte de session,
-**afin de** choisir rapidement où les onglets sont ouverts sans passer par le wizard complet.
+**As a** user on the Sessions page,
+**I want** a search field and the action buttons in a toolbar at the top of the list,
+**so that** I can quickly filter my sessions and trigger an action without hunting for controls.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Chaque carte de session affiche un bouton « More actions » (icône ···) donnant accès à un menu déroulant.
-- [ ] Ce menu propose au minimum les options de restauration : « Restore in current window », « Restore in new window », « Replace tabs in current window », « Customized restoration… ».
-- [ ] L'option « Restore in current window » restaure les onglets et affiche un message de confirmation de succès (ex. « X tab(s) opened »).
-- [ ] L'option « Replace tabs in current window » ferme les onglets non épinglés de la fenêtre active (en conservant l'onglet hôte de la page options si l'action part de celle-ci) puis restaure les onglets de la session. Une notification système « Session activated » confirme la bascule.
-- [ ] L'option « Customized restoration… » ouvre le wizard de restauration (dialogue de type `role="dialog"` contenant un texte « Restore »).
-
-> **Note de design (v1.1+) :** Le split button dédié a été remplacé par le menu « More actions » pour réduire l'encombrement visuel. Les métadonnées de session (dates, note) sont accessibles via un HoverCard sur le nom de la session.
-
----
-
-## US-S012 — Analyse des conflits avant restauration dans la fenêtre courante
-
-**En tant qu'** utilisateur,
-**je veux** que l'extension détecte automatiquement les conflits entre la session à restaurer et les onglets/groupes déjà ouverts,
-**afin de** me proposer des options de résolution avant d'ouvrir quoi que ce soit.
-
-### Critères d'acceptation
-
-- [ ] Lorsque la destination choisie est « Fenêtre courante », l'extension analyse les onglets et groupes actuellement ouverts avant d'afficher l'étape de résolution.
-- [ ] Un **onglet en doublon** est détecté par correspondance exacte d'URL avec un onglet déjà ouvert dans la fenêtre.
-- [ ] Un **groupe en conflit** est détecté lorsqu'un groupe existant dans la fenêtre a exactement le même titre (insensible à la casse) **et** la même couleur qu'un groupe à restaurer.
-- [ ] Si aucun conflit n'est détecté, l'étape de résolution est sautée : le wizard passe directement à la confirmation (2 étapes au lieu de 3).
-- [ ] Si au moins un conflit est détecté, une étape de résolution intermédiaire est insérée (3 étapes au total).
-- [ ] Choisir « Nouvelle fenêtre » comme destination ignore l'analyse de conflits et passe directement à la confirmation.
-- [ ] Choisir « Replace tabs in current window » comme destination ignore également l'analyse de conflits et passe directement à l'exécution (aucune étape de résolution) : les onglets non épinglés et non protégés sont fermés après la création des nouveaux.
+- [ ] A search field (magnifier icon) is shown at the top of the Sessions page, on the left of the toolbar.
+- [ ] Typing text in this field filters the session list in real time by name match (case-insensitive).
+- [ ] The "Take Snapshot" button is shown to the right of the search field in the same toolbar.
+- [ ] If there are no sessions, the empty state area shows the message "No saved sessions.".
+- [ ] The "Take Snapshot" button is also visible in the empty state area.
+- [ ] During the search, both sections (pinned / normal, cf. US-S020) remain visible but only show the matching sessions. A section without results is hidden.
 
 ---
 
-## US-S013 — Résolution globale des onglets en double
+## US-S011 - Restore options in the actions menu
 
-**En tant qu'** utilisateur,
-**je veux** choisir une action globale pour tous les onglets déjà ouverts détectés comme doublons,
-**afin de** contrôler si ces onglets sont ré-ouverts ou ignorés lors de la restauration.
+**As a** user,
+**I want** to be able to restore a session in different ways from the session card,
+**so that** I can quickly choose where the tabs are opened without going through the full wizard.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] L'étape de résolution affiche la liste des onglets en doublon (titre + URL) avec une icône d'avertissement et un badge « Already Open ».
-- [ ] Deux options globales sont proposées (boutons radio) :
-  - **Ne pas restaurer les doublons** (par défaut) : les onglets déjà ouverts ne sont pas recréés.
-  - **Ouvrir quand même** : les onglets en double sont ouverts en plus des onglets existants.
-- [ ] La même option s'applique à **tous** les onglets en doublon.
+- [ ] Each session card shows a "More actions" button (... icon) giving access to a dropdown menu.
+- [ ] This menu offers at least the restore options: "Restore in current window", "Restore in new window", "Replace tabs in current window", "Customized restoration...".
+- [ ] The "Restore in current window" option restores the tabs and shows a success confirmation message (e.g. "X tab(s) opened").
+- [ ] The "Replace tabs in current window" option closes the non-pinned tabs of the active window (keeping the host tab of the options page if the action starts from it) then restores the session tabs. A "Session activated" system notification confirms the switch.
+- [ ] The "Customized restoration..." option opens the restore wizard (a `role="dialog"` containing a "Restore" text).
 
----
-
-## US-S014 — Résolution par groupe des conflits de groupes
-
-**En tant qu'** utilisateur,
-**je veux** choisir indépendamment pour chaque groupe en conflit comment le traiter,
-**afin d'** appliquer la stratégie la plus adaptée groupe par groupe.
-
-### Critères d'acceptation
-
-- [ ] Chaque groupe en conflit est affiché avec sa couleur, son titre et le nombre d'onglets qu'il contient.
-- [ ] Trois actions sont disponibles pour chaque groupe (menu déroulant) :
-  - **Fusionner** (par défaut) : les onglets à restaurer sont ajoutés au groupe existant ; les onglets déjà présents dans ce groupe ne sont pas dupliqués.
-  - **Créer un nouveau groupe** : un nouveau groupe distinct est créé, indépendamment du groupe existant.
-  - **Ignorer** : le groupe et ses onglets ne sont pas restaurés.
-- [ ] La décision prise pour un groupe n'affecte pas les autres groupes.
+> **Design note (v1.1+):** The dedicated split button has been replaced with the "More actions" menu to reduce visual clutter. Session metadata (dates, note) is accessible via a HoverCard on the session name.
 
 ---
 
-## US-S015 — Confirmation, exécution et métriques de restauration
+## US-S012 - Conflict analysis before restoring in the current window
 
-**En tant qu'** utilisateur,
-**je veux** voir un récapitulatif de ce qui va être restauré avant de valider, puis un bilan chiffré après l'opération,
-**afin de** confirmer la restauration en connaissance de cause et vérifier le résultat.
+**As a** user,
+**I want** the extension to automatically detect conflicts between the session to restore and the tabs/groups already open,
+**so that** I am offered resolution options before opening anything.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] L'étape de confirmation indique la destination (fenêtre courante ou nouvelle fenêtre) et le nombre d'onglets qui seront ouverts.
-- [ ] Si des doublons sont ignorés, le nombre d'onglets ignorés est indiqué dans l'étape de confirmation.
-- [ ] Après la restauration, le dialogue se ferme automatiquement.
-- [ ] Une notification système apparaît avec le titre « Session restored » et un message indiquant le nombre d'onglets ouverts et de doublons ignorés (ex. « 5 tab(s) opened, 2 duplicate(s) skipped »).
-- [ ] Si des erreurs surviennent lors de la restauration, une notification d'erreur est affichée à la place.
-- [ ] Après une restauration en mode « Replace tabs in current window », une notification système supplémentaire « Session activated / Switched to session "{nom}" » confirme le changement de contexte.
-
----
-
-## US-S016 : Capture de l'etat replie/deplie des groupes d'onglets
-
-**En tant qu'** utilisateur qui prend un snapshot de ses onglets,
-**je veux** que l'etat replie ou deplie de chaque groupe d'onglets Chrome soit enregistre automatiquement,
-**afin que** le snapshot reflète fidelement l'agencement de ma fenetre au moment de la sauvegarde.
-
-### Criteres d'acceptation
-
-- [ ] Lorsqu'un groupe Chrome est replie au moment du snapshot, la session enregistree contient `collapsed: true` pour ce groupe.
-- [ ] Lorsqu'un groupe Chrome est deplie au moment du snapshot, la session enregistree contient `collapsed: false` pour ce groupe.
-- [ ] Les sessions existantes sans champ `collapsed` continuent de fonctionner normalement (retro-compatibilite) : elles sont traitees comme si tous les groupes etaient deplies.
+- [ ] When the chosen destination is "Current window", the extension analyzes the currently open tabs and groups before showing the resolution step.
+- [ ] A **duplicate tab** is detected by exact URL match with a tab already open in the window.
+- [ ] A **conflicting group** is detected when an existing group in the window has exactly the same title (case-insensitive) **and** the same color as a group to restore.
+- [ ] If no conflict is detected, the resolution step is skipped: the wizard goes directly to confirmation (2 steps instead of 3).
+- [ ] If at least one conflict is detected, an intermediate resolution step is inserted (3 steps total).
+- [ ] Choosing "New window" as the destination skips conflict analysis and goes directly to confirmation.
+- [ ] Choosing "Replace tabs in current window" as the destination also skips conflict analysis and goes directly to execution (no resolution step): non-pinned and non-protected tabs are closed after the new ones are created.
 
 ---
 
-## US-S017 : Restauration de l'etat replie/deplie des groupes d'onglets
+## US-S013 - Global resolution of duplicate tabs
 
-**En tant qu'** utilisateur qui restaure une session,
-**je veux** que les groupes d'onglets soient recrees avec leur etat replie ou deplie d'origine,
-**afin de** retrouver exactement l'agencement que j'avais sauvegarde.
+**As a** user,
+**I want** to choose a global action for all tabs already open detected as duplicates,
+**so that** I can control whether these tabs are reopened or skipped during restore.
 
-### Criteres d'acceptation
+### Acceptance criteria
 
-- [ ] Lors de la restauration dans une nouvelle fenetre, un groupe marque `collapsed: true` est cree replie dans Chrome.
-- [ ] Lors de la restauration dans la fenetre courante (creation d'un nouveau groupe), le groupe respecte l'etat `collapsed` sauvegarde.
-- [ ] Lors d'une fusion (merge) dans un groupe existant, l'etat replie/deplie du groupe existant n'est pas modifie.
-- [ ] Les sessions sans champ `collapsed` restaurent les groupes en etat deplie (comportement par defaut).
-
----
-
-## US-S018 : Edition de l'etat replie/deplie dans l'editeur de session
-
-**En tant qu'** utilisateur qui edite une session,
-**je veux** que l'editeur affiche les groupes selon leur etat replie/deplie sauvegarde et que les modifications de cet etat soient persistees a la sauvegarde,
-**afin de** pouvoir ajuster l'agencement des groupes avant une restauration.
-
-### Criteres d'acceptation
-
-- [ ] A l'ouverture de l'editeur, un groupe avec `collapsed: true` est affiche replie (ses onglets enfants ne sont pas visibles).
-- [ ] A l'ouverture de l'editeur, un groupe sans champ `collapsed` ou avec `collapsed: false` est affiche deplie (ses onglets enfants sont visibles).
-- [ ] Replier ou deplier un groupe dans l'editeur est considere comme une modification (le bouton « Save » devient activable).
-- [ ] Apres sauvegarde, la valeur `collapsed` de chaque groupe est mise a jour dans le stockage.
+- [ ] The resolution step shows the list of duplicate tabs (title + URL) with a warning icon and an "Already Open" badge.
+- [ ] Two global options are offered (radio buttons):
+  - **Do not restore duplicates** (default): tabs already open are not recreated.
+  - **Open anyway**: duplicate tabs are opened in addition to the existing tabs.
+- [ ] The same option applies to **all** duplicate tabs.
 
 ---
 
-## US-S019 : Carte de session redessinee (HoverCard et rename inline)
+## US-S014 - Per-group resolution of group conflicts
 
-**En tant qu'** utilisateur sur la page Sessions,
-**je veux** consulter les metadonnees d'une session (dates de creation et de modification, note) et renommer une session directement sur sa carte,
-**afin de** acceder aux informations utiles sans ouvrir l'editeur et de renommer rapidement une session.
+**As a** user,
+**I want** to independently choose for each conflicting group how to handle it,
+**so that** I can apply the most appropriate strategy group by group.
 
-### Criteres d'acceptation
+### Acceptance criteria
 
-**HoverCard metadonnees :**
-- [ ] Le nom de la session dans la carte est un declencheur de HoverCard (Radix `HoverCard.Root`).
-- [ ] Au survol, le HoverCard affiche : nom de la session, date de creation, date de derniere modification.
-- [ ] Si la session a une note, celle-ci est egalement affichee dans le HoverCard.
-- [ ] Le HoverCard ne bloque pas les interactions avec la carte (il se ferme au deplacement du curseur).
-
-**Rename inline :**
-- [ ] Un bouton crayon (icone `Pencil`) est affiche entre le nom de la session et le badge de categorie.
-- [ ] Au clic sur le crayon, le nom de la session devient un champ de texte editable.
-- [ ] Le champ est confirme par la touche Entree ou par un bouton de validation (icone `Check`).
-- [ ] Le champ est annule par la touche Echap ou par un bouton d'annulation (icone `X`).
-- [ ] Un nom duplique (insensible a la casse) affiche un message d'erreur sous le champ.
-- [ ] Un nom vide n'est pas accepte.
-
-**Menu d'actions consolide :**
-- [ ] Le menu d'actions (`...`) regroupe toutes les actions : restauration (fenetre courante, nouvelle fenetre, personnalisee), edition, deplacer en premier/dernier dans le groupe (cf. US-S-DND), epingler/desepingler, supprimer.
+- [ ] Each conflicting group is shown with its color, its title, and the number of tabs it contains.
+- [ ] Three actions are available for each group (dropdown menu):
+  - **Merge** (default): the tabs to restore are added to the existing group; tabs already in this group are not duplicated.
+  - **Create a new group**: a new separate group is created, independently of the existing group.
+  - **Ignore**: the group and its tabs are not restored.
+- [ ] The decision made for one group does not affect the others.
 
 ---
 
-## US-S020 : Separation des sessions epinglees et normales
+## US-S015 - Confirmation, execution, and restore metrics
 
-**En tant qu'** utilisateur sur la page Sessions,
-**je veux** que les sessions epinglees soient affichees dans une section distincte au-dessus des sessions normales,
-**afin de** distinguer visuellement mes profils (sessions epinglees) de mes snapshots classiques.
+**As a** user,
+**I want** to see a recap of what will be restored before validating, then a numerical report after the operation,
+**so that** I can confirm the restore knowingly and verify the result.
 
-### Criteres d'acceptation
+### Acceptance criteria
 
-**Sections visuelles :**
-- [ ] La page Sessions affiche deux sections distinctes : « Pinned Sessions » (en haut) et « Sessions » (en bas), separees par un `Separator`.
-- [ ] Chaque section possede un en-tete non repliable avec une icone (`Pin` pour les epinglees, `Archive` pour les normales), un titre i18n et un compteur (`Badge`).
-- [ ] Les sections ne sont pas repliables (pas de `Collapsible`).
-
-**Etats vides :**
-- [ ] Si aucune session epinglee n'existe, la section « Pinned Sessions » affiche un message d'aide contextuel (ex. « No pinned sessions. Pin a session for quick popup access. »).
-- [ ] Si toutes les sessions sont epinglees, la section « Sessions » affiche un message d'aide (ex. « All sessions are pinned. »).
-- [ ] Si aucune session n'existe du tout, l'etat vide global existant est affiche (icone Archive + bouton « Take Snapshot ») sans en-tetes de section.
-
-**Drag-and-drop intra-groupe :**
-- [ ] Chaque section dispose de son propre `DragDropProvider` independant.
-- [ ] Le drag-and-drop fonctionne uniquement a l'interieur d'une section (pas de deplacement inter-sections).
-- [ ] Pour changer le statut epingle d'une session, l'utilisateur utilise le bouton pin/unpin sur la carte, ce qui deplace la session dans la bonne section.
-
-**"Move to first" / "Move to last" dans le groupe :**
-- [ ] Les actions "Move to first" et "Move to last" du menu d'actions operent dans le groupe de la session (epingle ou normal), pas dans la liste globale.
-
-**Recherche :**
-- [ ] Pendant la recherche, les deux sections restent visibles mais n'affichent que les sessions correspondantes.
-- [ ] Une section sans resultat est masquee pendant la recherche.
-- [ ] Le drag-and-drop reste desactive pendant la recherche.
+- [ ] The confirmation step indicates the destination (current window or new window) and the number of tabs that will be opened.
+- [ ] If duplicates are skipped, the number of skipped tabs is indicated in the confirmation step.
+- [ ] After the restore, the dialog closes automatically.
+- [ ] A system notification appears with the title "Session restored" and a message stating the number of opened tabs and skipped duplicates (e.g. "5 tab(s) opened, 2 duplicate(s) skipped").
+- [ ] If errors occur during the restore, an error notification is shown instead.
+- [ ] After a "Replace tabs in current window" restore, an additional system notification (title "Session activated", message `Switched to session "{name}"`) confirms the context switch.
 
 ---
 
-## US-S021 : Remplacement des onglets de la fenêtre courante pour switcher de contexte
+## US-S016: Capture of the collapsed/expanded state of tab groups
 
-**En tant qu'** utilisateur,
-**je veux** pouvoir remplacer les onglets de la fenêtre active par ceux d'une session choisie,
-**afin de** basculer rapidement de contexte de travail sans accumuler les onglets d'autres activités.
+**As a** user taking a snapshot of their tabs,
+**I want** the collapsed or expanded state of each Chrome tab group to be saved automatically,
+**so that** the snapshot faithfully reflects my window layout at save time.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Une 4ème option « Replace tabs in current window » est disponible dans le menu du `SessionRestoreButton` (carte de session et popup).
-- [ ] Un 3ème radio « Replace tabs in current window » est disponible dans le wizard de restauration personnalisée, à la suite de « In the current window » et « In a new window ».
-- [ ] L'exécution du mode « Replace » :
-  - Ferme tous les onglets **non épinglés** de la fenêtre active.
-  - Conserve les onglets **épinglés** (`tab.pinned === true`).
-  - Conserve l'onglet hôte de la page options quand l'action est déclenchée depuis celle-ci (carte de session ou wizard).
-  - Ferme les onglets préexistants **après** la création des onglets de la session pour éviter que la fenêtre ne se retrouve vide.
-- [ ] Depuis la popup, tous les onglets non épinglés sont remplacés (la popup n'étant pas un onglet, aucun onglet hôte à protéger).
-- [ ] Le mode « Replace » dans le wizard saute l'étape de résolution des conflits.
-- [ ] Une notification système (titre « Session activated », message « Switched to session "{nom}" ») confirme la bascule après la restauration.
-- [ ] La déduplication automatique est neutralisée le temps de la restauration (cf. US-D correspondante) : si un onglet épinglé conservé partage une URL avec un onglet de la session, les deux onglets coexistent.
-- [ ] Depuis la popup, la popup se ferme automatiquement après le déclenchement du remplacement.
+- [ ] When a Chrome group is collapsed at the time of the snapshot, the saved session contains `collapsed: true` for that group.
+- [ ] When a Chrome group is expanded at the time of the snapshot, the saved session contains `collapsed: false` for that group.
+- [ ] Existing sessions without the `collapsed` field continue to work normally (backward compatibility): they are processed as if all groups were expanded.
+
+---
+
+## US-S017: Restoring the collapsed/expanded state of tab groups
+
+**As a** user restoring a session,
+**I want** tab groups to be recreated with their original collapsed or expanded state,
+**so that** I find again exactly the layout I had saved.
+
+### Acceptance criteria
+
+- [ ] When restoring in a new window, a group marked `collapsed: true` is created collapsed in Chrome.
+- [ ] When restoring in the current window (creating a new group), the group respects the saved `collapsed` state.
+- [ ] When merging into an existing group, the collapsed/expanded state of the existing group is not modified.
+- [ ] Sessions without the `collapsed` field restore groups as expanded (default behavior).
+
+---
+
+## US-S018: Editing the collapsed/expanded state in the session editor
+
+**As a** user editing a session,
+**I want** the editor to display groups according to their saved collapsed/expanded state and for changes to that state to be persisted on save,
+**so that** I can adjust the layout of groups before a restore.
+
+### Acceptance criteria
+
+- [ ] When the editor opens, a group with `collapsed: true` is shown collapsed (its child tabs are not visible).
+- [ ] When the editor opens, a group without the `collapsed` field or with `collapsed: false` is shown expanded (its child tabs are visible).
+- [ ] Collapsing or expanding a group in the editor counts as a modification (the "Save" button becomes enabled).
+- [ ] After save, the `collapsed` value of each group is updated in storage.
+
+---
+
+## US-S019: Redesigned session card (HoverCard and inline rename)
+
+**As a** user on the Sessions page,
+**I want** to view a session's metadata (creation and modification dates, note) and rename a session directly on its card,
+**so that** I can access useful information without opening the editor and quickly rename a session.
+
+### Acceptance criteria
+
+**HoverCard metadata:**
+- [ ] The session name in the card is a HoverCard trigger (Radix `HoverCard.Root`).
+- [ ] On hover, the HoverCard shows: session name, creation date, last modification date.
+- [ ] If the session has a note, it is also shown in the HoverCard.
+- [ ] The HoverCard does not block interactions with the card (it closes when the cursor moves away).
+
+**Inline rename:**
+- [ ] A pencil button (`Pencil` icon) is shown between the session name and the category badge.
+- [ ] On click of the pencil, the session name becomes an editable text field.
+- [ ] The field is confirmed via the Enter key or a confirm button (`Check` icon).
+- [ ] The field is cancelled via the Esc key or a cancel button (`X` icon).
+- [ ] A duplicate name (case-insensitive) shows an error message under the field.
+- [ ] An empty name is not accepted.
+
+**Consolidated actions menu:**
+- [ ] The actions menu (`...`) groups all actions: restore (current window, new window, customized), edit, move to first/last in the group (cf. US-S-DND), pin/unpin, delete.
+
+---
+
+## US-S020: Separation of pinned and normal sessions
+
+**As a** user on the Sessions page,
+**I want** pinned sessions to be shown in a separate section above normal sessions,
+**so that** I can visually distinguish my profiles (pinned sessions) from my classic snapshots.
+
+### Acceptance criteria
+
+**Visual sections:**
+- [ ] The Sessions page shows two distinct sections: "Pinned Sessions" (at the top) and "Sessions" (at the bottom), separated by a `Separator`.
+- [ ] Each section has a non-collapsible header with an icon (`Pin` for pinned, `Archive` for normal), an i18n title, and a counter (`Badge`).
+- [ ] The sections are not collapsible (no `Collapsible`).
+
+**Empty states:**
+- [ ] If no pinned session exists, the "Pinned Sessions" section shows a contextual help message (e.g. "No pinned sessions. Pin a session for quick popup access.").
+- [ ] If all sessions are pinned, the "Sessions" section shows a help message (e.g. "All sessions are pinned.").
+- [ ] If no session exists at all, the existing global empty state is shown (Archive icon + "Take Snapshot" button) without section headers.
+
+**Intra-group drag-and-drop:**
+- [ ] Each section has its own independent `DragDropProvider`.
+- [ ] Drag-and-drop only works inside a section (no inter-section moves).
+- [ ] To change the pinned status of a session, the user uses the pin/unpin button on the card, which moves the session into the right section.
+
+**"Move to first" / "Move to last" within the group:**
+- [ ] The "Move to first" and "Move to last" actions in the actions menu operate within the session's group (pinned or normal), not within the global list.
+
+**Search:**
+- [ ] During the search, both sections remain visible but only show the matching sessions.
+- [ ] A section without results is hidden during the search.
+- [ ] Drag-and-drop stays disabled during the search.
+
+---
+
+## US-S021: Replacing the tabs of the current window to switch context
+
+**As a** user,
+**I want** to be able to replace the tabs of the active window with those of a chosen session,
+**so that** I can quickly switch work context without accumulating tabs from other activities.
+
+### Acceptance criteria
+
+- [ ] A 4th "Replace tabs in current window" option is available in the `SessionRestoreButton` menu (session card and popup).
+- [ ] A 3rd "Replace tabs in current window" radio is available in the customized restore wizard, after "In the current window" and "In a new window".
+- [ ] Execution of the "Replace" mode:
+  - Closes all **non-pinned** tabs of the active window.
+  - Keeps the **pinned** tabs (`tab.pinned === true`).
+  - Keeps the host tab of the options page when the action is triggered from it (session card or wizard).
+  - Closes the pre-existing tabs **after** the session tabs are created to avoid the window being empty.
+- [ ] From the popup, all non-pinned tabs are replaced (since the popup is not a tab, there is no host tab to protect).
+- [ ] The "Replace" mode in the wizard skips the conflict resolution step.
+- [ ] A system notification (title "Session activated", message `Switched to session "{name}"`) confirms the switch after the restore.
+- [ ] Automatic deduplication is neutralized for the duration of the restore (cf. corresponding US-D): if a kept pinned tab shares a URL with a session tab, both tabs coexist.
+- [ ] From the popup, the popup automatically closes after triggering the replacement.

@@ -1,78 +1,78 @@
-# User Stories — Domaine A11Y : Accessibilité
+# User Stories - Domain A11Y: Accessibility
 
 ---
 
-## US-A11Y001 — Focus initial des dialogues
+## US-A11Y001 - Initial focus of dialogs
 
-**En tant qu'** utilisateur naviguant au clavier ou utilisant un lecteur d'ecran,
-**je veux** que le focus initial d'un dialogue soit positionne sur l'element le plus pertinent a l'ouverture,
-**afin de** ne pas fermer accidentellement le dialogue en appuyant sur `Entrée` et de comprendre immediatement le contexte ou l'action attendue.
+**As a** user navigating with the keyboard or using a screen reader,
+**I want** the initial focus of a dialog to be placed on the most relevant element when it opens,
+**so that** I do not accidentally close the dialog by pressing `Enter`, and I immediately understand the context or the expected action.
 
-### Contexte
+### Context
 
-Radix UI (`Dialog.Content`, `AlertDialog.Content`) place par defaut le focus sur le premier element focusable du DOM, qui est presque toujours la croix de fermeture (`DialogCloseButton`). Un appui immediat sur `Entree` ferme alors le dialogue, ce qui contredit le WAI-ARIA Authoring Practices Guide (APG) Modal Dialog Pattern.
+Radix UI (`Dialog.Content`, `AlertDialog.Content`) places focus by default on the first focusable element in the DOM, which is almost always the close cross (`DialogCloseButton`). An immediate press on `Enter` then closes the dialog, which contradicts the WAI-ARIA Authoring Practices Guide (APG) Modal Dialog Pattern.
 
-### Convention de focus initial par type de dialogue
+### Initial focus convention by dialog type
 
-| Type | Cible du focus initial | Justification |
+| Type | Initial focus target | Rationale |
 |---|---|---|
-| Formulaire (creation, edition) | Premier champ de saisie utile | L'utilisateur veut saisir, pas fermer. |
-| Wizard multi-etapes | Premier champ utile de l'etape active, ou bouton principal si l'etape n'a pas de champ | Identique, adapte a la progression. |
-| Confirmation destructive | Bouton **Annuler** | WAI-ARIA APG Alert Dialog. Evite la confirmation accidentelle. |
-| Destructif avec input obligatoire | L'input de validation (le bouton Confirmer est desactive tant que la saisie ne correspond pas) | Pas de risque d'action accidentelle : Confirmer est desactive. |
-| Informationnel (sans champ ni action principale claire) | Titre du dialogue (`tabIndex={-1}`) | WAI-ARIA APG, troisieme cas. Le lecteur d'ecran annonce le titre a l'ouverture. |
+| Form (creation, editing) | First useful input field | The user wants to type, not close. |
+| Multi-step wizard | First useful field of the active step, or main button if the step has no field | Same idea, adapted to progression. |
+| Destructive confirmation | **Cancel** button | WAI-ARIA APG Alert Dialog. Avoids accidental confirmation. |
+| Destructive with mandatory input | The validation input (the Confirm button is disabled until the input matches) | No risk of accidental action: Confirm is disabled. |
+| Informational (no field or clear main action) | Dialog title (`tabIndex={-1}`) | WAI-ARIA APG, third case. The screen reader announces the title on opening. |
 
-**Regle absolue : `DialogCloseButton` ne doit jamais recevoir le focus initial.**
+**Absolute rule: `DialogCloseButton` must never receive the initial focus.**
 
-### Criteres d'acceptation
+### Acceptance criteria
 
-- [ ] L'ouverture du wizard de creation de regle place le focus sur l'input « Etiquette ».
-- [ ] L'ouverture du dialogue de creation de workspace place le focus sur l'input nom.
-- [ ] L'ouverture d'un `ConfirmDialog` (destruction) place le focus sur le bouton Annuler. Appuyer sur `Entree` immediatement ferme le dialogue sans declencher l'action destructive.
-- [ ] L'ouverture de l'`AlertDialogShell` place le focus sur le bouton Annuler (le moins destructeur des trois).
-- [ ] L'ouverture du `RestoreWizard` place le focus sur le bouton Restaurer (step 0).
-- [ ] L'ouverture d'un `DialogShell` sans element `[data-autofocus]` place le focus sur le titre du dialogue (pas sur la croix de fermeture).
-- [ ] Le titre focuse programmatiquement n'affiche pas de focus ring visible (il est cible de focus non interactif).
-- [ ] Le `WorkspaceDeleteConfirmDialog` place le focus sur l'input de saisie du nom (pas sur Annuler, car Confirmer est desactive jusqu'a la saisie correcte).
+- [ ] Opening the rule creation wizard places focus on the "Label" input.
+- [ ] Opening the workspace creation dialog places focus on the name input.
+- [ ] Opening a `ConfirmDialog` (destruction) places focus on the Cancel button. Pressing `Enter` immediately closes the dialog without triggering the destructive action.
+- [ ] Opening the `AlertDialogShell` places focus on the Cancel button (the least destructive of the three).
+- [ ] Opening the `RestoreWizard` places focus on the Restore button (step 0).
+- [ ] Opening a `DialogShell` without a `[data-autofocus]` element places focus on the dialog title (not on the close cross).
+- [ ] The programmatically focused title does not display a visible focus ring (it is a non-interactive focus target).
+- [ ] The `WorkspaceDeleteConfirmDialog` places focus on the name input (not on Cancel, because Confirm is disabled until the correct value is typed).
 
 ### Implementation
 
-#### Utilitaire partage
+#### Shared utility
 
-`src/components/UI/DialogShell/autoFocusHandler.ts` exporte `focusAutoFocusTarget(event: Event)`.
-Passer cette fonction en `onOpenAutoFocus` sur `AlertDialog.Content`.
+`src/components/UI/DialogShell/autoFocusHandler.ts` exports `focusAutoFocusTarget(event: Event)`.
+Pass this function as `onOpenAutoFocus` on `AlertDialog.Content`.
 
-#### Convention `data-autofocus`
+#### `data-autofocus` convention
 
-Ajouter `data-autofocus="true"` sur le premier element cible (champ ou bouton Annuler selon le type).
-`DialogShell.defaultOnOpenAutoFocus` cherche cet attribut en priorite, puis bascule sur le titre.
+Add `data-autofocus="true"` on the first target element (field or Cancel button depending on the type).
+`DialogShell.defaultOnOpenAutoFocus` searches this attribute first, then falls back to the title.
 
-#### Fallback titre dans `DialogShell`
+#### Title fallback in `DialogShell`
 
-`Dialog.Title` recoit `tabIndex={-1}` et `data-dialog-title` pour etre focusable programmatiquement.
-`defaultOnOpenAutoFocus` cible `[data-dialog-title]` si aucun `[data-autofocus]` n'est present.
+`Dialog.Title` receives `tabIndex={-1}` and `data-dialog-title` to be programmatically focusable.
+`defaultOnOpenAutoFocus` targets `[data-dialog-title]` if no `[data-autofocus]` is present.
 
-### Tests associes
+### Associated tests
 
-- Stories Storybook : `DialogShell.stories.tsx`, `ConfirmDialog.stories.tsx`, `AlertDialogShell.stories.tsx`
-  (play functions verifiant `document.activeElement`).
-- Test E2E : `tests/e2e/dialog-initial-focus.spec.ts` (`[US-A11Y001]`).
+- Storybook stories: `DialogShell.stories.tsx`, `ConfirmDialog.stories.tsx`, `AlertDialogShell.stories.tsx`
+  (play functions checking `document.activeElement`).
+- E2E test: `tests/e2e/dialog-initial-focus.spec.ts` (`[US-A11Y001]`).
 
-### Dialogues couverts
+### Covered dialogs
 
-| Composant | Chemin | Focus cible |
+| Component | Path | Focus target |
 |---|---|---|
-| RuleWizardModal | `Core/DomainRule/RuleWizardModal.tsx` | Input label (custom `onOpenAutoFocus` existant) |
-| SessionEditDialog | `Core/Session/SessionEditDialog.tsx` | Input nom session (custom `onOpenAutoFocus` existant) |
-| SnapshotWizard | `UI/SessionWizards/SnapshotWizard.tsx` | Input nom session (custom `onOpenAutoFocus` existant) |
-| RestoreWizard | `UI/SessionWizards/RestoreWizard.tsx` | Bouton Restaurer (`data-autofocus` steps 0 et 1) |
-| WorkspaceFormDialog | `UI/Workspace/WorkspaceFormDialog.tsx` | Input nom workspace (`data-autofocus`, migre vers DialogShell) |
-| ConfirmDialog | `UI/ConfirmDialog/ConfirmDialog.tsx` | Bouton Annuler (`data-autofocus` + `focusAutoFocusTarget`) |
-| AlertDialogShell | `Core/TabTree/AlertDialogShell.tsx` | Bouton Annuler (`data-autofocus` + `focusAutoFocusTarget`) |
-| WorkspaceDeleteConfirmDialog | `UI/Workspace/WorkspaceDeleteConfirmDialog.tsx` | Input saisie nom (`data-autofocus` + `focusAutoFocusTarget`) |
-| SessionEditDialog sub-AlertDialog | `Core/Session/SessionEditDialog.tsx` | Bouton Annuler (`data-autofocus` + `focusAutoFocusTarget`) |
-| ConfigEditModal | `Core/DomainRule/ConfigEditModal.tsx` | Titre (fallback DialogShell) |
-| ExportWorkspaceDialog | `UI/Workspace/ExportWorkspaceDialog.tsx` | Titre (fallback DialogShell) |
-| ImportWorkspaceDialog | `UI/Workspace/ImportWorkspaceDialog.tsx` | Titre (fallback DialogShell) |
-| ImportSessionsWizard / ExportSessionsWizard | `UI/ImportExportWizards/` | Titre (fallback DialogShell) |
-| ShortcutsDrawer | `UI/ShortcutsPanel/ShortcutsDrawer.tsx` | Premier trigger (custom, harmonise avec `e.currentTarget`) |
+| RuleWizardModal | `Core/DomainRule/RuleWizardModal.tsx` | Label input (existing custom `onOpenAutoFocus`) |
+| SessionEditDialog | `Core/Session/SessionEditDialog.tsx` | Session name input (existing custom `onOpenAutoFocus`) |
+| SnapshotWizard | `UI/SessionWizards/SnapshotWizard.tsx` | Session name input (existing custom `onOpenAutoFocus`) |
+| RestoreWizard | `UI/SessionWizards/RestoreWizard.tsx` | Restore button (`data-autofocus` steps 0 and 1) |
+| WorkspaceFormDialog | `UI/Workspace/WorkspaceFormDialog.tsx` | Workspace name input (`data-autofocus`, migrated to DialogShell) |
+| ConfirmDialog | `UI/ConfirmDialog/ConfirmDialog.tsx` | Cancel button (`data-autofocus` + `focusAutoFocusTarget`) |
+| AlertDialogShell | `Core/TabTree/AlertDialogShell.tsx` | Cancel button (`data-autofocus` + `focusAutoFocusTarget`) |
+| WorkspaceDeleteConfirmDialog | `UI/Workspace/WorkspaceDeleteConfirmDialog.tsx` | Name input (`data-autofocus` + `focusAutoFocusTarget`) |
+| SessionEditDialog sub-AlertDialog | `Core/Session/SessionEditDialog.tsx` | Cancel button (`data-autofocus` + `focusAutoFocusTarget`) |
+| ConfigEditModal | `Core/DomainRule/ConfigEditModal.tsx` | Title (DialogShell fallback) |
+| ExportWorkspaceDialog | `UI/Workspace/ExportWorkspaceDialog.tsx` | Title (DialogShell fallback) |
+| ImportWorkspaceDialog | `UI/Workspace/ImportWorkspaceDialog.tsx` | Title (DialogShell fallback) |
+| ImportSessionsWizard / ExportSessionsWizard | `UI/ImportExportWizards/` | Title (DialogShell fallback) |
+| ShortcutsDrawer | `UI/ShortcutsPanel/ShortcutsDrawer.tsx` | First trigger (custom, harmonized with `e.currentTarget`) |

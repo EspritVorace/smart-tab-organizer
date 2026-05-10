@@ -1,16 +1,16 @@
-# Dashboard Page — Brief
+# Dashboard Page: Brief
 
-Page à ajouter dans la **page Options** de l'extension SmartTab Organizer
-(pas un site marketing, pas la homepage web). Objectif : donner à
-l'utilisateur une vue de synthèse qui évite d'avoir à naviguer dans les
-autres tabs pour comprendre l'état de son système.
+Page to add to the **Options page** of the SmartTab Organizer extension
+(not a marketing site, not the web homepage). Goal: give the user a
+synthesis view that removes the need to navigate the other tabs to
+understand the state of their system.
 
-## Intégration architecturale (non négociable)
+## Architectural integration (non-negotiable)
 
-La page s'ajoute au même niveau que les pages existantes listées dans
-`src/pages/options.tsx` :
+The page sits at the same level as the existing pages listed in
+`src/pages/options.tsx`:
 
-| id | label (i18n key) | icon | composant |
+| id | label (i18n key) | icon | component |
 |---|---|---|---|
 | `rules` | `domainRulesTab` | `Shield` | `DomainRulesPage` |
 | `sessions` | `sessionsTab` | `Archive` | `SessionsPage` |
@@ -18,121 +18,121 @@ La page s'ajoute au même niveau que les pages existantes listées dans
 | `stats` | `statisticsTab` | `BarChart3` | `StatisticsPage` |
 | `settings` | `settingsTab` | `Settings` | `SettingsPage` |
 
-La nouvelle entrée est **la première** de la Sidebar :
+The new entry is **the first** in the Sidebar:
 
-| id | label (nouvelle clé i18n) | icon | composant |
+| id | label (new i18n key) | icon | component |
 |---|---|---|---|
 | `dashboard` | `dashboardTab` | `LayoutDashboard` (Lucide) | `DashboardPage` |
 
-Contraintes d'intégration :
+Integration constraints:
 
-- Routing hash : `window.location.hash = 'dashboard'`. Déjà géré par
-  `useDeepLinking`, il suffit d'ajouter le cas côté `options.tsx`.
-- Wrapper obligatoire : `<PageLayout titleKey="dashboardTab"
+- Hash routing: `window.location.hash = 'dashboard'`. Already handled
+  by `useDeepLinking`; just add the case in `options.tsx`.
+- Required wrapper: `<PageLayout titleKey="dashboardTab"
   descriptionKey="dashboardPageDescription" icon={LayoutDashboard}
-  syncSettings={settings}>`. Voir `samples/layout/PageLayout.tsx` dans
-  ce pack.
-- Accent `indigo` unifié, tokens Radix, pas de couleur hardcodée.
-- Toutes les chaînes via `getMessage('key')` (ne PAS hardcoder). Les
-  nouvelles clés seront ajoutées dans les 3 locales (EN / FR / ES).
-- Composants Radix Themes en priorité (`Card`, `Flex`, `Grid`, `Box`,
+  syncSettings={settings}>`. See `samples/layout/PageLayout.tsx` in
+  this pack.
+- Unified `indigo` accent, Radix tokens, no hardcoded color.
+- Every string via `getMessage('key')` (do NOT hardcode). The new
+  keys will be added in all three locales (EN / FR / ES).
+- Prefer Radix Themes components (`Card`, `Flex`, `Grid`, `Box`,
   `Heading`, `Text`, `Button`, `IconButton`, `Badge`, `Separator`,
   `Tooltip`).
-- Icônes Lucide avec `aria-hidden="true"`. Boutons icon-only ont
-  `aria-label` et `title`.
+- Lucide icons with `aria-hidden="true"`. Icon-only buttons carry
+  `aria-label` and `title`.
 
-## Contenu de la page Dashboard
+## Dashboard page contents
 
-L'utilisateur a déjà ces pages ailleurs : Rules, Sessions,
-ImportExport, Stats, Settings. Le dashboard **ne remplace pas** ces
-pages, il en fait la synthèse et expose des raccourcis.
+The user already has these pages elsewhere: Rules, Sessions,
+ImportExport, Stats, Settings. The dashboard **does not replace**
+those pages, it summarizes them and exposes shortcuts.
 
-### Layout proposé (responsive)
+### Suggested layout (responsive)
 
-Grille en 12 colonnes (Radix `Grid`), qui s'effondre sur mobile.
-Mobile : chaque widget prend 12 colonnes. Desktop : compositions
-2 / 3 / 4 colonnes selon le widget.
+12-column grid (Radix `Grid`) that collapses on mobile. Mobile: each
+widget spans 12 columns. Desktop: 2 / 3 / 4 column compositions
+depending on the widget.
 
-### Widgets (dans l'ordre de lecture)
+### Widgets (in reading order)
 
 1. **Welcome / state banner** (12 cols)
-   - Si **0 règle configurée** : appel à l'action « Create your first
-     rule » qui route vers `#rules`.
-   - Si **grouping OU dedup désactivé globalement** : callout
-     `color="orange"` avec toggle inline pour réactiver.
-   - Sinon : banner sobre `color="gray"` avec un court résumé
-     (« 12 rules active, 3 pinned sessions »).
+   - If **0 rules configured**: call to action "Create your first
+     rule" routing to `#rules`.
+   - If **grouping OR dedup globally disabled**: callout
+     `color="orange"` with an inline toggle to re-enable.
+   - Otherwise: subdued banner `color="gray"` with a short summary
+     ("12 rules active, 3 pinned sessions").
 
-2. **Global toggles** (4 cols × 2)
-   - Deux cartes côte à côte avec un Switch Radix : Grouping ON/OFF,
-     Deduplication ON/OFF. Labels via i18n. Persistence :
+2. **Global toggles** (4 cols x 2)
+   - Two side-by-side cards each with a Radix Switch: Grouping ON/OFF,
+     Deduplication ON/OFF. Labels via i18n. Persistence via
      `useSyncedSettings`.
 
-3. **Statistics summary** (3 cols × 2)
-   - Reprendre les deux KPI cards de `StatisticsPage` (Groups created,
-     Tabs deduplicated). Même visuel : icône Lucide
-     (`Layers`, `Copy`), compteur en `size="8"` `weight="bold"` avec
-     `color: var(--accent-11)`, label en `gray`. Pas de bouton reset
-     ici : laisser sur la page Stats.
-   - Ajouter une 3e carte « Active rules » qui compte
-     `settings.domainRules.filter(r => r.enabled).length` si cet état
-     est dispo. Si pas dispo, omettre.
+3. **Statistics summary** (3 cols x 2)
+   - Reuse the two KPI cards from `StatisticsPage` (Groups created,
+     Tabs deduplicated). Same visual: Lucide icon (`Layers`, `Copy`),
+     counter at `size="8"` `weight="bold"` with
+     `color: var(--accent-11)`, label in `gray`. No reset button
+     here, leave that on the Stats page.
+   - Add a third card "Active rules" that counts
+     `settings.domainRules.filter(r => r.enabled).length` if that
+     state is available. If unavailable, omit it.
 
-4. **Pinned sessions** (12 cols, 1 ou plusieurs lignes)
-   - Liste horizontale scrollable des sessions épinglées (composant
-     existant côté popup : `PopupProfilesList`, non fourni dans ce pack
-     car domain-locked, à reproduire avec les primitives du DS).
-   - Chaque item : icône de la session, nom, onglet count, action
-     « Restore » (bouton primaire) + menu `DropdownMenu` (Edit, Unpin,
-     Delete).
-   - Empty state si aucune session épinglée : utiliser `EmptyState` du
-     pack (`samples/composed/EmptyState.tsx`) avec message dédié
-     (`dashboardPinnedSessionsEmpty`) et bouton « Browse sessions »
-     qui route vers `#sessions`.
+4. **Pinned sessions** (12 cols, one or several rows)
+   - Horizontally scrollable list of pinned sessions (existing
+     popup component: `PopupProfilesList`, not provided in this pack
+     because it is domain-locked, to be reproduced with the DS
+     primitives).
+   - Each item: session icon, name, tab count, "Restore" action
+     (primary button) plus a `DropdownMenu` (Edit, Unpin, Delete).
+   - Empty state when no pinned session: use `EmptyState` from the
+     pack (`samples/composed/EmptyState.tsx`) with a dedicated
+     message (`dashboardPinnedSessionsEmpty`) and a "Browse sessions"
+     button routing to `#sessions`.
 
 5. **Recent activity** (6 cols)
-   - Liste compacte des 5 dernières sessions créées (tri par
-     `createdAt` desc) : nom + date relative + bouton restore.
-   - Si données indisponibles ou 0 sessions : `EmptyState` compact.
+   - Compact list of the 5 most recently created sessions (sorted by
+     `createdAt` desc): name + relative date + restore button.
+   - When data is unavailable or 0 sessions: compact `EmptyState`.
 
 6. **Quick actions** (6 cols)
-   - Grille 2×2 de cartes-boutons : « New rule », « Snapshot current
-     window », « Import », « Export ».
-   - Chaque carte : icône Lucide, titre, 1 ligne de description,
-     action au clic. Route vers la page concernée ou ouvre le wizard
-     approprié.
+   - 2x2 grid of card-buttons: "New rule", "Snapshot current window",
+     "Import", "Export".
+   - Each card: Lucide icon, title, one-line description, click
+     action. Routes to the relevant page or opens the appropriate
+     wizard.
 
-### Interactions clés
+### Key interactions
 
-- Clic sur une KPI card de stats : scroll / route vers `#stats`.
-- Clic sur une session épinglée (zone principale) : lance la
-  restauration (wizard si conflit).
-- Clic « Snapshot current window » : ouvre le `SnapshotWizard`
-  existant (`openSnapshotWizard` dans `useDeepLinking`).
+- Click on a stats KPI card: scrolls / routes to `#stats`.
+- Click on a pinned session (main area): launches the restore
+  (wizard on conflict).
+- Click "Snapshot current window": opens the existing
+  `SnapshotWizard` (`openSnapshotWizard` in `useDeepLinking`).
 
-### États à couvrir
+### States to cover
 
-| État | Rendu |
+| State | Rendering |
 |---|---|
-| Loading (settings pas encore chargé) | `Spinner size="3"` + `Text` (pattern options.tsx ligne 66) |
-| 0 règle, 0 session, toggles off | Welcome state + quick actions seulement |
-| Toggles off mais données présentes | Callout orange + widgets normaux |
-| Nominal | Welcome banner sobre + tous les widgets |
-| Erreur de chargement | `Callout` rouge avec message + bouton retry (hors scope v1 si trop coûteux) |
+| Loading (settings not yet loaded) | `Spinner size="3"` + `Text` (pattern at options.tsx line 66) |
+| 0 rules, 0 sessions, toggles off | Welcome state + quick actions only |
+| Toggles off but data present | Orange callout + normal widgets |
+| Nominal | Subdued welcome banner + every widget |
+| Loading error | Red `Callout` with message + retry button (out of scope for v1 if too costly) |
 
-### Accessibilité
+### Accessibility
 
-- Un `<h1>` via `Heading as="h1"` dans `PageLayout` (déjà géré).
-- Les widgets en `<section aria-labelledby>` avec un `Heading as="h2"`
-  visible dans chacun.
-- Navigation clavier complète : Tab entre widgets, Enter pour activer
-  les quick actions.
-- Chaque KPI card annoncée proprement : `aria-label` ou structure
-  `<Text>` + `<Text>` suffisante.
+- One `<h1>` via `Heading as="h1"` in `PageLayout` (already handled).
+- Widgets wrapped in `<section aria-labelledby>` with a visible
+  `Heading as="h2"` inside each.
+- Full keyboard navigation: Tab between widgets, Enter to activate
+  the quick actions.
+- Each KPI card properly announced: `aria-label` or `<Text>` +
+  `<Text>` structure is enough.
 
 ### i18n
 
-Nouvelles clés à ajouter dans `public/_locales/{en,fr,es}/messages.json` :
+New keys to add in `public/_locales/{en,fr,es}/messages.json`:
 
 - `dashboardTab`
 - `dashboardPageDescription`
@@ -149,48 +149,47 @@ Nouvelles clés à ajouter dans `public/_locales/{en,fr,es}/messages.json` :
 - `dashboardQuickActionImport`
 - `dashboardQuickActionExport`
 
-Claude Design peut produire la page en EN en utilisant `getMessage`.
-La traduction FR / ES se fera dans un deuxième temps.
+Claude Design can produce the page in EN using `getMessage`. FR / ES
+translations will follow in a later step.
 
-## Livrables attendus de Claude Design
+## Expected deliverables from Claude Design
 
-1. Composant `DashboardPage.tsx` à placer dans `src/pages/`.
-2. `DashboardPage.stories.tsx` avec au minimum ces variants :
+1. `DashboardPage.tsx` component to place in `src/pages/`.
+2. `DashboardPage.stories.tsx` with at least these variants:
    `DashboardEmpty`, `DashboardTogglesOff`, `DashboardNominal`,
    `DashboardNoPinnedSessions`.
-3. Extraction éventuelle de sous-composants dans
+3. Optional extraction of sub-components into
    `src/components/UI/Dashboard/` (KpiCard, QuickActionTile,
-   WelcomeBanner) si la décomposition gagne en lisibilité.
-4. Diff patch (ou snippet) pour `src/pages/options.tsx` montrant
-   l'ajout de l'entrée sidebar et de la route `currentTab ===
-   'dashboard'`.
-5. Diff partiel pour `public/_locales/en/messages.json` avec les
-   nouvelles clés.
+   WelcomeBanner) when decomposition improves readability.
+4. Diff patch (or snippet) for `src/pages/options.tsx` showing the
+   added sidebar entry and the `currentTab === 'dashboard'` route.
+5. Partial diff for `public/_locales/en/messages.json` with the new
+   keys.
 
-## Ce que Claude Design doit éviter
+## What Claude Design should avoid
 
-- Inventer des metrics qui n'existent pas dans le type `Statistics`
-  (actuellement : `tabGroupsCreatedCount`, `tabsDeduplicatedCount`).
-  Si un KPI n'a pas de source de données, le marquer clairement
-  `[needs data source]` dans un commentaire et ne pas l'afficher.
-- Ajouter une 6e entrée de sidebar autre que Dashboard.
-- Ré-implémenter Pinned Sessions from scratch : proposer de réutiliser
-  le composant existant `PopupProfilesList` en l'adaptant (le pack ne
-  le fournit pas car domain-locked, mais Claude Design peut produire
-  une version design-system-aware à base des primitives livrées).
-- Dark pattern (notifications modales au load, pop-ups intrusifs).
-- Emojis, tirets cadratins, strings hardcodés.
+- Inventing metrics that do not exist in the `Statistics` type
+  (currently: `tabGroupsCreatedCount`, `tabsDeduplicatedCount`).
+  When a KPI has no data source, mark it clearly with a
+  `[needs data source]` comment and do not display it.
+- Adding a 6th sidebar entry beyond Dashboard.
+- Re-implementing Pinned Sessions from scratch: propose to reuse the
+  existing `PopupProfilesList` component by adapting it (the pack
+  does not ship it because it is domain-locked, but Claude Design
+  can produce a design-system-aware version using the supplied
+  primitives).
+- Dark patterns (modal notifications on load, intrusive pop-ups).
+- Emojis, em-dashes, hardcoded strings.
 
-## Références dans le pack
+## References in the pack
 
-- `samples/layout/PageLayout.tsx` : wrapper de page obligatoire.
-- `samples/composed/EmptyState.tsx` : état vide.
-- `samples/atomic/StatusBadge.tsx` : badge (réutilisable pour les
-  toggles on/off).
-- `samples/composition/SessionCard.tsx` : pour inspiration des pinned
-  sessions (patterns DnD + HoverCard metadata).
-- `samples/form/FormField.tsx` + `FieldError.tsx` + `FieldLabel.tsx` :
-  non utilisés directement ici, mais les conventions de composition
-  s'appliquent.
-- `conventions.md` : règles globales (i18n, a11y, style d'écriture).
-- `theme/radix-themes.css` : tokens CSS disponibles.
+- `samples/layout/PageLayout.tsx`: required page wrapper.
+- `samples/composed/EmptyState.tsx`: empty state.
+- `samples/atomic/StatusBadge.tsx`: badge (reusable for the on/off
+  toggles).
+- `samples/composition/SessionCard.tsx`: inspiration for the pinned
+  sessions (DnD + HoverCard metadata patterns).
+- `samples/form/FormField.tsx` + `FieldError.tsx` + `FieldLabel.tsx`:
+  not directly used here, but the composition conventions apply.
+- `conventions.md`: global rules (i18n, a11y, writing style).
+- `theme/radix-themes.css`: available CSS tokens.

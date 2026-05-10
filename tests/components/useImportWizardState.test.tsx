@@ -29,7 +29,7 @@ beforeEach(() => {
 });
 
 describe('useImportWizardState', () => {
-  it('transmet initialSourceMode à useJsonSourceInput', () => {
+  it('forwards initialSourceMode to useJsonSourceInput', () => {
     const { result } = renderHook(() =>
       useImportWizardState<Item, never>({
         open: true,
@@ -42,7 +42,7 @@ describe('useImportWizardState', () => {
     expect(result.current.source.sourceMode).toBe('pack');
   });
 
-  it("avance automatiquement à l'étape 1 quand mode=pack et parsedData devient non-null", () => {
+  it('advances to step 1 automatically when mode=pack and parsedData becomes non-null', () => {
     const { result } = renderHook(() =>
       useImportWizardState<Item, never>({
         open: true,
@@ -60,7 +60,7 @@ describe('useImportWizardState', () => {
     expect(result.current.step).toBe(1);
   });
 
-  it("reste à l'étape 0 quand mode=file et parsedData devient non-null", () => {
+  it('stays on step 0 when mode=file and parsedData becomes non-null', () => {
     const { result } = renderHook(() =>
       useImportWizardState<Item, never>({
         open: true,

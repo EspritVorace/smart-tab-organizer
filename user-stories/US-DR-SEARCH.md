@@ -1,92 +1,93 @@
-# US-DR-SEARCH — Recherche et surlignage dans les règles de domaine
+# US-DR-SEARCH: Search and highlighting in domain rules
 
-## Contexte
+## Context
 
-La barre de recherche de la section Règles de domaine filtre les règles selon le
-**label** et le **filtre de domaine**. L'utilisateur ne sait pas toujours pourquoi
-une règle apparaît dans les résultats lorsqu'il tape un terme.
+The search bar in the Domain Rules section filters rules by **label** and
+**domain filter**. The user does not always know why a rule appears in the
+results when typing a term.
 
 ---
 
 ## User Stories
 
-### US-DR-SEARCH-01 — Filtrage par label
+### US-DR-SEARCH-01: Filtering by label
 
-**En tant qu'** utilisateur gérant de nombreuses règles de domaine,
-**je veux** que la barre de recherche filtre les règles dont le **label** contient
-le terme recherché,
-**afin de** retrouver rapidement une règle par son nom.
+**As a** user managing many domain rules,
+**I want** the search bar to filter rules whose **label** contains the
+searched term,
+**so that** I can quickly find a rule by its name.
 
-**Critères d'acceptance :**
-- Saisir un terme correspondant au label d'une règle fait apparaître cette règle
-  dans la liste filtrée.
-- Les règles dont le label ne correspond pas sont masquées.
-- La recherche est insensible à la casse et aux accents.
-- La partie du label correspondant au terme est **surlignée** (composant
-  `AccessibleHighlight`) dans le badge affiché sur la carte.
-- Le label est également surligné dans l'en-tête du HoverCard de détail.
-
----
-
-### US-DR-SEARCH-02 — Filtrage par filtre de domaine
-
-**En tant qu'** utilisateur,
-**je veux** que la barre de recherche trouve des règles dont le **filtre de domaine**
-contient le terme recherché,
-**afin de** retrouver une règle à partir d'un domaine ou pattern connu.
-
-**Critères d'acceptance :**
-- Saisir un terme correspondant au filtre de domaine d'une règle fait apparaître
-  cette règle dans la liste filtrée.
-- Les règles dont le filtre de domaine ne correspond pas sont masquées.
-- La recherche est insensible à la casse et aux accents.
-- La partie du filtre de domaine correspondant au terme est **surlignée** dans le
-  texte du filtre affiché sur la carte.
-- Le filtre de domaine est également surligné dans le HoverCard de détail (champ
-  « Domain filter »).
+**Acceptance criteria:**
+- Typing a term matching the label of a rule makes that rule appear in the
+  filtered list.
+- Rules whose label does not match are hidden.
+- The search is case- and accent-insensitive.
+- The part of the label matching the term is **highlighted** (component
+  `AccessibleHighlight`) in the badge shown on the card.
+- The label is also highlighted in the detail HoverCard header.
 
 ---
 
-### US-DR-SEARCH-03 — Surlignage des correspondances
+### US-DR-SEARCH-02: Filtering by domain filter
 
-**En tant qu'** utilisateur effectuant une recherche dans les règles de domaine,
-**je veux** que les parties du texte correspondant au terme recherché soient
-visuellement mises en évidence,
-**afin de** comprendre immédiatement pourquoi un résultat apparaît.
+**As a** user,
+**I want** the search bar to find rules whose **domain filter** contains the
+searched term,
+**so that** I can find a rule from a known domain or pattern.
 
-**Critères d'acceptance :**
-- Le terme recherché est **surligné** (fond jaune, texte en gras) dans les champs
-  suivants lorsqu'ils correspondent :
-  - Label de la règle (badge sur la carte et en-tête du HoverCard)
-  - Filtre de domaine (texte sur la carte et champ du HoverCard)
-- Le surlignage utilise le composant `AccessibleHighlight` (inclut des marqueurs
-  accessibles `sr-only` pour les lecteurs d'écran).
-- En l'absence de terme de recherche, aucun surlignage n'est affiché.
-- Le surlignage est insensible à la casse et aux accents (cohérent avec le filtrage).
+**Acceptance criteria:**
+- Typing a term matching the domain filter of a rule makes that rule appear
+  in the filtered list.
+- Rules whose domain filter does not match are hidden.
+- The search is case- and accent-insensitive.
+- The part of the domain filter matching the term is **highlighted** in the
+  filter text shown on the card.
+- The domain filter is also highlighted in the detail HoverCard (field
+  "Domain filter").
 
 ---
 
-## Règles de gestion
+### US-DR-SEARCH-03: Highlighting matches
 
-| Champ de recherche | Filtrage | Surlignage sur la carte | Surlignage dans le HoverCard |
+**As a** user searching in domain rules,
+**I want** the parts of the text matching the searched term to be visually
+highlighted,
+**so that** I immediately understand why a result appears.
+
+**Acceptance criteria:**
+- The searched term is **highlighted** (yellow background, bold text) in the
+  following fields when they match:
+  - Rule label (badge on the card and HoverCard header)
+  - Domain filter (text on the card and HoverCard field)
+- The highlighting uses the `AccessibleHighlight` component (includes
+  accessible `sr-only` markers for screen readers).
+- When no search term is provided, no highlighting is displayed.
+- The highlighting is case- and accent-insensitive (consistent with the
+  filtering).
+
+---
+
+## Business rules
+
+| Search field | Filtering | Highlight on the card | Highlight in the HoverCard |
 |---|---|---|---|
-| `rule.label` | Oui | Badge (label) | En-tête (label) |
-| `rule.domainFilter` | Oui | Texte du filtre | Champ « Domain filter » |
+| `rule.label` | Yes | Badge (label) | Header (label) |
+| `rule.domainFilter` | Yes | Filter text | "Domain filter" field |
 
 ---
 
-## Champ de recherche
+## Search field
 
-La recherche porte sur les champs suivants pour chaque règle :
+The search applies to the following fields for each rule:
 
-1. `rule.label` — Nom/label de la règle
-2. `rule.domainFilter` — Filtre de domaine (ex. `*.github.com`)
+1. `rule.label`: Rule name/label
+2. `rule.domainFilter`: Domain filter (e.g. `*.github.com`)
 
-La comparaison est toujours insensible à la casse et aux accents (via `foldAccents()`).
+The comparison is always case- and accent-insensitive (via `foldAccents()`).
 
 ---
 
-## Hors périmètre
+## Out of scope
 
-- Recherche dans les autres champs (regex de titre, regex d'URL, preset ID…).
-- Surlignage dans les champs hors recherche du HoverCard (regex, déduplication…).
+- Search in other fields (title regex, URL regex, preset ID, etc.).
+- Highlighting in HoverCard fields outside of the search (regex, deduplication, etc.).

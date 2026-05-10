@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { ruleCategorySchema, categoriesFileSchema } from '../../src/schemas/category';
 
 describe('ruleCategorySchema', () => {
-  it('accepte une catégorie built-in avec labelKey uniquement', () => {
+  it('accepts a built-in category with labelKey only', () => {
     const result = ruleCategorySchema.safeParse({
       id: 'development',
       emoji: '💻',
@@ -13,7 +13,7 @@ describe('ruleCategorySchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('accepte une catégorie custom avec label uniquement', () => {
+  it('accepts a custom category with label only', () => {
     const result = ruleCategorySchema.safeParse({
       id: 'gaming',
       emoji: '🎮',
@@ -24,7 +24,7 @@ describe('ruleCategorySchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('remplit builtIn à false par défaut', () => {
+  it('defaults builtIn to false', () => {
     const parsed = ruleCategorySchema.parse({
       id: 'x',
       emoji: '✨',
@@ -34,7 +34,7 @@ describe('ruleCategorySchema', () => {
     expect(parsed.builtIn).toBe(false);
   });
 
-  it('rejette une catégorie sans labelKey ni label', () => {
+  it('rejects a category with neither labelKey nor label', () => {
     const result = ruleCategorySchema.safeParse({
       id: 'x',
       emoji: '✨',
@@ -43,7 +43,7 @@ describe('ruleCategorySchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejette une couleur non supportée', () => {
+  it('rejects an unsupported color', () => {
     const result = ruleCategorySchema.safeParse({
       id: 'x',
       emoji: '✨',
@@ -53,7 +53,7 @@ describe('ruleCategorySchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejette un id vide', () => {
+  it('rejects an empty id', () => {
     const result = ruleCategorySchema.safeParse({
       id: '',
       emoji: '✨',
@@ -63,7 +63,7 @@ describe('ruleCategorySchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejette un emoji vide', () => {
+  it('rejects an empty emoji', () => {
     const result = ruleCategorySchema.safeParse({
       id: 'x',
       emoji: '',
@@ -75,12 +75,12 @@ describe('ruleCategorySchema', () => {
 });
 
 describe('categoriesFileSchema', () => {
-  it('accepte une liste vide', () => {
+  it('accepts an empty list', () => {
     const result = categoriesFileSchema.safeParse({ categories: [] });
     expect(result.success).toBe(true);
   });
 
-  it('accepte le fichier de seed complet', () => {
+  it('accepts the complete seed file', () => {
     const result = categoriesFileSchema.safeParse({
       categories: [
         { id: 'development', emoji: '💻', color: 'blue', labelKey: 'category_development', builtIn: true },

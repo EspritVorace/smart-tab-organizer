@@ -44,21 +44,21 @@ function makeMockSource(
 }
 
 describe('FileDropZone (portable stories)', () => {
-  it("affiche la zone de glisser-déposer sans nom de fichier", () => {
+  it('renders the drag-and-drop zone without a file name', () => {
     render(<FileDropZoneEmpty />);
     expect(screen.getByText('Drag a JSON file here')).toBeInTheDocument();
     expect(screen.getByText('Browse...')).toBeInTheDocument();
     expect(screen.queryByText('import.json')).not.toBeInTheDocument();
   });
 
-  it("affiche le nom du fichier quand source.fileName est défini", () => {
+  it('renders the file name when source.fileName is defined', () => {
     render(<FileDropZoneWithFile />);
     expect(screen.getByText('import.json')).toBeInTheDocument();
   });
 });
 
 describe('FileDropZone - branches', () => {
-  it("appelle handleBrowse et stopPropagation quand le bouton Browse est cliqué", () => {
+  it('calls handleBrowse and stopPropagation when the Browse button is clicked', () => {
     const handleBrowse = vi.fn();
     render(
       <Theme>

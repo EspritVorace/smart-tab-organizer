@@ -5,13 +5,13 @@ export type IconBoxSize = 'sm' | 'md' | 'lg';
 export type IconBoxVariant = 'gradient' | 'soft';
 
 export interface IconBoxProps {
-  /** Icône Lucide à afficher au centre */
+  /** Lucide icon rendered at the center. */
   icon: LucideIcon;
-  /** Taille du conteneur. Défaut : 'md' */
+  /** Container size. Default: 'md'. */
   size?: IconBoxSize;
-  /** Style visuel. Défaut : 'gradient' (style Windows 11) */
+  /** Visual style. Default: 'gradient' (Windows 11 look). */
   variant?: IconBoxVariant;
-  /** Classe CSS additionnelle (optionnel) */
+  /** Optional additional CSS class. */
   className?: string;
 }
 
@@ -22,19 +22,19 @@ const SIZE_CONFIG: Record<IconBoxSize, { box: number; icon: number; radius: stri
 };
 
 /**
- * IconBox : conteneur arrondi affichant une icône Lucide avec un fond
- * dérivé de la couleur d'accent du thème Radix actif.
+ * IconBox: rounded container that displays a Lucide icon over a background
+ * derived from the active Radix theme's accent color.
  *
- * Utilise les tokens `var(--accent-*)` pour suivre automatiquement
- * l'accentColor du <Theme> Radix parent (indigo par défaut, ou l'accent
- * d'un sous-thème si l'IconBox est rendu dans un wrapper).
+ * Uses `var(--accent-*)` tokens, so it automatically tracks the parent
+ * <Theme>'s accentColor (indigo by default, or a sub-theme accent if the
+ * IconBox is rendered inside a wrapper).
  *
- * Variantes :
- * - `gradient` (défaut) : dégradé accent-9 → accent-11 avec icône blanche.
- *   Force l'échelle dark via un sous-thème Radix pour garantir un contraste
- *   identique en light et dark (sinon les stops 9 et 11 sont trop proches
- *   en light et le gradient devient invisible).
- * - `soft` : fond accent-a3 avec icône en accent-11
+ * Variants:
+ * - `gradient` (default): accent-9 to accent-11 gradient with a white icon.
+ *   Forces the dark scale via a Radix sub-theme so contrast stays identical
+ *   in light and dark modes (otherwise stops 9 and 11 sit too close together
+ *   in light mode and the gradient becomes invisible).
+ * - `soft`: accent-a3 background with the icon in accent-11.
  */
 export function IconBox({
   icon: Icon,

@@ -12,16 +12,16 @@ import {
   type UrlExtractionModeValue
 } from './enums.js';
 
-// Regex autorisée pour les noms de query params (syntaxe HTTP + wildcard `*`).
+// Allowed pattern for ignored query param names (HTTP syntax plus the wildcard `*`).
 const ignoredQueryParamPattern = /^[A-Za-z0-9_\-.*]+$/;
 
-// Pattern strict pour le nom d'un query param utilisé en extraction (sans wildcard).
+// Stricter pattern for the query param name used for extraction (no wildcard).
 const queryParamNamePattern = /^[A-Za-z0-9_\-.]+$/;
 
-// groupNameSource modes qui impliquent une extraction depuis l'URL
+// groupNameSource modes that imply extraction from the URL.
 const URL_SOURCE_MODES: GroupNameSourceValue[] = ['url', 'smart', 'smart_label', 'smart_preset', 'smart_manual'];
 
-// Schéma pour domainRules (sans "enabled")
+// Schema for domainRules (without the "enabled" flag).
 export const domainRuleSchema = z.object({
   id: idSchema,
   domainFilter: createDomainFilterValidator(),
@@ -49,13 +49,13 @@ export const domainRuleSchema = z.object({
     { error: () => getMessage('errorInvalidQueryParamName') }
   ).optional()
 }).refine((data) => {
-  // Si presetId est null, les validations conditionnelles s'appliquent
+  // When presetId is null, the conditional validations below apply.
   if (data.presetId === null) {
-    // titleParsingRegEx obligatoire si groupNameSource = 'title'
+    // titleParsingRegEx is required when groupNameSource === 'title'.
     if (data.groupNameSource === 'title' && (!data.titleParsingRegEx || data.titleParsingRegEx.trim() === '')) {
       return false;
     }
-    // urlParsingRegEx obligatoire si groupNameSource = 'url' ET extraction par regex
+    // urlParsingRegEx is required when groupNameSource === 'url' AND extraction uses regex.
     if (
       data.groupNameSource === 'url'
       && data.urlExtractionMode !== 'query_param'
@@ -69,7 +69,7 @@ export const domainRuleSchema = z.object({
   error: () => getMessage('errorZodRequired'),
   path: ['titleParsingRegEx']
 }).refine((data) => {
-  // urlParsingRegEx requis seulement quand l'extraction se fait par regex
+  // urlParsingRegEx is required only when extraction uses regex.
   return !(
     data.presetId === null
     && data.groupNameSource === 'url'
@@ -80,7 +80,7 @@ export const domainRuleSchema = z.object({
   error: () => getMessage('errorZodRequired'),
   path: ['urlParsingRegEx']
 }).refine((data) => {
-  // urlQueryParamName requis quand mode = query_param et source URL impliquée
+  // urlQueryParamName is required when mode === 'query_param' and a URL-based source is used.
   if (data.presetId !== null) return true;
   if (data.urlExtractionMode !== 'query_param') return true;
   if (!URL_SOURCE_MODES.includes(data.groupNameSource)) return true;
@@ -89,8 +89,8 @@ export const domainRuleSchema = z.object({
   error: () => getMessage('errorQueryParamNameRequired'),
   path: ['urlQueryParamName']
 }).refine((data) => {
-  // En mode `exact_ignore_params`, au moins un paramètre doit être déclaré,
-  // sinon le mode est équivalent à `exact` et on évite la confusion.
+  // In `exact_ignore_params` mode at least one parameter must be declared,
+  // otherwise the mode is equivalent to `exact` and the distinction is misleading.
   if (data.deduplicationEnabled && data.deduplicationMatchMode === 'exact_ignore_params') {
     return Array.isArray(data.ignoredQueryParams) && data.ignoredQueryParams.length > 0;
   }
@@ -100,10 +100,9 @@ export const domainRuleSchema = z.object({
   path: ['ignoredQueryParams']
 });
 
-// Type inféré
 export type DomainRule = z.infer<typeof domainRuleSchema>;
 
-// Schéma avec validation d'unicité du label pour un domainRule individuel
+// Schema with label-uniqueness validation for a single domain rule.
 export const createDomainRuleSchemaWithUniqueness = (existingRules: DomainRule[], editingRuleId?: string) => {
   return domainRuleSchema.refine((data) => {
     const existingLabels = existingRules
@@ -117,7 +116,7 @@ export const createDomainRuleSchemaWithUniqueness = (existingRules: DomainRule[]
   });
 };
 
-// Schéma pour les tableaux avec validation d'unicité des labels
+// Array schema that validates label uniqueness across all domain rules.
 export const domainRulesSchema = z.array(domainRuleSchema).refine((rules) => {
   const labels = rules.map(rule => rule.label.toLowerCase());
   const uniqueLabels = new Set(labels);

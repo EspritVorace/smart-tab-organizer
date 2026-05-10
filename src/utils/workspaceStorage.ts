@@ -11,9 +11,9 @@ import type { WorkspaceMeta } from '@/schemas/workspace.js';
 export const DEFAULT_WORKSPACE_ID = 'default';
 
 /**
- * Liste des champs scopés par workspace, exposée pour la migration et les tests.
- * Chaque entrée représente une clé qui était à la racine de `storage.local`
- * avant l'introduction des workspaces, et qui est désormais préfixée par
+ * List of fields scoped per workspace, exposed for migration and tests.
+ * Each entry represents a key that lived at the root of `storage.local`
+ * before workspaces were introduced and is now prefixed with
  * `local:ws:{wsId}:`.
  */
 export const WORKSPACE_SCOPED_KEYS = [

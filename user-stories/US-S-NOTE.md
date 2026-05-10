@@ -1,123 +1,116 @@
-# US-S-NOTE — Notes de session
+# US-S-NOTE: Session notes
 
-## Contexte
+## Context
 
-Les sessions permettent de sauvegarder un état d'onglets pour une restauration ultérieure.
-Cependant, l'utilisateur ne dispose d'aucun moyen d'annoter une session pour expliquer son
-contexte : pourquoi elle a été créée, ce sur quoi elle porte, ce qu'il reste à faire, etc.
+Sessions allow saving a tab state for later restoration.
+However, the user has no way to annotate a session to explain its context: why it was created, what it covers, what is left to do, etc.
 
-Ajouter un champ **note libre** (texte multiligne) à chaque session permet de contextualiser
-les sessions et de les retrouver plus facilement par leur contenu textuel.
+Adding a **free-form note** field (multiline text) to each session allows contextualizing sessions and finding them more easily by their textual content.
 
 ---
 
 ## User Stories
 
-### US-S-NOTE-01 — Ajouter une note lors de la création d'un snapshot
+### US-S-NOTE-01: Adding a note when creating a snapshot
 
-**En tant qu'** utilisateur qui prend un snapshot de ses onglets,
-**je veux** pouvoir rédiger une note optionnelle avant de sauvegarder la session,
-**afin de** documenter immédiatement le contexte de cette capture.
+**As a** user taking a snapshot of their tabs,
+**I want** to be able to write an optional note before saving the session,
+**so that** I can immediately document the context of this capture.
 
-**Critères d'acceptance :**
-- Le wizard de snapshot expose un champ `TextArea` (Radix, redimensionnable verticalement)
-  labellisé **« Note »**, sous la sélection des onglets.
-- Le champ est optionnel : laisser le champ vide ne bloque pas la sauvegarde.
-- La note saisie est persistée dans la session créée.
-- À l'ouverture du wizard, le champ est vide.
-
----
-
-### US-S-NOTE-02 — Modifier la note via le dialog d'édition
-
-**En tant qu'** utilisateur qui édite une session existante,
-**je veux** pouvoir lire, modifier ou supprimer la note associée,
-**afin de** maintenir une annotation à jour au fil du temps.
-
-**Critères d'acceptance :**
-- Le dialog d'édition de session expose un `TextArea` (Radix, redimensionnable verticalement)
-  labellisé **« Note »**, sous l'éditeur d'onglets.
-- La valeur initiale du champ est la note existante (vide si aucune note).
-- Toute modification de la note rend le dialog **dirty** (le dialog de confirmation
-  « modifications non enregistrées » apparaît si l'utilisateur tente de fermer sans sauvegarder).
-- La note modifiée est persistée après clic sur **Enregistrer**.
-- Vider complètement le champ efface la note de la session.
+**Acceptance criteria:**
+- The snapshot wizard exposes a `TextArea` field (Radix, vertically resizable)
+  labeled **"Note"**, below the tab selection.
+- The field is optional: leaving the field empty does not block saving.
+- The entered note is persisted in the created session.
+- When the wizard opens, the field is empty.
 
 ---
 
-### US-S-NOTE-03 — Affichage de la note dans la carte de session dépliée
+### US-S-NOTE-02: Modifying the note via the editing dialog
 
-**En tant qu'** utilisateur consultant la liste des sessions,
-**je veux** voir la note d'une session lorsque je déplie sa carte,
-**afin de** comprendre rapidement le contexte de la session sans l'ouvrir.
+**As a** user editing an existing session,
+**I want** to be able to read, modify, or remove the associated note,
+**so that** I can keep an annotation up to date over time.
 
-**Critères d'acceptance :**
-- La note s'affiche **sous le prévisuel des onglets** dans la section dépliable de la carte.
-- Elle n'est visible que lorsque la carte est dépliée.
-- Si la session n'a pas de note, aucune zone de note n'est affichée.
-- Les retours à la ligne de la note sont respectés à l'affichage (`white-space: pre-wrap`).
-
----
-
-### US-S-NOTE-04 — La recherche trouve du texte dans la note
-
-**En tant qu'** utilisateur effectuant une recherche dans les sessions,
-**je veux** que la barre de recherche trouve aussi les sessions dont la note contient
-le terme recherché,
-**afin de** retrouver une session grâce à une annotation que j'y avais laissée.
-
-**Critères d'acceptance :**
-- Saisir un terme contenu dans la note d'une session fait apparaître cette session
-  dans la liste filtrée.
-- La section dépliable (preview) de la session est **automatiquement ouverte**
-  (même comportement que lorsqu'un onglet correspond).
-- La recherche est insensible à la casse et aux accents.
-- Si seule la note correspond (ni nom ni onglets), la carte s'ouvre quand même.
+**Acceptance criteria:**
+- The session editing dialog exposes a `TextArea` (Radix, vertically resizable)
+  labeled **"Note"**, below the tab editor.
+- The initial value of the field is the existing note (empty if no note).
+- Any modification to the note marks the dialog as **dirty** (the "unsaved changes" confirmation dialog appears if the user tries to close without saving).
+- The modified note is persisted after clicking **Save**.
+- Fully clearing the field removes the note from the session.
 
 ---
 
-### US-S-NOTE-05 — Surlignage du texte correspondant dans la note
+### US-S-NOTE-03: Display of the note in the expanded session card
 
-**En tant qu'** utilisateur effectuant une recherche,
-**je veux** que la partie de la note correspondant au terme de recherche soit
-visuellement mise en évidence,
-**afin de** repérer instantanément pourquoi la session apparaît dans les résultats.
+**As a** user browsing the list of sessions,
+**I want** to see a session's note when I expand its card,
+**so that** I can quickly understand the session context without opening it.
 
-**Critères d'acceptance :**
-- Le terme recherché est **surligné** (fond jaune, texte en gras) dans le texte de la note
-  affiché dans la carte dépliée.
-- Le surlignage utilise le composant `AccessibleHighlight` (marqueurs `sr-only` inclus).
-- En l'absence de terme de recherche, aucun surlignage n'est affiché.
-- Le surlignage est insensible à la casse et aux accents (cohérent avec le filtrage).
+**Acceptance criteria:**
+- The note appears **below the tab preview** in the expandable section of the card.
+- It is only visible when the card is expanded.
+- If the session has no note, no note area is shown.
+- Line breaks in the note are respected on display (`white-space: pre-wrap`).
 
 ---
 
-## Règles de gestion
+### US-S-NOTE-04: Search finds text in the note
 
-| Condition | Preview de la session | Note |
+**As a** user searching in sessions,
+**I want** the search bar to also find sessions whose note contains the searched term,
+**so that** I can find a session via an annotation I had left on it.
+
+**Acceptance criteria:**
+- Typing a term contained in a session's note makes that session appear in the filtered list.
+- The expandable section (preview) of the session is **automatically opened**
+  (same behavior as when a tab matches).
+- The search is case- and accent-insensitive.
+- If only the note matches (neither name nor tabs), the card still opens.
+
+---
+
+### US-S-NOTE-05: Highlighting the matching text in the note
+
+**As a** user performing a search,
+**I want** the part of the note matching the search term to be visually highlighted,
+**so that** I can instantly see why the session appears in the results.
+
+**Acceptance criteria:**
+- The searched term is **highlighted** (yellow background, bold text) in the note text shown in the expanded card.
+- The highlighting uses the `AccessibleHighlight` component (with `sr-only` markers included).
+- When no search term is provided, no highlighting is shown.
+- The highlighting is case- and accent-insensitive (consistent with filtering).
+
+---
+
+## Business rules
+
+| Condition | Session preview | Note |
 |---|---|---|
-| Correspondance sur la note uniquement | **Ouverte automatiquement** | Note visible avec surlignage |
-| Correspondance sur nom + note | **Ouverte automatiquement** | Note visible avec surlignage |
-| Correspondance sur onglets + note | **Ouverte automatiquement** | Note visible avec surlignage |
-| Correspondance sur nom uniquement | Fermée | N/A |
-| Aucune correspondance | Session masquée | N/A |
+| Match on the note only | **Automatically opened** | Note visible with highlighting |
+| Match on name + note | **Automatically opened** | Note visible with highlighting |
+| Match on tabs + note | **Automatically opened** | Note visible with highlighting |
+| Match on name only | Closed | N/A |
+| No match | Session hidden | N/A |
 
 ---
 
-## Champ de recherche (étendu)
+## Search field (extended)
 
-La recherche porte désormais sur les champs suivants :
+The search now applies to the following fields:
 
-1. `session.name` — Nom de la session
-2. `group.title` — Titre de chaque groupe
-3. `tab.title` — Titre de chaque onglet
-4. `tab.url` — URL de chaque onglet
-5. `session.note` — **Note de session** *(nouveau)*
+1. `session.name`: Session name
+2. `group.title`: Title of each group
+3. `tab.title`: Title of each tab
+4. `tab.url`: URL of each tab
+5. `session.note`: **Session note** *(new)*
 
 ---
 
-## Hors périmètre
+## Out of scope
 
-- Formatage riche (markdown, HTML) dans la note.
-- Historique des modifications de la note.
-- Note sur les groupes ou les onglets individuels.
+- Rich formatting (markdown, HTML) in the note.
+- History of note modifications.
+- Notes on groups or individual tabs.

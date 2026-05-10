@@ -75,12 +75,12 @@ describe('Sidebar — static renders', () => {
 });
 
 describe('SidebarSearch', () => {
-  it('retourne null quand isCollapsed=true', () => {
+  it('returns null when isCollapsed=true', () => {
     const { container } = render(<SidebarSearch isCollapsed={true} />);
     expect(container.firstChild).toBeNull();
   });
 
-  it('appelle onSearch avec la valeur courante quand Enter est pressé', () => {
+  it('calls onSearch with the current value when Enter is pressed', () => {
     const onSearch = vi.fn();
     render(<SidebarSearch value="test" onSearch={onSearch} />);
     const input = screen.getByPlaceholderText('Search...');
@@ -88,7 +88,7 @@ describe('SidebarSearch', () => {
     expect(onSearch).toHaveBeenCalledWith('test');
   });
 
-  it("n'appelle pas onSearch quand une autre touche est pressée", () => {
+  it('does not call onSearch when a different key is pressed', () => {
     const onSearch = vi.fn();
     render(<SidebarSearch value="test" onSearch={onSearch} />);
     const input = screen.getByPlaceholderText('Search...');
@@ -96,7 +96,7 @@ describe('SidebarSearch', () => {
     expect(onSearch).not.toHaveBeenCalled();
   });
 
-  it("n'appelle pas onSearch quand onSearch n'est pas fourni", () => {
+  it('does not call onSearch when onSearch is not provided', () => {
     render(<SidebarSearch value="test" />);
     const input = screen.getByPlaceholderText('Search...');
     expect(() => fireEvent.keyDown(input, { key: 'Enter' })).not.toThrow();

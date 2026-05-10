@@ -3,7 +3,7 @@ import type { Preview } from '@storybook/react'
 import { Theme } from '@radix-ui/themes'
 import '../src/styles/radix-themes.css'
 
-// Cache pour les messages (exposé globalement pour le mock)
+// Message cache (exposed globally for the mock).
 (globalThis as any).messagesCache = {};
 const messagesCache = (globalThis as any).messagesCache;
 

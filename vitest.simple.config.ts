@@ -5,8 +5,8 @@ import { fileURLToPath } from 'url';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
-// Alias wxt/browser vers mock-browser (fakeBrowser) pour les tests, sans passer
-// par WxtVitest() qui requiert un accès réseau (plugin download).
+// Alias wxt/browser to mock-browser (fakeBrowser) for the tests, without going
+// through WxtVitest() which requires network access (plugin download).
 const mockBrowserPath = path.resolve(__dirname, 'node_modules/wxt/dist/virtual/mock-browser.mjs');
 
 export default defineConfig({
@@ -24,8 +24,8 @@ export default defineConfig({
     ],
     exclude: [],
     setupFiles: ['./tests/setup.ts', './tests/setup-ui.ts', './tests/setup-storybook.ts'],
-    // Le parallélisme au niveau fichier est sûr : chaque worker Vitest a son
-    // propre contexte de modules, donc fakeBrowser et i18n sont isolés par worker.
+    // File-level parallelism is safe: each Vitest worker has its own module
+    // context, so fakeBrowser and i18n are isolated per worker.
     fileParallelism: true,
     reporters: [
       'default',
