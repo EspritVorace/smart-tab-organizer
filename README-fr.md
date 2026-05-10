@@ -4,168 +4,93 @@
 
 # SmartTab Organizer
 
-![Licence](https://img.shields.io/badge/License-GPL_v3-blue.svg)
+> **Dompte tes onglets. Sans cloud, sans IA, sans tracking.**
 
-**SmartTab Organizer** est une extension multi-navigateur qui regroupe automatiquement les onglets liés, évite les doublons et sauvegarde vos espaces de travail sous forme de sessions nommées.
+Une extension Chrome et Firefox qui regroupe tes onglets par domaine, supprime les doublons, et capture tes espaces de travail sous forme de sessions à restaurer en un clic.
 
 <p align="center">
-  <img src="assets/store.png" alt="SmartTab Organizer">
+  <img src="assets/store.png" alt="SmartTab Organizer" width="720">
 </p>
 
-## 🛒 Chrome Web Store ##
-
-
-[![](https://img.shields.io/chrome-web-store/v/ijnpdkkcbmfikocmboibffjgbohhlmah?style=for-the-badge&label=version)](https://chromewebstore.google.com/detail/smarttab-organizer/ijnpdkkcbmfikocmboibffjgbohhlmah)
-
-## 🦊 Firefox Add-ons ##
-
-
-[![](https://img.shields.io/amo/v/smarttab-organizer?style=for-the-badge&label=version)](https://addons.mozilla.org/firefox/addon/smarttab-organizer/)
-
-## Fonctionnalités
-
-### ⚙️ Gestion des Règles
-
-Les règles de domaine sont créées via un assistant guidé en 4 étapes : identité → mode de nommage → options → récapitulatif.
-
-Trois modes de nommage de groupe :
-- **Préréglage** — choisissez un motif regex intégré ou personnalisé (numéros de tickets Jira, noms de dépôts GitHub…)
-- **Demander** — prompt pour saisir un nom à l'ouverture de l'onglet
-- **Manuel** — nom de groupe fixe
-
 <p align="center">
-  <img src="doc/readme/fr-dark-rules-create-summary.png" alt="Assistant de création de règle — étape récapitulatif">
+  <a href="https://chromewebstore.google.com/detail/smarttab-organizer/ijnpdkkcbmfikocmboibffjgbohhlmah">
+    <img src="https://img.shields.io/chrome-web-store/v/ijnpdkkcbmfikocmboibffjgbohhlmah?style=for-the-badge&label=Chrome%20Web%20Store&logo=googlechrome&color=4285F4" alt="Disponible sur le Chrome Web Store">
+  </a>
+  <a href="https://addons.mozilla.org/firefox/addon/smarttab-organizer/">
+    <img src="https://img.shields.io/amo/v/smarttab-organizer?style=for-the-badge&label=Firefox%20Add-ons&logo=firefox&color=FF7139" alt="Disponible sur Firefox Add-ons">
+  </a>
+  <img src="https://img.shields.io/badge/Licence-GPL_v3-blue.svg?style=for-the-badge" alt="Licence : GPL v3">
 </p>
 
-### 🗂️ Regroupement Automatique
+## Pourquoi ?
 
-Clic molette ou clic droit → « Ouvrir dans un nouvel onglet » sur un site configuré, et l'onglet rejoint instantanément le bon groupe.
+- Tes onglets s'accumulent plus vite que tu ne les fermes. SmartTab les met à leur place, automatiquement.
+- Les autres outils envoient tes données ailleurs ou collent de l'IA partout. Ici, tout reste dans ton navigateur, zéro télémétrie.
+- L'espace de travail que tu as monté mérite de revenir demain. Sauvegarde-le, nomme-le, restaure-le.
 
-- Nom du groupe extrait du titre de la page, de l'URL ou d'un préréglage regex
-- Préréglages intégrés pour Jira, GitLab, GitHub, Trello et plus encore
+## Ce que ça fait
+
+### 🗂️ Regroupement automatique par domaine
+
+Tu ouvres un ticket Jira, une PR GitHub, une page de docs : le nouvel onglet atterrit dans le bon groupe instantanément. Le nom du groupe vient du titre de la page, de l'URL, ou d'un préréglage regex (Jira, GitHub, GitLab, Trello, et bien d'autres).
 
 <p align="center">
-  <img src="assets/readme/gifs/regroup.gif" alt="Vidéo de regroupement automatique">
+  <img src="assets/readme/gifs/regroup.gif" alt="Démo du regroupement automatique" width="640">
 </p>
 
 ### 🔁 Déduplication
 
-Ouvrir une page déjà ouverte ferme le doublon et ne conserve qu'un seul onglet.
-La sensibilité de correspondance est configurable par règle : URL exacte, URL sans paramètres ignorés, ou « includes ».
-Vous choisissez lequel des deux onglets survit : le groupé puis le nouveau (par défaut), le groupé puis l'existant, toujours l'existant, ou toujours le nouveau.
+Tu ouvres une page déjà ouverte ? Le doublon disparaît. Le mode de comparaison se règle par règle (URL exacte, "contient", ou "ignore ces paramètres"), et tu choisis lequel des deux onglets survit.
 
 <p align="center">
-  <img src="assets/readme/gifs/dedup.gif" alt="Vidéo de déduplication">
+  <img src="assets/readme/gifs/dedup.gif" alt="Démo de la déduplication" width="640">
 </p>
 
+### 📷 Des sessions vraiment utilisables
 
-### 📷 Sessions
-
-Sauvegardez un snapshot nommé de vos onglets et groupes ouverts, et restaurez-les quand vous en avez besoin.
-
-- **Sessions épinglées** — promouvez un snapshot dans le popup pour un accès en un clic, avec une icône personnalisée
-- **Assistant de restauration** — choisissez les onglets à récupérer, la fenêtre cible, et résolvez les conflits de groupes avant d'appliquer
-- **Recherche profonde** — retrouvez onglets et groupes par nom dans toutes vos sessions sauvegardées
-- **Éditeur de session** — réorganisez, renommez et supprimez onglets et groupes sans avoir à restaurer
-- **Notes de session** — annotez vos sessions avec du texte libre
-- **Drag-and-drop** — réordonnez vos sessions par glisser-déposer
+Capture tes onglets et tes groupes ouverts, nomme-les, épingle ceux dans lesquels tu vis. Restaure dans la fenêtre courante, dans une nouvelle, ou remplace ce que tu as. Chaque session est éditable, cherchable jusqu'au niveau des onglets, et peut porter tes propres notes.
 
 <p align="center">
-  <img src="doc/readme/fr-dark-sessions-list.png" alt="Liste des sessions">
+  <img src="assets/readme/fr-dark-sessions-list.png" alt="Liste des sessions" width="720">
 </p>
 
-<p align="center">
-  <img src="doc/readme/fr-dark-sessions-search-deep.png" alt="Recherche profonde dans les sessions">
-</p>
+## Et aussi
 
+- **Espaces de travail** : règles, sessions et stats séparés par contexte (pro, perso, projet annexe)
+- **20+ packs de règles** prêts à importer pour les outils courants (GitHub, GitLab, Jira, AWS, assistants IA, Discord...)
+- **Import / export** avec résolution de conflits pour les règles comme pour les sessions
+- **Statistiques locales** : vois combien de regroupements et de déduplications te font gagner du temps
+- **Raccourcis clavier** avec panneau d'aide intégré
+- **Thème clair / sombre / système**
+- **Accessibilité d'abord** : audité par axe-core, navigation clavier, compatible lecteurs d'écran
+- **3 langues** : français, anglais, espagnol
 
-Un **assistant d'import/export pour les Règles et les Sessions** classe les éléments entrants en nouveaux, en conflit ou identiques, et résout les conflits pas à pas.
+## 📖 Documentation
 
-<p align="center">
-  <img src="doc/readme/fr-dark-rules-import-text-conflicts.png" alt="Assistant d'import avec résolution de conflits">
-</p>
-
-### ⚡ Popup d'Accès Rapide
-
-- Activez/désactivez globalement le regroupement et la déduplication
-- Prenez un snapshot ou accédez aux Sessions en un clic
-- Sessions épinglées listées avec des actions de restauration rapide
-
-<p align="center">
-
-<img src="doc/readme/fr-dark-popup-content.png" alt="Contenu du popup">
-</p>
-
-### ♿ Accessibilité & i18n
-
-Navigation complète au clavier et support des lecteurs d'écran via les primitives Radix UI. Disponible en Anglais, Français et Espagnol.
-
-## 💻 Installation
+Le guide complet est dans [`docs/`](docs/src/content/docs/) (Astro Starlight, 3 langues, plus de 30 pages avec captures). Lis le MDX directement sur GitHub, ou lance la doc en local :
 
 ```bash
-git clone https://github.com/EspritVorace/smart-tab-organizer.git
-cd smart-tab-organizer
-npm install -g pnpm  # si nécessaire
-pnpm install
-pnpm build
+pnpm docs:dev
 ```
 
-- **Chrome :** `chrome://extensions/` → Charger l'extension non empaquetée → `.output/chrome-mv3`
+## 🛠️ Pour les contributeurs
 
-Pour le développement avec rechargement automatique : `pnpm dev` (Chrome) ou `pnpm dev:firefox`.
-
-## 🛠️ Stack Technique
-
-| Couche | Technologie |
-|---|---|
-| Framework d'extension | [WXT](https://wxt.dev/) |
-| Interface | [React 19](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
-| Bibliothèque de composants | [Radix UI Themes](https://www.radix-ui.com/themes) + icônes [Lucide](https://lucide.dev/) |
-| Formulaires & validation | [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) |
-| Arbre d'onglets | [react-accessible-treeview](https://github.com/dgreene1/react-accessible-treeview) |
-| Palette de commandes | [cmdk](https://cmdk.paco.me/) |
-| Drag-and-drop | [@dnd-kit](https://dndkit.com/) |
-| Thèmes | [next-themes](https://github.com/pacocoursey/next-themes) |
-| Tests unitaires | [Vitest](https://vitest.dev/) + [Testing Library](https://testing-library.com/) |
-| Tests E2E | [Playwright](https://playwright.dev/) |
-| Audits accessibilité | [axe-core](https://github.com/dequelabs/axe-core) (Storybook + Playwright) |
-| Qualité du code | [ESLint](https://eslint.org/) + [SonarJS](https://github.com/SonarSource/SonarJS) + [jscpd](https://github.com/kucherenko/jscpd) (duplication) |
-| Rapports de tests | [CTRF](https://ctrf.io/) (format unifié de rapport de tests) |
-| Explorateur de composants | [Storybook](https://storybook.js.org/) |
-| Site de documentation | [Astro Starlight](https://starlight.astro.build/) |
-| Gestionnaire de paquets | [pnpm](https://pnpm.io/) |
-
-## 🤝 Contribuer
-
-Les contributions sont les bienvenues ! Voici comment démarrer :
-
-**Prérequis :** Node.js, [pnpm](https://pnpm.io/) (`npm install -g pnpm`)
+**Prérequis :** Node.js, [pnpm](https://pnpm.io/)
 
 ```bash
-git clone https://github.com/EspritVorace/smart-tab-organizer.git
-cd smart-tab-organizer
 pnpm install
-pnpm dev          # Chrome avec rechargement automatique
-pnpm dev:firefox  # Firefox avec rechargement automatique
-```
-
-**Tests**
-
-```bash
-pnpm test         # Tests unitaires (Vitest)
-pnpm test:e2e     # Tests end-to-end (Playwright)
+pnpm dev          # Chrome avec rechargement auto
+pnpm dev:firefox  # Firefox avec rechargement auto
+pnpm test         # Tests unitaires Vitest
+pnpm test:e2e     # Tests E2E Playwright
 pnpm storybook    # Explorateur de composants (port 6006)
+pnpm build        # Build production
 ```
 
-**Conventions de code**
-
-- Utiliser `logger.debug()` de `src/utils/logger.ts` — jamais `console.log()`
-- Pas de type `any` — utiliser des types précis ou `unknown` avec narrowing
-- Tout texte UI via `getMessage()` de `src/utils/i18n.ts` — pas de chaînes en dur
-- Accessibilité via les primitives Radix UI ; les icônes Lucide nécessitent `aria-hidden="true"`
+La stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) et les conventions de code sont documentées dans [`CLAUDE.md`](CLAUDE.md) et l'[annexe stack technique](docs/src/content/docs/annexes/stack-technique.mdx).
 
 Merci d'ouvrir une issue avant de soumettre une pull request importante.
 
 ## 📜 Licence
 
-GNU General Public License v3.0
+GNU General Public License v3.0.
