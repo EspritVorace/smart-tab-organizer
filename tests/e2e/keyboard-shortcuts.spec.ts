@@ -32,7 +32,7 @@ test.describe('[US-KB-popup] Popup shortcuts', () => {
     await goToPopup(page, extensionId);
 
     // Wait for the toolbar to mount: this guarantees the popup-level
-    // useKeyboardShortcuts effect has run and the document keydown listener
+    // useShortcuts effect has run and the document keydown listener
     // is attached before we send the key.
     await expect(page.getByTestId('popup-toolbar')).toBeVisible();
 

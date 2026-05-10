@@ -6,14 +6,36 @@ import {
   getShortcutsByGroup,
   getShortcutsByScope,
 } from '../../src/shortcuts/registry';
+import { GROUP_DESCRIPTORS } from '../../src/shortcuts/groups';
+import type { ShortcutScope } from '../../src/shortcuts/types';
 import { parseCombo } from '../../src/utils/keyboardShortcuts';
 
-const enMessages: Record<string, { message: string }> = JSON.parse(
-  readFileSync(
-    join(__dirname, '..', '..', 'public', '_locales', 'en', 'messages.json'),
-    'utf-8',
-  ),
-);
+function loadLocaleMessages(locale: 'en' | 'fr' | 'es'): Record<string, { message: string }> {
+  return JSON.parse(
+    readFileSync(
+      join(__dirname, '..', '..', 'public', '_locales', locale, 'messages.json'),
+      'utf-8',
+    ),
+  );
+}
+
+const enMessages = loadLocaleMessages('en');
+const frMessages = loadLocaleMessages('fr');
+const esMessages = loadLocaleMessages('es');
+
+const VALID_SCOPES: readonly ShortcutScope[] = [
+  'global',
+  'page:home',
+  'page:rules',
+  'page:sessions',
+  'page:importexport',
+  'page:stats',
+  'page:settings',
+  'page:workspaces',
+  'page:popup',
+  'widget:session-card',
+  'widget:rule-card',
+];
 
 describe('SHORTCUTS_REGISTRY', () => {
   it('uses each entry id as its own key', () => {
@@ -47,6 +69,42 @@ describe('SHORTCUTS_REGISTRY', () => {
         enMessages[entry.descriptionKey],
         `missing locale key: ${entry.descriptionKey}`,
       ).toBeDefined();
+    }
+  });
+
+  it('every descriptionKey exists in the fr locale', () => {
+    for (const entry of Object.values(SHORTCUTS_REGISTRY)) {
+      expect(
+        frMessages[entry.descriptionKey],
+        `missing fr locale key: ${entry.descriptionKey}`,
+      ).toBeDefined();
+    }
+  });
+
+  it('every descriptionKey exists in the es locale', () => {
+    for (const entry of Object.values(SHORTCUTS_REGISTRY)) {
+      expect(
+        esMessages[entry.descriptionKey],
+        `missing es locale key: ${entry.descriptionKey}`,
+      ).toBeDefined();
+    }
+  });
+
+  it('every entry.group is a known GROUP_DESCRIPTORS key', () => {
+    for (const entry of Object.values(SHORTCUTS_REGISTRY)) {
+      expect(
+        GROUP_DESCRIPTORS[entry.group],
+        `entry ${entry.id} references unknown group ${entry.group}`,
+      ).toBeDefined();
+    }
+  });
+
+  it('every entry.scope belongs to the ShortcutScope union', () => {
+    for (const entry of Object.values(SHORTCUTS_REGISTRY)) {
+      expect(
+        VALID_SCOPES,
+        `entry ${entry.id} references unknown scope ${entry.scope}`,
+      ).toContain(entry.scope);
     }
   });
 

@@ -536,6 +536,12 @@
   "shortcutsUnboundWarning": { "message": "Algunos atajos del navegador no están definidos. El navegador no aplica automáticamente los atajos sugeridos después de una actualización de la extensión; defínelos en 'Personalizar atajos' abajo." },
   "shortcutNotSet": { "message": "Sin definir" },
 
+  "docsKeyboardShortcutsTitle": { "message": "Atajos de teclado" },
+  "docsKeyboardShortcutsIntro": { "message": "Todos los atajos de teclado disponibles en SmartTab Organizer, agrupados por superficie. Los atajos globales se pueden personalizar desde la configuración de extensiones del navegador." },
+  "docsKeyboardShortcutsTableHeaderShortcut": { "message": "Atajo" },
+  "docsKeyboardShortcutsTableHeaderAction": { "message": "Acción" },
+  "docsKeyboardShortcutsGenerated": { "message": "Esta página se genera desde src/shortcuts/registry.ts. Ejecuta pnpm shortcuts:doc para actualizarla." },
+
   "shortcutsGroupGlobal": { "message": "Globales (navegador)" },
   "shortcutsGroupPopup": { "message": "Popup" },
   "shortcutsGroupOptions": { "message": "Página de opciones" },
