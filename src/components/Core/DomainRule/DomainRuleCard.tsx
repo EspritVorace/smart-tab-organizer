@@ -123,6 +123,8 @@ export function DomainRuleCard({
     <Card
       ref={isSummary ? null : ref}
       data-testid={`rule-card-${rule.id}`}
+      data-rule-id={isSummary ? undefined : rule.id}
+      data-shortcut-scope={isSummary ? undefined : 'widget:rule-card'}
       variant="surface"
       size="2"
       role="listitem"

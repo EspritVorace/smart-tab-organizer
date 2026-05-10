@@ -47,6 +47,15 @@ export interface ShortcutEntry {
   allowWhenDialogOpen?: boolean;
 
   /**
+   * When true (only meaningful for `global` and `page:*` scopes), the
+   * shortcut is suppressed if the event target is inside any element flagged
+   * with `data-shortcut-scope="widget:..."`. Lets a focused widget claim
+   * conflicting key combos (e.g. `r` belongs to the focused session card,
+   * not the popup-level restore action).
+   */
+  excludeIfInsideWidget?: boolean;
+
+  /**
    * Manifest `commands` entry name. When set, the panel reads the live combo
    * from `browser.commands.getAll()` instead of `defaultBindings` so it
    * reflects any per-user customization done via the browser UI.

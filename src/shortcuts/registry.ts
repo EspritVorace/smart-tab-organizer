@@ -37,13 +37,17 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     commandName: '_execute_action',
   },
 
-  // Popup
+  // Popup. The four action-binding shortcuts (s/r/o/p) yield to a focused
+  // pinned card so the card's own widget bindings (sessionCard.restore.*)
+  // stay authoritative; `?` is intentionally never widget-suppressed so the
+  // help drawer can be summoned from anywhere in the popup.
   'popup.save': {
     id: 'popup.save',
     defaultBindings: ['s'],
     descriptionKey: 'shortcutDescPopupSave',
     group: 'popup',
     scope: 'page:popup',
+    excludeIfInsideWidget: true,
   },
   'popup.restore': {
     id: 'popup.restore',
@@ -51,6 +55,7 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     descriptionKey: 'shortcutDescPopupRestore',
     group: 'popup',
     scope: 'page:popup',
+    excludeIfInsideWidget: true,
   },
   'popup.organize': {
     id: 'popup.organize',
@@ -58,6 +63,7 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     descriptionKey: 'shortcutDescPopupOrganize',
     group: 'popup',
     scope: 'page:popup',
+    excludeIfInsideWidget: true,
   },
   'popup.options': {
     id: 'popup.options',
@@ -65,6 +71,7 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     descriptionKey: 'shortcutDescPopupOptions',
     group: 'popup',
     scope: 'page:popup',
+    excludeIfInsideWidget: true,
   },
   'popup.help': {
     id: 'popup.help',
@@ -147,33 +154,37 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'list-rules',
     scope: 'page:rules',
   },
-  'list.rules.edit': {
-    id: 'list.rules.edit',
+  // Per-card actions: only fire when a rule card itself has focus. They keep
+  // the same display group (`list-rules`) so the help panel still shows them
+  // under "Rules list", but their scope is widget so the page-level handler
+  // doesn't fight with focused-card shortcuts.
+  'ruleCard.edit': {
+    id: 'ruleCard.edit',
     defaultBindings: ['e'],
     descriptionKey: 'shortcutDescListEdit',
     group: 'list-rules',
-    scope: 'page:rules',
+    scope: 'widget:rule-card',
   },
-  'list.rules.toggleSelection': {
-    id: 'list.rules.toggleSelection',
+  'ruleCard.toggleSelection': {
+    id: 'ruleCard.toggleSelection',
     defaultBindings: ['Space'],
     descriptionKey: 'shortcutDescListToggleSelection',
     group: 'list-rules',
-    scope: 'page:rules',
+    scope: 'widget:rule-card',
   },
-  'list.rules.toggleEnabled': {
-    id: 'list.rules.toggleEnabled',
+  'ruleCard.toggleEnabled': {
+    id: 'ruleCard.toggleEnabled',
     defaultBindings: ['t'],
     descriptionKey: 'shortcutDescListToggleEnabled',
     group: 'list-rules',
-    scope: 'page:rules',
+    scope: 'widget:rule-card',
   },
-  'list.rules.delete': {
-    id: 'list.rules.delete',
+  'ruleCard.delete': {
+    id: 'ruleCard.delete',
     defaultBindings: ['Delete'],
     descriptionKey: 'shortcutDescListDelete',
     group: 'list-rules',
-    scope: 'page:rules',
+    scope: 'widget:rule-card',
   },
   'list.rules.reorderKeyboard': {
     id: 'list.rules.reorderKeyboard',
@@ -198,26 +209,29 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'list-sessions',
     scope: 'page:sessions',
   },
-  'list.sessions.edit': {
-    id: 'list.sessions.edit',
+  // Per-card actions on the Sessions page (Edit/Delete/Pin). Group stays
+  // `list-sessions` so the help panel keeps them under "Sessions list" while
+  // the scope ties them to the focused session card.
+  'sessionCard.edit': {
+    id: 'sessionCard.edit',
     defaultBindings: ['e'],
     descriptionKey: 'shortcutDescListEdit',
     group: 'list-sessions',
-    scope: 'page:sessions',
+    scope: 'widget:session-card',
   },
-  'list.sessions.delete': {
-    id: 'list.sessions.delete',
+  'sessionCard.delete': {
+    id: 'sessionCard.delete',
     defaultBindings: ['Delete'],
     descriptionKey: 'shortcutDescListDelete',
     group: 'list-sessions',
-    scope: 'page:sessions',
+    scope: 'widget:session-card',
   },
-  'list.sessions.pin': {
-    id: 'list.sessions.pin',
+  'sessionCard.pin': {
+    id: 'sessionCard.pin',
     defaultBindings: ['p'],
     descriptionKey: 'shortcutDescListPin',
     group: 'list-sessions',
-    scope: 'page:sessions',
+    scope: 'widget:session-card',
   },
   'list.sessions.reorderKeyboard': {
     id: 'list.sessions.reorderKeyboard',

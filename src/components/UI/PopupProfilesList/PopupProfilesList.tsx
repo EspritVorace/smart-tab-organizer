@@ -12,6 +12,7 @@ import { getRuleCategory } from '@/utils/categoriesStore';
 import { chromeGroupColors } from '@/utils/tabTreeUtils';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
 import { useListNavigation } from '@/hooks/useListNavigation';
+import { useShortcuts } from '@/hooks/useShortcuts';
 import type { Session } from '@/types/session';
 import styles from './PopupProfilesList.module.css';
 
@@ -111,23 +112,44 @@ export function PopupProfilesList() {
 
   const { handleNavigationKey } = useListNavigation(listRef, '[data-popup-pinned-card]');
 
-  const handleCardKeyDown = useCallback((e: React.KeyboardEvent<HTMLElement>, session: Session, index: number) => {
+  // Card-level keydown is now navigation-only; the r/Shift+r/Alt+r/Alt+Shift+r
+  // bindings are dispatched at document level via the widget-scope shortcuts
+  // registered below.
+  const handleCardKeyDown = useCallback((e: React.KeyboardEvent<HTMLElement>, index: number) => {
     if (e.target !== e.currentTarget) return;
-    if (handleNavigationKey(e, index)) return;
-    if (e.key.toLowerCase() === 'r' && !e.ctrlKey && !e.metaKey) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.altKey && e.shiftKey) {
-        handleRestore(session, 'new');
-      } else if (e.altKey) {
-        handleRestore(session, 'replace');
-      } else if (e.shiftKey) {
-        handleRestore(session, 'current');
-      } else {
-        void openCustomizeRestore(session);
-      }
-    }
-  }, [handleNavigationKey, handleRestore]);
+    handleNavigationKey(e, index);
+  }, [handleNavigationKey]);
+
+  const getFocusedSession = useCallback((): Session | null => {
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement)) return null;
+    if (!active.matches('[data-shortcut-scope="widget:session-card"]')) return null;
+    const id = active.getAttribute('data-session-id');
+    if (!id) return null;
+    return pinnedSessions.find((s) => s.id === id) ?? null;
+  }, [pinnedSessions]);
+
+  useShortcuts(
+    {
+      'sessionCard.restore.custom': () => {
+        const focused = getFocusedSession();
+        if (focused) void openCustomizeRestore(focused);
+      },
+      'sessionCard.restore.current': () => {
+        const focused = getFocusedSession();
+        if (focused) handleRestore(focused, 'current');
+      },
+      'sessionCard.restore.replace': () => {
+        const focused = getFocusedSession();
+        if (focused) handleRestore(focused, 'replace');
+      },
+      'sessionCard.restore.new': () => {
+        const focused = getFocusedSession();
+        if (focused) handleRestore(focused, 'new');
+      },
+    },
+    { scope: 'widget:session-card' },
+  );
 
   const handleToggleEmptyCollapsed = useCallback((nextOpen: boolean) => {
     const nextCollapsed = !nextOpen;
@@ -219,12 +241,14 @@ export function PopupProfilesList() {
             key={session.id}
             data-testid={`popup-profile-item-${session.id}`}
             data-popup-pinned-card=""
+            data-session-id={session.id}
+            data-shortcut-scope="widget:session-card"
             size="1"
             tabIndex={0}
             role="listitem"
             aria-label={session.name}
             className={styles.pinnedCard}
-            onKeyDown={(e) => handleCardKeyDown(e, session, index)}
+            onKeyDown={(e) => handleCardKeyDown(e, index)}
           >
             <Flex align="center" gap="3" style={{ minWidth: 0 }}>
               <Flex align="center" style={{ flexShrink: 0 }}>

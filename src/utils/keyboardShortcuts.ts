@@ -100,6 +100,13 @@ export interface ShortcutDefinition {
    * the card's per-session R/Shift+R/Alt+R bindings stay authoritative).
    */
   excludeIfTargetWithin?: string;
+  /**
+   * CSS selector. When set, the shortcut only fires if the event target
+   * itself matches this selector (not its descendants). Used by widget-scope
+   * bindings so that pressing the combo on an inner control (drag handle,
+   * button) does not steal it from the inner control's own handler.
+   */
+  requireTargetMatches?: string;
 }
 
 export function shouldFire(event: KeyboardEvent, def: ShortcutDefinition): boolean {
@@ -109,5 +116,26 @@ export function shouldFire(event: KeyboardEvent, def: ShortcutDefinition): boole
   if (def.excludeIfTargetWithin && event.target instanceof Element) {
     if (event.target.closest(def.excludeIfTargetWithin)) return false;
   }
+  if (def.requireTargetMatches) {
+    if (!(event.target instanceof Element)) return false;
+    if (!event.target.matches(def.requireTargetMatches)) return false;
+  }
   return true;
+}
+
+/**
+ * CSS selector matching any element that opts into a `widget:*` shortcut
+ * scope. Page-level entries flagged `excludeIfInsideWidget` use this to
+ * yield to the focused widget without enumerating every widget kind.
+ */
+export const WIDGET_SCOPE_SELECTOR = '[data-shortcut-scope^="widget:"]';
+
+/**
+ * Returns the CSS selector that matches the element opting into a given
+ * widget scope (e.g. `[data-shortcut-scope="widget:session-card"]`). Used
+ * by `useShortcuts` to derive `requireTargetMatches` from a registry
+ * entry's `scope`.
+ */
+export function widgetScopeSelector(scope: string): string {
+  return `[data-shortcut-scope="${scope}"]`;
 }

@@ -13,9 +13,8 @@ import { getMessage } from '@/utils/i18n';
 import { foldAccents } from '@/utils/stringUtils';
 import { generateUUID } from '@/utils/utils';
 import { DomainRuleCard } from '@/components/Core/DomainRule/DomainRuleCard';
-import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useShortcuts } from '@/hooks/useShortcuts';
 import { useListNavigation } from '@/hooks/useListNavigation';
-import type { ShortcutDefinition } from '@/utils/keyboardShortcuts';
 import {
   moveToFirst,
   moveToLast,
@@ -232,47 +231,72 @@ export function DomainRulesPage({
 
   const { handleNavigationKey } = useListNavigation(listRef, '[role="listitem"]');
 
+  // The card keydown handler now only forwards arrow/Home/End to
+  // useListNavigation. The Enter binding is kept here because Enter to
+  // open the editor is a card-local interaction that is not in the registry
+  // (the registry exposes `e` for editing, surfaced via widget shortcuts
+  // below). All other key actions (e, t, Space, Delete) are dispatched at
+  // document level via `useShortcuts({...}, { scope: 'widget:rule-card' })`.
   const handleCardKeyDown = useCallback((e: React.KeyboardEvent, rule: DomainRuleSetting, index: number) => {
-    // Only act when the card element itself has focus (not a child input/button).
     if (e.target !== e.currentTarget) return;
-
     if (handleNavigationKey(e as React.KeyboardEvent<HTMLElement>, index)) return;
-
-    switch (e.key) {
-      case ' ':
-        e.preventDefault();
-        handleRowSelect(rule.id, !selectedIds.has(rule.id));
-        return;
-      case 'Enter':
-        e.preventDefault();
-        handleEditRule(rule);
-        return;
-      case 'Delete':
-        e.preventDefault();
-        setDeleteTarget({ type: 'single', ruleId: rule.id, focusIndex: index });
-        return;
-    }
-
-    if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
-    const lower = e.key.toLowerCase();
-    if (lower === 'e') {
+    if (e.key === 'Enter' && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
       e.preventDefault();
       handleEditRule(rule);
-    } else if (lower === 't') {
-      e.preventDefault();
-      handleToggleEnabled(rule.id, !rule.enabled);
     }
-  }, [handleNavigationKey, handleRowSelect, handleEditRule, handleToggleEnabled, selectedIds]);
+  }, [handleNavigationKey, handleEditRule]);
 
   const handleAddRule = useCallback(() => {
     setEditingRule(undefined);
     setIsModalOpen(true);
   }, []);
 
-  const pageShortcuts = useMemo<ShortcutDefinition[]>(() => [
-    { combo: 'n', action: handleAddRule },
-  ], [handleAddRule]);
-  useKeyboardShortcuts(pageShortcuts);
+  const getFocusedRule = useCallback((): { rule: DomainRuleSetting; index: number } | null => {
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement)) return null;
+    if (!active.matches('[data-shortcut-scope="widget:rule-card"]')) return null;
+    const id = active.getAttribute('data-rule-id');
+    if (!id) return null;
+    const cards = listRef.current?.querySelectorAll<HTMLElement>('[role="listitem"]');
+    let index = -1;
+    if (cards) {
+      cards.forEach((card, i) => {
+        if (card === active) index = i;
+      });
+    }
+    const rule = syncSettings.domainRules.find((r) => r.id === id);
+    return rule ? { rule, index } : null;
+  }, [syncSettings.domainRules]);
+
+  useShortcuts({ 'list.rules.new': handleAddRule }, { scope: 'page:rules' });
+
+  useShortcuts(
+    {
+      'ruleCard.edit': () => {
+        const focused = getFocusedRule();
+        if (focused) handleEditRule(focused.rule);
+      },
+      'ruleCard.toggleEnabled': () => {
+        const focused = getFocusedRule();
+        if (focused) handleToggleEnabled(focused.rule.id, !focused.rule.enabled);
+      },
+      'ruleCard.toggleSelection': () => {
+        const focused = getFocusedRule();
+        if (focused) handleRowSelect(focused.rule.id, !selectedIds.has(focused.rule.id));
+      },
+      'ruleCard.delete': () => {
+        const focused = getFocusedRule();
+        if (focused) {
+          setDeleteTarget({
+            type: 'single',
+            ruleId: focused.rule.id,
+            focusIndex: focused.index >= 0 ? focused.index : undefined,
+          });
+        }
+      },
+    },
+    { scope: 'widget:rule-card' },
+  );
 
   const handleSubmitRule = (rule: DomainRule) => {
     if (editingRule) {

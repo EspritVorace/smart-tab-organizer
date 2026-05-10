@@ -524,6 +524,8 @@ export function SessionCard({
       ref={isSummary ? null : ref}
       data-testid={`session-card-${session.id}`}
       data-session-card="true"
+      data-session-id={isSummary ? undefined : session.id}
+      data-shortcut-scope={isSummary ? undefined : 'widget:session-card'}
       role={isSummary ? 'listitem' : undefined}
       tabIndex={isSummary ? undefined : 0}
       onKeyDown={isSummary ? undefined : onCardKeyDown}
