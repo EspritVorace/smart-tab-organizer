@@ -79,7 +79,10 @@ describe('registry helpers', () => {
     expect(popupEntries.length).toBe(5);
 
     const cardEntries = getShortcutsByScope('widget:session-card');
-    expect(cardEntries.length).toBe(4);
+    expect(cardEntries.length).toBe(7);
+
+    const ruleCardEntries = getShortcutsByScope('widget:rule-card');
+    expect(ruleCardEntries.length).toBe(4);
   });
 
   it('getShortcutsByGroup returns only entries of the requested group', () => {

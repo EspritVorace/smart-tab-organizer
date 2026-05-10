@@ -23,7 +23,7 @@ export function ShortcutsDrawer({ open, onOpenChange }: ShortcutsDrawerProps) {
   }, []);
 
   // Toggle close on `?` while the drawer is open. Attached at the document
-  // level (capture phase) because the popup-level useKeyboardShortcuts has
+  // level (capture phase) because the popup-level useShortcuts dispatch has
   // `allowWhenDialogOpen: false` and Radix Themes' Dialog.Content can swallow
   // some bubbling keydowns from focused descendants.
   useEffect(() => {

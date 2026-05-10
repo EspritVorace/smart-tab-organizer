@@ -13,8 +13,7 @@ import { DEFAULT_WORKSPACE_ID } from '@/utils/workspaceStorage';
 import { getMessage } from '@/utils/i18n';
 import { logger } from '@/utils/logger';
 import { foldAccents } from '@/utils/stringUtils';
-import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
-import type { ShortcutDefinition } from '@/utils/keyboardShortcuts';
+import { useShortcuts } from '@/hooks/useShortcuts';
 import type { AppSettings } from '@/types/syncSettings';
 import type { WorkspaceMeta } from '@/schemas/workspace';
 
@@ -134,10 +133,7 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
 
   const handleOpenCreate = useCallback(() => setCreateOpen(true), []);
 
-  const pageShortcuts = useMemo<ShortcutDefinition[]>(() => [
-    { combo: 'n', action: handleOpenCreate },
-  ], [handleOpenCreate]);
-  useKeyboardShortcuts(pageShortcuts);
+  useShortcuts({ 'list.workspaces.new': handleOpenCreate }, { scope: 'page:workspaces' });
 
   const handleCreate = useCallback(
     async ({ name, accentColor }: { name: string; accentColor: WorkspaceMeta['accentColor'] }) => {

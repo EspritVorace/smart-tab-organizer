@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { mountExtensionApp } from '@/utils/mountExtensionApp.js';
 import { Box, Flex, Separator, Theme } from '@radix-ui/themes';
@@ -13,8 +13,7 @@ import { PopupWorkspaceSwitcher } from '@/components/UI/Workspace/PopupWorkspace
 import { ShortcutsDrawer } from '@/components/UI/ShortcutsPanel';
 import { openOptionsWithHash } from '@/utils/openOptions';
 import { useSettings } from '@/hooks/useSettings';
-import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
-import type { ShortcutDefinition } from '@/utils/keyboardShortcuts';
+import { useShortcuts } from '@/hooks/useShortcuts';
 import {
   ActiveWorkspaceProvider,
   useActiveWorkspaceContext,
@@ -61,15 +60,16 @@ export function PopupContent() {
     window.close();
   }, []);
 
-  const shortcuts = useMemo<ShortcutDefinition[]>(() => [
-    { combo: 's', action: handlePopupSave, excludeIfTargetWithin: '[data-popup-pinned-card]' },
-    { combo: 'r', action: handlePopupRestore, excludeIfTargetWithin: '[data-popup-pinned-card]' },
-    { combo: 'o', action: handlePopupOrganize, excludeIfTargetWithin: '[data-popup-pinned-card]' },
-    { combo: 'p', action: openOptionsPage, excludeIfTargetWithin: '[data-popup-pinned-card]' },
-    { combo: '?', action: () => setShortcutsOpen((open) => !open), allowWhenDialogOpen: false },
-  ], [handlePopupSave, handlePopupRestore, handlePopupOrganize, openOptionsPage]);
-
-  useKeyboardShortcuts(shortcuts);
+  useShortcuts(
+    {
+      'popup.save': handlePopupSave,
+      'popup.restore': handlePopupRestore,
+      'popup.organize': handlePopupOrganize,
+      'popup.options': openOptionsPage,
+      'popup.help': () => setShortcutsOpen((open) => !open),
+    },
+    { scope: 'page:popup' },
+  );
 
   const hasRules = isLoaded && (settings?.domainRules?.length ?? 0) > 0;
 

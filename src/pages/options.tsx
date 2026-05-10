@@ -14,9 +14,8 @@ import { useSettings } from '@/hooks/useSettings.js';
 import { useStatistics } from '@/hooks/useStatistics.js';
 import { useDeepLinking } from '@/hooks/useDeepLinking.js';
 import type { ImportExportAction, ImportExportFrom } from '@/hooks/useDeepLinking.js';
-import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts.js';
+import { useShortcuts, type ShortcutAction } from '@/hooks/useShortcuts.js';
 import { getMessage } from '@/utils/i18n';
-import type { ShortcutDefinition } from '@/utils/keyboardShortcuts';
 import type { SourceMode } from '@/components/UI/ImportExportWizards/Source';
 
 import { Sidebar } from '@/components/UI/Sidebar/Sidebar';
@@ -159,21 +158,20 @@ export function OptionsContent() {
         }
     }, [shortcutsAsideOpen]);
 
-    const shortcuts = useMemo<ShortcutDefinition[]>(() => {
+    const shortcutBindings = useMemo<Record<string, ShortcutAction>>(() => {
         const flatItems = sidebarSections.flatMap((section) => section.items);
-        const tabShortcuts: ShortcutDefinition[] = flatItems.map((item, index) => ({
-            combo: `Alt+${index + 1}`,
-            action: () => handleTabChange(item.id),
-        }));
-        return [
-            ...tabShortcuts,
-            { combo: '/', action: focusActiveSearch },
-            { combo: '?', action: () => setShortcutsAsideOpen((open) => !open) },
-            { combo: 'Escape', action: handleEscape, allowInTypingTarget: false },
-        ];
+        const bindings: Record<string, ShortcutAction> = {
+            'options.search.focus': focusActiveSearch,
+            'options.help': () => setShortcutsAsideOpen((open) => !open),
+            'options.search.clear': handleEscape,
+        };
+        flatItems.slice(0, 5).forEach((item, index) => {
+            bindings[`options.tab.${index + 1}`] = () => handleTabChange(item.id);
+        });
+        return bindings;
     }, [sidebarSections, handleTabChange, focusActiveSearch, handleEscape]);
 
-    useKeyboardShortcuts(shortcuts);
+    useShortcuts(shortcutBindings, { scope: 'global' });
 
     const openShortcuts = useCallback(() => setShortcutsAsideOpen(true), []);
 

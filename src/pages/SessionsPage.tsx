@@ -17,12 +17,11 @@ import { foldAccents } from '@/utils/stringUtils';
 import { matchSessionSearch, splitByPinned } from '@/utils/sessionUtils';
 import { moveSessionToFirstInGroup, moveSessionToLastInGroup } from '@/utils/sessionOrderUtils';
 import { useSessions } from '@/hooks/useSessions';
-import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useShortcuts } from '@/hooks/useShortcuts';
 import { useListNavigation } from '@/hooks/useListNavigation';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { updateSession } from '@/utils/sessionStorage';
 import { showSuccessNotification } from '@/utils/notifications';
-import type { ShortcutDefinition } from '@/utils/keyboardShortcuts';
 import { browser } from 'wxt/browser';
 import type { Session } from '@/types/session';
 import type { SessionSearchMatch } from '@/utils/sessionUtils';
@@ -73,16 +72,19 @@ interface SessionSectionProps {
   updateOrder: (sessions: Session[]) => Promise<void>;
   /** Rename a session (forwarded straight to SessionCard). */
   renameSession: (id: string, newName: string) => Promise<void>;
-  /** Reload sessions after a mutation (used for pin/unpin). */
-  reload: () => Promise<void>;
   /** Open the RestoreWizard (owned by the parent). */
   onOpenRestoreWizard: (session: Session) => void;
   /** Open the SessionEditDialog (owned by the parent). */
   onOpenEditDialog: (session: Session) => void;
   /** Open the delete ConfirmDialog (owned by the parent). */
   onOpenDeleteDialog: (session: Session) => void;
-  /** Emit a transient feedback message (single callout shared between both sections). */
-  onRestoreFeedback: (message: string | null) => void;
+  /** Quick-restore handlers shared with the page-level widget shortcuts. */
+  onRestoreCurrentWindow: (session: Session) => void;
+  onRestoreNewWindow: (session: Session) => void;
+  onReplaceCurrentWindow: (session: Session) => void;
+  /** Pin/unpin handlers shared with the page-level widget shortcuts. */
+  onPin: (session: Session) => void;
+  onUnpin: (session: Session) => void;
 }
 
 function SessionSection({
@@ -97,11 +99,14 @@ function SessionSection({
   searchMatches,
   updateOrder,
   renameSession,
-  reload,
   onOpenRestoreWizard,
   onOpenEditDialog,
   onOpenDeleteDialog,
-  onRestoreFeedback,
+  onRestoreCurrentWindow,
+  onRestoreNewWindow,
+  onReplaceCurrentWindow,
+  onPin,
+  onUnpin,
 }: SessionSectionProps) {
   const [dragItems, setDragItems] = useState<Session[] | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -127,102 +132,19 @@ function SessionSection({
     setDragItems(null);
   }, [dragItems, sessions, allSessions, isPinned, updateOrder]);
 
-  // Quick restore: full session content, no conflict resolution wizard.
-  const handleQuickRestore = useCallback(async (session: Session, target: RestoreTarget) => {
-    try {
-      let protectedTabId: number | undefined;
-      if (target === 'replace') {
-        const currentTab = await browser.tabs.getCurrent();
-        protectedTabId = currentTab?.id;
-      }
-      const result = await restoreSessionTabs(session, target, protectedTabId);
-      onRestoreFeedback(getMessage('restoreResultTabsCreated', [String(result.tabsCreated)]));
-      if (target === 'replace') {
-        void showSuccessNotification(
-          getMessage('sessionSwitchedNotificationTitle'),
-          getMessage('sessionSwitchedNotificationMessage', [session.name]),
-        );
-      }
-    } catch {
-      onRestoreFeedback(getMessage('restoreError'));
-    }
-    setTimeout(() => onRestoreFeedback(null), 4000);
-  }, [onRestoreFeedback]);
-
-  const handleRestoreCurrentWindow = useCallback(
-    (session: Session) => handleQuickRestore(session, 'current'),
-    [handleQuickRestore],
-  );
-
-  const handleRestoreNewWindow = useCallback(
-    (session: Session) => handleQuickRestore(session, 'new'),
-    [handleQuickRestore],
-  );
-
-  const handleReplaceCurrentWindow = useCallback(
-    (session: Session) => handleQuickRestore(session, 'replace'),
-    [handleQuickRestore],
-  );
-
-  const handlePin = useCallback(async (session: Session) => {
-    await updateSession(session.id, { isPinned: true });
-    await reload();
-  }, [reload]);
-
-  const handleUnpin = useCallback(async (session: Session) => {
-    await updateSession(session.id, { isPinned: false });
-    await reload();
-  }, [reload]);
-
-  const handleRestoreCombo = useCallback((session: Session, shiftKey: boolean, altKey: boolean) => {
-    if (altKey && shiftKey) {
-      void handleRestoreNewWindow(session);
-    } else if (altKey) {
-      void handleReplaceCurrentWindow(session);
-    } else if (shiftKey) {
-      void handleRestoreCurrentWindow(session);
-    } else {
-      onOpenRestoreWizard(session);
-    }
-  }, [handleRestoreCurrentWindow, handleRestoreNewWindow, handleReplaceCurrentWindow, onOpenRestoreWizard]);
-
   const { handleNavigationKey } = useListNavigation(listRef, '[data-session-card]');
 
-  const handleCardKeyDown = useCallback((e: React.KeyboardEvent<HTMLElement>, index: number, session: Session) => {
-    // Only act when the card element itself has focus (not a child input/button).
-    if (e.target !== e.currentTarget) return;
-    if (handleNavigationKey(e, index)) return;
-    if (e.key === 'Delete' || e.key === 'Backspace') {
-      e.preventDefault();
-      onOpenDeleteDialog(session);
-      return;
-    }
-    const lower = e.key.toLowerCase();
-    if (e.ctrlKey || e.metaKey) return;
-    if (lower === 'r') {
-      e.preventDefault();
-      handleRestoreCombo(session, e.shiftKey, e.altKey);
-      return;
-    }
-    if (e.altKey || e.shiftKey) return;
-    if (lower === 'e') {
-      e.preventDefault();
-      onOpenEditDialog(session);
-      return;
-    }
-    if (lower === 'p') {
-      e.preventDefault();
-      const togglePin = session.isPinned ? handleUnpin : handlePin;
-      void togglePin(session);
-    }
-  }, [
-    handleNavigationKey,
-    handleRestoreCombo,
-    onOpenEditDialog,
-    onOpenDeleteDialog,
-    handlePin,
-    handleUnpin,
-  ]);
+  // Card-level keydown is now navigation-only; per-card actions
+  // (r/Shift+r/Alt+r/Alt+Shift+r/e/Delete/p) are dispatched at document level
+  // through `useShortcuts({...}, { scope: 'widget:session-card' })` in
+  // SessionsPage.
+  const handleCardKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLElement>, index: number) => {
+      if (e.target !== e.currentTarget) return;
+      handleNavigationKey(e, index);
+    },
+    [handleNavigationKey],
+  );
 
   const handleMoveToFirst = useCallback((session: Session) => {
     void updateOrder(moveSessionToFirstInGroup(allSessions, session.id));
@@ -260,14 +182,14 @@ function SessionSection({
                   session={session}
                   existingSessions={allSessions}
                   onRestore={onOpenRestoreWizard}
-                  onRestoreCurrentWindow={handleRestoreCurrentWindow}
-                  onRestoreNewWindow={handleRestoreNewWindow}
-                  onReplaceCurrentWindow={handleReplaceCurrentWindow}
+                  onRestoreCurrentWindow={onRestoreCurrentWindow}
+                  onRestoreNewWindow={onRestoreNewWindow}
+                  onReplaceCurrentWindow={onReplaceCurrentWindow}
                   onRename={renameSession}
                   onEdit={onOpenEditDialog}
                   onDelete={onOpenDeleteDialog}
-                  onPin={handlePin}
-                  onUnpin={handleUnpin}
+                  onPin={onPin}
+                  onUnpin={onUnpin}
                   forcePreviewOpen={searchMatch?.matchesTabs === true || searchMatch?.matchesNote === true}
                   searchMatchingGroupIds={searchMatch?.matchingGroupIds}
                   searchQuery={searchQuery || undefined}
@@ -275,7 +197,7 @@ function SessionSection({
                   isDragDisabled={!!searchQuery}
                   onMoveToFirst={() => handleMoveToFirst(session)}
                   onMoveLast={() => handleMoveLast(session)}
-                  onCardKeyDown={(e) => handleCardKeyDown(e, index, session)}
+                  onCardKeyDown={(e) => handleCardKeyDown(e, index)}
                 />
               );
             })}
@@ -319,10 +241,101 @@ export function SessionsPage({
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleOpenSnapshotWizard = useCallback(() => setSnapshotOpen(true), []);
-  const pageShortcuts = useMemo<ShortcutDefinition[]>(() => [
-    { combo: 'n', action: handleOpenSnapshotWizard },
-  ], [handleOpenSnapshotWizard]);
-  useKeyboardShortcuts(pageShortcuts);
+
+  // Quick-restore (no conflict-resolution wizard) handlers shared by the
+  // SessionCard split button, the dropdown menu, and the widget-scope
+  // shortcuts registered below.
+  const handleQuickRestore = useCallback(async (session: Session, target: RestoreTarget) => {
+    try {
+      let protectedTabId: number | undefined;
+      if (target === 'replace') {
+        const currentTab = await browser.tabs.getCurrent();
+        protectedTabId = currentTab?.id;
+      }
+      const result = await restoreSessionTabs(session, target, protectedTabId);
+      setQuickRestoreMessage(getMessage('restoreResultTabsCreated', [String(result.tabsCreated)]));
+      if (target === 'replace') {
+        void showSuccessNotification(
+          getMessage('sessionSwitchedNotificationTitle'),
+          getMessage('sessionSwitchedNotificationMessage', [session.name]),
+        );
+      }
+    } catch {
+      setQuickRestoreMessage(getMessage('restoreError'));
+    }
+    setTimeout(() => setQuickRestoreMessage(null), 4000);
+  }, []);
+
+  const handleRestoreCurrentWindow = useCallback(
+    (session: Session) => { void handleQuickRestore(session, 'current'); },
+    [handleQuickRestore],
+  );
+  const handleRestoreNewWindow = useCallback(
+    (session: Session) => { void handleQuickRestore(session, 'new'); },
+    [handleQuickRestore],
+  );
+  const handleReplaceCurrentWindow = useCallback(
+    (session: Session) => { void handleQuickRestore(session, 'replace'); },
+    [handleQuickRestore],
+  );
+
+  const handlePin = useCallback(async (session: Session) => {
+    await updateSession(session.id, { isPinned: true });
+    await reload();
+  }, [reload]);
+  const handleUnpin = useCallback(async (session: Session) => {
+    await updateSession(session.id, { isPinned: false });
+    await reload();
+  }, [reload]);
+
+  // Resolves the session whose card currently has focus. Returns null when
+  // focus is on a non-card element so widget shortcuts no-op silently.
+  const getFocusedSession = useCallback((): Session | null => {
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement)) return null;
+    if (!active.matches('[data-shortcut-scope="widget:session-card"]')) return null;
+    const id = active.getAttribute('data-session-id');
+    if (!id) return null;
+    return sessions.find((s) => s.id === id) ?? null;
+  }, [sessions]);
+
+  useShortcuts({ 'list.sessions.new': handleOpenSnapshotWizard }, { scope: 'page:sessions' });
+
+  useShortcuts(
+    {
+      'sessionCard.restore.custom': () => {
+        const focused = getFocusedSession();
+        if (focused) setRestoreSession(focused);
+      },
+      'sessionCard.restore.current': () => {
+        const focused = getFocusedSession();
+        if (focused) handleRestoreCurrentWindow(focused);
+      },
+      'sessionCard.restore.replace': () => {
+        const focused = getFocusedSession();
+        if (focused) handleReplaceCurrentWindow(focused);
+      },
+      'sessionCard.restore.new': () => {
+        const focused = getFocusedSession();
+        if (focused) handleRestoreNewWindow(focused);
+      },
+      'sessionCard.edit': () => {
+        const focused = getFocusedSession();
+        if (focused) setEditTarget(focused);
+      },
+      'sessionCard.delete': () => {
+        const focused = getFocusedSession();
+        if (focused) setDeleteTarget(focused);
+      },
+      'sessionCard.pin': () => {
+        const focused = getFocusedSession();
+        if (!focused) return;
+        const togglePin = focused.isPinned ? handleUnpin : handlePin;
+        togglePin(focused).catch(() => {});
+      },
+    },
+    { scope: 'widget:session-card' },
+  );
 
   // Deep-link: open the RestoreWizard when a sessionId has been provided via
   // URL hash (e.g. from the popup's customize restore action).
@@ -476,11 +489,14 @@ export function SessionsPage({
                 searchMatches={sessionSearchMatches}
                 updateOrder={updateOrder}
                 renameSession={renameSession}
-                reload={reload}
                 onOpenRestoreWizard={setRestoreSession}
                 onOpenEditDialog={setEditTarget}
                 onOpenDeleteDialog={setDeleteTarget}
-                onRestoreFeedback={setQuickRestoreMessage}
+                onRestoreCurrentWindow={handleRestoreCurrentWindow}
+                onRestoreNewWindow={handleRestoreNewWindow}
+                onReplaceCurrentWindow={handleReplaceCurrentWindow}
+                onPin={handlePin}
+                onUnpin={handleUnpin}
               />
 
               <Separator size="4" />
@@ -497,11 +513,14 @@ export function SessionsPage({
                 searchMatches={sessionSearchMatches}
                 updateOrder={updateOrder}
                 renameSession={renameSession}
-                reload={reload}
                 onOpenRestoreWizard={setRestoreSession}
                 onOpenEditDialog={setEditTarget}
                 onOpenDeleteDialog={setDeleteTarget}
-                onRestoreFeedback={setQuickRestoreMessage}
+                onRestoreCurrentWindow={handleRestoreCurrentWindow}
+                onRestoreNewWindow={handleRestoreNewWindow}
+                onReplaceCurrentWindow={handleReplaceCurrentWindow}
+                onPin={handlePin}
+                onUnpin={handleUnpin}
               />
             </Flex>
           )}
