@@ -6,35 +6,47 @@ import { getMessage } from '@/utils/i18n';
 import { getShortcutsCustomizeInfo, openShortcutsCustomizePage } from '@/utils/browserUrls';
 import { useBrowserCommands, type BrowserCommandsMap } from '@/hooks/useBrowserCommands';
 import {
-  SHORTCUT_GROUPS,
+  getDisplayTree,
   isGroupOpenByDefault,
+  type DisplayGroup,
   type PageContext,
-  type ShortcutDisplay,
-  type ShortcutGroup,
-} from './shortcuts';
+  type ShortcutGroupDescriptor,
+  type Surface,
+} from '@/shortcuts/groups';
+import { getShortcutsByGroup } from '@/shortcuts/registry';
+import type { ShortcutEntry } from '@/shortcuts/types';
+import { tokenizeComboForDisplay } from '@/utils/shortcutDisplay';
 import styles from './ShortcutsContent.module.css';
 
 interface ShortcutsContentProps {
-  /** Optional override of the groups to display (defaults to SHORTCUT_GROUPS). */
-  groups?: ShortcutGroup[];
   /**
-   * When provided, each group's initial expanded state is derived from the
-   * page context (see `isGroupOpenByDefault`). When omitted, all groups start
-   * expanded so non-contextual surfaces (Storybook, popup drawer) keep their
-   * historical behaviour.
+   * Surface this panel renders into. Drives both group filtering
+   * (`VISIBLE_GROUPS_BY_SURFACE`) and structural choices (SessionCard
+   * top-level on popup, nested under Home/Sessions on options).
+   */
+  surface: Surface;
+  /**
+   * Active page on the options surface. Each group's initial expanded state
+   * is derived from `isGroupOpenByDefault`. When omitted (popup drawer or
+   * Storybook), every group starts expanded.
    */
   pageContext?: PageContext;
 }
 
+interface ResolvedKeys {
+  keys: string[];
+  unbound: boolean;
+}
+
 function resolveKeys(
-  shortcut: ShortcutDisplay,
+  entry: ShortcutEntry,
   liveCommands: BrowserCommandsMap | null,
-): { keys: string[]; unbound: boolean } {
-  if (!shortcut.commandName || liveCommands === null) {
-    return { keys: shortcut.keys, unbound: false };
+): ResolvedKeys {
+  if (!entry.commandName || liveCommands === null) {
+    return { keys: entry.defaultBindings, unbound: false };
   }
-  const live = liveCommands[shortcut.commandName];
-  if (live === undefined) return { keys: shortcut.keys, unbound: false };
+  const live = liveCommands[entry.commandName];
+  if (live === undefined) return { keys: entry.defaultBindings, unbound: false };
   if (live === '') return { keys: [], unbound: true };
   return { keys: [live], unbound: false };
 }
@@ -95,12 +107,21 @@ function handleTriggerKeyDown(event: React.KeyboardEvent<HTMLDivElement>): void 
   }
 }
 
-export function ShortcutsContent({ groups = SHORTCUT_GROUPS, pageContext }: ShortcutsContentProps) {
+function flattenDisplayTree(tree: DisplayGroup[]): ShortcutGroupDescriptor[] {
+  return tree.flatMap((node) => [node.descriptor, ...node.subgroups]);
+}
+
+export function ShortcutsContent({ surface, pageContext }: ShortcutsContentProps) {
   const { isDirect } = getShortcutsCustomizeInfo();
   const liveCommands = useBrowserCommands();
-  const hasUnbound = !!liveCommands && groups.some((group) =>
-    group.shortcuts.some((s) => resolveKeys(s, liveCommands).unbound),
-  );
+  const tree = getDisplayTree(surface);
+  const hasUnbound =
+    !!liveCommands &&
+    flattenDisplayTree(tree).some((descriptor) =>
+      getShortcutsByGroup(descriptor.id).some(
+        (entry) => resolveKeys(entry, liveCommands).unbound,
+      ),
+    );
   return (
     <Flex direction="column" gap="4" data-testid="shortcuts-content" onKeyDown={handleTriggerKeyDown}>
       {hasUnbound && (
@@ -110,10 +131,11 @@ export function ShortcutsContent({ groups = SHORTCUT_GROUPS, pageContext }: Shor
           </Text>
         </Box>
       )}
-      {groups.map((group) => (
+      {tree.map((node) => (
         <CollapsibleGroup
-          key={group.titleKey}
-          group={group}
+          key={node.descriptor.id}
+          descriptor={node.descriptor}
+          subgroups={node.subgroups}
           pageContext={pageContext}
           liveCommands={liveCommands}
           nested={false}
@@ -140,24 +162,27 @@ export function ShortcutsContent({ groups = SHORTCUT_GROUPS, pageContext }: Shor
 }
 
 function CollapsibleGroup({
-  group,
+  descriptor,
+  subgroups,
   pageContext,
   liveCommands,
   nested,
 }: {
-  group: ShortcutGroup;
+  descriptor: ShortcutGroupDescriptor;
+  subgroups: ShortcutGroupDescriptor[];
   pageContext?: PageContext;
   liveCommands: BrowserCommandsMap | null;
   nested: boolean;
 }) {
   const [open, setOpen] = useState(() =>
-    pageContext === undefined ? true : isGroupOpenByDefault(group.titleKey, pageContext),
+    pageContext === undefined ? true : isGroupOpenByDefault(descriptor.id, pageContext),
   );
+  const entries = getShortcutsByGroup(descriptor.id);
   return (
     <Collapsible.Root
       open={open}
       onOpenChange={setOpen}
-      data-group-title={group.titleKey}
+      data-group-id={descriptor.id}
       className={nested ? styles.nestedGroup : undefined}
     >
       <Collapsible.Trigger asChild>
@@ -175,24 +200,25 @@ function CollapsibleGroup({
             className={styles.groupTitle}
             as="div"
           >
-            {getMessage(group.titleKey)}
+            {getMessage(descriptor.titleKey)}
           </Text>
           <ChevronDown size={14} className={styles.chevron} />
         </button>
       </Collapsible.Trigger>
       <Collapsible.Content>
         <Flex direction="column">
-          {group.shortcuts.map((shortcut) => (
+          {entries.map((entry) => (
             <ShortcutRow
-              key={shortcut.descriptionKey}
-              shortcut={shortcut}
+              key={entry.id}
+              entry={entry}
               liveCommands={liveCommands}
             />
           ))}
-          {group.subgroups?.map((sub) => (
+          {subgroups.map((sub) => (
             <CollapsibleGroup
-              key={sub.titleKey}
-              group={sub}
+              key={sub.id}
+              descriptor={sub}
+              subgroups={[]}
               pageContext={pageContext}
               liveCommands={liveCommands}
               nested
@@ -205,17 +231,17 @@ function CollapsibleGroup({
 }
 
 function ShortcutRow({
-  shortcut,
+  entry,
   liveCommands,
 }: {
-  shortcut: ShortcutDisplay;
+  entry: ShortcutEntry;
   liveCommands: BrowserCommandsMap | null;
 }) {
-  const { keys, unbound } = resolveKeys(shortcut, liveCommands);
+  const { keys, unbound } = resolveKeys(entry, liveCommands);
   return (
     <div className={styles.row}>
       <Text size="2" className={styles.rowDescription}>
-        {getMessage(shortcut.descriptionKey)}
+        {getMessage(entry.descriptionKey)}
       </Text>
       <div className={styles.rowKeys}>
         {unbound ? (
@@ -236,13 +262,13 @@ function ShortcutRow({
 }
 
 function KeyCombo({ combo }: { combo: string }) {
-  const tokens = combo.split('+');
+  const tokens = tokenizeComboForDisplay(combo);
   return (
     <Flex gap="1" align="center">
       {tokens.map((token, i) => (
-        <React.Fragment key={`${token}-${i}`}>
+        <React.Fragment key={`${token.display}-${i}`}>
           {i > 0 && <span className={styles.plus} aria-hidden="true">+</span>}
-          <Kbd size="1">{token}</Kbd>
+          <Kbd size="1" aria-label={token.accessibleLabel}>{token.display}</Kbd>
         </React.Fragment>
       ))}
     </Flex>

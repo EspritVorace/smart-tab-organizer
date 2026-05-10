@@ -19,32 +19,26 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const ShortcutsContentDefault: Story = {};
+export const ShortcutsContentPopup: Story = {
+  args: { surface: 'popup' },
+};
+
+export const ShortcutsContentOptions: Story = {
+  args: { surface: 'options' },
+};
 
 export const ShortcutsContentOnRules: Story = {
-  args: { pageContext: 'rules' },
+  args: { surface: 'options', pageContext: 'rules' },
 };
 
 export const ShortcutsContentOnSessions: Story = {
-  args: { pageContext: 'sessions' },
+  args: { surface: 'options', pageContext: 'sessions' },
+};
+
+export const ShortcutsContentOnHome: Story = {
+  args: { surface: 'options', pageContext: 'home' },
 };
 
 export const ShortcutsContentOnStats: Story = {
-  args: { pageContext: 'stats' },
-};
-
-export const ShortcutsContentSingleGroup: Story = {
-  args: {
-    groups: [
-      {
-        titleKey: 'shortcutsGroupSessionCard',
-        shortcuts: [
-          { keys: ['R'], descriptionKey: 'shortcutDescSessionRestoreCustom' },
-          { keys: ['Shift+R'], descriptionKey: 'shortcutDescSessionRestoreCurrent' },
-          { keys: ['Alt+R'], descriptionKey: 'shortcutDescSessionReplaceCurrent' },
-          { keys: ['Alt+Shift+R'], descriptionKey: 'shortcutDescSessionRestoreNew' },
-        ],
-      },
-    ],
-  },
+  args: { surface: 'options', pageContext: 'stats' },
 };

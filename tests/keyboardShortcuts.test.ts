@@ -1,4 +1,5 @@
 import assert from 'assert';
+import { describe, it, expect, vi } from 'vitest';
 import {
   parseCombo,
   matchesShortcut,
@@ -174,4 +175,74 @@ test('shouldFire: skips when dialog is open unless allowWhenDialogOpen', () => {
     true,
   );
   document.body.innerHTML = '';
+});
+
+test('matchesShortcut: letter shortcut matches via event.code when key is remapped (Mac Alt+R = "®")', () => {
+  // On macOS QWERTY, Option (Alt) + R produces event.key = "®"; the binding
+  // would never match without the event.code = "KeyR" fallback.
+  assert.strictEqual(
+    matchesShortcut(makeEvent({ key: '®', code: 'KeyR', altKey: true }), 'Alt+r'),
+    true,
+  );
+  // The fallback only applies for the matching code: KeyT must not match Alt+r.
+  assert.strictEqual(
+    matchesShortcut(makeEvent({ key: '†', code: 'KeyT', altKey: true }), 'Alt+r'),
+    false,
+  );
+  // AZERTY layout: physical "n" key with foreign key value still matches.
+  assert.strictEqual(
+    matchesShortcut(makeEvent({ key: ',', code: 'KeyN' }), 'n'),
+    true,
+  );
+});
+
+describe('Mod modifier resolution (platform mocked)', () => {
+  it('resolves to Ctrl on non-Mac', async () => {
+    vi.resetModules();
+    vi.doMock('../src/utils/platform', () => ({ IS_MAC: false }));
+    const mod = await import('../src/utils/keyboardShortcuts');
+    expect(mod.parseCombo('Mod+K')).toEqual({
+      key: 'k',
+      shift: false,
+      alt: false,
+      ctrl: true,
+      meta: false,
+    });
+    expect(mod.parseCombo('Mod+Shift+r')).toEqual({
+      key: 'r',
+      shift: true,
+      alt: false,
+      ctrl: true,
+      meta: false,
+    });
+    vi.doUnmock('../src/utils/platform');
+  });
+
+  it('resolves to Meta on Mac', async () => {
+    vi.resetModules();
+    vi.doMock('../src/utils/platform', () => ({ IS_MAC: true }));
+    const mod = await import('../src/utils/keyboardShortcuts');
+    expect(mod.parseCombo('Mod+K')).toEqual({
+      key: 'k',
+      shift: false,
+      alt: false,
+      ctrl: false,
+      meta: true,
+    });
+    expect(mod.parseCombo('Mod+Alt+r')).toEqual({
+      key: 'r',
+      shift: false,
+      alt: true,
+      ctrl: false,
+      meta: true,
+    });
+    vi.doUnmock('../src/utils/platform');
+  });
+
+  it('keeps explicit Ctrl/Meta unaffected by platform', () => {
+    expect(parseCombo('Ctrl+K').ctrl).toBe(true);
+    expect(parseCombo('Ctrl+K').meta).toBe(false);
+    expect(parseCombo('Meta+K').meta).toBe(true);
+    expect(parseCombo('Meta+K').ctrl).toBe(false);
+  });
 });

@@ -50,7 +50,7 @@ test.describe('[US-KB-popup] Popup shortcuts', () => {
     // Only the 2 popup-relevant groups must be displayed (Popup, Session
     // card). Global, Options and Lists groups are hidden in the popup drawer.
     await expect(
-      page.locator('[data-testid="shortcuts-content"] [data-group-title]'),
+      page.locator('[data-testid="shortcuts-content"] [data-group-id]'),
     ).toHaveCount(2);
 
     // Regression guard: the popup.html `.radix-themes` selector used to also

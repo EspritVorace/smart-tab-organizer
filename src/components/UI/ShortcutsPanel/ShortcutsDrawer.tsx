@@ -4,7 +4,6 @@ import { Keyboard } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { DialogCloseButton } from '@/components/UI/DialogShell';
 import { ShortcutsContent, focusFirstOpenTrigger } from './ShortcutsContent';
-import { POPUP_SHORTCUT_GROUPS } from './shortcuts';
 import styles from './ShortcutsDrawer.module.css';
 
 interface ShortcutsDrawerProps {
@@ -67,7 +66,7 @@ export function ShortcutsDrawer({ open, onOpenChange }: ShortcutsDrawerProps) {
           <Dialog.Description size="1" color="gray" mb="3">
             {getMessage('shortcutsPanelDescription')}
           </Dialog.Description>
-          <ShortcutsContent groups={POPUP_SHORTCUT_GROUPS} />
+          <ShortcutsContent surface="popup" />
         </Box>
       </Dialog.Content>
     </Dialog.Root>
