@@ -19,17 +19,25 @@ export type ShortcutGroupId =
   | 'list-sessions'
   | 'list-workspaces'
   | 'list-home'
-  | 'session-card';
+  | 'session-card'
+  | 'importexport';
+
+/**
+ * A single combo (e.g. `'Mod+K'`) OR an ordered sequence of combos (e.g.
+ * `['i', 'r']`). Sequences match as a chord: each step must be pressed within
+ * the timeout window of the previous one.
+ */
+export type Binding = string | string[];
 
 export interface ShortcutEntry {
   /** Stable ID. Doubles as customization key and test selector. */
   id: string;
 
   /**
-   * Default combos. Multiple entries are equivalent alternative bindings.
-   * Kept as plain strings for now; Lot 3 will widen to support key sequences.
+   * Default bindings. Multiple entries are equivalent alternatives. Each
+   * entry is either a single combo string or an ordered sequence of combos.
    */
-  defaultBindings: string[];
+  defaultBindings: Binding[];
 
   /** i18n key for the description shown in the help panel. */
   descriptionKey: string;

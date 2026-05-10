@@ -59,6 +59,11 @@ export const GROUP_DESCRIPTORS: Record<ShortcutGroupId, ShortcutGroupDescriptor>
     titleKey: 'shortcutsGroupSessionCard',
     topLevel: false,
   },
+  importexport: {
+    id: 'importexport',
+    titleKey: 'shortcutsGroupImportExport',
+    topLevel: true,
+  },
 };
 
 /**
@@ -72,6 +77,7 @@ export const TOP_LEVEL_GROUP_ORDER: ShortcutGroupId[] = [
   'list-rules',
   'list-sessions',
   'list-workspaces',
+  'importexport',
   'options',
   'popup',
 ];
@@ -89,6 +95,7 @@ export const VISIBLE_GROUPS_BY_SURFACE: Record<Surface, ShortcutGroupId[]> = {
     'list-rules',
     'list-sessions',
     'list-workspaces',
+    'importexport',
     'options',
     'popup',
   ],
@@ -153,6 +160,8 @@ export function isGroupOpenByDefault(
       return pageContext === 'sessions';
     case 'list-workspaces':
       return pageContext === 'workspaces';
+    case 'importexport':
+      return pageContext === 'importexport';
     case 'session-card':
       return pageContext === 'sessions' || pageContext === 'home';
     default:

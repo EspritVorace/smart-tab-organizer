@@ -75,3 +75,24 @@ describe('formatComboForA11y', () => {
     vi.doUnmock('../../src/utils/platform');
   });
 });
+
+describe('formatSequenceForA11y', () => {
+  it('joins each combo with the localized separator', async () => {
+    const { formatSequenceForA11y } = await loadDisplay(false);
+    expect(formatSequenceForA11y(['i', 'r'], 'then')).toBe('I then R');
+    expect(formatSequenceForA11y(['e', 's'], 'then')).toBe('E then S');
+    vi.doUnmock('../../src/utils/platform');
+  });
+
+  it('honors the separator on Mac builds too', async () => {
+    const { formatSequenceForA11y } = await loadDisplay(true);
+    expect(formatSequenceForA11y(['i', 'r'], 'puis')).toBe('I puis R');
+    vi.doUnmock('../../src/utils/platform');
+  });
+
+  it('returns a single combo unchanged when sequence has length 1', async () => {
+    const { formatSequenceForA11y } = await loadDisplay(false);
+    expect(formatSequenceForA11y(['i'], 'then')).toBe('I');
+    vi.doUnmock('../../src/utils/platform');
+  });
+});

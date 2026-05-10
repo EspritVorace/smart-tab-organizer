@@ -23,6 +23,7 @@ import type { SidebarSection } from '@/components/UI/Sidebar/Sidebar';
 import { OptionsHeader, OptionsHeaderCollapsed } from '@/components/UI/OptionsLayout/OptionsHeader';
 import { WorkspaceFooter, WorkspaceFooterCollapsed } from '@/components/UI/Workspace/WorkspaceFooter';
 import { ShortcutsAside, type PageContext } from '@/components/UI/ShortcutsPanel';
+import { SequenceIndicator } from '@/components/UI/SequenceIndicator';
 import { DomainRulesPage } from './DomainRulesPage';
 import { HomePage } from './HomePage';
 import { StatisticsPage } from './StatisticsPage';
@@ -57,6 +58,7 @@ export function OptionsContent() {
     const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
     const [shortcutsAsideOpen, setShortcutsAsideOpen] = useState(false);
     const [importInitialMode, setImportInitialMode] = useState<SourceMode | null>(null);
+    const [sequencePrefix, setSequencePrefix] = useState<string[] | null>(null);
 
     const updateRules = useCallback((newRules: DomainRuleSettings) => {
         updateSettings({ domainRules: newRules });
@@ -233,6 +235,7 @@ export function OptionsContent() {
                                 onNavigate={handleTabChange}
                                 importRulesInitialMode={importInitialMode}
                                 onImportRulesClosed={handleImportRulesClosed}
+                                onSequencePrefixChange={setSequencePrefix}
                             />
                         )}
                         {currentTab === 'sessions' && (
@@ -276,6 +279,7 @@ export function OptionsContent() {
                 confirmLabel={getMessage('confirmAction')}
                 color="orange"
             />
+            <SequenceIndicator activePrefix={sequencePrefix} />
         </div>
         </ShortcutsControlProvider>
     );

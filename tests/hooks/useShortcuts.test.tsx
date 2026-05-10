@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { renderHook } from '@testing-library/react';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { act, renderHook } from '@testing-library/react';
 import { useShortcuts } from '../../src/hooks/useShortcuts';
 
 function dispatch(combo: {
@@ -214,5 +214,140 @@ describe('useShortcuts (widget scope)', () => {
 
     dispatchOn(card, { key: '?' });
     expect(action).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('useShortcuts (sequences)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('fires the action when a sequence is typed within the timeout window', () => {
+    const action = vi.fn();
+    renderHook(() =>
+      useShortcuts(
+        { 'importexport.import.rules': action },
+        { scope: 'page:importexport' },
+      ),
+    );
+
+    dispatch({ key: 'i' });
+    expect(action).not.toHaveBeenCalled();
+    dispatch({ key: 'r' });
+    expect(action).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not fire when the second key arrives after the timeout', () => {
+    const action = vi.fn();
+    renderHook(() =>
+      useShortcuts(
+        { 'importexport.import.rules': action },
+        { scope: 'page:importexport', sequenceTimeout: 1500 },
+      ),
+    );
+
+    dispatch({ key: 'i' });
+    act(() => {
+      vi.advanceTimersByTime(1600);
+    });
+    dispatch({ key: 'r' });
+    expect(action).not.toHaveBeenCalled();
+  });
+
+  it('clears the buffer when an unrelated key is pressed mid-sequence', () => {
+    const action = vi.fn();
+    renderHook(() =>
+      useShortcuts(
+        { 'importexport.import.rules': action },
+        { scope: 'page:importexport' },
+      ),
+    );
+
+    dispatch({ key: 'i' });
+    dispatch({ key: 'x' });
+    dispatch({ key: 'r' });
+    expect(action).not.toHaveBeenCalled();
+  });
+
+  it('clears the buffer when Escape is pressed', () => {
+    const action = vi.fn();
+    renderHook(() =>
+      useShortcuts(
+        { 'importexport.import.rules': action },
+        { scope: 'page:importexport' },
+      ),
+    );
+
+    dispatch({ key: 'i' });
+    dispatch({ key: 'Escape' });
+    dispatch({ key: 'r' });
+    expect(action).not.toHaveBeenCalled();
+  });
+
+  it('clears the buffer on focusin into a typing target', () => {
+    const action = vi.fn();
+    renderHook(() =>
+      useShortcuts(
+        { 'importexport.import.rules': action },
+        { scope: 'page:importexport' },
+      ),
+    );
+
+    dispatch({ key: 'i' });
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    input.focus();
+    dispatch({ key: 'r' });
+    expect(action).not.toHaveBeenCalled();
+  });
+
+  it('reports buffer state via onSequenceState (active then null)', () => {
+    const action = vi.fn();
+    const onSequenceState = vi.fn();
+    renderHook(() =>
+      useShortcuts(
+        { 'importexport.import.rules': action },
+        { scope: 'page:importexport', onSequenceState },
+      ),
+    );
+
+    dispatch({ key: 'i' });
+    expect(onSequenceState).toHaveBeenLastCalledWith({ activePrefix: ['i'] });
+
+    dispatch({ key: 'r' });
+    expect(action).toHaveBeenCalledTimes(1);
+    expect(onSequenceState).toHaveBeenLastCalledWith({ activePrefix: null });
+  });
+
+  it('clears the indicator when the timeout expires', () => {
+    const action = vi.fn();
+    const onSequenceState = vi.fn();
+    renderHook(() =>
+      useShortcuts(
+        { 'importexport.import.rules': action },
+        { scope: 'page:importexport', sequenceTimeout: 500, onSequenceState },
+      ),
+    );
+
+    dispatch({ key: 'i' });
+    expect(onSequenceState).toHaveBeenLastCalledWith({ activePrefix: ['i'] });
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+    expect(onSequenceState).toHaveBeenLastCalledWith({ activePrefix: null });
+  });
+
+  it('does not affect simple combos pressed before any sequence prefix', () => {
+    const simpleAction = vi.fn();
+    renderHook(() =>
+      useShortcuts({ 'popup.save': simpleAction }, { scope: 'page:popup' }),
+    );
+
+    dispatch({ key: 's' });
+    expect(simpleAction).toHaveBeenCalledTimes(1);
   });
 });

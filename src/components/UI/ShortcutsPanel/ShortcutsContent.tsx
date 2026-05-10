@@ -14,8 +14,11 @@ import {
   type Surface,
 } from '@/shortcuts/groups';
 import { getShortcutsByGroup } from '@/shortcuts/registry';
-import type { ShortcutEntry } from '@/shortcuts/types';
-import { tokenizeComboForDisplay } from '@/utils/shortcutDisplay';
+import type { Binding, ShortcutEntry } from '@/shortcuts/types';
+import {
+  formatSequenceForA11y,
+  tokenizeComboForDisplay,
+} from '@/utils/shortcutDisplay';
 import styles from './ShortcutsContent.module.css';
 
 interface ShortcutsContentProps {
@@ -34,7 +37,7 @@ interface ShortcutsContentProps {
 }
 
 interface ResolvedKeys {
-  keys: string[];
+  keys: Binding[];
   unbound: boolean;
 }
 
@@ -230,6 +233,10 @@ function CollapsibleGroup({
   );
 }
 
+function bindingKey(binding: Binding): string {
+  return typeof binding === 'string' ? binding : binding.join('|');
+}
+
 function ShortcutRow({
   entry,
   liveCommands,
@@ -249,10 +256,10 @@ function ShortcutRow({
             {getMessage('shortcutNotSet')}
           </span>
         ) : (
-          keys.map((combo, index) => (
-            <React.Fragment key={combo}>
+          keys.map((binding, index) => (
+            <React.Fragment key={bindingKey(binding)}>
               {index > 0 && <span className={styles.altSeparator} aria-hidden="true">/</span>}
-              <KeyCombo combo={combo} />
+              <KeyCombo binding={binding} />
             </React.Fragment>
           ))
         )}
@@ -261,7 +268,7 @@ function ShortcutRow({
   );
 }
 
-function KeyCombo({ combo }: { combo: string }) {
+function SimpleCombo({ combo }: { combo: string }) {
   const tokens = tokenizeComboForDisplay(combo);
   return (
     <Flex gap="1" align="center">
@@ -269,6 +276,27 @@ function KeyCombo({ combo }: { combo: string }) {
         <React.Fragment key={`${token.display}-${i}`}>
           {i > 0 && <span className={styles.plus} aria-hidden="true">+</span>}
           <Kbd size="1" aria-label={token.accessibleLabel}>{token.display}</Kbd>
+        </React.Fragment>
+      ))}
+    </Flex>
+  );
+}
+
+function KeyCombo({ binding }: { binding: Binding }) {
+  if (typeof binding === 'string') {
+    return <SimpleCombo combo={binding} />;
+  }
+  const separator = getMessage('shortcutSequenceSeparator');
+  return (
+    <Flex gap="1" align="center" aria-label={formatSequenceForA11y(binding, separator)}>
+      {binding.map((combo, i) => (
+        <React.Fragment key={`${combo}-${i}`}>
+          {i > 0 && (
+            <Text size="1" color="gray" className={styles.sequenceSeparator} aria-hidden="true">
+              {separator}
+            </Text>
+          )}
+          <SimpleCombo combo={combo} />
         </React.Fragment>
       ))}
     </Flex>

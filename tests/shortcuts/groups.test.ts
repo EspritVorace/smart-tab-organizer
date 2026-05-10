@@ -27,7 +27,7 @@ describe('getDisplayTree("popup")', () => {
 });
 
 describe('getDisplayTree("options")', () => {
-  it('returns the 7 top-level groups in the historical order', () => {
+  it('returns the 8 top-level groups in the historical order', () => {
     const tree = getDisplayTree('options');
     expect(tree.map((n) => n.descriptor.id)).toEqual([
       'global',
@@ -35,6 +35,7 @@ describe('getDisplayTree("options")', () => {
       'list-rules',
       'list-sessions',
       'list-workspaces',
+      'importexport',
       'options',
       'popup',
     ]);
@@ -47,7 +48,7 @@ describe('getDisplayTree("options")', () => {
     );
     expect(subIdsByGroup['list-home']).toEqual(['session-card']);
     expect(subIdsByGroup['list-sessions']).toEqual(['session-card']);
-    for (const id of ['global', 'list-rules', 'list-workspaces', 'options', 'popup'] as const) {
+    for (const id of ['global', 'list-rules', 'list-workspaces', 'importexport', 'options', 'popup'] as const) {
       expect(subIdsByGroup[id]).toEqual([]);
     }
   });
@@ -87,6 +88,12 @@ describe('isGroupOpenByDefault', () => {
   it('opens list-workspaces only on the workspaces page', () => {
     for (const ctx of ALL_CONTEXTS) {
       expect(isGroupOpenByDefault('list-workspaces', ctx)).toBe(ctx === 'workspaces');
+    }
+  });
+
+  it('opens importexport only on the importexport page', () => {
+    for (const ctx of ALL_CONTEXTS) {
+      expect(isGroupOpenByDefault('importexport', ctx)).toBe(ctx === 'importexport');
     }
   });
 

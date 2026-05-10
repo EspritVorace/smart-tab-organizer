@@ -85,3 +85,12 @@ export function formatComboForA11y(combo: string): string {
   const separator = IS_MAC ? ' ' : ' + ';
   return tokens.map((t) => t.accessibleLabel).join(separator);
 }
+
+/**
+ * Plain-text formatting for sequence bindings (e.g. `['i', 'r']`). Each step
+ * is rendered via `formatComboForA11y`, joined by the localised separator
+ * passed in (typically `getMessage('shortcutSequenceSeparator')`).
+ */
+export function formatSequenceForA11y(sequence: string[], separator: string): string {
+  return sequence.map((combo) => formatComboForA11y(combo)).join(` ${separator} `);
+}

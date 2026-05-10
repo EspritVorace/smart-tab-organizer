@@ -33,6 +33,12 @@
   user-select: none;
 }
 
+.sequenceSeparator {
+  font-style: italic;
+  user-select: none;
+  margin: 0 2px;
+}
+
 .groupTitle {
   margin-bottom: 4px;
 }
