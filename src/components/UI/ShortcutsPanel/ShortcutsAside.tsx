@@ -3,7 +3,7 @@ import { Flex, IconButton, Text } from '@radix-ui/themes';
 import { Keyboard, X } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { ShortcutsContent, focusFirstOpenTrigger } from './ShortcutsContent';
-import type { PageContext } from './shortcuts';
+import type { PageContext } from '@/shortcuts/groups';
 import styles from './ShortcutsAside.module.css';
 
 interface ShortcutsAsideProps {
@@ -84,7 +84,7 @@ export function ShortcutsAside({ open, onClose, pageContext }: ShortcutsAsidePro
         </IconButton>
       </div>
       <Flex direction="column" className={styles.body}>
-        <ShortcutsContent key={pageContext} pageContext={pageContext} />
+        <ShortcutsContent key={pageContext} surface="options" pageContext={pageContext} />
       </Flex>
     </aside>
   );

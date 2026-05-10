@@ -6,11 +6,17 @@
  * `Escape`, `?`, `/`. Modifier order does not matter, casing on the key does
  * not matter.
  *
+ * The `Mod` modifier resolves to `Cmd` on macOS and `Ctrl` elsewhere so a
+ * single registry entry can target the OS-native primary modifier without
+ * branching at every call site.
+ *
  * For the literal keys `?` and `/`, shift is ignored: many layouts require
  * shift to produce them (`?` on QWERTY, `/` on French AZERTY where Shift+: is
  * the only way to type a slash). All other keys require strict modifier match
  * so that `r` and `Shift+r` are distinguishable.
  */
+
+import { IS_MAC } from './platform';
 
 export interface ParsedCombo {
   key: string;
@@ -24,12 +30,13 @@ export function parseCombo(combo: string): ParsedCombo {
   const parts = combo.split('+').map((p) => p.trim()).filter(Boolean);
   const rawKey = parts.pop() ?? '';
   const mods = new Set(parts.map((p) => p.toLowerCase()));
+  const isMod = mods.has('mod');
   return {
     key: rawKey.toLowerCase(),
     shift: mods.has('shift'),
     alt: mods.has('alt'),
-    ctrl: mods.has('ctrl') || mods.has('control'),
-    meta: mods.has('meta') || mods.has('cmd') || mods.has('command'),
+    ctrl: mods.has('ctrl') || mods.has('control') || (isMod && !IS_MAC),
+    meta: mods.has('meta') || mods.has('cmd') || mods.has('command') || (isMod && IS_MAC),
   };
 }
 
@@ -46,14 +53,16 @@ export function matchesShortcut(event: KeyboardEvent, combo: string): boolean {
 }
 
 /**
- * `event.key` is layout-dependent: on AZERTY for example, the physical "1"
- * key emits "&" without shift, so an `Alt+1` combo would never match if we
- * only compared `event.key`. Fall back to `event.code` for digits, which is
- * stable across layouts (`Digit0` to `Digit9`).
+ * `event.key` is layout-dependent: on AZERTY the physical "1" key emits "&"
+ * without shift, and on macOS QWERTY `Alt+R` produces "®" instead of "r" so
+ * the combo would never match if we only compared `event.key`. Fall back to
+ * `event.code` for digits (`Digit0`..`Digit9`) and ASCII letters
+ * (`KeyA`..`KeyZ`), both stable across layouts.
  */
 function keyMatches(event: KeyboardEvent, parsedKey: string): boolean {
   if (event.key.toLowerCase() === parsedKey) return true;
   if (/^\d$/.test(parsedKey) && event.code === `Digit${parsedKey}`) return true;
+  if (/^[a-z]$/.test(parsedKey) && event.code === `Key${parsedKey.toUpperCase()}`) return true;
   return false;
 }
 
