@@ -100,6 +100,45 @@ Accent unique `indigo` (défaut Radix Themes). Préférer les tokens Radix (`var
 ### Internationalization
 Always use `getMessage()` from `src/utils/i18n.ts` — for UI text, `aria-label`, and `title` attributes. Never hardcode strings.
 
+### Conventions raccourcis clavier
+
+Registry central : `src/shortcuts/registry.ts`. Doc développeur détaillée :
+[`src/shortcuts/README.md`](./src/shortcuts/README.md).
+
+**Ajouter un raccourci**
+
+1. Ajouter une entrée dans `SHORTCUTS_REGISTRY` (ID kebab-case hiérarchique :
+   `{scope}.{action}` ou `{scope}.{action}.{variant}`).
+2. Ajouter `descriptionKey` dans les 3 fichiers
+   `public/_locales/{fr,en,es}/messages.json`.
+3. Dans le composant : `useShortcuts({ 'mon.id': handler }, { scope })`.
+4. `pnpm shortcuts:doc` régénère la page Starlight `annexes/raccourcis-clavier`.
+
+**Format des combos**
+
+- Modificateurs : `Mod` (Cmd/Ctrl), `Shift`, `Alt`, `Ctrl`, `Meta`. Ordre indifférent.
+- Touches : minuscule (`Mod+Shift+r`).
+- Touches spéciales : CamelCase (`Escape`, `Enter`, `ArrowUp`).
+- Séquence : tableau de combos (`['i', 'r']`).
+
+**Registry vs handlers locaux**
+
+Vont dans le registry : tout raccourci utilisateur « apprenable » (description
+i18n, comportement reproductible, à montrer dans le panneau d'aide).
+
+Restent en handlers locaux : Enter/Escape sur input rename, virgule pour valider
+un tag, navigation flèches dans une liste (`useListNavigation`), drag and drop
+clavier de dnd-kit.
+
+**Personnalisation utilisateur**
+
+Le hook façade `useShortcuts` lit ses bindings via
+`getEffectiveBindings(id)` (`src/shortcuts/getEffectiveBindings.ts`). Le schéma
+Zod `ShortcutOverridesSchema` (`src/shortcuts/overridesSchema.ts`) décrit le
+format de stockage des overrides utilisateur. Aucune UI ni storage actif à ce
+stade : les deux modules existent pour qu'une future feature de personnalisation
+puisse se brancher sans toucher aux callers.
+
 ## Code Conventions
 
 ### Logging

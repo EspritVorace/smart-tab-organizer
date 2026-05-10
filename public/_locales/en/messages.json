@@ -535,6 +535,12 @@
   "shortcutsUnboundWarning": { "message": "Some browser shortcuts are not bound. The browser does not auto-apply suggested keys after an extension update; bind them via 'Customize browser shortcuts' below." },
   "shortcutNotSet": { "message": "Not set" },
 
+  "docsKeyboardShortcutsTitle": { "message": "Keyboard shortcuts" },
+  "docsKeyboardShortcutsIntro": { "message": "All keyboard shortcuts available in SmartTab Organizer, grouped by surface. Browser-wide shortcuts can be customized in your browser's extension settings." },
+  "docsKeyboardShortcutsTableHeaderShortcut": { "message": "Shortcut" },
+  "docsKeyboardShortcutsTableHeaderAction": { "message": "Action" },
+  "docsKeyboardShortcutsGenerated": { "message": "This page is generated from src/shortcuts/registry.ts. Run pnpm shortcuts:doc to refresh." },
+
   "shortcutsGroupGlobal": { "message": "Browser-wide" },
   "shortcutsGroupPopup": { "message": "Popup" },
   "shortcutsGroupOptions": { "message": "Options page" },

@@ -19,6 +19,7 @@
  */
 
 import { useEffect, useRef } from 'react';
+import { getEffectiveBindings } from '@/shortcuts/getEffectiveBindings';
 import { SHORTCUTS_REGISTRY } from '@/shortcuts/registry';
 import type { Binding, ShortcutEntry, ShortcutScope } from '@/shortcuts/types';
 import {
@@ -108,7 +109,8 @@ export function useShortcuts(
         const entry = SHORTCUTS_REGISTRY[id];
         if (!entry) continue;
         if (entry.scope !== scope) continue;
-        out.push({ id, entry, action });
+        const resolved: ShortcutEntry = { ...entry, defaultBindings: getEffectiveBindings(id) };
+        out.push({ id, entry: resolved, action });
       }
       return out;
     };

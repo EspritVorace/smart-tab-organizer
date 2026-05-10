@@ -536,6 +536,12 @@
   "shortcutsUnboundWarning": { "message": "Certains raccourcis navigateur ne sont pas définis. Le navigateur n'applique pas automatiquement les raccourcis suggérés après une mise à jour de l'extension ; définissez-les via 'Personnaliser les raccourcis' ci-dessous." },
   "shortcutNotSet": { "message": "Non défini" },
 
+  "docsKeyboardShortcutsTitle": { "message": "Raccourcis clavier" },
+  "docsKeyboardShortcutsIntro": { "message": "Tous les raccourcis clavier disponibles dans SmartTab Organizer, groupés par surface. Les raccourcis globaux peuvent être personnalisés depuis les paramètres d'extensions du navigateur." },
+  "docsKeyboardShortcutsTableHeaderShortcut": { "message": "Raccourci" },
+  "docsKeyboardShortcutsTableHeaderAction": { "message": "Action" },
+  "docsKeyboardShortcutsGenerated": { "message": "Cette page est générée depuis src/shortcuts/registry.ts. Lancez pnpm shortcuts:doc pour la mettre à jour." },
+
   "shortcutsGroupGlobal": { "message": "Globaux navigateur" },
   "shortcutsGroupPopup": { "message": "Popup" },
   "shortcutsGroupOptions": { "message": "Page d'options" },
