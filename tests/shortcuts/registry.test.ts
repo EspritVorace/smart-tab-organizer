@@ -30,10 +30,13 @@ describe('SHORTCUTS_REGISTRY', () => {
 
   it('parses every defaultBinding without error', () => {
     for (const entry of Object.values(SHORTCUTS_REGISTRY)) {
-      for (const combo of entry.defaultBindings) {
-        expect(() => parseCombo(combo)).not.toThrow();
-        const parsed = parseCombo(combo);
-        expect(parsed.key.length).toBeGreaterThan(0);
+      for (const binding of entry.defaultBindings) {
+        const combos = typeof binding === 'string' ? [binding] : binding;
+        for (const combo of combos) {
+          expect(() => parseCombo(combo)).not.toThrow();
+          const parsed = parseCombo(combo);
+          expect(parsed.key.length).toBeGreaterThan(0);
+        }
       }
     }
   });
@@ -56,6 +59,26 @@ describe('SHORTCUTS_REGISTRY', () => {
     expect(getShortcutsByGroup('list-workspaces')).toHaveLength(1);
     expect(getShortcutsByGroup('list-home')).toHaveLength(4);
     expect(getShortcutsByGroup('session-card')).toHaveLength(4);
+    expect(getShortcutsByGroup('importexport')).toHaveLength(6);
+  });
+
+  it('reserves i and e as sequence prefixes in page:importexport scope', () => {
+    const ieScope = getShortcutsByScope('page:importexport');
+    expect(ieScope.length).toBeGreaterThan(0);
+
+    const offending: { id: string; combo: string; key: string }[] = [];
+    for (const entry of ieScope) {
+      for (const binding of entry.defaultBindings) {
+        const combos = typeof binding === 'string' ? [binding] : [];
+        for (const combo of combos) {
+          const parsed = parseCombo(combo);
+          if (parsed.key === 'i' || parsed.key === 'e') {
+            offending.push({ id: entry.id, combo, key: parsed.key });
+          }
+        }
+      }
+    }
+    expect(offending).toEqual([]);
   });
 
   it('attaches commandName only on global manifest entries', () => {

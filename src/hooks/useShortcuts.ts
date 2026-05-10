@@ -1,25 +1,34 @@
 /**
- * Façade hook that lets callers wire keyboard actions by registry ID instead
- * of duplicating combo strings inline. Resolves each binding against
- * `SHORTCUTS_REGISTRY` and translates the entry's `scope` into a low-level
- * `ShortcutDefinition`:
+ * Façade hook that lets callers wire keyboard actions by registry ID. Resolves
+ * each binding against `SHORTCUTS_REGISTRY` and dispatches keydown events
+ * directly. Supports both simple combos (`'Mod+K'`) and ordered key sequences
+ * (`['i', 'r']`) declared on a registry entry's `defaultBindings`.
  *
- * - `global` and `page:*` scopes attach as plain document-level shortcuts.
- *   Entries flagged `excludeIfInsideWidget` are suppressed when focus is
- *   anywhere inside a `[data-shortcut-scope="widget:..."]` element.
+ * Scope filtering mirrors Lot 2 semantics:
  * - `widget:*` scopes only fire when the event target itself carries the
  *   matching `data-shortcut-scope` attribute (descendants do not steal the
- *   combo, so a drag handle's Space still starts the drag).
+ *   combo).
+ * - `global` and `page:*` scopes attach as document-level shortcuts; entries
+ *   flagged `excludeIfInsideWidget` are suppressed when focus is inside any
+ *   `[data-shortcut-scope^="widget:"]` element.
+ *
+ * Sequences accumulate in a buffer cleared on Escape, on focus into a typing
+ * target, on dialog open, or after `sequenceTimeout` ms of inactivity. The
+ * `onSequenceState` callback fires whenever the active prefix changes so the
+ * UI can render a `SequenceIndicator`.
  */
 
-import { useMemo } from 'react';
-import { useKeyboardShortcuts } from './useKeyboardShortcuts';
+import { useEffect, useRef } from 'react';
 import { SHORTCUTS_REGISTRY } from '@/shortcuts/registry';
-import type { ShortcutScope } from '@/shortcuts/types';
+import type { Binding, ShortcutEntry, ShortcutScope } from '@/shortcuts/types';
 import {
   WIDGET_SCOPE_SELECTOR,
+  isDialogOpen,
+  isSequencePrefix,
+  isTypingTarget,
+  matchesBinding,
+  serializeKeyEvent,
   widgetScopeSelector,
-  type ShortcutDefinition,
 } from '@/utils/keyboardShortcuts';
 
 export type ShortcutAction = (event: KeyboardEvent) => void;
@@ -27,38 +36,168 @@ export type ShortcutAction = (event: KeyboardEvent) => void;
 export interface UseShortcutsOptions {
   scope?: ShortcutScope;
   enabled?: boolean;
+  /** Sequence timeout in ms. Default 1500. */
+  sequenceTimeout?: number;
+  /**
+   * Notified when the sequence buffer changes. Receives the active prefix
+   * (array of canonical combos) or `null` when the buffer is empty. Also
+   * fired on hook unmount so the indicator clears when the page changes.
+   */
+  onSequenceState?: (state: { activePrefix: string[] | null }) => void;
+}
+
+const DEFAULT_SEQUENCE_TIMEOUT_MS = 1500;
+
+function entryScopeFilter(entry: ShortcutEntry, event: KeyboardEvent): boolean {
+  if (entry.scope.startsWith('widget:')) {
+    if (!(event.target instanceof Element)) return false;
+    if (!event.target.matches(widgetScopeSelector(entry.scope))) return false;
+    return true;
+  }
+  if (entry.excludeIfInsideWidget && event.target instanceof Element) {
+    if (event.target.closest(WIDGET_SCOPE_SELECTOR)) return false;
+  }
+  return true;
+}
+
+function passesContextualFilters(entry: ShortcutEntry, event: KeyboardEvent): boolean {
+  if (!entry.allowInTypingTarget && isTypingTarget(event.target)) return false;
+  if (!entry.allowWhenDialogOpen && isDialogOpen()) return false;
+  return entryScopeFilter(entry, event);
 }
 
 export function useShortcuts(
   bindings: Record<string, ShortcutAction>,
   options: UseShortcutsOptions = {},
 ): void {
-  const { scope = 'global', enabled = true } = options;
+  const {
+    scope = 'global',
+    enabled = true,
+    sequenceTimeout = DEFAULT_SEQUENCE_TIMEOUT_MS,
+    onSequenceState,
+  } = options;
 
-  const definitions = useMemo<ShortcutDefinition[]>(() => {
-    const defs: ShortcutDefinition[] = [];
-    for (const [id, action] of Object.entries(bindings)) {
-      const entry = SHORTCUTS_REGISTRY[id];
-      if (!entry) continue;
-      if (entry.scope !== scope) continue;
-      const isWidget = entry.scope.startsWith('widget:');
-      for (const combo of entry.defaultBindings) {
-        const def: ShortcutDefinition = {
-          combo,
-          action,
-          allowInTypingTarget: entry.allowInTypingTarget,
-          allowWhenDialogOpen: entry.allowWhenDialogOpen,
-        };
-        if (isWidget) {
-          def.requireTargetMatches = widgetScopeSelector(entry.scope);
-        } else if (entry.excludeIfInsideWidget) {
-          def.excludeIfTargetWithin = WIDGET_SCOPE_SELECTOR;
-        }
-        defs.push(def);
+  const bindingsRef = useRef(bindings);
+  bindingsRef.current = bindings;
+  const onSequenceStateRef = useRef(onSequenceState);
+  onSequenceStateRef.current = onSequenceState;
+
+  useEffect(() => {
+    if (!enabled) return undefined;
+
+    let buffer: string[] = [];
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const clearTimer = () => {
+      if (timer !== null) {
+        clearTimeout(timer);
+        timer = null;
       }
-    }
-    return defs;
-  }, [bindings, scope]);
+    };
 
-  useKeyboardShortcuts(definitions, { enabled });
+    const reset = () => {
+      const wasActive = buffer.length > 0;
+      buffer = [];
+      clearTimer();
+      if (wasActive) onSequenceStateRef.current?.({ activePrefix: null });
+    };
+
+    const collectScopedEntries = (): { id: string; entry: ShortcutEntry; action: ShortcutAction }[] => {
+      const out: { id: string; entry: ShortcutEntry; action: ShortcutAction }[] = [];
+      for (const [id, action] of Object.entries(bindingsRef.current)) {
+        const entry = SHORTCUTS_REGISTRY[id];
+        if (!entry) continue;
+        if (entry.scope !== scope) continue;
+        out.push({ id, entry, action });
+      }
+      return out;
+    };
+
+    const tryFullMatch = (
+      scoped: { entry: ShortcutEntry; action: ShortcutAction }[],
+      candidateBuffer: string[],
+      event: KeyboardEvent,
+    ): boolean => {
+      for (const { entry, action } of scoped) {
+        for (const binding of entry.defaultBindings) {
+          if (!matchesBinding(candidateBuffer, binding as Binding, event)) continue;
+          if (!passesContextualFilters(entry, event)) {
+            reset();
+            return true;
+          }
+          event.preventDefault();
+          try {
+            action(event);
+          } finally {
+            reset();
+          }
+          return true;
+        }
+      }
+      return false;
+    };
+
+    const tryPartialMatch = (
+      scoped: { entry: ShortcutEntry }[],
+      candidateBuffer: string[],
+      event: KeyboardEvent,
+    ): boolean => {
+      for (const { entry } of scoped) {
+        for (const binding of entry.defaultBindings) {
+          if (!isSequencePrefix(candidateBuffer, binding as Binding, event)) continue;
+          if (isTypingTarget(event.target) || isDialogOpen()) {
+            reset();
+            return true;
+          }
+          buffer = candidateBuffer;
+          clearTimer();
+          timer = setTimeout(reset, sequenceTimeout);
+          onSequenceStateRef.current?.({ activePrefix: [...buffer] });
+          event.preventDefault();
+          return true;
+        }
+      }
+      return false;
+    };
+
+    const tryDispatch = (candidateBuffer: string[], event: KeyboardEvent): boolean => {
+      const scoped = collectScopedEntries();
+      if (tryFullMatch(scoped, candidateBuffer, event)) return true;
+      return tryPartialMatch(scoped, candidateBuffer, event);
+    };
+
+    const handler = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && buffer.length > 0) {
+        reset();
+      }
+
+      const keyCombo = serializeKeyEvent(event);
+      if (keyCombo === null) return;
+
+      const candidateBuffer = [...buffer, keyCombo];
+      if (tryDispatch(candidateBuffer, event)) return;
+
+      if (buffer.length > 0) {
+        reset();
+        tryDispatch([keyCombo], event);
+      }
+    };
+
+    const focusHandler = (event: FocusEvent) => {
+      if (buffer.length === 0) return;
+      if (isTypingTarget(event.target)) reset();
+    };
+
+    document.addEventListener('keydown', handler);
+    document.addEventListener('focusin', focusHandler);
+    return () => {
+      document.removeEventListener('keydown', handler);
+      document.removeEventListener('focusin', focusHandler);
+      clearTimer();
+      if (buffer.length > 0) {
+        buffer = [];
+        onSequenceStateRef.current?.({ activePrefix: null });
+      }
+    };
+  }, [enabled, scope, sequenceTimeout]);
 }

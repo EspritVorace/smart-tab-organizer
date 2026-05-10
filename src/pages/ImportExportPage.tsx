@@ -11,6 +11,7 @@ import { ImportExportActionCard } from '@/components/UI/ImportExportWizards/Impo
 import { ExportWorkspaceDialog } from '@/components/UI/Workspace/ExportWorkspaceDialog';
 import { ImportWorkspaceDialog } from '@/components/UI/Workspace/ImportWorkspaceDialog';
 import { useSessions } from '@/hooks/useSessions';
+import { useShortcuts, type ShortcutAction } from '@/hooks/useShortcuts';
 import type { ImportExportAction, ImportExportFrom } from '@/hooks/useDeepLinking';
 import type { SourceMode } from '@/components/UI/ImportExportWizards/Source';
 import type { AppSettings, DomainRuleSetting } from '@/types/syncSettings';
@@ -30,6 +31,8 @@ interface ImportExportPageProps {
   importRulesInitialMode?: SourceMode | null;
   /** Called when the rules import wizard closes so the parent can clear `importRulesInitialMode`. */
   onImportRulesClosed?: () => void;
+  /** Forwarded sequence-buffer state so a parent can render the global indicator. */
+  onSequencePrefixChange?: (prefix: string[] | null) => void;
 }
 
 export function ImportExportPage({
@@ -41,6 +44,7 @@ export function ImportExportPage({
   onNavigate,
   importRulesInitialMode,
   onImportRulesClosed,
+  onSequencePrefixChange,
 }: ImportExportPageProps) {
   const [exportOpen, setExportOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
@@ -95,6 +99,26 @@ export function ImportExportPage({
     },
     [triggeredByDeepLink, pendingFrom, onNavigate],
   );
+
+  const shortcutBindings: Record<string, ShortcutAction> = {
+    'importexport.import.rules': () => setImportOpen(true),
+    'importexport.import.sessions': () => setImportSessionsOpen(true),
+    'importexport.import.workspaces': () => setImportWorkspaceOpen(true),
+    'importexport.export.rules': () => {
+      if (syncSettings.domainRules.length === 0) return;
+      setExportOpen(true);
+    },
+    'importexport.export.sessions': () => {
+      if (sessions.length === 0) return;
+      setExportSessionsOpen(true);
+    },
+    'importexport.export.workspaces': () => setExportWorkspaceOpen(true),
+  };
+
+  useShortcuts(shortcutBindings, {
+    scope: 'page:importexport',
+    onSequenceState: ({ activePrefix }) => onSequencePrefixChange?.(activePrefix),
+  });
 
   return (
     <PageLayout

@@ -309,6 +309,53 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'session-card',
     scope: 'widget:session-card',
   },
+
+  // Page: Import/Export. Mnemonic two-key sequences (i/e prefix + target
+  // initial). The `i` and `e` letters are reserved as sequence prefixes in
+  // this scope: no simple combo may use them so the sequence timeout never
+  // delays a single keypress (enforced by registry invariant test).
+  'importexport.import.rules': {
+    id: 'importexport.import.rules',
+    defaultBindings: [['i', 'r']],
+    descriptionKey: 'shortcutDescImportRules',
+    group: 'importexport',
+    scope: 'page:importexport',
+  },
+  'importexport.import.sessions': {
+    id: 'importexport.import.sessions',
+    defaultBindings: [['i', 's']],
+    descriptionKey: 'shortcutDescImportSessions',
+    group: 'importexport',
+    scope: 'page:importexport',
+  },
+  'importexport.import.workspaces': {
+    id: 'importexport.import.workspaces',
+    defaultBindings: [['i', 'w']],
+    descriptionKey: 'shortcutDescImportWorkspaces',
+    group: 'importexport',
+    scope: 'page:importexport',
+  },
+  'importexport.export.rules': {
+    id: 'importexport.export.rules',
+    defaultBindings: [['e', 'r']],
+    descriptionKey: 'shortcutDescExportRules',
+    group: 'importexport',
+    scope: 'page:importexport',
+  },
+  'importexport.export.sessions': {
+    id: 'importexport.export.sessions',
+    defaultBindings: [['e', 's']],
+    descriptionKey: 'shortcutDescExportSessions',
+    group: 'importexport',
+    scope: 'page:importexport',
+  },
+  'importexport.export.workspaces': {
+    id: 'importexport.export.workspaces',
+    defaultBindings: [['e', 'w']],
+    descriptionKey: 'shortcutDescExportWorkspaces',
+    group: 'importexport',
+    scope: 'page:importexport',
+  },
 };
 
 export function getShortcutsByScope(scope: ShortcutScope): ShortcutEntry[] {

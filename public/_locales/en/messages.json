@@ -543,6 +543,15 @@
   "shortcutsGroupListSessions": { "message": "Sessions list" },
   "shortcutsGroupListWorkspaces": { "message": "Workspaces list" },
   "shortcutsGroupSessionCard": { "message": "Session card (focused)" },
+  "shortcutsGroupImportExport": { "message": "Import / Export" },
+
+  "shortcutSequenceSeparator": { "message": "then" },
+  "shortcutSequenceActiveAnnouncement": {
+    "message": "Prefix $PREFIX$ active, waiting for next key",
+    "placeholders": {
+      "prefix": { "content": "$1" }
+    }
+  },
 
   "shortcutDescOrganize": { "message": "Organize all tabs" },
   "shortcutDescSaveSession": { "message": "Save current window as a session" },
@@ -570,6 +579,12 @@
   "shortcutDescHomeFirstLast": { "message": "Move focus to first or last item" },
   "shortcutDescHomeNextSection": { "message": "Move focus to the next section" },
   "shortcutDescHomeActivate": { "message": "Activate the focused item" },
+  "shortcutDescImportRules": { "message": "Import rules" },
+  "shortcutDescImportSessions": { "message": "Import sessions" },
+  "shortcutDescImportWorkspaces": { "message": "Import workspaces" },
+  "shortcutDescExportRules": { "message": "Export rules" },
+  "shortcutDescExportSessions": { "message": "Export sessions" },
+  "shortcutDescExportWorkspaces": { "message": "Export workspaces" },
 
   "homeTab": { "message": "Home" },
   "homePageDescription": { "message": "Your SmartTab Organizer dashboard: pinned sessions, shortcuts, and activity." },

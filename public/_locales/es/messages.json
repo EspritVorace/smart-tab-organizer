@@ -544,6 +544,15 @@
   "shortcutsGroupListSessions": { "message": "Lista de sesiones" },
   "shortcutsGroupListWorkspaces": { "message": "Lista de espacios" },
   "shortcutsGroupSessionCard": { "message": "Tarjeta de sesión (con foco)" },
+  "shortcutsGroupImportExport": { "message": "Importar / Exportar" },
+
+  "shortcutSequenceSeparator": { "message": "después" },
+  "shortcutSequenceActiveAnnouncement": {
+    "message": "Prefijo $PREFIX$ activo, esperando la siguiente tecla",
+    "placeholders": {
+      "prefix": { "content": "$1" }
+    }
+  },
 
   "shortcutDescOrganize": { "message": "Organizar todas las pestañas" },
   "shortcutDescSaveSession": { "message": "Guardar la ventana como sesión" },
@@ -571,6 +580,12 @@
   "shortcutDescHomeFirstLast": { "message": "Mover el foco al primer o último elemento" },
   "shortcutDescHomeNextSection": { "message": "Mover el foco a la sección siguiente" },
   "shortcutDescHomeActivate": { "message": "Activar el elemento con foco" },
+  "shortcutDescImportRules": { "message": "Importar reglas" },
+  "shortcutDescImportSessions": { "message": "Importar sesiones" },
+  "shortcutDescImportWorkspaces": { "message": "Importar espacios de trabajo" },
+  "shortcutDescExportRules": { "message": "Exportar reglas" },
+  "shortcutDescExportSessions": { "message": "Exportar sesiones" },
+  "shortcutDescExportWorkspaces": { "message": "Exportar espacios de trabajo" },
 
   "homeTab": { "message": "Inicio" },
   "homePageDescription": { "message": "Tu panel de SmartTab Organizer: sesiones ancladas, accesos rápidos y actividad." },

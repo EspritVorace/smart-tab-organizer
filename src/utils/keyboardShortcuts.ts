@@ -17,6 +17,7 @@
  */
 
 import { IS_MAC } from './platform';
+import type { Binding } from '@/shortcuts/types';
 
 export interface ParsedCombo {
   key: string;
@@ -138,4 +139,76 @@ export const WIDGET_SCOPE_SELECTOR = '[data-shortcut-scope^="widget:"]';
  */
 export function widgetScopeSelector(scope: string): string {
   return `[data-shortcut-scope="${scope}"]`;
+}
+
+const LONE_MODIFIER_KEYS = new Set([
+  'Shift', 'Control', 'Alt', 'Meta', 'OS', 'ContextMenu',
+]);
+
+/**
+ * Serializes a `KeyboardEvent` into a canonical combo string compatible with
+ * `parseCombo`. Used to feed the sequence buffer in `useShortcuts`. Returns
+ * `null` for lone modifier keypresses so the buffer ignores them.
+ */
+export function serializeKeyEvent(event: KeyboardEvent): string | null {
+  if (LONE_MODIFIER_KEYS.has(event.key)) return null;
+  const key = event.key.toLowerCase();
+  const parts: string[] = [];
+  if (event.metaKey) parts.push('Meta');
+  if (event.ctrlKey) parts.push('Ctrl');
+  if (event.altKey) parts.push('Alt');
+  if (event.shiftKey && !SHIFT_INSENSITIVE_KEYS.has(key)) parts.push('Shift');
+  parts.push(key);
+  return parts.join('+');
+}
+
+function comboEquivalent(a: string, b: string): boolean {
+  const pa = parseCombo(a);
+  const pb = parseCombo(b);
+  return pa.key === pb.key
+    && pa.shift === pb.shift
+    && pa.alt === pb.alt
+    && pa.ctrl === pb.ctrl
+    && pa.meta === pb.meta;
+}
+
+/**
+ * Returns true when the buffer (already including the latest keypress) fully
+ * matches `binding`. Simple combos require a length-1 buffer matching the
+ * combo. Sequences require equal length: the last step is matched against
+ * the live event for layout-aware fallbacks (`event.code`), prior steps
+ * compared canonically.
+ */
+export function matchesBinding(
+  buffer: string[],
+  binding: Binding,
+  lastEvent: KeyboardEvent,
+): boolean {
+  if (typeof binding === 'string') {
+    return buffer.length === 1 && matchesShortcut(lastEvent, binding);
+  }
+  if (buffer.length !== binding.length) return false;
+  for (let i = 0; i < binding.length - 1; i++) {
+    if (!comboEquivalent(buffer[i], binding[i])) return false;
+  }
+  return matchesShortcut(lastEvent, binding[binding.length - 1]);
+}
+
+/**
+ * Returns true when the buffer is a strict prefix of `binding`. Returns
+ * false for simple combos (no prefix possible) and for full matches (use
+ * `matchesBinding` for those).
+ */
+export function isSequencePrefix(
+  buffer: string[],
+  binding: Binding,
+  lastEvent: KeyboardEvent,
+): boolean {
+  if (typeof binding === 'string') return false;
+  if (buffer.length >= binding.length) return false;
+  if (buffer.length === 0) return false;
+  for (let i = 0; i < buffer.length - 1; i++) {
+    if (!comboEquivalent(buffer[i], binding[i])) return false;
+  }
+  return matchesShortcut(lastEvent, binding[buffer.length - 1]);
 }
