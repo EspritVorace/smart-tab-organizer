@@ -31,8 +31,8 @@ const meta: Meta<typeof Sidebar> = {
         <div style={{ height: '100vh', display: 'flex' }}>
           <Story />
           <div style={{ flex: 1, padding: '20px', backgroundColor: 'var(--gray-2)' }}>
-            <h1>Contenu principal</h1>
-            <p>Cette zone représente le contenu principal de l'application.</p>
+            <h1>Main content</h1>
+            <p>This area represents the application's main content.</p>
           </div>
         </div>
       </Theme>
@@ -41,15 +41,15 @@ const meta: Meta<typeof Sidebar> = {
   argTypes: {
     isCollapsed: {
       control: 'boolean',
-      description: 'État de la sidebar (réduite ou étendue)',
+      description: 'Sidebar state (collapsed or expanded)',
     },
     activeItem: {
       control: 'text',
-      description: 'ID de l\'élément actif',
+      description: 'ID of the active item',
     },
     showFooter: {
       control: 'boolean',
-      description: 'Afficher le footer',
+      description: 'Whether to display the footer',
     },
   },
 };
@@ -258,7 +258,7 @@ export const SidebarWithSearch: Story = {
     isCollapsed: false,
     showFooter: false,
     showSearch: true,
-    searchPlaceholder: "Rechercher...",
+    searchPlaceholder: "Search...",
     onSearch: (query: string) => console.log(`Search: ${query}`),
     onSearchValueChange: (value: string) => console.log(`Search value: ${value}`),
     headerContent: <HeaderExpanded title="Menu with Search" />,
@@ -297,7 +297,7 @@ export const SidebarComplete: Story = {
     showToolbar: true,
     showSearch: true,
     toolbarContent: <ToolbarExpanded />,
-    searchPlaceholder: "Rechercher...",
+    searchPlaceholder: "Search...",
     footerContent: <UserFooterExpanded />,
     footerCollapsedContent: <UserFooterCollapsed />,
     headerContent: <HeaderExpanded title="Complete Menu" />,

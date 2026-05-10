@@ -1,95 +1,95 @@
 # Firefox QA Checklist
 
-Smoke-test manuel à exécuter avant chaque release Firefox, tant qu'on n'a pas de suite E2E Firefox automatisée (voir [wxt-dev/wxt#1699](https://github.com/wxt-dev/wxt/issues/1699)).
+Manual smoke test to run before each Firefox release until we have an automated Firefox E2E suite (see [wxt-dev/wxt#1699](https://github.com/wxt-dev/wxt/issues/1699)).
 
-## Prérequis
+## Prerequisites
 
-- Firefox ≥ 139 (requis pour `browser.tabGroups`)
-- `pnpm build:firefox` puis charger `.output/firefox-mv2` via `about:debugging#/runtime/this-firefox` → "Load Temporary Add-on…" → sélectionner `manifest.json`
-- Ou `pnpm dev:firefox` pour l'auto-reload
+- Firefox >= 139 (required for `browser.tabGroups`)
+- `pnpm build:firefox`, then load `.output/firefox-mv2` via `about:debugging#/runtime/this-firefox` -> "Load Temporary Add-on..." -> select `manifest.json`
+- Or `pnpm dev:firefox` for auto-reload
 
-## 1. Storage & bootstrap
+## 1. Storage and bootstrap
 
-- [ ] Aucune erreur `The storage API will not work with a temporary addon ID` dans la console Firefox (regression gecko ID — voir `wxt.config.ts`)
-- [ ] Aucune erreur `[useSyncedState] load error` au démarrage
-- [ ] Ouvrir Options → tous les toggles chargent leur état par défaut sans erreur console
+- [ ] No `The storage API will not work with a temporary addon ID` error in the Firefox console (gecko ID regression, see `wxt.config.ts`)
+- [ ] No `[useSyncedState] load error` at startup
+- [ ] Open Options: every toggle loads its default state without console errors
 
-## 2. Sessions — Sauvegarde
+## 2. Sessions: save
 
-- [ ] Ouvrir 3-4 onglets réels (ex: github.com, mdn.dev, news.ycombinator.com)
-- [ ] Clic sur le bouton Snapshot du popup → wizard s'ouvre
-- [ ] **La page Options SmartTab n'apparaît PAS dans la liste des onglets sélectionnables** (regression `moz-extension://` — voir `tabCapture.ts`)
-- [ ] Saisir un nom, sauvegarder → notification de succès
-- [ ] Rouvrir Options → onglet Sessions → la session apparaît avec le bon nombre d'onglets
-- [ ] Recharger l'extension (ou Firefox) → la session est toujours là
+- [ ] Open 3-4 real tabs (e.g. github.com, mdn.dev, news.ycombinator.com)
+- [ ] Click the popup's Snapshot button: the wizard opens
+- [ ] **The SmartTab Options page must NOT appear in the selectable tabs list** (`moz-extension://` regression, see `tabCapture.ts`)
+- [ ] Enter a name, save: success notification
+- [ ] Reopen Options, Sessions tab: the session shows the right tab count
+- [ ] Reload the extension (or Firefox): the session is still there
 
-## 3. Sessions — Épinglage & popup
+## 3. Sessions: pin and popup
 
-- [ ] Épingler une session depuis la carte → icône change
-- [ ] Ouvrir le popup → section "Sessions épinglées" visible avec la session
-- [ ] Clic restore (current window) → les onglets s'ouvrent dans la fenêtre courante
-- [ ] Clic restore (new window) → nouvelle fenêtre avec les onglets
-- [ ] Désépingler → la section disparaît du popup si plus aucune session épinglée
+- [ ] Pin a session from its card: the icon changes
+- [ ] Open the popup: the "Pinned sessions" section is visible with the session
+- [ ] Click restore (current window): tabs open in the current window
+- [ ] Click restore (new window): a new window opens with the tabs
+- [ ] Unpin: the section disappears from the popup if no pinned sessions remain
 
-## 4. Sessions — Édition
+## 4. Sessions: edit
 
-- [ ] Éditer une session → dialog s'ouvre, tree view fonctionnel
-- [ ] Renommer un groupe, changer la couleur → sauvegarder → changements persistés
-- [ ] Désélectionner un onglet, sauvegarder → l'onglet disparaît de la session
-- [ ] Annuler une édition → aucun changement appliqué
+- [ ] Edit a session: dialog opens, tree view works
+- [ ] Rename a group, change its color, save: changes persisted
+- [ ] Unselect a tab and save: the tab disappears from the session
+- [ ] Cancel an edit: no change is applied
 
 ## 5. Grouping (Firefox 139+)
 
-- [ ] Ajouter une domain rule (ex: `github.com`, label "GitHub")
-- [ ] Ouvrir un onglet github.com → middle-click sur un lien interne
-- [ ] Vérifier que le nouvel onglet est groupé avec le label "GitHub"
-- [ ] Tester les 4 `groupNameSource` : label, title, url, smart
-- [ ] Vérifier qu'une couleur custom dans la rule est bien appliquée
-- [ ] Regex preset : tester au moins un preset builtin (ex: JIRA)
+- [ ] Add a domain rule (e.g. `github.com`, label "GitHub")
+- [ ] Open a github.com tab, middle-click an internal link
+- [ ] Verify that the new tab is grouped with the "GitHub" label
+- [ ] Test all four `groupNameSource` values: label, title, url, smart
+- [ ] Verify that a custom rule color is applied
+- [ ] Regex preset: try at least one builtin preset (e.g. JIRA)
 
-## 6. Déduplication
+## 6. Deduplication
 
-- [ ] Activer la dedup globale + ajouter une rule avec `deduplicationEnabled: true`
-- [ ] Ouvrir 2 fois la même URL → le doublon doit se fermer et focus passer sur l'original
-- [ ] Tester les 4 modes : `exact`, `hostname+path`, `hostname`, `includes`
-- [ ] Vérifier la notification de dedup (si activée dans settings)
+- [ ] Enable global dedup and add a rule with `deduplicationEnabled: true`
+- [ ] Open the same URL twice: the duplicate must close and focus must move to the original
+- [ ] Test all four modes: `exact`, `hostname+path`, `hostname`, `includes`
+- [ ] Verify the dedup notification (if enabled in settings)
 
 ## 7. Domain Rules CRUD
 
-- [ ] Créer une rule → champs remplis, sauvegarde → apparaît dans la liste
-- [ ] Éditer une rule existante → modifs persistées
-- [ ] Toggle enabled/disabled → icône et comportement cohérents
-- [ ] Drag-and-drop pour réordonner → ordre conservé au reload
-- [ ] Supprimer une rule → confirm dialog → disparaît
+- [ ] Create a rule: fill the fields, save: it appears in the list
+- [ ] Edit an existing rule: edits persisted
+- [ ] Toggle enabled/disabled: icon and behavior consistent
+- [ ] Drag and drop to reorder: order preserved across reload
+- [ ] Delete a rule: confirm dialog, then disappears
 
 ## 8. Import / Export
 
-- [ ] Export rules → fichier JSON téléchargé, contenu valide
-- [ ] Import du même fichier → wizard détecte "identical" pour toutes les rules
-- [ ] Import d'un fichier modifié → détection new/conflicting correcte
-- [ ] Résolution de conflits → options `keep/replace/skip` fonctionnent
+- [ ] Export rules: a JSON file is downloaded with valid contents
+- [ ] Import the same file: the wizard detects "identical" for every rule
+- [ ] Import an edited file: new/conflicting detection is correct
+- [ ] Conflict resolution: `keep`, `replace`, `skip` options all work
 
 ## 9. Statistics
 
-- [ ] Les compteurs grouping et dedup s'incrémentent pendant les tests ci-dessus
-- [ ] Reset statistics → compteurs reviennent à 0
+- [ ] Grouping and dedup counters increment during the tests above
+- [ ] Reset statistics: counters return to 0
 
-## 10. UI transverse
+## 10. Cross-cutting UI
 
-- [ ] Sidebar navigation entre Domain Rules / Sessions / Statistics / Settings / Import-Export
-- [ ] Theme toggle light/dark fonctionne
-- [ ] Tester les 3 locales : EN, FR, ES (changer la langue Firefox ou inspecter les strings)
-- [ ] Popup s'affiche correctement (taille, pas de scroll horizontal)
-- [ ] Options s'affiche correctement en mobile-width (responsive)
+- [ ] Sidebar navigation between Domain Rules, Sessions, Statistics, Settings, Import-Export
+- [ ] Theme toggle light/dark works
+- [ ] Test all three locales: EN, FR, ES (change Firefox's language or inspect strings)
+- [ ] Popup renders correctly (size, no horizontal scroll)
+- [ ] Options page renders correctly at mobile widths (responsive)
 
 ## 11. Console
 
-- [ ] Aucune erreur rouge dans la console du background page
-- [ ] Aucune erreur rouge dans la console de la page Options
-- [ ] Aucune erreur rouge dans la console du popup
-- [ ] Les `logger.debug` sont présents en dev mais absents en build production
+- [ ] No red errors in the background page console
+- [ ] No red errors in the Options page console
+- [ ] No red errors in the popup console
+- [ ] `logger.debug` calls are present in dev but absent in production builds
 
-## Connu / Non testable automatiquement
+## Known / not automatable
 
-- Le bug `moz-extension://` dans `tabCapture.ts` (#bug-scope-du-QA) — corrigé, à vérifier à chaque release
-- `browser.tabGroups` est supporté depuis Firefox 139 uniquement. Documenter dans le README la version min.
+- The `moz-extension://` bug in `tabCapture.ts` (#bug-scope-du-QA), fixed, recheck on each release
+- `browser.tabGroups` is supported since Firefox 139 only. Document the minimum version in the README.

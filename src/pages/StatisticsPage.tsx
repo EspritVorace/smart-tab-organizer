@@ -96,7 +96,7 @@ export function StatisticsPage({ syncSettings, statisticsData, onReset }: Statis
       {() => (
         <Box data-testid="page-stats">
 
-          {/* Section 1 : Totaux historiques */}
+          {/* Section 1: historical totals */}
           <Card mb="4">
             <Flex direction="column" gap="3" p="2">
               <Heading size="3">{getMessage('statsHistoricalTotals')}</Heading>
@@ -139,7 +139,7 @@ export function StatisticsPage({ syncSettings, statisticsData, onReset }: Statis
             </Flex>
           </Card>
 
-          {/* Section 2 : Cette semaine */}
+          {/* Section 2: this week */}
           <Card mb="4">
             <Flex direction="column" gap="3" p="2">
               <Heading size="3">{getMessage('statsThisWeekTitle')}</Heading>
@@ -166,7 +166,7 @@ export function StatisticsPage({ syncSettings, statisticsData, onReset }: Statis
             </Flex>
           </Card>
 
-          {/* Section 3 : Top règles */}
+          {/* Section 3: top rules */}
           {data.topRules.length > 0 && (
             <Card mb="4">
               <Flex direction="column" gap="3" p="2">

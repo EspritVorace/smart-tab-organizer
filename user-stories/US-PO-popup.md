@@ -1,46 +1,46 @@
-# User Stories — Domaine PO : Popup (compléments)
+# User Stories - Domain PO: Popup (additions)
 
-> Comportements testés dans `tests/e2e/popup.spec.ts` non couverts par les US-PO001→PO002 existantes.
-> Les US numérotées ci-dessous reprennent la continuité à partir de US-PO003.
-
----
-
-## US-PO003 — Deep linking : accès direct à la section Sessions
-
-**En tant qu'** utilisateur ou développeur de l'extension,
-**je veux** pouvoir accéder directement à la section Sessions de la page Options via un hash d'URL,
-**afin de** naviguer vers la bonne section sans interaction supplémentaire.
-
-### Critères d'acceptation
-
-- [ ] Naviguer vers `options.html#sessions` affiche directement la section Sessions (titre ou état vide visible).
+> Behaviors tested in `tests/e2e/popup.spec.ts` not covered by the existing US-PO001 to PO002.
+> The US numbered below continue from US-PO003.
 
 ---
 
-## US-PO004 — Deep linking : ouverture automatique du wizard de snapshot
+## US-PO003 - Deep linking: direct access to the Sessions section
 
-**En tant qu'** utilisateur qui clique sur le bouton « Save » dans le popup,
-**je veux** être redirigé vers la page Options avec le wizard de snapshot déjà ouvert,
-**afin de** démarrer la prise de snapshot en un minimum d'étapes.
+**As a** user or developer of the extension,
+**I want** to be able to access the Sessions section of the Options page directly via a URL hash,
+**so that** I can navigate to the right section without additional interaction.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Naviguer vers `options.html#sessions?action=snapshot` ouvre automatiquement le dialogue wizard « Save Session Snapshot » (dialogue visible avec ce titre).
-- [ ] Le bouton « Save » dans le popup redirige vers `options.html` avec les paramètres `sessions` et `action=snapshot` dans l'URL.
+- [ ] Navigating to `options.html#sessions` directly shows the Sessions section (title or empty state visible).
 
 ---
 
-## US-PO005 — Affichage conditionnel de la section Sessions épinglées dans le popup
+## US-PO004 - Deep linking: automatic opening of the snapshot wizard
 
-**En tant qu'** utilisateur du popup,
-**je veux** que la section « Pinned sessions » n'apparaisse que s'il existe au moins une session épinglée,
-**afin que** le popup reste concis quand aucune session n'a été épinglée.
+**As a** user clicking the "Save" button in the popup,
+**I want** to be redirected to the Options page with the snapshot wizard already open,
+**so that** I can start taking a snapshot in as few steps as possible.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Quand aucune session épinglée n'existe (seuls des snapshots), la section « Pinned sessions » n'est **pas** visible dans le popup.
-- [ ] Quand au moins une session épinglée existe, la section « Pinned sessions » et le nom de la session sont visibles.
-- [ ] Toutes les sessions épinglées sont listées dans la section.
-- [ ] Les sessions non épinglées ne sont **pas** affichées dans la liste.
-- [ ] Chaque ligne dispose d'un bouton de restauration rapide (« Restore options ») dont le menu expose les 4 options : `current`, `new`, `replace` (« Replace tabs in current window »), `customize`.
-- [ ] L'option `replace` remplace les onglets non épinglés de la fenêtre active par ceux de la session choisie et affiche une notification système « Session activated » confirmant la bascule, puis ferme la popup.
+- [ ] Navigating to `options.html#sessions?action=snapshot` automatically opens the "Save Session Snapshot" wizard dialog (dialog visible with this title).
+- [ ] The "Save" button in the popup redirects to `options.html` with the `sessions` and `action=snapshot` parameters in the URL.
+
+---
+
+## US-PO005 - Conditional display of the Pinned sessions section in the popup
+
+**As a** user of the popup,
+**I want** the "Pinned sessions" section to appear only if there is at least one pinned session,
+**so that** the popup stays concise when no session has been pinned.
+
+### Acceptance criteria
+
+- [ ] When no pinned session exists (only snapshots), the "Pinned sessions" section is **not** visible in the popup.
+- [ ] When at least one pinned session exists, the "Pinned sessions" section and the session name are visible.
+- [ ] All pinned sessions are listed in the section.
+- [ ] Non-pinned sessions are **not** shown in the list.
+- [ ] Each row has a quick-restore button ("Restore options") whose menu exposes the 4 options: `current`, `new`, `replace` ("Replace tabs in current window"), `customize`.
+- [ ] The `replace` option replaces the non-pinned tabs of the active window with those of the chosen session and shows a "Session activated" system notification confirming the switch, then closes the popup.

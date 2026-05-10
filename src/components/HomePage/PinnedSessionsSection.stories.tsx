@@ -56,27 +56,27 @@ type Story = StoryObj<typeof meta>;
 export const PinnedSessionsSectionThree: Story = {
   args: {
     sessions: [
-      makeSession('s1', 'Travail', 3, 12),
-      makeSession('s2', 'Recherche IA', 2, 7),
-      makeSession('s3', 'Veille tech', 1, 4),
+      makeSession('s1', 'Work', 3, 12),
+      makeSession('s2', 'AI research', 2, 7),
+      makeSession('s3', 'Tech watch', 1, 4),
     ],
   },
 };
 
 export const PinnedSessionsSectionSingle: Story = {
   args: {
-    sessions: [makeSession('s1', 'Mon onboarding', 0, 3)],
+    sessions: [makeSession('s1', 'My onboarding', 0, 3)],
   },
 };
 
-/** Plus de 6 sessions: la section limite l'affichage à 6 et le compteur reste correct. */
+/** More than 6 sessions: the section caps the rendered list at 6 and the counter stays accurate. */
 export const PinnedSessionsSectionOverflow: Story = {
   args: {
     sessions: Array.from({ length: 9 }, (_, i) => makeSession(`s${i + 1}`, `Session ${i + 1}`, 2, 6)),
   },
 };
 
-/** Aucune session épinglée: le composant retourne null et ne rend rien. */
+/** No pinned sessions: the component returns null and renders nothing. */
 export const PinnedSessionsSectionEmpty: Story = {
   args: {
     sessions: [],

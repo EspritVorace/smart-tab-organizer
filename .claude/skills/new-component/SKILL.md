@@ -1,42 +1,42 @@
 ---
 name: new-component
-description: Rappelle les conventions obligatoires pour créer un nouveau composant React dans ce projet (Storybook, i18n, logger, theming, accessibilité)
+description: Reminds the mandatory conventions for creating a new React component in this project (Storybook, i18n, logger, theming, accessibility).
 user-invocable: false
 ---
 
-Checklist obligatoire pour tout nouveau composant dans smart-tab-organizer :
+Mandatory checklist for any new component in smart-tab-organizer:
 
-## Emplacement
-- `src/components/Core/` — logique métier liée à un concept domaine
-- `src/components/UI/` — layout et composants inter-features
-- `src/components/Form/` — champs de formulaire réutilisables, callouts thématiques
+## Location
+- `src/components/Core/`: business logic tied to a domain concept
+- `src/components/UI/`: layout and cross-feature components
+- `src/components/Form/`: reusable form fields, themed callouts
 
 ## Storybook
-- Fichier `.stories.tsx` obligatoire dans le même dossier
-- Titre : `Components/Core/<Feature>/<ComponentName>` (miroir du chemin)
-- Préfixer tous les exports avec le nom du composant : `ComponentNameDefault`, `ComponentNameDisabled`
+- A `.stories.tsx` file is required in the same folder
+- Title: `Components/Core/<Feature>/<ComponentName>` (mirrors the path)
+- Prefix every export with the component name: `ComponentNameDefault`, `ComponentNameDisabled`
 
-## Internationalisation
-- Tous les textes via `getMessage(key)` depuis `src/utils/i18n.ts`
-- Jamais de strings hardcodées dans le JSX
-- Ajouter les nouvelles clés dans les 3 locales : `public/_locales/{en,fr,es}/messages.json`
-- Format placeholder i18n : `$1`, `$2` (pas `{placeholder}`)
+## Internationalization
+- All text via `getMessage(key)` from `src/utils/i18n.ts`
+- Never hardcode strings in JSX
+- Add new keys to all three locales: `public/_locales/{en,fr,es}/messages.json`
+- i18n placeholder format: `$1`, `$2` (not `{placeholder}`)
 
 ## Logging
-- `logger.debug('[MON_MODULE] message', value)` depuis `src/utils/logger.ts`
-- Jamais `console.log()` — c'est une no-op en production mais une violation de convention
+- `logger.debug('[MY_MODULE] message', value)` from `src/utils/logger.ts`
+- Never `console.log()`. It is a no-op in production but a convention violation.
 
-## Accessibilité
-- Icônes Lucide : toujours `aria-hidden="true"`
-- Boutons icône only : `aria-label` + `title` obligatoires
-- Préférer les primitives Radix (Dialog, Collapsible, Toolbar, RadioGroup) aux ARIA manuels
+## Accessibility
+- Lucide icons: always `aria-hidden="true"`
+- Icon-only buttons: `aria-label` + `title` are required
+- Prefer Radix primitives (Dialog, Collapsible, Toolbar, RadioGroup) over manual ARIA
 
 ## Theming
-- Une seule couleur d'accent : `indigo` (défaut Radix Themes). Ne pas introduire d'accent custom par feature.
-- `src/utils/themeConstants.ts` est conservé pour compat mais toutes les valeurs sont `indigo` : ne pas s'appuyer dessus pour différencier des features.
-- Utiliser les tokens Radix (`var(--accent-a3)`, `var(--gray-a2)`, etc.) plutôt que des couleurs hardcodées.
+- Single accent color: `indigo` (Radix Themes default). Do not introduce a per-feature custom accent.
+- `src/utils/themeConstants.ts` is kept for compatibility but every value is `indigo`: do not rely on it to differentiate features.
+- Use Radix tokens (`var(--accent-a3)`, `var(--gray-a2)`, etc.) rather than hardcoded colors.
 
-## CSS Modules (si hover actions)
+## CSS Modules (if hover actions)
 ```css
 .row:hover .actions,
 .row:focus-within .actions { opacity: 1; }
@@ -44,5 +44,5 @@ Checklist obligatoire pour tout nouveau composant dans smart-tab-organizer :
 ```
 
 ## Types
-- Pas de `any` — utiliser des types précis ou `unknown` avec narrowing
-- Zod schemas dans `src/schemas/` si nouvelles entités persistées
+- No `any`: use precise types or `unknown` with narrowing
+- Zod schemas in `src/schemas/` for new persisted entities

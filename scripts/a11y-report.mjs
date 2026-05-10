@@ -10,7 +10,7 @@
  *
  * Optional baseline:
  *   reports/a11y/baseline.json
- *     If present, a "Nouveautés vs baseline" section lists rule IDs that
+ *     If present, a "New issues vs. baseline" section lists rule IDs that
  *     appear in the current run but not in the baseline.
  */
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';

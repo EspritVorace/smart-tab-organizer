@@ -1,18 +1,18 @@
-# User Stories : Domaine O : Onboarding et aide contextuelle
+# User Stories: Domain O: Onboarding and contextual help
 
-> Comportements testés dans `tests/e2e/sessions.spec.ts`.
+> Behaviors tested in `tests/e2e/sessions.spec.ts`.
 
 ---
 
-## US-O001 : Description permanente de la page Sessions
+## US-O001: Permanent description of the Sessions page
 
-**En tant qu'** utilisateur visitant la section Sessions,
-**je veux** voir une description courte de la page en haut du contenu,
-**afin de** comprendre à tout moment le rôle de la fonctionnalité Sessions.
+**As a** user visiting the Sessions section,
+**I want** to see a short description of the page at the top of the content,
+**so that** I understand at all times the role of the Sessions feature.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] La description de page est visible au chargement de la section Sessions, pour tout utilisateur.
-- [ ] La description est rendue dans le bloc `data-testid="page-layout-description"` situé entre le header et le contenu.
-- [ ] Le texte affiché correspond à la clé i18n `sessionsPageDescription` dans la locale active (EN, FR ou ES).
-- [ ] La description reste visible après rechargement (elle n'est pas dismissible et n'utilise pas de persistance).
+- [ ] The page description is visible when the Sessions section is loaded, for every user.
+- [ ] The description is rendered in the `data-testid="page-layout-description"` block located between the header and the content.
+- [ ] The displayed text corresponds to the i18n key `sessionsPageDescription` in the active locale (EN, FR, or ES).
+- [ ] The description remains visible after reload (it is not dismissible and does not use persistence).

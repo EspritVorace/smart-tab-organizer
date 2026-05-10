@@ -4,9 +4,9 @@ import {
   type GroupNameSourceValue 
 } from '@/schemas/enums.js';
 
-// Schéma pour un preset individuel.
-// titleExample / urlExample sont requis lorsque le regex correspondant est défini,
-// pour documenter un cas concret côté regex titre et côté regex URL.
+// Schema for a single preset.
+// titleExample / urlExample are required whenever the corresponding regex is
+// defined, so the title regex and URL regex each ship with a concrete example.
 export const presetSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -33,7 +33,7 @@ export const presetSchema = z.object({
     { message: 'urlQueryParamName is required when urlExtractionMode is query_param', path: ['urlQueryParamName'] }
   );
 
-// Schéma pour une catégorie de presets
+// Schema for a preset category.
 export const presetCategorySchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -41,12 +41,11 @@ export const presetCategorySchema = z.object({
   presets: z.array(presetSchema)
 });
 
-// Schéma pour le fichier presets.json complet
+// Schema for the full presets.json file.
 export const presetsFileSchema = z.object({
   categories: z.array(presetCategorySchema)
 });
 
-// Types inférés
 export type Preset = z.infer<typeof presetSchema>;
 export type PresetCategory = z.infer<typeof presetCategorySchema>;
 export type PresetsFile = z.infer<typeof presetsFileSchema>;

@@ -3,14 +3,14 @@ import { renderHook, act, waitFor, cleanup } from '@testing-library/react';
 import { fakeBrowser } from 'wxt/testing';
 import { useSettings } from '../../src/hooks/useSettings';
 
-// fakeBrowser.reset() est appelé avant chaque test via tests/setup.ts
+// fakeBrowser.reset() runs before each test via tests/setup.ts.
 
 describe('useSettings', () => {
   afterEach(() => {
     cleanup();
   });
 
-  it('devrait charger les paramètres par défaut', async () => {
+  it('loads the default settings', async () => {
     const { result } = renderHook(() => useSettings());
 
     await waitFor(() => {
@@ -24,7 +24,7 @@ describe('useSettings', () => {
     expect(result.current.settings?.domainRules).toEqual([]);
   });
 
-  it('devrait mettre à jour deduplicateUnmatchedDomains', async () => {
+  it('updates deduplicateUnmatchedDomains', async () => {
     const { result } = renderHook(() => useSettings());
 
     await waitFor(() => {
@@ -38,7 +38,7 @@ describe('useSettings', () => {
     expect(result.current.settings?.deduplicateUnmatchedDomains).toBe(true);
   });
 
-  it('devrait charger les paramètres existants', async () => {
+  it('loads the existing settings', async () => {
     await fakeBrowser.storage.local.set({
       globalGroupingEnabled: false,
       globalDeduplicationEnabled: true,
@@ -55,7 +55,7 @@ describe('useSettings', () => {
     expect(result.current.settings?.domainRules).toHaveLength(1);
   });
 
-  it('devrait mettre à jour globalGroupingEnabled', async () => {
+  it('updates globalGroupingEnabled', async () => {
     const { result } = renderHook(() => useSettings());
 
     await waitFor(() => {
@@ -69,7 +69,7 @@ describe('useSettings', () => {
     expect(result.current.settings?.globalGroupingEnabled).toBe(false);
   });
 
-  it('devrait mettre à jour globalDeduplicationEnabled', async () => {
+  it('updates globalDeduplicationEnabled', async () => {
     const { result } = renderHook(() => useSettings());
 
     await waitFor(() => {
@@ -83,7 +83,7 @@ describe('useSettings', () => {
     expect(result.current.settings?.globalDeduplicationEnabled).toBe(false);
   });
 
-  it('devrait mettre à jour les domainRules', async () => {
+  it('updates the domainRules', async () => {
     const { result } = renderHook(() => useSettings());
 
     await waitFor(() => {
@@ -102,7 +102,7 @@ describe('useSettings', () => {
     expect(result.current.settings?.domainRules).toHaveLength(2);
   });
 
-  it('devrait mettre à jour plusieurs paramètres', async () => {
+  it('updates several settings at once', async () => {
     const { result } = renderHook(() => useSettings());
 
     await waitFor(() => {
@@ -120,7 +120,7 @@ describe('useSettings', () => {
     expect(result.current.settings?.globalDeduplicationEnabled).toBe(false);
   });
 
-  it('devrait recharger les paramètres', async () => {
+  it('reloads the settings', async () => {
     const { result } = renderHook(() => useSettings());
 
     await waitFor(() => {
@@ -143,7 +143,7 @@ describe('useSettings', () => {
     expect(result.current.settings?.domainRules).toHaveLength(1);
   });
 
-  it('devrait mettre à jour deduplicationKeepStrategy', async () => {
+  it('updates deduplicationKeepStrategy', async () => {
     const { result } = renderHook(() => useSettings());
 
     await waitFor(() => expect(result.current.isLoaded).toBe(true));
@@ -155,7 +155,7 @@ describe('useSettings', () => {
     expect(result.current.settings?.deduplicationKeepStrategy).toBe('keep-old');
   });
 
-  it('devrait mettre à jour les categories', async () => {
+  it('updates the categories', async () => {
     const { result } = renderHook(() => useSettings());
 
     await waitFor(() => expect(result.current.isLoaded).toBe(true));
@@ -171,7 +171,7 @@ describe('useSettings', () => {
     expect(result.current.settings?.categories).toEqual(newCategories);
   });
 
-  it('migre les wildcards legacy `*.example.com` -> `example.com`', async () => {
+  it('migrates legacy wildcards `*.example.com` -> `example.com`', async () => {
     await fakeBrowser.storage.local.set({
       domainRules: [
         { id: 'r1', domainFilter: '*.example.com', label: 'Ex' },
@@ -191,8 +191,8 @@ describe('useSettings', () => {
     expect(filters).toEqual(['example.com', 'plain.com']);
   });
 
-  describe('listeners onFieldChange', () => {
-    it('exposent toutes une fonction de désinscription', async () => {
+  describe('onFieldChange listeners', () => {
+    it('all expose an unsubscribe function', async () => {
       const { result } = renderHook(() => useSettings());
       await waitFor(() => expect(result.current.isLoaded).toBe(true));
 
@@ -211,7 +211,7 @@ describe('useSettings', () => {
       }
     });
 
-    it('déclenche le callback enregistré sur un changement externe', async () => {
+    it('triggers the registered callback on an external change', async () => {
       const { result } = renderHook(() => useSettings());
       await waitFor(() => expect(result.current.isLoaded).toBe(true));
 

@@ -1,4 +1,4 @@
-// Mock pour browser.storage utilisé dans les tests
+// Mock for browser.storage used in tests.
 
 interface StorageChange {
   oldValue?: unknown;
@@ -92,7 +92,7 @@ class MockStorage {
     }, 0);
   }
 
-  // Méthodes pour les tests
+  // Test-only helpers.
   _setData(data: Record<string, unknown>): void {
     this.data = { ...data };
   }

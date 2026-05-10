@@ -68,7 +68,7 @@ export function EditSummaryView({
 
   return (
     <Flex direction="column" gap="4">
-      {/* ── Zone 1 : Identité ── */}
+      {/* Section 1: identity */}
       <Box>
         <Text size="2" weight="bold" color="gray" mb="2" as="p">
           {getMessage('wizardStepIdentity')}
@@ -136,7 +136,7 @@ export function EditSummaryView({
 
       <Separator style={{ width: '100%' }} />
 
-      {/* ── Zone 2 : Configuration ── */}
+      {/* Section 2: configuration */}
       <Box>
         <Flex justify="between" align="center" mb="2">
           <Text size="2" weight="bold" color="gray">{getMessage('wizardStepConfig')}</Text>
@@ -158,7 +158,7 @@ export function EditSummaryView({
 
       <Separator style={{ width: '100%' }} />
 
-      {/* ── Zone 3 : Options (Collapsible) ── */}
+      {/* Section 3: options (collapsible) */}
       <Collapsible.Root open={isOptionsOpen} onOpenChange={setIsOptionsOpen}>
         <Collapsible.Trigger asChild>
           <Button data-testid="wizard-rule-edit-toggle-options" type="button" variant="ghost" size="2" style={{ width: '100%', justifyContent: 'flex-start', '--button-ghost-padding-x': '0px' } as React.CSSProperties}>

@@ -7,18 +7,18 @@ import { Statistics } from '../../src/components/Core/Statistics/Statistics';
 vi.mock('../../src/utils/i18n', () => ({
   getMessage: vi.fn((key: string) => {
     const messages: Record<string, string> = {
-      statisticsTab: 'Statistiques',
-      resetStats: 'Réinitialiser les statistiques',
-      groupCreatedSingular: 'Groupe créé',
-      groupCreatedPlural: 'Groupes créés',
-      tabDeduplicatedSingular: 'Onglet dédupliqué',
-      tabDeduplicatedPlural: 'Onglets dédupliqués'
+      statisticsTab: 'Statistics',
+      resetStats: 'Reset statistics',
+      groupCreatedSingular: 'Group created',
+      groupCreatedPlural: 'Groups created',
+      tabDeduplicatedSingular: 'Tab deduplicated',
+      tabDeduplicatedPlural: 'Tabs deduplicated'
     };
     return messages[key] || key;
   })
 }));
 
-// Wrapper pour les composants Radix UI
+// Wrapper for Radix UI components.
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
   <Theme>{children}</Theme>
 );
@@ -30,18 +30,18 @@ describe('Statistics', () => {
     vi.clearAllMocks();
   });
 
-  it('devrait afficher le titre Statistiques et les compteurs à zéro par défaut', () => {
+  it('renders the Statistics title and zero counters by default', () => {
     render(
       <TestWrapper>
         <Statistics stats={{ tabGroupsCreatedCount: 0, tabsDeduplicatedCount: 0 }} onReset={mockOnReset} />
       </TestWrapper>
     );
 
-    expect(screen.getByText('Statistiques')).toBeInTheDocument();
+    expect(screen.getByText('Statistics')).toBeInTheDocument();
     expect(screen.getAllByText('0')).toHaveLength(2);
   });
 
-  it('devrait afficher les valeurs des statistiques et un bouton reset accessible', () => {
+  it('renders the statistics values and an accessible reset button', () => {
     render(
       <TestWrapper>
         <Statistics
@@ -54,13 +54,13 @@ describe('Statistics', () => {
     expect(screen.getByText('5')).toBeInTheDocument();
     expect(screen.getByText('10')).toBeInTheDocument();
 
-    // Bouton reset exposé (a11y : aria-label + title)
-    const resetButton = screen.getByRole('button', { name: /réinitialiser/i });
-    expect(resetButton).toHaveAttribute('aria-label', 'Réinitialiser les statistiques');
-    expect(resetButton).toHaveAttribute('title', 'Réinitialiser les statistiques');
+    // Reset button exposed (a11y: aria-label + title).
+    const resetButton = screen.getByRole('button', { name: /reset/i });
+    expect(resetButton).toHaveAttribute('aria-label', 'Reset statistics');
+    expect(resetButton).toHaveAttribute('title', 'Reset statistics');
   });
 
-  it('devrait utiliser le singulier pour 1', () => {
+  it('uses the singular form for 1', () => {
     render(
       <TestWrapper>
         <Statistics
@@ -70,11 +70,11 @@ describe('Statistics', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByText('Groupe créé')).toBeInTheDocument();
-    expect(screen.getByText('Onglet dédupliqué')).toBeInTheDocument();
+    expect(screen.getByText('Group created')).toBeInTheDocument();
+    expect(screen.getByText('Tab deduplicated')).toBeInTheDocument();
   });
 
-  it('devrait utiliser le pluriel pour > 1', () => {
+  it('uses the plural form for values > 1', () => {
     render(
       <TestWrapper>
         <Statistics
@@ -84,11 +84,11 @@ describe('Statistics', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByText('Groupes créés')).toBeInTheDocument();
-    expect(screen.getByText('Onglets dédupliqués')).toBeInTheDocument();
+    expect(screen.getByText('Groups created')).toBeInTheDocument();
+    expect(screen.getByText('Tabs deduplicated')).toBeInTheDocument();
   });
 
-  it('devrait appeler onReset lors du click sur le bouton reset', () => {
+  it('calls onReset when the reset button is clicked', () => {
     render(
       <TestWrapper>
         <Statistics
@@ -98,39 +98,39 @@ describe('Statistics', () => {
       </TestWrapper>
     );
 
-    const resetButton = screen.getByRole('button', { name: /réinitialiser/i });
+    const resetButton = screen.getByRole('button', { name: /reset/i });
     fireEvent.click(resetButton);
 
     expect(mockOnReset).toHaveBeenCalledTimes(1);
   });
 
-  it('devrait afficher un skeleton en mode loading', () => {
+  it('renders a skeleton in loading mode', () => {
     const { container } = render(
       <TestWrapper>
         <Statistics stats={null} onReset={mockOnReset} isLoading={true} />
       </TestWrapper>
     );
 
-    // Ne devrait pas afficher le contenu normal
-    expect(screen.queryByText('Statistiques')).not.toBeInTheDocument();
+    // The normal content must not render.
+    expect(screen.queryByText('Statistics')).not.toBeInTheDocument();
 
-    // Devrait afficher des skeletons
+    // Skeletons should be rendered.
     const skeletons = container.querySelectorAll('[data-state]');
     expect(skeletons.length).toBeGreaterThanOrEqual(0);
   });
 
-  it('devrait gérer des stats nulles', () => {
+  it('handles null stats', () => {
     render(
       <TestWrapper>
         <Statistics stats={null} onReset={mockOnReset} />
       </TestWrapper>
     );
 
-    // Devrait afficher 0 par défaut
+    // Falls back to displaying 0.
     expect(screen.getAllByText('0')).toHaveLength(2);
   });
 
-  it('devrait gérer des stats avec des valeurs undefined', () => {
+  it('handles stats with undefined values', () => {
     render(
       <TestWrapper>
         <Statistics
@@ -140,7 +140,7 @@ describe('Statistics', () => {
       </TestWrapper>
     );
 
-    // Devrait afficher 0 par défaut
+    // Falls back to displaying 0.
     expect(screen.getAllByText('0')).toHaveLength(2);
   });
 

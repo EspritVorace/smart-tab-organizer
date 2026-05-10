@@ -22,7 +22,7 @@ afterEach(() => {
 });
 
 describe('initCategoriesStore', () => {
-  it('remplit le cache depuis storage au premier appel', async () => {
+  it('populates the cache from storage on first call', async () => {
     await fakeBrowser.storage.local.set({ categories: SAMPLE_CATEGORIES });
     const { initCategoriesStore, getAllCategories } = await import('../../src/utils/categoriesStore');
 
@@ -32,7 +32,7 @@ describe('initCategoriesStore', () => {
     expect(getAllCategories()[0].id).toBe('development');
   });
 
-  it('retourne un cache vide si storage est vide', async () => {
+  it('returns an empty cache when storage is empty', async () => {
     const { initCategoriesStore, getAllCategories } = await import('../../src/utils/categoriesStore');
 
     await initCategoriesStore();
@@ -40,7 +40,7 @@ describe('initCategoriesStore', () => {
     expect(getAllCategories()).toEqual([]);
   });
 
-  it('est idempotent sur plusieurs appels', async () => {
+  it('is idempotent across multiple calls', async () => {
     await fakeBrowser.storage.local.set({ categories: SAMPLE_CATEGORIES });
     const { initCategoriesStore, getAllCategories } = await import('../../src/utils/categoriesStore');
 
@@ -52,7 +52,7 @@ describe('initCategoriesStore', () => {
 });
 
 describe('getRuleCategory', () => {
-  it('retourne la catégorie correspondante à l\'id', async () => {
+  it('returns the category matching the id', async () => {
     await fakeBrowser.storage.local.set({ categories: SAMPLE_CATEGORIES });
     const { initCategoriesStore, getRuleCategory } = await import('../../src/utils/categoriesStore');
     await initCategoriesStore();
@@ -61,7 +61,7 @@ describe('getRuleCategory', () => {
     expect(cat?.emoji).toBe('💻');
   });
 
-  it('retourne null pour un id inconnu', async () => {
+  it('returns null for an unknown id', async () => {
     await fakeBrowser.storage.local.set({ categories: SAMPLE_CATEGORIES });
     const { initCategoriesStore, getRuleCategory } = await import('../../src/utils/categoriesStore');
     await initCategoriesStore();
@@ -69,7 +69,7 @@ describe('getRuleCategory', () => {
     expect(getRuleCategory('unknown')).toBeNull();
   });
 
-  it('retourne null pour null/undefined/chaîne vide', async () => {
+  it('returns null for null/undefined/empty string', async () => {
     await fakeBrowser.storage.local.set({ categories: SAMPLE_CATEGORIES });
     const { initCategoriesStore, getRuleCategory } = await import('../../src/utils/categoriesStore');
     await initCategoriesStore();
@@ -81,21 +81,21 @@ describe('getRuleCategory', () => {
 });
 
 describe('getCategoryLabel', () => {
-  it('résout labelKey via getMessage pour les built-ins', async () => {
+  it('resolves labelKey via getMessage for built-ins', async () => {
     const { getCategoryLabel } = await import('../../src/utils/categoriesStore');
     const cat: RuleCategory = { id: 'x', emoji: '✨', color: 'blue', labelKey: 'category_x', builtIn: true };
 
     expect(getCategoryLabel(cat)).toBe('i18n(category_x)');
   });
 
-  it('utilise label en texte brut pour les customs', async () => {
+  it('uses the raw label for custom categories', async () => {
     const { getCategoryLabel } = await import('../../src/utils/categoriesStore');
     const cat: RuleCategory = { id: 'x', emoji: '✨', color: 'blue', label: 'Custom Label', builtIn: false };
 
     expect(getCategoryLabel(cat)).toBe('Custom Label');
   });
 
-  it('privilégie labelKey sur label quand les deux sont présents', async () => {
+  it('prefers labelKey over label when both are present', async () => {
     const { getCategoryLabel } = await import('../../src/utils/categoriesStore');
     const cat: RuleCategory = {
       id: 'x',
@@ -149,7 +149,7 @@ describe('initCategoriesStore: external storage updates + reset', () => {
 });
 
 describe('fetchBuiltInCategories', () => {
-  it('télécharge et valide le fichier categories.json', async () => {
+  it('downloads and validates the categories.json file', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
@@ -165,7 +165,7 @@ describe('fetchBuiltInCategories', () => {
     expect(result[0].id).toBe('development');
   });
 
-  it('lève une erreur si la réponse HTTP est KO', async () => {
+  it('throws when the HTTP response is not OK', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({ ok: false, status: 404, json: async () => ({}) }),
@@ -175,7 +175,7 @@ describe('fetchBuiltInCategories', () => {
     await expect(fetchBuiltInCategories()).rejects.toThrow();
   });
 
-  it('lève une erreur si le JSON ne respecte pas le schéma', async () => {
+  it('throws when the JSON does not match the schema', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({

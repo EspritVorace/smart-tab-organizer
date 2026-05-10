@@ -26,7 +26,7 @@ beforeEach(() => {
   document.body.innerHTML = '';
 });
 
-describe('useShortcuts (façade)', () => {
+describe('useShortcuts (facade)', () => {
   it('resolves the registry id and fires the action when the combo is pressed', () => {
     const action = vi.fn();
     renderHook(() =>

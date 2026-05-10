@@ -52,7 +52,7 @@ beforeEach(() => {
 });
 
 describe('ImportWizard integration : mode pack', () => {
-  it('rend la PackGallery quand initialSourceMode=pack', () => {
+  it('renders the PackGallery when initialSourceMode=pack', () => {
     wrap(
       <ImportWizard
         open
@@ -65,7 +65,7 @@ describe('ImportWizard integration : mode pack', () => {
     expect(screen.getByTestId('pack-gallery')).toBeInTheDocument();
   });
 
-  it("avance à l'étape 1 quand l'utilisateur sélectionne un pack et confirme", () => {
+  it('advances to step 1 when the user selects a pack and confirms', () => {
     wrap(
       <ImportWizard
         open
@@ -86,7 +86,7 @@ describe('ImportWizard integration : mode pack', () => {
     expect(screen.queryByTestId('pack-gallery')).not.toBeInTheDocument();
   });
 
-  it("permet de revenir à l'étape 0 via Précédent en gardant la galerie visible", () => {
+  it('returns to step 0 via Previous while keeping the gallery visible', () => {
     wrap(
       <ImportWizard
         open
@@ -107,7 +107,7 @@ describe('ImportWizard integration : mode pack', () => {
     expect(screen.getByTestId('pack-gallery')).toBeInTheDocument();
   });
 
-  it('ne touche pas au mode par défaut quand initialSourceMode est absent', () => {
+  it('does not touch the default mode when initialSourceMode is missing', () => {
     wrap(
       <ImportWizard
         open

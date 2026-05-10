@@ -33,15 +33,15 @@ export const PageLayoutDomainRules: Story = {
     children: (settings) => (
       <Box>
         <Text size="3" style={{ marginBottom: '16px', display: 'block' }}>
-          Gestion des règles de domaine pour le groupement automatique
+          Manage domain rules for automatic grouping
         </Text>
         <Box style={{ marginBottom: '16px' }}>
           <Text size="2" style={{ color: 'var(--gray-11)' }}>
-            Nombre de règles: {settings.domainRules.length}
+            Rule count: {settings.domainRules.length}
           </Text>
         </Box>
         <Flex gap="3">
-          <Button variant="solid">Ajouter une règle</Button>
+          <Button variant="solid">Add rule</Button>
         </Flex>
       </Box>
     ),
@@ -57,11 +57,11 @@ export const PageLayoutImportExport: Story = {
     children: () => (
       <Box>
         <Text size="3" style={{ marginBottom: '16px', display: 'block' }}>
-          Importer ou exporter vos paramètres
+          Import or export your settings
         </Text>
         <Flex gap="3">
-          <Button variant="solid">Exporter</Button>
-          <Button variant="outline">Importer</Button>
+          <Button variant="solid">Export</Button>
+          <Button variant="outline">Import</Button>
         </Flex>
       </Box>
     ),
@@ -77,15 +77,15 @@ export const PageLayoutStatistics: Story = {
     children: (settings) => (
       <Box>
         <Text size="3" style={{ marginBottom: '16px', display: 'block' }}>
-          Statistiques d'utilisation de l'extension
+          Extension usage statistics
         </Text>
         <Box style={{ marginBottom: '16px' }}>
           <Text size="2" style={{ color: 'var(--gray-11)' }}>
-            Groupement global: {settings.globalGroupingEnabled ? 'Activé' : 'Désactivé'}
+            Global grouping: {settings.globalGroupingEnabled ? 'Enabled' : 'Disabled'}
           </Text>
         </Box>
         <Flex gap="3">
-          <Button variant="outline" color="red">Réinitialiser</Button>
+          <Button variant="outline" color="red">Reset</Button>
         </Flex>
       </Box>
     ),

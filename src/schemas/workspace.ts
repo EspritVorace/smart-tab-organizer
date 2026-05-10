@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
 /**
- * Couleurs d'accent Radix Themes autorisées pour un workspace.
- * Subset des couleurs Radix excluant les neutres (gray/mauve/slate/sage/olive/sand)
- * et bronze/gold/brown qui rendent mal en accent UI.
+ * Radix Themes accent colors allowed for a workspace.
+ * Subset of Radix colors, excluding the neutrals (gray/mauve/slate/sage/olive/sand)
+ * and bronze/gold/brown which render poorly as a UI accent.
  */
 export const workspaceAccentColors = [
   'tomato', 'red', 'ruby', 'crimson', 'pink', 'plum', 'purple', 'violet',

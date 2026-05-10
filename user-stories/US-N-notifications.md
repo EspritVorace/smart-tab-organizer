@@ -1,95 +1,95 @@
-# User Stories — Domaine N : Notifications avec action Annuler
+# User Stories - Domain N: Notifications with Undo action
 
-> Comportements identifiés dans le code source (`src/utils/notifications.ts`,
+> Behaviors identified in the source code (`src/utils/notifications.ts`,
 > `src/background/grouping.ts`, `src/background/deduplication.ts`,
-> `src/utils/deduplicationSkip.ts`) et non couverts par les US existantes
-> (US-S001→S011, US-E001→E005, US-P001→P009, US-PO001→PO005,
-> US-W001→W003, US-O001→O004, US-G001→G010, US-D001→D007,
-> US-C001→C005, US-AS001→AS003).
+> `src/utils/deduplicationSkip.ts`) and not covered by existing US
+> (US-S001->S011, US-E001->E005, US-P001->P009, US-PO001->PO005,
+> US-W001->W003, US-O001->O004, US-G001->G010, US-D001->D007,
+> US-C001->C005, US-AS001->AS003).
 
 ---
 
-## US-N001 — Notification de regroupement avec bouton Annuler
+## US-N001 - Grouping notification with Undo button
 
-**En tant qu'** utilisateur dont les onglets viennent d'être regroupés automatiquement,
-**je veux** recevoir une notification native avec un bouton « Annuler »,
-**afin de** pouvoir défaire immédiatement le regroupement si celui-ci n'était pas souhaité.
+**As a** user whose tabs have just been grouped automatically,
+**I want** to receive a native notification with an "Undo" button,
+**so that** I can immediately undo the grouping if it was not desired.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Après la création d'un groupe d'onglets, une notification native du navigateur est affichée avec :
-  - le titre localisé (ex. « 📁 Tabs Grouped » en anglais, « 📁 Onglets Regroupés » en français) ;
-  - un message mentionnant le nom du groupe (ex. « Tabs grouped into "Mon Groupe" »).
-- [ ] La notification contient un bouton dont le libellé est localisé : « Undo » (EN), « Annuler » (FR), « Deshacer » (ES).
-- [ ] Cliquer sur le bouton Annuler désgroupe immédiatement les onglets qui venaient d'être regroupés (`browser.tabs.ungroup` sur les IDs concernés).
-- [ ] La notification se ferme automatiquement après **5 secondes** si l'utilisateur n'interagit pas.
-- [ ] La notification n'est affichée que si le paramètre `notifyOnGrouping` est **activé** dans les réglages.
-- [ ] Si `notifyOnGrouping` est **désactivé**, aucune notification n'apparaît après un regroupement.
-
----
-
-## US-N002 — Notification de déduplication avec bouton Annuler
-
-**En tant qu'** utilisateur dont un onglet en double vient d'être fermé automatiquement,
-**je veux** recevoir une notification native avec un bouton « Annuler »,
-**afin de** pouvoir récupérer l'onglet fermé si la fermeture était indésirable.
-
-### Critères d'acceptation
-
-- [ ] Après la fermeture d'un onglet doublon, une notification native est affichée avec :
-  - le titre localisé (ex. « ✂️ Duplicate Closed » / « ✂️ Doublon Fermé ») ;
-  - un message mentionnant le titre de l'onglet fermé (ex. « Duplicate tab closed: GitHub »).
-- [ ] La notification contient un bouton « Undo » / « Annuler » / « Deshacer » (selon la langue).
-- [ ] Cliquer sur le bouton Annuler rouvre l'onglet fermé dans la **même fenêtre** que celle d'origine.
-- [ ] L'onglet rouvert devient l'onglet **actif**.
-- [ ] La notification se ferme automatiquement après **5 secondes** si l'utilisateur n'interagit pas.
-- [ ] La notification n'est affichée que si le paramètre `notifyOnDeduplication` est **activé**.
-- [ ] Si `notifyOnDeduplication` est **désactivé**, aucune notification n'apparaît après une déduplication.
+- [ ] After a tab group is created, a native browser notification is shown with:
+  - the localized title (e.g. "Tabs Grouped" in English, "Onglets Regroupes" in French);
+  - a message mentioning the group name (e.g. `Tabs grouped into "My Group"`).
+- [ ] The notification contains a button whose label is localized: "Undo" (EN), "Annuler" (FR), "Deshacer" (ES).
+- [ ] Clicking the Undo button immediately ungroups the tabs that had just been grouped (`browser.tabs.ungroup` on the relevant IDs).
+- [ ] The notification automatically closes after **5 seconds** if the user does not interact.
+- [ ] The notification is only shown if the `notifyOnGrouping` setting is **enabled** in the settings.
+- [ ] If `notifyOnGrouping` is **disabled**, no notification appears after a grouping.
 
 ---
 
-## US-N003 — Protection contre la re-déduplication après un Annuler
+## US-N002 - Deduplication notification with Undo button
 
-**En tant qu'** utilisateur qui vient de rouvrir un onglet via le bouton Annuler,
-**je veux** que cet onglet ne soit pas immédiatement re-fermé par la déduplication,
-**afin de** pouvoir utiliser l'onglet récupéré sans qu'il disparaisse à nouveau.
+**As a** user whose duplicate tab has just been closed automatically,
+**I want** to receive a native notification with an "Undo" button,
+**so that** I can recover the closed tab if the closure was undesired.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Lorsqu'un onglet est rouvert via l'action Annuler, son URL est marquée pour **ignorer la déduplication** pendant **10 secondes**.
-- [ ] Pendant cette fenêtre de 10 secondes, si un second onglet avec la même URL est déjà ouvert, l'onglet rouvert est **conservé** (non fermé par la déduplication).
-- [ ] Au-delà de 10 secondes, la protection expire automatiquement et la déduplication normale reprend pour cette URL.
-- [ ] Les entrées expirées dans la liste de protection sont nettoyées automatiquement.
-
----
-
-## US-N004 — Nettoyage des actions en attente à la fermeture de la notification
-
-**En tant que** service worker de l'extension,
-**je veux** nettoyer les actions d'annulation en mémoire quand une notification se ferme,
-**afin d'** éviter des fuites mémoire et des actions fantômes.
-
-### Critères d'acceptation
-
-- [ ] Chaque notification est identifiée par un ID unique au format `smarttab-{timestamp}`.
-- [ ] L'action d'annulation associée à une notification est stockée en mémoire (Map) pendant la durée de vie de la notification.
-- [ ] Quand l'utilisateur ferme la notification **sans** cliquer sur Annuler (fermeture manuelle ou timeout), l'entrée correspondante est **supprimée** de la Map des actions en attente.
-- [ ] Après la suppression, il n'est plus possible d'exécuter l'annulation pour cette notification.
+- [ ] After a duplicate tab is closed, a native notification is shown with:
+  - the localized title (e.g. "Duplicate Closed" / "Doublon Ferme");
+  - a message mentioning the title of the closed tab (e.g. "Duplicate tab closed: GitHub").
+- [ ] The notification contains an "Undo" / "Annuler" / "Deshacer" button (depending on the language).
+- [ ] Clicking the Undo button reopens the closed tab in the **same window** as the original.
+- [ ] The reopened tab becomes the **active** tab.
+- [ ] The notification automatically closes after **5 seconds** if the user does not interact.
+- [ ] The notification is only shown if the `notifyOnDeduplication` setting is **enabled**.
+- [ ] If `notifyOnDeduplication` is **disabled**, no notification appears after a deduplication.
 
 ---
 
-## US-N005 — Paramètres d'activation des notifications par fonctionnalité
+## US-N003 - Protection against re-deduplication after an Undo
 
-**En tant qu'** utilisateur,
-**je veux** pouvoir activer ou désactiver indépendamment les notifications de regroupement et de déduplication,
-**afin de** contrôler le niveau d'interruption selon mes préférences.
+**As a** user who has just reopened a tab via the Undo button,
+**I want** that tab not to be immediately re-closed by deduplication,
+**so that** I can use the recovered tab without it disappearing again.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Un paramètre `notifyOnGrouping` (booléen) est disponible dans les réglages de l'extension.
-  - Quand `true` : une notification apparaît à chaque regroupement réussi.
-  - Quand `false` : aucune notification de regroupement n'est émise.
-- [ ] Un paramètre `notifyOnDeduplication` (booléen) est disponible dans les réglages.
-  - Quand `true` : une notification apparaît à chaque fermeture de doublon.
-  - Quand `false` : aucune notification de déduplication n'est émise.
-- [ ] Les deux paramètres sont indépendants : on peut notifier sur le regroupement uniquement, sur la déduplication uniquement, sur les deux, ou sur aucun.
+- [ ] When a tab is reopened via the Undo action, its URL is marked to **skip deduplication** for **10 seconds**.
+- [ ] During that 10-second window, if a second tab with the same URL is already open, the reopened tab is **kept** (not closed by deduplication).
+- [ ] Beyond 10 seconds, the protection expires automatically and normal deduplication resumes for that URL.
+- [ ] Expired entries in the protection list are cleaned up automatically.
+
+---
+
+## US-N004 - Cleanup of pending actions when the notification closes
+
+**As the** extension service worker,
+**I want** to clean up undo actions in memory when a notification closes,
+**so that** I avoid memory leaks and ghost actions.
+
+### Acceptance criteria
+
+- [ ] Each notification is identified by a unique ID in the format `smarttab-{timestamp}`.
+- [ ] The undo action associated with a notification is stored in memory (Map) for the lifetime of the notification.
+- [ ] When the user closes the notification **without** clicking Undo (manual close or timeout), the corresponding entry is **removed** from the pending actions Map.
+- [ ] After removal, it is no longer possible to execute the undo for that notification.
+
+---
+
+## US-N005 - Per-feature notification toggles
+
+**As a** user,
+**I want** to be able to enable or disable grouping and deduplication notifications independently,
+**so that** I can control the level of interruption based on my preferences.
+
+### Acceptance criteria
+
+- [ ] A `notifyOnGrouping` setting (boolean) is available in the extension settings.
+  - When `true`: a notification appears at each successful grouping.
+  - When `false`: no grouping notification is emitted.
+- [ ] A `notifyOnDeduplication` setting (boolean) is available in the settings.
+  - When `true`: a notification appears at each duplicate closure.
+  - When `false`: no deduplication notification is emitted.
+- [ ] The two settings are independent: notifications can be enabled for grouping only, deduplication only, both, or neither.

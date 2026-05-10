@@ -24,7 +24,7 @@ afterEach(() => {
 });
 
 describe('useJsonSourceInput', () => {
-  it('démarre en mode file avec un état vide', () => {
+  it('starts in file mode with an empty state', () => {
     const { result } = renderHook(() => useJsonSourceInput(validate));
     expect(result.current.sourceMode).toBe('file');
     expect(result.current.parsedData).toBeNull();
@@ -34,7 +34,7 @@ describe('useJsonSourceInput', () => {
     expect(result.current.isDragOver).toBe(false);
   });
 
-  it('parse du JSON valide via handleTextChange', () => {
+  it('parses valid JSON through handleTextChange', () => {
     const { result } = renderHook(() => useJsonSourceInput(validate));
     act(() => {
       result.current.handleTextChange('{"name":"Alice","note":"hello"}');
@@ -44,7 +44,7 @@ describe('useJsonSourceInput', () => {
     expect(result.current.parseError).toBeNull();
   });
 
-  it('réinitialise le résultat parsé quand le texte est vidé', () => {
+  it('clears the parsed result when the text is cleared', () => {
     const { result } = renderHook(() => useJsonSourceInput(validate));
     act(() => result.current.handleTextChange('{"name":"Alice"}'));
     expect(result.current.parsedData).not.toBeNull();
@@ -53,21 +53,21 @@ describe('useJsonSourceInput', () => {
     expect(result.current.parseError).toBeNull();
   });
 
-  it('signale un message i18n pour les SyntaxError JSON', () => {
+  it('reports an i18n message for JSON SyntaxErrors', () => {
     const { result } = renderHook(() => useJsonSourceInput(validate));
     act(() => result.current.handleTextChange('{not json'));
     expect(result.current.parseError).toBe('i18n(invalidJson)');
     expect(result.current.parsedData).toBeNull();
   });
 
-  it('signale les erreurs Zod ligne par ligne', () => {
+  it('reports Zod errors line by line', () => {
     const { result } = renderHook(() => useJsonSourceInput(validate));
     act(() => result.current.handleTextChange('{"name":42}'));
     expect(result.current.parseError).toContain('name:');
     expect(result.current.parsedData).toBeNull();
   });
 
-  it('signale les autres erreurs avec un message générique', () => {
+  it('reports other errors with a generic message', () => {
     const customValidate = () => {
       throw new Error('custom');
     };
@@ -76,7 +76,7 @@ describe('useJsonSourceInput', () => {
     expect(result.current.parseError).toBe('i18n(errorImportInvalidStructure)');
   });
 
-  it('handleDragOver active le drag, handleDragLeave le désactive', () => {
+  it('handleDragOver activates the drag, handleDragLeave deactivates it', () => {
     const { result } = renderHook(() => useJsonSourceInput(validate));
     const event = { preventDefault: vi.fn() } as unknown as React.DragEvent;
     act(() => result.current.handleDragOver(event));
@@ -87,7 +87,7 @@ describe('useJsonSourceInput', () => {
     expect(result.current.isDragOver).toBe(false);
   });
 
-  it('handleDrop ignore les fichiers non .json', () => {
+  it('handleDrop ignores non-.json files', () => {
     const { result } = renderHook(() => useJsonSourceInput(validate));
     const file = new File(['data'], 'note.txt', { type: 'text/plain' });
     const event = {
@@ -99,7 +99,7 @@ describe('useJsonSourceInput', () => {
     expect(result.current.parsedData).toBeNull();
   });
 
-  it('reset() restaure tout l\'état initial', () => {
+  it('reset() restores the entire initial state', () => {
     const { result } = renderHook(() => useJsonSourceInput(validate));
     act(() => result.current.handleTextChange('{"name":"Alice","note":"hi"}'));
     act(() => result.current.setSourceMode('text'));
@@ -114,7 +114,7 @@ describe('useJsonSourceInput', () => {
     expect(result.current.isDragOver).toBe(false);
   });
 
-  it('handleBrowse appelle le click sur la ref de l\'input fichier', () => {
+  it('handleBrowse clicks on the file input ref', () => {
     const { result } = renderHook(() => useJsonSourceInput(validate));
     const click = vi.fn();
     (result.current.fileInputRef as { current: { click: () => void } }).current = { click };
@@ -122,7 +122,7 @@ describe('useJsonSourceInput', () => {
     expect(click).toHaveBeenCalled();
   });
 
-  it('setSourceMode bascule entre les modes', () => {
+  it('setSourceMode toggles between modes', () => {
     const { result } = renderHook(() => useJsonSourceInput(validate));
     act(() => result.current.setSourceMode('text'));
     expect(result.current.sourceMode).toBe('text');
@@ -130,12 +130,12 @@ describe('useJsonSourceInput', () => {
     expect(result.current.sourceMode).toBe('pack');
   });
 
-  it('initialSourceMode positionne le mode initial', () => {
+  it('initialSourceMode sets the initial mode', () => {
     const { result } = renderHook(() => useJsonSourceInput(validate, 'pack'));
     expect(result.current.sourceMode).toBe('pack');
   });
 
-  it('reset() restaure initialSourceMode et non file en dur', () => {
+  it('reset() restores initialSourceMode rather than a hard-coded file mode', () => {
     const { result } = renderHook(() => useJsonSourceInput(validate, 'pack'));
     act(() => result.current.setSourceMode('text'));
     expect(result.current.sourceMode).toBe('text');

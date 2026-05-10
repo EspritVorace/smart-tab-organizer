@@ -1,218 +1,218 @@
-# User Stories — Domaine IE : Import / Export de règles de domaine
+# User Stories - Domain IE: Import / Export of domain rules
 
-> Comportements identifiés dans `src/components/UI/ImportExportPage/`,
-> `src/utils/importClassification.ts` et `src/components/UI/WizardStepper/`
-> non couverts par les US existantes.
-
----
-
-## US-IE001 — Sélection de la source JSON (fichier ou texte)
-
-**En tant qu'** utilisateur,
-**je veux** pouvoir fournir le JSON à importer soit en glissant-déposant un fichier `.json`, soit en le collant directement dans un champ texte,
-**afin de** choisir librement la méthode la plus commode selon mon environnement.
-
-### Critères d'acceptation
-
-- [ ] Le wizard d'import propose deux modes de saisie sélectionnables : **Fichier** et **Texte**.
-- [ ] En mode **Fichier** : une zone de dépôt accepte le glisser-déposer ; un bouton « Browse » ouvre le sélecteur de fichier natif (filtre `.json`).
-- [ ] La zone de dépôt change visuellement d'état (bordure en surbrillance) pendant qu'un fichier est survolé.
-- [ ] En mode **Texte** : un champ multi-lignes (police monospace) permet de coller ou saisir du JSON brut.
-- [ ] Passer d'un mode à l'autre conserve les données déjà saisies dans chaque mode.
-- [ ] Le bouton « Suivant » reste désactivé tant qu'aucun JSON valide n'a été chargé.
+> Behaviors identified in `src/components/UI/ImportExportPage/`,
+> `src/utils/importClassification.ts` and `src/components/UI/WizardStepper/`
+> not covered by existing US.
 
 ---
 
-## US-IE002 — Validation du JSON importé
+## US-IE001 - Selecting the JSON source (file or text)
 
-**En tant qu'** utilisateur,
-**je veux** être informé immédiatement si le JSON fourni est invalide ou ne correspond pas au format attendu,
-**afin de** corriger le fichier ou le texte avant de continuer.
+**As a** user,
+**I want** to be able to provide the JSON to import either by drag-and-dropping a `.json` file or by pasting it directly into a text field,
+**so that** I can freely choose the most convenient method depending on my environment.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Si le JSON est syntaxiquement invalide (ex. virgule manquante), un message d'erreur rouge est affiché avec le libellé « JSON invalide ».
-- [ ] Si le JSON est syntaxiquement correct mais ne respecte pas le schéma attendu, les erreurs de validation sont listées par champ (ex. « label : requis »).
-- [ ] Si le JSON est valide, un indicateur de succès vert confirme le chargement et indique le nombre de règles détectées.
-- [ ] Un champ texte vide n'affiche ni erreur ni succès : il remet l'état à zéro.
-- [ ] La validation s'effectue en temps réel à chaque modification du champ texte.
-
----
-
-## US-IE003 — Classification des règles importées
-
-**En tant qu'** utilisateur,
-**je veux** voir les règles du fichier importé classées en trois catégories avant de confirmer l'import,
-**afin de** savoir exactement ce qui sera ajouté, modifié ou ignoré.
-
-### Critères d'acceptation
-
-- [ ] Les règles sont classées en trois groupes :
-  - **Nouvelles** : aucune règle existante ne porte le même libellé (insensible à la casse).
-  - **Conflictuelles** : une règle existante porte le même libellé mais avec des propriétés différentes.
-  - **Identiques** : une règle existante porte le même libellé avec exactement les mêmes propriétés.
-- [ ] Chaque groupe est accompagné d'un compteur (ex. « 3 nouvelles règles »).
-- [ ] Les règles identiques sont affichées en grisé avec le badge « Already Exists » et ne sont **pas** sélectionnables.
-- [ ] L'étape de sélection est présentée dans une zone défilante (hauteur maximale fixe).
+- [ ] The import wizard offers two selectable input modes: **File** and **Text**.
+- [ ] In **File** mode: a drop zone accepts drag-and-drop; a "Browse" button opens the native file picker (filter `.json`).
+- [ ] The drop zone visually changes state (highlighted border) while a file is hovered over it.
+- [ ] In **Text** mode: a multi-line field (monospace font) lets the user paste or type raw JSON.
+- [ ] Switching between modes preserves the data already entered in each mode.
+- [ ] The "Next" button stays disabled as long as no valid JSON has been loaded.
 
 ---
 
-## US-IE004 — Sélection individuelle des nouvelles règles
+## US-IE002 - Validation of the imported JSON
 
-**En tant qu'** utilisateur,
-**je veux** pouvoir choisir quelles nouvelles règles importer parmi celles proposées,
-**afin de** n'ajouter que les règles qui m'intéressent.
+**As a** user,
+**I want** to be informed immediately if the provided JSON is invalid or does not match the expected format,
+**so that** I can correct the file or text before continuing.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Chaque nouvelle règle est accompagnée d'une case à cocher, cochée par défaut.
-- [ ] Décocher une règle l'exclut de l'import sans la supprimer de l'affichage.
-- [ ] Le compteur « Règles à importer » est mis à jour en temps réel selon les cases cochées.
-- [ ] Le bouton « Suivant » est désactivé si le compteur atteint zéro (aucune règle sélectionnée).
-
----
-
-## US-IE005 — Résolution globale des conflits
-
-**En tant qu'** utilisateur,
-**je veux** choisir comment les règles conflictuelles sont traitées (écraser, dupliquer ou ignorer),
-**afin d'** appliquer une stratégie cohérente à l'ensemble des conflits en un seul choix.
-
-### Critères d'acceptation
-
-- [ ] Trois modes de résolution sont proposés (contrôle segmenté) :
-  - **Overwrite** : la règle importée remplace la règle existante en conservant son identifiant.
-  - **Duplicate** : la règle importée est créée comme nouvelle entrée avec un nouvel identifiant.
-  - **Ignore** : les règles conflictuelles ne sont pas importées.
-- [ ] Le mode sélectionné s'applique à **toutes** les règles conflictuelles.
-- [ ] Le compteur « Règles à importer » tient compte du mode choisi (les règles ignorées ne sont pas comptées).
-- [ ] En mode **Overwrite**, une alerte de mise en garde est affichée à l'étape de confirmation.
+- [ ] If the JSON is syntactically invalid (e.g. missing comma), a red error message is shown with the label "Invalid JSON".
+- [ ] If the JSON is syntactically correct but does not match the expected schema, the validation errors are listed by field (e.g. "label: required").
+- [ ] If the JSON is valid, a green success indicator confirms the loading and reports the number of detected rules.
+- [ ] An empty text field shows neither error nor success: it resets the state.
+- [ ] Validation runs in real time on every change to the text field.
 
 ---
 
-## US-IE006 — Visualisation des différences pour une règle conflictuelle
+## US-IE003 - Classification of imported rules
 
-**En tant qu'** utilisateur,
-**je veux** pouvoir inspecter les différences entre la règle existante et la règle importée pour chaque conflit,
-**afin de** prendre une décision éclairée sur la stratégie de résolution.
+**As a** user,
+**I want** to see the rules from the imported file classified into three categories before confirming the import,
+**so that** I know exactly what will be added, modified, or ignored.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Chaque règle conflictuelle affiche une icône d'avertissement (triangle orange).
-- [ ] Un bouton « Voir les différences » (icône œil) est disponible sur chaque règle conflictuelle.
-- [ ] Cliquer sur ce bouton ouvre un panneau contextuel (popover) listant les propriétés différentes.
-- [ ] Pour chaque propriété différente, la valeur actuelle et la valeur importée sont affichées avec une mise en évidence distincte (ex. badge rouge « Valeur actuelle » / badge vert « Valeur importée »).
-
----
-
-## US-IE007 — Confirmation et résultat de l'import
-
-**En tant qu'** utilisateur,
-**je veux** voir un récapitulatif avant de valider l'import, puis un retour chiffré une fois l'import effectué,
-**afin de** confirmer l'opération en connaissance de cause et vérifier qu'elle s'est déroulée comme prévu.
-
-### Critères d'acceptation
-
-- [ ] L'étape de confirmation affiche un résumé : nombre de règles ajoutées, écrasées, dupliquées ou ignorées selon les choix de l'étape précédente.
-- [ ] Si le mode **Overwrite** est sélectionné et qu'il y a des conflits, une alerte orange rappelle que des règles existantes seront remplacées.
-- [ ] Après validation, le dialogue se ferme automatiquement.
-- [ ] Une notification système apparaît avec le titre « Rules imported » et un message indiquant les compteurs (ex. « 3 rule(s) added, 1 rule(s) overwritten »).
-- [ ] L'état du wizard est réinitialisé à chaque réouverture du dialogue.
+- [ ] Rules are classified into three groups:
+  - **New**: no existing rule has the same label (case-insensitive).
+  - **Conflicting**: an existing rule has the same label but with different properties.
+  - **Identical**: an existing rule has the same label with exactly the same properties.
+- [ ] Each group has a counter (e.g. "3 new rules").
+- [ ] Identical rules are displayed grayed out with the "Already Exists" badge and are **not** selectable.
+- [ ] The selection step is presented in a scrollable area (fixed maximum height).
 
 ---
 
-## US-IE008 — Sélection des règles à exporter
+## US-IE004 - Individual selection of new rules
 
-**En tant qu'** utilisateur,
-**je veux** choisir quelles règles inclure dans le fichier d'export,
-**afin de** partager uniquement les règles pertinentes.
+**As a** user,
+**I want** to be able to choose which new rules to import among those proposed,
+**so that** I only add the rules I am interested in.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Toutes les règles sont présélectionnées par défaut à l'ouverture du wizard d'export.
-- [ ] Chaque règle est accompagnée d'une case à cocher.
-- [ ] Les boutons « Tout sélectionner » et « Tout désélectionner » sont disponibles.
-- [ ] Les règles désactivées sont signalées par un badge « Disabled » mais restent sélectionnables.
-- [ ] Le bouton « Suivant » est désactivé si aucune règle n'est sélectionnée.
-
----
-
-## US-IE009 — Export vers fichier ou presse-papiers
-
-**En tant qu'** utilisateur,
-**je veux** exporter les règles sélectionnées soit dans un fichier `.json`, soit dans le presse-papiers,
-**afin de** les transférer vers une autre installation ou de les partager facilement.
-
-### Critères d'acceptation
-
-- [ ] Le pied de page de l'étape d'export contient un bouton principal « Export » et un bouton chevron (▾) ouvrant un menu déroulant.
-- [ ] Le menu déroulant propose deux options : « Export to File » (défaut) et « Copy to Clipboard ».
-- [ ] L'export vers fichier propose un nom par défaut `smarttab_organizer_rules.json`.
-- [ ] Sur les navigateurs qui supportent l'API FileSystem (ex. Chrome), la boîte de dialogue native de sauvegarde est utilisée ; sur les autres, un téléchargement automatique est déclenché.
-- [ ] Annuler la boîte de dialogue native ne produit pas d'erreur visible.
-- [ ] Après un export réussi (fichier ou presse-papiers), le dialogue se ferme automatiquement.
-- [ ] Une notification système apparaît avec le titre « Rules exported ».
-- [ ] Le JSON exporté est formaté avec une indentation de 2 espaces.
+- [ ] Each new rule has a checkbox, checked by default.
+- [ ] Unchecking a rule excludes it from the import without removing it from the display.
+- [ ] The "Rules to import" counter is updated in real time based on the checked boxes.
+- [ ] The "Next" button is disabled if the counter reaches zero (no rule selected).
 
 ---
 
-## US-IE010 : Note optionnelle a l'export (regles et sessions)
+## US-IE005 - Global resolution of conflicts
 
-**En tant qu'** utilisateur qui exporte des regles ou des sessions,
-**je veux** pouvoir ajouter une note libre au fichier d'export,
-**afin de** documenter le contenu ou le contexte de l'export pour le destinataire.
+**As a** user,
+**I want** to choose how conflicting rules are handled (overwrite, duplicate, or ignore),
+**so that** I can apply a consistent strategy to all conflicts in a single choice.
 
-### Criteres d'acceptation
+### Acceptance criteria
 
-- [ ] Le wizard d'export (regles et sessions) expose un champ `TextArea` (Radix, redimensionnable verticalement) labellise **"Note"**.
-- [ ] Le champ est optionnel : laisser le champ vide n'affecte pas l'export.
-- [ ] Si une note est saisie, le JSON exporte contient un champ `note` a la racine de l'objet (ex. `{ "note": "...", "rules": [...] }`).
-- [ ] Si le champ est vide, le champ `note` n'apparait pas dans le JSON exporte.
-
----
-
-## US-IE011 : Affichage de la note a l'import (regles et sessions)
-
-**En tant qu'** utilisateur qui importe un fichier JSON contenant une note,
-**je veux** voir la note de l'auteur affichee dans le wizard d'import,
-**afin de** comprendre le contexte du fichier avant de valider l'import.
-
-### Criteres d'acceptation
-
-- [ ] Si le JSON importe contient un champ `note` a la racine, celle-ci est affichee dans un callout gris au-dessus de la liste de classification (etape 2 du wizard).
-- [ ] Si le JSON ne contient pas de champ `note`, aucun callout n'est affiche.
-- [ ] La note est affichee en lecture seule (pas de champ editable).
+- [ ] Three resolution modes are offered (segmented control):
+  - **Overwrite**: the imported rule replaces the existing rule, keeping its identifier.
+  - **Duplicate**: the imported rule is created as a new entry with a new identifier.
+  - **Ignore**: conflicting rules are not imported.
+- [ ] The selected mode applies to **all** conflicting rules.
+- [ ] The "Rules to import" counter takes into account the chosen mode (ignored rules are not counted).
+- [ ] In **Overwrite** mode, a warning alert is shown at the confirmation step.
 
 ---
 
-## US-IE012 : Format enveloppe pour l'export de sessions
+## US-IE006 - Viewing differences for a conflicting rule
 
-**En tant qu'** utilisateur,
-**je veux** que l'export de sessions utilise un format enveloppe (`{ note?, sessions: [...] }`),
-**afin que** le fichier puisse contenir des metadonnees (comme la note) en plus des sessions.
+**As a** user,
+**I want** to be able to inspect the differences between the existing rule and the imported rule for each conflict,
+**so that** I can make an informed decision about the resolution strategy.
 
-### Criteres d'acceptation
+### Acceptance criteria
 
-- [ ] L'export de sessions produit un objet JSON `{ sessions: [...] }` (et non un tableau brut).
-- [ ] Si une note est redigee, elle est incluse : `{ note: "...", sessions: [...] }`.
-- [ ] A l'import, le wizard accepte les deux formats : le nouveau format enveloppe et l'ancien format (tableau brut `[...]`) pour la retro-compatibilite.
-- [ ] Le schema Zod `importSessionsDataSchema` valide les deux formats.
+- [ ] Each conflicting rule displays a warning icon (orange triangle).
+- [ ] A "View differences" button (eye icon) is available on each conflicting rule.
+- [ ] Clicking that button opens a contextual panel (popover) listing the different properties.
+- [ ] For each different property, the current value and the imported value are displayed with distinct emphasis (e.g. red badge "Current value" / green badge "Imported value").
 
 ---
 
-## US-IE013 : Sous-groupement pinned/normal dans l'export de sessions
+## US-IE007 - Confirmation and result of the import
 
-**En tant qu'** utilisateur qui exporte des sessions,
-**je veux** que la liste de selection dans le wizard d'export soit organisee en deux sous-groupes (sessions epinglees, sessions normales),
-**afin de** selectionner plus facilement les sessions selon leur statut.
+**As a** user,
+**I want** to see a recap before validating the import, then a numerical feedback once the import is done,
+**so that** I can confirm the operation knowingly and verify that it went as expected.
 
-### Criteres d'acceptation
+### Acceptance criteria
 
-- [ ] Si des sessions epinglees existent, elles sont affichees dans un sous-groupe « Pinned Sessions » avec un en-tete (icone `Pin` + titre + checkbox de groupe).
-- [ ] Si des sessions normales existent, elles sont affichees dans un sous-groupe « Sessions » avec un en-tete (icone `Archive` + titre + checkbox de groupe).
-- [ ] Les deux sous-groupes sont separes par un `Separator` si les deux existent.
-- [ ] La checkbox de groupe permet de selectionner/deselectionner toutes les sessions du sous-groupe.
-- [ ] La checkbox de groupe affiche un etat indeterminate si seulement une partie des sessions du groupe est selectionnee.
-- [ ] Le badge individuel « Pinned » est retire des lignes de session dans l'export (le groupement le rend redondant).
-- [ ] Les boutons « Select all » / « Deselect all » globaux continuent de fonctionner sur l'ensemble des sessions.
-- [ ] Si toutes les sessions sont du meme type (toutes epinglees ou toutes normales), un seul sous-groupe est affiche sans en-tete de sous-groupe.
+- [ ] The confirmation step shows a summary: number of rules added, overwritten, duplicated, or ignored according to the choices in the previous step.
+- [ ] If **Overwrite** mode is selected and there are conflicts, an orange alert reminds the user that existing rules will be replaced.
+- [ ] After validation, the dialog closes automatically.
+- [ ] A system notification appears with the title "Rules imported" and a message indicating the counters (e.g. "3 rule(s) added, 1 rule(s) overwritten").
+- [ ] The wizard state is reset every time the dialog is reopened.
+
+---
+
+## US-IE008 - Selecting the rules to export
+
+**As a** user,
+**I want** to choose which rules to include in the export file,
+**so that** I share only the relevant rules.
+
+### Acceptance criteria
+
+- [ ] All rules are pre-selected by default when opening the export wizard.
+- [ ] Each rule has a checkbox.
+- [ ] "Select all" and "Deselect all" buttons are available.
+- [ ] Disabled rules are flagged with a "Disabled" badge but remain selectable.
+- [ ] The "Next" button is disabled if no rule is selected.
+
+---
+
+## US-IE009 - Export to file or clipboard
+
+**As a** user,
+**I want** to export the selected rules either to a `.json` file or to the clipboard,
+**so that** I can transfer them to another install or share them easily.
+
+### Acceptance criteria
+
+- [ ] The footer of the export step contains a primary "Export" button and a chevron button (v) opening a dropdown menu.
+- [ ] The dropdown menu offers two options: "Export to File" (default) and "Copy to Clipboard".
+- [ ] Export to file proposes a default name `smarttab_organizer_rules.json`.
+- [ ] On browsers supporting the FileSystem API (e.g. Chrome), the native save dialog is used; on others, an automatic download is triggered.
+- [ ] Cancelling the native dialog does not produce a visible error.
+- [ ] After a successful export (file or clipboard), the dialog closes automatically.
+- [ ] A system notification appears with the title "Rules exported".
+- [ ] The exported JSON is formatted with a 2-space indentation.
+
+---
+
+## US-IE010: Optional note on export (rules and sessions)
+
+**As a** user exporting rules or sessions,
+**I want** to be able to add a free-form note to the export file,
+**so that** I can document the content or the context of the export for the recipient.
+
+### Acceptance criteria
+
+- [ ] The export wizard (rules and sessions) exposes a `TextArea` field (Radix, vertically resizable) labeled **"Note"**.
+- [ ] The field is optional: leaving it empty does not affect the export.
+- [ ] If a note is entered, the exported JSON contains a `note` field at the root of the object (e.g. `{ "note": "...", "rules": [...] }`).
+- [ ] If the field is empty, the `note` field does not appear in the exported JSON.
+
+---
+
+## US-IE011: Showing the note on import (rules and sessions)
+
+**As a** user importing a JSON file containing a note,
+**I want** to see the author's note shown in the import wizard,
+**so that** I understand the context of the file before validating the import.
+
+### Acceptance criteria
+
+- [ ] If the imported JSON contains a `note` field at the root, it is shown in a gray callout above the classification list (step 2 of the wizard).
+- [ ] If the JSON does not contain a `note` field, no callout is shown.
+- [ ] The note is shown read-only (no editable field).
+
+---
+
+## US-IE012: Envelope format for session export
+
+**As a** user,
+**I want** session export to use an envelope format (`{ note?, sessions: [...] }`),
+**so that** the file can contain metadata (such as the note) in addition to the sessions.
+
+### Acceptance criteria
+
+- [ ] Session export produces a JSON object `{ sessions: [...] }` (not a raw array).
+- [ ] If a note is written, it is included: `{ note: "...", sessions: [...] }`.
+- [ ] On import, the wizard accepts both formats: the new envelope format and the old format (raw array `[...]`) for backward compatibility.
+- [ ] The Zod schema `importSessionsDataSchema` validates both formats.
+
+---
+
+## US-IE013: Pinned/normal sub-grouping in session export
+
+**As a** user exporting sessions,
+**I want** the selection list in the export wizard to be organized into two sub-groups (pinned sessions, normal sessions),
+**so that** I can more easily select sessions according to their status.
+
+### Acceptance criteria
+
+- [ ] If pinned sessions exist, they are shown in a "Pinned Sessions" sub-group with a header (`Pin` icon + title + group checkbox).
+- [ ] If normal sessions exist, they are shown in a "Sessions" sub-group with a header (`Archive` icon + title + group checkbox).
+- [ ] The two sub-groups are separated by a `Separator` if both exist.
+- [ ] The group checkbox lets the user select/deselect all sessions of the sub-group.
+- [ ] The group checkbox shows an indeterminate state if only some of the sessions in the group are selected.
+- [ ] The individual "Pinned" badge is removed from session rows in the export (the grouping makes it redundant).
+- [ ] Global "Select all" / "Deselect all" buttons continue to work on the entire set of sessions.
+- [ ] If all sessions are of the same type (all pinned or all normal), only one sub-group is shown without a sub-group header.

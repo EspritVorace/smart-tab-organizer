@@ -161,7 +161,7 @@ test.describe('Group Naming Modes', () => {
       expect(groups[0].title).toBe('projects');
     });
 
-    test('smart mode without presetId: extrait quand même via regex [US-G012]', async ({
+    test('smart mode without presetId: still extracts via regex [US-G012]', async ({
       helpers,
     }) => {
       await helpers.addDomainRule({
@@ -170,9 +170,9 @@ test.describe('Group Naming Modes', () => {
         groupingEnabled: true,
         deduplicationEnabled: false,
         groupNameSource: 'smart',
-        // Pas de presetId : les regex fonctionnent quand même depuis la correction du guard
-        titleParsingRegEx: 'NOMATCH:\\s*(\\w+)', // ne matche pas
-        urlParsingRegEx: 'example\\.com/(\\w+)', // extrait "projects"
+        // No presetId: the regex paths still work since the guard was fixed.
+        titleParsingRegEx: 'NOMATCH:\\s*(\\w+)', // does not match
+        urlParsingRegEx: 'example\\.com/(\\w+)', // extracts "projects"
       });
 
       const opener = await helpers.createTab('https://example.com/projects');
@@ -184,7 +184,7 @@ test.describe('Group Naming Modes', () => {
       expect(groups[0].title).toBe('projects');
     });
 
-    test('smart mode without presetId: ne groupe pas si les deux regex échouent [US-G012]', async ({
+    test('smart mode without presetId: does not group when both regexes fail [US-G012]', async ({
       helpers,
     }) => {
       await helpers.addDomainRule({
@@ -207,7 +207,7 @@ test.describe('Group Naming Modes', () => {
       expect(groups).toHaveLength(0);
     });
 
-    test('smart mode: ne groupe pas quand les deux regex échouent [US-G012]', async ({
+    test('smart mode: does not group when both regexes fail [US-G012]', async ({
       helpers,
     }) => {
       await helpers.addDomainRule({

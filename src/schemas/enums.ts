@@ -1,4 +1,4 @@
-// Types pour les enum avec clés de traduction
+// Enum types with their translation keys.
 export const colorOptions = [
   { value: 'grey', keyLabel: 'color_grey' },
   { value: 'blue', keyLabel: 'color_blue' },
@@ -45,7 +45,7 @@ export const badgeOptions = [
   { value: 'DELETED', color: 'red', keyLabel: 'badge_deleted' }
 ] as const;
 
-// Types pour les valeurs des enum
+// Value types extracted from the enum option lists above.
 export type ColorValue = typeof colorOptions[number]['value'];
 export type GroupNameSourceValue = typeof groupNameSourceOptions[number]['value'];
 export type DeduplicationMatchModeValue = typeof deduplicationMatchModeOptions[number]['value'];

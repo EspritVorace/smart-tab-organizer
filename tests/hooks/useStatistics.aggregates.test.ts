@@ -1,9 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import type { Statistics } from '../../src/types/statistics';
 
-// Extraire computeAggregates via un import dynamique n'est pas possible directement
-// (fonction non exportée), on teste donc la logique via les types publics.
-// Les calculs réels sont testés ici en instanciant manuellement la logique.
+// computeAggregates is not exported, so we cannot import it directly.
+// The tests below replicate the same logic against the public types.
 
 function getMondayOfWeek(date: Date): Date {
   const d = new Date(date);
@@ -32,7 +31,7 @@ function buildStats(overrides: Partial<Statistics> = {}): Statistics {
   };
 }
 
-// Reproduit la logique de computeAggregates pour les tests unitaires
+// Replicates the computeAggregates logic for unit tests.
 function computeWeeklyTotals(stats: Statistics) {
   const today = new Date();
   const thisWeekStart = getMondayOfWeek(today);
@@ -88,8 +87,8 @@ function computeTopRules(stats: Statistics, labelMap: Record<string, string> = {
     .slice(0, 5);
 }
 
-describe('statisticsAggregates - calcul hebdomadaire', () => {
-  it('compte uniquement les buckets de la semaine courante', () => {
+describe('statisticsAggregates - weekly computation', () => {
+  it('counts only buckets in the current week', () => {
     const today = isoDate(new Date());
     const stats = buildStats({
       dailyBuckets: {
@@ -102,7 +101,7 @@ describe('statisticsAggregates - calcul hebdomadaire', () => {
     expect(thisWeek.dedup).toBe(1);
   });
 
-  it('compte uniquement les buckets de la semaine précédente', () => {
+  it('counts only buckets in the previous week', () => {
     const lastWeekDay = (() => {
       const d = getMondayOfWeek(new Date());
       d.setDate(d.getDate() - 3);
@@ -118,14 +117,14 @@ describe('statisticsAggregates - calcul hebdomadaire', () => {
     expect(lastWeek.dedup).toBe(2);
   });
 
-  it('retourne des zéros si aucun bucket', () => {
+  it('returns zeros when there are no buckets', () => {
     const stats = buildStats();
     const { thisWeek, lastWeek } = computeWeeklyTotals(stats);
     expect(thisWeek).toEqual({ grouping: 0, dedup: 0 });
     expect(lastWeek).toEqual({ grouping: 0, dedup: 0 });
   });
 
-  it('additionne plusieurs règles sur la même semaine', () => {
+  it('sums multiple rules in the same week', () => {
     const today = isoDate(new Date());
     const stats = buildStats({
       dailyBuckets: {
@@ -141,8 +140,8 @@ describe('statisticsAggregates - calcul hebdomadaire', () => {
   });
 });
 
-describe('statisticsAggregates - top règles', () => {
-  it('retourne les 5 règles les plus actives sur 30 jours', () => {
+describe('statisticsAggregates - top rules', () => {
+  it('returns the 5 most active rules over 30 days', () => {
     const today = isoDate(new Date());
     const stats = buildStats({
       dailyBuckets: {
@@ -162,7 +161,7 @@ describe('statisticsAggregates - top règles', () => {
     expect(top[4].ruleId).toBe('r5');
   });
 
-  it('exclut les buckets antérieurs à 30 jours', () => {
+  it('excludes buckets older than 30 days', () => {
     const old = daysAgo(31);
     const stats = buildStats({
       dailyBuckets: {
@@ -172,7 +171,7 @@ describe('statisticsAggregates - top règles', () => {
     expect(computeTopRules(stats)).toHaveLength(0);
   });
 
-  it('utilise ruleId comme label si la règle est supprimée', () => {
+  it('uses ruleId as the label when the rule has been deleted', () => {
     const today = isoDate(new Date());
     const stats = buildStats({
       dailyBuckets: {
@@ -183,7 +182,7 @@ describe('statisticsAggregates - top règles', () => {
     expect(top[0].label).toBe('deleted-rule-id');
   });
 
-  it('trie par total décroissant', () => {
+  it('sorts by total descending', () => {
     const today = isoDate(new Date());
     const stats = buildStats({
       dailyBuckets: {
@@ -201,7 +200,7 @@ describe('statisticsAggregates - top règles', () => {
   });
 });
 
-describe('indicateur de tendance', () => {
+describe('trend indicator', () => {
   type TrendDirection = 'new' | 'up' | 'down' | 'stable';
 
   function getTrend(current: number, previous: number): TrendDirection {
@@ -212,23 +211,23 @@ describe('indicateur de tendance', () => {
     return 'stable';
   }
 
-  it('retourne "stable" quand les deux sont à 0', () => {
+  it('returns "stable" when both values are 0', () => {
     expect(getTrend(0, 0)).toBe('stable');
   });
 
-  it('retourne "new" quand la semaine précédente était à 0 et la courante > 0', () => {
+  it('returns "new" when the previous week was 0 and the current week > 0', () => {
     expect(getTrend(5, 0)).toBe('new');
   });
 
-  it('retourne "up" quand la semaine courante dépasse la précédente', () => {
+  it('returns "up" when the current week exceeds the previous one', () => {
     expect(getTrend(10, 7)).toBe('up');
   });
 
-  it('retourne "down" quand la semaine courante est inférieure à la précédente', () => {
+  it('returns "down" when the current week is below the previous one', () => {
     expect(getTrend(3, 8)).toBe('down');
   });
 
-  it('retourne "stable" quand les valeurs sont égales et non nulles', () => {
+  it('returns "stable" when the values are equal and non-zero', () => {
     expect(getTrend(5, 5)).toBe('stable');
   });
 });

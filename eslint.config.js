@@ -6,17 +6,17 @@ import vitest from '@vitest/eslint-plugin';
 import playwright from 'eslint-plugin-playwright';
 import sonarjs from 'eslint-plugin-sonarjs';
 
-// Liste explicite des règles SonarJS conservées en "warn" (signal CTRF sans
-// blocage). Vide par défaut depuis #200 : la dette historique a été résorbée
-// (voir #191 et #192) et toute nouvelle violation doit échouer le build.
-// Ajouter une entrée ici uniquement avec un commentaire justifiant pourquoi
-// la règle est trop stricte pour le projet (lien vers le ticket dédié).
+// Explicit list of SonarJS rules kept at "warn" (CTRF signal without blocking
+// the build). Empty by default since #200: historical debt has been paid down
+// (see #191 and #192) and any new violation must fail the build.
+// Add an entry here only with a comment justifying why the rule is too strict
+// for the project (link to the dedicated ticket).
 const sonarjsWarnOverrides = {};
 
-// Petite règle locale : interdit les imports remontants (../...) dans src/
-// et les remplace automatiquement par l'alias @/<chemin-relatif-à-src>.
-// Équivalent de `eslint-plugin-no-relative-import-paths` mais compatible
-// ESLint 10 (ce dernier utilise encore context.getCwd(), supprimé en v9).
+// Small local rule: forbids upward relative imports (../...) inside src/ and
+// auto-replaces them with the alias @/<path-relative-to-src>.
+// Equivalent to `eslint-plugin-no-relative-import-paths` but compatible with
+// ESLint 10 (the original still uses context.getCwd(), removed in v9).
 const preferAliasImportsRule = {
   meta: {
     type: 'problem',
@@ -24,7 +24,7 @@ const preferAliasImportsRule = {
     schema: [],
     messages: {
       useAlias:
-        "Utiliser l'alias '@/{{aliased}}' plutôt qu'un import relatif remontant.",
+        "Use the '@/{{aliased}}' alias rather than an upward relative import.",
     },
   },
   create(context) {

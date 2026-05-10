@@ -9,16 +9,16 @@ import {
 } from '../../src/utils/settingsUtils';
 import { defaultAppSettings } from '../../src/types/syncSettings';
 
-// fakeBrowser.reset() est appelé avant chaque test via tests/setup.ts
+// fakeBrowser.reset() runs before each test via tests/setup.ts.
 
 describe('settingsUtils', () => {
   describe('getSettings', () => {
-    it('retourne les valeurs par défaut si le storage est vide', async () => {
+    it('returns default values when storage is empty', async () => {
       const settings = await getSettings();
       expect(settings).toEqual(defaultAppSettings);
     });
 
-    it('retourne les paramètres stockés', async () => {
+    it('returns the stored settings', async () => {
       await fakeBrowser.storage.local.set({
         globalGroupingEnabled: false,
         globalDeduplicationEnabled: false,
@@ -33,17 +33,17 @@ describe('settingsUtils', () => {
       expect(settings.deduplicateUnmatchedDomains).toBe(false);
     });
 
-    it('retourne false par défaut pour deduplicateUnmatchedDomains si absent du storage', async () => {
+    it('defaults deduplicateUnmatchedDomains to false when missing from storage', async () => {
       const settings = await getSettings();
       expect(settings.deduplicateUnmatchedDomains).toBe(false);
     });
 
-    it('retourne keep-grouped-or-new par défaut pour deduplicationKeepStrategy si absent du storage', async () => {
+    it('defaults deduplicationKeepStrategy to keep-grouped-or-new when missing from storage', async () => {
       const settings = await getSettings();
       expect(settings.deduplicationKeepStrategy).toBe('keep-grouped-or-new');
     });
 
-    it("retourne les valeurs par défaut en cas d'erreur", async () => {
+    it('returns default values on error', async () => {
       vi.spyOn(fakeBrowser.storage.local, 'get').mockRejectedValueOnce(
         new Error('Local storage error'),
       );
@@ -53,7 +53,7 @@ describe('settingsUtils', () => {
   });
 
   describe('setSettings', () => {
-    it('écrit tous les paramètres dans le storage', async () => {
+    it('writes every setting to storage', async () => {
       const newSettings = {
         ...defaultAppSettings,
         globalGroupingEnabled: false,
@@ -63,7 +63,7 @@ describe('settingsUtils', () => {
       expect(stored.globalGroupingEnabled).toBe(false);
     });
 
-    it("ne lance pas d'erreur si storage.set échoue", async () => {
+    it('does not throw when storage.set fails', async () => {
       vi.spyOn(fakeBrowser.storage.local, 'set').mockRejectedValueOnce(
         new Error('Storage write error'),
       );
@@ -72,7 +72,7 @@ describe('settingsUtils', () => {
   });
 
   describe('updateSettings', () => {
-    it('met à jour partiellement les paramètres', async () => {
+    it('partially updates settings', async () => {
       await fakeBrowser.storage.local.set({
         globalGroupingEnabled: true,
         globalDeduplicationEnabled: true,
@@ -80,55 +80,55 @@ describe('settingsUtils', () => {
       await updateSettings({ globalGroupingEnabled: false });
       const settings = await getSettings();
       expect(settings.globalGroupingEnabled).toBe(false);
-      expect(settings.globalDeduplicationEnabled).toBe(true); // inchangé
+      expect(settings.globalDeduplicationEnabled).toBe(true); // unchanged
     });
 
-    it('met à jour deduplicateUnmatchedDomains isolément', async () => {
+    it('updates deduplicateUnmatchedDomains in isolation', async () => {
       await updateSettings({ deduplicateUnmatchedDomains: true });
       const settings = await getSettings();
       expect(settings.deduplicateUnmatchedDomains).toBe(true);
-      // Autres champs inchangés (valeurs par défaut conservées)
+      // Other fields untouched (default values preserved).
       expect(settings.globalDeduplicationEnabled).toBe(true);
     });
 
-    it("ne lance pas d'erreur si storage.set échoue", async () => {
+    it('does not throw when storage.set fails', async () => {
       vi.spyOn(fakeBrowser.storage.local, 'set').mockRejectedValueOnce(
         new Error('Storage write error'),
       );
       await expect(updateSettings({ globalGroupingEnabled: false })).resolves.toBeUndefined();
     });
 
-    it('met à jour globalDeduplicationEnabled', async () => {
+    it('updates globalDeduplicationEnabled', async () => {
       await updateSettings({ globalDeduplicationEnabled: false });
       const settings = await getSettings();
       expect(settings.globalDeduplicationEnabled).toBe(false);
     });
 
-    it('met à jour deduplicationKeepStrategy', async () => {
+    it('updates deduplicationKeepStrategy', async () => {
       await updateSettings({ deduplicationKeepStrategy: 'keep-old' });
       const settings = await getSettings();
       expect(settings.deduplicationKeepStrategy).toBe('keep-old');
     });
 
-    it('met à jour domainRules', async () => {
+    it('updates domainRules', async () => {
       await updateSettings({ domainRules: [] });
       const settings = await getSettings();
       expect(settings.domainRules).toEqual([]);
     });
 
-    it('met à jour notifyOnGrouping', async () => {
+    it('updates notifyOnGrouping', async () => {
       await updateSettings({ notifyOnGrouping: false });
       const settings = await getSettings();
       expect(settings.notifyOnGrouping).toBe(false);
     });
 
-    it('met à jour notifyOnDeduplication', async () => {
+    it('updates notifyOnDeduplication', async () => {
       await updateSettings({ notifyOnDeduplication: false });
       const settings = await getSettings();
       expect(settings.notifyOnDeduplication).toBe(false);
     });
 
-    it('met à jour categories', async () => {
+    it('updates categories', async () => {
       await updateSettings({ categories: [] });
       const settings = await getSettings();
       expect(settings.categories).toEqual([]);
@@ -136,26 +136,26 @@ describe('settingsUtils', () => {
   });
 
   describe('watchSettings', () => {
-    it('retourne une fonction de cleanup', () => {
+    it('returns a cleanup function', () => {
       const unwatch = watchSettings(() => {});
       expect(typeof unwatch).toBe('function');
       unwatch();
     });
 
-    it('la fonction de cleanup peut être appelée sans erreur', () => {
+    it('the cleanup function is callable without errors', () => {
       const unwatch = watchSettings(vi.fn());
       expect(() => unwatch()).not.toThrow();
     });
   });
 
   describe('watchSettingsField', () => {
-    it('retourne une fonction de cleanup pour globalGroupingEnabled', () => {
+    it('returns a cleanup function for globalGroupingEnabled', () => {
       const unwatch = watchSettingsField('globalGroupingEnabled', vi.fn());
       expect(typeof unwatch).toBe('function');
       unwatch();
     });
 
-    it('retourne une fonction de cleanup pour deduplicationKeepStrategy', () => {
+    it('returns a cleanup function for deduplicationKeepStrategy', () => {
       const unwatch = watchSettingsField('deduplicationKeepStrategy', vi.fn());
       expect(typeof unwatch).toBe('function');
       unwatch();

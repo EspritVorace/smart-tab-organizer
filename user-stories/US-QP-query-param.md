@@ -1,16 +1,16 @@
-# User Stories — Domaine QP : Extraction par paramètre de requête URL
+# User Stories - Domain QP: Extraction by URL query parameter
 
-> Implémenté dans la PR #177. **US-QP006 (déduplication par query param) est hors périmètre de la V1**, la déduplication n'est pas modifiée par cette feature.
+> Implemented in PR #177. **US-QP006 (deduplication by query param) is out of scope for V1**, deduplication is not modified by this feature.
 
-## Contexte
+## Context
 
-Aujourd'hui, l'extraction du nom de groupe depuis une URL passe obligatoirement par une expression régulière (`urlParsingRegEx`). Pour les pages de recherche (Google, YouTube, Amazon, Stack Overflow, etc.), c'est un overkill : la donnée recherchée est toujours la valeur d'un paramètre de requête (`?q=foo`, `?search_query=bar`, `?k=baz`).
+Today, extracting the group name from a URL goes through a regular expression (`urlParsingRegEx`) without exception. For search pages (Google, YouTube, Amazon, Stack Overflow, etc.), it is overkill: the data sought is always the value of a query parameter (`?q=foo`, `?search_query=bar`, `?k=baz`).
 
-Cette feature introduit un mode d'extraction alternatif basé sur le nom d'un paramètre de requête, plus simple, plus robuste et adapté à 90% des SERP. L'utilisateur choisit entre `regex` et `query param` lorsqu'il configure une extraction depuis l'URL.
+This feature introduces an alternative extraction mode based on the name of a query parameter, which is simpler, more robust, and well suited to 90% of SERPs. The user picks between `regex` and `query param` when configuring URL extraction.
 
-**Exemples d'usage :**
+**Usage examples:**
 
-| Site | Paramètre |
+| Site | Parameter |
 |---|---|
 | Google, Bing, DuckDuckGo, Stack Overflow, Reddit, GitHub, npm, MDN | `q` |
 | YouTube | `search_query` |
@@ -20,24 +20,24 @@ Cette feature introduit un mode d'extraction alternatif basé sur le nom d'un pa
 
 ---
 
-## US-QP001 — Choix entre regex et query param pour l'extraction URL
+## US-QP001 - Choice between regex and query param for URL extraction
 
-**En tant qu'** utilisateur configurant une règle de domaine,
-**je veux** choisir entre une expression régulière et un nom de paramètre de requête comme méthode d'extraction depuis l'URL,
-**afin de** configurer rapidement les règles pour les pages de recherche sans écrire de regex.
+**As a** user configuring a domain rule,
+**I want** to choose between a regular expression and a query parameter name as the URL extraction method,
+**so that** I can quickly configure rules for search pages without writing a regex.
 
-### Critères d'acceptance
+### Acceptance criteria
 
-- [x] Le schéma `domainRuleSchema` inclut un nouveau champ `urlExtractionMode` qui peut prendre les valeurs `regex` ou `query_param`. Valeur par défaut : `regex` (rétrocompatibilité).
-- [x] Le schéma `domainRuleSchema` inclut un nouveau champ `urlQueryParamName` (string optionnel, max 64 caractères) qui contient le nom du paramètre à extraire.
-- [x] Le champ `urlQueryParamName` doit respecter le pattern `/^[A-Za-z0-9_\-.]+$/` (mêmes caractères qu'un nom de query param HTTP, sans le wildcard `*` qui n'a pas de sens ici).
-- [x] Quand `urlExtractionMode = 'query_param'` et que `groupNameSource` implique l'extraction URL (voir US-QP002), `urlQueryParamName` est **obligatoire** et non vide.
-- [x] Quand `urlExtractionMode = 'regex'`, `urlParsingRegEx` est obligatoire dans les modes qui le requièrent (comportement actuel inchangé).
-- [x] Changer `urlExtractionMode` n'efface pas les valeurs des autres champs (`urlParsingRegEx` et `urlQueryParamName` coexistent dans le formulaire).
+- [x] The `domainRuleSchema` includes a new `urlExtractionMode` field which can take the values `regex` or `query_param`. Default value: `regex` (backward compatibility).
+- [x] The `domainRuleSchema` includes a new `urlQueryParamName` field (optional string, max 64 characters) containing the name of the parameter to extract.
+- [x] The `urlQueryParamName` field must match the pattern `/^[A-Za-z0-9_\-.]+$/` (same characters as an HTTP query param name, without the wildcard `*` which has no meaning here).
+- [x] When `urlExtractionMode = 'query_param'` and `groupNameSource` implies URL extraction (see US-QP002), `urlQueryParamName` is **required** and non-empty.
+- [x] When `urlExtractionMode = 'regex'`, `urlParsingRegEx` is required in the modes that need it (current behavior unchanged).
+- [x] Changing `urlExtractionMode` does not erase the values of the other fields (`urlParsingRegEx` and `urlQueryParamName` coexist in the form).
 
-### Note d'implémentation
+### Implementation note
 
-Modifications de `src/schemas/domainRule.ts` et `src/schemas/enums.ts` :
+Changes in `src/schemas/domainRule.ts` and `src/schemas/enums.ts`:
 
 ```ts
 // enums.ts
@@ -50,35 +50,35 @@ export type UrlExtractionModeValue = typeof urlExtractionModeOptions[number]['va
 ```
 
 ```ts
-// domainRule.ts : ajouts dans z.object({...})
+// domainRule.ts: additions inside z.object({...})
 urlExtractionMode: z.enum(urlExtractionModeOptions.map(opt => opt.value) as [...]).default('regex'),
 urlQueryParamName: z.string().max(64).refine((val) => val === '' || /^[A-Za-z0-9_\-.]+$/.test(val)).optional(),
 ```
 
-Refine au niveau schéma : `urlQueryParamName` non vide quand `presetId === null`, `urlExtractionMode === 'query_param'` et `groupNameSource` implique l'URL.
+Schema-level refine: `urlQueryParamName` non-empty when `presetId === null`, `urlExtractionMode === 'query_param'`, and `groupNameSource` implies the URL.
 
 ---
 
-## US-QP002 — Extraction du nom de groupe depuis un paramètre de requête
+## US-QP002 - Extraction of the group name from a query parameter
 
-**En tant que** service worker de l'extension,
-**je veux** extraire le nom de groupe depuis la valeur d'un paramètre de requête de l'URL parente,
-**afin de** générer un nom contextuel pour les pages de recherche.
+**As the** extension service worker,
+**I want** to extract the group name from the value of a query parameter of the parent URL,
+**so that** I can generate a contextual name for search pages.
 
-### Critères d'acceptance
+### Acceptance criteria
 
-- [x] Quand `urlExtractionMode = 'query_param'` et qu'une extraction URL est demandée (modes `url`, `smart`, `smart_label`, `smart_preset`, `smart_manual`), l'extension utilise `URL.searchParams.get(urlQueryParamName)` pour récupérer la valeur.
-- [x] La valeur retournée est utilisée **brute, après décodage URL natif** (`URL.searchParams.get` décode automatiquement les `%20`, `+`, etc.).
-  - Exemple : `https://google.com/search?q=foo+bar` → nom du groupe = `foo bar`.
-  - Exemple : `https://youtube.com/results?search_query=hello%20world` → nom du groupe = `hello world`.
-- [x] Aucune transformation supplémentaire n'est appliquée (pas de troncature, pas de capitalisation, pas de premier mot uniquement).
-- [x] Si le paramètre est **absent** de l'URL, l'extraction échoue silencieusement et la chaîne de fallback du mode s'applique (cf. US-G015).
-- [x] Si le paramètre est **présent mais vide** (`?q=`), l'extraction est considérée comme un échec (chaîne vide non utilisable), et la chaîne de fallback du mode s'applique.
-- [x] Si l'URL parente est **invalide** (impossible à parser via `new URL(...)`), l'extension trace un avertissement via `logger.debug` et la chaîne de fallback s'applique.
+- [x] When `urlExtractionMode = 'query_param'` and a URL extraction is required (modes `url`, `smart`, `smart_label`, `smart_preset`, `smart_manual`), the extension uses `URL.searchParams.get(urlQueryParamName)` to retrieve the value.
+- [x] The returned value is used **raw, after native URL decoding** (`URL.searchParams.get` automatically decodes `%20`, `+`, etc.).
+  - Example: `https://google.com/search?q=foo+bar` -> group name = `foo bar`.
+  - Example: `https://youtube.com/results?search_query=hello%20world` -> group name = `hello world`.
+- [x] No further transformation is applied (no truncation, no capitalization, no first-word-only).
+- [x] If the parameter is **missing** from the URL, the extraction silently fails and the mode's fallback chain applies (cf. US-G015).
+- [x] If the parameter is **present but empty** (`?q=`), the extraction is considered a failure (unusable empty string), and the mode's fallback chain applies.
+- [x] If the parent URL is **invalid** (cannot be parsed via `new URL(...)`), the extension logs a warning via `logger.debug` and the fallback chain applies.
 
-### Note d'implémentation
+### Implementation note
 
-Helpers `extractFromQueryParam` et `extractGroupNameFromUrlByMode` ajoutés dans `src/utils/utils.ts`. Tous les call sites URL de `src/background/grouping.ts` passent par le dispatcher.
+Helpers `extractFromQueryParam` and `extractGroupNameFromUrlByMode` added in `src/utils/utils.ts`. All URL call sites of `src/background/grouping.ts` go through the dispatcher.
 
 ```ts
 export function extractFromQueryParam(url: string | null, paramName: string | null | undefined): string | null {
@@ -96,58 +96,58 @@ export function extractFromQueryParam(url: string | null, paramName: string | nu
 
 ---
 
-## US-QP003 — Étape 2 du wizard : choix regex/query param dans le mode Manuel
+## US-QP003 - Wizard step 2: regex/query param choice in Manual mode
 
-**En tant qu'** utilisateur configurant une règle en mode Manuel avec source URL,
-**je veux** voir un sélecteur compact (regex / query param) qui change le champ affiché,
-**afin de** choisir la méthode d'extraction la plus adaptée à mon site sans saturer l'étape du wizard.
+**As a** user configuring a rule in Manual mode with URL source,
+**I want** to see a compact selector (regex / query param) that switches the displayed field,
+**so that** I can pick the extraction method best suited to my site without overcrowding the wizard step.
 
-### Critères d'acceptance
+### Acceptance criteria
 
-- [x] Dans le wizard de création/édition (`WizardStep2Config`), en mode **Manuel** avec `groupNameSource = url` (ou un mode `smart*` qui implique l'URL), un `Select` Radix Themes à deux options est affiché : « Regex » et « Paramètre de requête ». Valeur par défaut : `regex`.
-- [x] Le `Select` est positionné **au-dessus** du champ d'extraction URL, avec un label « Méthode d'extraction » (clé i18n `urlExtractionModeLabel`).
-- [x] Quand « Regex » est sélectionné : le champ `urlParsingRegEx` (TextField multiline existant) est affiché et validé par `createRegexValidator`.
-- [x] Quand « Paramètre de requête » est sélectionné : un `TextField` simple est affiché pour `urlQueryParamName`. Placeholder : `q`. Helper text : « Nom du paramètre de requête à extraire (ex : q, search_query, k) ».
-- [x] Le champ `urlQueryParamName` est validé en temps réel : caractères autorisés `[A-Za-z0-9_\-.]`, longueur 1 à 64.
-- [x] Le `Select` n'apparaît **pas** quand le mode courant n'implique pas d'extraction URL (ex : `groupNameSource = title` strict, `manual`, `ask`).
-- [x] Changer la valeur du `Select` ne réinitialise pas la valeur de l'autre champ (les deux coexistent en mémoire formulaire jusqu'à la sauvegarde, seul le champ correspondant au mode actif est validé pour passer à l'étape suivante).
-- [x] Sur l'étape de résumé (étape 4), le mode d'extraction et la valeur correspondante sont affichés clairement (ex : « Extraction URL : paramètre `q` » ou « Extraction URL : regex `/issue=(\d+)/` »).
+- [x] In the create/edit wizard (`WizardStep2Config`), in **Manual** mode with `groupNameSource = url` (or a `smart*` mode that involves the URL), a Radix Themes `Select` with two options is shown: "Regex" and "Query parameter". Default value: `regex`.
+- [x] The `Select` is positioned **above** the URL extraction field, with a label "Extraction method" (i18n key `urlExtractionModeLabel`).
+- [x] When "Regex" is selected: the `urlParsingRegEx` field (existing multiline TextField) is shown and validated by `createRegexValidator`.
+- [x] When "Query parameter" is selected: a simple `TextField` is shown for `urlQueryParamName`. Placeholder: `q`. Helper text: "Name of the query parameter to extract (e.g. q, search_query, k)".
+- [x] The `urlQueryParamName` field is validated in real time: allowed characters `[A-Za-z0-9_\-.]`, length 1 to 64.
+- [x] The `Select` does **not** appear when the current mode does not involve URL extraction (e.g. `groupNameSource = title` strict, `manual`, `ask`).
+- [x] Changing the value of the `Select` does not reset the value of the other field (both coexist in the form memory until save; only the field corresponding to the active mode is validated to move to the next step).
+- [x] On the summary step (step 4), the extraction mode and the corresponding value are clearly shown (e.g. "URL extraction: parameter `q`" or "URL extraction: regex `/issue=(\d+)/`").
 
-### Note d'implémentation
+### Implementation note
 
-Composants modifiés : `DomainRuleConfigForm`, `WizardStep2Config`, `WizardStep4Summary`, `RuleWizardModal`, `ConfigEditModal`. Les valeurs `urlParsingRegEx` et `urlQueryParamName` coexistent dans l'état RHF du wizard via `lastManualState` et `lastPresetState`.
-
----
-
-## US-QP004 — Support des query params dans le système de presets
-
-**En tant qu'** auteur de preset (intégré ou communautaire),
-**je veux** pouvoir distribuer des presets qui utilisent l'extraction par query param,
-**afin de** couvrir les SERP courantes sans regex complexes.
-
-### Critères d'acceptance
-
-- [x] Le schéma `presetSchema` (`src/types/preset.ts`) accepte deux nouveaux champs optionnels : `urlExtractionMode` (`regex` | `query_param`, défaut `regex`) et `urlQueryParamName` (string, mêmes contraintes que sur `domainRule`).
-- [x] Quand `urlExtractionMode = 'query_param'` est défini sur un preset, le champ `urlRegex` doit être absent ou ignoré, et `urlQueryParamName` est **obligatoire**.
-- [x] La validation `refine` existante du preset est étendue : `urlExample` reste obligatoire si `urlRegex` OU `urlQueryParamName` est défini, pour documenter un cas concret.
-- [x] Quand un utilisateur sélectionne un preset basé sur query param, les champs `urlExtractionMode` et `urlQueryParamName` de la règle sont auto-renseignés depuis le preset (de la même façon que `urlParsingRegEx` l'est aujourd'hui).
-
-### Hors périmètre V1
-- L'éditeur de presets dédié et le convertisseur Go ne sont pas mis à jour dans cette PR.
+Modified components: `DomainRuleConfigForm`, `WizardStep2Config`, `WizardStep4Summary`, `RuleWizardModal`, `ConfigEditModal`. The `urlParsingRegEx` and `urlQueryParamName` values coexist in the wizard's RHF state via `lastManualState` and `lastPresetState`.
 
 ---
 
-## US-QP005 — Presets de SERP intégrés (catégorie « Patterns Génériques »)
+## US-QP004 - Query param support in the preset system
 
-**En tant qu'** utilisateur,
-**je veux** pouvoir sélectionner directement un preset pour les moteurs de recherche populaires,
-**afin de** configurer une règle SERP en un clic sans rien saisir.
+**As a** preset author (built-in or community),
+**I want** to be able to distribute presets that use query param extraction,
+**so that** I can cover common SERPs without complex regexes.
 
-### Critères d'acceptance
+### Acceptance criteria
 
-- [x] **12 nouveaux presets** SERP sont ajoutés à `public/data/presets.json` dans la catégorie existante « Patterns Génériques » (`generic`).
-- [x] Chaque preset SERP utilise `urlExtractionMode = 'query_param'` et `groupNameSource = 'smart_label'` (fallback sur le label si le param est manquant).
-- [x] Liste des presets inclus :
+- [x] The `presetSchema` (`src/types/preset.ts`) accepts two new optional fields: `urlExtractionMode` (`regex` | `query_param`, default `regex`) and `urlQueryParamName` (string, same constraints as on `domainRule`).
+- [x] When `urlExtractionMode = 'query_param'` is set on a preset, the `urlRegex` field must be absent or ignored, and `urlQueryParamName` is **required**.
+- [x] The preset's existing `refine` validation is extended: `urlExample` remains required if `urlRegex` OR `urlQueryParamName` is set, in order to document a concrete case.
+- [x] When a user selects a preset based on a query param, the rule's `urlExtractionMode` and `urlQueryParamName` fields are auto-filled from the preset (the same way `urlParsingRegEx` is today).
+
+### Out of scope V1
+- The dedicated preset editor and the Go converter are not updated in this PR.
+
+---
+
+## US-QP005 - Built-in SERP presets (category "Generic Patterns")
+
+**As a** user,
+**I want** to be able to directly select a preset for popular search engines,
+**so that** I can configure a SERP rule in one click without typing anything.
+
+### Acceptance criteria
+
+- [x] **12 new** SERP presets are added to `public/data/presets.json` in the existing "Generic Patterns" (`generic`) category.
+- [x] Each SERP preset uses `urlExtractionMode = 'query_param'` and `groupNameSource = 'smart_label'` (fallback to the label if the param is missing).
+- [x] List of included presets:
 
 | Preset | domainFilters | urlQueryParamName |
 |---|---|---|
@@ -166,66 +166,66 @@ Composants modifiés : `DomainRuleConfigForm`, `WizardStep2Config`, `WizardStep4
 
 ---
 
-## US-QP006 — Déduplication par valeur de paramètre de requête
+## US-QP006 - Deduplication by query parameter value
 
-> **Hors périmètre V1.** Décision prise pendant l'implémentation : la déduplication n'est pas étendue par cette feature pour limiter le scope de la PR. Pourra être réintroduite dans une itération future.
-
----
-
-## US-QP007 — Import/Export des règles avec mode query param
-
-**En tant qu'** utilisateur,
-**je veux** pouvoir exporter et importer des règles utilisant le mode query param,
-**afin de** sauvegarder et partager mes configurations.
-
-### Critères d'acceptance
-
-- [x] Le schéma relâché d'import (`src/schemas/importExport.ts`) accepte les nouveaux champs `urlExtractionMode` et `urlQueryParamName`.
-- [x] Lors de l'import d'une règle qui n'a pas le champ `urlExtractionMode` (règle exportée d'une version antérieure), la valeur par défaut `regex` est appliquée silencieusement.
-- [x] L'export JSON inclut systématiquement les nouveaux champs (même avec leur valeur par défaut), pour garantir la compatibilité ascendante.
+> **Out of scope V1.** Decision taken during implementation: deduplication is not extended by this feature in order to limit the scope of the PR. May be reintroduced in a future iteration.
 
 ---
 
-## US-QP008 — Migration des règles existantes
+## US-QP007 - Import/Export of rules with query param mode
 
-**En tant que** développeur,
-**je veux** que les règles existantes en stockage local soient migrées sans intervention utilisateur,
-**afin de** garantir la rétrocompatibilité après le déploiement de la feature.
+**As a** user,
+**I want** to be able to export and import rules using the query param mode,
+**so that** I can save and share my configurations.
 
-### Critères d'acceptance
+### Acceptance criteria
 
-- [x] La fonction de migration `migrateRulesAddUrlExtractionMode` (`src/background/migration.ts`) ajoute le champ `urlExtractionMode = 'regex'` à toutes les règles existantes qui n'en ont pas.
-- [x] La migration est idempotente : exécutée plusieurs fois, elle produit le même résultat (gardée par le flag `urlExtractionModeMigrated` en `storage.local`).
-- [x] La migration ne touche pas aux règles qui ont déjà le champ.
-- [x] Appelée depuis `setupInstallationHandler` après `migrateSettingsFromSyncToLocal` et avant `initializeDefaults`.
-- [x] Tests unitaires Vitest couvrant idempotence, ajout sur règles legacy, absence de domainRules.
+- [x] The relaxed import schema (`src/schemas/importExport.ts`) accepts the new `urlExtractionMode` and `urlQueryParamName` fields.
+- [x] When importing a rule that does not have the `urlExtractionMode` field (rule exported from a previous version), the default value `regex` is applied silently.
+- [x] The JSON export systematically includes the new fields (even with their default value), to ensure forward compatibility.
 
 ---
 
-## Clés i18n ajoutées
+## US-QP008 - Migration of existing rules
 
-Dans `public/_locales/{en,fr,es}/messages.json` :
+**As a** developer,
+**I want** existing rules in local storage to be migrated without user intervention,
+**so that** backward compatibility is guaranteed after the feature is deployed.
 
-| Clé | EN | FR | ES |
+### Acceptance criteria
+
+- [x] The migration function `migrateRulesAddUrlExtractionMode` (`src/background/migration.ts`) adds the field `urlExtractionMode = 'regex'` to all existing rules that do not have it.
+- [x] The migration is idempotent: run multiple times, it produces the same result (guarded by the `urlExtractionModeMigrated` flag in `storage.local`).
+- [x] The migration does not touch rules that already have the field.
+- [x] Called from `setupInstallationHandler` after `migrateSettingsFromSyncToLocal` and before `initializeDefaults`.
+- [x] Vitest unit tests covering idempotence, addition on legacy rules, absence of domainRules.
+
+---
+
+## i18n keys added
+
+In `public/_locales/{en,fr,es}/messages.json`:
+
+| Key | EN | FR (i18n value) | ES (i18n value) |
 |---|---|---|---|
 | `urlExtractionModeRegex` | Regex | Regex | Regex |
-| `urlExtractionModeQueryParam` | Query parameter | Paramètre de requête | Parámetro de consulta |
-| `urlExtractionModeLabel` | Extraction method | Méthode d'extraction | Método de extracción |
-| `urlQueryParamNameLabel` | Query parameter name | Nom du paramètre | Nombre del parámetro |
+| `urlExtractionModeQueryParam` | Query parameter | Parametre de requete | Parametro de consulta |
+| `urlExtractionModeLabel` | Extraction method | Methode d'extraction | Metodo de extraccion |
+| `urlQueryParamNameLabel` | Query parameter name | Nom du parametre | Nombre del parametro |
 | `urlQueryParamNamePlaceholder` | e.g. q | ex : q | ej. q |
-| `urlQueryParamNameHelper` | Name of the URL query parameter to extract (e.g. q, search_query, k) | Nom du paramètre de requête à extraire (ex : q, search_query, k) | Nombre del parámetro de consulta a extraer (ej. q, search_query, k) |
-| `errorQueryParamNameRequired` | Query parameter name is required | Le nom du paramètre est obligatoire | El nombre del parámetro es obligatorio |
-| `errorInvalidQueryParamName` | Invalid parameter name (allowed: letters, digits, _ - .) | Nom de paramètre invalide (autorisés : lettres, chiffres, _ - .) | Nombre de parámetro inválido (permitido: letras, dígitos, _ - .) |
-| `urlExtractionSummaryRegex` | URL extraction: regex `{regex}` | Extraction URL : regex `{regex}` | Extracción URL: regex `{regex}` |
-| `urlExtractionSummaryQueryParam` | URL extraction: parameter `{param}` | Extraction URL : paramètre `{param}` | Extracción URL: parámetro `{param}` |
+| `urlQueryParamNameHelper` | Name of the URL query parameter to extract (e.g. q, search_query, k) | Nom du parametre de requete a extraire (ex : q, search_query, k) | Nombre del parametro de consulta a extraer (ej. q, search_query, k) |
+| `errorQueryParamNameRequired` | Query parameter name is required | Le nom du parametre est obligatoire | El nombre del parametro es obligatorio |
+| `errorInvalidQueryParamName` | Invalid parameter name (allowed: letters, digits, _ - .) | Nom de parametre invalide (autorises : lettres, chiffres, _ - .) | Nombre de parametro invalido (permitido: letras, digitos, _ - .) |
+| `urlExtractionSummaryRegex` | URL extraction: regex `{regex}` | Extraction URL : regex `{regex}` | Extraccion URL: regex `{regex}` |
+| `urlExtractionSummaryQueryParam` | URL extraction: parameter `{param}` | Extraction URL : parametre `{param}` | Extraccion URL: parametro `{param}` |
 
 ---
 
-## Hors périmètre
+## Out of scope
 
-- Extraction depuis le **fragment** (`#hash`).
-- Extraction depuis le **path** segmenté (ex : `/users/:id`) : la regex couvre déjà ce cas.
-- Transformation de la valeur extraite (premier mot, troncature, capitalisation) : la valeur brute décodée est utilisée telle quelle.
-- Combinaison de plusieurs paramètres dans le nom de groupe : un seul paramètre par règle/preset.
-- Extraction par query param côté **titre** (les titres ne sont pas des URL structurées).
-- **Déduplication par query param (US-QP006)** : voir note ci-dessus.
+- Extraction from the **fragment** (`#hash`).
+- Extraction from the segmented **path** (e.g. `/users/:id`): the regex already covers this case.
+- Transformation of the extracted value (first word, truncation, capitalization): the raw decoded value is used as-is.
+- Combination of multiple parameters in the group name: only one parameter per rule/preset.
+- Query param extraction on the **title** side (titles are not structured URLs).
+- **Deduplication by query param (US-QP006)**: see note above.

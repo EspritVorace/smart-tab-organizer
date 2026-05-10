@@ -1,91 +1,91 @@
 # Clarifications - pipeline `e2e-doc-scenarios/` (issues #257, #259)
 
-Décisions prises avant et pendant l'implémentation des phases successives.
+Decisions made before and during the implementation of the successive phases.
 
-## Scope Phase 1 (#257)
+## Phase 1 scope (#257)
 
-Cette PR couvrait :
+This PR covered:
 
-- US-DS001 / US-DS002 : scénario principal `00-main-journey` en `en x dark` uniquement (le scaffold matrice est prêt mais la PR ne lançait pas encore les 6 variantes).
-- US-DS004 : sites locaux mimétiques (GitHub, YouTube, Google, Le Monde).
-- US-DS005 : helpers `ui-actions.ts`.
-- US-DS006 : `captureStep()` avec compteur séquentiel.
-- US-DS007 : co-existence et factorisation dans `e2e-shared/`.
-- US-DS008 : README auto-généré par scénario.
-- US-DS009 : migration complète du routage `e2e-screenshots/` vers manifests.
+- US-DS001 / US-DS002: main scenario `00-main-journey` in `en x dark` only (the matrix scaffold is ready but the PR did not yet run the 6 variants).
+- US-DS004: mimetic local sites (GitHub, YouTube, Google, Le Monde).
+- US-DS005: `ui-actions.ts` helpers.
+- US-DS006: `captureStep()` with sequential counter.
+- US-DS007: coexistence and factoring in `e2e-shared/`.
+- US-DS008: README auto-generated per scenario.
+- US-DS009: full migration of routing from `e2e-screenshots/` to manifests.
 
-Reportés en phases ultérieures :
+Deferred to later phases:
 
-- US-DS003 : 4 scénarios satellites (`10-import-conflicts`, `11-restore-conflicts`, `12-deduplication-modes`, `13-grouping-modes`).
-- Matrice complète 3 locales x 2 thèmes pour le scénario principal.
-- US-DS010 : commande `pnpm doc:scenarios:audit`.
-- US-DS011 : commande `pnpm doc:scenarios:sync`.
+- US-DS003: 4 satellite scenarios (`10-import-conflicts`, `11-restore-conflicts`, `12-deduplication-modes`, `13-grouping-modes`).
+- Full matrix 3 locales x 2 themes for the main scenario.
+- US-DS010: `pnpm doc:scenarios:audit` command.
+- US-DS011: `pnpm doc:scenarios:sync` command.
 
-## Scope Phase 2.1 (#259)
+## Phase 2.1 scope (#259)
 
-Cette phase étend la couverture :
+This phase extends the coverage:
 
-- Matrice complète : `playwright.doc.config.ts` génère 6 projects `{locale}-{theme}` (en/fr/es x dark/light) ; chaque project porte ses paramètres via `metadata: { locale, theme }`, lus par la fixture (`doc-fixture.ts`) et par le scénario.
-- Le scénario lit locale et theme via les nouvelles fixtures `locale` / `theme` (worker-scoped) au lieu d'inférer la locale depuis `project.name`.
-- Captures complémentaires ajoutées au scénario `00-main-journey` :
+- Full matrix: `playwright.doc.config.ts` generates 6 projects `{locale}-{theme}` (en/fr/es x dark/light); each project carries its parameters via `metadata: { locale, theme }`, read by the fixture (`doc-fixture.ts`) and by the scenario.
+- The scenario reads locale and theme via the new fixtures `locale` / `theme` (worker-scoped) instead of inferring the locale from `project.name`.
+- Additional captures added to the `00-main-journey` scenario:
   - `034-sessions-card-relative-time.png`
   - `035-sessions-card-hovercard.png`
   - `036-sessions-pin-onboarding.png` (popup pinned-empty hint)
   - `037-sessions-list-with-pinned.png`
   - `041-export-wizard-selection.png`
-  - `042-export-toast-success.png` (via stub de `window.showSaveFilePicker` côté page : faux handle dont `write` / `close` sont no-op, l'export passe par sa branche succès et émet le toast)
+  - `042-export-toast-success.png` (via a `window.showSaveFilePicker` stub on the page side: a fake handle whose `write` / `close` are no-ops, the export goes through its success branch and emits the toast)
   - `043-import-wizard-paste.png`
   - `044-import-wizard-classification.png`
   - `050-rules-list-with-disabled.png`
   - `051-sessions-search-active.png`
   - `052-sessions-search-deep.png`
-  - `060-rules-list-final.png` (renumérotation : laisse 050 disponible pour la version désactivée).
-- Helpers de stabilisation ajoutés : `waitForToast`, `hoverSessionCardName`, `pinSession`, `getFirstSessionId`, `toggleRuleEnabled`, `fillSessionsSearch`, `openExportRulesWizard`, `openImportRulesWizard`, `pasteImportJson`, `importWizardNextToClassification`.
-- Petit ajout source : `data-testid="session-card-{id}-btn-pin"` / `-btn-unpin` sur le bouton pin/unpin de `SessionCard`, pour fiabiliser la sélection sans recourir à un locator par aria-label i18n.
-- Wiring testid sur le footer de l'export wizard : `ExportWizardShell` propage désormais `primaryTestId` / `clipboardTestId` / `cancelTestId` à `ExportWizardFooter` (déjà supporté par `ExportSplitButton`). `ExportWizard` (rules) renseigne `wizard-export-rules-btn-{export,clipboard,cancel}` pour permettre à 042 de cliquer le bouton primaire de manière déterministe.
+  - `060-rules-list-final.png` (renumbering: leaves 050 available for the disabled version).
+- Stabilization helpers added: `waitForToast`, `hoverSessionCardName`, `pinSession`, `getFirstSessionId`, `toggleRuleEnabled`, `fillSessionsSearch`, `openExportRulesWizard`, `openImportRulesWizard`, `pasteImportJson`, `importWizardNextToClassification`.
+- Small source addition: `data-testid="session-card-{id}-btn-pin"` / `-btn-unpin` on the pin/unpin button of `SessionCard`, to make selection more reliable without resorting to a locator by i18n aria-label.
+- Testid wiring on the export wizard footer: `ExportWizardShell` now propagates `primaryTestId` / `clipboardTestId` / `cancelTestId` to `ExportWizardFooter` (already supported by `ExportSplitButton`). `ExportWizard` (rules) sets `wizard-export-rules-btn-{export,clipboard,cancel}` to allow 042 to click the primary button deterministically.
 
-### Captures explicitement non livrées en Phase 2.1
+### Captures explicitly not delivered in Phase 2.1
 
-- `014-rules-toast-created.png` : aucun toast in-app n'est émis lors de la création d'une règle dans la base actuelle. À ré-évaluer si un `showSuccessToast` est ajouté à `handleSubmitRule` (`src/pages/DomainRulesPage.tsx`).
-- `023-toast-grouping-with-undo.png` : aucun toast in-app n'accompagne le groupage automatique. La notification système (`chrome.notifications`) avec bouton Annuler reste OS-level (cf. décision Phase 1) et ne peut pas être capturée par Playwright. À reprendre une fois un toast in-app ajouté.
-- `031-sessions-snapshot-wizard-step2.png` : `SnapshotWizard` est mono-étape (cf. décision Phase 1). Capture unique conservée (`030-sessions-snapshot-wizard-filled.png`).
+- `014-rules-toast-created.png`: no in-app toast is emitted when creating a rule in the current codebase. To be re-evaluated if a `showSuccessToast` is added to `handleSubmitRule` (`src/pages/DomainRulesPage.tsx`).
+- `023-toast-grouping-with-undo.png`: no in-app toast accompanies automatic grouping. The system notification (`chrome.notifications`) with Undo button stays OS-level (cf. Phase 1 decision) and cannot be captured by Playwright. To be revisited once an in-app toast is added.
+- `031-sessions-snapshot-wizard-step2.png`: `SnapshotWizard` is single-step (cf. Phase 1 decision). Single capture kept (`030-sessions-snapshot-wizard-filled.png`).
 
-## Décisions techniques
+## Technical decisions
 
-### Sites locaux mimétiques (US-DS004)
+### Mimetic local sites (US-DS004)
 
-Approche retenue : **DNS local via Chromium `--host-resolver-rules`**.
+Chosen approach: **local DNS via Chromium `--host-resolver-rules`**.
 
-Le serveur HTTP statique tourne sur `127.0.0.1:4173`. Chromium est lancé avec :
+The static HTTP server runs on `127.0.0.1:4173`. Chromium is launched with:
 
 ```
 --host-resolver-rules=MAP github.com:80 127.0.0.1:4173, MAP youtube.com:80 127.0.0.1:4173, MAP google.com:80 127.0.0.1:4173, MAP lemonde.fr:80 127.0.0.1:4173, EXCLUDE localhost
 ```
 
-Conséquences :
+Consequences:
 
-- En barre d'adresse, l'utilisateur voit `http://github.com/repo-readme.html` (réaliste).
-- `chrome.tabs.url` retourne la même URL : les règles de domaine matchent naturellement `github.com`, sans adaptation.
-- Tout reste offline et déterministe.
+- In the address bar, the user sees `http://github.com/repo-readme.html` (realistic).
+- `chrome.tabs.url` returns the same URL: domain rules naturally match `github.com`, without adaptation.
+- Everything stays offline and deterministic.
 
-### Modes de configuration disponibles
+### Available configuration modes
 
-Le code expose 3 modes (`preset`, `ask`, `manual`). Le mode `label` mentionné dans l'issue n'existe pas dans la base actuelle : la capture `017-rules-wizard-step2-mode-label.png` est donc retirée du Phase 1. À ré-évaluer si un mode `label` est ajouté ultérieurement.
+The code exposes 3 modes (`preset`, `ask`, `manual`). The `label` mode mentioned in the issue does not exist in the current codebase: the `017-rules-wizard-step2-mode-label.png` capture is therefore removed from Phase 1. To be re-evaluated if a `label` mode is added later.
 
-### Étapes du wizard de snapshot
+### Snapshot wizard steps
 
-Le `SnapshotWizard` est mono-étape dans le code actuel : pas de découpage `step1-naming` / `step2-tab-selection` / `summary`. Capture unique du wizard rempli (`030-sessions-snapshot-wizard-filled.png`).
+The `SnapshotWizard` is single-step in the current code: no breakdown into `step1-naming` / `step2-tab-selection` / `summary`. Single capture of the filled wizard (`030-sessions-snapshot-wizard-filled.png`).
 
-### Factorisation (US-DS007)
+### Factoring (US-DS007)
 
-Helpers communs dans le dossier `e2e-shared/` à la racine :
+Common helpers in the `e2e-shared/` folder at the root:
 
-- `chromium-finder.ts` : résolution du binaire Chromium (CI vs local).
-- `extension-loader.ts` : `launchExtension()` partagé (userDataDir, args, deterministic flags, host-resolver).
-- `extension-id.ts` : `waitForServiceWorker()` + `getExtensionId()`.
-- `locale-injector.ts` : override `chrome.i18n.getMessage` via `addInitScript`.
-- `theme.ts` : `applyTheme(page, 'light' | 'dark')`.
-- `sharp-save.ts` : `savePng()` avec routage manifest-driven.
-- `routing/types.ts`, `routing/destinations.ts` : types et roots des destinations.
+- `chromium-finder.ts`: Chromium binary resolution (CI vs local).
+- `extension-loader.ts`: shared `launchExtension()` (userDataDir, args, deterministic flags, host-resolver).
+- `extension-id.ts`: `waitForServiceWorker()` + `getExtensionId()`.
+- `locale-injector.ts`: `chrome.i18n.getMessage` override via `addInitScript`.
+- `theme.ts`: `applyTheme(page, 'light' | 'dark')`.
+- `sharp-save.ts`: `savePng()` with manifest-driven routing.
+- `routing/types.ts`, `routing/destinations.ts`: types and roots of destinations.
 
-Les pipelines `tests/e2e/` et `e2e-screenshots/` consomment ces helpers, sans changement d'API publique.
+The `tests/e2e/` and `e2e-screenshots/` pipelines consume these helpers, with no public API change.

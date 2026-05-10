@@ -182,7 +182,7 @@ describe('captureCurrentTabs', () => {
     expect(result.groups[0].collapsed).toBe(false);
   });
 
-  it('normalizeColor : retourne la couleur inchangée si elle est valide', async () => {
+  it('normalizeColor: returns the color unchanged when valid', async () => {
     mockTabsQuery.mockResolvedValue([
       { id: 10, index: 0, url: 'https://a.com', title: 'A', groupId: 5 },
     ]);

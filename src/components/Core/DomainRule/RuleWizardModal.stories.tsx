@@ -71,7 +71,7 @@ const meta: Meta<typeof RuleWizardModal> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// === CRÉATION (wizard 4 étapes) ===
+// === Creation (4-step wizard) ===
 
 export const RuleWizardModalCreate: Story = {
   args: {
@@ -80,7 +80,7 @@ export const RuleWizardModalCreate: Story = {
   },
 };
 
-// === ÉDITION (vue résumé) ===
+// === Edit (summary view) ===
 
 export const RuleWizardModalEdit: Story = {
   args: {
@@ -125,7 +125,7 @@ export const RuleWizardModalEditDeduplicationDisabled: Story = {
   },
 };
 
-// === CAS LIMITES ===
+// === Edge cases ===
 
 export const RuleWizardModalClosed: Story = {
   args: {

@@ -25,19 +25,19 @@ import type { Session } from '@/types/session';
 interface SessionCardProps {
   session: Session;
   /**
-   * 'full' (défaut) : carte complète avec drag, pin, restore, menu.
-   * 'summary' : carte épurée pour les wizards d'import/export (pas d'actions).
+   * 'full' (default): full card with drag, pin, restore, menu.
+   * 'summary': stripped-down card for the import/export wizards (no actions).
    */
   variant?: 'full' | 'summary';
   /**
-   * État visuel de la carte en mode summary.
-   * 'conflict' : fond orange + icône AlertTriangle.
-   * 'identical' : opacité réduite.
+   * Visual state of the card in summary mode.
+   * 'conflict': orange background plus AlertTriangle icon.
+   * 'identical': reduced opacity.
    */
   status?: SessionCardStatus;
-  /** Slot gauche en mode summary (ex. Checkbox de sélection). */
+  /** Leading slot in summary mode (e.g. selection Checkbox). */
   leading?: React.ReactNode;
-  /** Slot droit en mode summary (ex. Badge statut, DiffPopover). */
+  /** Trailing slot in summary mode (e.g. status Badge, DiffPopover). */
   trailing?: React.ReactNode;
   existingSessions?: Session[];
   onRestore?: (session: Session) => void;
@@ -73,10 +73,10 @@ interface SessionCardProps {
   onCardKeyDown?: (e: React.KeyboardEvent<HTMLElement>) => void;
 }
 
-/** État visuel d'une SessionCard en mode summary. */
+/** Visual state of a SessionCard in summary mode. */
 export type SessionCardStatus = 'default' | 'conflict' | 'identical';
 
-/* ─── Helpers ────────────────────────────────────────────────────────────── */
+/* Helpers */
 
 function getStatusStyle(status: SessionCardStatus): React.CSSProperties {
   if (status === 'conflict') return { background: 'var(--orange-a2)' };
@@ -84,7 +84,7 @@ function getStatusStyle(status: SessionCardStatus): React.CSSProperties {
   return {};
 }
 
-/* ─── SessionMoreMenu ─────────────────────────────────────────────────────── */
+/* SessionMoreMenu */
 
 interface SessionMoreMenuProps {
   session: Session;
@@ -138,7 +138,7 @@ function SessionMoreMenu({ session, isDragDisabled, onEdit, onDelete, onMoveToFi
   );
 }
 
-/* ─── SessionMetadataHoverContent ─────────────────────────────────────────── */
+/* SessionMetadataHoverContent */
 
 function SessionMetadataHoverContent({ session }: { session: Session }) {
   return (
@@ -162,7 +162,7 @@ function SessionMetadataHoverContent({ session }: { session: Session }) {
   );
 }
 
-/* ─── useSessionRename ────────────────────────────────────────────────────── */
+/* useSessionRename */
 
 function useSessionRename(session: Session, existingSessions: Session[], onRename: (id: string, name: string) => Promise<void>) {
   const [isRenaming, setIsRenaming] = useState(false);
@@ -212,7 +212,7 @@ function useSessionRename(session: Session, existingSessions: Session[], onRenam
   };
 }
 
-/* ─── SessionNameHoverCard ────────────────────────────────────────────────── */
+/* SessionNameHoverCard */
 
 interface SessionNameHoverCardProps {
   session: Session;
@@ -244,7 +244,7 @@ function SessionNameHoverCard({
   );
 }
 
-/* ─── SessionCardSummaryHeader ────────────────────────────────────────────── */
+/* SessionCardSummaryHeader */
 
 interface SessionCardSummaryHeaderProps {
   session: Session;
@@ -284,7 +284,7 @@ function SessionCardSummaryHeader({
   );
 }
 
-/* ─── SessionCardFullHeader ───────────────────────────────────────────────── */
+/* SessionCardFullHeader */
 
 interface SessionCardFullHeaderProps {
   session: Session;
@@ -447,7 +447,7 @@ function SessionCardFullHeader({
   );
 }
 
-/* ─── SessionCard ─────────────────────────────────────────────────────────── */
+/* SessionCard */
 
 export function SessionCard({
   session,
@@ -485,7 +485,7 @@ export function SessionCard({
   } = useSessionRename(session, existingSessions, onRename ?? (() => Promise.resolve()));
   const [previewOpen, setPreviewOpen] = useState(false);
 
-  // Toujours appelé pour respecter les règles des hooks React
+  // Always called to satisfy the rules of hooks.
   const { ref, handleRef, isDragging } = useSortable({
     id: session.id,
     index,

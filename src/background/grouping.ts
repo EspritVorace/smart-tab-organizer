@@ -139,7 +139,7 @@ function extractRawGroupName(rule: DomainRuleSetting, openerTab: Browser.tabs.Ta
         case 'url':
             return tryExtractFromUrl(rule, openerTab) ?? tryExtractFromTitle(rule, openerTab, '(url fallback)');
         case 'smart_manual':
-            // Si pas d'extraction, le nom sera demandé à l'utilisateur via handleManualGroupNaming.
+            // When extraction fails, the user is prompted via handleManualGroupNaming.
             return tryExtractGroupNameFromPresetOrFallback(rule, openerTab) ?? fallbackLabel;
         case 'smart_preset': {
             const extracted = tryExtractGroupNameFromPresetOrFallback(rule, openerTab);

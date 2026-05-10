@@ -15,7 +15,7 @@ describe('PinnedSessionTile (portable stories)', () => {
     const onRestore = vi.fn();
     render(<PinnedSessionTileDefault onRestore={onRestore} />);
 
-    expect(screen.getByText('Travail courant')).toBeInTheDocument();
+    expect(screen.getByText('Current work')).toBeInTheDocument();
     expect(screen.getByTestId('home-pinned-tile-s1')).toBeInTheDocument();
     const restoreBtn = screen.getByTestId('home-pinned-tile-restore-s1');
     expect(restoreBtn).toBeInTheDocument();
@@ -28,7 +28,7 @@ describe('PinnedSessionTile (portable stories)', () => {
   it('long-name story still mounts the truncated label', () => {
     render(<PinnedSessionTileLongName />);
     expect(
-      screen.getByText(/Une session avec un nom particulièrement long/),
+      screen.getByText(/A session with a deliberately long name/),
     ).toBeInTheDocument();
   });
 

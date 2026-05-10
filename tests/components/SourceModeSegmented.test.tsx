@@ -49,7 +49,7 @@ describe('SourceModeSegmented', () => {
     expect(screen.getAllByText('i18n(sourcePack)').length).toBeGreaterThanOrEqual(1);
   });
 
-  it("affiche 2 onglets quand availableModes est omis (compatibilité ascendante)", () => {
+  it("renders 2 tabs when availableModes is omitted (backwards compatibility)", () => {
     const source = makeSource();
     wrap(<SourceModeSegmented source={source} />);
     expect(screen.getAllByText('i18n(sourceFile)').length).toBeGreaterThanOrEqual(1);

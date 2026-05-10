@@ -39,7 +39,7 @@ export const sessionsArraySchema = z.array(sessionSchema);
 
 export type SessionForUniqueness = { id: string; name: string };
 
-// Schéma avec validation d'unicité du nom pour une session individuelle
+// Schema with name-uniqueness validation for a single session.
 export const createSessionSchemaWithUniqueness = (existingSessions: SessionForUniqueness[], editingSessionId?: string) => {
   return sessionSchema.refine((data) => {
     const existingNames = existingSessions

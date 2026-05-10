@@ -4,19 +4,19 @@ import type { LucideProps } from 'lucide-react';
 
 interface EmptyStateProps {
   icon: React.ComponentType<LucideProps>;
-  /** Titre affiché en variante principale. */
+  /** Title shown in the primary variant. */
   title?: string;
-  /** Description affichée en variante principale. */
+  /** Description shown in the primary variant. */
   description?: string;
-  /** Boutons d'action (slot libre). Affiché en variante principale uniquement. */
+  /** Action buttons (free slot). Rendered in the primary variant only. */
   actions?: React.ReactNode;
-  /** Mode compact : icône + message uniquement, sans titre ni boutons. */
+  /** Compact mode: icon plus message only, no title or buttons. */
   compact?: boolean;
-  /** Message affiché en mode compact (alias de title). */
+  /** Message shown in compact mode (alias of title). */
   message?: string;
-  /** Largeur max de la description (défaut : 340). Passer `undefined` pour supprimer la contrainte. */
+  /** Max width of the description (default: 340). Pass `undefined` to drop the constraint. */
   descriptionMaxWidth?: number | 'none';
-  /** Hauteur minimale du conteneur (défaut : 200 en principal, 120 en compact). */
+  /** Minimum container height (default: 200 primary, 120 compact). */
   minHeight?: number | string;
   'data-testid'?: string;
 }

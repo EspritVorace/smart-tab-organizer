@@ -20,21 +20,21 @@ import type { DomainRuleSetting } from '@/types/syncSettings';
 export interface DomainRuleCardProps {
   rule: DomainRuleSetting;
   /**
-   * 'full' (défaut) : carte complète avec drag, selection, switch, menu.
-   * 'summary' : carte épurée pour les wizards d'import/export (pas d'actions).
+   * 'full' (default): full card with drag, selection, switch, menu.
+   * 'summary': stripped-down card for the import/export wizards (no actions).
    */
   variant?: 'full' | 'summary';
   /**
-   * État visuel de la carte en mode summary.
-   * 'conflict' : fond orange + icône AlertTriangle.
-   * 'identical' : opacité réduite.
+   * Visual state of the card in summary mode.
+   * 'conflict': orange background plus AlertTriangle icon.
+   * 'identical': reduced opacity.
    */
   status?: 'default' | 'conflict' | 'identical';
-  /** Slot gauche en mode summary (ex. Checkbox de sélection import/export). */
+  /** Leading slot in summary mode (e.g. selection Checkbox for import/export). */
   leading?: React.ReactNode;
-  /** Slot droit en mode summary (ex. Badge statut, DiffPopover). */
+  /** Trailing slot in summary mode (e.g. status Badge, DiffPopover). */
   trailing?: React.ReactNode;
-  /** Terme de recherche pour surlignage (optionnel en mode summary). */
+  /** Search term used for highlighting (optional in summary mode). */
   searchTerm?: string;
   index?: number;
   isSelected?: boolean;
@@ -74,7 +74,7 @@ export function DomainRuleCard({
 }: DomainRuleCardProps) {
   const isSummary = variant === 'summary';
 
-  // Toujours appelé pour respecter les règles des hooks React
+  // Always called to satisfy the rules of hooks.
   const { ref, handleRef, isDragging } = useSortable({
     id: rule.id,
     index,

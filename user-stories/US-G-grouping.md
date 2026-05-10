@@ -1,146 +1,146 @@
-# User Stories — Domaine G : Regroupement automatique d'onglets
+# User Stories - Domain G: Automatic tab grouping
 
-> Comportements testés dans `tests/e2e/grouping.spec.ts` non couverts par les US existantes (US-S001→S008, US-E001→E002, US-P001→P004, US-PO001→PO002, US-W001, US-O001).
-
----
-
-## US-G001 — Activation globale du regroupement
-
-**En tant qu'** utilisateur de l'extension,
-**je veux** pouvoir activer ou désactiver le regroupement automatique de façon globale,
-**afin de** contrôler si mes onglets sont organisés en groupes lors de l'ouverture d'un lien.
-
-### Critères d'acceptation
-
-- [ ] Quand le regroupement global est **activé** et qu'une règle de domaine correspond, un onglet enfant ouvert depuis un onglet parent est automatiquement placé dans un groupe.
-- [ ] Quand le regroupement global est **désactivé**, aucun onglet n'est regroupé, même si une règle de domaine correspondante existe.
-- [ ] Quand **aucune règle** ne correspond au domaine de l'onglet ouvert, aucun groupe n'est créé.
-- [ ] Le compteur `tabGroupsCreatedCount` dans les statistiques reste à 0 quand aucun groupe n'est créé.
+> Behaviors tested in `tests/e2e/grouping.spec.ts` not covered by existing US (US-S001->S008, US-E001->E002, US-P001->P004, US-PO001->PO002, US-W001, US-O001).
 
 ---
 
-## US-G002 — Paramètres de regroupement par règle
+## US-G001 - Global grouping toggle
 
-**En tant qu'** utilisateur,
-**je veux** que chaque règle de domaine puisse activer ou désactiver le regroupement indépendamment du paramètre global,
-**afin de** gérer finement les domaines qui méritent un regroupement.
+**As a** user of the extension,
+**I want** to be able to enable or disable automatic grouping globally,
+**so that** I can control whether my tabs are organized into groups when opening a link.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Quand une règle a `groupingEnabled = false`, les onglets du domaine correspondant ne sont **pas** regroupés, même si le regroupement global est activé.
-- [ ] Quand une règle est désactivée (`enabled = false`), elle est ignorée et aucun groupe n'est créé pour ce domaine.
-
----
-
-## US-G003 — Sources du nom de groupe
-
-**En tant qu'** utilisateur,
-**je veux** choisir comment le nom d'un groupe est déterminé (label, URL, titre de page, ou automatique),
-**afin de** personnaliser l'identification visuelle de mes groupes d'onglets.
-
-### Critères d'acceptation
-
-- [ ] `groupNameSource = label` : le nom du groupe est le **label** de la règle de domaine.
-- [ ] `groupNameSource = url` : le nom du groupe est **extrait de l'URL** de l'onglet parent grâce à l'expression régulière `urlParsingRegEx`; en cas d'échec d'extraction, repli sur le label.
-- [ ] `groupNameSource = title` : le nom du groupe est **extrait du titre** de la page parente grâce à `titleParsingRegEx`; en cas d'échec d'extraction, repli sur le label.
-- [ ] `groupNameSource = smart_label` : utilise la même logique que `title` mais replie sur le label si l'extraction échoue.
-- [ ] Une expression régulière **invalide** (syntaxiquement incorrecte) ne provoque pas de crash de l'extension; un groupe est tout de même créé avec le label comme nom de repli.
+- [ ] When global grouping is **enabled** and a domain rule matches, a child tab opened from a parent tab is automatically placed into a group.
+- [ ] When global grouping is **disabled**, no tab is grouped, even if a matching domain rule exists.
+- [ ] When **no rule** matches the domain of the opened tab, no group is created.
+- [ ] The `tabGroupsCreatedCount` counter in statistics stays at 0 when no group is created.
 
 ---
 
-## US-G004 — Couleur du groupe
+## US-G002 - Per-rule grouping settings
 
-**En tant qu'** utilisateur,
-**je veux** définir la couleur d'un groupe dans la règle de domaine,
-**afin de** distinguer visuellement mes groupes dans la barre d'onglets.
+**As a** user,
+**I want** each domain rule to enable or disable grouping independently of the global setting,
+**so that** I can finely manage which domains deserve grouping.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] La couleur spécifiée dans la règle (`blue`, `red`, `green`, `purple`, etc.) est correctement appliquée au groupe créé par le navigateur.
-- [ ] Quand aucune couleur n'est spécifiée (`color = ""`), Chrome assigne sa couleur par défaut et le groupe est tout de même créé.
-
----
-
-## US-G005 — Comportement avec un groupe existant
-
-**En tant qu'** utilisateur,
-**je veux** que les onglets enfants successifs ouverts depuis le même onglet parent rejoignent le groupe existant,
-**afin d'** éviter la multiplication de groupes redondants.
-
-### Critères d'acceptation
-
-- [ ] Un premier onglet enfant crée un nouveau groupe; le compteur `tabGroupsCreatedCount` passe à 1.
-- [ ] Un deuxième onglet enfant ouvert depuis le **même** onglet parent est ajouté au groupe existant sans créer de nouveau groupe.
-- [ ] Le nombre d'onglets dans le groupe augmente à chaque enfant ajouté.
-- [ ] Un nouvel onglet parent (distinct) crée un **nouveau** groupe séparé; `tabGroupsCreatedCount` s'incrémente.
+- [ ] When a rule has `groupingEnabled = false`, tabs from the matching domain are **not** grouped, even if global grouping is enabled.
+- [ ] When a rule is disabled (`enabled = false`), it is ignored and no group is created for that domain.
 
 ---
 
-## US-G006 — Règles multiples et priorité
+## US-G003 - Group name sources
 
-**En tant qu'** utilisateur,
-**je veux** définir plusieurs règles de domaine et que la plus spécifique s'applique,
-**afin d'** avoir des comportements différents selon le domaine exact.
+**As a** user,
+**I want** to choose how the name of a group is determined (label, URL, page title, or automatic),
+**so that** I can customize the visual identification of my tab groups.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Quand plusieurs règles existent, chaque domaine utilise la règle qui lui correspond (ex. `example.com` → groupe bleu, `httpbin.org` → groupe rouge).
-- [ ] En cas de correspondances multiples pour un même domaine, la **première règle** de la liste gagne (ex. `www.example.com` est prioritaire sur `example.com`).
-- [ ] Les domaines sans règle correspondante ne sont pas regroupés.
-
----
-
-## US-G007 — Statistiques de regroupement
-
-**En tant qu'** utilisateur,
-**je veux** que le compteur de groupes créés reflète fidèlement l'activité réelle,
-**afin de** suivre l'efficacité de l'extension.
-
-### Critères d'acceptation
-
-- [ ] `tabGroupsCreatedCount` s'incrémente de 1 uniquement lorsqu'un **nouveau** groupe est créé.
-- [ ] Quand un onglet est ajouté à un groupe existant, le compteur **ne s'incrémente pas**.
-- [ ] Quand un second groupe est créé (domaine différent ou nouvel onglet parent distinct), le compteur atteint 2.
+- [ ] `groupNameSource = label`: the group name is the **label** of the domain rule.
+- [ ] `groupNameSource = url`: the group name is **extracted from the URL** of the parent tab via the regular expression `urlParsingRegEx`; on extraction failure, falls back to the label.
+- [ ] `groupNameSource = title`: the group name is **extracted from the title** of the parent page via `titleParsingRegEx`; on extraction failure, falls back to the label.
+- [ ] `groupNameSource = smart_label`: uses the same logic as `title` but falls back to the label if extraction fails.
+- [ ] An **invalid** regular expression (syntactically incorrect) does not crash the extension; a group is still created with the label as fallback name.
 
 ---
 
-## US-G008 — Cas limite : ouvertures simultanées
+## US-G004 - Group color
 
-**En tant qu'** utilisateur,
-**je veux** que l'extension gère correctement plusieurs onglets enfants ouverts simultanément depuis le même parent,
-**afin d'** éviter la création de groupes dupliqués.
+**As a** user,
+**I want** to define the color of a group in the domain rule,
+**so that** I can visually distinguish my groups in the tab bar.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Quand trois onglets enfants sont créés en parallèle depuis le même onglet parent, **un seul** groupe est créé (`tabGroupsCreatedCount = 1`).
-- [ ] Le groupe résultant contient au moins deux des onglets enfants.
-
----
-
-## US-G009 — Détection du clic du milieu (middle-click)
-
-**En tant qu'** utilisateur,
-**je veux** que les onglets ouverts par un clic du milieu sur un lien soient automatiquement regroupés,
-**afin d'** organiser mes onglets sans action manuelle.
-
-### Critères d'acceptation
-
-- [ ] Le content script intercepte l'événement `auxclick` (bouton 1) sur les liens et enregistre l'URL cible dans `middleClickedTabs`.
-- [ ] Quand l'onglet enfant est ensuite créé avec le bon `openerTabId`, le background retrouve l'entrée dans `middleClickedTabs` et crée le groupe.
-- [ ] Quand un onglet enfant est créé avec un `openerTabId` mais **sans** que le content script ait enregistré un clic (ex. raccourci clavier), aucun groupe n'est créé.
-- [ ] Un deuxième onglet enfant ouvert naturellement depuis le même parent rejoint le groupe existant.
-- [ ] Le regroupement global désactivé empêche la création de groupe même via la voie naturelle.
+- [ ] The color specified in the rule (`blue`, `red`, `green`, `purple`, etc.) is correctly applied to the group created by the browser.
+- [ ] When no color is specified (`color = ""`), Chrome assigns its default color and the group is still created.
 
 ---
 
-## US-G010 — Détection du clic droit (contextmenu)
+## US-G005 - Behavior with an existing group
 
-**En tant qu'** utilisateur,
-**je veux** que les onglets ouverts via un clic droit → "Ouvrir dans un nouvel onglet" soient également regroupés,
-**afin de** couvrir tous les modes d'ouverture habituels d'un lien.
+**As a** user,
+**I want** successive child tabs opened from the same parent tab to join the existing group,
+**so that** I avoid the multiplication of redundant groups.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Le content script intercepte l'événement `contextmenu` sur les liens et enregistre l'URL cible dans `middleClickedTabs`.
-- [ ] Quand l'utilisateur ouvre ensuite un onglet avec cet `openerTabId`, le groupe est créé de façon identique au clic du milieu.
-- [ ] Le groupe créé reçoit la couleur et le nom définis dans la règle de domaine correspondante.
+- [ ] A first child tab creates a new group; the `tabGroupsCreatedCount` counter goes to 1.
+- [ ] A second child tab opened from the **same** parent tab is added to the existing group without creating a new one.
+- [ ] The number of tabs in the group increases with each added child.
+- [ ] A new (distinct) parent tab creates a **new** separate group; `tabGroupsCreatedCount` increments.
+
+---
+
+## US-G006 - Multiple rules and priority
+
+**As a** user,
+**I want** to define multiple domain rules so that the most specific one applies,
+**so that** I have different behaviors based on the exact domain.
+
+### Acceptance criteria
+
+- [ ] When multiple rules exist, each domain uses the rule that matches it (e.g. `example.com` -> blue group, `httpbin.org` -> red group).
+- [ ] In case of multiple matches for the same domain, the **first rule** in the list wins (e.g. `www.example.com` takes priority over `example.com`).
+- [ ] Domains without a matching rule are not grouped.
+
+---
+
+## US-G007 - Grouping statistics
+
+**As a** user,
+**I want** the counter of created groups to faithfully reflect actual activity,
+**so that** I can track the effectiveness of the extension.
+
+### Acceptance criteria
+
+- [ ] `tabGroupsCreatedCount` increments by 1 only when a **new** group is created.
+- [ ] When a tab is added to an existing group, the counter **does not increment**.
+- [ ] When a second group is created (different domain or new distinct parent tab), the counter reaches 2.
+
+---
+
+## US-G008 - Edge case: simultaneous openings
+
+**As a** user,
+**I want** the extension to correctly handle multiple child tabs opened simultaneously from the same parent,
+**so that** I avoid creating duplicate groups.
+
+### Acceptance criteria
+
+- [ ] When three child tabs are created in parallel from the same parent tab, **only one** group is created (`tabGroupsCreatedCount = 1`).
+- [ ] The resulting group contains at least two of the child tabs.
+
+---
+
+## US-G009 - Middle-click detection
+
+**As a** user,
+**I want** tabs opened by a middle-click on a link to be automatically grouped,
+**so that** I can organize my tabs without manual action.
+
+### Acceptance criteria
+
+- [ ] The content script intercepts the `auxclick` event (button 1) on links and records the target URL in `middleClickedTabs`.
+- [ ] When the child tab is then created with the right `openerTabId`, the background finds the entry in `middleClickedTabs` and creates the group.
+- [ ] When a child tab is created with an `openerTabId` but **without** the content script having recorded a click (e.g. keyboard shortcut), no group is created.
+- [ ] A second child tab opened naturally from the same parent joins the existing group.
+- [ ] Disabling global grouping prevents group creation even via the natural path.
+
+---
+
+## US-G010 - Right-click detection (contextmenu)
+
+**As a** user,
+**I want** tabs opened via right-click -> "Open in a new tab" to also be grouped,
+**so that** all the usual ways of opening a link are covered.
+
+### Acceptance criteria
+
+- [ ] The content script intercepts the `contextmenu` event on links and records the target URL in `middleClickedTabs`.
+- [ ] When the user then opens a tab with that `openerTabId`, the group is created the same way as for middle-click.
+- [ ] The created group receives the color and name defined in the matching domain rule.

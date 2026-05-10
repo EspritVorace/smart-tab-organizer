@@ -23,12 +23,13 @@ const markStyle: React.CSSProperties = {
 };
 
 /**
- * Découpe `text` en segments en cherchant `searchTerm` de façon insensible à la casse
- * ET aux accents ("etude" trouve "étude", "e" trouve "é").
+ * Splits `text` into segments by searching for `searchTerm` case-insensitively
+ * and accent-insensitively ("etude" matches "étude", "e" matches "é").
  *
- * La recherche s'effectue sur les formes normalisées, mais les segments retournés
- * contiennent le texte original — les indices sont compatibles car chaque caractère
- * NFC précomposé produit exactement un caractère après normalisation NFD + suppression.
+ * Matching runs on the normalized forms, but the returned segments contain
+ * the original text. Indices stay aligned because each precomposed NFC
+ * character produces exactly one character after NFD normalization plus
+ * diacritic stripping.
  */
 function buildSegments(text: string, searchTerm: string): Segment[] {
   const trimmed = searchTerm.trim();

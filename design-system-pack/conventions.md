@@ -1,88 +1,87 @@
 # Conventions
 
-Extrait ciblé du `CLAUDE.md` du projet source. Les règles ci-dessous
-sont celles que le design system cible doit respecter et refléter.
+Targeted excerpt from the source project's `CLAUDE.md`. The rules
+below are the ones the target design system must respect and reflect.
 
 ## Theming
 
-Accent unique `indigo` (défaut Radix Themes). Le fichier
-`theme/themeConstants.ts` conserve les constantes par feature pour
-compat historique, mais **toutes pointent désormais sur `indigo`**.
+Single `indigo` accent (Radix Themes default). The
+`theme/themeConstants.ts` file keeps the per-feature constants for
+historical compatibility, but **all of them now point to `indigo`**.
 
-Préférer systématiquement les tokens Radix aux couleurs hardcodées :
+Always prefer Radix tokens over hardcoded colors:
 
 - `var(--accent-a3)`, `var(--accent-a6)`, `var(--accent-9)`,
   `var(--accent-11)`, etc.
 - `var(--gray-a2)`, `var(--gray-11)`, etc.
-- `var(--space-1)` à `var(--space-9)`
-- `var(--radius-2)` à `var(--radius-4)`
+- `var(--space-1)` to `var(--space-9)`
+- `var(--radius-2)` to `var(--radius-4)`
 
-Les wrappers dans `theme/Form.themes.tsx` restent en place (compat)
-mais n'appliquent plus d'accent différencié.
+The wrappers in `theme/Form.themes.tsx` remain (for compatibility) but
+no longer apply a differentiated accent.
 
-## Internationalisation
+## Internationalization
 
-Toujours utiliser `getMessage()` de `i18n/i18n.ts` :
+Always use `getMessage()` from `i18n/i18n.ts`:
 
-- pour le texte UI,
-- pour `aria-label`,
-- pour `title`.
+- for UI text,
+- for `aria-label`,
+- for `title`.
 
-**Ne jamais hardcoder une chaîne utilisateur.** Les clés vivent dans
-`public/_locales/{en,fr,es}/messages.json` (format Chrome MV3). Le
-pack n'inclut que `en` mais le pattern est identique.
+**Never hardcode a user-facing string.** The keys live in
+`public/_locales/{en,fr,es}/messages.json` (Chrome MV3 format). The
+pack only ships `en`, but the pattern is identical.
 
-Pour le pluriel : `getPluralMessage(count, "keySingular", "keyPlural")`.
+For plurals: `getPluralMessage(count, "keySingular", "keyPlural")`.
 
-## Accessibilité
+## Accessibility
 
-- Préférer les primitives Radix (`Dialog`, `Collapsible`, `Toolbar`,
-  `RadioGroup`, `Tabs`) à une ré-implémentation ARIA manuelle.
-- Les composants `@radix-ui/themes` (Switch, IconButton...) gèrent
-  focus / clavier / ARIA nativement, ne pas les surcharger.
-- Icônes Lucide : toujours `aria-hidden="true"`.
-- Boutons icon-only : `aria-label` et `title` obligatoires.
-- Règles CSS de focus custom uniquement pour du markup non-Radix
-  (voir `theme/radix-themes.css`).
+- Prefer Radix primitives (`Dialog`, `Collapsible`, `Toolbar`,
+  `RadioGroup`, `Tabs`) over a manual ARIA re-implementation.
+- `@radix-ui/themes` components (Switch, IconButton...) handle focus,
+  keyboard and ARIA natively; do not override them.
+- Lucide icons: always `aria-hidden="true"`.
+- Icon-only buttons: `aria-label` and `title` are mandatory.
+- Custom CSS focus rules only for non-Radix markup
+  (see `theme/radix-themes.css`).
 
 ## Logging
 
-- **Jamais** `console.log()` directement. Utiliser `logger.debug()`
-  importé depuis un utilitaire dédié.
-- Le logger est un no-op en production (`import.meta.env.MODE ===
-  "production"`) pour garder la console propre.
-- `console.warn()` et `console.error()` restent acceptables pour de
-  vraies alertes / erreurs.
+- **Never** call `console.log()` directly. Use `logger.debug()`
+  imported from a dedicated utility.
+- The logger is a no-op in production
+  (`import.meta.env.MODE === "production"`) to keep the console clean.
+- `console.warn()` and `console.error()` remain acceptable for real
+  warnings or errors.
 
 ## Type Safety
 
-Pas de `any`. Utiliser des types précis ou `unknown` avec narrowing.
+No `any`. Use precise types or `unknown` with narrowing.
 
-## Organisation des composants
+## Component organization
 
-- **Core/** : logique métier liée à un concept domain (exclu de ce
+- **Core/**: domain-locked logic tied to a concept (excluded from this
   pack).
-- **UI/** : layout et composants d'interface transverses.
-- **Form/** : champs de formulaire réutilisables, callouts thématisés,
-  theme providers.
+- **UI/**: layout and cross-feature interface components.
+- **Form/**: reusable form fields, themed callouts, theme providers.
 
 ## Storybook
 
-- Titres qui miment l'arborescence :
+- Titles mirror the directory layout:
   `Components/UI/StatusBadge/StatusBadge`.
-- Chaque export préfixé par le nom du composant pour éviter les
-  collisions : `StatusBadgeNew`, `StatusBadgeWarning`,
+- Every export is prefixed with the component name to avoid
+  collisions: `StatusBadgeNew`, `StatusBadgeWarning`,
   `StatusBadgeDeleted`.
-- CSF3 : `export const StoryName: Story = { args: { ... } }`.
-- `tags: ['autodocs']` pour générer la doc auto.
+- CSF3: `export const StoryName: Story = { args: { ... } }`.
+- `tags: ['autodocs']` for auto-generated docs.
 
-## Style d'écriture
+## Writing style
 
-**Ne jamais utiliser de tiret cadratin (`—`, U+2014) ni de tiret
-demi-cadratin (`–`, U+2013)** dans les contenus textuels (docs, UI,
-commentaires, commit messages, PR descriptions, frontmatter).
+**Never use the em-dash (`—`, U+2014) or en-dash (`–`, U+2013)** in
+textual content (docs, UI, comments, commit messages, PR descriptions,
+frontmatter).
 
-Préférer une reformulation : parenthèses `(...)`, virgules, deux-points
-`:`, ou phrases séparées.
+Reformulate instead: parentheses `(...)`, commas, colons `:`, or
+separate sentences.
 
-Règle applicable au français, à l'anglais et à l'espagnol.
+Rule applies to French, English and Spanish alike.

@@ -1,106 +1,101 @@
-# Onboarding Prompt — Design System
+# Onboarding Prompt: Design System
 
-À utiliser pendant l'onboarding Claude Design, quand Claude ingère le
-contenu de ce repo / dossier pour construire sa représentation interne
-du design system.
+To use during Claude Design onboarding, when Claude ingests this repo
+or folder to build its internal representation of the design system.
 
-Pour un brief projet (page à générer), voir `DASHBOARD_BRIEF.md` ou
-les briefs spécifiques à venir.
+For a project brief (page to generate), see `DASHBOARD_BRIEF.md` or
+the upcoming dedicated briefs.
 
 ---
 
-## Contexte
+## Context
 
-Tu reçois le design system d'une extension navigateur (Chrome MV3 +
-Firefox MV2, framework WXT). La stack UI repose sur :
+You are receiving the design system of a browser extension (Chrome MV3
++ Firefox MV2, WXT framework). The UI stack is built on:
 
-- React 18 + `@radix-ui/themes` 3.2 (accent unifié `indigo`,
-  radius / scaling par défaut),
-- `next-themes` pour light / dark / system,
-- Storybook 9 (CSF3, `tags: ['autodocs']`, toolbar locale + theme),
-- `lucide-react` pour les icônes, `cmdk` pour le searchable select,
-  `react-hook-form` pour les forms, `@dnd-kit/react` pour le
-  drag-and-drop.
+- React 18 + `@radix-ui/themes` 3.2 (unified `indigo` accent, default
+  radius / scaling),
+- `next-themes` for light / dark / system,
+- Storybook 9 (CSF3, `tags: ['autodocs']`, locale + theme toolbar),
+- `lucide-react` for icons, `cmdk` for the searchable select,
+  `react-hook-form` for forms, `@dnd-kit/react` for drag and drop.
 
-Aucun Tailwind, aucun `tokens.json` propriétaire. Tout repose sur les
-CSS variables Radix : `var(--accent-a3)`, `var(--accent-9)`,
+No Tailwind, no proprietary `tokens.json`. Everything relies on Radix
+CSS variables: `var(--accent-a3)`, `var(--accent-9)`,
 `var(--accent-11)`, `var(--gray-a2)`, `var(--gray-11)`,
 `var(--space-1..9)`, `var(--radius-2..4)`.
 
-i18n via `browser.i18n.getMessage` (pattern Chrome MV3, catalogues
-JSON dans `_locales/{en,fr,es}/messages.json`). Le pack fournit la
-locale EN.
+i18n via `browser.i18n.getMessage` (Chrome MV3 pattern, JSON catalogs
+in `_locales/{en,fr,es}/messages.json`). The pack ships the EN locale.
 
-## Ce que le pack contient
+## What the pack contains
 
-| Dossier / fichier | Rôle |
+| Folder / file | Role |
 |---|---|
-| `theme/themeConstants.ts` | Constantes par feature (toutes `indigo` aujourd'hui) |
-| `theme/radix-themes.css` | Import Radix + resets a11y + focus rings |
-| `theme/Form.themes.tsx` | 7 wrappers de thème (compat historique, tous `indigo`) |
-| `storybook/main.ts` + `preview.tsx` | Config + mock `wxt/browser` + toolbar locale / theme |
-| `i18n/i18n.ts` + `messages.en.json` | Utilitaire `getMessage` + plural |
-| `samples/atomic/StatusBadge` | Pattern atomique : mapping enum → Badge + i18n |
-| `samples/form/{FormField,FieldLabel,FieldError}` | Pattern form compound |
-| `samples/layout/PageLayout` | Layout de page : header gradient + description + content |
-| `samples/composed/EmptyState` | Primitive état vide |
-| `samples/composition/SessionCard` | **Domain-locked**, inclus pour les patterns HoverCard metadata + inline rename + sortable |
-| `samples/composition/DomainRuleCard` | **Domain-locked**, inclus pour le pattern `useSortable` + DropdownMenu + Card |
-| `conventions.md` | Règles de code (theming, i18n, a11y, style) |
-| `package.excerpt.json` | Dépendances UI pertinentes (référence, pas install) |
-| `tsconfig.json` | Paths alias `@/*`, `moduleResolution: "bundler"` |
+| `theme/themeConstants.ts` | Per-feature constants (all `indigo` today) |
+| `theme/radix-themes.css` | Radix import + a11y resets + focus rings |
+| `theme/Form.themes.tsx` | 7 theme wrappers (historical compat, all `indigo`) |
+| `storybook/main.ts` + `preview.tsx` | Config + `wxt/browser` mock + locale / theme toolbar |
+| `i18n/i18n.ts` + `messages.en.json` | `getMessage` utility + plural helper |
+| `samples/atomic/StatusBadge` | Atomic pattern: enum to Badge mapping plus i18n |
+| `samples/form/{FormField,FieldLabel,FieldError}` | Compound form pattern |
+| `samples/layout/PageLayout` | Page layout: gradient header + description + content |
+| `samples/composed/EmptyState` | Empty-state primitive |
+| `samples/composition/SessionCard` | **Domain-locked**, included for HoverCard metadata + inline rename + sortable patterns |
+| `samples/composition/DomainRuleCard` | **Domain-locked**, included for the `useSortable` + DropdownMenu + Card pattern |
+| `conventions.md` | Code rules (theming, i18n, a11y, style) |
+| `package.excerpt.json` | Relevant UI dependencies (reference only, not for install) |
+| `tsconfig.json` | Path alias `@/*`, `moduleResolution: "bundler"` |
 
-## Objectif de l'onboarding
+## Onboarding goal
 
-Construis une représentation interne du design system qui te permette,
-dans les projets suivants, de :
+Build an internal representation of the design system so that, in
+later projects, you can:
 
-1. **Produire du code React + Radix Themes idiomatique** : utiliser
-   `<Card>`, `<Flex>`, `<Box>`, `<Grid>`, `<Heading>`, `<Text>`,
-   `<Button>`, `<IconButton>`, `<Badge>`, `<Switch>`, `<Separator>`,
-   `<Tooltip>`, `<DropdownMenu>`, `<HoverCard>`, `<Dialog>`,
-   `<Collapsible>`, `<RadioGroup>` plutôt que du markup custom.
-2. **Respecter le token system** : jamais de couleur hardcodée, toujours
+1. **Produce idiomatic React + Radix Themes code**: use `<Card>`,
+   `<Flex>`, `<Box>`, `<Grid>`, `<Heading>`, `<Text>`, `<Button>`,
+   `<IconButton>`, `<Badge>`, `<Switch>`, `<Separator>`, `<Tooltip>`,
+   `<DropdownMenu>`, `<HoverCard>`, `<Dialog>`, `<Collapsible>`,
+   `<RadioGroup>` rather than custom markup.
+2. **Respect the token system**: never hardcode a color, always use
    `var(--accent-*)`, `var(--gray-*)`, `var(--space-*)`, `var(--radius-*)`.
-3. **Intégrer l'i18n dès la génération** : toutes les chaînes passent
-   par `getMessage('clé')`, y compris `aria-label` et `title`. Pour
-   Claude Design, si tu génères un prototype visuel avec du texte
-   statique, marque chaque chaîne d'un commentaire `// i18n: clé` pour
-   faciliter l'extraction ultérieure.
-4. **Respecter l'accessibilité** : icônes Lucide avec
-   `aria-hidden="true"`, boutons icon-only avec `aria-label` + `title`,
-   préférer les primitives Radix à l'ARIA manuel, focus rings visibles
-   sur le markup custom (voir `radix-themes.css`).
-5. **Traiter les composants de `samples/composition/`** comme des
-   **patterns à abstraire**, pas à copier tels quels. Leurs noms
-   (`SessionCard`, `DomainRuleCard`) sont domain-locked. Quand tu
-   réutilises ces patterns dans un projet, renomme et découple du
-   domaine.
+3. **Wire i18n in from the start**: every string goes through
+   `getMessage('key')`, including `aria-label` and `title`. For Claude
+   Design, if you generate a visual prototype with static text, mark
+   each string with a `// i18n: key` comment to ease later extraction.
+4. **Respect accessibility**: Lucide icons with `aria-hidden="true"`,
+   icon-only buttons with `aria-label` + `title`, prefer Radix
+   primitives over manual ARIA, visible focus rings on custom markup
+   (see `radix-themes.css`).
+5. **Treat the components in `samples/composition/`** as **patterns to
+   abstract**, not to copy as-is. Their names (`SessionCard`,
+   `DomainRuleCard`) are domain-locked. When reusing these patterns
+   in a project, rename and decouple from the domain.
 
-## Contraintes non-négociables
+## Non-negotiable constraints
 
-- Pas de tiret cadratin (`—`, U+2014) ni demi-cadratin (`–`, U+2013)
-  dans le code, les commentaires, les textes UI, les stories, les
-  commits. Reformuler avec parenthèses, virgules, deux-points.
-- Pas de `console.log` dans le code livré. Utiliser un logger no-op
-  en prod.
-- Pas de `any` TypeScript. Types précis ou `unknown` avec narrowing.
-- Pas d'emoji dans les livrables code et UI (tolérés dans les docs /
-  README seulement si l'utilisateur le demande).
-- Accent accent unique au niveau du `<Theme>` root Radix, pas de
-  variation par feature.
+- No em-dash (`—`, U+2014) or en-dash (`–`, U+2013) in code,
+  comments, UI text, stories, or commits. Reformulate with
+  parentheses, commas, colons.
+- No `console.log` in the delivered code. Use a logger that becomes a
+  no-op in production.
+- No TypeScript `any`. Use precise types or `unknown` with narrowing.
+- No emoji in code and UI deliverables (tolerated only in docs and
+  READMEs when the user explicitly asks for them).
+- Single accent at the Radix root `<Theme>` level, no per-feature
+  variation.
 
-## Exports attendus pour les projets
+## Expected outputs for projects
 
-Quand tu génères une page ou un composant à partir de ce DS :
+When you generate a page or a component from this DS:
 
-- Fichier `.tsx` prêt à coller dans `src/pages/` ou
+- A `.tsx` file ready to drop into `src/pages/` or
   `src/components/**/`.
-- Fichier `.stories.tsx` CSF3 associé avec `tags: ['autodocs']` et
-  des exports préfixés par le nom du composant.
-- Liste des clés i18n nouvelles à ajouter dans
+- An associated `.stories.tsx` CSF3 file with `tags: ['autodocs']`
+  and exports prefixed by the component name.
+- The list of new i18n keys to add in
   `public/_locales/{en,fr,es}/messages.json`.
-- Snippet de diff pour les fichiers de routing / sidebar impactés
-  (ex : `src/pages/options.tsx`).
-- Si un export HTML standalone est produit (Claude Design Canvas),
-  conserver les contraintes ci-dessus.
+- A diff snippet for the routing / sidebar files affected
+  (e.g. `src/pages/options.tsx`).
+- If a standalone HTML export is produced (Claude Design Canvas),
+  preserve the constraints above.
