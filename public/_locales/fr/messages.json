@@ -219,6 +219,8 @@
   "color_cyan": { "message": "Cyan" },
   "color_orange": { "message": "Orange" },
   "categoryNone": { "message": "Aucune catégorie" },
+  "categoryPickerLabel": { "message": "Catégorie" },
+  "ruleColorLabel": { "message": "Couleur du groupe d'onglets" },
   "category_development": { "message": "Développement" },
   "category_productivity": { "message": "Productivité" },
   "category_commerce": { "message": "Commerce" },

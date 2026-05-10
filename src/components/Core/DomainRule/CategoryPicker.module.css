@@ -3,6 +3,7 @@
   height: 24px;
   border-radius: 50%;
   border: 2px solid transparent;
+  background-color: var(--gray-a3);
   cursor: pointer;
   padding: 0;
   outline: none;
@@ -41,6 +42,7 @@
   height: 32px;
   border-radius: 50%;
   border: 2px solid transparent;
+  background-color: var(--gray-a3);
   cursor: pointer;
   padding: 0;
   outline: none;

@@ -161,7 +161,7 @@ describe('useSettings', () => {
     await waitFor(() => expect(result.current.isLoaded).toBe(true));
 
     const newCategories = [
-      { id: 'work', emoji: '💼', color: 'blue', label: 'Work', builtIn: false },
+      { id: 'work', emoji: '💼', label: 'Work', builtIn: false },
     ] as never;
 
     await act(async () => {

@@ -219,6 +219,8 @@
   "color_cyan": { "message": "Cyan" },
   "color_orange": { "message": "Orange" },
   "categoryNone": { "message": "No category" },
+  "categoryPickerLabel": { "message": "Category" },
+  "ruleColorLabel": { "message": "Tab group color" },
   "category_development": { "message": "Development" },
   "category_productivity": { "message": "Productivity" },
   "category_commerce": { "message": "Commerce" },

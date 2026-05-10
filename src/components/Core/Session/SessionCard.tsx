@@ -16,7 +16,6 @@ import { useRelativeTime } from '@/hooks/useRelativeTime';
 import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 import { chromeGroupColors } from '@/utils/tabTreeUtils';
 import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
-import { getRadixColor } from '@/utils/utils';
 import { getDragHandleStyle } from '@/utils/dragHandleStyle';
 import { SessionPreviewTree } from './SessionPreviewTree';
 import { SessionRestoreButton } from './SessionRestoreButton/SessionRestoreButton';
@@ -273,7 +272,7 @@ function SessionCardSummaryHeader({
         />
         {category && (
           <Tooltip content={getCategoryLabel(category)}>
-            <Badge color={getRadixColor(category.color)} size="1" style={{ flexShrink: 0 }}>
+            <Badge color="gray" size="1" style={{ flexShrink: 0 }}>
               {category.emoji}
             </Badge>
           </Tooltip>
@@ -412,7 +411,7 @@ function SessionCardFullHeader({
               <Pencil size={14} />
             </IconButton>
             {category && (
-              <Badge color={getRadixColor(category.color)} size="1" style={{ flexShrink: 0 }}>
+              <Badge color="gray" size="1" style={{ flexShrink: 0 }}>
                 {category.emoji} {getCategoryLabel(category)}
               </Badge>
             )}

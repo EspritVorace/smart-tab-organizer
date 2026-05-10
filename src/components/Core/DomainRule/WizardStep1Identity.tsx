@@ -3,7 +3,9 @@ import { Controller, type Control, type FieldErrors } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
 import { FormField } from '@/components/Form/FormFields';
 import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
+import { ChromeColorPicker } from '@/components/Core/TabTree/ChromeColorPicker';
 import type { DomainRule } from '@/schemas/domainRule';
+import type { ChromeGroupColor } from '@/types/tabTree';
 
 interface WizardStep1IdentityProps {
   control: Control<DomainRule>;
@@ -42,6 +44,24 @@ export function WizardStep1Identity({ control, errors }: WizardStep1IdentityProp
                       onCategoryChange={catField.onChange}
                     />
                   )}
+                />
+              )}
+            />
+          </div>
+        )}
+      </FormField>
+
+      {/* Tab group color */}
+      <FormField label={getMessage('ruleColorLabel')} error={errors.color}>
+        {() => (
+          <div style={{ marginTop: '4px' }}>
+            <Controller
+              name="color"
+              control={control}
+              render={({ field }) => (
+                <ChromeColorPicker
+                  value={(field.value ?? 'grey') as ChromeGroupColor}
+                  onChange={(color) => field.onChange(color)}
                 />
               )}
             />

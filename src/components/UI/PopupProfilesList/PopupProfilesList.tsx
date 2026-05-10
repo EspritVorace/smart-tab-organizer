@@ -9,7 +9,6 @@ import { loadSessions } from '@/utils/sessionStorage';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { showSuccessNotification } from '@/utils/notifications';
 import { getRuleCategory } from '@/utils/categoriesStore';
-import { chromeGroupColors } from '@/utils/tabTreeUtils';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
 import { useListNavigation } from '@/hooks/useListNavigation';
 import { useShortcuts } from '@/hooks/useShortcuts';
@@ -29,7 +28,7 @@ function getCategoryIcon(categoryId: string | null | undefined): React.ReactNode
           height: 22,
           borderRadius: '50%',
           fontSize: 12,
-          backgroundColor: chromeGroupColors[cat.color],
+          backgroundColor: 'var(--gray-a3)',
           flexShrink: 0,
         }}
         aria-hidden="true"

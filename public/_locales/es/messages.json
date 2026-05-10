@@ -219,6 +219,8 @@
   "color_cyan": { "message": "Cian" },
   "color_orange": { "message": "Naranja" },
   "categoryNone": { "message": "Sin categoría" },
+  "categoryPickerLabel": { "message": "Categoría" },
+  "ruleColorLabel": { "message": "Color del grupo de pestañas" },
   "category_development": { "message": "Desarrollo" },
   "category_productivity": { "message": "Productividad" },
   "category_commerce": { "message": "Comercio" },

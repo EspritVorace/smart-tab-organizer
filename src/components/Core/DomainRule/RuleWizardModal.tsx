@@ -79,6 +79,7 @@ const getDefaultValues = (rule?: DomainRule): Partial<DomainRule> => {
     urlParsingRegEx: '',
     groupNameSource: 'title',
     deduplicationMatchMode: 'exact',
+    color: 'grey',
     categoryId: null,
     deduplicationEnabled: true,
     ignoredQueryParams: [],
