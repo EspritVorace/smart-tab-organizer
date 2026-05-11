@@ -1,4 +1,4 @@
-import { browser } from 'wxt/browser';
+import { browser, Browser } from 'wxt/browser';
 import { logger } from '@/utils/logger.js';
 import { fetchBuiltInCategories } from '@/utils/categoriesStore.js';
 import { DEFAULT_WORKSPACE_ID } from '@/utils/workspaceStorage.js';
@@ -19,6 +19,7 @@ const SETTINGS_KEYS = [
 const MIGRATION_FLAG = 'settingsMigratedToLocal';
 const URL_EXTRACTION_MODE_MIGRATION_FLAG = 'urlExtractionModeMigrated';
 const WORKSPACES_MIGRATION_FLAG = 'workspacesMigrated';
+export const FIRST_RUN_REDIRECT_FLAG = 'firstRunRedirectDone';
 
 const DEFAULT_WORKSPACE_ACCENT: WorkspaceAccentColor = 'indigo';
 
@@ -141,6 +142,39 @@ export async function migrateToWorkspaces(): Promise<void> {
     await browser.storage.local.set({ [WORKSPACES_MIGRATION_FLAG]: true });
   } catch (error) {
     logger.error('[MIGRATION] Workspaces migration failed, will retry on next startup:', error);
+  }
+}
+
+/**
+ * On a fresh install, disables the popup so the first icon click opens the
+ * Options Home page instead. The flag is written to `storage.local` to track
+ * whether the redirect has been scheduled (`false`) or already used / not
+ * applicable (`true`).
+ *
+ * - First install: write `false`, clear the popup via `action.setPopup({ popup: '' })`.
+ * - Update / browser_update / shared_module_update: write `true` so existing
+ *   users are never redirected.
+ * - Flag already present (any value): no-op (idempotent).
+ */
+export async function initializeFirstRunRedirectFlag(reason: Browser.runtime.OnInstalledReason | string): Promise<void> {
+  try {
+    const state = await browser.storage.local.get(FIRST_RUN_REDIRECT_FLAG);
+    if (state[FIRST_RUN_REDIRECT_FLAG] !== undefined) {
+      logger.debug('[FIRST_RUN] Flag already set, skipping.');
+      return;
+    }
+    if (reason === 'install') {
+      await browser.storage.local.set({ [FIRST_RUN_REDIRECT_FLAG]: false });
+      if (browser.action?.setPopup) {
+        await browser.action.setPopup({ popup: '' });
+        logger.debug('[FIRST_RUN] Fresh install: popup disabled, awaiting first click.');
+      }
+      return;
+    }
+    await browser.storage.local.set({ [FIRST_RUN_REDIRECT_FLAG]: true });
+    logger.debug('[FIRST_RUN] Existing user, flag initialized to true.');
+  } catch (error) {
+    logger.error('[FIRST_RUN] Failed to initialize first-run redirect flag:', error);
   }
 }
 

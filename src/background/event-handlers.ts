@@ -1,6 +1,6 @@
 import { browser, Browser } from 'wxt/browser';
 import { initializeDefaults, migrateRuleColorsFromCategories } from '@/utils/migration.js';
-import { migrateSettingsFromSyncToLocal, migrateRulesAddUrlExtractionMode, migrateToWorkspaces, seedBuiltInCategories } from './migration.js';
+import { migrateSettingsFromSyncToLocal, migrateRulesAddUrlExtractionMode, migrateToWorkspaces, seedBuiltInCategories, initializeFirstRunRedirectFlag, FIRST_RUN_REDIRECT_FLAG } from './migration.js';
 import { initCategoriesStore } from '@/utils/categoriesStore.js';
 import { logger } from '@/utils/logger.js';
 import {
@@ -29,6 +29,28 @@ export function setupInstallationHandler(): void {
         await seedBuiltInCategories();
         await migrateRuleColorsFromCategories();
         await initCategoriesStore();
+        await initializeFirstRunRedirectFlag(details.reason);
+    });
+}
+
+export function setupActionClickHandler(): void {
+    if (!browser.action?.onClicked) {
+        logger.debug('[FIRST_RUN] browser.action.onClicked unavailable, skipping handler.');
+        return;
+    }
+    browser.action.onClicked.addListener(async () => {
+        try {
+            const state = await browser.storage.local.get(FIRST_RUN_REDIRECT_FLAG);
+            if (state[FIRST_RUN_REDIRECT_FLAG]) return;
+            await openOptionsWithHash('#home');
+            await browser.storage.local.set({ [FIRST_RUN_REDIRECT_FLAG]: true });
+            if (browser.action?.setPopup) {
+                await browser.action.setPopup({ popup: 'popup.html' });
+            }
+            logger.debug('[FIRST_RUN] First click handled: opened options home and re-enabled popup.');
+        } catch (e) {
+            logger.error('[FIRST_RUN] first-click redirect failed:', e);
+        }
     });
 }
 
@@ -256,6 +278,7 @@ export function setupAllEventHandlers(): void {
     setupInstallationHandler();
     setupMessageHandler();
     setupCommandHandler();
+    setupActionClickHandler();
     setupTabCreatedHandler();
     setupTabUpdatedHandler();
     setupTabRemovedHandler();

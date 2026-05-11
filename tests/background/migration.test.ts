@@ -1,6 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { fakeBrowser } from 'wxt/testing';
-import { migrateSettingsFromSyncToLocal, migrateRulesAddUrlExtractionMode } from '../../src/background/migration';
+import {
+  migrateSettingsFromSyncToLocal,
+  migrateRulesAddUrlExtractionMode,
+  initializeFirstRunRedirectFlag,
+} from '../../src/background/migration';
 
 describe('migrateSettingsFromSyncToLocal', () => {
   it('sets the migration flag after running on a fresh install', async () => {
@@ -82,5 +86,52 @@ describe('migrateRulesAddUrlExtractionMode', () => {
     await expect(migrateRulesAddUrlExtractionMode()).resolves.toBeUndefined();
     const state = await fakeBrowser.storage.local.get('urlExtractionModeMigrated');
     expect(state.urlExtractionModeMigrated).toBe(true);
+  });
+});
+
+describe('initializeFirstRunRedirectFlag', () => {
+  const setPopupMock = vi.fn(async () => undefined);
+
+  beforeEach(() => {
+    setPopupMock.mockClear();
+    // fakeBrowser does not provide `action`; stub it manually after reset().
+    (fakeBrowser as unknown as { action: unknown }).action = { setPopup: setPopupMock };
+  });
+
+  it('on fresh install: writes flag=false and disables the popup', async () => {
+    await initializeFirstRunRedirectFlag('install');
+
+    const state = await fakeBrowser.storage.local.get('firstRunRedirectDone');
+    expect(state.firstRunRedirectDone).toBe(false);
+    expect(setPopupMock).toHaveBeenCalledWith({ popup: '' });
+  });
+
+  it('on update: writes flag=true and does not touch the popup', async () => {
+    await initializeFirstRunRedirectFlag('update');
+
+    const state = await fakeBrowser.storage.local.get('firstRunRedirectDone');
+    expect(state.firstRunRedirectDone).toBe(true);
+    expect(setPopupMock).not.toHaveBeenCalled();
+  });
+
+  it('is idempotent when the flag is already present (false)', async () => {
+    await fakeBrowser.storage.local.set({ firstRunRedirectDone: false });
+
+    await initializeFirstRunRedirectFlag('install');
+
+    // Flag stays at false (no overwrite), and popup is not re-disabled.
+    const state = await fakeBrowser.storage.local.get('firstRunRedirectDone');
+    expect(state.firstRunRedirectDone).toBe(false);
+    expect(setPopupMock).not.toHaveBeenCalled();
+  });
+
+  it('is idempotent when the flag is already present (true)', async () => {
+    await fakeBrowser.storage.local.set({ firstRunRedirectDone: true });
+
+    await initializeFirstRunRedirectFlag('install');
+
+    const state = await fakeBrowser.storage.local.get('firstRunRedirectDone');
+    expect(state.firstRunRedirectDone).toBe(true);
+    expect(setPopupMock).not.toHaveBeenCalled();
   });
 });
