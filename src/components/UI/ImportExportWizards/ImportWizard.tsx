@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { FileUp } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast } from '@/utils/toast';
-import { importDataSchema } from '@/schemas/importExport';
+import { importDataSchema, type ImportDomainRule } from '@/schemas/importExport';
 import {
   classifyImportedRules,
   type ConflictingRule,
@@ -10,6 +10,7 @@ import {
 import { generateUUID } from '@/utils/utils';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 import { PackGallery } from '@/components/Core/Pack/PackGallery/PackGallery';
+import { usePackSelections } from '@/components/Core/Pack/PackGallery/usePackSelections';
 import { usePacks } from '@/hooks/usePacks';
 import { ImportWizardShell } from './ImportWizardShell';
 import {
@@ -57,16 +58,29 @@ export function ImportWizard({
   onImport,
   initialSourceMode,
 }: ImportWizardProps) {
+  const packSelections = usePackSelections();
+
   const state = useImportWizardState<DomainRuleSetting, ConflictingRule>({
     open,
     existingItems: existingRules,
     validatePayload: validateRulesPayload,
     classify: classifyRules,
     initialSourceMode,
+    onReset: packSelections.reset,
   });
 
   const { packs, categories } = usePacks();
   const { classification, conflictMode, newSelection, source } = state;
+
+  const handlePackConfirm = useCallback(() => {
+    const aggregated: ImportDomainRule[] = [];
+    for (const pack of packs) {
+      const sel = packSelections.selections[pack.pack.id];
+      if (sel?.selected) aggregated.push(...sel.rules);
+    }
+    const payload = JSON.stringify({ domainRules: aggregated });
+    source.handleTextChange(payload);
+  }, [packs, packSelections.selections, source]);
 
   const executeImport = useCallback(() => {
     if (!classification) return;
@@ -122,8 +136,17 @@ export function ImportWizard({
       fillHeight
       availableModes={RULES_AVAILABLE_MODES}
       packGalleryNode={
-        <PackGallery packs={packs} categories={categories} source={source} />
+        <PackGallery
+          packs={packs}
+          categories={categories}
+          selections={packSelections.selections}
+          onSelectionChange={packSelections.setPackSelection}
+        />
       }
+      packFooter={{
+        ruleCount: packSelections.totals.ruleCount,
+        onConfirm: handlePackConfirm,
+      }}
       renderNewItem={(rule) => (
         <RuleRow
           key={rule.id}

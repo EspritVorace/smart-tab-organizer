@@ -45,6 +45,11 @@ interface ImportWizardShellProps<TItem extends { id: string }, TConflict>
   availableModes?: readonly SourceMode[];
   /** Optional gallery node rendered when `sourceMode === 'pack'`. */
   packGalleryNode?: React.ReactNode;
+  /** Pack-mode footer wiring: the rule count drives the Next button's disabled state, the callback triggers the confirmation. */
+  packFooter?: {
+    ruleCount: number;
+    onConfirm: () => void;
+  };
 }
 
 /**
@@ -75,6 +80,7 @@ export function ImportWizardShell<TItem extends { id: string }, TConflict>({
   fillHeight,
   availableModes,
   packGalleryNode,
+  packFooter,
 }: ImportWizardShellProps<TItem, TConflict>) {
   const {
     step,
@@ -152,11 +158,13 @@ export function ImportWizardShell<TItem extends { id: string }, TConflict>({
       <WizardModal.Footer>
         <ImportWizardFooter
           step={step}
+          sourceMode={source.sourceMode}
           hasParsedData={!!source.parsedData}
           importCount={importCount}
           onNext={goToStep1}
           onBack={goToStep0}
           onConfirm={onConfirm}
+          packFooter={packFooter}
         />
       </WizardModal.Footer>
     </WizardModal>
