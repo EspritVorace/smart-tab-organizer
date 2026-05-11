@@ -121,11 +121,17 @@ test.describe('Edit rule via dropdown', () => {
     await page.getByRole('listitem', { name: /Notion/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
-    const dialog = page.getByRole('dialog');
+    const dialog = page.getByTestId('wizard-rule');
     await expect(dialog).toBeVisible();
-    // In edit mode the identity zone has directly editable inputs (no wizard steps)
-    await expect(dialog.locator('input[name="label"]')).toHaveValue('Notion');
-    await expect(dialog.locator('input[name="domainFilter"]')).toHaveValue('notion.so');
+    // The summary view reflects the rule's current values (label and domain).
+    const summary = dialog.getByTestId('wizard-rule-edit-summary');
+    await expect(summary).toContainText('Notion');
+    await expect(summary).toContainText('notion.so');
+    // Opening the identity sub-dialog confirms the inputs are pre-filled.
+    await dialog.getByRole('button', { name: /modify/i }).first().click();
+    const identityModal = page.getByTestId('modal-edit-identity');
+    await expect(identityModal.getByTestId('modal-edit-identity-field-label')).toHaveValue('Notion');
+    await expect(identityModal.getByTestId('modal-edit-identity-field-domain')).toHaveValue('notion.so');
     await page.close();
   });
 });

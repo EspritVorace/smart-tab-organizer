@@ -7,9 +7,9 @@ vi.mock('../../src/utils/i18n', () => ({
 }));
 
 const SAMPLE_CATEGORIES: RuleCategory[] = [
-  { id: 'development', emoji: '💻', color: 'blue', labelKey: 'category_development', builtIn: true },
-  { id: 'media', emoji: '🎬', color: 'red', labelKey: 'category_media', builtIn: true },
-  { id: 'gaming', emoji: '🎮', color: 'purple', label: 'Gaming', builtIn: false },
+  { id: 'development', emoji: '💻', labelKey: 'category_development', builtIn: true },
+  { id: 'media', emoji: '🎬', labelKey: 'category_media', builtIn: true },
+  { id: 'gaming', emoji: '🎮', label: 'Gaming', builtIn: false },
 ];
 
 beforeEach(() => {
@@ -83,14 +83,14 @@ describe('getRuleCategory', () => {
 describe('getCategoryLabel', () => {
   it('resolves labelKey via getMessage for built-ins', async () => {
     const { getCategoryLabel } = await import('../../src/utils/categoriesStore');
-    const cat: RuleCategory = { id: 'x', emoji: '✨', color: 'blue', labelKey: 'category_x', builtIn: true };
+    const cat: RuleCategory = { id: 'x', emoji: '✨', labelKey: 'category_x', builtIn: true };
 
     expect(getCategoryLabel(cat)).toBe('i18n(category_x)');
   });
 
   it('uses the raw label for custom categories', async () => {
     const { getCategoryLabel } = await import('../../src/utils/categoriesStore');
-    const cat: RuleCategory = { id: 'x', emoji: '✨', color: 'blue', label: 'Custom Label', builtIn: false };
+    const cat: RuleCategory = { id: 'x', emoji: '✨', label: 'Custom Label', builtIn: false };
 
     expect(getCategoryLabel(cat)).toBe('Custom Label');
   });
@@ -100,7 +100,6 @@ describe('getCategoryLabel', () => {
     const cat: RuleCategory = {
       id: 'x',
       emoji: '✨',
-      color: 'blue',
       labelKey: 'category_x',
       label: 'Fallback',
       builtIn: true,
@@ -121,7 +120,7 @@ describe('initCategoriesStore: external storage updates + reset', () => {
 
     // External update
     const next: RuleCategory[] = [
-      { id: 'gaming', emoji: '🎮', color: 'purple', label: 'Gaming', builtIn: false },
+      { id: 'gaming', emoji: '🎮', label: 'Gaming', builtIn: false },
     ];
     await fakeBrowser.storage.local.set({ categories: next });
 

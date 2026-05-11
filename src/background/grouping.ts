@@ -87,16 +87,11 @@ export function findGroupingRuleForTab(
 }
 
 export function determineGroupColor(rule: DomainRuleSetting, _settings?: AppSettings): string | null {
-    const category = getRuleCategory(rule.categoryId);
-    if (category) {
-        logger.debug(`[GROUPING_DEBUG] Using category "${rule.categoryId}" color: "${category.color}".`);
-        return category.color;
-    }
     if (rule.color) {
-        logger.debug(`[GROUPING_DEBUG] Using legacy rule color: "${rule.color}".`);
+        logger.debug(`[GROUPING_DEBUG] Using rule color: "${rule.color}".`);
         return rule.color;
     }
-    logger.debug(`[GROUPING_DEBUG] Rule has no category or color defined.`);
+    logger.debug(`[GROUPING_DEBUG] Rule has no color defined.`);
     return null;
 }
 

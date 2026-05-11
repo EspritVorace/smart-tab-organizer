@@ -3,8 +3,8 @@ import { fakeBrowser } from 'wxt/testing';
 import type { RuleCategory } from '../../src/schemas/category';
 
 const BUILT_IN_SEED: RuleCategory[] = [
-  { id: 'development', emoji: '💻', color: 'blue', labelKey: 'category_development', builtIn: true },
-  { id: 'media', emoji: '🎬', color: 'red', labelKey: 'category_media', builtIn: true },
+  { id: 'development', emoji: '💻', labelKey: 'category_development', builtIn: true },
+  { id: 'media', emoji: '🎬', labelKey: 'category_media', builtIn: true },
 ];
 
 function mockOkFetch(body: unknown) {
@@ -42,7 +42,7 @@ describe('seedBuiltInCategories', () => {
     const fetchMock = mockOkFetch({ categories: BUILT_IN_SEED });
     vi.stubGlobal('fetch', fetchMock);
     const existing: RuleCategory[] = [
-      { id: 'gaming', emoji: '🎮', color: 'purple', label: 'Gaming', builtIn: false },
+      { id: 'gaming', emoji: '🎮', label: 'Gaming', builtIn: false },
     ];
     await fakeBrowser.storage.local.set({ categories: existing });
 

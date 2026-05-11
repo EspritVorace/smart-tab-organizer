@@ -37,6 +37,7 @@ vi.mock('wxt/browser', () => ({
 
 vi.mock('../../src/utils/migration.js', () => ({
   initializeDefaults: vi.fn().mockResolvedValue(undefined),
+  migrateRuleColorsFromCategories: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('../../src/background/messaging.js', () => ({

@@ -35,23 +35,19 @@ export function RuleDetailPopover({ rule, searchTerm }: RuleDetailPopoverProps) 
 
         <Text size="1" weight="bold" color="gray" highContrast>{getMessage('tabGroupColor')}</Text>
         <Flex align="center" gap="2">
-          {cat ? (
-            <>
-              <div style={{
-                width: '16px', height: '16px',
-                backgroundColor: `var(--${getRadixColor(cat.color)}-9)`,
-                borderRadius: '50%',
-                border: '1px solid var(--gray-6)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '10px',
-              }}>
-                {cat.emoji}
-              </div>
-              <Text size="2">{getCategoryLabel(cat)}</Text>
-            </>
-          ) : (
-            <Text size="2" color="gray" highContrast>{getMessage('categoryNone')}</Text>
-          )}
+          <div style={{
+            width: '16px', height: '16px',
+            backgroundColor: rule.color ? `var(--${getRadixColor(rule.color)}-9)` : 'var(--gray-a5)',
+            borderRadius: '50%',
+            border: '1px solid var(--gray-6)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '10px',
+          }}>
+            {cat?.emoji}
+          </div>
+          <Text size="2">
+            {cat ? getCategoryLabel(cat) : getMessage('categoryNone')}
+          </Text>
         </Flex>
 
         <Text size="1" weight="bold" color="gray" highContrast>{getMessage('groupNameSource')}</Text>

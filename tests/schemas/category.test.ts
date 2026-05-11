@@ -6,7 +6,6 @@ describe('ruleCategorySchema', () => {
     const result = ruleCategorySchema.safeParse({
       id: 'development',
       emoji: '💻',
-      color: 'blue',
       labelKey: 'category_development',
       builtIn: true,
     });
@@ -17,7 +16,6 @@ describe('ruleCategorySchema', () => {
     const result = ruleCategorySchema.safeParse({
       id: 'gaming',
       emoji: '🎮',
-      color: 'purple',
       label: 'Gaming',
       builtIn: false,
     });
@@ -28,7 +26,6 @@ describe('ruleCategorySchema', () => {
     const parsed = ruleCategorySchema.parse({
       id: 'x',
       emoji: '✨',
-      color: 'green',
       label: 'X',
     });
     expect(parsed.builtIn).toBe(false);
@@ -38,26 +35,24 @@ describe('ruleCategorySchema', () => {
     const result = ruleCategorySchema.safeParse({
       id: 'x',
       emoji: '✨',
-      color: 'green',
     });
     expect(result.success).toBe(false);
   });
 
-  it('rejects an unsupported color', () => {
-    const result = ruleCategorySchema.safeParse({
+  it('strips an unknown color field (color belongs on rules now)', () => {
+    const parsed = ruleCategorySchema.parse({
       id: 'x',
       emoji: '✨',
-      color: 'magenta',
+      color: 'blue',
       label: 'X',
     });
-    expect(result.success).toBe(false);
+    expect((parsed as Record<string, unknown>).color).toBeUndefined();
   });
 
   it('rejects an empty id', () => {
     const result = ruleCategorySchema.safeParse({
       id: '',
       emoji: '✨',
-      color: 'green',
       label: 'X',
     });
     expect(result.success).toBe(false);
@@ -67,7 +62,6 @@ describe('ruleCategorySchema', () => {
     const result = ruleCategorySchema.safeParse({
       id: 'x',
       emoji: '',
-      color: 'green',
       label: 'X',
     });
     expect(result.success).toBe(false);
@@ -83,8 +77,8 @@ describe('categoriesFileSchema', () => {
   it('accepts the complete seed file', () => {
     const result = categoriesFileSchema.safeParse({
       categories: [
-        { id: 'development', emoji: '💻', color: 'blue', labelKey: 'category_development', builtIn: true },
-        { id: 'media', emoji: '🎬', color: 'red', labelKey: 'category_media', builtIn: true },
+        { id: 'development', emoji: '💻', labelKey: 'category_development', builtIn: true },
+        { id: 'media', emoji: '🎬', labelKey: 'category_media', builtIn: true },
       ],
     });
     expect(result.success).toBe(true);

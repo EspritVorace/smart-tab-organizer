@@ -3,7 +3,6 @@ import { Popover, Tooltip } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
 import { useSettings } from '@/hooks/useSettings';
-import { chromeGroupColors } from '@/utils/tabTreeUtils';
 import styles from './CategoryPicker.module.css';
 
 export interface CategoryPickerProps {
@@ -31,7 +30,6 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
           aria-label={selectedLabel}
           title={selectedLabel}
           className={`${styles.trigger} ${!selectedCategory ? styles.triggerNone : ''}`}
-          style={selectedCategory ? { backgroundColor: chromeGroupColors[selectedCategory.color] } : undefined}
         >
           {selectedCategory ? selectedCategory.emoji : null}
         </button>
@@ -40,7 +38,7 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
         <div
           className={styles.grid}
           role="radiogroup"
-          aria-label={getMessage('color')}
+          aria-label={getMessage('categoryPickerLabel')}
         >
           {/* None option */}
           <Tooltip content={getMessage('categoryNone')}>
@@ -65,7 +63,6 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
                   aria-checked={value === category.id}
                   aria-label={label}
                   className={`${styles.swatch} ${value === category.id ? styles.swatchActive : ''}`}
-                  style={{ backgroundColor: chromeGroupColors[category.color] }}
                   onClick={() => handleSelect(category.id)}
                 >
                   {category.emoji}
