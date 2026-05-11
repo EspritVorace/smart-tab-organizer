@@ -3,15 +3,15 @@ import { Box, Flex, TextField } from '@radix-ui/themes';
 import { Search } from 'lucide-react';
 
 interface ListToolbarProps {
-  /** testid du conteneur (ex: "page-rules-toolbar") */
+  /** Container testid (e.g. "page-rules-toolbar"). */
   testId?: string;
-  /** testid du champ de recherche (ex: "page-rules-search") */
+  /** Search-field testid (e.g. "page-rules-search"). */
   searchTestId?: string;
-  /** Placeholder i18n déjà résolu par le caller via getMessage() */
+  /** Placeholder string already resolved by the caller via getMessage(). */
   searchPlaceholder: string;
   searchValue: string;
   onSearchChange: (value: string) => void;
-  /** Bouton d'action (Add Rule / Take Snapshot) passé par le caller */
+  /** Action button (Add Rule / Take Snapshot) supplied by the caller. */
   action: React.ReactNode;
 }
 
@@ -23,6 +23,17 @@ export function ListToolbar({
   onSearchChange,
   action,
 }: ListToolbarProps) {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Escape') return;
+    if (searchValue.length > 0) {
+      event.preventDefault();
+      event.stopPropagation();
+      onSearchChange('');
+      return;
+    }
+    event.currentTarget.blur();
+  };
+
   return (
     <Flex data-testid={testId} gap="3" mb="4" align="center">
       <Box style={{ flex: 1 }}>
@@ -32,9 +43,10 @@ export function ListToolbar({
           aria-label={searchPlaceholder}
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
+          onKeyDown={handleKeyDown}
         >
           <TextField.Slot>
-            <Search size={16} aria-hidden="true" />
+            <Search size={16} />
           </TextField.Slot>
         </TextField.Root>
       </Box>

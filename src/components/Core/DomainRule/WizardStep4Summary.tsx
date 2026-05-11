@@ -4,6 +4,7 @@ import { Pencil } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { deduplicationMatchModeOptions, groupNameSourceOptions } from '@/schemas/enums';
 import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
+import { getRadixColor } from '@/utils/utils';
 import type { DomainRule } from '@/schemas/domainRule';
 
 interface WizardStep4SummaryProps {
@@ -24,12 +25,13 @@ function SummarySection({ title, onEdit, stepIndex, children }: {
       <Flex justify="between" align="center" mb="2">
         <Text size="2" weight="bold" color="gray">{title}</Text>
         <Button
+          type="button"
           variant="ghost"
           size="1"
           onClick={() => onEdit(stepIndex)}
           aria-label={`${getMessage('summaryModify')} — ${title}`}
         >
-          <Pencil size={12} aria-hidden="true" />
+          <Pencil size={12} />
           {getMessage('summaryModify')}
         </Button>
       </Flex>
@@ -96,12 +98,12 @@ export function WizardStep4Summary({ values, configMode, presetName, onEditStep 
           <Flex gap="2" align="baseline">
             <Text size="2" color="gray" style={{ minWidth: 130, flexShrink: 0 }}>{getMessage('labelLabel')}</Text>
             <Flex align="center" gap="2">
+              <Badge color={values.color ? getRadixColor(values.color) : 'gray'} variant="solid" size="1">
+                {category ? `${category.emoji} ` : ''}{values.label}
+              </Badge>
               {category && (
-                <Badge color="gray" variant="soft" size="1">
-                  {category.emoji} {getCategoryLabel(category)}
-                </Badge>
+                <Text size="1" color="gray">{getCategoryLabel(category)}</Text>
               )}
-              <Text size="2">{values.label}</Text>
             </Flex>
           </Flex>
           <SummaryRow label={getMessage('domainFilter')} value={values.domainFilter} />

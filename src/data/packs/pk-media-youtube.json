@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-media-youtube",
+    "name": {
+      "en": "YouTube",
+      "fr": "YouTube",
+      "es": "YouTube"
+    },
+    "description": {
+      "en": "Group YouTube tabs by channel and search query.",
+      "fr": "Regroupe les onglets YouTube par chaîne et par requête de recherche.",
+      "es": "Agrupa las pestañas de YouTube por canal y por consulta de búsqueda."
+    },
+    "categoryId": "media"
+  },
+  "domainRules": [
+    {
+      "id": "pk-media-youtube-channel",
+      "enabled": true,
+      "domainFilter": "*.youtube.com",
+      "label": "YouTube: Channel",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "youtube\\.com/(?:@|c/|user/|channel/)([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "media",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "youtube-channel",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-media-youtube-search",
+      "enabled": true,
+      "domainFilter": "*.youtube.com",
+      "label": "YouTube: Search",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "media",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "serp-youtube",
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "search_query"
+    }
+  ]
+}

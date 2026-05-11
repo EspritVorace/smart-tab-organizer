@@ -1,8 +1,8 @@
 import React from 'react';
-import { Dialog, Flex, IconButton, Separator } from '@radix-ui/themes';
-import { X, type LucideIcon } from 'lucide-react';
-import { getMessage } from '@/utils/i18n';
+import { Dialog, Flex, Separator } from '@radix-ui/themes';
+import { type LucideIcon } from 'lucide-react';
 import { IconBox } from '@/components/UI/IconBox/IconBox';
+import { DialogCloseButton } from './DialogCloseButton';
 
 type DialogContentProps = React.ComponentProps<typeof Dialog.Content>;
 
@@ -40,6 +40,42 @@ const closeButtonStyle: React.CSSProperties = {
   right: 16,
 };
 
+/**
+ * Radix's default focuses the first focusable element, which in our shell is
+ * the close X button: pressing Enter then dismisses the dialog instead of
+ * triggering the primary action.
+ *
+ * Priority order (WAI-ARIA APG Modal Dialog Pattern):
+ * 1. Element marked [data-autofocus] and not disabled -> focus it.
+ * 2. Disabled [data-autofocus] -> fall through to title.
+ * 3. No [data-autofocus] -> focus the dialog title ([data-dialog-title]).
+ *
+ * The title receives tabIndex={-1} so it is programmatically focusable but
+ * stays out of the Tab order. Screen readers announce it on open, which is
+ * the expected WAI-ARIA behaviour for informational dialogs.
+ */
+function defaultOnOpenAutoFocus(event: Event) {
+  const root = event.currentTarget;
+  if (!(root instanceof HTMLElement)) return;
+  const target = root.querySelector<HTMLElement>('[data-autofocus]');
+  if (target) {
+    const isDisabled =
+      (target instanceof HTMLButtonElement && target.disabled) ||
+      target.getAttribute('aria-disabled') === 'true';
+    if (!isDisabled) {
+      event.preventDefault();
+      target.focus();
+      return;
+    }
+  }
+  // Fallback: focus the dialog title so the close button is never the initial target.
+  const titleEl = root.querySelector<HTMLElement>('[data-dialog-title]');
+  if (titleEl) {
+    event.preventDefault();
+    titleEl.focus();
+  }
+}
+
 export function DialogShell({
   open,
   onOpenChange,
@@ -71,6 +107,7 @@ export function DialogShell({
     onInteractOutside ?? (preventOutsideClose ? (event) => event.preventDefault() : undefined);
   const resolvedPointerDownOutside =
     onPointerDownOutside ?? (preventOutsideClose ? (event) => event.preventDefault() : undefined);
+  const resolvedOnOpenAutoFocus = onOpenAutoFocus ?? defaultOnOpenAutoFocus;
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -80,10 +117,10 @@ export function DialogShell({
         onInteractOutside={resolvedInteractOutside}
         onPointerDownOutside={resolvedPointerDownOutside}
         onEscapeKeyDown={onEscapeKeyDown}
-        onOpenAutoFocus={onOpenAutoFocus}
+        onOpenAutoFocus={resolvedOnOpenAutoFocus}
       >
         <div style={{ flexShrink: 0 }}>
-          <Dialog.Title>
+          <Dialog.Title tabIndex={-1} data-dialog-title style={{ outline: 'none' }}>
             <Flex align="center" gap="2">
               {Icon && <IconBox icon={Icon} size="sm" variant="gradient" />}
               {title}
@@ -102,18 +139,7 @@ export function DialogShell({
           {showHeaderSeparator && <Separator size="4" mt="3" style={{ opacity: 0.3 }} />}
         </div>
 
-        <Dialog.Close>
-          <IconButton
-            size="1"
-            variant="ghost"
-            color="gray"
-            aria-label={getMessage('close')}
-            title={getMessage('close')}
-            style={closeButtonStyle}
-          >
-            <X size={16} aria-hidden="true" />
-          </IconButton>
-        </Dialog.Close>
+        <DialogCloseButton style={closeButtonStyle} />
 
         {children}
       </Dialog.Content>

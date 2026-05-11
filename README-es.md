@@ -4,156 +4,93 @@
 
 # SmartTab Organizer
 
-![Licencia](https://img.shields.io/badge/License-GPL_v3-blue.svg)
+> **Doma tus pestañas. Sin nube, sin IA, sin tracking.**
 
-**SmartTab Organizer** es una extensión multinavegador que agrupa automáticamente las pestañas relacionadas, evita duplicados y guarda tus espacios de trabajo como sesiones con nombre.
+Una extensión para Chrome y Firefox que agrupa tus pestañas por dominio, elimina los duplicados y captura tus espacios de trabajo como sesiones que puedes restaurar con un clic.
 
 <p align="center">
-  <img src="assets/store.png" alt="SmartTab Organizer">
+  <img src="assets/store.png" alt="SmartTab Organizer" width="720">
 </p>
 
-## 🛒 Chrome Web Store ##
-
-
-[![](https://img.shields.io/chrome-web-store/v/ijnpdkkcbmfikocmboibffjgbohhlmah?style=for-the-badge&label=version)](https://chromewebstore.google.com/detail/smarttab-organizer/ijnpdkkcbmfikocmboibffjgbohhlmah)
-
-## Características
-
-### ⚙️ Gestión de Reglas
-
-Las reglas de dominio se crean mediante un asistente guiado de 4 pasos: identidad → modo de nombrado → opciones → resumen.
-
-Tres modos de nombrado de grupo:
-- **Preajuste** — elige un patrón regex integrado o personalizado (IDs de tickets Jira, nombres de repos de GitHub…)
-- **Preguntar** — solicita un nombre cuando se abre la pestaña
-- **Manual** — nombre de grupo fijo
-
 <p align="center">
-  <img src="doc/readme/es-dark-rules-create-summary.png" alt="Asistente de creación de regla — paso resumen">
+  <a href="https://chromewebstore.google.com/detail/smarttab-organizer/ijnpdkkcbmfikocmboibffjgbohhlmah">
+    <img src="https://img.shields.io/chrome-web-store/v/ijnpdkkcbmfikocmboibffjgbohhlmah?style=for-the-badge&label=Chrome%20Web%20Store&logo=googlechrome&color=4285F4" alt="Disponible en Chrome Web Store">
+  </a>
+  <a href="https://addons.mozilla.org/firefox/addon/smarttab-organizer/">
+    <img src="https://img.shields.io/amo/v/smarttab-organizer?style=for-the-badge&label=Firefox%20Add-ons&logo=firefox&color=FF7139" alt="Disponible en Firefox Add-ons">
+  </a>
+  <img src="https://img.shields.io/badge/Licencia-GPL_v3-blue.svg?style=for-the-badge" alt="Licencia : GPL v3">
 </p>
 
-### 🗂️ Agrupación Automática
+## ¿Por qué?
 
-Clic central o clic derecho → «Abrir en una pestaña nueva» en un sitio configurado, y la pestaña aterriza al instante en el grupo correcto.
+- Tus pestañas se acumulan más rápido de lo que las cierras. SmartTab las pone en su sitio, automáticamente.
+- Las otras herramientas envían tus datos a la nube o meten IA por todas partes. Aquí, todo se queda en tu navegador, cero telemetría.
+- El espacio de trabajo que has montado merece volver mañana. Guárdalo, ponle nombre, restáuralo.
 
-- Nombre del grupo extraído del título de la página, la URL o un preajuste regex
-- Preajustes integrados para Jira, GitLab, GitHub, Trello y más
+## Lo que hace
+
+### 🗂️ Agrupación automática por dominio
+
+Abres un ticket de Jira, una PR de GitHub, una página de docs : la nueva pestaña aterriza al instante en el grupo correcto. El nombre del grupo viene del título de la página, de la URL, o de un preajuste regex (Jira, GitHub, GitLab, Trello, y muchos más).
 
 <p align="center">
-  <img src="assets/readme/gifs/regroup.gif" alt="Vídeo de agrupación automática">
+  <img src="assets/readme/gifs/regroup.gif" alt="Demo de agrupación automática" width="640">
 </p>
 
 ### 🔁 Deduplicación
 
-Abrir una página que ya está abierta reactiva y recarga la pestaña existente en lugar de crear una nueva.
-La sensibilidad de coincidencia es configurable por regla: URL exacta, nombre de host + ruta, nombre de host o «includes».
+¿Abres una página que ya estaba abierta ? El duplicado desaparece. El modo de comparación se ajusta por regla (URL exacta, "contiene", o "ignora estos parámetros"), y tú eliges cuál de las dos pestañas sobrevive.
 
 <p align="center">
-  <img src="assets/readme/gifs/dedup.gif" alt="Vídeo de deduplicación">
+  <img src="assets/readme/gifs/dedup.gif" alt="Demo de deduplicación" width="640">
 </p>
 
+### 📷 Sesiones que de verdad usarás
 
-### 📷 Sesiones
-
-Guarda un snapshot con nombre de tus pestañas y grupos abiertos, y restáuralos cuando los necesites.
-
-- **Sesiones ancladas** — convierte cualquier snapshot en acceso rápido desde el popup, con un icono personalizado
-- **Asistente de restauración** — elige qué pestañas recuperar, la ventana de destino y resuelve conflictos de grupos antes de aplicar
-- **Búsqueda profunda** — encuentra pestañas y grupos por nombre en todas tus sesiones guardadas
-- **Editor de sesión** — reorganiza, renombra y elimina pestañas y grupos sin necesidad de restaurar
-- **Notas de sesión** — anota tus sesiones con texto libre
-- **Drag-and-drop** — reordena tus sesiones arrastrando
+Captura tus pestañas y grupos abiertos, ponles nombre, fija las que más usas. Restaura en la ventana actual, en una nueva, o reemplaza lo que tienes. Cada sesión es editable, buscable hasta el nivel de pestaña, y puede llevar tus propias notas.
 
 <p align="center">
-  <img src="doc/readme/es-dark-sessions-list.png" alt="Lista de sesiones">
+  <img src="assets/readme/es-dark-sessions-list.png" alt="Lista de sesiones" width="720">
 </p>
 
-<p align="center">
-  <img src="doc/readme/es-dark-sessions-search-deep.png" alt="Búsqueda profunda en sesiones">
-</p>
+## Y además
 
+- **Espacios de trabajo** : reglas, sesiones y estadísticas separadas por contexto (trabajo, personal, side project)
+- **20+ packs de reglas** listos para importar para herramientas populares (GitHub, GitLab, Jira, AWS, asistentes de IA, Discord...)
+- **Importar / exportar** con resolución de conflictos para reglas y sesiones
+- **Estadísticas locales** : ve cuántas agrupaciones y deduplicaciones te ahorran tiempo
+- **Atajos de teclado** con panel de ayuda integrado
+- **Tema claro / oscuro / sistema**
+- **Accesibilidad primero** : auditado con axe-core, navegación por teclado, compatible con lectores de pantalla
+- **3 idiomas** : inglés, francés, español
 
-Un **asistente de importación/exportación para Reglas y Sesiones** clasifica los elementos entrantes como nuevos, en conflicto o idénticos, y resuelve los conflictos paso a paso.
+## 📖 Documentación
 
-<p align="center">
-  <img src="doc/readme/es-dark-rules-import-text-conflicts.png" alt="Asistente de importación con resolución de conflictos">
-</p>
-
-### ⚡ Popup de Acceso Rápido
-
-- Activa/desactiva globalmente la agrupación y la deduplicación
-- Toma un snapshot o accede a Sesiones con un clic
-- Sesiones ancladas listadas con acciones de restauración rápida
-
-<p align="center">
-
-<img src="doc/readme/es-dark-popup-content.png" alt="Contenido del popup">
-</p>
-
-### ♿ Accesibilidad e i18n
-
-Navegación completa por teclado y soporte para lectores de pantalla mediante primitivas Radix UI. Disponible en Inglés, Francés y Español.
-
-## 💻 Instalación
+La guía completa está en [`docs/`](docs/src/content/docs/es/) (Astro Starlight, 3 idiomas, más de 30 páginas con capturas). Lee el MDX directamente en GitHub, o lanza la doc en local :
 
 ```bash
-git clone https://github.com/EspritVorace/smart-tab-organizer.git
-cd smart-tab-organizer
-npm install -g pnpm  # si es necesario
-pnpm install
-pnpm build
+pnpm docs:dev
 ```
 
-- **Chrome:** `chrome://extensions/` → Cargar descomprimida → `.output/chrome-mv3`
+## 🛠️ Para contribuir
 
-Para desarrollo con recarga automática: `pnpm dev` (Chrome) o `pnpm dev:firefox`.
-
-## 🛠️ Stack Tecnológico
-
-| Capa | Tecnología |
-|---|---|
-| Framework de extensión | [WXT](https://wxt.dev/) |
-| Interfaz | [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
-| Biblioteca de componentes | [Radix UI Themes](https://www.radix-ui.com/themes) + iconos [Lucide](https://lucide.dev/) |
-| Formularios & validación | [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) |
-| Drag-and-drop | [@dnd-kit](https://dndkit.com/) |
-| Temas | [next-themes](https://github.com/pacocoursey/next-themes) |
-| Tests unitarios | [Vitest](https://vitest.dev/) |
-| Tests E2E | [Playwright](https://playwright.dev/) |
-| Explorador de componentes | [Storybook](https://storybook.js.org/) |
-| Gestor de paquetes | [pnpm](https://pnpm.io/) |
-
-## 🤝 Contribuir
-
-¡Las contribuciones son bienvenidas! Aquí tienes cómo empezar:
-
-**Requisitos previos:** Node.js, [pnpm](https://pnpm.io/) (`npm install -g pnpm`)
+**Requisitos :** Node.js, [pnpm](https://pnpm.io/)
 
 ```bash
-git clone https://github.com/EspritVorace/smart-tab-organizer.git
-cd smart-tab-organizer
 pnpm install
-pnpm dev          # Chrome con recarga automática
-pnpm dev:firefox  # Firefox con recarga automática
-```
-
-**Tests**
-
-```bash
-pnpm test         # Tests unitarios (Vitest)
-pnpm test:e2e     # Tests end-to-end (Playwright)
+pnpm dev          # Chrome con auto-recarga
+pnpm dev:firefox  # Firefox con auto-recarga
+pnpm test         # Tests unitarios Vitest
+pnpm test:e2e     # Tests E2E Playwright
 pnpm storybook    # Explorador de componentes (puerto 6006)
+pnpm build        # Build de producción
 ```
 
-**Convenciones de código**
+El stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) y las convenciones de código están documentadas en [`CLAUDE.md`](CLAUDE.md) y el [anexo stack técnico](docs/src/content/docs/annexes/stack-technique.mdx).
 
-- Usar `logger.debug()` de `src/utils/logger.ts` — nunca `console.log()`
-- Sin tipos `any` — usar tipos precisos o `unknown` con narrowing
-- Todo texto de UI mediante `getMessage()` de `src/utils/i18n.ts` — sin cadenas hardcodeadas
-- Accesibilidad mediante primitivas Radix UI; los iconos Lucide requieren `aria-hidden="true"`
-
-Por favor, abre un issue antes de enviar un pull request grande.
+Por favor, abre una issue antes de enviar una pull request grande.
 
 ## 📜 Licencia
 
-GNU General Public License v3.0
+GNU General Public License v3.0.

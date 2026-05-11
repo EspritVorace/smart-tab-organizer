@@ -23,11 +23,15 @@ vi.mock('../../src/utils/i18n', () => ({
 // Mock popupPinnedEmptyCollapsedItem to avoid hitting real storage in tests
 const mockGetValue = vi.fn(async () => false);
 const mockSetValue = vi.fn(async () => {});
-vi.mock('../../src/utils/storageItems', () => ({
-  popupPinnedEmptyCollapsedItem: {
-    getValue: () => mockGetValue(),
-    setValue: (value: boolean) => mockSetValue(value),
-  },
+vi.mock('../../src/contexts/ActiveWorkspaceContext', () => ({
+  useActiveWorkspaceContext: () => ({
+    scopedItems: {
+      popupPinnedEmptyCollapsedItem: {
+        getValue: () => mockGetValue(),
+        setValue: (value: boolean) => mockSetValue(value),
+      },
+    },
+  }),
 }));
 
 // Mock sessionStorage
@@ -297,6 +301,38 @@ describe('PopupProfilesList', () => {
     expect(screen.getByRole('button', { name: /Restore in current window/i })).toBeInTheDocument();
     // Chevron dropdown trigger (right half) — exposes the 3 options (asserted in e2e)
     expect(screen.getByRole('button', { name: /Restore options/i })).toBeInTheDocument();
+  });
+
+  it('should call restoreSessionTabs when clicking the primary restore button', async () => {
+    const { fireEvent } = await import('@testing-library/react');
+    const tabRestoreModule = await import('../../src/utils/tabRestore');
+    const restoreSpy = vi.mocked(tabRestoreModule.restoreSessionTabs);
+
+    const sessions: Session[] = [
+      {
+        id: 'p-restore',
+        isPinned: true,
+        updatedAt: '2026-04-10T00:00:00Z',
+        name: 'Restorable',
+        createdAt: '2026-04-10T00:00:00Z',
+        ungroupedTabs: [],
+        groups: [],
+      },
+    ];
+    mockLoadSessions.mockResolvedValue(sessions);
+
+    render(
+      <TestWrapper>
+        <PopupProfilesList />
+      </TestWrapper>,
+    );
+
+    const primary = await screen.findByRole('button', { name: /Restore in current window/i });
+    fireEvent.click(primary);
+
+    await waitFor(() => {
+      expect(restoreSpy).toHaveBeenCalled();
+    });
   });
 
   it('should display pinned sessions label when pinned sessions exist', async () => {

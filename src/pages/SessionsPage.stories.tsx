@@ -35,6 +35,7 @@ const meta: Meta<typeof SessionsPage> = {
   parameters: { layout: 'fullscreen' },
   args: {
     syncSettings: mockSyncSettings,
+    onOpenImportSessions: () => {},
   },
 };
 

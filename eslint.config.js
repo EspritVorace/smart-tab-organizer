@@ -6,21 +6,17 @@ import vitest from '@vitest/eslint-plugin';
 import playwright from 'eslint-plugin-playwright';
 import sonarjs from 'eslint-plugin-sonarjs';
 
-// Toutes les règles "error" du recommended sonarjs sont rétrogradées en
-// "warn" pour publier un signal CTRF sans bloquer la CI le temps d'un audit.
-const sonarjsWarnRules = Object.fromEntries(
-  Object.entries(sonarjs.configs.recommended.rules).map(([rule, value]) => {
-    const severity = Array.isArray(value) ? value[0] : value;
-    const opts = Array.isArray(value) ? value.slice(1) : [];
-    const downgraded = severity === 'error' ? 'warn' : severity;
-    return [rule, opts.length ? [downgraded, ...opts] : downgraded];
-  }),
-);
+// Explicit list of SonarJS rules kept at "warn" (CTRF signal without blocking
+// the build). Empty by default since #200: historical debt has been paid down
+// (see #191 and #192) and any new violation must fail the build.
+// Add an entry here only with a comment justifying why the rule is too strict
+// for the project (link to the dedicated ticket).
+const sonarjsWarnOverrides = {};
 
-// Petite règle locale : interdit les imports remontants (../...) dans src/
-// et les remplace automatiquement par l'alias @/<chemin-relatif-à-src>.
-// Équivalent de `eslint-plugin-no-relative-import-paths` mais compatible
-// ESLint 10 (ce dernier utilise encore context.getCwd(), supprimé en v9).
+// Small local rule: forbids upward relative imports (../...) inside src/ and
+// auto-replaces them with the alias @/<path-relative-to-src>.
+// Equivalent to `eslint-plugin-no-relative-import-paths` but compatible with
+// ESLint 10 (the original still uses context.getCwd(), removed in v9).
 const preferAliasImportsRule = {
   meta: {
     type: 'problem',
@@ -28,7 +24,7 @@ const preferAliasImportsRule = {
     schema: [],
     messages: {
       useAlias:
-        "Utiliser l'alias '@/{{aliased}}' plutôt qu'un import relatif remontant.",
+        "Use the '@/{{aliased}}' alias rather than an upward relative import.",
     },
   },
   create(context) {
@@ -102,7 +98,10 @@ export default tseslint.config(
   {
     files: ['src/**/*.{ts,tsx}'],
     ...sonarjs.configs.recommended,
-    rules: sonarjsWarnRules,
+    rules: {
+      ...sonarjs.configs.recommended.rules,
+      ...sonarjsWarnOverrides,
+    },
   },
 
   {

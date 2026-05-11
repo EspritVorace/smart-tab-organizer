@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-finance-markets",
+    "name": {
+      "en": "Markets & tickers",
+      "fr": "Marchés & tickers",
+      "es": "Mercados y tickers"
+    },
+    "description": {
+      "en": "Group Yahoo Finance, TradingView and Investing.com tabs by ticker symbol.",
+      "fr": "Regroupe les onglets Yahoo Finance, TradingView et Investing.com par symbole ticker.",
+      "es": "Agrupa las pestañas de Yahoo Finance, TradingView e Investing.com por símbolo de ticker."
+    },
+    "categoryId": "finance"
+  },
+  "domainRules": [
+    {
+      "id": "pk-finance-yahoo",
+      "enabled": true,
+      "domainFilter": "finance.yahoo.com",
+      "label": "Yahoo Finance: Ticker",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/quote/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "purple",
+      "categoryId": "finance",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-finance-tradingview",
+      "enabled": true,
+      "domainFilter": "*.tradingview.com",
+      "label": "TradingView: Symbol",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "symbol=([^&]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "finance",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "tradingview-chart",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-finance-investing",
+      "enabled": true,
+      "domainFilter": "*.investing.com",
+      "label": "Investing.com: Instrument",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "investing\\.com/(?:equities|etfs|currencies|indices|commodities)/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "finance",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

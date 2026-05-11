@@ -35,9 +35,9 @@ export function PackRulesPreview({ rules, packId }: PackRulesPreviewProps) {
           }}
         >
           {open ? (
-            <ChevronDown size={13} aria-hidden="true" />
+            <ChevronDown size={13} />
           ) : (
-            <ChevronRight size={13} aria-hidden="true" />
+            <ChevronRight size={13} />
           )}
           <Text size="1" color="gray">
             {getMessage('packGalleryViewRules')}

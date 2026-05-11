@@ -1,0 +1,173 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-cloud-aws",
+    "name": {
+      "en": "AWS Console",
+      "fr": "Console AWS",
+      "es": "Consola AWS"
+    },
+    "description": {
+      "en": "Group AWS console tabs around the service you focus on most.",
+      "fr": "Regroupe les onglets de la console AWS selon le service que vous utilisez le plus.",
+      "es": "Agrupa las pestañas de la consola AWS según el servicio que más utilice."
+    },
+    "categoryId": "cloud",
+    "configurable": {
+      "rulePattern": "aws/{service}/",
+      "params": [
+        {
+          "id": "service",
+          "label": {
+            "en": "AWS service",
+            "fr": "Service AWS",
+            "es": "Servicio AWS"
+          },
+          "default": "ec2",
+          "options": [
+            { "value": "ec2", "label": "EC2 (Compute)" },
+            { "value": "s3", "label": "S3 (Storage)" },
+            { "value": "lambda", "label": "Lambda (Functions)" },
+            { "value": "rds", "label": "RDS (Databases)" },
+            { "value": "cloudwatch", "label": "CloudWatch (Monitoring)" },
+            { "value": "iam", "label": "IAM (Identity)" },
+            { "value": "dynamodb", "label": "DynamoDB (NoSQL)" },
+            { "value": "ecs", "label": "ECS (Containers)" }
+          ]
+        }
+      ]
+    }
+  },
+  "domainRules": [
+    {
+      "id": "pk-cloud-aws-ec2",
+      "enabled": true,
+      "domainFilter": "*.console.aws.amazon.com",
+      "label": "aws/ec2/by region",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "cloud",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "region"
+    },
+    {
+      "id": "pk-cloud-aws-s3",
+      "enabled": true,
+      "domainFilter": "*.console.aws.amazon.com",
+      "label": "aws/s3/buckets",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/s3/buckets/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "cloud",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-cloud-aws-lambda",
+      "enabled": true,
+      "domainFilter": "*.console.aws.amazon.com",
+      "label": "aws/lambda/functions",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "#/functions/([^/?]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "cloud",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-cloud-aws-rds",
+      "enabled": true,
+      "domainFilter": "*.console.aws.amazon.com",
+      "label": "aws/rds/databases",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "database:id=([^;&]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "cloud",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-cloud-aws-cloudwatch",
+      "enabled": true,
+      "domainFilter": "*.console.aws.amazon.com",
+      "label": "aws/cloudwatch/by region",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "cloud",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "region"
+    },
+    {
+      "id": "pk-cloud-aws-iam",
+      "enabled": true,
+      "domainFilter": "*.console.aws.amazon.com",
+      "label": "aws/iam/by section",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/iam[v0-9]*/home#/?([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "cloud",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-cloud-aws-dynamodb",
+      "enabled": true,
+      "domainFilter": "*.console.aws.amazon.com",
+      "label": "aws/dynamodb/tables",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "[?&#]name=([^&;]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "cloud",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-cloud-aws-ecs",
+      "enabled": true,
+      "domainFilter": "*.console.aws.amazon.com",
+      "label": "aws/ecs/clusters",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/ecs/(?:v2/)?clusters/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "cloud",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

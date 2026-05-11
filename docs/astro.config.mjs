@@ -89,6 +89,7 @@ export default defineConfig({
           translations: { en: 'Reference', es: 'Referencia' },
           items: [
             { slug: 'annexes/presets-regex' },
+            { slug: 'annexes/raccourcis-clavier' },
             { slug: 'annexes/stack-technique' },
           ],
         },

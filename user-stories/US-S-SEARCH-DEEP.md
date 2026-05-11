@@ -1,156 +1,138 @@
-# US-S-SEARCH-01 — Recherche dans les titres et URLs des onglets d'une session
+# US-S-SEARCH-01: Search in tab titles and URLs of a session
 
-## Contexte
+## Context
 
-La barre de recherche de la section Sessions filtre actuellement uniquement sur le
-**nom** de la session. L'utilisateur ne peut pas retrouver une session contenant
-un onglet spécifique s'il ne se souvient pas du nom qu'il a donné à la session.
+The search bar in the Sessions section currently filters only on the
+**name** of the session. The user cannot find a session containing
+a specific tab if they do not remember the name they gave the session.
 
 ---
 
 ## User Stories
 
-### US-S-SEARCH-01 — Recherche par titre d'onglet
+### US-S-SEARCH-01: Search by tab title
 
-**En tant qu'** utilisateur ayant de nombreuses sessions sauvegardées,
-**je veux** que la barre de recherche trouve aussi des sessions dont un onglet a
-un titre correspondant au terme recherché,
-**afin de** retrouver rapidement une session grâce au titre de l'un de ses onglets.
+**As a** user with many saved sessions,
+**I want** the search bar to also find sessions whose tab has a title matching the searched term,
+**so that** I can quickly find a session via the title of one of its tabs.
 
-**Critères d'acceptance :**
-- Saisir un terme correspondant au titre d'un onglet (groupé ou non) fait apparaître
-  la session dans la liste filtrée.
-- La section dépliable (preview) de la session est **automatiquement ouverte**.
-- Les groupes d'onglets contenant l'onglet correspondant sont **dépliés**.
-- Les groupes sans correspondance restent **repliés**.
-- La recherche est insensible à la casse et aux accents.
-- Les parties du titre d'onglet correspondant au terme de recherche sont
-  **surlignées** (composant `AccessibleHighlight`) dans la preview ouverte.
+**Acceptance criteria:**
+- Typing a term matching the title of a tab (grouped or not) makes the session appear in the filtered list.
+- The expandable section (preview) of the session is **automatically opened**.
+- Tab groups containing the matching tab are **expanded**.
+- Groups without matches stay **collapsed**.
+- The search is case- and accent-insensitive.
+- The parts of the tab title matching the search term are **highlighted** (component `AccessibleHighlight`) in the open preview.
 
 ---
 
-### US-S-SEARCH-02 — Recherche par URL d'onglet
+### US-S-SEARCH-02: Search by tab URL
 
-**En tant qu'** utilisateur,
-**je veux** que la barre de recherche trouve des sessions dont un onglet a une URL
-contenant le terme recherché,
-**afin de** retrouver une session contenant un domaine ou une URL particulière.
+**As a** user,
+**I want** the search bar to find sessions whose tab has a URL containing the searched term,
+**so that** I can find a session containing a particular domain or URL.
 
-**Critères d'acceptance :**
-- Saisir un terme correspondant à l'URL d'un onglet (groupé ou non) fait apparaître
-  la session dans la liste filtrée.
-- La section dépliable (preview) de la session est **automatiquement ouverte**.
-- Les groupes d'onglets contenant l'onglet correspondant sont **dépliés**.
-- La recherche est insensible à la casse et aux accents.
-- La partie du domaine affiché (extrait de l'URL) correspondant au terme de recherche
-  est **surlignée** dans la preview ouverte.
+**Acceptance criteria:**
+- Typing a term matching the URL of a tab (grouped or not) makes the session appear in the filtered list.
+- The expandable section (preview) of the session is **automatically opened**.
+- Tab groups containing the matching tab are **expanded**.
+- The search is case- and accent-insensitive.
+- The part of the displayed domain (extracted from the URL) matching the search term is **highlighted** in the open preview.
 
 ---
 
-### US-S-SEARCH-03 — Recherche par titre de groupe d'onglets
+### US-S-SEARCH-03: Search by tab group title
 
-**En tant qu'** utilisateur,
-**je veux** que la barre de recherche trouve des sessions dont un groupe d'onglets
-porte un titre correspondant au terme recherché,
-**afin de** retrouver une session à partir du nom d'un de ses groupes.
+**As a** user,
+**I want** the search bar to find sessions whose tab group has a title matching the searched term,
+**so that** I can find a session from the name of one of its groups.
 
-**Critères d'acceptance :**
-- Saisir un terme correspondant au titre d'un groupe fait apparaître la session
-  dans la liste filtrée.
-- La section dépliable (preview) de la session est **automatiquement ouverte**.
-- Le(s) groupe(s) dont le titre correspond sont **dépliés**.
-- La recherche est insensible à la casse et aux accents.
-- La partie du titre de groupe correspondant au terme de recherche est
-  **surlignée** dans la preview ouverte.
+**Acceptance criteria:**
+- Typing a term matching the title of a group makes the session appear in the filtered list.
+- The expandable section (preview) of the session is **automatically opened**.
+- The group(s) whose title matches are **expanded**.
+- The search is case- and accent-insensitive.
+- The part of the group title matching the search term is **highlighted** in the open preview.
 
 ---
 
-### US-S-SEARCH-06 — Surlignage du nom de session et des onglets correspondants
+### US-S-SEARCH-06: Highlighting the session name and matching tabs
 
-**En tant qu'** utilisateur effectuant une recherche dans les sessions,
-**je veux** que les parties du texte correspondant au terme recherché soient
-visuellement mises en évidence dans les cartes de session,
-**afin de** comprendre immédiatement pourquoi un résultat apparaît.
+**As a** user searching in sessions,
+**I want** the parts of the text matching the searched term to be visually highlighted in session cards,
+**so that** I immediately understand why a result appears.
 
-**Critères d'acceptance :**
-- Le terme recherché est **surligné** (fond jaune, texte en gras) dans les champs
-  suivants lorsqu'ils correspondent :
-  - Nom de la session (toujours visible sur la carte)
-  - Titre du groupe (dans la preview ouverte)
-  - Titre de l'onglet (dans la preview ouverte)
-  - Domaine extrait de l'URL de l'onglet (dans la preview ouverte)
-- Le surlignage utilise le composant `AccessibleHighlight` (inclut des marqueurs
-  accessibles `sr-only` pour les lecteurs d'écran).
-- En l'absence de terme de recherche, aucun surlignage n'est affiché.
-- Le surlignage est insensible à la casse et aux accents (cohérent avec le filtrage).
+**Acceptance criteria:**
+- The searched term is **highlighted** (yellow background, bold text) in the following fields when they match:
+  - Session name (always visible on the card)
+  - Group title (in the open preview)
+  - Tab title (in the open preview)
+  - Domain extracted from the tab URL (in the open preview)
+- The highlighting uses the `AccessibleHighlight` component (includes accessible `sr-only` markers for screen readers).
+- When no search term is provided, no highlighting is shown.
+- The highlighting is case- and accent-insensitive (consistent with filtering).
 
 ---
 
-### US-S-SEARCH-04 — Correspondance sur le nom de session uniquement
+### US-S-SEARCH-04: Match on the session name only
 
-**En tant qu'** utilisateur,
-**je veux** que lorsque la recherche correspond uniquement au **nom** de la session
-(sans correspondance dans les onglets ni les groupes), la section dépliable reste
-**refermée**,
-**afin de** garder une vue compacte quand seul le nom suffit à identifier la session.
+**As a** user,
+**I want** the expandable section to remain **closed** when the search matches only the **name** of the session (without matches in tabs or groups),
+**so that** I keep a compact view when the name alone is enough to identify the session.
 
-**Critères d'acceptance :**
-- Si le terme correspond au nom de la session mais pas à un titre/URL d'onglet ou
-  titre de groupe, la session est affichée avec sa section dépliable **fermée**.
-- L'utilisateur peut toujours ouvrir manuellement la section dépliable.
+**Acceptance criteria:**
+- If the term matches the session name but not a tab title/URL or group title, the session is shown with its expandable section **closed**.
+- The user can still open the expandable section manually.
 
 ---
 
-### US-S-SEARCH-05 — Ouverture forcée non bloquante
+### US-S-SEARCH-05: Non-blocking forced opening
 
-**En tant qu'** utilisateur,
-**je veux** pouvoir refermer manuellement la section dépliable d'une session dont
-la preview a été ouverte automatiquement par la recherche,
-**afin de** garder le contrôle de l'affichage même lors d'une recherche active.
+**As a** user,
+**I want** to be able to manually re-close the expandable section of a session whose preview was automatically opened by the search,
+**so that** I keep control of the display even during an active search.
 
-**Critères d'acceptance :**
-- Lorsque la preview est ouverte automatiquement (correspondance onglet/groupe),
-  l'utilisateur peut cliquer sur le déclencheur pour la refermer.
-- Effacer la recherche remet les cartes dans leur état initial (preview fermée,
-  sauf si l'utilisateur l'a ouverte manuellement avant de rechercher).
+**Acceptance criteria:**
+- When the preview is automatically opened (tab/group match), the user can click the trigger to close it.
+- Clearing the search returns the cards to their initial state (preview closed, unless the user manually opened it before searching).
 
 ---
 
-## Règles de gestion
+## Business rules
 
-| Condition | Preview de la session | Groupes |
+| Condition | Session preview | Groups |
 |---|---|---|
-| Correspondance sur nom uniquement | Fermée (comportement existant) | N/A |
-| Correspondance sur onglet non groupé | **Ouverte automatiquement** | N/A |
-| Correspondance sur titre de groupe | **Ouverte automatiquement** | Groupes correspondants **dépliés** |
-| Correspondance sur onglet dans un groupe | **Ouverte automatiquement** | Groupe parent **déplié** |
-| Correspondance sur nom ET onglets/groupes | **Ouverte automatiquement** | Groupes correspondants **dépliés** |
-| Aucune correspondance | Session masquée | N/A |
+| Match on name only | Closed (existing behavior) | N/A |
+| Match on ungrouped tab | **Automatically opened** | N/A |
+| Match on group title | **Automatically opened** | Matching groups **expanded** |
+| Match on tab in a group | **Automatically opened** | Parent group **expanded** |
+| Match on name AND tabs/groups | **Automatically opened** | Matching groups **expanded** |
+| No match | Session hidden | N/A |
 
 ---
 
-## Champ de recherche
+## Search field
 
-La recherche porte sur les champs suivants, pour chaque session :
+The search applies to the following fields, for each session:
 
-1. `session.name` — Nom de la session
-2. `group.title` — Titre de chaque groupe
-3. `tab.title` — Titre de chaque onglet (groupés et non groupés)
-4. `tab.url` — URL de chaque onglet (groupés et non groupés)
+1. `session.name`: Session name
+2. `group.title`: Title of each group
+3. `tab.title`: Title of each tab (grouped and ungrouped)
+4. `tab.url`: URL of each tab (grouped and ungrouped)
 
-La comparaison est toujours insensible à la casse et aux accents (via `foldAccents()`).
-
----
-
-## Interaction avec les sections epinglees/normales (cf. US-S020)
-
-- La recherche filtre les sessions dans les deux sections (epinglees et normales) de maniere independante.
-- Chaque section n'affiche que les sessions correspondant au terme recherche.
-- Une section sans resultat est masquee pendant la recherche.
-- Le drag-and-drop reste desactive pendant la recherche dans les deux sections.
+The comparison is always case- and accent-insensitive (via `foldAccents()`).
 
 ---
 
-## Hors périmètre
+## Interaction with pinned/normal sections (cf. US-S020)
 
-- Recherche dans les descriptions ou métadonnées futures des sessions.
+- The search filters sessions in both sections (pinned and normal) independently.
+- Each section only shows the sessions matching the searched term.
+- A section with no result is hidden during the search.
+- Drag-and-drop stays disabled during the search in both sections.
+
+---
+
+## Out of scope
+
+- Search in future descriptions or metadata of sessions.

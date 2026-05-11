@@ -1,240 +1,240 @@
-# User Stories — Domaine RW : Wizard de création et d'édition de règle
+# User Stories - Domain RW: Rule creation and editing wizard
 
-> Remplacement du formulaire modal plat `DomainRuleFormModal` par un wizard en 4 étapes pour la création, et par une vue de résumé éditable pour la modification.
-> Composants existants réutilisés : `WizardStepper`, `SegmentedControl` (Radix), `CategoryPicker`.
-> Comportements testés dans `tests/e2e/rule-wizard.spec.ts`.
+> Replacement of the flat modal form `DomainRuleFormModal` with a 4-step wizard for creation, and with an editable summary view for modification.
+> Existing components reused: `WizardStepper`, `SegmentedControl` (Radix), `CategoryPicker`.
+> Behaviors tested in `tests/e2e/rule-wizard.spec.ts`.
 
 ---
 
-## Modèle de navigation
+## Navigation model
 
-### Création (wizard 4 étapes)
+### Creation (4-step wizard)
 
 ```
-Étape 1 : Identité       → Catégorie, étiquette, filtre de domaine
-Étape 2 : Configuration  → Mode (SegmentedControl) + champs conditionnels selon le mode
-Étape 3 : Options        → Déduplication
-Étape 4 : Résumé         → Lecture seule + bouton "Créer"
+Step 1: Identity        -> Category, label, domain filter
+Step 2: Configuration   -> Mode (SegmentedControl) + conditional fields based on the mode
+Step 3: Options         -> Deduplication
+Step 4: Summary         -> Read-only + "Create" button
 ```
 
-### Édition (vue résumé)
+### Edition (summary view)
 
 ```
-Zone 1 : Identité          → Catégorie, étiquette, filtre de domaine (champs directement éditables)
-Zone 2 : Configuration     → Résumé textuel du mode + crayon ouvrant une modale dédiée
-Zone 3 : Options diverses  → Section repliée par défaut, dépliable pour éditer
+Zone 1: Identity            -> Category, label, domain filter (directly editable fields)
+Zone 2: Configuration       -> Textual summary of the mode + pencil opening a dedicated modal
+Zone 3: Misc options        -> Section collapsed by default, expandable to edit
 ```
 
 ---
 
-## Décisions de conception
+## Design decisions
 
-- **Déduplication** : 2 modes seulement (`exact`, `includes`) — pas d'extension du schéma Zod actuel.
-- **Sélecteur de mode** : `SegmentedControl` de Radix (déjà utilisé dans le formulaire actuel), extrait en `WizardStep2Config`.
-- **Mode Manuel** : toutes les 7 valeurs de `groupNameSource` disponibles (comme le formulaire actuel).
-- **Tests** : nouveau fichier `tests/e2e/rule-wizard.spec.ts` + mise à jour de `domain-rules.spec.ts`.
-
----
-
-## US-RW001 — Étape 1 : saisie de l'identité de la règle
-
-**En tant qu'** utilisateur créant une règle,
-**je veux** saisir la catégorie logique, l'étiquette et le filtre de domaine dans une première étape dédiée,
-**afin de** poser l'identité de la règle avant de configurer son comportement.
-
-### Critères d'acceptation
-
-- [ ] L'étape 1 affiche trois champs : sélecteur de catégorie (`categoryId`), champ texte étiquette (`label`), champ texte filtre de domaine (`domainFilter`).
-- [ ] Le sélecteur de catégorie utilise le composant `CategoryPicker` existant. La valeur "Aucune catégorie" est toujours disponible et correspond à `categoryId = null`.
-- [ ] Le champ étiquette est obligatoire. Si vide au clic "Suivant", un message d'erreur s'affiche sous le champ et la navigation vers l'étape 2 est bloquée.
-- [ ] L'étiquette doit être unique parmi les règles existantes (insensible à la casse), validée via `createDomainRuleSchemaWithUniqueness`. Si en doublon, un message d'erreur s'affiche et la navigation est bloquée.
-- [ ] Le champ filtre de domaine est obligatoire et doit passer la validation `createDomainFilterValidator`. Si invalide, un message d'erreur s'affiche et la navigation est bloquée.
-- [ ] Le bouton "Suivant" est toujours visible mais déclenche la validation au clic.
-- [ ] Il n'y a pas de bouton "Précédent" à l'étape 1.
-- [ ] Le `WizardStepper` affiche 4 étapes numérotées. L'étape 1 est active.
-
-### Note d'implémentation
-
-Composant : `WizardStep1Identity`. Le champ `categoryId` utilise le composant `CategoryPicker` déjà présent dans le formulaire actuel.
+- **Deduplication**: 2 modes only (`exact`, `includes`), no extension of the current Zod schema.
+- **Mode selector**: Radix `SegmentedControl` (already used in the current form), extracted to `WizardStep2Config`.
+- **Manual mode**: all 7 values of `groupNameSource` available (like the current form).
+- **Tests**: new file `tests/e2e/rule-wizard.spec.ts` plus update of `domain-rules.spec.ts`.
 
 ---
 
-## US-RW002 — Étape 2 : configuration du mode de nommage
+## US-RW001 - Step 1: enter the rule identity
 
-**En tant qu'** utilisateur créant une règle,
-**je veux** choisir le mode de configuration via un `SegmentedControl` et saisir les informations correspondantes dans la même étape,
-**afin de** configurer la logique de nommage de groupe sans navigation supplémentaire.
+**As a** user creating a rule,
+**I want** to enter the logical category, the label, and the domain filter in a dedicated first step,
+**so that** I can lay out the identity of the rule before configuring its behavior.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] L'étape 2 affiche un `SegmentedControl` à trois segments : "Preset", "Ask", "Manuel". Le mode sélectionné est mis en valeur visuellement. La valeur par défaut est "Preset".
-- [ ] Le mode actif pilote les champs `presetId` et `groupNameSource` selon la correspondance suivante : Preset → `presetId != null` / Ask → `presetId = null` + `groupNameSource = 'ask'` / Manuel → `presetId = null` + `groupNameSource` selon sélection.
-- [ ] En mode **Preset** : le `SearchableSelect` (CMDK) existant dans le formulaire actuel est réutilisé pour choisir parmi les presets disponibles. `presetId` est mis à jour à la sélection. Le champ est obligatoire pour passer à l'étape 3.
-- [ ] En mode **Ask** : aucun champ supplémentaire n'est affiché. Un texte explicatif court indique que le nom du groupe sera demandé à chaque ouverture d'onglet correspondant.
-- [ ] En mode **Manuel** : un `Select` permet de choisir la source (toutes les 7 valeurs de `groupNameSource` disponibles sauf `manual` et `smart_preset`), ce qui fixe `groupNameSource`. Le(s) champ(s) regex correspondants s'affichent et sont validés par `createRegexValidator`.
-- [ ] Changer de mode conserve les valeurs déjà saisies dans les champs des autres modes.
-- [ ] Le bouton "Précédent" ramène à l'étape 1 sans perte des valeurs de l'étape 1.
-- [ ] Le bouton "Suivant" déclenche la validation des champs du mode actif avant de progresser.
+- [ ] Step 1 shows three fields: category selector (`categoryId`), label text field (`label`), domain filter text field (`domainFilter`).
+- [ ] The category selector uses the existing `CategoryPicker` component. The "No category" value is always available and corresponds to `categoryId = null`.
+- [ ] The label field is required. If empty when clicking "Next", an error message is shown under the field and navigation to step 2 is blocked.
+- [ ] The label must be unique among existing rules (case-insensitive), validated via `createDomainRuleSchemaWithUniqueness`. If duplicated, an error message is shown and navigation is blocked.
+- [ ] The domain filter field is required and must pass `createDomainFilterValidator` validation. If invalid, an error message is shown and navigation is blocked.
+- [ ] The "Next" button is always visible but triggers validation on click.
+- [ ] There is no "Previous" button on step 1.
+- [ ] The `WizardStepper` shows 4 numbered steps. Step 1 is active.
 
-### Note d'implémentation
+### Implementation note
 
-Composant : `WizardStep2Config`. Logique de bascule de mode copiée depuis l'ancien `DomainRuleFormModal`.
-
----
-
-## US-RW003 — Étape 3 : options de déduplication
-
-**En tant qu'** utilisateur créant une règle,
-**je veux** configurer la déduplication dans une étape dédiée,
-**afin de** ajuster le comportement avancé de la règle sans surcharger les étapes précédentes.
-
-### Critères d'acceptation
-
-- [ ] L'étape 3 affiche un `Switch` "Activer la déduplication" (`deduplicationEnabled`). Activé par défaut conformément au schéma Zod (`default(true)`).
-- [ ] Quand la déduplication est activée, un `RadioGroup` affiche les deux modes disponibles : "URL exacte" (`exact`), "URL incluse" (`includes`).
-- [ ] Quand la déduplication est désactivée, le `RadioGroup` est masqué (non simplement grisé).
-- [ ] Le bouton "Précédent" ramène à l'étape 2 sans perte des valeurs de l'étape 2.
-- [ ] Le bouton "Suivant" est toujours actif à cette étape (aucun champ obligatoire).
-- [ ] Aucune validation bloquante n'est appliquée à cette étape.
-
-### Note d'implémentation
-
-Composant : `WizardStep3Options`. Également utilisé dans la section Options repliable du mode édition.
+Component: `WizardStep1Identity`. The `categoryId` field uses the `CategoryPicker` component already present in the current form.
 
 ---
 
-## US-RW004 — Étape 4 : résumé et confirmation
+## US-RW002 - Step 2: naming mode configuration
 
-**En tant qu'** utilisateur créant une règle,
-**je veux** voir un résumé lisible de ma configuration avant de valider,
-**afin de** détecter une erreur avant la création effective.
+**As a** user creating a rule,
+**I want** to choose the configuration mode via a `SegmentedControl` and enter the corresponding information in the same step,
+**so that** I can configure the group naming logic without additional navigation.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] L'étape 4 affiche en lecture seule l'ensemble des valeurs saisies aux étapes 1 à 3, regroupées en sections correspondant aux étapes.
-- [ ] Chaque section du résumé comporte un bouton discret "Modifier" qui, au clic, ramène directement à l'étape correspondante sans perdre les données des autres étapes.
-- [ ] Le bouton "Créer" est affiché à la place de "Suivant". Il déclenche la création effective de la règle.
-- [ ] Le bouton "Précédent" ramène à l'étape 3.
-- [ ] Après une création réussie, la modale se ferme et la nouvelle règle apparaît dans la liste.
-- [ ] Si la création échoue (erreur inattendue), un message d'erreur est affiché dans l'étape 4 sans fermer la modale.
+- [ ] Step 2 shows a `SegmentedControl` with three segments: "Preset", "Ask", "Manual". The selected mode is visually highlighted. The default value is "Preset".
+- [ ] The active mode drives the `presetId` and `groupNameSource` fields according to the following mapping: Preset -> `presetId != null` / Ask -> `presetId = null` + `groupNameSource = 'ask'` / Manual -> `presetId = null` + `groupNameSource` based on selection.
+- [ ] In **Preset** mode: the `SearchableSelect` (CMDK) existing in the current form is reused to choose among the available presets. `presetId` is updated on selection. The field is required to move to step 3.
+- [ ] In **Ask** mode: no additional field is shown. A short explanatory text states that the group name will be requested at every matching tab opening.
+- [ ] In **Manual** mode: a `Select` lets the user choose the source (all 7 values of `groupNameSource` available except `manual` and `smart_preset`), which sets `groupNameSource`. The corresponding regex field(s) are shown and validated by `createRegexValidator`.
+- [ ] Switching mode preserves the values already entered in the other modes' fields.
+- [ ] The "Previous" button goes back to step 1 without losing step 1 values.
+- [ ] The "Next" button triggers validation of the active mode's fields before progressing.
 
-### Note d'implémentation
+### Implementation note
 
-Composant : `WizardStep4Summary`.
-
----
-
-## US-RW005 — Navigation clavier dans le wizard
-
-**En tant qu'** utilisateur clavier,
-**je veux** naviguer dans le wizard sans utiliser la souris,
-**afin de** créer une règle de façon accessible.
-
-### Critères d'acceptation
-
-- [ ] La touche `Tab` parcourt tous les champs interactifs de l'étape active dans l'ordre visuel.
-- [ ] La touche `Enter` sur le bouton "Suivant" ou "Créer" déclenche l'action correspondante.
-- [ ] La touche `Escape` ferme la modale (comportement natif de `Dialog.Root` Radix).
-- [ ] Le focus est placé sur le premier champ interactif (`input[name="label"]`) à l'ouverture de la modale.
-- [ ] Le `WizardStepper` est navigation visuelle uniquement : les étapes futures sont `aria-disabled="true"`. La navigation arrière se fait uniquement via "Précédent".
+Component: `WizardStep2Config`. Mode-switching logic copied from the old `DomainRuleFormModal`.
 
 ---
 
-## US-RW006 — Mode édition : identité directement éditable
+## US-RW003 - Step 3: deduplication options
 
-**En tant qu'** utilisateur modifiant une règle existante,
-**je veux** voir et modifier la catégorie, l'étiquette et le filtre de domaine directement dans la vue de résumé,
-**afin de** corriger rapidement l'identité d'une règle sans traverser un wizard.
+**As a** user creating a rule,
+**I want** to configure deduplication in a dedicated step,
+**so that** I can adjust the advanced behavior of the rule without overloading the previous steps.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] En mode édition, la modale s'ouvre directement sur la vue résumé (pas sur l'étape 1 du wizard). Aucun `WizardStepper` n'est affiché.
-- [ ] La zone "Identité" affiche les champs `categoryId`, `label` et `domainFilter` sous forme de champs éditables (pas en lecture seule).
-- [ ] Le champ `categoryId` utilise le composant `CategoryPicker` existant.
-- [ ] Les mêmes règles de validation qu'à l'étape 1 du wizard s'appliquent. Les erreurs s'affichent inline sous chaque champ.
-- [ ] La modification de l'étiquette ou du domaine ne déclenche pas de sauvegarde immédiate : la sauvegarde globale se fait via le bouton "Enregistrer".
+- [ ] Step 3 shows a "Enable deduplication" `Switch` (`deduplicationEnabled`). Enabled by default in line with the Zod schema (`default(true)`).
+- [ ] When deduplication is enabled, a `RadioGroup` shows the two available modes: "Exact URL" (`exact`), "URL included" (`includes`).
+- [ ] When deduplication is disabled, the `RadioGroup` is hidden (not just grayed out).
+- [ ] The "Previous" button goes back to step 2 without losing step 2 values.
+- [ ] The "Next" button is always active at this step (no required field).
+- [ ] No blocking validation is applied at this step.
 
-### Note d'implémentation
+### Implementation note
 
-Composant : `EditSummaryView` → Zone 1 Identité (mêmes champs que `WizardStep1Identity`).
-
----
-
-## US-RW007 — Mode édition : configuration du mode via modale dédiée
-
-**En tant qu'** utilisateur modifiant une règle existante,
-**je veux** voir un résumé lisible du mode de configuration actuel et pouvoir le modifier via une modale secondaire,
-**afin de** comprendre la configuration en place et la changer sans quitter la vue résumé.
-
-### Critères d'acceptation
-
-- [ ] La zone "Configuration" affiche un texte de résumé décrivant le mode actif. Exemples : "Préréglage : Jira", "Demander (nom saisi à chaque ouverture d'onglet)", "Manuel : Titre".
-- [ ] Un bouton icône crayon est affiché à droite du résumé. Il est accessible au clavier et possède un `aria-label`.
-- [ ] Au clic sur le crayon, une modale secondaire (`ConfigEditModal`) s'ouvre. Elle contient le même `SegmentedControl` que l'étape 2 du wizard avec les champs conditionnels.
-- [ ] La modale secondaire possède ses propres boutons "Annuler" et "Appliquer". "Appliquer" valide les champs du mode actif et met à jour l'état local de la règle sans sauvegarder en base. "Annuler" ferme la modale sans changement.
-- [ ] Après "Appliquer", le texte de résumé dans la vue principale se met à jour pour refléter la nouvelle configuration.
-- [ ] La sauvegarde effective ne se produit qu'au clic sur "Enregistrer" de la modale principale.
-
-### Note d'implémentation
-
-Composant : `ConfigEditModal`. Utilise un état local indépendant (snapshot des valeurs au moment de l'ouverture). Pas de `react-hook-form` dans la modale secondaire.
+Component: `WizardStep3Options`. Also used in the collapsible Options section of edit mode.
 
 ---
 
-## US-RW008 — Mode édition : options diverses en section repliée
+## US-RW004 - Step 4: summary and confirmation
 
-**En tant qu'** utilisateur modifiant une règle existante,
-**je veux** accéder aux options de déduplication dans une section repliée par défaut,
-**afin de** ne pas être distrait par des options rarement modifiées.
+**As a** user creating a rule,
+**I want** to see a readable summary of my configuration before validating,
+**so that** I can spot a mistake before the actual creation.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] La zone "Options" est rendue avec un composant `Collapsible` Radix, repliée par défaut en mode édition.
-- [ ] L'en-tête de la section affiche un résumé compact des options actives. Exemple : "Déduplication activée · URL exacte".
-- [ ] Au dépliage, le même contenu qu'à l'étape 3 du wizard est affiché : `Switch` `deduplicationEnabled`, `RadioGroup` `deduplicationMatchMode`.
-- [ ] Les modifications dans la section dépliée sont répercutées immédiatement dans le résumé de l'en-tête de section.
-- [ ] La sauvegarde effective ne se produit qu'au clic sur "Enregistrer" de la modale principale.
+- [ ] Step 4 shows in read-only the set of values entered in steps 1 to 3, grouped in sections matching the steps.
+- [ ] Each section of the summary has a discreet "Edit" button which, on click, jumps directly to the corresponding step without losing data from the other steps.
+- [ ] The "Create" button is shown in place of "Next". It triggers the actual creation of the rule.
+- [ ] The "Previous" button goes back to step 3.
+- [ ] After a successful creation, the modal closes and the new rule appears in the list.
+- [ ] If creation fails (unexpected error), an error message is shown in step 4 without closing the modal.
 
-### Note d'implémentation
+### Implementation note
 
-`EditSummaryView` → Zone 3 Options. Réutilise `WizardStep3Options`.
-
----
-
-## US-RW009 — Persistance de l'état du wizard entre les étapes
-
-**En tant qu'** utilisateur naviguant entre les étapes du wizard,
-**je veux** que mes saisies soient conservées si je reviens à une étape précédente,
-**afin de** corriger une valeur sans tout ressaisir.
-
-### Critères d'acceptation
-
-- [ ] Revenir à l'étape 1 depuis l'étape 2 ou ultérieure conserve les valeurs saisies à l'étape 1.
-- [ ] Revenir à l'étape 2 depuis l'étape 3 ou 4 conserve le mode sélectionné et les champs du mode.
-- [ ] Changer de mode à l'étape 2 après y être revenu préserve les valeurs des autres modes via les refs `lastManualState` / `lastPresetState`.
-- [ ] Fermer la modale (bouton "Annuler" ou touche `Escape`) vide l'état interne du wizard. Une réouverture repart d'une étape 1 vierge.
-
-### Note d'implémentation
-
-Logique de persistance dans `RuleWizardModal` : `lastManualState` et `lastPresetState` refs (copiées depuis l'ancien `DomainRuleFormModal`). État du wizard via `useState(step)`.
+Component: `WizardStep4Summary`.
 
 ---
 
-## US-RW010 — Accessibilité du wizard
+## US-RW005 - Keyboard navigation in the wizard
 
-**En tant qu'** utilisateur utilisant un lecteur d'écran ou la navigation clavier,
-**je veux** que le wizard soit entièrement navigable sans souris,
-**afin d'** accéder à la fonctionnalité de création de règle de façon autonome.
+**As a** keyboard user,
+**I want** to navigate the wizard without using the mouse,
+**so that** I can create a rule accessibly.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Le `WizardStepper` expose `aria-current="step"` sur l'étape active.
-- [ ] Les étapes non encore atteintes sont `aria-disabled="true"` dans le stepper (prop `disableFutureNavigation`).
-- [ ] Chaque changement d'étape annonce le titre de la nouvelle étape via une région `aria-live="polite"` visually-hidden dans `RuleWizardModal`.
-- [ ] Le `SegmentedControl` à l'étape 2 est accessible nativement via le composant Radix (role radiogroup).
-- [ ] Toutes les icônes décoratives portent `aria-hidden="true"`. Le bouton icône crayon en mode édition porte un `aria-label` explicite.
+- [ ] The `Tab` key cycles through all interactive fields of the active step in visual order.
+- [ ] Pressing `Enter` on the "Next" or "Create" button triggers the corresponding action.
+- [ ] Pressing `Escape` closes the modal (Radix `Dialog.Root` native behavior).
+- [ ] Focus is placed on the first interactive field (`input[name="label"]`) when the modal opens.
+- [ ] The `WizardStepper` is visual navigation only: future steps are `aria-disabled="true"`. Backward navigation only happens via "Previous".
 
-### Note d'implémentation
+---
 
-`WizardStepper` : attributs `role="list"`, `role="listitem"`, `aria-current`, `aria-disabled`, `aria-hidden` sur les icônes.
-`RuleWizardModal` : `<div role="status" aria-live="polite">` avec annonce `getMessage('wizardStepAnnouncement')`.
+## US-RW006 - Edit mode: directly editable identity
+
+**As a** user modifying an existing rule,
+**I want** to see and edit the category, the label, and the domain filter directly in the summary view,
+**so that** I can quickly correct the identity of a rule without going through a wizard.
+
+### Acceptance criteria
+
+- [ ] In edit mode, the modal opens directly on the summary view (not on step 1 of the wizard). No `WizardStepper` is shown.
+- [ ] The "Identity" zone displays the `categoryId`, `label`, and `domainFilter` fields as editable fields (not read-only).
+- [ ] The `categoryId` field uses the existing `CategoryPicker` component.
+- [ ] The same validation rules as in step 1 of the wizard apply. Errors are shown inline below each field.
+- [ ] Modifying the label or the domain does not trigger an immediate save: the global save is done via the "Save" button.
+
+### Implementation note
+
+Component: `EditSummaryView` -> Zone 1 Identity (same fields as `WizardStep1Identity`).
+
+---
+
+## US-RW007 - Edit mode: mode configuration via dedicated modal
+
+**As a** user modifying an existing rule,
+**I want** to see a readable summary of the current configuration mode and be able to modify it via a secondary modal,
+**so that** I can understand the configuration in place and change it without leaving the summary view.
+
+### Acceptance criteria
+
+- [ ] The "Configuration" zone shows a summary text describing the active mode. Examples: "Preset: Jira", "Ask (name entered at each tab opening)", "Manual: Title".
+- [ ] A pencil icon button is shown to the right of the summary. It is keyboard-accessible and has an `aria-label`.
+- [ ] Clicking the pencil opens a secondary modal (`ConfigEditModal`). It contains the same `SegmentedControl` as step 2 of the wizard with the conditional fields.
+- [ ] The secondary modal has its own "Cancel" and "Apply" buttons. "Apply" validates the active mode's fields and updates the local state of the rule without saving to storage. "Cancel" closes the modal without change.
+- [ ] After "Apply", the summary text in the main view updates to reflect the new configuration.
+- [ ] The actual save only happens when the main modal's "Save" button is clicked.
+
+### Implementation note
+
+Component: `ConfigEditModal`. Uses an independent local state (snapshot of values at opening time). No `react-hook-form` in the secondary modal.
+
+---
+
+## US-RW008 - Edit mode: misc options in a collapsed section
+
+**As a** user modifying an existing rule,
+**I want** to access deduplication options in a section collapsed by default,
+**so that** I am not distracted by options that are rarely modified.
+
+### Acceptance criteria
+
+- [ ] The "Options" zone is rendered with a Radix `Collapsible` component, collapsed by default in edit mode.
+- [ ] The section header shows a compact summary of the active options. Example: "Deduplication enabled, Exact URL".
+- [ ] When expanded, the same content as in step 3 of the wizard is shown: `Switch` `deduplicationEnabled`, `RadioGroup` `deduplicationMatchMode`.
+- [ ] Modifications in the expanded section are immediately reflected in the section header summary.
+- [ ] The actual save only happens when the main modal's "Save" button is clicked.
+
+### Implementation note
+
+`EditSummaryView` -> Zone 3 Options. Reuses `WizardStep3Options`.
+
+---
+
+## US-RW009 - Persistence of the wizard state between steps
+
+**As a** user navigating between wizard steps,
+**I want** my entries to be preserved if I go back to a previous step,
+**so that** I can correct a value without re-entering everything.
+
+### Acceptance criteria
+
+- [ ] Going back to step 1 from step 2 or later preserves the values entered in step 1.
+- [ ] Going back to step 2 from step 3 or 4 preserves the selected mode and the mode's fields.
+- [ ] Changing mode at step 2 after coming back to it preserves the values of the other modes via the `lastManualState` / `lastPresetState` refs.
+- [ ] Closing the modal ("Cancel" button or `Escape` key) clears the wizard's internal state. Reopening starts from a fresh step 1.
+
+### Implementation note
+
+Persistence logic in `RuleWizardModal`: `lastManualState` and `lastPresetState` refs (copied from the old `DomainRuleFormModal`). Wizard state via `useState(step)`.
+
+---
+
+## US-RW010 - Wizard accessibility
+
+**As a** user using a screen reader or keyboard navigation,
+**I want** the wizard to be fully navigable without a mouse,
+**so that** I can use the rule creation feature autonomously.
+
+### Acceptance criteria
+
+- [ ] The `WizardStepper` exposes `aria-current="step"` on the active step.
+- [ ] Steps not yet reached are `aria-disabled="true"` in the stepper (prop `disableFutureNavigation`).
+- [ ] Each step change announces the new step's title via a visually-hidden `aria-live="polite"` region in `RuleWizardModal`.
+- [ ] The `SegmentedControl` at step 2 is natively accessible via the Radix component (role radiogroup).
+- [ ] All decorative icons have `aria-hidden="true"`. The pencil icon button in edit mode has an explicit `aria-label`.
+
+### Implementation note
+
+`WizardStepper`: attributes `role="list"`, `role="listitem"`, `aria-current`, `aria-disabled`, `aria-hidden` on icons.
+`RuleWizardModal`: `<div role="status" aria-live="polite">` with announcement `getMessage('wizardStepAnnouncement')`.

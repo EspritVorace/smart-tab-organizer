@@ -1,5 +1,4 @@
 import type { StorybookConfig } from '@storybook/react-vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import { resolve } from 'node:path';
 
 // Resolved relative to this file's directory at runtime. Storybook loads main.ts
@@ -38,9 +37,7 @@ const config: StorybookConfig = {
       'wxt/browser': browserMockPath,
       '@wxt-dev/browser': browserMockPath,
     };
-
-    config.plugins = config.plugins || [];
-    config.plugins.push(tsconfigPaths({ projects: ['./tsconfig.json'] }));
+    config.resolve.tsconfigPaths = true;
 
     return config;
   },

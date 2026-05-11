@@ -18,10 +18,14 @@ describe('ConflictResolutionStep — static renders', () => {
     expect(screen.getByText('GitHub PR #42')).toBeInTheDocument();
   });
 
-  it('renders conflicting groups section', () => {
+  it('renders conflicting groups with combobox dropdowns', () => {
     render(<ConflictResolutionGroupsOnly />);
     expect(screen.getByText('Frontend')).toBeInTheDocument();
     expect(screen.getByText('Backend')).toBeInTheDocument();
+    // ConflictResolutionChangeGroupAction uses Radix Select which requires pointer events
+    // not available in happy-dom; verify the comboboxes are rendered statically.
+    const comboboxes = screen.queryAllByRole('combobox');
+    expect(comboboxes.length).toBeGreaterThan(0);
   });
 
   it('renders both sections in mixed mode', () => {
@@ -45,13 +49,5 @@ describe('ConflictResolutionStep — interactions', () => {
     // At least one radio should now be in "checked" state (data-state attribute used by Radix)
     const checkedByDataState = radios.some(r => r.getAttribute('data-state') === 'checked');
     expect(checkedByDataState).toBe(true);
-  });
-
-  it('renders group conflict dropdowns without throwing', () => {
-    // ConflictResolutionChangeGroupAction uses Radix Select which requires pointer events
-    // not available in happy-dom; verify static render instead
-    render(<ConflictResolutionGroupsOnly />);
-    const comboboxes = screen.queryAllByRole('combobox');
-    expect(comboboxes.length).toBeGreaterThan(0);
   });
 });

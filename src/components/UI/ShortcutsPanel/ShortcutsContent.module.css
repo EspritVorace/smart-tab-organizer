@@ -1,0 +1,96 @@
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  padding: 4px 0;
+}
+
+.rowDescription {
+  flex: 1 1 140px;
+  min-width: 140px;
+}
+
+.rowKeys {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+  max-width: 100%;
+}
+
+.altSeparator {
+  color: var(--gray-a9);
+  font-size: 11px;
+}
+
+.plus {
+  color: var(--gray-a9);
+  font-size: 10px;
+  user-select: none;
+}
+
+.sequenceSeparator {
+  font-style: italic;
+  user-select: none;
+  margin: 0 2px;
+}
+
+.groupTitle {
+  margin-bottom: 4px;
+}
+
+.groupTrigger {
+  all: unset;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 4px 0;
+  cursor: pointer;
+  border-radius: var(--radius-2);
+}
+
+.groupTrigger:focus-visible {
+  outline: 2px solid var(--focus-8);
+  outline-offset: 2px;
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: var(--gray-11);
+  transition: transform 150ms ease;
+}
+
+.groupTrigger[data-state="open"] .chevron {
+  transform: rotate(180deg);
+}
+
+.firefoxHint {
+  margin-top: 4px;
+  color: var(--gray-11);
+}
+
+.unboundBanner {
+  padding: 8px 10px;
+  background: var(--amber-a3);
+  border: 1px solid var(--amber-a5);
+  border-radius: var(--radius-2);
+  color: var(--amber-12);
+}
+
+.unboundLabel {
+  font-size: 11px;
+  font-style: italic;
+  color: var(--amber-11);
+}
+
+.nestedGroup {
+  margin-top: var(--space-2);
+  padding-left: var(--space-3);
+  border-left: 1px solid var(--gray-a4);
+}

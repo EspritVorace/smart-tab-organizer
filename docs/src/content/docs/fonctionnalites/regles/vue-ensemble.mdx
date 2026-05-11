@@ -3,4 +3,26 @@ title: Vue d'ensemble
 description: Découvrir la liste des règles de domaine et ses fonctionnalités (navigation, drag-and-drop, badges, toggles, actions en masse).
 ---
 
-{/* TODO: contenu à rédiger */}
+import { Aside } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import rulesListLight from '../../../../assets/screenshots/fr-light-journey-rules-list-populated.png';
+import rulesListDark from '../../../../assets/screenshots/fr-dark-journey-rules-list-populated.png';
+
+La page **Règles de domaine** rassemble toutes vos règles existantes. Chaque ligne couvre un domaine et indique son label, son mode de configuration, sa catégorie et son état (activée ou désactivée).
+
+<ThemeImage
+  lightSrc={rulesListLight}
+  darkSrc={rulesListDark}
+  alt="Liste des règles de domaine avec quatre entrées couvrant les différents modes de configuration."
+/>
+
+Depuis cette vue vous pouvez :
+
+- **Réordonner** les règles par glisser-déposer pour ajuster leur priorité.
+- **Activer ou désactiver** une règle individuellement via son toggle, sans la supprimer.
+- **Ouvrir l'assistant** pour modifier une règle existante ou en créer une nouvelle.
+- **Effectuer des actions en masse** sur une sélection (suppression, activation, export).
+
+<Aside type="note">
+La capture ci-dessus est extraite du parcours narratif `00-main-journey` du pipeline `e2e-doc-scenarios/`. Elle est régénérée à chaque exécution de `pnpm doc:scenarios` pour rester synchronisée avec l'UI.
+</Aside>

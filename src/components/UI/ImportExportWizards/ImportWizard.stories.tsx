@@ -14,7 +14,9 @@ const existingRules: DomainRuleSetting[] = [
     deduplicationMatchMode: 'exact',
     color: 'purple',
     deduplicationEnabled: true,
+    ignoredQueryParams: [],
     presetId: null,
+    urlExtractionMode: 'regex',
     enabled: true,
   },
 ];
@@ -109,4 +111,19 @@ export const ImportWizardConflictDuplicate: Story = {
     const dupOption = body.getAllByText(/Duplicate/i).find(el => el.closest('button'));
     if (dupOption) await userEvent.click(dupOption);
   },
+};
+
+// Opens the wizard pre-selected on the Pack tab in the wider 960px dialog.
+export const ImportWizardLargeWithPack: Story = {
+  args: { open: true, initialSourceMode: 'pack' },
+};
+
+// Opens the wider dialog on the File tab to verify the layout still feels balanced.
+export const ImportWizardSizeFile: Story = {
+  args: { open: true, initialSourceMode: 'file' },
+};
+
+// Opens the wider dialog on the Text tab to verify the textarea behaviour.
+export const ImportWizardSizeText: Story = {
+  args: { open: true, initialSourceMode: 'text' },
 };

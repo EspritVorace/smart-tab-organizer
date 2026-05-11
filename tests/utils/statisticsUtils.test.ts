@@ -14,12 +14,12 @@ import { defaultStatistics } from '../../src/types/statistics';
 
 describe('statisticsUtils', () => {
   describe('getStatisticsData', () => {
-    it('retourne les valeurs par défaut si le storage est vide', async () => {
+    it('returns default values when storage is empty', async () => {
       const stats = await getStatisticsData();
       expect(stats).toEqual(defaultStatistics);
     });
 
-    it('retourne les données stockées', async () => {
+    it('returns the stored data', async () => {
       await fakeBrowser.storage.local.set({
         statistics: { tabGroupsCreatedCount: 5, tabsDeduplicatedCount: 10, dailyBuckets: {} },
       });
@@ -28,7 +28,7 @@ describe('statisticsUtils', () => {
       expect(stats.tabsDeduplicatedCount).toBe(10);
     });
 
-    it('fusionne avec les valeurs par défaut si données partielles', async () => {
+    it('merges with default values when stored data is partial', async () => {
       await fakeBrowser.storage.local.set({
         statistics: { tabGroupsCreatedCount: 42 },
       });
@@ -38,7 +38,7 @@ describe('statisticsUtils', () => {
       expect(stats.dailyBuckets).toEqual({});
     });
 
-    it("retourne les valeurs par défaut en cas d'erreur", async () => {
+    it('returns default values on error', async () => {
       vi.spyOn(fakeBrowser.storage.local, 'get').mockRejectedValueOnce(
         new Error('Storage error'),
       );
@@ -48,7 +48,7 @@ describe('statisticsUtils', () => {
   });
 
   describe('setStatisticsData', () => {
-    it('écrit les statistiques dans le storage', async () => {
+    it('writes statistics to storage', async () => {
       const data = { tabGroupsCreatedCount: 7, tabsDeduplicatedCount: 3, dailyBuckets: {} };
       await setStatisticsData(data);
       const stored = await fakeBrowser.storage.local.get('statistics');
@@ -57,7 +57,7 @@ describe('statisticsUtils', () => {
   });
 
   describe('updateStatisticsData', () => {
-    it('met à jour partiellement les statistiques', async () => {
+    it('partially updates statistics', async () => {
       await fakeBrowser.storage.local.set({
         statistics: { tabGroupsCreatedCount: 5, tabsDeduplicatedCount: 10, dailyBuckets: {} },
       });
@@ -69,7 +69,7 @@ describe('statisticsUtils', () => {
   });
 
   describe('incrementStat', () => {
-    it("incrémente tabGroupsCreatedCount pour type 'grouping'", async () => {
+    it("increments tabGroupsCreatedCount for type 'grouping'", async () => {
       await fakeBrowser.storage.local.set({
         statistics: { tabGroupsCreatedCount: 3, tabsDeduplicatedCount: 0, dailyBuckets: {} },
       });
@@ -79,7 +79,7 @@ describe('statisticsUtils', () => {
       expect(stats.tabsDeduplicatedCount).toBe(0);
     });
 
-    it("incrémente tabsDeduplicatedCount pour type 'dedup'", async () => {
+    it("increments tabsDeduplicatedCount for type 'dedup'", async () => {
       await fakeBrowser.storage.local.set({
         statistics: { tabGroupsCreatedCount: 0, tabsDeduplicatedCount: 7, dailyBuckets: {} },
       });
@@ -89,7 +89,7 @@ describe('statisticsUtils', () => {
       expect(stats.tabGroupsCreatedCount).toBe(0);
     });
 
-    it('écrit dans le bucket journalier pour la règle', async () => {
+    it("writes to the daily bucket for the rule", async () => {
       await incrementStat('grouping', 'rule-abc');
       const stats = await getStatisticsData();
       const today = new Date().toISOString().slice(0, 10);
@@ -97,7 +97,7 @@ describe('statisticsUtils', () => {
       expect(stats.dailyBuckets[today]?.['rule-abc']?.dedup).toBe(0);
     });
 
-    it('cumule les appels successifs dans le bucket', async () => {
+    it('accumulates successive calls in the bucket', async () => {
       await incrementStat('grouping', 'rule-x');
       await incrementStat('grouping', 'rule-x');
       await incrementStat('dedup', 'rule-x');
@@ -107,7 +107,7 @@ describe('statisticsUtils', () => {
       expect(stats.dailyBuckets[today]?.['rule-x']?.dedup).toBe(1);
     });
 
-    it('initialise firstUsedAt au premier incrément', async () => {
+    it('initializes firstUsedAt on the first increment', async () => {
       const stats = await getStatisticsData();
       expect(stats.firstUsedAt).toBeUndefined();
       await incrementStat('grouping', 'rule-1');
@@ -115,7 +115,7 @@ describe('statisticsUtils', () => {
       expect(updated.firstUsedAt).toBeDefined();
     });
 
-    it('ne modifie pas firstUsedAt si déjà défini', async () => {
+    it('does not change firstUsedAt when it is already set', async () => {
       const existingDate = '2026-01-01T00:00:00.000Z';
       await fakeBrowser.storage.local.set({
         statistics: { tabGroupsCreatedCount: 1, tabsDeduplicatedCount: 0, dailyBuckets: {}, firstUsedAt: existingDate },
@@ -127,7 +127,7 @@ describe('statisticsUtils', () => {
   });
 
   describe('resetStatisticsData', () => {
-    it('remet les statistiques aux valeurs par défaut', async () => {
+    it('resets statistics back to default values', async () => {
       await fakeBrowser.storage.local.set({
         statistics: {
           tabGroupsCreatedCount: 100,
@@ -143,7 +143,7 @@ describe('statisticsUtils', () => {
       expect(stats.dailyBuckets).toEqual({});
     });
 
-    it("ne lance pas d'erreur si setStatisticsData échoue", async () => {
+    it('does not throw when setStatisticsData fails', async () => {
       vi.spyOn(fakeBrowser.storage.local, 'set').mockRejectedValueOnce(
         new Error('Storage write error'),
       );
@@ -152,13 +152,13 @@ describe('statisticsUtils', () => {
   });
 
   describe('watchStatisticsData', () => {
-    it('retourne une fonction de cleanup', () => {
+    it('returns a cleanup function', () => {
       const unwatch = watchStatisticsData(() => {});
       expect(typeof unwatch).toBe('function');
       unwatch();
     });
 
-    it('invoque le callback avec les données fusionnées aux défauts quand le storage change', async () => {
+    it('invokes the callback with data merged with defaults when storage changes', async () => {
       const callback = vi.fn();
       const unwatch = watchStatisticsData(callback);
 
@@ -177,13 +177,13 @@ describe('statisticsUtils', () => {
 });
 
 describe('purgeOldBuckets', () => {
-  it('conserve les entrées récentes', () => {
+  it('keeps recent entries', () => {
     const today = new Date().toISOString().slice(0, 10);
     const buckets = { [today]: { 'rule-1': { grouping: 1, dedup: 0 } } };
     expect(purgeOldBuckets(buckets)).toEqual(buckets);
   });
 
-  it('supprime les entrées antérieures à maxDays jours', () => {
+  it('removes entries older than maxDays days', () => {
     const old = new Date();
     old.setDate(old.getDate() - 91);
     const oldDate = old.toISOString().slice(0, 10);
@@ -197,7 +197,7 @@ describe('purgeOldBuckets', () => {
     expect(result[today]).toBeDefined();
   });
 
-  it('conserve les entrées à exactement maxDays jours', () => {
+  it('keeps entries that are exactly maxDays days old', () => {
     const boundary = new Date();
     boundary.setDate(boundary.getDate() - 90);
     const boundaryDate = boundary.toISOString().slice(0, 10);
@@ -206,11 +206,11 @@ describe('purgeOldBuckets', () => {
     expect(result[boundaryDate]).toBeDefined();
   });
 
-  it('retourne un objet vide si buckets est vide', () => {
+  it('returns an empty object when buckets is empty', () => {
     expect(purgeOldBuckets({})).toEqual({});
   });
 
-  it('respecte un maxDays personnalisé', () => {
+  it('respects a custom maxDays value', () => {
     const old = new Date();
     old.setDate(old.getDate() - 8);
     const oldDate = old.toISOString().slice(0, 10);

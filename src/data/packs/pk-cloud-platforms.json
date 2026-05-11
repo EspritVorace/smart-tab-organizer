@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-cloud-platforms",
+    "name": {
+      "en": "Deployment platforms",
+      "fr": "Plateformes de déploiement",
+      "es": "Plataformas de despliegue"
+    },
+    "description": {
+      "en": "Group dashboards on Cloudflare, Vercel, Netlify and Render by site or project.",
+      "fr": "Regroupe les tableaux de bord Cloudflare, Vercel, Netlify et Render par site ou projet.",
+      "es": "Agrupa los paneles de Cloudflare, Vercel, Netlify y Render por sitio o proyecto."
+    },
+    "categoryId": "cloud"
+  },
+  "domainRules": [
+    {
+      "id": "pk-cloud-platforms-cloudflare",
+      "enabled": true,
+      "domainFilter": "dash.cloudflare.com",
+      "label": "Cloudflare: Domain",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "dash\\.cloudflare\\.com/[0-9a-f]+/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "green",
+      "categoryId": "cloud",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-cloud-platforms-vercel",
+      "enabled": true,
+      "domainFilter": "vercel.com",
+      "label": "Vercel: Project",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "vercel\\.com/[^/]+/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "green",
+      "categoryId": "cloud",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "vercel-dashboard",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-cloud-platforms-netlify",
+      "enabled": true,
+      "domainFilter": "app.netlify.com",
+      "label": "Netlify: Site",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/sites/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "green",
+      "categoryId": "cloud",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-cloud-platforms-render",
+      "enabled": true,
+      "domainFilter": "dashboard.render.com",
+      "label": "Render: Service",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/(srv-[a-z0-9]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "green",
+      "categoryId": "cloud",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

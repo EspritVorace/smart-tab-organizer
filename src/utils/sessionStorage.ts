@@ -1,11 +1,12 @@
 import type { Session } from '@/types/session';
 import { sessionsArraySchema } from '@/schemas/session';
 import { logger } from './logger.js';
-import { sessionsItem } from './storageItems.js';
+import { getActiveScopedItems } from './workspaceContext.js';
 
-/** Load all sessions from storage, validated with Zod */
+/** Load all sessions from the active workspace, validated with Zod. */
 export async function loadSessions(): Promise<Session[]> {
   try {
+    const { sessionsItem } = await getActiveScopedItems();
     const raw = await sessionsItem.getValue();
     const parsed = sessionsArraySchema.safeParse(raw);
     if (parsed.success) {
@@ -19,8 +20,9 @@ export async function loadSessions(): Promise<Session[]> {
   }
 }
 
-/** Save all sessions to storage */
+/** Save all sessions to the active workspace. */
 export async function saveSessions(sessions: Session[]): Promise<void> {
+  const { sessionsItem } = await getActiveScopedItems();
   await sessionsItem.setValue(sessions);
 }
 

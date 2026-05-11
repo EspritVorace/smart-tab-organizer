@@ -1,5 +1,5 @@
 import { Flex, Text, RadioGroup } from '@radix-ui/themes';
-import { Controller, type Control, type FieldValues } from 'react-hook-form';
+import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
 import { FieldLabel } from './FieldLabel';
 import { getMessage } from '@/utils/i18n';
 
@@ -8,23 +8,23 @@ interface RadioOption {
   readonly keyLabel: string;
 }
 
-interface RadioGroupFieldProps {
+interface RadioGroupFieldProps<TFieldValues extends FieldValues> {
   label: string;
-  name: string;
+  name: Path<TFieldValues>;
   options: readonly RadioOption[];
-  control: Control<FieldValues>;
+  control: Control<TFieldValues>;
   required?: boolean;
   onChange?: (value: string) => void;
 }
 
-export function RadioGroupField({ 
-  label, 
-  name, 
-  options, 
+export function RadioGroupField<TFieldValues extends FieldValues>({
+  label,
+  name,
+  options,
   control,
   required = false,
   onChange
-}: RadioGroupFieldProps) {
+}: RadioGroupFieldProps<TFieldValues>) {
   return (
     <Flex direction="column">
       <FieldLabel required={required}>{label}</FieldLabel>

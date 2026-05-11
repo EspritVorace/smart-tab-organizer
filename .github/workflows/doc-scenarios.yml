@@ -1,0 +1,141 @@
+name: Doc Scenarios
+
+# Narrative documentation captures (e2e-doc-scenarios pipeline).
+#
+# Not wired to pull_request because the matrix (3 locales x 2 themes) takes
+# several minutes per run and is not relevant to functional code changes.
+# Triggers:
+#   - workflow_dispatch (manual, with optional auto-PR)
+#   - tag pushes (release captures stay in sync with shipped UI)
+#   - weekly cron (catches drift between two releases)
+
+on:
+  workflow_dispatch:
+    inputs:
+      open_pr:
+        description: 'Open a pull request with the routed captures (docs/src/assets/screenshots, doc/readme, doc/chrome-web-store).'
+        type: boolean
+        default: false
+  push:
+    tags:
+      - 'v*'
+  schedule:
+    # Mondays 06:00 UTC.
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: doc-scenarios-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    name: Capture narrative scenarios
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install xvfb
+        run: sudo apt-get install -y xvfb
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Regenerate keyboard shortcuts reference page
+        run: pnpm shortcuts:doc
+
+      - name: Verify keyboard shortcuts reference is up to date
+        run: |
+          if ! git diff --quiet -- docs/src/content/docs/annexes/raccourcis-clavier.mdx \
+                docs/src/content/docs/en/annexes/raccourcis-clavier.mdx \
+                docs/src/content/docs/es/annexes/raccourcis-clavier.mdx; then
+            echo "::error::docs/src/content/docs/**/annexes/raccourcis-clavier.mdx is out of sync with src/shortcuts/registry.ts. Run 'pnpm shortcuts:doc' and commit the result."
+            git --no-pager diff -- docs/src/content/docs/annexes/raccourcis-clavier.mdx \
+              docs/src/content/docs/en/annexes/raccourcis-clavier.mdx \
+              docs/src/content/docs/es/annexes/raccourcis-clavier.mdx
+            exit 1
+          fi
+
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm build
+
+      - name: Run doc:scenarios (full matrix)
+        run: xvfb-run --auto-servernum -- pnpm exec playwright test --config=e2e-doc-scenarios/playwright.doc.config.ts
+
+      - name: Audit routing manifests
+        if: always()
+        continue-on-error: true
+        run: pnpm doc:scenarios:audit
+
+      - name: Upload narrative captures (raw output)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: doc-scenarios-output
+          path: e2e-doc-scenarios/output/**
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload routed assets (Starlight + README + Chrome Web Store)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: doc-scenarios-routed
+          path: |
+            docs/src/assets/screenshots/**
+            doc/readme/**
+            doc/chrome-web-store/**
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload routing audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: doc-scenarios-audit
+          path: reports/routing-audit.md
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Detect routed asset changes
+        if: github.event_name == 'workflow_dispatch' && inputs.open_pr
+        id: diff
+        run: |
+          set -e
+          if git diff --quiet -- docs/src/assets/screenshots doc/readme doc/chrome-web-store; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open pull request with routed captures
+        if: github.event_name == 'workflow_dispatch' && inputs.open_pr && steps.diff.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: chore/refresh-doc-scenarios
+          base: ${{ github.ref_name }}
+          commit-message: 'chore(doc-scenarios): refresh narrative captures'
+          title: 'chore(doc-scenarios): refresh narrative captures'
+          body: |
+            Refresh of the routed narrative captures produced by `pnpm doc:scenarios`.
+
+            Triggered by workflow run [`${{ github.run_id }}`](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+
+            See the `doc-scenarios-audit` artifact for the routing audit report.
+          add-paths: |
+            docs/src/assets/screenshots
+            doc/readme
+            doc/chrome-web-store
+          delete-branch: true

@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-travel-stays",
+    "name": {
+      "en": "Hotels & rentals",
+      "fr": "Hôtels & locations",
+      "es": "Hoteles y alquileres"
+    },
+    "description": {
+      "en": "Group Booking, Airbnb and Hotels.com tabs by destination or listing.",
+      "fr": "Regroupe les onglets Booking, Airbnb et Hotels.com par destination ou annonce.",
+      "es": "Agrupa las pestañas de Booking, Airbnb y Hotels.com por destino o anuncio."
+    },
+    "categoryId": "travel"
+  },
+  "domainRules": [
+    {
+      "id": "pk-travel-booking",
+      "enabled": true,
+      "domainFilter": "*.booking.com",
+      "label": "Booking: Destination",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_manual",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "travel",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "booking-hotel",
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "ss"
+    },
+    {
+      "id": "pk-travel-airbnb",
+      "enabled": true,
+      "domainFilter": "*.airbnb.*",
+      "label": "Airbnb: Listing",
+      "titleParsingRegEx": "(?:.+?)\\s*-\\s*(.+?)\\s*-\\s*Airbnb",
+      "urlParsingRegEx": "rooms/(\\d+)",
+      "groupNameSource": "smart_manual",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "travel",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "airbnb-listing",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-travel-hotels-com",
+      "enabled": true,
+      "domainFilter": "*.hotels.com",
+      "label": "Hotels.com: Search",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_manual",
+      "deduplicationMatchMode": "exact",
+      "color": "purple",
+      "categoryId": "travel",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "destination"
+    }
+  ]
+}

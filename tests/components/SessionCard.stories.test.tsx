@@ -17,7 +17,7 @@ const existingSessions = [
 
 describe('SessionCard (portable stories)', () => {
   describe('SessionCardDefault', () => {
-    it('renders session metadata (name, tab/group counts, color dots)', () => {
+    it('renders metadata, action buttons and collapsed preview', () => {
       const { container } = render(
         <SessionCardDefault existingSessions={existingSessions as any} />,
       );
@@ -34,12 +34,6 @@ describe('SessionCard (portable stories)', () => {
         (el) => (el as HTMLElement).style.borderRadius === '50%',
       );
       expect(colorDots).toHaveLength(2);
-    });
-
-    it('renders action buttons and collapsed preview', () => {
-      render(
-        <SessionCardDefault existingSessions={existingSessions as any} />,
-      );
 
       expect(screen.getByRole('button', { name: 'Pin' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Rename' })).toBeInTheDocument();
@@ -52,12 +46,63 @@ describe('SessionCard (portable stories)', () => {
         'closed',
       );
     });
+
+    it('rename flow: enter mode, show confirm/cancel, cancel exits', async () => {
+      render(
+        <SessionCardDefault existingSessions={existingSessions as any} />,
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Rename' }));
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole('textbox', { name: 'Session name' }),
+        ).toBeInTheDocument();
+      });
+
+      expect(
+        screen.getByRole('button', { name: 'Confirm rename' }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: 'Cancel' }),
+      ).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+      await waitFor(() => {
+        expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+      });
+    });
+
+    it('calls onPin and toggles preview open on trigger click', async () => {
+      const onPin = vi.fn();
+      render(
+        <SessionCardDefault
+          existingSessions={existingSessions as any}
+          onPin={onPin}
+        />,
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Pin' }));
+      expect(onPin).toHaveBeenCalledOnce();
+
+      const toggle = screen.getByTestId('session-card-session-1-preview-toggle');
+      fireEvent.click(toggle);
+
+      await waitFor(() => {
+        const root = toggle.closest('[data-state]');
+        expect(root?.getAttribute('data-state')).toBe('open');
+      });
+    });
   });
 
   describe('SessionCardPinned', () => {
-    it('shows the "Unpin" button instead of "Pin"', () => {
+    it('shows Unpin button (not Pin) and calls onUnpin when clicked', () => {
+      const onUnpin = vi.fn();
       render(
-        <SessionCardPinned existingSessions={existingSessions as any} />,
+        <SessionCardPinned
+          existingSessions={existingSessions as any}
+          onUnpin={onUnpin}
+        />,
       );
 
       expect(
@@ -66,11 +111,14 @@ describe('SessionCard (portable stories)', () => {
       expect(
         screen.queryByRole('button', { name: 'Pin' }),
       ).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Unpin' }));
+      expect(onUnpin).toHaveBeenCalledOnce();
     });
   });
 
   describe('SessionCardWithRelativeDates', () => {
-    it('renders a relative-time text with a <time> element on every card', () => {
+    it('renders <time> elements with "modified"/"created" prefixes', () => {
       const { container } = render(<SessionCardWithRelativeDates />);
 
       const timeElements = container.querySelectorAll('time[datetime]');
@@ -83,20 +131,17 @@ describe('SessionCard (portable stories)', () => {
         );
         expect(el.textContent?.trim().length).toBeGreaterThan(0);
       }
-    });
 
-    it('uses the "modified" prefix when updatedAt differs from createdAt', () => {
-      render(<SessionCardWithRelativeDates />);
       // "Sprint en cours" has updatedAt 5 min ago vs createdAt 30 min ago.
-      const node = screen.getByTestId('session-card-rt-5min-modified-relative-time');
-      expect(node.textContent).toMatch(/modified/);
-    });
-
-    it('uses the "created" prefix when updatedAt equals createdAt', () => {
-      render(<SessionCardWithRelativeDates />);
+      expect(
+        screen.getByTestId('session-card-rt-5min-modified-relative-time')
+          .textContent,
+      ).toMatch(/modified/);
       // "Recherches du matin" passes updatedOffset null -> createdAt === updatedAt.
-      const node = screen.getByTestId('session-card-rt-2h-created-relative-time');
-      expect(node.textContent).toMatch(/created/);
+      expect(
+        screen.getByTestId('session-card-rt-2h-created-relative-time')
+          .textContent,
+      ).toMatch(/created/);
     });
   });
 
@@ -112,95 +157,6 @@ describe('SessionCard (portable stories)', () => {
         .getByTestId('session-card-session-1-preview-toggle')
         .closest('[data-state]');
       expect(collapsibleRoot?.getAttribute('data-state')).toBe('open');
-    });
-  });
-
-  describe('interactions', () => {
-    it('enters rename mode when the rename button is clicked', async () => {
-      render(
-        <SessionCardDefault existingSessions={existingSessions as any} />,
-      );
-
-      fireEvent.click(screen.getByRole('button', { name: 'Rename' }));
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole('textbox', { name: 'Session name' }),
-        ).toBeInTheDocument();
-      });
-    });
-
-    it('shows confirm and cancel buttons in rename mode', async () => {
-      render(
-        <SessionCardDefault existingSessions={existingSessions as any} />,
-      );
-
-      fireEvent.click(screen.getByRole('button', { name: 'Rename' }));
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole('button', { name: 'Confirm rename' }),
-        ).toBeInTheDocument();
-        expect(
-          screen.getByRole('button', { name: 'Cancel' }),
-        ).toBeInTheDocument();
-      });
-    });
-
-    it('cancels rename mode on cancel click', async () => {
-      render(
-        <SessionCardDefault existingSessions={existingSessions as any} />,
-      );
-
-      fireEvent.click(screen.getByRole('button', { name: 'Rename' }));
-      await waitFor(() => {
-        expect(screen.getByRole('textbox')).toBeInTheDocument();
-      });
-
-      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
-      await waitFor(() => {
-        expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
-      });
-    });
-
-    it('calls onPin when the pin button is clicked', () => {
-      const onPin = vi.fn();
-      render(
-        <SessionCardDefault
-          existingSessions={existingSessions as any}
-          onPin={onPin}
-        />,
-      );
-
-      fireEvent.click(screen.getByRole('button', { name: 'Pin' }));
-      expect(onPin).toHaveBeenCalledOnce();
-    });
-
-    it('calls onUnpin when the unpin button is clicked on a pinned card', () => {
-      const onUnpin = vi.fn();
-      render(
-        <SessionCardPinned
-          existingSessions={existingSessions as any}
-          onUnpin={onUnpin}
-        />,
-      );
-
-      fireEvent.click(screen.getByRole('button', { name: 'Unpin' }));
-      expect(onUnpin).toHaveBeenCalledOnce();
-    });
-
-    it('toggles preview open on trigger click', async () => {
-      render(
-        <SessionCardDefault existingSessions={existingSessions as any} />,
-      );
-
-      const toggle = screen.getByTestId('session-card-session-1-preview-toggle');
-      fireEvent.click(toggle);
-
-      await waitFor(() => {
-        const root = toggle.closest('[data-state]');
-        expect(root?.getAttribute('data-state')).toBe('open');
-      });
     });
   });
 });

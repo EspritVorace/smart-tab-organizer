@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-dev-stackoverflow",
+    "name": {
+      "en": "Stack Overflow & Stack Exchange",
+      "fr": "Stack Overflow & Stack Exchange",
+      "es": "Stack Overflow & Stack Exchange"
+    },
+    "description": {
+      "en": "Group Q&A tabs across Stack Overflow, Server Fault, Super User and Stack Exchange sites.",
+      "fr": "Regroupe les onglets Q/R sur Stack Overflow, Server Fault, Super User et les sites Stack Exchange.",
+      "es": "Agrupa las pestañas de Q&R en Stack Overflow, Server Fault, Super User y los sitios Stack Exchange."
+    },
+    "categoryId": "development"
+  },
+  "domainRules": [
+    {
+      "id": "pk-dev-stackoverflow-question",
+      "enabled": true,
+      "domainFilter": "stackoverflow.com",
+      "label": "Stack Overflow: Question",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_preset",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "yellow",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["utm_*", "noredirect", "newreg"],
+      "presetId": "stackoverflow-question",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-dev-stackoverflow-tag",
+      "enabled": true,
+      "domainFilter": "stackoverflow.com",
+      "label": "Stack Overflow: Tag",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/questions/tagged/([^/?#]+)",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "yellow",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["utm_*", "tab", "page"],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

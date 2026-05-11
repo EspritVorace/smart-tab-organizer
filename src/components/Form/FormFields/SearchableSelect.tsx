@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useCallback, useId } from 'react';
 import { Command } from 'cmdk';
-import { ChevronDown, Check, Search } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import './SearchableSelect.css';
+import { SearchableSelectItem } from './SearchableSelectItem';
 
 export interface SearchableSelectOption {
   value: string;
@@ -137,32 +138,14 @@ export function SearchableSelect({
     }
   };
 
-  const renderItem = (option: SearchableSelectOption) => {
-    const isSelected = option.value === value;
-    return (
-      <Command.Item
-        key={option.value}
-        value={`${option.value} ${option.label}`}
-        onSelect={() => {
-          if (!option.disabled) handleSelect(option.value);
-        }}
-        disabled={option.disabled}
-        className={[
-          'ss-item',
-          isSelected ? 'ss-item--selected' : '',
-          option.disabled ? 'ss-item--disabled' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        aria-selected={isSelected}
-      >
-        <span className="ss-item__check">
-          <Check size={14} aria-hidden="true" />
-        </span>
-        <span className="ss-item__label">{option.label}</span>
-      </Command.Item>
-    );
-  };
+  const renderItem = (option: SearchableSelectOption) => (
+    <SearchableSelectItem
+      key={option.value}
+      option={option}
+      selectedValue={value}
+      onSelect={handleSelect}
+    />
+  );
 
   return (
     <div ref={containerRef} className={['ss-root', className].filter(Boolean).join(' ')}>
@@ -196,7 +179,6 @@ export function SearchableSelect({
         </span>
         <ChevronDown
           size={16}
-          aria-hidden="true"
           className={['ss-trigger__icon', open ? 'ss-trigger__icon--open' : '']
             .filter(Boolean)
             .join(' ')}
@@ -207,7 +189,7 @@ export function SearchableSelect({
         <div className="ss-dropdown" style={dropdownStyle}>
           <Command>
             <div className="ss-search">
-              <Search size={14} aria-hidden="true" className="ss-search__icon" />
+              <Search size={14} className="ss-search__icon" />
               <Command.Input
                 ref={inputRef}
                 placeholder={searchPlaceholder}

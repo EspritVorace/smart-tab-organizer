@@ -1,7 +1,7 @@
 import { Box, Button, Dialog, Flex } from '@radix-ui/themes';
 import { Edit2, Plus } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getMessage } from '@/utils/i18n';
 import { WizardModal } from '@/components/UI/WizardModal';
@@ -10,14 +10,16 @@ import { WizardStep1Identity } from './WizardStep1Identity';
 import { WizardStep2Config } from './WizardStep2Config';
 import { WizardStep3Options } from './WizardStep3Options';
 import { WizardStep4Summary } from './WizardStep4Summary';
-import { EditSummaryView } from './EditSummaryView';
-import { type ConfigEditValues } from './ConfigEditModal';
+import { ConfigEditModal, type ConfigEditValues } from './ConfigEditModal';
+import { IdentityEditModal, type IdentityEditValues } from './IdentityEditModal';
+import { OptionsEditModal, type OptionsEditValues } from './OptionsEditModal';
 import type { ConfigMode } from './ConfigModeSelector';
 import { generateUUID } from '@/utils/utils';
 import { createDomainRuleSchemaWithUniqueness, type DomainRule } from '@/schemas/domainRule';
 import { groupNameSourceOptions, type GroupNameSourceValue, type UrlExtractionModeValue } from '@/schemas/enums';
 import { getPresetById, loadPresets, type PresetCategory } from '@/utils/presetUtils';
 import type { AppSettings } from '@/types/syncSettings';
+import type { ChromeGroupColor } from '@/types/tabTree';
 import { logger } from '@/utils/logger';
 
 interface RuleWizardModalProps {
@@ -79,6 +81,7 @@ const getDefaultValues = (rule?: DomainRule): Partial<DomainRule> => {
     urlParsingRegEx: '',
     groupNameSource: 'title',
     deduplicationMatchMode: 'exact',
+    color: 'grey',
     categoryId: null,
     deduplicationEnabled: true,
     ignoredQueryParams: [],
@@ -138,6 +141,11 @@ export function RuleWizardModal({
   const [presetName, setPresetName] = useState<string | null>(null);
   const [stepError, setStepError] = useState<string | null>(null);
 
+  // Sub-dialog visibility (edit mode only).
+  const [isIdentityModalOpen, setIsIdentityModalOpen] = useState(false);
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
+
   // aria-live announcement
   const [stepAnnouncement, setStepAnnouncement] = useState('');
 
@@ -155,7 +163,9 @@ export function RuleWizardModal({
     getValues,
     trigger,
   } = useForm<DomainRule>({
-    resolver: zodResolver(createDomainRuleSchemaWithUniqueness(syncSettings.domainRules, domainRule?.id)),
+    resolver: zodResolver(
+      createDomainRuleSchemaWithUniqueness(syncSettings.domainRules, domainRule?.id),
+    ) as Resolver<DomainRule>,
     defaultValues: getDefaultValues(domainRule),
     mode: 'onChange',
   });
@@ -163,6 +173,9 @@ export function RuleWizardModal({
   const groupNameSource = watch('groupNameSource');
   const deduplicationEnabled = watch('deduplicationEnabled');
   const watchedPresetId = watch('presetId');
+  // Reactive snapshot of the full rule, used to feed the edit-mode summary so
+  // it refreshes after each sub-dialog Apply (getValues() is not reactive).
+  const watchedValues = useWatch({ control }) as DomainRule;
 
   // Load presets when modal opens
   useEffect(() => {
@@ -189,6 +202,9 @@ export function RuleWizardModal({
     setStep(0);
     setStepError(null);
     setStepAnnouncement('');
+    setIsIdentityModalOpen(false);
+    setIsConfigModalOpen(false);
+    setIsOptionsModalOpen(false);
     const mode = inferConfigMode(domainRule);
     setConfigMode(mode);
     if (!domainRule || domainRule.groupNameSource === 'manual') {
@@ -336,9 +352,25 @@ export function RuleWizardModal({
     announceStep(newStep);
   };
 
+  // In create mode, the summary's "Modify" button jumps back to the relevant step.
+  // In edit mode, it opens the matching sub-dialog instead.
   const handleEditStep = (targetStep: number) => {
+    if (isEditing) {
+      if (targetStep === 0) setIsIdentityModalOpen(true);
+      else if (targetStep === 1) setIsConfigModalOpen(true);
+      else if (targetStep === 2) setIsOptionsModalOpen(true);
+      return;
+    }
     setStep(targetStep);
     announceStep(targetStep);
+  };
+
+  const handleApplyIdentity = (values: IdentityEditValues) => {
+    setValue('label', values.label, { shouldValidate: true, shouldDirty: true });
+    setValue('categoryId', values.categoryId, { shouldDirty: true });
+    setValue('color', values.color, { shouldDirty: true });
+    setValue('domainFilter', values.domainFilter, { shouldValidate: true, shouldDirty: true });
+    trigger();
   };
 
   const handleApplyConfig = (values: ConfigEditValues) => {
@@ -364,6 +396,13 @@ export function RuleWizardModal({
     }
   };
 
+  const handleApplyOptions = (values: OptionsEditValues) => {
+    setValue('deduplicationEnabled', values.deduplicationEnabled, { shouldDirty: true });
+    setValue('deduplicationMatchMode', values.deduplicationMatchMode, { shouldDirty: true });
+    setValue('ignoredQueryParams', values.ignoredQueryParams, { shouldValidate: true, shouldDirty: true });
+    trigger();
+  };
+
   const handleFormSubmit = (data: DomainRule) => {
     setStepError(null);
     onSubmit(data);
@@ -377,6 +416,9 @@ export function RuleWizardModal({
     setConfigMode('preset');
     setStepError(null);
     setStepAnnouncement('');
+    setIsIdentityModalOpen(false);
+    setIsConfigModalOpen(false);
+    setIsOptionsModalOpen(false);
     onClose();
   };
 
@@ -397,6 +439,13 @@ export function RuleWizardModal({
     urlQueryParamName: getValues('urlQueryParamName') ?? '',
   };
 
+  const currentIdentityValues: IdentityEditValues = {
+    label: watchedValues?.label ?? '',
+    categoryId: watchedValues?.categoryId ?? null,
+    color: (watchedValues?.color ?? 'grey') as ChromeGroupColor,
+    domainFilter: watchedValues?.domainFilter ?? '',
+  };
+
   const description = isEditing
     ? getMessage('editRuleDescription')
     : getMessage(STEP_DESCRIPTION_KEYS[step]);
@@ -409,6 +458,8 @@ export function RuleWizardModal({
       icon={isEditing ? Edit2 : Plus}
       title={title}
       description={description}
+      maxWidth={820}
+      fillHeight={!isEditing && step === 1}
       onOpenAutoFocus={(e) => {
         e.preventDefault();
         const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[name="label"]');
@@ -435,21 +486,25 @@ export function RuleWizardModal({
           />
         )}
 
-        <WizardModal.Body>
-          <Flex direction="column" gap="4">
+        <WizardModal.Body fillHeight={!isEditing && step === 1}>
+          <Flex
+            direction="column"
+            gap="4"
+            style={
+              !isEditing && step === 1
+                ? { flex: 1, minHeight: 0, overflow: 'hidden' }
+                : undefined
+            }
+          >
             {isEditing ? (
-              <EditSummaryView
-                control={control}
-                errors={errors}
-                configMode={configMode}
-                onApplyConfig={handleApplyConfig}
-                presetCategories={presetCategories}
-                isLoadingPresets={isLoadingPresets}
-                presetName={presetName}
-                groupNameSource={groupNameSource as GroupNameSourceValue}
-                deduplicationEnabled={deduplicationEnabled}
-                currentConfigValues={currentConfigValues}
-              />
+              <Box data-testid="wizard-rule-edit-summary">
+                <WizardStep4Summary
+                  values={watchedValues}
+                  configMode={configMode}
+                  presetName={presetName}
+                  onEditStep={handleEditStep}
+                />
+              </Box>
             ) : (
               <>
                 {step === 0 && (
@@ -458,7 +513,16 @@ export function RuleWizardModal({
                   </Box>
                 )}
                 {step === 1 && (
-                  <Box data-testid="wizard-rule-step-2">
+                  <Box
+                    data-testid="wizard-rule-step-2"
+                    style={{
+                      flex: 1,
+                      minHeight: 0,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      overflow: 'hidden',
+                    }}
+                  >
                     <WizardStep2Config
                       control={control}
                       errors={errors}
@@ -526,6 +590,33 @@ export function RuleWizardModal({
           )}
         </WizardModal.Footer>
       </form>
+
+      {isEditing && (
+        <>
+          <IdentityEditModal
+            isOpen={isIdentityModalOpen}
+            onClose={() => setIsIdentityModalOpen(false)}
+            onApply={handleApplyIdentity}
+            initial={currentIdentityValues}
+            existingRules={syncSettings.domainRules}
+            editingRuleId={domainRule?.id}
+          />
+          <ConfigEditModal
+            isOpen={isConfigModalOpen}
+            onClose={() => setIsConfigModalOpen(false)}
+            onApply={handleApplyConfig}
+            initial={currentConfigValues}
+            presetCategories={presetCategories}
+            isLoadingPresets={isLoadingPresets}
+          />
+          <OptionsEditModal
+            isOpen={isOptionsModalOpen}
+            onClose={() => setIsOptionsModalOpen(false)}
+            onApply={handleApplyOptions}
+            initial={watchedValues}
+          />
+        </>
+      )}
     </WizardModal>
   );
 }

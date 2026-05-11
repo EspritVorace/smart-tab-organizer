@@ -1,0 +1,83 @@
+.tipCard {
+  background: var(--accent-a2);
+  border-radius: var(--radius-3);
+  padding: var(--space-4);
+  min-height: 96px;
+}
+
+.tipCardCompact {
+  min-height: 0;
+  padding: var(--space-3);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--gray-a3);
+  cursor: pointer;
+  transition: background 0.12s ease, transform 0.12s ease;
+}
+
+.dot:hover {
+  background: var(--gray-a4);
+}
+
+.dotActive {
+  background: var(--accent-9);
+  transform: scale(1.2);
+}
+
+.dot:focus-visible,
+.dotActive:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+.accordionTrigger {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  padding: var(--space-3) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  font: inherit;
+  color: var(--gray-12);
+  text-align: left;
+}
+
+.accordionTrigger:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+  border-radius: var(--radius-2);
+}
+
+.accordionChevron {
+  transition: transform 0.15s ease;
+  color: var(--gray-11);
+  flex-shrink: 0;
+}
+
+.accordionTriggerOpen .accordionChevron {
+  transform: rotate(180deg);
+}
+
+.accordionItem {
+  border-bottom: 1px solid var(--gray-a3);
+}
+
+.accordionItem:last-child {
+  border-bottom: 0;
+}
+
+.accordionBody {
+  padding: 0 0 var(--space-3) calc(24px + var(--space-2));
+}
+
+.accordionLabel {
+  flex: 1;
+}

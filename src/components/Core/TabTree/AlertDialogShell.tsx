@@ -1,5 +1,6 @@
 import { AlertDialog, Button, Flex } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
+import { focusAutoFocusTarget } from '@/components/UI/DialogShell';
 
 export interface AlertDialogShellProps {
   /** Controls dialog visibility */
@@ -46,12 +47,12 @@ export function AlertDialogShell({
         if (!isOpen) onClose();
       }}
     >
-      <AlertDialog.Content maxWidth={maxWidth}>
+      <AlertDialog.Content maxWidth={maxWidth} onOpenAutoFocus={focusAutoFocusTarget}>
         <AlertDialog.Title>{title}</AlertDialog.Title>
         <AlertDialog.Description size="2">{description}</AlertDialog.Description>
         <Flex gap="2" mt="4" justify="end" wrap="wrap">
           <AlertDialog.Cancel>
-            <Button variant="soft" color="gray">
+            <Button variant="soft" color="gray" data-autofocus="true">
               {getMessage('cancel')}
             </Button>
           </AlertDialog.Cancel>

@@ -1,6 +1,6 @@
 # Data-TestID Reference Guide
 
-Référence complète des `data-testid` par page et composant pour les tests Playwright.
+Complete reference of the `data-testid` values per page and component for the Playwright tests.
 
 ---
 
@@ -20,7 +20,7 @@ popup                             # Main popup container (350px width)
 ### `DomainRulesPage.tsx`
 ```
 page-rules                        # Main page container
-page-rules-toolbar                # Toolbar area (search + add button) — hidden when no rules
+page-rules-toolbar                # Toolbar area (search + add button), hidden when no rules
 page-rules-search                 # Search input
 page-rules-btn-add                # "Add rule" button (toolbar OR empty placeholder, mutually exclusive)
 page-rules-list                   # List container (role="grid")
@@ -31,7 +31,7 @@ page-rules-bulk-bar               # Bulk action bar
 ### `SessionsPage.tsx`
 ```
 page-sessions                     # Main page container
-page-sessions-toolbar             # Toolbar area (search + snapshot button) — hidden when no sessions
+page-sessions-toolbar             # Toolbar area (search + snapshot button), hidden when no sessions
 page-sessions-search              # Search input
 page-sessions-btn-snapshot        # "Snapshot" button (toolbar OR empty placeholder, mutually exclusive)
 page-sessions-list                # Sessions list container

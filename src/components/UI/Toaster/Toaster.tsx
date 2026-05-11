@@ -86,7 +86,7 @@ export function Toaster() {
                   title={getMessage('toastCloseLabel')}
                   data-testid="toast-btn-close"
                 >
-                  <X size={14} aria-hidden="true" />
+                  <X size={14} />
                 </IconButton>
               </Toast.Close>
             </Flex>

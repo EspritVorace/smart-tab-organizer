@@ -228,7 +228,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
           onClick={handleSave}
           disabled={!sessionName.trim() || selectedTabIds.size === 0 || isCapturing || isSaving}
         >
-          <Camera size={14} aria-hidden="true" />
+          <Camera size={14} />
           {getMessage('snapshotSaveButton')}
         </Button>
       </WizardModal.Footer>

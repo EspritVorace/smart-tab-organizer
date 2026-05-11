@@ -1,0 +1,44 @@
+.aside {
+  display: flex;
+  flex-direction: column;
+  background: var(--gray-a2);
+  border-left: 1px solid var(--gray-a4);
+  overflow: hidden;
+  transition: width 200ms ease-in-out;
+  flex-shrink: 0;
+}
+
+.asideOpen {
+  width: 360px;
+}
+
+.asideClosed {
+  width: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 14px 16px 10px 20px;
+  border-bottom: 1px solid var(--gray-a3);
+  flex-shrink: 0;
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  /* Avoid horizontal flicker when the parent width animates. */
+  width: 360px;
+  box-sizing: border-box;
+}

@@ -39,15 +39,15 @@ export const sessionsArraySchema = z.array(sessionSchema);
 
 export type SessionForUniqueness = { id: string; name: string };
 
-// Schéma avec validation d'unicité du nom pour une session individuelle
+// Schema with name-uniqueness validation for a single session.
 export const createSessionSchemaWithUniqueness = (existingSessions: SessionForUniqueness[], editingSessionId?: string) => {
   return sessionSchema.refine((data) => {
     const existingNames = existingSessions
       .filter(s => editingSessionId ? s.id !== editingSessionId : true)
       .map(s => s.name.toLowerCase());
     return !existingNames.includes(data.name.toLowerCase());
-  }, () => ({
-    message: getMessage('errorSessionNameUnique'),
+  }, {
+    error: () => getMessage('errorSessionNameUnique'),
     path: ['name'],
-  }));
+  });
 };

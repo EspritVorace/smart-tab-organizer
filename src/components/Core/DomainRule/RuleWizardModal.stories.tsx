@@ -24,7 +24,9 @@ const mockAppSettings: AppSettings = {
       deduplicationMatchMode: 'exact',
       color: 'grey',
       deduplicationEnabled: true,
+      ignoredQueryParams: [],
       presetId: null,
+      urlExtractionMode: 'regex',
       enabled: true
     }
   ]
@@ -40,7 +42,9 @@ const mockDomainRule: DomainRule = {
   deduplicationMatchMode: 'exact',
   color: 'purple',
   deduplicationEnabled: true,
-  presetId: null
+  ignoredQueryParams: [],
+  presetId: null,
+  urlExtractionMode: 'regex'
 };
 
 const meta: Meta<typeof RuleWizardModal> = {
@@ -67,7 +71,7 @@ const meta: Meta<typeof RuleWizardModal> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// === CRÉATION (wizard 4 étapes) ===
+// === Creation (4-step wizard) ===
 
 export const RuleWizardModalCreate: Story = {
   args: {
@@ -76,7 +80,7 @@ export const RuleWizardModalCreate: Story = {
   },
 };
 
-// === ÉDITION (vue résumé) ===
+// === Edit (summary view) ===
 
 export const RuleWizardModalEdit: Story = {
   args: {
@@ -121,7 +125,7 @@ export const RuleWizardModalEditDeduplicationDisabled: Story = {
   },
 };
 
-// === CAS LIMITES ===
+// === Edge cases ===
 
 export const RuleWizardModalClosed: Story = {
   args: {
@@ -223,7 +227,9 @@ export const RuleWizardModalLabelUniqueness: Story = {
           deduplicationMatchMode: 'exact',
           color: 'grey',
           deduplicationEnabled: true,
+          ignoredQueryParams: [],
           presetId: null,
+          urlExtractionMode: 'regex',
           enabled: true
         }
       ]

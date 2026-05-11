@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-comm-slack",
+    "name": {
+      "en": "Slack",
+      "fr": "Slack",
+      "es": "Slack"
+    },
+    "description": {
+      "en": "Group Slack tabs by workspace.",
+      "fr": "Regroupe les onglets Slack par espace de travail.",
+      "es": "Agrupa las pestañas de Slack por espacio de trabajo."
+    },
+    "categoryId": "communication"
+  },
+  "domainRules": [
+    {
+      "id": "pk-comm-slack-workspace",
+      "enabled": true,
+      "domainFilter": "*.slack.com",
+      "label": "Slack: Workspace",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "://([^.]+)\\.slack\\.com",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "purple",
+      "categoryId": "social",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "slack-workspace",
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-travel-flights",
+    "name": {
+      "en": "Flights",
+      "fr": "Vols",
+      "es": "Vuelos"
+    },
+    "description": {
+      "en": "Group Skyscanner, Google Flights and Kayak tabs by route.",
+      "fr": "Regroupe les onglets Skyscanner, Google Flights et Kayak par itinéraire.",
+      "es": "Agrupa las pestañas de Skyscanner, Google Flights y Kayak por ruta."
+    },
+    "categoryId": "travel"
+  },
+  "domainRules": [
+    {
+      "id": "pk-travel-skyscanner",
+      "enabled": true,
+      "domainFilter": "*.skyscanner.*",
+      "label": "Skyscanner: Route",
+      "titleParsingRegEx": "(?:.+?)\\s*to\\s*(.+?)\\s*-",
+      "urlParsingRegEx": "(?:flights|vols)/([^/]+)/([^/?#]+)",
+      "groupNameSource": "smart_manual",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "travel",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "skyscanner-flights",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-travel-google-flights",
+      "enabled": true,
+      "domainFilter": "*.google.*",
+      "label": "Google Flights: Search",
+      "titleParsingRegEx": "(.+?)\\s*-\\s*Google\\s+(?:Flights|Vols)",
+      "urlParsingRegEx": "google\\.[a-z.]+/(travel|flights)/",
+      "groupNameSource": "title",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "travel",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-travel-kayak",
+      "enabled": true,
+      "domainFilter": "*.kayak.*",
+      "label": "Kayak: Route",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/flights/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "travel",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

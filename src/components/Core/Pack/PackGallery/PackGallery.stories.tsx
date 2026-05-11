@@ -1,10 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { PackGallery } from './PackGallery';
+import type { PackSelectionState } from './usePackSelections';
 import type { PackCategory, PackFile } from '@/schemas/pack';
 import type { ImportDomainRule } from '@/schemas/importExport';
-import type { JsonSourceInputState } from '@/components/UI/ImportExportWizards/Source';
-import type { DomainRuleSetting } from '@/types/syncSettings';
 
 const baseRule = (overrides: Partial<ImportDomainRule>): ImportDomainRule => ({
   id: overrides.id ?? 'r',
@@ -17,6 +16,7 @@ const baseRule = (overrides: Partial<ImportDomainRule>): ImportDomainRule => ({
   deduplicationEnabled: true,
   ignoredQueryParams: [],
   presetId: null,
+  urlExtractionMode: 'regex',
   enabled: true,
   ...overrides,
 });
@@ -76,27 +76,6 @@ const packs: PackFile[] = [
   },
 ];
 
-function makeSourceStub(): JsonSourceInputState<DomainRuleSetting[]> {
-  return {
-    sourceMode: 'file',
-    setSourceMode: () => undefined,
-    jsonText: '',
-    parsedData: null,
-    parseError: null,
-    importedNote: null,
-    fileName: null,
-    isDragOver: false,
-    fileInputRef: { current: null } as never,
-    handleTextChange: () => undefined,
-    handleDrop: () => undefined,
-    handleDragOver: () => undefined,
-    handleDragLeave: () => undefined,
-    handleBrowse: () => undefined,
-    handleFileSelect: () => undefined,
-    reset: () => undefined,
-  };
-}
-
 interface HarnessProps {
   packs: PackFile[];
   categories: PackCategory[];
@@ -104,7 +83,7 @@ interface HarnessProps {
 }
 
 function PackGalleryHarness({ packs, categories, initialSearch }: HarnessProps) {
-  const source = useMemo(() => makeSourceStub(), []);
+  const [selections, setSelections] = useState<Record<string, PackSelectionState>>({});
   const [, force] = useState(0);
   if (typeof initialSearch === 'string') {
     setTimeout(() => {
@@ -122,7 +101,14 @@ function PackGalleryHarness({ packs, categories, initialSearch }: HarnessProps) 
       }
     }, 0);
   }
-  return <PackGallery packs={packs} categories={categories} source={source} />;
+  return (
+    <PackGallery
+      packs={packs}
+      categories={categories}
+      selections={selections}
+      onSelectionChange={(id, next) => setSelections((prev) => ({ ...prev, [id]: next }))}
+    />
+  );
 }
 
 const meta = {

@@ -13,7 +13,9 @@ const rules: DomainRuleSetting[] = [
     deduplicationMatchMode: 'exact',
     color: 'purple',
     deduplicationEnabled: true,
+    ignoredQueryParams: [],
     presetId: null,
+    urlExtractionMode: 'regex',
     enabled: true,
   },
   {
@@ -26,7 +28,9 @@ const rules: DomainRuleSetting[] = [
     deduplicationMatchMode: 'exact',
     color: 'blue',
     deduplicationEnabled: true,
+    ignoredQueryParams: [],
     presetId: null,
+    urlExtractionMode: 'regex',
     enabled: true,
   },
 ];
@@ -49,6 +53,7 @@ const meta: Meta<typeof DomainRulesPage> = {
   args: {
     syncSettings: mockSyncSettings,
     updateRules: () => {},
+    onOpenImportRules: () => {},
   },
 };
 

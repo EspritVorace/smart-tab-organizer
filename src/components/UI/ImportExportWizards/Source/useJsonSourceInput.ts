@@ -18,7 +18,7 @@ export interface JsonSourceInputState<T> {
   importedNote: string | null;
   fileName: string | null;
   isDragOver: boolean;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
   handleTextChange: (text: string) => void;
   handleDrop: (e: React.DragEvent) => void;
   handleDragOver: (e: React.DragEvent) => void;
@@ -35,8 +35,9 @@ export interface JsonSourceInputState<T> {
  */
 export function useJsonSourceInput<T>(
   validate: (raw: unknown) => JsonSourceValidationResult<T>,
+  initialSourceMode: SourceMode = 'file',
 ): JsonSourceInputState<T> {
-  const [sourceMode, setSourceMode] = useState<SourceMode>('file');
+  const [sourceMode, setSourceMode] = useState<SourceMode>(initialSourceMode);
   const [jsonText, setJsonText] = useState('');
   const [parsedData, setParsedData] = useState<T | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
@@ -121,14 +122,14 @@ export function useJsonSourceInput<T>(
   }, [handleFileRead]);
 
   const reset = useCallback(() => {
-    setSourceMode('file');
+    setSourceMode(initialSourceMode);
     setJsonText('');
     setParsedData(null);
     setParseError(null);
     setImportedNote(null);
     setFileName(null);
     setIsDragOver(false);
-  }, []);
+  }, [initialSourceMode]);
 
   return {
     sourceMode,

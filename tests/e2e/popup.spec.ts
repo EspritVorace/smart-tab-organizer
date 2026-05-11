@@ -47,7 +47,8 @@ test.describe('[US-PO01] Toolbar', () => {
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
-    await expect(page.getByTestId('popup-toolbar-btn-save')).toBeEnabled({ timeout: 5000 });
+    // Button uses aria-disabled instead of native disabled; wait until attribute is absent
+    await expect(page.getByTestId('popup-toolbar-btn-save')).not.toHaveAttribute('aria-disabled', { timeout: 5000 });
 
     const [newPage] = await Promise.all([
       extensionContext.waitForEvent('page'),
@@ -69,8 +70,8 @@ test.describe('[US-PO01] Toolbar', () => {
     const page = await extensionContext.newPage();
     await goToPopup(page, extensionId);
 
-    // Wait for sessions to load so the Restore button is enabled
-    await expect(page.getByTestId('popup-toolbar-btn-restore')).toBeEnabled({ timeout: 5000 });
+    // Button uses aria-disabled instead of native disabled; wait until attribute is absent
+    await expect(page.getByTestId('popup-toolbar-btn-restore')).not.toHaveAttribute('aria-disabled', { timeout: 5000 });
 
     const [newPage] = await Promise.all([
       extensionContext.waitForEvent('page'),
@@ -80,6 +81,48 @@ test.describe('[US-PO01] Toolbar', () => {
     expect(newPage.url()).toContain('options.html');
 
     await newPage.close();
+  });
+
+  test('Save button is keyboard-reachable when no capturable tab exists [US-A11Y001]', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    // Snapshot existing pages BEFORE opening the new one. Chromium persistent
+    // contexts with --load-extension can shut down (or refuse subsequent
+    // newPage() calls with "Failed to open a new tab") once their last page
+    // closes, so we keep the new page alive while we close the others.
+    const stalePages = extensionContext.pages();
+    const page = await extensionContext.newPage();
+
+    // Close stale pages so hasCapturableTabs() sees no capturable tab.
+    // Extension pages (chrome-extension://) are already filtered by hasCapturableTabs.
+    await Promise.all(stalePages.map((p) => p.close().catch(() => {})));
+
+    await goToPopup(page, extensionId);
+
+    const saveBtn = page.getByTestId('popup-toolbar-btn-save');
+    await expect(saveBtn).toHaveAttribute('aria-disabled', 'true', { timeout: 5000 });
+
+    // Must NOT have native disabled so it stays in the tab order
+    await expect(saveBtn).not.toHaveAttribute('disabled');
+
+    await page.close();
+  });
+
+  test('Restore button has aria-disabled when no sessions exist [US-A11Y001]', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    await goToPopup(page, extensionId);
+
+    const restoreBtn = page.getByTestId('popup-toolbar-btn-restore');
+    await expect(restoreBtn).toHaveAttribute('aria-disabled', 'true', { timeout: 5000 });
+
+    // Must NOT have native disabled (so it stays in tab order)
+    await expect(restoreBtn).not.toHaveAttribute('disabled');
+
+    await page.close();
   });
 });
 

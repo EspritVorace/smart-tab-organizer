@@ -31,8 +31,10 @@ async function goToImportExportSection(page: any, extensionId: string): Promise<
     { timeout: 10_000 },
   );
 
-  // Click the "Import / Export" sidebar item
-  await page.getByRole('button', { name: /import.*export/i }).click();
+  // Click the "Import / Export" sidebar item (use the test id since the
+  // accessible name now matches both the sidebar nav item and the home
+  // quick-action card with the same label).
+  await page.getByTestId('sidebar-nav-item-importexport').click();
   await page.getByTestId('page-import-export-card-import-rules').waitFor({ state: 'visible' });
 }
 
@@ -72,6 +74,17 @@ async function clearDomainRules(extensionContext: any): Promise<void> {
   const sw = extensionContext.serviceWorkers()[0];
   await sw.evaluate(async () => {
     await chrome.storage.local.set({ domainRules: [] });
+  });
+  await new Promise(r => setTimeout(r, 200));
+}
+
+/** Clear all sessions from storage. Used by deep-link tests that rely on the
+ *  sessions empty state appearing. Without this a prior spec may have left
+ *  sessions in chrome.storage.local. */
+async function clearSessions(extensionContext: any): Promise<void> {
+  const sw = extensionContext.serviceWorkers()[0];
+  await sw.evaluate(async () => {
+    await chrome.storage.local.set({ sessions: [] });
   });
   await new Promise(r => setTimeout(r, 200));
 }
@@ -398,8 +411,8 @@ test.describe('Import / Export', () => {
 
       await dialog.getByRole('button', { name: /next/i }).click();
 
-      // Deselect the rule
-      await dialog.getByRole('checkbox').first().click();
+      // Deselect the rule (aria-label matches the rule label passed to makeRuleJson)
+      await dialog.getByRole('checkbox', { name: 'Deselect Rule' }).click();
 
       // "0 rule(s) to import" and Confirm Import disabled
       await expect(dialog.getByText(/0 rule.*import/i)).toBeVisible();
@@ -868,6 +881,165 @@ test.describe('Import / Export', () => {
 
       // Should show clipboard option
       await expect(page.getByRole('menuitem', { name: /clipboard/i })).toBeVisible();
+
+      await page.close();
+    });
+  });
+
+  // ── Deep-link referrer (#importexport?action=...&from=...) ───────────────
+
+  test.describe('Deep-link referrer', () => {
+    test('opens the rules import wizard when navigating with action=import-rules', async ({
+      extensionContext,
+      extensionId,
+    }) => {
+      const page = await extensionContext.newPage();
+      await page.goto(
+        `chrome-extension://${extensionId}/options.html#importexport?action=import-rules&from=home`,
+      );
+      await page.waitForLoadState('domcontentloaded');
+
+      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
+      // The wizard's "File" radio is part of the source step.
+      await expect(page.getByRole('radio', { name: 'File' }).locator('..')).toBeVisible();
+
+      // Hash should be cleaned of the action/from params after consumption.
+      await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#importexport');
+
+      await page.close();
+    });
+
+    test('returns to the referrer section when the wizard closes (from=home)', async ({
+      extensionContext,
+      extensionId,
+    }) => {
+      const page = await extensionContext.newPage();
+      await page.goto(
+        `chrome-extension://${extensionId}/options.html#importexport?action=import-rules&from=home`,
+      );
+      await page.waitForLoadState('domcontentloaded');
+      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
+
+      // Close the wizard via Escape.
+      await page.keyboard.press('Escape');
+      await expect(page.getByRole('dialog')).toBeHidden();
+
+      await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#home');
+      await expect(page.getByTestId('page-home')).toBeVisible();
+
+      await page.close();
+    });
+
+    test('stays on importexport when from=popup', async ({
+      extensionContext,
+      extensionId,
+    }) => {
+      const page = await extensionContext.newPage();
+      await page.goto(
+        `chrome-extension://${extensionId}/options.html#importexport?action=import-rules&from=popup`,
+      );
+      await page.waitForLoadState('domcontentloaded');
+      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
+
+      await page.keyboard.press('Escape');
+      await expect(page.getByRole('dialog')).toBeHidden();
+
+      await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#importexport');
+      await expect(page.getByTestId('page-import-export')).toBeVisible();
+
+      await page.close();
+    });
+
+    test('does not re-open the wizard after a refresh on #importexport', async ({
+      extensionContext,
+      extensionId,
+    }) => {
+      const page = await extensionContext.newPage();
+      await page.goto(
+        `chrome-extension://${extensionId}/options.html#importexport?action=import-rules&from=home`,
+      );
+      await page.waitForLoadState('domcontentloaded');
+      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
+      await page.keyboard.press('Escape');
+      await expect(page.getByRole('dialog')).toBeHidden();
+
+      // Navigate back to importexport without params and reload.
+      await page.evaluate(() => { window.location.hash = '#importexport'; });
+      await page.reload();
+      await page.waitForLoadState('domcontentloaded');
+      await expect(page.getByTestId('page-import-export')).toBeVisible();
+      await expect(page.getByRole('dialog')).toBeHidden();
+
+      await page.close();
+    });
+
+    test('rules empty-state Import button uses the deep-link mechanism', async ({
+      extensionContext,
+      extensionId,
+    }) => {
+      const page = await extensionContext.newPage();
+      await page.goto(`chrome-extension://${extensionId}/options.html#rules`);
+      await page.waitForLoadState('domcontentloaded');
+
+      const emptyState = page.getByTestId('page-rules-empty');
+      await emptyState.waitFor({ state: 'visible', timeout: 10_000 });
+      const importBtn = emptyState.getByRole('button', { name: /import/i });
+      await importBtn.click();
+
+      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
+      await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#importexport');
+
+      await page.keyboard.press('Escape');
+      await expect(page.getByRole('dialog')).toBeHidden();
+      await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#rules');
+
+      await page.close();
+    });
+
+    test('sessions empty-state Import button uses the deep-link mechanism', async ({
+      extensionContext,
+      extensionId,
+    }) => {
+      await clearSessions(extensionContext);
+
+      const page = await extensionContext.newPage();
+      await page.goto(`chrome-extension://${extensionId}/options.html#sessions`);
+      await page.waitForLoadState('domcontentloaded');
+
+      const emptyState = page.getByTestId('page-sessions-empty');
+      await emptyState.waitFor({ state: 'visible', timeout: 10_000 });
+      const importBtn = emptyState.getByRole('button', { name: /import/i });
+      await importBtn.click();
+
+      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
+      await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#importexport');
+
+      await page.keyboard.press('Escape');
+      await expect(page.getByRole('dialog')).toBeHidden();
+      await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#sessions');
+
+      await page.close();
+    });
+
+    test('home onboarding "Import pack" button opens the rules wizard with from=home', async ({
+      extensionContext,
+      extensionId,
+    }) => {
+      // No rules seeded -> hero is shown.
+      const page = await extensionContext.newPage();
+      await page.goto(`chrome-extension://${extensionId}/options.html#home`);
+      await page.waitForLoadState('domcontentloaded');
+
+      const heroImport = page.getByTestId('home-hero-import');
+      await heroImport.waitFor({ state: 'visible', timeout: 10_000 });
+      await heroImport.click();
+
+      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
+      await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#importexport');
+
+      await page.keyboard.press('Escape');
+      await expect(page.getByRole('dialog')).toBeHidden();
+      await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#home');
 
       await page.close();
     });

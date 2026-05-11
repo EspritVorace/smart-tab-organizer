@@ -73,7 +73,6 @@ export function Statistics({ stats, onReset, isLoading = false, collapsed = fals
                                 >
                                     <ChevronDown
                                         size={16}
-                                        aria-hidden="true"
                                         style={{
                                             color: 'var(--gray-9)',
                                             transition: 'transform 0.2s ease',
@@ -95,7 +94,7 @@ export function Statistics({ stats, onReset, isLoading = false, collapsed = fals
                                 title={getMessage('resetStats')}
                                 aria-label={getMessage('resetStats')}
                             >
-                                <Trash2 size={14} aria-hidden="true" />
+                                <Trash2 size={14} />
                             </IconButton>
                         )}
                     </Flex>
@@ -111,7 +110,7 @@ export function Statistics({ stats, onReset, isLoading = false, collapsed = fals
                                 textAlign: 'center',
                             }}>
                                 <Flex direction="column" gap="1" align="center">
-                                    <FolderOpen size={18} aria-hidden="true" style={{ color: 'var(--accent-9)' }} />
+                                    <FolderOpen size={18} style={{ color: 'var(--accent-9)' }} />
                                     <Text size="5" weight="bold" aria-hidden="true">{groupCount}</Text>
                                     <Text size="1" color="gray" aria-hidden="true">
                                         {groupLabel}
@@ -128,7 +127,7 @@ export function Statistics({ stats, onReset, isLoading = false, collapsed = fals
                                 textAlign: 'center',
                             }}>
                                 <Flex direction="column" gap="1" align="center">
-                                    <TabletSmartphone size={18} aria-hidden="true" style={{ color: 'var(--accent-9)' }} />
+                                    <TabletSmartphone size={18} style={{ color: 'var(--accent-9)' }} />
                                     <Text size="5" weight="bold" aria-hidden="true">{dedupCount}</Text>
                                     <Text size="1" color="gray" aria-hidden="true">
                                         {dedupLabel}

@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-comm-meetings",
+    "name": {
+      "en": "Video meetings",
+      "fr": "Visioconférences",
+      "es": "Videoconferencias"
+    },
+    "description": {
+      "en": "Group meeting tabs by meeting ID across Zoom, Google Meet and Microsoft Teams.",
+      "fr": "Regroupe les onglets de réunion par identifiant sur Zoom, Google Meet et Microsoft Teams.",
+      "es": "Agrupa las pestañas de reunión por identificador en Zoom, Google Meet y Microsoft Teams."
+    },
+    "categoryId": "communication"
+  },
+  "domainRules": [
+    {
+      "id": "pk-comm-zoom",
+      "enabled": true,
+      "domainFilter": "*.zoom.us",
+      "label": "Zoom: Meeting",
+      "titleParsingRegEx": "Zoom Meeting ID: (\\d+)",
+      "urlParsingRegEx": "zoom\\.us/j/(\\d+)",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": null,
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "zoom-meeting",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-comm-google-meet",
+      "enabled": true,
+      "domainFilter": "meet.google.com",
+      "label": "Google Meet: Meeting",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "meet\\.google\\.com/([a-z]{3,4}-[a-z]{3,4}-[a-z]{3,4})",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "green",
+      "categoryId": null,
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-comm-teams",
+      "enabled": true,
+      "domainFilter": "teams.microsoft.com",
+      "label": "Teams: Meeting",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/meetup-join/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "purple",
+      "categoryId": null,
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

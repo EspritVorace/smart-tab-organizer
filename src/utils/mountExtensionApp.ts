@@ -16,7 +16,7 @@ import { initCategoriesStore } from './categoriesStore.js';
  * @param rootId - The `id` attribute of the target DOM element (e.g. `"options-app"`).
  * @param app    - The React element to render (e.g. `<OptionsApp />`).
  */
-export function mountExtensionApp(rootId: string, app: React.ReactElement): void {
+export function mountExtensionApp(rootId: string, app: React.ReactNode): void {
   // Set document lang to match browser locale for screen readers
   try {
     const uiLang = browser.i18n.getUILanguage();

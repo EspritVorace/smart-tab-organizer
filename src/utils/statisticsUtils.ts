@@ -1,7 +1,7 @@
 import type { Statistics, DailyBuckets } from '@/types/statistics.js';
 import { defaultStatistics } from '@/types/statistics.js';
 import { logger } from './logger.js';
-import { statisticsItem } from './storageItems.js';
+import { getActiveScopedItems, getActiveScopedItemsSync } from './workspaceContext.js';
 
 export function purgeOldBuckets(buckets: DailyBuckets, maxDays = 90): DailyBuckets {
   const cutoff = new Date();
@@ -14,6 +14,7 @@ export function purgeOldBuckets(buckets: DailyBuckets, maxDays = 90): DailyBucke
 
 export async function getStatisticsData(): Promise<Statistics> {
   try {
+    const { statisticsItem } = await getActiveScopedItems();
     const value = await statisticsItem.getValue();
     return { ...defaultStatistics, ...value };
   } catch (error) {
@@ -24,6 +25,7 @@ export async function getStatisticsData(): Promise<Statistics> {
 
 export async function setStatisticsData(statistics: Statistics): Promise<void> {
   try {
+    const { statisticsItem } = await getActiveScopedItems();
     await statisticsItem.setValue(statistics);
   } catch (error) {
     logger.error('Error setting statistics:', error);
@@ -82,6 +84,7 @@ export async function resetStatisticsData(): Promise<void> {
 export function watchStatisticsData(
   callback: (statistics: Statistics) => void,
 ): () => void {
+  const { statisticsItem } = getActiveScopedItemsSync();
   return statisticsItem.watch((newValue) => {
     callback({ ...defaultStatistics, ...newValue });
   });

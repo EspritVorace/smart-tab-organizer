@@ -94,6 +94,72 @@ export function moveTabInGroup(
   return { ...session, groups };
 }
 
+type Tab = Session['ungroupedTabs'][number];
+type RemoveResult = { tab: Tab | undefined; nextUngrouped: Session['ungroupedTabs']; nextGroups: Session['groups'] };
+
+function removeTabFromSource(
+  session: Session,
+  tabId: string,
+  sourceGroupId: string | null | undefined,
+): RemoveResult {
+  if (sourceGroupId === null) {
+    return {
+      tab: session.ungroupedTabs.find((t) => t.id === tabId),
+      nextUngrouped: session.ungroupedTabs.filter((t) => t.id !== tabId),
+      nextGroups: session.groups,
+    };
+  }
+
+  if (sourceGroupId !== undefined) {
+    const group = session.groups.find((g) => g.id === sourceGroupId);
+    return {
+      tab: group?.tabs.find((t) => t.id === tabId),
+      nextUngrouped: session.ungroupedTabs,
+      nextGroups: session.groups.map((g) =>
+        g.id === sourceGroupId ? { ...g, tabs: g.tabs.filter((t) => t.id !== tabId) } : g
+      ),
+    };
+  }
+
+  // Auto-detect source
+  const ungroupedIdx = session.ungroupedTabs.findIndex((t) => t.id === tabId);
+  if (ungroupedIdx !== -1) {
+    return {
+      tab: session.ungroupedTabs[ungroupedIdx],
+      nextUngrouped: session.ungroupedTabs.filter((t) => t.id !== tabId),
+      nextGroups: session.groups,
+    };
+  }
+
+  let found: Tab | undefined;
+  for (const g of session.groups) {
+    found = g.tabs.find((t) => t.id === tabId);
+    if (found) break;
+  }
+  return {
+    tab: found,
+    nextUngrouped: session.ungroupedTabs,
+    nextGroups: session.groups.map((g) => ({ ...g, tabs: g.tabs.filter((t) => t.id !== tabId) })),
+  };
+}
+
+function insertTabInTarget(
+  ungrouped: Session['ungroupedTabs'],
+  groups: Session['groups'],
+  tab: Tab,
+  targetGroupId: string | null,
+): { nextUngrouped: Session['ungroupedTabs']; nextGroups: Session['groups'] } {
+  if (targetGroupId === null) {
+    return { nextUngrouped: [...ungrouped, tab], nextGroups: groups };
+  }
+  return {
+    nextUngrouped: ungrouped,
+    nextGroups: groups.map((g) =>
+      g.id === targetGroupId ? { ...g, tabs: [...g.tabs, tab] } : g
+    ),
+  };
+}
+
 /**
  * Reassign a tab from its source location to a target group (or to ungrouped).
  *
@@ -111,49 +177,8 @@ export function reassignTabToGroup(
   sourceGroupId: string | null | undefined,
   targetGroupId: string | null,
 ): Session {
-  let tab: Session['ungroupedTabs'][number] | undefined;
-  let newUngrouped = session.ungroupedTabs;
-  let newGroups = session.groups;
-
-  if (sourceGroupId === null) {
-    tab = session.ungroupedTabs.find((t) => t.id === tabId);
-    newUngrouped = session.ungroupedTabs.filter((t) => t.id !== tabId);
-  } else if (sourceGroupId !== undefined) {
-    const group = session.groups.find((g) => g.id === sourceGroupId);
-    tab = group?.tabs.find((t) => t.id === tabId);
-    newGroups = session.groups.map((g) =>
-      g.id === sourceGroupId ? { ...g, tabs: g.tabs.filter((t) => t.id !== tabId) } : g
-    );
-  } else {
-    // Auto-detect source
-    const ungroupedIdx = session.ungroupedTabs.findIndex((t) => t.id === tabId);
-    if (ungroupedIdx !== -1) {
-      tab = session.ungroupedTabs[ungroupedIdx];
-      newUngrouped = session.ungroupedTabs.filter((t) => t.id !== tabId);
-    } else {
-      for (const g of session.groups) {
-        const found = g.tabs.find((t) => t.id === tabId);
-        if (found) {
-          tab = found;
-          break;
-        }
-      }
-      newGroups = session.groups.map((g) => ({
-        ...g,
-        tabs: g.tabs.filter((t) => t.id !== tabId),
-      }));
-    }
-  }
-
+  const { tab, nextUngrouped, nextGroups } = removeTabFromSource(session, tabId, sourceGroupId);
   if (!tab) return session;
-
-  if (targetGroupId === null) {
-    newUngrouped = [...newUngrouped, tab];
-  } else {
-    newGroups = newGroups.map((g) =>
-      g.id === targetGroupId ? { ...g, tabs: [...g.tabs, tab!] } : g
-    );
-  }
-
-  return { ...session, ungroupedTabs: newUngrouped, groups: newGroups };
+  const { nextUngrouped: finalUngrouped, nextGroups: finalGroups } = insertTabInTarget(nextUngrouped, nextGroups, tab, targetGroupId);
+  return { ...session, ungroupedTabs: finalUngrouped, groups: finalGroups };
 }

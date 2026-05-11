@@ -9,7 +9,7 @@ import {
 } from '../src/background/grouping';
 import type { DomainRuleSetting } from '../src/types/syncSettings';
 
-// Mock pour éviter les imports du module browser
+// Mock to avoid pulling in the browser module.
 vi.mock('wxt/browser', () => ({
   browser: {
     tabs: {
@@ -31,7 +31,7 @@ vi.mock('wxt/browser', () => ({
   }
 }));
 
-// Mock des modules dépendants
+// Mock dependent modules.
 vi.mock('../src/utils/statisticsUtils.js', () => ({
   incrementStat: vi.fn()
 }));
@@ -52,7 +52,7 @@ vi.mock('../src/utils/i18n.js', () => ({
   getMessage: vi.fn((key) => key)
 }));
 
-// Type pour les tabs mockés
+// Type used for mocked tabs.
 interface MockTab {
   id: number;
   index: number;
@@ -101,7 +101,7 @@ describe('grouping', () => {
   });
 
   describe('findMatchingRule', () => {
-    it('devrait trouver une règle correspondante pour une URL', () => {
+    it('finds a matching rule for a URL', () => {
       const rules: DomainRuleSetting[] = [
         createMockRule({ domainFilter: 'example.com', label: 'Example Rule' }),
         createMockRule({ domainFilter: 'other.com', label: 'Other Rule' })
@@ -113,7 +113,7 @@ describe('grouping', () => {
       expect(result?.label).toBe('Example Rule');
     });
 
-    it('devrait retourner undefined si aucune règle ne correspond', () => {
+    it('returns undefined when no rule matches', () => {
       const rules: DomainRuleSetting[] = [
         createMockRule({ domainFilter: 'other.com' })
       ];
@@ -123,7 +123,7 @@ describe('grouping', () => {
       expect(result).toBeUndefined();
     });
 
-    it('devrait ignorer les règles désactivées', () => {
+    it('ignores disabled rules', () => {
       const rules: DomainRuleSetting[] = [
         createMockRule({ domainFilter: 'example.com', enabled: false }),
         createMockRule({ domainFilter: 'example.com', enabled: true, label: 'Active Rule' })
@@ -134,7 +134,7 @@ describe('grouping', () => {
       expect(result?.label).toBe('Active Rule');
     });
 
-    it('devrait matcher les sous-domaines implicitement (plain domain)', () => {
+    it('matches subdomains implicitly (plain domain)', () => {
       const rules: DomainRuleSetting[] = [
         createMockRule({ domainFilter: 'example.com' })
       ];
@@ -144,7 +144,7 @@ describe('grouping', () => {
       expect(result).toBeDefined();
     });
 
-    it('devrait retourner la première règle correspondante', () => {
+    it('returns the first matching rule', () => {
       const rules: DomainRuleSetting[] = [
         createMockRule({ domainFilter: 'example.com', label: 'First' }),
         createMockRule({ domainFilter: 'example.com', label: 'Second' })
@@ -157,7 +157,7 @@ describe('grouping', () => {
   });
 
   describe('findMatchingRules', () => {
-    it('retourne toutes les règles activées correspondant au domaine, dans l\'ordre', () => {
+    it('returns all enabled rules matching the domain, in order', () => {
       const rules: DomainRuleSetting[] = [
         createMockRule({ domainFilter: 'example.com', label: 'First' }),
         createMockRule({ domainFilter: 'example.com', label: 'Second' }),
@@ -169,7 +169,7 @@ describe('grouping', () => {
       expect(result.map(r => r.label)).toEqual(['First', 'Second']);
     });
 
-    it('ignore les règles désactivées', () => {
+    it('ignores disabled rules', () => {
       const rules: DomainRuleSetting[] = [
         createMockRule({ domainFilter: 'example.com', label: 'Off', enabled: false }),
         createMockRule({ domainFilter: 'example.com', label: 'On' }),
@@ -180,7 +180,7 @@ describe('grouping', () => {
       expect(result.map(r => r.label)).toEqual(['On']);
     });
 
-    it('retourne un tableau vide quand aucune règle ne correspond', () => {
+    it('returns an empty array when no rule matches', () => {
       const rules: DomainRuleSetting[] = [
         createMockRule({ domainFilter: 'other.com' }),
       ];
@@ -190,7 +190,7 @@ describe('grouping', () => {
   });
 
   describe('findGroupingRuleForTab', () => {
-    it('saute la première règle si son extraction échoue et utilise la suivante', () => {
+    it('skips the first rule when its extraction fails and uses the next one', () => {
       const rules: DomainRuleSetting[] = [
         createMockRule({
           id: '1',
@@ -217,7 +217,7 @@ describe('grouping', () => {
       expect(result?.groupName).toBe('Example');
     });
 
-    it('retourne null si aucune règle ne produit un nom de groupe', () => {
+    it('returns null when no rule produces a group name', () => {
       const rules: DomainRuleSetting[] = [
         createMockRule({
           id: '1',
@@ -241,7 +241,7 @@ describe('grouping', () => {
       expect(findGroupingRuleForTab(tab, rules)).toBeNull();
     });
 
-    it('saute les règles dont groupingEnabled est faux', () => {
+    it('skips rules whose groupingEnabled is false', () => {
       const rules: DomainRuleSetting[] = [
         createMockRule({
           id: '1',
@@ -267,7 +267,7 @@ describe('grouping', () => {
       expect(result?.rule.label).toBe('Active');
     });
 
-    it('retourne la première règle qui réussit (ordre préservé)', () => {
+    it('returns the first rule that succeeds (order preserved)', () => {
       const rules: DomainRuleSetting[] = [
         createMockRule({
           id: '1',
@@ -293,7 +293,7 @@ describe('grouping', () => {
       expect(result?.rule.label).toBe('First');
     });
 
-    it('coerce manual et smart_manual en smart_label quand demandé', () => {
+    it('coerces manual and smart_manual to smart_label when requested', () => {
       const rules: DomainRuleSetting[] = [
         createMockRule({
           domainFilter: 'example.com',
@@ -309,7 +309,7 @@ describe('grouping', () => {
       expect(result?.groupName).toBe('My Label');
     });
 
-    it('retourne null quand l\'URL est absente', () => {
+    it('returns null when the URL is missing', () => {
       const rules: DomainRuleSetting[] = [
         createMockRule({ domainFilter: 'example.com', groupingEnabled: true }),
       ];
@@ -320,7 +320,7 @@ describe('grouping', () => {
   });
 
   describe('determineGroupColor', () => {
-    it('devrait retourner la couleur de la règle si définie', () => {
+    it("returns the rule's color when defined", () => {
       const rule = createMockRule({ color: 'blue' });
 
       const result = determineGroupColor(rule, {});
@@ -328,7 +328,7 @@ describe('grouping', () => {
       expect(result).toBe('blue');
     });
 
-    it('devrait retourner null si aucune couleur dans la règle', () => {
+    it('returns null when the rule has no color', () => {
       const rule = createMockRule({ color: undefined });
 
       const result = determineGroupColor(rule, {});
@@ -336,19 +336,19 @@ describe('grouping', () => {
       expect(result).toBeNull();
     });
 
-    it('devrait retourner null pour une couleur vide', () => {
+    it('returns null for an empty color', () => {
       const rule = createMockRule({ color: '' });
 
       const result = determineGroupColor(rule, {});
 
-      // Une chaîne vide est falsy, donc null
+      // An empty string is falsy, so the helper returns null.
       expect(result).toBeNull();
     });
   });
 
   describe('extractGroupNameFromRule', () => {
     describe('groupNameSource: title', () => {
-      it('devrait extraire le nom du groupe depuis le titre avec regex', () => {
+      it('extracts the group name from the title via regex', () => {
         const rule = createMockRule({
           groupNameSource: 'title',
           titleParsingRegEx: 'Test Page - (\\w+)'
@@ -360,7 +360,7 @@ describe('grouping', () => {
         expect(result).toBe('Example');
       });
 
-      it('devrait retourner null si le titre et l\'URL ne trouvent rien', () => {
+      it('returns null when neither the title nor the URL matches', () => {
         const rule = createMockRule({
           groupNameSource: 'title',
           titleParsingRegEx: 'NoMatch - (\\w+)',
@@ -373,7 +373,7 @@ describe('grouping', () => {
         expect(result).toBeNull();
       });
 
-      it('devrait retourner null si pas de label et aucune extraction', () => {
+      it('returns null when there is no label and no extraction', () => {
         const rule = createMockRule({
           groupNameSource: 'title',
           titleParsingRegEx: 'NoMatch',
@@ -386,7 +386,7 @@ describe('grouping', () => {
         expect(result).toBeNull();
       });
 
-      it('devrait utiliser l\'URL comme fallback si le titre ne donne rien', () => {
+      it('falls back to the URL when the title yields nothing', () => {
         const rule = createMockRule({
           groupNameSource: 'title',
           titleParsingRegEx: 'NoMatch - (\\w+)',
@@ -405,7 +405,7 @@ describe('grouping', () => {
     });
 
     describe('groupNameSource: url', () => {
-      it('devrait extraire le nom du groupe depuis l\'URL avec regex', () => {
+      it('extracts the group name from the URL via regex', () => {
         const rule = createMockRule({
           groupNameSource: 'url',
           urlParsingRegEx: 'example\\.com/(\\w+)'
@@ -417,7 +417,7 @@ describe('grouping', () => {
         expect(result).toBe('products');
       });
 
-      it('devrait retourner null si l\'URL et le titre ne trouvent rien', () => {
+      it('returns null when neither the URL nor the title matches', () => {
         const rule = createMockRule({
           groupNameSource: 'url',
           urlParsingRegEx: 'nomatch/(\\w+)',
@@ -430,7 +430,7 @@ describe('grouping', () => {
         expect(result).toBeNull();
       });
 
-      it('devrait utiliser le titre comme fallback si l\'URL ne donne rien', () => {
+      it('falls back to the title when the URL yields nothing', () => {
         const rule = createMockRule({
           groupNameSource: 'url',
           urlParsingRegEx: 'nomatch/(\\w+)',
@@ -449,7 +449,7 @@ describe('grouping', () => {
     });
 
     describe('groupNameSource: smart_label', () => {
-      it('devrait utiliser le label comme fallback si pas d\'extraction', () => {
+      it('falls back to the label when no extraction succeeds', () => {
         const rule = createMockRule({
           groupNameSource: 'smart_label',
           label: 'Smart Label Fallback',
@@ -464,7 +464,7 @@ describe('grouping', () => {
     });
 
     describe('groupNameSource: smart_preset', () => {
-      it('devrait utiliser le presetId comme fallback', () => {
+      it('falls back to the presetId', () => {
         const rule = createMockRule({
           groupNameSource: 'smart_preset',
           presetId: 'github-issues',
@@ -477,10 +477,10 @@ describe('grouping', () => {
         expect(result).toBe('github-issues');
       });
 
-      it('devrait essayer l\'URL si le titre ne donne rien, même sans presetId', () => {
+      it('tries the URL when the title yields nothing, even without a presetId', () => {
         const rule = createMockRule({
           groupNameSource: 'smart_preset',
-          // pas de presetId : anciennement ce cas retournait null sans essayer l'URL
+          // no presetId: this case used to return null without trying the URL.
           titleParsingRegEx: 'NoMatch - (\\w+)',
           urlParsingRegEx: 'example\\.com/(\\w+)',
           label: 'My Rule'
@@ -496,8 +496,8 @@ describe('grouping', () => {
       });
     });
 
-    describe('groupNameSource: smart (sans presetId)', () => {
-      it('devrait essayer titre puis URL pour une règle manuelle sans presetId', () => {
+    describe('groupNameSource: smart (without presetId)', () => {
+      it('tries title then URL for a manual rule without presetId', () => {
         const rule = createMockRule({
           groupNameSource: 'smart',
           titleParsingRegEx: 'NoMatch',
@@ -511,7 +511,7 @@ describe('grouping', () => {
         expect(result).toBe('projects');
       });
 
-      it('devrait retourner null si aucune extraction ne réussit', () => {
+      it('returns null when no extraction succeeds', () => {
         const rule = createMockRule({
           groupNameSource: 'smart',
           titleParsingRegEx: 'NoMatch',
@@ -526,7 +526,7 @@ describe('grouping', () => {
       });
     });
 
-    it('devrait gérer une regex invalide gracieusement et retourner null', () => {
+    it('handles an invalid regex gracefully and returns null', () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
       const rule = createMockRule({
@@ -542,7 +542,7 @@ describe('grouping', () => {
       consoleSpy.mockRestore();
     });
 
-    it('devrait trimmer le nom extrait', () => {
+    it('trims the extracted name', () => {
       const rule = createMockRule({
         groupNameSource: 'title',
         titleParsingRegEx: 'Page - (.*)'
@@ -556,7 +556,7 @@ describe('grouping', () => {
   });
 
   describe('createGroupingContext', () => {
-    it('devrait créer un contexte de groupage complet', () => {
+    it('creates a complete grouping context', () => {
       const rule = createMockRule({
         label: 'Test Rule',
         color: 'green',
@@ -576,7 +576,7 @@ describe('grouping', () => {
       expect(context.newTab).toBe(newTab);
     });
 
-    it('devrait retourner null quand l\'extraction échoue (pas de fallback label)', () => {
+    it('returns null when extraction fails (no label fallback)', () => {
       const rule = createMockRule({
         label: 'Default Label',
         groupNameSource: 'title',
@@ -592,7 +592,7 @@ describe('grouping', () => {
   });
 
   describe('urlExtractionMode: query_param', () => {
-    it('extrait le nom de groupe depuis le paramètre q (Google SERP)', () => {
+    it('extracts the group name from the q parameter (Google SERP)', () => {
       const rule = createMockRule({
         groupNameSource: 'url',
         urlExtractionMode: 'query_param',
@@ -604,7 +604,7 @@ describe('grouping', () => {
       expect(result).toBe('hello world');
     });
 
-    it('utilise le param search_query (YouTube SERP)', () => {
+    it('uses the search_query param (YouTube SERP)', () => {
       const rule = createMockRule({
         groupNameSource: 'url',
         urlExtractionMode: 'query_param',
@@ -616,7 +616,7 @@ describe('grouping', () => {
       expect(result).toBe('hello world');
     });
 
-    it('retourne null en mode url strict quand le paramètre est absent', () => {
+    it('returns null in strict url mode when the parameter is missing', () => {
       const rule = createMockRule({
         groupNameSource: 'url',
         urlExtractionMode: 'query_param',
@@ -628,7 +628,7 @@ describe('grouping', () => {
       expect(result).toBeNull();
     });
 
-    it('fallback sur le label en mode smart_label quand le paramètre est vide', () => {
+    it('falls back to the label in smart_label mode when the parameter is empty', () => {
       const rule = createMockRule({
         label: 'My Label',
         groupNameSource: 'smart_label',
@@ -641,7 +641,7 @@ describe('grouping', () => {
       expect(result).toBe('My Label');
     });
 
-    it('fallback sur le label en mode smart_label quand l\'URL est invalide', () => {
+    it('falls back to the label in smart_label mode when the URL is invalid', () => {
       const rule = createMockRule({
         label: 'My Label',
         groupNameSource: 'smart_label',
@@ -654,7 +654,7 @@ describe('grouping', () => {
       expect(result).toBe('My Label');
     });
 
-    it('priorise le titre puis l\'URL en mode smart (titre regex avant query param)', () => {
+    it('prefers the title then the URL in smart mode (title regex before query param)', () => {
       const rule = createMockRule({
         groupNameSource: 'smart',
         urlExtractionMode: 'query_param',
@@ -670,7 +670,7 @@ describe('grouping', () => {
       expect(result).toBe('from-title');
     });
 
-    it('utilise le query param en fallback en mode smart quand le titre regex échoue', () => {
+    it('falls back to the query param in smart mode when the title regex fails', () => {
       const rule = createMockRule({
         groupNameSource: 'smart',
         urlExtractionMode: 'query_param',

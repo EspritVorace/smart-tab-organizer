@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-dev-gitlab",
+    "name": {
+      "en": "GitLab",
+      "fr": "GitLab",
+      "es": "GitLab"
+    },
+    "description": {
+      "en": "Group GitLab tabs by project, issue and merge request.",
+      "fr": "Regroupe les onglets GitLab par projet, issue et merge request.",
+      "es": "Agrupa las pestañas de GitLab por proyecto, issue y merge request."
+    },
+    "categoryId": "development"
+  },
+  "domainRules": [
+    {
+      "id": "pk-dev-gitlab-project",
+      "enabled": true,
+      "domainFilter": "gitlab.com",
+      "label": "GitLab: Project",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "orange",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["utm_*", "ref"],
+      "presetId": "gitlab-project",
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-dev-gitlab-issue",
+      "enabled": true,
+      "domainFilter": "gitlab.com",
+      "label": "GitLab: Issue",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/-/issues/(\\d+)",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "orange",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["utm_*"],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-dev-gitlab-mr",
+      "enabled": true,
+      "domainFilter": "gitlab.com",
+      "label": "GitLab: Merge Request",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/-/merge_requests/(\\d+)",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "orange",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["utm_*"],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

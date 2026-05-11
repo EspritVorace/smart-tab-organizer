@@ -5,6 +5,7 @@ import { browser } from 'wxt/browser';
 import { TabTree } from '@/components/Core/TabTree/TabTree';
 import { WizardModal } from '@/components/UI/WizardModal';
 import { ConflictResolutionStep } from './ConflictResolutionStep';
+import { Tooltip } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast, showErrorToast } from '@/utils/toast';
 import { showSuccessNotification } from '@/utils/notifications';
@@ -297,14 +298,21 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
                 {getMessage('cancel')}
               </Button>
             </Dialog.Close>
-            <Button
-              data-testid="wizard-restore-btn-restore"
-              onClick={handleRestoreOrNext}
-              disabled={selectedTabIds.size === 0 || isAnalyzing || isRestoring}
+            <Tooltip
+              content={getMessage('wizardRestoreNoTabsHint')}
+              hidden={selectedTabIds.size > 0 || isAnalyzing || isRestoring}
             >
-              <RotateCcw size={14} aria-hidden="true" />
-              {isAnalyzing ? getMessage('loadingText') : getMessage('sessionRestore')}
-            </Button>
+              <Button
+                data-testid="wizard-restore-btn-restore"
+                data-autofocus="true"
+                onClick={selectedTabIds.size === 0 ? undefined : handleRestoreOrNext}
+                disabled={isAnalyzing || isRestoring}
+                aria-disabled={selectedTabIds.size === 0 || isAnalyzing || isRestoring || undefined}
+              >
+                <RotateCcw size={14} />
+                {isAnalyzing ? getMessage('loadingText') : getMessage('sessionRestore')}
+              </Button>
+            </Tooltip>
           </>
         )}
 
@@ -319,10 +327,11 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
               {getMessage('previous')}
             </Button>
             <Button
+              data-autofocus="true"
               onClick={() => executeRestore(conflictAnalysis, duplicateTabAction, groupActions)}
               disabled={isRestoring}
             >
-              <RotateCcw size={14} aria-hidden="true" />
+              <RotateCcw size={14} />
               {getMessage('sessionRestore')}
             </Button>
           </>

@@ -1,33 +1,33 @@
-# Smart Tab Organizer : Design System
+# Smart Tab Organizer: Design System
 
-> Version : 1.1.3. Synthese destinee a Claude Design (claude.ai/design) pour generer de nouveaux ecrans coherents avec l'extension. Toutes les regles proviennent du code source et de `CLAUDE.md`.
+> Version 1.1.3. Synthesis aimed at Claude Design (claude.ai/design) for generating new screens consistent with the extension. Every rule is sourced from the codebase and `CLAUDE.md`.
 
 ## 1. Visual Theme & Atmosphere
 
-Extension navigateur multiplateforme (Chrome MV3, Firefox MV2) dediee a l'organisation d'onglets.
+Cross-platform browser extension (Chrome MV3, Firefox MV2) dedicated to tab organization.
 
-- **Ton** : productivite calme, pro, dense mais lisible.
-- **Densite** : moyenne. Popup 420 px de large (compact), pages d'options plus aerees.
-- **Ambiance** : technique et sobre, degrade subtil via les tokens d'alpha Radix (`--accent-a3`, `--gray-a2`).
-- **Dark mode** : natif via `next-themes` (`ThemeProvider` a la racine), switcher utilisateur light / dark / system.
-- **Framework UI** : [Radix Themes](https://www.radix-ui.com/themes) v3. Tous les composants visibles passent par les primitives Radix.
-- **Framework applicatif** : React 18 + WXT (extension runtime), TypeScript strict.
+- **Tone**: calm productivity, professional, dense yet readable.
+- **Density**: medium. Popup 420 px wide (compact), options pages more breathable.
+- **Atmosphere**: technical and understated, subtle gradients via Radix alpha tokens (`--accent-a3`, `--gray-a2`).
+- **Dark mode**: native via `next-themes` (`ThemeProvider` at the root), with a user switcher light / dark / system.
+- **UI framework**: [Radix Themes](https://www.radix-ui.com/themes) v3. Every visible component goes through Radix primitives.
+- **App framework**: React 18 + WXT (extension runtime), strict TypeScript.
 
 ## 2. Color Palette & Roles
 
-Accent unique **`indigo`** sur toute l'app. Neutres Radix **`gray`**. Pas de palette custom.
+Single accent **`indigo`** across the whole app. Radix neutrals **`gray`**. No custom palette.
 
-### Tokens Radix utilises
+### Radix tokens used
 
-| Token CSS | Usage |
+| CSS token | Usage |
 |-----------|-------|
-| `var(--accent-9)` | Couleur d'accent forte (focus ring, bouton primaire, switch on) |
-| `var(--accent-a3)` | Fond teinte subtil pour etats actifs / selection |
-| `var(--accent-11)` | Texte accent sur fond clair |
-| `var(--gray-1)` a `var(--gray-12)` | Echelle neutre (fonds, bordures, textes) |
-| `var(--gray-a2)`, `--gray-a3` | Surfaces cartes (hover, selection) |
-| `var(--red-9)`, `--amber-9`, `--green-9` | Statuts (erreur, warning, succes) via `StatusBadge` |
-| `var(--radius-3)` | Rayon standard cartes / inputs |
+| `var(--accent-9)` | Strong accent color (focus ring, primary button, switch on) |
+| `var(--accent-a3)` | Subtle tinted background for active / selected states |
+| `var(--accent-11)` | Accent text on light backgrounds |
+| `var(--gray-1)` to `var(--gray-12)` | Neutral scale (backgrounds, borders, text) |
+| `var(--gray-a2)`, `--gray-a3` | Card surfaces (hover, selection) |
+| `var(--red-9)`, `--amber-9`, `--green-9` | Status (error, warning, success) via `StatusBadge` |
+| `var(--radius-3)` | Standard radius for cards / inputs |
 
 ### Theme provider
 
@@ -39,174 +39,174 @@ import { Theme } from '@radix-ui/themes';
 </Theme>
 ```
 
-Accent unique `indigo` applique au `<Theme>` racine. Les wrappers par feature dans `src/components/Form/themes/index.tsx` (`DomainRulesTheme`, `SessionsTheme`, etc.) existent pour compat mais n'appliquent plus d'accent differencie.
+Single `indigo` accent applied at the root `<Theme>`. The per-feature wrappers in `src/components/Form/themes/index.tsx` (`DomainRulesTheme`, `SessionsTheme`, etc.) remain for compatibility but no longer apply a differentiated accent.
 
-### Regle
+### Rule
 
-> Preferer les tokens Radix (`var(--accent-a3)`, `var(--gray-a2)`, etc.) aux couleurs hardcodees. Aucun hex direct dans les composants.
+> Prefer Radix tokens (`var(--accent-a3)`, `var(--gray-a2)`, etc.) over hardcoded colors. No raw hex inside components.
 
 ## 3. Typography Rules
 
-Stack typographique Radix Themes par defaut (pas d'override de `font-family`). Font system de l'OS via la variable Radix.
+Default Radix Themes typography stack (no `font-family` override). System font through the Radix variable.
 
-### Echelle
+### Scale
 
-Utiliser `<Text size="1">` a `<Text size="9">` et `<Heading size="1">` a `"9"` fournis par Radix.
+Use `<Text size="1">` to `<Text size="9">` and `<Heading size="1">` to `"9"` provided by Radix.
 
-| Usage | Composant |
+| Usage | Component |
 |-------|-----------|
-| Titre de page | `<Heading size="6">` |
-| Titre de section | `<Heading size="4">` |
-| Titre de carte | `<Text size="3" weight="medium">` |
-| Corps | `<Text size="2">` |
+| Page title | `<Heading size="6">` |
+| Section title | `<Heading size="4">` |
+| Card title | `<Text size="3" weight="medium">` |
+| Body | `<Text size="2">` |
 | Meta / hint | `<Text size="1" color="gray">` |
-| Label de form | `<Text size="2" weight="medium">` via `FieldLabel` |
+| Form label | `<Text size="2" weight="medium">` via `FieldLabel` |
 
-### Regle
+### Rule
 
-Ne pas utiliser `font-size` en CSS direct. Toujours passer par les props Radix.
+Do not use raw CSS `font-size`. Always go through Radix props.
 
 ## 4. Component Stylings
 
 ### 4.1 Form (`src/components/Form/`)
 
-| Composant | Primitive Radix | Etats | Fichier |
-|-----------|-----------------|-------|---------|
-| `FormField` | `<Flex>` + `<Text>` | erreur, desactive | `Form/FormFields/FormField/` |
-| `FieldLabel` | `<Text size="2" weight="medium">` | requis, desactive | `Form/FormFields/FieldLabel/` |
-| `FieldError` | `<Text size="1" color="red">` | visible si erreur | `Form/FormFields/FieldError/` |
-| `RadioGroupField` | `<RadioGroup>` Radix | default, checked, disabled | `Form/FormFields/RadioGroupField/` |
-| `SearchableSelect` | `cmdk` + `<Popover>` Radix | closed, open, searching, empty | `Form/FormFields/SearchableSelect/` |
+| Component | Radix primitive | States | File |
+|-----------|-----------------|--------|------|
+| `FormField` | `<Flex>` + `<Text>` | error, disabled | `Form/FormFields/FormField/` |
+| `FieldLabel` | `<Text size="2" weight="medium">` | required, disabled | `Form/FormFields/FieldLabel/` |
+| `FieldError` | `<Text size="1" color="red">` | visible on error | `Form/FormFields/FieldError/` |
+| `RadioGroupField` | Radix `<RadioGroup>` | default, checked, disabled | `Form/FormFields/RadioGroupField/` |
+| `SearchableSelect` | `cmdk` + Radix `<Popover>` | closed, open, searching, empty | `Form/FormFields/SearchableSelect/` |
 | `TagInputField` | `<TextField>` + tags Radix Badge | default, focus, tag hover | `Form/FormFields/TagInputField/` |
 | `TextFieldWithCategory` | `<TextField>` + `<Select>` | default, focus, error | `Form/FormFields/TextFieldWithCategory/` |
 
-Tous les champs acceptent `label`, `error`, `hint`, `required`, `disabled` et proxent les refs vers l'input natif.
+Every field accepts `label`, `error`, `hint`, `required`, `disabled`, and forwards refs to the native input.
 
 ### 4.2 UI primitives (`src/components/UI/`)
 
-| Composant | Role | Primitive |
+| Component | Role | Primitive |
 |-----------|------|-----------|
-| `ConfirmDialog` | Confirmation destructive | `<AlertDialog>` Radix |
-| `DialogShell` | Coque modale generique | `<Dialog>` Radix |
-| `WizardModal` | Modal multi-etapes | `DialogShell` + `WizardStepper` |
-| `WizardStepper` | Barre de progression | compose avec `<Flex>` |
-| `SplitButton` | Bouton principal + dropdown | `<Button>` + `<DropdownMenu>` Radix |
-| `StatusBadge` | Indicateur statut (ok, warn, error) | `<Badge>` Radix |
+| `ConfirmDialog` | Destructive confirmation | Radix `<AlertDialog>` |
+| `DialogShell` | Generic modal shell | Radix `<Dialog>` |
+| `WizardModal` | Multi-step modal | `DialogShell` + `WizardStepper` |
+| `WizardStepper` | Progress bar | composed with `<Flex>` |
+| `SplitButton` | Primary button + dropdown | Radix `<Button>` + `<DropdownMenu>` |
+| `StatusBadge` | Status indicator (ok, warn, error) | Radix `<Badge>` |
 | `ThemeToggle` | Light / dark / system | `<IconButton>` + `<DropdownMenu>` + Lucide `Sun`, `Moon`, `Monitor` |
-| `Toaster` | Notifications ephemeres | `@radix-ui/react-toast` |
-| `AccessibleHighlight` | Surbrillance texte recherche | `<mark>` + styles Radix |
-| `EmptyState` | Placeholder liste vide | `<Flex direction="column">` centre |
+| `Toaster` | Ephemeral notifications | `@radix-ui/react-toast` |
+| `AccessibleHighlight` | Search-text highlight | `<mark>` + Radix styles |
+| `EmptyState` | Empty list placeholder | centered `<Flex direction="column">` |
 
 ### 4.3 UI layout (`src/components/UI/`)
 
-| Composant | Role |
+| Component | Role |
 |-----------|------|
-| `PageLayout` | Conteneur principal (header + content + footer) |
-| `Header` | En-tete de page avec titre + actions |
-| `Sidebar` | Navigation laterale, collapsible |
-| `OptionsLayout` | Wrapper specifique page Options |
-| `PopupHeader`, `PopupToolbar`, `PopupProfilesList` | Surfaces popup 420 px |
-| `ListToolbar` | Barre d'actions pour listes (ajout, filtres, tri) |
-| `SettingsPage`, `SettingsToggles` | Conteneur reglages + groupes de toggles |
-| `SessionWizards`, `ImportExportWizards` | Composes wizards multi-etapes |
+| `PageLayout` | Main container (header + content + footer) |
+| `Header` | Page header with title + actions |
+| `Sidebar` | Collapsible side navigation |
+| `OptionsLayout` | Options-page wrapper |
+| `PopupHeader`, `PopupToolbar`, `PopupProfilesList` | 420 px popup surfaces |
+| `ListToolbar` | Action bar for lists (add, filter, sort) |
+| `SettingsPage`, `SettingsToggles` | Settings container + toggle groups |
+| `SessionWizards`, `ImportExportWizards` | Multi-step wizard compositions |
 
-### 4.4 Etats communs
+### 4.4 Common states
 
-Chaque composant doit gerer :
+Each component must handle:
 
 1. **Default**
-2. **Hover** (pointer fine) : tokens `--accent-a4` / `--gray-a3`
-3. **Focus visible** : outline `var(--accent-9)` 2 px offset negatif (deja traite nativement par Radix sauf pour `[role="row"][tabindex]` et `[data-session-card]`, voir `src/styles/radix-themes.css`)
+2. **Hover** (fine pointer): `--accent-a4` / `--gray-a3` tokens
+3. **Focus visible**: `var(--accent-9)` outline 2 px negative offset (Radix handles it natively except for `[role="row"][tabindex]` and `[data-session-card]`, see `src/styles/radix-themes.css`)
 4. **Active / pressed**
-5. **Disabled** : opacity Radix + `cursor: not-allowed`
-6. **Loading** (boutons d'action async) : spinner Lucide `Loader2` + bouton disabled
+5. **Disabled**: Radix opacity + `cursor: not-allowed`
+6. **Loading** (async action buttons): Lucide `Loader2` spinner + disabled button
 
 ## 5. Layout Principles
 
-- **Primitives** : `<Flex>`, `<Grid>`, `<Box>`, `<Container>`, `<Section>` de Radix Themes.
-- **Gap** : via prop `gap` Radix (`"1"` a `"9"`), pas de marges custom.
-- **Spacing scale** : Radix token `--space-1` (4 px) a `--space-9` (64 px).
-- **Pages options** : `<Container size="3">` (1064 px max).
-- **Popup** : largeur fixe 420 px, hauteur variable jusqu'a la limite du navigateur.
-- **Cartes** : `<Card>` Radix, `padding="3"` standard, `padding="4"` sur pages d'options.
+- **Primitives**: Radix Themes `<Flex>`, `<Grid>`, `<Box>`, `<Container>`, `<Section>`.
+- **Gap**: via the Radix `gap` prop (`"1"` to `"9"`), no custom margins.
+- **Spacing scale**: Radix tokens `--space-1` (4 px) to `--space-9` (64 px).
+- **Options pages**: `<Container size="3">` (1064 px max).
+- **Popup**: fixed 420 px width, variable height up to the browser limit.
+- **Cards**: Radix `<Card>`, `padding="3"` standard, `padding="4"` on options pages.
 
 ## 6. Depth & Elevation
 
-Usage limite. Les tokens Radix disponibles : `--shadow-1` a `--shadow-6`.
+Limited use. Available Radix tokens: `--shadow-1` to `--shadow-6`.
 
-| Niveau | Usage |
-|--------|-------|
-| `var(--shadow-2)` | `<Card>` Radix par defaut |
+| Level | Usage |
+|-------|-------|
+| `var(--shadow-2)` | Default Radix `<Card>` |
 | `var(--shadow-4)` | Popover, dropdown |
 | `var(--shadow-5)` | Dialog, AlertDialog |
 | `var(--shadow-6)` | Toast |
 
-**Ne pas** empiler les ombres ni ajouter de shadow CSS custom.
+**Do not** stack shadows or add custom CSS shadows.
 
 ## 7. Do's and Don'ts
 
 ### Do
 
-- **i18n partout** : toujours `getMessage()` depuis `src/utils/i18n.ts` pour labels, `aria-label`, `title`, placeholders. Les 3 locales (en, fr, es) doivent rester synchronisees.
-- **Primitives Radix first** : Dialog, Collapsible, Toolbar, RadioGroup, DropdownMenu, Tooltip, Switch, IconButton. Laisser Radix gerer focus, clavier et ARIA.
-- **Lucide icons** : toujours `aria-hidden="true"` sur les icones decoratives. Boutons icon-only : `<IconButton aria-label="..." title="...">`.
-- **Tokens Radix** uniquement (`var(--accent-9)`, `var(--gray-a2)`, `var(--radius-3)`, `var(--space-3)`).
-- **Typage strict** : pas de `any`. Preferer `unknown` + narrowing.
-- **Storybook** : une story par composant, titres miroir dossier (`Components/UI/Header`), exports prefixes du nom (`HeaderDefault`, `HeaderLight`).
+- **i18n everywhere**: always `getMessage()` from `src/utils/i18n.ts` for labels, `aria-label`, `title`, placeholders. The 3 locales (en, fr, es) must stay in sync.
+- **Radix primitives first**: Dialog, Collapsible, Toolbar, RadioGroup, DropdownMenu, Tooltip, Switch, IconButton. Let Radix manage focus, keyboard, and ARIA.
+- **Lucide icons**: always `aria-hidden="true"` on decorative icons. Icon-only buttons: `<IconButton aria-label="..." title="...">`.
+- **Radix tokens** only (`var(--accent-9)`, `var(--gray-a2)`, `var(--radius-3)`, `var(--space-3)`).
+- **Strict typing**: no `any`. Prefer `unknown` + narrowing.
+- **Storybook**: one story per component, titles mirror the folder (`Components/UI/Header`), exports prefixed with the name (`HeaderDefault`, `HeaderLight`).
 
 ### Don't
 
-- **Jamais de `console.log`** : utiliser `logger.debug()` (`src/utils/logger.ts`). `console.warn` / `console.error` autorises pour les vraies erreurs.
-- **Jamais de string hardcodee** dans l'UI (ni labels, ni aria, ni title).
-- **Jamais d'ARIA manuel** si une primitive Radix existe.
-- **Jamais d'override de focus** sur les composants Radix (deja corrects). Custom CSS focus reserve aux elements non-Radix (voir `src/styles/radix-themes.css`).
-- **Jamais de couleur hex** en dur. Toujours un token Radix.
-- **Jamais de tiret cadratin** (U+2014) ni tiret demi-cadratin (U+2013) dans les textes. Preferer parentheses, virgules, ou deux-points.
+- **Never `console.log`**: use `logger.debug()` (`src/utils/logger.ts`). `console.warn` / `console.error` are allowed for real errors.
+- **Never hardcode strings** in the UI (no labels, no aria, no title).
+- **Never write manual ARIA** if a Radix primitive already exists.
+- **Never override focus** on Radix components (already correct). Custom CSS focus is reserved for non-Radix elements (see `src/styles/radix-themes.css`).
+- **Never hardcode hex colors**. Always a Radix token.
+- **Never use the em-dash** (U+2014) or en-dash (U+2013) in text. Prefer parentheses, commas, or colons.
 
 ## 8. Responsive Behavior
 
-### Popup (420 px fixe)
+### Popup (fixed 420 px)
 
-- Pas de breakpoint horizontal, largeur figee.
-- Scroll vertical uniquement, hauteur limitee par le navigateur (environ 600 px).
-- Pas de sidebar. Navigation via tabs ou boutons compacts.
-- Typographie reduite : `<Text size="2">` par defaut.
+- No horizontal breakpoint, fixed width.
+- Vertical scroll only, height limited by the browser (around 600 px).
+- No sidebar. Navigation via tabs or compact buttons.
+- Reduced typography: `<Text size="2">` by default.
 
-### Options page (adaptative)
+### Options page (adaptive)
 
-- `<Container size="3">` pour centrer jusqu'a 1064 px.
-- **Sidebar collapsible** (`Sidebar` UI) : visible >= 960 px, pliable au clic. En dessous : menu burger.
-- Touch targets : 40 px minimum (Radix `size="2"` ou `"3"` pour les boutons sur les pages).
-- Images / illustrations : aucune (seulement Lucide SVG inline).
+- `<Container size="3">` to center up to 1064 px.
+- **Collapsible sidebar** (`Sidebar` UI): visible >= 960 px, foldable on click. Below: burger menu.
+- Touch targets: minimum 40 px (Radix `size="2"` or `"3"` for buttons on pages).
+- Images / illustrations: none (only inline Lucide SVGs).
 
 ### Storybook
 
-Decorateur preview avec switchers locale (en / fr / es) et theme (light / dark / system) pour tester toutes les surfaces.
+Preview decorator with locale switchers (en / fr / es) and theme (light / dark / system) to test every surface.
 
 ## 9. Agent Prompt Guide
 
-Prompts types a passer a Claude Design apres onboarding :
+Sample prompts to feed Claude Design after onboarding:
 
-### Generer une nouvelle page
+### Generate a new page
 
-> Cree une page `NotificationsPage` alignee sur le pattern de `SettingsPage` : container Radix, titre `<Heading size="6">`, liste de toggles groupes par categorie via `SettingsToggles`. Respecter l'accent `indigo`, i18n via `getMessage()`, tokens Radix uniquement.
+> Create a `NotificationsPage` aligned with the `SettingsPage` pattern: Radix container, `<Heading size="6">` title, list of toggles grouped by category via `SettingsToggles`. Respect the `indigo` accent, use i18n via `getMessage()`, Radix tokens only.
 
-### Varier un composant existant
+### Vary an existing component
 
-> Genere une variante `compact` de `SessionCard` : hauteur 48 px, afficher uniquement le nom et la date, retirer le `HoverCard` metadata. Conserver le focus ring custom (`[data-session-card]:focus`).
+> Generate a `compact` variant of `SessionCard`: 48 px height, show only the name and the date, drop the `HoverCard` metadata. Keep the custom focus ring (`[data-session-card]:focus`).
 
-### Ajouter un wizard
+### Add a wizard
 
-> Propose un wizard a 3 etapes pour l'export de profils : selection profils, options (format, inclure notes), confirmation. Base-toi sur `WizardModal` + `WizardStepper`. Chaque etape doit avoir un bouton Back et Next, le dernier etant un bouton primaire avec `<Loader2>` en loading.
+> Propose a 3-step wizard for profile export: profile selection, options (format, include notes), confirmation. Base it on `WizardModal` + `WizardStepper`. Each step must have a Back and Next button, the last one being a primary button with `<Loader2>` in loading.
 
-### Refondre une surface popup
+### Rework a popup surface
 
-> Repense `PopupToolbar` pour tenir en 36 px de haut sur 420 px de large : icones Lucide `Plus`, `Search`, `Filter`, `Settings`. Chaque bouton : `<IconButton size="1" aria-label="..." title="...">`. Respecter les regles d'accessibilite Radix.
+> Redesign `PopupToolbar` to fit in 36 px tall by 420 px wide: Lucide icons `Plus`, `Search`, `Filter`, `Settings`. Each button: `<IconButton size="1" aria-label="..." title="...">`. Respect the Radix accessibility rules.
 
-### Generer un ecran vide
+### Generate an empty screen
 
-> Genere un EmptyState pour la page Sessions : illustration Lucide `ArchiveRestore`, titre i18n `emptySessionsTitle`, texte `emptySessionsHint`, CTA primaire `emptySessionsCta`. Respecter le pattern de `EmptyState/`.
+> Generate an EmptyState for the Sessions page: Lucide `ArchiveRestore` illustration, i18n title `emptySessionsTitle`, text `emptySessionsHint`, primary CTA `emptySessionsCta`. Respect the `EmptyState/` pattern.
 
 ---
 
-**Depot source** : voir dossiers `src/components/UI/`, `src/components/Form/`, `src/pages/` et `.storybook/` inclus dans le bundle pour les implementations de reference.
+**Source repository**: see folders `src/components/UI/`, `src/components/Form/`, `src/pages/` and `.storybook/` included in the bundle for the reference implementations.

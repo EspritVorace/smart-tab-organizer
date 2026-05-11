@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-cloud-azure",
+    "name": {
+      "en": "Azure Portal",
+      "fr": "Portail Azure",
+      "es": "Portal Azure"
+    },
+    "description": {
+      "en": "Group Azure portal tabs by subscription or by Microsoft service provider.",
+      "fr": "Regroupe les onglets du portail Azure par abonnement ou par fournisseur de service Microsoft.",
+      "es": "Agrupa las pestañas del portal Azure por suscripción o por proveedor de servicio Microsoft."
+    },
+    "categoryId": "cloud",
+    "configurable": {
+      "rulePattern": "azure/{scope}/",
+      "params": [
+        {
+          "id": "scope",
+          "label": {
+            "en": "Group by",
+            "fr": "Grouper par",
+            "es": "Agrupar por"
+          },
+          "default": "subscription",
+          "options": [
+            {
+              "value": "subscription",
+              "label": {
+                "en": "Subscription",
+                "fr": "Abonnement",
+                "es": "Suscripción"
+              }
+            },
+            {
+              "value": "service",
+              "label": {
+                "en": "Service",
+                "fr": "Service",
+                "es": "Servicio"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "domainRules": [
+    {
+      "id": "pk-cloud-azure-subscription",
+      "enabled": true,
+      "domainFilter": "portal.azure.com",
+      "label": "azure/subscription/by subscription",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "subscriptions/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "cyan",
+      "categoryId": "cloud",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-cloud-azure-service",
+      "enabled": true,
+      "domainFilter": "portal.azure.com",
+      "label": "azure/service/by service",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "providers/Microsoft\\.([A-Za-z0-9]+)/",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "cyan",
+      "categoryId": "cloud",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button, Text, Flex, Box, Checkbox, Separator } from '@radix-ui/themes';
 import { Plus, Eye, EyeOff, Shield, AlertCircle, Upload, Trash2 } from 'lucide-react';
 import { DragDropProvider, type DragEndEvent, type DragOverEvent } from '@dnd-kit/react';
@@ -7,13 +7,14 @@ import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { EmptyState } from '@/components/UI/EmptyState';
 import { RuleWizardModal } from '@/components/Core/DomainRule/RuleWizardModal';
-import { ImportWizard } from '@/components/UI/ImportExportWizards/ImportWizard';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
 import { ListToolbar } from '@/components/UI/ListToolbar';
 import { getMessage } from '@/utils/i18n';
 import { foldAccents } from '@/utils/stringUtils';
 import { generateUUID } from '@/utils/utils';
 import { DomainRuleCard } from '@/components/Core/DomainRule/DomainRuleCard';
+import { useShortcuts } from '@/hooks/useShortcuts';
+import { useListNavigation } from '@/hooks/useListNavigation';
 import {
   moveToFirst,
   moveToLast,
@@ -48,6 +49,12 @@ function confirmDeleteDescription(
 interface DomainRulesPageProps {
   syncSettings: AppSettings;
   updateRules: (rules: DomainRuleSetting[]) => void;
+  /** When true, opens the create-rule wizard from outside the page (e.g. HomePage). */
+  openRuleWizard?: boolean;
+  /** Notifies the parent when the modal opens or closes. */
+  onOpenRuleWizardChange?: (open: boolean) => void;
+  /** Opens the rules import wizard via deep-link with from=rules. */
+  onOpenImportRules: () => void;
 }
 
 /* ─── Local presentation components ──────────────────────────────────────── */
@@ -102,11 +109,23 @@ function BulkActionsBar({
 
 /* ─── Page component ──────────────────────────────────────────────────────── */
 
-export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPageProps) {
+export function DomainRulesPage({
+  syncSettings,
+  updateRules,
+  openRuleWizard,
+  onOpenRuleWizardChange,
+  onOpenImportRules,
+}: DomainRulesPageProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isImportOpen, setIsImportOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<DomainRule | undefined>(undefined);
   const [dragItems, setDragItems] = useState<DomainRuleSetting[] | null>(null);
+
+  useEffect(() => {
+    if (openRuleWizard) {
+      setEditingRule(undefined);
+      setIsModalOpen(true);
+    }
+  }, [openRuleWizard]);
 
   const handleToggleEnabled = useCallback((ruleId: string, enabled: boolean) => {
     updateRules(syncSettings.domainRules.map(rule =>
@@ -185,18 +204,18 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
   // unknown-cast and rely on the helper for the rest.
   const moveRules = (
     rules: DomainRuleSetting[],
-    event: Parameters<DragOverEvent>[0] | Parameters<DragEndEvent>[0],
+    event: DragOverEvent | DragEndEvent,
   ): DomainRuleSetting[] =>
     (move as unknown as (
       r: DomainRuleSetting[],
       e: typeof event,
     ) => DomainRuleSetting[])(rules, event);
 
-  const handleDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
+  const handleDragOver = useCallback((event: DragOverEvent) => {
     setDragItems(prev => moveRules(prev ?? syncSettings.domainRules, event));
   }, [syncSettings.domainRules]);
 
-  const handleDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     if (!event.canceled) {
       const reordered = moveRules(dragItems ?? syncSettings.domainRules, event);
       if (reordered !== (dragItems ?? syncSettings.domainRules)) {
@@ -210,62 +229,74 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
 
   const listRef = useRef<HTMLDivElement>(null);
 
+  const { handleNavigationKey } = useListNavigation(listRef, '[role="listitem"]');
+
+  // The card keydown handler now only forwards arrow/Home/End to
+  // useListNavigation. The Enter binding is kept here because Enter to
+  // open the editor is a card-local interaction that is not in the registry
+  // (the registry exposes `e` for editing, surfaced via widget shortcuts
+  // below). All other key actions (e, t, Space, Delete) are dispatched at
+  // document level via `useShortcuts({...}, { scope: 'widget:rule-card' })`.
   const handleCardKeyDown = useCallback((e: React.KeyboardEvent, rule: DomainRuleSetting, index: number) => {
-    const cards = listRef.current?.querySelectorAll<HTMLElement>('[role="listitem"]');
-    if (!cards) return;
-
-    switch (e.key) {
-      case 'ArrowDown': {
-        e.preventDefault();
-        cards[index + 1]?.focus();
-        break;
-      }
-      case 'ArrowUp': {
-        e.preventDefault();
-        cards[index - 1]?.focus();
-        break;
-      }
-      case 'Home': {
-        e.preventDefault();
-        cards[0]?.focus();
-        break;
-      }
-      case 'End': {
-        e.preventDefault();
-        cards[cards.length - 1]?.focus();
-        break;
-      }
-      case ' ': {
-        const target = e.target as HTMLElement;
-        if (target.getAttribute('role') === 'row') {
-          e.preventDefault();
-          handleRowSelect(rule.id, !selectedIds.has(rule.id));
-        }
-        break;
-      }
-      case 'Enter': {
-        const target = e.target as HTMLElement;
-        if (target.getAttribute('role') === 'row') {
-          e.preventDefault();
-          handleEditRule(rule);
-        }
-        break;
-      }
-      case 'Delete': {
-        const target = e.target as HTMLElement;
-        if (target.getAttribute('role') === 'row') {
-          e.preventDefault();
-          setDeleteTarget({ type: 'single', ruleId: rule.id, focusIndex: index });
-        }
-        break;
-      }
+    if (e.target !== e.currentTarget) return;
+    if (handleNavigationKey(e as React.KeyboardEvent<HTMLElement>, index)) return;
+    if (e.key === 'Enter' && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+      e.preventDefault();
+      handleEditRule(rule);
     }
-  }, [handleRowSelect, handleEditRule, selectedIds]);
+  }, [handleNavigationKey, handleEditRule]);
 
-  const handleAddRule = () => {
+  const handleAddRule = useCallback(() => {
     setEditingRule(undefined);
     setIsModalOpen(true);
-  };
+  }, []);
+
+  const getFocusedRule = useCallback((): { rule: DomainRuleSetting; index: number } | null => {
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement)) return null;
+    if (!active.matches('[data-shortcut-scope="widget:rule-card"]')) return null;
+    const id = active.getAttribute('data-rule-id');
+    if (!id) return null;
+    const cards = listRef.current?.querySelectorAll<HTMLElement>('[role="listitem"]');
+    let index = -1;
+    if (cards) {
+      cards.forEach((card, i) => {
+        if (card === active) index = i;
+      });
+    }
+    const rule = syncSettings.domainRules.find((r) => r.id === id);
+    return rule ? { rule, index } : null;
+  }, [syncSettings.domainRules]);
+
+  useShortcuts({ 'list.rules.new': handleAddRule }, { scope: 'page:rules' });
+
+  useShortcuts(
+    {
+      'ruleCard.edit': () => {
+        const focused = getFocusedRule();
+        if (focused) handleEditRule(focused.rule);
+      },
+      'ruleCard.toggleEnabled': () => {
+        const focused = getFocusedRule();
+        if (focused) handleToggleEnabled(focused.rule.id, !focused.rule.enabled);
+      },
+      'ruleCard.toggleSelection': () => {
+        const focused = getFocusedRule();
+        if (focused) handleRowSelect(focused.rule.id, !selectedIds.has(focused.rule.id));
+      },
+      'ruleCard.delete': () => {
+        const focused = getFocusedRule();
+        if (focused) {
+          setDeleteTarget({
+            type: 'single',
+            ruleId: focused.rule.id,
+            focusIndex: focused.index >= 0 ? focused.index : undefined,
+          });
+        }
+      },
+    },
+    { scope: 'widget:rule-card' },
+  );
 
   const handleSubmitRule = (rule: DomainRule) => {
     if (editingRule) {
@@ -282,11 +313,13 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
     }
     setIsModalOpen(false);
     setEditingRule(undefined);
+    onOpenRuleWizardChange?.(false);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingRule(undefined);
+    onOpenRuleWizardChange?.(false);
   };
 
   const handleConfirmDelete = useCallback(() => {
@@ -327,7 +360,7 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                 onSearchChange={setSearchTerm}
                 action={
                   <Button data-testid="page-rules-btn-add" onClick={handleAddRule}>
-                    <Plus size={16} aria-hidden="true" />
+                    <Plus size={16} />
                     {getMessage('addRule')}
                   </Button>
                 }
@@ -355,11 +388,11 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
                 actions={
                   <Flex gap="2">
                     <Button data-testid="page-rules-btn-add" variant="soft" onClick={handleAddRule}>
-                      <Plus size={14} aria-hidden="true" />
+                      <Plus size={14} />
                       {getMessage('addRule')}
                     </Button>
-                    <Button variant="soft" onClick={() => setIsImportOpen(true)}>
-                      <Upload size={14} aria-hidden="true" />
+                    <Button variant="soft" onClick={onOpenImportRules}>
+                      <Upload size={14} />
                       {getMessage('importRulesButton')}
                     </Button>
                   </Flex>
@@ -419,12 +452,6 @@ export function DomainRulesPage({ syncSettings, updateRules }: DomainRulesPagePr
         description={confirmDeleteDescription(deleteTarget, syncSettings.domainRules)}
       />
 
-      <ImportWizard
-        open={isImportOpen}
-        onOpenChange={setIsImportOpen}
-        existingRules={syncSettings.domainRules}
-        onImport={updateRules}
-      />
     </>
   );
 }

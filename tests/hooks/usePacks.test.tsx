@@ -79,7 +79,7 @@ describe('usePacks', () => {
     warnSpy.mockClear();
   });
 
-  it('expose seulement les packs valides + warn pour chaque rejet', () => {
+  it('exposes only valid packs and warns for each rejection', () => {
     const { result } = renderHook(() => usePacks());
 
     expect(result.current.packs).toHaveLength(1);
@@ -89,9 +89,88 @@ describe('usePacks', () => {
     expect(warnSpy).toHaveBeenCalledTimes(2);
   });
 
-  it('trie les packs par ordre de categorie puis par nom', () => {
+  it('sorts packs by category then by name', () => {
     const { result } = renderHook(() => usePacks());
     const ids = result.current.packs.map((p) => p.pack.id);
     expect(ids).toEqual(['pack-cloud']);
+  });
+});
+
+describe('usePacks (invalid categories)', () => {
+  beforeEach(() => {
+    warnSpy.mockClear();
+    vi.resetModules();
+  });
+
+  it('exposes loadError when the categories file is invalid', async () => {
+    vi.doMock('../../src/hooks/packDataSource', () => ({
+      getPackSourceEntries: () => [],
+      getCategoriesSource: () => ({ wrong: 'shape' }),
+    }));
+    const { usePacks: usePacksReloaded } = await import('../../src/hooks/usePacks');
+
+    const { result } = renderHook(() => usePacksReloaded());
+    expect(result.current.loadError).toMatch(/invalid/i);
+    expect(warnSpy).toHaveBeenCalled();
+  });
+
+  it('sorts two packs that share a category by name', async () => {
+    vi.doMock('../../src/hooks/packDataSource', () => ({
+      getPackSourceEntries: () => [
+        {
+          path: '/p2.json',
+          data: {
+            version: 1,
+            pack: { id: 'b-pack', name: 'Beta', categoryId: 'cloud' },
+            domainRules: [validRule],
+          },
+        },
+        {
+          path: '/p1.json',
+          data: {
+            version: 1,
+            pack: { id: 'a-pack', name: 'Alpha', categoryId: 'cloud' },
+            domainRules: [validRule],
+          },
+        },
+      ],
+      getCategoriesSource: () => ({
+        categories: [{ id: 'cloud', label: 'Cloud' }],
+      }),
+    }));
+    const { usePacks: usePacksReloaded } = await import('../../src/hooks/usePacks');
+
+    const { result } = renderHook(() => usePacksReloaded());
+    expect(result.current.packs.map((p) => p.pack.id)).toEqual(['a-pack', 'b-pack']);
+  });
+
+  it('places packs without categoryId last', async () => {
+    vi.doMock('../../src/hooks/packDataSource', () => ({
+      getPackSourceEntries: () => [
+        {
+          path: '/p1.json',
+          data: {
+            version: 1,
+            pack: { id: 'no-cat', name: 'Aaa Pack', category: 'Misc' },
+            domainRules: [validRule],
+          },
+        },
+        {
+          path: '/p2.json',
+          data: {
+            version: 1,
+            pack: { id: 'cloud-pack', name: 'Zeta Pack', categoryId: 'cloud' },
+            domainRules: [validRule],
+          },
+        },
+      ],
+      getCategoriesSource: () => ({
+        categories: [{ id: 'cloud', label: 'Cloud' }],
+      }),
+    }));
+    const { usePacks: usePacksReloaded } = await import('../../src/hooks/usePacks');
+
+    const { result } = renderHook(() => usePacksReloaded());
+    expect(result.current.packs.map((p) => p.pack.id)).toEqual(['cloud-pack', 'no-cat']);
   });
 });

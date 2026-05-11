@@ -42,7 +42,7 @@ export function SessionExportGroupSection({
           aria-label={getMessage(titleKey)}
         />
       </Flex>
-      <Flex direction="column" gap="2">
+      <Flex direction="column" gap="2" role="list">
         {sessions.map((session) => (
           <SelectableSessionRow
             key={session.id}

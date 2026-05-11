@@ -16,7 +16,7 @@ export function ImportedNoteCallout({ note }: ImportedNoteCalloutProps) {
   return (
     <Callout.Root color="gray" variant="soft" mb="3">
       <Callout.Icon>
-        <Info size={16} aria-hidden="true" />
+        <Info size={16} />
       </Callout.Icon>
       <Callout.Text>
         <Text as="p" size="1" weight="medium" mb="1">{getMessage('importExportNote')}</Text>

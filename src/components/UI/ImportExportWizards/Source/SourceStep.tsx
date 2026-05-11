@@ -5,31 +5,37 @@ import { FileDropZone } from './FileDropZone';
 import { JsonTextArea } from './JsonTextArea';
 import { ImportErrorCallout } from './ImportErrorCallout';
 import { ImportSuccessCallout } from './ImportSuccessCallout';
-import type { JsonSourceInputState } from './useJsonSourceInput';
+import type { JsonSourceInputState, SourceMode } from './useJsonSourceInput';
 
 interface SourceStepProps<T extends readonly unknown[]> {
   source: JsonSourceInputState<T>;
   textareaPlaceholder: string;
   successCountMessageKey: string;
+  availableModes?: readonly SourceMode[];
+  packGalleryNode?: React.ReactNode;
 }
 
 /**
- * Step 0 of an import wizard: mode segmented control + either file drop zone
- * or JSON textarea, followed by success / error callouts.
+ * Step 0 of an import wizard: mode segmented control + either file drop zone,
+ * JSON textarea, or pack gallery, followed by success / error callouts.
  */
 export function SourceStep<T extends readonly unknown[]>({
   source,
   textareaPlaceholder,
   successCountMessageKey,
+  availableModes,
+  packGalleryNode,
 }: SourceStepProps<T>) {
   return (
     <Box mt="4">
-      <SourceModeSegmented source={source} />
+      <SourceModeSegmented source={source} availableModes={availableModes} />
 
       <Box mt="3">
-        {source.sourceMode === 'file'
-          ? <FileDropZone source={source} />
-          : <JsonTextArea source={source} placeholder={textareaPlaceholder} />}
+        {source.sourceMode === 'file' && <FileDropZone source={source} />}
+        {source.sourceMode === 'text' && (
+          <JsonTextArea source={source} placeholder={textareaPlaceholder} />
+        )}
+        {source.sourceMode === 'pack' && packGalleryNode}
       </Box>
 
       <ImportErrorCallout source={source} />

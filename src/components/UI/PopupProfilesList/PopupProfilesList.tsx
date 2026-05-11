@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Box, Button, Card, Flex, Text } from '@radix-ui/themes';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { browser } from 'wxt/browser';
@@ -9,9 +9,11 @@ import { loadSessions } from '@/utils/sessionStorage';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { showSuccessNotification } from '@/utils/notifications';
 import { getRuleCategory } from '@/utils/categoriesStore';
-import { chromeGroupColors } from '@/utils/tabTreeUtils';
-import { popupPinnedEmptyCollapsedItem } from '@/utils/storageItems';
+import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
+import { useListNavigation } from '@/hooks/useListNavigation';
+import { useShortcuts } from '@/hooks/useShortcuts';
 import type { Session } from '@/types/session';
+import styles from './PopupProfilesList.module.css';
 
 function getCategoryIcon(categoryId: string | null | undefined): React.ReactNode {
   const cat = getRuleCategory(categoryId);
@@ -26,7 +28,7 @@ function getCategoryIcon(categoryId: string | null | undefined): React.ReactNode
           height: 22,
           borderRadius: '50%',
           fontSize: 12,
-          backgroundColor: chromeGroupColors[cat.color],
+          backgroundColor: 'var(--gray-a3)',
           flexShrink: 0,
         }}
         aria-hidden="true"
@@ -74,10 +76,13 @@ async function openCustomizeRestore(session: Session) {
 }
 
 export function PopupProfilesList() {
+  const { scopedItems } = useActiveWorkspaceContext();
+  const popupPinnedEmptyCollapsedItem = scopedItems.popupPinnedEmptyCollapsedItem;
   const [pinnedSessions, setPinnedSessions] = useState<Session[]>([]);
   const [hasAnySession, setHasAnySession] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [emptyCollapsed, setEmptyCollapsed] = useState(false);
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadSessions().then((all) => {
@@ -85,10 +90,10 @@ export function PopupProfilesList() {
       setHasAnySession(all.length > 0);
       setLoaded(true);
     });
-    popupPinnedEmptyCollapsedItem.getValue().then(setEmptyCollapsed);
-  }, []);
+    popupPinnedEmptyCollapsedItem.getValue().then((v) => setEmptyCollapsed(v ?? false));
+  }, [popupPinnedEmptyCollapsedItem]);
 
-  function handleRestore(session: Session, target: RestoreTarget) {
+  const handleRestore = useCallback((session: Session, target: RestoreTarget) => {
     // The popup is not a tab, so browser.tabs.getCurrent() returns undefined,
     // which means every non-pinned tab in the active window is replaced.
     restoreSessionTabs(session, target)
@@ -102,13 +107,54 @@ export function PopupProfilesList() {
         }
       })
       .catch(() => {});
-  }
+  }, []);
 
-  function handleToggleEmptyCollapsed(nextOpen: boolean) {
+  const { handleNavigationKey } = useListNavigation(listRef, '[data-popup-pinned-card]');
+
+  // Card-level keydown is now navigation-only; the r/Shift+r/Alt+r/Alt+Shift+r
+  // bindings are dispatched at document level via the widget-scope shortcuts
+  // registered below.
+  const handleCardKeyDown = useCallback((e: React.KeyboardEvent<HTMLElement>, index: number) => {
+    if (e.target !== e.currentTarget) return;
+    handleNavigationKey(e, index);
+  }, [handleNavigationKey]);
+
+  const getFocusedSession = useCallback((): Session | null => {
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement)) return null;
+    if (!active.matches('[data-shortcut-scope="widget:session-card"]')) return null;
+    const id = active.getAttribute('data-session-id');
+    if (!id) return null;
+    return pinnedSessions.find((s) => s.id === id) ?? null;
+  }, [pinnedSessions]);
+
+  useShortcuts(
+    {
+      'sessionCard.restore.custom': () => {
+        const focused = getFocusedSession();
+        if (focused) void openCustomizeRestore(focused);
+      },
+      'sessionCard.restore.current': () => {
+        const focused = getFocusedSession();
+        if (focused) handleRestore(focused, 'current');
+      },
+      'sessionCard.restore.replace': () => {
+        const focused = getFocusedSession();
+        if (focused) handleRestore(focused, 'replace');
+      },
+      'sessionCard.restore.new': () => {
+        const focused = getFocusedSession();
+        if (focused) handleRestore(focused, 'new');
+      },
+    },
+    { scope: 'widget:session-card' },
+  );
+
+  const handleToggleEmptyCollapsed = useCallback((nextOpen: boolean) => {
     const nextCollapsed = !nextOpen;
     setEmptyCollapsed(nextCollapsed);
     popupPinnedEmptyCollapsedItem.setValue(nextCollapsed).catch(() => {});
-  }
+  }, [popupPinnedEmptyCollapsedItem]);
 
   if (!loaded) return null;
 
@@ -146,7 +192,6 @@ export function PopupProfilesList() {
             >
               <ChevronDown
                 size={14}
-                aria-hidden="true"
                 style={{
                   color: 'var(--gray-9)',
                   transition: 'transform 0.2s ease',
@@ -167,7 +212,7 @@ export function PopupProfilesList() {
                   size="1"
                   onClick={() => void openSessionsPage()}
                 >
-                  <ExternalLink size={12} aria-hidden="true" />
+                  <ExternalLink size={12} />
                   {getMessage('popupGoToSessions')}
                 </Button>
               </Flex>
@@ -182,12 +227,27 @@ export function PopupProfilesList() {
     <Flex direction="column" gap="2">
       <Box style={{ paddingLeft: 4 }}>{sectionLabel}</Box>
 
-      <Flex data-testid="popup-profiles-list" direction="column" gap="2">
-        {pinnedSessions.map((session) => (
+      <Flex
+        ref={listRef}
+        data-testid="popup-profiles-list"
+        direction="column"
+        gap="2"
+        role="list"
+        aria-label={getMessage('popupPinnedSessionsLabel')}
+      >
+        {pinnedSessions.map((session, index) => (
           <Card
             key={session.id}
             data-testid={`popup-profile-item-${session.id}`}
+            data-popup-pinned-card=""
+            data-session-id={session.id}
+            data-shortcut-scope="widget:session-card"
             size="1"
+            tabIndex={0}
+            role="listitem"
+            aria-label={session.name}
+            className={styles.pinnedCard}
+            onKeyDown={(e) => handleCardKeyDown(e, index)}
           >
             <Flex align="center" gap="3" style={{ minWidth: 0 }}>
               <Flex align="center" style={{ flexShrink: 0 }}>

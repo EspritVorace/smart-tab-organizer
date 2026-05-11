@@ -1,75 +1,26 @@
-import { storage } from 'wxt/utils/storage';
-import type { DomainRuleSettings } from '@/types/syncSettings.js';
-import { defaultAppSettings } from '@/types/syncSettings.js';
-import type { DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
-import type { RuleCategory } from '@/schemas/category.js';
-import type { Statistics } from '@/types/statistics.js';
-import { defaultStatistics } from '@/types/statistics.js';
-import type { Session } from '@/types/session.js';
+import { defineWorkspaceItems, DEFAULT_WORKSPACE_ID } from './workspaceStorage.js';
 
-// --- Sync storage items ---
+/**
+ * All settings/sessions/statistics items are scoped per workspace under
+ * `local:ws:{wsId}:{field}`. For Lots 1-2 (before the active-workspace runtime
+ * is wired through), every consumer keeps reading via the items below, which
+ * are bound to the default workspace. Lot 2 introduces a context that re-binds
+ * these items to the actually active workspace.
+ */
+const _defaultItems = defineWorkspaceItems(DEFAULT_WORKSPACE_ID);
 
-export const globalGroupingEnabledItem = storage.defineItem<boolean>(
-  'local:globalGroupingEnabled',
-  { defaultValue: defaultAppSettings.globalGroupingEnabled },
-);
-
-export const globalDeduplicationEnabledItem = storage.defineItem<boolean>(
-  'local:globalDeduplicationEnabled',
-  { defaultValue: defaultAppSettings.globalDeduplicationEnabled },
-);
-
-export const deduplicateUnmatchedDomainsItem = storage.defineItem<boolean>(
-  'local:deduplicateUnmatchedDomains',
-  { defaultValue: defaultAppSettings.deduplicateUnmatchedDomains },
-);
-
-export const deduplicationKeepStrategyItem = storage.defineItem<DeduplicationKeepStrategyValue>(
-  'local:deduplicationKeepStrategy',
-  { defaultValue: defaultAppSettings.deduplicationKeepStrategy },
-);
-
-export const domainRulesItem = storage.defineItem<DomainRuleSettings>(
-  'local:domainRules',
-  { defaultValue: defaultAppSettings.domainRules },
-);
-
-export const categoriesItem = storage.defineItem<RuleCategory[]>(
-  'local:categories',
-  { defaultValue: defaultAppSettings.categories },
-);
-
-export const categoriesSeededItem = storage.defineItem<boolean>(
-  'local:categoriesSeeded',
-  { defaultValue: false },
-);
-
-export const notifyOnGroupingItem = storage.defineItem<boolean>(
-  'local:notifyOnGrouping',
-  { defaultValue: defaultAppSettings.notifyOnGrouping },
-);
-
-export const notifyOnDeduplicationItem = storage.defineItem<boolean>(
-  'local:notifyOnDeduplication',
-  { defaultValue: defaultAppSettings.notifyOnDeduplication },
-);
-
-// --- Local storage items ---
-
-export const statisticsItem = storage.defineItem<Statistics>(
-  'local:statistics',
-  { defaultValue: defaultStatistics },
-);
-
-export const sessionsItem = storage.defineItem<Session[]>(
-  'local:sessions',
-  { defaultValue: [] },
-);
-
-export const popupPinnedEmptyCollapsedItem = storage.defineItem<boolean>(
-  'local:popupPinnedEmptyCollapsed',
-  { defaultValue: false },
-);
+export const globalGroupingEnabledItem = _defaultItems.globalGroupingEnabledItem;
+export const globalDeduplicationEnabledItem = _defaultItems.globalDeduplicationEnabledItem;
+export const deduplicateUnmatchedDomainsItem = _defaultItems.deduplicateUnmatchedDomainsItem;
+export const deduplicationKeepStrategyItem = _defaultItems.deduplicationKeepStrategyItem;
+export const domainRulesItem = _defaultItems.domainRulesItem;
+export const categoriesItem = _defaultItems.categoriesItem;
+export const categoriesSeededItem = _defaultItems.categoriesSeededItem;
+export const notifyOnGroupingItem = _defaultItems.notifyOnGroupingItem;
+export const notifyOnDeduplicationItem = _defaultItems.notifyOnDeduplicationItem;
+export const statisticsItem = _defaultItems.statisticsItem;
+export const sessionsItem = _defaultItems.sessionsItem;
+export const popupPinnedEmptyCollapsedItem = _defaultItems.popupPinnedEmptyCollapsedItem;
 
 // Map des items settings par champ (pour watchSettingsField)
 export const settingsItemMap = {

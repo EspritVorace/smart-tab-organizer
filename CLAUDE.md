@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-> Ce projet utilise pnpm comme gestionnaire de paquets.
+> This project uses pnpm as its package manager.
 
 ## Commands
 
@@ -23,14 +23,17 @@ pnpm test:e2e:headed          # build + Playwright headed
 pnpm storybook                            # Storybook (port 6006)
 pnpm docs:dev / docs:build / docs:preview # Astro Starlight (port 4321)
 pnpm screenshots                          # Deterministic multi-locale/theme screenshots
+pnpm doc:scenarios                        # Narrative captures (3 locales x 2 themes matrix)
+pnpm doc:scenarios:audit                  # Audit routing manifests vs output / destinations
+pnpm doc:scenarios:sync                   # Re-route output to dest dirs (without re-running Playwright)
 ```
 
 ## Architecture
 
-**Cross-browser extension** (WXT framework) — Chrome MV3 / Firefox MV2.
+**Cross-browser extension** (WXT framework), Chrome MV3 / Firefox MV2.
 
 ### Entry Points
-- `src/entrypoints/background.ts` → delegates to `src/background/`
+- `src/entrypoints/background.ts` -> delegates to `src/background/`
 - `src/entrypoints/content.content.ts`
 - `src/entrypoints/popup.html` / `options.html`
 
@@ -46,14 +49,14 @@ pnpm screenshots                          # Deterministic multi-locale/theme scr
 `useSettings` hook uses refs to prevent race conditions. `useStorageState` unifies storage access for settings and statistics.
 
 ### Schemas & Types
-- `src/schemas/` — Zod schemas: `common`, `domainRule`, `enums`, `importExport`, `session`
-- `src/schemas/importExport.ts` — relaxed schema (no form-level refinements) for import validation
-- `src/types/` — TS types extending Zod-inferred types (e.g. `DomainRuleSetting` adds `enabled`, `badge`), plus `messages.ts` (inter-component message types)
+- `src/schemas/`: Zod schemas: `common`, `domainRule`, `enums`, `importExport`, `session`
+- `src/schemas/importExport.ts`: relaxed schema (no form-level refinements) for import validation
+- `src/types/`: TS types extending Zod-inferred types (e.g. `DomainRuleSetting` adds `enabled`, `badge`), plus `messages.ts` (inter-component message types)
 
 ### Static Data
-- `public/data/presets.json` — regex presets (read-only, loaded at runtime)
+- `public/data/presets.json`: regex presets (read-only, loaded at runtime)
 - `public/data/default_settings.json`
-- `public/_locales/` — i18n messages (EN, FR, ES)
+- `public/_locales/`: i18n messages (EN, FR, ES)
 
 ### Key Directories
 ```
@@ -84,18 +87,58 @@ tests/e2e/         # Playwright E2E tests
 ```
 
 ### Features
-1. **Automatic Grouping** : domain rules + regex presets (middle-click / right-click new tab)
-2. **Deduplication** : exact URL / URL without ignored params / includes modes; keep strategy (`keep-grouped-or-new` default, `keep-grouped`, `keep-old`, `keep-new`) to decide which of the two matching tabs survives; undo action captures `groupId` and tries to restore group membership of the closed tab
-3. **Rule Management** : CRUD for domain rules; built-in & custom regex presets; drag-and-drop reordering
-4. **Import/Export Wizard** : Zod-validated JSON for rules and sessions; rule/session classification (new/conflicting/identical); conflict resolution; optional note field
-5. **Statistics** : grouping & dedup counters
-6. **Sessions & Profiles** : snapshots of open tabs with optional note; pinned profiles with icon, window exclusivity; restore wizard with conflict resolution; interactive session editor; collapsed/expanded group state persistence; drag-and-drop session reordering; session card with HoverCard metadata and inline rename
+1. **Automatic Grouping**: domain rules + regex presets (middle-click / right-click new tab)
+2. **Deduplication**: exact URL / URL without ignored params / includes modes; keep strategy (`keep-grouped-or-new` default, `keep-grouped`, `keep-old`, `keep-new`) decides which of the two matching tabs survives; the undo action captures `groupId` and tries to restore the closed tab's group membership
+3. **Rule Management**: CRUD for domain rules; built-in & custom regex presets; drag-and-drop reordering
+4. **Import/Export Wizard**: Zod-validated JSON for rules and sessions; rule/session classification (new/conflicting/identical); conflict resolution; optional note field
+5. **Statistics**: grouping & dedup counters
+6. **Sessions & Profiles**: snapshots of open tabs with optional note; pinned profiles with icon, window exclusivity; restore wizard with conflict resolution; interactive session editor; collapsed/expanded group state persistence; drag-and-drop session reordering; session card with HoverCard metadata and inline rename
 
 ### Theming
-Accent unique `indigo` (défaut Radix Themes). Préférer les tokens Radix (`var(--accent-a3)`, `var(--gray-a2)`, etc.) aux couleurs hardcodées.
+Single `indigo` accent (Radix Themes default). Prefer Radix tokens (`var(--accent-a3)`, `var(--gray-a2)`, etc.) over hardcoded colors.
 
 ### Internationalization
-Always use `getMessage()` from `src/utils/i18n.ts` — for UI text, `aria-label`, and `title` attributes. Never hardcode strings.
+Always use `getMessage()` from `src/utils/i18n.ts`, for UI text, `aria-label`, and `title` attributes. Never hardcode strings.
+
+### Keyboard shortcut conventions
+
+Central registry: `src/shortcuts/registry.ts`. Detailed developer docs:
+[`src/shortcuts/README.md`](./src/shortcuts/README.md).
+
+**Adding a shortcut**
+
+1. Add an entry to `SHORTCUTS_REGISTRY` (hierarchical kebab-case ID:
+   `{scope}.{action}` or `{scope}.{action}.{variant}`).
+2. Add `descriptionKey` to all three
+   `public/_locales/{fr,en,es}/messages.json` files.
+3. In the component: `useShortcuts({ 'my.id': handler }, { scope })`.
+4. `pnpm shortcuts:doc` regenerates the Starlight `annexes/raccourcis-clavier` page.
+
+**Combo format**
+
+- Modifiers: `Mod` (Cmd/Ctrl), `Shift`, `Alt`, `Ctrl`, `Meta`. Order does not matter.
+- Keys: lowercase (`Mod+Shift+r`).
+- Special keys: CamelCase (`Escape`, `Enter`, `ArrowUp`).
+- Sequence: array of combos (`['i', 'r']`).
+
+**Registry vs. local handlers**
+
+In the registry: every "learnable" user shortcut (i18n description,
+reproducible behavior, expected to surface in the help panel).
+
+Stays local: Enter/Escape on a rename input, comma to commit a tag,
+arrow-key navigation inside a list (`useListNavigation`), keyboard
+drag and drop driven by `dnd-kit`.
+
+**User customization**
+
+The `useShortcuts` facade hook reads its bindings via
+`getEffectiveBindings(id)` (`src/shortcuts/getEffectiveBindings.ts`).
+The Zod schema `ShortcutOverridesSchema`
+(`src/shortcuts/overridesSchema.ts`) describes the storage format for
+user overrides. There is no UI or active storage at this stage: both
+modules exist so a future customization feature can plug in without
+touching the callers.
 
 ## Code Conventions
 
@@ -110,96 +153,140 @@ logger.debug('[MY_MODULE] Something happened:', value);
 ```
 
 ### Type Safety
-- No `any` — use precise types or unknown with narrowing.
+- No `any`: use precise types or unknown with narrowing.
+
+### React
+- React 19. Function components receive `ref` directly as a prop, not via `forwardRef`. To expose a ref, add `ref?: Ref<T>` to the props and forward it to the target DOM node.
+- Do not reintroduce `forwardRef` in new code (deprecated in a future React release).
 
 ### Accessibility
-- Prefer Radix primitives over hand-rolled ARIA (Dialog, Collapsible, Toolbar, RadioGroup…).
-- Radix Themes components (Switch, IconButton…) handle focus/keyboard/ARIA natively — don't override.
+- Prefer Radix primitives over hand-rolled ARIA (Dialog, Collapsible, Toolbar, RadioGroup...).
+- Radix Themes components (Switch, IconButton...) handle focus/keyboard/ARIA natively, do not override.
 - Lucide icons: always `aria-hidden="true"`. Icon-only buttons need `aria-label` + `title`.
 - Custom CSS focus rules only for non-Radix markup (see `src/styles/radix-themes.css`).
 
 ### Component Organization
-- **Core/** — business logic tied to a domain concept
-- **UI/** — layout and cross-feature interface components
-- **Form/** — reusable form fields
+- **Core/**: business logic tied to a domain concept
+- **UI/**: layout and cross-feature interface components
+- **Form/**: reusable form fields
 
 ### Storybook
 - Story titles mirror folder: `Components/Core/Session/SessionCard`
 - Prefix all exports with component name: `SessionCardDefault`, `SessionCardDisabled` (avoids conflicts)
 
+### Doc-scenarios (narrative captures)
+
+Pipeline `e2e-doc-scenarios/` is distinct from `e2e-screenshots/`: it
+captures complete user journeys (initial state, creation, real usage,
+sessions, import/export, advanced states) across 3 locales x 2 themes.
+See [`e2e-doc-scenarios/README.md`](./e2e-doc-scenarios/README.md) for
+details.
+
+- Scenarios under `e2e-doc-scenarios/scenarios/NN-name.scenario.ts`,
+  paired with `NN-name.routing.ts` describing where to copy each
+  capture.
+- Raw output in `e2e-doc-scenarios/output/{locale}/{theme}/{scenario}/`
+  (gitignored). Routes then copy to `docs/src/assets/screenshots/`,
+  `doc/readme/` or `doc/chrome-web-store/`.
+- Dedicated CI workflow: `.github/workflows/doc-scenarios.yml`
+  (`workflow_dispatch` + tag push + weekly cron). Not triggered on PRs.
+- For a Starlight integration, prefix the route `path` with `journey-`
+  to avoid collisions with the `e2e-screenshots/` pipeline names.
+
 ### Accessibility audits (axe-core)
-Two layers run axe-core et partagent le même rapport consolidé :
+Two layers run axe-core and share the same consolidated report:
 
-- **Storybook** : `@storybook/addon-a11y` (panel live en dev) plus `@storybook/test-runner` qui exécute axe sur chaque story. En CI un job dédié `a11y-storybook` tourne dans `tests.yml`.
-- **Playwright E2E** : helper `tests/e2e/helpers/a11y.ts` (`auditPage`) instrumente les specs existantes aux points clés. No-op tant que `A11Y_ENABLED=true` n'est pas dans l'environnement. En CI, `A11Y_ENABLED=true` est activé sur les 3 shards E2E existants (pas de run Playwright en double).
+- **Storybook**: `@storybook/addon-a11y` (live panel in dev) plus `@storybook/test-runner` runs axe on each story. In CI a dedicated `a11y-storybook` job runs in `tests.yml`.
+- **Playwright E2E**: helper `tests/e2e/helpers/a11y.ts` (`auditPage`) instruments existing specs at key points. No-op until `A11Y_ENABLED=true` is in the environment. In CI, `A11Y_ENABLED=true` is enabled on the 3 existing E2E shards (no duplicate Playwright run).
 
-Le job `report` de `tests.yml` télécharge les artefacts, consolide les shards, produit `summary.md` et publie un commentaire sticky PR (marker `<!-- a11y-report -->`).
+The `report` job in `tests.yml` downloads the artifacts, consolidates the shards, produces `summary.md`, and posts a sticky PR comment (marker `<!-- a11y-report -->`).
 
-Scripts :
+Scripts:
 ```bash
-pnpm a11y:storybook   # build Storybook, lance test-runner + axe, consolide le shard JSONL
-pnpm a11y:e2e         # build extension, lance Playwright avec A11Y_ENABLED=true
-pnpm a11y             # enchaîne storybook, e2e, puis consolidation
-pnpm a11y:report      # lit les deux rapports et génère reports/a11y/summary.md
+pnpm a11y:storybook   # build Storybook, run test-runner + axe, consolidate the JSONL shard
+pnpm a11y:e2e         # build extension, run Playwright with A11Y_ENABLED=true
+pnpm a11y             # chains storybook, e2e, then consolidation
+pnpm a11y:report      # reads both reports and produces reports/a11y/summary.md
 ```
 
-Rapports (gitignorés, dossier `reports/a11y/`) :
-- `storybook-shards.jsonl` (shard brut) puis `storybook-a11y.json` (consolidé).
-- `e2e-shards/*.jsonl` (shards brut per-worker) puis `e2e-a11y.json` (consolidé par globalTeardown).
-- `summary.md`, `summary.json` : synthèse consolidée (tableau, top 10, diff baseline si `reports/a11y/baseline.json` existe).
+Reports (gitignored, `reports/a11y/` folder):
+- `storybook-shards.jsonl` (raw shard) then `storybook-a11y.json` (consolidated).
+- `e2e-shards/*.jsonl` (raw shards per worker) then `e2e-a11y.json` (consolidated by globalTeardown).
+- `summary.md`, `summary.json`: consolidated synthesis (table, top 10, baseline diff if `reports/a11y/baseline.json` exists).
 
-Seuil d'échec configurable via `A11Y_FAIL_LEVEL` (valeurs : `minor`, `moderate`, `serious` (défaut), `critical`, `none`).
+Failure threshold configurable via `A11Y_FAIL_LEVEL` (values: `minor`, `moderate`, `serious` (default), `critical`, `none`).
 
-Pour désactiver une règle axe localement (à accompagner d'un commentaire justificatif) :
-- Story : `parameters.a11y.config.rules = [{ id: 'aria-allowed-attr', enabled: false }]`.
-- E2E : `await auditPage(page, 'label', { disableRules: ['region'] });`.
+To disable an axe rule locally (always with a justifying comment):
+- Story: `parameters.a11y.config.rules = [{ id: 'aria-allowed-attr', enabled: false }]`.
+- E2E: `await auditPage(page, 'label', { disableRules: ['region'] });`.
 
-### Style d'écriture
-- **Ne jamais utiliser de tiret cadratin (`—`, U+2014) ni de tiret demi-cadratin (`–`, U+2013)** dans les contenus textuels (docs, UI, commentaires, commit messages, PR descriptions, frontmatter, etc.).
-- Préférer une reformulation : parenthèses `(...)`, virgules, deux-points `:`, ou phrases séparées.
-- Cette règle s'applique au français, à l'anglais et à l'espagnol.
+### Disabled state for focusable controls
 
-## Clarification avant implémentation
+Any `Button`, `IconButton`, or interactive element that needs to
+explain why it is disabled uses `aria-disabled="true"` rather than
+`disabled`. The component must:
 
-Avant de générer un plan ou d'écrire du code pour une nouvelle feature,
-identifier et résoudre les zones floues de la user story concernée.
+1. Short-circuit its `onClick` when `aria-disabled` is true.
+2. Keep its `tabIndex` so it remains focusable.
+3. Always provide an explanation via a Radix Tooltip or
+   `aria-describedby`.
 
-### Processus
+Use `AriaButton` (`src/components/UI/AriaButton/AriaButton.tsx`) for
+Radix buttons, or apply the pattern directly on native `<button>`
+elements.
 
-1. Lire la ou les US concernées dans `user-stories/`.
-2. Lister les points ambigus ou non couverts : cas limites, comportements
-   implicites, interactions avec des features existantes, impact sur les
-   schemas Zod ou les types.
-3. Poser les questions groupées à l'utilisateur — une seule passe,
-   pas de questions au fil de l'implémentation.
-4. Une fois les réponses obtenues, noter les décisions prises sous forme
-   de commentaire dans le prompt ou dans un fichier `clarifications.md`
-   dans le dossier de la feature si les décisions sont structurantes.
-5. Seulement ensuite : générer le plan technique et implémenter.
+The native `disabled` attribute remains reserved for form inputs whose
+value must not be submitted, and for transient loading states (e.g.
+`isRestoring`, `isAnalyzing`) where a tooltip would not be relevant.
 
-### Ne pas sauter cette étape si
+### Writing style
+- **Never use the em-dash (`—`, U+2014) or en-dash (`–`, U+2013)** in textual content (docs, UI, comments, commit messages, PR descriptions, frontmatter, etc.).
+- Reformulate instead: parentheses `(...)`, commas, colons `:`, or separate sentences.
+- Rule applies to French, English and Spanish alike.
 
-- La US référence une entité dont les champs ne sont pas tous explicites.
-- La US interagit avec `browser.storage.local` ou `browser.storage.session`.
-- La US introduit un nouveau composant UI sans préciser le comportement
-  responsive, les états vides, ou les états d'erreur.
-- La US touche au système i18n (nouvelles clés à ajouter dans les 3 locales).
+## Clarification before implementation
 
-## Agents Claude disponibles
+Before generating a plan or writing code for a new feature, identify
+and resolve the unclear areas in the relevant user story.
 
-- **`e2e-flaky-detector`** : analyse les tests Playwright pour repérer
-  les patterns de fragilité (race conditions, assertions fragiles,
-  storage async sans await).
-- **`code-deduplicator`** : scanne `src/` via le skill `jscpd`,
-  présente un top 10 des duplications les plus douloureuses, applique
-  le refacto choisi par l'utilisateur (extraction de hook/composant/util)
-  avec garde-fous (compile, tests, revert si échec, commit atomique).
-  L'agent lance lui-même `npx skills experimental_install` à chaque appel
-  pour rester synchronisé sur `skills-lock.json`.
+### Process
+
+1. Read the relevant US in `user-stories/`.
+2. List ambiguous or uncovered points: edge cases, implicit
+   behaviors, interactions with existing features, impact on the Zod
+   schemas or types.
+3. Ask the user the questions in a single batch, not piecemeal during
+   implementation.
+4. Once the answers are in, write the decisions down (as a comment in
+   the prompt, or in a `clarifications.md` file inside the feature
+   folder if the decisions are structural).
+5. Only then: generate the technical plan and implement.
+
+### Do not skip this step when
+
+- The US references an entity whose fields are not all explicit.
+- The US interacts with `browser.storage.local` or
+  `browser.storage.session`.
+- The US introduces a new UI component without specifying responsive
+  behavior, empty states, or error states.
+- The US touches the i18n system (new keys to add across all three
+  locales).
+
+## Available Claude agents
+
+- **`e2e-flaky-detector`**: analyzes Playwright tests to spot
+  fragility patterns (race conditions, fragile assertions, async
+  storage without await).
+- **`code-deduplicator`**: scans `src/` through the `jscpd` skill,
+  presents a top 10 of the most painful duplications, applies the
+  refactor chosen by the user (hook/component/util extraction) with
+  guardrails (compile, tests, revert on failure, atomic commit).
+  The agent runs `npx skills experimental_install` itself on each
+  invocation to stay in sync with `skills-lock.json`.
 
 ### Skill jscpd
-- Installé via `npx skills add kucherenko/jscpd` (une fois, lockfile
-  versionné dans `skills-lock.json`).
-- Config projet dans `.jscpd.json` (pattern, ignore, formats).
-- Le skill source est sous `.agents/skills/jscpd/` (gitignored), recréé
-  à la demande par `npx skills experimental_install`.
+- Installed via `npx skills add kucherenko/jscpd` (once, lockfile
+  versioned in `skills-lock.json`).
+- Project config in `.jscpd.json` (pattern, ignore, formats).
+- The skill source lives under `.agents/skills/jscpd/` (gitignored),
+  recreated on demand by `npx skills experimental_install`.

@@ -1,15 +1,25 @@
 import { defineConfig } from 'wxt';
 import react from '@vitejs/plugin-react';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import { resolve } from 'path';
 
 export default defineConfig({
   srcDir: 'src',
   outDir: '.output',
+  hooks: {
+    'build:manifestGenerated': (wxt, manifest) => {
+      // Firefox MV2 uses `_execute_browser_action`; only Chromium MV3 accepts
+      // `_execute_action`. Without this rename the popup hotkey (and on some
+      // validators the whole `commands` object) is silently dropped on Firefox.
+      if (manifest.manifest_version === 2 && manifest.commands?._execute_action) {
+        manifest.commands._execute_browser_action = manifest.commands._execute_action;
+        delete manifest.commands._execute_action;
+      }
+    },
+  },
   manifest: {
     name: '__MSG_extensionName__',
     description: '__MSG_extensionDescription__',
-    version: '1.1.4',
+    version: '1.2.0',
     author: 'EspritVorace',
     homepage_url: 'https://github.com/EspritVorace/smart-tab-organizer',
     default_locale: 'en',
@@ -28,6 +38,19 @@ export default defineConfig({
     },
     permissions: ['tabs', 'tabGroups', 'storage', 'notifications'],
     host_permissions: ['<all_urls>'],
+    commands: {
+      'organize-all-tabs': {
+        suggested_key: { default: 'Alt+Shift+O' },
+        description: '__MSG_cmdOrganizeAllTabs__',
+      },
+      'save-current-window-session': {
+        suggested_key: { default: 'Alt+Shift+S' },
+        description: '__MSG_cmdSaveSession__',
+      },
+      _execute_action: {
+        suggested_key: { default: 'Alt+Shift+P' },
+      },
+    },
     action: {
       default_icon: {
         '16': 'icons/icon16.png',
@@ -49,7 +72,10 @@ export default defineConfig({
     profileCreateIfMissing: true,
   },
   vite: () => ({
-    plugins: [react(), tsconfigPaths({ projects: ['./tsconfig.json'] })],
+    plugins: [react()],
+    resolve: {
+      tsconfigPaths: true,
+    },
     build: {
       emptyOutDir: true,
       rollupOptions: {

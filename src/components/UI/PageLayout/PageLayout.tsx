@@ -3,6 +3,7 @@ import type { LucideIcon } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import type { AppSettings } from '@/types/syncSettings.js';
 import { IconBox } from '@/components/UI/IconBox/IconBox';
+import { StatusBar } from '@/components/UI/StatusBar/StatusBar';
 
 interface PageLayoutProps {
   titleKey: string;
@@ -53,6 +54,8 @@ export function PageLayout({ titleKey, descriptionKey, icon: Icon, syncSettings,
       <Box data-testid="page-layout-content" style={{ flex: 1, overflow: 'auto', marginTop: 'var(--space-3)', backgroundColor: 'var(--accent-a2)', borderRadius: 'var(--radius-3)', padding: 'var(--space-4)' }}>
         {children(syncSettings)}
       </Box>
+
+      <StatusBar />
     </Box>
   );
 }

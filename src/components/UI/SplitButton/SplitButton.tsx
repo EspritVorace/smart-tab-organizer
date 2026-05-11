@@ -1,7 +1,8 @@
 import React from 'react';
-import { Button, DropdownMenu, Flex } from '@radix-ui/themes';
+import { Button, DropdownMenu, Flex, Kbd } from '@radix-ui/themes';
 import { ChevronDown } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
+import { AriaButton } from '@/components/UI/AriaButton/AriaButton';
 
 export interface SplitButtonMenuItem {
   label: string;
@@ -10,6 +11,8 @@ export interface SplitButtonMenuItem {
   disabled?: boolean;
   /** If true, a separator is rendered before this item */
   separator?: boolean;
+  /** Optional keyboard hint rendered on the right side (e.g. "Shift+R"). */
+  shortcut?: string;
   /** data-testid forwarded to the DropdownMenu.Item */
   'data-testid'?: string;
 }
@@ -27,6 +30,8 @@ export interface SplitButtonProps {
   size?: '1' | '2' | '3';
   /** Disabled state */
   disabled?: boolean;
+  /** Explanation shown in a Tooltip when the button is disabled. */
+  disabledReason?: string;
   /** Aria-label for the chevron dropdown trigger */
   ariaLabel?: string;
   /** Aria-label for the primary button. Required when label is not textual */
@@ -42,39 +47,43 @@ export function SplitButton({
   variant = 'solid',
   size = '2',
   disabled = false,
+  disabledReason,
   ariaLabel,
   primaryAriaLabel,
   'data-testid': testId,
 }: SplitButtonProps) {
+  const chevronStyle = {
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
+    borderLeft: '1px solid rgba(255,255,255,0.2)',
+    paddingLeft: 6,
+    paddingRight: 6,
+    minWidth: 28,
+  };
+
   return (
     <Flex gap="0">
-      <Button
+      <AriaButton
         data-testid={testId}
         variant={variant}
         size={size}
         onClick={onClick}
-        disabled={disabled}
+        ariaDisabled={disabled}
+        disabledReason={disabledReason}
         aria-label={typeof label === 'string' ? undefined : primaryAriaLabel}
         style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
       >
         {label}
-      </Button>
+      </AriaButton>
       {disabled ? (
         <Button
           variant={variant}
           size={size}
-          disabled
+          aria-disabled="true"
           aria-label={ariaLabel ?? getMessage('sessionRestoreOptions')}
-          style={{
-            borderTopLeftRadius: 0,
-            borderBottomLeftRadius: 0,
-            borderLeft: '1px solid rgba(255,255,255,0.2)',
-            paddingLeft: 6,
-            paddingRight: 6,
-            minWidth: 28,
-          }}
+          style={chevronStyle}
         >
-          <ChevronDown size={14} aria-hidden="true" />
+          <ChevronDown size={14} />
         </Button>
       ) : (
         <DropdownMenu.Root>
@@ -83,16 +92,9 @@ export function SplitButton({
               variant={variant}
               size={size}
               aria-label={ariaLabel ?? getMessage('sessionRestoreOptions')}
-              style={{
-                borderTopLeftRadius: 0,
-                borderBottomLeftRadius: 0,
-                borderLeft: '1px solid rgba(255,255,255,0.2)',
-                paddingLeft: 6,
-                paddingRight: 6,
-                minWidth: 28,
-              }}
+              style={chevronStyle}
             >
-              <ChevronDown size={14} aria-hidden="true" />
+              <ChevronDown size={14} />
             </Button>
           </DropdownMenu.Trigger>
           <DropdownMenu.Content>
@@ -104,8 +106,15 @@ export function SplitButton({
                   disabled={item.disabled}
                   data-testid={item['data-testid']}
                 >
-                  {item.icon}
-                  {item.label}
+                  <Flex align="center" justify="between" gap="3" width="100%">
+                    <Flex align="center" gap="2">
+                      {item.icon}
+                      {item.label}
+                    </Flex>
+                    {item.shortcut && (
+                      <Kbd size="1">{item.shortcut}</Kbd>
+                    )}
+                  </Flex>
                 </DropdownMenu.Item>
               </React.Fragment>
             ))}

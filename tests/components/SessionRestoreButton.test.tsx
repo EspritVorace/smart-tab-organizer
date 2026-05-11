@@ -6,8 +6,10 @@ import type { Session } from '../../src/types/session';
 vi.mock('../../src/utils/i18n', () => ({
   getMessage: vi.fn((key: string) => {
     const messages: Record<string, string> = {
+      sessionRestore: 'Restore',
       sessionRestoreCurrentWindow: 'Restore in current window',
       sessionRestoreNewWindow: 'Restore in new window',
+      sessionRestoreReplaceCurrentWindow: 'Replace tabs in current window',
       sessionRestoreCustomize: 'Customized restoration',
       sessionRestoreOptions: 'Restore options',
     };
@@ -38,11 +40,13 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 describe('SessionRestoreButton', () => {
   let onRestoreCurrentWindow: ReturnType<typeof vi.fn>;
   let onRestoreNewWindow: ReturnType<typeof vi.fn>;
+  let onReplaceCurrentWindow: ReturnType<typeof vi.fn>;
   let onCustomize: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     onRestoreCurrentWindow = vi.fn();
     onRestoreNewWindow = vi.fn();
+    onReplaceCurrentWindow = vi.fn();
     onCustomize = vi.fn();
   });
 
@@ -53,6 +57,7 @@ describe('SessionRestoreButton', () => {
           session={session}
           onRestoreCurrentWindow={onRestoreCurrentWindow}
           onRestoreNewWindow={onRestoreNewWindow}
+          onReplaceCurrentWindow={onReplaceCurrentWindow}
           onCustomize={onCustomize}
           data-testid="restore-btn"
         />
@@ -74,11 +79,33 @@ describe('SessionRestoreButton', () => {
           session={session}
           onRestoreCurrentWindow={onRestoreCurrentWindow}
           onRestoreNewWindow={onRestoreNewWindow}
+          onReplaceCurrentWindow={onReplaceCurrentWindow}
           onCustomize={onCustomize}
         />
       </TestWrapper>,
     );
 
     expect(screen.getByRole('button', { name: /Restore options/i })).toBeInTheDocument();
+  });
+
+  it('tile presentation renders the textual "Restore" label on the primary button', () => {
+    render(
+      <TestWrapper>
+        <SessionRestoreButton
+          session={session}
+          onRestoreCurrentWindow={onRestoreCurrentWindow}
+          onRestoreNewWindow={onRestoreNewWindow}
+          onReplaceCurrentWindow={onReplaceCurrentWindow}
+          onCustomize={onCustomize}
+          presentation="tile"
+          data-testid="restore-btn"
+        />
+      </TestWrapper>,
+    );
+
+    const primary = screen.getByTestId('restore-btn');
+    expect(primary).toHaveTextContent('Restore');
+    fireEvent.click(primary);
+    expect(onRestoreCurrentWindow).toHaveBeenCalledWith(session);
   });
 });

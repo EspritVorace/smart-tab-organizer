@@ -1,10 +1,68 @@
 diff --git a/dist/generate-report.js b/dist/generate-report.js
-index 87d2b725c03dd96d10b239dea9f6eef147591186..714f35bd92a9c88914747b6cc505fd524ce19278 100644
+index 87d2b725c03dd96d10b239dea9f6eef147591186..ddde919f09364e9eef0d773eddbd0fd3747bdfa0 100644
 --- a/dist/generate-report.js
 +++ b/dist/generate-report.js
-@@ -84,30 +84,35 @@ class GenerateCtrfReport {
+@@ -83,31 +83,93 @@ class GenerateCtrfReport {
+         this.ctrfReport.results.summary.stop = Date.now();
          this.writeReportToFile(this.ctrfReport);
      }
++    // Vitest 4 reporter API: onFinished was renamed to onTestRunEnd, and the
++    // first argument is now ReadonlyArray<TestModule> (public reporter API)
++    // instead of internal task files.
++    onTestRunEnd(testModules, unhandledErrors, reason) {
++        var _a;
++        try {
++            for (const mod of testModules !== null && testModules !== void 0 ? testModules : []) {
++                const moduleId = (_a = mod === null || mod === void 0 ? void 0 : mod.moduleId) !== null && _a !== void 0 ? _a : "";
++                for (const testCase of mod.children.allTests()) {
++                    this.collectReportedTestCase(testCase, moduleId);
++                }
++            }
++        }
++        catch (error) {
++            console.error(`error in onTestRunEnd : ${String(error)}`);
++        }
++        this.ctrfReport.results.summary.stop = Date.now();
++        this.writeReportToFile(this.ctrfReport);
++    }
++    collectReportedTestCase(testCase, moduleId) {
++        var _a, _b, _c, _d, _e;
++        const result = (_a = testCase.result) === null || _a === void 0 ? void 0 : _a.call(testCase);
++        const diagnostic = (_b = testCase.diagnostic) === null || _b === void 0 ? void 0 : _b.call(testCase);
++        const rawState = result === null || result === void 0 ? void 0 : result.state;
++        const testStatus = this.mapReportedState(rawState);
++        const test = {
++            name: testCase.name,
++            duration: (_c = diagnostic === null || diagnostic === void 0 ? void 0 : diagnostic.duration) !== null && _c !== void 0 ? _c : 0,
++            status: testStatus,
++        };
++        if (this.reporterConfigOptions.minimal === false) {
++            const errors = (result === null || result === void 0 ? void 0 : result.errors) && result.errors.length > 0 ? result.errors : undefined;
++            test.message = errors ? ((_d = errors[0].message) !== null && _d !== void 0 ? _d : "") : "";
++            test.trace = errors ? ((_e = errors[0].stack) !== null && _e !== void 0 ? _e : "") : "";
++            test.rawStatus = rawState !== null && rawState !== void 0 ? rawState : "";
++            test.type = this.reporterConfigOptions.testType ? this.reporterConfigOptions.testType : "unit";
++            test.filePath = moduleId;
++            test.retries = (diagnostic === null || diagnostic === void 0 ? void 0 : diagnostic.retryCount) ? diagnostic.retryCount : 0;
++        }
++        this.ctrfReport.results.summary[testStatus]++;
++        this.ctrfReport.results.summary.tests++;
++        this.ctrfReport.results.tests.push(test);
++    }
++    mapReportedState(state) {
++        switch (state) {
++            case "passed":
++                return "passed";
++            case "failed":
++                return "failed";
++            case "skipped":
++                return "skipped";
++            case "pending":
++                return "pending";
++            default:
++                return "other";
++        }
++    }
      updateCtrfTestResultsFromTestResult(files) {
 +        const processTask = (task) => {
 +            var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;

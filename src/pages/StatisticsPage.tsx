@@ -33,7 +33,7 @@ function TrendBadge({ current, previous }: TrendBadgeProps) {
   if (trend === 'stable') {
     return (
       <Flex align="center" gap="1">
-        <Minus size={14} aria-hidden="true" style={{ color: 'var(--gray-9)' }} />
+        <Minus size={14} style={{ color: 'var(--gray-9)' }} />
         <Text size="1" color="gray">{getMessage('statsTrendStable')}</Text>
       </Flex>
     );
@@ -42,7 +42,7 @@ function TrendBadge({ current, previous }: TrendBadgeProps) {
   if (trend === 'new') {
     return (
       <Flex align="center" gap="1">
-        <TrendingUp size={14} aria-hidden="true" style={{ color: 'var(--accent-9)' }} />
+        <TrendingUp size={14} style={{ color: 'var(--accent-9)' }} />
         <Text size="1" style={{ color: 'var(--accent-11)' }}>{getMessage('statsTrendNewActivity')}</Text>
       </Flex>
     );
@@ -96,7 +96,7 @@ export function StatisticsPage({ syncSettings, statisticsData, onReset }: Statis
       {() => (
         <Box data-testid="page-stats">
 
-          {/* Section 1 : Totaux historiques */}
+          {/* Section 1: historical totals */}
           <Card mb="4">
             <Flex direction="column" gap="3" p="2">
               <Heading size="3">{getMessage('statsHistoricalTotals')}</Heading>
@@ -104,7 +104,7 @@ export function StatisticsPage({ syncSettings, statisticsData, onReset }: Statis
                 <Card data-testid="page-stats-card-groups" style={{ flex: '1', minWidth: '180px' }}>
                   <Flex direction="column" gap="2" p="3">
                     <Flex align="center" gap="2">
-                      <Layers size={18} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />
+                      <Layers size={18} style={{ color: 'var(--accent-9)' }} />
                       <Text size="2" color="gray" highContrast>{getMessage('groupsCreated')}</Text>
                     </Flex>
                     <Text size="8" weight="bold" style={{ color: 'var(--accent-11)' }}>
@@ -116,7 +116,7 @@ export function StatisticsPage({ syncSettings, statisticsData, onReset }: Statis
                 <Card data-testid="page-stats-card-dedup" style={{ flex: '1', minWidth: '180px' }}>
                   <Flex direction="column" gap="2" p="3">
                     <Flex align="center" gap="2">
-                      <Copy size={18} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />
+                      <Copy size={18} style={{ color: 'var(--accent-9)' }} />
                       <Text size="2" color="gray" highContrast>{getMessage('tabsDeduplicated')}</Text>
                     </Flex>
                     <Text size="8" weight="bold" style={{ color: 'var(--accent-11)' }}>
@@ -139,7 +139,7 @@ export function StatisticsPage({ syncSettings, statisticsData, onReset }: Statis
             </Flex>
           </Card>
 
-          {/* Section 2 : Cette semaine */}
+          {/* Section 2: this week */}
           <Card mb="4">
             <Flex direction="column" gap="3" p="2">
               <Heading size="3">{getMessage('statsThisWeekTitle')}</Heading>
@@ -166,7 +166,7 @@ export function StatisticsPage({ syncSettings, statisticsData, onReset }: Statis
             </Flex>
           </Card>
 
-          {/* Section 3 : Top règles */}
+          {/* Section 3: top rules */}
           {data.topRules.length > 0 && (
             <Card mb="4">
               <Flex direction="column" gap="3" p="2">
@@ -218,7 +218,7 @@ export function StatisticsPage({ syncSettings, statisticsData, onReset }: Statis
 
           <Box mt="4">
             <Button data-testid="page-stats-btn-reset" variant="soft" color="red" highContrast onClick={onReset}>
-              <RotateCcw size={16} aria-hidden="true" />
+              <RotateCcw size={16} />
               {getMessage('resetStats')}
             </Button>
           </Box>

@@ -1,39 +1,35 @@
-import React, { useCallback, useState } from 'react';
-import { Box } from '@radix-ui/themes';
+import React, { useCallback } from 'react';
 import { FileUp } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast } from '@/utils/toast';
-import { importDataSchema } from '@/schemas/importExport';
-import { classifyImportedRules } from '@/utils/importClassification';
+import { importDataSchema, type ImportDomainRule } from '@/schemas/importExport';
+import {
+  classifyImportedRules,
+  type ConflictingRule,
+} from '@/utils/importClassification';
 import { generateUUID } from '@/utils/utils';
 import type { DomainRuleSetting } from '@/types/syncSettings';
-import { WizardModal } from '@/components/UI/WizardModal';
-import { useDialogReset } from './Shared';
-import { SourceStep, ImportedNoteCallout, useJsonSourceInput } from './Source';
-import { ImportWizardFooter } from './ImportWizardFooter';
+import { PackGallery } from '@/components/Core/Pack/PackGallery/PackGallery';
+import { usePackSelections } from '@/components/Core/Pack/PackGallery/usePackSelections';
+import { usePacks } from '@/hooks/usePacks';
+import { ImportWizardShell } from './ImportWizardShell';
 import {
-  useImportClassification,
-  computeImportCount,
-  ClassificationGroup,
-  ClassificationScrollArea,
-  ConflictModeSelector,
-  ConflictWarningCallout,
-  ImportCountLabel,
-} from './Classification';
-import type { RuleClassification } from '@/utils/importClassification';
+  useImportWizardState,
+  type NormalizedClassification,
+} from './useImportWizardState';
+import type { SourceMode } from './Source';
 import { RuleRow, ConflictRuleRow } from './RuleImportRows';
+
+const RULES_AVAILABLE_MODES: readonly SourceMode[] = ['file', 'text', 'pack'];
 
 interface ImportWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   existingRules: DomainRuleSetting[];
   onImport: (updatedRules: DomainRuleSetting[]) => void;
+  /** When provided, the wizard opens on this source mode instead of `'file'`. */
+  initialSourceMode?: SourceMode;
 }
-
-const STEP_DESCRIPTION_KEYS = [
-  'importRulesStepSourceDescription',
-  'importRulesStepReviewDescription',
-] as const;
 
 const validateRulesPayload = (raw: unknown) => {
   const validated = importDataSchema.parse(raw);
@@ -43,37 +39,49 @@ const validateRulesPayload = (raw: unknown) => {
   };
 };
 
-export function ImportWizard({ open, onOpenChange, existingRules, onImport }: ImportWizardProps) {
-  const [step, setStep] = useState(0);
-  const source = useJsonSourceInput<DomainRuleSetting[]>(validateRulesPayload);
-  const classificationState = useImportClassification<RuleClassification>();
-  const { classification, conflictMode, newSelection: newRuleSelection } = classificationState;
+const classifyRules = (
+  imported: DomainRuleSetting[],
+  existing: DomainRuleSetting[],
+): NormalizedClassification<DomainRuleSetting, ConflictingRule> => {
+  const result = classifyImportedRules(imported, existing);
+  return {
+    newItems: result.newRules,
+    conflictingItems: result.conflictingRules,
+    identicalItems: result.identicalRules,
+  };
+};
 
-  useDialogReset(open, () => {
-    setStep(0);
-    source.reset();
-    classificationState.reset();
+export function ImportWizard({
+  open,
+  onOpenChange,
+  existingRules,
+  onImport,
+  initialSourceMode,
+}: ImportWizardProps) {
+  const packSelections = usePackSelections();
+
+  const state = useImportWizardState<DomainRuleSetting, ConflictingRule>({
+    open,
+    existingItems: existingRules,
+    validatePayload: validateRulesPayload,
+    classify: classifyRules,
+    initialSourceMode,
+    onReset: packSelections.reset,
   });
 
-  // Transition to step 1: classify rules
-  const goToStep1 = useCallback(() => {
-    if (!source.parsedData) return;
-    const result = classifyImportedRules(source.parsedData, existingRules);
-    classificationState.setClassification(result);
-    newRuleSelection.setAll(result.newRules.map((r) => r.id));
-    setStep(1);
-  }, [source.parsedData, existingRules, classificationState, newRuleSelection]);
+  const { packs, categories } = usePacks();
+  const { classification, conflictMode, newSelection, source } = state;
 
-  const importCount = classification
-    ? computeImportCount(
-        classification.newRules,
-        classification.conflictingRules.length,
-        newRuleSelection,
-        conflictMode,
-      )
-    : 0;
+  const handlePackConfirm = useCallback(() => {
+    const aggregated: ImportDomainRule[] = [];
+    for (const pack of packs) {
+      const sel = packSelections.selections[pack.pack.id];
+      if (sel?.selected) aggregated.push(...sel.rules);
+    }
+    const payload = JSON.stringify({ domainRules: aggregated });
+    source.handleTextChange(payload);
+  }, [packs, packSelections.selections, source]);
 
-  // Execute import
   const executeImport = useCallback(() => {
     if (!classification) return;
 
@@ -81,20 +89,16 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
     let added = 0;
     let overwritten = 0;
 
-    // Add new selected rules
-    for (const rule of classification.newRules) {
-      if (newRuleSelection.has(rule.id)) {
+    for (const rule of classification.newItems) {
+      if (newSelection.has(rule.id)) {
         updatedRules.push(rule);
         added++;
       }
     }
 
-    // Handle conflicts
-    for (const conflict of classification.conflictingRules) {
+    for (const conflict of classification.conflictingItems) {
       if (conflictMode === 'overwrite') {
-        const idx = updatedRules.findIndex(
-          r => r.label.toLowerCase() === conflict.existing.label.toLowerCase()
-        );
+        const idx = updatedRules.findIndex(r => r.id === conflict.existing.id);
         if (idx !== -1) {
           updatedRules[idx] = { ...conflict.imported, id: conflict.existing.id };
           overwritten++;
@@ -103,7 +107,6 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
         updatedRules.push({ ...conflict.imported, id: generateUUID() });
         added++;
       }
-      // 'ignore': do nothing
     }
 
     onImport(updatedRules);
@@ -112,92 +115,59 @@ export function ImportWizard({ open, onOpenChange, existingRules, onImport }: Im
       getMessage('importNotificationTitle'),
       getMessage('importNotificationMessage', [String(added), String(overwritten)]),
     );
-  }, [classification, existingRules, newRuleSelection, conflictMode, onImport, onOpenChange]);
+  }, [classification, existingRules, newSelection, conflictMode, onImport, onOpenChange]);
 
   return (
-    <WizardModal
+    <ImportWizardShell<DomainRuleSetting, ConflictingRule>
       open={open}
       onOpenChange={onOpenChange}
       icon={FileUp}
       title={getMessage('importRulesTitle')}
-      description={getMessage(STEP_DESCRIPTION_KEYS[step])}
-    >
-      <WizardModal.Body>
-        {step === 0 && (
-          <SourceStep
-            source={source}
-            textareaPlaceholder='{"domainRules": [...]}'
-            successCountMessageKey="rulesFoundCount"
-          />
-        )}
-
-        {step === 1 && classification && (
-          <Box>
-            <ImportedNoteCallout note={source.importedNote} />
-            <ClassificationScrollArea>
-              <ClassificationGroup
-                titleKey="newRulesGroup"
-                items={classification.newRules}
-                renderItem={(rule) => (
-                  <RuleRow
-                    key={rule.id}
-                    rule={rule}
-                    checkbox
-                    checked={newRuleSelection.has(rule.id)}
-                    onToggle={() => newRuleSelection.toggle(rule.id)}
-                  />
-                )}
-              />
-              <ClassificationGroup
-                titleKey="conflictingRulesGroup"
-                items={classification.conflictingRules}
-                showSeparator={classification.newRules.length > 0}
-                beforeList={
-                  <ConflictModeSelector
-                    value={conflictMode}
-                    onChange={classificationState.setConflictMode}
-                  />
-                }
-                renderItem={(conflict) => (
-                  <ConflictRuleRow key={conflict.imported.id} conflict={conflict} />
-                )}
-              />
-              <ClassificationGroup
-                titleKey="identicalRulesGroup"
-                items={classification.identicalRules}
-                showSeparator={
-                  classification.newRules.length > 0 || classification.conflictingRules.length > 0
-                }
-                renderItem={(rule) => (
-                  <RuleRow
-                    key={rule.id}
-                    rule={rule}
-                    dimmed
-                    statusBadge={getMessage('alreadyExists')}
-                  />
-                )}
-              />
-            </ClassificationScrollArea>
-
-            <ImportCountLabel messageKey="rulesToImportCount" count={importCount} />
-            <ConflictWarningCallout
-              when={conflictMode === 'overwrite' && classification.conflictingRules.length > 0}
-              messageKey="overwriteWarning"
-            />
-          </Box>
-        )}
-      </WizardModal.Body>
-
-      <WizardModal.Footer>
-        <ImportWizardFooter
-          step={step as 0 | 1}
-          hasParsedData={!!source.parsedData}
-          importCount={importCount}
-          onNext={goToStep1}
-          onBack={() => setStep(0)}
-          onConfirm={executeImport}
+      stepDescriptionKeys={['importRulesStepSourceDescription', 'importRulesStepReviewDescription']}
+      textareaPlaceholder='{"domainRules": [...]}'
+      successCountMessageKey="rulesFoundCount"
+      newGroupTitleKey="newRulesGroup"
+      conflictingGroupTitleKey="conflictingRulesGroup"
+      identicalGroupTitleKey="identicalRulesGroup"
+      countLabelKey="rulesToImportCount"
+      overwriteWarningKey="overwriteWarning"
+      state={state}
+      maxWidth="min(960px, 95vw)"
+      fillHeight
+      availableModes={RULES_AVAILABLE_MODES}
+      packGalleryNode={
+        <PackGallery
+          packs={packs}
+          categories={categories}
+          selections={packSelections.selections}
+          onSelectionChange={packSelections.setPackSelection}
         />
-      </WizardModal.Footer>
-    </WizardModal>
+      }
+      packFooter={{
+        ruleCount: packSelections.totals.ruleCount,
+        onConfirm: handlePackConfirm,
+      }}
+      renderNewItem={(rule) => (
+        <RuleRow
+          key={rule.id}
+          rule={rule}
+          checkbox
+          checked={newSelection.has(rule.id)}
+          onToggle={() => newSelection.toggle(rule.id)}
+        />
+      )}
+      renderConflictingItem={(conflict) => (
+        <ConflictRuleRow key={conflict.imported.id} conflict={conflict} />
+      )}
+      renderIdenticalItem={(rule) => (
+        <RuleRow
+          key={rule.id}
+          rule={rule}
+          dimmed
+          statusBadge={getMessage('alreadyExists')}
+        />
+      )}
+      onConfirm={executeImport}
+    />
   );
 }

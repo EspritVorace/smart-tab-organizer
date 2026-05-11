@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-cloud-gcp",
+    "name": {
+      "en": "Google Cloud Console",
+      "fr": "Console Google Cloud",
+      "es": "Consola Google Cloud"
+    },
+    "description": {
+      "en": "Group Google Cloud console tabs by project or by product family.",
+      "fr": "Regroupe les onglets de la console Google Cloud par projet ou par famille de produit.",
+      "es": "Agrupa las pestañas de la consola Google Cloud por proyecto o por familia de producto."
+    },
+    "categoryId": "cloud",
+    "configurable": {
+      "rulePattern": "gcp/{scope}/",
+      "params": [
+        {
+          "id": "scope",
+          "label": {
+            "en": "Group by",
+            "fr": "Grouper par",
+            "es": "Agrupar por"
+          },
+          "default": "project",
+          "options": [
+            {
+              "value": "project",
+              "label": {
+                "en": "Project",
+                "fr": "Projet",
+                "es": "Proyecto"
+              }
+            },
+            {
+              "value": "product",
+              "label": {
+                "en": "Product family",
+                "fr": "Famille de produit",
+                "es": "Familia de producto"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "domainRules": [
+    {
+      "id": "pk-cloud-gcp-project",
+      "enabled": true,
+      "domainFilter": "console.cloud.google.com",
+      "label": "gcp/project/by project",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "cloud",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "project"
+    },
+    {
+      "id": "pk-cloud-gcp-product",
+      "enabled": true,
+      "domainFilter": "console.cloud.google.com",
+      "label": "gcp/product/by product",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "console\\.cloud\\.google\\.com/([a-z0-9-]+)(?:/|\\?|$)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "cloud",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

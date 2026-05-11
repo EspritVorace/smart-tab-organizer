@@ -5,38 +5,74 @@ import { tab } from './_helpers';
 // Capture callbacks passed to addListener so tests can invoke them directly.
 
 type AnyFn = (...args: any[]) => any;
-const captured: {
-  onInstalled?: AnyFn;
-  onMessage?: AnyFn;
-  onWindowRemoved?: AnyFn;
-  onTabCreated?: AnyFn;
-  onTabUpdated?: AnyFn;
-  onTabRemoved?: AnyFn;
-} = {};
 
+// Hoist references used inside vi.mock factories. Plain top-level `const`
+// declarations are accessed before initialization because vi.mock is hoisted
+// to the top of the file.
+const hoisted = vi.hoisted(() => ({
+  captured: {} as {
+    onInstalled?: AnyFn;
+    onMessage?: AnyFn;
+    onWindowRemoved?: AnyFn;
+    onTabCreated?: AnyFn;
+    onTabUpdated?: AnyFn;
+    onTabRemoved?: AnyFn;
+    onActionClicked?: AnyFn;
+  },
+  storage: new Map<string, unknown>(),
+  setPopupMock: vi.fn(async () => undefined),
+}));
 // ---- Mocks ------------------------------------------------------------------
 
 vi.mock('wxt/browser', () => ({
   browser: {
     runtime: {
-      onInstalled: { addListener: (cb: AnyFn) => { captured.onInstalled = cb; } },
-      onMessage: { addListener: (cb: AnyFn) => { captured.onMessage = cb; } },
+      onInstalled: { addListener: (cb: AnyFn) => { hoisted.captured.onInstalled = cb; } },
+      onMessage: { addListener: (cb: AnyFn) => { hoisted.captured.onMessage = cb; } },
     },
     tabs: {
-      onCreated: { addListener: (cb: AnyFn) => { captured.onTabCreated = cb; } },
-      onUpdated: { addListener: (cb: AnyFn) => { captured.onTabUpdated = cb; } },
-      onRemoved: { addListener: (cb: AnyFn) => { captured.onTabRemoved = cb; } },
+      onCreated: { addListener: (cb: AnyFn) => { hoisted.captured.onTabCreated = cb; } },
+      onUpdated: { addListener: (cb: AnyFn) => { hoisted.captured.onTabUpdated = cb; } },
+      onRemoved: { addListener: (cb: AnyFn) => { hoisted.captured.onTabRemoved = cb; } },
       get: vi.fn(),
     },
     windows: {
-      onRemoved: { addListener: (cb: AnyFn) => { captured.onWindowRemoved = cb; } },
+      onRemoved: { addListener: (cb: AnyFn) => { hoisted.captured.onWindowRemoved = cb; } },
       getCurrent: vi.fn(),
+    },
+    action: {
+      onClicked: { addListener: (cb: AnyFn) => { hoisted.captured.onActionClicked = cb; } },
+      setPopup: hoisted.setPopupMock,
+    },
+    storage: {
+      local: {
+        get: vi.fn(async (key: string | string[] | Record<string, unknown>) => {
+          const keys = typeof key === 'string' ? [key] : Array.isArray(key) ? key : Object.keys(key);
+          const result: Record<string, unknown> = {};
+          for (const k of keys) {
+            if (hoisted.storage.has(k)) result[k] = hoisted.storage.get(k);
+          }
+          return result;
+        }),
+        set: vi.fn(async (items: Record<string, unknown>) => {
+          for (const [k, v] of Object.entries(items)) hoisted.storage.set(k, v);
+        }),
+      },
     },
   },
 }));
 
+const captured = hoisted.captured;
+const storage = hoisted.storage;
+const setPopupMock = hoisted.setPopupMock;
+
+vi.mock('@/utils/openOptions.js', () => ({
+  openOptionsWithHash: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('../../src/utils/migration.js', () => ({
   initializeDefaults: vi.fn().mockResolvedValue(undefined),
+  migrateRuleColorsFromCategories: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('../../src/background/messaging.js', () => ({
@@ -65,6 +101,7 @@ import {
   setupWindowRemovedHandler,
   setupTabCreatedHandler,
   setupTabUpdatedHandler,
+  setupActionClickHandler,
   setupAllEventHandlers,
 } from '../../src/background/event-handlers';
 import { browser } from 'wxt/browser';
@@ -76,6 +113,7 @@ import {
 import { processTabForDeduplication } from '../../src/background/deduplication';
 import { processGroupingForNewTab } from '../../src/background/grouping';
 import { handleOrganizeAllTabs } from '../../src/background/organize';
+import { openOptionsWithHash } from '@/utils/openOptions.js';
 
 // ---- Helpers ----------------------------------------------------------------
 
@@ -91,9 +129,12 @@ const mockedProcessDedup = processTabForDeduplication as ReturnType<typeof vi.fn
 const mockedProcessGrouping = processGroupingForNewTab as ReturnType<typeof vi.fn>;
 const mockedOrganize = handleOrganizeAllTabs as ReturnType<typeof vi.fn>;
 
+const mockedOpenOptions = openOptionsWithHash as ReturnType<typeof vi.fn>;
+
 beforeEach(() => {
   vi.clearAllMocks();
   Object.keys(captured).forEach(k => { delete (captured as any)[k]; });
+  storage.clear();
   // Reset the middleClickedTabs global used by onUpdated URL matching
   (globalThis as any).middleClickedTabs = new Map<string, number>();
 });
@@ -396,6 +437,42 @@ describe('setupTabUpdatedHandler', () => {
   });
 });
 
+describe('setupActionClickHandler', () => {
+  beforeEach(() => setupActionClickHandler());
+
+  it('registers the onClicked listener', () => {
+    expect(captured.onActionClicked).toBeDefined();
+  });
+
+  it('on first click (flag=false): opens options home, flips flag, re-enables popup', async () => {
+    storage.set('firstRunRedirectDone', false);
+
+    await captured.onActionClicked!();
+
+    expect(mockedOpenOptions).toHaveBeenCalledWith('#home');
+    expect(storage.get('firstRunRedirectDone')).toBe(true);
+    expect(setPopupMock).toHaveBeenCalledWith({ popup: 'popup.html' });
+  });
+
+  it('on subsequent click (flag=true): no-op', async () => {
+    storage.set('firstRunRedirectDone', true);
+
+    await captured.onActionClicked!();
+
+    expect(mockedOpenOptions).not.toHaveBeenCalled();
+    expect(setPopupMock).not.toHaveBeenCalled();
+  });
+
+  it('swallows errors from openOptionsWithHash', async () => {
+    storage.set('firstRunRedirectDone', false);
+    mockedOpenOptions.mockRejectedValueOnce(new Error('boom'));
+
+    await expect(captured.onActionClicked!()).resolves.toBeUndefined();
+    // Flag stays unchanged so a future click will retry
+    expect(storage.get('firstRunRedirectDone')).toBe(false);
+  });
+});
+
 describe('setupAllEventHandlers', () => {
   it('registers every listener in one call', () => {
     setupAllEventHandlers();
@@ -405,5 +482,6 @@ describe('setupAllEventHandlers', () => {
     expect(captured.onWindowRemoved).toBeDefined();
     expect(captured.onTabCreated).toBeDefined();
     expect(captured.onTabUpdated).toBeDefined();
+    expect(captured.onActionClicked).toBeDefined();
   });
 });

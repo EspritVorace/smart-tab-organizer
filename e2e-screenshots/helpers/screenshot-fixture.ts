@@ -7,21 +7,15 @@
  *
  * The browser is launched once per locale (Playwright project name).
  * Theme switching is handled inside captureAll() via localStorage.
+ *
+ * Backed by the shared launcher in `e2e-shared/extension-loader.ts`.
  */
+import { test as base, type BrowserContext } from '@playwright/test';
 import {
-  test as base,
-  chromium,
-  type BrowserContext,
-} from '@playwright/test';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
-import * as fs from 'fs';
-import * as os from 'os';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const EXTENSION_PATH = path.resolve(__dirname, '../../.output/chrome-mv3');
+  launchExtension,
+  cleanupUserDataDir,
+} from '../../e2e-shared/extension-loader.js';
+import { getExtensionId } from '../../e2e-shared/extension-id.js';
 
 /** Maps Playwright project name → Chrome --lang value */
 const LOCALE_LANG: Record<string, string> = {
@@ -41,89 +35,26 @@ export const test = base.extend<ScreenshotFixtures>({
   extensionContext: [
     async ({}, use, testInfo) => {
       const locale = testInfo.project.name;
-      const langArg = `--lang=${LOCALE_LANG[locale] ?? 'en-US'}`;
+      const lang = LOCALE_LANG[locale] ?? 'en-US';
 
-      const userDataDir = path.join(
-        os.tmpdir(),
-        `playwright-screenshots-${locale}-${Date.now()}`,
-      );
-      fs.mkdirSync(userDataDir, { recursive: true });
-
-      // Resolve Chromium executable: prefer a "chromium-custom" build (CI),
-      // then fall back to any versioned Playwright Chromium already on disk.
-      function findChrome(): string | undefined {
-        const candidates = [
-          // CI / manually pre-installed custom build
-          path.join(os.homedir(), '.cache/ms-playwright/chromium-custom/chrome-linux64/chrome'),
-          // /opt/pw-browsers layout (alternative CI install path)
-          '/opt/pw-browsers/chromium-custom/chrome-linux64/chrome',
-          '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
-          '/opt/pw-browsers/chromium-1208/chrome-linux64/chrome',
-          '/opt/pw-browsers/chromium-1200/chrome-linux64/chrome',
-          // ~/.cache/ms-playwright fallbacks
-          path.join(os.homedir(), '.cache/ms-playwright/chromium-1208/chrome-linux64/chrome'),
-          path.join(os.homedir(), '.cache/ms-playwright/chromium-1194/chrome-linux/chrome'),
-        ];
-        return candidates.find((p) => fs.existsSync(p));
-      }
-      const executablePath = findChrome();
-
-      // Chromium does not support extensions in headless mode on Windows.
-      // On Linux (CI), xvfb-maybe provides a virtual display so headless: true works.
-      const headless = process.platform === 'linux';
-
-      const context = await chromium.launchPersistentContext(userDataDir, {
-        headless,
-        executablePath,
-        args: [
-          `--disable-extensions-except=${EXTENSION_PATH}`,
-          `--load-extension=${EXTENSION_PATH}`,
-          langArg,
-          '--no-first-run',
-          '--no-default-browser-check',
-          '--disable-popup-blocking',
-          '--force-device-scale-factor=1',
-          // Deterministic text rendering — without these flags, Chromium uses
-          // sub-pixel font positioning + GPU rasterization, which produces
-          // pixel-different output on every run (text outlines shift by 1-2 px),
-          // making `git diff` flag every screenshot as modified even when the
-          // visual content is identical.
-          '--font-render-hinting=none',
-          '--disable-font-subpixel-positioning',
-          '--disable-lcd-text',
-          '--disable-gpu',
-          ...(headless ? ['--no-sandbox', '--disable-dev-shm-usage'] : []),
-        ],
+      const { context, userDataDir } = await launchExtension({
+        label: `screenshots-${locale}`,
+        lang,
+        deterministicRendering: true,
         viewport: { width: 1280, height: 800 },
       });
-
-      // Wait for the extension service worker to register
-      const deadline = Date.now() + 10_000;
-      while (!context.serviceWorkers()[0] && Date.now() < deadline) {
-        await new Promise((r) => setTimeout(r, 200));
-      }
-      if (!context.serviceWorkers()[0]) {
-        throw new Error('Extension service worker did not start within 10 s');
-      }
 
       await use(context);
 
       await context.close();
-      try {
-        fs.rmSync(userDataDir, { recursive: true, force: true });
-      } catch {
-        // ignore cleanup errors
-      }
+      cleanupUserDataDir(userDataDir);
     },
     { scope: 'worker' },
   ],
 
   extensionId: [
     async ({ extensionContext }, use) => {
-      const sw = extensionContext.serviceWorkers()[0];
-      if (!sw) throw new Error('Service worker not available');
-      const id = new URL(sw.url()).hostname;
-      await use(id);
+      await use(getExtensionId(extensionContext));
     },
     { scope: 'worker' },
   ],

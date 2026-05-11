@@ -3,8 +3,8 @@ import { fakeBrowser } from 'wxt/testing';
 import type { RuleCategory } from '../../src/schemas/category';
 
 const BUILT_IN_SEED: RuleCategory[] = [
-  { id: 'development', emoji: '💻', color: 'blue', labelKey: 'category_development', builtIn: true },
-  { id: 'media', emoji: '🎬', color: 'red', labelKey: 'category_media', builtIn: true },
+  { id: 'development', emoji: '💻', labelKey: 'category_development', builtIn: true },
+  { id: 'media', emoji: '🎬', labelKey: 'category_media', builtIn: true },
 ];
 
 function mockOkFetch(body: unknown) {
@@ -24,7 +24,7 @@ afterEach(() => {
 });
 
 describe('seedBuiltInCategories', () => {
-  it('seed les built-ins depuis le JSON quand le storage est vide', async () => {
+  it('seeds the built-ins from JSON when storage is empty', async () => {
     vi.stubGlobal('fetch', mockOkFetch({ categories: BUILT_IN_SEED }));
     const { seedBuiltInCategories } = await import('../../src/background/migration');
 
@@ -38,11 +38,11 @@ describe('seedBuiltInCategories', () => {
     expect(categoriesSeeded).toBe(true);
   });
 
-  it('n\'écrase pas des catégories déjà présentes dans le storage', async () => {
+  it('does not overwrite categories already present in storage', async () => {
     const fetchMock = mockOkFetch({ categories: BUILT_IN_SEED });
     vi.stubGlobal('fetch', fetchMock);
     const existing: RuleCategory[] = [
-      { id: 'gaming', emoji: '🎮', color: 'purple', label: 'Gaming', builtIn: false },
+      { id: 'gaming', emoji: '🎮', label: 'Gaming', builtIn: false },
     ];
     await fakeBrowser.storage.local.set({ categories: existing });
 
@@ -58,7 +58,7 @@ describe('seedBuiltInCategories', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('est idempotent : ne refait rien si le flag categoriesSeeded est déjà posé', async () => {
+  it('is idempotent: does nothing when the categoriesSeeded flag is already set', async () => {
     const fetchMock = mockOkFetch({ categories: BUILT_IN_SEED });
     vi.stubGlobal('fetch', fetchMock);
     await fakeBrowser.storage.local.set({ categoriesSeeded: true });
@@ -71,7 +71,7 @@ describe('seedBuiltInCategories', () => {
     expect(categories).toBeUndefined();
   });
 
-  it('ne pose pas le flag si fetch échoue (retry au prochain démarrage)', async () => {
+  it('does not set the flag when fetch fails (retry on next startup)', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network down')));
     const { seedBuiltInCategories } = await import('../../src/background/migration');
 

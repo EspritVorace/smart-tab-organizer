@@ -1,7 +1,10 @@
-import { browser } from 'wxt/browser';
+import { browser, Browser } from 'wxt/browser';
 import { logger } from '@/utils/logger.js';
-import { categoriesItem, categoriesSeededItem } from '@/utils/storageItems.js';
 import { fetchBuiltInCategories } from '@/utils/categoriesStore.js';
+import { DEFAULT_WORKSPACE_ID } from '@/utils/workspaceStorage.js';
+import { getActiveScopedItems } from '@/utils/workspaceContext.js';
+import type { WorkspaceMeta, WorkspaceAccentColor } from '@/schemas/workspace.js';
+import { getMessage } from '@/utils/i18n.js';
 
 const SETTINGS_KEYS = [
   'globalGroupingEnabled',
@@ -15,6 +18,10 @@ const SETTINGS_KEYS = [
 
 const MIGRATION_FLAG = 'settingsMigratedToLocal';
 const URL_EXTRACTION_MODE_MIGRATION_FLAG = 'urlExtractionModeMigrated';
+const WORKSPACES_MIGRATION_FLAG = 'workspacesMigrated';
+export const FIRST_RUN_REDIRECT_FLAG = 'firstRunRedirectDone';
+
+const DEFAULT_WORKSPACE_ACCENT: WorkspaceAccentColor = 'indigo';
 
 /**
  * Copies settings from storage.sync into storage.local once per installation.
@@ -92,12 +99,93 @@ export async function migrateRulesAddUrlExtractionMode(): Promise<void> {
 }
 
 /**
+ * Initializes the workspace runtime. The default workspace uses the legacy
+ * unprefixed storage keys (`local:domainRules`, `local:statistics`, ...), so
+ * no data moves: existing settings, sessions and statistics remain in place
+ * and stay rollback-compatible with prior versions.
+ *
+ * The migration only ensures `local:workspaces` contains at least the default
+ * workspace entry and that `local:activeWorkspaceId` points to it. Idempotent:
+ * guarded by `workspacesMigrated`. Runs on both fresh installs and upgrades.
+ */
+export async function migrateToWorkspaces(): Promise<void> {
+  try {
+    const flagState = await browser.storage.local.get(WORKSPACES_MIGRATION_FLAG);
+    if (flagState[WORKSPACES_MIGRATION_FLAG]) {
+      logger.debug('[MIGRATION] Workspaces already initialized.');
+      return;
+    }
+
+    const indexState = await browser.storage.local.get(['workspaces', 'activeWorkspaceId']);
+    const toWrite: Record<string, unknown> = {};
+
+    if (!Array.isArray(indexState.workspaces) || indexState.workspaces.length === 0) {
+      const now = new Date().toISOString();
+      const defaultWorkspace: WorkspaceMeta = {
+        id: DEFAULT_WORKSPACE_ID,
+        name: getMessage('workspaceDefaultName') || 'Default',
+        accentColor: DEFAULT_WORKSPACE_ACCENT,
+        createdAt: now,
+        updatedAt: now,
+      };
+      toWrite['workspaces'] = [defaultWorkspace];
+    }
+    if (typeof indexState.activeWorkspaceId !== 'string') {
+      toWrite['activeWorkspaceId'] = DEFAULT_WORKSPACE_ID;
+    }
+
+    if (Object.keys(toWrite).length > 0) {
+      await browser.storage.local.set(toWrite);
+      logger.debug(`[MIGRATION] Workspaces: wrote ${Object.keys(toWrite).length} keys.`);
+    }
+
+    await browser.storage.local.set({ [WORKSPACES_MIGRATION_FLAG]: true });
+  } catch (error) {
+    logger.error('[MIGRATION] Workspaces migration failed, will retry on next startup:', error);
+  }
+}
+
+/**
+ * On a fresh install, disables the popup so the first icon click opens the
+ * Options Home page instead. The flag is written to `storage.local` to track
+ * whether the redirect has been scheduled (`false`) or already used / not
+ * applicable (`true`).
+ *
+ * - First install: write `false`, clear the popup via `action.setPopup({ popup: '' })`.
+ * - Update / browser_update / shared_module_update: write `true` so existing
+ *   users are never redirected.
+ * - Flag already present (any value): no-op (idempotent).
+ */
+export async function initializeFirstRunRedirectFlag(reason: Browser.runtime.OnInstalledReason | string): Promise<void> {
+  try {
+    const state = await browser.storage.local.get(FIRST_RUN_REDIRECT_FLAG);
+    if (state[FIRST_RUN_REDIRECT_FLAG] !== undefined) {
+      logger.debug('[FIRST_RUN] Flag already set, skipping.');
+      return;
+    }
+    if (reason === 'install') {
+      await browser.storage.local.set({ [FIRST_RUN_REDIRECT_FLAG]: false });
+      if (browser.action?.setPopup) {
+        await browser.action.setPopup({ popup: '' });
+        logger.debug('[FIRST_RUN] Fresh install: popup disabled, awaiting first click.');
+      }
+      return;
+    }
+    await browser.storage.local.set({ [FIRST_RUN_REDIRECT_FLAG]: true });
+    logger.debug('[FIRST_RUN] Existing user, flag initialized to true.');
+  } catch (error) {
+    logger.error('[FIRST_RUN] Failed to initialize first-run redirect flag:', error);
+  }
+}
+
+/**
  * Seeds the built-in categories from public/data/categories.json into storage.local.
  * Idempotent: guarded by categoriesSeededItem.
  * Never overwrites existing categories (safety net if the user already has customs).
  */
 export async function seedBuiltInCategories(): Promise<void> {
   try {
+    const { categoriesItem, categoriesSeededItem } = await getActiveScopedItems();
     if (await categoriesSeededItem.getValue()) {
       logger.debug('[MIGRATION] Categories already seeded.');
       return;

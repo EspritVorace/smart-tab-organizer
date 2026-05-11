@@ -67,7 +67,7 @@ export function findMiddleClickOpener(newTab: Browser.tabs.Tab): number | null {
         const openerIdFromMap = middleClickedTabs.get(urlToCheck);
         middleClickedTabs.delete(urlToCheck);
         logger.debug(`[GROUPING_DEBUG] Direct match for openerIdFromMap: ${openerIdFromMap} (URL: "${urlToCheck}")`);
-        return openerIdFromMap;
+        return openerIdFromMap ?? null;
     }
     
     // Fallback search

@@ -1,57 +1,57 @@
-# User Stories : Domaine PO : Sauvegarde d'un groupe d'onglets actif
+# User Stories: Domain PO: Saving the active tab group
 
-> Comportements couverts par `tests/e2e/popup-save-group.spec.ts` et `tests/tabCapture.test.ts`.
-> Les US numérotées ci-dessous reprennent la continuité à partir de US-PO006.
-
----
-
-## US-PO006 : Bouton Save contextuel dans le popup
-
-**En tant qu'** utilisateur du popup,
-**je veux** un bouton Save unique dont l'action s'adapte au contexte de l'onglet actif,
-**afin de** sauvegarder en un clic la portée la plus pertinente sans avoir à choisir dans un menu.
-
-### Critères d'acceptation
-
-- [ ] Le bouton Save reste un bouton simple (icône appareil photo + texte « Save ») dans tous les cas : aucun chevron, aucun menu déroulant, aucun SplitButton.
-- [ ] Quand l'onglet actif **n'appartient pas** à un groupe Chrome, cliquer sur Save ouvre le SnapshotWizard avec tous les onglets de la fenêtre pré-cochés (deep link `#sessions?action=snapshot`).
-- [ ] Quand l'onglet actif **appartient à un groupe** Chrome, cliquer sur Save ouvre le SnapshotWizard avec uniquement les onglets de ce groupe pré-cochés (deep link `#sessions?action=snapshot&groupId=<id>`).
-- [ ] Quand le bouton est désactivé (`canSave = false`), aucun clic ne déclenche d'action.
-- [ ] Le `aria-label` reflète l'action contextuelle :
-  - hors groupe : « Save session » (clé `popupSaveSession`),
-  - dans un groupe : « Save active tab group » (clé `popupSaveActiveGroup`).
+> Behaviors covered by `tests/e2e/popup-save-group.spec.ts` and `tests/tabCapture.test.ts`.
+> The US numbered below continue from US-PO006.
 
 ---
 
-## US-PO007 : Sauvegarde du groupe d'onglets actif
+## US-PO006: Contextual Save button in the popup
 
-**En tant qu'** utilisateur dont l'onglet actif appartient à un groupe Chrome,
-**je veux** que le bouton Save sauvegarde uniquement ce groupe et m'informe de cette restriction modifiable,
-**afin de** créer rapidement une session dédiée sans craindre une sélection incomplète subie.
+**As a** user of the popup,
+**I want** a single Save button whose action adapts to the context of the active tab,
+**so that** I can save the most relevant scope in one click without having to pick from a menu.
 
-### Critères d'acceptation
+### Acceptance criteria
 
-- [ ] Le clic sur Save (ou l'ouverture directe du deep link `#sessions?action=snapshot&groupId=<id>`) ouvre le SnapshotWizard.
-- [ ] Le SnapshotWizard s'ouvre avec **uniquement les onglets du groupe actif pré-cochés** ; les autres onglets (hors groupe ou d'autres groupes) ne sont pas cochés.
-- [ ] La pré-sélection est **modifiable** : l'utilisateur peut cocher ou décocher librement n'importe quel onglet.
-- [ ] Le **nom de session par défaut** est le titre du groupe Chrome (ex : « Travail »).
-- [ ] Si le groupe **n'a pas de titre** (groupe sans nom), le nom par défaut est « Snapshot \<date\> » (comportement habituel).
-- [ ] Si le `groupId` passé en paramètre ne correspond à aucun groupe capturé (groupe entre-temps supprimé), le SnapshotWizard s'ouvre avec tous les onglets pré-cochés (fallback habituel) et sans callout.
+- [ ] The Save button stays a simple button (camera icon + "Save" text) in all cases: no chevron, no dropdown menu, no SplitButton.
+- [ ] When the active tab **does not belong** to a Chrome group, clicking Save opens the SnapshotWizard with all tabs of the window pre-checked (deep link `#sessions?action=snapshot`).
+- [ ] When the active tab **belongs to a Chrome group**, clicking Save opens the SnapshotWizard with only the tabs of that group pre-checked (deep link `#sessions?action=snapshot&groupId=<id>`).
+- [ ] When the button is disabled (`canSave = false`), clicking does not trigger any action.
+- [ ] The `aria-label` reflects the contextual action:
+  - outside a group: "Save session" (key `popupSaveSession`),
+  - inside a group: "Save active tab group" (key `popupSaveActiveGroup`).
 
-### Callout d'information
+---
 
-- [ ] Quand le SnapshotWizard est ouvert avec une pré-sélection issue d'un groupe actif identifié et que cette pré-sélection est strictement partielle (au moins un onglet de la fenêtre n'est pas pré-coché), un callout d'information apparaît en haut du wizard (`data-testid="wizard-snapshot-group-callout"`) pour signaler que la sélection est restreinte au groupe actif et qu'elle reste extensible.
-- [ ] Si tous les onglets de la fenêtre sont déjà pré-cochés (la fenêtre ne contient que le groupe actif), le callout n'est pas affiché.
-- [ ] Si l'utilisateur étend la sélection à tous les onglets après ouverture, le callout disparaît (sélection complète).
-- [ ] Si aucun `groupId` n'est passé (chemin « save all » classique), le callout n'est pas affiché.
-- [ ] Si le `groupId` est invalide (groupe disparu), le callout n'est pas affiché.
+## US-PO007: Saving the active tab group
 
-### Règles métier
+**As a** user whose active tab belongs to a Chrome group,
+**I want** the Save button to save only that group and inform me of this modifiable restriction,
+**so that** I can quickly create a dedicated session without fearing an unwanted incomplete selection.
 
-| Situation | Callout | Nom de session par défaut | Onglets pré-cochés |
+### Acceptance criteria
+
+- [ ] Clicking Save (or directly opening the deep link `#sessions?action=snapshot&groupId=<id>`) opens the SnapshotWizard.
+- [ ] The SnapshotWizard opens with **only the tabs of the active group pre-checked**; other tabs (outside the group or from other groups) are not checked.
+- [ ] The pre-selection is **modifiable**: the user can freely check or uncheck any tab.
+- [ ] The **default session name** is the title of the Chrome group (e.g. "Work").
+- [ ] If the group **has no title** (unnamed group), the default name is "Snapshot \<date\>" (usual behavior).
+- [ ] If the `groupId` passed as a parameter does not match any captured group (group deleted in the meantime), the SnapshotWizard opens with all tabs pre-checked (usual fallback) and without the callout.
+
+### Information callout
+
+- [ ] When the SnapshotWizard is opened with a pre-selection coming from an identified active group and that pre-selection is strictly partial (at least one tab of the window is not pre-checked), an information callout appears at the top of the wizard (`data-testid="wizard-snapshot-group-callout"`) signaling that the selection is restricted to the active group and remains extensible.
+- [ ] If all tabs of the window are already pre-checked (the window contains only the active group), the callout is not shown.
+- [ ] If the user extends the selection to all tabs after opening, the callout disappears (full selection).
+- [ ] If no `groupId` is passed ("save all" classic path), the callout is not shown.
+- [ ] If the `groupId` is invalid (group gone), the callout is not shown.
+
+### Business rules
+
+| Situation | Callout | Default session name | Pre-checked tabs |
 |---|---|---|---|
-| Fenêtre = groupe actif uniquement | Non | Titre du groupe (ou « Snapshot \<date\> ») | Tous (= groupe) |
-| Fenêtre = groupe actif + onglets hors groupe | Oui | Titre du groupe (ou « Snapshot \<date\> ») | Onglets du groupe |
-| Fenêtre = plusieurs groupes | Oui | Titre du groupe actif (ou « Snapshot \<date\> ») | Onglets du groupe actif |
-| Pas de groupe actif (chemin « save all ») | Non | « Snapshot \<date\> » | Tous |
-| `groupId` inconnu au moment de la capture | Non | « Snapshot \<date\> » | Tous |
+| Window = active group only | No | Group title (or "Snapshot \<date\>") | All (= group) |
+| Window = active group + tabs outside the group | Yes | Group title (or "Snapshot \<date\>") | Tabs of the group |
+| Window = multiple groups | Yes | Title of the active group (or "Snapshot \<date\>") | Tabs of the active group |
+| No active group ("save all" path) | No | "Snapshot \<date\>" | All |
+| Unknown `groupId` at capture time | No | "Snapshot \<date\>" | All |

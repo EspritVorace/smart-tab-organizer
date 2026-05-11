@@ -6,7 +6,6 @@ import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { move } from '@dnd-kit/helpers';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { EmptyState } from '@/components/UI/EmptyState';
-import { ImportSessionsWizard } from '@/components/UI/ImportExportWizards/ImportSessionsWizard';
 import { SessionCard } from '@/components/Core/Session/SessionCard';
 import { SessionEditDialog } from '@/components/Core/Session/SessionEditDialog';
 import { SnapshotWizard } from '@/components/UI/SessionWizards/SnapshotWizard';
@@ -18,6 +17,8 @@ import { foldAccents } from '@/utils/stringUtils';
 import { matchSessionSearch, splitByPinned } from '@/utils/sessionUtils';
 import { moveSessionToFirstInGroup, moveSessionToLastInGroup } from '@/utils/sessionOrderUtils';
 import { useSessions } from '@/hooks/useSessions';
+import { useShortcuts } from '@/hooks/useShortcuts';
+import { useListNavigation } from '@/hooks/useListNavigation';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { updateSession } from '@/utils/sessionStorage';
 import { showSuccessNotification } from '@/utils/notifications';
@@ -40,6 +41,8 @@ interface SessionsPageProps {
   restoreSessionId?: string | null;
   /** Called to clear the restore deep-link once consumed. */
   onRestoreSessionIdChange?: (id: string | null) => void;
+  /** Opens the sessions import wizard via deep-link with from=sessions. */
+  onOpenImportSessions: () => void;
 }
 
 function SectionHeader({ icon: Icon, titleKey, count }: { icon: LucideIcon; titleKey: string; count: number }) {
@@ -69,16 +72,19 @@ interface SessionSectionProps {
   updateOrder: (sessions: Session[]) => Promise<void>;
   /** Rename a session (forwarded straight to SessionCard). */
   renameSession: (id: string, newName: string) => Promise<void>;
-  /** Reload sessions after a mutation (used for pin/unpin). */
-  reload: () => Promise<void>;
   /** Open the RestoreWizard (owned by the parent). */
   onOpenRestoreWizard: (session: Session) => void;
   /** Open the SessionEditDialog (owned by the parent). */
   onOpenEditDialog: (session: Session) => void;
   /** Open the delete ConfirmDialog (owned by the parent). */
   onOpenDeleteDialog: (session: Session) => void;
-  /** Emit a transient feedback message (single callout shared between both sections). */
-  onRestoreFeedback: (message: string | null) => void;
+  /** Quick-restore handlers shared with the page-level widget shortcuts. */
+  onRestoreCurrentWindow: (session: Session) => void;
+  onRestoreNewWindow: (session: Session) => void;
+  onReplaceCurrentWindow: (session: Session) => void;
+  /** Pin/unpin handlers shared with the page-level widget shortcuts. */
+  onPin: (session: Session) => void;
+  onUnpin: (session: Session) => void;
 }
 
 function SessionSection({
@@ -93,46 +99,24 @@ function SessionSection({
   searchMatches,
   updateOrder,
   renameSession,
-  reload,
   onOpenRestoreWizard,
   onOpenEditDialog,
   onOpenDeleteDialog,
-  onRestoreFeedback,
+  onRestoreCurrentWindow,
+  onRestoreNewWindow,
+  onReplaceCurrentWindow,
+  onPin,
+  onUnpin,
 }: SessionSectionProps) {
   const [dragItems, setDragItems] = useState<Session[] | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const handleCardKeyDown = useCallback((e: React.KeyboardEvent<HTMLElement>, index: number) => {
-    // Only act when the card element itself has focus (not a child input/button).
-    if (e.target !== e.currentTarget) return;
-    const cards = listRef.current?.querySelectorAll<HTMLElement>('[data-session-card]');
-    if (!cards) return;
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        cards[index + 1]?.focus();
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        cards[index - 1]?.focus();
-        break;
-      case 'Home':
-        e.preventDefault();
-        cards[0]?.focus();
-        break;
-      case 'End':
-        e.preventDefault();
-        cards[cards.length - 1]?.focus();
-        break;
-    }
-  }, []);
-
   // Drag: reorder within this section, then splice back into the global order.
-  const handleDragOver = useCallback((event: Parameters<DragOverEvent>[0]) => {
+  const handleDragOver = useCallback((event: DragOverEvent) => {
     setDragItems(prev => move(prev ?? sessions, event));
   }, [sessions]);
 
-  const handleDragEnd = useCallback((event: Parameters<DragEndEvent>[0]) => {
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
     if (!event.canceled) {
       const source = dragItems ?? sessions;
       const reordered = move(source, event) as Session[];
@@ -148,52 +132,19 @@ function SessionSection({
     setDragItems(null);
   }, [dragItems, sessions, allSessions, isPinned, updateOrder]);
 
-  // Quick restore: full session content, no conflict resolution wizard.
-  const handleQuickRestore = useCallback(async (session: Session, target: RestoreTarget) => {
-    try {
-      let protectedTabId: number | undefined;
-      if (target === 'replace') {
-        const currentTab = await browser.tabs.getCurrent();
-        protectedTabId = currentTab?.id;
-      }
-      const result = await restoreSessionTabs(session, target, protectedTabId);
-      onRestoreFeedback(getMessage('restoreResultTabsCreated', [String(result.tabsCreated)]));
-      if (target === 'replace') {
-        void showSuccessNotification(
-          getMessage('sessionSwitchedNotificationTitle'),
-          getMessage('sessionSwitchedNotificationMessage', [session.name]),
-        );
-      }
-    } catch {
-      onRestoreFeedback(getMessage('restoreError'));
-    }
-    setTimeout(() => onRestoreFeedback(null), 4000);
-  }, [onRestoreFeedback]);
+  const { handleNavigationKey } = useListNavigation(listRef, '[data-session-card]');
 
-  const handleRestoreCurrentWindow = useCallback(
-    (session: Session) => handleQuickRestore(session, 'current'),
-    [handleQuickRestore],
+  // Card-level keydown is now navigation-only; per-card actions
+  // (r/Shift+r/Alt+r/Alt+Shift+r/e/Delete/p) are dispatched at document level
+  // through `useShortcuts({...}, { scope: 'widget:session-card' })` in
+  // SessionsPage.
+  const handleCardKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLElement>, index: number) => {
+      if (e.target !== e.currentTarget) return;
+      handleNavigationKey(e, index);
+    },
+    [handleNavigationKey],
   );
-
-  const handleRestoreNewWindow = useCallback(
-    (session: Session) => handleQuickRestore(session, 'new'),
-    [handleQuickRestore],
-  );
-
-  const handleReplaceCurrentWindow = useCallback(
-    (session: Session) => handleQuickRestore(session, 'replace'),
-    [handleQuickRestore],
-  );
-
-  const handlePin = useCallback(async (session: Session) => {
-    await updateSession(session.id, { isPinned: true });
-    await reload();
-  }, [reload]);
-
-  const handleUnpin = useCallback(async (session: Session) => {
-    await updateSession(session.id, { isPinned: false });
-    await reload();
-  }, [reload]);
 
   const handleMoveToFirst = useCallback((session: Session) => {
     void updateOrder(moveSessionToFirstInGroup(allSessions, session.id));
@@ -231,14 +182,14 @@ function SessionSection({
                   session={session}
                   existingSessions={allSessions}
                   onRestore={onOpenRestoreWizard}
-                  onRestoreCurrentWindow={handleRestoreCurrentWindow}
-                  onRestoreNewWindow={handleRestoreNewWindow}
-                  onReplaceCurrentWindow={handleReplaceCurrentWindow}
+                  onRestoreCurrentWindow={onRestoreCurrentWindow}
+                  onRestoreNewWindow={onRestoreNewWindow}
+                  onReplaceCurrentWindow={onReplaceCurrentWindow}
                   onRename={renameSession}
                   onEdit={onOpenEditDialog}
                   onDelete={onOpenDeleteDialog}
-                  onPin={handlePin}
-                  onUnpin={handleUnpin}
+                  onPin={onPin}
+                  onUnpin={onUnpin}
                   forcePreviewOpen={searchMatch?.matchesTabs === true || searchMatch?.matchesNote === true}
                   searchMatchingGroupIds={searchMatch?.matchingGroupIds}
                   searchQuery={searchQuery || undefined}
@@ -265,11 +216,11 @@ export function SessionsPage({
   onSnapshotGroupIdChange,
   restoreSessionId,
   onRestoreSessionIdChange,
+  onOpenImportSessions,
 }: SessionsPageProps) {
   const { sessions, isLoaded, createSession, renameSession, removeSession, reload, updateOrder } = useSessions();
   // Internal open state; initialized from external prop so the wizard opens immediately on mount.
   const [snapshotOpen, setSnapshotOpen] = useState(snapshotWizardOpen);
-  const [importSessionsOpen, setImportSessionsOpen] = useState(false);
 
   // Sync: if the external prop becomes true after mount (e.g. user already on sessions tab),
   // open the wizard.
@@ -288,6 +239,103 @@ export function SessionsPage({
   const [deleteTarget, setDeleteTarget] = useState<Session | null>(null);
   const [quickRestoreMessage, setQuickRestoreMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const handleOpenSnapshotWizard = useCallback(() => setSnapshotOpen(true), []);
+
+  // Quick-restore (no conflict-resolution wizard) handlers shared by the
+  // SessionCard split button, the dropdown menu, and the widget-scope
+  // shortcuts registered below.
+  const handleQuickRestore = useCallback(async (session: Session, target: RestoreTarget) => {
+    try {
+      let protectedTabId: number | undefined;
+      if (target === 'replace') {
+        const currentTab = await browser.tabs.getCurrent();
+        protectedTabId = currentTab?.id;
+      }
+      const result = await restoreSessionTabs(session, target, protectedTabId);
+      setQuickRestoreMessage(getMessage('restoreResultTabsCreated', [String(result.tabsCreated)]));
+      if (target === 'replace') {
+        void showSuccessNotification(
+          getMessage('sessionSwitchedNotificationTitle'),
+          getMessage('sessionSwitchedNotificationMessage', [session.name]),
+        );
+      }
+    } catch {
+      setQuickRestoreMessage(getMessage('restoreError'));
+    }
+    setTimeout(() => setQuickRestoreMessage(null), 4000);
+  }, []);
+
+  const handleRestoreCurrentWindow = useCallback(
+    (session: Session) => { void handleQuickRestore(session, 'current'); },
+    [handleQuickRestore],
+  );
+  const handleRestoreNewWindow = useCallback(
+    (session: Session) => { void handleQuickRestore(session, 'new'); },
+    [handleQuickRestore],
+  );
+  const handleReplaceCurrentWindow = useCallback(
+    (session: Session) => { void handleQuickRestore(session, 'replace'); },
+    [handleQuickRestore],
+  );
+
+  const handlePin = useCallback(async (session: Session) => {
+    await updateSession(session.id, { isPinned: true });
+    await reload();
+  }, [reload]);
+  const handleUnpin = useCallback(async (session: Session) => {
+    await updateSession(session.id, { isPinned: false });
+    await reload();
+  }, [reload]);
+
+  // Resolves the session whose card currently has focus. Returns null when
+  // focus is on a non-card element so widget shortcuts no-op silently.
+  const getFocusedSession = useCallback((): Session | null => {
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement)) return null;
+    if (!active.matches('[data-shortcut-scope="widget:session-card"]')) return null;
+    const id = active.getAttribute('data-session-id');
+    if (!id) return null;
+    return sessions.find((s) => s.id === id) ?? null;
+  }, [sessions]);
+
+  useShortcuts({ 'list.sessions.new': handleOpenSnapshotWizard }, { scope: 'page:sessions' });
+
+  useShortcuts(
+    {
+      'sessionCard.restore.custom': () => {
+        const focused = getFocusedSession();
+        if (focused) setRestoreSession(focused);
+      },
+      'sessionCard.restore.current': () => {
+        const focused = getFocusedSession();
+        if (focused) handleRestoreCurrentWindow(focused);
+      },
+      'sessionCard.restore.replace': () => {
+        const focused = getFocusedSession();
+        if (focused) handleReplaceCurrentWindow(focused);
+      },
+      'sessionCard.restore.new': () => {
+        const focused = getFocusedSession();
+        if (focused) handleRestoreNewWindow(focused);
+      },
+      'sessionCard.edit': () => {
+        const focused = getFocusedSession();
+        if (focused) setEditTarget(focused);
+      },
+      'sessionCard.delete': () => {
+        const focused = getFocusedSession();
+        if (focused) setDeleteTarget(focused);
+      },
+      'sessionCard.pin': () => {
+        const focused = getFocusedSession();
+        if (!focused) return;
+        const togglePin = focused.isPinned ? handleUnpin : handlePin;
+        togglePin(focused).catch(() => {});
+      },
+    },
+    { scope: 'widget:session-card' },
+  );
 
   // Deep-link: open the RestoreWizard when a sessionId has been provided via
   // URL hash (e.g. from the popup's customize restore action).
@@ -378,7 +426,7 @@ export function SessionsPage({
                   onClick={() => setSnapshotOpen(true)}
                   style={{ color: 'white' }}
                 >
-                  <Camera size={16} aria-hidden="true" />
+                  <Camera size={16} />
                   {getMessage('sessionSnapshotButton')}
                 </Button>
               }
@@ -413,11 +461,11 @@ export function SessionsPage({
                     variant="soft"
                     onClick={() => setSnapshotOpen(true)}
                   >
-                    <Camera size={14} aria-hidden="true" />
+                    <Camera size={14} />
                     {getMessage('sessionSnapshotButton')}
                   </Button>
-                  <Button variant="soft" onClick={() => setImportSessionsOpen(true)}>
-                    <Upload size={14} aria-hidden="true" />
+                  <Button variant="soft" onClick={onOpenImportSessions}>
+                    <Upload size={14} />
                     {getMessage('importSessionsButton')}
                   </Button>
                 </Flex>
@@ -441,11 +489,14 @@ export function SessionsPage({
                 searchMatches={sessionSearchMatches}
                 updateOrder={updateOrder}
                 renameSession={renameSession}
-                reload={reload}
                 onOpenRestoreWizard={setRestoreSession}
                 onOpenEditDialog={setEditTarget}
                 onOpenDeleteDialog={setDeleteTarget}
-                onRestoreFeedback={setQuickRestoreMessage}
+                onRestoreCurrentWindow={handleRestoreCurrentWindow}
+                onRestoreNewWindow={handleRestoreNewWindow}
+                onReplaceCurrentWindow={handleReplaceCurrentWindow}
+                onPin={handlePin}
+                onUnpin={handleUnpin}
               />
 
               <Separator size="4" />
@@ -462,19 +513,17 @@ export function SessionsPage({
                 searchMatches={sessionSearchMatches}
                 updateOrder={updateOrder}
                 renameSession={renameSession}
-                reload={reload}
                 onOpenRestoreWizard={setRestoreSession}
                 onOpenEditDialog={setEditTarget}
                 onOpenDeleteDialog={setDeleteTarget}
-                onRestoreFeedback={setQuickRestoreMessage}
+                onRestoreCurrentWindow={handleRestoreCurrentWindow}
+                onRestoreNewWindow={handleRestoreNewWindow}
+                onReplaceCurrentWindow={handleReplaceCurrentWindow}
+                onPin={handlePin}
+                onUnpin={handleUnpin}
               />
             </Flex>
           )}
-
-          <ImportSessionsWizard
-            open={importSessionsOpen}
-            onOpenChange={setImportSessionsOpen}
-          />
 
           <SnapshotWizard
             open={snapshotOpen}

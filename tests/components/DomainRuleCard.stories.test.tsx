@@ -28,36 +28,36 @@ describe('DomainRuleCard (portable stories)', () => {
     mockGetRuleCategory.mockReturnValue(null);
   });
 
-  it('rend la carte par défaut avec le label et le domaine', () => {
+  it('renders the default card with the label and the domain', () => {
     render(<DomainRuleCardDefault />);
     expect(screen.getByTestId('rule-card-rule-1')).toBeInTheDocument();
     expect(screen.getByTestId('rule-card-rule-1-btn-dropdown')).toBeInTheDocument();
   });
 
-  it('rend la carte désactivée (rule.enabled = false => opacité 0.6)', () => {
+  it('renders the disabled card (rule.enabled = false => opacity 0.6)', () => {
     render(<DomainRuleCardDisabled />);
     const card = screen.getByTestId('rule-card-rule-1');
     expect(card).toBeInTheDocument();
     expect(card).toHaveStyle({ opacity: '0.6' });
   });
 
-  it('rend la carte avec drag désactivé (isDragDisabled = true)', () => {
+  it('renders the card with drag disabled (isDragDisabled = true)', () => {
     render(<DomainRuleCardDragDisabled />);
     const handle = screen.getByTestId('rule-card-rule-1-drag-handle');
     expect(handle).toHaveAttribute('aria-disabled', 'true');
   });
 
-  it('rend la carte avec actions domaine désactivées', () => {
+  it('renders the card with domain actions disabled', () => {
     render(<DomainRuleCardDomainActionsDisabled />);
     expect(screen.getByTestId('rule-card-rule-1')).toBeInTheDocument();
   });
 
-  it('rend la carte avec mise en évidence de la recherche', () => {
+  it('renders the card with the search highlight applied', () => {
     render(<DomainRuleCardWithSearch />);
     expect(screen.getByTestId('rule-card-rule-1')).toBeInTheDocument();
   });
 
-  it('rend le badge avec la couleur et l\'emoji de la catégorie quand category != null', () => {
+  it("renders the badge with the category's color and emoji when category != null", () => {
     mockGetRuleCategory.mockReturnValue({
       id: 'dev',
       label: 'Dev',

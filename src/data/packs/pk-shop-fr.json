@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-shop-fr",
+    "name": {
+      "en": "French marketplaces",
+      "fr": "Places de marché françaises",
+      "es": "Marketplaces franceses"
+    },
+    "description": {
+      "en": "Group Leboncoin, Backmarket and Cdiscount tabs by listing or search query.",
+      "fr": "Regroupe les onglets Leboncoin, Backmarket et Cdiscount par annonce ou requête.",
+      "es": "Agrupa las pestañas de Leboncoin, Backmarket y Cdiscount por anuncio o consulta."
+    },
+    "categoryId": "commerce"
+  },
+  "domainRules": [
+    {
+      "id": "pk-shop-leboncoin-search",
+      "enabled": true,
+      "domainFilter": "*.leboncoin.fr",
+      "label": "Leboncoin: Search",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "commerce",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "text"
+    },
+    {
+      "id": "pk-shop-leboncoin-ad",
+      "enabled": true,
+      "domainFilter": "*.leboncoin.fr",
+      "label": "Leboncoin: Ad",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "leboncoin\\.fr/(?:ad/[^/]+|annonces)/(\\d+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "commerce",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-shop-backmarket-product",
+      "enabled": true,
+      "domainFilter": "*.backmarket.*",
+      "label": "Back Market: Product",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/p/[^/]+/([a-f0-9-]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "green",
+      "categoryId": "commerce",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": ["utm_source", "utm_medium", "utm_campaign"],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-shop-cdiscount-search",
+      "enabled": true,
+      "domainFilter": "*.cdiscount.com",
+      "label": "Cdiscount: Search",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "deduplicationMatchMode": "exact",
+      "color": "yellow",
+      "categoryId": "commerce",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "query_param",
+      "urlQueryParamName": "search"
+    }
+  ]
+}

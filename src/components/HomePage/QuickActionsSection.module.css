@@ -1,0 +1,31 @@
+.actionButton {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  border-radius: var(--radius-3);
+}
+
+.actionButton:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+.actionCard {
+  min-height: 88px;
+  transition: box-shadow 0.12s ease, background-color 0.12s ease;
+}
+
+.actionButton:hover .actionCard {
+  box-shadow: var(--shadow-3);
+  background-color: var(--accent-a2);
+}
+
+:global([data-theme='dark']) .actionButton:hover .actionCard {
+  background-color: var(--accent-a3);
+}

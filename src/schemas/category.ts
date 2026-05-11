@@ -9,7 +9,6 @@ export const ruleCategorySchema = z
   .object({
     id: z.string().min(1),
     emoji: z.string().min(1),
-    color: chromeGroupColorSchema,
     labelKey: z.string().optional(),
     label: z.string().optional(),
     builtIn: z.boolean().default(false),

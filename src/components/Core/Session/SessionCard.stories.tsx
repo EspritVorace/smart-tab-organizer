@@ -1,13 +1,13 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Theme, Box, Flex, TextField } from '@radix-ui/themes';
+import { Theme, Box, Flex, TextField, Checkbox, Badge, Button } from '@radix-ui/themes';
 import { Search } from 'lucide-react';
 import { SessionCard } from './SessionCard';
 import type { Session } from '@/types/session';
 
 const baseSession: Session = {
   id: 'session-1',
-  name: 'Work — Sprint 42',
+  name: 'Work: Sprint 42',
   createdAt: '2025-03-20T09:00:00.000Z',
   updatedAt: '2025-03-28T17:30:00.000Z',
   isPinned: false,
@@ -18,7 +18,7 @@ const baseSession: Session = {
       title: 'Frontend',
       color: 'blue',
       tabs: [
-        { id: 't1', title: 'React Docs — useEffect', url: 'https://react.dev/reference/react/useEffect', favIconUrl: '' },
+        { id: 't1', title: 'React Docs: useEffect', url: 'https://react.dev/reference/react/useEffect', favIconUrl: '' },
         { id: 't2', title: 'GitHub PR #42', url: 'https://github.com/my-org/my-repo/pull/42', favIconUrl: '' },
       ],
     },
@@ -33,7 +33,7 @@ const baseSession: Session = {
     },
   ],
   ungroupedTabs: [
-    { id: 't5', title: 'Figma — Sprint 42 Designs', url: 'https://figma.com/file/abc123', favIconUrl: '' },
+    { id: 't5', title: 'Figma: Sprint 42 designs', url: 'https://figma.com/file/abc123', favIconUrl: '' },
   ],
 };
 
@@ -88,7 +88,7 @@ export const SessionCardPinned: Story = {
 
 // ---------------------------------------------------------------------------
 // Relative dates: cards staggered across multiple time ranges to validate
-// the "modifiée il y a X" / "créée il y a Y" rendering on the right of the
+// the "updated X ago" / "created Y ago" rendering on the right of the
 // counters line, and the wrap behavior on narrow widths.
 // ---------------------------------------------------------------------------
 const SECOND = 1_000;
@@ -122,12 +122,12 @@ const buildSession = (
 export const SessionCardWithRelativeDates: Story = {
   render: () => {
     const sessions: Session[] = [
-      buildSession('rt-just-now', 'Vient de naître', 1 * SECOND, null),
-      buildSession('rt-5min-modified', 'Sprint en cours', 30 * MINUTE, 5 * MINUTE),
-      buildSession('rt-2h-created', 'Recherches du matin', 2 * HOUR, null),
-      buildSession('rt-yesterday', 'Veille technologique', 2 * DAY, 1 * DAY),
+      buildSession('rt-just-now', 'Just born', 1 * SECOND, null),
+      buildSession('rt-5min-modified', 'Sprint in progress', 30 * MINUTE, 5 * MINUTE),
+      buildSession('rt-2h-created', 'Morning research', 2 * HOUR, null),
+      buildSession('rt-yesterday', 'Tech watch', 2 * DAY, 1 * DAY),
       buildSession('rt-3-days', 'Documentation API', 3 * DAY, null),
-      buildSession('rt-2-weeks', 'Refonte UI', 3 * WEEK, 2 * WEEK),
+      buildSession('rt-2-weeks', 'UI redesign', 3 * WEEK, 2 * WEEK),
       buildSession('rt-1-month', 'Release Q1', 1 * MONTH, null),
       buildSession('rt-1-year', 'Archives 2025', 1 * YEAR, null),
     ];
@@ -164,6 +164,92 @@ export const SessionCardWithRelativeDates: Story = {
 // - Only the "Frontend" group (which contains the GitHub PR tab) is expanded.
 // - The "Backend APIs" group is collapsed because it has no match.
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Summary mode: base (no actions, no drag)
+// ---------------------------------------------------------------------------
+export const SessionCardSummary: Story = {
+  name: 'SessionCard — Summary (base)',
+  decorators: [(Story) => <div role="list"><Story /></div>],
+  args: {
+    session: baseSession,
+    variant: 'summary',
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Summary mode: with leading checkbox (export use case)
+// ---------------------------------------------------------------------------
+export const SessionCardSummaryWithCheckbox: Story = {
+  name: 'SessionCard — Summary + checkbox (export)',
+  render: () => (
+    <Theme>
+      <Box style={{ maxWidth: 680 }}>
+        <div role="list">
+          <SessionCard
+            session={baseSession}
+            variant="summary"
+            leading={<Checkbox defaultChecked aria-label={baseSession.name} />}
+          />
+        </div>
+      </Box>
+    </Theme>
+  ),
+};
+
+// ---------------------------------------------------------------------------
+// Summary mode: conflict state (import conflicting session)
+// ---------------------------------------------------------------------------
+export const SessionCardSummaryConflict: Story = {
+  name: 'SessionCard — Summary + conflict (import)',
+  render: () => (
+    <Theme>
+      <Box style={{ maxWidth: 680 }}>
+        <div role="list">
+          <SessionCard
+            session={baseSession}
+            variant="summary"
+            status="conflict"
+            trailing={
+              <Button size="1" variant="soft" color="orange">View diff</Button>
+            }
+          />
+        </div>
+      </Box>
+    </Theme>
+  ),
+};
+
+// ---------------------------------------------------------------------------
+// Summary mode: identical state (import already-existing session)
+// ---------------------------------------------------------------------------
+export const SessionCardSummaryIdentical: Story = {
+  name: 'SessionCard — Summary + identical (import)',
+  render: () => (
+    <Theme>
+      <Box style={{ maxWidth: 680 }}>
+        <div role="list">
+          <SessionCard
+            session={baseSession}
+            variant="summary"
+            status="identical"
+            trailing={
+              <Badge color="gray" variant="outline" size="1">Already exists</Badge>
+            }
+          />
+        </div>
+      </Box>
+    </Theme>
+  ),
+};
+
+// ---------------------------------------------------------------------------
+// Deep search — preview auto-expanded, only matching group shown
+//
+// Simulates a user typing "github" in the search bar:
+// - The card preview is forced open (forcePreviewOpen=true).
+// - Only the "Frontend" group (which contains the GitHub PR tab) is expanded.
+// - The "Backend APIs" group is collapsed because it has no match.
+// ---------------------------------------------------------------------------
 export const SessionCardDeepSearchMatch: Story = {
   decorators: [
     (Story) => (
@@ -174,7 +260,7 @@ export const SessionCardDeepSearchMatch: Story = {
             <Box style={{ flex: 1 }}>
               <TextField.Root defaultValue="github" readOnly aria-label="Search sessions">
                 <TextField.Slot>
-                  <Search size={16} aria-hidden="true" />
+                  <Search size={16} />
                 </TextField.Slot>
               </TextField.Root>
             </Box>

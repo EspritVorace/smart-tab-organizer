@@ -1,6 +1,6 @@
 import { browser, Browser } from 'wxt/browser';
-import { initializeDefaults } from '@/utils/migration.js';
-import { migrateSettingsFromSyncToLocal, migrateRulesAddUrlExtractionMode, seedBuiltInCategories } from './migration.js';
+import { initializeDefaults, migrateRuleColorsFromCategories } from '@/utils/migration.js';
+import { migrateSettingsFromSyncToLocal, migrateRulesAddUrlExtractionMode, migrateToWorkspaces, seedBuiltInCategories, initializeFirstRunRedirectFlag, FIRST_RUN_REDIRECT_FLAG } from './migration.js';
 import { initCategoriesStore } from '@/utils/categoriesStore.js';
 import { logger } from '@/utils/logger.js';
 import {
@@ -12,6 +12,7 @@ import {
 import { processTabForDeduplication } from './deduplication.js';
 import { processGroupingForNewTab } from './grouping.js';
 import { handleOrganizeAllTabs } from './organize.js';
+import { openOptionsWithHash } from '@/utils/openOptions.js';
 import type { BackgroundMessage, MessageResponse } from '@/types/messages.js';
 
 function isBackgroundMessage(value: unknown): value is BackgroundMessage {
@@ -23,9 +24,53 @@ export function setupInstallationHandler(): void {
         logger.debug("SmartTab Organizer installed/updated.", details.reason);
         await migrateSettingsFromSyncToLocal();
         await migrateRulesAddUrlExtractionMode();
+        await migrateToWorkspaces();
         await initializeDefaults();
         await seedBuiltInCategories();
+        await migrateRuleColorsFromCategories();
         await initCategoriesStore();
+        await initializeFirstRunRedirectFlag(details.reason);
+    });
+}
+
+export function setupActionClickHandler(): void {
+    if (!browser.action?.onClicked) {
+        logger.debug('[FIRST_RUN] browser.action.onClicked unavailable, skipping handler.');
+        return;
+    }
+    browser.action.onClicked.addListener(async () => {
+        try {
+            const state = await browser.storage.local.get(FIRST_RUN_REDIRECT_FLAG);
+            if (state[FIRST_RUN_REDIRECT_FLAG]) return;
+            await openOptionsWithHash('#home');
+            await browser.storage.local.set({ [FIRST_RUN_REDIRECT_FLAG]: true });
+            if (browser.action?.setPopup) {
+                await browser.action.setPopup({ popup: 'popup.html' });
+            }
+            logger.debug('[FIRST_RUN] First click handled: opened options home and re-enabled popup.');
+        } catch (e) {
+            logger.error('[FIRST_RUN] first-click redirect failed:', e);
+        }
+    });
+}
+
+export function setupCommandHandler(): void {
+    if (!browser.commands?.onCommand) {
+        logger.debug('[COMMANDS] browser.commands.onCommand unavailable, skipping handler.');
+        return;
+    }
+    browser.commands.onCommand.addListener((name: string) => {
+        logger.debug('[COMMANDS] received', name);
+        if (name === 'organize-all-tabs') {
+            browser.windows.getCurrent()
+                .then(win => { if (win.id != null) return handleOrganizeAllTabs(win.id); })
+                .catch(e => logger.error('[COMMANDS] organize-all-tabs failed:', e));
+            return;
+        }
+        if (name === 'save-current-window-session') {
+            openOptionsWithHash('#sessions?action=snapshot')
+                .catch(e => logger.error('[COMMANDS] save-current-window-session failed:', e));
+        }
     });
 }
 
@@ -111,7 +156,8 @@ async function registerPendingGroupingForNewTab(newTab: Browser.tabs.Tab, opener
         pendingGroupings.set(newTab.id!, { openerTab, newTab });
         await tryProcessFastLoadGrouping(newTab.id!);
     } catch (e) {
-        if (e.message && e.message.toLowerCase().includes("no tab with id")) {
+        const message = e instanceof Error ? e.message : '';
+        if (message && message.toLowerCase().includes("no tab with id")) {
             logger.debug(`[GROUPING_DEBUG] onCreated: Opener tab ${openerIdFromMap} was closed.`);
         } else {
             logger.error(`[GROUPING_DEBUG] onCreated: Error getting opener tab ${openerIdFromMap}:`, e);
@@ -231,6 +277,8 @@ async function flushPendingGroupingOnComplete(
 export function setupAllEventHandlers(): void {
     setupInstallationHandler();
     setupMessageHandler();
+    setupCommandHandler();
+    setupActionClickHandler();
     setupTabCreatedHandler();
     setupTabUpdatedHandler();
     setupTabRemovedHandler();

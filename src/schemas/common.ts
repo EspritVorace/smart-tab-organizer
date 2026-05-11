@@ -1,63 +1,59 @@
 import { z } from 'zod';
 import { getMessage } from '@/utils/i18n';
 
-// Helper pour valider UUID ou string
+// Helper to validate UUID or string.
 export const idSchema = z.string().min(1);
 
-// Custom error map pour utiliser les traductions
-const customErrorMap: z.ZodErrorMap = (issue, ctx) => {
+// Custom error map that routes Zod messages through the i18n layer.
+const customErrorMap: z.core.$ZodErrorMap = (issue) => {
   switch (issue.code) {
-    case z.ZodIssueCode.too_small:
-      if (issue.type === 'string') {
+    case 'too_small':
+      if (issue.origin === 'string') {
         return { message: getMessage('errorZodRequired') };
       }
       break;
-    case z.ZodIssueCode.too_big:
-      if (issue.type === 'string') {
+    case 'too_big':
+      if (issue.origin === 'string') {
         return { message: getMessage('errorZodMaxLength') };
       }
       break;
-    case z.ZodIssueCode.custom:
+    case 'custom':
       return { message: issue.message || getMessage('errorZodInvalid') };
-    case z.ZodIssueCode.invalid_enum_value:
+    case 'invalid_value':
       return { message: getMessage('errorZodInvalidValue') };
   }
-  return { message: ctx.defaultError };
+  return undefined;
 };
 
-// Appliquer la error map personnalisée
-z.setErrorMap(customErrorMap);
+// Apply the custom error map.
+z.config({ customError: customErrorMap });
 
-// Helper pour valider les expressions régulières
+// Helper to validate regular expressions.
 export const createRegexValidator = (allowEmpty = false) => {
   return z.string().refine((val) => {
     if (allowEmpty && val === '') return true;
     try {
       new RegExp(val);
-      // Vérifier que la regex contient au moins un groupe de capture
+      // The regex must contain at least one capture group.
       return val.includes('(') && val.includes(')');
     } catch {
       return false;
     }
-  }, () => ({
-    message: getMessage('errorInvalidRegex')
-  }));
+  }, { error: () => getMessage('errorInvalidRegex') });
 };
 
-// Helper pour valider les filtres de domaine
+// Helper to validate domain filters.
 export const createDomainFilterValidator = () => {
   return z.string().min(1).refine((val) => {
-    // D'abord vérifier si c'est un nom de domaine valide
     if (val === 'localhost') return true;
 
-    // Vérifier les noms de domaine normaux (au moins 2 parties séparées par un point, pas de point final)
-    // Les wildcards (*.domain) ne sont plus acceptés — les sous-domaines matchent implicitement
+    // Plain domain names: at least two dot-separated parts, no trailing dot.
+    // Wildcards (*.domain) are no longer accepted: subdomains match implicitly.
     const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)+$/;
-    // Vérifier qu'il ne se termine pas par un point
     if (val.endsWith('.')) return false;
     if (domainRegex.test(val)) return true;
-    
-    // Pour les regex, vérifier qu'elles contiennent des caractères spéciaux regex
+
+    // Regex filters must contain at least one regex special character.
     const hasRegexChars = /[.*+?^${}()|[\]\\]/.test(val);
     if (hasRegexChars) {
       try {
@@ -67,9 +63,7 @@ export const createDomainFilterValidator = () => {
         return false;
       }
     }
-    
+
     return false;
-  }, () => ({
-    message: getMessage('errorInvalidDomain')
-  }));
+  }, { error: () => getMessage('errorInvalidDomain') });
 };

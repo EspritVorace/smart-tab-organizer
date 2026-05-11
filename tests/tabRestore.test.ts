@@ -426,4 +426,328 @@ describe('restoreTabs — current window', () => {
     expect(result.groupsCreated).toBe(0);
     expect(result.errors).toHaveLength(1);
   });
+
+  it('records an error when tabs.create fails for an ungrouped tab', async () => {
+    mockTabsCreate
+      .mockImplementationOnce(async () => ({ id: nextTabId() }))
+      .mockImplementationOnce(async () => { throw new Error('boom'); });
+
+    const result = await restoreTabs({
+      tabs: [makeTab('https://ok.com'), makeTab('https://fail.com')],
+      groups: [],
+      target: 'current',
+    });
+
+    expect(result.tabsCreated).toBe(1);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toContain('https://fail.com');
+  });
+
+  it('falls back to create_new when groupAction is "merge" but no existingConflict matches', async () => {
+    const group = makeGroup('Work', [makeTab('https://a.com')]);
+    const analysis: ConflictAnalysis = {
+      duplicateTabs: [],
+      conflictingGroups: [],
+    } as unknown as ConflictAnalysis;
+    const resolution: ConflictResolution = {
+      duplicateTabAction: 'keep',
+      groupActions: new Map([['group-Work', 'merge']]),
+    } as unknown as ConflictResolution;
+
+    const result = await restoreTabs({
+      tabs: [],
+      groups: [group],
+      target: 'current',
+      conflictAnalysis: analysis,
+      conflictResolution: resolution,
+    });
+
+    expect(mockTabsQuery).not.toHaveBeenCalled();
+    expect(mockTabsGroup).toHaveBeenCalledOnce();
+    const groupCall = mockTabsGroup.mock.calls[0][0];
+    expect(groupCall.groupId).toBeUndefined();
+    expect(result.groupsCreated).toBe(1);
+    expect(result.groupsMerged).toBe(0);
+  });
+
+  it('proceeds to create all tabs when tabs.query fails during merge (silent fallback)', async () => {
+    const group = makeGroup('Work', [
+      makeTab('https://a.com'),
+      makeTab('https://b.com'),
+    ]);
+    const analysis: ConflictAnalysis = {
+      duplicateTabs: [],
+      conflictingGroups: [{ savedGroup: group, existingGroupId: 500 }],
+    } as unknown as ConflictAnalysis;
+    const resolution: ConflictResolution = {
+      duplicateTabAction: 'keep',
+      groupActions: new Map([['group-Work', 'merge']]),
+    } as unknown as ConflictResolution;
+
+    mockTabsQuery.mockRejectedValue(new Error('query failed'));
+
+    const result = await restoreTabs({
+      tabs: [],
+      groups: [group],
+      target: 'current',
+      conflictAnalysis: analysis,
+      conflictResolution: resolution,
+    });
+
+    expect(mockTabsCreate).toHaveBeenCalledTimes(2);
+    expect(result.tabsCreated).toBe(2);
+    expect(result.duplicatesSkipped).toBe(0);
+    expect(result.groupsMerged).toBe(1);
+  });
+
+  it('records an error when merging fails on tabs.group call', async () => {
+    const group = makeGroup('Work', [makeTab('https://a.com')]);
+    const analysis: ConflictAnalysis = {
+      duplicateTabs: [],
+      conflictingGroups: [{ savedGroup: group, existingGroupId: 500 }],
+    } as unknown as ConflictAnalysis;
+    const resolution: ConflictResolution = {
+      duplicateTabAction: 'keep',
+      groupActions: new Map([['group-Work', 'merge']]),
+    } as unknown as ConflictResolution;
+
+    mockTabsGroup.mockRejectedValue(new Error('merge failed'));
+
+    const result = await restoreTabs({
+      tabs: [],
+      groups: [group],
+      target: 'current',
+      conflictAnalysis: analysis,
+      conflictResolution: resolution,
+    });
+
+    expect(result.tabsCreated).toBe(1);
+    expect(result.groupsMerged).toBe(0);
+    expect(result.errors.some(e => e.toLowerCase().includes('merge'))).toBe(true);
+  });
+
+  it('processes a mix of successful and failing groups without aborting the loop', async () => {
+    const okGroup = makeGroup('Ok', [makeTab('https://ok.com')]);
+    const failGroup = makeGroup('Fail', [makeTab('https://fail.com')]);
+    const okGroup2 = makeGroup('Ok2', [makeTab('https://ok2.com')]);
+
+    // First group succeeds, second group's tabs.group call fails, third group succeeds.
+    let groupCall = 0;
+    mockTabsGroup.mockImplementation(async () => {
+      groupCall++;
+      if (groupCall === 2) throw new Error('group failed');
+      return 100 + groupCall;
+    });
+
+    const result = await restoreTabs({
+      tabs: [],
+      groups: [okGroup, failGroup, okGroup2],
+      target: 'current',
+    });
+
+    expect(result.tabsCreated).toBe(3);
+    expect(result.groupsCreated).toBe(2);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toContain('Fail');
+  });
+
+  it('continues processing groups after a tab creation error inside a previous group', async () => {
+    const g1 = makeGroup('G1', [
+      makeTab('https://g1a.com'),
+      makeTab('https://g1b.com'),
+    ]);
+    const g2 = makeGroup('G2', [makeTab('https://g2.com')]);
+
+    // First call OK (g1a), second fails (g1b), third OK (g2).
+    mockTabsCreate
+      .mockImplementationOnce(async () => ({ id: nextTabId() }))
+      .mockImplementationOnce(async () => { throw new Error('boom'); })
+      .mockImplementationOnce(async () => ({ id: nextTabId() }));
+
+    const result = await restoreTabs({
+      tabs: [],
+      groups: [g1, g2],
+      target: 'current',
+    });
+
+    expect(result.tabsCreated).toBe(2);
+    expect(result.groupsCreated).toBe(2); // g1 still creates with 1 tab, g2 creates with 1 tab
+    expect(result.errors.some(e => e.includes('https://g1b.com'))).toBe(true);
+  });
+});
+
+describe('restoreTabs — replace target', () => {
+  it('closes existing non-pinned tabs and creates new ones', async () => {
+    mockTabsQuery.mockResolvedValue([
+      { id: 1, pinned: false },
+      { id: 2, pinned: false },
+      { id: 3, pinned: false },
+    ]);
+
+    const result = await restoreTabs({
+      tabs: [makeTab('https://new.com')],
+      groups: [],
+      target: 'replace',
+    });
+
+    expect(mockTabsCreate).toHaveBeenCalledWith({ url: 'https://new.com' });
+    expect(mockTabsRemove).toHaveBeenCalledWith([1, 2, 3]);
+    expect(result.tabsCreated).toBe(1);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it('preserves pinned tabs from being closed', async () => {
+    mockTabsQuery.mockResolvedValue([
+      { id: 1, pinned: true },
+      { id: 2, pinned: false },
+      { id: 3, pinned: true },
+    ]);
+
+    await restoreTabs({
+      tabs: [makeTab('https://new.com')],
+      groups: [],
+      target: 'replace',
+    });
+
+    expect(mockTabsRemove).toHaveBeenCalledWith([2]);
+  });
+
+  it('preserves the protectedTabId from being closed', async () => {
+    mockTabsQuery.mockResolvedValue([
+      { id: 1, pinned: false },
+      { id: 2, pinned: false },
+      { id: 99, pinned: false },
+    ]);
+
+    await restoreTabs({
+      tabs: [makeTab('https://new.com')],
+      groups: [],
+      target: 'replace',
+      protectedTabId: 99,
+    });
+
+    expect(mockTabsRemove).toHaveBeenCalledWith([1, 2]);
+  });
+
+  it('does not call tabs.remove when no tabs need to be closed (only pinned + protected exist)', async () => {
+    mockTabsQuery.mockResolvedValue([
+      { id: 1, pinned: true },
+      { id: 99, pinned: false },
+    ]);
+
+    await restoreTabs({
+      tabs: [makeTab('https://new.com')],
+      groups: [],
+      target: 'replace',
+      protectedTabId: 99,
+    });
+
+    expect(mockTabsRemove).not.toHaveBeenCalled();
+  });
+
+  it('records an error when tabs.remove fails but still completes the restore', async () => {
+    mockTabsQuery.mockResolvedValue([{ id: 1, pinned: false }]);
+    mockTabsRemove.mockRejectedValue(new Error('remove failed'));
+
+    const result = await restoreTabs({
+      tabs: [makeTab('https://new.com')],
+      groups: [],
+      target: 'replace',
+    });
+
+    expect(result.tabsCreated).toBe(1);
+    expect(result.errors.some(e => e.toLowerCase().includes('failed to close'))).toBe(true);
+  });
+
+  it('restores groups in replace mode (delegates to restoreInCurrentWindow)', async () => {
+    mockTabsQuery.mockResolvedValue([{ id: 1, pinned: false }]);
+
+    const result = await restoreTabs({
+      tabs: [],
+      groups: [makeGroup('Work', [makeTab('https://w1.com'), makeTab('https://w2.com')])],
+      target: 'replace',
+    });
+
+    expect(mockTabsCreate).toHaveBeenCalledTimes(2);
+    expect(mockTabsGroup).toHaveBeenCalledOnce();
+    expect(mockTabsRemove).toHaveBeenCalledWith([1]);
+    expect(result.groupsCreated).toBe(1);
+    expect(result.tabsCreated).toBe(2);
+  });
+});
+
+describe('restoreTabs — new window edge cases', () => {
+  it('opens a blank window when there are no tabs and no groups', async () => {
+    mockWindowsCreate.mockResolvedValue({ id: 42, tabs: [{ id: 1 }] });
+
+    const result = await restoreTabs({
+      tabs: [],
+      groups: [],
+      target: 'new',
+    });
+
+    expect(mockWindowsCreate).toHaveBeenCalledWith({ url: undefined });
+    expect(mockTabsCreate).not.toHaveBeenCalled();
+    expect(result.tabsCreated).toBe(0);
+    expect(result.windowId).toBe(42);
+    // Default tab is left in place since no other tabs were created
+    expect(mockTabsRemove).not.toHaveBeenCalled();
+  });
+
+  it('records an error when a group tab creation fails in a new window', async () => {
+    mockWindowsCreate.mockResolvedValue({ id: 42, tabs: [{ id: 1 }] });
+    mockTabsCreate.mockRejectedValue(new Error('tab create failed'));
+
+    const result = await restoreTabs({
+      tabs: [],
+      groups: [makeGroup('Work', [makeTab('https://a.com'), makeTab('https://b.com')])],
+      target: 'new',
+    });
+
+    // First tab consumed from windows.create (a.com). b.com fails via tabs.create.
+    expect(result.tabsCreated).toBe(1);
+    expect(result.errors.some(e => e.includes('https://b.com'))).toBe(true);
+    // Group should still be created from the consumed firstTabId
+    expect(mockTabsGroup).toHaveBeenCalledOnce();
+  });
+
+  it('records an error when tabs.group fails in a new window', async () => {
+    mockWindowsCreate.mockResolvedValue({ id: 42, tabs: [{ id: 1 }] });
+    mockTabsGroup.mockRejectedValue(new Error('group failed'));
+
+    const result = await restoreTabs({
+      tabs: [],
+      groups: [makeGroup('Work', [makeTab('https://a.com')])],
+      target: 'new',
+    });
+
+    expect(result.tabsCreated).toBe(1);
+    expect(result.groupsCreated).toBe(0);
+    expect(result.errors.some(e => e.includes('Work'))).toBe(true);
+  });
+
+  it('processes mixed success and failure across groups in a new window', async () => {
+    mockWindowsCreate.mockResolvedValue({ id: 42, tabs: [{ id: 1 }] });
+
+    let groupCall = 0;
+    mockTabsGroup.mockImplementation(async () => {
+      groupCall++;
+      if (groupCall === 1) throw new Error('group failed');
+      return 200 + groupCall;
+    });
+
+    const result = await restoreTabs({
+      tabs: [],
+      groups: [
+        makeGroup('Fail', [makeTab('https://fail.com')]),
+        makeGroup('Ok', [makeTab('https://ok.com')]),
+      ],
+      target: 'new',
+    });
+
+    expect(result.tabsCreated).toBe(2);
+    expect(result.groupsCreated).toBe(1);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toContain('Fail');
+  });
 });
