@@ -131,8 +131,9 @@ test.describe('[US-KB-options] Options shortcuts', () => {
     const page = await extensionContext.newPage();
     await goToOptionsPage(page, extensionId);
 
-    // First focus the document (sidebar may default to home)
-    await page.locator('body').click();
+    // Click the top-left corner so a fresh-install Home (empty rules ->
+    // HeroOnboarding) does not intercept the click on its CTA button.
+    await page.locator('body').click({ position: { x: 5, y: 5 } });
     // Sidebar order is home, rules, sessions, ... so Alt+3 selects Sessions.
     await page.keyboard.press('Alt+3');
 
@@ -152,7 +153,7 @@ test.describe('[US-KB-options] Options shortcuts', () => {
   }) => {
     const page = await extensionContext.newPage();
     await goToOptionsPage(page, extensionId);
-    await page.locator('body').click();
+    await page.locator('body').click({ position: { x: 5, y: 5 } });
 
     // page.keyboard.press always uses the US layout (event.key === event.code's
     // digit), so it cannot reproduce the AZERTY case where Alt+1 dispatches
@@ -187,7 +188,7 @@ test.describe('[US-KB-options] Options shortcuts', () => {
     const page = await extensionContext.newPage();
     await goToOptionsPage(page, extensionId);
 
-    await page.locator('body').click();
+    await page.locator('body').click({ position: { x: 5, y: 5 } });
     await page.keyboard.press('Shift+Slash');
 
     const aside = page.getByTestId('shortcuts-aside');
