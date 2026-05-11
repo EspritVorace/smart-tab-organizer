@@ -453,7 +453,7 @@ jobs:
 
       - name: Install docs dependencies
         working-directory: docs
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-workspace
 
       - name: Build Astro docs
         working-directory: docs
