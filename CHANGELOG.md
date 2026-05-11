@@ -1,5 +1,48 @@
 # Changelog
 
+## 1.2.0 — since 1.1.4
+
+### New Features
+- HomePage with pinned sessions, quick actions, tips, and keyboard navigation
+- Per-workspace data containers with workspace switcher hidden when only the default exists
+- ListToolbar with search, highlight and shortcuts; workspace import/export dialogs aligned with shared wizard shell
+- Pack Gallery: 13 categories and 38 curated packs, available as a third import source
+- Central keyboard shortcuts registry with Mod modifier, platform-aware display, key sequences, page-level bindings, and auto-generated documentation page
+- Keyboard drag-and-drop on sessions and domain rules
+- Status bar exposing shortcuts hint and version
+- Popup redesigned with hero CTA toolbar, right-side fullscreen help drawer, and P shortcut for options
+- Sidebar nav grouped into Tools, Tracking, Configuration sections
+- IconBox component with gradient applied on sidebar, page header and dialog icons
+- URL query parameter extraction mode for domain rules
+- Statistics: daily buckets per rule with aggregates
+- Session card with relative last-activity time, hover-card metadata and restore shortcuts menu
+- Summary variants for rule and session cards
+- First-run redirect to Options Home on the very first icon click
+- Narrative doc-scenarios pipeline (3 locales x 2 themes matrix, manifest-driven routing, audit/sync commands, dedicated CI workflow)
+- Autofocus primary action in dialogs; '/' clear-on-Escape; nested shortcut groups in panel
+
+### Improvements
+- Move rule color from category onto the rule itself; drop default_settings.json
+- Dependency upgrades: React 19, TypeScript 6.0, Zod 4, Vitest 4, Storybook 10, Vite ^8, @dnd-kit 0.4
+- ESLint with eslint-plugin-sonarjs (3 priority sweeps cleaned up); SonarJS rules promoted from warn to error
+- Cognitive complexity reductions in sessionClassification, tabRestore, tabCapture, sessionOrderUtils
+- WAI-ARIA initial focus across dialogs; aria-disabled pattern on focusable controls; color-contrast fixes via Radix Avatar/Kbd
+- Storybook browser mock refactor and a11y test coverage improvements
+- Shared shells extracted for import/export wizards, dialog close button, session name hover card, searchable select item
+- Patched 11 audit vulnerabilities via pnpm.overrides
+- i18n: 104 orphan keys removed; French default workspace renamed to "Principal"
+- Save button simplified to a single contextual button (no SplitButton)
+- Internal developer docs standardized to English; multilingual READMEs rewritten as concise vitrines
+
+### Bug Fixes
+- Import wizard: pack mode now uses the wizard Next button
+- Import: match rules and sessions by id with label/name fallback
+- Grouping: try every domain rule until one yields a group name
+- Sidebar: prevent active item overflow and recenter collapsed icon
+- Rules: wire keyboard shortcuts on the domain rules page
+- Shortcuts: repair cheatsheet layout and Firefox global shortcuts
+- E2E: isolate tab state in the flaky Save button aria-disabled test
+
 ## 1.1.4 — since 1.1.3
 
 ### New Features
