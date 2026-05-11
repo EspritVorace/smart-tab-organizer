@@ -6,7 +6,7 @@ export function OptionsHeader() {
   return (
     <Flex data-testid="options-header" align="center" gap="3" style={{ width: '100%', minWidth: 0 }}>
       <img
-        src="/icons/icon48.png"
+        src="/icons/48.png"
         alt=""
         aria-hidden="true"
         style={{ width: '32px', height: '32px', flexShrink: 0 }}
@@ -25,7 +25,7 @@ export function OptionsHeaderCollapsed() {
   return (
     <Flex align="center" justify="center" style={{ width: '100%' }}>
       <img
-        src="/icons/icon48.png"
+        src="/icons/48.png"
         alt=""
         aria-hidden="true"
         style={{ width: '32px', height: '32px' }}

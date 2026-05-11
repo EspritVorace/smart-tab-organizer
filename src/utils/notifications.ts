@@ -42,7 +42,7 @@ export async function showNotification({ title, message, type: _type = 'info', u
 
   const notificationOptions: Browser.notifications.NotificationCreateOptions = {
     type: 'basic',
-    iconUrl: browser.runtime.getURL('/icons/icon128.png'),
+    iconUrl: browser.runtime.getURL('/icons/128.png'),
     title,
     message
   };

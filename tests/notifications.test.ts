@@ -49,7 +49,7 @@ describe('showNotification', () => {
     expect(stored).toBeDefined();
     expect(stored.title).toBe('Hello');
     expect(stored.message).toBe('World');
-    expect(stored.iconUrl).toContain('/icons/icon128.png');
+    expect(stored.iconUrl).toContain('/icons/128.png');
     expect(stored.buttons).toBeUndefined();
   });
 
