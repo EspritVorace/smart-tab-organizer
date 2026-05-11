@@ -1,7 +1,7 @@
 {
   "name": "smart-tab-organizer",
   "version": "1.2.0",
-  "packageManager": "pnpm@11.0.9",
+  "packageManager": "pnpm@10.33.2",
   "type": "module",
   "scripts": {
     "test": "vitest run --config vitest.simple.config.ts",
