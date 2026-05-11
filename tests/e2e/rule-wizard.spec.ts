@@ -341,7 +341,7 @@ test.describe('Creation wizard — Step 4: Summary', () => {
 // Edit mode
 // ---------------------------------------------------------------------------
 test.describe('Edit mode — Summary View', () => {
-  test('edit opens on summary view (no wizard stepper)', async ({
+  test('edit opens on summary view (no wizard stepper, no inline fields)', async ({
     extensionContext, extensionId, helpers,
   }) => {
     await helpers.addDomainRule({ label: 'Edit Me', domainFilter: 'edit.com' });
@@ -356,13 +356,16 @@ test.describe('Edit mode — Summary View', () => {
     await expect(dialog).toBeVisible();
     // No wizard stepper
     await expect(dialog.getByTestId('wizard-rule-stepper')).not.toBeAttached();
-    // Identity fields visible and editable
-    await expect(dialog.getByTestId('wizard-rule-field-label')).toHaveValue('Edit Me');
-    await expect(dialog.getByTestId('wizard-rule-field-domain')).toHaveValue('edit.com');
+    // Summary view rendered (no inline editable identity fields).
+    await expect(dialog.getByTestId('wizard-rule-edit-summary')).toBeVisible();
+    await expect(dialog.getByTestId('wizard-rule-field-label')).not.toBeAttached();
+    await expect(dialog.getByTestId('wizard-rule-field-domain')).not.toBeAttached();
+    // Three "Modify" buttons (one per section).
+    await expect(dialog.getByRole('button', { name: /modify/i })).toHaveCount(3);
     await page.close();
   });
 
-  test('edit — Save button saves changes', async ({
+  test('edit — identity modal updates label and Save persists', async ({
     extensionContext, extensionId, helpers,
   }) => {
     await helpers.addDomainRule({ label: 'Rename Me', domainFilter: 'rename.com' });
@@ -374,15 +377,26 @@ test.describe('Edit mode — Summary View', () => {
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
     const dialog = page.getByTestId('wizard-rule');
-    await dialog.getByTestId('wizard-rule-field-label').fill('Renamed Rule');
-    await dialog.getByRole('button', { name: /save/i }).click();
+    await dialog.waitFor({ state: 'visible' });
 
+    // Open the identity sub-dialog via the first Modify button.
+    await dialog.getByRole('button', { name: /modify/i }).first().click();
+    const identityModal = page.getByTestId('modal-edit-identity');
+    await expect(identityModal).toBeVisible();
+
+    // Rename and apply.
+    await identityModal.getByTestId('modal-edit-identity-field-label').fill('Renamed Rule');
+    await identityModal.getByTestId('modal-edit-identity-btn-apply').click();
+    await expect(identityModal).toBeHidden();
+
+    // Save the parent dialog to commit.
+    await dialog.getByRole('button', { name: /save/i }).click();
     await expect(dialog).toBeHidden();
     await expect(page.getByRole('listitem', { name: /Renamed Rule/i })).toBeVisible();
     await page.close();
   });
 
-  test('edit — pencil button opens config modal', async ({
+  test('edit — Modify button on Configuration section opens the config modal', async ({
     extensionContext, extensionId, helpers,
   }) => {
     await helpers.addDomainRule({ label: 'Config Test', domainFilter: 'config.com' });
@@ -396,16 +410,16 @@ test.describe('Edit mode — Summary View', () => {
     const dialog = page.getByTestId('wizard-rule');
     await dialog.waitFor({ state: 'visible' });
 
-    // Click pencil button (aria-label contains "Edit configuration" or similar)
-    await dialog.getByRole('button', { name: /edit configuration/i }).click();
+    // The second Modify button targets the Configuration section.
+    await dialog.getByRole('button', { name: /modify/i }).nth(1).click();
 
-    // A second dialog opens
+    // A second dialog opens.
     const dialogs = page.locator('[role="dialog"]');
     await expect(dialogs).toHaveCount(2);
     await page.close();
   });
 
-  test('edit — options section is collapsed by default and expands', async ({
+  test('edit — Modify button on Options section opens the options modal', async ({
     extensionContext, extensionId, helpers,
   }) => {
     await helpers.addDomainRule({ label: 'Options Test', domainFilter: 'options.com' });
@@ -419,15 +433,43 @@ test.describe('Edit mode — Summary View', () => {
     const dialog = page.getByTestId('wizard-rule');
     await dialog.waitFor({ state: 'visible' });
 
-    // Dedup switch not visible (options collapsed)
+    // Dedup switch not visible (no inline form in the summary).
     await expect(dialog.locator('[role="switch"]')).toBeHidden();
 
-    // Click the collapsible trigger to expand
-    const optionsTrigger = dialog.getByRole('button', { name: /options/i });
-    await optionsTrigger.click();
+    // The third Modify button targets the Options section.
+    await dialog.getByRole('button', { name: /modify/i }).nth(2).click();
 
-    // Dedup switch now visible
-    await expect(dialog.locator('[role="switch"]')).toBeVisible();
+    // The options modal opens and exposes the dedup switch.
+    const optionsModal = page.getByTestId('modal-edit-options');
+    await expect(optionsModal).toBeVisible();
+    await expect(optionsModal.locator('[role="switch"]')).toBeVisible();
+    await page.close();
+  });
+
+  test('edit — identity modal Cancel does not persist', async ({
+    extensionContext, extensionId, helpers,
+  }) => {
+    await helpers.addDomainRule({ label: 'Keep Me', domainFilter: 'keep.com' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    await page.getByRole('listitem', { name: /Keep Me/i }).getByLabel('More actions').click();
+    await page.getByRole('menuitem', { name: /edit/i }).click();
+
+    const dialog = page.getByTestId('wizard-rule');
+    await dialog.getByRole('button', { name: /modify/i }).first().click();
+
+    const identityModal = page.getByTestId('modal-edit-identity');
+    await identityModal.getByTestId('modal-edit-identity-field-label').fill('Discarded Label');
+    // Cancel the sub-dialog: nothing is applied to the parent form.
+    await identityModal.getByRole('button', { name: /cancel/i }).click();
+    await expect(identityModal).toBeHidden();
+
+    // Close the parent dialog without saving: the rule is still named "Keep Me".
+    await dialog.getByRole('button', { name: /cancel/i }).click();
+    await expect(page.getByRole('listitem', { name: /Keep Me/i })).toBeVisible();
+    await expect(page.getByRole('listitem', { name: /Discarded Label/i })).toHaveCount(0);
     await page.close();
   });
 });
