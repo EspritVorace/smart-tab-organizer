@@ -65,7 +65,24 @@ describe('ImportWizard integration : mode pack', () => {
     expect(screen.getByTestId('pack-gallery')).toBeInTheDocument();
   });
 
-  it('advances to step 1 when the user selects a pack and confirms', () => {
+  it('disables the wizard Next button (aria-disabled) when no pack is selected', () => {
+    wrap(
+      <ImportWizard
+        open
+        onOpenChange={vi.fn()}
+        existingRules={[] as DomainRuleSetting[]}
+        onImport={vi.fn()}
+        initialSourceMode="pack"
+      />,
+    );
+
+    const nextBtn = screen.getByTestId('import-wizard-pack-next');
+    expect(nextBtn).toHaveAttribute('aria-disabled', 'true');
+    // aria-disabled pattern keeps the button focusable (no native tabindex=-1 added).
+    expect(nextBtn.getAttribute('tabindex')).not.toBe('-1');
+  });
+
+  it('advances to step 1 when the user selects a pack and clicks the wizard Next', () => {
     wrap(
       <ImportWizard
         open
@@ -79,8 +96,9 @@ describe('ImportWizard integration : mode pack', () => {
     const checkbox = screen.getByTestId('pack-card-pack-sample-checkbox');
     fireEvent.click(checkbox);
 
-    const confirmBtn = screen.getByTestId('pack-gallery-confirm');
-    fireEvent.click(confirmBtn);
+    const nextBtn = screen.getByTestId('import-wizard-pack-next');
+    expect(nextBtn).not.toHaveAttribute('aria-disabled', 'true');
+    fireEvent.click(nextBtn);
 
     expect(screen.getByText('newRulesGroup')).toBeInTheDocument();
     expect(screen.queryByTestId('pack-gallery')).not.toBeInTheDocument();
@@ -98,7 +116,7 @@ describe('ImportWizard integration : mode pack', () => {
     );
 
     fireEvent.click(screen.getByTestId('pack-card-pack-sample-checkbox'));
-    fireEvent.click(screen.getByTestId('pack-gallery-confirm'));
+    fireEvent.click(screen.getByTestId('import-wizard-pack-next'));
     expect(screen.getByText('newRulesGroup')).toBeInTheDocument();
 
     const previousBtn = screen.getByText('previous').closest('button')!;

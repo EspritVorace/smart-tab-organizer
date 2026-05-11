@@ -12,12 +12,11 @@ const {
 } = composed;
 
 describe('PackGallery (stories)', () => {
-  it('renders the gallery grouped by category and disables the confirm button initially', () => {
+  it('renders the gallery grouped by category', () => {
     render(<PackGalleryDefault />);
     expect(screen.getByTestId('pack-gallery')).toBeInTheDocument();
     expect(screen.getByText('Cloud Console')).toBeInTheDocument();
     expect(screen.getByText('Code Hosting')).toBeInTheDocument();
-    expect(screen.getByTestId('pack-gallery-confirm')).toBeDisabled();
   });
 
   it('shows the empty state when there are no packs', () => {
@@ -39,15 +38,13 @@ describe('PackGallery (stories)', () => {
     expect(screen.getByText('Code Hosting')).toBeInTheDocument();
   });
 
-  it('selecting a pack enables the confirm button and updates the global counter', () => {
+  it('reflects the selected state on a pack card after clicking its checkbox', () => {
     render(<PackGalleryDefault />);
 
     const checkbox = screen.getByTestId('pack-card-pk-github-checkbox');
+    expect(checkbox.getAttribute('data-state')).toBe('unchecked');
     fireEvent.click(checkbox);
-
-    expect(screen.getByTestId('pack-gallery-confirm')).not.toBeDisabled();
-    const counter = screen.getByTestId('pack-gallery-counter');
-    expect(counter.textContent).not.toBe('packGalleryGlobalCounterEmpty');
+    expect(checkbox.getAttribute('data-state')).toBe('checked');
   });
 
   it('shows the no-result message when search matches nothing', () => {
