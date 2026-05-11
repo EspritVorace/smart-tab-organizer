@@ -14,7 +14,7 @@ describe('OptionsHeader (portable stories)', () => {
 
   it('renders the collapsed header with logo only', () => {
     const { container } = render(<OptionsHeaderCollapsedStory />);
-    const logo = container.querySelector('img[src="/icons/icon48.png"]');
+    const logo = container.querySelector('img[src="/icons/48.png"]');
     expect(logo).toBeInTheDocument();
     expect(screen.queryByTestId('theme-toggle')).not.toBeInTheDocument();
   });

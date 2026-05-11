@@ -5,6 +5,12 @@ import { resolve } from 'path';
 export default defineConfig({
   srcDir: 'src',
   outDir: '.output',
+  modules: ['@wxt-dev/auto-icons'],
+  autoIcons: {
+    baseIconPath: 'assets/icon.svg',
+    sizes: [16, 32, 48, 96, 128],
+    developmentIndicator: 'overlay',
+  },
   hooks: {
     'build:manifestGenerated': (wxt, manifest) => {
       // Firefox MV2 uses `_execute_browser_action`; only Chromium MV3 accepts
@@ -52,17 +58,7 @@ export default defineConfig({
       },
     },
     action: {
-      default_icon: {
-        '16': 'icons/icon16.png',
-        '48': 'icons/icon48.png',
-        '128': 'icons/icon128.png'
-      },
       default_popup: 'popup.html'
-    },
-    icons: {
-      '16': 'icons/icon16.png',
-      '48': 'icons/icon48.png',
-      '128': 'icons/icon128.png'
     }
   },
   webExt: {

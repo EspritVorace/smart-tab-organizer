@@ -312,7 +312,7 @@ export const SidebarComplete: Story = {
 const SmartTabHeader = () => (
   <Flex align="center" gap="3" style={{ width: '100%', paddingRight: '64px', position: 'relative' }}>
     <img
-      src="/icons/icon48.png"
+      src="/icons/48.png"
       alt=""
       aria-hidden="true"
       style={{
@@ -343,7 +343,7 @@ const SmartTabHeader = () => (
 const SmartTabHeaderCollapsed = () => (
   <Flex align="center" justify="center" style={{ width: '100%' }}>
     <img
-      src="/icons/icon48.png"
+      src="/icons/48.png"
       alt=""
       aria-hidden="true"
       style={{

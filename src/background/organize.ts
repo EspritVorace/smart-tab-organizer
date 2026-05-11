@@ -353,7 +353,7 @@ export async function handleOrganizeAllTabs(windowId: number): Promise<void> {
     if (removedCount > 0 && settings.notifyOnDeduplication) {
         (browser as unknown as { notifications: ChromeNotificationsAPI }).notifications.create({
             type: 'basic',
-            iconUrl: browser.runtime.getURL('/icons/icon128.png'),
+            iconUrl: browser.runtime.getURL('/icons/128.png'),
             title: getMessage('extensionName'),
             message: getMessage('notifDeduplication', [String(removedCount)]),
         });
@@ -372,7 +372,7 @@ export async function handleOrganizeAllTabs(windowId: number): Promise<void> {
     if (tabsGrouped > 0 && settings.notifyOnGrouping) {
         (browser as unknown as { notifications: ChromeNotificationsAPI }).notifications.create({
             type: 'basic',
-            iconUrl: browser.runtime.getURL('/icons/icon128.png'),
+            iconUrl: browser.runtime.getURL('/icons/128.png'),
             title: getMessage('extensionName'),
             message: getMessage('notifGrouping', [String(tabsGrouped), String(groupCount)]),
         });
