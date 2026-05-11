@@ -6,10 +6,10 @@
     </linearGradient>
   </defs>
   <rect width="128" height="128" rx="28" fill="url(#bg)"/>
-  <rect x="24" y="32" width="80" height="16" rx="8" fill="#EDE4FF"/>
+  <rect x="24" y="26" width="80" height="16" rx="8" fill="#EDE4FF"/>
   <rect x="24" y="56" width="64" height="16" rx="8" fill="#EDE4FF"/>
-  <rect x="24" y="80" width="48" height="16" rx="8" fill="#EDE4FF"/>
-  <circle cx="32" cy="40" r="5" fill="#D4C5FF"/>
+  <rect x="24" y="86" width="48" height="16" rx="8" fill="#EDE4FF"/>
+  <circle cx="32" cy="34" r="5" fill="#D4C5FF"/>
   <circle cx="32" cy="64" r="5" fill="#5EE3E3"/>
-  <circle cx="32" cy="88" r="5" fill="#FFB68A"/>
+  <circle cx="32" cy="94" r="5" fill="#FFB68A"/>
 </svg>
