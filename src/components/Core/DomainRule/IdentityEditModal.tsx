@@ -1,8 +1,9 @@
-import { Button, Flex, TextField } from '@radix-ui/themes';
+import { Flex, TextField } from '@radix-ui/themes';
 import { useState, useEffect, useMemo } from 'react';
 import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
 import { DialogShell } from '@/components/UI/DialogShell';
+import { EditModalFooter } from './EditModalFooter';
 import { FormField } from '@/components/Form/FormFields';
 import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
 import { ChromeColorPicker } from '@/components/Core/TabTree/ChromeColorPicker';
@@ -147,18 +148,12 @@ export function IdentityEditModal({
         </FormField>
       </Flex>
 
-      <Flex gap="3" justify="end" mt="4" style={{ flexShrink: 0 }}>
-        <Button variant="soft" color="gray" onClick={onClose}>
-          {getMessage('cancel')}
-        </Button>
-        <Button
-          data-testid="modal-edit-identity-btn-apply"
-          onClick={handleApply}
-          disabled={hasError}
-        >
-          {getMessage('apply')}
-        </Button>
-      </Flex>
+      <EditModalFooter
+        onClose={onClose}
+        onApply={handleApply}
+        disabled={hasError}
+        applyTestId="modal-edit-identity-btn-apply"
+      />
     </DialogShell>
   );
 }
