@@ -3,6 +3,4 @@
   top: 0;
   z-index: 1;
   background: var(--color-panel-solid);
-  padding-block: var(--space-2);
-  margin-block: calc(-1 * var(--space-2));
 }
