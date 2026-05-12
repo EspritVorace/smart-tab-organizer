@@ -1,4 +1,4 @@
-import { Button, Flex } from '@radix-ui/themes';
+import { Flex } from '@radix-ui/themes';
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
@@ -10,6 +10,7 @@ import { getPresetById } from '@/utils/presetUtils';
 import { logger } from '@/utils/logger';
 import { DomainRuleConfigForm } from './DomainRuleConfigForm';
 import type { ConfigMode } from './ConfigModeSelector';
+import { EditModalFooter } from './EditModalFooter';
 
 const regexValidator = createRegexValidator(true);
 const QUERY_PARAM_NAME_PATTERN = /^[A-Za-z0-9_\-.]+$/;
@@ -196,14 +197,7 @@ export function ConfigEditModal({
         />
       </Flex>
 
-      <Flex gap="3" justify="end" mt="4" style={{ flexShrink: 0 }}>
-        <Button variant="soft" color="gray" onClick={onClose}>
-          {getMessage('cancel')}
-        </Button>
-        <Button onClick={handleApply} disabled={hasError}>
-          {getMessage('apply')}
-        </Button>
-      </Flex>
+      <EditModalFooter onClose={onClose} onApply={handleApply} disabled={hasError} />
     </DialogShell>
   );
 }
