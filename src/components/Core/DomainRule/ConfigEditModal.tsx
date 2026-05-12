@@ -2,7 +2,6 @@ import { Flex } from '@radix-ui/themes';
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
-import { DialogShell } from '@/components/UI/DialogShell';
 import { type GroupNameSourceValue, type UrlExtractionModeValue } from '@/schemas/enums';
 import { createRegexValidator } from '@/schemas/common';
 import type { PresetCategory } from '@/utils/presetUtils';
@@ -10,7 +9,7 @@ import { getPresetById } from '@/utils/presetUtils';
 import { logger } from '@/utils/logger';
 import { DomainRuleConfigForm } from './DomainRuleConfigForm';
 import type { ConfigMode } from './ConfigModeSelector';
-import { EditModalFooter } from './EditModalFooter';
+import { EditModalShell } from './EditModalShell';
 
 const regexValidator = createRegexValidator(true);
 const QUERY_PARAM_NAME_PATTERN = /^[A-Za-z0-9_\-.]+$/;
@@ -146,19 +145,14 @@ export function ConfigEditModal({
     onClose();
   };
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) onClose();
-  };
-
   return (
-    <DialogShell
-      open={isOpen}
-      onOpenChange={handleOpenChange}
+    <EditModalShell
+      isOpen={isOpen}
+      onClose={onClose}
+      onApply={handleApply}
+      disabled={hasError}
       title={getMessage('editConfigTitle')}
-      description={getMessage('editConfigTitle')}
-      hideDescription
       maxWidth={820}
-      showHeaderSeparator={false}
       contentStyle={{
         display: 'flex',
         flexDirection: 'column',
@@ -196,8 +190,6 @@ export function ConfigEditModal({
           urlQueryParamNameError={queryParamNameError}
         />
       </Flex>
-
-      <EditModalFooter onClose={onClose} onApply={handleApply} disabled={hasError} />
-    </DialogShell>
+    </EditModalShell>
   );
 }

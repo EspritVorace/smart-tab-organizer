@@ -2,8 +2,7 @@ import { Flex } from '@radix-ui/themes';
 import { useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
-import { DialogShell } from '@/components/UI/DialogShell';
-import { EditModalFooter } from './EditModalFooter';
+import { EditModalShell } from './EditModalShell';
 import { WizardStep3Options } from './WizardStep3Options';
 import type { DeduplicationMatchModeValue } from '@/schemas/enums';
 import type { DomainRule } from '@/schemas/domainRule';
@@ -61,19 +60,15 @@ export function OptionsEditModal({ isOpen, onClose, onApply, initial }: OptionsE
     onClose();
   };
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) onClose();
-  };
-
   return (
-    <DialogShell
-      open={isOpen}
-      onOpenChange={handleOpenChange}
+    <EditModalShell
+      isOpen={isOpen}
+      onClose={onClose}
+      onApply={handleApply}
+      disabled={ignoredParamsInvalid}
       title={getMessage('editOptionsTitle')}
-      description={getMessage('editOptionsTitle')}
-      hideDescription
       maxWidth={680}
-      showHeaderSeparator={false}
+      applyTestId="modal-edit-options-btn-apply"
       data-testid="modal-edit-options"
     >
       <Flex direction="column" gap="4" mt="4">
@@ -83,13 +78,6 @@ export function OptionsEditModal({ isOpen, onClose, onApply, initial }: OptionsE
           errors={errors}
         />
       </Flex>
-
-      <EditModalFooter
-        onClose={onClose}
-        onApply={handleApply}
-        disabled={ignoredParamsInvalid}
-        applyTestId="modal-edit-options-btn-apply"
-      />
-    </DialogShell>
+    </EditModalShell>
   );
 }

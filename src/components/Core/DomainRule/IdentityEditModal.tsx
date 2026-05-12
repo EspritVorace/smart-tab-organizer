@@ -2,8 +2,7 @@ import { Flex, TextField } from '@radix-ui/themes';
 import { useState, useEffect, useMemo } from 'react';
 import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
-import { DialogShell } from '@/components/UI/DialogShell';
-import { EditModalFooter } from './EditModalFooter';
+import { EditModalShell } from './EditModalShell';
 import { FormField } from '@/components/Form/FormFields';
 import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
 import { ChromeColorPicker } from '@/components/Core/TabTree/ChromeColorPicker';
@@ -92,19 +91,15 @@ export function IdentityEditModal({
     onClose();
   };
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) onClose();
-  };
-
   return (
-    <DialogShell
-      open={isOpen}
-      onOpenChange={handleOpenChange}
+    <EditModalShell
+      isOpen={isOpen}
+      onClose={onClose}
+      onApply={handleApply}
+      disabled={hasError}
       title={getMessage('editIdentityTitle')}
-      description={getMessage('editIdentityTitle')}
-      hideDescription
       maxWidth={680}
-      showHeaderSeparator={false}
+      applyTestId="modal-edit-identity-btn-apply"
       data-testid="modal-edit-identity"
     >
       <Flex direction="column" gap="4" mt="4">
@@ -147,13 +142,6 @@ export function IdentityEditModal({
           )}
         </FormField>
       </Flex>
-
-      <EditModalFooter
-        onClose={onClose}
-        onApply={handleApply}
-        disabled={hasError}
-        applyTestId="modal-edit-identity-btn-apply"
-      />
-    </DialogShell>
+    </EditModalShell>
   );
 }
