@@ -401,6 +401,37 @@ export function SessionsPage({
     setDeleteTarget(null);
   }, [deleteTarget, removeSession]);
 
+  const sharedSectionProps: Pick<
+    SessionSectionProps,
+    | 'allSessions'
+    | 'searchQuery'
+    | 'searchMatches'
+    | 'updateOrder'
+    | 'renameSession'
+    | 'onOpenRestoreWizard'
+    | 'onOpenEditDialog'
+    | 'onOpenDeleteDialog'
+    | 'onRestoreCurrentWindow'
+    | 'onRestoreNewWindow'
+    | 'onReplaceCurrentWindow'
+    | 'onPin'
+    | 'onUnpin'
+  > = {
+    allSessions: sortedSessions,
+    searchQuery,
+    searchMatches: sessionSearchMatches,
+    updateOrder,
+    renameSession,
+    onOpenRestoreWizard: setRestoreSession,
+    onOpenEditDialog: setEditTarget,
+    onOpenDeleteDialog: setDeleteTarget,
+    onRestoreCurrentWindow: handleRestoreCurrentWindow,
+    onRestoreNewWindow: handleRestoreNewWindow,
+    onReplaceCurrentWindow: handleReplaceCurrentWindow,
+    onPin: handlePin,
+    onUnpin: handleUnpin,
+  };
+
   return (
     <PageLayout
       titleKey="sessionsTab"
@@ -484,19 +515,7 @@ export function SessionsPage({
                 emptyDescriptionKey="pinnedSessionsEmptyDescription"
                 isPinned={true}
                 sessions={pinnedSessions}
-                allSessions={sortedSessions}
-                searchQuery={searchQuery}
-                searchMatches={sessionSearchMatches}
-                updateOrder={updateOrder}
-                renameSession={renameSession}
-                onOpenRestoreWizard={setRestoreSession}
-                onOpenEditDialog={setEditTarget}
-                onOpenDeleteDialog={setDeleteTarget}
-                onRestoreCurrentWindow={handleRestoreCurrentWindow}
-                onRestoreNewWindow={handleRestoreNewWindow}
-                onReplaceCurrentWindow={handleReplaceCurrentWindow}
-                onPin={handlePin}
-                onUnpin={handleUnpin}
+                {...sharedSectionProps}
               />
 
               <Separator size="4" />
@@ -508,19 +527,7 @@ export function SessionsPage({
                 emptyDescriptionKey="unpinnedSessionsEmptyDescription"
                 isPinned={false}
                 sessions={unpinnedSessions}
-                allSessions={sortedSessions}
-                searchQuery={searchQuery}
-                searchMatches={sessionSearchMatches}
-                updateOrder={updateOrder}
-                renameSession={renameSession}
-                onOpenRestoreWizard={setRestoreSession}
-                onOpenEditDialog={setEditTarget}
-                onOpenDeleteDialog={setDeleteTarget}
-                onRestoreCurrentWindow={handleRestoreCurrentWindow}
-                onRestoreNewWindow={handleRestoreNewWindow}
-                onReplaceCurrentWindow={handleReplaceCurrentWindow}
-                onPin={handlePin}
-                onUnpin={handleUnpin}
+                {...sharedSectionProps}
               />
             </Flex>
           )}
