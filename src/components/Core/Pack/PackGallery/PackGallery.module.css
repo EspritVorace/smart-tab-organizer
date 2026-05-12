@@ -1,0 +1,9 @@
+.searchSticky {
+  position: sticky;
+  /* Compense la padding-top de WizardModal.Body (var(--space-4)) :
+     sans cela, la zone du padding reste défilante et laisse voir le
+     contenu qui passe avant d'être clipé par overflow-y: auto. */
+  top: calc(-1 * var(--space-4));
+  z-index: 1;
+  background: var(--color-panel-solid);
+}
