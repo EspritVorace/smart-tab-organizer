@@ -99,7 +99,7 @@ export function WizardStep4Summary({ values, configMode, presetName, onEditStep 
           <Flex gap="2" align="baseline">
             <Text size="2" color="gray" highContrast style={{ minWidth: 130, flexShrink: 0 }}>{getMessage('labelLabel')}</Text>
             <Flex align="center" gap="2">
-              <Badge color={values.color ? getRadixColor(values.color) : 'gray'} variant="solid" size="1">
+              <Badge color={values.color ? getRadixColor(values.color) : 'gray'} variant="solid" highContrast size="1">
                 {category ? `${category.emoji} ` : ''}{values.label}
               </Badge>
               {category && (
