@@ -28,6 +28,7 @@ function SummarySection({ title, onEdit, stepIndex, children }: {
           type="button"
           variant="ghost"
           size="1"
+          highContrast
           onClick={() => onEdit(stepIndex)}
           aria-label={`${getMessage('summaryModify')} — ${title}`}
         >
