@@ -257,13 +257,15 @@ export function RuleWizardModal({
     }
   }, [setValue, trigger]);
 
-  const captureSnapshot = useCallback((): ModeStateSnapshot => ({
+  const readModeState = useCallback((): ModeStateSnapshot => ({
     groupNameSource: getValues('groupNameSource') as GroupNameSourceValue,
     titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
     urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
     urlExtractionMode: (getValues('urlExtractionMode') ?? 'regex') as UrlExtractionModeValue,
     urlQueryParamName: getValues('urlQueryParamName') ?? '',
   }), [getValues]);
+
+  const captureSnapshot = readModeState;
 
   const applySnapshot = useCallback((snapshot: ModeStateSnapshot) => {
     setValue('groupNameSource', snapshot.groupNameSource);
@@ -432,11 +434,7 @@ export function RuleWizardModal({
   const currentConfigValues: ConfigEditValues = {
     configMode,
     presetId: getValues('presetId') ?? null,
-    groupNameSource: groupNameSource as GroupNameSourceValue,
-    titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
-    urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
-    urlExtractionMode: (getValues('urlExtractionMode') ?? 'regex') as UrlExtractionModeValue,
-    urlQueryParamName: getValues('urlQueryParamName') ?? '',
+    ...readModeState(),
   };
 
   const currentIdentityValues: IdentityEditValues = {

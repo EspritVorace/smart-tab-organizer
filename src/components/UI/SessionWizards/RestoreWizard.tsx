@@ -26,6 +26,19 @@ const STEP_DESCRIPTION_KEYS = [
   'restoreStepConflictDescription',
 ] as const;
 
+function RadioOption({ testId, value, label }: { testId: string; value: string; label: string }) {
+  return (
+    <Text size="2" asChild>
+      <label>
+        <Flex align="center" gap="2">
+          <RadioGroup.Item data-testid={testId} value={value} />
+          {label}
+        </Flex>
+      </label>
+    </Text>
+  );
+}
+
 interface RestoreWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -238,30 +251,9 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
                 onValueChange={v => setTarget(v as RestoreTarget)}
               >
                 <Flex direction="column" gap="2">
-                  <Text size="2" asChild>
-                    <label>
-                      <Flex align="center" gap="2">
-                        <RadioGroup.Item data-testid="wizard-restore-radio-current-window" value="current" />
-                        {getMessage('restoreTargetCurrent')}
-                      </Flex>
-                    </label>
-                  </Text>
-                  <Text size="2" asChild>
-                    <label>
-                      <Flex align="center" gap="2">
-                        <RadioGroup.Item data-testid="wizard-restore-radio-new-window" value="new" />
-                        {getMessage('restoreTargetNew')}
-                      </Flex>
-                    </label>
-                  </Text>
-                  <Text size="2" asChild>
-                    <label>
-                      <Flex align="center" gap="2">
-                        <RadioGroup.Item data-testid="wizard-restore-radio-replace-window" value="replace" />
-                        {getMessage('restoreTargetReplace')}
-                      </Flex>
-                    </label>
-                  </Text>
+                  <RadioOption testId="wizard-restore-radio-current-window" value="current" label={getMessage('restoreTargetCurrent')} />
+                  <RadioOption testId="wizard-restore-radio-new-window" value="new" label={getMessage('restoreTargetNew')} />
+                  <RadioOption testId="wizard-restore-radio-replace-window" value="replace" label={getMessage('restoreTargetReplace')} />
                 </Flex>
               </RadioGroup.Root>
             </Flex>

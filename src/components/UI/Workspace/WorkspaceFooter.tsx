@@ -11,13 +11,18 @@ interface WorkspaceFooterProps {
   onManage?: () => void;
 }
 
+function useWorkspaceName() {
+  const { active, accentColor } = useActiveWorkspaceContext();
+  const name = active?.name ?? getMessage('workspaceDefaultName');
+  return { name, accentColor };
+}
+
 /**
  * Sidebar footer that surfaces the active workspace and exposes the workspace
  * switcher. Replaces the static EspritVorace/GitHub footer.
  */
 export function WorkspaceFooter({ onManage }: WorkspaceFooterProps) {
-  const { active, accentColor } = useActiveWorkspaceContext();
-  const name = active?.name ?? getMessage('workspaceDefaultName');
+  const { name, accentColor } = useWorkspaceName();
 
   const trigger = (
     <Flex
@@ -70,8 +75,7 @@ export function WorkspaceFooter({ onManage }: WorkspaceFooterProps) {
 
 /** Collapsed sidebar footer: avatar only acting as the dropdown trigger. */
 export function WorkspaceFooterCollapsed({ onManage }: WorkspaceFooterProps) {
-  const { active, accentColor } = useActiveWorkspaceContext();
-  const name = active?.name ?? getMessage('workspaceDefaultName');
+  const { name, accentColor } = useWorkspaceName();
 
   const trigger = (
     <Flex

@@ -17,11 +17,12 @@ import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/Accessi
 import { chromeGroupColors } from '@/utils/tabTreeUtils';
 import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
 import { getDragHandleStyle } from '@/utils/dragHandleStyle';
+import { getStatusStyle } from '@/utils/statusStyle';
 import { SessionPreviewTree } from './SessionPreviewTree';
 import { SessionRestoreButton } from './SessionRestoreButton/SessionRestoreButton';
 import type { Session } from '@/types/session';
 
-interface SessionCardProps {
+interface SessionCardProps extends SessionRestoreCallbacks {
   session: Session;
   /**
    * 'full' (default): full card with drag, pin, restore, menu.
@@ -39,10 +40,6 @@ interface SessionCardProps {
   /** Trailing slot in summary mode (e.g. status Badge, DiffPopover). */
   trailing?: React.ReactNode;
   existingSessions?: Session[];
-  onRestore?: (session: Session) => void;
-  onRestoreCurrentWindow?: (session: Session) => void;
-  onRestoreNewWindow?: (session: Session) => void;
-  onReplaceCurrentWindow?: (session: Session) => void;
   onRename?: (id: string, newName: string) => Promise<void>;
   onEdit?: (session: Session) => void;
   onDelete?: (session: Session) => void;
@@ -75,12 +72,11 @@ interface SessionCardProps {
 /** Visual state of a SessionCard in summary mode. */
 export type SessionCardStatus = 'default' | 'conflict' | 'identical';
 
-/* Helpers */
-
-function getStatusStyle(status: SessionCardStatus): React.CSSProperties {
-  if (status === 'conflict') return { background: 'var(--orange-a2)' };
-  if (status === 'identical') return { opacity: 0.6 };
-  return {};
+interface SessionRestoreCallbacks {
+  onRestore?: (session: Session) => void;
+  onRestoreCurrentWindow?: (session: Session) => void;
+  onRestoreNewWindow?: (session: Session) => void;
+  onReplaceCurrentWindow?: (session: Session) => void;
 }
 
 /* SessionMoreMenu */
@@ -285,7 +281,7 @@ function SessionCardSummaryHeader({
 
 /* SessionCardFullHeader */
 
-interface SessionCardFullHeaderProps {
+interface SessionCardFullHeaderProps extends SessionRestoreCallbacks {
   session: Session;
   handleRef: (element: HTMLElement | null) => void;
   isDragDisabled: boolean;
@@ -304,10 +300,6 @@ interface SessionCardFullHeaderProps {
   hoverCardContent: React.ReactNode;
   onPin?: (session: Session) => void;
   onUnpin?: (session: Session) => void;
-  onRestore?: (session: Session) => void;
-  onRestoreCurrentWindow?: (session: Session) => void;
-  onRestoreNewWindow?: (session: Session) => void;
-  onReplaceCurrentWindow?: (session: Session) => void;
   onEdit?: (session: Session) => void;
   onDelete?: (session: Session) => void;
   onMoveToFirst?: () => void;

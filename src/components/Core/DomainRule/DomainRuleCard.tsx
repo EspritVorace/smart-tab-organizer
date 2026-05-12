@@ -2,13 +2,7 @@ import React from 'react';
 import { Switch, Text, HoverCard, Flex, Badge, Card, Checkbox, IconButton, DropdownMenu } from '@radix-ui/themes';
 import { Pencil, Trash2, MoreHorizontal, GripVertical, AlertTriangle } from 'lucide-react';
 import { useSortable } from '@dnd-kit/react/sortable';
-
-function getStatusStyle(status: 'default' | 'conflict' | 'identical'): React.CSSProperties {
-  if (status === 'conflict') return { background: 'var(--orange-a2)' };
-  if (status === 'identical') return { opacity: 0.6 };
-  return {};
-}
-
+import { getStatusStyle, type CardStatus } from '@/utils/statusStyle';
 import { RuleDetailPopover } from './RuleDetailPopover';
 import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 import { getMessage } from '@/utils/i18n';
@@ -29,7 +23,7 @@ export interface DomainRuleCardProps {
    * 'conflict': orange background plus AlertTriangle icon.
    * 'identical': reduced opacity.
    */
-  status?: 'default' | 'conflict' | 'identical';
+  status?: CardStatus;
   /** Leading slot in summary mode (e.g. selection Checkbox for import/export). */
   leading?: React.ReactNode;
   /** Trailing slot in summary mode (e.g. status Badge, DiffPopover). */
