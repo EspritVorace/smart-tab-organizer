@@ -12,6 +12,7 @@ import type { PackCategory, PackFile } from '@/schemas/pack';
 import { PackCard } from './PackCard/PackCard';
 import { PackCategoryHeader } from './PackCategoryHeader/PackCategoryHeader';
 import type { PackSelectionState } from './usePackSelections';
+import styles from './PackGallery.module.css';
 
 interface PackGalleryProps {
   packs: PackFile[];
@@ -96,17 +97,19 @@ export function PackGallery({
 
   return (
     <Flex direction="column" gap="3" data-testid="pack-gallery">
-      <TextField.Root
-        size="2"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder={getMessage('packGallerySearchPlaceholder')}
-        aria-label={getMessage('packGallerySearchPlaceholder')}
-      >
-        <TextField.Slot>
-          <Search size={14} />
-        </TextField.Slot>
-      </TextField.Root>
+      <Box className={styles.searchSticky}>
+        <TextField.Root
+          size="2"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={getMessage('packGallerySearchPlaceholder')}
+          aria-label={getMessage('packGallerySearchPlaceholder')}
+        >
+          <TextField.Slot>
+            <Search size={14} />
+          </TextField.Slot>
+        </TextField.Root>
+      </Box>
 
       {filteredPacks.length === 0 && (
         <Flex
