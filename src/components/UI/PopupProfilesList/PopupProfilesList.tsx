@@ -6,6 +6,7 @@ import { ChevronDown, ExternalLink, Pin } from 'lucide-react';
 import { SessionRestoreButton } from '@/components/Core/Session/SessionRestoreButton/SessionRestoreButton';
 import { getMessage } from '@/utils/i18n';
 import { loadSessions } from '@/utils/sessionStorage';
+import { getFocusedSessionFromDOM } from '@/utils/sessionUtils';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { showSuccessNotification } from '@/utils/notifications';
 import { getRuleCategory } from '@/utils/categoriesStore';
@@ -119,14 +120,10 @@ export function PopupProfilesList() {
     handleNavigationKey(e, index);
   }, [handleNavigationKey]);
 
-  const getFocusedSession = useCallback((): Session | null => {
-    const active = document.activeElement;
-    if (!(active instanceof HTMLElement)) return null;
-    if (!active.matches('[data-shortcut-scope="widget:session-card"]')) return null;
-    const id = active.getAttribute('data-session-id');
-    if (!id) return null;
-    return pinnedSessions.find((s) => s.id === id) ?? null;
-  }, [pinnedSessions]);
+  const getFocusedSession = useCallback(
+    () => getFocusedSessionFromDOM(pinnedSessions),
+    [pinnedSessions],
+  );
 
   useShortcuts(
     {

@@ -5,6 +5,20 @@ import { foldAccents } from './stringUtils';
 import { getMessage } from './i18n';
 
 /**
+ * Returns the session whose card currently has DOM focus, looked up from the
+ * provided session list. Returns null when the focused element is not a session
+ * card (so callers can no-op silently).
+ */
+export function getFocusedSessionFromDOM(sessions: readonly Session[]): Session | null {
+  const active = document.activeElement;
+  if (!(active instanceof HTMLElement)) return null;
+  if (!active.matches('[data-shortcut-scope="widget:session-card"]')) return null;
+  const id = active.getAttribute('data-session-id');
+  if (!id) return null;
+  return sessions.find((s) => s.id === id) ?? null;
+}
+
+/**
  * Result of matching a session against a search term.
  * Used to determine which sessions to show and how to render them.
  */

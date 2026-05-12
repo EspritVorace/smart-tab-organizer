@@ -14,7 +14,7 @@ import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
 import { ListToolbar } from '@/components/UI/ListToolbar';
 import { getMessage } from '@/utils/i18n';
 import { foldAccents } from '@/utils/stringUtils';
-import { matchSessionSearch, splitByPinned } from '@/utils/sessionUtils';
+import { matchSessionSearch, splitByPinned, getFocusedSessionFromDOM } from '@/utils/sessionUtils';
 import { moveSessionToFirstInGroup, moveSessionToLastInGroup } from '@/utils/sessionOrderUtils';
 import { useSessions } from '@/hooks/useSessions';
 import { useShortcuts } from '@/hooks/useShortcuts';
@@ -288,16 +288,10 @@ export function SessionsPage({
     await reload();
   }, [reload]);
 
-  // Resolves the session whose card currently has focus. Returns null when
-  // focus is on a non-card element so widget shortcuts no-op silently.
-  const getFocusedSession = useCallback((): Session | null => {
-    const active = document.activeElement;
-    if (!(active instanceof HTMLElement)) return null;
-    if (!active.matches('[data-shortcut-scope="widget:session-card"]')) return null;
-    const id = active.getAttribute('data-session-id');
-    if (!id) return null;
-    return sessions.find((s) => s.id === id) ?? null;
-  }, [sessions]);
+  const getFocusedSession = useCallback(
+    () => getFocusedSessionFromDOM(sessions),
+    [sessions],
+  );
 
   useShortcuts({ 'list.sessions.new': handleOpenSnapshotWizard }, { scope: 'page:sessions' });
 
