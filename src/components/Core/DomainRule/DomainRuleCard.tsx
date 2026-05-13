@@ -83,6 +83,8 @@ export function DomainRuleCard({
     zIndex: isDragging ? 10 : undefined,
     position: isDragging ? 'relative' : undefined,
     ...getStatusStyle(status),
+    paddingTop: 'var(--space-2)',
+    paddingBottom: 'var(--space-2)',
   };
 
   const category = getRuleCategory(rule.categoryId);
