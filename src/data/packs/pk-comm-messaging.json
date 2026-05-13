@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-comm-messaging",
+    "name": {
+      "en": "Messaging clients",
+      "fr": "Clients de messagerie",
+      "es": "Clientes de mensajería"
+    },
+    "description": {
+      "en": "Group Messenger, Mattermost and Google Chat tabs by conversation, team or room.",
+      "fr": "Regroupe les onglets Messenger, Mattermost et Google Chat par conversation, équipe ou salon.",
+      "es": "Agrupa las pestañas de Messenger, Mattermost y Google Chat por conversación, equipo o sala."
+    },
+    "categoryId": "communication"
+  },
+  "domainRules": [
+    {
+      "id": "pk-comm-messenger-thread",
+      "enabled": true,
+      "domainFilter": "*.messenger.com",
+      "label": "Messenger: Thread",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "messenger\\.com/t/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "communication",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-comm-mattermost-team",
+      "enabled": true,
+      "domainFilter": "*.mattermost.com",
+      "label": "Mattermost: Team",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "mattermost\\.com/([^/?#]+)/channels",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "cyan",
+      "categoryId": "communication",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-comm-google-chat-room",
+      "enabled": true,
+      "domainFilter": "chat.google.com",
+      "label": "Google Chat: Room",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "chat\\.google\\.com/room/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "green",
+      "categoryId": "communication",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-comm-google-chat-dm",
+      "enabled": true,
+      "domainFilter": "chat.google.com",
+      "label": "Google Chat: Direct message",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "chat\\.google\\.com/dm/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "yellow",
+      "categoryId": "communication",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

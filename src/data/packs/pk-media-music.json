@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-media-music",
+    "name": {
+      "en": "Music streaming",
+      "fr": "Streaming musical",
+      "es": "Streaming musical"
+    },
+    "description": {
+      "en": "Group Apple Music, Deezer and SoundCloud tabs by artist, album or user.",
+      "fr": "Regroupe les onglets Apple Music, Deezer et SoundCloud par artiste, album ou utilisateur.",
+      "es": "Agrupa las pestañas de Apple Music, Deezer y SoundCloud por artista, álbum o usuario."
+    },
+    "categoryId": "media"
+  },
+  "domainRules": [
+    {
+      "id": "pk-media-applemusic-artist",
+      "enabled": true,
+      "domainFilter": "music.apple.com",
+      "label": "Apple Music: Artist",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "music\\.apple\\.com/[a-z]{2}/artist/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "pink",
+      "categoryId": "media",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-media-applemusic-album",
+      "enabled": true,
+      "domainFilter": "music.apple.com",
+      "label": "Apple Music: Album",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "music\\.apple\\.com/[a-z]{2}/album/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "media",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-media-deezer-artist",
+      "enabled": true,
+      "domainFilter": "*.deezer.com",
+      "label": "Deezer: Artist",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "deezer\\.com/(?:[a-z]{2}/)?artist/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "purple",
+      "categoryId": "media",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-media-deezer-album",
+      "enabled": true,
+      "domainFilter": "*.deezer.com",
+      "label": "Deezer: Album",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "deezer\\.com/(?:[a-z]{2}/)?album/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "purple",
+      "categoryId": "media",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-media-soundcloud-user",
+      "enabled": true,
+      "domainFilter": "*.soundcloud.com",
+      "label": "SoundCloud: User",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "soundcloud\\.com/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "media",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}
