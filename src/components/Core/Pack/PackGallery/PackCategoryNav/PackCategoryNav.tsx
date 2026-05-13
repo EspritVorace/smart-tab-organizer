@@ -1,8 +1,8 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { getMessage } from '@/utils/i18n';
 import { resolvePackCategoryLabel } from '@/utils/packLabel';
 import type { PackCategory } from '@/schemas/pack';
-import styles from '../PackGallery.module.css';
+import styles from '@/components/Core/Pack/PackGallery/PackGallery.module.css';
 
 export const ALL_CATEGORIES = '__all__';
 
@@ -30,21 +30,24 @@ export function PackCategoryNav({
 }: PackCategoryNavProps) {
   const navRef = useRef<HTMLDivElement>(null);
 
-  const items: PackCategoryNavItem[] = [
-    {
-      id: ALL_CATEGORIES,
-      label: getMessage('packGalleryCategoryNavAll'),
-      count: totalCount,
-    },
-    ...categories
-      .filter((cat) => (countsByCategory.get(cat.id) ?? 0) > 0)
-      .map((cat) => ({
-        id: cat.id,
-        label: resolvePackCategoryLabel(cat),
-        icon: cat.icon,
-        count: countsByCategory.get(cat.id) ?? 0,
-      })),
-  ];
+  const items = useMemo<PackCategoryNavItem[]>(
+    () => [
+      {
+        id: ALL_CATEGORIES,
+        label: getMessage('packGalleryCategoryNavAll'),
+        count: totalCount,
+      },
+      ...categories
+        .filter((cat) => (countsByCategory.get(cat.id) ?? 0) > 0)
+        .map((cat) => ({
+          id: cat.id,
+          label: resolvePackCategoryLabel(cat),
+          icon: cat.icon,
+          count: countsByCategory.get(cat.id) ?? 0,
+        })),
+    ],
+    [categories, countsByCategory, totalCount],
+  );
 
   const focusChip = useCallback((id: string) => {
     const root = navRef.current;
@@ -87,6 +90,7 @@ export function PackCategoryNav({
     <div
       ref={navRef}
       role="tablist"
+      tabIndex={-1}
       aria-label={getMessage('packGalleryCategoryNavLabel')}
       className={styles.categoryNav}
       onKeyDown={handleKeyDown}

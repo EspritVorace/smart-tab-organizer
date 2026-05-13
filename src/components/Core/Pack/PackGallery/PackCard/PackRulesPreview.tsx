@@ -6,7 +6,7 @@ import { getMessage } from '@/utils/i18n';
 import { DomainRuleCard } from '@/components/Core/DomainRule/DomainRuleCard';
 import type { ImportDomainRule } from '@/schemas/importExport';
 import type { DomainRuleSetting } from '@/types/syncSettings';
-import styles from '../PackGallery.module.css';
+import styles from '@/components/Core/Pack/PackGallery/PackGallery.module.css';
 
 interface PackRulesPreviewProps {
   rules: ImportDomainRule[];

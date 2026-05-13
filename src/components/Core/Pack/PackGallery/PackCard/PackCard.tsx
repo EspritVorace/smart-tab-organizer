@@ -12,7 +12,7 @@ import { resolvePackRules, type PackParamSelection } from '@/utils/packResolutio
 import type { PackFile } from '@/schemas/pack';
 import type { ImportDomainRule } from '@/schemas/importExport';
 import { PackRulesPreview } from './PackRulesPreview';
-import styles from '../PackGallery.module.css';
+import styles from '@/components/Core/Pack/PackGallery/PackGallery.module.css';
 
 interface PackCardProps {
   pack: PackFile;
