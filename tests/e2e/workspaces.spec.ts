@@ -19,6 +19,33 @@ async function goToWorkspaces(page: import('@playwright/test').Page, extensionId
   await page.getByTestId('workspace-create-button').waitFor({ state: 'visible', timeout: 10_000 });
 }
 
+// Other spec files in the same worker (notably workspaces-search.spec.ts) call
+// the create-workspace UI, which adds workspaces to storage and auto-switches
+// `activeWorkspaceId` to the new one. Storage is shared by extensionContext
+// across spec files, so leftover state leaks here and breaks both the
+// "default is active" assertion and the "create Personal" flow (the form
+// rejects names that already exist). Reset to a post-migration baseline
+// before each test: only the default workspace, and it is active.
+test.beforeEach(async ({ extensionContext }) => {
+  const sw = extensionContext.serviceWorkers()[0];
+  if (!sw) return;
+  await sw
+    .evaluate(async () => {
+      const { workspaces } = await chrome.storage.local.get('workspaces');
+      const defaultOnly = Array.isArray(workspaces)
+        ? workspaces.filter((w) => (w as { id: string }).id === 'default')
+        : null;
+      const update: Record<string, unknown> = { activeWorkspaceId: 'default' };
+      if (defaultOnly && defaultOnly.length > 0) {
+        update.workspaces = defaultOnly;
+      }
+      await chrome.storage.local.set(update);
+    })
+    .catch(() => {
+      // SW may be evicted; the test will surface the real failure if any.
+    });
+});
+
 test.describe('Workspaces — baseline', () => {
   test('default workspace is migrated and active', async ({ optionsPage, extensionId }) => {
     await goToWorkspaces(optionsPage, extensionId);

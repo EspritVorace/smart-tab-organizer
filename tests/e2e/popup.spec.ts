@@ -106,7 +106,12 @@ test.describe('[US-PO01] Toolbar', () => {
     // Must NOT have native disabled so it stays in the tab order
     await expect(saveBtn).not.toHaveAttribute('disabled');
 
-    await page.close();
+    // Intentionally do NOT close `page` here. This test already closes every
+    // stale page so hasCapturableTabs() returns false; closing the popup too
+    // would leave the persistent Chromium context with zero pages, which
+    // terminates the browser process. The next test's `clearSessions`
+    // beforeEach then can't reach the service worker and the suite goes
+    // flaky. The worker-scoped extensionContext closes everything at teardown.
   });
 
   test('Restore button has aria-disabled when no sessions exist [US-A11Y001]', async ({

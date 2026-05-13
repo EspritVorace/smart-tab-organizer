@@ -33,9 +33,20 @@ You specialize in Playwright tests for browser extensions built with WXT (Web Ex
 ### 5. Cross-test state dependencies (MEDIUM)
 - Tests assuming an initial state without explicitly forcing it
 - Confirm each test initializes its own state via the `seed.ts` helpers
+- **Cross-spec leakage**: the `extensionContext` fixture is worker-scoped, so `chrome.storage.local` persists across spec files within a worker. Spec files that mutate global state (workspaces, `activeWorkspaceId`, sessions, domain rules) via the UI and never reset it leak that state into the next spec. Suspect any UI flow with side effects: creating a workspace, for example, silently auto-switches `activeWorkspaceId` to the new id.
 
 ### 6. Storage quota (LOW)
 - Looped writes to `chrome.storage.sync` without a retry: the project has a retry mechanism, verify it is used
+
+### 7. Last-page browser exit (LOW)
+- Chromium persistent contexts launched with `--user-data-dir` and `--load-extension` terminate the browser process when their last page closes. A test that aggressively closes every stale page AND its own page at the end leaves zero pages. The next test's `extensionContext.newPage()` then fails with "Target page, context or browser has been closed", which can masquerade as a service-worker eviction.
+- Fix: keep at least one page alive (do not close the last one).
+
+## When local repro passes but CI still flakes
+
+The MCP GitHub tools surface check-run metadata (id, name, conclusion, html_url) but **not** the raw workflow log content. There is no `get_workflow_logs` endpoint exposed, and the local environment has no `gh` CLI access. The CTRF sticky comment on the PR only tells you "test X retried once" without the failing assertion.
+
+If local repro is clean across 10+ runs and you only have CTRF retry counts, the actual failure mode is unknowable from code alone, and speculation routinely costs 4-5 blind fixes per session. In that case, ask the user for the signed job-logs URL from the failed CI run. It appears under the failed job in the GitHub Actions UI as a `productionresultssa*.blob.core.windows.net/.../job-logs.txt?...&sig=...` link. Fetch it with WebFetch and look for the Playwright "Error: ... failed", "Locator:", and "Call log:" block. That pinpoints which assertion is timing out, which is often the only fact that separates a real fix from another speculative one.
 
 ## Expected output
 For each issue detected:
