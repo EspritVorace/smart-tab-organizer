@@ -276,6 +276,8 @@
   "packGalleryViewRules": { "message": "Ver las reglas" },
   "packGalleryConfigurableBadge": { "message": "CONFIG" },
   "packGalleryConfigurableBadgeTooltip": { "message": "Pack configurable" },
+  "packGallerySelectionSummaryPacksOne": { "message": "1 pack seleccionado" },
+  "packGallerySelectionSummaryPacks": { "message": "$count$ packs seleccionados", "placeholders": { "count": { "content": "$1" } } },
   "dragDropZone": { "message": "Arrastre un archivo JSON aquí" },
   "dragHandle": { "message": "Arrastrar para reordenar" },
   "browse": { "message": "Examinar..." },

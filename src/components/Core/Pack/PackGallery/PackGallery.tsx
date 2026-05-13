@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import { Box, Flex, Text, TextField } from '@radix-ui/themes';
-import { Search } from 'lucide-react';
-import { getMessage } from '@/utils/i18n';
+import { Box, Callout, Flex, Text, TextField } from '@radix-ui/themes';
+import { PackageCheck, PackageOpen, Search, SearchX } from 'lucide-react';
+import { getMessage, getPluralMessage } from '@/utils/i18n';
 import { foldAccents } from '@/utils/stringUtils';
 import {
   resolvePackCategoryLabel,
@@ -34,6 +34,20 @@ function matchesSearch(pack: PackFile, normalized: string): boolean {
   return haystack.includes(normalized);
 }
 
+function computeTotals(selections: Record<string, PackSelectionState>): {
+  packCount: number;
+  ruleCount: number;
+} {
+  let packCount = 0;
+  let ruleCount = 0;
+  for (const s of Object.values(selections)) {
+    if (!s.selected) continue;
+    packCount += 1;
+    ruleCount += s.rules.length;
+  }
+  return { packCount, ruleCount };
+}
+
 export function PackGallery({
   packs,
   categories,
@@ -53,6 +67,7 @@ export function PackGallery({
   );
 
   const isSearching = normalizedSearch.length > 0;
+  const totals = useMemo(() => computeTotals(selections), [selections]);
 
   const grouped = useMemo(() => {
     if (isSearching) return null;
@@ -73,9 +88,14 @@ export function PackGallery({
         align="center"
         justify="center"
         gap="2"
-        py="6"
+        py="7"
         data-testid="pack-gallery-empty"
       >
+        <PackageOpen
+          size={32}
+          aria-hidden="true"
+          style={{ color: 'var(--gray-9)' }}
+        />
         <Text size="2" color="gray">
           {getMessage('packGalleryEmptyState')}
         </Text>
@@ -95,8 +115,44 @@ export function PackGallery({
     );
   };
 
+  const summaryLine =
+    totals.packCount > 0 ? (
+      <Callout.Root
+        color="indigo"
+        size="1"
+        variant="soft"
+        data-testid="pack-gallery-selection-summary"
+        role="status"
+        aria-live="polite"
+      >
+        <Callout.Icon>
+          <PackageCheck size={14} aria-hidden="true" />
+        </Callout.Icon>
+        <Callout.Text>
+          <Text weight="medium">
+            {getPluralMessage(
+              totals.packCount,
+              'packGallerySelectionSummaryPacksOne',
+              'packGallerySelectionSummaryPacks',
+            )}
+          </Text>
+          {' · '}
+          {getPluralMessage(
+            totals.ruleCount,
+            'packGalleryRuleCountOne',
+            'packGalleryRuleCount',
+          )}
+        </Callout.Text>
+      </Callout.Root>
+    ) : null;
+
   return (
-    <Flex direction="column" gap="3" data-testid="pack-gallery">
+    <Flex
+      direction="column"
+      gap="3"
+      data-testid="pack-gallery"
+      className={styles.gallery}
+    >
       <Box className={styles.searchSticky}>
         <TextField.Root
           size="2"
@@ -106,67 +162,71 @@ export function PackGallery({
           aria-label={getMessage('packGallerySearchPlaceholder')}
         >
           <TextField.Slot>
-            <Search size={14} />
+            <Search size={14} aria-hidden="true" />
           </TextField.Slot>
         </TextField.Root>
       </Box>
+
+      {summaryLine}
 
       {filteredPacks.length === 0 && (
         <Flex
           direction="column"
           align="center"
           justify="center"
-          py="4"
+          gap="2"
+          py="6"
           data-testid="pack-gallery-search-empty"
         >
+          <SearchX
+            size={32}
+            aria-hidden="true"
+            style={{ color: 'var(--gray-9)' }}
+          />
           <Text size="2" color="gray">
             {getMessage('packGallerySearchNoResult')}
           </Text>
         </Flex>
       )}
+
       {filteredPacks.length > 0 && isSearching && (
-        <Flex direction="column" gap="2">
-          {filteredPacks.map(renderPack)}
-        </Flex>
+        <Box className={styles.packList}>{filteredPacks.map(renderPack)}</Box>
       )}
-      {filteredPacks.length > 0 && !isSearching && (
-        grouped && (
-          <Flex direction="column" gap="1">
-            {[
-              ...categories
-                .filter((cat) => grouped.has(cat.id))
-                .map((cat) => ({
-                  key: cat.id,
-                  label: resolvePackCategoryLabel(cat),
-                  icon: cat.icon,
-                  packs: grouped.get(cat.id) ?? [],
-                })),
-              ...(grouped.has(null)
-                ? [
-                    {
-                      key: '__inline__',
-                      label: '',
-                      icon: undefined,
-                      packs: grouped.get(null) ?? [],
-                    },
-                  ]
-                : []),
-            ].map((bucket) => (
-              <Box key={bucket.key}>
-                {bucket.label && (
-                  <PackCategoryHeader
-                    label={bucket.label}
-                    icon={bucket.icon}
-                    count={bucket.packs.length}
-                  />
-                )}
-                <Flex direction="column" gap="2">
-                  {bucket.packs.map(renderPack)}
-                </Flex>
-              </Box>
-            ))}
-          </Flex>
-        )
+
+      {filteredPacks.length > 0 && !isSearching && grouped && (
+        <Flex direction="column" gap="1">
+          {[
+            ...categories
+              .filter((cat) => grouped.has(cat.id))
+              .map((cat) => ({
+                key: cat.id,
+                label: resolvePackCategoryLabel(cat),
+                icon: cat.icon,
+                packs: grouped.get(cat.id) ?? [],
+              })),
+            ...(grouped.has(null)
+              ? [
+                  {
+                    key: '__inline__',
+                    label: '',
+                    icon: undefined,
+                    packs: grouped.get(null) ?? [],
+                  },
+                ]
+              : []),
+          ].map((bucket) => (
+            <Box key={bucket.key}>
+              {bucket.label && (
+                <PackCategoryHeader
+                  label={bucket.label}
+                  icon={bucket.icon}
+                  count={bucket.packs.length}
+                />
+              )}
+              <Box className={styles.packList}>{bucket.packs.map(renderPack)}</Box>
+            </Box>
+          ))}
+        </Flex>
       )}
     </Flex>
   );

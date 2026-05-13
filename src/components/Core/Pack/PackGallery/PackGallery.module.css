@@ -4,6 +4,125 @@
      sans cela, la zone du padding reste défilante et laisse voir le
      contenu qui passe avant d'être clipé par overflow-y: auto. */
   top: calc(-1 * var(--space-4));
-  z-index: 1;
+  z-index: 2;
   background: var(--color-panel-solid);
+  padding-block: var(--space-1);
+}
+
+/* Grille de packs : 1 colonne par défaut (popup 420 px), 2 colonnes
+   quand le conteneur dépasse 640 px (WizardModal 960 px). */
+.gallery {
+  container-type: inline-size;
+  container-name: pack-gallery;
+}
+
+.packList {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+@container pack-gallery (min-width: 640px) {
+  .packList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Carte cliquable (toggle plein cadre). Wrapper <label> qui pilote
+   visuellement la Checkbox interne. */
+.packCard {
+  --pc-border: var(--gray-a5);
+  --pc-bg: var(--color-panel-solid);
+  position: relative;
+  display: block;
+  cursor: pointer;
+  background: var(--pc-bg);
+  border: 1px solid var(--pc-border);
+  border-radius: var(--radius-3);
+  padding: var(--space-3) var(--space-4);
+  transition:
+    background 120ms ease,
+    border-color 120ms ease;
+}
+
+.packCard:hover {
+  background: var(--gray-a2);
+  border-color: var(--gray-a7);
+}
+
+.packCard:focus-within {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+.packCardSelected {
+  --pc-border: var(--accent-9);
+  --pc-bg: var(--accent-a3);
+  border-width: 2px;
+  /* Compense l'épaisseur 2px de la bordure pour que la taille
+     extérieure reste constante entre les états (évite le saut). */
+  padding: calc(var(--space-3) - 1px) calc(var(--space-4) - 1px);
+}
+
+.packCardSelected:hover {
+  background: var(--accent-a4);
+}
+
+/* Bloc des params configurables : fond contrastant pour le séparer
+   du reste de la carte sans recourir à une indentation arbitraire. */
+.configurableBlock {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  background: var(--accent-a2);
+  border: 1px solid var(--accent-a4);
+  border-radius: var(--radius-3);
+}
+
+.packCardSelected .configurableBlock {
+  background: var(--color-panel-solid);
+  border-color: var(--accent-a5);
+}
+
+/* Bouton "Voir les règles" : vraie affordance bouton (ghost). */
+.previewToggle {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-2);
+  background: var(--gray-a3);
+  color: var(--gray-11);
+  font-size: var(--font-size-1);
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 100ms ease,
+    color 100ms ease;
+}
+
+.previewToggle:hover {
+  background: var(--gray-a4);
+  color: var(--gray-12);
+}
+
+.previewToggle:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+.previewChevron {
+  transition: transform 120ms ease;
+}
+
+.previewToggle[aria-expanded='true'] .previewChevron {
+  transform: rotate(90deg);
+}
+
+/* Stop la propagation du clic sur les sous-zones interactives
+   (Select, PackRulesPreview) pour ne pas toggler la carte. */
+.stopClick {
+  /* Pas de style : c'est le onClick handler dans le TSX qui agit.
+     La classe sert de marqueur explicite à la lecture. */
 }

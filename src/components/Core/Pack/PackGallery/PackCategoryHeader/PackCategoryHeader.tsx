@@ -1,4 +1,4 @@
-import { Flex, Text } from '@radix-ui/themes';
+import { Badge, Box, Flex, Separator, Text } from '@radix-ui/themes';
 
 interface PackCategoryHeaderProps {
   label: string;
@@ -10,22 +10,25 @@ export function PackCategoryHeader({ label, icon, count }: PackCategoryHeaderPro
   return (
     <Flex
       align="center"
-      gap="2"
-      mt="4"
-      mb="2"
+      gap="3"
+      mt="5"
+      mb="3"
       style={{ paddingInlineStart: 'var(--space-1)' }}
     >
       {icon && (
-        <Text size="3" aria-hidden="true">
+        <Text size="4" aria-hidden="true" style={{ lineHeight: 1 }}>
           {icon}
         </Text>
       )}
-      <Text size="2" weight="medium" color="gray">
+      <Text size="3" weight="medium" style={{ color: 'var(--gray-12)' }}>
         {label}
       </Text>
-      <Text size="1" color="gray">
-        ({count})
-      </Text>
+      <Badge color="gray" variant="soft" size="1" radius="full">
+        {count}
+      </Badge>
+      <Box flexGrow="1">
+        <Separator size="4" />
+      </Box>
     </Flex>
   );
 }
