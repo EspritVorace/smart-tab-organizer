@@ -4,9 +4,92 @@
      sans cela, la zone du padding reste défilante et laisse voir le
      contenu qui passe avant d'être clipé par overflow-y: auto. */
   top: calc(-1 * var(--space-4));
-  z-index: 2;
+  z-index: 3;
   background: var(--color-panel-solid);
   padding-block: var(--space-1);
+}
+
+/* Barre de chips catégories : tablist en wrap multi-ligne, sticky
+   sous la barre de recherche. Les chips passent à la ligne quand
+   elles dépassent la largeur du conteneur (popup 420 px), au lieu
+   d'un scroll horizontal qui masque les catégories hors écran. */
+.categoryNav {
+  position: sticky;
+  top: calc(40px - var(--space-4));
+  z-index: 2;
+  margin-inline: calc(-1 * var(--space-1));
+  padding-block: var(--space-1);
+  background: var(--color-panel-solid);
+}
+
+.categoryNavTrack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-1);
+}
+
+.categoryChip {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  font-size: var(--font-size-2);
+  font-weight: 500;
+  color: var(--gray-11);
+  background: var(--gray-a2);
+  border: 1px solid var(--gray-a4);
+  border-radius: 999px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 100ms ease,
+    border-color 100ms ease,
+    color 100ms ease;
+}
+
+.categoryChip:hover {
+  background: var(--gray-a3);
+  border-color: var(--gray-a6);
+  color: var(--gray-12);
+}
+
+.categoryChip:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+.categoryChip[aria-selected='true'] {
+  background: var(--accent-a3);
+  border-color: var(--accent-9);
+  color: var(--accent-11);
+}
+
+.categoryChipEmoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.categoryChipCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--gray-12);
+  background: var(--gray-a4);
+  border-radius: 999px;
+}
+
+.categoryChip[aria-selected='true'] .categoryChipCount {
+  color: var(--accent-11);
+  background: var(--accent-a5);
 }
 
 /* Grille de packs : 1 colonne par défaut (popup 420 px), 2 colonnes

@@ -11,6 +11,10 @@ import {
 import type { PackCategory, PackFile } from '@/schemas/pack';
 import { PackCard } from './PackCard/PackCard';
 import { PackCategoryHeader } from './PackCategoryHeader/PackCategoryHeader';
+import {
+  ALL_CATEGORIES,
+  PackCategoryNav,
+} from './PackCategoryNav/PackCategoryNav';
 import type { PackSelectionState } from './usePackSelections';
 import styles from './PackGallery.module.css';
 
@@ -55,13 +59,14 @@ export function PackGallery({
   onSelectionChange,
 }: PackGalleryProps) {
   const [search, setSearch] = useState('');
+  const [activeCategory, setActiveCategory] = useState<string>(ALL_CATEGORIES);
 
   const normalizedSearch = useMemo(
     () => foldAccents(search.trim().toLowerCase()),
     [search],
   );
 
-  const filteredPacks = useMemo(
+  const searchFilteredPacks = useMemo(
     () => packs.filter((pack) => matchesSearch(pack, normalizedSearch)),
     [packs, normalizedSearch],
   );
@@ -69,8 +74,26 @@ export function PackGallery({
   const isSearching = normalizedSearch.length > 0;
   const totals = useMemo(() => computeTotals(selections), [selections]);
 
+  const countsByCategory = useMemo(() => {
+    const map = new Map<string | null, number>();
+    for (const pack of packs) {
+      const key = pack.pack.categoryId ?? null;
+      map.set(key, (map.get(key) ?? 0) + 1);
+    }
+    return map;
+  }, [packs]);
+
+  const filteredPacks = useMemo(() => {
+    if (isSearching) return searchFilteredPacks;
+    if (activeCategory === ALL_CATEGORIES) return searchFilteredPacks;
+    return searchFilteredPacks.filter(
+      (pack) => pack.pack.categoryId === activeCategory,
+    );
+  }, [activeCategory, isSearching, searchFilteredPacks]);
+
   const grouped = useMemo(() => {
     if (isSearching) return null;
+    if (activeCategory !== ALL_CATEGORIES) return null;
     const map = new Map<string | null, PackFile[]>();
     for (const pack of filteredPacks) {
       const key = pack.pack.categoryId ?? null;
@@ -79,7 +102,7 @@ export function PackGallery({
       map.set(key, list);
     }
     return map;
-  }, [filteredPacks, isSearching]);
+  }, [activeCategory, filteredPacks, isSearching]);
 
   if (packs.length === 0) {
     return (
@@ -169,7 +192,17 @@ export function PackGallery({
 
       {summaryLine}
 
-      {filteredPacks.length === 0 && (
+      {!isSearching && (
+        <PackCategoryNav
+          categories={categories}
+          countsByCategory={countsByCategory}
+          totalCount={packs.length}
+          activeCategory={activeCategory}
+          onActiveCategoryChange={setActiveCategory}
+        />
+      )}
+
+      {filteredPacks.length === 0 && isSearching && (
         <Flex
           direction="column"
           align="center"
@@ -189,9 +222,37 @@ export function PackGallery({
         </Flex>
       )}
 
+      {filteredPacks.length === 0 &&
+        !isSearching &&
+        activeCategory !== ALL_CATEGORIES && (
+          <Flex
+            direction="column"
+            align="center"
+            justify="center"
+            gap="2"
+            py="6"
+            data-testid="pack-gallery-category-empty"
+          >
+            <PackageOpen
+              size={32}
+              aria-hidden="true"
+              style={{ color: 'var(--gray-9)' }}
+            />
+            <Text size="2" color="gray">
+              {getMessage('packGalleryCategoryEmpty')}
+            </Text>
+          </Flex>
+        )}
+
       {filteredPacks.length > 0 && isSearching && (
         <Box className={styles.packList}>{filteredPacks.map(renderPack)}</Box>
       )}
+
+      {filteredPacks.length > 0 &&
+        !isSearching &&
+        activeCategory !== ALL_CATEGORIES && (
+          <Box className={styles.packList}>{filteredPacks.map(renderPack)}</Box>
+        )}
 
       {filteredPacks.length > 0 && !isSearching && grouped && (
         <Flex direction="column" gap="1">
