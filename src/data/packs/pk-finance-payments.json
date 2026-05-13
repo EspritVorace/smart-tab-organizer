@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-finance-payments",
+    "name": {
+      "en": "Payments dashboards",
+      "fr": "Tableaux de bord paiements",
+      "es": "Paneles de pagos"
+    },
+    "description": {
+      "en": "Group Stripe Dashboard, PayPal and Wise tabs by section.",
+      "fr": "Regroupe les onglets Stripe Dashboard, PayPal et Wise par section.",
+      "es": "Agrupa las pestañas de Stripe Dashboard, PayPal y Wise por sección."
+    },
+    "categoryId": "finance"
+  },
+  "domainRules": [
+    {
+      "id": "pk-finance-stripe-dashboard",
+      "enabled": true,
+      "domainFilter": "dashboard.stripe.com",
+      "label": "Stripe Dashboard: Section",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "dashboard\\.stripe\\.com/(?:test/)?([a-z][a-z0-9_-]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "purple",
+      "categoryId": "finance",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-finance-paypal-section",
+      "enabled": true,
+      "domainFilter": "*.paypal.com",
+      "label": "PayPal: Section",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "paypal\\.com/myaccount/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "finance",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-finance-wise-section",
+      "enabled": true,
+      "domainFilter": "wise.com",
+      "label": "Wise: Section",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "wise\\.com/(?:[a-z]{2}/)?(?:user|account|business)/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "green",
+      "categoryId": "finance",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

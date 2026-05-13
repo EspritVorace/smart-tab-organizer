@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-edu-creative",
+    "name": {
+      "en": "Creative & open learning",
+      "fr": "Apprentissage créatif & libre",
+      "es": "Aprendizaje creativo y abierto"
+    },
+    "description": {
+      "en": "Group Skillshare, MasterClass, Khan Academy and OpenClassrooms tabs by class or topic.",
+      "fr": "Regroupe les onglets Skillshare, MasterClass, Khan Academy et OpenClassrooms par cours ou matière.",
+      "es": "Agrupa las pestañas de Skillshare, MasterClass, Khan Academy y OpenClassrooms por clase o materia."
+    },
+    "categoryId": "education"
+  },
+  "domainRules": [
+    {
+      "id": "pk-edu-skillshare-class",
+      "enabled": true,
+      "domainFilter": "*.skillshare.com",
+      "label": "Skillshare: Class",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "skillshare\\.com/(?:[a-z]{2}/)?classes/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "orange",
+      "categoryId": "education",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-edu-masterclass-class",
+      "enabled": true,
+      "domainFilter": "*.masterclass.com",
+      "label": "MasterClass: Class",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "masterclass\\.com/classes/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "education",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-edu-khanacademy-topic",
+      "enabled": true,
+      "domainFilter": "*.khanacademy.org",
+      "label": "Khan Academy: Topic",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "khanacademy\\.org/(?:math|science|computing|humanities|economics-finance-domain|test-prep|ela)/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "green",
+      "categoryId": "education",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-edu-openclassrooms-course",
+      "enabled": true,
+      "domainFilter": "*.openclassrooms.com",
+      "label": "OpenClassrooms: Course",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "openclassrooms\\.com/(?:[a-z]{2}/)?courses/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "cyan",
+      "categoryId": "education",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

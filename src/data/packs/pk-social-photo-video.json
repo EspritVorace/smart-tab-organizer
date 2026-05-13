@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-social-photo-video",
+    "name": {
+      "en": "Photo & video social",
+      "fr": "Réseaux photo & vidéo",
+      "es": "Redes de foto y vídeo"
+    },
+    "description": {
+      "en": "Group Instagram, TikTok and Pinterest tabs by profile or hashtag.",
+      "fr": "Regroupe les onglets Instagram, TikTok et Pinterest par profil ou hashtag.",
+      "es": "Agrupa las pestañas de Instagram, TikTok y Pinterest por perfil o hashtag."
+    },
+    "categoryId": "social"
+  },
+  "domainRules": [
+    {
+      "id": "pk-social-instagram-profile",
+      "enabled": true,
+      "domainFilter": "*.instagram.com",
+      "label": "Instagram: Profile",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "instagram\\.com/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "pink",
+      "categoryId": "social",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-social-tiktok-tag",
+      "enabled": true,
+      "domainFilter": "*.tiktok.com",
+      "label": "TikTok: Hashtag",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "tiktok\\.com/tag/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "cyan",
+      "categoryId": "social",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-social-tiktok-profile",
+      "enabled": true,
+      "domainFilter": "*.tiktok.com",
+      "label": "TikTok: Profile",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "tiktok\\.com/@([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "grey",
+      "categoryId": "social",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-social-pinterest-profile",
+      "enabled": true,
+      "domainFilter": "*.pinterest.com",
+      "label": "Pinterest: Profile or topic",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "pinterest\\.[a-z.]+/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "social",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}
