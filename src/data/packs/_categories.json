@@ -1,31 +1,13 @@
 {
   "categories": [
     {
-      "id": "development",
+      "id": "search",
       "label": {
-        "en": "Development",
-        "fr": "Développement",
-        "es": "Desarrollo"
+        "en": "Search",
+        "fr": "Recherche",
+        "es": "Búsqueda"
       },
-      "icon": "💻"
-    },
-    {
-      "id": "cloud",
-      "label": {
-        "en": "Cloud & DevOps",
-        "fr": "Cloud & DevOps",
-        "es": "Cloud y DevOps"
-      },
-      "icon": "☁️"
-    },
-    {
-      "id": "productivity",
-      "label": {
-        "en": "Productivity",
-        "fr": "Productivité",
-        "es": "Productividad"
-      },
-      "icon": "📋"
+      "icon": "🔍"
     },
     {
       "id": "communication",
@@ -35,24 +17,6 @@
         "es": "Comunicación"
       },
       "icon": "💬"
-    },
-    {
-      "id": "ai",
-      "label": {
-        "en": "AI assistants",
-        "fr": "Assistants IA",
-        "es": "Asistentes de IA"
-      },
-      "icon": "🤖"
-    },
-    {
-      "id": "search",
-      "label": {
-        "en": "Search",
-        "fr": "Recherche",
-        "es": "Búsqueda"
-      },
-      "icon": "🔍"
     },
     {
       "id": "media",
@@ -82,6 +46,33 @@
       "icon": "🛍️"
     },
     {
+      "id": "news",
+      "label": {
+        "en": "News",
+        "fr": "Actualités",
+        "es": "Actualidad"
+      },
+      "icon": "📰"
+    },
+    {
+      "id": "productivity",
+      "label": {
+        "en": "Productivity",
+        "fr": "Productivité",
+        "es": "Productividad"
+      },
+      "icon": "📋"
+    },
+    {
+      "id": "ai",
+      "label": {
+        "en": "AI assistants",
+        "fr": "Assistants IA",
+        "es": "Asistentes de IA"
+      },
+      "icon": "🤖"
+    },
+    {
       "id": "travel",
       "label": {
         "en": "Travel",
@@ -100,15 +91,6 @@
       "icon": "💰"
     },
     {
-      "id": "news",
-      "label": {
-        "en": "News",
-        "fr": "Actualités",
-        "es": "Actualidad"
-      },
-      "icon": "📰"
-    },
-    {
       "id": "education",
       "label": {
         "en": "Learning",
@@ -116,6 +98,24 @@
         "es": "Aprendizaje"
       },
       "icon": "🎓"
+    },
+    {
+      "id": "development",
+      "label": {
+        "en": "Development",
+        "fr": "Développement",
+        "es": "Desarrollo"
+      },
+      "icon": "💻"
+    },
+    {
+      "id": "cloud",
+      "label": {
+        "en": "Cloud & DevOps",
+        "fr": "Cloud & DevOps",
+        "es": "Cloud y DevOps"
+      },
+      "icon": "☁️"
     }
   ]
 }
