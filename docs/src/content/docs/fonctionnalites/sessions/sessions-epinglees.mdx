@@ -1,6 +1,45 @@
 ---
-title: Sessions épinglées
-description: Épingler une session pour la rendre permanente et l'associer à une fenêtre de navigateur dédiée.
+title: Épingler une session
+description: Marquer une session comme épinglée pour la promouvoir au rang de profil dans la popup et la page d'accueil du workspace actif.
 ---
 
-{/* TODO: contenu à rédiger */}
+import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="En bref">
+- L'épinglage promeut une session au rang de **profil** : elle s'affiche dans la popup et dans la page d'accueil du workspace actif.
+- L'action est réversible à tout moment depuis la carte de session.
+- Une **catégorie** optionnelle (couleur + emoji) permet de distinguer visuellement plusieurs profils.
+</Aside>
+
+## Épingler une session
+
+<Steps>
+1. Ouvrez la page Sessions et identifiez la session cible.
+2. Sur sa carte, cliquez sur l'icône **Épingler** (ou utilisez le menu contextuel).
+3. La session passe immédiatement dans la section **Sessions épinglées** en haut de la page, et apparait dans la popup et la page d'accueil.
+</Steps>
+
+L'épinglage ne modifie ni le nom de la session, ni les onglets sauvegardés. Seul son statut change.
+
+## Désépingler une session
+
+Cliquez sur la même icône (qui change de tooltip pour indiquer **Désépingler**). La session retourne dans la section des sessions ordinaires et disparait de la popup et de la page d'accueil.
+
+## Associer une catégorie
+
+Chaque session, épinglée ou non, peut être associée à une catégorie. Pour les sessions épinglées, la catégorie apporte un emoji et une couleur d'accent qui aident à les distinguer visuellement dans la popup quand vous en avez plusieurs.
+
+La catégorie se choisit depuis le dialog d'édition de session, dans le champ **Catégorie**.
+
+## Différence avec les "profils" de la popup
+
+L'épinglage est l'action côté **page Sessions**. La **projection** dans la popup et la page d'accueil sous forme de profils est automatique, et reste cloisonnée au workspace actif. Pour le détail de cette projection (raccourcis, restauration), voir [Profils dans la popup](/fonctionnalites/workspaces/profils-popup).
+
+## Voir aussi
+
+<CardGrid>
+  <LinkCard title="Sessions épinglées (concept)" href="/concepts/sessions-epinglees" description="Pourquoi épingler, cas d'usage et distinction avec les sessions ordinaires." />
+  <LinkCard title="Profils dans la popup" href="/fonctionnalites/workspaces/profils-popup" description="La projection workspace-scoped et ses raccourcis de restauration." />
+  <LinkCard title="Vue d'ensemble des sessions" href="/fonctionnalites/sessions/vue-ensemble" description="Lister, rechercher et réorganiser les sessions." />
+  <LinkCard title="Éditer une session" href="/fonctionnalites/sessions/editer-session" description="Renommer, modifier la structure, associer une catégorie." />
+</CardGrid>

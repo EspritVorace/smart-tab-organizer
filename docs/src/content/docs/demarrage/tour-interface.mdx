@@ -24,12 +24,16 @@ Depuis cet écran vous accédez aux toggles de groupement et de déduplication, 
 
 ## La page Options
 
-La page Options regroupe quatre sections principales :
+La page Options regroupe les sections principales suivantes :
 
+- **Accueil** : page d'entrée qui agrège profils épinglés, actions rapides et mini-statistiques (voir [La page d'accueil](/demarrage/page-accueil)).
 - **Règles de domaine** : créer, modifier et organiser les règles qui pilotent le groupement et la déduplication.
 - **Sessions** : capturer un instantané des onglets ouverts, l'éditer, ou en restaurer un précédent.
+- **Espaces de travail** : cloisonner règles, sessions et statistiques par contexte (voir [Qu'est-ce qu'un espace de travail ?](/concepts/workspaces)).
 - **Statistiques** : suivre l'activité de groupement et de déduplication dans le temps.
 - **Import / Export** : sauvegarder ou restaurer votre configuration et vos sessions au format JSON.
+
+Le footer de la page Options héberge un **sélecteur de workspace** (`WorkspaceSwitcherDropdown`) qui permet de basculer d'espace de travail à tout moment. Le même sélecteur est disponible dans la popup.
 
 <Aside type="note">
 La capture ci-dessus est extraite du parcours narratif `00-main-journey` du pipeline `e2e-doc-scenarios/`. Elle est régénérée à chaque exécution de `pnpm doc:scenarios` pour rester synchronisée avec l'UI.

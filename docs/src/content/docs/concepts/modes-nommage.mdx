@@ -6,7 +6,7 @@ description: Catalogue des six modes de nommage de groupe, leurs chaînes de rep
 import { Aside, Steps, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
 <Aside type="tip" title="En bref">
-- Six modes couvrent les situations possibles : saisie manuelle, extraction depuis le titre ou l'URL, mode intelligent basé sur un preset, avec différents replis si l'extraction échoue.
+- Six modes couvrent les situations possibles : saisie manuelle, extraction depuis le titre ou l'URL, mode intelligent basé sur les regex d'un pack ou d'un preset, avec différents replis si l'extraction échoue.
 - Certains modes laissent l'onglet non groupé en cas d'échec ; d'autres utilisent le label de la règle ou une invite comme filet de sécurité.
 </Aside>
 
@@ -50,11 +50,11 @@ Symétrique du mode Titre : extraction depuis l'URL en premier, puis repli sur l
 
 ## Intelligent
 
-L'extension utilise les regex du preset sélectionné pour tenter l'extraction depuis le titre puis depuis l'URL. Si les deux échouent, l'onglet n'est pas groupé.
+L'extension utilise les regex héritées du pack importé (ou du preset sélectionné manuellement) pour tenter l'extraction depuis le titre puis depuis l'URL. Si les deux échouent, l'onglet n'est pas groupé.
 
 <Steps>
-1. Extraction depuis le **titre** avec la regex du preset.
-2. À défaut, extraction depuis l'**URL** avec la regex du preset.
+1. Extraction depuis le **titre** avec la regex du pack ou du preset.
+2. À défaut, extraction depuis l'**URL** avec la regex du pack ou du preset.
 3. À défaut, l'onglet n'est **pas groupé**.
 </Steps>
 
@@ -63,8 +63,8 @@ L'extension utilise les regex du preset sélectionné pour tenter l'extraction d
 Même stratégie d'extraction que le mode Intelligent. En cas d'échec, le **label de la règle** est utilisé comme nom de repli.
 
 <Steps>
-1. Extraction depuis le **titre** avec la regex du preset.
-2. À défaut, extraction depuis l'**URL** avec la regex du preset.
+1. Extraction depuis le **titre** avec la regex du pack ou du preset.
+2. À défaut, extraction depuis l'**URL** avec la regex du pack ou du preset.
 3. À défaut, utilisation du **label de la règle** comme nom de groupe.
 </Steps>
 
@@ -77,8 +77,8 @@ Ce mode garantit qu'un groupe est toujours créé, même quand la regex ne corre
 Même stratégie d'extraction que le mode Intelligent. En cas d'échec, une invite de saisie est présentée, comme en mode Demander.
 
 <Steps>
-1. Extraction depuis le **titre** avec la regex du preset.
-2. À défaut, extraction depuis l'**URL** avec la regex du preset.
+1. Extraction depuis le **titre** avec la regex du pack ou du preset.
+2. À défaut, extraction depuis l'**URL** avec la regex du pack ou du preset.
 3. À défaut, **invite utilisateur**. Les onglets sont dégroupés si vous annulez.
 </Steps>
 
@@ -90,6 +90,7 @@ Ce mode combine l'extraction automatique et la saisie manuelle comme filet de s�
 
 <CardGrid>
   <LinkCard title="Sources de nom de groupe" href="/concepts/sources-nom-groupe" description="Principe d'extraction et choix du mode dans l'assistant de règle." />
+  <LinkCard title="Qu'est-ce qu'un pack ?" href="/concepts/packs" description="L'autre source de regex prêtes à l'emploi pour le mode Intelligent." />
   <LinkCard title="Presets regex" href="/fonctionnalites/regles/presets-regex" description="Utiliser les patterns intégrés pour configurer le mode et les regex." />
   <LinkCard title="Comment fonctionne le groupement" href="/concepts/groupement" description="Conditions de déclenchement et comportement général." />
 </CardGrid>

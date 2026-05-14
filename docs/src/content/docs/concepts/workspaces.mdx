@@ -1,0 +1,62 @@
+---
+title: Qu'est-ce qu'un espace de travail ?
+description: Cloisonner règles, sessions et statistiques par contexte professionnel ou personnel grâce aux workspaces de SmartTab Organizer.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="En bref">
+- Un **workspace** est un conteneur isolé qui regroupe ses propres règles, sessions et statistiques.
+- Une couleur d'accent par workspace permet de reconnaître d'un coup d'oeil le contexte actif.
+- Le workspace **Par défaut** existe toujours et ne peut pas être supprimé.
+</Aside>
+
+Un espace de travail (ou workspace) permet de séparer deux contextes d'usage sans que leurs configurations se mélangent. Travail et vie personnelle, projet A et projet B, environnement client et environnement R&D : chaque contexte garde ses règles de domaine, ses sessions épinglées et ses compteurs.
+
+## Ce que cloisonne un workspace
+
+Quand vous basculez d'un workspace à l'autre, l'interface ne montre plus que les données rattachées au workspace actif.
+
+| Donnée | Cloisonnée par workspace ? |
+|---|---|
+| Règles de domaine | Oui |
+| Sessions et profils épinglés | Oui |
+| Statistiques (groupes créés, doublons fermés) | Oui |
+| Paramètres globaux (notifications, langue, thème) | Non, partagés |
+| Presets et packs intégrés | Non, partagés |
+
+Le workspace actif est mémorisé dans `browser.storage.local` et exposé à toute l'interface via le contexte React `ActiveWorkspaceContext` (`src/contexts/ActiveWorkspaceContext.tsx`).
+
+## Workspace par défaut
+
+Un workspace appelé **Par défaut** existe dès la première installation. Il porte l'identifiant `DEFAULT_WORKSPACE_ID` et héberge toutes les règles et sessions présentes avant que vous n'introduisiez d'autres workspaces.
+
+<Aside type="caution">
+Le workspace **Par défaut** ne peut pas être supprimé. C'est le seul à bénéficier de ce statut, pour garantir qu'il existe toujours un espace de repli même si vous supprimez tous les autres.
+</Aside>
+
+## Couleur d'accent
+
+À la création d'un workspace, vous choisissez une couleur d'accent. Cette couleur sert d'indicateur visuel dans le sélecteur de workspace, le footer des options et la popup. Vingt couleurs Radix sont proposées :
+
+`tomato`, `red`, `ruby`, `crimson`, `pink`, `plum`, `purple`, `violet`, `iris`, `indigo`, `blue`, `cyan`, `teal`, `jade`, `green`, `grass`, `orange`, `amber`, `yellow`, `lime`.
+
+Les neutres (gray, mauve, slate, sage, olive, sand) et les couleurs métalliques (bronze, gold, brown) sont volontairement exclues car elles rendent mal en accent d'interface.
+
+## Limites de saisie
+
+Le schéma Zod `workspaceMetaSchema` (`src/schemas/workspace.ts`) impose deux limites strictes :
+
+- Nom : entre 1 et 40 caractères.
+- Identifiant interne : entre 1 et 64 caractères (généré automatiquement à la création).
+
+Les dates `createdAt` et `updatedAt` sont gérées par l'extension, vous n'avez pas à les fournir.
+
+## Voir aussi
+
+<CardGrid>
+  <LinkCard title="Vue d'ensemble des workspaces" href="/fonctionnalites/workspaces/vue-ensemble" description="La page de gestion des espaces de travail : lister, rechercher, basculer." />
+  <LinkCard title="Créer, renommer, supprimer un workspace" href="/fonctionnalites/workspaces/gerer-workspaces" description="Les actions CRUD et leurs contraintes." />
+  <LinkCard title="Changer de workspace actif" href="/fonctionnalites/workspaces/changer-workspace-actif" description="Basculer depuis les Options ou depuis la popup, et son effet sur les données affichées." />
+  <LinkCard title="Profils dans la popup" href="/fonctionnalites/workspaces/profils-popup" description="Les sessions épinglées projetées dans la popup et la page d'accueil." />
+</CardGrid>
