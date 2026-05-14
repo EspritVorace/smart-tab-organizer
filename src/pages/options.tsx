@@ -160,20 +160,23 @@ export function OptionsContent() {
         }
     }, [shortcutsAsideOpen]);
 
-    const shortcutBindings = useMemo<Record<string, ShortcutAction>>(() => {
-        const flatItems = sidebarSections.flatMap((section) => section.items);
-        const bindings: Record<string, ShortcutAction> = {
-            'options.search.focus': focusActiveSearch,
-            'options.help': () => setShortcutsAsideOpen((open) => !open),
-            'options.search.clear': handleEscape,
-        };
-        flatItems.slice(0, 5).forEach((item, index) => {
-            bindings[`options.tab.${index + 1}`] = () => handleTabChange(item.id);
-        });
-        return bindings;
-    }, [sidebarSections, handleTabChange, focusActiveSearch, handleEscape]);
+    const shortcutBindings = useMemo<Record<string, ShortcutAction>>(() => ({
+        'options.search.focus': focusActiveSearch,
+        'options.help': () => setShortcutsAsideOpen((open) => !open),
+        'options.search.clear': handleEscape,
+        'options.nav.home': () => handleTabChange('home'),
+        'options.nav.rules': () => handleTabChange('rules'),
+        'options.nav.sessions': () => handleTabChange('sessions'),
+        'options.nav.stats': () => handleTabChange('stats'),
+        'options.nav.importexport': () => handleTabChange('importexport'),
+        'options.nav.settings': () => handleTabChange('settings'),
+        'options.nav.workspaces': () => handleTabChange('workspaces'),
+    }), [handleTabChange, focusActiveSearch, handleEscape]);
 
-    useShortcuts(shortcutBindings, { scope: 'global' });
+    useShortcuts(shortcutBindings, {
+        scope: 'global',
+        onSequenceState: ({ activePrefix }) => setSequencePrefix(activePrefix),
+    });
 
     const openShortcuts = useCallback(() => setShortcutsAsideOpen(true), []);
 

@@ -67,19 +67,21 @@ export const GROUP_DESCRIPTORS: Record<ShortcutGroupId, ShortcutGroupDescriptor>
 };
 
 /**
- * Top-level group order on the options surface. Mirrors the historical
- * SHORTCUT_GROUPS ordering: Global, Home, Rules, Sessions, Workspaces,
- * Options, Popup.
+ * Top-level group order on the options surface. Mirrors the sidebar order
+ * (Home, Rules, Sessions, ImportExport, Workspaces) so users find each
+ * page's shortcuts where their eyes already are, followed by the
+ * cross-surface groups (Options, Popup) and finally the browser-wide
+ * Global commands.
  */
 export const TOP_LEVEL_GROUP_ORDER: ShortcutGroupId[] = [
-  'global',
   'list-home',
   'list-rules',
   'list-sessions',
-  'list-workspaces',
   'importexport',
+  'list-workspaces',
   'options',
   'popup',
+  'global',
 ];
 
 /**
@@ -90,14 +92,14 @@ export const TOP_LEVEL_GROUP_ORDER: ShortcutGroupId[] = [
 export const VISIBLE_GROUPS_BY_SURFACE: Record<Surface, ShortcutGroupId[]> = {
   popup: ['popup', 'session-card'],
   options: [
-    'global',
     'list-home',
     'list-rules',
     'list-sessions',
-    'list-workspaces',
     'importexport',
+    'list-workspaces',
     'options',
     'popup',
+    'global',
   ],
 };
 
