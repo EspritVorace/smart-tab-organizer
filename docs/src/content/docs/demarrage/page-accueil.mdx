@@ -1,0 +1,59 @@
+---
+title: La page d'accueil
+description: "Le hub central des Options : onboarding, profils épinglés, actions rapides, mini-statistiques et astuces."
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="En bref">
+- La page d'accueil est le **premier écran** affiché à l'ouverture des Options.
+- Tant qu'aucune règle n'est créée, un **Hero d'onboarding** propose de créer une règle ou d'importer un pack.
+- Une fois l'extension utilisée, la page agrège **profils épinglés**, **actions rapides**, **mini-statistiques** et **astuces**.
+</Aside>
+
+## Les sections de la page
+
+La page d'accueil est composée de plusieurs sections, affichées de haut en bas dans cet ordre quand elles sont pertinentes.
+
+### Hero d'onboarding
+
+Quand aucune règle n'est encore définie dans le workspace actif, le Hero d'onboarding occupe la partie haute. Deux actions principales y sont proposées :
+
+- **Créer ma première règle** : ouvre directement l'assistant de création de règle.
+- **Importer un pack** : ouvre la galerie de packs dans le wizard d'import (mode `pack`).
+
+Dès qu'au moins une règle existe, le Hero d'onboarding disparait au profit des autres sections.
+
+### Profils épinglés
+
+Cette section regroupe jusqu'à **6 sessions épinglées** du workspace actif, triées par date de mise à jour décroissante. Chaque profil s'affiche sous forme de tuile cliquable.
+
+La navigation au clavier est possible (flèches pour se déplacer entre tuiles). Quatre raccourcis pilotent la restauration du profil ayant le focus :
+
+- `R` : ouvre le wizard et laisse choisir le mode.
+- `Shift+R` : restaure dans la fenêtre actuelle.
+- `Alt+R` : remplace les onglets de la fenêtre actuelle.
+- `Alt+Shift+R` : ouvre une nouvelle fenêtre.
+
+Le détail des cibles est documenté dans [Profils dans la popup](/fonctionnalites/workspaces/profils-popup).
+
+### Actions rapides
+
+Une grille d'actions usuelles : organiser tous les onglets, capturer un instantané, créer une règle, ouvrir Import/Export, voir les statistiques, accéder aux Espaces de travail, ouvrir le panneau des raccourcis clavier.
+
+### Mini-statistiques
+
+Trois compteurs synthétiques : groupes créés, doublons fermés, sessions enregistrées. Chaque compteur est cliquable et amène vers la page complète correspondante. La section n'apparait que si au moins un compteur est non nul.
+
+### Astuces
+
+Un carrousel léger d'astuces tournantes (mode Intelligent, raccourcis, sessions épinglées, packs, etc.). Sa visibilité peut être désactivée depuis la page Paramètres.
+
+## Voir aussi
+
+<CardGrid>
+  <LinkCard title="Tour de l'interface" href="/demarrage/tour-interface" description="Vue d'ensemble des écrans des Options et de la popup." />
+  <LinkCard title="Profils dans la popup" href="/fonctionnalites/workspaces/profils-popup" description="Sessions épinglées et leurs raccourcis de restauration." />
+  <LinkCard title="Importer des packs de règles" href="/fonctionnalites/regles/packs" description="L'action proposée par le Hero d'onboarding." />
+  <LinkCard title="Vue d'ensemble des sessions" href="/fonctionnalites/sessions/vue-ensemble" description="Toutes les sessions, y compris les non épinglées." />
+</CardGrid>

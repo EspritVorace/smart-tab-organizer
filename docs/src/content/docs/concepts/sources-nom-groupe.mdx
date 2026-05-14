@@ -7,7 +7,7 @@ import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
 <Aside type="tip" title="En bref">
 - Chaque règle configure un **mode de nommage** qui décide comment le nom du groupe est calculé.
-- Trois familles de modes : **Preset** (recommandé), **Demander**, **Manuel**.
+- Trois familles de modes : **Intelligent** (recommandé, basé sur un pack ou un preset), **Demander**, **Manuel**.
 - Les modes extractifs utilisent une expression régulière sur le titre ou l'URL de l'onglet parent.
 </Aside>
 
@@ -31,9 +31,9 @@ Une regex syntaxiquement invalide est ignorée sans faire planter l'extension. L
 
 Lors de la création ou de l'édition d'une règle, trois segments sont proposés.
 
-### Preset
+### Intelligent (depuis un pack ou un preset)
 
-Délègue entièrement le choix du mode au preset sélectionné. Chaque preset embarque un mode de nommage recommandé adapté au site visé (Titre, URL, Intelligent, Intelligent + Label ou Intelligent + Demander) et configure aussi les regex automatiquement. C'est l'approche recommandée pour les sites courants.
+Délègue entièrement le choix du mode aux regex héritées : soit celles fournies par le [pack importé](/concepts/packs), soit celles du preset sélectionné dans le dropdown de l'assistant. Chaque source embarque un mode de nommage recommandé adapté au site visé (Titre, URL, Intelligent, Intelligent + Label ou Intelligent + Demander) et configure aussi les regex automatiquement. C'est l'approche recommandée pour les sites courants.
 
 ### Demander
 
@@ -50,9 +50,9 @@ Vous laisse choisir explicitement le mode parmi les six options disponibles, et 
 | Demander | Invite utilisateur | Dégroupage si annulation | |
 | Titre | Extraction titre | Extraction URL | Pas de groupage |
 | URL | Extraction URL | Extraction titre | Pas de groupage |
-| Intelligent | Extraction titre (preset) | Extraction URL (preset) | Pas de groupage |
-| Intelligent + Label | Extraction titre (preset) | Extraction URL (preset) | Label de la règle |
-| Intelligent + Demander | Extraction titre (preset) | Extraction URL (preset) | Invite utilisateur, dégroupage si annulation |
+| Intelligent | Extraction titre (pack ou preset) | Extraction URL (pack ou preset) | Pas de groupage |
+| Intelligent + Label | Extraction titre (pack ou preset) | Extraction URL (pack ou preset) | Label de la règle |
+| Intelligent + Demander | Extraction titre (pack ou preset) | Extraction URL (pack ou preset) | Invite utilisateur, dégroupage si annulation |
 
 <CardGrid>
   <LinkCard title="Détail des modes de nommage" href="/concepts/modes-nommage" description="Catalogue complet des six modes, avec les cas limites et les comportements de repli." />
@@ -62,6 +62,7 @@ Vous laisse choisir explicitement le mode parmi les six options disponibles, et 
 
 <CardGrid>
   <LinkCard title="Comment fonctionne le groupement" href="/concepts/groupement" description="Conditions de déclenchement et comportement général." />
+  <LinkCard title="Qu'est-ce qu'un pack ?" href="/concepts/packs" description="L'autre source de regex toute prête, sous forme de bundle importable." />
   <LinkCard title="Presets regex" href="/fonctionnalites/regles/presets-regex" description="Utiliser les patterns intégrés pour configurer automatiquement le mode et les regex." />
   <LinkCard title="Liste des presets" href="/annexes/presets-regex" description="Tableau de référence des presets disponibles." />
 </CardGrid>
