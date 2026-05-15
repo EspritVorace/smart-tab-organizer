@@ -1,5 +1,5 @@
 // options/options.ts
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { mountExtensionApp } from '@/utils/mountExtensionApp.js';
 import { Flex, Spinner, Text, Theme } from '@radix-ui/themes';
@@ -24,16 +24,29 @@ import { OptionsHeader, OptionsHeaderCollapsed } from '@/components/UI/OptionsLa
 import { WorkspaceFooter, WorkspaceFooterCollapsed } from '@/components/UI/Workspace/WorkspaceFooter';
 import { ShortcutsAside, type PageContext } from '@/components/UI/ShortcutsPanel';
 import { SequenceIndicator } from '@/components/UI/SequenceIndicator';
-import { DomainRulesPage } from './DomainRulesPage';
 import { HomePage } from './HomePage';
-import { StatisticsPage } from './StatisticsPage';
-import { SettingsPage } from '@/components/UI/SettingsPage/SettingsPage';
-import { ImportExportPage } from './ImportExportPage';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
 import { Home, Shield, FileText, BarChart3, Settings, Archive, Layers } from 'lucide-react';
-import { SessionsPage } from './SessionsPage';
-import { WorkspacesPage } from './WorkspacesPage';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
+
+const DomainRulesPage = lazy(() =>
+    import('./DomainRulesPage').then((m) => ({ default: m.DomainRulesPage })),
+);
+const SessionsPage = lazy(() =>
+    import('./SessionsPage').then((m) => ({ default: m.SessionsPage })),
+);
+const ImportExportPage = lazy(() =>
+    import('./ImportExportPage').then((m) => ({ default: m.ImportExportPage })),
+);
+const StatisticsPage = lazy(() =>
+    import('./StatisticsPage').then((m) => ({ default: m.StatisticsPage })),
+);
+const SettingsPage = lazy(() =>
+    import('@/components/UI/SettingsPage/SettingsPage').then((m) => ({ default: m.SettingsPage })),
+);
+const WorkspacesPage = lazy(() =>
+    import('./WorkspacesPage').then((m) => ({ default: m.WorkspacesPage })),
+);
 import type { Session } from '@/types/session';
 import type { HomeRestoreTarget } from '@/components/HomePage/types';
 import { Toaster } from '@/components/UI/Toaster/Toaster';
@@ -207,61 +220,70 @@ export function OptionsContent() {
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
                     <main data-testid="options-content" style={{ flex: 1, overflow: 'auto', padding: '20px 20px 0 20px', minWidth: 0 }}>
-                        {currentTab === 'home' && (
-                            <HomePage
-                                syncSettings={settings}
-                                statisticsAggregates={statisticsAggregates}
-                                onNavigate={handleTabChange}
-                                onOpenSnapshotWizard={handleOpenSnapshotWizardFromHome}
-                                onOpenRuleWizard={handleOpenRuleWizardFromHome}
-                                onOpenImportRules={handleOpenImportRulesFromHome}
-                                onOpenShortcutsAside={openShortcuts}
-                                onRestore={handleRestoreFromHome}
-                            />
-                        )}
-                        {currentTab === 'rules' && (
-                            <DomainRulesPage
-                                syncSettings={settings}
-                                updateRules={updateRules}
-                                openRuleWizard={openRuleWizard}
-                                onOpenRuleWizardChange={setOpenRuleWizard}
-                                onOpenImportRules={handleOpenImportRulesFromRules}
-                            />
-                        )}
-                        {currentTab === 'importexport' && (
-                            <ImportExportPage
-                                syncSettings={settings}
-                                onSettingsUpdate={updateSettings}
-                                deepLinkAction={importExportAction}
-                                deepLinkFrom={importExportFrom}
-                                onDeepLinkConsumed={handleImportExportConsumed}
-                                onNavigate={handleTabChange}
-                                importRulesInitialMode={importInitialMode}
-                                onImportRulesClosed={handleImportRulesClosed}
-                                onSequencePrefixChange={setSequencePrefix}
-                            />
-                        )}
-                        {currentTab === 'sessions' && (
-                            <SessionsPage
-                                syncSettings={settings}
-                                snapshotWizardOpen={openSnapshotWizard}
-                                onSnapshotWizardOpenChange={setOpenSnapshotWizard}
-                                snapshotGroupId={snapshotGroupId}
-                                onSnapshotGroupIdChange={setSnapshotGroupId}
-                                restoreSessionId={restoreSessionId}
-                                onRestoreSessionIdChange={setRestoreSessionId}
-                                onOpenImportSessions={handleOpenImportSessionsFromSessions}
-                            />
-                        )}
-                        {currentTab === 'stats' && (
-                            <StatisticsPage syncSettings={settings} statisticsData={statisticsAggregates} onReset={handleResetStats} />
-                        )}
-                        {currentTab === 'settings' && (
-                            <SettingsPage syncSettings={settings} updateSettings={updateSettings} />
-                        )}
-                        {currentTab === 'workspaces' && (
-                            <WorkspacesPage syncSettings={settings} />
-                        )}
+                        <Suspense
+                            fallback={
+                                <Flex align="center" justify="center" gap="2" style={{ height: '100%' }}>
+                                    <Spinner size="3" />
+                                    <Text>{getMessage('loadingText')}</Text>
+                                </Flex>
+                            }
+                        >
+                            {currentTab === 'home' && (
+                                <HomePage
+                                    syncSettings={settings}
+                                    statisticsAggregates={statisticsAggregates}
+                                    onNavigate={handleTabChange}
+                                    onOpenSnapshotWizard={handleOpenSnapshotWizardFromHome}
+                                    onOpenRuleWizard={handleOpenRuleWizardFromHome}
+                                    onOpenImportRules={handleOpenImportRulesFromHome}
+                                    onOpenShortcutsAside={openShortcuts}
+                                    onRestore={handleRestoreFromHome}
+                                />
+                            )}
+                            {currentTab === 'rules' && (
+                                <DomainRulesPage
+                                    syncSettings={settings}
+                                    updateRules={updateRules}
+                                    openRuleWizard={openRuleWizard}
+                                    onOpenRuleWizardChange={setOpenRuleWizard}
+                                    onOpenImportRules={handleOpenImportRulesFromRules}
+                                />
+                            )}
+                            {currentTab === 'importexport' && (
+                                <ImportExportPage
+                                    syncSettings={settings}
+                                    onSettingsUpdate={updateSettings}
+                                    deepLinkAction={importExportAction}
+                                    deepLinkFrom={importExportFrom}
+                                    onDeepLinkConsumed={handleImportExportConsumed}
+                                    onNavigate={handleTabChange}
+                                    importRulesInitialMode={importInitialMode}
+                                    onImportRulesClosed={handleImportRulesClosed}
+                                    onSequencePrefixChange={setSequencePrefix}
+                                />
+                            )}
+                            {currentTab === 'sessions' && (
+                                <SessionsPage
+                                    syncSettings={settings}
+                                    snapshotWizardOpen={openSnapshotWizard}
+                                    onSnapshotWizardOpenChange={setOpenSnapshotWizard}
+                                    snapshotGroupId={snapshotGroupId}
+                                    onSnapshotGroupIdChange={setSnapshotGroupId}
+                                    restoreSessionId={restoreSessionId}
+                                    onRestoreSessionIdChange={setRestoreSessionId}
+                                    onOpenImportSessions={handleOpenImportSessionsFromSessions}
+                                />
+                            )}
+                            {currentTab === 'stats' && (
+                                <StatisticsPage syncSettings={settings} statisticsData={statisticsAggregates} onReset={handleResetStats} />
+                            )}
+                            {currentTab === 'settings' && (
+                                <SettingsPage syncSettings={settings} updateSettings={updateSettings} />
+                            )}
+                            {currentTab === 'workspaces' && (
+                                <WorkspacesPage syncSettings={settings} />
+                            )}
+                        </Suspense>
                     </main>
                     <ShortcutsAside
                         open={shortcutsAsideOpen}

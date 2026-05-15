@@ -99,34 +99,34 @@ describe('OptionsApp rendu', () => {
     expect(screen.getByTestId('page-home-mock')).toBeInTheDocument();
   });
 
-  it('affiche la page rules quand currentTab=rules', () => {
+  it('affiche la page rules quand currentTab=rules', async () => {
     mockedUseDeepLinking.mockReturnValue(makeDeepLinking('rules'));
     render(<OptionsApp />);
-    expect(screen.getByTestId('page-rules-mock')).toBeInTheDocument();
+    expect(await screen.findByTestId('page-rules-mock')).toBeInTheDocument();
   });
 
-  it('affiche la page sessions quand currentTab=sessions', () => {
+  it('affiche la page sessions quand currentTab=sessions', async () => {
     mockedUseDeepLinking.mockReturnValue(makeDeepLinking('sessions'));
     render(<OptionsApp />);
-    expect(screen.getByTestId('page-sessions-mock')).toBeInTheDocument();
+    expect(await screen.findByTestId('page-sessions-mock')).toBeInTheDocument();
   });
 
-  it('affiche la page importexport quand currentTab=importexport', () => {
+  it('affiche la page importexport quand currentTab=importexport', async () => {
     mockedUseDeepLinking.mockReturnValue(makeDeepLinking('importexport'));
     render(<OptionsApp />);
-    expect(screen.getByTestId('page-importexport-mock')).toBeInTheDocument();
+    expect(await screen.findByTestId('page-importexport-mock')).toBeInTheDocument();
   });
 
-  it('affiche la page stats quand currentTab=stats', () => {
+  it('affiche la page stats quand currentTab=stats', async () => {
     mockedUseDeepLinking.mockReturnValue(makeDeepLinking('stats'));
     render(<OptionsApp />);
-    expect(screen.getByTestId('page-stats-mock')).toBeInTheDocument();
+    expect(await screen.findByTestId('page-stats-mock')).toBeInTheDocument();
   });
 
-  it('affiche la page settings quand currentTab=settings', () => {
+  it('affiche la page settings quand currentTab=settings', async () => {
     mockedUseDeepLinking.mockReturnValue(makeDeepLinking('settings'));
     render(<OptionsApp />);
-    expect(screen.getByTestId('page-settings-mock')).toBeInTheDocument();
+    expect(await screen.findByTestId('page-settings-mock')).toBeInTheDocument();
   });
 });
 
@@ -145,7 +145,7 @@ describe('OptionsContent callbacks', () => {
     mockedUseDeepLinking.mockReturnValue(makeDeepLinking('stats'));
     render(<OptionsApp />);
 
-    fireEvent.click(screen.getByTestId('stats-reset-mock'));
+    fireEvent.click(await screen.findByTestId('stats-reset-mock'));
 
     await waitFor(() => {
       expect(screen.getByTestId('confirm-dialog')).toBeInTheDocument();
