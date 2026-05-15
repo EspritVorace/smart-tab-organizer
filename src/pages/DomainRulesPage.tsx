@@ -15,6 +15,8 @@ import { generateUUID } from '@/utils/utils';
 import { DomainRuleCard } from '@/components/Core/DomainRule/DomainRuleCard';
 import { useShortcuts } from '@/hooks/useShortcuts';
 import { useListNavigation } from '@/hooks/useListNavigation';
+import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
+import type { RulesPendingAction } from '@/hooks/useDeepLinking';
 import {
   moveToFirst,
   moveToLast,
@@ -49,12 +51,10 @@ function confirmDeleteDescription(
 interface DomainRulesPageProps {
   syncSettings: AppSettings;
   updateRules: (rules: DomainRuleSetting[]) => void;
-  /** When true, opens the create-rule wizard from outside the page (e.g. HomePage). */
-  openRuleWizard?: boolean;
-  /** Notifies the parent when the modal opens or closes. */
-  onOpenRuleWizardChange?: (open: boolean) => void;
-  /** Opens the rules import wizard via deep-link with from=rules. */
-  onOpenImportRules: () => void;
+  /** Deep-link action to consume on mount (e.g. open the create or import wizard). */
+  pendingAction?: RulesPendingAction | null;
+  /** Called once the pending action has been consumed so the parent can clear it. */
+  onPendingActionConsumed?: () => void;
 }
 
 /* ─── Local presentation components ──────────────────────────────────────── */
@@ -112,20 +112,24 @@ function BulkActionsBar({
 export function DomainRulesPage({
   syncSettings,
   updateRules,
-  openRuleWizard,
-  onOpenRuleWizardChange,
-  onOpenImportRules,
+  pendingAction,
+  onPendingActionConsumed,
 }: DomainRulesPageProps) {
+  const { openImportRules } = useImportExportWizards();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<DomainRule | undefined>(undefined);
   const [dragItems, setDragItems] = useState<DomainRuleSetting[] | null>(null);
 
   useEffect(() => {
-    if (openRuleWizard) {
+    if (!pendingAction) return;
+    if (pendingAction === 'create') {
       setEditingRule(undefined);
       setIsModalOpen(true);
+    } else if (pendingAction === 'import') {
+      openImportRules();
     }
-  }, [openRuleWizard]);
+    onPendingActionConsumed?.();
+  }, [pendingAction, openImportRules, onPendingActionConsumed]);
 
   const handleToggleEnabled = useCallback((ruleId: string, enabled: boolean) => {
     updateRules(syncSettings.domainRules.map(rule =>
@@ -313,13 +317,11 @@ export function DomainRulesPage({
     }
     setIsModalOpen(false);
     setEditingRule(undefined);
-    onOpenRuleWizardChange?.(false);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingRule(undefined);
-    onOpenRuleWizardChange?.(false);
   };
 
   const handleConfirmDelete = useCallback(() => {
@@ -391,7 +393,7 @@ export function DomainRulesPage({
                       <Plus size={14} />
                       {getMessage('addRule')}
                     </Button>
-                    <Button variant="soft" onClick={onOpenImportRules}>
+                    <Button variant="soft" onClick={() => openImportRules()}>
                       <Upload size={14} />
                       {getMessage('importRulesButton')}
                     </Button>

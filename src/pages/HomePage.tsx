@@ -3,10 +3,10 @@ import { browser } from 'wxt/browser';
 import { Box, Flex } from '@radix-ui/themes';
 import { Home } from 'lucide-react';
 import { useSessions } from '@/hooks/useSessions';
+import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
 import type { AppSettings } from '@/types/syncSettings';
 import type { Session } from '@/types/session';
 import type { StatisticsAggregates } from '@/types/statistics';
-import type { SourceMode } from '@/components/UI/ImportExportWizards/Source';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { HeroOnboarding } from '@/components/HomePage/HeroOnboarding';
 import { PinnedSessionsSection } from '@/components/HomePage/PinnedSessionsSection';
@@ -26,8 +26,6 @@ export interface HomePageProps {
   onNavigate: (tab: string) => void;
   onOpenSnapshotWizard: () => void;
   onOpenRuleWizard: () => void;
-  /** Opens the rules import wizard via deep-link with from=home. */
-  onOpenImportRules: (initialSourceMode?: SourceMode) => void;
   onOpenShortcutsAside: () => void;
   onRestore: (session: Session, target: HomeRestoreTarget) => void;
   /** Locale used by mini-stats for thousand-separator formatting. */
@@ -48,11 +46,11 @@ export function HomePage({
   onNavigate,
   onOpenSnapshotWizard,
   onOpenRuleWizard,
-  onOpenImportRules,
   onOpenShortcutsAside,
   onRestore,
   locale,
 }: HomePageProps) {
+  const { openImportRules } = useImportExportWizards();
   const { sessions, isLoaded: sessionsLoaded } = useSessions();
 
   const pinnedSessions = useMemo(
@@ -109,8 +107,8 @@ export function HomePage({
   };
 
   const handleHeroImportPack = useCallback(() => {
-    onOpenImportRules('pack');
-  }, [onOpenImportRules]);
+    openImportRules({ initialSourceMode: 'pack' });
+  }, [openImportRules]);
 
   return (
     <PageLayout

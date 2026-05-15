@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Card, Flex, Skeleton, Switch, Text } from '@radix-ui/themes';
-import { Copy, ExternalLink, Layers, Shield } from 'lucide-react';
+import { Copy, Layers, Plus, Shield, Upload } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 
 interface SettingsTogglesProps {
@@ -10,7 +10,8 @@ interface SettingsTogglesProps {
   onDeduplicationChange?: (checked: boolean) => void;
   isLoading?: boolean;
   hasRules?: boolean;
-  onOpenRules?: () => void;
+  onCreateRule?: () => void;
+  onImportRules?: () => void;
 }
 
 export function SettingsToggles({
@@ -20,7 +21,8 @@ export function SettingsToggles({
   onDeduplicationChange,
   isLoading = false,
   hasRules = true,
-  onOpenRules,
+  onCreateRule,
+  onImportRules,
 }: SettingsTogglesProps) {
   if (isLoading) {
     return (
@@ -39,10 +41,16 @@ export function SettingsToggles({
           <Text size="2" color="gray" align="center">
             {getMessage('popupNoRulesTitle')}
           </Text>
-          <Button variant="soft" size="2" onClick={onOpenRules}>
-            <ExternalLink size={14} />
-            {getMessage('popupGoToRules')}
-          </Button>
+          <Flex gap="2">
+            <Button variant="soft" size="2" onClick={onCreateRule}>
+              <Plus size={14} />
+              {getMessage('popupCreateRule')}
+            </Button>
+            <Button variant="soft" size="2" onClick={onImportRules}>
+              <Upload size={14} />
+              {getMessage('popupImportRules')}
+            </Button>
+          </Flex>
         </Flex>
       </Card>
     );

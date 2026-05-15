@@ -22,7 +22,7 @@ describe('useDeepLinking — defaults', () => {
     const { result } = renderHook(() => useDeepLinking());
     expect(result.current.currentTab).toBe('home');
     expect(result.current.openSnapshotWizard).toBe(false);
-    expect(result.current.openRuleWizard).toBe(false);
+    expect(result.current.rulesPendingAction).toBeNull();
     expect(result.current.snapshotGroupId).toBeNull();
   });
 });
@@ -128,27 +128,34 @@ describe('useDeepLinking — hashchange listener', () => {
   });
 });
 
-describe('useDeepLinking — rule wizard deep link', () => {
-  it('opens the rule wizard when hash is #rules?action=create', () => {
+describe('useDeepLinking — rules deep link', () => {
+  it('exposes rulesPendingAction=create when hash is #rules?action=create', () => {
     window.location.hash = '#rules?action=create';
     const { result } = renderHook(() => useDeepLinking());
     expect(result.current.currentTab).toBe('rules');
-    expect(result.current.openRuleWizard).toBe(true);
+    expect(result.current.rulesPendingAction).toBe('create');
   });
 
-  it('does not open the rule wizard when action is not "create"', () => {
+  it('exposes rulesPendingAction=import when hash is #rules?action=import', () => {
+    window.location.hash = '#rules?action=import';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.currentTab).toBe('rules');
+    expect(result.current.rulesPendingAction).toBe('import');
+  });
+
+  it('leaves rulesPendingAction null when action is unknown', () => {
     window.location.hash = '#rules?action=other';
     const { result } = renderHook(() => useDeepLinking());
     expect(result.current.currentTab).toBe('rules');
-    expect(result.current.openRuleWizard).toBe(false);
+    expect(result.current.rulesPendingAction).toBeNull();
   });
 
-  it('exposes setOpenRuleWizard to close the wizard', () => {
+  it('exposes setRulesPendingAction to clear the pending action', () => {
     window.location.hash = '#rules?action=create';
     const { result } = renderHook(() => useDeepLinking());
-    expect(result.current.openRuleWizard).toBe(true);
-    act(() => result.current.setOpenRuleWizard(false));
-    expect(result.current.openRuleWizard).toBe(false);
+    expect(result.current.rulesPendingAction).toBe('create');
+    act(() => result.current.setRulesPendingAction(null));
+    expect(result.current.rulesPendingAction).toBeNull();
   });
 });
 
@@ -179,81 +186,6 @@ describe('useDeepLinking — restore deep link', () => {
     expect(result.current.restoreSessionId).toBe('s-1');
     act(() => result.current.setRestoreSessionId(null));
     expect(result.current.restoreSessionId).toBeNull();
-  });
-});
-
-describe('useDeepLinking — import/export deep link', () => {
-  it('starts with both fields null when there is no hash', () => {
-    const { result } = renderHook(() => useDeepLinking());
-    expect(result.current.importExportAction).toBeNull();
-    expect(result.current.importExportFrom).toBeNull();
-  });
-
-  it.each([
-    'import-rules',
-    'export-rules',
-    'import-sessions',
-    'export-sessions',
-    'import-workspace',
-    'export-workspace',
-  ] as const)('parses valid action %s', (action) => {
-    window.location.hash = `#importexport?action=${action}&from=home`;
-    const { result } = renderHook(() => useDeepLinking());
-    expect(result.current.currentTab).toBe('importexport');
-    expect(result.current.importExportAction).toBe(action);
-    expect(result.current.importExportFrom).toBe('home');
-  });
-
-  it.each(['home', 'rules', 'sessions', 'workspaces', 'popup'] as const)(
-    'parses valid from %s',
-    (from) => {
-      window.location.hash = `#importexport?action=import-rules&from=${from}`;
-      const { result } = renderHook(() => useDeepLinking());
-      expect(result.current.importExportFrom).toBe(from);
-    },
-  );
-
-  it('treats an unknown action as null', () => {
-    window.location.hash = '#importexport?action=bogus&from=home';
-    const { result } = renderHook(() => useDeepLinking());
-    expect(result.current.importExportAction).toBeNull();
-    expect(result.current.importExportFrom).toBe('home');
-  });
-
-  it('treats a spoofed from as null', () => {
-    window.location.hash = '#importexport?action=import-rules&from=evil';
-    const { result } = renderHook(() => useDeepLinking());
-    expect(result.current.importExportAction).toBe('import-rules');
-    expect(result.current.importExportFrom).toBeNull();
-  });
-
-  it('returns both fields null when params are missing', () => {
-    window.location.hash = '#importexport';
-    const { result } = renderHook(() => useDeepLinking());
-    expect(result.current.currentTab).toBe('importexport');
-    expect(result.current.importExportAction).toBeNull();
-    expect(result.current.importExportFrom).toBeNull();
-  });
-
-  it('reacts to a hashchange after mount', () => {
-    const { result } = renderHook(() => useDeepLinking());
-    act(() => setHash('#importexport?action=export-sessions&from=sessions'));
-    expect(result.current.currentTab).toBe('importexport');
-    expect(result.current.importExportAction).toBe('export-sessions');
-    expect(result.current.importExportFrom).toBe('sessions');
-  });
-
-  it('exposes setters to clear both fields', () => {
-    window.location.hash = '#importexport?action=import-rules&from=home';
-    const { result } = renderHook(() => useDeepLinking());
-    expect(result.current.importExportAction).toBe('import-rules');
-    expect(result.current.importExportFrom).toBe('home');
-    act(() => {
-      result.current.setImportExportAction(null);
-      result.current.setImportExportFrom(null);
-    });
-    expect(result.current.importExportAction).toBeNull();
-    expect(result.current.importExportFrom).toBeNull();
   });
 });
 

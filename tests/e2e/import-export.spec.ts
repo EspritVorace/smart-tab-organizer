@@ -886,94 +886,33 @@ test.describe('Import / Export', () => {
     });
   });
 
-  // ── Deep-link referrer (#importexport?action=...&from=...) ───────────────
+  // ── Wizard triggers (context-based, no URL routing for import/export) ──────
 
-  test.describe('Deep-link referrer', () => {
-    test('opens the rules import wizard when navigating with action=import-rules', async ({
+  test.describe('Wizard triggers', () => {
+    test('opens the rules import wizard from the #importexport cards page and stays on that hash', async ({
       extensionContext,
       extensionId,
     }) => {
       const page = await extensionContext.newPage();
-      await page.goto(
-        `chrome-extension://${extensionId}/options.html#importexport?action=import-rules&from=home`,
-      );
+      await page.goto(`chrome-extension://${extensionId}/options.html#importexport`);
       await page.waitForLoadState('domcontentloaded');
 
+      const importBtn = page
+        .getByTestId('page-import-export-card-import-rules')
+        .getByRole('button');
+      await importBtn.click();
       await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
-      // The wizard's "File" radio is part of the source step.
-      await expect(page.getByRole('radio', { name: 'File' }).locator('..')).toBeVisible();
-
-      // Hash should be cleaned of the action/from params after consumption.
       await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#importexport');
 
-      await page.close();
-    });
-
-    test('returns to the referrer section when the wizard closes (from=home)', async ({
-      extensionContext,
-      extensionId,
-    }) => {
-      const page = await extensionContext.newPage();
-      await page.goto(
-        `chrome-extension://${extensionId}/options.html#importexport?action=import-rules&from=home`,
-      );
-      await page.waitForLoadState('domcontentloaded');
-      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
-
-      // Close the wizard via Escape.
       await page.keyboard.press('Escape');
       await expect(page.getByRole('dialog')).toBeHidden();
-
-      await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#home');
-      await expect(page.getByTestId('page-home')).toBeVisible();
-
-      await page.close();
-    });
-
-    test('stays on importexport when from=popup', async ({
-      extensionContext,
-      extensionId,
-    }) => {
-      const page = await extensionContext.newPage();
-      await page.goto(
-        `chrome-extension://${extensionId}/options.html#importexport?action=import-rules&from=popup`,
-      );
-      await page.waitForLoadState('domcontentloaded');
-      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
-
-      await page.keyboard.press('Escape');
-      await expect(page.getByRole('dialog')).toBeHidden();
-
       await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#importexport');
       await expect(page.getByTestId('page-import-export')).toBeVisible();
 
       await page.close();
     });
 
-    test('does not re-open the wizard after a refresh on #importexport', async ({
-      extensionContext,
-      extensionId,
-    }) => {
-      const page = await extensionContext.newPage();
-      await page.goto(
-        `chrome-extension://${extensionId}/options.html#importexport?action=import-rules&from=home`,
-      );
-      await page.waitForLoadState('domcontentloaded');
-      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
-      await page.keyboard.press('Escape');
-      await expect(page.getByRole('dialog')).toBeHidden();
-
-      // Navigate back to importexport without params and reload.
-      await page.evaluate(() => { window.location.hash = '#importexport'; });
-      await page.reload();
-      await page.waitForLoadState('domcontentloaded');
-      await expect(page.getByTestId('page-import-export')).toBeVisible();
-      await expect(page.getByRole('dialog')).toBeHidden();
-
-      await page.close();
-    });
-
-    test('rules empty-state Import button uses the deep-link mechanism', async ({
+    test('rules empty-state Import button opens the wizard and leaves the hash on #rules', async ({
       extensionContext,
       extensionId,
     }) => {
@@ -987,7 +926,7 @@ test.describe('Import / Export', () => {
       await importBtn.click();
 
       await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
-      await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#importexport');
+      await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#rules');
 
       await page.keyboard.press('Escape');
       await expect(page.getByRole('dialog')).toBeHidden();
@@ -996,7 +935,7 @@ test.describe('Import / Export', () => {
       await page.close();
     });
 
-    test('sessions empty-state Import button uses the deep-link mechanism', async ({
+    test('sessions empty-state Import button opens the wizard and leaves the hash on #sessions', async ({
       extensionContext,
       extensionId,
     }) => {
@@ -1012,7 +951,7 @@ test.describe('Import / Export', () => {
       await importBtn.click();
 
       await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
-      await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#importexport');
+      await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#sessions');
 
       await page.keyboard.press('Escape');
       await expect(page.getByRole('dialog')).toBeHidden();
@@ -1021,7 +960,7 @@ test.describe('Import / Export', () => {
       await page.close();
     });
 
-    test('home onboarding "Import pack" button opens the rules wizard with from=home', async ({
+    test('home onboarding "Import pack" button opens the wizard and leaves the hash on #home', async ({
       extensionContext,
       extensionId,
     }) => {
@@ -1035,11 +974,51 @@ test.describe('Import / Export', () => {
       await heroImport.click();
 
       await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
-      await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#importexport');
+      await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#home');
 
       await page.keyboard.press('Escape');
       await expect(page.getByRole('dialog')).toBeHidden();
       await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#home');
+
+      await page.close();
+    });
+
+    test('refresh on #importexport does not re-open any wizard', async ({
+      extensionContext,
+      extensionId,
+    }) => {
+      const page = await extensionContext.newPage();
+      await page.goto(`chrome-extension://${extensionId}/options.html#importexport`);
+      await page.waitForLoadState('domcontentloaded');
+      await expect(page.getByTestId('page-import-export')).toBeVisible();
+      await expect(page.getByRole('dialog')).toBeHidden();
+
+      await page.reload();
+      await page.waitForLoadState('domcontentloaded');
+      await expect(page.getByTestId('page-import-export')).toBeVisible();
+      await expect(page.getByRole('dialog')).toBeHidden();
+
+      await page.close();
+    });
+  });
+
+  // ── Popup -> rules deeplink (the one allowed cross-page deep link) ─────────
+
+  test.describe('Popup -> rules deeplink', () => {
+    test('navigating to #rules?action=import opens the import wizard on the rules page', async ({
+      extensionContext,
+      extensionId,
+    }) => {
+      const page = await extensionContext.newPage();
+      await page.goto(`chrome-extension://${extensionId}/options.html#rules?action=import`);
+      await page.waitForLoadState('domcontentloaded');
+
+      await expect(page.getByTestId('page-rules')).toBeVisible({ timeout: 10_000 });
+      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
+
+      await page.keyboard.press('Escape');
+      await expect(page.getByRole('dialog')).toBeHidden();
+      await expect(page.getByTestId('page-rules')).toBeVisible();
 
       await page.close();
     });

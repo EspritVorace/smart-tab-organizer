@@ -9,14 +9,13 @@ import {
     useActiveWorkspaceContext,
 } from '@/contexts/ActiveWorkspaceContext.js';
 import { ShortcutsControlProvider } from '@/contexts/ShortcutsControlContext';
+import { ImportExportWizardsProvider } from '@/contexts/ImportExportWizardsContext';
 
 import { useSettings } from '@/hooks/useSettings.js';
 import { useStatistics } from '@/hooks/useStatistics.js';
 import { useDeepLinking } from '@/hooks/useDeepLinking.js';
-import type { ImportExportAction, ImportExportFrom } from '@/hooks/useDeepLinking.js';
 import { useShortcuts, type ShortcutAction } from '@/hooks/useShortcuts.js';
 import { getMessage } from '@/utils/i18n';
-import type { SourceMode } from '@/components/UI/ImportExportWizards/Source';
 
 import { Sidebar } from '@/components/UI/Sidebar/Sidebar';
 import type { SidebarSection } from '@/components/UI/Sidebar/Sidebar';
@@ -60,17 +59,14 @@ export function OptionsContent() {
     const {
         currentTab, setCurrentTab,
         openSnapshotWizard, setOpenSnapshotWizard,
-        openRuleWizard, setOpenRuleWizard,
+        rulesPendingAction, setRulesPendingAction,
         snapshotGroupId, setSnapshotGroupId,
         restoreSessionId, setRestoreSessionId,
-        importExportAction, setImportExportAction,
-        importExportFrom, setImportExportFrom,
     } = useDeepLinking();
 
     const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
     const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
     const [shortcutsAsideOpen, setShortcutsAsideOpen] = useState(false);
-    const [importInitialMode, setImportInitialMode] = useState<SourceMode | null>(null);
     const [sequencePrefix, setSequencePrefix] = useState<string[] | null>(null);
 
     const updateRules = useCallback((newRules: DomainRuleSettings) => {
@@ -84,43 +80,15 @@ export function OptionsContent() {
         setCurrentTab(tab);
     }, [setCurrentTab]);
 
-    const handleOpenRuleWizardFromHome = useCallback(() => {
-        setOpenRuleWizard(true);
-        handleTabChange('rules');
-    }, [setOpenRuleWizard, handleTabChange]);
-
     const handleOpenSnapshotWizardFromHome = useCallback(() => {
         setOpenSnapshotWizard(true);
         handleTabChange('sessions');
     }, [setOpenSnapshotWizard, handleTabChange]);
 
-    const navigateToImportExportAction = useCallback((action: ImportExportAction, from: ImportExportFrom) => {
-        window.location.hash = `importexport?action=${action}&from=${from}`;
-        setCurrentTab('importexport');
-    }, [setCurrentTab]);
-
-    const handleOpenImportRulesFromHome = useCallback((initialSourceMode?: SourceMode) => {
-        setImportInitialMode(initialSourceMode ?? null);
-        navigateToImportExportAction('import-rules', 'home');
-    }, [navigateToImportExportAction]);
-
-    const handleOpenImportRulesFromRules = useCallback(() => {
-        setImportInitialMode(null);
-        navigateToImportExportAction('import-rules', 'rules');
-    }, [navigateToImportExportAction]);
-
-    const handleOpenImportSessionsFromSessions = useCallback(() => {
-        navigateToImportExportAction('import-sessions', 'sessions');
-    }, [navigateToImportExportAction]);
-
-    const handleImportExportConsumed = useCallback(() => {
-        setImportExportAction(null);
-        setImportExportFrom(null);
-    }, [setImportExportAction, setImportExportFrom]);
-
-    const handleImportRulesClosed = useCallback(() => {
-        setImportInitialMode(null);
-    }, []);
+    const handleOpenRuleWizardFromHome = useCallback(() => {
+        setRulesPendingAction('create');
+        handleTabChange('rules');
+    }, [setRulesPendingAction, handleTabChange]);
 
     const handleRestoreFromHome = useCallback(async (session: Session, target: HomeRestoreTarget) => {
         if (target === 'custom') {
@@ -204,6 +172,7 @@ export function OptionsContent() {
 
     return (
         <ShortcutsControlProvider openShortcuts={openShortcuts} version={version}>
+        <ImportExportWizardsProvider>
         <div id="options-inner" data-testid="options" style={{ display: 'flex', height: '100vh' }}>
             <Sidebar
                 isCollapsed={sidebarCollapsed}
@@ -235,7 +204,6 @@ export function OptionsContent() {
                                     onNavigate={handleTabChange}
                                     onOpenSnapshotWizard={handleOpenSnapshotWizardFromHome}
                                     onOpenRuleWizard={handleOpenRuleWizardFromHome}
-                                    onOpenImportRules={handleOpenImportRulesFromHome}
                                     onOpenShortcutsAside={openShortcuts}
                                     onRestore={handleRestoreFromHome}
                                 />
@@ -244,21 +212,13 @@ export function OptionsContent() {
                                 <DomainRulesPage
                                     syncSettings={settings}
                                     updateRules={updateRules}
-                                    openRuleWizard={openRuleWizard}
-                                    onOpenRuleWizardChange={setOpenRuleWizard}
-                                    onOpenImportRules={handleOpenImportRulesFromRules}
+                                    pendingAction={rulesPendingAction}
+                                    onPendingActionConsumed={() => setRulesPendingAction(null)}
                                 />
                             )}
                             {currentTab === 'importexport' && (
                                 <ImportExportPage
                                     syncSettings={settings}
-                                    onSettingsUpdate={updateSettings}
-                                    deepLinkAction={importExportAction}
-                                    deepLinkFrom={importExportFrom}
-                                    onDeepLinkConsumed={handleImportExportConsumed}
-                                    onNavigate={handleTabChange}
-                                    importRulesInitialMode={importInitialMode}
-                                    onImportRulesClosed={handleImportRulesClosed}
                                     onSequencePrefixChange={setSequencePrefix}
                                 />
                             )}
@@ -271,7 +231,6 @@ export function OptionsContent() {
                                     onSnapshotGroupIdChange={setSnapshotGroupId}
                                     restoreSessionId={restoreSessionId}
                                     onRestoreSessionIdChange={setRestoreSessionId}
-                                    onOpenImportSessions={handleOpenImportSessionsFromSessions}
                                 />
                             )}
                             {currentTab === 'stats' && (
@@ -306,6 +265,7 @@ export function OptionsContent() {
             />
             <SequenceIndicator activePrefix={sequencePrefix} />
         </div>
+        </ImportExportWizardsProvider>
         </ShortcutsControlProvider>
     );
 }

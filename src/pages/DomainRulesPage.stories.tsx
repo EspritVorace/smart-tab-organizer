@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { DomainRulesPage } from './DomainRulesPage';
+import { MockImportExportWizardsProvider } from '@/test-utils/MockImportExportWizardsProvider';
 import type { AppSettings, DomainRuleSetting } from '@/types/syncSettings';
 
 const rules: DomainRuleSetting[] = [
@@ -50,10 +51,16 @@ const meta: Meta<typeof DomainRulesPage> = {
   title: 'Pages/DomainRulesPage',
   component: DomainRulesPage,
   parameters: { layout: 'fullscreen' },
+  decorators: [
+    (Story) => (
+      <MockImportExportWizardsProvider>
+        <Story />
+      </MockImportExportWizardsProvider>
+    ),
+  ],
   args: {
     syncSettings: mockSyncSettings,
     updateRules: () => {},
-    onOpenImportRules: () => {},
   },
 };
 

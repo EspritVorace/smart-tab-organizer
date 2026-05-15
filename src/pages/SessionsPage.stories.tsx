@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { browser } from 'wxt/browser';
 import { SessionsPage } from './SessionsPage';
+import { MockImportExportWizardsProvider } from '@/test-utils/MockImportExportWizardsProvider';
 import type { AppSettings } from '@/types/syncSettings';
 import type { Session } from '@/types/session';
 
@@ -33,9 +35,15 @@ const meta: Meta<typeof SessionsPage> = {
   title: 'Pages/SessionsPage',
   component: SessionsPage,
   parameters: { layout: 'fullscreen' },
+  decorators: [
+    (Story) => (
+      <MockImportExportWizardsProvider>
+        <Story />
+      </MockImportExportWizardsProvider>
+    ),
+  ],
   args: {
     syncSettings: mockSyncSettings,
-    onOpenImportSessions: () => {},
   },
 };
 
