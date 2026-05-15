@@ -443,6 +443,47 @@ test('main journey', async (
       description: 'Sessions list with one pinned profile.',
     });
     await sessionsPage2.close();
+
+    // Seed a second workspace so the PopupWorkspaceSwitcher renders (it
+    // hides itself when only the default workspace exists). The default
+    // workspace must remain present in the index so its scoped data stays
+    // reachable. The popup uses `activeWorkspaceId` to pick its accent.
+    await sw.evaluate(async () => {
+      const now = new Date().toISOString();
+      await chrome.storage.local.set({
+        workspaces: [
+          { id: 'default', name: 'Personal', accentColor: 'indigo', createdAt: now, updatedAt: now },
+          { id: 'ws-work', name: 'Work', accentColor: 'green', createdAt: now, updatedAt: now },
+        ],
+        activeWorkspaceId: 'default',
+      });
+    });
+
+    // Re-open the popup so it picks up the freshly pinned session, the
+    // populated workspace index, and the still-open mimetic tabs (which
+    // keep Save enabled). Restore is enabled because a session now exists.
+    const popupPinnedPage = await openExtensionPage(
+      extensionContext,
+      extensionId,
+      'popup',
+      locale,
+      theme,
+    );
+    await popupPinnedPage
+      .getByTestId('popup-workspace-switcher')
+      .waitFor({ state: 'visible', timeout: 5_000 })
+      .catch(() => {});
+    await popupPinnedPage
+      .getByTestId('popup-profiles-list')
+      .waitFor({ state: 'visible', timeout: 5_000 })
+      .catch(() => {});
+    await captureStep(popupPinnedPage, 'popup-with-pinned-and-workspace', {
+      force: 38,
+      description:
+        'Popup with workspace switcher, one pinned profile, and Save/Restore enabled.',
+      elementSelector: '#popup-app',
+    });
+    await popupPinnedPage.close();
   });
 
   await test.step('Act 5 - Import / Export', async () => {
@@ -481,11 +522,16 @@ test('main journey', async (
     });
 
     // Open the import wizard, switch to Text mode, and paste a rules payload.
+    // The schema (`importDomainRuleSchema`) requires `id`, `presetId` and
+    // `enabled` and rejects unknown color values. Reusing `doc-rule-github`
+    // produces a "conflicting" classification entry; the Stack Overflow entry
+    // appears as new.
     await openImportRulesWizard(page);
     const samplePayload = JSON.stringify(
       {
         domainRules: [
           {
+            id: 'doc-import-stackoverflow',
             label: 'Stack Overflow',
             domainFilter: 'stackoverflow.com',
             titleParsingRegEx: '',
@@ -493,9 +539,12 @@ test('main journey', async (
             groupNameSource: 'smart_label',
             deduplicationMatchMode: 'exact',
             deduplicationEnabled: true,
-            color: 'gray',
+            color: 'grey',
+            presetId: null,
+            enabled: true,
           },
           {
+            id: 'doc-rule-github',
             label: 'GitHub',
             domainFilter: 'github.com',
             titleParsingRegEx: '',
@@ -504,6 +553,8 @@ test('main journey', async (
             deduplicationMatchMode: 'exact',
             deduplicationEnabled: true,
             color: 'green',
+            presetId: null,
+            enabled: true,
           },
         ],
       },

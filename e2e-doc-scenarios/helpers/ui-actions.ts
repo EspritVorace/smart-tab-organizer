@@ -430,27 +430,30 @@ export async function openEditRuleWizard(page: Page, ruleId: string): Promise<vo
   await page.getByTestId('wizard-rule').waitFor({ state: 'visible' });
 }
 
-/** Expand the Options collapsible inside the EditSummaryView, if not already. */
-export async function expandEditWizardOptions(page: Page): Promise<void> {
-  const trigger = page.getByTestId('wizard-rule-edit-toggle-options');
-  await trigger.waitFor({ state: 'visible' });
-  const state = await trigger.getAttribute('data-state');
-  if (state !== 'open') {
-    await trigger.click();
-    await page.waitForTimeout(200);
-  }
+/**
+ * Open the Options sub-modal from the edit wizard's summary view.
+ *
+ * The edit wizard lands directly on the summary; each section exposes a
+ * dedicated "Modify" button (data-testid `wizard-rule-edit-modify-step-N`)
+ * that opens the matching sub-modal. Index 2 targets the Options section.
+ */
+export async function openEditWizardOptionsModal(page: Page): Promise<void> {
+  await page.getByTestId('wizard-rule-edit-modify-step-2').click();
+  await page.getByTestId('modal-edit-options').waitFor({ state: 'visible' });
 }
 
-/** Pick a deduplication match mode in the Step 3 Options radio group. */
+/**
+ * Pick a deduplication match mode in the Options sub-modal of the edit wizard.
+ *
+ * The modal stacks on top of the wizard dialog; scope by its data-testid so we
+ * never hit a radio from the underlying summary view.
+ */
 export async function selectDeduplicationMode(
   page: Page,
   mode: 'exact' | 'includes' | 'exact_ignore_params',
 ): Promise<void> {
-  // Radix RadioGroup.Item exposes its value via the `value` attribute on the
-  // rendered button[role="radio"]. Scope to the visible dialog so we never
-  // hit a hidden radio from a stale Collapsible state.
-  const dialog = page.getByRole('dialog').first();
-  await dialog.locator(`[role="radio"][value="${mode}"]`).first().click();
+  const modal = page.getByTestId('modal-edit-options');
+  await modal.locator(`[role="radio"][value="${mode}"]`).first().click();
   await page.waitForTimeout(100);
 }
 
