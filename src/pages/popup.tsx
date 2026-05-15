@@ -31,15 +31,13 @@ export function PopupContent() {
     browser.runtime.openOptionsPage();
   }, []);
 
-  const openRulesPage = useCallback(async (): Promise<void> => {
-    const url = browser.runtime.getURL('/options.html') + '#rules';
-    const tabs = await browser.tabs.query({ url: browser.runtime.getURL('/options.html') });
-    if (tabs.length > 0) {
-      await browser.tabs.update(tabs[0].id, { active: true, url });
-      await browser.windows.update(tabs[0].windowId!, { focused: true });
-    } else {
-      await browser.tabs.create({ url });
-    }
+  const handlePopupCreateRule = useCallback(() => {
+    void openOptionsWithHash('#rules?action=create');
+    window.close();
+  }, []);
+
+  const handlePopupImportRules = useCallback(() => {
+    void openOptionsWithHash('#rules?action=import');
     window.close();
   }, []);
 
@@ -88,7 +86,8 @@ export function PopupContent() {
             <SettingsToggles
               isLoading={false}
               hasRules={false}
-              onOpenRules={openRulesPage}
+              onCreateRule={handlePopupCreateRule}
+              onImportRules={handlePopupImportRules}
             />
           ) : null}
 

@@ -80,7 +80,8 @@ describe('PopupApp rendu', () => {
     });
     render(<PopupApp />);
     expect(screen.queryByTestId('settings-toggles')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'popupGoToRules' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'popupCreateRule' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'popupImportRules' })).toBeInTheDocument();
   });
 
   it('renders SettingsToggles with rules (hasRules=true)', () => {
@@ -92,7 +93,8 @@ describe('PopupApp rendu', () => {
     });
     render(<PopupApp />);
     expect(screen.getByTestId('settings-toggles')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'popupGoToRules' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'popupCreateRule' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'popupImportRules' })).not.toBeInTheDocument();
   });
 
   it("n'affiche aucun SettingsToggles pendant le chargement (isLoaded=false)", () => {
@@ -104,7 +106,7 @@ describe('PopupApp rendu', () => {
     });
     render(<PopupApp />);
     expect(screen.queryByTestId('settings-toggles')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'popupGoToRules' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'popupCreateRule' })).not.toBeInTheDocument();
   });
 });
 
@@ -116,7 +118,7 @@ describe('openOptionsPage', () => {
   });
 });
 
-describe('openRulesPage', () => {
+describe('empty-state rule buttons', () => {
   beforeEach(() => {
     mockedUseSettings.mockReturnValue({
       settings: { ...defaultSettings, domainRules: [] },
@@ -127,32 +129,26 @@ describe('openRulesPage', () => {
     vi.spyOn(window, 'close').mockImplementation(() => {});
   });
 
-  it('creates a new tab when none is open, otherwise updates the existing tab', async () => {
-    // Scenario 1: no existing options tab -> creates a new one
+  it('"Create rule" opens options with #rules?action=create', async () => {
     mockedTabsQuery.mockResolvedValue([]);
-    const { unmount } = render(<PopupApp />);
-    fireEvent.click(screen.getByRole('button', { name: 'popupGoToRules' }));
+    render(<PopupApp />);
+    fireEvent.click(screen.getByRole('button', { name: 'popupCreateRule' }));
     await waitFor(() => {
       expect(browser.tabs.create).toHaveBeenCalledWith(
-        expect.objectContaining({ url: expect.stringContaining('#rules') }),
+        expect.objectContaining({ url: expect.stringContaining('#rules?action=create') }),
       );
       expect(window.close).toHaveBeenCalled();
     });
+  });
 
-    unmount();
-    vi.clearAllMocks();
-    vi.spyOn(window, 'close').mockImplementation(() => {});
-
-    // Scenario 2: existing options tab -> updates and focuses it
-    mockedTabsQuery.mockResolvedValue([{ id: 42, windowId: 1 }]);
+  it('"Import rules" opens options with #rules?action=import', async () => {
+    mockedTabsQuery.mockResolvedValue([]);
     render(<PopupApp />);
-    fireEvent.click(screen.getByRole('button', { name: 'popupGoToRules' }));
+    fireEvent.click(screen.getByRole('button', { name: 'popupImportRules' }));
     await waitFor(() => {
-      expect(browser.tabs.update).toHaveBeenCalledWith(
-        42,
-        expect.objectContaining({ active: true }),
+      expect(browser.tabs.create).toHaveBeenCalledWith(
+        expect.objectContaining({ url: expect.stringContaining('#rules?action=import') }),
       );
-      expect(browser.windows.update).toHaveBeenCalledWith(1, { focused: true });
       expect(window.close).toHaveBeenCalled();
     });
   });

@@ -19,6 +19,7 @@ import { moveSessionToFirstInGroup, moveSessionToLastInGroup } from '@/utils/ses
 import { useSessions } from '@/hooks/useSessions';
 import { useShortcuts } from '@/hooks/useShortcuts';
 import { useListNavigation } from '@/hooks/useListNavigation';
+import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { updateSession } from '@/utils/sessionStorage';
 import { showSuccessNotification } from '@/utils/notifications';
@@ -41,8 +42,6 @@ interface SessionsPageProps {
   restoreSessionId?: string | null;
   /** Called to clear the restore deep-link once consumed. */
   onRestoreSessionIdChange?: (id: string | null) => void;
-  /** Opens the sessions import wizard via deep-link with from=sessions. */
-  onOpenImportSessions: () => void;
 }
 
 function SectionHeader({ icon: Icon, titleKey, count }: { icon: LucideIcon; titleKey: string; count: number }) {
@@ -216,8 +215,8 @@ export function SessionsPage({
   onSnapshotGroupIdChange,
   restoreSessionId,
   onRestoreSessionIdChange,
-  onOpenImportSessions,
 }: SessionsPageProps) {
+  const { openImportSessions } = useImportExportWizards();
   const { sessions, isLoaded, createSession, renameSession, removeSession, reload, updateOrder } = useSessions();
   // Internal open state; initialized from external prop so the wizard opens immediately on mount.
   const [snapshotOpen, setSnapshotOpen] = useState(snapshotWizardOpen);
@@ -489,7 +488,7 @@ export function SessionsPage({
                     <Camera size={14} />
                     {getMessage('sessionSnapshotButton')}
                   </Button>
-                  <Button variant="soft" onClick={onOpenImportSessions}>
+                  <Button variant="soft" onClick={() => openImportSessions()}>
                     <Upload size={14} />
                     {getMessage('importSessionsButton')}
                   </Button>

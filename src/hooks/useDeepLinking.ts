@@ -1,34 +1,15 @@
 import { useState, useEffect } from 'react';
 import { logger } from '@/utils/logger';
 
-export const VALID_IMPORTEXPORT_ACTIONS = [
-  'import-rules',
-  'export-rules',
-  'import-sessions',
-  'export-sessions',
-  'import-workspace',
-  'export-workspace',
-] as const;
-
-export const VALID_FROM_VALUES = [
-  'home',
-  'rules',
-  'sessions',
-  'workspaces',
-  'popup',
-] as const;
-
-export type ImportExportAction = typeof VALID_IMPORTEXPORT_ACTIONS[number];
-export type ImportExportFrom = typeof VALID_FROM_VALUES[number];
+const VALID_RULES_ACTIONS = ['create', 'import'] as const;
+export type RulesPendingAction = typeof VALID_RULES_ACTIONS[number];
 
 interface DeepLinkState {
   currentTab: string;
   openSnapshotWizard: boolean;
-  openRuleWizard: boolean;
+  rulesPendingAction: RulesPendingAction | null;
   snapshotGroupId: number | null;
   restoreSessionId: string | null;
-  importExportAction: ImportExportAction | null;
-  importExportFrom: ImportExportFrom | null;
 }
 
 const VALID_SECTIONS = ['home', 'rules', 'importexport', 'sessions', 'stats', 'settings', 'workspaces'] as const;
@@ -54,19 +35,15 @@ function parseHash(hash: string): ParsedHash | null {
 export function useDeepLinking(): DeepLinkState & {
   setCurrentTab: (tab: string) => void;
   setOpenSnapshotWizard: (open: boolean) => void;
-  setOpenRuleWizard: (open: boolean) => void;
+  setRulesPendingAction: (action: RulesPendingAction | null) => void;
   setSnapshotGroupId: (id: number | null) => void;
   setRestoreSessionId: (id: string | null) => void;
-  setImportExportAction: (action: ImportExportAction | null) => void;
-  setImportExportFrom: (from: ImportExportFrom | null) => void;
 } {
   const [currentTab, setCurrentTab] = useState<string>('home');
   const [openSnapshotWizard, setOpenSnapshotWizard] = useState(false);
-  const [openRuleWizard, setOpenRuleWizard] = useState(false);
+  const [rulesPendingAction, setRulesPendingAction] = useState<RulesPendingAction | null>(null);
   const [snapshotGroupId, setSnapshotGroupId] = useState<number | null>(null);
   const [restoreSessionId, setRestoreSessionId] = useState<string | null>(null);
-  const [importExportAction, setImportExportAction] = useState<ImportExportAction | null>(null);
-  const [importExportFrom, setImportExportFrom] = useState<ImportExportFrom | null>(null);
 
   useEffect(() => {
     function applySessionsAction(params: URLSearchParams) {
@@ -82,31 +59,11 @@ export function useDeepLinking(): DeepLinkState & {
     }
 
     function applyRulesAction(params: URLSearchParams) {
-      if (params.get('action') === 'create') {
-        setOpenRuleWizard(true);
-      }
-    }
-
-    function applyImportExportAction(params: URLSearchParams) {
       const rawAction = params.get('action');
-      const rawFrom = params.get('from');
-
-      if (rawAction && (VALID_IMPORTEXPORT_ACTIONS as readonly string[]).includes(rawAction)) {
-        setImportExportAction(rawAction as ImportExportAction);
-      } else {
-        if (rawAction) {
-          logger.debug('[DEEPLINK] Unknown importexport action ignored:', rawAction);
-        }
-        setImportExportAction(null);
-      }
-
-      if (rawFrom && (VALID_FROM_VALUES as readonly string[]).includes(rawFrom)) {
-        setImportExportFrom(rawFrom as ImportExportFrom);
-      } else {
-        if (rawFrom) {
-          logger.debug('[DEEPLINK] Unknown importexport from ignored:', rawFrom);
-        }
-        setImportExportFrom(null);
+      if (rawAction && (VALID_RULES_ACTIONS as readonly string[]).includes(rawAction)) {
+        setRulesPendingAction(rawAction as RulesPendingAction);
+      } else if (rawAction) {
+        logger.debug('[DEEPLINK] Unknown rules action ignored:', rawAction);
       }
     }
 
@@ -116,7 +73,6 @@ export function useDeepLinking(): DeepLinkState & {
       setCurrentTab(parsed.section);
       if (parsed.section === 'sessions') applySessionsAction(parsed.params);
       else if (parsed.section === 'rules') applyRulesAction(parsed.params);
-      else if (parsed.section === 'importexport') applyImportExportAction(parsed.params);
     }
 
     handleHash();
@@ -129,15 +85,11 @@ export function useDeepLinking(): DeepLinkState & {
     setCurrentTab,
     openSnapshotWizard,
     setOpenSnapshotWizard,
-    openRuleWizard,
-    setOpenRuleWizard,
+    rulesPendingAction,
+    setRulesPendingAction,
     snapshotGroupId,
     setSnapshotGroupId,
     restoreSessionId,
     setRestoreSessionId,
-    importExportAction,
-    setImportExportAction,
-    importExportFrom,
-    setImportExportFrom,
   };
 }
