@@ -51,5 +51,16 @@ export const MAIN_JOURNEY_MANIFEST: Manifest = {
         },
       ],
     },
+    {
+      capture: 'popup-with-pinned-and-workspace',
+      destinations: [
+        {
+          target: 'starlight',
+          path: 'journey-popup-with-pinned-and-workspace',
+          locales: [...ALL_LOCALES],
+          themes: [...ALL_THEMES],
+        },
+      ],
+    },
   ],
 };

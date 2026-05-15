@@ -30,7 +30,8 @@ function SummarySection({ title, onEdit, stepIndex, children }: {
           size="1"
           highContrast
           onClick={() => onEdit(stepIndex)}
-          aria-label={`${getMessage('summaryModify')} — ${title}`}
+          aria-label={`${getMessage('summaryModify')}, ${title}`}
+          data-testid={`wizard-rule-edit-modify-step-${stepIndex}`}
         >
           <Pencil size={12} />
           {getMessage('summaryModify')}

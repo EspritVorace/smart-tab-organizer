@@ -10,9 +10,8 @@ import { captureStep, startScenario } from '../helpers/doc-capture.js';
 import { writeScenarioReadme } from '../helpers/scenario-readme.js';
 import {
   clearExtensionStorage,
-  dismissDialog,
-  expandEditWizardOptions,
   openEditRuleWizard,
+  openEditWizardOptionsModal,
   openExtensionPage,
   seedDomainRules,
   selectDeduplicationMode,
@@ -63,16 +62,18 @@ test('deduplication modes', async (
   await rulesPage.getByTestId('page-rules-list').waitFor({ state: 'visible' });
 
   await openEditRuleWizard(rulesPage, SEED_RULE.id);
-  await expandEditWizardOptions(rulesPage);
+  await openEditWizardOptionsModal(rulesPage);
 
   for (const mode of MODES) {
     await selectDeduplicationMode(rulesPage, mode);
     await captureStep(rulesPage, `edit-wizard-options-${mode.replace(/_/g, '-')}`, {
-      description: `Edit wizard, Options section expanded with deduplication mode "${mode}" selected.`,
+      description: `Edit wizard, Options sub-modal with deduplication mode "${mode}" selected.`,
     });
   }
 
-  await dismissDialog(rulesPage);
+  // Two stacked dialogs are open at this point (wizard + OptionsEditModal);
+  // closing the page short-circuits both rather than chaining two Escape
+  // presses, which can race with React/Radix focus-management cleanup.
   await rulesPage.close();
 
   await writeScenarioReadme({
