@@ -146,5 +146,17 @@ export default tseslint.config(
   {
     files: ['tests/e2e/**/*.spec.ts', 'tests/e2e/helpers/**/*.ts'],
     ...playwright.configs['flat/recommended'],
+    rules: {
+      ...playwright.configs['flat/recommended'].rules,
+      // Page Objects in e2e-shared/pages expose `expect*` wrapper methods
+      // (e.g. `wizard.expectInvalidJsonError()`) that internally call
+      // Playwright's `expect`. Teach the rule about that convention so
+      // tests written in Page Object style are not flagged as
+      // assertion-less.
+      'playwright/expect-expect': ['warn', {
+        assertFunctionNames: ['expect'],
+        assertFunctionPatterns: ['^expect[A-Z]'],
+      }],
+    },
   },
 );

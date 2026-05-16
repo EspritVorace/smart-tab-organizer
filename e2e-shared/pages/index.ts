@@ -8,3 +8,4 @@ export {
   ImportWizardPage,
   type ImportClassificationCounts,
 } from './ImportWizardPage.js';
+export { ExportWizardPage } from './ExportWizardPage.js';
