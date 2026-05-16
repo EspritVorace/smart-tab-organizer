@@ -2,12 +2,15 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { composeStories } from '@storybook/react';
 import * as stories from '../../src/components/HomePage/TipsSection.stories';
+import { TIPS } from '../../src/components/HomePage/data';
 
 const {
   TipsSectionCards,
   TipsSectionListe,
   TipsSectionAccordeon,
 } = composeStories(stories);
+
+const LAST_TIP_INDEX = TIPS.length - 1;
 
 describe('TipsSection (portable stories)', () => {
   it('cards story renders carousel controls, dots, and navigates with chevrons + dot clicks', () => {
@@ -34,10 +37,10 @@ describe('TipsSection (portable stories)', () => {
     fireEvent.click(screen.getByTestId('home-tips-dot-3'));
     expect(screen.getByTestId('home-tips-dot-3')).toHaveAttribute('aria-selected', 'true');
 
-    // Wrap-around: jump back to dot 0 then click Prev to wrap to last (4).
+    // Wrap-around: jump back to dot 0 then click Prev to wrap to the last tip.
     fireEvent.click(screen.getByTestId('home-tips-dot-0'));
     fireEvent.click(screen.getByTestId('home-tips-prev'));
-    expect(screen.getByTestId('home-tips-dot-4')).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByTestId(`home-tips-dot-${LAST_TIP_INDEX}`)).toHaveAttribute('aria-selected', 'true');
   });
 
   it('liste story renders the section without carousel controls or dots', () => {
