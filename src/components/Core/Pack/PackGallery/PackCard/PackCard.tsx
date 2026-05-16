@@ -11,6 +11,7 @@ import {
 import { resolvePackRules, type PackParamSelection } from '@/utils/packResolution';
 import type { PackFile } from '@/schemas/pack';
 import type { ImportDomainRule } from '@/schemas/importExport';
+import type { PackInstallInfo } from '@/utils/packInstallStatus';
 import { PackRulesPreview } from './PackRulesPreview';
 import styles from '@/components/Core/Pack/PackGallery/PackGallery.module.css';
 
@@ -18,7 +19,14 @@ interface PackCardProps {
   pack: PackFile;
   selected: boolean;
   onSelectionChange: (next: { selected: boolean; rules: ImportDomainRule[] }) => void;
+  installInfo?: PackInstallInfo;
 }
+
+const DEFAULT_INSTALL_INFO: PackInstallInfo = {
+  status: 'not-installed',
+  installedCount: 0,
+  totalCount: 0,
+};
 
 function computeRuleCountLabel(isConfigurable: boolean, ruleCount: number): string {
   if (!isConfigurable) {
@@ -50,7 +58,12 @@ function stopActivation(event: React.SyntheticEvent) {
   event.stopPropagation();
 }
 
-export function PackCard({ pack, selected, onSelectionChange }: PackCardProps) {
+export function PackCard({
+  pack,
+  selected,
+  onSelectionChange,
+  installInfo = DEFAULT_INSTALL_INFO,
+}: PackCardProps) {
   const [selection, setSelection] = useState<PackParamSelection>(() =>
     buildInitialSelection(pack),
   );
@@ -63,12 +76,15 @@ export function PackCard({ pack, selected, onSelectionChange }: PackCardProps) {
   const checkboxId = useId();
   const ruleCount = resolvedRules.length;
   const isConfigurable = Boolean(pack.pack.configurable);
+  const isFullyInstalled = installInfo.status === 'installed';
+  const isPartiallyInstalled = installInfo.status === 'partial';
 
   const handleToggle = useCallback(
     (next: boolean) => {
+      if (isFullyInstalled) return;
       onSelectionChange({ selected: next, rules: next ? resolvedRules : [] });
     },
-    [onSelectionChange, resolvedRules],
+    [isFullyInstalled, onSelectionChange, resolvedRules],
   );
 
   const handleParamChange = useCallback(
@@ -93,12 +109,34 @@ export function PackCard({ pack, selected, onSelectionChange }: PackCardProps) {
     ? `${styles.packCard} ${styles.packCardSelected}`
     : styles.packCard;
 
+  let installedBadge: React.ReactNode = null;
+  if (isFullyInstalled) {
+    installedBadge = (
+      <Tooltip content={getMessage('packCardInstalledTooltip')}>
+        <Badge color="gray" variant="soft" size="1">
+          {getMessage('packCardInstalledBadge')}
+        </Badge>
+      </Tooltip>
+    );
+  } else if (isPartiallyInstalled) {
+    installedBadge = (
+      <Badge color="gray" variant="outline" size="1">
+        {getMessage('packCardPartiallyInstalledBadge', [
+          String(installInfo.installedCount),
+          String(installInfo.totalCount),
+        ])}
+      </Badge>
+    );
+  }
+
   return (
     <label
       htmlFor={checkboxId}
       className={cardClassName}
       data-testid={`pack-card-${pack.pack.id}`}
       data-selected={selected ? 'true' : 'false'}
+      data-install-status={installInfo.status}
+      aria-disabled={isFullyInstalled || undefined}
     >
       <Flex align="start" gap="3">
         <Box style={{ paddingTop: 2 }}>
@@ -106,6 +144,7 @@ export function PackCard({ pack, selected, onSelectionChange }: PackCardProps) {
             id={checkboxId}
             checked={selected}
             onCheckedChange={(value) => handleToggle(value === true)}
+            disabled={isFullyInstalled}
             aria-label={name}
             data-testid={`pack-card-${pack.pack.id}-checkbox`}
           />
@@ -122,6 +161,7 @@ export function PackCard({ pack, selected, onSelectionChange }: PackCardProps) {
                 </Badge>
               </Tooltip>
             )}
+            {installedBadge}
           </Flex>
           {description && (
             <Text size="2" color="gray">

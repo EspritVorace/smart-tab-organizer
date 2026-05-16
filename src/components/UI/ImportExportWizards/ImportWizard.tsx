@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { FileUp } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast } from '@/utils/toast';
@@ -72,6 +72,11 @@ export function ImportWizard({
   const { packs, categories } = usePacks();
   const { classification, conflictMode, newSelection, source } = state;
 
+  const existingRuleIds = useMemo(
+    () => new Set(existingRules.map((rule) => rule.id)),
+    [existingRules],
+  );
+
   const handlePackConfirm = useCallback(() => {
     const aggregated: ImportDomainRule[] = [];
     for (const pack of packs) {
@@ -141,6 +146,7 @@ export function ImportWizard({
           categories={categories}
           selections={packSelections.selections}
           onSelectionChange={packSelections.setPackSelection}
+          existingRuleIds={existingRuleIds}
         />
       }
       packFooter={{

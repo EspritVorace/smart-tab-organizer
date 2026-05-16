@@ -9,6 +9,7 @@ import {
   resolvePackName,
 } from '@/utils/packLabel';
 import type { PackCategory, PackFile } from '@/schemas/pack';
+import { computePackInstallStatus } from '@/utils/packInstallStatus';
 import { PackCard } from './PackCard/PackCard';
 import { PackCategoryHeader } from './PackCategoryHeader/PackCategoryHeader';
 import {
@@ -23,7 +24,10 @@ interface PackGalleryProps {
   categories: PackCategory[];
   selections: Record<string, PackSelectionState>;
   onSelectionChange: (packId: string, next: PackSelectionState) => void;
+  existingRuleIds?: ReadonlySet<string>;
 }
+
+const EMPTY_RULE_IDS: ReadonlySet<string> = new Set();
 
 function matchesSearch(pack: PackFile, normalized: string): boolean {
   if (!normalized) return true;
@@ -57,6 +61,7 @@ export function PackGallery({
   categories,
   selections,
   onSelectionChange,
+  existingRuleIds = EMPTY_RULE_IDS,
 }: PackGalleryProps) {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>(ALL_CATEGORIES);
@@ -128,12 +133,14 @@ export function PackGallery({
 
   const renderPack = (pack: PackFile) => {
     const sel = selections[pack.pack.id];
+    const installInfo = computePackInstallStatus(pack, existingRuleIds);
     return (
       <PackCard
         key={pack.pack.id}
         pack={pack}
         selected={sel?.selected ?? false}
         onSelectionChange={(next) => onSelectionChange(pack.pack.id, next)}
+        installInfo={installInfo}
       />
     );
   };
