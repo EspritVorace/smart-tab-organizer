@@ -5,9 +5,15 @@ import {
 } from '../../e2e-shared/extension-loader.js';
 import { getExtensionId } from '../../e2e-shared/extension-id.js';
 
+// Side-effect import: registers custom matchers on Playwright's `expect`.
+// Must be imported once from a fixture file so every spec inherits the
+// extended matchers (`toHaveDomainRulesCount`, `toHaveToast`, ...).
+import '../../e2e-shared/matchers/register.js';
+
 export interface ExtensionFixtures {
   extensionContext: BrowserContext;
   extensionId: string;
+  extensionPage: Page;
   popupPage: Page;
   optionsPage: Page;
 }
@@ -110,6 +116,40 @@ export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers 
   extensionId: [async ({ extensionContext }, use) => {
     await use(getExtensionId(extensionContext));
   }, { scope: 'worker' }],
+
+  /**
+   * Page-scoped fixture providing a fresh `Page` per test, sparing the
+   * caller from the `extensionContext.newPage()` + `page.close()`
+   * plumbing that pollutes most specs (and is the root cause of the
+   * `last-page-browser-exit` pattern documented in
+   * `.claude/agents/e2e-flaky-detector.md`).
+   *
+   * After the test:
+   *   1. silently ignore an already-closed page (`isClosed()`),
+   *   2. refuse to close the page if it is the last one in the
+   *      context (closing it would terminate the persistent context
+   *      and kill the worker for the next test).
+   *
+   * Multi-page specs (sessions, deduplication, ...) keep using
+   * `extensionContext.newPage()` directly; this fixture is a
+   * convenience for the single-page majority.
+   */
+  extensionPage: async ({ extensionContext }, use) => {
+    const page = await extensionContext.newPage();
+    await use(page);
+    if (page.isClosed()) return;
+    // "Last page" guard: closing the only remaining page closes the
+    // persistent context, which Chromium-launched extensions cannot
+    // survive between tests. Keep it open instead.
+    if (extensionContext.pages().length <= 1) return;
+    try {
+      await page.close();
+    } catch {
+      // Page was closed between the isClosed() check and the close()
+      // call (race when the test triggers an extension flow that
+      // tears the page down).
+    }
+  },
 
   // Popup page fixture
   popupPage: async ({ extensionContext, extensionId }, use) => {
