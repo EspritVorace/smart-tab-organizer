@@ -3,9 +3,9 @@
  * `e2e-doc-scenarios/`. Consumes Page Objects from `../pages/`.
  *
  * Each action narrates a single business outcome ("import rules from
- * JSON text", "export rules to a file") and hides the wizard step
- * plumbing so specs read as business intent rather than a sequence of
- * clicks.
+ * JSON text", "create a snapshot with these tabs", "export sessions to a
+ * file") and hides the wizard step plumbing so specs read as business
+ * intent rather than a sequence of clicks.
  */
 export {
   openRulesImportWizard,
@@ -16,3 +16,34 @@ export {
   exportRulesToClipboard,
   type ExportRulesOptions,
 } from './rules-import-export.js';
+
+export {
+  openRuleWizard,
+  openEditRuleWizard,
+  createRuleViaWizard,
+  editRule,
+  type RuleWizardCreateConfig,
+  type RuleWizardEditPatch,
+} from './rules-management.js';
+
+export {
+  openSnapshotWizard,
+  createSnapshotWithTabs,
+  pinSession,
+  type CreateSnapshotOptions,
+} from './sessions-snapshot.js';
+
+export {
+  openCustomizeRestoreWizard,
+  restoreSessionAsReplace,
+  restoreSessionAsMerge,
+  type RestoreReplaceOptions,
+  type RestoreMergeOptions,
+} from './sessions-restore.js';
+
+export {
+  openSessionsExportWizard,
+  exportSessionsToFile,
+  exportSessionsToClipboard,
+  type ExportSessionsOptions,
+} from './sessions-export.js';
