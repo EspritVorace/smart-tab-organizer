@@ -12,5 +12,11 @@
     },
     "skipLibCheck": true
   },
-  "include": ["src/**/*", ".wxt/wxt.d.ts"]
+  "include": [
+    "src/**/*",
+    "e2e-shared/pages/**/*",
+    "e2e-shared/actions/**/*",
+    "e2e-shared/matchers/**/*",
+    ".wxt/wxt.d.ts"
+  ]
 }
