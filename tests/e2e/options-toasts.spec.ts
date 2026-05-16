@@ -70,8 +70,14 @@ function makeRuleJson(label: string, domainFilter: string): string {
   });
 }
 
-async function submitTextImport(page: any, json: string): Promise<void> {
-  await page.getByTestId('page-import-export-card-import-rules').getByRole('button', { name: /^import$/i }).click();
+async function submitTextImport(
+  page: any,
+  json: string,
+  options: { skipOpen?: boolean } = {},
+): Promise<void> {
+  if (!options.skipOpen) {
+    await page.getByTestId('page-import-export-card-import-rules').getByRole('button', { name: /^import$/i }).click();
+  }
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible({ timeout: 5000 });
   await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
@@ -90,38 +96,39 @@ test.describe('Options page toasts', () => {
   test('rule import shows an in-page toast and no native notification', async ({
     extensionContext,
     extensionId,
+    extensionPage,
   }) => {
-    const page = await extensionContext.newPage();
-    await goToImportExportSection(page, extensionId);
+    await goToImportExportSection(extensionPage, extensionId);
 
     const notifBefore = await getSmartTabNotificationIds(extensionContext);
 
-    await submitTextImport(page, makeRuleJson('Toast Rule', 'toast-visible.com'));
+    await extensionPage.getByTestId('page-import-export-card-import-rules')
+      .getByRole('button', { name: /^import$/i })
+      .click();
+    await expect(extensionPage).toHaveDialogOpen();
 
-    const toast = page.getByTestId('toast-success');
-    await expect(toast).toBeVisible({ timeout: 3000 });
+    await submitTextImport(extensionPage, makeRuleJson('Toast Rule', 'toast-visible.com'), {
+      skipOpen: true,
+    });
+
+    await expect(extensionPage).toHaveToast('success');
+    await expect(extensionContext).toHaveDomainRulesCount(1);
 
     const notifAfter = await getSmartTabNotificationIds(extensionContext);
     expect(notifAfter).toEqual(notifBefore);
-
-    await page.close();
   });
 
   test('closing a toast removes it from the viewport', async ({
-    extensionContext,
     extensionId,
+    extensionPage,
   }) => {
-    const page = await extensionContext.newPage();
-    await goToImportExportSection(page, extensionId);
+    await goToImportExportSection(extensionPage, extensionId);
 
-    await submitTextImport(page, makeRuleJson('Toast Close Rule', 'toast-close.com'));
+    await submitTextImport(extensionPage, makeRuleJson('Toast Close Rule', 'toast-close.com'));
 
-    const toast = page.getByTestId('toast-success');
-    await expect(toast).toBeVisible({ timeout: 3000 });
+    await expect(extensionPage).toHaveToast('success');
 
-    await page.getByTestId('toast-btn-close').first().click();
-    await expect(toast).toBeHidden({ timeout: 2000 });
-
-    await page.close();
+    await extensionPage.getByTestId('toast-btn-close').first().click();
+    await expect(extensionPage.getByTestId('toast-success')).toBeHidden({ timeout: 2000 });
   });
 });
