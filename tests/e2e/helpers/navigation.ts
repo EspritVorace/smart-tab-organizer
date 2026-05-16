@@ -62,6 +62,29 @@ export async function goToDomainRulesSection(page: Page, extensionId: string): P
   await page.getByTestId('page-rules-btn-add').waitFor({ state: 'visible', timeout: 10_000 });
 }
 
+/**
+ * Navigate to the Import / Export section of the options page and wait
+ * until both action cards are visible (rules + sessions). Uses the
+ * sidebar nav item rather than the hash so the same code path covers
+ * tests that exercise hash routing separately.
+ */
+export async function goToImportExportSection(page: Page, extensionId: string): Promise<void> {
+  await page.goto(`chrome-extension://${extensionId}/options.html`);
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForFunction(
+    () => {
+      const body = document.body.textContent ?? '';
+      return !body.includes('Chargement') && body.length > 50;
+    },
+    null,
+    { timeout: 10_000 },
+  );
+  // Use the test id so the click is unambiguous (the accessible name now
+  // matches both the sidebar nav item and the home quick-action card).
+  await page.getByTestId('sidebar-nav-item-importexport').click();
+  await page.getByTestId('page-import-export-card-import-rules').waitFor({ state: 'visible' });
+}
+
 /** Navigate to the extension popup page. */
 export async function goToPopup(page: Page, extensionId: string): Promise<void> {
   await page.goto(`chrome-extension://${extensionId}/popup.html`);
