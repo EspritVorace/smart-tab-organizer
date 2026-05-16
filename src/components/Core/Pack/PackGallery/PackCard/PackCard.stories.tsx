@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { PackCard } from './PackCard';
 import type { PackFile } from '@/schemas/pack';
 import type { ImportDomainRule } from '@/schemas/importExport';
+import type { PackInstallInfo } from '@/utils/packInstallStatus';
 
 const baseRule = (overrides: Partial<ImportDomainRule>): ImportDomainRule => ({
   id: overrides.id ?? 'r1',
@@ -68,9 +69,11 @@ const configurablePack: PackFile = {
 function PackCardHarness({
   pack,
   initiallySelected = false,
+  installInfo,
 }: {
   pack: PackFile;
   initiallySelected?: boolean;
+  installInfo?: PackInstallInfo;
 }) {
   const [selected, setSelected] = useState(initiallySelected);
   return (
@@ -78,6 +81,7 @@ function PackCardHarness({
       pack={pack}
       selected={selected}
       onSelectionChange={({ selected: next }) => setSelected(next)}
+      installInfo={installInfo}
     />
   );
 }
@@ -122,5 +126,19 @@ export const PackCardConfigurableNoMatch: Story = {
       ],
     },
     initiallySelected: true,
+  },
+};
+
+export const PackCardPartiallyInstalled: Story = {
+  args: {
+    pack: simplePack,
+    installInfo: { status: 'partial', installedCount: 1, totalCount: 2 },
+  },
+};
+
+export const PackCardFullyInstalled: Story = {
+  args: {
+    pack: simplePack,
+    installInfo: { status: 'installed', installedCount: 2, totalCount: 2 },
   },
 };

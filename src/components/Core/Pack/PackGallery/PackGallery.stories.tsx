@@ -80,9 +80,15 @@ interface HarnessProps {
   packs: PackFile[];
   categories: PackCategory[];
   initialSearch?: string;
+  existingRuleIds?: ReadonlySet<string>;
 }
 
-function PackGalleryHarness({ packs, categories, initialSearch }: HarnessProps) {
+function PackGalleryHarness({
+  packs,
+  categories,
+  initialSearch,
+  existingRuleIds,
+}: HarnessProps) {
   const [selections, setSelections] = useState<Record<string, PackSelectionState>>({});
   const [, force] = useState(0);
   if (typeof initialSearch === 'string') {
@@ -107,6 +113,7 @@ function PackGalleryHarness({ packs, categories, initialSearch }: HarnessProps) 
       categories={categories}
       selections={selections}
       onSelectionChange={(id, next) => setSelections((prev) => ({ ...prev, [id]: next }))}
+      existingRuleIds={existingRuleIds}
     />
   );
 }
@@ -149,5 +156,14 @@ export const PackGalleryConfigurableExpanded: Story = {
   args: {
     packs: [packs[0]],
     categories: [categories[0]],
+  },
+};
+
+export const PackGalleryWithInstalledPacks: Story = {
+  args: {
+    packs,
+    categories,
+    // pk-github (g, l) is fully installed; pk-cloud (a1, a2, g1) is partial (1/3).
+    existingRuleIds: new Set(['g', 'l', 'a1']),
   },
 };
