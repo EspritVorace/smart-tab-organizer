@@ -47,3 +47,34 @@ export {
   exportSessionsToClipboard,
   type ExportSessionsOptions,
 } from './sessions-export.js';
+
+export {
+  openPopup,
+  triggerOrganizeFromPopup,
+} from './popup-actions.js';
+
+export {
+  openChildTabViaMiddleClick,
+  openChildTabViaContextMenu,
+  waitForGroupCreated,
+  type GroupingHelpers,
+  type TabGroupInfo,
+} from './tabs-grouping.js';
+
+export {
+  expectTabDeduplicated,
+  undoLastDeduplication,
+  type DeduplicationHelpers,
+} from './tabs-deduplication.js';
+
+export {
+  getServiceWorker,
+  getServiceWorkerWithUndoFn,
+  getServiceWorkerWithOrganizeFn,
+  getNotificationIds,
+  getSmartTabNotificationIds,
+  clearAllNotifications,
+  setNotificationPrefs,
+  executeNotificationUndo,
+  triggerOrganizeAllTabsViaSW,
+} from './notifications.js';

@@ -10,53 +10,22 @@
  *
  * Because native browser notifications cannot be intercepted by Playwright DOM
  * queries, these tests verify notification behaviour at the service-worker level
- * using chrome.notifications.getAll() and by inspecting observable side-effects
- * (tab count changes, group count changes, skip-list state).
+ * using `chrome.notifications.getAll()` and by inspecting observable
+ * side-effects (tab count changes, group count changes, skip-list state).
+ *
+ * Migrated to the Page Object / Domain Action architecture (lot 5):
+ * the SW handshake, the smarttab-id filter and the undo trigger now live
+ * in `e2e-shared/actions/notifications.ts`.
  */
 
 import { test, expect } from './fixtures';
-
-// ─── helpers ────────────────────────────────────────────────────────────────
-
-/** Returns all currently visible notification IDs from the service worker. */
-async function getNotificationIds(sw: any): Promise<string[]> {
-  return sw.evaluate(async () => {
-    return new Promise<string[]>(resolve => {
-      chrome.notifications.getAll(notifications => resolve(Object.keys(notifications)));
-    });
-  });
-}
-
-/** Sets notifyOnGrouping and notifyOnDeduplication via storage. */
-async function setNotificationPrefs(
-  sw: any,
-  prefs: { notifyOnGrouping?: boolean; notifyOnDeduplication?: boolean },
-) {
-  await sw.evaluate(async (p: { notifyOnGrouping?: boolean; notifyOnDeduplication?: boolean }) => {
-    await chrome.storage.local.set(p);
-  }, prefs);
-  await new Promise(r => setTimeout(r, 100));
-}
-
-/**
- * Polls until executeNotificationUndoById is available on the SW's globalThis.
- * Needed because the SW may be idle-terminated and restarting while the test waits,
- * causing a race condition where background.ts hasn't finished re-initializing yet.
- */
-async function getSwWithUndoFn(extensionContext: any, timeoutMs = 5000): Promise<any> {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    const sw = extensionContext.serviceWorkers()[0];
-    if (sw) {
-      const ready = await sw.evaluate(
-        () => typeof (globalThis as any).executeNotificationUndoById === 'function',
-      ).catch(() => false);
-      if (ready) return sw;
-    }
-    await new Promise(r => setTimeout(r, 200));
-  }
-  throw new Error('executeNotificationUndoById not available on SW globalThis after timeout');
-}
+import {
+  clearAllNotifications,
+  executeNotificationUndo,
+  getServiceWorker,
+  getSmartTabNotificationIds,
+  setNotificationPrefs,
+} from '../../e2e-shared/actions/index.js';
 
 // ─── suite ──────────────────────────────────────────────────────────────────
 
@@ -82,7 +51,7 @@ test.describe('Notifications', () => {
       helpers,
       extensionContext,
     }) => {
-      const sw = extensionContext.serviceWorkers()[0];
+      const sw = await getServiceWorker(extensionContext);
       await setNotificationPrefs(sw, { notifyOnGrouping: true });
 
       await helpers.addDomainRule({
@@ -101,9 +70,7 @@ test.describe('Notifications', () => {
       // Give the notification a moment to be created
       await new Promise(r => setTimeout(r, 500));
 
-      const notificationIds = await getNotificationIds(sw);
-      // At least one notification should have been created with the smarttab prefix
-      const smartTabNotifs = notificationIds.filter(id => id.startsWith('smarttab-'));
+      const smartTabNotifs = await getSmartTabNotificationIds(sw);
       expect(smartTabNotifs.length).toBeGreaterThan(0);
     });
 
@@ -111,18 +78,9 @@ test.describe('Notifications', () => {
       helpers,
       extensionContext,
     }) => {
-      const sw = extensionContext.serviceWorkers()[0];
+      const sw = await getServiceWorker(extensionContext);
       await setNotificationPrefs(sw, { notifyOnGrouping: false });
-
-      // Clear any pre-existing notifications
-      await sw.evaluate(async () => {
-        const notifs = await new Promise<Record<string, any>>(resolve =>
-          chrome.notifications.getAll(resolve),
-        );
-        for (const id of Object.keys(notifs)) {
-          chrome.notifications.clear(id);
-        }
-      });
+      await clearAllNotifications(sw);
 
       await helpers.addDomainRule({
         label: 'No Notify Group',
@@ -139,8 +97,7 @@ test.describe('Notifications', () => {
 
       await new Promise(r => setTimeout(r, 500));
 
-      const notificationIds = await getNotificationIds(sw);
-      const smartTabNotifs = notificationIds.filter(id => id.startsWith('smarttab-'));
+      const smartTabNotifs = await getSmartTabNotificationIds(sw);
       expect(smartTabNotifs).toHaveLength(0);
     });
 
@@ -148,7 +105,7 @@ test.describe('Notifications', () => {
       helpers,
       extensionContext,
     }) => {
-      const sw = extensionContext.serviceWorkers()[0];
+      const sw = await getServiceWorker(extensionContext);
       await setNotificationPrefs(sw, { notifyOnGrouping: true });
 
       await helpers.addDomainRule({
@@ -166,20 +123,14 @@ test.describe('Notifications', () => {
 
       await new Promise(r => setTimeout(r, 500));
 
-      const notificationIds = await getNotificationIds(sw);
-      const notifId = notificationIds.find(id => id.startsWith('smarttab-'));
+      const smartTabNotifs = await getSmartTabNotificationIds(sw);
+      const notifId = smartTabNotifs[0];
       expect(notifId).toBeDefined();
 
-      // Trigger the Undo action via the exposed globalThis helper
-      const undoSw = await getSwWithUndoFn(extensionContext);
-      await undoSw.evaluate(async (id: string) => {
-        await (globalThis as any).executeNotificationUndoById(id);
-      }, notifId!);
-
+      await executeNotificationUndo(extensionContext, notifId);
       await new Promise(r => setTimeout(r, 1000));
 
       const groups = await helpers.getTabGroups();
-      // Undo should have ungrouped the tabs
       expect(groups).toHaveLength(0);
     });
   });
@@ -191,20 +142,11 @@ test.describe('Notifications', () => {
       helpers,
       extensionContext,
     }) => {
-      const sw = extensionContext.serviceWorkers()[0];
+      const sw = await getServiceWorker(extensionContext);
       await setNotificationPrefs(sw, { notifyOnDeduplication: true });
       await helpers.setGlobalDeduplicationEnabled(true);
       await helpers.setGlobalGroupingEnabled(false);
-
-      // Clear any pre-existing notifications
-      await sw.evaluate(async () => {
-        const notifs = await new Promise<Record<string, any>>(resolve =>
-          chrome.notifications.getAll(resolve),
-        );
-        for (const id of Object.keys(notifs)) {
-          chrome.notifications.clear(id);
-        }
-      });
+      await clearAllNotifications(sw);
 
       const _tab1 = await helpers.createTab('https://example.com/page-dedup');
       await helpers.waitForDeduplication();
@@ -214,13 +156,11 @@ test.describe('Notifications', () => {
       await helpers.waitForDeduplication();
 
       const finalCount = await helpers.getTabCount();
-      // Deduplication should have removed the duplicate tab
       expect(finalCount).toBeLessThanOrEqual(initialCount);
 
       await new Promise(r => setTimeout(r, 500));
 
-      const notificationIds = await getNotificationIds(sw);
-      const smartTabNotifs = notificationIds.filter(id => id.startsWith('smarttab-'));
+      const smartTabNotifs = await getSmartTabNotificationIds(sw);
       expect(smartTabNotifs.length).toBeGreaterThan(0);
     });
 
@@ -228,31 +168,20 @@ test.describe('Notifications', () => {
       helpers,
       extensionContext,
     }) => {
-      const sw = extensionContext.serviceWorkers()[0];
+      const sw = await getServiceWorker(extensionContext);
       await setNotificationPrefs(sw, { notifyOnDeduplication: false });
       await helpers.setGlobalDeduplicationEnabled(true);
       await helpers.setGlobalGroupingEnabled(false);
+      await clearAllNotifications(sw);
 
-      // Clear any pre-existing notifications
-      await sw.evaluate(async () => {
-        const notifs = await new Promise<Record<string, any>>(resolve =>
-          chrome.notifications.getAll(resolve),
-        );
-        for (const id of Object.keys(notifs)) {
-          chrome.notifications.clear(id);
-        }
-      });
-
-      const _tab1 = await helpers.createTab('https://example.com/page-nodedup');
+      await helpers.createTab('https://example.com/page-nodedup');
       await helpers.waitForDeduplication();
-
       await helpers.createTab('https://example.com/page-nodedup');
       await helpers.waitForDeduplication();
 
       await new Promise(r => setTimeout(r, 500));
 
-      const notificationIds = await getNotificationIds(sw);
-      const smartTabNotifs = notificationIds.filter(id => id.startsWith('smarttab-'));
+      const smartTabNotifs = await getSmartTabNotificationIds(sw);
       expect(smartTabNotifs).toHaveLength(0);
     });
 
@@ -260,20 +189,11 @@ test.describe('Notifications', () => {
       helpers,
       extensionContext,
     }) => {
-      const sw = extensionContext.serviceWorkers()[0];
+      const sw = await getServiceWorker(extensionContext);
       await setNotificationPrefs(sw, { notifyOnDeduplication: true });
       await helpers.setGlobalDeduplicationEnabled(true);
       await helpers.setGlobalGroupingEnabled(false);
-
-      // Clear pre-existing notifications
-      await sw.evaluate(async () => {
-        const notifs = await new Promise<Record<string, any>>(resolve =>
-          chrome.notifications.getAll(resolve),
-        );
-        for (const id of Object.keys(notifs)) {
-          chrome.notifications.clear(id);
-        }
-      });
+      await clearAllNotifications(sw);
 
       await helpers.createTab('https://example.com/undo-dedup');
       await helpers.waitForDeduplication();
@@ -286,20 +206,13 @@ test.describe('Notifications', () => {
 
       await new Promise(r => setTimeout(r, 500));
 
-      const notificationIds = await getNotificationIds(sw);
-      const notifId = notificationIds.find(id => id.startsWith('smarttab-'));
+      const notifId = (await getSmartTabNotificationIds(sw))[0];
       expect(notifId).toBeDefined();
 
-      // Trigger Undo to reopen the closed tab
-      const undoSw = await getSwWithUndoFn(extensionContext);
-      await undoSw.evaluate(async (id: string) => {
-        await (globalThis as any).executeNotificationUndoById(id);
-      }, notifId!);
-
+      await executeNotificationUndo(extensionContext, notifId);
       await new Promise(r => setTimeout(r, 1500));
 
       const countAfterUndo = await helpers.getTabCount();
-      // The undone tab should have been reopened, increasing count
       expect(countAfterUndo).toBeGreaterThan(countAfterDedup);
     });
   });
@@ -311,54 +224,40 @@ test.describe('Notifications', () => {
       helpers,
       extensionContext,
     }) => {
-      const sw = extensionContext.serviceWorkers()[0];
+      const sw = await getServiceWorker(extensionContext);
       await setNotificationPrefs(sw, { notifyOnDeduplication: true });
       await helpers.setGlobalDeduplicationEnabled(true);
       await helpers.setGlobalGroupingEnabled(false);
-
-      // Clear pre-existing notifications
-      await sw.evaluate(async () => {
-        const notifs = await new Promise<Record<string, any>>(resolve =>
-          chrome.notifications.getAll(resolve),
-        );
-        for (const id of Object.keys(notifs)) {
-          chrome.notifications.clear(id);
-        }
-      });
+      await clearAllNotifications(sw);
 
       const testUrl = 'https://example.com/protected-reopen';
 
       await helpers.createTab(testUrl);
       await helpers.waitForDeduplication();
 
-      // Create a duplicate — should be deduplicated
       await helpers.createTab(testUrl);
       await helpers.waitForDeduplication();
 
       await new Promise(r => setTimeout(r, 500));
 
-      const notificationIds = await getNotificationIds(sw);
-      const notifId = notificationIds.find(id => id.startsWith('smarttab-'));
+      const notifId = (await getSmartTabNotificationIds(sw))[0];
       expect(notifId).toBeDefined();
 
       const countBeforeUndo = await helpers.getTabCount();
-
-      // Trigger Undo to reopen the deduplicated tab
-      const undoSw = await getSwWithUndoFn(extensionContext);
-      await undoSw.evaluate(async (id: string) => {
-        await (globalThis as any).executeNotificationUndoById(id);
-      }, notifId!);
-
+      await executeNotificationUndo(extensionContext, notifId);
       await new Promise(r => setTimeout(r, 1500));
 
       const countAfterUndo = await helpers.getTabCount();
-      // The tab should have been reopened (count increased by at least 1)
       expect(countAfterUndo).toBeGreaterThan(countBeforeUndo);
 
       // The URL should be in the skip-deduplication list for 10 seconds.
-      // Use undoSw (same SW instance that ran the undo and owns the in-memory skip list).
+      // Re-resolve the SW to evaluate `shouldSkipDeduplication` on the
+      // same instance that owns the in-memory skip list.
+      const undoSw = await getServiceWorker(extensionContext);
       const isProtected = await undoSw.evaluate((url: string) => {
-        return globalThis.shouldSkipDeduplication(url);
+        return (globalThis as unknown as {
+          shouldSkipDeduplication: (url: string) => boolean;
+        }).shouldSkipDeduplication(url);
       }, testUrl);
       expect(isProtected).toBe(true);
     });
@@ -371,18 +270,9 @@ test.describe('Notifications', () => {
       helpers,
       extensionContext,
     }) => {
-      const sw = extensionContext.serviceWorkers()[0];
+      const sw = await getServiceWorker(extensionContext);
       await setNotificationPrefs(sw, { notifyOnGrouping: true });
-
-      // Clear pre-existing notifications
-      await sw.evaluate(async () => {
-        const notifs = await new Promise<Record<string, any>>(resolve =>
-          chrome.notifications.getAll(resolve),
-        );
-        for (const id of Object.keys(notifs)) {
-          chrome.notifications.clear(id);
-        }
-      });
+      await clearAllNotifications(sw);
 
       await helpers.addDomainRule({
         label: 'Cleanup Test',
@@ -399,12 +289,10 @@ test.describe('Notifications', () => {
 
       await new Promise(r => setTimeout(r, 500));
 
-      const notificationIds = await getNotificationIds(sw);
-      const notifId = notificationIds.find(id => id.startsWith('smarttab-'));
+      const notifId = (await getSmartTabNotificationIds(sw))[0];
       expect(notifId).toBeDefined();
 
-      // Verify the format: smarttab-{numeric timestamp}
-      const parts = notifId!.split('-');
+      const parts = notifId.split('-');
       expect(parts[0]).toBe('smarttab');
       expect(Number(parts[1])).toBeGreaterThan(0);
     });
@@ -413,7 +301,7 @@ test.describe('Notifications', () => {
       helpers,
       extensionContext,
     }) => {
-      const sw = extensionContext.serviceWorkers()[0];
+      const sw = await getServiceWorker(extensionContext);
       await setNotificationPrefs(sw, { notifyOnGrouping: true });
 
       await helpers.addDomainRule({
@@ -431,20 +319,19 @@ test.describe('Notifications', () => {
 
       await new Promise(r => setTimeout(r, 500));
 
-      const notificationIds = await getNotificationIds(sw);
-      const notifId = notificationIds.find(id => id.startsWith('smarttab-'));
+      const notifId = (await getSmartTabNotificationIds(sw))[0];
       expect(notifId).toBeDefined();
 
-      // Close the notification (simulate manual close / timeout via chrome.notifications.clear,
-      // which triggers the onClosed listener that cleans up pendingUndoActions)
+      // Close the notification (simulate manual close / timeout via
+      // chrome.notifications.clear, which triggers the onClosed listener
+      // that cleans up pendingUndoActions).
       await sw.evaluate(async (id: string) => {
         await chrome.notifications.clear(id);
-      }, notifId!);
+      }, notifId);
 
       await new Promise(r => setTimeout(r, 300));
 
-      // After close, the notification should no longer be visible
-      const remainingIds = await getNotificationIds(sw);
+      const remainingIds = await getSmartTabNotificationIds(sw);
       expect(remainingIds).not.toContain(notifId);
     });
   });
@@ -456,16 +343,13 @@ test.describe('Notifications', () => {
       helpers,
       extensionContext,
     }) => {
-      const sw = extensionContext.serviceWorkers()[0];
-
-      // Set them independently
+      const sw = await getServiceWorker(extensionContext);
       await setNotificationPrefs(sw, { notifyOnGrouping: true, notifyOnDeduplication: false });
 
       const settings = await helpers.getSettings();
       expect(settings.notifyOnGrouping).toBe(true);
       expect(settings.notifyOnDeduplication).toBe(false);
 
-      // Change only deduplication
       await setNotificationPrefs(sw, { notifyOnDeduplication: true });
 
       const updated = await helpers.getSettings();
@@ -477,20 +361,11 @@ test.describe('Notifications', () => {
       helpers,
       extensionContext,
     }) => {
-      const sw = extensionContext.serviceWorkers()[0];
+      const sw = await getServiceWorker(extensionContext);
       await setNotificationPrefs(sw, { notifyOnGrouping: true, notifyOnDeduplication: false });
       await helpers.setGlobalGroupingEnabled(true);
       await helpers.setGlobalDeduplicationEnabled(true);
-
-      // Clear pre-existing notifications
-      await sw.evaluate(async () => {
-        const notifs = await new Promise<Record<string, any>>(resolve =>
-          chrome.notifications.getAll(resolve),
-        );
-        for (const id of Object.keys(notifs)) {
-          chrome.notifications.clear(id);
-        }
-      });
+      await clearAllNotifications(sw);
 
       // Trigger deduplication first (should NOT generate a notification)
       await helpers.createTab('https://example.com/only-dedup');
@@ -499,9 +374,7 @@ test.describe('Notifications', () => {
       await helpers.waitForDeduplication();
 
       await new Promise(r => setTimeout(r, 500));
-      const afterDedup = await getNotificationIds(sw);
-      const smartTabAfterDedup = afterDedup.filter(id => id.startsWith('smarttab-'));
-      expect(smartTabAfterDedup).toHaveLength(0);
+      expect(await getSmartTabNotificationIds(sw)).toHaveLength(0);
 
       // Now trigger grouping (SHOULD generate a notification)
       await helpers.clearDomainRules();
@@ -519,29 +392,19 @@ test.describe('Notifications', () => {
       await helpers.waitForTabGrouped('Only Grouping Notif');
 
       await new Promise(r => setTimeout(r, 500));
-      const afterGrouping = await getNotificationIds(sw);
-      const smartTabAfterGrouping = afterGrouping.filter(id => id.startsWith('smarttab-'));
-      expect(smartTabAfterGrouping.length).toBeGreaterThan(0);
+      const afterGrouping = await getSmartTabNotificationIds(sw);
+      expect(afterGrouping.length).toBeGreaterThan(0);
     });
 
     test('notifyOnGrouping=false, notifyOnDeduplication=true: only deduplication creates notifications [US-N005]', async ({
       helpers,
       extensionContext,
     }) => {
-      const sw = extensionContext.serviceWorkers()[0];
+      const sw = await getServiceWorker(extensionContext);
       await setNotificationPrefs(sw, { notifyOnGrouping: false, notifyOnDeduplication: true });
       await helpers.setGlobalGroupingEnabled(true);
       await helpers.setGlobalDeduplicationEnabled(true);
-
-      // Clear pre-existing notifications
-      await sw.evaluate(async () => {
-        const notifs = await new Promise<Record<string, any>>(resolve =>
-          chrome.notifications.getAll(resolve),
-        );
-        for (const id of Object.keys(notifs)) {
-          chrome.notifications.clear(id);
-        }
-      });
+      await clearAllNotifications(sw);
 
       // Trigger grouping (should NOT generate a notification)
       await helpers.addDomainRule({
@@ -558,9 +421,7 @@ test.describe('Notifications', () => {
       await helpers.waitForTabGrouped('No Grouping Notif');
 
       await new Promise(r => setTimeout(r, 500));
-      const afterGrouping = await getNotificationIds(sw);
-      const smartTabAfterGrouping = afterGrouping.filter(id => id.startsWith('smarttab-'));
-      expect(smartTabAfterGrouping).toHaveLength(0);
+      expect(await getSmartTabNotificationIds(sw)).toHaveLength(0);
 
       // Now trigger deduplication (SHOULD generate a notification)
       await helpers.clearAllTabGroups();
@@ -572,9 +433,8 @@ test.describe('Notifications', () => {
       await helpers.waitForDeduplication();
 
       await new Promise(r => setTimeout(r, 500));
-      const afterDedup = await getNotificationIds(sw);
-      const smartTabAfterDedup = afterDedup.filter(id => id.startsWith('smarttab-'));
-      expect(smartTabAfterDedup.length).toBeGreaterThan(0);
+      const afterDedup = await getSmartTabNotificationIds(sw);
+      expect(afterDedup.length).toBeGreaterThan(0);
     });
   });
 });

@@ -4,6 +4,7 @@
  * template used to create a new Page Object.
  */
 export { DialogPage } from './DialogPage.js';
+export { PopupPage } from './PopupPage.js';
 export {
   ImportWizardPage,
   type ImportClassificationCounts,
