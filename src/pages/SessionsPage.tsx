@@ -238,7 +238,7 @@ function SessionSection({
             </Button>
             <Button
               size="1"
-              variant="solid"
+              variant="soft"
               color="red"
               highContrast
               data-testid={`page-sessions-bulk-btn-delete-${testIdSuffix}`}

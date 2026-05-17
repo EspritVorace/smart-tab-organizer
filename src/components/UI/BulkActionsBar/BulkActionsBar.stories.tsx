@@ -40,7 +40,7 @@ function rulesActions() {
         <FileDown size={14} />
         Export Selected
       </Button>
-      <Button size="1" variant="solid" color="red" highContrast>
+      <Button size="1" variant="soft" color="red" highContrast>
         <Trash2 size={14} />
         Delete Selected
       </Button>
@@ -59,7 +59,7 @@ function sessionsUnpinnedActions() {
         <FileDown size={14} />
         Export Selected
       </Button>
-      <Button size="1" variant="solid" color="red" highContrast>
+      <Button size="1" variant="soft" color="red" highContrast>
         <Trash2 size={14} />
         Delete Selected
       </Button>
@@ -78,7 +78,7 @@ function sessionsPinnedActions() {
         <FileDown size={14} />
         Export Selected
       </Button>
-      <Button size="1" variant="solid" color="red" highContrast>
+      <Button size="1" variant="soft" color="red" highContrast>
         <Trash2 size={14} />
         Delete Selected
       </Button>

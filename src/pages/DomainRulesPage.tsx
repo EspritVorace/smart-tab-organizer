@@ -349,7 +349,7 @@ export function DomainRulesPage({
                 </Button>
                 <Button
                   size="1"
-                  variant="solid"
+                  variant="soft"
                   color="red"
                   highContrast
                   onClick={() => setDeleteTarget({ type: 'bulk', ruleIds: Array.from(selectedIds) })}
