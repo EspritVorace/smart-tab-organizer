@@ -1,14 +1,5 @@
-import { test as base, type BrowserContext, type Page } from '@playwright/test';
-import {
-  launchExtension,
-  cleanupUserDataDir,
-} from '../../e2e-shared/extension-loader.js';
-import { getExtensionId } from '../../e2e-shared/extension-id.js';
-
-// Side-effect import: registers custom matchers on Playwright's `expect`.
-// Must be imported once from a fixture file so every spec inherits the
-// extended matchers (`toHaveDomainRulesCount`, `toHaveToast`, ...).
-import '../../e2e-shared/matchers/register.js';
+import { type BrowserContext, type Page } from '@playwright/test';
+import { createExtensionTest } from '../../e2e-shared/fixtures-base.js';
 
 export interface ExtensionFixtures {
   extensionContext: BrowserContext;
@@ -96,27 +87,13 @@ async function localSet(sw: Page, data: Record<string, unknown>): Promise<void> 
   }, data as Record<string, unknown>);
 }
 
-export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers }>({
-  // Custom browser extensionContext with extension loaded — worker-scoped so the browser
-  // is launched once per worker instead of once per test.
-  extensionContext: [async ({}, use) => {
-    const { context, userDataDir } = await launchExtension({
-      label: 'chrome',
-      headless: false,
-      lang: 'en-US',
-    });
+const baseTest = createExtensionTest(() => ({
+  label: 'chrome',
+  headless: false,
+  lang: 'en-US',
+}));
 
-    await use(context);
-
-    await context.close();
-    cleanupUserDataDir(userDataDir);
-  }, { scope: 'worker' }],
-
-  // Get extension ID from service worker — worker-scoped, resolved once per worker.
-  extensionId: [async ({ extensionContext }, use) => {
-    await use(getExtensionId(extensionContext));
-  }, { scope: 'worker' }],
-
+export const test = baseTest.extend<Omit<ExtensionFixtures, 'extensionContext' | 'extensionId'> & { helpers: ExtensionHelpers }>({
   /**
    * Page-scoped fixture providing a fresh `Page` per test, sparing the
    * caller from the `extensionContext.newPage()` + `page.close()`

@@ -8,7 +8,14 @@
  * narrates the business intent so specs read as "given an opener, open a
  * grouped child" rather than a sequence of micro-steps.
  */
-import type { Page } from '@playwright/test';
+import type { BrowserContext, Page } from '@playwright/test';
+import { waitForServiceWorker } from '../extension-id.js';
+
+// Minimal Chrome typings consumed inside `evaluate` callbacks. The shared
+// bundle does not pull in `@types/chrome`; the only API used here is
+// `chrome.tabGroups.query`, which we narrow via an `unknown` cast at the
+// call site below.
+declare const chrome: unknown;
 
 export interface TabGroupInfo {
   id: number;
@@ -72,4 +79,42 @@ export async function waitForGroupCreated(
   timeoutMs = 8_000,
 ): Promise<TabGroupInfo[]> {
   return helpers.waitForTabGrouped(title, timeoutMs);
+}
+
+/**
+ * Wait for the extension's grouping pipeline to settle without the helpers
+ * fixture. Polls `chrome.tabGroups.query` via the service worker until the
+ * group count is stable for 600 ms or the timeout elapses.
+ *
+ * Used by the narrative capture pipeline, which only has access to the
+ * BrowserContext (no `helpers` injection): the doc-scenarios fixture
+ * extends the same `e2e-shared/fixtures-base.ts` as the functional suite
+ * but stops short of plumbing the `helpers` object.
+ */
+export async function waitForGroupingSettled(
+  context: BrowserContext,
+  timeoutMs = 5_000,
+): Promise<void> {
+  const sw = await waitForServiceWorker(context);
+  const deadline = Date.now() + timeoutMs;
+  let lastCount = -1;
+  let stableMs = 0;
+  while (Date.now() < deadline) {
+    const count = await sw.evaluate<number>(async () => {
+      const browser = chrome as unknown as {
+        tabGroups?: { query: (q: object) => Promise<unknown[]> };
+      };
+      if (!browser.tabGroups) return 0;
+      const groups = await browser.tabGroups.query({});
+      return groups.length;
+    });
+    if (count === lastCount) {
+      stableMs += 200;
+      if (stableMs >= 600) return;
+    } else {
+      lastCount = count;
+      stableMs = 0;
+    }
+    await new Promise((r) => setTimeout(r, 200));
+  }
 }

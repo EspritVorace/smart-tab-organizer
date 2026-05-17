@@ -29,26 +29,54 @@ export abstract class ExportWizardPageBase extends DialogPage {
     return this.dialog().locator('textarea').first();
   }
 
-  /** Primary "Export" button (defaults to JSON file). */
+  /**
+   * Primary "Export" button (defaults to JSON file).
+   *
+   * Subclasses override `primaryExportTestId` to point at their specific
+   * testid (rules vs. sessions); the base falls back to a role-based
+   * lookup when the subclass does not provide one.
+   */
   exportFileButton(): Locator {
+    const testId = this.primaryExportTestId();
+    if (testId) return this.dialog().getByTestId(testId);
     return this.dialog().getByRole('button', { name: /^export$/i });
   }
 
   /**
    * Chevron / "Export options" button that opens the split-button popover
-   * (file vs. clipboard).
+   * (file vs. clipboard). Locale-agnostic: anchors on the Lucide
+   * `chevron-down` icon used inside the chevron button (see SplitButton).
    */
   exportOptionsButton(): Locator {
-    return this.dialog().getByRole('button', { name: /export.*option|chevron/i });
+    return this.dialog().locator('button:has(svg.lucide-chevron-down)').first();
   }
 
   /**
    * Clipboard menu item inside the split-button popover. Lives outside the
-   * dialog (Radix Popover.Content is portalled), so we anchor on the page,
-   * not on `dialog()`.
+   * dialog (Radix DropdownMenu.Content is portalled), so we anchor on the
+   * page, not on `dialog()`. Subclasses provide a testid for cross-locale
+   * stability; the base falls back to a role-based lookup.
    */
   exportClipboardButton(): Locator {
+    const testId = this.clipboardExportTestId();
+    if (testId) return this.page.getByTestId(testId);
     return this.page.getByRole('menuitem', { name: /clipboard/i });
+  }
+
+  // ─── Subclass extension points ───────────────────────────────────────────
+
+  /**
+   * Optional testid for the primary "Export to file" button. Subclasses
+   * return the concrete value (e.g. `wizard-export-rules-btn-export`); the
+   * base falls back to a role-based lookup when undefined.
+   */
+  protected primaryExportTestId(): string | undefined {
+    return undefined;
+  }
+
+  /** Optional testid for the clipboard menu item in the split-button popover. */
+  protected clipboardExportTestId(): string | undefined {
+    return undefined;
   }
 
   /** "Select all" toolbar button (exact match to avoid the sibling "Deselect all"). */
