@@ -58,9 +58,9 @@ export function ImportWizardFooter({
     return (
       <>
         <Dialog.Close>
-          <Button variant="soft" color="gray">{getMessage('cancel')}</Button>
+          <Button variant="soft" color="gray" data-testid="import-wizard-btn-cancel">{getMessage('cancel')}</Button>
         </Dialog.Close>
-        <Button onClick={onNext} disabled={!hasParsedData}>
+        <Button onClick={onNext} disabled={!hasParsedData} data-testid="import-wizard-btn-next">
           {getMessage('next')}
         </Button>
       </>
@@ -69,10 +69,10 @@ export function ImportWizardFooter({
 
   return (
     <>
-      <Button variant="soft" color="gray" onClick={onBack}>
+      <Button variant="soft" color="gray" onClick={onBack} data-testid="import-wizard-btn-previous">
         {getMessage('previous')}
       </Button>
-      <Button onClick={onConfirm} disabled={importCount === 0}>
+      <Button onClick={onConfirm} disabled={importCount === 0} data-testid="import-wizard-btn-confirm">
         {getMessage('confirmImport')}
       </Button>
     </>

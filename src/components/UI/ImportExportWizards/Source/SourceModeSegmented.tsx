@@ -27,7 +27,11 @@ export function SourceModeSegmented<T>({
       size="2"
     >
       {availableModes.map((mode) => (
-        <SegmentedControl.Item key={mode} value={mode}>
+        <SegmentedControl.Item
+          key={mode}
+          value={mode}
+          data-testid={`source-mode-${mode}`}
+        >
           {getMessage(MODE_LABEL_KEYS[mode])}
         </SegmentedControl.Item>
       ))}
