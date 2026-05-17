@@ -27,6 +27,7 @@ test.describe('[KBD-DND] Domain rules keyboard drag-and-drop', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
+    // allow-inline-dom: drag-handle is a DnD atom selector, not a dialog/wizard surface.
     const handle = page.locator('[data-testid$="-drag-handle"]').first();
     await expect(handle).toBeVisible();
 
@@ -119,6 +120,7 @@ test.describe('[KBD-DND] Domain rules keyboard drag-and-drop', () => {
 
     await page.getByTestId('page-rules-search').fill('git');
 
+    // allow-inline-dom: drag-handle is a DnD atom selector, not a dialog/wizard surface.
     const handle = page.locator('[data-testid$="-drag-handle"]').first();
     await expect(handle).toBeDisabled();
 

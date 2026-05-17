@@ -130,6 +130,9 @@ jobs:
       - name: Run ESLint with CTRF reporter
         run: pnpm lint:ctrf
 
+      - name: E2E grep guard (no inline DOM access outside Page Objects)
+        run: bash .github/scripts/e2e-no-inline-dom.sh
+
       - name: Generate lint markdown summary
         if: always()
         run: node scripts/lint-markdown.mjs > ctrf/lint.md

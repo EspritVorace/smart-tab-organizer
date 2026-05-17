@@ -50,6 +50,12 @@ Subclass `DialogPage` (declared in this folder). It exposes:
 - `expectVisible()` / `expectHidden()`: parameterised waits,
 - `clickButton(name: RegExp | string)`: footer button shortcut.
 
+`DialogPage` is also directly instantiable for the rare case where a
+spec only needs the generic "a Radix dialog is open" assertion (e.g.
+keyboard-sequence specs that fan out to several wizards and only check
+that one of them opened). Subclass instead when the test needs
+dialog-specific interactions.
+
 Override `dialog()` in your subclass when **more than one dialog can be
 visible at a time** (nested confirmation, error overlay, ...) so each
 Page Object scopes its locators to its own dialog:

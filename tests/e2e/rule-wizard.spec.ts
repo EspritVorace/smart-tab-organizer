@@ -367,8 +367,8 @@ test.describe('Edit mode — Summary View', () => {
 
     await wizard.clickModifySection(1);
 
-    const dialogs = page.locator('[role="dialog"]');
-    await expect(dialogs).toHaveCount(2);
+    await wizard.expectVisible();
+    await expect(page.getByTestId('modal-edit-config')).toBeVisible();
     await page.close();
   });
 

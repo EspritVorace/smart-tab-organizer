@@ -18,6 +18,7 @@ async function createWorkspace(page: Page, name: string) {
   await page.getByTestId('workspace-form-name').fill(name);
   await page.getByTestId('workspace-form-btn-submit').click();
   await expect(page.getByTestId('workspace-form-dialog')).toBeHidden();
+  // allow-inline-dom: testid-prefix scoping to a list row, not a dialog/wizard.
   await expect(page.locator('[data-testid^="workspace-row-"]', { hasText: name })).toBeVisible();
 }
 

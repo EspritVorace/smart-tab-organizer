@@ -27,6 +27,7 @@ test.describe('[KBD-DND] Sessions keyboard drag-and-drop', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
+    // allow-inline-dom: drag-handle is a DnD atom selector, not a dialog/wizard surface.
     const handle = page.locator('[data-testid$="-drag-handle"]').first();
     await expect(handle).toBeVisible();
 

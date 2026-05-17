@@ -146,7 +146,8 @@ test.describe('[US-DR-SEARCH-03] Highlight matching text in domain rule cards', 
 
     await page.getByPlaceholder('Search rules...').fill('GitHub');
 
-    // A <mark> element should wrap the matching part of the label
+    // A <mark> element should wrap the matching part of the label.
+    // allow-inline-dom: `<mark>` is the search highlight atom, not a dialog/wizard surface.
     await expect(page.locator('mark').filter({ hasText: 'GitHub' }).first()).toBeVisible();
     await page.close();
   });
@@ -163,7 +164,8 @@ test.describe('[US-DR-SEARCH-03] Highlight matching text in domain rule cards', 
 
     await page.getByPlaceholder('Search rules...').fill('vercel');
 
-    // A <mark> element should wrap the matching part of the domain filter text
+    // A <mark> element should wrap the matching part of the domain filter text.
+    // allow-inline-dom: `<mark>` is the search highlight atom, not a dialog/wizard surface.
     await expect(page.locator('mark').filter({ hasText: 'vercel' }).first()).toBeVisible();
     await page.close();
   });
@@ -178,12 +180,13 @@ test.describe('[US-DR-SEARCH-03] Highlight matching text in domain rule cards', 
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
-    // No search term → no <mark> elements
+    // No search term so no <mark> elements.
+    // allow-inline-dom: `<mark>` is the search highlight atom, not a dialog/wizard surface.
     await expect(page.locator('mark')).toHaveCount(0);
     await page.close();
   });
 
-  test('highlight is case-insensitive — lowercase query matches mixed-case label', async ({
+  test('highlight is case-insensitive: lowercase query matches mixed-case label', async ({
     extensionContext,
     extensionId,
     helpers,
@@ -195,6 +198,7 @@ test.describe('[US-DR-SEARCH-03] Highlight matching text in domain rule cards', 
 
     await page.getByPlaceholder('Search rules...').fill('confluence');
 
+    // allow-inline-dom: `<mark>` is the search highlight atom, not a dialog/wizard surface.
     await expect(page.locator('mark').filter({ hasText: /confluence/i }).first()).toBeVisible();
     await page.close();
   });
