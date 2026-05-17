@@ -11,12 +11,14 @@ interface ExportWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   rules: DomainRuleSetting[];
+  initialSelectedIds?: string[];
 }
 
-export function ExportWizard({ open, onOpenChange, rules }: ExportWizardProps) {
+export function ExportWizard({ open, onOpenChange, rules, initialSelectedIds }: ExportWizardProps) {
   const state = useExportWizardState<DomainRuleSetting>({
     open,
     items: rules,
+    initialSelectedIds,
     payloadKey: 'domainRules',
     filename: 'smarttab_organizer_rules.json',
     notifyTitleKey: 'exportNotificationTitle',

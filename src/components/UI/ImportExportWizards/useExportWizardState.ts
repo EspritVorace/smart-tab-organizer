@@ -8,6 +8,12 @@ interface UseExportWizardStateOptions<TItem extends { id: string }> {
   items?: TItem[];
   /** Async loader called when the dialog opens (e.g. `loadSessions`). */
   loadItems?: () => Promise<TItem[]>;
+  /**
+   * Optional pre-selection applied on dialog open (sync `items` source only).
+   * Invalid ids (not in `items`) are filtered out. When omitted or empty,
+   * all items are selected (historical default).
+   */
+  initialSelectedIds?: string[];
   /** JSON top-level key wrapping the selected items (e.g. "domainRules", "sessions"). */
   payloadKey: string;
   filename: string;
@@ -40,6 +46,7 @@ export function useExportWizardState<TItem extends { id: string }>({
   open,
   items: providedItems,
   loadItems,
+  initialSelectedIds,
   payloadKey,
   filename,
   notifyTitleKey,
@@ -59,7 +66,16 @@ export function useExportWizardState<TItem extends { id: string }>({
         selection.setAll(loaded.map((item) => item.id));
       });
     } else if (providedItems) {
-      selection.setAll(providedItems.map((item) => item.id));
+      if (initialSelectedIds && initialSelectedIds.length > 0) {
+        const validIds = initialSelectedIds.filter((id) =>
+          providedItems.some((item) => item.id === id),
+        );
+        selection.setAll(
+          validIds.length > 0 ? validIds : providedItems.map((item) => item.id),
+        );
+      } else {
+        selection.setAll(providedItems.map((item) => item.id));
+      }
     }
   });
 

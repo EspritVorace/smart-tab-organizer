@@ -1,12 +1,13 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button, Text, Flex, Box, Checkbox, Separator } from '@radix-ui/themes';
-import { Plus, Eye, EyeOff, Shield, AlertCircle, Upload, Trash2 } from 'lucide-react';
+import { Plus, Eye, EyeOff, Shield, AlertCircle, Upload, Trash2, FileDown } from 'lucide-react';
 import { DragDropProvider, type DragEndEvent, type DragOverEvent } from '@dnd-kit/react';
 import { move } from '@dnd-kit/helpers';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { EmptyState } from '@/components/UI/EmptyState';
 import { RuleWizardModal } from '@/components/Core/DomainRule/RuleWizardModal';
+import { ExportWizard } from '@/components/UI/ImportExportWizards/ExportWizard';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
 import { ListToolbar } from '@/components/UI/ListToolbar';
 import { getMessage } from '@/utils/i18n';
@@ -67,11 +68,12 @@ interface BulkActionsBarProps {
   onSelectAll: (checked: boolean) => void;
   onBulkToggle: (ids: string[], enabled: boolean) => void;
   onBulkDeleteRequest: (ids: string[]) => void;
+  onBulkExportRequest: (ids: string[]) => void;
 }
 
 function BulkActionsBar({
   selectedIds, filteredRules: _filteredRules, isAllSelected, isIndeterminate,
-  onSelectAll, onBulkToggle, onBulkDeleteRequest,
+  onSelectAll, onBulkToggle, onBulkDeleteRequest, onBulkExportRequest,
 }: BulkActionsBarProps) {
   return (
     <Flex data-testid="page-rules-bulk-bar" align="center" gap="3" p="2" mb="4"
@@ -96,6 +98,15 @@ function BulkActionsBar({
         <Button size="1" variant="soft" onClick={() => onBulkToggle(Array.from(selectedIds), false)}>
           <EyeOff size={14} />
           {getMessage('disableSelected')}
+        </Button>
+        <Button
+          size="1"
+          variant="soft"
+          data-testid="page-rules-bulk-btn-export"
+          onClick={() => onBulkExportRequest(Array.from(selectedIds))}
+        >
+          <FileDown size={14} />
+          {getMessage('exportSelected')}
         </Button>
         <Button size="1" variant="soft" color="red"
           onClick={() => onBulkDeleteRequest(Array.from(selectedIds))}>
@@ -168,6 +179,7 @@ export function DomainRulesPage({
   }, [syncSettings.domainRules, updateRules]);
 
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const [bulkExportIds, setBulkExportIds] = useState<string[] | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -378,6 +390,7 @@ export function DomainRulesPage({
                 onSelectAll={handleSelectAll}
                 onBulkToggle={handleBulkToggle}
                 onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', ruleIds: ids })}
+                onBulkExportRequest={(ids) => setBulkExportIds(ids)}
               />
             )}
 
@@ -452,6 +465,13 @@ export function DomainRulesPage({
             : getMessage('confirmDeleteRule')
         }
         description={confirmDeleteDescription(deleteTarget, syncSettings.domainRules)}
+      />
+
+      <ExportWizard
+        open={bulkExportIds != null}
+        onOpenChange={(open) => { if (!open) setBulkExportIds(null); }}
+        rules={syncSettings.domainRules}
+        initialSelectedIds={bulkExportIds ?? undefined}
       />
 
     </>
