@@ -36,6 +36,20 @@ type DeleteTarget =
   | { type: 'single'; session: Session }
   | { type: 'bulk'; scope: BulkScope; ids: string[] };
 
+/** Returns `prev` unchanged when every id is still visible, otherwise a new
+ * Set restricted to ids present in `visible`. Used to keep section-local
+ * selections in sync after delete / pin / search filtering. */
+function pruneSelection(prev: Set<string>, visible: readonly { id: string }[]): Set<string> {
+  const visibleIds = new Set(visible.map(s => s.id));
+  let changed = false;
+  const next = new Set<string>();
+  for (const id of prev) {
+    if (visibleIds.has(id)) next.add(id);
+    else changed = true;
+  }
+  return changed ? next : prev;
+}
+
 interface SessionsPageProps {
   syncSettings: AppSettings;
   /** Controlled by options.tsx: true when a deep-link requests the snapshot wizard. */
@@ -440,29 +454,11 @@ export function SessionsPage({
   // pinned/unpinned, or filtered out by the search). This keeps the master
   // checkbox count in sync with what the user actually sees.
   useEffect(() => {
-    const visibleIds = new Set(pinnedSessions.map(s => s.id));
-    setSelectedPinnedIds(prev => {
-      let changed = false;
-      const next = new Set<string>();
-      for (const id of prev) {
-        if (visibleIds.has(id)) next.add(id);
-        else changed = true;
-      }
-      return changed ? next : prev;
-    });
+    setSelectedPinnedIds(prev => pruneSelection(prev, pinnedSessions));
   }, [pinnedSessions]);
 
   useEffect(() => {
-    const visibleIds = new Set(unpinnedSessions.map(s => s.id));
-    setSelectedUnpinnedIds(prev => {
-      let changed = false;
-      const next = new Set<string>();
-      for (const id of prev) {
-        if (visibleIds.has(id)) next.add(id);
-        else changed = true;
-      }
-      return changed ? next : prev;
-    });
+    setSelectedUnpinnedIds(prev => pruneSelection(prev, unpinnedSessions));
   }, [unpinnedSessions]);
 
   const handleSaveSession = useCallback(
