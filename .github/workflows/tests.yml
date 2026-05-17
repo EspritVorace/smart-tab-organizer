@@ -213,10 +213,17 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - name: Cache Playwright browsers
+        id: playwright-cache
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Report Playwright cache status
+        run: |
+          STATUS="${{ steps.playwright-cache.outputs.cache-hit }}"
+          echo "Playwright cache hit: ${STATUS:-false}"
+          echo "Playwright cache hit: ${STATUS:-false}" >> "$GITHUB_STEP_SUMMARY"
 
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm build
@@ -260,10 +267,17 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - name: Cache Playwright browsers
+        id: playwright-cache
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Report Playwright cache status
+        run: |
+          STATUS="${{ steps.playwright-cache.outputs.cache-hit }}"
+          echo "Playwright cache hit: ${STATUS:-false}"
+          echo "Playwright cache hit: ${STATUS:-false}" >> "$GITHUB_STEP_SUMMARY"
 
       - run: pnpm exec playwright install --with-deps chromium
 
