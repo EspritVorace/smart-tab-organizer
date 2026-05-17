@@ -371,6 +371,8 @@
   "confirmDeleteSelectedSessions": { "message": "¿Eliminar las sesiones seleccionadas?" },
   "confirmDeleteSelectedSessionsDescription": { "message": "Esta acción eliminará definitivamente {count} sesión(es). No se puede deshacer." },
   "sessionSelectAriaLabel": { "message": "Seleccionar sesión" },
+  "pinSelected": { "message": "Anclar selección" },
+  "unpinSelected": { "message": "Desanclar selección" },
 
   "snapshotTitle": { "message": "Guardar instantánea de sesión" },
   "snapshotDescription": { "message": "Elige qué pestañas incluir en esta sesión." },

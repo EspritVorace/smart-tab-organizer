@@ -371,6 +371,8 @@
   "confirmDeleteSelectedSessions": { "message": "Supprimer les sessions sélectionnées ?" },
   "confirmDeleteSelectedSessionsDescription": { "message": "Cette action supprimera définitivement {count} session(s). Elle est irréversible." },
   "sessionSelectAriaLabel": { "message": "Sélectionner la session" },
+  "pinSelected": { "message": "Épingler la sélection" },
+  "unpinSelected": { "message": "Désépingler la sélection" },
 
   "snapshotTitle": { "message": "Sauvegarder un instantané" },
   "snapshotDescription": { "message": "Choisissez les onglets à inclure dans cette session." },

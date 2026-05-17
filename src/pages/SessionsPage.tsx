@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Box, Flex, Button, Text, Callout, Separator, Badge } from '@radix-ui/themes';
-import { Camera, Archive, CheckCircle, Pin, Upload, Trash2, FileDown, type LucideIcon } from 'lucide-react';
+import { Camera, Archive, CheckCircle, Pin, PinOff, Upload, Trash2, FileDown, type LucideIcon } from 'lucide-react';
 import { DragDropProvider, type DragOverEvent, type DragEndEvent } from '@dnd-kit/react';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { move } from '@dnd-kit/helpers';
@@ -111,6 +111,8 @@ interface SessionSectionProps {
   onSelectionChange: (next: Set<string>) => void;
   onBulkDeleteRequest: (ids: string[]) => void;
   onBulkExportRequest: (ids: string[]) => void;
+  /** Bulk pin (in unpinned section) / unpin (in pinned section). */
+  onBulkPinToggle: (ids: string[]) => void;
   /** Suffix appended to bulk testIds (e.g. 'pinned' / 'unpinned'). */
   testIdSuffix: BulkScope;
 }
@@ -139,6 +141,7 @@ function SessionSection({
   onSelectionChange,
   onBulkDeleteRequest,
   onBulkExportRequest,
+  onBulkPinToggle,
   testIdSuffix,
 }: SessionSectionProps) {
   const [dragItems, setDragItems] = useState<Session[] | null>(null);
@@ -215,6 +218,15 @@ function SessionSection({
             isIndeterminate={isIndeterminate}
             onSelectAll={handleSelectAll}
           >
+            <Button
+              size="1"
+              variant="soft"
+              data-testid={`page-sessions-bulk-btn-${isPinned ? 'unpin' : 'pin'}-${testIdSuffix}`}
+              onClick={() => onBulkPinToggle(Array.from(selectedIds))}
+            >
+              {isPinned ? <PinOff size={14} /> : <Pin size={14} />}
+              {getMessage(isPinned ? 'unpinSelected' : 'pinSelected')}
+            </Button>
             <Button
               size="1"
               variant="soft"
@@ -484,6 +496,13 @@ export function SessionsPage({
     [reload],
   );
 
+  const handleBulkPinToggle = useCallback(async (ids: string[], makePinned: boolean) => {
+    for (const id of ids) {
+      await updateSession(id, { isPinned: makePinned });
+    }
+    await reload();
+  }, [reload]);
+
   const handleDeleteConfirm = useCallback(async () => {
     if (!deleteTarget) return;
     if (deleteTarget.type === 'single') {
@@ -631,6 +650,7 @@ export function SessionsPage({
                 onSelectionChange={setSelectedPinnedIds}
                 onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'pinned', ids })}
                 onBulkExportRequest={(ids) => setBulkExportIds(ids)}
+                onBulkPinToggle={(ids) => handleBulkPinToggle(ids, false)}
                 testIdSuffix="pinned"
                 {...sharedSectionProps}
               />
@@ -648,6 +668,7 @@ export function SessionsPage({
                 onSelectionChange={setSelectedUnpinnedIds}
                 onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'unpinned', ids })}
                 onBulkExportRequest={(ids) => setBulkExportIds(ids)}
+                onBulkPinToggle={(ids) => handleBulkPinToggle(ids, true)}
                 testIdSuffix="unpinned"
                 {...sharedSectionProps}
               />

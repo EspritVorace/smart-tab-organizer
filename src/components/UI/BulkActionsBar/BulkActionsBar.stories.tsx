@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { Theme, Button, Box } from '@radix-ui/themes';
-import { Eye, EyeOff, FileDown, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, FileDown, Pin, PinOff, Trash2 } from 'lucide-react';
 import { BulkActionsBar } from './BulkActionsBar';
 
 const meta = {
@@ -48,9 +48,32 @@ function rulesActions() {
   );
 }
 
-function sessionsActions() {
+function sessionsUnpinnedActions() {
   return (
     <>
+      <Button size="1" variant="soft">
+        <Pin size={14} />
+        Pin Selected
+      </Button>
+      <Button size="1" variant="soft">
+        <FileDown size={14} />
+        Export Selected
+      </Button>
+      <Button size="1" variant="solid" color="red" highContrast>
+        <Trash2 size={14} />
+        Delete Selected
+      </Button>
+    </>
+  );
+}
+
+function sessionsPinnedActions() {
+  return (
+    <>
+      <Button size="1" variant="soft">
+        <PinOff size={14} />
+        Unpin Selected
+      </Button>
       <Button size="1" variant="soft">
         <FileDown size={14} />
         Export Selected
@@ -93,7 +116,19 @@ export const BulkActionsBarSessions: Story = {
     isAllSelected: false,
     isIndeterminate: true,
     onSelectAll: () => {},
-    children: sessionsActions(),
+    children: sessionsUnpinnedActions(),
+  },
+  render: (args) => <ControlledBulkBar {...args} />,
+};
+
+export const BulkActionsBarSessionsPinned: Story = {
+  args: {
+    testId: 'page-sessions-bulk-bar-pinned',
+    selectedCount: 1,
+    isAllSelected: false,
+    isIndeterminate: true,
+    onSelectAll: () => {},
+    children: sessionsPinnedActions(),
   },
   render: (args) => <ControlledBulkBar {...args} />,
 };
@@ -117,7 +152,7 @@ export const BulkActionsBarSingleSelected: Story = {
     isAllSelected: false,
     isIndeterminate: true,
     onSelectAll: () => {},
-    children: sessionsActions(),
+    children: sessionsUnpinnedActions(),
   },
   render: (args) => <ControlledBulkBar {...args} />,
 };
