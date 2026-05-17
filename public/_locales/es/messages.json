@@ -368,6 +368,9 @@
   "sessionNamePlaceholder": { "message": "ej. Pestañas de trabajo - Lunes" },
   "sessionSaveError": { "message": "Error al guardar la sesión. Por favor, inténtalo de nuevo." },
   "confirmDeleteSession": { "message": "¿Estás seguro de que quieres eliminar la sesión \"{name}\"? Esta acción no se puede deshacer." },
+  "confirmDeleteSelectedSessions": { "message": "¿Eliminar las sesiones seleccionadas?" },
+  "confirmDeleteSelectedSessionsDescription": { "message": "Esta acción eliminará definitivamente {count} sesión(es). No se puede deshacer." },
+  "sessionSelectAriaLabel": { "message": "Seleccionar sesión" },
 
   "snapshotTitle": { "message": "Guardar instantánea de sesión" },
   "snapshotDescription": { "message": "Elige qué pestañas incluir en esta sesión." },

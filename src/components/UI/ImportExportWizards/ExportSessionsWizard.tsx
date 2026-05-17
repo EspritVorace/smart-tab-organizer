@@ -12,12 +12,15 @@ import { SessionExportGroupSection } from './Export';
 interface ExportSessionsWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Optional pre-selection (typically passed by a bulk action call site). */
+  initialSelectedIds?: string[];
 }
 
-export function ExportSessionsWizard({ open, onOpenChange }: ExportSessionsWizardProps) {
+export function ExportSessionsWizard({ open, onOpenChange, initialSelectedIds }: ExportSessionsWizardProps) {
   const state = useExportWizardState<Session>({
     open,
     loadItems: loadSessions,
+    initialSelectedIds,
     payloadKey: 'sessions',
     filename: 'smarttab_organizer_sessions.json',
     notifyTitleKey: 'exportSessionsNotificationTitle',

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { Button, Text, Flex, Box, Checkbox, Separator } from '@radix-ui/themes';
+import { Button, Flex, Box } from '@radix-ui/themes';
 import { Plus, Eye, EyeOff, Shield, AlertCircle, Upload, Trash2, FileDown } from 'lucide-react';
 import { DragDropProvider, type DragEndEvent, type DragOverEvent } from '@dnd-kit/react';
 import { move } from '@dnd-kit/helpers';
@@ -10,6 +10,7 @@ import { RuleWizardModal } from '@/components/Core/DomainRule/RuleWizardModal';
 import { ExportWizard } from '@/components/UI/ImportExportWizards/ExportWizard';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
 import { ListToolbar } from '@/components/UI/ListToolbar';
+import { BulkActionsBar } from '@/components/UI/BulkActionsBar';
 import { getMessage } from '@/utils/i18n';
 import { foldAccents } from '@/utils/stringUtils';
 import { generateUUID } from '@/utils/utils';
@@ -56,66 +57,6 @@ interface DomainRulesPageProps {
   pendingAction?: RulesPendingAction | null;
   /** Called once the pending action has been consumed so the parent can clear it. */
   onPendingActionConsumed?: () => void;
-}
-
-/* ─── Local presentation components ──────────────────────────────────────── */
-
-interface BulkActionsBarProps {
-  selectedIds: Set<string>;
-  filteredRules: DomainRuleSetting[];
-  isAllSelected: boolean;
-  isIndeterminate: boolean;
-  onSelectAll: (checked: boolean) => void;
-  onBulkToggle: (ids: string[], enabled: boolean) => void;
-  onBulkDeleteRequest: (ids: string[]) => void;
-  onBulkExportRequest: (ids: string[]) => void;
-}
-
-function BulkActionsBar({
-  selectedIds, filteredRules: _filteredRules, isAllSelected, isIndeterminate,
-  onSelectAll, onBulkToggle, onBulkDeleteRequest, onBulkExportRequest,
-}: BulkActionsBarProps) {
-  return (
-    <Flex data-testid="page-rules-bulk-bar" align="center" gap="3" p="2" mb="4"
-      style={{ backgroundColor: 'var(--accent-a3)', borderRadius: 'var(--radius-2)' }}>
-      <Checkbox
-        checked={isAllSelected}
-        onCheckedChange={(checked) => onSelectAll(checked as boolean)}
-        {...(isIndeterminate && { 'data-indeterminate': true })}
-      />
-      <Text size="2" weight="medium">
-        {selectedIds.size === 1
-          ? getMessage('dataTableSelectedCountSingular')
-          : getMessage('dataTableSelectedCountPlural').replace('{count}', selectedIds.size.toString())
-        }
-      </Text>
-      <Separator orientation="vertical" />
-      <Flex gap="2">
-        <Button size="1" variant="solid" onClick={() => onBulkToggle(Array.from(selectedIds), true)}>
-          <Eye size={14} />
-          {getMessage('enableSelected')}
-        </Button>
-        <Button size="1" variant="soft" onClick={() => onBulkToggle(Array.from(selectedIds), false)}>
-          <EyeOff size={14} />
-          {getMessage('disableSelected')}
-        </Button>
-        <Button
-          size="1"
-          variant="soft"
-          data-testid="page-rules-bulk-btn-export"
-          onClick={() => onBulkExportRequest(Array.from(selectedIds))}
-        >
-          <FileDown size={14} />
-          {getMessage('exportSelected')}
-        </Button>
-        <Button size="1" variant="soft" color="red"
-          onClick={() => onBulkDeleteRequest(Array.from(selectedIds))}>
-          <Trash2 size={14} />
-          {getMessage('deleteSelected')}
-        </Button>
-      </Flex>
-    </Flex>
-  );
 }
 
 /* ─── Page component ──────────────────────────────────────────────────────── */
@@ -383,15 +324,39 @@ export function DomainRulesPage({
 
             {selectedIds.size > 0 && (
               <BulkActionsBar
-                selectedIds={selectedIds}
-                filteredRules={filteredRules}
+                testId="page-rules-bulk-bar"
+                selectedCount={selectedIds.size}
                 isAllSelected={isAllSelected}
                 isIndeterminate={isIndeterminate}
                 onSelectAll={handleSelectAll}
-                onBulkToggle={handleBulkToggle}
-                onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', ruleIds: ids })}
-                onBulkExportRequest={(ids) => setBulkExportIds(ids)}
-              />
+              >
+                <Button size="1" variant="solid" onClick={() => handleBulkToggle(Array.from(selectedIds), true)}>
+                  <Eye size={14} />
+                  {getMessage('enableSelected')}
+                </Button>
+                <Button size="1" variant="soft" onClick={() => handleBulkToggle(Array.from(selectedIds), false)}>
+                  <EyeOff size={14} />
+                  {getMessage('disableSelected')}
+                </Button>
+                <Button
+                  size="1"
+                  variant="soft"
+                  data-testid="page-rules-bulk-btn-export"
+                  onClick={() => setBulkExportIds(Array.from(selectedIds))}
+                >
+                  <FileDown size={14} />
+                  {getMessage('exportSelected')}
+                </Button>
+                <Button
+                  size="1"
+                  variant="soft"
+                  color="red"
+                  onClick={() => setDeleteTarget({ type: 'bulk', ruleIds: Array.from(selectedIds) })}
+                >
+                  <Trash2 size={14} />
+                  {getMessage('deleteSelected')}
+                </Button>
+              </BulkActionsBar>
             )}
 
             {filteredRules.length === 0 && syncSettings.domainRules.length === 0 && !searchTerm && (
