@@ -16,6 +16,7 @@
  */
 import type { BrowserContext, Page } from '@playwright/test';
 import { injectLocaleOverride } from '../../e2e-shared/locale-injector.js';
+import { DialogPage } from '../../e2e-shared/pages/index.js';
 import { applyTheme, type Theme } from '../../e2e-shared/theme.js';
 
 /**
@@ -84,9 +85,6 @@ export async function openMimeticTab(
  */
 export async function dismissDialog(page: Page): Promise<void> {
   await page.keyboard.press('Escape');
-  await page
-    .getByRole('dialog')
-    .first()
-    .waitFor({ state: 'hidden' })
-    .catch(() => undefined);
+  const dialog = new DialogPage(page);
+  await dialog.expectHidden().catch(() => undefined);
 }

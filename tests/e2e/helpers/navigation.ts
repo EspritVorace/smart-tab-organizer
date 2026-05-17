@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import { DialogPage } from '../../../e2e-shared/pages/index.js';
 
 /** Navigate to the extension options page. */
 export async function goToOptionsPage(page: Page, extensionId: string): Promise<void> {
@@ -40,9 +41,8 @@ export async function goToSessionsSectionWithSnapshot(page: Page, extensionId: s
   await page.goto(`chrome-extension://${extensionId}/options.html#sessions?action=snapshot`);
   await page.waitForLoadState('domcontentloaded');
   // Wait for the wizard dialog (opened by the deep link action)
-  await page
-    .getByRole('dialog')
-    .waitFor({ state: 'visible', timeout: 10_000 });
+  const dialog = new DialogPage(page);
+  await dialog.expectVisible({ timeout: 10_000 });
 }
 
 /**

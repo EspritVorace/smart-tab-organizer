@@ -152,6 +152,7 @@ export function ConfigEditModal({
       onApply={handleApply}
       disabled={hasError}
       title={getMessage('editConfigTitle')}
+      data-testid="modal-edit-config"
       maxWidth={820}
       contentStyle={{
         display: 'flex',

@@ -6,6 +6,7 @@ import { test, expect } from './fixtures';
 import { goToSessionsSection } from './helpers/navigation';
 import { seedSessions, clearSessions, getSessionsFromStorage, createTestSession } from './helpers/seed';
 import { auditPage } from './helpers/a11y';
+import { SessionEditorPage } from '../../e2e-shared/pages/index.js';
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
@@ -25,10 +26,8 @@ test.describe('[US-E01] Opening', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
-
-    await expect(page.getByTestId('dialog-session-edit')).toBeVisible();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
     await expect(page.getByText('Edit Session')).toBeVisible();
     await auditPage(page, 'session-editor-dialog-open', { include: '[role="dialog"]' });
     await page.close();
@@ -41,11 +40,10 @@ test.describe('[US-E01] Opening', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const nameInput = page.getByTestId('dialog-session-edit-field-name');
-    await expect(nameInput).toHaveValue('My Special Session');
+    await expect(editor.nameInput()).toHaveValue('My Special Session');
     await page.close();
   });
 
@@ -57,13 +55,11 @@ test.describe('[US-E01] Opening', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    // Scope to dialog to avoid matching the same count on the session card
-    const dialog = page.getByRole('dialog');
-    await expect(dialog.getByText(/3 tab/i)).toBeVisible();
-    await expect(dialog.getByText(/1 group/i)).toBeVisible();
+    await editor.expectCounterVisible(/3 tab/i);
+    await editor.expectCounterVisible(/1 group/i);
     await page.close();
   });
 });
@@ -82,15 +78,13 @@ test.describe('[US-E01] Name editing', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const nameInput = page.getByTestId('dialog-session-edit-field-name');
-    await nameInput.fill('After Edit');
+    await editor.fillName('After Edit');
+    await editor.clickSave();
 
-    await page.getByTestId('dialog-session-edit-btn-save').click();
-
-    await expect(page.getByTestId('dialog-session-edit')).toBeHidden();
+    await editor.expectHidden();
     await expect(page.getByText('After Edit')).toBeVisible();
 
     const sessions = await getSessionsFromStorage(extensionContext);
@@ -113,12 +107,11 @@ test.describe('[US-E01] Cancel and unsaved changes', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    await page.getByTestId('dialog-session-edit-btn-cancel').click();
-
-    await expect(page.getByTestId('dialog-session-edit')).toBeHidden();
+    await editor.clickCancel();
+    await editor.expectHidden();
     await page.close();
   });
 
@@ -129,18 +122,13 @@ test.describe('[US-E01] Cancel and unsaved changes', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    // Make a change
-    const nameInput = page.getByTestId('dialog-session-edit-field-name');
-    await nameInput.fill('Modified Name');
+    await editor.fillName('Modified Name');
+    await editor.clickCancel();
 
-    await page.getByTestId('dialog-session-edit-btn-cancel').click();
-
-    // AlertDialog should appear asking about unsaved changes ("unsaved" appears in both title and body)
-    await expect(page.getByRole('alertdialog')).toBeVisible();
-    await expect(page.getByRole('alertdialog').getByText(/unsaved/i).first()).toBeVisible();
+    await editor.expectUnsavedAlertVisible();
     await page.close();
   });
 
@@ -154,18 +142,14 @@ test.describe('[US-E01] Cancel and unsaved changes', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const nameInput = page.getByTestId('dialog-session-edit-field-name');
-    await nameInput.fill('Will Not Save');
+    await editor.fillName('Will Not Save');
+    await editor.clickCancel();
+    await editor.confirmLeaveUnsaved();
 
-    await page.getByRole('button', { name: /cancel/i }).click();
-    await page.getByRole('button', { name: /leave/i }).click();
-
-    // Both dialogs should be closed
-    await expect(page.getByRole('dialog')).toBeHidden();
-    // The session name should be unchanged
+    await editor.expectHidden();
     await expect(page.getByText('Original')).toBeVisible();
     await expect(page.getByText('Will Not Save')).toBeHidden();
     await page.close();
@@ -183,13 +167,12 @@ test.describe('[US-E01] Tab tree', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    // Scope to dialog; use exact:true since 'Example' also appears in 'example.com'
-    const dialog = page.getByRole('dialog');
-    await expect(dialog.getByText('Example', { exact: true })).toBeVisible();
-    await expect(dialog.getByText('GitHub', { exact: true })).toBeVisible();
+    // Use exact:true since 'Example' also appears in 'example.com'
+    await editor.expectTextVisible('Example', { exact: true });
+    await editor.expectTextVisible('GitHub', { exact: true });
     await page.close();
   });
 
@@ -200,20 +183,18 @@ test.describe('[US-E01] Tab tree', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const dialog = page.getByRole('dialog');
-    // Scope to the GitHub listitem to avoid strict-mode violations (3 rows have 'Delete tab')
-    const githubRow = dialog.getByRole('listitem').filter({ hasText: 'GitHub' });
-    // Hover the right edge of the row (not just the title text) to verify the full row width is hoverable
+    // Scope to the GitHub listitem to avoid strict-mode violations (3 rows have 'Delete tab').
+    // Hover the right edge of the row (not just the title text) to verify the full row width is hoverable.
+    const githubRow = editor.rowByText('GitHub');
     const box = await githubRow.boundingBox();
     expect(box).not.toBeNull();
     await page.mouse.move(box!.x + box!.width - 8, box!.y + box!.height / 2);
     await githubRow.getByRole('button', { name: 'Delete tab' }).click();
 
-    // GitHub tab should be gone
-    await expect(dialog.getByText('GitHub', { exact: true })).toBeHidden();
+    await editor.expectTextHidden('GitHub', { exact: true });
     await page.close();
   });
 
@@ -224,26 +205,15 @@ test.describe('[US-E01] Tab tree', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const dialog = page.getByRole('dialog');
-    // Scope to the GitHub listitem to avoid strict-mode violations
-    const githubRow = dialog.getByRole('listitem').filter({ hasText: 'GitHub' });
-    await githubRow.hover();
-    await githubRow.getByRole('button', { name: 'Edit tab' }).click();
+    await editor.editTab('GitHub');
+    await editor.fillTabUrlAndCommit('https://modified.example.com');
 
-    // Replace the URL
-    const urlInput = dialog.getByRole('textbox', { name: /url/i });
-    await urlInput.clear();
-    await urlInput.fill('https://modified.example.com');
-    await urlInput.press('Enter');
+    await editor.clickSave();
+    await editor.expectHidden();
 
-    // Save the session
-    await page.getByTestId('dialog-session-edit-btn-save').click();
-    await expect(page.getByRole('dialog')).toBeHidden();
-
-    // Verify storage updated
     const sessions = await getSessionsFromStorage(extensionContext);
     const allUrls = [
       ...sessions[0].ungroupedTabs.map(t => t.url),
@@ -260,22 +230,14 @@ test.describe('[US-E01] Tab tree', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const dialog = page.getByRole('dialog');
-    // Hover the group row and click Edit group
-    await dialog.getByRole('listitem').filter({ hasText: 'Work' }).first().hover();
-    await dialog.getByRole('button', { name: 'Edit group' }).click();
+    await editor.editGroup('Work');
+    await editor.fillGroupNameAndCommit('Renamed Group');
 
-    // Rename in the inline text field
-    const nameInput = dialog.getByRole('textbox', { name: /group name/i });
-    await nameInput.clear();
-    await nameInput.fill('Renamed Group');
-    await nameInput.press('Enter');
-
-    await expect(dialog.getByText('Renamed Group', { exact: true })).toBeVisible();
-    await expect(dialog.getByText('Work', { exact: true })).toBeHidden();
+    await editor.expectTextVisible('Renamed Group', { exact: true });
+    await editor.expectTextHidden('Work', { exact: true });
     await page.close();
   });
 
@@ -296,20 +258,15 @@ test.describe('[US-E01] Tab tree', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const dialog = page.getByRole('dialog');
-    // Hover Example tab (in Work group) and open Move dropdown
-    const exampleRow = dialog.getByRole('listitem').filter({ hasText: 'Example' });
-    await exampleRow.hover();
-    await exampleRow.getByRole('button', { name: 'Move tab to group' }).click();
-    // Choose Personal as target
-    await page.getByRole('menuitem', { name: 'Personal' }).click();
+    await editor.openMoveTabDropdown('Example');
+    await editor.selectMoveTarget('Personal');
 
     // The Work group should have lost one tab (Google remains, Example moved)
     // Work group now shows count (1)
-    const workRow = dialog.getByRole('listitem').filter({ hasText: 'Work' }).first();
+    const workRow = editor.rowByText('Work').first();
     await expect(workRow.getByText('(1)')).toBeVisible();
     await page.close();
   });
@@ -325,20 +282,14 @@ test.describe('[US-E01] Tab tree', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const dialog = page.getByRole('dialog');
-    // Verify initial count
-    await expect(dialog.getByText(/3 tab/i)).toBeVisible();
+    await editor.expectCounterVisible(/3 tab/i);
 
-    // Delete the ungrouped GitHub tab
-    const githubRow = dialog.getByRole('listitem').filter({ hasText: 'GitHub' });
-    await githubRow.hover();
-    await githubRow.getByRole('button', { name: 'Delete tab' }).click();
+    await editor.deleteTab('GitHub');
 
-    // Counter should update to 2 tabs
-    await expect(dialog.getByText(/2 tab/i)).toBeVisible();
+    await editor.expectCounterVisible(/2 tab/i);
     await page.close();
   });
 });
@@ -357,13 +308,11 @@ test.describe('[US-E02] Delete group', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const dialog = page.getByRole('dialog');
-    // Hover the group row to reveal the action buttons
-    await dialog.getByRole('listitem').filter({ hasText: 'Work' }).first().hover();
-    await expect(dialog.getByRole('button', { name: 'Delete group' })).toBeVisible();
+    await editor.rowByText('Work').first().hover();
+    await expect(editor.dialog().getByRole('button', { name: 'Delete group' })).toBeVisible();
     await page.close();
   });
 
@@ -377,15 +326,11 @@ test.describe('[US-E02] Delete group', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const dialog = page.getByRole('dialog');
-    await dialog.getByRole('listitem').filter({ hasText: 'Work' }).first().hover();
-    await dialog.getByRole('button', { name: 'Delete group' }).click();
-
-    // AlertDialog for group deletion should appear
-    await expect(page.getByRole('alertdialog')).toBeVisible();
+    await editor.openDeleteGroupAlert('Work');
+    await editor.expectDeleteGroupAlertVisible();
     await page.close();
   });
 
@@ -399,18 +344,13 @@ test.describe('[US-E02] Delete group', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const dialog = page.getByRole('dialog');
-    await dialog.getByRole('listitem').filter({ hasText: 'Work' }).first().hover();
-    await dialog.getByRole('button', { name: 'Delete group' }).click();
+    await editor.openDeleteGroupAlert('Work');
+    await editor.confirmDeleteGroupAndTabs();
 
-    // Click the destructive "Delete group and N tab(s)" button
-    await page.getByRole('button', { name: /delete group and/i }).click();
-
-    // Group 'Work' should no longer appear in the editor
-    await expect(dialog.getByText('Work', { exact: true })).toBeHidden();
+    await editor.expectTextHidden('Work', { exact: true });
     await page.close();
   });
 
@@ -424,19 +364,14 @@ test.describe('[US-E02] Delete group', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const dialog = page.getByRole('dialog');
-    await dialog.getByRole('listitem').filter({ hasText: 'Work' }).first().hover();
-    await dialog.getByRole('button', { name: 'Delete group' }).click();
+    await editor.openDeleteGroupAlert('Work');
+    await editor.confirmUngroupTabs();
 
-    // Choose to ungroup tabs rather than delete them
-    await page.getByRole('button', { name: /ungroup/i }).click();
-
-    // Group 'Work' is gone, but its tabs remain (now ungrouped)
-    await expect(dialog.getByText('Work', { exact: true })).toBeHidden();
-    await expect(dialog.getByText('Example', { exact: true })).toBeVisible();
+    await editor.expectTextHidden('Work', { exact: true });
+    await editor.expectTextVisible('Example', { exact: true });
     await page.close();
   });
 });
@@ -456,15 +391,12 @@ test.describe('[US-S018] Collapsed group state in editor', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const dialog = page.getByRole('dialog');
-    // Group header should be visible
-    await expect(dialog.getByText('Work', { exact: true })).toBeVisible();
-    // Tabs inside the collapsed group should NOT be visible
-    await expect(dialog.getByText('Example', { exact: true })).toBeHidden();
-    await expect(dialog.getByText('Google', { exact: true })).toBeHidden();
+    await editor.expectTextVisible('Work', { exact: true });
+    await editor.expectTextHidden('Example', { exact: true });
+    await editor.expectTextHidden('Google', { exact: true });
     await page.close();
   });
 
@@ -479,13 +411,11 @@ test.describe('[US-S018] Collapsed group state in editor', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const dialog = page.getByRole('dialog');
-    await expect(dialog.getByText('Work', { exact: true })).toBeVisible();
-    // Tabs inside the expanded group should be visible
-    await expect(dialog.getByText('Example', { exact: true })).toBeVisible();
+    await editor.expectTextVisible('Work', { exact: true });
+    await editor.expectTextVisible('Example', { exact: true });
     await page.close();
   });
 
@@ -499,24 +429,18 @@ test.describe('[US-S018] Collapsed group state in editor', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
-    await page.getByRole('menuitem', { name: /edit/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const dialog = page.getByRole('dialog');
-    // Tabs should be visible (group starts expanded)
-    await expect(dialog.getByText('Example', { exact: true })).toBeVisible();
+    await editor.expectTextVisible('Example', { exact: true });
 
-    // Click the expand/collapse toggle on the group row
-    await dialog.getByRole('button', { name: /collapse group/i }).click();
+    await editor.toggleCollapseGroup();
 
-    // Tabs should now be hidden
-    await expect(dialog.getByText('Example', { exact: true })).toBeHidden();
+    await editor.expectTextHidden('Example', { exact: true });
 
-    // Save
-    await page.getByTestId('dialog-session-edit-btn-save').click();
-    await expect(dialog).toBeHidden();
+    await editor.clickSave();
+    await editor.expectHidden();
 
-    // Verify storage
     const sessions = await getSessionsFromStorage(extensionContext);
     expect(sessions[0].groups[0].collapsed).toBe(true);
     await page.close();

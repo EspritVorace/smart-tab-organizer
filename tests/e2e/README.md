@@ -123,3 +123,59 @@ Shared between this suite and `e2e-doc-scenarios/`:
 - Never `console.log()` from specs; use the existing logger conventions
   if debugging output is genuinely needed.
 - Group tests with `test.describe` only when a `beforeEach` is shared.
+
+## No inline DOM access (grep guard)
+
+Specs and pipeline helpers must consume Page Objects under
+`e2e-shared/pages/` instead of reaching for the DOM directly via
+`page.getByRole('dialog')` or `page.locator(...)`. The convergence
+guarantee documented in `CLAUDE.md` only holds when every spec breaks
+at the same call site after a UI refactor; inline locators dilute that
+guarantee.
+
+A CI grep guard enforces the contract:
+
+```bash
+bash .github/scripts/e2e-no-inline-dom.sh
+```
+
+The script runs inside the `Lint` job in `.github/workflows/tests.yml`
+and fails the build if a new violation is introduced.
+
+### When the selector is legitimately local
+
+Some selectors do not target a dialog or wizard surface and don't
+belong in a Page Object:
+
+- `<mark>` highlights produced by `AccessibleHighlight` (search
+  results),
+- attribute selectors for DnD atoms
+  (`[data-testid$="-drag-handle"]`),
+- `body.click()` gestures used to refocus the document so a follow-up
+  keyboard shortcut bubbles to `document`,
+- testid-scoped queries on a content surface that has no Page Object
+  (e.g. `[data-testid="shortcuts-content"] [data-group-id]`).
+
+Tag those lines with an inline marker comment:
+
+```ts
+// allow-inline-dom: <reason in one line>
+await expect(page.locator('mark').filter({ hasText: 'GitHub' }).first()).toBeVisible();
+```
+
+The marker is also recognised when it sits on a comment line above the
+flagged statement, including across multi-line `await expect(...)`
+wrappers.
+
+### When the entire file is a meta-test
+
+For specs whose subject IS the raw `role="dialog"` element (e.g.
+`dialog-initial-focus.spec.ts` asserts that Radix dialogs land focus on
+the right element on open), add the file path to:
+
+```
+.github/scripts/e2e-inline-dom-allowlist.txt
+```
+
+Keep that file as small as possible: file-level exemptions hide future
+violations from the grep guard.

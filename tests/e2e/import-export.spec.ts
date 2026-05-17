@@ -20,7 +20,7 @@ import type { BrowserContext, Page } from '@playwright/test';
 import { test, expect } from './fixtures';
 import { auditPage } from './helpers/a11y';
 import { goToImportExportSection } from './helpers/navigation';
-import { ImportWizardPage } from '../../e2e-shared/pages/index.js';
+import { DialogPage, ImportWizardPage } from '../../e2e-shared/pages/index.js';
 import { openRulesImportWizard, openRulesExportWizard } from '../../e2e-shared/actions/index.js';
 
 // ─── Local fixtures ─────────────────────────────────────────────────────────
@@ -526,11 +526,12 @@ test.describe('Import / Export', () => {
       await page.waitForLoadState('domcontentloaded');
 
       await openWizard();
-      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
+      const dialog = new DialogPage(page);
+      await dialog.expectVisible({ timeout: 10_000 });
       await expect.poll(() => page.evaluate(() => window.location.hash)).toBe(hash);
 
       await page.keyboard.press('Escape');
-      await expect(page.getByRole('dialog')).toBeHidden();
+      await dialog.expectHidden();
       await expect.poll(() => page.evaluate(() => window.location.hash)).toBe(hash);
     }
 
@@ -590,13 +591,14 @@ test.describe('Import / Export', () => {
     }) => {
       await extensionPage.goto(`chrome-extension://${extensionId}/options.html#importexport`);
       await extensionPage.waitForLoadState('domcontentloaded');
+      const dialog = new DialogPage(extensionPage);
       await expect(extensionPage.getByTestId('page-import-export')).toBeVisible();
-      await expect(extensionPage.getByRole('dialog')).toBeHidden();
+      await dialog.expectHidden();
 
       await extensionPage.reload();
       await extensionPage.waitForLoadState('domcontentloaded');
       await expect(extensionPage.getByTestId('page-import-export')).toBeVisible();
-      await expect(extensionPage.getByRole('dialog')).toBeHidden();
+      await dialog.expectHidden();
     });
   });
 
@@ -610,11 +612,12 @@ test.describe('Import / Export', () => {
       await extensionPage.goto(`chrome-extension://${extensionId}/options.html#rules?action=import`);
       await extensionPage.waitForLoadState('domcontentloaded');
 
+      const dialog = new DialogPage(extensionPage);
       await expect(extensionPage.getByTestId('page-rules')).toBeVisible({ timeout: 10_000 });
-      await expect(extensionPage.getByRole('dialog')).toBeVisible({ timeout: 10_000 });
+      await dialog.expectVisible({ timeout: 10_000 });
 
       await extensionPage.keyboard.press('Escape');
-      await expect(extensionPage.getByRole('dialog')).toBeHidden();
+      await dialog.expectHidden();
       await expect(extensionPage.getByTestId('page-rules')).toBeVisible();
     });
   });

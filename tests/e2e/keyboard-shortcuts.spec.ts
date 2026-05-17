@@ -50,6 +50,7 @@ test.describe('[US-KB-popup] Popup shortcuts', () => {
 
     // Only the 2 popup-relevant groups must be displayed (Popup, Session
     // card). Global, Options and Lists groups are hidden in the popup drawer.
+    // allow-inline-dom: scopes to a testid-keyed content surface, not a dialog/wizard.
     await expect(
       page.locator('[data-testid="shortcuts-content"] [data-group-id]'),
     ).toHaveCount(2);
@@ -107,6 +108,7 @@ test.describe('[US-KB-popup] Popup shortcuts', () => {
       timeout: 5000,
     });
 
+    // allow-inline-dom: body.click() is a generic UI gesture to refocus, not a wizard surface.
     await page.locator('body').click();
     const [newPage] = await Promise.all([
       extensionContext.waitForEvent('page'),
@@ -134,6 +136,7 @@ test.describe('[US-KB-options] Options shortcuts', () => {
 
     // Click the top-left corner so a fresh-install Home (empty rules ->
     // HeroOnboarding) does not intercept the click on its CTA button.
+    // allow-inline-dom: body.click() is a generic UI gesture to refocus, not a wizard surface.
     await page.locator('body').click({ position: { x: 5, y: 5 } });
     // Sequence shortcut: `m` opens the navigation prefix, `s` selects Sessions.
     await page.keyboard.press('m');
@@ -156,6 +159,7 @@ test.describe('[US-KB-options] Options shortcuts', () => {
     const page = await extensionContext.newPage();
     await goToOptionsPage(page, extensionId);
 
+    // allow-inline-dom: body.click() is a generic UI gesture to refocus, not a wizard surface.
     await page.locator('body').click({ position: { x: 5, y: 5 } });
     await page.keyboard.press('Shift+Slash');
 
@@ -231,6 +235,7 @@ test.describe('[US-KB-panel] Shortcuts panel keyboard navigation', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
+    // allow-inline-dom: body.click() is a generic UI gesture to refocus, not a wizard surface.
     await page.locator('body').click();
     await page.keyboard.press('Shift+Slash');
 

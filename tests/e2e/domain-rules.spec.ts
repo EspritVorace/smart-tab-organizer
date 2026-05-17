@@ -10,6 +10,7 @@
 import { test, expect } from './fixtures';
 import { goToDomainRulesSection } from './helpers/navigation';
 import { auditPage } from './helpers/a11y';
+import { RuleWizardPage } from '../../e2e-shared/pages/index.js';
 
 test.beforeEach(async ({ helpers }) => {
   await helpers.clearDomainRules();
@@ -103,7 +104,8 @@ test.describe('Edit rule via dropdown', () => {
     await page.getByRole('listitem', { name: /Slack/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /edit/i }).click();
 
-    await expect(page.getByRole('dialog')).toBeVisible();
+    const wizard = new RuleWizardPage(page);
+    await wizard.expectVisible();
     await expect(page.getByText('Edit Rule')).toBeVisible();
     await page.close();
   });
