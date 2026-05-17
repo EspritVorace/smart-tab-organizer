@@ -138,6 +138,7 @@
   "enableSelected": { "message": "Enable Selected" },
   "disableSelected": { "message": "Disable Selected" },
   "deleteSelected": { "message": "Delete Selected" },
+  "exportSelected": { "message": "Export Selected" },
   "confirmDeleteSelected": { "message": "Delete the selected rules?" },
   "confirmDeleteSelectedDescription": { "message": "This will permanently delete the selected rules. This action cannot be undone." },
   "searchRules": { "message": "Search rules..." },

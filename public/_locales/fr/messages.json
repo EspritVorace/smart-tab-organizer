@@ -138,6 +138,7 @@
   "enableSelected": { "message": "Activer Sélectionnés" },
   "disableSelected": { "message": "Désactiver Sélectionnés" },
   "deleteSelected": { "message": "Supprimer Sélectionnés" },
+  "exportSelected": { "message": "Exporter Sélectionnés" },
   "confirmDeleteSelected": { "message": "Supprimer les règles sélectionnées ?" },
   "confirmDeleteSelectedDescription": { "message": "Les règles sélectionnées seront définitivement supprimées. Cette action est irréversible." },
   "searchRules": { "message": "Rechercher des règles..." },
