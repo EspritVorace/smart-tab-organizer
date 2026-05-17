@@ -37,6 +37,7 @@ export function BulkActionsBar({
       <Checkbox
         checked={isAllSelected}
         onCheckedChange={(checked) => onSelectAll(checked as boolean)}
+        aria-label={getMessage('selectAll')}
         {...(isIndeterminate && { 'data-indeterminate': true })}
       />
       <Text size="2" weight="medium">

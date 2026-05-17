@@ -40,7 +40,7 @@ function rulesActions() {
         <FileDown size={14} />
         Export Selected
       </Button>
-      <Button size="1" variant="soft" color="red">
+      <Button size="1" variant="solid" color="red" highContrast>
         <Trash2 size={14} />
         Delete Selected
       </Button>
@@ -55,7 +55,7 @@ function sessionsActions() {
         <FileDown size={14} />
         Export Selected
       </Button>
-      <Button size="1" variant="soft" color="red">
+      <Button size="1" variant="solid" color="red" highContrast>
         <Trash2 size={14} />
         Delete Selected
       </Button>

@@ -226,8 +226,9 @@ function SessionSection({
             </Button>
             <Button
               size="1"
-              variant="soft"
+              variant="solid"
               color="red"
+              highContrast
               data-testid={`page-sessions-bulk-btn-delete-${testIdSuffix}`}
               onClick={() => onBulkDeleteRequest(Array.from(selectedIds))}
             >
