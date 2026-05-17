@@ -23,7 +23,7 @@
 #
 #   bash .github/scripts/e2e-no-inline-dom.sh
 #
-set -euo pipefail
+set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 ALLOWLIST="${ROOT}/.github/scripts/e2e-inline-dom-allowlist.txt"
@@ -37,68 +37,88 @@ cd "${ROOT}"
 PATTERN='getByRole\(['"'"'"]dialog|page\.locator\('
 MARKER='allow-inline-dom'
 
-# Use awk over each file: per match, accept if the current line OR any
-# of the contiguous comment / blank lines immediately preceding it carry
-# the marker. This makes the marker tolerant of multi-line comment
-# blocks ("// foo\n// bar\n// allow-inline-dom\nawait expect(...)").
-# Output mirrors `grep -rn` (`path:lineno:content`).
-collect_violations() {
-  local root="$1"
-  find "${root}" -type f \( -name '*.ts' -o -name '*.tsx' \) -print0 \
-    | while IFS= read -r -d '' file; do
-        awk -v file="${file}" -v pat="${PATTERN}" -v marker="${MARKER}" '
-          {
-            lines[NR] = $0
-          }
-          END {
-            for (i = 1; i <= NR; i++) {
-              if (lines[i] !~ pat) continue
-              if (lines[i] ~ marker) continue
-              found = 0
-              # Look back through contiguous comment / blank / continuation
-              # lines for the marker. Stop at the first non-comment code line.
-              for (j = i - 1; j >= 1 && j >= i - 8; j--) {
-                if (lines[j] ~ marker) { found = 1; break }
-                # Lines counted as "still attached to i": blank, // comment,
-                # /* ... */ block comment, or an opening `await expect(`
-                # / `await` line that wraps onto the next line.
-                if (lines[j] ~ /^[[:space:]]*$/) continue
-                if (lines[j] ~ /^[[:space:]]*\/\//) continue
-                if (lines[j] ~ /^[[:space:]]*\*/) continue
-                if (lines[j] ~ /^[[:space:]]*\/\*/) continue
-                if (lines[j] ~ /^[[:space:]]*await[[:space:]]+expect\([[:space:]]*$/) continue
-                if (lines[j] ~ /^[[:space:]]*expect\([[:space:]]*$/) continue
-                break
-              }
-              if (!found) {
-                printf("%s:%d:%s\n", file, i, lines[i])
-              }
-            }
-          }
-        ' "${file}"
-      done
-}
+# Collect candidate violations: `grep -rnE` returns `path:lineno:content`
+# for every line matching the forbidden pattern. The `|| true` swallows
+# grep's exit code 1 (no matches), which is the success case for us.
+candidates=$(
+  grep -rnE "${PATTERN}" tests/e2e e2e-doc-scenarios \
+    --include='*.ts' --include='*.tsx' \
+    2>/dev/null || true
+)
 
-matches=$(collect_violations tests/e2e; collect_violations e2e-doc-scenarios)
+if [ -z "${candidates}" ]; then
+  echo "No inline DOM access detected."
+  exit 0
+fi
+
+# For each candidate `path:lineno:content`, accept it if:
+#  - the matched line itself carries the marker, or
+#  - any of the up-to-8 preceding non-code lines (comments, blanks,
+#    bare `await expect(` wrappers) carries the marker.
+violations=""
+while IFS= read -r line; do
+  # Skip blank entries (defensive).
+  [ -z "${line}" ] && continue
+
+  # Parse `path:lineno:content`. The content may itself contain colons,
+  # so cut just the first two fields.
+  file=${line%%:*}
+  rest=${line#*:}
+  lineno=${rest%%:*}
+  content=${rest#*:}
+
+  # Marker on the matched line itself.
+  case "${content}" in
+    *"${MARKER}"*) continue ;;
+  esac
+
+  # Look back up to 8 lines for the marker. Stop early at a code line
+  # (not a comment / blank / bare `await expect(` wrapper).
+  found_marker=0
+  start=$((lineno - 1))
+  end=$((lineno - 8))
+  [ "${end}" -lt 1 ] && end=1
+
+  for ((n = start; n >= end; n--)); do
+    prev_line=$(sed -n "${n}p" "${file}")
+    case "${prev_line}" in
+      *"${MARKER}"*) found_marker=1; break ;;
+    esac
+    # Trim leading whitespace for the "is this still attached" check.
+    trimmed=${prev_line#"${prev_line%%[![:space:]]*}"}
+    case "${trimmed}" in
+      ''|//*|'*'*|'/*'*) continue ;;
+      'await expect('|'expect(') continue ;;
+      *) break ;;
+    esac
+  done
+
+  if [ "${found_marker}" -eq 0 ]; then
+    violations="${violations}${line}"$'\n'
+  fi
+done <<< "${candidates}"
 
 # Apply the file-level allow-list (paths listed there are skipped wholesale).
-if [ -s "${ALLOWLIST}" ] && [ -n "${matches}" ]; then
+if [ -s "${ALLOWLIST}" ] && [ -n "${violations}" ]; then
   while IFS= read -r entry; do
     case "${entry}" in
       ''|\#*) continue ;;
     esac
-    matches=$(echo "${matches}" | grep -v -F "${entry}" || true)
+    violations=$(echo "${violations}" | grep -v -F "${entry}" || true)
   done < "${ALLOWLIST}"
 fi
 
-if [ -z "${matches}" ]; then
+# Trim trailing newline for the empty check.
+violations=$(printf '%s' "${violations}")
+
+if [ -z "${violations}" ]; then
   echo "No inline DOM access detected."
   exit 0
 fi
 
 echo "Inline DOM access detected outside Page Objects:"
 echo ""
-echo "${matches}"
+echo "${violations}"
 echo ""
 echo "Either wrap the locator in a Page Object under e2e-shared/pages/,"
 echo "or tag the offending line (or the line just above it) with:"
