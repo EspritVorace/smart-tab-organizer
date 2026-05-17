@@ -9,9 +9,9 @@ interface UseExportWizardStateOptions<TItem extends { id: string }> {
   /** Async loader called when the dialog opens (e.g. `loadSessions`). */
   loadItems?: () => Promise<TItem[]>;
   /**
-   * Optional pre-selection applied on dialog open (sync `items` source only).
-   * Invalid ids (not in `items`) are filtered out. When omitted or empty,
-   * all items are selected (historical default).
+   * Optional pre-selection applied on dialog open. Invalid ids (not in
+   * the resolved items) are filtered out. When omitted or empty, all
+   * items are selected (historical default).
    */
   initialSelectedIds?: string[];
   /** JSON top-level key wrapping the selected items (e.g. "domainRules", "sessions"). */
@@ -58,24 +58,28 @@ export function useExportWizardState<TItem extends { id: string }>({
   const selection = useToggleSet<string>();
   const [exportNote, setExportNote] = useState('');
 
+  const applySelection = useCallback((resolved: TItem[]) => {
+    if (initialSelectedIds && initialSelectedIds.length > 0) {
+      const validIds = initialSelectedIds.filter((id) =>
+        resolved.some((item) => item.id === id),
+      );
+      selection.setAll(
+        validIds.length > 0 ? validIds : resolved.map((item) => item.id),
+      );
+    } else {
+      selection.setAll(resolved.map((item) => item.id));
+    }
+  }, [initialSelectedIds, selection]);
+
   useDialogReset(open, () => {
     setExportNote('');
     if (loadItems) {
       loadItems().then((loaded) => {
         setLoadedItems(loaded);
-        selection.setAll(loaded.map((item) => item.id));
+        applySelection(loaded);
       });
     } else if (providedItems) {
-      if (initialSelectedIds && initialSelectedIds.length > 0) {
-        const validIds = initialSelectedIds.filter((id) =>
-          providedItems.some((item) => item.id === id),
-        );
-        selection.setAll(
-          validIds.length > 0 ? validIds : providedItems.map((item) => item.id),
-        );
-      } else {
-        selection.setAll(providedItems.map((item) => item.id));
-      }
+      applySelection(providedItems);
     }
   });
 
