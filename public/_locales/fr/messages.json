@@ -368,6 +368,11 @@
   "sessionNamePlaceholder": { "message": "ex. Onglets travail - Lundi" },
   "sessionSaveError": { "message": "Échec de la sauvegarde. Veuillez réessayer." },
   "confirmDeleteSession": { "message": "Êtes-vous sûr de vouloir supprimer la session « {name} » ? Cette action est irréversible." },
+  "confirmDeleteSelectedSessions": { "message": "Supprimer les sessions sélectionnées ?" },
+  "confirmDeleteSelectedSessionsDescription": { "message": "Cette action supprimera définitivement {count} session(s). Elle est irréversible." },
+  "sessionSelectAriaLabel": { "message": "Sélectionner la session" },
+  "pinSelected": { "message": "Épingler la sélection" },
+  "unpinSelected": { "message": "Désépingler la sélection" },
 
   "snapshotTitle": { "message": "Sauvegarder un instantané" },
   "snapshotDescription": { "message": "Choisissez les onglets à inclure dans cette session." },

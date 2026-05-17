@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Box, Flex, Button, Text, Callout, Separator, Badge } from '@radix-ui/themes';
-import { Camera, Archive, CheckCircle, Pin, Upload, type LucideIcon } from 'lucide-react';
+import { Camera, Archive, CheckCircle, Pin, PinOff, Upload, Trash2, FileDown, type LucideIcon } from 'lucide-react';
 import { DragDropProvider, type DragOverEvent, type DragEndEvent } from '@dnd-kit/react';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { move } from '@dnd-kit/helpers';
@@ -12,6 +12,8 @@ import { SnapshotWizard } from '@/components/UI/SessionWizards/SnapshotWizard';
 import { RestoreWizard } from '@/components/UI/SessionWizards/RestoreWizard';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
 import { ListToolbar } from '@/components/UI/ListToolbar';
+import { BulkActionsBar } from '@/components/UI/BulkActionsBar';
+import { ExportSessionsWizard } from '@/components/UI/ImportExportWizards/ExportSessionsWizard';
 import { getMessage } from '@/utils/i18n';
 import { foldAccents } from '@/utils/stringUtils';
 import { matchSessionSearch, splitByPinned, getFocusedSessionFromDOM } from '@/utils/sessionUtils';
@@ -27,6 +29,26 @@ import { browser } from 'wxt/browser';
 import type { Session } from '@/types/session';
 import type { SessionSearchMatch } from '@/utils/sessionUtils';
 import type { AppSettings } from '@/types/syncSettings';
+
+type BulkScope = 'pinned' | 'unpinned';
+
+type DeleteTarget =
+  | { type: 'single'; session: Session }
+  | { type: 'bulk'; scope: BulkScope; ids: string[] };
+
+/** Returns `prev` unchanged when every id is still visible, otherwise a new
+ * Set restricted to ids present in `visible`. Used to keep section-local
+ * selections in sync after delete / pin / search filtering. */
+function pruneSelection(prev: Set<string>, visible: readonly { id: string }[]): Set<string> {
+  const visibleIds = new Set(visible.map(s => s.id));
+  let changed = false;
+  const next = new Set<string>();
+  for (const id of prev) {
+    if (visibleIds.has(id)) next.add(id);
+    else changed = true;
+  }
+  return changed ? next : prev;
+}
 
 interface SessionsPageProps {
   syncSettings: AppSettings;
@@ -84,6 +106,15 @@ interface SessionSectionProps {
   /** Pin/unpin handlers shared with the page-level widget shortcuts. */
   onPin: (session: Session) => void;
   onUnpin: (session: Session) => void;
+  /** Section-local bulk selection (independent between pinned and unpinned). */
+  selectedIds: Set<string>;
+  onSelectionChange: (next: Set<string>) => void;
+  onBulkDeleteRequest: (ids: string[]) => void;
+  onBulkExportRequest: (ids: string[]) => void;
+  /** Bulk pin (in unpinned section) / unpin (in pinned section). */
+  onBulkPinToggle: (ids: string[]) => void;
+  /** Suffix appended to bulk testIds (e.g. 'pinned' / 'unpinned'). */
+  testIdSuffix: BulkScope;
 }
 
 function SessionSection({
@@ -106,6 +137,12 @@ function SessionSection({
   onReplaceCurrentWindow,
   onPin,
   onUnpin,
+  selectedIds,
+  onSelectionChange,
+  onBulkDeleteRequest,
+  onBulkExportRequest,
+  onBulkPinToggle,
+  testIdSuffix,
 }: SessionSectionProps) {
   const [dragItems, setDragItems] = useState<Session[] | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -153,11 +190,66 @@ function SessionSection({
     void updateOrder(moveSessionToLastInGroup(allSessions, session.id));
   }, [allSessions, updateOrder]);
 
+  const handleCardSelect = useCallback((id: string, checked: boolean) => {
+    const next = new Set(selectedIds);
+    if (checked) next.add(id);
+    else next.delete(id);
+    onSelectionChange(next);
+  }, [selectedIds, onSelectionChange]);
+
+  const handleSelectAll = useCallback((checked: boolean) => {
+    onSelectionChange(checked ? new Set(sessions.map(s => s.id)) : new Set());
+  }, [sessions, onSelectionChange]);
+
+  const isAllSelected = sessions.length > 0 && selectedIds.size === sessions.length;
+  const isIndeterminate = selectedIds.size > 0 && selectedIds.size < sessions.length;
+
   // When a search is active, hide the whole section if it matched nothing.
   if (sessions.length === 0 && searchQuery) return null;
   return (
     <Box>
       <SectionHeader icon={icon} titleKey={titleKey} count={sessions.length} />
+      {selectedIds.size > 0 && (
+        <Box mt="3">
+          <BulkActionsBar
+            testId={`page-sessions-bulk-bar-${testIdSuffix}`}
+            selectedCount={selectedIds.size}
+            isAllSelected={isAllSelected}
+            isIndeterminate={isIndeterminate}
+            onSelectAll={handleSelectAll}
+          >
+            <Button
+              size="1"
+              variant="soft"
+              data-testid={`page-sessions-bulk-btn-${isPinned ? 'unpin' : 'pin'}-${testIdSuffix}`}
+              onClick={() => onBulkPinToggle(Array.from(selectedIds))}
+            >
+              {isPinned ? <PinOff size={14} /> : <Pin size={14} />}
+              {getMessage(isPinned ? 'unpinSelected' : 'pinSelected')}
+            </Button>
+            <Button
+              size="1"
+              variant="soft"
+              data-testid={`page-sessions-bulk-btn-export-${testIdSuffix}`}
+              onClick={() => onBulkExportRequest(Array.from(selectedIds))}
+            >
+              <FileDown size={14} />
+              {getMessage('exportSelected')}
+            </Button>
+            <Button
+              size="1"
+              variant="soft"
+              color="red"
+              highContrast
+              data-testid={`page-sessions-bulk-btn-delete-${testIdSuffix}`}
+              onClick={() => onBulkDeleteRequest(Array.from(selectedIds))}
+            >
+              <Trash2 size={14} />
+              {getMessage('deleteSelected')}
+            </Button>
+          </BulkActionsBar>
+        </Box>
+      )}
       {sessions.length === 0 ? (
         <EmptyState
           icon={icon}
@@ -180,6 +272,8 @@ function SessionSection({
                   key={session.id}
                   session={session}
                   existingSessions={allSessions}
+                  isSelected={selectedIds.has(session.id)}
+                  onSelect={handleCardSelect}
                   onRestore={onOpenRestoreWizard}
                   onRestoreCurrentWindow={onRestoreCurrentWindow}
                   onRestoreNewWindow={onRestoreNewWindow}
@@ -235,7 +329,10 @@ export function SessionsPage({
 
   const [restoreSession, setRestoreSession] = useState<Session | null>(null);
   const [editTarget, setEditTarget] = useState<Session | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Session | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const [bulkExportIds, setBulkExportIds] = useState<string[] | null>(null);
+  const [selectedPinnedIds, setSelectedPinnedIds] = useState<Set<string>>(new Set());
+  const [selectedUnpinnedIds, setSelectedUnpinnedIds] = useState<Set<string>>(new Set());
   const [quickRestoreMessage, setQuickRestoreMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -318,7 +415,7 @@ export function SessionsPage({
       },
       'sessionCard.delete': () => {
         const focused = getFocusedSession();
-        if (focused) setDeleteTarget(focused);
+        if (focused) setDeleteTarget({ type: 'single', session: focused });
       },
       'sessionCard.pin': () => {
         const focused = getFocusedSession();
@@ -366,6 +463,17 @@ export function SessionsPage({
     [displayedSessions],
   );
 
+  // Cleanup: drop selected ids that are no longer in their section (deleted,
+  // pinned/unpinned, or filtered out by the search). This keeps the master
+  // checkbox count in sync with what the user actually sees.
+  useEffect(() => {
+    setSelectedPinnedIds(prev => pruneSelection(prev, pinnedSessions));
+  }, [pinnedSessions]);
+
+  useEffect(() => {
+    setSelectedUnpinnedIds(prev => pruneSelection(prev, unpinnedSessions));
+  }, [unpinnedSessions]);
+
   const handleSaveSession = useCallback(
     async (session: Session) => {
       await createSession(session);
@@ -388,11 +496,30 @@ export function SessionsPage({
     [reload],
   );
 
+  const handleBulkPinToggle = useCallback(async (ids: string[], makePinned: boolean) => {
+    for (const id of ids) {
+      await updateSession(id, { isPinned: makePinned });
+    }
+    await reload();
+  }, [reload]);
+
   const handleDeleteConfirm = useCallback(async () => {
     if (!deleteTarget) return;
-    await removeSession(deleteTarget.id);
+    if (deleteTarget.type === 'single') {
+      await removeSession(deleteTarget.session.id);
+    } else {
+      for (const id of deleteTarget.ids) {
+        await removeSession(id);
+      }
+      if (deleteTarget.scope === 'pinned') setSelectedPinnedIds(new Set());
+      else setSelectedUnpinnedIds(new Set());
+    }
     setDeleteTarget(null);
   }, [deleteTarget, removeSession]);
+
+  const handleOpenSingleDelete = useCallback((session: Session) => {
+    setDeleteTarget({ type: 'single', session });
+  }, []);
 
   const sharedSectionProps: Pick<
     SessionSectionProps,
@@ -417,13 +544,24 @@ export function SessionsPage({
     renameSession,
     onOpenRestoreWizard: setRestoreSession,
     onOpenEditDialog: setEditTarget,
-    onOpenDeleteDialog: setDeleteTarget,
+    onOpenDeleteDialog: handleOpenSingleDelete,
     onRestoreCurrentWindow: handleRestoreCurrentWindow,
     onRestoreNewWindow: handleRestoreNewWindow,
     onReplaceCurrentWindow: handleReplaceCurrentWindow,
     onPin: handlePin,
     onUnpin: handleUnpin,
   };
+
+  const deleteDialogTitle = deleteTarget?.type === 'bulk'
+    ? getMessage('confirmDeleteSelectedSessions')
+    : getMessage('confirmDelete');
+  const singleDeleteName = deleteTarget?.type === 'single' ? deleteTarget.session.name : '';
+  const deleteDialogDescription = deleteTarget?.type === 'bulk'
+    ? getMessage('confirmDeleteSelectedSessionsDescription').replace(
+      '{count}',
+      String(deleteTarget.ids.length),
+    )
+    : getMessage('confirmDeleteSession').replace('{name}', singleDeleteName);
 
   return (
     <PageLayout
@@ -508,6 +646,12 @@ export function SessionsPage({
                 emptyDescriptionKey="pinnedSessionsEmptyDescription"
                 isPinned={true}
                 sessions={pinnedSessions}
+                selectedIds={selectedPinnedIds}
+                onSelectionChange={setSelectedPinnedIds}
+                onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'pinned', ids })}
+                onBulkExportRequest={(ids) => setBulkExportIds(ids)}
+                onBulkPinToggle={(ids) => handleBulkPinToggle(ids, false)}
+                testIdSuffix="pinned"
                 {...sharedSectionProps}
               />
 
@@ -520,6 +664,12 @@ export function SessionsPage({
                 emptyDescriptionKey="unpinnedSessionsEmptyDescription"
                 isPinned={false}
                 sessions={unpinnedSessions}
+                selectedIds={selectedUnpinnedIds}
+                onSelectionChange={setSelectedUnpinnedIds}
+                onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'unpinned', ids })}
+                onBulkExportRequest={(ids) => setBulkExportIds(ids)}
+                onBulkPinToggle={(ids) => handleBulkPinToggle(ids, true)}
+                testIdSuffix="unpinned"
                 {...sharedSectionProps}
               />
             </Flex>
@@ -563,13 +713,16 @@ export function SessionsPage({
               if (!isOpen) setDeleteTarget(null);
             }}
             onConfirm={handleDeleteConfirm}
-            title={getMessage('confirmDelete')}
-            description={getMessage('confirmDeleteSession').replace(
-              '{name}',
-              deleteTarget?.name ?? '',
-            )}
+            title={deleteDialogTitle}
+            description={deleteDialogDescription}
             confirmLabel={getMessage('delete')}
             color="red"
+          />
+
+          <ExportSessionsWizard
+            open={bulkExportIds != null}
+            onOpenChange={(open) => { if (!open) setBulkExportIds(null); }}
+            initialSelectedIds={bulkExportIds ?? undefined}
           />
         </Box>
       )}

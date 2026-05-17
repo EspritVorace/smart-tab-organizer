@@ -368,6 +368,11 @@
   "sessionNamePlaceholder": { "message": "e.g., Work tabs - Monday" },
   "sessionSaveError": { "message": "Failed to save session. Please try again." },
   "confirmDeleteSession": { "message": "Are you sure you want to delete the session \"{name}\"? This action cannot be undone." },
+  "confirmDeleteSelectedSessions": { "message": "Delete the selected sessions?" },
+  "confirmDeleteSelectedSessionsDescription": { "message": "This will permanently delete {count} session(s). This action cannot be undone." },
+  "sessionSelectAriaLabel": { "message": "Select session" },
+  "pinSelected": { "message": "Pin Selected" },
+  "unpinSelected": { "message": "Unpin Selected" },
 
   "snapshotTitle": { "message": "Save Session Snapshot" },
   "snapshotDescription": { "message": "Choose which tabs to save in this session." },
