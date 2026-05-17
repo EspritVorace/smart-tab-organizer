@@ -8,6 +8,7 @@ export { PopupPage } from './PopupPage.js';
 export {
   ImportWizardPage,
   type ImportClassificationCounts,
+  type ImportConflictMode,
 } from './ImportWizardPage.js';
 export { ExportWizardPageBase } from './ExportWizardPageBase.js';
 export { ExportWizardPage } from './ExportWizardPage.js';
@@ -24,3 +25,9 @@ export {
   type DuplicateTabAction,
   type GroupConflictAction,
 } from './RestoreWizardPage.js';
+export { SessionsListPage } from './SessionsListPage.js';
+export { DomainRulesListPage } from './DomainRulesListPage.js';
+export {
+  OptionsEditModalPage,
+  type DeduplicationMatchMode,
+} from './OptionsEditModalPage.js';

@@ -5,20 +5,21 @@
  * opens the rules import wizard, pastes a JSON crafted to produce one new,
  * one conflicting and one identical rule (`buildConflictJson()`), and
  * captures every step of the classification + conflict-mode resolution.
+ *
+ * Lot 6 (issue #309): consumes shared Domain Actions and the
+ * `ImportWizardPage` Page Object exclusively, so a DOM evolution on the
+ * import wizard breaks the functional and narrative pipelines at the same
+ * call site.
  */
 import { test } from '../helpers/doc-fixture.js';
 import { captureStep, startScenario } from '../helpers/doc-capture.js';
 import { writeScenarioReadme } from '../helpers/scenario-readme.js';
+import { dismissDialog, openExtensionPage } from '../helpers/ui-actions.js';
 import {
   clearExtensionStorage,
-  dismissDialog,
-  importWizardNextToClassification,
-  openExtensionPage,
-  openImportRulesWizard,
-  pasteImportJson,
+  openRulesImportWizard,
   seedDomainRules,
-  setImportConflictMode,
-} from '../helpers/ui-actions.js';
+} from '../../e2e-shared/actions/index.js';
 import { SCREENSHOT_RULES } from '../../e2e-screenshots/fixtures/rules-seed.js';
 import { buildConflictJson } from '../../e2e-screenshots/fixtures/conflicts-seed.js';
 import { IMPORT_CONFLICTS_MANIFEST } from './10-import-conflicts.routing.js';
@@ -56,23 +57,31 @@ test('import conflicts', async (
     description: 'Import/Export page with four seeded rules ready to be imported on top of.',
   });
 
-  await openImportRulesWizard(page);
-  await pasteImportJson(page, buildConflictJson());
+  const wizard = await openRulesImportWizard(page);
+  await wizard.pasteJson(buildConflictJson());
+  // Validation runs on each input change; brief breath so the success
+  // callout renders before capture.
+  await page.waitForTimeout(200);
   await captureStep(page, 'import-wizard-paste', {
     description: 'Import wizard step 0, JSON pasted in Text mode (validation succeeded).',
   });
 
-  await importWizardNextToClassification(page);
+  await wizard.clickNext();
+  // Radix renders step 1 inside the same dialog; small breath so the
+  // classification scroll area mounts before capture.
+  await page.waitForTimeout(300);
   await captureStep(page, 'import-wizard-classification-overwrite', {
     description: 'Classification step with conflict mode "overwrite" (default): one new, one conflicting, one identical.',
   });
 
-  await setImportConflictMode(page, 'duplicate');
+  await wizard.setConflictMode('duplicate');
+  await page.waitForTimeout(150);
   await captureStep(page, 'import-wizard-classification-duplicate', {
     description: 'Classification step with conflict mode set to "duplicate".',
   });
 
-  await setImportConflictMode(page, 'ignore');
+  await wizard.setConflictMode('ignore');
+  await page.waitForTimeout(150);
   await captureStep(page, 'import-wizard-classification-ignore', {
     description: 'Classification step with conflict mode set to "ignore".',
   });

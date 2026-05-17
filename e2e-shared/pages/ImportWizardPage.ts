@@ -28,6 +28,8 @@ export interface ImportClassificationCounts {
   identical?: number;
 }
 
+export type ImportConflictMode = 'overwrite' | 'duplicate' | 'ignore';
+
 export class ImportWizardPage extends DialogPage {
   constructor(page: Page) {
     super(page);
@@ -50,14 +52,28 @@ export class ImportWizardPage extends DialogPage {
     return this.dialog().getByRole('button', { name: /browse/i });
   }
 
-  /** "Next" button in the source-step footer. */
+  /**
+   * "Next" button in the source-step footer.
+   *
+   * Locale-agnostic: anchors on the last button in the dialog (the
+   * `WizardModal.Footer` is the bottom-most flex, so its rightmost button
+   * is the dialog's last button in DOM order). Pack mode renders its own
+   * Next button with the dedicated `import-wizard-pack-next` testid; the
+   * generic `nextButton()` still finds it because it remains the last
+   * footer button.
+   */
   nextButton(): Locator {
-    return this.dialog().getByRole('button', { name: /next/i });
+    return this.dialog().locator('button').last();
   }
 
-  /** "Confirm import" button in the classification-step footer. */
+  /**
+   * "Confirm import" button in the classification-step footer.
+   *
+   * Locale-agnostic: anchors on the last button in the dialog (Previous +
+   * Confirm Import on step 1).
+   */
   confirmButton(): Locator {
-    return this.dialog().getByRole('button', { name: /confirm import/i });
+    return this.dialog().locator('button').last();
   }
 
   /**
@@ -95,21 +111,44 @@ export class ImportWizardPage extends DialogPage {
 
   // ─── Atomic actions ──────────────────────────────────────────────────────
 
-  /** Switch the source segmented control to "File" mode. */
+  /**
+   * Switch the source segmented control to "File" mode.
+   *
+   * Locale-agnostic: anchors on the Radix `SegmentedControl.Item` button
+   * (`button.rt-SegmentedControlItem[value="file"]`), which is set by
+   * `SourceModeSegmented` and unaffected by translation.
+   */
   async selectFileMode(): Promise<void> {
     await this.dialog()
-      .getByRole('radio', { name: /file/i })
-      .locator('..')
+      .locator('button.rt-SegmentedControlItem[value="file"]')
+      .first()
       .click();
   }
 
-  /** Switch the source segmented control to "Text" mode. */
+  /**
+   * Switch the source segmented control to "Text" mode.
+   *
+   * Locale-agnostic via the `[value="text"]` attribute on the
+   * `SegmentedControl.Item` button.
+   */
   async selectTextMode(): Promise<void> {
     await this.dialog()
-      .getByRole('radio', { name: /text/i })
-      .locator('..')
+      .locator('button.rt-SegmentedControlItem[value="text"]')
+      .first()
       .click();
     await this.textArea().waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Pick a conflict-resolution mode on the classification step
+   * (`ConflictModeSelector`). Locale-agnostic via the `[value=]` attribute
+   * carried by each Radix `SegmentedControl.Item` button.
+   */
+  async setConflictMode(mode: ImportConflictMode): Promise<void> {
+    await this.dialog()
+      .locator(`button.rt-SegmentedControlItem[value="${mode}"]`)
+      .first()
+      .click();
   }
 
   /**

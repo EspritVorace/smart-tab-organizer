@@ -39,6 +39,11 @@ export interface RestoreMergeOptions extends RestoreReplaceOptions {
  * Open the Customize-restoration wizard for a given session by clicking
  * the SplitButton chevron on its card and selecting the "Customize" item.
  *
+ * Locale-agnostic: targets the chevron by its Lucide `chevron-down` SVG
+ * (set by `SplitButton`) rather than its localized `aria-label`. Falls
+ * back to the next visible chevron when the session card renders multiple
+ * SplitButtons (defensive: only one is rendered today).
+ *
  * Relevant US: US-S004 (entry point), US-S011 (split-button options).
  */
 export async function openCustomizeRestoreWizard(
@@ -46,7 +51,7 @@ export async function openCustomizeRestoreWizard(
   sessionId: string,
 ): Promise<RestoreWizardPage> {
   const card = page.getByTestId(`session-card-${sessionId}`);
-  await card.getByRole('button', { name: /restore options/i }).click();
+  await card.locator('button:has(svg.lucide-chevron-down)').first().click();
   await page.getByTestId('session-restore-menu-customize').click();
   const wizard = new RestoreWizardPage(page);
   await wizard.expectVisible({ timeout: 5000 });

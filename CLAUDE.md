@@ -83,8 +83,42 @@ src/
                    # notifications · utils
   styles/          # radix-themes.css (custom focus for non-Radix markup only)
 tests/             # Vitest unit tests
-tests/e2e/         # Playwright E2E tests
+tests/e2e/         # Playwright E2E tests (functional)
+e2e-shared/        # Shared Page Objects, Domain Actions, fixtures-base, matchers
+e2e-doc-scenarios/ # Narrative captures (Starlight, README, Chrome Web Store)
+e2e-screenshots/   # Chrome Web Store screenshots (out of scope of Page Objects epic)
 ```
+
+### E2E architecture (Page Objects + Domain Actions)
+
+Three Playwright pipelines (`tests/e2e/`, `e2e-doc-scenarios/`,
+`e2e-screenshots/`) consume one shared bundle under
+[`e2e-shared/`](./e2e-shared/README.md). The convergence guarantees that
+a DOM evolution breaks every pipeline at the same call site, which keeps
+the `e2e-flaky-detector` agent honest.
+
+Layered model:
+
+- `e2e-shared/pages/`: Page Objects (atomic locators + atomic actions +
+  atomic assertions). One class per UI surface (dialog, page section,
+  sub-modal). Subclass `DialogPage` for Radix dialogs.
+- `e2e-shared/actions/`: Domain Actions (composed flows that narrate a
+  single business outcome). Consumes Page Objects only; never reaches
+  for raw locators.
+- `e2e-shared/matchers/`: custom Playwright matchers
+  (`toHaveDomainRulesCount`, `toHaveToast`, ...). Registered once.
+- `e2e-shared/fixtures-base.ts`: worker-scoped `extensionContext` and
+  `extensionId`. Pipelines extend the base instead of redeclaring it.
+
+**Locale-agnostic by default**. The narrative pipeline runs across
+`en`/`fr`/`es`; selectors anchor on `data-testid`, then Radix-stable
+attributes (`[value="…"]`, `.rt-SegmentedControlItem`,
+`svg.lucide-…`), and `getByRole({ name })` regex only as a fallback.
+A locale-sensitive selector in a shared Page Object is a regression.
+
+See [`e2e-shared/README.md`](./e2e-shared/README.md) for the full
+convention and the template for adding a new Page Object or Domain
+Action.
 
 ### Features
 1. **Automatic Grouping**: domain rules + regex presets (middle-click / right-click new tab)

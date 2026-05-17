@@ -10,45 +10,40 @@
  * `playwright.doc.config.ts`; one project => one persistent Chromium context,
  * resulting in 6 isolated runs.
  *
- * Captures requiring features that do not yet exist in the source (rule-
- * creation toast, grouping toast with undo, sessions snapshot multi-step
- * wizard, file-picker driven export-success toast) remain deferred and are
- * documented in `user-stories/doc-scenarios/clarifications.md`.
+ * Lot 6 (issue #309): the scenario now drives the UI exclusively through
+ * Page Objects and Domain Actions from `e2e-shared/`. Only pipeline-
+ * specific helpers (locale-aware page opening, mimetic-tab spawn,
+ * Escape-to-dismiss) live in `../helpers/ui-actions.ts`. An evolution of
+ * the extension's DOM breaks both pipelines at the same call site, which
+ * keeps the `e2e-flaky-detector` agent's diagnoses honest.
  */
 import { test } from '../helpers/doc-fixture.js';
-import { waitForServiceWorker } from '../../e2e-shared/extension-id.js';
 import {
   captureStep,
   startScenario,
 } from '../helpers/doc-capture.js';
 import { writeScenarioReadme } from '../helpers/scenario-readme.js';
 import {
-  dismissRuleWizard,
-  exportRulesToFile,
-  fillRuleWizardStep1,
-  fillSessionsSearch,
-  fillSnapshotName,
-  fillSnapshotNotes,
-  getFirstSessionId,
-  hoverSessionCardName,
-  importWizardNextToClassification,
-  openExportRulesWizard,
+  dismissDialog,
   openExtensionPage,
-  openImportRulesWizard,
   openMimeticTab,
+} from '../helpers/ui-actions.js';
+import {
+  clearExtensionStorage,
   openRuleWizard,
   openSnapshotWizard,
-  pasteImportJson,
+  openRulesExportWizard,
+  openRulesImportWizard,
   pinSession,
-  ruleWizardNextToOptions,
-  ruleWizardNextToSummary,
-  saveSnapshotWizard,
-  selectConfigurationMode,
   stubShowSaveFilePicker,
-  toggleRuleEnabled,
   waitForGroupingSettled,
   waitForToast,
-} from '../helpers/ui-actions.js';
+} from '../../e2e-shared/actions/index.js';
+import {
+  DomainRulesListPage,
+  SessionsListPage,
+} from '../../e2e-shared/pages/index.js';
+import { waitForServiceWorker } from '../../e2e-shared/extension-id.js';
 import { MAIN_JOURNEY_MANIFEST } from './00-main-journey.routing.js';
 
 /**
@@ -129,10 +124,8 @@ test('main journey', async (
   });
 
   // Reset extension storage so Act 1 captures are reproducible.
+  await clearExtensionStorage(extensionContext);
   const sw = await waitForServiceWorker(extensionContext);
-  await sw.evaluate(async () => {
-    await chrome.storage.local.clear();
-  });
 
   await test.step('Act 1 - Empty state', async () => {
     const popupPage = await openExtensionPage(
@@ -212,65 +205,70 @@ test('main journey', async (
       theme,
     );
 
-    // Walk 1 — Ask mode through every step. We use Ask rather than Preset
-    // because Preset mode requires picking a preset via CMDK (hard to drive
-    // headlessly without flake). Captures still cover the entire 4-step flow.
-    await openRuleWizard(rulesPage);
+    // Walk 1 — Preset/Ask mode through every step. We use Ask rather than
+    // Preset because Preset mode requires picking a preset via CMDK (hard
+    // to drive headlessly without flake). Captures still cover the entire
+    // 4-step flow.
+    const wizard1 = await openRuleWizard(rulesPage);
     await captureStep(rulesPage, 'rules-wizard-step1-identity', {
       force: 10,
       description: 'Rule wizard step 1 (identity fields).',
     });
-    await fillRuleWizardStep1(rulesPage, {
-      label: 'GitHub',
-      domainFilter: 'github.com',
-    });
-    await selectConfigurationMode(rulesPage, 'preset');
+    await wizard1.fillLabel('GitHub');
+    await wizard1.fillDomainFilter('github.com');
+    await wizard1.clickNext();
+    await wizard1.expectOnStep(2);
+    await wizard1.selectConfigMode('preset');
     await captureStep(rulesPage, 'rules-wizard-step2-mode-preset', {
       force: 11,
       description: 'Rule wizard step 2, Preset mode selected.',
     });
-    await selectConfigurationMode(rulesPage, 'ask');
-    await ruleWizardNextToOptions(rulesPage);
+    await wizard1.selectConfigMode('ask');
+    await wizard1.clickNext();
+    await wizard1.expectOnStep(3);
     await captureStep(rulesPage, 'rules-wizard-step3-options', {
       force: 12,
       description: 'Rule wizard step 3 (options: deduplication, etc.).',
     });
-    await ruleWizardNextToSummary(rulesPage);
+    await wizard1.clickNext();
+    await wizard1.expectOnStep(4);
     await captureStep(rulesPage, 'rules-wizard-step4-summary', {
       force: 13,
       description: 'Rule wizard step 4 (summary before save).',
     });
-    await dismissRuleWizard(rulesPage);
+    await rulesPage.keyboard.press('Escape');
+    await wizard1.expectHidden();
 
     // Walk 2 — Ask mode capture only.
-    await openRuleWizard(rulesPage);
-    await fillRuleWizardStep1(rulesPage, {
-      label: 'YouTube',
-      domainFilter: 'youtube.com',
-    });
-    await selectConfigurationMode(rulesPage, 'ask');
+    const wizard2 = await openRuleWizard(rulesPage);
+    await wizard2.fillLabel('YouTube');
+    await wizard2.fillDomainFilter('youtube.com');
+    await wizard2.clickNext();
+    await wizard2.expectOnStep(2);
+    await wizard2.selectConfigMode('ask');
     await captureStep(rulesPage, 'rules-wizard-step2-mode-ask', {
       force: 15,
       description: 'Rule wizard step 2, Ask mode selected.',
     });
-    await dismissRuleWizard(rulesPage);
+    await rulesPage.keyboard.press('Escape');
+    await wizard2.expectHidden();
 
     // Walk 3 — Manual mode capture only.
-    await openRuleWizard(rulesPage);
-    await fillRuleWizardStep1(rulesPage, {
-      label: 'Google',
-      domainFilter: 'google.com',
-    });
-    await selectConfigurationMode(rulesPage, 'manual');
+    const wizard3 = await openRuleWizard(rulesPage);
+    await wizard3.fillLabel('Google');
+    await wizard3.fillDomainFilter('google.com');
+    await wizard3.clickNext();
+    await wizard3.expectOnStep(2);
+    await wizard3.selectConfigMode('manual');
     await captureStep(rulesPage, 'rules-wizard-step2-mode-manual', {
       force: 16,
       description: 'Rule wizard step 2, Manual mode (regex fields visible).',
     });
-    await dismissRuleWizard(rulesPage);
+    await rulesPage.keyboard.press('Escape');
+    await wizard3.expectHidden();
 
     // Seed the four rules so Act 3 can exercise grouping and the list view
-    // is populated with a representative state. SEED_RULES mirrors the
-    // schema from src/types/syncSettings.ts -> DomainRuleSetting.
+    // is populated with a representative state.
     await sw.evaluate(async (rules) => {
       await chrome.storage.local.set({ domainRules: rules });
     }, SEED_RULES);
@@ -278,9 +276,8 @@ test('main journey', async (
     // Reload the rules page to pick up the seeded list.
     await rulesPage.reload();
     await rulesPage.waitForLoadState('domcontentloaded');
-    await rulesPage
-      .getByTestId('page-rules-list')
-      .waitFor({ state: 'visible' });
+    const rulesList = new DomainRulesListPage(rulesPage);
+    await rulesList.expectListVisible();
     await captureStep(rulesPage, 'rules-list-populated', {
       force: 18,
       description: 'Rules list with four rules covering every configuration mode.',
@@ -359,35 +356,34 @@ test('main journey', async (
       theme,
     );
 
-    await openSnapshotWizard(sessionsPage);
-    await fillSnapshotName(sessionsPage, 'Morning research');
-    await fillSnapshotNotes(
-      sessionsPage,
+    const snapshot = await openSnapshotWizard(sessionsPage);
+    await snapshot.fillName('Morning research');
+    await snapshot.fillNote(
       'Initial research session captured at the start of the day.',
     );
     await captureStep(sessionsPage, 'sessions-snapshot-wizard-filled', {
       force: 30,
       description: 'Snapshot wizard with name and notes filled in.',
     });
-    await saveSnapshotWizard(sessionsPage);
+    await snapshot.clickSave();
+    await snapshot.expectHidden();
 
-    await sessionsPage
-      .getByTestId('page-sessions-list')
-      .waitFor({ state: 'visible' });
+    const sessionsList = new SessionsListPage(sessionsPage);
+    await sessionsList.expectListVisible();
     await captureStep(sessionsPage, 'sessions-list-with-snapshot', {
       force: 33,
       description: 'Sessions list with one snapshot freshly created.',
     });
 
     // Card-level captures: relative time + HoverCard.
-    const sessionId = await getFirstSessionId(sessionsPage);
+    const sessionId = await sessionsList.firstSessionId();
     await captureStep(sessionsPage, 'sessions-card-relative-time', {
       force: 34,
       description: 'Session card showing relative time and metadata.',
       elementSelector: `[data-testid="session-card-${sessionId}"]`,
     });
 
-    await hoverSessionCardName(sessionsPage, sessionId);
+    await sessionsList.hoverCardName(sessionId);
     await captureStep(sessionsPage, 'sessions-card-hovercard', {
       force: 35,
       description: 'HoverCard open on the session card name.',
@@ -434,9 +430,8 @@ test('main journey', async (
       locale,
       theme,
     );
-    await sessionsPage2
-      .getByTestId('page-sessions-list')
-      .waitFor({ state: 'visible' });
+    const sessionsList2 = new SessionsListPage(sessionsPage2);
+    await sessionsList2.expectListVisible();
     await pinSession(sessionsPage2, sessionId);
     await captureStep(sessionsPage2, 'sessions-list-with-pinned', {
       force: 37,
@@ -472,11 +467,11 @@ test('main journey', async (
     await popupPinnedPage
       .getByTestId('popup-workspace-switcher')
       .waitFor({ state: 'visible', timeout: 5_000 })
-      .catch(() => {});
+      .catch(() => undefined);
     await popupPinnedPage
       .getByTestId('popup-profiles-list')
       .waitFor({ state: 'visible', timeout: 5_000 })
-      .catch(() => {});
+      .catch(() => undefined);
     await captureStep(popupPinnedPage, 'popup-with-pinned-and-workspace', {
       force: 38,
       description:
@@ -503,7 +498,7 @@ test('main journey', async (
     });
 
     // Open the rules export wizard and capture the selection step.
-    await openExportRulesWizard(page);
+    const exportWizard = await openRulesExportWizard(page);
     await captureStep(page, 'export-wizard-selection', {
       force: 41,
       description: 'Rules export wizard, selection step (all rules pre-selected).',
@@ -513,8 +508,8 @@ test('main journey', async (
     // (no native save dialog), then trigger the export and capture the
     // success toast that fires once the wizard auto-closes.
     await stubShowSaveFilePicker(page);
-    await exportRulesToFile(page);
-    await page.getByRole('dialog').first().waitFor({ state: 'hidden' });
+    await exportWizard.clickExportToFile();
+    await exportWizard.expectHidden();
     await waitForToast(page, { variant: 'success' });
     await captureStep(page, 'export-toast-success', {
       force: 42,
@@ -526,7 +521,7 @@ test('main journey', async (
     // `enabled` and rejects unknown color values. Reusing `doc-rule-github`
     // produces a "conflicting" classification entry; the Stack Overflow entry
     // appears as new.
-    await openImportRulesWizard(page);
+    const importWizard = await openRulesImportWizard(page);
     const samplePayload = JSON.stringify(
       {
         domainRules: [
@@ -561,19 +556,24 @@ test('main journey', async (
       null,
       2,
     );
-    await pasteImportJson(page, samplePayload);
+    await importWizard.pasteJson(samplePayload);
+    // Validation runs on each input change; brief stabilisation so the
+    // success callout renders before capture.
+    await page.waitForTimeout(200);
     await captureStep(page, 'import-wizard-paste', {
       force: 43,
       description: 'Rules import wizard, JSON pasted in Text mode (validated).',
     });
 
-    await importWizardNextToClassification(page);
+    await importWizard.clickNext();
+    // Radix renders step 1 inside the same dialog; small breath so the
+    // classification scroll area mounts before capture.
+    await page.waitForTimeout(300);
     await captureStep(page, 'import-wizard-classification', {
       force: 44,
       description: 'Rules import wizard, classification step (new + conflicting).',
     });
-    await page.keyboard.press('Escape');
-    await page.getByRole('dialog').first().waitFor({ state: 'hidden' }).catch(() => {});
+    await dismissDialog(page);
 
     await page.close();
   });
@@ -586,13 +586,12 @@ test('main journey', async (
       locale,
       theme,
     );
-    await rulesPage
-      .getByTestId('page-rules-list')
-      .waitFor({ state: 'visible' });
+    const rulesList = new DomainRulesListPage(rulesPage);
+    await rulesList.expectListVisible();
 
     // Disable one rule (Google) so the list shows a representative
     // disabled-rule visual: dimmed card, switch off.
-    await toggleRuleEnabled(rulesPage, 'doc-rule-google');
+    await rulesList.toggleRuleEnabled('doc-rule-google');
     await captureStep(rulesPage, 'rules-list-with-disabled', {
       force: 50,
       description: 'Rules list with one rule disabled (toggle off, dimmed card).',
@@ -607,15 +606,14 @@ test('main journey', async (
       locale,
       theme,
     );
-    await sessionsPage
-      .getByTestId('page-sessions-list')
-      .waitFor({ state: 'visible' });
-    await fillSessionsSearch(sessionsPage, 'Morning');
+    const sessionsList = new SessionsListPage(sessionsPage);
+    await sessionsList.expectListVisible();
+    await sessionsList.search('Morning');
     await captureStep(sessionsPage, 'sessions-search-active', {
       force: 51,
       description: 'Sessions list with an active search filtering by session name.',
     });
-    await fillSessionsSearch(sessionsPage, 'tutorial');
+    await sessionsList.search('tutorial');
     await captureStep(sessionsPage, 'sessions-search-deep', {
       force: 52,
       description: 'Sessions list with a deep search matching tab titles inside the snapshot.',
@@ -629,9 +627,8 @@ test('main journey', async (
       locale,
       theme,
     );
-    await finalPage
-      .getByTestId('page-rules-list')
-      .waitFor({ state: 'visible' });
+    const finalList = new DomainRulesListPage(finalPage);
+    await finalList.expectListVisible();
     await captureStep(finalPage, 'rules-list-final', {
       force: 60,
       description: 'Rules list at the end of the journey (advanced state).',

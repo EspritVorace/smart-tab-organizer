@@ -19,12 +19,16 @@ import { ExportWizardPage } from '../pages/ExportWizardPage.js';
  * Returns the `ImportWizardPage` instance so callers can interact with
  * the open dialog without re-instantiating it.
  *
+ * Locale-agnostic: targets the card's only button via role rather than its
+ * (localized) accessible name, so the helper works in every UI language.
+ *
  * Relevant US: US-IE001 (wizard entry point).
  */
 export async function openRulesImportWizard(page: Page): Promise<ImportWizardPage> {
   await page
     .getByTestId('page-import-export-card-import-rules')
-    .getByRole('button', { name: /^import$/i })
+    .getByRole('button')
+    .first()
     .click();
   const wizard = new ImportWizardPage(page);
   await wizard.expectVisible({ timeout: 5000 });
@@ -34,12 +38,16 @@ export async function openRulesImportWizard(page: Page): Promise<ImportWizardPag
 /**
  * Open the rules export wizard from the Import/Export cards page.
  *
+ * Locale-agnostic: targets the card's only button via role rather than its
+ * (localized) accessible name.
+ *
  * Relevant US: US-IE008 (export entry point).
  */
 export async function openRulesExportWizard(page: Page): Promise<ExportWizardPage> {
   await page
     .getByTestId('page-import-export-card-export-rules')
-    .getByRole('button', { name: /^export$/i })
+    .getByRole('button')
+    .first()
     .click();
   const wizard = new ExportWizardPage(page);
   await wizard.expectVisible({ timeout: 5000 });
@@ -97,9 +105,11 @@ export interface ExportRulesOptions {
  * function (useful for asserting the payload shape).
  *
  * Idempotent: re-installs the stub on every call so tests do not need to
- * track installation state.
+ * track installation state. Exported so the narrative capture pipeline can
+ * reuse the exact same stub when it wants to drive the export flow without
+ * also asserting on the written payload (typical "capture only" usage).
  */
-async function stubShowSaveFilePicker(page: Page): Promise<() => Promise<string>> {
+export async function stubShowSaveFilePicker(page: Page): Promise<() => Promise<string>> {
   await page.evaluate(() => {
     const w = window as unknown as {
       __exportedJson?: string;

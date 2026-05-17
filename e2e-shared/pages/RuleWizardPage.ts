@@ -272,6 +272,21 @@ export class RuleWizardPage extends DialogPage {
     await this.modifyButton(stepIndex).click();
   }
 
+  /**
+   * Open the Options sub-modal from the edit wizard's summary view. The
+   * edit wizard lands directly on the summary; each section exposes a
+   * dedicated "Modify" button (testid `wizard-rule-edit-modify-step-N`)
+   * that opens the matching sub-dialog. Index 2 targets the Options
+   * section (`OptionsEditModal`). Returns nothing; callers instantiate the
+   * matching `OptionsEditModalPage` Page Object to interact with the modal.
+   */
+  async openEditOptionsModal(): Promise<void> {
+    await this.clickModifySection(2);
+    await this.page
+      .getByTestId('modal-edit-options')
+      .waitFor({ state: 'visible' });
+  }
+
   // ─── Atomic assertions ───────────────────────────────────────────────────
 
   /** Assert the wizard is on a given step container (1-based). */

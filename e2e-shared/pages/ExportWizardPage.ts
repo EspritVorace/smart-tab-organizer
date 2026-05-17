@@ -21,6 +21,14 @@ export class ExportWizardPage extends ExportWizardPageBase {
     super(page);
   }
 
+  protected override primaryExportTestId(): string {
+    return 'wizard-export-rules-btn-export';
+  }
+
+  protected override clipboardExportTestId(): string {
+    return 'wizard-export-rules-btn-clipboard';
+  }
+
   // ─── Atomic actions ──────────────────────────────────────────────────────
 
   /**

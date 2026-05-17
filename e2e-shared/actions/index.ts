@@ -14,6 +14,7 @@ export {
   importRulesViaFile,
   exportRulesToFile,
   exportRulesToClipboard,
+  stubShowSaveFilePicker,
   type ExportRulesOptions,
 } from './rules-import-export.js';
 
@@ -57,6 +58,7 @@ export {
   openChildTabViaMiddleClick,
   openChildTabViaContextMenu,
   waitForGroupCreated,
+  waitForGroupingSettled,
   type GroupingHelpers,
   type TabGroupInfo,
 } from './tabs-grouping.js';
@@ -78,3 +80,13 @@ export {
   executeNotificationUndo,
   triggerOrganizeAllTabsViaSW,
 } from './notifications.js';
+
+export {
+  clearExtensionStorage,
+  seedDomainRules,
+  seedSessions,
+} from './storage-seed.js';
+
+export { createLiveTabGroup, type TabGroupColor } from './live-tab-group.js';
+
+export { waitForToast, type ToastVariant, type WaitForToastOptions } from './toast.js';

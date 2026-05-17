@@ -83,9 +83,10 @@ export async function createSnapshotWithTabs(
 
 /**
  * Pin an existing session by clicking the dedicated pin icon-button on its
- * card. The button toggles between "Pin" and "Unpin" via its `aria-label`,
- * so the helper anchors on the pin (not unpin) label to stay idempotent
- * when the session is already unpinned.
+ * card. The button carries a stable `data-testid` that switches between
+ * `session-card-{id}-btn-pin` (unpinned) and `session-card-{id}-btn-unpin`
+ * (pinned), so the helper is idempotent across re-runs and locale-agnostic
+ * across the doc-scenarios matrix (en/fr/es).
  *
  * Drives the real UI path rather than seeding storage so the action
  * exercises the same code path users go through.
@@ -93,12 +94,8 @@ export async function createSnapshotWithTabs(
  * Relevant US: US-S008 (pinned sessions appear in their own section).
  */
 export async function pinSession(page: Page, sessionId: string): Promise<void> {
-  const card = page.getByTestId(`session-card-${sessionId}`);
-  // The pin button uses `aria-label="Pin"` when the session is unpinned and
-  // `aria-label="Unpin"` once pinned. Match exactly to avoid hitting the
-  // latter after the click resolves.
-  await card.getByRole('button', { name: 'Pin', exact: true }).click();
+  await page.getByTestId(`session-card-${sessionId}-btn-pin`).click();
   await expect(
-    card.getByRole('button', { name: 'Unpin', exact: true }),
+    page.getByTestId(`session-card-${sessionId}-btn-unpin`),
   ).toBeVisible({ timeout: 5000 });
 }
