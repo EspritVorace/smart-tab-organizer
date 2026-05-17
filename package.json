@@ -1,7 +1,7 @@
 {
   "name": "smart-tab-organizer",
   "version": "1.2.0",
-  "packageManager": "pnpm@10.33.2",
+  "packageManager": "pnpm@11.1.2",
   "type": "module",
   "scripts": {
     "test": "vitest run --config vitest.simple.config.ts",
@@ -100,31 +100,5 @@
     "react-dom": "^19.2.5",
     "react-hook-form": "^7.75.0",
     "zod": "^4.4.3"
-  },
-  "overrides": {
-    "rollup": "npm:@rollup/wasm-node@^4.0.0",
-    "vite-node": "^6.0.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "spawn-sync",
-      "sharp",
-      "unrs-resolver"
-    ],
-    "patchedDependencies": {
-      "vitest-ctrf-json-reporter@0.0.3": "patches/vitest-ctrf-json-reporter@0.0.3.patch"
-    },
-    "ignoredBuiltDependencies": [
-      "@swc/core"
-    ],
-    "overrides": {
-      "node-forge": "^1.4.0",
-      "defu": "^6.1.5",
-      "vite": "^8.0.10",
-      "brace-expansion@1": "^1.1.13",
-      "brace-expansion@2": "^2.0.3",
-      "brace-expansion@5": "^5.0.5"
-    }
   }
 }
