@@ -300,7 +300,6 @@ export function DomainRulesPage({
       <PageLayout
         titleKey="domainRulesTab"
         descriptionKey="domainRulesPageDescription"
-        icon={Shield}
         syncSettings={syncSettings}
       >
         {() => (
@@ -330,17 +329,17 @@ export function DomainRulesPage({
                 isIndeterminate={isIndeterminate}
                 onSelectAll={handleSelectAll}
               >
-                <Button size="1" variant="solid" onClick={() => handleBulkToggle(Array.from(selectedIds), true)}>
+                <Button size="1" variant="ghost" onClick={() => handleBulkToggle(Array.from(selectedIds), true)}>
                   <Eye size={14} />
                   {getMessage('enableSelected')}
                 </Button>
-                <Button size="1" variant="soft" onClick={() => handleBulkToggle(Array.from(selectedIds), false)}>
+                <Button size="1" variant="ghost" onClick={() => handleBulkToggle(Array.from(selectedIds), false)}>
                   <EyeOff size={14} />
                   {getMessage('disableSelected')}
                 </Button>
                 <Button
                   size="1"
-                  variant="soft"
+                  variant="ghost"
                   data-testid="page-rules-bulk-btn-export"
                   onClick={() => setBulkExportIds(Array.from(selectedIds))}
                 >
@@ -349,9 +348,8 @@ export function DomainRulesPage({
                 </Button>
                 <Button
                   size="1"
-                  variant="soft"
+                  variant="ghost"
                   color="red"
-                  highContrast
                   onClick={() => setDeleteTarget({ type: 'bulk', ruleIds: Array.from(selectedIds) })}
                 >
                   <Trash2 size={14} />

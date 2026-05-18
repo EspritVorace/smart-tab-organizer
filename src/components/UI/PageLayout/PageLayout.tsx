@@ -1,19 +1,16 @@
-import { Heading, Box, Flex, Text } from '@radix-ui/themes';
-import type { LucideIcon } from 'lucide-react';
+import { Heading, Box, Text } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 import type { AppSettings } from '@/types/syncSettings.js';
-import { IconBox } from '@/components/UI/IconBox/IconBox';
 import { StatusBar } from '@/components/UI/StatusBar/StatusBar';
 
 interface PageLayoutProps {
   titleKey: string;
   descriptionKey: string;
-  icon?: LucideIcon;
   syncSettings: AppSettings;
   children: (settings: AppSettings) => React.ReactNode;
 }
 
-export function PageLayout({ titleKey, descriptionKey, icon: Icon, syncSettings, children }: PageLayoutProps) {
+export function PageLayout({ titleKey, descriptionKey, syncSettings, children }: PageLayoutProps) {
   return (
     <Box style={{
       width: '100%',
@@ -26,12 +23,9 @@ export function PageLayout({ titleKey, descriptionKey, icon: Icon, syncSettings,
         pb="3"
         style={{ borderBottom: '1px solid var(--gray-a4)' }}
       >
-        <Flex align="center" gap="3">
-          {Icon && <IconBox icon={Icon} size="md" variant="gradient" />}
-          <Heading size="5" weight="bold" as="h1" style={{ letterSpacing: '-0.02em' }}>
-            {getMessage(titleKey)}
-          </Heading>
-        </Flex>
+        <Heading size="5" weight="bold" as="h1" style={{ letterSpacing: '-0.02em' }}>
+          {getMessage(titleKey)}
+        </Heading>
 
         <Box data-testid="page-layout-description" pt="2">
           <Text size="2" color="gray" as="p" style={{ margin: 0 }}>

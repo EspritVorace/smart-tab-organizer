@@ -30,9 +30,17 @@ export function BulkActionsBar({
       data-testid={testId}
       align="center"
       gap="3"
-      p="2"
+      px="3"
+      py="2"
       mb="4"
-      style={{ backgroundColor: 'var(--accent-a3)', borderRadius: 'var(--radius-2)' }}
+      style={{
+        backgroundColor: 'var(--accent-a2)',
+        border: '1px solid var(--accent-a7)',
+        borderRadius: 'var(--radius-3)',
+        position: 'sticky',
+        top: '52px',
+        zIndex: 4,
+      }}
     >
       <Checkbox
         checked={isAllSelected}
@@ -40,13 +48,21 @@ export function BulkActionsBar({
         aria-label={getMessage('selectAll')}
         {...(isIndeterminate && { 'data-indeterminate': true })}
       />
-      <Text size="2" weight="medium">
+      <Text
+        size="1"
+        weight="bold"
+        style={{
+          fontFamily: 'var(--code-font-family)',
+          fontVariantNumeric: 'tabular-nums',
+          color: 'var(--accent-12)',
+        }}
+      >
         {selectedCount === 1
           ? getMessage('dataTableSelectedCountSingular')
           : getMessage('dataTableSelectedCountPlural').replace('{count}', selectedCount.toString())}
       </Text>
       <Separator orientation="vertical" />
-      <Flex gap="2">{children}</Flex>
+      <Flex gap="2" style={{ marginLeft: 'auto' }}>{children}</Flex>
     </Flex>
   );
 }

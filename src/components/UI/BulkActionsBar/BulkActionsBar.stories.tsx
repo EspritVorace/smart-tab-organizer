@@ -28,19 +28,19 @@ type Story = StoryObj<typeof meta>;
 function rulesActions() {
   return (
     <>
-      <Button size="1" variant="solid">
+      <Button size="1" variant="ghost">
         <Eye size={14} />
         Enable Selected
       </Button>
-      <Button size="1" variant="soft">
+      <Button size="1" variant="ghost">
         <EyeOff size={14} />
         Disable Selected
       </Button>
-      <Button size="1" variant="soft">
+      <Button size="1" variant="ghost">
         <FileDown size={14} />
         Export Selected
       </Button>
-      <Button size="1" variant="soft" color="red" highContrast>
+      <Button size="1" variant="ghost" color="red">
         <Trash2 size={14} />
         Delete Selected
       </Button>
@@ -51,15 +51,15 @@ function rulesActions() {
 function sessionsUnpinnedActions() {
   return (
     <>
-      <Button size="1" variant="soft">
+      <Button size="1" variant="ghost">
         <Pin size={14} />
         Pin Selected
       </Button>
-      <Button size="1" variant="soft">
+      <Button size="1" variant="ghost">
         <FileDown size={14} />
         Export Selected
       </Button>
-      <Button size="1" variant="soft" color="red" highContrast>
+      <Button size="1" variant="ghost" color="red">
         <Trash2 size={14} />
         Delete Selected
       </Button>
@@ -70,15 +70,15 @@ function sessionsUnpinnedActions() {
 function sessionsPinnedActions() {
   return (
     <>
-      <Button size="1" variant="soft">
+      <Button size="1" variant="ghost">
         <PinOff size={14} />
         Unpin Selected
       </Button>
-      <Button size="1" variant="soft">
+      <Button size="1" variant="ghost">
         <FileDown size={14} />
         Export Selected
       </Button>
-      <Button size="1" variant="soft" color="red" highContrast>
+      <Button size="1" variant="ghost" color="red">
         <Trash2 size={14} />
         Delete Selected
       </Button>

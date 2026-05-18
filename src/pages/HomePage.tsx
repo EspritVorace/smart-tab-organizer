@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { browser } from 'wxt/browser';
 import { Box, Flex } from '@radix-ui/themes';
-import { Home } from 'lucide-react';
 import { useSessions } from '@/hooks/useSessions';
 import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
 import type { AppSettings } from '@/types/syncSettings';
@@ -114,7 +113,6 @@ export function HomePage({
     <PageLayout
       titleKey="homeTab"
       descriptionKey="homePageDescription"
-      icon={Home}
       syncSettings={syncSettings}
     >
       {() => (

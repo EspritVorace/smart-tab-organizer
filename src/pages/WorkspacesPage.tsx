@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Box, Button, Card, Flex, IconButton, Text, Tooltip } from '@radix-ui/themes';
-import { AlertCircle, Layers, Pencil, Plus, Trash2 } from 'lucide-react';
+import { AlertCircle, Pencil, Plus, Trash2 } from 'lucide-react';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { ListToolbar } from '@/components/UI/ListToolbar';
 import { EmptyState } from '@/components/UI/EmptyState';
@@ -172,7 +172,6 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
     <PageLayout
       titleKey="workspacesTab"
       descriptionKey="workspacesDescription"
-      icon={Layers}
       syncSettings={syncSettings}
     >
       {() => (

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Grid } from '@radix-ui/themes';
-import { Download, Upload, FileText, Layers } from 'lucide-react';
+import { Download, Upload, Layers } from 'lucide-react';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { getMessage } from '@/utils/i18n';
 import { ImportExportActionCard } from '@/components/UI/ImportExportWizards/ImportExportActionCard';
@@ -53,7 +53,6 @@ export function ImportExportPage({
     <PageLayout
       titleKey="importExportTab"
       descriptionKey="importExportPageDescription"
-      icon={FileText}
       syncSettings={syncSettings}
     >
       {() => (

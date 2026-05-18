@@ -220,7 +220,7 @@ function SessionSection({
           >
             <Button
               size="1"
-              variant="soft"
+              variant="ghost"
               data-testid={`page-sessions-bulk-btn-${isPinned ? 'unpin' : 'pin'}-${testIdSuffix}`}
               onClick={() => onBulkPinToggle(Array.from(selectedIds))}
             >
@@ -229,7 +229,7 @@ function SessionSection({
             </Button>
             <Button
               size="1"
-              variant="soft"
+              variant="ghost"
               data-testid={`page-sessions-bulk-btn-export-${testIdSuffix}`}
               onClick={() => onBulkExportRequest(Array.from(selectedIds))}
             >
@@ -238,9 +238,8 @@ function SessionSection({
             </Button>
             <Button
               size="1"
-              variant="soft"
+              variant="ghost"
               color="red"
-              highContrast
               data-testid={`page-sessions-bulk-btn-delete-${testIdSuffix}`}
               onClick={() => onBulkDeleteRequest(Array.from(selectedIds))}
             >
@@ -567,7 +566,6 @@ export function SessionsPage({
     <PageLayout
       titleKey="sessionsTab"
       descriptionKey="sessionsPageDescription"
-      icon={Archive}
       syncSettings={syncSettings}
     >
       {() => (
