@@ -67,3 +67,76 @@
   bottom: auto;
   height: var(--line-height-2);
 }
+
+/* ============================================================
+ * Design system surcharges (from design-system-bundle mockups).
+ * Direction: tech-utility + modern-minimal, indigo accent kept.
+ *
+ * Targeted overrides only: no Radix component is replaced, we
+ * just tighten typography, force tabular numerics on numbers,
+ * and push the sidebar / bulk bar a notch further than Radix
+ * defaults. Drop any block below if you want to revert that
+ * specific change.
+ * ============================================================ */
+
+/* ---- Tighter heading tracking (modern product UI feel) ----
+ * Radix adds --heading-letter-spacing to each size's letter-spacing
+ * via calc(). Pushing it slightly negative tightens every Heading. */
+.radix-themes {
+  --heading-letter-spacing: -0.015em;
+}
+
+/* ---- Mono + tabular numerics for inline code / kbd / samp ---- */
+.radix-themes :where(code, kbd, samp, .rt-Code) {
+  font-feature-settings: 'tnum' 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Tabular numerics on large display headings ----
+ * The HomePage mini-stats and the StatisticsPage totals use big
+ * numbers; tabular-nums keeps digits aligned when counts change. */
+.radix-themes :where(
+  .rt-Heading:where(.rt-r-size-7),
+  .rt-Heading:where(.rt-r-size-8),
+  .rt-Heading:where(.rt-r-size-9)
+) {
+  font-variant-numeric: tabular-nums;
+}
+
+/* StatisticsPage trend deltas + per-rule counts also benefit. */
+[data-testid='statistics-page'] :where(.rt-Text, .rt-Heading) {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- BulkActionsBar: sticky + indigo hairline ----
+ * Keeps "N sélectionnés" visible while scrolling a long list.
+ * Opt-in via data-testid or .bulk-actions-bar class. */
+[data-testid='bulk-actions-bar'],
+.bulk-actions-bar {
+  position: sticky;
+  top: var(--space-2);
+  z-index: 5;
+  border: 1px solid var(--accent-a7);
+  background: var(--accent-a2);
+  backdrop-filter: saturate(180%) blur(8px);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
+}
+
+[data-testid='bulk-actions-bar'] :where([data-testid$='selection-count']) {
+  font-family: var(--code-font-family);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Frosted topbar (opt-in) ----
+ * Drop a `<header data-options-topbar>` above <main> in
+ * src/pages/options.tsx to get a sticky frosted bar that lets the
+ * page scroll behind it. Skipping the attribute is a no-op. */
+[data-options-topbar] {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: oklch(from var(--color-background) l c h / 0.85);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--gray-a4);
+}

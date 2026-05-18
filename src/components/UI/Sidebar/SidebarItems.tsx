@@ -175,13 +175,15 @@ export function SidebarItems({
               <Text
                 id={labelId}
                 as="div"
-                size="1"
                 weight="medium"
                 color="gray"
                 mb="1"
                 style={{
                   textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
+                  letterSpacing: '0.08em',
+                  fontSize: '10.5px',
+                  fontFamily: 'var(--code-font-family)',
+                  lineHeight: 1.4,
                   paddingLeft: 'var(--space-2)',
                 }}
               >

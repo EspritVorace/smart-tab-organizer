@@ -20,6 +20,7 @@ import { getMessage } from '@/utils/i18n';
 import { Sidebar } from '@/components/UI/Sidebar/Sidebar';
 import type { SidebarSection } from '@/components/UI/Sidebar/Sidebar';
 import { OptionsHeader, OptionsHeaderCollapsed } from '@/components/UI/OptionsLayout/OptionsHeader';
+import { OptionsTopbar } from '@/components/UI/OptionsLayout/OptionsTopbar';
 import { WorkspaceFooter, WorkspaceFooterCollapsed } from '@/components/UI/Workspace/WorkspaceFooter';
 import { ShortcutsAside, type PageContext } from '@/components/UI/ShortcutsPanel';
 import { SequenceIndicator } from '@/components/UI/SequenceIndicator';
@@ -127,6 +128,14 @@ export function OptionsContent() {
         },
     ], []);
 
+    const activePageTitle = useMemo(() => {
+        for (const section of sidebarSections) {
+            const match = section.items.find((item) => item.id === currentTab);
+            if (match) return match.label;
+        }
+        return getMessage('homeTab');
+    }, [sidebarSections, currentTab]);
+
 
     const focusActiveSearch = useCallback(() => {
         const node = document.querySelector<HTMLInputElement>(
@@ -186,7 +195,8 @@ export function OptionsContent() {
                 footerContent={<WorkspaceFooter onManage={() => handleTabChange('workspaces')} />}
                 footerCollapsedContent={<WorkspaceFooterCollapsed onManage={() => handleTabChange('workspaces')} />}
             />
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <OptionsTopbar pageTitle={activePageTitle} />
                 <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
                     <main data-testid="options-content" style={{ flex: 1, overflow: 'auto', padding: '20px 20px 0 20px', minWidth: 0 }}>
                         <Suspense

@@ -1,7 +1,6 @@
 import { Flex, Text } from '@radix-ui/themes';
-import { ThemeToggle } from '@/components/UI/ThemeToggle/ThemeToggle';
 
-/** Expanded sidebar header: logo, app name, theme toggle. */
+/** Expanded sidebar header: logo + app name. */
 export function OptionsHeader() {
   return (
     <Flex data-testid="options-header" align="center" gap="3" style={{ width: '100%', minWidth: 0 }}>
@@ -15,7 +14,6 @@ export function OptionsHeader() {
         <Text size="3" weight="bold" style={{ color: 'var(--gray-12)' }}>SmartTab</Text>
         <Text size="3" weight="bold" style={{ color: 'var(--gray-12)' }}>Organizer</Text>
       </Flex>
-      <ThemeToggle />
     </Flex>
   );
 }
