@@ -1,6 +1,6 @@
 import React from 'react';
-import { Flex, IconButton, Text } from '@radix-ui/themes';
-import { ChevronDown, Settings2 } from 'lucide-react';
+import { Flex, Text } from '@radix-ui/themes';
+import { ChevronDown } from 'lucide-react';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext.js';
 import { getMessage } from '@/utils/i18n.js';
 import { WorkspaceAvatar } from './WorkspaceAvatar.js';
@@ -54,21 +54,9 @@ export function WorkspaceFooter({ onManage }: WorkspaceFooterProps) {
     <Flex
       data-testid="workspace-footer"
       align="center"
-      gap="2"
       style={{ width: '100%', padding: '4px 6px' }}
     >
       <WorkspaceSwitcherDropdown trigger={trigger} onManage={onManage} />
-      <IconButton
-        data-testid="workspace-manage-button"
-        variant="ghost"
-        size="2"
-        disabled={!onManage}
-        aria-label={getMessage('workspaceManageLabel')}
-        title={getMessage('workspaceManageLabel')}
-        onClick={onManage}
-      >
-        <Settings2 size={16} />
-      </IconButton>
     </Flex>
   );
 }

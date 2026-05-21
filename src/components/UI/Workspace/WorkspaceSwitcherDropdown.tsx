@@ -1,6 +1,6 @@
 import React from 'react';
 import { DropdownMenu, Flex, Text } from '@radix-ui/themes';
-import { Check } from 'lucide-react';
+import { Check, Settings2 } from 'lucide-react';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext.js';
 import { getMessage } from '@/utils/i18n.js';
 import { WorkspaceAvatar } from './WorkspaceAvatar.js';
@@ -57,7 +57,10 @@ export function WorkspaceSwitcherDropdown({ trigger, onManage }: WorkspaceSwitch
             if (onManage) onManage();
           }}
         >
-          {getMessage('workspaceManageLabel')}
+          <Flex align="center" gap="2">
+            <Settings2 size={14} aria-hidden="true" />
+            <Text size="2">{getMessage('workspaceManageLabel')}</Text>
+          </Flex>
         </DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>
