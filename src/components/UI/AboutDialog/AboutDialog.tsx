@@ -108,7 +108,7 @@ function InfoRow({ label, value, hint }: InfoRowProps) {
         as="div"
         size="1"
         style={{
-          color: 'var(--gray-10)',
+          color: 'var(--gray-11)',
           fontFamily: 'var(--code-font-family)',
           fontVariantNumeric: 'tabular-nums',
         }}
@@ -134,7 +134,7 @@ function InfoRow({ label, value, hint }: InfoRowProps) {
             as="span"
             size="1"
             style={{
-              color: 'var(--gray-10)',
+              color: 'var(--gray-11)',
               fontWeight: 400,
               marginLeft: 6,
             }}
@@ -196,7 +196,7 @@ function LinkRow({ href, title, hint, icon }: LinkRowProps) {
         <Text
           size="1"
           style={{
-            color: 'var(--gray-10)',
+            color: 'var(--gray-11)',
             fontFamily: 'var(--code-font-family)',
             marginTop: 1,
           }}
@@ -207,7 +207,7 @@ function LinkRow({ href, title, hint, icon }: LinkRowProps) {
       <ArrowUpRight
         size={14}
         aria-hidden="true"
-        style={{ color: 'var(--gray-10)', flexShrink: 0 }}
+        style={{ color: 'var(--gray-11)', flexShrink: 0 }}
       />
     </a>
   );
@@ -235,7 +235,7 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
     fontFamily: 'var(--code-font-family)',
     textTransform: 'uppercase',
     letterSpacing: '0.10em',
-    color: 'var(--gray-10)',
+    color: 'var(--gray-11)',
     fontWeight: 500,
     margin: '0 0 12px',
   };
@@ -306,6 +306,7 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
           </div>
           <Flex direction="column" gap="1" style={{ flex: 1, minWidth: 0 }}>
             <Heading
+              as="h2"
               size="6"
               weight="medium"
               style={{ letterSpacing: '-0.022em', lineHeight: 1.15, color: 'var(--gray-12)' }}
@@ -427,7 +428,7 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
           <Text
             size="1"
             style={{
-              color: 'var(--gray-10)',
+              color: 'var(--gray-11)',
               fontFamily: 'var(--code-font-family)',
             }}
           >
