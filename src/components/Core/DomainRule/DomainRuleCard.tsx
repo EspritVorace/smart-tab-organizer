@@ -89,29 +89,45 @@ export function DomainRuleCard({
 
   const category = getRuleCategory(rule.categoryId);
 
+  const labelBadge = (
+    <HoverCard.Root>
+      <HoverCard.Trigger>
+        <Badge
+          color={rule.color ? getRadixColor(rule.color) : 'gray'}
+          variant="solid"
+          size="2"
+          style={{ cursor: 'pointer', flexShrink: 0 }}
+          aria-label={getMessage('ruleDetailsAriaLabel')}
+        >
+          {category ? `${category.emoji} ` : ''}
+          <AccessibleHighlight text={rule.label} searchTerm={searchTerm} />
+        </Badge>
+      </HoverCard.Trigger>
+      <HoverCard.Content size="2" style={{ maxWidth: 400 }}>
+        <RuleDetailPopover rule={rule} searchTerm={searchTerm} />
+      </HoverCard.Content>
+    </HoverCard.Root>
+  );
+
+  const domainText = (
+    <Text
+      size="2"
+      color="gray"
+      style={{
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        maxWidth: '100%',
+      }}
+    >
+      <AccessibleHighlight text={rule.domainFilter} searchTerm={searchTerm} />
+    </Text>
+  );
+
   const centerContent = (
     <Flex align="center" gap="3" style={{ flex: 1, minWidth: 0 }}>
-      <HoverCard.Root>
-        <HoverCard.Trigger>
-          <Badge
-            color={rule.color ? getRadixColor(rule.color) : 'gray'}
-            variant="solid"
-            size="2"
-            style={{ cursor: 'pointer', flexShrink: 0 }}
-            aria-label={getMessage('ruleDetailsAriaLabel')}
-          >
-            {category ? `${category.emoji} ` : ''}
-            <AccessibleHighlight text={rule.label} searchTerm={searchTerm} />
-          </Badge>
-        </HoverCard.Trigger>
-        <HoverCard.Content size="2" style={{ maxWidth: 400 }}>
-          <RuleDetailPopover rule={rule} searchTerm={searchTerm} />
-        </HoverCard.Content>
-      </HoverCard.Root>
-
-      <Text size="2" color="gray" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        <AccessibleHighlight text={rule.domainFilter} searchTerm={searchTerm} />
-      </Text>
+      {labelBadge}
+      {domainText}
     </Flex>
   );
 
@@ -162,25 +178,27 @@ export function DomainRuleCard({
             <GripVertical size={16} />
           </IconButton>
 
-          {/* Left: Selection + Toggle */}
-          <Flex align="center" gap="3">
-            <Checkbox
-              checked={isSelected}
-              onCheckedChange={(checked) => onSelect?.(rule.id, checked as boolean)}
-              aria-label={getMessage('ruleSelectAriaLabel')}
-            />
+          {/* Left: Selection */}
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={(checked) => onSelect?.(rule.id, checked as boolean)}
+            aria-label={getMessage('ruleSelectAriaLabel')}
+          />
+
+          {/* Center: label badge stacked on the domain filter */}
+          <Flex direction="column" gap="1" align="start" style={{ flex: 1, minWidth: 0 }}>
+            {labelBadge}
+            {domainText}
+          </Flex>
+
+          {/* Right: Switch + Actions */}
+          <Flex align="center" gap="3" style={{ flexShrink: 0 }}>
             <Switch
               size="1"
               checked={rule.enabled}
               onCheckedChange={(checked) => onToggleEnabled?.(rule.id, checked)}
               aria-label={getMessage('ruleToggleEnabledAriaLabel')}
             />
-          </Flex>
-
-          {centerContent}
-
-          {/* Right: Actions */}
-          <Flex align="center" style={{ flexShrink: 0 }}>
             <DropdownMenu.Root>
               <DropdownMenu.Trigger>
                 <IconButton
