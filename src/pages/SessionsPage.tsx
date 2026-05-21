@@ -209,8 +209,12 @@ function SessionSection({
   return (
     <Box>
       <SectionHeader icon={icon} titleKey={titleKey} count={sessions.length} />
-      {selectedIds.size > 0 && (
-        <Box mt="3">
+      {/* This wrapper extends from below the SectionHeader to the bottom of
+       * the cards list. It is the containing block for the sticky
+       * BulkActionsBar so the bar stays visible while any card of this
+       * section is in view (independent of the other section's bar). */}
+      <Box mt="3">
+        {selectedIds.size > 0 && (
           <BulkActionsBar
             testId={`page-sessions-bulk-bar-${testIdSuffix}`}
             selectedCount={selectedIds.size}
@@ -247,24 +251,23 @@ function SessionSection({
               {getMessage('deleteSelected')}
             </Button>
           </BulkActionsBar>
-        </Box>
-      )}
-      {sessions.length === 0 ? (
-        <EmptyState
-          icon={icon}
-          title={getMessage(emptyTitleKey)}
-          description={emptyDescriptionKey ? getMessage(emptyDescriptionKey) : undefined}
-          descriptionMaxWidth="none"
-          minHeight={100}
-        />
-      ) : (
-        <DragDropProvider
-          modifiers={[RestrictToVerticalAxis]}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-        >
-          <Flex ref={listRef} direction="column" gap="3" mt="3" pl="6">
-            {(dragItems ?? sessions).map((session, index) => {
+        )}
+        {sessions.length === 0 ? (
+          <EmptyState
+            icon={icon}
+            title={getMessage(emptyTitleKey)}
+            description={emptyDescriptionKey ? getMessage(emptyDescriptionKey) : undefined}
+            descriptionMaxWidth="none"
+            minHeight={100}
+          />
+        ) : (
+          <DragDropProvider
+            modifiers={[RestrictToVerticalAxis]}
+            onDragOver={handleDragOver}
+            onDragEnd={handleDragEnd}
+          >
+            <Flex ref={listRef} direction="column" gap="3" pl="6">
+              {(dragItems ?? sessions).map((session, index) => {
               const searchMatch = searchMatches?.get(session.id);
               return (
                 <SessionCard
@@ -295,7 +298,8 @@ function SessionSection({
             })}
           </Flex>
         </DragDropProvider>
-      )}
+        )}
+      </Box>
     </Box>
   );
 }
@@ -569,7 +573,15 @@ export function SessionsPage({
       syncSettings={syncSettings}
     >
       {() => (
-        <Box data-testid="page-sessions">
+        <Box
+          data-testid="page-sessions"
+          style={{
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 0,
+          }}
+        >
           {/* Toolbar: Search + Actions (hidden when no sessions exist) */}
           {isLoaded && sessions.length > 0 && (
             <ListToolbar
@@ -603,75 +615,80 @@ export function SessionsPage({
             </Callout.Root>
           )}
 
-          {!isLoaded && (
-            <Text size="2" color="gray">
-              {getMessage('loadingText')}
-            </Text>
-          )}
-          {isLoaded && sessions.length === 0 && !searchQuery && (
-            <EmptyState
-              data-testid="page-sessions-empty"
-              icon={Archive}
-              title={getMessage('sessionsEmptyStateTitle')}
-              description={getMessage('sessionsEmptyStateDescription')}
-              actions={
-                <Flex gap="2">
-                  <Button
-                    data-testid="page-sessions-btn-snapshot"
-                    variant="soft"
-                    onClick={() => setSnapshotOpen(true)}
-                  >
-                    <Camera size={14} />
-                    {getMessage('sessionSnapshotButton')}
-                  </Button>
-                  <Button variant="soft" onClick={() => openImportSessions()}>
-                    <Upload size={14} />
-                    {getMessage('importSessionsButton')}
-                  </Button>
-                </Flex>
-              }
-            />
-          )}
-          {isLoaded && sessions.length > 0 && displayedSessions.length === 0 && searchQuery && (
-            <EmptyState compact icon={Archive} message={getMessage('noSessionsFound')} />
-          )}
-          {isLoaded && displayedSessions.length > 0 && (
-            <Flex data-testid="page-sessions-list" direction="column" gap="3">
-              <SessionSection
-                icon={Pin}
-                titleKey="pinnedSessionsSection"
-                emptyTitleKey="pinnedSessionsEmptyTitle"
-                emptyDescriptionKey="pinnedSessionsEmptyDescription"
-                isPinned={true}
-                sessions={pinnedSessions}
-                selectedIds={selectedPinnedIds}
-                onSelectionChange={setSelectedPinnedIds}
-                onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'pinned', ids })}
-                onBulkExportRequest={(ids) => setBulkExportIds(ids)}
-                onBulkPinToggle={(ids) => handleBulkPinToggle(ids, false)}
-                testIdSuffix="pinned"
-                {...sharedSectionProps}
-              />
-
-              <Separator size="4" />
-
-              <SessionSection
+          <Box
+            data-testid="page-sessions-scroll"
+            style={{ flex: 1, overflow: 'auto', minHeight: 0 }}
+          >
+            {!isLoaded && (
+              <Text size="2" color="gray">
+                {getMessage('loadingText')}
+              </Text>
+            )}
+            {isLoaded && sessions.length === 0 && !searchQuery && (
+              <EmptyState
+                data-testid="page-sessions-empty"
                 icon={Archive}
-                titleKey="sessionsSection"
-                emptyTitleKey="unpinnedSessionsEmptyTitle"
-                emptyDescriptionKey="unpinnedSessionsEmptyDescription"
-                isPinned={false}
-                sessions={unpinnedSessions}
-                selectedIds={selectedUnpinnedIds}
-                onSelectionChange={setSelectedUnpinnedIds}
-                onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'unpinned', ids })}
-                onBulkExportRequest={(ids) => setBulkExportIds(ids)}
-                onBulkPinToggle={(ids) => handleBulkPinToggle(ids, true)}
-                testIdSuffix="unpinned"
-                {...sharedSectionProps}
+                title={getMessage('sessionsEmptyStateTitle')}
+                description={getMessage('sessionsEmptyStateDescription')}
+                actions={
+                  <Flex gap="2">
+                    <Button
+                      data-testid="page-sessions-btn-snapshot"
+                      variant="soft"
+                      onClick={() => setSnapshotOpen(true)}
+                    >
+                      <Camera size={14} />
+                      {getMessage('sessionSnapshotButton')}
+                    </Button>
+                    <Button variant="soft" onClick={() => openImportSessions()}>
+                      <Upload size={14} />
+                      {getMessage('importSessionsButton')}
+                    </Button>
+                  </Flex>
+                }
               />
-            </Flex>
-          )}
+            )}
+            {isLoaded && sessions.length > 0 && displayedSessions.length === 0 && searchQuery && (
+              <EmptyState compact icon={Archive} message={getMessage('noSessionsFound')} />
+            )}
+            {isLoaded && displayedSessions.length > 0 && (
+              <Flex data-testid="page-sessions-list" direction="column" gap="3">
+                <SessionSection
+                  icon={Pin}
+                  titleKey="pinnedSessionsSection"
+                  emptyTitleKey="pinnedSessionsEmptyTitle"
+                  emptyDescriptionKey="pinnedSessionsEmptyDescription"
+                  isPinned={true}
+                  sessions={pinnedSessions}
+                  selectedIds={selectedPinnedIds}
+                  onSelectionChange={setSelectedPinnedIds}
+                  onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'pinned', ids })}
+                  onBulkExportRequest={(ids) => setBulkExportIds(ids)}
+                  onBulkPinToggle={(ids) => handleBulkPinToggle(ids, false)}
+                  testIdSuffix="pinned"
+                  {...sharedSectionProps}
+                />
+
+                <Separator size="4" />
+
+                <SessionSection
+                  icon={Archive}
+                  titleKey="sessionsSection"
+                  emptyTitleKey="unpinnedSessionsEmptyTitle"
+                  emptyDescriptionKey="unpinnedSessionsEmptyDescription"
+                  isPinned={false}
+                  sessions={unpinnedSessions}
+                  selectedIds={selectedUnpinnedIds}
+                  onSelectionChange={setSelectedUnpinnedIds}
+                  onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'unpinned', ids })}
+                  onBulkExportRequest={(ids) => setBulkExportIds(ids)}
+                  onBulkPinToggle={(ids) => handleBulkPinToggle(ids, true)}
+                  testIdSuffix="unpinned"
+                  {...sharedSectionProps}
+                />
+              </Flex>
+            )}
+          </Box>
 
           <SnapshotWizard
             open={snapshotOpen}

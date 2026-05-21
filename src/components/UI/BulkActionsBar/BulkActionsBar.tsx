@@ -38,7 +38,7 @@ export function BulkActionsBar({
         border: '1px solid var(--accent-a7)',
         borderRadius: 'var(--radius-3)',
         position: 'sticky',
-        top: '52px',
+        top: 0,
         zIndex: 4,
       }}
     >
