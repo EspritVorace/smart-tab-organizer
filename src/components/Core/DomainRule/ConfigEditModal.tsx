@@ -1,8 +1,7 @@
-import { Button, Flex } from '@radix-ui/themes';
+import { Flex } from '@radix-ui/themes';
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
-import { DialogShell } from '@/components/UI/DialogShell';
 import { type GroupNameSourceValue, type UrlExtractionModeValue } from '@/schemas/enums';
 import { createRegexValidator } from '@/schemas/common';
 import type { PresetCategory } from '@/utils/presetUtils';
@@ -10,6 +9,7 @@ import { getPresetById } from '@/utils/presetUtils';
 import { logger } from '@/utils/logger';
 import { DomainRuleConfigForm } from './DomainRuleConfigForm';
 import type { ConfigMode } from './ConfigModeSelector';
+import { EditModalShell } from './EditModalShell';
 
 const regexValidator = createRegexValidator(true);
 const QUERY_PARAM_NAME_PATTERN = /^[A-Za-z0-9_\-.]+$/;
@@ -145,19 +145,15 @@ export function ConfigEditModal({
     onClose();
   };
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) onClose();
-  };
-
   return (
-    <DialogShell
-      open={isOpen}
-      onOpenChange={handleOpenChange}
+    <EditModalShell
+      isOpen={isOpen}
+      onClose={onClose}
+      onApply={handleApply}
+      disabled={hasError}
       title={getMessage('editConfigTitle')}
-      description={getMessage('editConfigTitle')}
-      hideDescription
+      data-testid="modal-edit-config"
       maxWidth={820}
-      showHeaderSeparator={false}
       contentStyle={{
         display: 'flex',
         flexDirection: 'column',
@@ -195,15 +191,6 @@ export function ConfigEditModal({
           urlQueryParamNameError={queryParamNameError}
         />
       </Flex>
-
-      <Flex gap="3" justify="end" mt="4" style={{ flexShrink: 0 }}>
-        <Button variant="soft" color="gray" onClick={onClose}>
-          {getMessage('cancel')}
-        </Button>
-        <Button onClick={handleApply} disabled={hasError}>
-          {getMessage('apply')}
-        </Button>
-      </Flex>
-    </DialogShell>
+    </EditModalShell>
   );
 }

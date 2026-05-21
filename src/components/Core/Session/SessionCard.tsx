@@ -3,7 +3,7 @@ import * as Collapsible from '@radix-ui/react-collapsible';
 import { useSortable } from '@dnd-kit/react/sortable';
 import {
   Card, Flex, Text, IconButton, TextField,
-  DropdownMenu, HoverCard, Tooltip, Badge, Box,
+  DropdownMenu, HoverCard, Tooltip, Badge, Box, Checkbox,
 } from '@radix-ui/themes';
 import {
   MoreHorizontal, Pencil, Trash2, Check, X,
@@ -17,11 +17,12 @@ import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/Accessi
 import { chromeGroupColors } from '@/utils/tabTreeUtils';
 import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
 import { getDragHandleStyle } from '@/utils/dragHandleStyle';
+import { getStatusStyle } from '@/utils/statusStyle';
 import { SessionPreviewTree } from './SessionPreviewTree';
 import { SessionRestoreButton } from './SessionRestoreButton/SessionRestoreButton';
 import type { Session } from '@/types/session';
 
-interface SessionCardProps {
+interface SessionCardProps extends SessionRestoreCallbacks {
   session: Session;
   /**
    * 'full' (default): full card with drag, pin, restore, menu.
@@ -38,11 +39,11 @@ interface SessionCardProps {
   leading?: React.ReactNode;
   /** Trailing slot in summary mode (e.g. status Badge, DiffPopover). */
   trailing?: React.ReactNode;
+  /** Whether the card is currently selected (full mode bulk selection). */
+  isSelected?: boolean;
+  /** Bulk selection toggle (full mode only). Showing the checkbox is conditioned on this. */
+  onSelect?: (id: string, checked: boolean) => void;
   existingSessions?: Session[];
-  onRestore?: (session: Session) => void;
-  onRestoreCurrentWindow?: (session: Session) => void;
-  onRestoreNewWindow?: (session: Session) => void;
-  onReplaceCurrentWindow?: (session: Session) => void;
   onRename?: (id: string, newName: string) => Promise<void>;
   onEdit?: (session: Session) => void;
   onDelete?: (session: Session) => void;
@@ -75,12 +76,11 @@ interface SessionCardProps {
 /** Visual state of a SessionCard in summary mode. */
 export type SessionCardStatus = 'default' | 'conflict' | 'identical';
 
-/* Helpers */
-
-function getStatusStyle(status: SessionCardStatus): React.CSSProperties {
-  if (status === 'conflict') return { background: 'var(--orange-a2)' };
-  if (status === 'identical') return { opacity: 0.6 };
-  return {};
+interface SessionRestoreCallbacks {
+  onRestore?: (session: Session) => void;
+  onRestoreCurrentWindow?: (session: Session) => void;
+  onRestoreNewWindow?: (session: Session) => void;
+  onReplaceCurrentWindow?: (session: Session) => void;
 }
 
 /* SessionMoreMenu */
@@ -285,7 +285,7 @@ function SessionCardSummaryHeader({
 
 /* SessionCardFullHeader */
 
-interface SessionCardFullHeaderProps {
+interface SessionCardFullHeaderProps extends SessionRestoreCallbacks {
   session: Session;
   handleRef: (element: HTMLElement | null) => void;
   isDragDisabled: boolean;
@@ -302,12 +302,10 @@ interface SessionCardFullHeaderProps {
   searchQuery: string | undefined;
   category: ReturnType<typeof getRuleCategory>;
   hoverCardContent: React.ReactNode;
+  isSelected?: boolean;
+  onSelect?: (id: string, checked: boolean) => void;
   onPin?: (session: Session) => void;
   onUnpin?: (session: Session) => void;
-  onRestore?: (session: Session) => void;
-  onRestoreCurrentWindow?: (session: Session) => void;
-  onRestoreNewWindow?: (session: Session) => void;
-  onReplaceCurrentWindow?: (session: Session) => void;
   onEdit?: (session: Session) => void;
   onDelete?: (session: Session) => void;
   onMoveToFirst?: () => void;
@@ -320,6 +318,7 @@ function SessionCardFullHeader({
   renameError, setRenameError, renameInputRef,
   handleRenameSubmit, handleRenameCancel, handleKeyDown,
   searchQuery, category, hoverCardContent,
+  isSelected, onSelect,
   onPin, onUnpin, onRestore, onRestoreCurrentWindow, onRestoreNewWindow, onReplaceCurrentWindow,
   onEdit, onDelete, onMoveToFirst, onMoveLast,
 }: SessionCardFullHeaderProps) {
@@ -342,6 +341,16 @@ function SessionCardFullHeader({
         >
           <GripVertical size={16} />
         </IconButton>
+      )}
+
+      {/* Bulk selection checkbox (after drag handle, like DomainRuleCard). */}
+      {!isRenaming && onSelect && (
+        <Checkbox
+          checked={isSelected ?? false}
+          onCheckedChange={(checked) => onSelect(session.id, checked as boolean)}
+          aria-label={getMessage('sessionSelectAriaLabel')}
+          data-testid={`session-card-${session.id}-checkbox`}
+        />
       )}
 
       {/* Pin / Unpin button */}
@@ -454,6 +463,8 @@ export function SessionCard({
   status = 'default',
   leading,
   trailing,
+  isSelected,
+  onSelect,
   existingSessions = [],
   onRestore,
   onRestoreCurrentWindow,
@@ -567,6 +578,8 @@ export function SessionCard({
               searchQuery={searchQuery}
               category={category}
               hoverCardContent={hoverCardContent}
+              isSelected={isSelected}
+              onSelect={onSelect}
               onPin={onPin}
               onUnpin={onUnpin}
               onRestore={onRestore}

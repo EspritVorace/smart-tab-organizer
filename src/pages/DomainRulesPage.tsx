@@ -1,20 +1,24 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { Button, Text, Flex, Box, Checkbox, Separator } from '@radix-ui/themes';
-import { Plus, Eye, EyeOff, Shield, AlertCircle, Upload, Trash2 } from 'lucide-react';
+import { Button, Flex, Box } from '@radix-ui/themes';
+import { Plus, Eye, EyeOff, Shield, AlertCircle, Upload, Trash2, FileDown } from 'lucide-react';
 import { DragDropProvider, type DragEndEvent, type DragOverEvent } from '@dnd-kit/react';
 import { move } from '@dnd-kit/helpers';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { EmptyState } from '@/components/UI/EmptyState';
 import { RuleWizardModal } from '@/components/Core/DomainRule/RuleWizardModal';
+import { ExportWizard } from '@/components/UI/ImportExportWizards/ExportWizard';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
 import { ListToolbar } from '@/components/UI/ListToolbar';
+import { BulkActionsBar } from '@/components/UI/BulkActionsBar';
 import { getMessage } from '@/utils/i18n';
 import { foldAccents } from '@/utils/stringUtils';
 import { generateUUID } from '@/utils/utils';
 import { DomainRuleCard } from '@/components/Core/DomainRule/DomainRuleCard';
 import { useShortcuts } from '@/hooks/useShortcuts';
 import { useListNavigation } from '@/hooks/useListNavigation';
+import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
+import type { RulesPendingAction } from '@/hooks/useDeepLinking';
 import {
   moveToFirst,
   moveToLast,
@@ -49,62 +53,10 @@ function confirmDeleteDescription(
 interface DomainRulesPageProps {
   syncSettings: AppSettings;
   updateRules: (rules: DomainRuleSetting[]) => void;
-  /** When true, opens the create-rule wizard from outside the page (e.g. HomePage). */
-  openRuleWizard?: boolean;
-  /** Notifies the parent when the modal opens or closes. */
-  onOpenRuleWizardChange?: (open: boolean) => void;
-  /** Opens the rules import wizard via deep-link with from=rules. */
-  onOpenImportRules: () => void;
-}
-
-/* ─── Local presentation components ──────────────────────────────────────── */
-
-interface BulkActionsBarProps {
-  selectedIds: Set<string>;
-  filteredRules: DomainRuleSetting[];
-  isAllSelected: boolean;
-  isIndeterminate: boolean;
-  onSelectAll: (checked: boolean) => void;
-  onBulkToggle: (ids: string[], enabled: boolean) => void;
-  onBulkDeleteRequest: (ids: string[]) => void;
-}
-
-function BulkActionsBar({
-  selectedIds, filteredRules: _filteredRules, isAllSelected, isIndeterminate,
-  onSelectAll, onBulkToggle, onBulkDeleteRequest,
-}: BulkActionsBarProps) {
-  return (
-    <Flex data-testid="page-rules-bulk-bar" align="center" gap="3" p="2" mb="4"
-      style={{ backgroundColor: 'var(--accent-a3)', borderRadius: 'var(--radius-2)' }}>
-      <Checkbox
-        checked={isAllSelected}
-        onCheckedChange={(checked) => onSelectAll(checked as boolean)}
-        {...(isIndeterminate && { 'data-indeterminate': true })}
-      />
-      <Text size="2" weight="medium">
-        {selectedIds.size === 1
-          ? getMessage('dataTableSelectedCountSingular')
-          : getMessage('dataTableSelectedCountPlural').replace('{count}', selectedIds.size.toString())
-        }
-      </Text>
-      <Separator orientation="vertical" />
-      <Flex gap="2">
-        <Button size="1" variant="solid" onClick={() => onBulkToggle(Array.from(selectedIds), true)}>
-          <Eye size={14} />
-          {getMessage('enableSelected')}
-        </Button>
-        <Button size="1" variant="soft" onClick={() => onBulkToggle(Array.from(selectedIds), false)}>
-          <EyeOff size={14} />
-          {getMessage('disableSelected')}
-        </Button>
-        <Button size="1" variant="soft" color="red"
-          onClick={() => onBulkDeleteRequest(Array.from(selectedIds))}>
-          <Trash2 size={14} />
-          {getMessage('deleteSelected')}
-        </Button>
-      </Flex>
-    </Flex>
-  );
+  /** Deep-link action to consume on mount (e.g. open the create or import wizard). */
+  pendingAction?: RulesPendingAction | null;
+  /** Called once the pending action has been consumed so the parent can clear it. */
+  onPendingActionConsumed?: () => void;
 }
 
 /* ─── Page component ──────────────────────────────────────────────────────── */
@@ -112,20 +64,24 @@ function BulkActionsBar({
 export function DomainRulesPage({
   syncSettings,
   updateRules,
-  openRuleWizard,
-  onOpenRuleWizardChange,
-  onOpenImportRules,
+  pendingAction,
+  onPendingActionConsumed,
 }: DomainRulesPageProps) {
+  const { openImportRules } = useImportExportWizards();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<DomainRule | undefined>(undefined);
   const [dragItems, setDragItems] = useState<DomainRuleSetting[] | null>(null);
 
   useEffect(() => {
-    if (openRuleWizard) {
+    if (!pendingAction) return;
+    if (pendingAction === 'create') {
       setEditingRule(undefined);
       setIsModalOpen(true);
+    } else if (pendingAction === 'import') {
+      openImportRules();
     }
-  }, [openRuleWizard]);
+    onPendingActionConsumed?.();
+  }, [pendingAction, openImportRules, onPendingActionConsumed]);
 
   const handleToggleEnabled = useCallback((ruleId: string, enabled: boolean) => {
     updateRules(syncSettings.domainRules.map(rule =>
@@ -164,6 +120,7 @@ export function DomainRulesPage({
   }, [syncSettings.domainRules, updateRules]);
 
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
+  const [bulkExportIds, setBulkExportIds] = useState<string[] | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -313,13 +270,11 @@ export function DomainRulesPage({
     }
     setIsModalOpen(false);
     setEditingRule(undefined);
-    onOpenRuleWizardChange?.(false);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingRule(undefined);
-    onOpenRuleWizardChange?.(false);
   };
 
   const handleConfirmDelete = useCallback(() => {
@@ -345,11 +300,18 @@ export function DomainRulesPage({
       <PageLayout
         titleKey="domainRulesTab"
         descriptionKey="domainRulesPageDescription"
-        icon={Shield}
         syncSettings={syncSettings}
       >
         {() => (
-          <Box data-testid="page-rules">
+          <Box
+            data-testid="page-rules"
+            style={{
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: 0,
+            }}
+          >
             {/* Toolbar: Search + Add (hidden when no rules exist) */}
             {syncSettings.domainRules.length > 0 && (
               <ListToolbar
@@ -369,65 +331,95 @@ export function DomainRulesPage({
 
             {selectedIds.size > 0 && (
               <BulkActionsBar
-                selectedIds={selectedIds}
-                filteredRules={filteredRules}
+                testId="page-rules-bulk-bar"
+                selectedCount={selectedIds.size}
                 isAllSelected={isAllSelected}
                 isIndeterminate={isIndeterminate}
                 onSelectAll={handleSelectAll}
-                onBulkToggle={handleBulkToggle}
-                onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', ruleIds: ids })}
-              />
+              >
+                <Button size="1" variant="ghost" onClick={() => handleBulkToggle(Array.from(selectedIds), true)}>
+                  <Eye size={14} />
+                  {getMessage('enableSelected')}
+                </Button>
+                <Button size="1" variant="ghost" onClick={() => handleBulkToggle(Array.from(selectedIds), false)}>
+                  <EyeOff size={14} />
+                  {getMessage('disableSelected')}
+                </Button>
+                <Button
+                  size="1"
+                  variant="ghost"
+                  data-testid="page-rules-bulk-btn-export"
+                  onClick={() => setBulkExportIds(Array.from(selectedIds))}
+                >
+                  <FileDown size={14} />
+                  {getMessage('exportSelected')}
+                </Button>
+                <Button
+                  size="1"
+                  variant="ghost"
+                  color="red"
+                  onClick={() => setDeleteTarget({ type: 'bulk', ruleIds: Array.from(selectedIds) })}
+                >
+                  <Trash2 size={14} />
+                  {getMessage('deleteSelected')}
+                </Button>
+              </BulkActionsBar>
             )}
 
-            {filteredRules.length === 0 && syncSettings.domainRules.length === 0 && !searchTerm && (
-              <EmptyState
-                data-testid="page-rules-empty"
-                icon={Shield}
-                title={getMessage('rulesEmptyTitle')}
-                description={getMessage('rulesEmptyDescription')}
-                actions={
-                  <Flex gap="2">
-                    <Button data-testid="page-rules-btn-add" variant="soft" onClick={handleAddRule}>
-                      <Plus size={14} />
-                      {getMessage('addRule')}
-                    </Button>
-                    <Button variant="soft" onClick={onOpenImportRules}>
-                      <Upload size={14} />
-                      {getMessage('importRulesButton')}
-                    </Button>
+            <Box
+              data-testid="page-rules-scroll"
+              style={{ flex: 1, overflow: 'auto', minHeight: 0 }}
+            >
+              {filteredRules.length === 0 && syncSettings.domainRules.length === 0 && !searchTerm && (
+                <EmptyState
+                  data-testid="page-rules-empty"
+                  icon={Shield}
+                  title={getMessage('rulesEmptyTitle')}
+                  description={getMessage('rulesEmptyDescription')}
+                  actions={
+                    <Flex gap="2">
+                      <Button data-testid="page-rules-btn-add" variant="soft" onClick={handleAddRule}>
+                        <Plus size={14} />
+                        {getMessage('addRule')}
+                      </Button>
+                      <Button variant="soft" onClick={() => openImportRules()}>
+                        <Upload size={14} />
+                        {getMessage('importRulesButton')}
+                      </Button>
+                    </Flex>
+                  }
+                />
+              )}
+              {filteredRules.length === 0 && (syncSettings.domainRules.length > 0 || searchTerm) && (
+                <EmptyState compact icon={AlertCircle} message={getMessage('noRulesFound')} />
+              )}
+              {filteredRules.length > 0 && (
+                <DragDropProvider modifiers={[RestrictToVerticalAxis]} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+                  <Flex data-testid="page-rules-list" direction="column" gap="3" role="list" aria-label={getMessage('domainRulesTab')} ref={listRef}>
+                    {(dragItems ?? filteredRules).map((rule, index) => (
+                      <DomainRuleCard
+                        key={rule.id}
+                        rule={rule}
+                        index={index}
+                        isSelected={selectedIds.has(rule.id)}
+                        searchTerm={searchTerm}
+                        isDragDisabled={!!searchTerm}
+                        isDomainActionDisabled={getRulesForRootDomain(syncSettings.domainRules, rule.domainFilter).length <= 1}
+                        onSelect={handleRowSelect}
+                        onToggleEnabled={handleToggleEnabled}
+                        onEdit={handleEditRule}
+                        onDeleteRequest={(ruleId, focusIndex) => setDeleteTarget({ type: 'single', ruleId, focusIndex })}
+                        onMoveToFirst={handleMoveToFirst}
+                        onMoveToLast={handleMoveToLast}
+                        onMoveToFirstOfDomain={handleMoveToFirstOfDomain}
+                        onMoveToLastOfDomain={handleMoveToLastOfDomain}
+                        onKeyDown={(e) => handleCardKeyDown(e, rule, index)}
+                      />
+                    ))}
                   </Flex>
-                }
-              />
-            )}
-            {filteredRules.length === 0 && (syncSettings.domainRules.length > 0 || searchTerm) && (
-              <EmptyState compact icon={AlertCircle} message={getMessage('noRulesFound')} />
-            )}
-            {filteredRules.length > 0 && (
-              <DragDropProvider modifiers={[RestrictToVerticalAxis]} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-                <Flex data-testid="page-rules-list" direction="column" gap="3" role="list" aria-label={getMessage('domainRulesTab')} ref={listRef}>
-                  {(dragItems ?? filteredRules).map((rule, index) => (
-                    <DomainRuleCard
-                      key={rule.id}
-                      rule={rule}
-                      index={index}
-                      isSelected={selectedIds.has(rule.id)}
-                      searchTerm={searchTerm}
-                      isDragDisabled={!!searchTerm}
-                      isDomainActionDisabled={getRulesForRootDomain(syncSettings.domainRules, rule.domainFilter).length <= 1}
-                      onSelect={handleRowSelect}
-                      onToggleEnabled={handleToggleEnabled}
-                      onEdit={handleEditRule}
-                      onDeleteRequest={(ruleId, focusIndex) => setDeleteTarget({ type: 'single', ruleId, focusIndex })}
-                      onMoveToFirst={handleMoveToFirst}
-                      onMoveToLast={handleMoveToLast}
-                      onMoveToFirstOfDomain={handleMoveToFirstOfDomain}
-                      onMoveToLastOfDomain={handleMoveToLastOfDomain}
-                      onKeyDown={(e) => handleCardKeyDown(e, rule, index)}
-                    />
-                  ))}
-                </Flex>
-              </DragDropProvider>
-            )}
+                </DragDropProvider>
+              )}
+            </Box>
           </Box>
         )}
       </PageLayout>
@@ -450,6 +442,13 @@ export function DomainRulesPage({
             : getMessage('confirmDeleteRule')
         }
         description={confirmDeleteDescription(deleteTarget, syncSettings.domainRules)}
+      />
+
+      <ExportWizard
+        open={bulkExportIds != null}
+        onOpenChange={(open) => { if (!open) setBulkExportIds(null); }}
+        rules={syncSettings.domainRules}
+        initialSelectedIds={bulkExportIds ?? undefined}
       />
 
     </>

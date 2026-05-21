@@ -6,15 +6,17 @@ import * as stories from '../../src/components/UI/OptionsLayout/OptionsHeader.st
 const { OptionsHeaderDefault, OptionsHeaderCollapsedStory } = composeStories(stories);
 
 describe('OptionsHeader (portable stories)', () => {
-  it('renders the expanded header with theme toggle', () => {
+  it('renders the expanded header with logo and app name', () => {
     render(<OptionsHeaderDefault />);
     expect(screen.getByTestId('options-header')).toBeInTheDocument();
-    expect(screen.getByTestId('theme-toggle')).toBeInTheDocument();
+    expect(screen.getByText('SmartTab')).toBeInTheDocument();
+    expect(screen.getByText('Organizer')).toBeInTheDocument();
+    expect(screen.queryByTestId('theme-toggle')).not.toBeInTheDocument();
   });
 
   it('renders the collapsed header with logo only', () => {
     const { container } = render(<OptionsHeaderCollapsedStory />);
-    const logo = container.querySelector('img[src="/icons/icon48.png"]');
+    const logo = container.querySelector('img[src="/icons/48.png"]');
     expect(logo).toBeInTheDocument();
     expect(screen.queryByTestId('theme-toggle')).not.toBeInTheDocument();
   });

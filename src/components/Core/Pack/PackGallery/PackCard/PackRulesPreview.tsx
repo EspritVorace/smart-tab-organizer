@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
-import { Box, Flex, Text } from '@radix-ui/themes';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { Box, Flex } from '@radix-ui/themes';
+import { ChevronRight } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
-import { chromeGroupColors } from '@/utils/tabTreeUtils';
+import { DomainRuleCard } from '@/components/Core/DomainRule/DomainRuleCard';
 import type { ImportDomainRule } from '@/schemas/importExport';
+import type { DomainRuleSetting } from '@/types/syncSettings';
+import styles from '@/components/Core/Pack/PackGallery/PackGallery.module.css';
 
 interface PackRulesPreviewProps {
   rules: ImportDomainRule[];
@@ -13,6 +15,7 @@ interface PackRulesPreviewProps {
 
 export function PackRulesPreview({ rules, packId }: PackRulesPreviewProps) {
   const [open, setOpen] = useState(false);
+  const contentId = useId();
 
   if (rules.length === 0) {
     return null;
@@ -23,92 +26,30 @@ export function PackRulesPreview({ rules, packId }: PackRulesPreviewProps) {
       <Collapsible.Trigger asChild>
         <button
           type="button"
+          className={styles.previewToggle}
           data-testid={`pack-card-${packId}-rules-toggle`}
           aria-expanded={open}
-          style={{
-            all: 'unset',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 'var(--space-1)',
-            cursor: 'pointer',
-            color: 'var(--gray-11)',
-          }}
+          aria-controls={contentId}
         >
-          {open ? (
-            <ChevronDown size={13} />
-          ) : (
-            <ChevronRight size={13} />
-          )}
-          <Text size="1" color="gray">
-            {getMessage('packGalleryViewRules')}
-          </Text>
+          <ChevronRight
+            size={12}
+            aria-hidden="true"
+            className={styles.previewChevron}
+          />
+          {getMessage('packGalleryViewRules')}
         </button>
       </Collapsible.Trigger>
-      <Collapsible.Content>
+      <Collapsible.Content id={contentId}>
         <Box mt="2">
-          <table
-            style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              fontSize: 'var(--font-size-1)',
-            }}
-          >
-            <thead>
-              <tr style={{ textAlign: 'left', color: 'var(--gray-11)' }}>
-                <th style={{ paddingBlock: 'var(--space-1)', fontWeight: 500 }}>
-                  {getMessage('packGalleryRuleColumnName')}
-                </th>
-                <th style={{ paddingBlock: 'var(--space-1)', fontWeight: 500 }}>
-                  {getMessage('packGalleryRuleColumnDomain')}
-                </th>
-                <th
-                  style={{
-                    paddingBlock: 'var(--space-1)',
-                    fontWeight: 500,
-                    width: 56,
-                  }}
-                >
-                  {getMessage('packGalleryRuleColumnColor')}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rules.map((rule) => {
-                const colorKey = rule.color ?? 'grey';
-                const swatch = chromeGroupColors[colorKey] ?? chromeGroupColors.grey;
-                return (
-                  <tr
-                    key={rule.id}
-                    style={{ borderTop: '1px solid var(--gray-4)' }}
-                  >
-                    <td style={{ paddingBlock: 'var(--space-1)' }}>{rule.label}</td>
-                    <td
-                      style={{
-                        paddingBlock: 'var(--space-1)',
-                        color: 'var(--gray-11)',
-                      }}
-                    >
-                      {rule.domainFilter}
-                    </td>
-                    <td style={{ paddingBlock: 'var(--space-1)' }}>
-                      <Flex align="center">
-                        <span
-                          aria-hidden="true"
-                          style={{
-                            display: 'inline-block',
-                            width: 8,
-                            height: 8,
-                            borderRadius: '50%',
-                            backgroundColor: swatch,
-                          }}
-                        />
-                      </Flex>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <Flex direction="column" gap="2">
+            {rules.map((rule) => (
+              <DomainRuleCard
+                key={rule.id}
+                rule={rule as DomainRuleSetting}
+                variant="summary"
+              />
+            ))}
+          </Flex>
         </Box>
       </Collapsible.Content>
     </Collapsible.Root>

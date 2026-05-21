@@ -87,6 +87,17 @@ export const SessionCardPinned: Story = {
 };
 
 // ---------------------------------------------------------------------------
+// Bulk selection: checkbox visible & checked.
+// ---------------------------------------------------------------------------
+export const SessionCardSelected: Story = {
+  args: {
+    ...SessionCardDefault.args,
+    isSelected: true,
+    onSelect: noop,
+  },
+};
+
+// ---------------------------------------------------------------------------
 // Relative dates: cards staggered across multiple time ranges to validate
 // the "updated X ago" / "created Y ago" rendering on the right of the
 // counters line, and the wrap behavior on narrow widths.

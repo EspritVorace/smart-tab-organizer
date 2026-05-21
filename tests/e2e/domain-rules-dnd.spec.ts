@@ -74,9 +74,11 @@ test.describe('Drag-and-drop reordering', () => {
 
     // Type in the search box to activate a filter
     await page.getByTestId('page-rules-search').fill('git');
+    // allow-inline-dom: drag-handle is a DnD atom selector, not a dialog/wizard surface.
     await expect(page.locator('[data-testid$="-drag-handle"]').first()).toHaveAttribute('aria-disabled', 'true');
 
-    // All visible rule drag handles should be aria-disabled
+    // All visible rule drag handles should be aria-disabled.
+    // allow-inline-dom: drag-handle is a DnD atom selector, not a dialog/wizard surface.
     const dragHandles = page.locator('[data-testid$="-drag-handle"]');
     const count = await dragHandles.count();
     expect(count).toBeGreaterThan(0);
@@ -98,6 +100,7 @@ test.describe('Drag-and-drop reordering', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
+    // allow-inline-dom: drag-handle is a DnD atom selector, not a dialog/wizard surface.
     const dragHandle = page.locator('[data-testid$="-drag-handle"]').first();
     await expect(dragHandle).not.toHaveAttribute('aria-disabled', 'true');
 

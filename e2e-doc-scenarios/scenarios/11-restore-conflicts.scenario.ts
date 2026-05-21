@@ -5,19 +5,21 @@
  * spawns a live tab group with the same `(title, color)` in the current
  * window, then opens the customize-restore wizard so `analyzeConflicts()`
  * detects a conflict and the wizard moves to the ConflictResolutionStep.
+ *
+ * Lot 6 (issue #309): consumes the shared `openCustomizeRestoreWizard`
+ * Domain Action and the `RestoreWizardPage` Page Object directly.
  */
 import { test } from '../helpers/doc-fixture.js';
 import { captureStep, startScenario } from '../helpers/doc-capture.js';
 import { writeScenarioReadme } from '../helpers/scenario-readme.js';
+import { dismissDialog, openExtensionPage } from '../helpers/ui-actions.js';
 import {
   clearExtensionStorage,
-  clickRestoreInWizard,
   createLiveTabGroup,
-  dismissDialog,
   openCustomizeRestoreWizard,
-  openExtensionPage,
   seedSessions,
-} from '../helpers/ui-actions.js';
+} from '../../e2e-shared/actions/index.js';
+import { SessionsListPage } from '../../e2e-shared/pages/index.js';
 import { SESSION_FOR_CONFLICT } from '../../e2e-screenshots/fixtures/sessions-seed.js';
 import { RESTORE_CONFLICTS_MANIFEST } from './11-restore-conflicts.routing.js';
 
@@ -47,7 +49,8 @@ test('restore conflicts', async (
     locale,
     theme,
   );
-  await sessionsPage.getByTestId('page-sessions-list').waitFor({ state: 'visible' });
+  const sessionsList = new SessionsListPage(sessionsPage);
+  await sessionsList.expectListVisible();
 
   // Create the live "Work" blue group in the current window so that the
   // RestoreWizard's analyzeConflicts() detects a conflicting group.
@@ -57,15 +60,13 @@ test('restore conflicts', async (
     description: 'Sessions page with one seeded snapshot and a live "Work" tab group already open in the same window.',
   });
 
-  await openCustomizeRestoreWizard(sessionsPage, SESSION_FOR_CONFLICT.id);
+  const wizard = await openCustomizeRestoreWizard(sessionsPage, SESSION_FOR_CONFLICT.id);
   await captureStep(sessionsPage, 'restore-wizard-step0', {
     description: 'Restore wizard step 0 (destination + tab selection) before triggering conflict analysis.',
   });
 
-  await clickRestoreInWizard(sessionsPage);
-  await sessionsPage
-    .getByTestId('wizard-restore-step-1')
-    .waitFor({ state: 'visible', timeout: 10_000 });
+  await wizard.clickRestore();
+  await wizard.step1Conflicts().waitFor({ state: 'visible', timeout: 10_000 });
   await captureStep(sessionsPage, 'restore-wizard-conflict-resolution', {
     description: 'Restore wizard step 1 (ConflictResolutionStep) showing detected conflicting group and per-group actions.',
   });

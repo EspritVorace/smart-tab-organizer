@@ -330,6 +330,7 @@ test.describe('[US-S-SEARCH-06] Highlight matching text in session cards', () =>
     await page.getByPlaceholder('Search sessions...').fill('React');
 
     // A <mark> element wrapping the matched portion of the session name
+    // allow-inline-dom: `<mark>` is the search highlight atom, not a dialog/wizard surface.
     await expect(page.locator('mark').filter({ hasText: 'React' }).first()).toBeVisible();
     await page.close();
   });
@@ -347,6 +348,7 @@ test.describe('[US-S-SEARCH-06] Highlight matching text in session cards', () =>
     await page.getByPlaceholder('Search sessions...').fill('TypeScript');
 
     // Preview is auto-opened; the matched part of the tab title should be in a <mark>
+    // allow-inline-dom: `<mark>` is the search highlight atom, not a dialog/wizard surface.
     await expect(page.locator('mark').filter({ hasText: 'TypeScript' }).first()).toBeVisible();
     await page.close();
   });
@@ -364,6 +366,7 @@ test.describe('[US-S-SEARCH-06] Highlight matching text in session cards', () =>
     await page.getByPlaceholder('Search sessions...').fill('my-unique-domain');
 
     // The domain extracted from the URL should appear highlighted
+    // allow-inline-dom: `<mark>` is the search highlight atom, not a dialog/wizard surface.
     await expect(page.locator('mark').filter({ hasText: 'my-unique-domain' }).first()).toBeVisible();
     await page.close();
   });
@@ -381,6 +384,7 @@ test.describe('[US-S-SEARCH-06] Highlight matching text in session cards', () =>
     await page.getByPlaceholder('Search sessions...').fill('Backend');
 
     // Preview auto-opens; the matched part of the group title should be in a <mark>
+    // allow-inline-dom: `<mark>` is the search highlight atom, not a dialog/wizard surface.
     await expect(page.locator('mark').filter({ hasText: 'Backend' }).first()).toBeVisible();
     await page.close();
   });
@@ -396,6 +400,7 @@ test.describe('[US-S-SEARCH-06] Highlight matching text in session cards', () =>
     await goToSessionsSection(page, extensionId);
 
     // No search term → no <mark> elements in the session list
+    // allow-inline-dom: `<mark>` is the search highlight atom, not a dialog/wizard surface.
     await expect(page.locator('mark')).toHaveCount(0);
     await page.close();
   });

@@ -39,13 +39,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
       - uses: pnpm/action-setup@v4
         with:
           run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
 
       - name: Install xvfb
         run: sudo apt-get install -y xvfb
@@ -66,6 +67,19 @@ jobs:
               docs/src/content/docs/es/annexes/raccourcis-clavier.mdx
             exit 1
           fi
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Report Playwright cache status
+        run: |
+          STATUS="${{ steps.playwright-cache.outputs.cache-hit }}"
+          echo "Playwright cache hit: ${STATUS:-false}"
+          echo "Playwright cache hit: ${STATUS:-false}" >> "$GITHUB_STEP_SUMMARY"
 
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm build

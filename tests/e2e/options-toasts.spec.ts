@@ -12,42 +12,17 @@
  * The import rules flow (Text mode paste + Next + Import) is the simplest
  * user trigger that produces a toast without needing any browser permission
  * (clipboard, filesystem...). We use it to assert toast behaviour.
+ *
+ * Migrated to the Page Object / Domain Action architecture (lot 5).
  */
-
 import { test, expect } from './fixtures';
-
-async function goToImportExportSection(page: any, extensionId: string): Promise<void> {
-  await page.goto(`chrome-extension://${extensionId}/options.html`);
-  await page.waitForLoadState('domcontentloaded');
-  await page.waitForFunction(
-    () => {
-      const body = document.body.textContent ?? '';
-      return !body.includes('Chargement') && body.length > 50;
-    },
-    null,
-    { timeout: 10_000 },
-  );
-  await page.getByTestId('sidebar-nav-item-importexport').click();
-  await page.getByTestId('page-import-export-card-import-rules').waitFor({ state: 'visible' });
-}
-
-async function clearDomainRules(extensionContext: any): Promise<void> {
-  const sw = extensionContext.serviceWorkers()[0];
-  await sw.evaluate(async () => {
-    await chrome.storage.local.set({ domainRules: [] });
-  });
-  await new Promise((r) => setTimeout(r, 200));
-}
-
-async function getSmartTabNotificationIds(extensionContext: any): Promise<string[]> {
-  const sw = extensionContext.serviceWorkers()[0];
-  const all: string[] = await sw.evaluate(async () => {
-    return await new Promise<string[]>((resolve) => {
-      chrome.notifications.getAll((n) => resolve(Object.keys(n ?? {})));
-    });
-  });
-  return all.filter((id) => id.startsWith('smarttab-'));
-}
+import { goToImportExportSection } from './helpers/navigation';
+import {
+  getServiceWorker,
+  getSmartTabNotificationIds,
+  openRulesImportWizard,
+} from '../../e2e-shared/actions/index.js';
+import type { ImportWizardPage } from '../../e2e-shared/pages/index.js';
 
 function makeRuleJson(label: string, domainFilter: string): string {
   return JSON.stringify({
@@ -70,58 +45,58 @@ function makeRuleJson(label: string, domainFilter: string): string {
   });
 }
 
-async function submitTextImport(page: any, json: string): Promise<void> {
-  await page.getByTestId('page-import-export-card-import-rules').getByRole('button', { name: /^import$/i }).click();
-  const dialog = page.getByRole('dialog');
-  await expect(dialog).toBeVisible({ timeout: 5000 });
-  await dialog.getByRole('radio', { name: 'Text' }).locator('..').click();
-  await dialog.locator('textarea').fill(json);
-  await expect(dialog.getByRole('button', { name: /next/i })).toBeEnabled();
-  await dialog.getByRole('button', { name: /next/i }).click();
-  await expect(dialog.getByRole('button', { name: /confirm.*import/i })).toBeVisible();
-  await dialog.getByRole('button', { name: /confirm.*import/i }).click();
+/** Drive the wizard through Text-mode import. Optionally bring your own wizard. */
+async function submitTextImport(
+  wizard: ImportWizardPage,
+  json: string,
+): Promise<void> {
+  await wizard.selectTextMode();
+  await wizard.pasteJson(json);
+  await expect(wizard.nextButton()).toBeEnabled();
+  await wizard.clickNext();
+  await expect(wizard.confirmButton()).toBeVisible();
+  await wizard.confirmImport();
 }
 
 test.describe('Options page toasts', () => {
-  test.beforeEach(async ({ extensionContext }) => {
-    await clearDomainRules(extensionContext);
+  test.beforeEach(async ({ helpers }) => {
+    await helpers.clearDomainRules();
   });
 
   test('rule import shows an in-page toast and no native notification', async ({
     extensionContext,
     extensionId,
+    extensionPage,
   }) => {
-    const page = await extensionContext.newPage();
-    await goToImportExportSection(page, extensionId);
+    await goToImportExportSection(extensionPage, extensionId);
 
-    const notifBefore = await getSmartTabNotificationIds(extensionContext);
+    const sw = await getServiceWorker(extensionContext);
+    const notifBefore = await getSmartTabNotificationIds(sw);
 
-    await submitTextImport(page, makeRuleJson('Toast Rule', 'toast-visible.com'));
+    const wizard = await openRulesImportWizard(extensionPage);
+    await expect(extensionPage).toHaveDialogOpen();
 
-    const toast = page.getByTestId('toast-success');
-    await expect(toast).toBeVisible({ timeout: 3000 });
+    await submitTextImport(wizard, makeRuleJson('Toast Rule', 'toast-visible.com'));
 
-    const notifAfter = await getSmartTabNotificationIds(extensionContext);
+    await expect(extensionPage).toHaveToast('success');
+    await expect(extensionContext).toHaveDomainRulesCount(1);
+
+    const notifAfter = await getSmartTabNotificationIds(sw);
     expect(notifAfter).toEqual(notifBefore);
-
-    await page.close();
   });
 
   test('closing a toast removes it from the viewport', async ({
-    extensionContext,
     extensionId,
+    extensionPage,
   }) => {
-    const page = await extensionContext.newPage();
-    await goToImportExportSection(page, extensionId);
+    await goToImportExportSection(extensionPage, extensionId);
 
-    await submitTextImport(page, makeRuleJson('Toast Close Rule', 'toast-close.com'));
+    const wizard = await openRulesImportWizard(extensionPage);
+    await submitTextImport(wizard, makeRuleJson('Toast Close Rule', 'toast-close.com'));
 
-    const toast = page.getByTestId('toast-success');
-    await expect(toast).toBeVisible({ timeout: 3000 });
+    await expect(extensionPage).toHaveToast('success');
 
-    await page.getByTestId('toast-btn-close').first().click();
-    await expect(toast).toBeHidden({ timeout: 2000 });
-
-    await page.close();
+    await extensionPage.getByTestId('toast-btn-close').first().click();
+    await expect(extensionPage.getByTestId('toast-success')).toBeHidden({ timeout: 2000 });
   });
 });

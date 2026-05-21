@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { ImportExportPage } from './ImportExportPage';
+import { MockImportExportWizardsProvider } from '@/test-utils/MockImportExportWizardsProvider';
 import { defaultAppSettings } from '@/types/syncSettings';
 import type { AppSettings } from '@/types/syncSettings';
 
@@ -60,9 +61,13 @@ const meta: Meta<typeof ImportExportPage> = {
   parameters: {
     layout: 'fullscreen',
   },
-  argTypes: {
-    onSettingsUpdate: { action: 'settings updated' },
-  },
+  decorators: [
+    (Story) => (
+      <MockImportExportWizardsProvider>
+        <Story />
+      </MockImportExportWizardsProvider>
+    ),
+  ],
 };
 
 export default meta;
@@ -71,13 +76,11 @@ type Story = StoryObj<typeof meta>;
 export const ImportExportPageDefault: Story = {
   args: {
     syncSettings: defaultAppSettings,
-    onSettingsUpdate: (settings) => console.log('Settings updated:', settings),
   },
 };
 
 export const ImportExportPageWithRules: Story = {
   args: {
     syncSettings: mockSyncSettingsWithRules,
-    onSettingsUpdate: (settings) => console.log('Settings updated:', settings),
   },
 };

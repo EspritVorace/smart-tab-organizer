@@ -1,13 +1,10 @@
-import { test as base, type BrowserContext, type Page } from '@playwright/test';
-import {
-  launchExtension,
-  cleanupUserDataDir,
-} from '../../e2e-shared/extension-loader.js';
-import { getExtensionId } from '../../e2e-shared/extension-id.js';
+import { type BrowserContext, type Page } from '@playwright/test';
+import { createExtensionTest } from '../../e2e-shared/fixtures-base.js';
 
 export interface ExtensionFixtures {
   extensionContext: BrowserContext;
   extensionId: string;
+  extensionPage: Page;
   popupPage: Page;
   optionsPage: Page;
 }
@@ -90,26 +87,46 @@ async function localSet(sw: Page, data: Record<string, unknown>): Promise<void> 
   }, data as Record<string, unknown>);
 }
 
-export const test = base.extend<ExtensionFixtures & { helpers: ExtensionHelpers }>({
-  // Custom browser extensionContext with extension loaded — worker-scoped so the browser
-  // is launched once per worker instead of once per test.
-  extensionContext: [async ({}, use) => {
-    const { context, userDataDir } = await launchExtension({
-      label: 'chrome',
-      headless: false,
-      lang: 'en-US',
-    });
+const baseTest = createExtensionTest(() => ({
+  label: 'chrome',
+  headless: false,
+  lang: 'en-US',
+}));
 
-    await use(context);
-
-    await context.close();
-    cleanupUserDataDir(userDataDir);
-  }, { scope: 'worker' }],
-
-  // Get extension ID from service worker — worker-scoped, resolved once per worker.
-  extensionId: [async ({ extensionContext }, use) => {
-    await use(getExtensionId(extensionContext));
-  }, { scope: 'worker' }],
+export const test = baseTest.extend<Omit<ExtensionFixtures, 'extensionContext' | 'extensionId'> & { helpers: ExtensionHelpers }>({
+  /**
+   * Page-scoped fixture providing a fresh `Page` per test, sparing the
+   * caller from the `extensionContext.newPage()` + `page.close()`
+   * plumbing that pollutes most specs (and is the root cause of the
+   * `last-page-browser-exit` pattern documented in
+   * `.claude/agents/e2e-flaky-detector.md`).
+   *
+   * After the test:
+   *   1. silently ignore an already-closed page (`isClosed()`),
+   *   2. refuse to close the page if it is the last one in the
+   *      context (closing it would terminate the persistent context
+   *      and kill the worker for the next test).
+   *
+   * Multi-page specs (sessions, deduplication, ...) keep using
+   * `extensionContext.newPage()` directly; this fixture is a
+   * convenience for the single-page majority.
+   */
+  extensionPage: async ({ extensionContext }, use) => {
+    const page = await extensionContext.newPage();
+    await use(page);
+    if (page.isClosed()) return;
+    // "Last page" guard: closing the only remaining page closes the
+    // persistent context, which Chromium-launched extensions cannot
+    // survive between tests. Keep it open instead.
+    if (extensionContext.pages().length <= 1) return;
+    try {
+      await page.close();
+    } catch {
+      // Page was closed between the isClosed() check and the close()
+      // call (race when the test triggers an extension flow that
+      // tears the page down).
+    }
+  },
 
   // Popup page fixture
   popupPage: async ({ extensionContext, extensionId }, use) => {

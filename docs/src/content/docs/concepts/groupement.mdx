@@ -56,9 +56,9 @@ La couleur du groupe est héritée de la catégorie associée à la règle. Si a
 
 Le nom affiché sur le groupe Chrome dépend du **mode de nommage** configuré dans la règle. Trois choix sont proposés lors de la création d'une règle.
 
-### Preset
+### Intelligent (depuis un pack ou un preset)
 
-L'extension extrait automatiquement un nom depuis le titre ou l'URL de l'onglet parent, en s'appuyant sur les expressions régulières du preset sélectionné. C'est le choix recommandé pour les sites courants.
+L'extension extrait automatiquement un nom depuis le titre ou l'URL de l'onglet parent, en s'appuyant sur les regex héritées du [pack importé](/concepts/packs) ou du preset choisi manuellement dans l'assistant de règle. C'est le choix recommandé pour les sites courants.
 
 ### Demander
 
@@ -88,6 +88,7 @@ Chaque règle possède un toggle individuel dans la liste des règles. Désactiv
 
 <CardGrid>
   <LinkCard title="Sources de nom de groupe" href="/concepts/sources-nom-groupe" description="Le principe d'extraction et les 6 modes de nommage disponibles." />
+  <LinkCard title="Qu'est-ce qu'un pack ?" href="/concepts/packs" description="Importer plusieurs règles d'un coup pour un site ou un usage donné." />
   <LinkCard title="Modes de déduplication" href="/concepts/deduplication" description="Éviter les doublons en complément du groupement." />
   <LinkCard title="Créer une règle" href="/fonctionnalites/regles/creer-une-regle" description="Guide pas-à-pas de l'assistant de création." />
 </CardGrid>

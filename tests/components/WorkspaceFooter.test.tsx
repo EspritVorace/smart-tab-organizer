@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { Theme } from '@radix-ui/themes';
 import type { WorkspaceMeta } from '../../src/schemas/workspace';
 
@@ -50,20 +50,10 @@ const makeWorkspace = (overrides: Partial<WorkspaceMeta> = {}): WorkspaceMeta =>
 });
 
 describe('WorkspaceFooter', () => {
-  it('renders the trigger and the manage button enabled when onManage is provided', () => {
-    const onManage = vi.fn();
-    wrap(<WorkspaceFooter onManage={onManage} />);
+  it('renders the trigger inside the footer', () => {
+    wrap(<WorkspaceFooter onManage={vi.fn()} />);
     expect(screen.getByTestId('workspace-footer')).toBeInTheDocument();
     expect(screen.getByTestId('workspace-footer-trigger')).toBeInTheDocument();
-    const manage = screen.getByTestId('workspace-manage-button');
-    expect(manage).not.toBeDisabled();
-    fireEvent.click(manage);
-    expect(onManage).toHaveBeenCalled();
-  });
-
-  it('disables the manage button when onManage is undefined', () => {
-    wrap(<WorkspaceFooter />);
-    expect(screen.getByTestId('workspace-manage-button')).toBeDisabled();
   });
 
   it('shows the active workspace name when one is set', () => {

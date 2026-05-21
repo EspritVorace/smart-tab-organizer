@@ -1,5 +1,5 @@
 import { Box, Flex, Text, Switch, Card, RadioGroup } from '@radix-ui/themes';
-import { Settings, Bell, Copy } from 'lucide-react';
+import { Bell, Copy } from 'lucide-react';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { getMessage } from '@/utils/i18n';
 import type { AppSettings } from '@/types/syncSettings';
@@ -18,7 +18,6 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
     <PageLayout
       titleKey="settingsTab"
       descriptionKey="settingsPageDescription"
-      icon={Settings}
       syncSettings={syncSettings}
     >
       {() => (

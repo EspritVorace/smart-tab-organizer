@@ -2,6 +2,12 @@
  * E2E Tests for Combined Deduplication and Grouping
  *
  * Tests scenarios where both features work together or interact with each other.
+ *
+ * Migrated to the Page Object / Domain Action architecture (lot 5): the
+ * grouping / deduplication flows in this spec already go through the
+ * `helpers` fixture primitives (no UI driving), so the migration mostly
+ * narrows imports and assertions to the shared matcher
+ * (`toHaveStatistic`).
  */
 
 import { test, expect } from './fixtures';
@@ -23,7 +29,7 @@ test.describe('Combined Deduplication and Grouping', () => {
   // ── 1. Both Features Enabled ──────────────────────────────────────────────
 
   test.describe('Both Features Enabled', () => {
-    test('groups a child tab AND deduplicates a subsequent duplicate [US-C001]', async ({ helpers }) => {
+    test('groups a child tab AND deduplicates a subsequent duplicate [US-C001]', async ({ helpers, extensionContext }) => {
       await helpers.addDomainRule({
         label: 'Combined Rule',
         domainFilter: 'example.com',
@@ -35,20 +41,18 @@ test.describe('Combined Deduplication and Grouping', () => {
         groupNameSource: 'label',
       });
 
-      // Opener + child → group is created
       const opener = await helpers.createTab('https://example.com/opener');
       await helpers.waitForGrouping();
       await helpers.createTabFromOpener(opener, 'https://example.com/child');
       await helpers.waitForGrouping();
 
-      let stats = await helpers.getStatistics();
-      expect(stats.tabGroupsCreatedCount).toBe(1);
+      await expect(extensionContext).toHaveStatistic('tabGroupsCreatedCount', 1);
 
       // Duplicate of child → deduplicated
       await helpers.createTab('https://example.com/child');
       await helpers.waitForDeduplication();
 
-      stats = await helpers.getStatistics();
+      const stats = await helpers.getStatistics();
       expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
     });
 
@@ -79,7 +83,7 @@ test.describe('Combined Deduplication and Grouping', () => {
   // ── 2. Different Settings Per Feature ────────────────────────────────────
 
   test.describe('Different Settings Per Feature', () => {
-    test('grouping enabled, deduplication disabled: groups child, keeps duplicate [US-C002]', async ({ helpers }) => {
+    test('grouping enabled, deduplication disabled: groups child, keeps duplicate [US-C002]', async ({ helpers, extensionContext }) => {
       await helpers.addDomainRule({
         label: 'Group Only',
         domainFilter: 'example.com',
@@ -95,16 +99,15 @@ test.describe('Combined Deduplication and Grouping', () => {
       await helpers.createTabFromOpener(opener, 'https://example.com/child');
       await helpers.waitForGrouping();
 
-      // Duplicate of opener — should NOT be deduplicated
+      // Duplicate of opener — should NOT be deduplicated.
       await helpers.createTab('https://example.com/opener');
       await helpers.waitForDeduplication();
 
-      const stats = await helpers.getStatistics();
-      expect(stats.tabGroupsCreatedCount).toBe(1);
-      expect(stats.tabsDeduplicatedCount).toBe(0);
+      await expect(extensionContext).toHaveStatistic('tabGroupsCreatedCount', 1);
+      await expect(extensionContext).toHaveStatistic('tabsDeduplicatedCount', 0);
     });
 
-    test('deduplication enabled, grouping disabled: deduplicates but creates no groups [US-C002]', async ({ helpers }) => {
+    test('deduplication enabled, grouping disabled: deduplicates but creates no groups [US-C002]', async ({ helpers, extensionContext }) => {
       await helpers.addDomainRule({
         label: 'Dedup Only',
         domainFilter: 'example.com',
@@ -119,15 +122,14 @@ test.describe('Combined Deduplication and Grouping', () => {
       await helpers.createTabFromOpener(opener, 'https://example.com/child');
       await helpers.waitForGrouping();
 
-      // Duplicate of child → deduplicated
       await helpers.createTab('https://example.com/child');
       await helpers.waitForDeduplication();
 
-      const stats = await helpers.getStatistics();
       const groups = await helpers.getTabGroups();
-
-      expect(stats.tabGroupsCreatedCount).toBe(0);
+      await expect(extensionContext).toHaveStatistic('tabGroupsCreatedCount', 0);
       expect(groups).toHaveLength(0);
+
+      const stats = await helpers.getStatistics();
       expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
     });
   });
@@ -181,7 +183,7 @@ test.describe('Combined Deduplication and Grouping', () => {
   // ── 4. Global vs Rule Settings ────────────────────────────────────────────
 
   test.describe('Global vs Rule Settings', () => {
-    test('rule settings override global: both disabled per rule → no action [US-C004]', async ({ helpers }) => {
+    test('rule settings override global: both disabled per rule → no action [US-C004]', async ({ helpers, extensionContext }) => {
       await helpers.setGlobalGroupingEnabled(true);
       await helpers.setGlobalDeduplicationEnabled(true);
 
@@ -202,16 +204,14 @@ test.describe('Combined Deduplication and Grouping', () => {
       await helpers.createTab('https://example.com/page');
       await helpers.waitForDeduplication();
 
-      const stats = await helpers.getStatistics();
-      expect(stats.tabGroupsCreatedCount).toBe(0);
-      expect(stats.tabsDeduplicatedCount).toBe(0);
+      await expect(extensionContext).toHaveStatistic('tabGroupsCreatedCount', 0);
+      await expect(extensionContext).toHaveStatistic('tabsDeduplicatedCount', 0);
     });
 
     test('unmatched domains fall back to global settings [US-C004]', async ({ helpers }) => {
       await helpers.setGlobalGroupingEnabled(true);
       await helpers.setGlobalDeduplicationEnabled(true);
 
-      // Rule only for example.com — both features disabled for it
       await helpers.addDomainRule({
         label: 'Example Only',
         domainFilter: 'example.com',
@@ -219,7 +219,7 @@ test.describe('Combined Deduplication and Grouping', () => {
         deduplicationEnabled: false,
       });
 
-      // example.net has no rule → global (enabled) applies
+      // example.net has no rule → global (enabled) applies.
       const _tab1 = await helpers.createTab('https://example.net/page');
       await helpers.waitForDeduplication();
 
@@ -234,7 +234,7 @@ test.describe('Combined Deduplication and Grouping', () => {
   // ── 5. Complex Workflows ──────────────────────────────────────────────────
 
   test.describe('Complex Workflows', () => {
-    test('simulate browsing a GitHub repo: group files, dedup duplicate tabs [US-C005]', async ({ helpers }) => {
+    test('simulate browsing a GitHub repo: group files, dedup duplicate tabs [US-C005]', async ({ helpers, extensionContext }) => {
       await helpers.addDomainRule({
         label: 'GitHub Project',
         domainFilter: 'github.com',
@@ -246,31 +246,27 @@ test.describe('Combined Deduplication and Grouping', () => {
         urlParsingRegEx: 'github\\.com/([^/]+/[^/]+)',
       });
 
-      // Main repo page
       const repoPage = await helpers.createTab('https://github.com/facebook/react');
       await helpers.waitForGrouping();
 
-      // Open README (should be grouped)
       await helpers.createTabFromOpener(repoPage, 'https://github.com/facebook/react/blob/main/README.md');
       await helpers.waitForGrouping();
 
-      // Open another file (added to group)
       await helpers.createTabFromOpener(repoPage, 'https://github.com/facebook/react/blob/main/src/index.ts');
       await helpers.waitForGrouping();
 
-      // Try to open duplicate of README → deduplicated
+      // Try to open duplicate of README → deduplicated.
       await helpers.createTab('https://github.com/facebook/react/blob/main/README.md');
       await helpers.waitForDeduplication();
 
-      const stats = await helpers.getStatistics();
       const groups = await helpers.getTabGroups();
-
-      expect(stats.tabGroupsCreatedCount).toBe(1);
+      await expect(extensionContext).toHaveStatistic('tabGroupsCreatedCount', 1);
+      const stats = await helpers.getStatistics();
       expect(stats.tabsDeduplicatedCount).toBeGreaterThan(0);
       expect(groups).toHaveLength(1);
     });
 
-    test('simulate two projects each getting their own group [US-C005]', async ({ helpers }) => {
+    test('simulate two projects each getting their own group [US-C005]', async ({ helpers, extensionContext }) => {
       await helpers.addDomainRule({
         label: 'Multi-Project',
         domainFilter: 'example.com',
@@ -294,10 +290,8 @@ test.describe('Combined Deduplication and Grouping', () => {
       await helpers.waitForGrouping();
 
       const groups = await helpers.getTabGroups();
-      const stats = await helpers.getStatistics();
-
       expect(groups).toHaveLength(2);
-      expect(stats.tabGroupsCreatedCount).toBe(2);
+      await expect(extensionContext).toHaveStatistic('tabGroupsCreatedCount', 2);
     });
   });
 });

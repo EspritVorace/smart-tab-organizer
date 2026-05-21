@@ -1,10 +1,25 @@
 import { defineConfig } from 'wxt';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
+import { mkdirSync } from 'fs';
+
+// `webExt.profileCreateIfMissing` does not create the parent dir early enough
+// for `chrome-launcher`, which opens `chrome-out.log` first and crashes with
+// ENOENT on a fresh checkout. Pre-create both profile dirs here.
+const chromiumProfile = resolve('.chrome-profile');
+const firefoxProfile = resolve('.firefox-profile');
+mkdirSync(chromiumProfile, { recursive: true });
+mkdirSync(firefoxProfile, { recursive: true });
 
 export default defineConfig({
   srcDir: 'src',
   outDir: '.output',
+  modules: ['@wxt-dev/auto-icons'],
+  autoIcons: {
+    baseIconPath: 'assets/icon.svg',
+    sizes: [16, 32, 48, 96, 128],
+    developmentIndicator: 'overlay',
+  },
   hooks: {
     'build:manifestGenerated': (wxt, manifest) => {
       // Firefox MV2 uses `_execute_browser_action`; only Chromium MV3 accepts
@@ -52,22 +67,12 @@ export default defineConfig({
       },
     },
     action: {
-      default_icon: {
-        '16': 'icons/icon16.png',
-        '48': 'icons/icon48.png',
-        '128': 'icons/icon128.png'
-      },
       default_popup: 'popup.html'
-    },
-    icons: {
-      '16': 'icons/icon16.png',
-      '48': 'icons/icon48.png',
-      '128': 'icons/icon128.png'
     }
   },
   webExt: {
-    chromiumProfile: resolve('.chrome-profile'),
-    firefoxProfile: resolve('.firefox-profile'),
+    chromiumProfile,
+    firefoxProfile,
     keepProfileChanges: true,
     profileCreateIfMissing: true,
   },

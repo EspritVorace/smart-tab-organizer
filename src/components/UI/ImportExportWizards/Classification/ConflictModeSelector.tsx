@@ -17,9 +17,9 @@ export function ConflictModeSelector({ value, onChange }: ConflictModeSelectorPr
         onValueChange={(v: string) => onChange(v as ConflictMode)}
         size="1"
       >
-        <SegmentedControl.Item value="overwrite">{getMessage('conflictModeOverwrite')}</SegmentedControl.Item>
-        <SegmentedControl.Item value="duplicate">{getMessage('conflictModeDuplicate')}</SegmentedControl.Item>
-        <SegmentedControl.Item value="ignore">{getMessage('conflictModeIgnore')}</SegmentedControl.Item>
+        <SegmentedControl.Item value="overwrite" data-testid="conflict-mode-overwrite">{getMessage('conflictModeOverwrite')}</SegmentedControl.Item>
+        <SegmentedControl.Item value="duplicate" data-testid="conflict-mode-duplicate">{getMessage('conflictModeDuplicate')}</SegmentedControl.Item>
+        <SegmentedControl.Item value="ignore" data-testid="conflict-mode-ignore">{getMessage('conflictModeIgnore')}</SegmentedControl.Item>
       </SegmentedControl.Root>
     </Flex>
   );

@@ -9,19 +9,17 @@
  * Reads `(locale, theme)` from the project's `metadata` (see
  * `playwright.doc.config.ts`); the scenario reuses that metadata so every
  * (locale x theme) variant runs in its own persistent context.
+ *
+ * Extends `e2e-shared/fixtures-base.ts` so the extension-launch path stays
+ * identical to the functional `tests/e2e/` pipeline: any change to the
+ * Chromium args or the service-worker readiness check propagates to both
+ * suites at once.
  */
-import { test as base, type BrowserContext } from '@playwright/test';
-import {
-  launchExtension,
-  cleanupUserDataDir,
-} from '../../e2e-shared/extension-loader.js';
-import { getExtensionId } from '../../e2e-shared/extension-id.js';
+import { createExtensionTest } from '../../e2e-shared/fixtures-base.js';
 import { getHostResolverRules } from '../fixtures/sites-server.js';
 import type { Locale, Theme } from '../../e2e-shared/routing/types.js';
 
 export interface DocScenarioFixtures {
-  extensionContext: BrowserContext;
-  extensionId: string;
   docLocale: Locale;
   docTheme: Theme;
 }
@@ -47,7 +45,18 @@ function readProjectMetadata(metadata: unknown): { locale: Locale; theme: Theme 
   return { locale: meta.locale, theme: meta.theme };
 }
 
-export const test = base.extend<DocScenarioFixtures>({
+const baseTest = createExtensionTest((testInfo) => {
+  const { locale, theme } = readProjectMetadata(testInfo.project.metadata);
+  return {
+    label: `doc-scenarios-${locale}-${theme}`,
+    lang: LOCALE_LANG[locale],
+    deterministicRendering: true,
+    viewport: { width: 1280, height: 800 },
+    hostResolverRules: getHostResolverRules(),
+  };
+});
+
+export const test = baseTest.extend<DocScenarioFixtures>({
   docLocale: [
     async ({}, use, testInfo) => {
       const { locale } = readProjectMetadata(testInfo.project.metadata);
@@ -60,34 +69,6 @@ export const test = base.extend<DocScenarioFixtures>({
     async ({}, use, testInfo) => {
       const { theme } = readProjectMetadata(testInfo.project.metadata);
       await use(theme);
-    },
-    { scope: 'worker' },
-  ],
-
-  extensionContext: [
-    async ({}, use, testInfo) => {
-      const { locale, theme } = readProjectMetadata(testInfo.project.metadata);
-      const lang = LOCALE_LANG[locale];
-
-      const { context, userDataDir } = await launchExtension({
-        label: `doc-scenarios-${locale}-${theme}`,
-        lang,
-        deterministicRendering: true,
-        viewport: { width: 1280, height: 800 },
-        hostResolverRules: getHostResolverRules(),
-      });
-
-      await use(context);
-
-      await context.close();
-      cleanupUserDataDir(userDataDir);
-    },
-    { scope: 'worker' },
-  ],
-
-  extensionId: [
-    async ({ extensionContext }, use) => {
-      await use(getExtensionId(extensionContext));
     },
     { scope: 'worker' },
   ],

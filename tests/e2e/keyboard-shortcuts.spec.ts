@@ -1,7 +1,8 @@
 /**
  * E2E tests for the keyboard shortcuts feature.
- * Covers the popup (S/R/O/?), options (Alt+1..5, /, ?), session card combos
- * (R/Shift+R/Alt+R/Alt+Shift+R) and pinned-card navigation in the popup.
+ * Covers the popup (S/R/O/?), options (M+letter sidebar nav, /, ?), session
+ * card combos (R/Shift+R/Alt+R/Alt+Shift+R) and pinned-card navigation in
+ * the popup.
  */
 import { test, expect } from './fixtures';
 import {
@@ -49,6 +50,7 @@ test.describe('[US-KB-popup] Popup shortcuts', () => {
 
     // Only the 2 popup-relevant groups must be displayed (Popup, Session
     // card). Global, Options and Lists groups are hidden in the popup drawer.
+    // allow-inline-dom: scopes to a testid-keyed content surface, not a dialog/wizard.
     await expect(
       page.locator('[data-testid="shortcuts-content"] [data-group-id]'),
     ).toHaveCount(2);
@@ -106,6 +108,7 @@ test.describe('[US-KB-popup] Popup shortcuts', () => {
       timeout: 5000,
     });
 
+    // allow-inline-dom: body.click() is a generic UI gesture to refocus, not a wizard surface.
     await page.locator('body').click();
     const [newPage] = await Promise.all([
       extensionContext.waitForEvent('page'),
@@ -124,7 +127,7 @@ test.describe('[US-KB-popup] Popup shortcuts', () => {
 // Options shortcuts
 // ---------------------------------------------------------------------------
 test.describe('[US-KB-options] Options shortcuts', () => {
-  test('Alt+3 switches to the Sessions sidebar tab', async ({
+  test('M then S switches to the Sessions sidebar tab', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -133,45 +136,13 @@ test.describe('[US-KB-options] Options shortcuts', () => {
 
     // Click the top-left corner so a fresh-install Home (empty rules ->
     // HeroOnboarding) does not intercept the click on its CTA button.
+    // allow-inline-dom: body.click() is a generic UI gesture to refocus, not a wizard surface.
     await page.locator('body').click({ position: { x: 5, y: 5 } });
-    // Sidebar order is home, rules, sessions, ... so Alt+3 selects Sessions.
-    await page.keyboard.press('Alt+3');
+    // Sequence shortcut: `m` opens the navigation prefix, `s` selects Sessions.
+    await page.keyboard.press('m');
+    await page.keyboard.press('s');
 
     // SessionsPage marker
-    await page.getByTestId('page-sessions-btn-snapshot').waitFor({
-      state: 'visible',
-      timeout: 5000,
-    });
-    expect(page.url()).toContain('#sessions');
-
-    await page.close();
-  });
-
-  test('Alt+digit also switches tabs on a non-US layout (where event.key is not the digit)', async ({
-    extensionContext,
-    extensionId,
-  }) => {
-    const page = await extensionContext.newPage();
-    await goToOptionsPage(page, extensionId);
-    await page.locator('body').click({ position: { x: 5, y: 5 } });
-
-    // page.keyboard.press always uses the US layout (event.key === event.code's
-    // digit), so it cannot reproduce the AZERTY case where Alt+1 dispatches
-    // event.key = "&" while event.code stays "Digit1". Synthesise the event
-    // directly: what matters for the matcher is that event.key is *not* the
-    // digit but event.code is the matching DigitN.
-    await page.evaluate(() => {
-      document.dispatchEvent(
-        new KeyboardEvent('keydown', {
-          code: 'Digit3',
-          key: 'layout-specific',
-          altKey: true,
-          bubbles: true,
-          cancelable: true,
-        }),
-      );
-    });
-
     await page.getByTestId('page-sessions-btn-snapshot').waitFor({
       state: 'visible',
       timeout: 5000,
@@ -188,6 +159,7 @@ test.describe('[US-KB-options] Options shortcuts', () => {
     const page = await extensionContext.newPage();
     await goToOptionsPage(page, extensionId);
 
+    // allow-inline-dom: body.click() is a generic UI gesture to refocus, not a wizard surface.
     await page.locator('body').click({ position: { x: 5, y: 5 } });
     await page.keyboard.press('Shift+Slash');
 
@@ -263,6 +235,7 @@ test.describe('[US-KB-panel] Shortcuts panel keyboard navigation', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
+    // allow-inline-dom: body.click() is a generic UI gesture to refocus, not a wizard surface.
     await page.locator('body').click();
     await page.keyboard.press('Shift+Slash');
 

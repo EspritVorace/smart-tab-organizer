@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { PageLayout } from './PageLayout';
 import { Text, Box, Button, Flex } from '@radix-ui/themes';
-import { Shield, FileText, BarChart3 } from 'lucide-react';
 import { defaultAppSettings } from '@/types/syncSettings';
 
 const meta: Meta<typeof PageLayout> = {
@@ -28,7 +27,6 @@ export const PageLayoutDomainRules: Story = {
   args: {
     titleKey: 'domainRulesTab',
     descriptionKey: 'domainRulesPageDescription',
-    icon: Shield,
     syncSettings: defaultAppSettings,
     children: (settings) => (
       <Box>
@@ -52,7 +50,6 @@ export const PageLayoutImportExport: Story = {
   args: {
     titleKey: 'importExportTab',
     descriptionKey: 'importExportPageDescription',
-    icon: FileText,
     syncSettings: defaultAppSettings,
     children: () => (
       <Box>
@@ -72,7 +69,6 @@ export const PageLayoutStatistics: Story = {
   args: {
     titleKey: 'statisticsTab',
     descriptionKey: 'statisticsPageDescription',
-    icon: BarChart3,
     syncSettings: defaultAppSettings,
     children: (settings) => (
       <Box>

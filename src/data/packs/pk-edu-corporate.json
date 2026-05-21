@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-edu-corporate",
+    "name": {
+      "en": "Corporate learning",
+      "fr": "Formation professionnelle",
+      "es": "Formación profesional"
+    },
+    "description": {
+      "en": "Group LinkedIn Learning, Pluralsight and DataCamp tabs by course or skill path.",
+      "fr": "Regroupe les onglets LinkedIn Learning, Pluralsight et DataCamp par cours ou parcours.",
+      "es": "Agrupa las pestañas de LinkedIn Learning, Pluralsight y DataCamp por curso o ruta."
+    },
+    "categoryId": "education"
+  },
+  "domainRules": [
+    {
+      "id": "pk-edu-linkedin-learning",
+      "enabled": true,
+      "domainFilter": "*.linkedin.com",
+      "label": "LinkedIn Learning: Course",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "linkedin\\.com/learning/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "education",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-edu-pluralsight-paths",
+      "enabled": true,
+      "domainFilter": "*.pluralsight.com",
+      "label": "Pluralsight: Skill path",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "pluralsight\\.com/paths/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "purple",
+      "categoryId": "education",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-edu-pluralsight-course",
+      "enabled": true,
+      "domainFilter": "*.pluralsight.com",
+      "label": "Pluralsight: Course",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "pluralsight\\.com/courses/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "pink",
+      "categoryId": "education",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-edu-datacamp-course",
+      "enabled": true,
+      "domainFilter": "*.datacamp.com",
+      "label": "DataCamp: Course",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "datacamp\\.com/courses/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "green",
+      "categoryId": "education",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

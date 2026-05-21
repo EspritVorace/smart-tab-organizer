@@ -1,0 +1,68 @@
+---
+title: Importer des packs de règles
+description: Découvrir et importer en quelques clics des dizaines de règles prêtes à l'emploi depuis la galerie de packs.
+---
+
+import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="En bref">
+- La galerie de packs propose 49 collections de règles prêtes à l'emploi, classées par catégorie.
+- Vous pouvez parcourir la galerie par catégorie ou rechercher par mot-clé (le nom, la description et le libellé de catégorie sont indexés).
+- Les packs marqués configurables vous demandent de choisir un paramètre avant l'import.
+</Aside>
+
+Plutôt que de créer manuellement chaque règle pour un site donné, ouvrez la galerie de packs et importez celui qui correspond à votre usage. Toutes ses règles seront ajoutées à votre liste de règles de domaine, dans le workspace actif.
+
+## Ouvrir la galerie
+
+<Steps>
+1. Depuis la page Règles, ouvrez l'assistant d'import.
+2. Sélectionnez l'onglet **Packs intégrés**.
+3. La galerie liste tous les packs disponibles, regroupés par catégorie.
+</Steps>
+
+La galerie est également accessible depuis le **Hero d'onboarding** de la page d'accueil, via le bouton **Importer un pack** qui s'affiche tant qu'aucune règle n'a été créée dans le workspace actif.
+
+## Parcourir et rechercher
+
+La galerie propose deux modes de navigation, exclusifs l'un de l'autre :
+
+- **Par catégorie** : la barre latérale gauche affiche les 13 catégories avec leur icône et le nombre de packs disponibles. Cliquer sur une catégorie filtre la liste.
+- **Par recherche** : la zone de recherche au-dessus de la galerie filtre les packs dont le nom, la description ou le libellé de catégorie contient le terme saisi. La recherche est insensible aux accents (le mot `videoconference` trouve aussi le pack **Visioconférences**).
+
+Quand une recherche est active, la sélection par catégorie est ignorée pour ne pas masquer de résultats.
+
+## Configurer un pack avant import
+
+Certains packs (typiquement les packs cloud) sont **configurables** : ils proposent un paramètre à choisir avant l'import.
+
+Exemple avec le pack **Console AWS** :
+
+<Steps>
+1. La carte du pack affiche un sélecteur **Service AWS** avec 8 valeurs possibles (EC2, S3, Lambda, RDS, CloudWatch, IAM, DynamoDB, ECS).
+2. Choisissez le service que vous utilisez le plus, par exemple `Lambda (Functions)`.
+3. À l'import, le pack ajoute toutes ses règles, et celle correspondant au service choisi est marquée comme règle principale.
+</Steps>
+
+<Aside type="note">
+Si vous changez d'avis plus tard, vous pouvez réimporter le pack avec un autre paramètre. Le wizard d'import détectera les règles déjà présentes comme conflits et vous proposera de les remplacer ou de les laisser telles quelles.
+</Aside>
+
+## Sélection multiple
+
+Vous pouvez préparer plusieurs imports en cochant successivement plusieurs packs. La galerie maintient un compteur en bas de page indiquant le nombre de packs sélectionnés et le nombre total de règles qui seront ajoutées si vous validez maintenant.
+
+## Conflits à l'import
+
+Si un pack contient une règle dont l'identifiant existe déjà dans le workspace actif (par exemple suite à un import précédent), le wizard d'import affiche cette règle comme **conflit** et vous propose de la conserver ou de l'écraser. Les règles strictement identiques sont marquées comme **identiques** et ignorées automatiquement.
+
+Pour le détail du wizard de conflits, voir [Importer des règles de domaine](/fonctionnalites/import-export/importer-regles).
+
+## Voir aussi
+
+<CardGrid>
+  <LinkCard title="Qu'est-ce qu'un pack ?" href="/concepts/packs" description="La notion de pack, anatomie du manifeste et catégories." />
+  <LinkCard title="Liste des packs intégrés" href="/annexes/packs-integres" description="Catalogue complet des 49 packs disponibles, par catégorie." />
+  <LinkCard title="Presets regex" href="/fonctionnalites/regles/presets-regex" description="L'autre source de regex prête à l'emploi, dans le wizard de création de règle." />
+  <LinkCard title="Vue d'ensemble des règles" href="/fonctionnalites/regles/vue-ensemble" description="La page de gestion des règles de domaine." />
+</CardGrid>

@@ -6,6 +6,7 @@
  */
 import type { Page } from '@playwright/test';
 import { test, expect } from './fixtures';
+import { DialogPage } from '../../e2e-shared/pages/index.js';
 
 async function goToImportExportSection(page: Page, extensionId: string): Promise<void> {
   await page.goto(`chrome-extension://${extensionId}/options.html`);
@@ -23,6 +24,8 @@ async function goToImportExportSection(page: Page, extensionId: string): Promise
 }
 
 async function focusBody(page: Page): Promise<void> {
+  // allow-inline-dom: focusing the page body to dispatch the next keydown
+  // outside any inner input is a generic UI gesture, not a wizard locator.
   await page.locator('body').click({ position: { x: 5, y: 5 } });
 }
 
@@ -35,7 +38,8 @@ test.describe('[issue-275] Import/Export sequence shortcuts', () => {
     await page.keyboard.press('i');
     await page.keyboard.press('r');
 
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+    const dialog = new DialogPage(page);
+    await dialog.expectVisible({ timeout: 5000 });
     await page.close();
   });
 
@@ -47,7 +51,8 @@ test.describe('[issue-275] Import/Export sequence shortcuts', () => {
     await page.keyboard.press('i');
     await page.keyboard.press('s');
 
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+    const dialog = new DialogPage(page);
+    await dialog.expectVisible({ timeout: 5000 });
     await page.close();
   });
 
@@ -59,7 +64,8 @@ test.describe('[issue-275] Import/Export sequence shortcuts', () => {
     await page.keyboard.press('i');
     await page.keyboard.press('w');
 
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 });
+    const dialog = new DialogPage(page);
+    await dialog.expectVisible({ timeout: 5000 });
     await page.close();
   });
 
@@ -78,7 +84,8 @@ test.describe('[issue-275] Import/Export sequence shortcuts', () => {
     await expect(indicator).toBeHidden({ timeout: 3000 });
     // r alone is not a binding in this scope, so no dialog opens.
     await page.keyboard.press('r');
-    await expect(page.getByRole('dialog')).toBeHidden();
+    const dialog = new DialogPage(page);
+    await dialog.expectHidden();
     await page.close();
   });
 
@@ -94,7 +101,8 @@ test.describe('[issue-275] Import/Export sequence shortcuts', () => {
     await expect(indicator).toBeHidden({ timeout: 1000 });
     // r alone is not a binding in this scope, so no dialog opens.
     await page.keyboard.press('r');
-    await expect(page.getByRole('dialog')).toBeHidden();
+    const dialog = new DialogPage(page);
+    await dialog.expectHidden();
     await page.close();
   });
 });

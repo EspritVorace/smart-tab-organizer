@@ -33,6 +33,7 @@ vi.mock('../../src/hooks/useSessions', () => ({
 
 import { useSessions } from '../../src/hooks/useSessions';
 import { HomePage } from '../../src/pages/HomePage';
+import { MockImportExportWizardsProvider } from '../../src/test-utils/MockImportExportWizardsProvider';
 
 const mockedUseSessions = useSessions as ReturnType<typeof vi.fn>;
 
@@ -75,19 +76,28 @@ function makeSession(overrides: Partial<Session> = {}): Session {
   };
 }
 
-const wrap = (ui: React.ReactNode) => render(<Theme>{ui}</Theme>);
+const openImportRules = vi.fn();
+
+const wrap = (ui: React.ReactNode) =>
+  render(
+    <Theme>
+      <MockImportExportWizardsProvider value={{ openImportRules }}>
+        {ui}
+      </MockImportExportWizardsProvider>
+    </Theme>,
+  );
 
 const baseHandlers = {
   onNavigate: vi.fn(),
   onOpenSnapshotWizard: vi.fn(),
   onOpenRuleWizard: vi.fn(),
-  onOpenImportRules: vi.fn(),
   onOpenShortcutsAside: vi.fn(),
   onRestore: vi.fn(),
 };
 
 beforeEach(() => {
   vi.clearAllMocks();
+  openImportRules.mockReset();
   Object.values(baseHandlers).forEach((fn) => fn.mockReset());
   mockedUseSessions.mockReturnValue({
     sessions: [],
@@ -228,8 +238,8 @@ describe('HomePage interactions', () => {
       />,
     );
     fireEvent.click(screen.getByTestId('home-hero-import'));
-    expect(baseHandlers.onOpenImportRules).toHaveBeenCalledTimes(1);
-    expect(baseHandlers.onOpenImportRules).toHaveBeenCalledWith('pack');
+    expect(openImportRules).toHaveBeenCalledTimes(1);
+    expect(openImportRules).toHaveBeenCalledWith({ initialSourceMode: 'pack' });
     expect(baseHandlers.onNavigate).not.toHaveBeenCalled();
   });
 

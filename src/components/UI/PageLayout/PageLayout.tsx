@@ -1,19 +1,16 @@
-import { Heading, Box, Flex, Separator, Text } from '@radix-ui/themes';
-import type { LucideIcon } from 'lucide-react';
+import { Heading, Box, Text } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 import type { AppSettings } from '@/types/syncSettings.js';
-import { IconBox } from '@/components/UI/IconBox/IconBox';
 import { StatusBar } from '@/components/UI/StatusBar/StatusBar';
 
 interface PageLayoutProps {
   titleKey: string;
   descriptionKey: string;
-  icon?: LucideIcon;
   syncSettings: AppSettings;
   children: (settings: AppSettings) => React.ReactNode;
 }
 
-export function PageLayout({ titleKey, descriptionKey, icon: Icon, syncSettings, children }: PageLayoutProps) {
+export function PageLayout({ titleKey, descriptionKey, syncSettings, children }: PageLayoutProps) {
   return (
     <Box style={{
       width: '100%',
@@ -21,37 +18,27 @@ export function PageLayout({ titleKey, descriptionKey, icon: Icon, syncSettings,
       display: 'flex',
       flexDirection: 'column'
     }}>
-      <Box data-testid="page-layout-header">
-        <Box
-          px="4"
-          py="3"
-          style={{
-            background: 'linear-gradient(135deg, var(--accent-a4) 0%, var(--accent-a6) 100%)',
-            borderRadius: 'var(--radius-3)',
-            marginBottom: 'var(--space-3)',
-          }}
-        >
-          <Flex align="center" gap="3">
-            {Icon && <IconBox icon={Icon} size="md" variant="gradient" />}
-            <Heading size="5" weight="bold" as="h1">
-              {getMessage(titleKey)}
-            </Heading>
-          </Flex>
+      <Box
+        data-testid="page-layout-header"
+        pb="3"
+        style={{ borderBottom: '1px solid var(--gray-a4)' }}
+      >
+        <Heading size="5" weight="bold" as="h1" style={{ letterSpacing: '-0.02em' }}>
+          {getMessage(titleKey)}
+        </Heading>
+
+        <Box data-testid="page-layout-description" pt="2">
+          <Text size="2" color="gray" as="p" style={{ margin: 0 }}>
+            {getMessage(descriptionKey)}
+          </Text>
         </Box>
-        <Separator size="4" style={{ opacity: 0.3 }} />
       </Box>
 
       <Box
-        data-testid="page-layout-description"
-        px="4"
-        pt="3"
+        data-testid="page-layout-content"
+        pt="4"
+        style={{ flex: 1, overflow: 'auto', minHeight: 0 }}
       >
-        <Text size="2" color="gray" as="p" style={{ margin: 0 }}>
-          {getMessage(descriptionKey)}
-        </Text>
-      </Box>
-
-      <Box data-testid="page-layout-content" style={{ flex: 1, overflow: 'auto', marginTop: 'var(--space-3)', backgroundColor: 'var(--accent-a2)', borderRadius: 'var(--radius-3)', padding: 'var(--space-4)' }}>
         {children(syncSettings)}
       </Box>
 

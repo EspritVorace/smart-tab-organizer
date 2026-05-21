@@ -30,6 +30,8 @@ export default defineConfig({
             { slug: 'concepts/sources-nom-groupe' },
             { slug: 'concepts/modes-nommage' },
             { slug: 'concepts/sessions-epinglees' },
+            { slug: 'concepts/packs' },
+            { slug: 'concepts/workspaces' },
           ],
         },
         {
@@ -38,6 +40,7 @@ export default defineConfig({
           items: [
             { slug: 'demarrage/installation' },
             { slug: 'demarrage/tour-interface' },
+            { slug: 'demarrage/page-accueil' },
           ],
         },
         {
@@ -52,6 +55,7 @@ export default defineConfig({
                 { slug: 'fonctionnalites/regles/vue-ensemble' },
                 { slug: 'fonctionnalites/regles/creer-une-regle' },
                 { slug: 'fonctionnalites/regles/modifier-supprimer' },
+                { slug: 'fonctionnalites/regles/packs' },
                 { slug: 'fonctionnalites/regles/presets-regex' },
               ],
             },
@@ -66,12 +70,24 @@ export default defineConfig({
               ],
             },
             {
+              label: 'Espaces de travail',
+              translations: { en: 'Workspaces', es: 'Espacios de trabajo' },
+              items: [
+                { slug: 'fonctionnalites/workspaces/vue-ensemble' },
+                { slug: 'fonctionnalites/workspaces/gerer-workspaces' },
+                { slug: 'fonctionnalites/workspaces/changer-workspace-actif' },
+                { slug: 'fonctionnalites/workspaces/profils-popup' },
+              ],
+            },
+            {
               label: 'Import / Export',
               items: [
                 { slug: 'fonctionnalites/import-export/exporter-regles' },
                 { slug: 'fonctionnalites/import-export/importer-regles' },
                 { slug: 'fonctionnalites/import-export/exporter-sessions' },
                 { slug: 'fonctionnalites/import-export/importer-sessions' },
+                { slug: 'fonctionnalites/import-export/exporter-workspace' },
+                { slug: 'fonctionnalites/import-export/importer-workspace' },
               ],
             },
             { slug: 'fonctionnalites/statistiques' },
@@ -88,6 +104,7 @@ export default defineConfig({
           label: 'Annexes',
           translations: { en: 'Reference', es: 'Referencia' },
           items: [
+            { slug: 'annexes/packs-integres' },
             { slug: 'annexes/presets-regex' },
             { slug: 'annexes/raccourcis-clavier' },
             { slug: 'annexes/stack-technique' },

@@ -1,0 +1,586 @@
+
+<!doctype html>
+<html lang="fr" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PackGallery — Redesign Preview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+    <style>
+      :root,
+      [data-theme='light'] {
+        color-scheme: light;
+        --color-background: #ffffff;
+        --color-panel-solid: #ffffff;
+        --color-overlay: rgba(0, 0, 0, 0.4);
+        --gray-1:#fcfcfc;--gray-2:#f9f9f9;--gray-3:#f0f0f0;--gray-4:#e8e8e8;--gray-5:#e0e0e0;--gray-6:#d9d9d9;--gray-7:#cecece;--gray-8:#bbbbbb;--gray-9:#8d8d8d;--gray-10:#838383;--gray-11:#646464;--gray-12:#202020;
+        --gray-a2:rgba(0,0,0,.024);--gray-a3:rgba(0,0,0,.063);--gray-a4:rgba(0,0,0,.094);--gray-a5:rgba(0,0,0,.122);--gray-a6:rgba(0,0,0,.149);--gray-a7:rgba(0,0,0,.192);--gray-a8:rgba(0,0,0,.267);--gray-a11:rgba(0,0,0,.612);
+        --accent-1:#fdfdfe;--accent-2:#f7f9ff;--accent-3:#edf2fe;--accent-4:#dfeaff;--accent-5:#d0dfff;--accent-6:#bdd1ff;--accent-7:#a6bff9;--accent-8:#87a5ef;--accent-9:#3e63dd;--accent-10:#3a5ccc;--accent-11:#3451b2;--accent-12:#101d46;
+        --accent-a2:rgba(0,47,247,.031);--accent-a3:rgba(0,71,247,.071);--accent-a4:rgba(0,81,255,.125);--accent-a5:rgba(0,80,255,.184);--accent-a6:rgba(0,67,255,.259);--accent-a7:rgba(2,60,224,.349);
+        --iris-3:#f0f1fe;--iris-9:#5b5bd6;--iris-11:#4f4fc9;--iris-a3:rgba(15,0,245,.059);
+        --radius-2:6px;--radius-3:8px;--radius-4:12px;--radius-5:16px;
+        --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:24px;--space-6:32px;--space-7:40px;--space-8:48px;--space-9:64px;
+        --shadow-2:0 0 0 1px var(--gray-a3);
+        --shadow-3:0 6px 12px -3px rgba(0,0,0,.08),0 2px 4px -1px rgba(0,0,0,.05);
+      }
+      [data-theme='dark'] {
+        color-scheme: dark;
+        --color-background:#111113;--color-panel-solid:#191b1d;--color-overlay:rgba(0,0,0,.6);
+        --gray-1:#111113;--gray-2:#18191b;--gray-3:#1f2123;--gray-4:#25272a;--gray-5:#2b2d31;--gray-6:#313438;--gray-7:#3a3d42;--gray-8:#4c5057;--gray-9:#696e77;--gray-10:#777b84;--gray-11:#b0b4ba;--gray-12:#edeef0;
+        --gray-a2:rgba(255,255,255,.034);--gray-a3:rgba(255,255,255,.071);--gray-a4:rgba(255,255,255,.105);--gray-a5:rgba(255,255,255,.134);--gray-a6:rgba(255,255,255,.172);--gray-a7:rgba(255,255,255,.218);--gray-a8:rgba(255,255,255,.319);--gray-a11:rgba(255,255,255,.701);
+        --accent-1:#11131f;--accent-2:#141726;--accent-3:#1c2543;--accent-4:#1f2d5c;--accent-5:#243474;--accent-6:#2b418b;--accent-7:#3a539e;--accent-8:#4e6bbf;--accent-9:#3e63dd;--accent-10:#5373e7;--accent-11:#9eb1ff;--accent-12:#d6e1ff;
+        --accent-a2:rgba(0,51,252,.097);--accent-a3:rgba(31,92,254,.211);--accent-a4:rgba(48,105,254,.323);--accent-a5:rgba(67,116,255,.428);--accent-a6:rgba(86,132,255,.529);--accent-a7:rgba(106,147,255,.621);
+        --iris-3:#1f2147;--iris-9:#6e6ade;--iris-11:#b1a9ff;--iris-a3:rgba(67,53,254,.275);
+      }
+      *,*::before,*::after{box-sizing:border-box}
+      html,body{margin:0;padding:0}
+      body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.5;color:var(--gray-12);background:var(--gray-2);min-height:100vh;padding:var(--space-6) var(--space-5)}
+      .page-header{max-width:1400px;margin:0 auto var(--space-6);display:flex;align-items:flex-end;justify-content:space-between;gap:var(--space-4);flex-wrap:wrap}
+      .page-title h1{margin:0;font-size:24px;font-weight:600;letter-spacing:-.01em}
+      .page-title p{margin:var(--space-1) 0 0;color:var(--gray-11);font-size:14px}
+      .toolbar{display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap}
+      .toolbar label{display:inline-flex;align-items:center;gap:var(--space-2);font-size:13px;color:var(--gray-11)}
+      .toolbar select,.toolbar button{font:inherit;color:var(--gray-12);background:var(--color-panel-solid);border:1px solid var(--gray-a5);border-radius:var(--radius-2);padding:6px 10px;cursor:pointer;height:30px}
+      .toolbar button[aria-pressed='true']{background:var(--accent-a3);border-color:var(--accent-9);color:var(--accent-11)}
+      .frames{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:460px 1fr;gap:var(--space-5);align-items:start}
+      @media (max-width:1100px){.frames{grid-template-columns:1fr}}
+      .frame{background:var(--color-panel-solid);border:1px solid var(--gray-a5);border-radius:var(--radius-4);overflow:hidden;box-shadow:var(--shadow-3)}
+      .frame-head{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--gray-a4);background:var(--gray-a2);font-size:12px;font-weight:500;color:var(--gray-11);text-transform:uppercase;letter-spacing:.04em}
+      .frame-head .dot{width:8px;height:8px;border-radius:50%;background:var(--accent-9)}
+      .frame-head .meta{margin-left:auto;font-weight:400;text-transform:none;letter-spacing:0;color:var(--gray-10)}
+      .frame-body{max-height:80vh;overflow-y:auto;padding:var(--space-4)}
+      .rt-TextField{position:relative;display:flex;align-items:center;gap:var(--space-2);width:100%;height:32px;padding:0 var(--space-3);background:var(--color-panel-solid);border:1px solid var(--gray-a6);border-radius:var(--radius-2);transition:border-color 80ms ease,box-shadow 80ms ease}
+      .rt-TextField:focus-within{border-color:var(--accent-9);box-shadow:0 0 0 1px var(--accent-9)}
+      .rt-TextField svg{color:var(--gray-11);flex:0 0 auto}
+      .rt-TextField input{flex:1;border:0;outline:0;background:transparent;font:inherit;color:var(--gray-12);padding:0;min-width:0}
+      .rt-TextField input::placeholder{color:var(--gray-10)}
+      .gallery{display:flex;flex-direction:column;gap:var(--space-3);container-type:inline-size;container-name:gallery}
+      .gallery .search-sticky{position:sticky;top:calc(-1 * var(--space-4));z-index:3;background:var(--color-panel-solid);padding-block:var(--space-1)}
+      .category-nav{position:sticky;top:calc(40px - var(--space-4));z-index:2;background:var(--color-panel-solid);padding-block:var(--space-1);margin-inline:calc(-1 * var(--space-1))}
+      .category-nav .nav-track{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2);padding:var(--space-1)}
+      .category-chip{all:unset;display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;font-size:13px;font-weight:500;color:var(--gray-11);background:var(--gray-a2);border:1px solid var(--gray-a4);border-radius:999px;cursor:pointer;white-space:nowrap;transition:background 100ms ease,border-color 100ms ease,color 100ms ease}
+      .category-chip:hover{background:var(--gray-a3);border-color:var(--gray-a6);color:var(--gray-12)}
+      .category-chip:focus-visible{outline:2px solid var(--accent-9);outline-offset:2px}
+      .category-chip[aria-selected='true']{background:var(--accent-a3);border-color:var(--accent-9);color:var(--accent-11)}
+      .category-chip .chip-emoji{font-size:14px;line-height:1}
+      .category-chip .chip-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;font-size:11px;font-weight:500;background:var(--gray-a4);color:var(--gray-12);border-radius:999px}
+      .category-chip[aria-selected='true'] .chip-count{background:var(--accent-a5);color:var(--accent-11)}
+      .selection-summary{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-3);background:var(--accent-a3);border:1px solid var(--accent-a5);border-radius:var(--radius-3);color:var(--accent-11)}
+      .selection-summary .icon{flex:0 0 auto;display:inline-flex}
+      .selection-summary .count{font-weight:600;font-size:14px}
+      .selection-summary .meta{margin-left:auto;font-size:13px;color:var(--accent-11);opacity:.85}
+      .bucket + .bucket{margin-top:var(--space-5)}
+      .category-header{display:flex;align-items:center;gap:var(--space-3);margin:var(--space-3) 0;padding-inline-start:var(--space-1)}
+      .category-header .emoji{font-size:20px;line-height:1;flex:0 0 auto}
+      .category-header .label{font-size:15px;font-weight:500;color:var(--gray-12)}
+      .category-header .count-pill{font-size:12px;font-weight:500;padding:2px 8px;border-radius:999px;background:var(--gray-a3);color:var(--gray-11)}
+      .category-header .rule{flex:1 1 auto;height:1px;background:var(--gray-a4)}
+      .pack-list{display:grid;grid-template-columns:1fr;gap:var(--space-3)}
+      @container gallery (min-width:640px){.pack-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+      .pack-card{--pc-border:var(--gray-a5);--pc-bg:var(--color-panel-solid);position:relative;display:block;background:var(--pc-bg);border:1px solid var(--pc-border);border-radius:var(--radius-3);padding:var(--space-3) var(--space-4);cursor:pointer;transition:background 120ms ease,border-color 120ms ease,box-shadow 120ms ease}
+      .pack-card:hover{background:var(--gray-a2);border-color:var(--gray-a7)}
+      .pack-card:focus-within{outline:2px solid var(--accent-9);outline-offset:2px}
+      .pack-card[data-selected='true']{--pc-border:var(--accent-9);--pc-bg:var(--accent-a3);border-width:2px;padding:calc(var(--space-3) - 1px) calc(var(--space-4) - 1px)}
+      .pack-card[data-selected='true']:hover{background:var(--accent-a4)}
+      .pack-header{display:grid;grid-template-columns:20px 1fr;gap:var(--space-3);align-items:start}
+      .pack-card .checkbox{margin-top:2px;width:18px;height:18px;border-radius:4px;border:1.5px solid var(--gray-a8);background:var(--color-panel-solid);display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;transition:background 100ms ease,border-color 100ms ease}
+      .pack-card[data-selected='true'] .checkbox{background:var(--accent-9);border-color:var(--accent-9);color:white}
+      .pack-card[data-selected='true'] .checkbox svg{display:block}
+      .pack-card .checkbox svg{display:none;width:12px;height:12px}
+      .pack-body{display:flex;flex-direction:column;gap:var(--space-1);min-width:0}
+      .pack-title-row{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap}
+      .pack-name{font-size:15px;font-weight:500;color:var(--gray-12);line-height:1.3}
+      .pack-description{font-size:13px;color:var(--gray-11);line-height:1.45}
+      .badge-iris{display:inline-flex;align-items:center;height:18px;padding:0 6px;font-size:11px;font-weight:500;letter-spacing:.02em;color:var(--iris-11);background:var(--iris-a3);border-radius:var(--radius-2)}
+      .pack-meta{display:flex;align-items:center;gap:var(--space-2);margin-top:var(--space-1);color:var(--gray-11)}
+      .pack-meta .meta-chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;line-height:1}
+      .pack-meta .meta-chip svg{width:12px;height:12px}
+      .pack-configurable{margin-top:var(--space-3);padding:var(--space-3);background:var(--accent-a2);border:1px solid var(--accent-a4);border-radius:var(--radius-3);display:flex;flex-direction:column;gap:var(--space-2)}
+      .pack-card[data-selected='true'] .pack-configurable{background:var(--color-panel-solid);border-color:var(--accent-a5)}
+      .pack-configurable .pc-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--accent-11);display:inline-flex;align-items:center;gap:6px}
+      .pack-configurable .pc-controls{display:flex;flex-wrap:wrap;gap:var(--space-2) var(--space-3)}
+      .pack-configurable .pc-field{display:flex;flex-direction:column;gap:4px;min-width:140px}
+      .pack-configurable .pc-field-label{font-size:12px;color:var(--gray-11)}
+      .pack-configurable select{appearance:none;font:inherit;font-size:13px;height:28px;padding:0 26px 0 10px;background-color:var(--color-panel-solid);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23646464' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;color:var(--gray-12);border:1px solid var(--gray-a6);border-radius:var(--radius-2);cursor:pointer}
+      .pack-configurable select:focus{outline:2px solid var(--accent-9);outline-offset:-1px;border-color:var(--accent-9)}
+      .pack-rules-preview{margin-top:var(--space-3)}
+      .preview-toggle{all:unset;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--gray-11);background:var(--gray-a3);padding:4px 10px 4px 8px;border-radius:var(--radius-2);cursor:pointer;transition:background 100ms ease,color 100ms ease}
+      .preview-toggle:hover{background:var(--gray-a4);color:var(--gray-12)}
+      .preview-toggle:focus-visible{outline:2px solid var(--accent-9);outline-offset:2px}
+      .preview-toggle svg{transition:transform 120ms ease}
+      .preview-toggle[aria-expanded='true'] svg{transform:rotate(90deg)}
+      .preview-content{margin-top:var(--space-2);display:none;flex-direction:column;gap:var(--space-2)}
+      .preview-toggle[aria-expanded='true'] + .preview-content{display:flex}
+      .rule-stub{display:flex;align-items:center;gap:var(--space-3);padding:var(--space-2) var(--space-3);background:var(--gray-a2);border:1px solid var(--gray-a4);border-radius:var(--radius-2);font-size:12px}
+      .rule-stub .color-dot{width:8px;height:8px;border-radius:50%;background:var(--accent-9);flex:0 0 auto}
+      .rule-stub.orange .color-dot{background:#f76b15}
+      .rule-stub.blue .color-dot{background:#3e63dd}
+      .rule-stub.green .color-dot{background:#30a46c}
+      .rule-stub .rule-name{color:var(--gray-12);font-weight:500}
+      .rule-stub .rule-domain{color:var(--gray-11)}
+      .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-2);padding:var(--space-7) var(--space-4);color:var(--gray-11);text-align:center}
+      .empty-state svg{color:var(--gray-9)}
+      .empty-state .title{font-size:14px;font-weight:500;color:var(--gray-12)}
+      .empty-state .sub{font-size:13px;color:var(--gray-11);max-width:280px}
+      .legend{max-width:1400px;margin:var(--space-6) auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--space-3)}
+      .legend-card{background:var(--color-panel-solid);border:1px solid var(--gray-a4);border-radius:var(--radius-3);padding:var(--space-3) var(--space-4)}
+      .legend-card h3{margin:0 0 var(--space-1);font-size:13px;font-weight:600;color:var(--gray-12)}
+      .legend-card p{margin:0;font-size:12px;color:var(--gray-11);line-height:1.5}
+      .legend-card code{font-family:ui-monospace,'JetBrains Mono','Fira Code',Menlo,monospace;font-size:11.5px;color:var(--accent-11);background:var(--accent-a3);padding:1px 5px;border-radius:4px}
+      .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    </style>
+  </head>
+  <body>
+    <header class="page-header">
+      <div class="page-title">
+        <h1>PackGallery — redesign preview</h1>
+        <p>Popup 420 px et modal 960 px côte à côte. Pattern: carte entière cliquable, indicateur Checkbox en haut à gauche.</p>
+      </div>
+      <div class="toolbar" role="toolbar" aria-label="Aperçu">
+        <label>
+          État
+          <select id="state-picker">
+            <option value="default">Par défaut</option>
+            <option value="selected" selected>Sélection en cours (2 packs cochés)</option>
+            <option value="search">Mode recherche (résultats)</option>
+            <option value="search-empty">Recherche sans résultat</option>
+            <option value="gallery-empty">Galerie vide</option>
+          </select>
+        </label>
+        <button type="button" id="theme-toggle" aria-pressed="false">Mode sombre</button>
+      </div>
+    </header>
+
+    <main class="frames">
+      <section class="frame" aria-label="Popup 420 px">
+        <header class="frame-head">
+          <span class="dot" aria-hidden="true"></span>
+          Popup
+          <span class="meta">420 × 600</span>
+        </header>
+        <div class="frame-body" id="frame-popup"></div>
+      </section>
+
+      <section class="frame" aria-label="WizardModal 960 px">
+        <header class="frame-head">
+          <span class="dot" aria-hidden="true"></span>
+          WizardModal — Import wizard, étape 3
+          <span class="meta">960 × 80 vh</span>
+        </header>
+        <div class="frame-body" id="frame-modal"></div>
+      </section>
+    </main>
+
+    <section class="legend" aria-label="Repères design">
+      <div class="legend-card">
+        <h3>Sélection</h3>
+        <p>Bordure <code>--accent-9</code> 2 px + fond <code>--accent-a3</code>. La bordure change d'épaisseur, pas seulement de couleur, pour rester lisible en faible contraste.</p>
+      </div>
+      <div class="legend-card">
+        <h3>Toggle plein cadre</h3>
+        <p>Toute la carte est cliquable via <code>&lt;label&gt;</code> enveloppant une Checkbox Radix. Clavier: <code>Space</code> / <code>Enter</code> sur la carte focus.</p>
+      </div>
+      <div class="legend-card">
+        <h3>Configurable params</h3>
+        <p>Sous-bloc avec un fond <code>--accent-a2</code>, libellé <code>CONFIGURATION</code> en uppercase. Plus d'indentation <code>pl="6"</code> arbitraire.</p>
+      </div>
+      <div class="legend-card">
+        <h3>Voir les règles</h3>
+        <p>Trigger en bouton ghost avec fond <code>--gray-a3</code> et chevron qui pivote. Plus d'<code>all: unset</code> invisible.</p>
+      </div>
+    </section>
+
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <defs>
+        <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
+        </symbol>
+        <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </symbol>
+        <symbol id="i-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </symbol>
+        <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m12 2 8 4-8 4-8-4 8-4Z"></path><path d="m4 14 8 4 8-4"></path><path d="m4 10 8 4 8-4"></path>
+        </symbol>
+        <symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line>
+          <line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line>
+          <line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line>
+        </symbol>
+        <symbol id="i-package-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m16 16 2 2 4-4"></path>
+          <path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0"></path>
+          <path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path>
+        </symbol>
+        <symbol id="i-package-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22V12"></path>
+          <path d="m20 7-8.06-4.59a2 2 0 0 0-1.88 0L2 7l10 5 10-5Z"></path>
+          <path d="M3.5 6.4 9 9.7"></path><path d="M15 9.7l5.5-3.3"></path>
+        </symbol>
+        <symbol id="i-search-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m13.5 8.5-5 5"></path><path d="m8.5 8.5 5 5"></path>
+          <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
+        </symbol>
+      </defs>
+    </svg>
+
+    <script>
+      const categories = [
+        { id: 'cloud', label: 'Cloud', icon: '☁️' },
+        { id: 'dev', label: 'Development', icon: '💻' },
+        { id: 'productivity', label: 'Productivity', icon: '🧠' },
+      ];
+
+      const packs = [
+        {
+          id: 'pk-cloud', name: 'Cloud Console',
+          description: 'Group cloud provider consoles by service area.',
+          categoryId: 'cloud', configurable: true,
+          params: [{ id: 'provider', label: 'Provider', default: 'aws',
+            options: [{ value: 'aws', label: 'AWS' }, { value: 'gcp', label: 'GCP' }, { value: 'azure', label: 'Azure' }] }],
+          rules: [
+            { id: 'a1', label: 'aws/EC2', domain: 'console.aws.amazon.com', color: 'orange' },
+            { id: 'a2', label: 'aws/S3', domain: 's3.console.aws.amazon.com', color: 'orange' },
+            { id: 'a3', label: 'aws/IAM', domain: 'iam.aws.amazon.com', color: 'orange' },
+            { id: 'a4', label: 'aws/Lambda', domain: 'lambda.console.aws.amazon.com', color: 'orange' },
+          ],
+        },
+        {
+          id: 'pk-github', name: 'Code Hosting',
+          description: 'Group GitHub and GitLab tabs by repository owner.',
+          categoryId: 'dev', configurable: false,
+          rules: [
+            { id: 'g', label: 'GitHub', domain: 'github.com', color: 'blue' },
+            { id: 'l', label: 'GitLab', domain: 'gitlab.com', color: 'orange' },
+          ],
+        },
+        {
+          id: 'pk-jira', name: 'Tickets & Boards',
+          description: 'Jira, Linear and YouTrack into one group.',
+          categoryId: 'dev', configurable: false,
+          rules: [
+            { id: 'j', label: 'Jira', domain: 'atlassian.net', color: 'blue' },
+            { id: 'li', label: 'Linear', domain: 'linear.app', color: 'green' },
+          ],
+        },
+        {
+          id: 'pk-notion', name: 'Knowledge Base',
+          description: 'Notion, Confluence and Coda grouped by workspace.',
+          categoryId: 'productivity', configurable: false,
+          rules: [
+            { id: 'n', label: 'Notion', domain: 'notion.so', color: 'blue' },
+            { id: 'c', label: 'Confluence', domain: 'atlassian.net/wiki', color: 'blue' },
+          ],
+        },
+      ];
+
+      const state = { mode: 'selected', search: '', activeCategory: 'all', selections: {}, expandedRules: {} };
+      state.selections['pk-cloud'] = { selected: true, params: { provider: 'aws' } };
+      state.selections['pk-github'] = { selected: true, params: {} };
+      state.expandedRules['pk-cloud'] = true;
+
+      function icon(id, extra = '') {
+        return `<svg ${extra} aria-hidden="true"><use href="#${id}"></use></svg>`;
+      }
+
+      function ruleCountLabel(pack) {
+        const n = pack.rules.length;
+        if (pack.configurable) {
+          if (n === 0) return '0 rule';
+          return n === 1 ? '1 rule configured' : `${n} rules configured`;
+        }
+        return n === 1 ? '1 rule' : `${n} rules`;
+      }
+
+      function renderCard(pack) {
+        const sel = state.selections[pack.id];
+        const selected = Boolean(sel?.selected);
+        const expanded = Boolean(state.expandedRules[pack.id]);
+
+        const paramsHTML = pack.configurable ? `
+          <div class="pack-configurable" data-stop-propagate>
+            <span class="pc-label">${icon('i-sliders', 'width="11" height="11"')}Customize</span>
+            <div class="pc-controls">
+              ${pack.params.map((p) => `
+                <label class="pc-field">
+                  <span class="pc-field-label">${p.label}</span>
+                  <select data-pack="${pack.id}" data-param="${p.id}">
+                    ${p.options.map((o) => `<option value="${o.value}" ${(sel?.params?.[p.id] ?? p.default) === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
+                  </select>
+                </label>`).join('')}
+            </div>
+          </div>` : '';
+
+        const previewHTML = `
+          <div class="pack-rules-preview" data-stop-propagate>
+            <button type="button" class="preview-toggle" data-toggle-preview data-pack="${pack.id}" aria-expanded="${expanded}">
+              ${icon('i-chevron-right', 'width="12" height="12"')}View rules
+            </button>
+            <div class="preview-content">
+              ${pack.rules.map((r) => `
+                <div class="rule-stub ${r.color}">
+                  <span class="color-dot" aria-hidden="true"></span>
+                  <span class="rule-name">${r.label}</span>
+                  <span class="rule-domain">${r.domain}</span>
+                </div>`).join('')}
+            </div>
+          </div>`;
+
+        return `
+          <label class="pack-card" data-pack="${pack.id}" data-selected="${selected}" data-card>
+            <input type="checkbox" class="sr-only" ${selected ? 'checked' : ''} data-checkbox data-pack="${pack.id}" aria-label="${pack.name}" />
+            <div class="pack-header">
+              <span class="checkbox" aria-hidden="true">${icon('i-check')}</span>
+              <div class="pack-body">
+                <div class="pack-title-row">
+                  <span class="pack-name">${pack.name}</span>
+                  ${pack.configurable ? '<span class="badge-iris">CONFIG</span>' : ''}
+                </div>
+                <span class="pack-description">${pack.description}</span>
+                <div class="pack-meta">
+                  <span class="meta-chip">${icon('i-layers')}${ruleCountLabel(pack)}</span>
+                </div>
+              </div>
+            </div>
+            ${paramsHTML}
+            ${previewHTML}
+          </label>`;
+      }
+
+      function renderCategoryHeader(category, count) {
+        return `
+          <div class="category-header" role="heading" aria-level="3">
+            <span class="emoji" aria-hidden="true">${category.icon}</span>
+            <span class="label">${category.label}</span>
+            <span class="count-pill">${count}</span>
+            <span class="rule" aria-hidden="true"></span>
+          </div>`;
+      }
+
+      function renderSelectionSummary() {
+        const selected = Object.entries(state.selections).filter(([, s]) => s.selected);
+        if (selected.length === 0) return '';
+        const packCount = selected.length;
+        const ruleCount = selected.reduce((sum, [id]) => {
+          const pack = packs.find((p) => p.id === id);
+          return sum + (pack?.rules.length ?? 0);
+        }, 0);
+        return `
+          <div class="selection-summary" role="status" aria-live="polite">
+            <span class="icon">${icon('i-package-check', 'width="16" height="16"')}</span>
+            <span class="count">${packCount} pack${packCount > 1 ? 's' : ''} selected</span>
+            <span class="meta">${ruleCount} rules total</span>
+          </div>`;
+      }
+
+      function renderSearchBar() {
+        return `
+          <div class="search-sticky">
+            <div class="rt-TextField">
+              ${icon('i-search', 'width="14" height="14"')}
+              <input type="search" value="${state.search}" placeholder="Search for a pack..." aria-label="Search for a pack..." data-search-input />
+            </div>
+          </div>`;
+      }
+
+      function renderCategoryNav() {
+        const totalCount = packs.length;
+        const counts = categories.map((c) => packs.filter((p) => p.categoryId === c.id).length);
+        const items = [
+          { id: 'all', label: 'All', icon: null, count: totalCount },
+          ...categories.map((c, i) => ({ id: c.id, label: c.label, icon: c.icon, count: counts[i] })),
+        ];
+        const chips = items
+          .map((it, idx) => {
+            const isActive = state.activeCategory === it.id;
+            const tabIndex = isActive ? 0 : -1;
+            return `
+              <button type="button" class="category-chip" role="tab"
+                aria-selected="${isActive}" tabindex="${tabIndex}"
+                data-cat-chip data-category-id="${it.id}" data-index="${idx}">
+                ${it.icon ? `<span class="chip-emoji" aria-hidden="true">${it.icon}</span>` : ''}
+                <span class="chip-label">${it.label}</span>
+                <span class="chip-count" aria-hidden="true">${it.count}</span>
+              </button>`;
+          })
+          .join('');
+        return `
+          <div class="category-nav" role="tablist" aria-label="Filter by category">
+            <div class="nav-track">${chips}</div>
+          </div>`;
+      }
+
+      function renderGalleryBody() {
+        if (state.mode === 'gallery-empty') {
+          return `
+            <div class="empty-state">
+              ${icon('i-package-open', 'width="32" height="32"')}
+              <span class="title">No pack available</span>
+            </div>`;
+        }
+
+        const searching = state.mode === 'search' || state.mode === 'search-empty';
+        const visibleSearch = state.mode === 'search-empty' ? [] : searching
+          ? packs.filter((p) => (p.name + ' ' + p.description).toLowerCase().includes((state.search || 'git').toLowerCase()))
+          : packs;
+
+        const visible = !searching && state.activeCategory !== 'all'
+          ? visibleSearch.filter((p) => p.categoryId === state.activeCategory)
+          : visibleSearch;
+
+        if (searching && visible.length === 0) {
+          return `
+            <div class="empty-state">
+              ${icon('i-search-x', 'width="32" height="32"')}
+              <span class="title">No pack matches your search</span>
+              <span class="sub">Try a different keyword or clear the search to browse every pack.</span>
+            </div>`;
+        }
+
+        if (!searching && state.activeCategory !== 'all' && visible.length === 0) {
+          return `
+            <div class="empty-state">
+              ${icon('i-package-open', 'width="32" height="32"')}
+              <span class="title">No pack in this category</span>
+            </div>`;
+        }
+
+        if (searching) {
+          return `<div class="pack-list">${visible.map(renderCard).join('')}</div>`;
+        }
+
+        if (state.activeCategory !== 'all') {
+          return `<div class="pack-list">${visible.map(renderCard).join('')}</div>`;
+        }
+
+        const buckets = categories
+          .map((c) => ({ category: c, packs: visible.filter((p) => p.categoryId === c.id) }))
+          .filter((b) => b.packs.length > 0);
+
+        return buckets.map((b) => `
+          <section class="bucket">
+            ${renderCategoryHeader(b.category, b.packs.length)}
+            <div class="pack-list">${b.packs.map(renderCard).join('')}</div>
+          </section>`).join('');
+      }
+
+      function renderGallery(width) {
+        const search = state.mode === 'gallery-empty' ? '' : renderSearchBar();
+        const summary = state.mode === 'gallery-empty' || state.mode === 'search-empty' ? '' : renderSelectionSummary();
+        const searching = state.mode === 'search' || state.mode === 'search-empty';
+        const nav = state.mode === 'gallery-empty' || searching ? '' : renderCategoryNav();
+        return `<div class="gallery" data-variant="${width}">${search}${summary}${nav}${renderGalleryBody()}</div>`;
+      }
+
+      function rerender() {
+        document.getElementById('frame-popup').innerHTML = renderGallery('popup');
+        document.getElementById('frame-modal').innerHTML = renderGallery('modal');
+      }
+
+      function toggleSelection(packId) {
+        const pack = packs.find((p) => p.id === packId);
+        if (!pack) return;
+        const current = state.selections[packId];
+        if (current?.selected) {
+          state.selections[packId] = { selected: false, params: current.params };
+        } else {
+          const defaults = pack.configurable ? Object.fromEntries(pack.params.map((p) => [p.id, p.default])) : {};
+          state.selections[packId] = { selected: true, params: { ...defaults, ...(current?.params ?? {}) } };
+        }
+        rerender();
+      }
+
+      document.addEventListener('change', (e) => {
+        const cb = e.target.closest('[data-checkbox]');
+        if (cb) { toggleSelection(cb.dataset.pack); return; }
+        const sel = e.target.closest('select[data-param]');
+        if (sel) {
+          const pid = sel.dataset.pack;
+          const param = sel.dataset.param;
+          state.selections[pid] = state.selections[pid] ?? { selected: false, params: {} };
+          state.selections[pid].params = { ...state.selections[pid].params, [param]: sel.value };
+          rerender();
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        const t = e.target.closest('[data-toggle-preview]');
+        if (t) {
+          e.preventDefault();
+          const pid = t.dataset.pack;
+          state.expandedRules[pid] = !state.expandedRules[pid];
+          rerender();
+          return;
+        }
+        const chip = e.target.closest('[data-cat-chip]');
+        if (chip) {
+          e.preventDefault();
+          const frameId = chip.closest('.frame-body')?.id;
+          state.activeCategory = chip.dataset.categoryId;
+          rerender();
+          if (frameId) {
+            const next = document.querySelector(`#${frameId} [data-cat-chip][data-category-id="${state.activeCategory}"]`);
+            if (next) next.focus();
+          }
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        const chip = e.target.closest('[data-cat-chip]');
+        if (!chip) return;
+        const nav = chip.closest('[role="tablist"]');
+        if (!nav) return;
+        const chips = Array.from(nav.querySelectorAll('[data-cat-chip]'));
+        const i = chips.indexOf(chip);
+        let nextIdx = -1;
+        if (e.key === 'ArrowRight') nextIdx = (i + 1) % chips.length;
+        else if (e.key === 'ArrowLeft') nextIdx = (i - 1 + chips.length) % chips.length;
+        else if (e.key === 'Home') nextIdx = 0;
+        else if (e.key === 'End') nextIdx = chips.length - 1;
+        if (nextIdx < 0) return;
+        e.preventDefault();
+        const frameId = chip.closest('.frame-body')?.id;
+        const target = chips[nextIdx];
+        state.activeCategory = target.dataset.categoryId;
+        rerender();
+        if (frameId) {
+          const focused = document.querySelector(`#${frameId} [data-cat-chip][data-category-id="${state.activeCategory}"]`);
+          if (focused) focused.focus();
+        }
+      });
+
+      document.addEventListener('input', (e) => {
+        const inp = e.target.closest('[data-search-input]');
+        if (!inp) return;
+        state.search = inp.value;
+        rerender();
+        const target = document.querySelector(`[data-variant] [data-search-input]`);
+        if (target) { target.focus(); target.setSelectionRange(target.value.length, target.value.length); }
+      });
+
+      document.getElementById('state-picker').addEventListener('change', (e) => {
+        state.mode = e.target.value;
+        if (state.mode === 'search') state.search = 'github';
+        else if (state.mode === 'search-empty') state.search = 'zzz';
+        else state.search = '';
+        rerender();
+      });
+
+      document.getElementById('theme-toggle').addEventListener('click', (e) => {
+        const btn = e.currentTarget;
+        const root = document.documentElement;
+        const isDark = root.getAttribute('data-theme') === 'dark';
+        root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        btn.setAttribute('aria-pressed', String(!isDark));
+        btn.textContent = isDark ? 'Mode sombre' : 'Mode clair';
+      });
+
+      rerender();
+    </script>
+  </body>
+</html>

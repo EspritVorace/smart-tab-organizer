@@ -1,6 +1,6 @@
 import React from 'react';
-import { Flex, IconButton, Text } from '@radix-ui/themes';
-import { ChevronDown, Settings2 } from 'lucide-react';
+import { Flex, Text } from '@radix-ui/themes';
+import { ChevronDown } from 'lucide-react';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext.js';
 import { getMessage } from '@/utils/i18n.js';
 import { WorkspaceAvatar } from './WorkspaceAvatar.js';
@@ -11,13 +11,18 @@ interface WorkspaceFooterProps {
   onManage?: () => void;
 }
 
+function useWorkspaceName() {
+  const { active, accentColor } = useActiveWorkspaceContext();
+  const name = active?.name ?? getMessage('workspaceDefaultName');
+  return { name, accentColor };
+}
+
 /**
  * Sidebar footer that surfaces the active workspace and exposes the workspace
  * switcher. Replaces the static EspritVorace/GitHub footer.
  */
 export function WorkspaceFooter({ onManage }: WorkspaceFooterProps) {
-  const { active, accentColor } = useActiveWorkspaceContext();
-  const name = active?.name ?? getMessage('workspaceDefaultName');
+  const { name, accentColor } = useWorkspaceName();
 
   const trigger = (
     <Flex
@@ -49,29 +54,16 @@ export function WorkspaceFooter({ onManage }: WorkspaceFooterProps) {
     <Flex
       data-testid="workspace-footer"
       align="center"
-      gap="2"
       style={{ width: '100%', padding: '4px 6px' }}
     >
       <WorkspaceSwitcherDropdown trigger={trigger} onManage={onManage} />
-      <IconButton
-        data-testid="workspace-manage-button"
-        variant="ghost"
-        size="2"
-        disabled={!onManage}
-        aria-label={getMessage('workspaceManageLabel')}
-        title={getMessage('workspaceManageLabel')}
-        onClick={onManage}
-      >
-        <Settings2 size={16} />
-      </IconButton>
     </Flex>
   );
 }
 
 /** Collapsed sidebar footer: avatar only acting as the dropdown trigger. */
 export function WorkspaceFooterCollapsed({ onManage }: WorkspaceFooterProps) {
-  const { active, accentColor } = useActiveWorkspaceContext();
-  const name = active?.name ?? getMessage('workspaceDefaultName');
+  const { name, accentColor } = useWorkspaceName();
 
   const trigger = (
     <Flex

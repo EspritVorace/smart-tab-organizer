@@ -1,6 +1,166 @@
 ---
 title: Liste des presets regex
-description: Tableau de référence de tous les patterns regex intégrés dans SmartTab Organizer, avec pour chacun le nom, la description et un exemple de correspondance.
+description: Tableau de référence des 65 patterns regex intégrés dans SmartTab Organizer, avec pour chacun le nom, la description et un exemple de correspondance.
 ---
 
-{/* TODO: contenu à rédiger */}
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="En bref">
+- 65 patterns regex prêts à l'emploi, répartis en 11 catégories.
+- Un preset est un **modèle de regex isolé**, sélectionnable depuis le dropdown du wizard de création de règle. À distinguer des [packs intégrés](/annexes/packs-integres) qui sont des bundles complets de règles importables.
+- Sélectionner un preset configure automatiquement les regex de titre et d'URL ainsi qu'un mode de nommage adapté.
+</Aside>
+
+Cette annexe liste l'intégralité des presets fournis avec l'extension. Pour comprendre comment ils s'utilisent dans l'assistant de règle, voir la page [Presets regex](/fonctionnalites/regles/presets-regex).
+
+## Catalogue par catégorie
+
+### 🛠️ Patterns Génériques
+
+Modèles de regex réutilisables pour créer vos propres règles.
+
+| Preset | Description | Exemple |
+|---|---|---|
+| ID Numérique | Extrait un identifiant numérique | Titre: 'Ticket ID 12345' → Groupe: '12345' |
+| ID Alphanumérique | Extrait un code alphanumérique | Titre: '[PROJ-123] Fix bug' → Groupe: 'PROJ-123' |
+| Contenu entre Parenthèses | Extrait le texte entre parenthèses | Titre: 'Article (Catégorie)' → Groupe: 'Catégorie' |
+| Contenu entre Crochets | Extrait le texte entre crochets | Titre: 'Document [Version 2.0]' → Groupe: 'Version 2.0' |
+| Date (YYYY-MM-DD) | Extrait une date au format ISO | URL: '/reports/2024-03-15' → Groupe: '2024-03-15' |
+| Mot après Mot-clé | Extrait le mot après un mot-clé | Titre: 'Projet: WebApp' → Groupe: 'WebApp' |
+| Premier Mot | Extrait le premier mot du titre | Titre: 'Marketing Dashboard' → Groupe: 'Marketing' |
+| Numéro de Version | Extrait un numéro de version | Titre: 'API v2.1.3' → Groupe: '2.1.3' |
+| UUID/GUID | Extrait un identifiant UUID | URL: '/object/550e8400-e29b-41d4-a716-446655440000' → Groupe: '550e8400-...' |
+| Mention Utilisateur | Extrait un nom d'utilisateur après @ | URL: '/@username/posts' → Groupe: 'username' |
+| Google Search | Groupe les recherches Google par requête (paramètre q) | `https://www.google.com/search?q=tab+organizer` |
+| Bing Search | Groupe les recherches Bing par requête (paramètre q) | `https://www.bing.com/search?q=tab+organizer` |
+| DuckDuckGo | Groupe les recherches DuckDuckGo par requête (paramètre q) | `https://duckduckgo.com/?q=tab+organizer` |
+| YouTube Search | Groupe les recherches YouTube par requête (paramètre search_query) | `https://www.youtube.com/results?search_query=tab+organizer` |
+| Amazon Search | Groupe les recherches Amazon par requête (paramètre k) | `https://www.amazon.com/s?k=tab+organizer` |
+| eBay Search | Groupe les recherches eBay par requête (paramètre _nkw) | `https://www.ebay.com/sch/i.html?_nkw=tab+organizer` |
+| Stack Overflow Search | Groupe les recherches Stack Overflow par requête (paramètre q) | `https://stackoverflow.com/search?q=tab+organizer` |
+| Reddit Search | Groupe les recherches Reddit par requête (paramètre q) | `https://www.reddit.com/search/?q=tab+organizer` |
+| GitHub Search | Groupe les recherches GitHub par requête (paramètre q) | `https://github.com/search?q=tab+organizer` |
+| npm Search | Groupe les recherches npm par requête (paramètre q) | `https://www.npmjs.com/search?q=tab+organizer` |
+| MDN Search | Groupe les recherches MDN par requête (paramètre q) | `https://developer.mozilla.org/en-US/search?q=tab+organizer` |
+| Wikipedia Search | Groupe les recherches Wikipedia par requête (paramètre search) | `https://en.wikipedia.org/wiki/Special:Search?search=tab+organizer` |
+
+### Développement et Code
+
+Sites de développement, repositories, documentation technique.
+
+| Preset | Description | Exemple |
+|---|---|---|
+| GitHub - Repository | Regroupe par repository | URL: '/microsoft/vscode' → Groupe: 'microsoft/vscode' |
+| GitHub - Issues | Regroupe par numéro d'issue | Titre: 'Fix memory leak · Issue #1234 · microsoft/vscode' → Groupe: '1234' |
+| Stack Overflow - Questions | Regroupe par ID de question | URL: '/questions/12345' → Groupe: '12345' |
+| GitLab - Projets | Regroupe par projet GitLab | URL: '/gitlab-org/gitlab' → Groupe: 'gitlab-org/gitlab' |
+| Figma - Fichiers | Regroupe par nom de fichier | Titre: 'Design System, Figma' → Groupe: 'Design System' |
+| NPM - Packages | Regroupe par nom de package | URL: '/package/react' → Groupe: 'react' |
+
+### Productivité et Tickets
+
+Outils de gestion de projets, tickets, tâches.
+
+| Preset | Description | Exemple |
+|---|---|---|
+| Jira - Tickets | Regroupe par ID de ticket Jira | Titre: 'PROJ-123: Fix the login bug \| Jira' → Groupe: 'PROJ-123' |
+| Jira - Ticket dans le titre (cross-domaine) | Extrait un ID de ticket Jira (PROJ-123) dans le titre, quel que soit le domaine. Utile pour les PR GitHub/GitLab, commits et reviews qui référencent un ticket Jira. | Titre: 'Fix login bug (PROJ-123)' → Groupe: 'PROJ-123' |
+| GitHub - Issue dans le titre (cross-domaine) | Extrait une référence d'issue GitHub (#123) dans le titre, quel que soit le domaine. | Titre: 'Fix bug (#123)' → Groupe: '123' |
+| ServiceNow - Record dans le titre (cross-domaine) | Extrait un identifiant ServiceNow (INC, CHG, REQ, RITM, PRB) dans le titre, quel que soit le domaine. | Titre: 'Fix login outage INC0012345' → Groupe: 'INC0012345' |
+| Trello - Boards | Regroupe par nom de board | Titre: 'Project Board \| Trello' → Groupe: 'Project Board' |
+| Notion - Pages | Regroupe par titre de page | Titre: 'Project Planning \| Notion' → Groupe: 'Project Planning' |
+| Asana - Tâches | Regroupe par projet Asana | URL: '/0/123456/789012' → Groupe: '123456' |
+| Salesforce - Organisations | Regroupe par organisation | URL: 'https://mycompany.salesforce.com' → Groupe: 'mycompany' |
+| Miro - Boards | Regroupe par nom de board | Titre: 'Sprint Planning \| Miro' → Groupe: 'Sprint Planning' |
+
+### E-commerce
+
+Sites marchands et comparateurs.
+
+| Preset | Description | Exemple |
+|---|---|---|
+| Amazon - Produits | Regroupe par ASIN produit | URL: '/dp/B08N5WRWNW' → Groupe: 'B08N5WRWNW' |
+| eBay - Articles | Regroupe par ID d'article | URL: '/itm/123456789' → Groupe: '123456789' |
+| Shopify - Administration | Regroupe par boutique | URL: 'https://mystore.myshopify.com' → Groupe: 'mystore' |
+
+### Voyage et Réservations
+
+Booking, transport, hébergement.
+
+| Preset | Description | Exemple |
+|---|---|---|
+| Airbnb - Logements | Regroupe par destination (demande si non trouvée) | Titre: 'Apartment, Paris, Airbnb' → Groupe: 'Paris' |
+| Booking.com - Hôtels | Regroupe par ville (demande si non trouvée) | Titre: 'Hilton London Bankside, London, Booking.com' → Groupe: 'London' |
+| Expedia - Voyages | Regroupe par destination | URL: '?destination=Paris' → Groupe: 'Paris' |
+| Skyscanner - Vols | Regroupe par destination | Titre: 'Flights from Paris to London, Skyscanner' → Groupe: 'London' |
+
+### Recherche et Documentation
+
+Moteurs de recherche et documentation.
+
+| Preset | Description | Exemple |
+|---|---|---|
+| Google - Recherches | Regroupe par termes de recherche | Titre: 'javascript tutorial, Google Search' → Groupe: 'javascript tutorial' |
+| Wikipedia - Articles | Regroupe par article | Titre: 'JavaScript, Wikipedia' → Groupe: 'JavaScript' |
+| MDN - Documentation | Regroupe par technologie | URL: '/docs/Web/JavaScript' → Groupe: 'JavaScript' |
+| Medium - Articles | Regroupe par auteur | URL: '/@author_name/article' → Groupe: 'author_name' |
+
+### Réseaux sociaux
+
+Plateformes sociales et communication.
+
+| Preset | Description | Exemple |
+|---|---|---|
+| LinkedIn - Profils | Regroupe par profil | URL: '/in/john-doe-123' → Groupe: 'john-doe-123' |
+| Twitter/X - Profils | Regroupe par utilisateur | URL: '/elonmusk' → Groupe: 'elonmusk' |
+| Reddit - Subreddits | Regroupe par subreddit | URL: '/r/programming' → Groupe: 'programming' |
+| Slack - Workspaces | Regroupe par workspace | URL: 'https://myteam.slack.com' → Groupe: 'myteam' |
+| Zoom - Réunions | Regroupe par ID de meeting | Titre: 'Zoom Meeting ID: 123456789' → Groupe: '123456789' |
+
+### Streaming et Médias
+
+Vidéos, musique, actualités.
+
+| Preset | Description | Exemple |
+|---|---|---|
+| YouTube - Vidéos | Regroupe par ID de vidéo | URL: '/watch?v=dQw4w9WgXcQ' → Groupe: 'dQw4w9WgXcQ' |
+| YouTube - Chaînes | Regroupe par chaîne | Titre: 'TechChannel, YouTube' → Groupe: 'TechChannel' |
+| Netflix - Contenus | Regroupe par ID de contenu | URL: '/title/80018499' → Groupe: '80018499' |
+| Spotify - Musiques | Regroupe par ID de piste | URL: '/track/4iV5W9uYEdYUVa79Axb7Rh' → Groupe: '4iV5W9uYEdYUVa79Axb7Rh' |
+| Twitch - Chaînes | Regroupe par chaîne | URL: '/ninja' → Groupe: 'ninja' |
+
+### Cloud et Infrastructure
+
+Services cloud et infrastructure.
+
+| Preset | Description | Exemple |
+|---|---|---|
+| AWS - Console | Regroupe par service AWS | URL: '/ec2/home' → Groupe: 'ec2' |
+| Azure - Portal | Regroupe par resource group | URL: '/resourceGroups/mygroup' → Groupe: 'mygroup' |
+| Vercel - Dashboard | Regroupe par projet | Titre: 'myproject, Vercel' → Groupe: 'myproject' |
+
+### Finance et Banking
+
+Banques, trading, crypto.
+
+| Preset | Description | Exemple |
+|---|---|---|
+| Coinbase - Cryptomonnaies | Regroupe par crypto | URL: '/price/bitcoin' → Groupe: 'bitcoin' |
+| TradingView - Graphiques | Regroupe par symbole | URL: '?symbol=NASDAQ:AAPL' → Groupe: 'NASDAQ:AAPL' |
+
+### Education et Apprentissage
+
+Cours en ligne, formations.
+
+| Preset | Description | Exemple |
+|---|---|---|
+| Udemy - Cours | Regroupe par cours | Titre: 'JavaScript Guide \| Udemy' → Groupe: 'JavaScript Guide' |
+| Coursera - Cours | Regroupe par cours | Titre: 'Machine Learning \| Coursera' → Groupe: 'Machine Learning' |
+
+## Voir aussi
+
+<CardGrid>
+  <LinkCard title="Presets regex (guide)" href="/fonctionnalites/regles/presets-regex" description="Comment utiliser le dropdown de presets dans l'assistant de création de règle." />
+  <LinkCard title="Liste des packs intégrés" href="/annexes/packs-integres" description="L'autre annexe catalogue : les 49 bundles importables." />
+  <LinkCard title="Qu'est-ce qu'un pack ?" href="/concepts/packs" description="Pack et preset, deux notions distinctes mais complémentaires." />
+</CardGrid>

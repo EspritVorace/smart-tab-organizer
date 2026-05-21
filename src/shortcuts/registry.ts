@@ -81,39 +81,56 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     scope: 'page:popup',
   },
 
-  // Options page-level
-  'options.tab.1': {
-    id: 'options.tab.1',
-    defaultBindings: ['Alt+1'],
-    descriptionKey: 'shortcutDescNavigateTabs',
+  // Options page-level. Mnemonic two-key sequences (m prefix + destination
+  // initial). The `m` letter is reserved as a global sequence prefix: no
+  // simple combo at the `global` scope should use it (otherwise the sequence
+  // timeout would delay the simple combo).
+  'options.nav.home': {
+    id: 'options.nav.home',
+    defaultBindings: [['m', 'h']],
+    descriptionKey: 'shortcutDescNavigateHome',
     group: 'options',
     scope: 'global',
   },
-  'options.tab.2': {
-    id: 'options.tab.2',
-    defaultBindings: ['Alt+2'],
-    descriptionKey: 'shortcutDescNavigateTabs',
+  'options.nav.rules': {
+    id: 'options.nav.rules',
+    defaultBindings: [['m', 'r']],
+    descriptionKey: 'shortcutDescNavigateRules',
     group: 'options',
     scope: 'global',
   },
-  'options.tab.3': {
-    id: 'options.tab.3',
-    defaultBindings: ['Alt+3'],
-    descriptionKey: 'shortcutDescNavigateTabs',
+  'options.nav.sessions': {
+    id: 'options.nav.sessions',
+    defaultBindings: [['m', 's']],
+    descriptionKey: 'shortcutDescNavigateSessions',
     group: 'options',
     scope: 'global',
   },
-  'options.tab.4': {
-    id: 'options.tab.4',
-    defaultBindings: ['Alt+4'],
-    descriptionKey: 'shortcutDescNavigateTabs',
+  'options.nav.stats': {
+    id: 'options.nav.stats',
+    defaultBindings: [['m', 't']],
+    descriptionKey: 'shortcutDescNavigateStats',
     group: 'options',
     scope: 'global',
   },
-  'options.tab.5': {
-    id: 'options.tab.5',
-    defaultBindings: ['Alt+5'],
-    descriptionKey: 'shortcutDescNavigateTabs',
+  'options.nav.importexport': {
+    id: 'options.nav.importexport',
+    defaultBindings: [['m', 'i']],
+    descriptionKey: 'shortcutDescNavigateImportExport',
+    group: 'options',
+    scope: 'global',
+  },
+  'options.nav.settings': {
+    id: 'options.nav.settings',
+    defaultBindings: [['m', 'c']],
+    descriptionKey: 'shortcutDescNavigateSettings',
+    group: 'options',
+    scope: 'global',
+  },
+  'options.nav.workspaces': {
+    id: 'options.nav.workspaces',
+    defaultBindings: [['m', 'w']],
+    descriptionKey: 'shortcutDescNavigateWorkspaces',
     group: 'options',
     scope: 'global',
   },

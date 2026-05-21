@@ -5,24 +5,24 @@
  * each configuration mode selected (`preset`, `ask`, `manual`). The
  * `config-mode-description` paragraph rendered next to the mode list provides
  * the contextual explanation requested by US-DS003.
+ *
+ * Lot 6 (issue #309): consumes the shared `openRuleWizard` Domain Action
+ * and the `RuleWizardPage` Page Object directly.
  */
 import { test } from '../helpers/doc-fixture.js';
 import { captureStep, startScenario } from '../helpers/doc-capture.js';
 import { writeScenarioReadme } from '../helpers/scenario-readme.js';
+import { openExtensionPage } from '../helpers/ui-actions.js';
 import {
   clearExtensionStorage,
-  dismissRuleWizard,
-  fillRuleWizardStep1,
-  openExtensionPage,
   openRuleWizard,
-  selectConfigurationMode,
-  type ConfigMode,
-} from '../helpers/ui-actions.js';
+} from '../../e2e-shared/actions/index.js';
+import type { RuleWizardConfigMode } from '../../e2e-shared/pages/index.js';
 import { GROUPING_MODES_MANIFEST } from './13-grouping-modes.routing.js';
 
 const SCENARIO_ID = '13-grouping-modes';
 
-const MODES: ConfigMode[] = ['preset', 'ask', 'manual'];
+const MODES: RuleWizardConfigMode[] = ['preset', 'ask', 'manual'];
 
 test.describe.configure({ mode: 'serial' });
 
@@ -46,14 +46,14 @@ test('grouping modes', async (
     theme,
   );
 
-  await openRuleWizard(rulesPage);
-  await fillRuleWizardStep1(rulesPage, {
-    label: 'GitHub',
-    domainFilter: 'github.com',
-  });
+  const wizard = await openRuleWizard(rulesPage);
+  await wizard.fillLabel('GitHub');
+  await wizard.fillDomainFilter('github.com');
+  await wizard.clickNext();
+  await wizard.expectOnStep(2);
 
   for (const mode of MODES) {
-    await selectConfigurationMode(rulesPage, mode);
+    await wizard.selectConfigMode(mode);
     // The right column carries the contextual description for the active mode.
     await rulesPage
       .getByTestId('config-mode-description')
@@ -63,7 +63,8 @@ test('grouping modes', async (
     });
   }
 
-  await dismissRuleWizard(rulesPage);
+  await rulesPage.keyboard.press('Escape');
+  await wizard.expectHidden();
   await rulesPage.close();
 
   await writeScenarioReadme({

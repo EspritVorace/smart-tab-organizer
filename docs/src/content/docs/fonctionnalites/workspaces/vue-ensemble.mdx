@@ -1,0 +1,60 @@
+---
+title: Vue d'ensemble des espaces de travail
+description: "La page de gestion des workspaces dans SmartTab Organizer : lister, rechercher, basculer entre les espaces de travail."
+---
+
+import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="En bref">
+- La page **Espaces de travail** liste tous les workspaces et permet de basculer entre eux.
+- Chaque ligne affiche l'avatar, le nom, la couleur d'accent et deux badges optionnels : **Actif** et **Par défaut**.
+- Une recherche par nom est disponible quand vous avez plusieurs workspaces.
+</Aside>
+
+La page **Espaces de travail** centralise la gestion des workspaces : créer un nouvel espace, basculer vers un autre, renommer ou supprimer. Elle s'ouvre depuis le menu principal des Options.
+
+## Ce que la page affiche
+
+Chaque workspace apparait sous forme de carte avec :
+
+- un **avatar** dérivé du nom et coloré par l'accent du workspace ;
+- son **nom**, surligné si une recherche est active (accent-folding) ;
+- la mention de sa **couleur d'accent** ;
+- un **badge "Actif"** si c'est le workspace en cours d'utilisation ;
+- un **badge "Par défaut"** s'il s'agit du workspace `DEFAULT_WORKSPACE_ID`.
+
+Les actions disponibles à droite de la carte sont : **Basculer** (sauf pour le workspace actif), **Modifier** et **Supprimer**.
+
+## Basculer vers un autre workspace
+
+<Steps>
+1. Identifiez le workspace cible dans la liste (la barre de recherche aide quand vous en avez beaucoup).
+2. Cliquez sur le bouton **Basculer** de sa carte.
+3. L'interface se rafraichit pour afficher les règles, sessions et statistiques du nouveau workspace actif.
+</Steps>
+
+Pour les détails du switch (effet sur les données, possibilité de basculer depuis la popup), voir [Changer de workspace actif](/fonctionnalites/workspaces/changer-workspace-actif).
+
+## Contraintes de suppression
+
+<Aside type="caution">
+Deux cas empêchent la suppression :
+
+- le workspace **Par défaut** ne peut jamais être supprimé ;
+- le **dernier workspace** restant ne peut pas être supprimé non plus, pour garantir qu'il y en a toujours au moins un.
+
+Dans ces deux cas, le bouton **Supprimer** est désactivé et un tooltip explique la raison.
+</Aside>
+
+## Recherche
+
+Une barre de recherche apparait en haut de la liste dès que plusieurs workspaces existent. Elle filtre la liste par nom, accent-folding inclus (`recette` trouve `Recette`).
+
+## Voir aussi
+
+<CardGrid>
+  <LinkCard title="Qu'est-ce qu'un espace de travail ?" href="/concepts/workspaces" description="La notion de workspace, ce qu'il cloisonne, le workspace par défaut, les couleurs d'accent." />
+  <LinkCard title="Créer, renommer, supprimer un workspace" href="/fonctionnalites/workspaces/gerer-workspaces" description="Les trois actions CRUD et leurs validations." />
+  <LinkCard title="Changer de workspace actif" href="/fonctionnalites/workspaces/changer-workspace-actif" description="Basculer depuis les Options ou depuis la popup." />
+  <LinkCard title="Profils dans la popup" href="/fonctionnalites/workspaces/profils-popup" description="Accès rapide aux sessions épinglées du workspace actif." />
+</CardGrid>

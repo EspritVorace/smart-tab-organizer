@@ -4,19 +4,23 @@
  * Seeds a single rule, opens its edit wizard, expands the Options collapsible
  * and captures the form once for each deduplication match mode (`exact`,
  * `includes`, `exact_ignore_params`).
+ *
+ * Lot 6 (issue #309): consumes the shared `openEditRuleWizard` Domain
+ * Action and the `OptionsEditModalPage` Page Object directly. The
+ * scenario closes the page rather than chaining two Escape presses
+ * because two stacked dialogs (wizard + OptionsEditModal) are open by the
+ * end and Radix focus-management can race with a sequential dismiss.
  */
 import { test } from '../helpers/doc-fixture.js';
 import { captureStep, startScenario } from '../helpers/doc-capture.js';
 import { writeScenarioReadme } from '../helpers/scenario-readme.js';
+import { openExtensionPage } from '../helpers/ui-actions.js';
 import {
   clearExtensionStorage,
-  dismissDialog,
-  expandEditWizardOptions,
   openEditRuleWizard,
-  openExtensionPage,
   seedDomainRules,
-  selectDeduplicationMode,
-} from '../helpers/ui-actions.js';
+} from '../../e2e-shared/actions/index.js';
+import { OptionsEditModalPage } from '../../e2e-shared/pages/index.js';
 import { DEDUPLICATION_MODES_MANIFEST } from './12-deduplication-modes.routing.js';
 
 const SCENARIO_ID = '12-deduplication-modes';
@@ -62,17 +66,22 @@ test('deduplication modes', async (
   );
   await rulesPage.getByTestId('page-rules-list').waitFor({ state: 'visible' });
 
-  await openEditRuleWizard(rulesPage, SEED_RULE.id);
-  await expandEditWizardOptions(rulesPage);
+  const wizard = await openEditRuleWizard(rulesPage, SEED_RULE.id);
+  await wizard.openEditOptionsModal();
 
+  const optionsModal = new OptionsEditModalPage(rulesPage);
   for (const mode of MODES) {
-    await selectDeduplicationMode(rulesPage, mode);
+    await optionsModal.selectDeduplicationMode(mode);
+    // Brief breath so the React state propagates and the capture is stable.
+    await rulesPage.waitForTimeout(100);
     await captureStep(rulesPage, `edit-wizard-options-${mode.replace(/_/g, '-')}`, {
-      description: `Edit wizard, Options section expanded with deduplication mode "${mode}" selected.`,
+      description: `Edit wizard, Options sub-modal with deduplication mode "${mode}" selected.`,
     });
   }
 
-  await dismissDialog(rulesPage);
+  // Two stacked dialogs are open at this point (wizard + OptionsEditModal);
+  // closing the page short-circuits both rather than chaining two Escape
+  // presses, which can race with React/Radix focus-management cleanup.
   await rulesPage.close();
 
   await writeScenarioReadme({

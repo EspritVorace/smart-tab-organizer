@@ -1,0 +1,17 @@
+patchedDependencies:
+  vitest-ctrf-json-reporter@0.0.3: patches/vitest-ctrf-json-reporter@0.0.3.patch
+overrides:
+  node-forge: ^1.4.0
+  defu: ^6.1.5
+  vite: ^8.0.10
+  brace-expansion@1: ^1.1.13
+  brace-expansion@2: ^2.0.3
+  brace-expansion@5: ^5.0.5
+  rollup: npm:@rollup/wasm-node@^4.0.0
+  vite-node: ^6.0.0
+allowBuilds:
+  esbuild: true
+  spawn-sync: true
+  sharp: true
+  unrs-resolver: true
+  '@swc/core': false

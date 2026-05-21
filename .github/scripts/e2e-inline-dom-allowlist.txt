@@ -1,0 +1,14 @@
+# File-level allow-list for `e2e-no-inline-dom.sh`.
+#
+# One path per line. Files listed here may use `page.getByRole('dialog')`
+# and `page.locator(...)` freely because their subject IS the raw dialog
+# element (meta-tests on Radix focus, dialog-stacking, etc.).
+#
+# Prefer the inline `// allow-inline-dom` marker for one-off legitimate
+# cases (drag-handle selectors, <mark> highlights, body.click() gestures).
+# Use this file only when the entire spec is a meta-test on dialogs.
+
+# `dialog-initial-focus.spec.ts` asserts that Radix dialogs land focus on
+# the right element on open. Wrapping `getByRole('dialog')` in a Page
+# Object would defeat the purpose of the spec.
+tests/e2e/dialog-initial-focus.spec.ts

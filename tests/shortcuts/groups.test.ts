@@ -27,17 +27,17 @@ describe('getDisplayTree("popup")', () => {
 });
 
 describe('getDisplayTree("options")', () => {
-  it('returns the 8 top-level groups in the historical order', () => {
+  it('returns the 8 top-level groups in sidebar order (page groups first, options/popup next, global last)', () => {
     const tree = getDisplayTree('options');
     expect(tree.map((n) => n.descriptor.id)).toEqual([
-      'global',
       'list-home',
       'list-rules',
       'list-sessions',
-      'list-workspaces',
       'importexport',
+      'list-workspaces',
       'options',
       'popup',
+      'global',
     ]);
   });
 

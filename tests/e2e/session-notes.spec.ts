@@ -16,6 +16,7 @@ import {
   getSessionsFromStorage,
 } from './helpers/seed';
 import type { TestSession } from './helpers/seed';
+import { SessionEditorPage } from '../../e2e-shared/pages/index.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -212,7 +213,8 @@ test.describe('[US-S-NOTE-04] Search matches note', () => {
 
     // Session appears (note matched)
     await expect(page.getByText('Generic Name ABC', { exact: true })).toBeVisible();
-    // Note text is visible (card opened) — use first() since AccessibleHighlight may split text
+    // Note text is visible (card opened); use first() since AccessibleHighlight may split text.
+    // allow-inline-dom: `<mark>` is the search highlight atom, not a dialog/wizard surface.
     await expect(page.locator('mark').filter({ hasText: 'only-in-note-xyz' }).first()).toBeVisible();
     await page.close();
   });
@@ -235,7 +237,8 @@ test.describe('[US-S-NOTE-05] Note text is highlighted in search', () => {
 
     await page.getByPlaceholder('Search sessions...').fill('TypeScript');
 
-    // Card auto-opens; note visible with highlighted text
+    // Card auto-opens; note visible with highlighted text.
+    // allow-inline-dom: `<mark>` is the search highlight atom, not a dialog/wizard surface.
     await expect(page.locator('mark').filter({ hasText: 'TypeScript' }).first()).toBeVisible();
     await page.close();
   });
@@ -250,8 +253,9 @@ test.describe('[US-S-NOTE-05] Note text is highlighted in search', () => {
     // No search — expand the card
     await page.getByText(/1 tab/i).click();
 
-    // Note visible but no <mark> elements
+    // Note visible but no <mark> elements.
     await expect(page.getByText('Some note content')).toBeVisible();
+    // allow-inline-dom: `<mark>` is the search highlight atom, not a dialog/wizard surface.
     await expect(page.locator('mark')).toHaveCount(0);
     await page.close();
   });
@@ -269,15 +273,10 @@ test.describe('[US-S-NOTE-02] Edit note via SessionEditDialog', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    // Open the "..." menu and click Edit
-    await page.getByRole('button', { name: /more actions/i }).click();
-    await page.getByRole('menuitem', { name: /^edit$/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const dialog = page.getByRole('dialog');
-    await dialog.waitFor({ state: 'visible' });
-
-    // The note textarea should be present in the dialog
-    await expect(dialog.locator('textarea')).toBeVisible();
+    await expect(editor.noteTextarea()).toBeVisible();
     await page.close();
   });
 
@@ -291,13 +290,10 @@ test.describe('[US-S-NOTE-02] Edit note via SessionEditDialog', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: /more actions/i }).click();
-    await page.getByRole('menuitem', { name: /^edit$/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const dialog = page.getByRole('dialog');
-    await dialog.waitFor({ state: 'visible' });
-
-    await expect(dialog.locator('textarea')).toHaveValue('Pre-existing note content');
+    await expect(editor.noteTextarea()).toHaveValue('Pre-existing note content');
     await page.close();
   });
 
@@ -308,18 +304,12 @@ test.describe('[US-S-NOTE-02] Edit note via SessionEditDialog', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: /more actions/i }).click();
-    await page.getByRole('menuitem', { name: /^edit$/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const dialog = page.getByRole('dialog');
-    await dialog.waitFor({ state: 'visible' });
-
-    // Type a note
-    await dialog.locator('textarea').fill('My new note for this session');
-
-    // Save
-    await dialog.getByRole('button', { name: /save/i }).click();
-    await dialog.waitFor({ state: 'hidden' });
+    await editor.fillNote('My new note for this session');
+    await editor.clickSave();
+    await editor.expectHidden();
 
     // Verify persisted in storage
     const stored = await getSessionsFromStorage(extensionContext);
@@ -338,17 +328,12 @@ test.describe('[US-S-NOTE-02] Edit note via SessionEditDialog', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: /more actions/i }).click();
-    await page.getByRole('menuitem', { name: /^edit$/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const dialog = page.getByRole('dialog');
-    await dialog.waitFor({ state: 'visible' });
-
-    // Clear the note
-    await dialog.locator('textarea').fill('');
-
-    await dialog.getByRole('button', { name: /save/i }).click();
-    await dialog.waitFor({ state: 'hidden' });
+    await editor.fillNote('');
+    await editor.clickSave();
+    await editor.expectHidden();
 
     const stored = await getSessionsFromStorage(extensionContext);
     const saved = stored.find(s => s.name === 'Session To Clear Note');
@@ -356,7 +341,7 @@ test.describe('[US-S-NOTE-02] Edit note via SessionEditDialog', () => {
     await page.close();
   });
 
-  test('note change makes dialog dirty — confirmation appears on cancel', async ({
+  test('note change makes dialog dirty, confirmation appears on cancel', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -366,20 +351,13 @@ test.describe('[US-S-NOTE-02] Edit note via SessionEditDialog', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: /more actions/i }).click();
-    await page.getByRole('menuitem', { name: /^edit$/i }).click();
+    const editor = new SessionEditorPage(page);
+    await editor.openFromFirstSessionMenu();
 
-    const dialog = page.getByRole('dialog');
-    await dialog.waitFor({ state: 'visible' });
+    await editor.fillNote('Unsaved note');
+    await editor.clickCancel();
 
-    // Type in the note to make dialog dirty
-    await dialog.locator('textarea').fill('Unsaved note');
-
-    // Click Cancel
-    await dialog.getByRole('button', { name: /cancel/i }).click();
-
-    // Unsaved changes alert dialog should appear
-    await expect(page.getByRole('alertdialog')).toBeVisible();
+    await editor.expectUnsavedAlertVisible();
     await page.close();
   });
 });

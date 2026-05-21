@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-social-fediverse",
+    "name": {
+      "en": "Fediverse & Bluesky",
+      "fr": "Fédiverse & Bluesky",
+      "es": "Fediverso y Bluesky"
+    },
+    "description": {
+      "en": "Group Mastodon, Bluesky and Threads tabs by profile.",
+      "fr": "Regroupe les onglets Mastodon, Bluesky et Threads par profil.",
+      "es": "Agrupa las pestañas de Mastodon, Bluesky y Threads por perfil."
+    },
+    "categoryId": "social"
+  },
+  "domainRules": [
+    {
+      "id": "pk-social-mastodon-social-profile",
+      "enabled": true,
+      "domainFilter": "mastodon.social",
+      "label": "Mastodon (mastodon.social): Profile",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "mastodon\\.social/(@[^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "purple",
+      "categoryId": "social",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-social-mastodon-online-profile",
+      "enabled": true,
+      "domainFilter": "mastodon.online",
+      "label": "Mastodon (mastodon.online): Profile",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "mastodon\\.online/(@[^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "purple",
+      "categoryId": "social",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-social-bluesky-profile",
+      "enabled": true,
+      "domainFilter": "bsky.app",
+      "label": "Bluesky: Profile",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "bsky\\.app/profile/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "cyan",
+      "categoryId": "social",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-social-threads-profile",
+      "enabled": true,
+      "domainFilter": "*.threads.net",
+      "label": "Threads: Profile",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "threads\\.net/(@[^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "grey",
+      "categoryId": "social",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

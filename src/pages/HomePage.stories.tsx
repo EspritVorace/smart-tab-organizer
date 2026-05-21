@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { browser } from 'wxt/browser';
 import { HomePage } from './HomePage';
+import { MockImportExportWizardsProvider } from '@/test-utils/MockImportExportWizardsProvider';
 import type { AppSettings, DomainRuleSetting } from '@/types/syncSettings';
 import type { Session } from '@/types/session';
 import type { StatisticsAggregates } from '@/types/statistics';
@@ -88,13 +89,19 @@ const meta: Meta<typeof HomePage> = {
     layout: 'fullscreen',
     landmark: false,
   },
+  decorators: [
+    (Story) => (
+      <MockImportExportWizardsProvider>
+        <Story />
+      </MockImportExportWizardsProvider>
+    ),
+  ],
   args: {
     syncSettings: baseSettings,
     statisticsAggregates: emptyAggregates,
     onNavigate: () => {},
     onOpenSnapshotWizard: () => {},
     onOpenRuleWizard: () => {},
-    onOpenImportRules: () => {},
     onOpenShortcutsAside: () => {},
     onRestore: () => {},
   },

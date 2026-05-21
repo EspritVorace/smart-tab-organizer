@@ -23,13 +23,15 @@ function SummarySection({ title, onEdit, stepIndex, children }: {
   return (
     <Box>
       <Flex justify="between" align="center" mb="2">
-        <Text size="2" weight="bold" color="gray">{title}</Text>
+        <Text size="2" weight="bold" color="gray" highContrast>{title}</Text>
         <Button
           type="button"
           variant="ghost"
           size="1"
+          highContrast
           onClick={() => onEdit(stepIndex)}
-          aria-label={`${getMessage('summaryModify')} — ${title}`}
+          aria-label={`${getMessage('summaryModify')}, ${title}`}
+          data-testid={`wizard-rule-edit-modify-step-${stepIndex}`}
         >
           <Pencil size={12} />
           {getMessage('summaryModify')}
@@ -43,7 +45,7 @@ function SummarySection({ title, onEdit, stepIndex, children }: {
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <Flex gap="2" align="baseline">
-      <Text size="2" color="gray" style={{ minWidth: 130, flexShrink: 0 }}>{label}</Text>
+      <Text size="2" color="gray" highContrast style={{ minWidth: 130, flexShrink: 0 }}>{label}</Text>
       <Text size="2">{value}</Text>
     </Flex>
   );
@@ -96,13 +98,13 @@ export function WizardStep4Summary({ values, configMode, presetName, onEditStep 
       <SummarySection title={getMessage('wizardStepIdentity')} onEdit={onEditStep} stepIndex={0}>
         <Flex direction="column" gap="1">
           <Flex gap="2" align="baseline">
-            <Text size="2" color="gray" style={{ minWidth: 130, flexShrink: 0 }}>{getMessage('labelLabel')}</Text>
+            <Text size="2" color="gray" highContrast style={{ minWidth: 130, flexShrink: 0 }}>{getMessage('labelLabel')}</Text>
             <Flex align="center" gap="2">
-              <Badge color={values.color ? getRadixColor(values.color) : 'gray'} variant="solid" size="1">
+              <Badge color={values.color ? getRadixColor(values.color) : 'gray'} variant="solid" highContrast size="1">
                 {category ? `${category.emoji} ` : ''}{values.label}
               </Badge>
               {category && (
-                <Text size="1" color="gray">{getCategoryLabel(category)}</Text>
+                <Text size="1" color="gray" highContrast>{getCategoryLabel(category)}</Text>
               )}
             </Flex>
           </Flex>

@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-media-twitch",
+    "name": {
+      "en": "Twitch",
+      "fr": "Twitch",
+      "es": "Twitch"
+    },
+    "description": {
+      "en": "Group Twitch tabs by category and channel.",
+      "fr": "Regroupe les onglets Twitch par catégorie et chaîne.",
+      "es": "Agrupa las pestañas de Twitch por categoría y canal."
+    },
+    "categoryId": "media"
+  },
+  "domainRules": [
+    {
+      "id": "pk-media-twitch-category",
+      "enabled": true,
+      "domainFilter": "*.twitch.tv",
+      "label": "Twitch: Category",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "twitch\\.tv/directory/(?:category|game)/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "purple",
+      "categoryId": "media",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-media-twitch-channel",
+      "enabled": true,
+      "domainFilter": "*.twitch.tv",
+      "label": "Twitch: Channel",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "twitch\\.tv/(?!directory|videos|search|subscriptions|moderator|drops|prime|jobs|popout|settings|wallet|inventory|p)([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "pink",
+      "categoryId": "media",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

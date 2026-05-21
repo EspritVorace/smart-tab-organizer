@@ -1,0 +1,47 @@
+---
+title: Importer un workspace
+description: Restaurer une archive de workspace dans SmartTab Organizer en créant un nouvel espace ou en fusionnant avec un workspace existant.
+---
+
+import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="En bref">
+- Deux modes d'import : créer un **nouveau workspace** ou **fusionner** dans le workspace actif.
+- L'archive est validée par le schéma Zod `importWorkspaceDataSchema` avant toute modification.
+- Une note embarquée et un compteur de règles/sessions sont affichés avant la confirmation.
+</Aside>
+
+## Ouvrir le dialog
+
+<Steps>
+1. Depuis la page Espaces de travail ou les Options, ouvrez l'action **Importer un workspace**.
+2. Sélectionnez la source : un fichier JSON local (drag and drop ou parcours) ou du texte JSON collé.
+3. Le dialog valide la structure et affiche un récapitulatif (nombre de règles, nombre de sessions, présence de statistiques).
+</Steps>
+
+Si la validation échoue, un message d'erreur précise la cause (champ manquant, type invalide). Aucune donnée n'est modifiée tant que vous n'avez pas confirmé.
+
+## Choisir le mode d'import
+
+| Mode | Comportement |
+|---|---|
+| **Nouveau workspace** | Crée un workspace neuf avec le nom et la couleur fournis par l'archive. Vous pouvez surcharger le nom dans le champ **Nom** avant validation. |
+| **Fusionner dans le workspace actif** | Ajoute les règles, catégories et sessions de l'archive au workspace actif. Les conflits éventuels (ID déjà présent) sont gérés au cas par cas. |
+
+<Aside type="caution">
+Le mode **Fusionner** modifie le workspace actif. Si vous voulez préserver le contenu actuel, utilisez plutôt **Nouveau workspace** et basculez ensuite manuellement.
+</Aside>
+
+## Options additionnelles
+
+- **Inclure les statistiques** : importe les compteurs de l'archive (uniquement disponible si l'archive en contient).
+- **Note** : si l'archive embarque une note, elle est affichée dans un encart avant la confirmation.
+
+## Voir aussi
+
+<CardGrid>
+  <LinkCard title="Exporter un workspace" href="/fonctionnalites/import-export/exporter-workspace" description="Produire une archive JSON à réimporter." />
+  <LinkCard title="Importer des règles" href="/fonctionnalites/import-export/importer-regles" description="Import ciblé sur les seules règles de domaine, avec wizard de conflits." />
+  <LinkCard title="Importer des sessions" href="/fonctionnalites/import-export/importer-sessions" description="Import ciblé sur les seules sessions." />
+  <LinkCard title="Qu'est-ce qu'un espace de travail ?" href="/concepts/workspaces" description="Ce qu'un workspace cloisonne et ce qui reste partagé." />
+</CardGrid>
