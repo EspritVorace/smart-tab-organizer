@@ -1,6 +1,15 @@
 import { defineConfig } from 'wxt';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
+import { mkdirSync } from 'fs';
+
+// `webExt.profileCreateIfMissing` does not create the parent dir early enough
+// for `chrome-launcher`, which opens `chrome-out.log` first and crashes with
+// ENOENT on a fresh checkout. Pre-create both profile dirs here.
+const chromiumProfile = resolve('.chrome-profile');
+const firefoxProfile = resolve('.firefox-profile');
+mkdirSync(chromiumProfile, { recursive: true });
+mkdirSync(firefoxProfile, { recursive: true });
 
 export default defineConfig({
   srcDir: 'src',
@@ -62,8 +71,8 @@ export default defineConfig({
     }
   },
   webExt: {
-    chromiumProfile: resolve('.chrome-profile'),
-    firefoxProfile: resolve('.firefox-profile'),
+    chromiumProfile,
+    firefoxProfile,
     keepProfileChanges: true,
     profileCreateIfMissing: true,
   },

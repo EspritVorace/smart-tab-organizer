@@ -3,6 +3,9 @@
   "version": "1.2.0",
   "packageManager": "pnpm@11.1.2",
   "type": "module",
+  "engines": {
+    "node": ">=24.0.0 <25.0.0"
+  },
   "scripts": {
     "test": "vitest run --config vitest.simple.config.ts",
     "test:watch": "vitest --watch --config vitest.simple.config.ts",

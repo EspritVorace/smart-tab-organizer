@@ -73,8 +73,8 @@ export function Sidebar({
         height: '100vh',
         width: isCollapsed ? '80px' : '280px',
         transition: 'width 0.2s ease-in-out',
-        borderRight: '1px solid var(--gray-6)',
-        backgroundColor: 'var(--color-panel-solid)',
+        borderRight: '1px solid var(--gray-a4)',
+        backgroundColor: 'var(--gray-2)',
         margin: 0,
         padding: 0
       }}

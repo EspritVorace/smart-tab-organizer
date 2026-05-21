@@ -1,5 +1,5 @@
 import { Box, Flex, Text, Button, Card, Separator, Heading } from '@radix-ui/themes';
-import { BarChart3, RotateCcw, Layers, Copy, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { RotateCcw, Layers, Copy, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { getMessage } from '@/utils/i18n';
 import type { AppSettings } from '@/types/syncSettings';
@@ -90,7 +90,6 @@ export function StatisticsPage({ syncSettings, statisticsData, onReset }: Statis
     <PageLayout
       titleKey="statisticsTab"
       descriptionKey="statisticsPageDescription"
-      icon={BarChart3}
       syncSettings={syncSettings}
     >
       {() => (
