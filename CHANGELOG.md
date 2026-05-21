@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.2.1 — since 1.2.0
+
+### New Features
+- Pack Gallery redesign with category navigation, full-card click and configurable params preview
+- Pack Gallery now flags installed packs and disables fully installed ones
+- Bulk selection and bulk actions on the Sessions page
+- Bulk rules export from the rules toolbar with preselection
+- HomePage tips section expanded from 5 to 44 entries
+- Mnemonic M+letter sidebar nav shortcuts (replaces Alt+1..5)
+- Options topbar and UI style tweaks
+
+### Improvements
+- Migrate package manager to pnpm 11.1.2
+- CI: pnpm store cache and Playwright browser cache across workflows, with hit/miss reporting in job summaries
+- Accessibility violations now block the CI pipeline
+- Shared Page Objects + Domain Actions architecture; tests/e2e and e2e-doc-scenarios converged onto e2e-shared (lots 5, 6, 7) with extensionPage fixture and 5 custom matchers
+- Code-split options page routes via React.lazy
+- Mount import/export wizards via React context
+- Prioritize mainstream categories in Pack Gallery order
+- Extract shared dedupe helpers, EditModalShell and EditModalFooter wrappers across rule edit modals, sharedSectionProps on SessionSection
+
+### Bug Fixes
+- Fix hydration race conditions in popup and workspaces
+- Pack Gallery: keep search input visible while scrolling the import wizard
+- Rule card vertical padding aligned with SessionCard and reused in pack preview
+- Raise contrast on rule wizard footer soft gray buttons, step 4 summary badge, and active pack category count
+- Doc-scenarios: unblock import and dedup capture modes, add popup-with-pinned capture
+
 ## 1.2.0 — since 1.1.4
 
 ### New Features
