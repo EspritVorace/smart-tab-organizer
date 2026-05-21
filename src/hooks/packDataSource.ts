@@ -1,11 +1,11 @@
-import categoriesData from '@/data/packs/_categories.json';
+import categoriesData from '@/data/categories.json';
 
 /**
  * Glob-based loader for pack files. Wrapped in its own module so tests can
  * mock it without touching Vite's `import.meta.glob` directly.
  *
- * Files matching `_*.json` (notably `_categories.json`) are filtered out by
- * convention so they never show up as packs.
+ * Files matching `_*.json` are filtered out by convention so any helper file
+ * co-located with pack manifests never shows up as a pack.
  */
 const rawPackModules = import.meta.glob('../data/packs/*.json', {
   eager: true,

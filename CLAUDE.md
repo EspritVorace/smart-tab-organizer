@@ -54,7 +54,17 @@ pnpm doc:scenarios:sync                   # Re-route output to dest dirs (withou
 - `src/types/`: TS types extending Zod-inferred types (e.g. `DomainRuleSetting` adds `enabled`, `badge`), plus `messages.ts` (inter-component message types)
 
 ### Static Data
-- `public/data/presets.json`: regex presets (read-only, loaded at runtime)
+- `src/data/categories.json`: **single source of truth** for the 14 built-in
+  rule categories. Consumed by domain rules (`DomainRule.categoryId`),
+  sessions (`SessionData.categoryId`), regex presets (`presets.json`
+  category buckets), and rule packs (`packs/pk-*.json` `categoryId`).
+  Labels resolved via `labelKey` against `public/_locales/`.
+- `src/data/packs/pk-*.json`: rule pack manifests, each referencing a
+  unified `categoryId`.
+- `public/data/presets.json`: regex presets (read-only, loaded at runtime).
+  Each preset category only carries `id` + `presets`; the emoji and
+  translated label come from `src/data/categories.json` via
+  `categoriesStore`.
 - `public/data/default_settings.json`
 - `public/_locales/`: i18n messages (EN, FR, ES)
 

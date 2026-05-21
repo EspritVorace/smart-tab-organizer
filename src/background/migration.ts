@@ -1,6 +1,6 @@
 import { browser, Browser } from 'wxt/browser';
 import { logger } from '@/utils/logger.js';
-import { fetchBuiltInCategories } from '@/utils/categoriesStore.js';
+import { getBuiltInCategories } from '@/utils/categoriesStore.js';
 import { DEFAULT_WORKSPACE_ID } from '@/utils/workspaceStorage.js';
 import { getActiveScopedItems } from '@/utils/workspaceContext.js';
 import type { WorkspaceMeta, WorkspaceAccentColor } from '@/schemas/workspace.js';
@@ -19,6 +19,7 @@ const SETTINGS_KEYS = [
 const MIGRATION_FLAG = 'settingsMigratedToLocal';
 const URL_EXTRACTION_MODE_MIGRATION_FLAG = 'urlExtractionModeMigrated';
 const WORKSPACES_MIGRATION_FLAG = 'workspacesMigrated';
+const UNIFIED_CATEGORIES_MIGRATION_FLAG = 'unifiedCategoriesSeeded';
 export const FIRST_RUN_REDIRECT_FLAG = 'firstRunRedirectDone';
 
 const DEFAULT_WORKSPACE_ACCENT: WorkspaceAccentColor = 'indigo';
@@ -179,7 +180,48 @@ export async function initializeFirstRunRedirectFlag(reason: Browser.runtime.OnI
 }
 
 /**
- * Seeds the built-in categories from public/data/categories.json into storage.local.
+ * Adds the built-in categories introduced after the initial seed (`generic`,
+ * `communication`, `news`, `ai`) to existing installations. Appends only the
+ * missing built-in IDs so any user-customized categories already in storage
+ * are preserved both in content and ordering. Idempotent: guarded by a flag
+ * in storage.local; on error the flag is not set so the migration is retried
+ * on next startup.
+ */
+export async function seedUnifiedCategories(): Promise<void> {
+  try {
+    const flagState = await browser.storage.local.get(UNIFIED_CATEGORIES_MIGRATION_FLAG);
+    if (flagState[UNIFIED_CATEGORIES_MIGRATION_FLAG]) {
+      logger.debug('[MIGRATION] Unified categories already seeded.');
+      return;
+    }
+
+    const { categoriesItem } = await getActiveScopedItems();
+    const existing = (await categoriesItem.getValue()) ?? [];
+    if (existing.length === 0) {
+      logger.debug('[MIGRATION] Categories storage empty, skipping unified seed (initial seed will handle it).');
+      await browser.storage.local.set({ [UNIFIED_CATEGORIES_MIGRATION_FLAG]: true });
+      return;
+    }
+
+    const builtIns = getBuiltInCategories();
+    const existingIds = new Set(existing.map((c) => c.id));
+    const toAppend = builtIns.filter((c) => !existingIds.has(c.id));
+
+    if (toAppend.length > 0) {
+      await categoriesItem.setValue([...existing, ...toAppend]);
+      logger.debug(`[MIGRATION] Appended ${toAppend.length} new built-in categories: ${toAppend.map((c) => c.id).join(', ')}`);
+    } else {
+      logger.debug('[MIGRATION] No new built-in categories to append.');
+    }
+
+    await browser.storage.local.set({ [UNIFIED_CATEGORIES_MIGRATION_FLAG]: true });
+  } catch (error) {
+    logger.error('[MIGRATION] Unified categories seeding failed, will retry on next startup:', error);
+  }
+}
+
+/**
+ * Seeds the built-in categories from src/data/categories.json into storage.local.
  * Idempotent: guarded by categoriesSeededItem.
  * Never overwrites existing categories (safety net if the user already has customs).
  */
@@ -193,7 +235,7 @@ export async function seedBuiltInCategories(): Promise<void> {
 
     const existing = await categoriesItem.getValue();
     if (!existing || existing.length === 0) {
-      const builtIns = await fetchBuiltInCategories();
+      const builtIns = getBuiltInCategories();
       await categoriesItem.setValue(builtIns);
       logger.debug(`[MIGRATION] Seeded ${builtIns.length} built-in categories.`);
     } else {

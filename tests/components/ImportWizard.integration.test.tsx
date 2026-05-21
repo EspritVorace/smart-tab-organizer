@@ -39,7 +39,7 @@ vi.mock('../../src/hooks/packDataSource', () => ({
     { path: '/src/data/packs/sample.json', data: samplePack },
   ],
   getCategoriesSource: () => ({
-    categories: [{ id: 'cloud', label: 'Cloud' }],
+    categories: [{ id: 'cloud', emoji: '☁️', label: 'Cloud', builtIn: false }],
   }),
 }));
 

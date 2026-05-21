@@ -2,7 +2,8 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { PackGallery } from './PackGallery';
 import type { PackSelectionState } from './usePackSelections';
-import type { PackCategory, PackFile } from '@/schemas/pack';
+import type { PackFile } from '@/schemas/pack';
+import type { RuleCategory } from '@/schemas/category';
 import type { ImportDomainRule } from '@/schemas/importExport';
 
 const baseRule = (overrides: Partial<ImportDomainRule>): ImportDomainRule => ({
@@ -21,9 +22,9 @@ const baseRule = (overrides: Partial<ImportDomainRule>): ImportDomainRule => ({
   ...overrides,
 });
 
-const categories: PackCategory[] = [
-  { id: 'cloud', label: { en: 'Cloud', fr: 'Cloud' }, icon: '☁️' },
-  { id: 'dev', label: { en: 'Development', fr: 'Développement' }, icon: '💻' },
+const categories: RuleCategory[] = [
+  { id: 'cloud', emoji: '☁️', label: 'Cloud', builtIn: false },
+  { id: 'dev', emoji: '💻', label: 'Development', builtIn: false },
 ];
 
 const packs: PackFile[] = [
@@ -78,7 +79,7 @@ const packs: PackFile[] = [
 
 interface HarnessProps {
   packs: PackFile[];
-  categories: PackCategory[];
+  categories: RuleCategory[];
   initialSearch?: string;
   existingRuleIds?: ReadonlySet<string>;
 }

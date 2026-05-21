@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ruleCategorySchema, categoriesFileSchema } from '../../src/schemas/category';
+import builtInCategoriesFile from '../../src/data/categories.json';
 
 describe('ruleCategorySchema', () => {
   it('accepts a built-in category with labelKey only', () => {
@@ -82,5 +83,31 @@ describe('categoriesFileSchema', () => {
       ],
     });
     expect(result.success).toBe(true);
+  });
+
+  it('validates the unified src/data/categories.json source file', () => {
+    const result = categoriesFileSchema.safeParse(builtInCategoriesFile);
+    expect(result.success).toBe(true);
+  });
+
+  it('exposes the 14 expected unified category ids', () => {
+    const parsed = categoriesFileSchema.parse(builtInCategoriesFile);
+    const ids = parsed.categories.map((c) => c.id);
+    for (const expected of [
+      'search', 'communication', 'media', 'social', 'commerce', 'news',
+      'productivity', 'ai', 'travel', 'finance', 'education', 'development',
+      'cloud', 'generic',
+    ]) {
+      expect(ids).toContain(expected);
+    }
+  });
+
+  it('marks every unified built-in with a labelKey and emoji', () => {
+    const parsed = categoriesFileSchema.parse(builtInCategoriesFile);
+    for (const c of parsed.categories) {
+      expect(c.builtIn).toBe(true);
+      expect(c.labelKey).toBeTruthy();
+      expect(c.emoji).toBeTruthy();
+    }
   });
 });

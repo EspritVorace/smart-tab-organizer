@@ -1,11 +1,12 @@
 import { browser } from 'wxt/browser';
 import type {
   LocalizedString,
-  PackCategory,
   PackManifest,
   PackParam,
   PackParamOption,
 } from '@/schemas/pack';
+import type { RuleCategory } from '@/schemas/category';
+import { getRuleCategory, getCategoryLabel } from './categoriesStore';
 
 function getUILocale(): string | null {
   try {
@@ -66,14 +67,25 @@ export function resolvePackOptionLabel(option: PackParamOption): string {
   return resolveLocalized(option.label, option.value);
 }
 
+/**
+ * Resolves a category label for either a `RuleCategory` (from the unified
+ * source) or a `PackManifest` (either pointing to a unified category via
+ * `categoryId`, or carrying a custom inline `category` localized string).
+ */
 export function resolvePackCategoryLabel(
-  source: PackCategory | PackManifest,
+  source: RuleCategory | PackManifest,
 ): string {
-  if ('label' in source && source.label !== undefined) {
-    return resolveLocalized(source.label, source.id);
+  if ('labelKey' in source || ('emoji' in source && 'builtIn' in source)) {
+    return getCategoryLabel(source as RuleCategory);
   }
-  if ('category' in source && source.category !== undefined) {
-    return resolveLocalized(source.category, '');
+  const manifest = source as PackManifest;
+  if (manifest.categoryId) {
+    const cat = getRuleCategory(manifest.categoryId);
+    if (cat) return getCategoryLabel(cat);
+    return manifest.categoryId;
+  }
+  if (manifest.category !== undefined) {
+    return resolveLocalized(manifest.category, '');
   }
   return '';
 }

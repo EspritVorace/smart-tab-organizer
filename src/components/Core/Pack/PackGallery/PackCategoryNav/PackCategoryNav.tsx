@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { getMessage } from '@/utils/i18n';
-import { resolvePackCategoryLabel } from '@/utils/packLabel';
-import type { PackCategory } from '@/schemas/pack';
+import { getCategoryLabel } from '@/utils/categoriesStore';
+import type { RuleCategory } from '@/schemas/category';
 import styles from '@/components/Core/Pack/PackGallery/PackGallery.module.css';
 
 export const ALL_CATEGORIES = '__all__';
@@ -14,7 +14,7 @@ export interface PackCategoryNavItem {
 }
 
 interface PackCategoryNavProps {
-  categories: PackCategory[];
+  categories: RuleCategory[];
   countsByCategory: Map<string | null, number>;
   totalCount: number;
   activeCategory: string;
@@ -41,8 +41,8 @@ export function PackCategoryNav({
         .filter((cat) => (countsByCategory.get(cat.id) ?? 0) > 0)
         .map((cat) => ({
           id: cat.id,
-          label: resolvePackCategoryLabel(cat),
-          icon: cat.icon,
+          label: getCategoryLabel(cat),
+          icon: cat.emoji,
           count: countsByCategory.get(cat.id) ?? 0,
         })),
     ],

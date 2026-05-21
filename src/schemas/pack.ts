@@ -36,16 +36,6 @@ export const packConfigurableSchema = z.object({
   params: z.array(packParamSchema).min(1),
 });
 
-export const packCategorySchema = z.object({
-  id: z.string().min(1),
-  label: localizedStringSchema,
-  icon: z.string().optional(),
-});
-
-export const packCategoriesFileSchema = z.object({
-  categories: z.array(packCategorySchema),
-});
-
 export const packManifestSchema = z
   .object({
     id: z.string().min(1),
@@ -73,7 +63,5 @@ export type LocalizedString = z.infer<typeof localizedStringSchema>;
 export type PackParamOption = z.infer<typeof packParamOptionSchema>;
 export type PackParam = z.infer<typeof packParamSchema>;
 export type PackConfigurable = z.infer<typeof packConfigurableSchema>;
-export type PackCategory = z.infer<typeof packCategorySchema>;
-export type PackCategoriesFile = z.infer<typeof packCategoriesFileSchema>;
 export type PackManifest = z.infer<typeof packManifestSchema>;
 export type PackFile = z.infer<typeof packFileSchema>;

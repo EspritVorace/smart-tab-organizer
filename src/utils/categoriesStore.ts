@@ -1,3 +1,4 @@
+import builtInCategoriesFile from '@/data/categories.json';
 import { categoriesFileSchema, type RuleCategory } from '@/schemas/category.js';
 import { getActiveScopedItems } from './workspaceContext.js';
 import { getMessage } from './i18n.js';
@@ -36,14 +37,8 @@ export function getCategoryLabel(category: RuleCategory): string {
   return category.label ?? '';
 }
 
-export async function fetchBuiltInCategories(): Promise<RuleCategory[]> {
-  const response = await fetch('/data/categories.json');
-  if (!response.ok) {
-    throw new Error(`Failed to load categories: ${response.status}`);
-  }
-  const data = await response.json();
-  const parsed = categoriesFileSchema.parse(data);
-  return parsed.categories;
+export function getBuiltInCategories(): RuleCategory[] {
+  return categoriesFileSchema.parse(builtInCategoriesFile).categories;
 }
 
 export function _resetCategoriesStoreForTests(): void {
@@ -53,4 +48,9 @@ export function _resetCategoriesStoreForTests(): void {
     unwatch();
     unwatch = null;
   }
+}
+
+export function _setCategoriesForTests(categories: RuleCategory[]): void {
+  cache = categories;
+  initialized = true;
 }

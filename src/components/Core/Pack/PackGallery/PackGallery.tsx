@@ -8,7 +8,9 @@ import {
   resolvePackDescription,
   resolvePackName,
 } from '@/utils/packLabel';
-import type { PackCategory, PackFile } from '@/schemas/pack';
+import type { PackFile } from '@/schemas/pack';
+import type { RuleCategory } from '@/schemas/category';
+import { getCategoryLabel } from '@/utils/categoriesStore';
 import { computePackInstallStatus } from '@/utils/packInstallStatus';
 import { PackCard } from './PackCard/PackCard';
 import { PackCategoryHeader } from './PackCategoryHeader/PackCategoryHeader';
@@ -21,7 +23,7 @@ import styles from './PackGallery.module.css';
 
 interface PackGalleryProps {
   packs: PackFile[];
-  categories: PackCategory[];
+  categories: RuleCategory[];
   selections: Record<string, PackSelectionState>;
   onSelectionChange: (packId: string, next: PackSelectionState) => void;
   existingRuleIds?: ReadonlySet<string>;
@@ -268,8 +270,8 @@ export function PackGallery({
               .filter((cat) => grouped.has(cat.id))
               .map((cat) => ({
                 key: cat.id,
-                label: resolvePackCategoryLabel(cat),
-                icon: cat.icon,
+                label: getCategoryLabel(cat),
+                icon: cat.emoji,
                 packs: grouped.get(cat.id) ?? [],
               })),
             ...(grouped.has(null)
