@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Flex, Text, Button, Box, Separator } from '@radix-ui/themes';
 import { SidebarItem, SidebarSection } from './Sidebar';
-import { IconBox } from '@/components/UI/IconBox/IconBox';
 import { useListNavigation } from '@/hooks/useListNavigation';
+
+const ICON_SIZE = 16;
+const ICON_STROKE = 1.75;
 
 interface SidebarItemsProps {
   isCollapsed?: boolean;
@@ -61,11 +63,16 @@ function renderBadgeContent(badge: SidebarItem['badge']): React.ReactNode {
   return typeof badge === 'number' && badge > 9 ? '9+' : badge;
 }
 
-function CollapsedItemContent({ item, accent }: { item: SidebarItem; accent: AccentTokens }) {
+function CollapsedItemContent({ item, accent, isActive }: { item: SidebarItem; accent: AccentTokens; isActive: boolean }) {
   const Icon = item.icon;
   return (
     <Flex align="center" justify="center" position="relative">
-      <IconBox icon={Icon} size="sm" variant="gradient" />
+      <Icon
+        size={ICON_SIZE}
+        strokeWidth={ICON_STROKE}
+        color={isActive ? 'var(--accent-11)' : 'var(--gray-11)'}
+        aria-hidden="true"
+      />
       {item.badge && (
         <Box
           style={{
@@ -93,11 +100,17 @@ function CollapsedItemContent({ item, accent }: { item: SidebarItem; accent: Acc
   );
 }
 
-function ExpandedItemContent({ item, accent }: { item: SidebarItem; accent: AccentTokens }) {
+function ExpandedItemContent({ item, accent, isActive }: { item: SidebarItem; accent: AccentTokens; isActive: boolean }) {
   const Icon = item.icon;
   return (
     <Flex align="center" gap="3" width="100%">
-      <IconBox icon={Icon} size="sm" variant="gradient" />
+      <Icon
+        size={ICON_SIZE}
+        strokeWidth={ICON_STROKE}
+        color={isActive ? 'var(--accent-11)' : 'var(--gray-11)'}
+        aria-hidden="true"
+        style={{ flexShrink: 0 }}
+      />
       <Text size="2" style={{
         flex: 1,
         textAlign: 'left',
@@ -212,8 +225,8 @@ export function SidebarItems({
                     style={computeButtonStyle(isCollapsed, isActive, accent, item.accentColor)}
                   >
                     {isCollapsed
-                      ? <CollapsedItemContent item={item} accent={accent} />
-                      : <ExpandedItemContent item={item} accent={accent} />}
+                      ? <CollapsedItemContent item={item} accent={accent} isActive={isActive} />
+                      : <ExpandedItemContent item={item} accent={accent} isActive={isActive} />}
                   </Button>
                 );
               })}
