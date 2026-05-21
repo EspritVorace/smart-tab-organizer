@@ -2,8 +2,6 @@
   "categories": [
     {
       "id": "generic",
-      "name": "🛠️ Patterns Génériques",
-      "description": "Modèles de regex réutilisables pour créer vos propres règles",
       "presets": [
         {
           "id": "numeric-id",
@@ -227,8 +225,6 @@
     },
     {
       "id": "development",
-      "name": "Développement & Code",
-      "description": "Sites de développement, repositories, documentation technique",
       "presets": [
         {
           "id": "github-repo",
@@ -292,8 +288,6 @@
     },
     {
       "id": "productivity",
-      "name": "Productivité & Tickets",
-      "description": "Outils de gestion de projets, tickets, tâches",
       "presets": [
         {
           "id": "jira-ticket",
@@ -383,9 +377,7 @@
       ]
     },
     {
-      "id": "ecommerce",
-      "name": "E-commerce",
-      "description": "Sites marchands et comparateurs",
+      "id": "commerce",
       "presets": [
         {
           "id": "amazon-product",
@@ -418,8 +410,6 @@
     },
     {
       "id": "travel",
-      "name": "Voyage & Réservations",
-      "description": "Booking, transport, hébergement",
       "presets": [
         {
           "id": "airbnb-listing",
@@ -467,8 +457,6 @@
     },
     {
       "id": "search",
-      "name": "Recherche & Documentation",
-      "description": "Moteurs de recherche et documentation",
       "presets": [
         {
           "id": "google-search",
@@ -514,8 +502,6 @@
     },
     {
       "id": "social",
-      "name": "Réseaux Sociaux",
-      "description": "Plateformes sociales et communication",
       "presets": [
         {
           "id": "linkedin-profile",
@@ -568,8 +554,6 @@
     },
     {
       "id": "media",
-      "name": "Streaming & Médias",
-      "description": "Vidéos, musique, actualités",
       "presets": [
         {
           "id": "youtube-video",
@@ -622,8 +606,6 @@
     },
     {
       "id": "cloud",
-      "name": "Cloud & Infrastructure",
-      "description": "Services cloud et infrastructure",
       "presets": [
         {
           "id": "aws-console",
@@ -658,8 +640,6 @@
     },
     {
       "id": "finance",
-      "name": "Finance & Banking",
-      "description": "Banques, trading, crypto",
       "presets": [
         {
           "id": "coinbase-crypto",
@@ -683,8 +663,6 @@
     },
     {
       "id": "education",
-      "name": "Education & Apprentissage",
-      "description": "Cours en ligne, formations",
       "presets": [
         {
           "id": "udemy-course",

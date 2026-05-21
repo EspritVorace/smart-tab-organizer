@@ -66,8 +66,8 @@ vi.mock('../../src/hooks/packDataSource', () => ({
   ],
   getCategoriesSource: () => ({
     categories: [
-      { id: 'cloud', label: { en: 'Cloud', fr: 'Cloud' } },
-      { id: 'dev', label: 'Development' },
+      { id: 'cloud', emoji: '☁️', labelKey: 'category_cloud', builtIn: true },
+      { id: 'dev', emoji: '💻', label: 'Development', builtIn: false },
     ],
   }),
 }));
@@ -135,7 +135,7 @@ describe('usePacks (invalid categories)', () => {
         },
       ],
       getCategoriesSource: () => ({
-        categories: [{ id: 'cloud', label: 'Cloud' }],
+        categories: [{ id: 'cloud', emoji: '☁️', label: 'Cloud', builtIn: false }],
       }),
     }));
     const { usePacks: usePacksReloaded } = await import('../../src/hooks/usePacks');
@@ -165,7 +165,7 @@ describe('usePacks (invalid categories)', () => {
         },
       ],
       getCategoriesSource: () => ({
-        categories: [{ id: 'cloud', label: 'Cloud' }],
+        categories: [{ id: 'cloud', emoji: '☁️', label: 'Cloud', builtIn: false }],
       }),
     }));
     const { usePacks: usePacksReloaded } = await import('../../src/hooks/usePacks');

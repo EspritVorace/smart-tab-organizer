@@ -147,43 +147,25 @@ describe('initCategoriesStore: external storage updates + reset', () => {
   });
 });
 
-describe('fetchBuiltInCategories', () => {
-  it('downloads and validates the categories.json file', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({ categories: SAMPLE_CATEGORIES }),
-      }),
-    );
-    const { fetchBuiltInCategories } = await import('../../src/utils/categoriesStore');
+describe('getBuiltInCategories', () => {
+  it('returns the 14 unified built-in categories from src/data/categories.json', async () => {
+    const { getBuiltInCategories } = await import('../../src/utils/categoriesStore');
 
-    const result = await fetchBuiltInCategories();
+    const result = getBuiltInCategories();
 
-    expect(result).toHaveLength(3);
-    expect(result[0].id).toBe('development');
-  });
-
-  it('throws when the HTTP response is not OK', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({ ok: false, status: 404, json: async () => ({}) }),
-    );
-    const { fetchBuiltInCategories } = await import('../../src/utils/categoriesStore');
-
-    await expect(fetchBuiltInCategories()).rejects.toThrow();
-  });
-
-  it('throws when the JSON does not match the schema', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({ not: 'the right shape' }),
-      }),
-    );
-    const { fetchBuiltInCategories } = await import('../../src/utils/categoriesStore');
-
-    await expect(fetchBuiltInCategories()).rejects.toThrow();
+    expect(result.length).toBeGreaterThanOrEqual(14);
+    const ids = result.map((c) => c.id);
+    for (const expected of [
+      'development', 'productivity', 'commerce', 'travel', 'search', 'social',
+      'media', 'cloud', 'finance', 'education', 'generic', 'communication',
+      'news', 'ai',
+    ]) {
+      expect(ids).toContain(expected);
+    }
+    for (const c of result) {
+      expect(c.builtIn).toBe(true);
+      expect(c.labelKey).toBeTruthy();
+      expect(c.emoji).toBeTruthy();
+    }
   });
 });

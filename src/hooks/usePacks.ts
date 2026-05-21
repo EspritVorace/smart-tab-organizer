@@ -1,35 +1,31 @@
 import { useMemo } from 'react';
-import {
-  packCategoriesFileSchema,
-  packFileSchema,
-  type PackCategory,
-  type PackFile,
-} from '@/schemas/pack';
+import { packFileSchema, type PackFile } from '@/schemas/pack';
+import { categoriesFileSchema, type RuleCategory } from '@/schemas/category';
 import { logger } from '@/utils/logger';
 import { resolvePackName, resolvePackCategoryLabel } from '@/utils/packLabel';
 import { getCategoriesSource, getPackSourceEntries } from './packDataSource';
 
 export interface UsePacksResult {
   packs: PackFile[];
-  categories: PackCategory[];
+  categories: RuleCategory[];
   loadError: string | null;
 }
 
 interface PreparedData {
   packs: PackFile[];
-  categories: PackCategory[];
+  categories: RuleCategory[];
   loadError: string | null;
 }
 
 function prepare(): PreparedData {
-  const categoriesParsed = packCategoriesFileSchema.safeParse(getCategoriesSource());
-  let categories: PackCategory[] = [];
+  const categoriesParsed = categoriesFileSchema.safeParse(getCategoriesSource());
+  let categories: RuleCategory[] = [];
   let loadError: string | null = null;
 
   if (categoriesParsed.success) {
     categories = categoriesParsed.data.categories;
   } else {
-    loadError = `Pack categories file is invalid: ${categoriesParsed.error.message}`;
+    loadError = `Categories file is invalid: ${categoriesParsed.error.message}`;
     logger.warn('[usePacks]', loadError);
   }
 
