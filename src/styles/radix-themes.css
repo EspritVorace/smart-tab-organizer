@@ -140,3 +140,114 @@
   -webkit-backdrop-filter: saturate(180%) blur(12px);
   border-bottom: 1px solid var(--gray-a4);
 }
+
+/* ---- Custom scrollbars (elegant, indigo accent) ----
+ * 10px wide pill thumb that flips to the indigo accent on hover and
+ * to a deeper accent on drag. Track stays transparent so it never
+ * competes with the content underneath.
+ *
+ * Firefox: native thin scrollbars via scrollbar-width / scrollbar-color.
+ * Chromium / WebKit: pseudo-elements with a 2px transparent border to
+ *   shrink the visible thumb to ~6px (gives the "floating pill" look).
+ * Light/dark parity is automatic: Radix's --gray-a8 / --accent-9 already
+ * shift between appearances. Dark mode (.dark on <html> via next-themes
+ * attribute="class") bumps the resting alpha up so the thumb stays
+ * visible on slate backgrounds. */
+.radix-themes {
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-a8) transparent;
+}
+
+.radix-themes *,
+.radix-themes *::before,
+.radix-themes *::after {
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-a8) transparent;
+}
+
+.radix-themes ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.radix-themes ::-webkit-scrollbar-track,
+.radix-themes ::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.radix-themes ::-webkit-scrollbar-thumb {
+  background-color: var(--gray-a8);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  min-height: 40px;
+  transition: background-color 120ms ease;
+}
+
+.radix-themes ::-webkit-scrollbar-thumb:hover {
+  background-color: var(--accent-9);
+}
+
+.radix-themes ::-webkit-scrollbar-thumb:active {
+  background-color: var(--accent-10);
+}
+
+/* Dark appearance: bump the resting alpha for slate backgrounds. */
+.dark .radix-themes,
+.dark.radix-themes,
+.dark .radix-themes *,
+.dark .radix-themes *::before,
+.dark .radix-themes *::after {
+  scrollbar-color: var(--gray-a9) transparent;
+}
+
+.dark .radix-themes ::-webkit-scrollbar-thumb,
+.dark.radix-themes ::-webkit-scrollbar-thumb {
+  background-color: var(--gray-a9);
+}
+
+.dark .radix-themes ::-webkit-scrollbar-thumb:hover,
+.dark.radix-themes ::-webkit-scrollbar-thumb:hover {
+  background-color: var(--accent-9);
+}
+
+/* Overlay variant (opt-in): thumb invisible until hover / focus-within.
+ * Useful for sidebars or panels where ambient scrollbars feel noisy. */
+.radix-themes .scroll-overlay {
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 200ms ease;
+}
+
+.radix-themes .scroll-overlay::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  transition: background-color 200ms ease;
+}
+
+.radix-themes .scroll-overlay:hover,
+.radix-themes .scroll-overlay:focus-within {
+  scrollbar-color: var(--gray-a8) transparent;
+}
+
+.radix-themes .scroll-overlay:hover::-webkit-scrollbar-thumb,
+.radix-themes .scroll-overlay:focus-within::-webkit-scrollbar-thumb {
+  background-color: var(--gray-a8);
+}
+
+.radix-themes .scroll-overlay:hover::-webkit-scrollbar-thumb:hover,
+.radix-themes .scroll-overlay:focus-within::-webkit-scrollbar-thumb:hover {
+  background-color: var(--accent-9);
+}
+
+.dark .radix-themes .scroll-overlay:hover,
+.dark .radix-themes .scroll-overlay:focus-within,
+.dark.radix-themes .scroll-overlay:hover,
+.dark.radix-themes .scroll-overlay:focus-within {
+  scrollbar-color: var(--gray-a9) transparent;
+}
+
+.dark .radix-themes .scroll-overlay:hover::-webkit-scrollbar-thumb,
+.dark .radix-themes .scroll-overlay:focus-within::-webkit-scrollbar-thumb,
+.dark.radix-themes .scroll-overlay:hover::-webkit-scrollbar-thumb,
+.dark.radix-themes .scroll-overlay:focus-within::-webkit-scrollbar-thumb {
+  background-color: var(--gray-a9);
+}
