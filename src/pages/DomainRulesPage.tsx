@@ -303,7 +303,15 @@ export function DomainRulesPage({
         syncSettings={syncSettings}
       >
         {() => (
-          <Box data-testid="page-rules">
+          <Box
+            data-testid="page-rules"
+            style={{
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: 0,
+            }}
+          >
             {/* Toolbar: Search + Add (hidden when no rules exist) */}
             {syncSettings.domainRules.length > 0 && (
               <ListToolbar
@@ -358,55 +366,60 @@ export function DomainRulesPage({
               </BulkActionsBar>
             )}
 
-            {filteredRules.length === 0 && syncSettings.domainRules.length === 0 && !searchTerm && (
-              <EmptyState
-                data-testid="page-rules-empty"
-                icon={Shield}
-                title={getMessage('rulesEmptyTitle')}
-                description={getMessage('rulesEmptyDescription')}
-                actions={
-                  <Flex gap="2">
-                    <Button data-testid="page-rules-btn-add" variant="soft" onClick={handleAddRule}>
-                      <Plus size={14} />
-                      {getMessage('addRule')}
-                    </Button>
-                    <Button variant="soft" onClick={() => openImportRules()}>
-                      <Upload size={14} />
-                      {getMessage('importRulesButton')}
-                    </Button>
+            <Box
+              data-testid="page-rules-scroll"
+              style={{ flex: 1, overflow: 'auto', minHeight: 0 }}
+            >
+              {filteredRules.length === 0 && syncSettings.domainRules.length === 0 && !searchTerm && (
+                <EmptyState
+                  data-testid="page-rules-empty"
+                  icon={Shield}
+                  title={getMessage('rulesEmptyTitle')}
+                  description={getMessage('rulesEmptyDescription')}
+                  actions={
+                    <Flex gap="2">
+                      <Button data-testid="page-rules-btn-add" variant="soft" onClick={handleAddRule}>
+                        <Plus size={14} />
+                        {getMessage('addRule')}
+                      </Button>
+                      <Button variant="soft" onClick={() => openImportRules()}>
+                        <Upload size={14} />
+                        {getMessage('importRulesButton')}
+                      </Button>
+                    </Flex>
+                  }
+                />
+              )}
+              {filteredRules.length === 0 && (syncSettings.domainRules.length > 0 || searchTerm) && (
+                <EmptyState compact icon={AlertCircle} message={getMessage('noRulesFound')} />
+              )}
+              {filteredRules.length > 0 && (
+                <DragDropProvider modifiers={[RestrictToVerticalAxis]} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+                  <Flex data-testid="page-rules-list" direction="column" gap="3" role="list" aria-label={getMessage('domainRulesTab')} ref={listRef}>
+                    {(dragItems ?? filteredRules).map((rule, index) => (
+                      <DomainRuleCard
+                        key={rule.id}
+                        rule={rule}
+                        index={index}
+                        isSelected={selectedIds.has(rule.id)}
+                        searchTerm={searchTerm}
+                        isDragDisabled={!!searchTerm}
+                        isDomainActionDisabled={getRulesForRootDomain(syncSettings.domainRules, rule.domainFilter).length <= 1}
+                        onSelect={handleRowSelect}
+                        onToggleEnabled={handleToggleEnabled}
+                        onEdit={handleEditRule}
+                        onDeleteRequest={(ruleId, focusIndex) => setDeleteTarget({ type: 'single', ruleId, focusIndex })}
+                        onMoveToFirst={handleMoveToFirst}
+                        onMoveToLast={handleMoveToLast}
+                        onMoveToFirstOfDomain={handleMoveToFirstOfDomain}
+                        onMoveToLastOfDomain={handleMoveToLastOfDomain}
+                        onKeyDown={(e) => handleCardKeyDown(e, rule, index)}
+                      />
+                    ))}
                   </Flex>
-                }
-              />
-            )}
-            {filteredRules.length === 0 && (syncSettings.domainRules.length > 0 || searchTerm) && (
-              <EmptyState compact icon={AlertCircle} message={getMessage('noRulesFound')} />
-            )}
-            {filteredRules.length > 0 && (
-              <DragDropProvider modifiers={[RestrictToVerticalAxis]} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-                <Flex data-testid="page-rules-list" direction="column" gap="3" role="list" aria-label={getMessage('domainRulesTab')} ref={listRef}>
-                  {(dragItems ?? filteredRules).map((rule, index) => (
-                    <DomainRuleCard
-                      key={rule.id}
-                      rule={rule}
-                      index={index}
-                      isSelected={selectedIds.has(rule.id)}
-                      searchTerm={searchTerm}
-                      isDragDisabled={!!searchTerm}
-                      isDomainActionDisabled={getRulesForRootDomain(syncSettings.domainRules, rule.domainFilter).length <= 1}
-                      onSelect={handleRowSelect}
-                      onToggleEnabled={handleToggleEnabled}
-                      onEdit={handleEditRule}
-                      onDeleteRequest={(ruleId, focusIndex) => setDeleteTarget({ type: 'single', ruleId, focusIndex })}
-                      onMoveToFirst={handleMoveToFirst}
-                      onMoveToLast={handleMoveToLast}
-                      onMoveToFirstOfDomain={handleMoveToFirstOfDomain}
-                      onMoveToLastOfDomain={handleMoveToLastOfDomain}
-                      onKeyDown={(e) => handleCardKeyDown(e, rule, index)}
-                    />
-                  ))}
-                </Flex>
-              </DragDropProvider>
-            )}
+                </DragDropProvider>
+              )}
+            </Box>
           </Box>
         )}
       </PageLayout>
