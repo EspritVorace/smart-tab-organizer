@@ -252,6 +252,8 @@ test.describe('Creation wizard — Step 2: Configuration', () => {
 test.describe('Creation wizard — Step 3: Options', () => {
   async function advanceToStep3(wizard: RuleWizardPage): Promise<void> {
     await advanceToStep2(wizard);
+    // Switch to Ask mode so step 2 does not require a preset selection.
+    await wizard.selectConfigMode('ask');
     await wizard.clickNext();
     await wizard.deduplicationSwitch().waitFor({ state: 'visible' });
   }
@@ -312,6 +314,8 @@ test.describe('Creation wizard — Step 3: Options', () => {
 test.describe('Creation wizard — Step 4: Summary', () => {
   async function advanceToStep4(wizard: RuleWizardPage): Promise<void> {
     await advanceToStep2(wizard);
+    // Switch to Ask mode so step 2 does not require a preset selection.
+    await wizard.selectConfigMode('ask');
     await wizard.clickNext(); // step 3
     await wizard.deduplicationSwitch().waitFor({ state: 'visible' });
     await wizard.clickNext(); // step 4
