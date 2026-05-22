@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { getMessage } from '@/utils/i18n';
 import { WizardModal } from '@/components/UI/WizardModal';
 import { WizardStepper } from '@/components/UI/WizardStepper/WizardStepper';
+import { AriaButton } from '@/components/UI/AriaButton/AriaButton';
 import { WizardStep1Identity } from './WizardStep1Identity';
 import { WizardStep2Config } from './WizardStep2Config';
 import { WizardStep3Options } from './WizardStep3Options';
@@ -338,8 +339,15 @@ export function RuleWizardModal({
     return [];
   };
 
+  const isPresetSelectionMissing =
+    step === 1 && configMode === 'preset' && !watchedPresetId;
+
   const handleNext = async () => {
     setStepError(null);
+    if (isPresetSelectionMissing) {
+      setStepError(getMessage('errorPresetRequired'));
+      return;
+    }
     const fieldsToValidate = computeFieldsToValidate();
     const valid = fieldsToValidate.length === 0 || await trigger(fieldsToValidate);
     if (!valid) return;
@@ -579,7 +587,15 @@ export function RuleWizardModal({
                 </Button>
               )}
               {step < 3 && (
-                <Button data-testid="wizard-rule-btn-next" type="button" onClick={handleNext}>{getMessage('next')}</Button>
+                <AriaButton
+                  data-testid="wizard-rule-btn-next"
+                  type="button"
+                  onClick={handleNext}
+                  ariaDisabled={isPresetSelectionMissing}
+                  disabledReason={isPresetSelectionMissing ? getMessage('errorPresetRequired') : undefined}
+                >
+                  {getMessage('next')}
+                </AriaButton>
               )}
               {step === 3 && (
                 <Button data-testid="wizard-rule-btn-create" type="submit">{getMessage('create')}</Button>
