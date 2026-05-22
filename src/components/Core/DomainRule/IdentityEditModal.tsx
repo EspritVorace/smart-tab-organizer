@@ -1,5 +1,5 @@
 import { Flex, TextField } from '@radix-ui/themes';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
 import { EditModalShell } from './EditModalShell';
@@ -7,6 +7,7 @@ import { FormField } from '@/components/Form/FormFields';
 import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
 import { ChromeColorPicker } from '@/components/Core/TabTree/ChromeColorPicker';
 import { createDomainFilterValidator } from '@/schemas/common';
+import { deriveLabelFromDomain } from '@/utils/labelFromDomain';
 import type { ChromeGroupColor } from '@/types/tabTree';
 import type { DomainRule } from '@/schemas/domainRule';
 
@@ -65,14 +66,31 @@ export function IdentityEditModal({
   const [color, setColor] = useState<ChromeGroupColor>(initial.color);
   const [domainFilter, setDomainFilter] = useState(initial.domainFilter);
 
+  // The label is considered "owned by the user" as soon as it's non-empty.
+  // Clearing the label re-arms the autofill on the next domainFilter change.
+  const labelOwnedRef = useRef<boolean>(initial.label.trim().length > 0);
+
   useEffect(() => {
     if (isOpen) {
       setLabel(initial.label);
       setCategoryId(initial.categoryId);
       setColor(initial.color);
       setDomainFilter(initial.domainFilter);
+      labelOwnedRef.current = initial.label.trim().length > 0;
     }
   }, [isOpen, initial]);
+
+  const handleLabelChange = (value: string) => {
+    labelOwnedRef.current = value.trim().length > 0;
+    setLabel(value);
+  };
+
+  const handleDomainFilterChange = (value: string) => {
+    setDomainFilter(value);
+    if (!labelOwnedRef.current) {
+      setLabel(deriveLabelFromDomain(value));
+    }
+  };
 
   const existingLabels = useMemo(
     () => existingRules
@@ -103,6 +121,20 @@ export function IdentityEditModal({
       data-testid="modal-edit-identity"
     >
       <Flex direction="column" gap="4" mt="4">
+        <FormField label={getMessage('domainFilter')} required error={domainError}>
+          {(fieldId) => (
+            <TextField.Root
+              id={fieldId}
+              name="domainFilter"
+              data-testid="modal-edit-identity-field-domain"
+              value={domainFilter}
+              onChange={(e) => handleDomainFilterChange(e.target.value)}
+              placeholder={getMessage('domainFilterPlaceholder')}
+              style={{ marginTop: '4px' }}
+            />
+          )}
+        </FormField>
+
         <FormField label={getMessage('labelLabel')} required error={labelError}>
           {(fieldId) => (
             <div style={{ marginTop: '4px' }}>
@@ -110,7 +142,7 @@ export function IdentityEditModal({
                 id={fieldId}
                 name="label"
                 value={label}
-                onChange={setLabel}
+                onChange={handleLabelChange}
                 data-testid="modal-edit-identity-field-label"
                 placeholder={getMessage('labelPlaceholder')}
                 categoryId={categoryId}
@@ -125,20 +157,6 @@ export function IdentityEditModal({
             <div style={{ marginTop: '4px' }}>
               <ChromeColorPicker value={color} onChange={setColor} />
             </div>
-          )}
-        </FormField>
-
-        <FormField label={getMessage('domainFilter')} required error={domainError}>
-          {(fieldId) => (
-            <TextField.Root
-              id={fieldId}
-              name="domainFilter"
-              data-testid="modal-edit-identity-field-domain"
-              value={domainFilter}
-              onChange={(e) => setDomainFilter(e.target.value)}
-              placeholder={getMessage('domainFilterPlaceholder')}
-              style={{ marginTop: '4px' }}
-            />
           )}
         </FormField>
       </Flex>

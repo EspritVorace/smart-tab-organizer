@@ -460,7 +460,7 @@ export function RuleWizardModal({
       fillHeight={!isEditing && step === 1}
       onOpenAutoFocus={(e) => {
         e.preventDefault();
-        const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[name="label"]');
+        const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[name="domainFilter"]');
         input?.focus();
       }}
     >
@@ -507,7 +507,7 @@ export function RuleWizardModal({
               <>
                 {step === 0 && (
                   <Box data-testid="wizard-rule-step-1">
-                    <WizardStep1Identity control={control} errors={errors} />
+                    <WizardStep1Identity control={control} errors={errors} setValue={setValue} />
                   </Box>
                 )}
                 {step === 1 && (
