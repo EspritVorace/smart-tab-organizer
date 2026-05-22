@@ -83,6 +83,52 @@ test.describe('Creation wizard — Step 1: Identity', () => {
     await page.close();
   });
 
+  test('step 1 — category radiogroup is visible and selection persists across steps', async ({
+    extensionContext, extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    const wizard = await openCreateWizard(page, extensionId);
+
+    await expect(wizard.categoryField()).toBeVisible();
+    await wizard.selectCategory('Development');
+    const developmentRadio = wizard.categoryField().getByTestId('wizard-rule-category-development');
+    await expect(developmentRadio).toHaveAttribute('aria-checked', 'true');
+
+    await wizard.fillLabel('Cat Rule');
+    await wizard.fillDomainFilter('catrule.com');
+    await wizard.clickNext();
+    await wizard.expectOnStep(2);
+
+    await wizard.clickBack();
+    await expect(wizard.categoryField().getByTestId('wizard-rule-category-development'))
+      .toHaveAttribute('aria-checked', 'true');
+    await page.close();
+  });
+
+  test('step 1 — category radiogroup supports arrow-key navigation', async ({
+    extensionContext, extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    const wizard = await openCreateWizard(page, extensionId);
+
+    const noneSwatch = wizard.categoryField().getByTestId('wizard-rule-category-none');
+    await noneSwatch.focus();
+    await expect(noneSwatch).toBeFocused();
+    await expect(noneSwatch).toHaveAttribute('aria-checked', 'true');
+
+    // Selection-follows-focus: ArrowRight selects the next swatch (the first
+    // built-in category by registry order).
+    await page.keyboard.press('ArrowRight');
+    const checkedAfterArrow = wizard.categoryField().getByRole('radio', { checked: true });
+    await expect(checkedAfterArrow).not.toHaveAttribute('data-testid', 'wizard-rule-category-none');
+
+    // Home key cycles back to the first swatch (None).
+    await page.keyboard.press('Home');
+    await expect(noneSwatch).toBeFocused();
+    await expect(noneSwatch).toHaveAttribute('aria-checked', 'true');
+    await page.close();
+  });
+
   test('step 1 — Next is blocked when domainFilter is invalid', async ({
     extensionContext, extensionId,
   }) => {

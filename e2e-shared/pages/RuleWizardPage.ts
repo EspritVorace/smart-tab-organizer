@@ -94,15 +94,11 @@ export class RuleWizardPage extends DialogPage {
   }
 
   /**
-   * Category picker trigger button (the colored swatch shown next to the
-   * label input). Opens a Radix Popover containing the category radios.
+   * Category radiogroup container, rendered inline as its own row in step 1.
+   * Anchored by data-testid so it stays locale-agnostic.
    */
-  categoryPicker(): Locator {
-    // The CategoryPicker is rendered next to the label input; its trigger is
-    // a `<button type="button">` with an `aria-label` matching the currently
-    // selected category. The only stable anchor across locales is the
-    // sibling structure of TextFieldWithCategory.
-    return this.step1Identity().locator('button[type="button"]').first();
+  categoryField(): Locator {
+    return this.step1Identity().getByTestId('wizard-rule-field-category');
   }
 
   // ─── Locators: config & options ──────────────────────────────────────────
@@ -178,14 +174,12 @@ export class RuleWizardPage extends DialogPage {
   }
 
   /**
-   * Open the category picker popover and select a category by its
-   * accessible label. Pass `null` to clear the selection.
+   * Pick a category by its accessible label in the inline radiogroup of
+   * step 1. Pass `null` to select the "None" swatch.
    */
   async selectCategory(label: string | null): Promise<void> {
-    await this.categoryPicker().click();
-    const popover = this.page.locator('[role="radiogroup"]').last();
     const target = label === null ? /no category|none/i : new RegExp(label, 'i');
-    await popover.getByRole('radio', { name: target }).click();
+    await this.categoryField().getByRole('radio', { name: target }).click();
   }
 
   // ─── Atomic actions: configuration (step 2) ──────────────────────────────

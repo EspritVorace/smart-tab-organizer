@@ -10,7 +10,7 @@ import {
 } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
 import { FormField } from '@/components/Form/FormFields';
-import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
+import { CategoryRadioGroup } from '@/components/Core/DomainRule/CategoryRadioGroup';
 import { ChromeColorPicker } from '@/components/Core/TabTree/ChromeColorPicker';
 import { deriveLabelFromDomain } from '@/utils/labelFromDomain';
 import type { DomainRule } from '@/schemas/domainRule';
@@ -61,35 +61,44 @@ export function WizardStep1Identity({ control, errors, setValue }: WizardStep1Id
         )}
       </FormField>
 
-      {/* Label + Category */}
+      {/* Label */}
       <FormField
         label={getMessage('labelLabel')}
         required={true}
         error={errors.label}
       >
         {(fieldId) => (
+          <Controller
+            name="label"
+            control={control}
+            render={({ field }) => (
+              <TextField.Root
+                {...field}
+                value={field.value ?? ''}
+                id={fieldId}
+                data-testid="wizard-rule-field-label"
+                name="label"
+                placeholder={getMessage('labelPlaceholder')}
+                style={{ marginTop: '4px' }}
+              />
+            )}
+          />
+        )}
+      </FormField>
+
+      {/* Category */}
+      <FormField label={getMessage('categoryPickerLabel')} error={errors.categoryId}>
+        {() => (
           <div style={{ marginTop: '4px' }}>
             <Controller
-              name="label"
+              name="categoryId"
               control={control}
-              render={({ field: labelField }) => (
-                <Controller
-                  name="categoryId"
-                  control={control}
-                  render={({ field: catField }) => (
-                    <TextFieldWithCategory
-                      id={fieldId}
-                      ref={labelField.ref}
-                      name={labelField.name}
-                      value={labelField.value ?? ''}
-                      onChange={labelField.onChange}
-                      onBlur={labelField.onBlur}
-                      data-testid="wizard-rule-field-label"
-                      placeholder={getMessage('labelPlaceholder')}
-                      categoryId={catField.value as string | null | undefined}
-                      onCategoryChange={catField.onChange}
-                    />
-                  )}
+              render={({ field }) => (
+                <CategoryRadioGroup
+                  value={field.value as string | null | undefined}
+                  onChange={field.onChange}
+                  data-testid="wizard-rule-field-category"
+                  swatchTestIdPrefix="wizard-rule-category"
                 />
               )}
             />

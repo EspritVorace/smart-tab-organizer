@@ -4,7 +4,7 @@ import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
 import { EditModalShell } from './EditModalShell';
 import { FormField } from '@/components/Form/FormFields';
-import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
+import { CategoryRadioGroup } from '@/components/Core/DomainRule/CategoryRadioGroup';
 import { ChromeColorPicker } from '@/components/Core/TabTree/ChromeColorPicker';
 import { createDomainFilterValidator } from '@/schemas/common';
 import { deriveLabelFromDomain } from '@/utils/labelFromDomain';
@@ -137,16 +137,26 @@ export function IdentityEditModal({
 
         <FormField label={getMessage('labelLabel')} required error={labelError}>
           {(fieldId) => (
+            <TextField.Root
+              id={fieldId}
+              name="label"
+              data-testid="modal-edit-identity-field-label"
+              value={label}
+              onChange={(e) => handleLabelChange(e.target.value)}
+              placeholder={getMessage('labelPlaceholder')}
+              style={{ marginTop: '4px' }}
+            />
+          )}
+        </FormField>
+
+        <FormField label={getMessage('categoryPickerLabel')}>
+          {() => (
             <div style={{ marginTop: '4px' }}>
-              <TextFieldWithCategory
-                id={fieldId}
-                name="label"
-                value={label}
-                onChange={handleLabelChange}
-                data-testid="modal-edit-identity-field-label"
-                placeholder={getMessage('labelPlaceholder')}
-                categoryId={categoryId}
-                onCategoryChange={setCategoryId}
+              <CategoryRadioGroup
+                value={categoryId}
+                onChange={setCategoryId}
+                data-testid="modal-edit-identity-field-category"
+                swatchTestIdPrefix="modal-edit-identity-category"
               />
             </div>
           )}
