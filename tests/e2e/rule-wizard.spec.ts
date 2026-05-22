@@ -52,17 +52,34 @@ test.describe('Creation wizard — Step 1: Identity', () => {
     await page.close();
   });
 
-  test('step 1 — Next is blocked when label is empty', async ({
+  test('step 1 — Next is blocked when fields are empty', async ({
     extensionContext, extensionId,
   }) => {
     const page = await extensionContext.newPage();
     const wizard = await openCreateWizard(page, extensionId);
 
-    await wizard.fillDomainFilter('test.com');
+    // Click Next without filling anything: label is empty (and so is the
+    // auto-derived value from an empty domain), so validation must block.
     await wizard.clickNext();
 
     // Still on step 1.
     await expect(wizard.labelInput()).toBeVisible();
+    await page.close();
+  });
+
+  test('step 1 — label is auto-derived from the domain filter', async ({
+    extensionContext, extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    const wizard = await openCreateWizard(page, extensionId);
+
+    await wizard.fillDomainFilter('mail.google.com');
+    await expect(wizard.labelInput()).toHaveValue('Google');
+
+    // Once the user owns the label, further domain edits do not overwrite it.
+    await wizard.fillLabel('Custom Label');
+    await wizard.fillDomainFilter('atlassian.net');
+    await expect(wizard.labelInput()).toHaveValue('Custom Label');
     await page.close();
   });
 
