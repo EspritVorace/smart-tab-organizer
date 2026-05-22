@@ -39,7 +39,7 @@ export const CategoryRadioGroupNoneSelected: Story = {
 export const CategoryRadioGroupNarrowContainer: Story = {
   decorators: [
     (Story) => (
-      <Box style={{ width: 320, padding: 'var(--space-3)' }}>
+      <Box style={{ width: 380, padding: 'var(--space-3)' }}>
         <Story />
       </Box>
     ),

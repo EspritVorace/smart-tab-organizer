@@ -38,8 +38,8 @@
 }
 
 .swatch {
-  width: 32px;
-  height: 32px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   border: 2px solid transparent;
   background-color: var(--gray-a3);
@@ -49,7 +49,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1;
   transition: transform 0.1s ease, border-color 0.1s ease;
   position: relative;
