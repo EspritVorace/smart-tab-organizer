@@ -33,7 +33,7 @@ export function CategoryRadioGroup({
   const categories = settings?.categories ?? [];
   const listRef = useRef<HTMLDivElement>(null);
   const { handleNavigationKey } = useListNavigation(listRef, '[role="radio"]', {
-    axis: 'both',
+    axis: 'horizontal',
     rovingTabIndex: true,
   });
 
@@ -56,11 +56,11 @@ export function CategoryRadioGroup({
     <Flex
       ref={listRef}
       align="center"
-      gap="2"
-      wrap="wrap"
+      gap="1"
       role="radiogroup"
       aria-label={groupLabel}
       data-testid={dataTestId}
+      style={{ flexShrink: 0 }}
     >
       {options.map((option, index) => {
         const isSelected = (option.id ?? null) === (value ?? null);
