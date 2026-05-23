@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flex, IconButton, Tooltip } from '@radix-ui/themes';
+import { Flex, IconButton, Kbd, Tooltip } from '@radix-ui/themes';
 import { Camera, Monitor, Replace, RotateCcw, Square, Wrench } from 'lucide-react';
 import { SplitButton } from '@/components/UI/SplitButton/SplitButton';
 import { getMessage } from '@/utils/i18n';
@@ -87,13 +87,21 @@ export function SessionRestoreButton({
 
   return (
     <Flex align="center" gap="1">
-      <Tooltip content={getMessage('sessionRefresh')}>
+      <Tooltip
+        content={
+          <Flex align="center" gap="2">
+            {getMessage('sessionRefresh')}
+            <Kbd>U</Kbd>
+          </Flex>
+        }
+      >
         <IconButton
           size={size}
           variant={variant}
           color="gray"
           onClick={() => onRefresh(session)}
           aria-label={getMessage('sessionRefresh')}
+          aria-keyshortcuts="U"
           data-testid={testId ? `${testId}-refresh` : undefined}
         >
           <Camera size={isTile ? 14 : 12} aria-hidden="true" />

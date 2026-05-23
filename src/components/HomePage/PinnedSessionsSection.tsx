@@ -36,6 +36,11 @@ export function PinnedSessionsSection({ sessions, onSeeAll, onRestore }: PinnedS
         else if (e.altKey) onRestore(session, 'replace');
         else if (e.shiftKey) onRestore(session, 'current');
         else onRestore(session, 'custom');
+        return;
+      }
+      if (e.key.toLowerCase() === 'u' && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        onRestore(session, 'refresh');
       }
     },
     [handleNavigationKey, onRestore],

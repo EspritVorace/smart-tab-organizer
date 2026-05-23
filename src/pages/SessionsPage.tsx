@@ -545,6 +545,10 @@ export function SessionsPage({
         const focused = getFocusedSession();
         if (focused) handleRestoreNewWindow(focused);
       },
+      'sessionCard.refresh': () => {
+        const focused = getFocusedSession();
+        if (focused) handleRefreshTrigger(focused);
+      },
       'sessionCard.edit': () => {
         const focused = getFocusedSession();
         if (focused) setEditTarget(focused);
