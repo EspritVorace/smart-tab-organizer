@@ -24,6 +24,7 @@ export interface TestSession {
   groups: TestSavedTabGroup[];
   ungroupedTabs: TestSavedTab[];
   isPinned: boolean;
+  isArchived?: boolean;
   categoryId?: string | null;
   note?: string;
 }
@@ -53,34 +54,59 @@ async function getServiceWorker(context: BrowserContext) {
   return sw;
 }
 
-/** Write sessions into chrome.storage.local (bypasses the UI). */
+/** Write sessions into chrome.storage.local, partitioning by bucket so the
+ * runtime sees them in the right storage item. Flips the per-workspace
+ * archive-split flag to keep the background migration idempotent.
+ */
 export async function seedSessions(
   context: BrowserContext,
   sessions: TestSession[],
 ): Promise<void> {
   const sw = await getServiceWorker(context);
   await sw.evaluate(async (data) => {
-    await chrome.storage.local.set({ sessions: data });
+    const all = data as TestSession[];
+    const pinned: TestSession[] = [];
+    const active: TestSession[] = [];
+    const archived: TestSession[] = [];
+    for (const session of all) {
+      if (session.isArchived) archived.push(session);
+      else if (session.isPinned) pinned.push(session);
+      else active.push(session);
+    }
+    await chrome.storage.local.set({
+      pinnedSessions: pinned,
+      sessions: active,
+      archivedSessions: archived,
+      sessionsArchiveSplitDone: true,
+    });
   }, sessions as any[]);
   // Give storage event listeners time to propagate
   await new Promise(resolve => setTimeout(resolve, 100));
 }
 
-/** Remove all sessions from storage. */
+/** Remove all sessions from every bucket. */
 export async function clearSessions(context: BrowserContext): Promise<void> {
   const sw = await getServiceWorker(context);
   await sw.evaluate(async () => {
-    await chrome.storage.local.remove('sessions');
+    await chrome.storage.local.remove(['sessions', 'pinnedSessions', 'archivedSessions']);
   });
   await new Promise(resolve => setTimeout(resolve, 100));
 }
 
-/** Read sessions back from storage (for assertions). */
+/** Read sessions back from every bucket, concatenated in the order pinned > active > archived. */
 export async function getSessionsFromStorage(context: BrowserContext): Promise<TestSession[]> {
   const sw = await getServiceWorker(context);
   return (await sw.evaluate(async () => {
-    const result = await chrome.storage.local.get({ sessions: [] });
-    return result.sessions;
+    const result = await chrome.storage.local.get({
+      pinnedSessions: [],
+      sessions: [],
+      archivedSessions: [],
+    });
+    return [
+      ...(result.pinnedSessions as TestSession[]),
+      ...(result.sessions as TestSession[]),
+      ...(result.archivedSessions as TestSession[]),
+    ];
   })) as TestSession[];
 }
 

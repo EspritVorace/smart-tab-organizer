@@ -47,13 +47,32 @@ export async function seedDomainRules<T>(
   }, rules as unknown as Parameters<typeof sw.evaluate>[1]);
 }
 
-/** Seed `sessions` directly into `chrome.storage.local`. */
+/** Seed sessions directly into `chrome.storage.local`, partitioning them
+ * across the three workspace-scoped buckets (`pinnedSessions`, `sessions`,
+ * `archivedSessions`) the runtime now expects. Also flips the per-workspace
+ * archive-split migration flag so the background's migration leaves the
+ * seeded data alone. */
 export async function seedSessions<T>(
   context: BrowserContext,
   sessions: T[],
 ): Promise<void> {
   const sw = await waitForServiceWorker(context);
   await sw.evaluate(async (data) => {
-    await chrome.storage.local.set({ sessions: data });
+    type SeedSession = { isPinned?: boolean; isArchived?: boolean };
+    const all = data as SeedSession[];
+    const pinned: SeedSession[] = [];
+    const active: SeedSession[] = [];
+    const archived: SeedSession[] = [];
+    for (const session of all) {
+      if (session.isArchived) archived.push(session);
+      else if (session.isPinned) pinned.push(session);
+      else active.push(session);
+    }
+    await chrome.storage.local.set({
+      pinnedSessions: pinned,
+      sessions: active,
+      archivedSessions: archived,
+      sessionsArchiveSplitDone: true,
+    });
   }, sessions as unknown as Parameters<typeof sw.evaluate>[1]);
 }

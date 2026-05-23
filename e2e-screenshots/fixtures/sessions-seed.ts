@@ -282,23 +282,40 @@ export const ALL_SESSIONS: Session[] = [
 
 // ─── Storage helpers ──────────────────────────────────────────────────────────
 
-/** Inject sessions into chrome.storage.local, bypassing the UI. */
+/** Inject sessions into chrome.storage.local, partitioning across the
+ * three bucket keys the runtime now expects. Also flips the
+ * archive-split migration flag so the background doesn't try to re-route
+ * the seeded data. */
 export async function seedSessions(
   context: BrowserContext,
   sessions: Session[],
 ): Promise<void> {
   const sw = await getServiceWorker(context);
   await sw.evaluate(async (data) => {
-    await chrome.storage.local.set({ sessions: data });
-  }, sessions as any[]);
+    const all = data as Session[];
+    const pinned: Session[] = [];
+    const active: Session[] = [];
+    const archived: Session[] = [];
+    for (const session of all) {
+      if (session.isArchived) archived.push(session);
+      else if (session.isPinned) pinned.push(session);
+      else active.push(session);
+    }
+    await chrome.storage.local.set({
+      pinnedSessions: pinned,
+      sessions: active,
+      archivedSessions: archived,
+      sessionsArchiveSplitDone: true,
+    });
+  }, sessions as unknown as Parameters<typeof sw.evaluate>[1]);
   await new Promise((r) => setTimeout(r, 150));
 }
 
-/** Remove all sessions from storage. */
+/** Remove sessions from every bucket. */
 export async function clearSessions(context: BrowserContext): Promise<void> {
   const sw = await getServiceWorker(context);
   await sw.evaluate(async () => {
-    await chrome.storage.local.remove('sessions');
+    await chrome.storage.local.remove(['sessions', 'pinnedSessions', 'archivedSessions']);
   });
   await new Promise((r) => setTimeout(r, 100));
 }
