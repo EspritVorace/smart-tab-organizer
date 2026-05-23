@@ -71,6 +71,11 @@ const emptyAggregates: StatisticsAggregates = {
   lastWeek: { grouping: 0, dedup: 0 },
   thisMonth: { grouping: 0, dedup: 0 },
   topRules: [],
+  sessionEvents: {
+    totals: { created: 0, restored: 0, tabsRestored: 0, archived: 0 },
+    thisWeek: { created: 0, restored: 0, tabsRestored: 0 },
+    lastWeek: { created: 0, restored: 0, tabsRestored: 0 },
+  },
 };
 
 const richAggregates: StatisticsAggregates = {

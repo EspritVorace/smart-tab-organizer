@@ -13,6 +13,7 @@ import { ImportExportWizardsProvider } from '@/contexts/ImportExportWizardsConte
 
 import { useSettings } from '@/hooks/useSettings.js';
 import { useStatistics } from '@/hooks/useStatistics.js';
+import { useSessionStatistics } from '@/hooks/useSessionStatistics.js';
 import { useDeepLinking } from '@/hooks/useDeepLinking.js';
 import { useShortcuts, type ShortcutAction } from '@/hooks/useShortcuts.js';
 import { getMessage } from '@/utils/i18n';
@@ -60,6 +61,7 @@ export function OptionsContent() {
 
     const { settings, updateSettings } = useSettings();
     const { statisticsAggregates, resetStatistics } = useStatistics(settings?.domainRules ?? []);
+    const { snapshot: sessionStatsSnapshot } = useSessionStatistics();
     const {
         currentTab, setCurrentTab,
         openSnapshotWizard, setOpenSnapshotWizard,
@@ -261,7 +263,12 @@ export function OptionsContent() {
                                 />
                             )}
                             {currentTab === 'stats' && (
-                                <StatisticsPage syncSettings={settings} statisticsData={statisticsAggregates} onReset={handleResetStats} />
+                                <StatisticsPage
+                                    syncSettings={settings}
+                                    statisticsData={statisticsAggregates}
+                                    sessionStats={sessionStatsSnapshot}
+                                    onReset={handleResetStats}
+                                />
                             )}
                             {currentTab === 'settings' && (
                                 <SettingsPage syncSettings={settings} updateSettings={updateSettings} />

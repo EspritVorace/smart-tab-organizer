@@ -7,6 +7,7 @@ import type {
   DuplicateTabAction,
   GroupConflictAction,
 } from './conflictDetection';
+import { incrementSessionEvent } from './statisticsUtils';
 
 export type RestoreTarget = 'current' | 'new' | 'replace';
 
@@ -100,6 +101,10 @@ export async function restoreTabs(options: RestoreOptions): Promise<RestoreResul
     await restoreReplaceInCurrentWindow(tabs, groups, protectedTabId, result);
   } else {
     await restoreInCurrentWindow(tabs, groups, conflictResolution, conflictAnalysis, result);
+  }
+
+  if (result.tabsCreated > 0) {
+    await incrementSessionEvent('restored', { tabsRestored: result.tabsCreated });
   }
 
   return result;
