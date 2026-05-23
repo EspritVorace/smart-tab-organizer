@@ -14,6 +14,13 @@ interface UseExportWizardStateOptions<TItem extends { id: string }> {
    * items are selected (historical default).
    */
   initialSelectedIds?: string[];
+  /**
+   * When no `initialSelectedIds` is provided and the default would otherwise
+   * select every item, returns the set of ids that should stay UNchecked
+   * (e.g. archived sessions). Use this to surface a category in the wizard
+   * without pre-selecting it for export.
+   */
+  defaultExcludeIds?: (items: TItem[]) => Set<string>;
   /** JSON top-level key wrapping the selected items (e.g. "domainRules", "sessions"). */
   payloadKey: string;
   filename: string;
@@ -47,6 +54,7 @@ export function useExportWizardState<TItem extends { id: string }>({
   items: providedItems,
   loadItems,
   initialSelectedIds,
+  defaultExcludeIds,
   payloadKey,
   filename,
   notifyTitleKey,
@@ -67,9 +75,14 @@ export function useExportWizardState<TItem extends { id: string }>({
         validIds.length > 0 ? validIds : resolved.map((item) => item.id),
       );
     } else {
-      selection.setAll(resolved.map((item) => item.id));
+      const excluded = defaultExcludeIds ? defaultExcludeIds(resolved) : null;
+      selection.setAll(
+        excluded
+          ? resolved.filter((item) => !excluded.has(item.id)).map((item) => item.id)
+          : resolved.map((item) => item.id),
+      );
     }
-  }, [initialSelectedIds, selection]);
+  }, [initialSelectedIds, defaultExcludeIds, selection]);
 
   useDialogReset(open, () => {
     setExportNote('');

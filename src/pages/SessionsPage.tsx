@@ -126,13 +126,18 @@ interface SessionSectionProps {
   onSelectionChange: (next: Set<string>) => void;
   onBulkDeleteRequest: (ids: string[]) => void;
   onBulkExportRequest: (ids: string[]) => void;
-  /** Primary bulk action button for this section (pin/unpin, archive, unarchive). */
-  bulkPrimary?: {
+  /**
+   * Section-specific bulk action buttons. Each renders inside the
+   * BulkActionsBar before the shared Export/Delete buttons. Order matters:
+   * the first action is visually the primary one (e.g. archive in the
+   * active section, unarchive in the archived section).
+   */
+  bulkExtraActions?: ReadonlyArray<{
     testId: string;
     icon: LucideIcon;
     label: string;
     onClick: (ids: string[]) => void;
-  };
+  }>;
   /** Suffix appended to bulk testIds (e.g. 'pinned' / 'unpinned' / 'archived'). */
   testIdSuffix: BulkScope;
 }
@@ -163,7 +168,7 @@ function SessionSection({
   onSelectionChange,
   onBulkDeleteRequest,
   onBulkExportRequest,
-  bulkPrimary,
+  bulkExtraActions,
   testIdSuffix,
 }: SessionSectionProps) {
   const [dragItems, setDragItems] = useState<Session[] | null>(null);
@@ -231,7 +236,6 @@ function SessionSection({
 
   // When a search is active, hide the whole section if it matched nothing.
   if (sessions.length === 0 && searchQuery) return null;
-  const PrimaryIcon = bulkPrimary?.icon;
   return (
     <Box>
       <SectionHeader icon={icon} titleKey={titleKey} count={sessions.length} />
@@ -244,17 +248,21 @@ function SessionSection({
             isIndeterminate={isIndeterminate}
             onSelectAll={handleSelectAll}
           >
-            {bulkPrimary && PrimaryIcon && (
-              <Button
-                size="1"
-                variant="ghost"
-                data-testid={bulkPrimary.testId}
-                onClick={() => bulkPrimary.onClick(Array.from(selectedIds))}
-              >
-                <PrimaryIcon size={14} />
-                {bulkPrimary.label}
-              </Button>
-            )}
+            {(bulkExtraActions ?? []).map((action) => {
+              const ActionIcon = action.icon;
+              return (
+                <Button
+                  key={action.testId}
+                  size="1"
+                  variant="ghost"
+                  data-testid={action.testId}
+                  onClick={() => action.onClick(Array.from(selectedIds))}
+                >
+                  <ActionIcon size={14} />
+                  {action.label}
+                </Button>
+              );
+            })}
             <Button
               size="1"
               variant="ghost"
@@ -565,7 +573,10 @@ export function SessionsPage({
   }, [restoreSessionId, isLoaded, sessions, onRestoreSessionIdChange]);
 
   // Deep search: name + group titles + tab titles + tab URLs
-  const visibleBucket = sessionsTab === 'archived' ? archivedBucket : [...pinnedBucket, ...activeBucket];
+  const visibleBucket = useMemo<Session[]>(
+    () => sessionsTab === 'archived' ? archivedBucket : [...pinnedBucket, ...activeBucket],
+    [sessionsTab, pinnedBucket, activeBucket, archivedBucket],
+  );
 
   const sessionSearchMatches = useMemo<Map<string, SessionSearchMatch> | null>(() => {
     if (!searchQuery) return null;
@@ -848,12 +859,14 @@ export function SessionsPage({
                   onSelectionChange={setSelectedPinnedIds}
                   onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'pinned', ids })}
                   onBulkExportRequest={(ids) => setBulkExportIds(ids)}
-                  bulkPrimary={{
-                    testId: 'page-sessions-bulk-btn-unpin-pinned',
-                    icon: PinOff,
-                    label: getMessage('unpinSelected'),
-                    onClick: (ids) => handleBulkPinToggle(ids, false),
-                  }}
+                  bulkExtraActions={[
+                    {
+                      testId: 'page-sessions-bulk-btn-unpin-pinned',
+                      icon: PinOff,
+                      label: getMessage('unpinSelected'),
+                      onClick: (ids) => handleBulkPinToggle(ids, false),
+                    },
+                  ]}
                   testIdSuffix="pinned"
                   {...sharedSectionProps}
                 />
@@ -871,12 +884,20 @@ export function SessionsPage({
                   onSelectionChange={setSelectedUnpinnedIds}
                   onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'unpinned', ids })}
                   onBulkExportRequest={(ids) => setBulkExportIds(ids)}
-                  bulkPrimary={{
-                    testId: 'page-sessions-bulk-btn-archive-unpinned',
-                    icon: Archive,
-                    label: getMessage('bulkArchiveAction'),
-                    onClick: handleBulkArchive,
-                  }}
+                  bulkExtraActions={[
+                    {
+                      testId: 'page-sessions-bulk-btn-pin-unpinned',
+                      icon: Pin,
+                      label: getMessage('pinSelected'),
+                      onClick: (ids) => handleBulkPinToggle(ids, true),
+                    },
+                    {
+                      testId: 'page-sessions-bulk-btn-archive-unpinned',
+                      icon: Archive,
+                      label: getMessage('bulkArchiveAction'),
+                      onClick: handleBulkArchive,
+                    },
+                  ]}
                   testIdSuffix="unpinned"
                   {...sharedSectionProps}
                 />
@@ -895,12 +916,14 @@ export function SessionsPage({
                   onSelectionChange={setSelectedArchivedIds}
                   onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'archived', ids })}
                   onBulkExportRequest={(ids) => setBulkExportIds(ids)}
-                  bulkPrimary={{
-                    testId: 'page-sessions-bulk-btn-unarchive-archived',
-                    icon: ArchiveRestore,
-                    label: getMessage('bulkUnarchiveAction'),
-                    onClick: handleBulkUnarchive,
-                  }}
+                  bulkExtraActions={[
+                    {
+                      testId: 'page-sessions-bulk-btn-unarchive-archived',
+                      icon: ArchiveRestore,
+                      label: getMessage('bulkUnarchiveAction'),
+                      onClick: handleBulkUnarchive,
+                    },
+                  ]}
                   testIdSuffix="archived"
                   {...sharedSectionProps}
                 />

@@ -1,9 +1,9 @@
 import React, { useCallback, useMemo } from 'react';
 import { Separator } from '@radix-ui/themes';
-import { Archive, FileDown, Pin } from 'lucide-react';
+import { Archive, Boxes, FileDown, Pin } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { loadSessions } from '@/utils/sessionStorage';
-import { splitByPinned } from '@/utils/sessionUtils';
+import { splitByBucket } from '@/utils/sessionUtils';
 import type { Session } from '@/types/session';
 import { ExportWizardShell } from './ExportWizardShell';
 import { useExportWizardState } from './useExportWizardState';
@@ -21,6 +21,8 @@ export function ExportSessionsWizard({ open, onOpenChange, initialSelectedIds }:
     open,
     loadItems: loadSessions,
     initialSelectedIds,
+    defaultExcludeIds: (items) =>
+      new Set(items.filter((s) => s.isArchived).map((s) => s.id)),
     payloadKey: 'sessions',
     filename: 'smarttab_organizer_sessions.json',
     notifyTitleKey: 'exportSessionsNotificationTitle',
@@ -31,8 +33,8 @@ export function ExportSessionsWizard({ open, onOpenChange, initialSelectedIds }:
 
   const { items: sessions, selection } = state;
 
-  const { pinned: pinnedSessions, unpinned: unpinnedSessions } = useMemo(
-    () => splitByPinned(sessions),
+  const { pinned: pinnedSessions, active: activeSessions, archived: archivedSessions } = useMemo(
+    () => splitByBucket(sessions),
     [sessions],
   );
 
@@ -55,6 +57,9 @@ export function ExportSessionsWizard({ open, onOpenChange, initialSelectedIds }:
     return 'indeterminate';
   }, [selection]);
 
+  const groupSeparator = (above: Session[], below: Session[]) =>
+    above.length > 0 && below.length > 0 ? <Separator size="4" my="1" /> : null;
+
   return (
     <ExportWizardShell<Session>
       open={open}
@@ -75,17 +80,26 @@ export function ExportSessionsWizard({ open, onOpenChange, initialSelectedIds }:
         onToggleGroup={() => toggleGroupSelection(pinnedSessions)}
       />
 
-      {pinnedSessions.length > 0 && unpinnedSessions.length > 0 && (
-        <Separator size="4" my="1" />
-      )}
+      {groupSeparator(pinnedSessions, activeSessions)}
 
       <SessionExportGroupSection
-        sessions={unpinnedSessions}
-        titleKey="sessionsSection"
+        sessions={activeSessions}
+        titleKey="activeSessionsSection"
         icon={Archive}
         selection={selection}
-        groupCheckedState={getGroupCheckedState(unpinnedSessions)}
-        onToggleGroup={() => toggleGroupSelection(unpinnedSessions)}
+        groupCheckedState={getGroupCheckedState(activeSessions)}
+        onToggleGroup={() => toggleGroupSelection(activeSessions)}
+      />
+
+      {groupSeparator([...pinnedSessions, ...activeSessions], archivedSessions)}
+
+      <SessionExportGroupSection
+        sessions={archivedSessions}
+        titleKey="exportArchivedSessionsGroupTitle"
+        icon={Boxes}
+        selection={selection}
+        groupCheckedState={getGroupCheckedState(archivedSessions)}
+        onToggleGroup={() => toggleGroupSelection(archivedSessions)}
       />
     </ExportWizardShell>
   );
