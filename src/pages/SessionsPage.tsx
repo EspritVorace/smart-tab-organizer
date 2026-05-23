@@ -160,6 +160,7 @@ function SessionSection({
   onRestoreCurrentWindow,
   onRestoreNewWindow,
   onReplaceCurrentWindow,
+  onRefresh,
   onPin,
   onUnpin,
   onArchive,
@@ -312,6 +313,7 @@ function SessionSection({
                   onRestoreCurrentWindow={onRestoreCurrentWindow}
                   onRestoreNewWindow={onRestoreNewWindow}
                   onReplaceCurrentWindow={onReplaceCurrentWindow}
+                  onRefresh={onRefresh}
                   onRename={renameSession}
                   onEdit={onOpenEditDialog}
                   onDelete={onOpenDeleteDialog}
