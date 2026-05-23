@@ -77,3 +77,23 @@ export const RuleDetailPopoverManualMode: Story = {
     },
   },
 };
+
+export const RuleDetailPopoverWithTimestampsCreatedOnly: Story = {
+  args: {
+    rule: {
+      ...baseRule,
+      createdAt: '2025-06-01T10:00:00.000Z',
+      updatedAt: '2025-06-01T10:00:00.000Z',
+    },
+  },
+};
+
+export const RuleDetailPopoverWithTimestampsModified: Story = {
+  args: {
+    rule: {
+      ...baseRule,
+      createdAt: '2025-06-01T10:00:00.000Z',
+      updatedAt: '2025-06-15T14:30:00.000Z',
+    },
+  },
+};

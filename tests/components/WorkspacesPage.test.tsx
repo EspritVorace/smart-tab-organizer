@@ -152,4 +152,45 @@ describe('WorkspacesPage', () => {
     fireEvent.click(screen.getByTestId('workspace-row-ws-2-delete'));
     expect(screen.getByTestId('workspace-delete-dialog')).toBeInTheDocument();
   });
+
+  describe('relative time line', () => {
+    it('renders a <time> element with the createdAt when timestamps are equal', () => {
+      const ws: WorkspaceMeta = {
+        id: 'ws-rt',
+        name: 'Fresh',
+        accentColor: 'indigo',
+        createdAt: '2025-06-01T10:00:00.000Z',
+        updatedAt: '2025-06-01T10:00:00.000Z',
+      };
+      ctx.workspaces = [ws];
+      ctx.activeId = 'ws-rt';
+      wrap(<WorkspacesPage syncSettings={baseSettings} />);
+
+      const node = screen.getByTestId('workspace-row-ws-rt-relative-time');
+      expect(node).toBeInTheDocument();
+      expect(node.textContent).toContain('workspaceCreatedPrefix');
+      const time = node.querySelector('time');
+      expect(time).not.toBeNull();
+      expect(time?.getAttribute('dateTime')).toBe('2025-06-01T10:00:00.000Z');
+    });
+
+    it('switches to the modified prefix and uses updatedAt when distinct', () => {
+      const ws: WorkspaceMeta = {
+        id: 'ws-mod',
+        name: 'Edited',
+        accentColor: 'indigo',
+        createdAt: '2025-06-01T10:00:00.000Z',
+        updatedAt: '2025-06-15T14:30:00.000Z',
+      };
+      ctx.workspaces = [ws];
+      ctx.activeId = 'ws-mod';
+      wrap(<WorkspacesPage syncSettings={baseSettings} />);
+
+      const node = screen.getByTestId('workspace-row-ws-mod-relative-time');
+      expect(node.textContent).toContain('workspaceModifiedPrefix');
+      expect(node.querySelector('time')?.getAttribute('dateTime')).toBe(
+        '2025-06-15T14:30:00.000Z',
+      );
+    });
+  });
 });

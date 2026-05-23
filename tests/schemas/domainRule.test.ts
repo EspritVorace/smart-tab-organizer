@@ -191,6 +191,26 @@ describe('domainRuleSchema', () => {
   });
 });
 
+describe('createdAt / updatedAt optional timestamps', () => {
+  it('accepts a rule with both timestamps present', () => {
+    const rule = {
+      ...validRule,
+      createdAt: '2026-05-01T10:00:00.000Z',
+      updatedAt: '2026-05-23T12:00:00.000Z',
+    };
+    expect(domainRuleSchema.safeParse(rule).success).toBe(true);
+  });
+
+  it('accepts a rule without any timestamps (backward compatibility)', () => {
+    expect(domainRuleSchema.safeParse(validRule).success).toBe(true);
+  });
+
+  it('accepts a rule with only createdAt', () => {
+    const rule = { ...validRule, createdAt: '2026-05-01T10:00:00.000Z' };
+    expect(domainRuleSchema.safeParse(rule).success).toBe(true);
+  });
+});
+
 describe('createDomainRuleSchemaWithUniqueness', () => {
   it('accepts a rule with a unique label', () => {
     const existing = [{ ...validRule, id: 'other', label: 'GitLab' }];

@@ -11,6 +11,8 @@ const {
   RuleDetailPopoverWithSearchHighlight,
   RuleDetailPopoverUrlMode,
   RuleDetailPopoverManualMode,
+  RuleDetailPopoverWithTimestampsCreatedOnly,
+  RuleDetailPopoverWithTimestampsModified,
 } = composeStories(stories);
 
 describe('RuleDetailPopover', () => {
@@ -50,5 +52,28 @@ describe('RuleDetailPopover', () => {
   it('renders a rule in manual mode', () => {
     render(<RuleDetailPopoverManualMode />);
     expect(screen.getByText('GitHub')).toBeInTheDocument();
+  });
+
+  it('shows the created prefix with createdAt when timestamps match', () => {
+    render(<RuleDetailPopoverWithTimestampsCreatedOnly />);
+    const node = screen.getByTestId('rule-detail-relative-time');
+    expect(node.textContent).toContain('created');
+    expect(node.querySelector('time')?.getAttribute('dateTime')).toBe(
+      '2025-06-01T10:00:00.000Z',
+    );
+  });
+
+  it('shows the modified prefix with updatedAt when distinct', () => {
+    render(<RuleDetailPopoverWithTimestampsModified />);
+    const node = screen.getByTestId('rule-detail-relative-time');
+    expect(node.textContent).toContain('modified');
+    expect(node.querySelector('time')?.getAttribute('dateTime')).toBe(
+      '2025-06-15T14:30:00.000Z',
+    );
+  });
+
+  it('omits the timestamp line when both timestamps are absent (backward compat)', () => {
+    render(<RuleDetailPopoverEnabled />);
+    expect(screen.queryByTestId('rule-detail-relative-time')).toBeNull();
   });
 });

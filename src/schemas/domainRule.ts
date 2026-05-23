@@ -47,7 +47,9 @@ export const domainRuleSchema = z.object({
   urlQueryParamName: z.string().max(64).refine(
     (val) => val === '' || queryParamNamePattern.test(val),
     { error: () => getMessage('errorInvalidQueryParamName') }
-  ).optional()
+  ).optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional()
 }).refine((data) => {
   // When presetId is null, the conditional validations below apply.
   if (data.presetId === null) {
