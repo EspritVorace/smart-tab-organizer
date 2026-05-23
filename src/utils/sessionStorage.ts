@@ -3,6 +3,7 @@ import { sessionsArraySchema } from '@/schemas/session';
 import { logger } from './logger.js';
 import { getActiveScopedItems } from './workspaceContext.js';
 import type { ScopedItems } from './workspaceStorage.js';
+import { incrementSessionEvent } from './statisticsUtils.js';
 
 /** Logical buckets sessions can live in. Each is backed by its own storage item. */
 export type SessionBucket = 'pinned' | 'active' | 'archived';
@@ -98,6 +99,7 @@ export async function addSession(session: Session): Promise<void> {
   const items = await loadBucket(bucket);
   items.push(session);
   await saveBucket(bucket, items);
+  await incrementSessionEvent('created');
 }
 
 /**
@@ -159,6 +161,7 @@ export async function deleteSession(id: string): Promise<void> {
  */
 export async function archiveSession(id: string): Promise<void> {
   await updateSession(id, { isArchived: true, isPinned: false });
+  await incrementSessionEvent('archived');
 }
 
 /** Move a session out of the archived bucket back into the active bucket. */
