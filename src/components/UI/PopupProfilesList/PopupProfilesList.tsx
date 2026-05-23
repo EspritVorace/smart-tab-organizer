@@ -8,6 +8,7 @@ import { getMessage } from '@/utils/i18n';
 import { loadSessions } from '@/utils/sessionStorage';
 import { getFocusedSessionFromDOM } from '@/utils/sessionUtils';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
+import { getActiveTabGroupId } from '@/utils/tabCapture';
 import { showSuccessNotification } from '@/utils/notifications';
 import { getRuleCategory } from '@/utils/categoriesStore';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
@@ -74,6 +75,14 @@ async function openSessionsPage(hashSuffix = '') {
 
 async function openCustomizeRestore(session: Session) {
   await openSessionsPage(`?action=restore&sessionId=${encodeURIComponent(session.id)}`);
+}
+
+async function openRefreshFromPopup(session: Session) {
+  const groupId = await getActiveTabGroupId();
+  const suffix = groupId !== null
+    ? `?action=refresh&sessionId=${encodeURIComponent(session.id)}&groupId=${groupId}`
+    : `?action=refresh&sessionId=${encodeURIComponent(session.id)}`;
+  await openSessionsPage(suffix);
 }
 
 export function PopupProfilesList() {
@@ -269,6 +278,7 @@ export function PopupProfilesList() {
                 onRestoreNewWindow={(s) => handleRestore(s, 'new')}
                 onReplaceCurrentWindow={(s) => handleRestore(s, 'replace')}
                 onCustomize={(s) => { void openCustomizeRestore(s); }}
+                onRefresh={(s) => { void openRefreshFromPopup(s); }}
                 data-testid={`popup-profile-btn-restore-${session.id}`}
               />
             </Flex>

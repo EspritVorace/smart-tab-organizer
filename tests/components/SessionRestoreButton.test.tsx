@@ -7,6 +7,7 @@ vi.mock('../../src/utils/i18n', () => ({
   getMessage: vi.fn((key: string) => {
     const messages: Record<string, string> = {
       sessionRestore: 'Restore',
+      sessionRefresh: 'Refresh',
       sessionRestoreCurrentWindow: 'Restore in current window',
       sessionRestoreNewWindow: 'Restore in new window',
       sessionRestoreReplaceCurrentWindow: 'Replace tabs in current window',
@@ -86,6 +87,45 @@ describe('SessionRestoreButton', () => {
     );
 
     expect(screen.getByRole('button', { name: /Restore options/i })).toBeInTheDocument();
+  });
+
+  it('does not render a Refresh button when onRefresh is omitted', () => {
+    render(
+      <TestWrapper>
+        <SessionRestoreButton
+          session={session}
+          onRestoreCurrentWindow={onRestoreCurrentWindow}
+          onRestoreNewWindow={onRestoreNewWindow}
+          onReplaceCurrentWindow={onReplaceCurrentWindow}
+          onCustomize={onCustomize}
+        />
+      </TestWrapper>,
+    );
+
+    expect(screen.queryByRole('button', { name: /Refresh/i })).not.toBeInTheDocument();
+  });
+
+  it('renders a Refresh button when onRefresh is provided and calls it on click', () => {
+    const onRefresh = vi.fn();
+    render(
+      <TestWrapper>
+        <SessionRestoreButton
+          session={session}
+          onRestoreCurrentWindow={onRestoreCurrentWindow}
+          onRestoreNewWindow={onRestoreNewWindow}
+          onReplaceCurrentWindow={onReplaceCurrentWindow}
+          onCustomize={onCustomize}
+          onRefresh={onRefresh}
+          data-testid="restore-btn"
+        />
+      </TestWrapper>,
+    );
+
+    const refreshBtn = screen.getByTestId('restore-btn-refresh');
+    fireEvent.click(refreshBtn);
+
+    expect(onRefresh).toHaveBeenCalledWith(session);
+    expect(onRestoreCurrentWindow).not.toHaveBeenCalled();
   });
 
   it('tile presentation renders the textual "Restore" label on the primary button', () => {

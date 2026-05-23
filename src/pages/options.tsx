@@ -28,6 +28,7 @@ import { HomePage } from './HomePage';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
 import { Home, Shield, FileText, BarChart3, Settings, Archive, Layers } from 'lucide-react';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
+import { getActiveTabGroupId } from '@/utils/tabCapture';
 import { lazyWithTiming } from '@/utils/lazyWithTiming.js';
 import { preloadPage } from './pagePreloaders.js';
 
@@ -65,6 +66,7 @@ export function OptionsContent() {
         rulesPendingAction, setRulesPendingAction,
         snapshotGroupId, setSnapshotGroupId,
         restoreSessionId, setRestoreSessionId,
+        refreshSessionId, setRefreshSessionId,
     } = useDeepLinking();
 
     const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
@@ -99,8 +101,15 @@ export function OptionsContent() {
             handleTabChange('sessions');
             return;
         }
+        if (target === 'refresh') {
+            const groupId = await getActiveTabGroupId();
+            setSnapshotGroupId(groupId);
+            setRefreshSessionId(session.id);
+            handleTabChange('sessions');
+            return;
+        }
         await restoreSessionTabs(session, target as RestoreTarget);
-    }, [setRestoreSessionId, handleTabChange]);
+    }, [setRestoreSessionId, setRefreshSessionId, setSnapshotGroupId, handleTabChange]);
 
     const sidebarSections: SidebarSection[] = useMemo(() => [
         {
@@ -244,6 +253,8 @@ export function OptionsContent() {
                                     onSnapshotGroupIdChange={setSnapshotGroupId}
                                     restoreSessionId={restoreSessionId}
                                     onRestoreSessionIdChange={setRestoreSessionId}
+                                    refreshSessionId={refreshSessionId}
+                                    onRefreshSessionIdChange={setRefreshSessionId}
                                 />
                             )}
                             {currentTab === 'stats' && (

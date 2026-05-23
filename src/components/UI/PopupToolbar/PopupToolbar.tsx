@@ -4,7 +4,7 @@ import { browser } from 'wxt/browser';
 import { Camera, RotateCcw, Wand2 } from 'lucide-react';
 import { getMessage, getPluralMessage } from '@/utils/i18n';
 import { loadSessions } from '@/utils/sessionStorage';
-import { hasCapturableTabs } from '@/utils/tabCapture';
+import { getActiveTabGroupId, hasCapturableTabs } from '@/utils/tabCapture';
 import { openOptionsWithHash } from '@/utils/openOptions';
 import { useSettings } from '@/hooks/useSettings';
 import styles from './PopupToolbar.module.css';
@@ -52,10 +52,7 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
       browser.tabs.query({ currentWindow: true }).then((tabs) => setTabCount(tabs.length));
     }
     if (props.activeTabGroupId === undefined) {
-      browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-        const groupId = (tabs[0] as { groupId?: number } | undefined)?.groupId;
-        setActiveTabGroupId(typeof groupId === 'number' && groupId >= 0 ? groupId : null);
-      });
+      getActiveTabGroupId().then(setActiveTabGroupId);
     }
   }, [props.tabCount, props.hasSessions, props.canSave, props.activeTabGroupId]);
 

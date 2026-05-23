@@ -3,7 +3,7 @@ import {
   Dialog, Flex, Button, Text,
   TextArea, Callout,
 } from '@radix-ui/themes';
-import { Camera, AlertCircle, Info } from 'lucide-react';
+import { Camera, AlertCircle, Info, RotateCw } from 'lucide-react';
 import { TabTree } from '@/components/Core/TabTree/TabTree';
 import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
 import { WizardModal } from '@/components/UI/WizardModal';
@@ -21,9 +21,18 @@ interface SnapshotWizardProps {
   existingSessions: Session[];
   /** Chrome numeric groupId: if set, pre-select only that group's tabs and use the group title as default name. */
   initialGroupId?: number;
+  /**
+   * When set, switches the wizard to "refresh mode": pre-fills name/note/category from this
+   * session, the uniqueness check excludes its id, and `onRefresh` is called instead of `onSave`
+   * with an updated Session object preserving id/createdAt/isPinned/position.
+   */
+  refreshSession?: Session;
+  /** Called on save in refresh mode. Receives the updated Session payload to persist via updateSession. */
+  onRefresh?: (session: Session) => Promise<void>;
 }
 
-export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, initialGroupId }: SnapshotWizardProps) {
+export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, initialGroupId, refreshSession, onRefresh }: SnapshotWizardProps) {
+  const isRefresh = refreshSession !== undefined;
   const [sessionName, setSessionName] = useState('');
   const [treeData, setTreeData] = useState<TabTreeData | null>(null);
   const [ungroupedTabs, setUngroupedTabs] = useState<SavedTab[]>([]);
@@ -43,14 +52,16 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
   useEffect(() => {
     if (!open) return;
     setSessionName(
-      `${getMessage('snapshotDefaultName')} ${formatSessionDate(new Date().toISOString())}`,
+      refreshSession
+        ? refreshSession.name
+        : `${getMessage('snapshotDefaultName')} ${formatSessionDate(new Date().toISOString())}`,
     );
     setTreeData(null);
     setSelectedTabIds(new Set());
     setSaveError(null);
     setIsCapturing(true);
-    setCategoryId(null);
-    setNote('');
+    setCategoryId(refreshSession?.categoryId ?? null);
+    setNote(refreshSession?.note ?? '');
     setCameFromActiveGroup(false);
 
     captureCurrentTabs()
@@ -70,7 +81,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
               if (groupTabUuids.has(uuid)) preSelected.add(numId);
             }
             setSelectedTabIds(preSelected);
-            if (targetGroup.title) {
+            if (!refreshSession && targetGroup.title) {
               setSessionName(targetGroup.title);
             }
             setCameFromActiveGroup(true);
@@ -86,7 +97,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
       .catch(() => {
         setIsCapturing(false);
       });
-  }, [open, initialGroupId]);
+  }, [open, initialGroupId, refreshSession]);
 
   const showGroupCallout =
     cameFromActiveGroup && selectedTabIds.size < numericIdToSavedTabId.size;
@@ -101,7 +112,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
     const trimmed = sessionName.trim();
     if (!trimmed) return;
     const isDuplicate = existingSessions.some(
-      s => s.name.toLowerCase() === trimmed.toLowerCase(),
+      s => s.id !== refreshSession?.id && s.name.toLowerCase() === trimmed.toLowerCase(),
     );
     if (isDuplicate) {
       setSaveError(getMessage('errorSessionNameUnique'));
@@ -117,27 +128,49 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
         trimmed,
         { categoryId: categoryId ?? null, note: note || undefined },
       );
-      await onSave(session);
-      onOpenChange(false);
-      showSuccessToast(
-        getMessage('snapshotNotificationTitle'),
-        getMessage('sessionNotificationMessage', [trimmed]),
-      );
+      if (isRefresh && refreshSession && onRefresh) {
+        const updated: Session = {
+          ...session,
+          id: refreshSession.id,
+          createdAt: refreshSession.createdAt,
+          isPinned: refreshSession.isPinned,
+          position: refreshSession.position,
+        };
+        await onRefresh(updated);
+        onOpenChange(false);
+        showSuccessToast(
+          getMessage('refreshNotificationTitle'),
+          getMessage('refreshNotificationMessage', [trimmed]),
+        );
+      } else {
+        await onSave(session);
+        onOpenChange(false);
+        showSuccessToast(
+          getMessage('snapshotNotificationTitle'),
+          getMessage('sessionNotificationMessage', [trimmed]),
+        );
+      }
     } catch {
       setSaveError(getMessage('sessionSaveError'));
     } finally {
       setIsSaving(false);
     }
-  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, categoryId, note, onSave, onOpenChange, existingSessions]);
+  }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, categoryId, note, onSave, onOpenChange, existingSessions, isRefresh, refreshSession, onRefresh]);
+
+  const wizardIcon = isRefresh ? RotateCw : Camera;
+  const wizardTitle = isRefresh ? getMessage('refreshTitle') : getMessage('snapshotTitle');
+  const wizardDescription = isRefresh ? getMessage('refreshDescription') : getMessage('snapshotDescription');
+  const saveLabel = isRefresh ? getMessage('refreshSaveButton') : getMessage('snapshotSaveButton');
+  const testIdPrefix = isRefresh ? 'wizard-refresh' : 'wizard-snapshot';
 
   return (
     <WizardModal
       open={open}
       onOpenChange={onOpenChange}
-      data-testid="wizard-snapshot"
-      icon={Camera}
-      title={getMessage('snapshotTitle')}
-      description={getMessage('snapshotDescription')}
+      data-testid={testIdPrefix}
+      icon={wizardIcon}
+      title={wizardTitle}
+      description={wizardDescription}
       onOpenAutoFocus={(e) => {
         e.preventDefault();
         const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[aria-label]');
@@ -151,7 +184,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
               color="blue"
               variant="soft"
               highContrast
-              data-testid="wizard-snapshot-group-callout"
+              data-testid={`${testIdPrefix}-group-callout`}
             >
               <Callout.Icon>
                 <Info size={16} />
@@ -164,7 +197,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
               {getMessage('sessionNameLabel')}
             </Text>
             <TextFieldWithCategory
-              data-testid="wizard-snapshot-field-name"
+              data-testid={`${testIdPrefix}-field-name`}
               value={sessionName}
               onChange={setSessionName}
               placeholder={getMessage('sessionNamePlaceholder')}
@@ -197,7 +230,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
               {getMessage('sessionNoteLabel')}
             </Text>
             <TextArea
-              data-testid="wizard-snapshot-field-notes"
+              data-testid={`${testIdPrefix}-field-notes`}
               value={note}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNote(e.target.value)}
               placeholder={getMessage('sessionNotePlaceholder')}
@@ -219,17 +252,17 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
 
       <WizardModal.Footer>
         <Dialog.Close>
-          <Button data-testid="wizard-snapshot-btn-cancel" variant="soft" color="gray" disabled={isSaving}>
+          <Button data-testid={`${testIdPrefix}-btn-cancel`} variant="soft" color="gray" disabled={isSaving}>
             {getMessage('cancel')}
           </Button>
         </Dialog.Close>
         <Button
-          data-testid="wizard-snapshot-btn-save"
+          data-testid={`${testIdPrefix}-btn-save`}
           onClick={handleSave}
           disabled={!sessionName.trim() || selectedTabIds.size === 0 || isCapturing || isSaving}
         >
-          <Camera size={14} />
-          {getMessage('snapshotSaveButton')}
+          {isRefresh ? <RotateCw size={14} /> : <Camera size={14} />}
+          {saveLabel}
         </Button>
       </WizardModal.Footer>
     </WizardModal>

@@ -81,6 +81,7 @@ interface SessionRestoreCallbacks {
   onRestoreCurrentWindow?: (session: Session) => void;
   onRestoreNewWindow?: (session: Session) => void;
   onReplaceCurrentWindow?: (session: Session) => void;
+  onRefresh?: (session: Session) => void;
 }
 
 /* SessionMoreMenu */
@@ -319,7 +320,7 @@ function SessionCardFullHeader({
   handleRenameSubmit, handleRenameCancel, handleKeyDown,
   searchQuery, category, hoverCardContent,
   isSelected, onSelect,
-  onPin, onUnpin, onRestore, onRestoreCurrentWindow, onRestoreNewWindow, onReplaceCurrentWindow,
+  onPin, onUnpin, onRestore, onRestoreCurrentWindow, onRestoreNewWindow, onReplaceCurrentWindow, onRefresh,
   onEdit, onDelete, onMoveToFirst, onMoveLast,
 }: SessionCardFullHeaderProps) {
   return (
@@ -436,6 +437,7 @@ function SessionCardFullHeader({
           onRestoreNewWindow={onRestoreNewWindow}
           onReplaceCurrentWindow={onReplaceCurrentWindow}
           onCustomize={onRestore}
+          onRefresh={onRefresh}
           data-testid={`session-card-${session.id}-btn-restore`}
         />
       )}
@@ -470,6 +472,7 @@ export function SessionCard({
   onRestoreCurrentWindow,
   onRestoreNewWindow,
   onReplaceCurrentWindow,
+  onRefresh,
   onRename,
   onEdit,
   onDelete,
@@ -586,6 +589,7 @@ export function SessionCard({
               onRestoreCurrentWindow={onRestoreCurrentWindow}
               onRestoreNewWindow={onRestoreNewWindow}
               onReplaceCurrentWindow={onReplaceCurrentWindow}
+              onRefresh={onRefresh}
               onEdit={onEdit}
               onDelete={onDelete}
               onMoveToFirst={onMoveToFirst}

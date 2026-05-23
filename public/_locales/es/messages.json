@@ -351,6 +351,7 @@
   "sessionGroupOne": { "message": "1 grupo" },
   "sessionGroupCount": { "message": "$1 grupos" },
   "sessionRestore": { "message": "Restaurar" },
+  "sessionRefresh": { "message": "Actualizar" },
   "sessionRename": { "message": "Renombrar" },
   "sessionRenameLabel": { "message": "Nombre de la sesión" },
   "sessionConfirmRename": { "message": "Confirmar cambio de nombre" },
@@ -386,6 +387,12 @@
   "snapshotDefaultName": { "message": "Instantánea" },
   "snapshotSaveButton": { "message": "Guardar sesión" },
   "snapshotActiveGroupCallout": { "message": "Selección limitada al grupo activo. Puedes ampliarla antes de guardar." },
+
+  "refreshTitle": { "message": "Actualizar sesión" },
+  "refreshDescription": { "message": "Captura las pestañas actuales y sobrescribe la sesión guardada. El título, la nota y la categoría se conservan." },
+  "refreshSaveButton": { "message": "Actualizar sesión" },
+  "refreshNotificationTitle": { "message": "Sesión actualizada" },
+  "refreshNotificationMessage": { "message": "\"$1\" ha sido actualizada" },
 
   "restoreTitle": { "message": "Restaurar \"$1\"" },
   "restoreStepSelectionDescription": { "message": "Seleccione las pestañas a restaurar y su destino." },
