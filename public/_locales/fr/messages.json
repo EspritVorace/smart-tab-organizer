@@ -641,6 +641,7 @@
   "shortcutDescSessionRestoreCurrent": { "message": "Ajouter la session à la fenêtre courante" },
   "shortcutDescSessionReplaceCurrent": { "message": "Remplacer les onglets de la fenêtre" },
   "shortcutDescSessionRestoreNew": { "message": "Ouvrir la session dans une nouvelle fenêtre" },
+  "shortcutDescSessionRefresh": { "message": "Rafraîchir la session avec les onglets de la fenêtre" },
   "shortcutDescHomeFirstLast": { "message": "Aller au premier ou au dernier élément" },
   "shortcutDescHomeNextSection": { "message": "Aller à la section suivante" },
   "shortcutDescHomeActivate": { "message": "Activer l'élément focus" },

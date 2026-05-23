@@ -326,6 +326,13 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'session-card',
     scope: 'widget:session-card',
   },
+  'sessionCard.refresh': {
+    id: 'sessionCard.refresh',
+    defaultBindings: ['u'],
+    descriptionKey: 'shortcutDescSessionRefresh',
+    group: 'session-card',
+    scope: 'widget:session-card',
+  },
 
   // Page: Import/Export. Mnemonic two-key sequences (i/e prefix + target
   // initial). The `i` and `e` letters are reserved as sequence prefixes in

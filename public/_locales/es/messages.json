@@ -641,6 +641,7 @@
   "shortcutDescSessionRestoreCurrent": { "message": "Añadir la sesión a la ventana actual" },
   "shortcutDescSessionReplaceCurrent": { "message": "Reemplazar las pestañas de la ventana" },
   "shortcutDescSessionRestoreNew": { "message": "Abrir la sesión en una nueva ventana" },
+  "shortcutDescSessionRefresh": { "message": "Actualizar la sesión con las pestañas de la ventana" },
   "shortcutDescHomeFirstLast": { "message": "Mover el foco al primer o último elemento" },
   "shortcutDescHomeNextSection": { "message": "Mover el foco a la sección siguiente" },
   "shortcutDescHomeActivate": { "message": "Activar el elemento con foco" },

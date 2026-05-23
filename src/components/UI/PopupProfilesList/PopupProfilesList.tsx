@@ -152,6 +152,10 @@ export function PopupProfilesList() {
         const focused = getFocusedSession();
         if (focused) handleRestore(focused, 'new');
       },
+      'sessionCard.refresh': () => {
+        const focused = getFocusedSession();
+        if (focused) void openRefreshFromPopup(focused);
+      },
     },
     { scope: 'widget:session-card' },
   );

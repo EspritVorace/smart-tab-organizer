@@ -640,6 +640,7 @@
   "shortcutDescSessionRestoreCurrent": { "message": "Add session to current window" },
   "shortcutDescSessionReplaceCurrent": { "message": "Replace current window tabs" },
   "shortcutDescSessionRestoreNew": { "message": "Open session in a new window" },
+  "shortcutDescSessionRefresh": { "message": "Refresh session from current window tabs" },
   "shortcutDescHomeFirstLast": { "message": "Move focus to first or last item" },
   "shortcutDescHomeNextSection": { "message": "Move focus to the next section" },
   "shortcutDescHomeActivate": { "message": "Activate the focused item" },
