@@ -26,6 +26,7 @@ import {
   moveToLastOfDomain,
   getRulesForRootDomain,
 } from '@/utils/ruleOrderUtils';
+import { getOverlapPrecedenceList } from '@/utils/ruleOverlapUtils';
 import type { AppSettings, DomainRuleSetting } from '@/types/syncSettings';
 import type { DomainRule } from '@/schemas/domainRule';
 
@@ -132,6 +133,16 @@ export function DomainRulesPage({
       foldAccents(rule.domainFilter).includes(term)
     );
   }, [syncSettings.domainRules, searchTerm]);
+
+  const overlapPrecedenceByRuleId = useMemo(() => {
+    const map = new Map<string, DomainRuleSetting[]>();
+    for (const r of syncSettings.domainRules) {
+      if (!r.enabled) continue;
+      const list = getOverlapPrecedenceList(r, syncSettings.domainRules);
+      if (list.length > 1) map.set(r.id, list);
+    }
+    return map;
+  }, [syncSettings.domainRules]);
 
   const handleRowSelect = useCallback((id: string, checked: boolean) => {
     setSelectedIds(prev => {
@@ -405,6 +416,7 @@ export function DomainRulesPage({
                         searchTerm={searchTerm}
                         isDragDisabled={!!searchTerm}
                         isDomainActionDisabled={getRulesForRootDomain(syncSettings.domainRules, rule.domainFilter).length <= 1}
+                        overlapPrecedenceList={overlapPrecedenceByRuleId.get(rule.id)}
                         onSelect={handleRowSelect}
                         onToggleEnabled={handleToggleEnabled}
                         onEdit={handleEditRule}
