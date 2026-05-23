@@ -29,6 +29,8 @@ export const WORKSPACE_SCOPED_KEYS = [
   'notifyOnOrganize',
   'statistics',
   'sessions',
+  'pinnedSessions',
+  'archivedSessions',
   'popupPinnedEmptyCollapsed',
 ] as const;
 
@@ -61,6 +63,8 @@ export interface ScopedItems {
   notifyOnOrganizeItem: WxtStorageItem<boolean, Record<string, unknown>>;
   statisticsItem: WxtStorageItem<Statistics, Record<string, unknown>>;
   sessionsItem: WxtStorageItem<Session[], Record<string, unknown>>;
+  pinnedSessionsItem: WxtStorageItem<Session[], Record<string, unknown>>;
+  archivedSessionsItem: WxtStorageItem<Session[], Record<string, unknown>>;
   popupPinnedEmptyCollapsedItem: WxtStorageItem<boolean, Record<string, unknown>>;
 }
 
@@ -122,6 +126,14 @@ export function defineWorkspaceItems(wsId: string): ScopedItems {
     ),
     sessionsItem: storage.defineItem<Session[]>(
       workspaceStorageKey(wsId, 'sessions'),
+      { defaultValue: [] },
+    ),
+    pinnedSessionsItem: storage.defineItem<Session[]>(
+      workspaceStorageKey(wsId, 'pinnedSessions'),
+      { defaultValue: [] },
+    ),
+    archivedSessionsItem: storage.defineItem<Session[]>(
+      workspaceStorageKey(wsId, 'archivedSessions'),
       { defaultValue: [] },
     ),
     popupPinnedEmptyCollapsedItem: storage.defineItem<boolean>(
