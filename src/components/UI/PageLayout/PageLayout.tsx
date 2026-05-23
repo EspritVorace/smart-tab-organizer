@@ -6,11 +6,17 @@ import { StatusBar } from '@/components/UI/StatusBar/StatusBar';
 interface PageLayoutProps {
   titleKey: string;
   descriptionKey: string;
+  /**
+   * Overrides the description rendered under the title. Useful when a single
+   * page swaps its sub-title based on internal sub-tab state (e.g. Sessions
+   * Active vs Archived). When unset, `descriptionKey` drives the text.
+   */
+  descriptionOverride?: string;
   syncSettings: AppSettings;
   children: (settings: AppSettings) => React.ReactNode;
 }
 
-export function PageLayout({ titleKey, descriptionKey, syncSettings, children }: PageLayoutProps) {
+export function PageLayout({ titleKey, descriptionKey, descriptionOverride, syncSettings, children }: PageLayoutProps) {
   return (
     <Box style={{
       width: '100%',
@@ -29,7 +35,7 @@ export function PageLayout({ titleKey, descriptionKey, syncSettings, children }:
 
         <Box data-testid="page-layout-description" pt="2">
           <Text size="2" color="gray" as="p" style={{ margin: 0 }}>
-            {getMessage(descriptionKey)}
+            {descriptionOverride ?? getMessage(descriptionKey)}
           </Text>
         </Box>
       </Box>

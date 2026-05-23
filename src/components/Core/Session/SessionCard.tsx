@@ -8,7 +8,7 @@ import {
 import {
   MoreHorizontal, Pencil, Trash2, Check, X,
   Pin, PinOff, ChevronDown, ChevronRight,
-  GripVertical, AlertTriangle,
+  GripVertical, AlertTriangle, Archive, ArchiveRestore,
 } from 'lucide-react';
 import { getMessage, getPluralMessage } from '@/utils/i18n';
 import { countSessionTabs, formatSessionDate } from '@/utils/sessionUtils';
@@ -49,6 +49,8 @@ interface SessionCardProps extends SessionRestoreCallbacks {
   onDelete?: (session: Session) => void;
   onPin?: (session: Session) => void;
   onUnpin?: (session: Session) => void;
+  onArchive?: (session: Session) => void;
+  onUnarchive?: (session: Session) => void;
   /**
    * When true, the collapsible preview is forced open (e.g. search matched a tab/group).
    * The user can still manually close it by clicking the trigger.
@@ -93,9 +95,15 @@ interface SessionMoreMenuProps {
   onDelete: (session: Session) => void;
   onMoveToFirst?: () => void;
   onMoveLast?: () => void;
+  onArchive?: (session: Session) => void;
+  onUnarchive?: (session: Session) => void;
 }
 
-function SessionMoreMenu({ session, isDragDisabled, onEdit, onDelete, onMoveToFirst, onMoveLast }: SessionMoreMenuProps) {
+function SessionMoreMenu({
+  session, isDragDisabled, onEdit, onDelete, onMoveToFirst, onMoveLast,
+  onArchive, onUnarchive,
+}: SessionMoreMenuProps) {
+  const isArchived = session.isArchived === true;
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
@@ -125,6 +133,26 @@ function SessionMoreMenu({ session, isDragDisabled, onEdit, onDelete, onMoveToFi
         {onMoveLast && (
           <DropdownMenu.Item onClick={onMoveLast} disabled={isDragDisabled}>
             {getMessage('sessionMoveLast')}
+          </DropdownMenu.Item>
+        )}
+
+        {(onArchive || onUnarchive) && <DropdownMenu.Separator />}
+        {!isArchived && onArchive && (
+          <DropdownMenu.Item
+            data-testid={`session-card-${session.id}-menu-archive`}
+            onClick={() => onArchive(session)}
+          >
+            <Archive size={14} />
+            {getMessage('archiveAction')}
+          </DropdownMenu.Item>
+        )}
+        {isArchived && onUnarchive && (
+          <DropdownMenu.Item
+            data-testid={`session-card-${session.id}-menu-unarchive`}
+            onClick={() => onUnarchive(session)}
+          >
+            <ArchiveRestore size={14} />
+            {getMessage('unarchiveAction')}
           </DropdownMenu.Item>
         )}
 
@@ -307,6 +335,8 @@ interface SessionCardFullHeaderProps extends SessionRestoreCallbacks {
   onSelect?: (id: string, checked: boolean) => void;
   onPin?: (session: Session) => void;
   onUnpin?: (session: Session) => void;
+  onArchive?: (session: Session) => void;
+  onUnarchive?: (session: Session) => void;
   onEdit?: (session: Session) => void;
   onDelete?: (session: Session) => void;
   onMoveToFirst?: () => void;
@@ -320,9 +350,11 @@ function SessionCardFullHeader({
   handleRenameSubmit, handleRenameCancel, handleKeyDown,
   searchQuery, category, hoverCardContent,
   isSelected, onSelect,
-  onPin, onUnpin, onRestore, onRestoreCurrentWindow, onRestoreNewWindow, onReplaceCurrentWindow, onRefresh,
+  onPin, onUnpin, onArchive, onUnarchive,
+  onRestore, onRestoreCurrentWindow, onRestoreNewWindow, onReplaceCurrentWindow, onRefresh,
   onEdit, onDelete, onMoveToFirst, onMoveLast,
 }: SessionCardFullHeaderProps) {
+  const isArchived = session.isArchived === true;
   return (
     <>
       {/* Drag handle */}
@@ -354,8 +386,8 @@ function SessionCardFullHeader({
         />
       )}
 
-      {/* Pin / Unpin button */}
-      {!isRenaming && (
+      {/* Pin / Unpin button: hidden for archived sessions (mutually exclusive with pin). */}
+      {!isRenaming && !isArchived && (
         <Tooltip content={session.isPinned ? getMessage('sessionUnpin') : getMessage('sessionPin')}>
           <IconButton
             size="1"
@@ -451,6 +483,8 @@ function SessionCardFullHeader({
           onDelete={onDelete}
           onMoveToFirst={onMoveToFirst}
           onMoveLast={onMoveLast}
+          onArchive={onArchive}
+          onUnarchive={onUnarchive}
         />
       )}
     </>
@@ -478,6 +512,8 @@ export function SessionCard({
   onDelete,
   onPin,
   onUnpin,
+  onArchive,
+  onUnarchive,
   forcePreviewOpen = false,
   searchMatchingGroupIds,
   searchQuery,
@@ -585,6 +621,8 @@ export function SessionCard({
               onSelect={onSelect}
               onPin={onPin}
               onUnpin={onUnpin}
+              onArchive={onArchive}
+              onUnarchive={onUnarchive}
               onRestore={onRestore}
               onRestoreCurrentWindow={onRestoreCurrentWindow}
               onRestoreNewWindow={onRestoreNewWindow}
