@@ -29,6 +29,7 @@ interface SidebarProps {
   onToggleCollapse?: () => void;
   activeItem?: string;
   onItemClick?: (itemId: string) => void;
+  onItemPreload?: (itemId: string) => void;
   sections: SidebarSection[];
   showFooter?: boolean;
   footerContent?: React.ReactNode;
@@ -50,6 +51,7 @@ export function Sidebar({
   onToggleCollapse,
   activeItem,
   onItemClick,
+  onItemPreload,
   sections,
   showFooter = false,
   footerContent,
@@ -111,6 +113,7 @@ export function Sidebar({
           isCollapsed={isCollapsed}
           activeItem={activeItem}
           onItemClick={onItemClick}
+          onItemPreload={onItemPreload}
           sections={sections}
         />
         
