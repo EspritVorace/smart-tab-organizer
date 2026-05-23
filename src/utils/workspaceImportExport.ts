@@ -59,7 +59,13 @@ async function readScopedSnapshot(items: ScopedItems): Promise<{
     items.categoriesItem,
     items.sessionsItem,
     items.statisticsItem,
+    items.pinnedSessionsItem,
+    items.archivedSessionsItem,
   ]);
+
+  const activeSessions = (results[9].value as Session[]) ?? [];
+  const pinnedSessions = (results[11].value as Session[]) ?? [];
+  const archivedSessions = (results[12].value as Session[]) ?? [];
 
   return {
     settings: {
@@ -73,7 +79,7 @@ async function readScopedSnapshot(items: ScopedItems): Promise<{
     },
     domainRules: (results[7].value as AppSettings['domainRules']) ?? [],
     categories: (results[8].value as RuleCategory[]) ?? [],
-    sessions: (results[9].value as Session[]) ?? [],
+    sessions: [...pinnedSessions, ...activeSessions, ...archivedSessions],
     statistics: results[10].value as Statistics,
   };
 }
@@ -107,6 +113,18 @@ async function writeScopedSnapshot(
   payload: ImportWorkspaceData,
   { includeStatistics }: { includeStatistics: boolean },
 ): Promise<void> {
+  // Partition the imported flat session list into the three bucket items so
+  // archives and pins land in their own storage keys (matches the runtime
+  // contract enforced by `sessionStorage`).
+  const pinned: Session[] = [];
+  const active: Session[] = [];
+  const archived: Session[] = [];
+  for (const session of payload.sessions as Session[]) {
+    if (session.isArchived) archived.push(session);
+    else if (session.isPinned) pinned.push(session);
+    else active.push(session);
+  }
+
   const writes: Parameters<typeof storage.setItems>[0] = [
     { item: items.globalGroupingEnabledItem, value: payload.settings.globalGroupingEnabled },
     { item: items.globalDeduplicationEnabledItem, value: payload.settings.globalDeduplicationEnabled },
@@ -117,7 +135,9 @@ async function writeScopedSnapshot(
     { item: items.notifyOnOrganizeItem, value: payload.settings.notifyOnOrganize ?? defaultAppSettings.notifyOnOrganize },
     { item: items.domainRulesItem, value: payload.domainRules as AppSettings['domainRules'] },
     { item: items.categoriesItem, value: payload.categories },
-    { item: items.sessionsItem, value: payload.sessions },
+    { item: items.sessionsItem, value: active },
+    { item: items.pinnedSessionsItem, value: pinned },
+    { item: items.archivedSessionsItem, value: archived },
   ];
   if (includeStatistics && payload.statistics) {
     writes.push({ item: items.statisticsItem, value: payload.statistics as Statistics });
