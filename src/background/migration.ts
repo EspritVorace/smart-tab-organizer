@@ -14,6 +14,7 @@ const SETTINGS_KEYS = [
   'domainRules',
   'notifyOnGrouping',
   'notifyOnDeduplication',
+  'notifyOnOrganize',
 ] as const;
 
 const MIGRATION_FLAG = 'settingsMigratedToLocal';

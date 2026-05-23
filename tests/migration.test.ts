@@ -26,6 +26,7 @@ describe('initializeDefaults — fresh install', () => {
     expect(stored.deduplicationKeepStrategy).toBe('keep-grouped-or-new');
     expect(stored.notifyOnGrouping).toBe(true);
     expect(stored.notifyOnDeduplication).toBe(true);
+    expect(stored.notifyOnOrganize).toBe(true);
   });
 
   it('initializes default statistics when storage.local has no statistics', async () => {

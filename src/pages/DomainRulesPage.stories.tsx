@@ -44,6 +44,7 @@ const mockSyncSettings: AppSettings = {
   categories: [],
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
+  notifyOnOrganize: true,
   domainRules: rules,
 };
 

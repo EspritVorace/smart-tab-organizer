@@ -133,7 +133,7 @@ export async function clearAllNotifications(sw: Page): Promise<void> {
  */
 export async function setNotificationPrefs(
   sw: Page,
-  prefs: { notifyOnGrouping?: boolean; notifyOnDeduplication?: boolean },
+  prefs: { notifyOnGrouping?: boolean; notifyOnDeduplication?: boolean; notifyOnOrganize?: boolean },
 ): Promise<void> {
   await sw.evaluate(async (p: Record<string, unknown>) => {
     await chrome.storage.local.set(p);

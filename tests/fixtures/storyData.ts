@@ -71,6 +71,8 @@ export const mockAppSettings: AppSettings = {
   deduplicationKeepStrategy: 'keep-old',
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
+  notifyOnOrganize: true,
+  categories: [],
   domainRules: [mockRule],
 };
 

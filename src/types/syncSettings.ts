@@ -22,6 +22,7 @@ export interface AppSettings {
   // Notification settings
   notifyOnGrouping: boolean;
   notifyOnDeduplication: boolean;
+  notifyOnOrganize: boolean;
 }
 
 // Default values for AppSettings.
@@ -33,5 +34,6 @@ export const defaultAppSettings: AppSettings = {
   domainRules: [],
   categories: [],
   notifyOnGrouping: true,
-  notifyOnDeduplication: true
+  notifyOnDeduplication: true,
+  notifyOnOrganize: true
 };

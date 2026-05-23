@@ -26,6 +26,7 @@ export const WORKSPACE_SCOPED_KEYS = [
   'categoriesSeeded',
   'notifyOnGrouping',
   'notifyOnDeduplication',
+  'notifyOnOrganize',
   'statistics',
   'sessions',
   'popupPinnedEmptyCollapsed',
@@ -57,6 +58,7 @@ export interface ScopedItems {
   categoriesSeededItem: WxtStorageItem<boolean, Record<string, unknown>>;
   notifyOnGroupingItem: WxtStorageItem<boolean, Record<string, unknown>>;
   notifyOnDeduplicationItem: WxtStorageItem<boolean, Record<string, unknown>>;
+  notifyOnOrganizeItem: WxtStorageItem<boolean, Record<string, unknown>>;
   statisticsItem: WxtStorageItem<Statistics, Record<string, unknown>>;
   sessionsItem: WxtStorageItem<Session[], Record<string, unknown>>;
   popupPinnedEmptyCollapsedItem: WxtStorageItem<boolean, Record<string, unknown>>;
@@ -109,6 +111,10 @@ export function defineWorkspaceItems(wsId: string): ScopedItems {
     notifyOnDeduplicationItem: storage.defineItem<boolean>(
       workspaceStorageKey(wsId, 'notifyOnDeduplication'),
       { defaultValue: defaultAppSettings.notifyOnDeduplication },
+    ),
+    notifyOnOrganizeItem: storage.defineItem<boolean>(
+      workspaceStorageKey(wsId, 'notifyOnOrganize'),
+      { defaultValue: defaultAppSettings.notifyOnOrganize },
     ),
     statisticsItem: storage.defineItem<Statistics>(
       workspaceStorageKey(wsId, 'statistics'),

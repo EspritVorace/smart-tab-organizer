@@ -146,7 +146,7 @@ describe('handleOrganizeAllTabs', () => {
       const disabledRule = makeRule({ enabled: false });
       const dedupOffRule = makeRule({ id: 'r2', deduplicationEnabled: false });
       mockedGetSettings.mockResolvedValue(
-        makeSettings({ domainRules: [disabledRule, dedupOffRule] }),
+        makeSettings({ domainRules: [disabledRule, dedupOffRule], notifyOnOrganize: false }),
       );
 
       mockedBrowser.tabs.query.mockResolvedValueOnce([
@@ -166,10 +166,10 @@ describe('handleOrganizeAllTabs', () => {
       expect(mockedBrowser.notifications.create).not.toHaveBeenCalled();
     });
 
-    it('does not show dedup notification when notifyOnDeduplication is false', async () => {
+    it('does not show dedup notification when notifyOnOrganize is false', async () => {
       const rule = makeRule();
       mockedGetSettings.mockResolvedValue(
-        makeSettings({ domainRules: [rule], notifyOnDeduplication: false }),
+        makeSettings({ domainRules: [rule], notifyOnOrganize: false }),
       );
 
       mockedBrowser.tabs.query.mockResolvedValueOnce([
@@ -199,7 +199,7 @@ describe('handleOrganizeAllTabs', () => {
 
       mockedFindMatchingRule.mockReturnValue(rule);
 
-      await expect(handleOrganizeAllTabs(1)).resolves.toBeUndefined();
+      await expect(handleOrganizeAllTabs(1)).resolves.toBeDefined();
     });
   });
 
@@ -253,7 +253,9 @@ describe('handleOrganizeAllTabs', () => {
 
     it('excludes single-member target groups (US-PO008)', async () => {
       const rule = makeRule();
-      mockedGetSettings.mockResolvedValue(makeSettings({ domainRules: [rule] }));
+      mockedGetSettings.mockResolvedValue(
+        makeSettings({ domainRules: [rule], notifyOnOrganize: false }),
+      );
 
       mockedBrowser.tabs.query.mockResolvedValueOnce([]);
       mockedBrowser.tabs.query.mockResolvedValueOnce([
@@ -311,7 +313,9 @@ describe('handleOrganizeAllTabs', () => {
 
     it('does not re-move tabs that are already in the target group', async () => {
       const rule = makeRule();
-      mockedGetSettings.mockResolvedValue(makeSettings({ domainRules: [rule] }));
+      mockedGetSettings.mockResolvedValue(
+        makeSettings({ domainRules: [rule], notifyOnOrganize: false }),
+      );
 
       mockedBrowser.tabs.query.mockResolvedValueOnce([]);
       mockedBrowser.tabs.query.mockResolvedValueOnce([
@@ -330,12 +334,13 @@ describe('handleOrganizeAllTabs', () => {
 
       expect(mockedAddToGroup).not.toHaveBeenCalled();
       expect(mockedCreateGroup).not.toHaveBeenCalled();
+      expect(mockedBrowser.notifications.create).not.toHaveBeenCalled();
     });
 
-    it('does not show grouping notification when notifyOnGrouping is false', async () => {
+    it('does not show grouping notification when notifyOnOrganize is false', async () => {
       const rule = makeRule();
       mockedGetSettings.mockResolvedValue(
-        makeSettings({ domainRules: [rule], notifyOnGrouping: false }),
+        makeSettings({ domainRules: [rule], notifyOnOrganize: false }),
       );
 
       mockedBrowser.tabs.query.mockResolvedValueOnce([]);
@@ -369,7 +374,7 @@ describe('handleOrganizeAllTabs', () => {
       mockedBrowser.tabGroups.query.mockResolvedValue([]);
       mockedCreateGroup.mockRejectedValueOnce(new Error('api error'));
 
-      await expect(handleOrganizeAllTabs(1)).resolves.toBeUndefined();
+      await expect(handleOrganizeAllTabs(1)).resolves.toBeDefined();
     });
   });
 
@@ -434,8 +439,8 @@ describe('handleOrganizeAllTabs', () => {
       expect(mockedBrowser.tabs.remove).not.toHaveBeenCalled();
     });
 
-    it('handles an empty window with no side effects except settings load', async () => {
-      mockedGetSettings.mockResolvedValue(makeSettings());
+    it('handles an empty window with no side effects (noop off) except settings load', async () => {
+      mockedGetSettings.mockResolvedValue(makeSettings({ notifyOnOrganize: false }));
       mockedBrowser.tabs.query.mockResolvedValueOnce([]);
       mockedBrowser.tabs.query.mockResolvedValueOnce([]);
 
@@ -445,6 +450,163 @@ describe('handleOrganizeAllTabs', () => {
       expect(mockedBrowser.tabs.remove).not.toHaveBeenCalled();
       expect(mockedCreateGroup).not.toHaveBeenCalled();
       expect(mockedBrowser.notifications.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('noop notification', () => {
+    it("fires 'empty' noop when the window has no organizable tab", async () => {
+      mockedGetSettings.mockResolvedValue(makeSettings());
+      mockedBrowser.tabs.query.mockResolvedValueOnce([]);
+      mockedBrowser.tabs.query.mockResolvedValueOnce([]);
+
+      const result = await handleOrganizeAllTabs(1);
+
+      expect(result.noopReason).toBe('empty');
+      expect(mockedBrowser.notifications.create).toHaveBeenCalledTimes(1);
+      expect(mockedBrowser.notifications.create).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'notifNoopEmpty' }),
+      );
+    });
+
+    it("fires 'no-match' noop when a single tab exists but no rule matches", async () => {
+      mockedGetSettings.mockResolvedValue(makeSettings({ deduplicateUnmatchedDomains: false }));
+      const onlyTab = [makeTab(1, 'https://lonely.com/page', { index: 0 })];
+      mockedBrowser.tabs.query.mockResolvedValueOnce(onlyTab);
+      mockedBrowser.tabs.query.mockResolvedValueOnce(onlyTab);
+      mockedFindMatchingRule.mockReturnValue(undefined);
+      mockedFindGroupingRule.mockReturnValue(null);
+
+      const result = await handleOrganizeAllTabs(1);
+
+      expect(result.noopReason).toBe('no-match');
+      expect(mockedBrowser.notifications.create).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'notifNoopNoMatch' }),
+      );
+    });
+
+    it("fires 'no-match' noop when no tab matches any rule", async () => {
+      mockedGetSettings.mockResolvedValue(makeSettings({ deduplicateUnmatchedDomains: false }));
+      mockedBrowser.tabs.query.mockResolvedValueOnce([
+        makeTab(1, 'https://a.com/page', { index: 0 }),
+        makeTab(2, 'https://b.com/page', { index: 1 }),
+      ]);
+      mockedBrowser.tabs.query.mockResolvedValueOnce([
+        makeTab(1, 'https://a.com/page', { index: 0 }),
+        makeTab(2, 'https://b.com/page', { index: 1 }),
+      ]);
+      mockedFindMatchingRule.mockReturnValue(undefined);
+      mockedFindGroupingRule.mockReturnValue(null);
+
+      const result = await handleOrganizeAllTabs(1);
+
+      expect(result.noopReason).toBe('no-match');
+      expect(mockedBrowser.notifications.create).toHaveBeenCalledTimes(1);
+      expect(mockedBrowser.notifications.create).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'notifNoopNoMatch' }),
+      );
+    });
+
+    it("fires 'no-match' noop when matches exist but all targets are single-member", async () => {
+      // The dedup pass and the plan pass see the same tab in a real browser:
+      // mock both queries with the same single matching tab.
+      const rule = makeRule({ deduplicationEnabled: false });
+      mockedGetSettings.mockResolvedValue(makeSettings({ domainRules: [rule] }));
+      mockedBrowser.tabs.query.mockResolvedValueOnce([
+        makeTab(10, 'https://x.com/only'),
+      ]);
+      mockedBrowser.tabs.query.mockResolvedValueOnce([
+        makeTab(10, 'https://x.com/only'),
+      ]);
+      mockedFindMatchingRule.mockReturnValue(rule);
+      mockedFindGroupingRule.mockReturnValue({ rule, groupName: 'Solo' });
+      mockedDetermineColor.mockReturnValue('red');
+      mockedBrowser.tabGroups.query.mockResolvedValue([]);
+
+      const result = await handleOrganizeAllTabs(1);
+
+      expect(result.noopReason).toBe('no-match');
+      expect(mockedBrowser.notifications.create).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'notifNoopNoMatch' }),
+      );
+    });
+
+    it("fires 'already-organized' noop when every matching tab is already in its target group", async () => {
+      // Same tab snapshot in both passes: two tabs already inside the right group.
+      const rule = makeRule({ deduplicationEnabled: false });
+      mockedGetSettings.mockResolvedValue(makeSettings({ domainRules: [rule] }));
+      const presentTabs = [
+        makeTab(60, 'https://x.com/a', { groupId: 77 }),
+        makeTab(61, 'https://x.com/b', { groupId: 77 }),
+      ];
+      mockedBrowser.tabs.query.mockResolvedValueOnce(presentTabs);
+      mockedBrowser.tabs.query.mockResolvedValueOnce(presentTabs);
+      mockedFindMatchingRule.mockReturnValue(rule);
+      mockedFindGroupingRule.mockReturnValue({ rule, groupName: 'Already There' });
+      mockedDetermineColor.mockReturnValue('blue');
+      mockedBrowser.tabGroups.query
+        .mockResolvedValueOnce([{ id: 77, title: 'Already There' }])
+        .mockResolvedValueOnce([{ id: 77 }]);
+      mockedBrowser.tabs.query.mockResolvedValueOnce([{ index: 0 }]);
+
+      const result = await handleOrganizeAllTabs(1);
+
+      expect(result.noopReason).toBe('already-organized');
+      expect(mockedBrowser.notifications.create).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'notifNoopAlreadyOrganized' }),
+      );
+    });
+
+    it('does not fire noop when notifyOnOrganize is false', async () => {
+      mockedGetSettings.mockResolvedValue(makeSettings({ notifyOnOrganize: false }));
+      mockedBrowser.tabs.query.mockResolvedValueOnce([]);
+      mockedBrowser.tabs.query.mockResolvedValueOnce([]);
+
+      const result = await handleOrganizeAllTabs(1);
+
+      expect(result.noopReason).toBe('empty');
+      expect(mockedBrowser.notifications.create).not.toHaveBeenCalled();
+    });
+
+    it('does not fire noop when deduplication removed at least one tab', async () => {
+      const rule = makeRule();
+      mockedGetSettings.mockResolvedValue(makeSettings({ domainRules: [rule] }));
+      mockedBrowser.tabs.query.mockResolvedValueOnce([
+        makeTab(1, 'https://a.com/x', { index: 0 }),
+        makeTab(2, 'https://a.com/x', { index: 1 }),
+      ]);
+      mockedBrowser.tabs.query.mockResolvedValueOnce([]);
+      mockedFindMatchingRule.mockReturnValue(rule);
+
+      const result = await handleOrganizeAllTabs(1);
+
+      expect(result.noopReason).toBeNull();
+      // Exactly the dedup notification, no noop notification on top.
+      expect(mockedBrowser.notifications.create).toHaveBeenCalledTimes(1);
+      expect(mockedBrowser.notifications.create).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'notifDeduplication' }),
+      );
+    });
+
+    it('does not fire noop when grouping moved at least one tab', async () => {
+      const rule = makeRule();
+      mockedGetSettings.mockResolvedValue(makeSettings({ domainRules: [rule] }));
+      mockedBrowser.tabs.query.mockResolvedValueOnce([]);
+      mockedBrowser.tabs.query.mockResolvedValueOnce([
+        makeTab(10, 'https://x.com/a'),
+        makeTab(11, 'https://x.com/b'),
+      ]);
+      mockedFindGroupingRule.mockReturnValue({ rule, groupName: 'My Group' });
+      mockedDetermineColor.mockReturnValue('blue');
+      mockedBrowser.tabGroups.query.mockResolvedValue([]);
+
+      const result = await handleOrganizeAllTabs(1);
+
+      expect(result.noopReason).toBeNull();
+      // Exactly the grouping notification, no noop notification on top.
+      expect(mockedBrowser.notifications.create).toHaveBeenCalledTimes(1);
+      expect(mockedBrowser.notifications.create).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'notifGrouping' }),
+      );
     });
   });
 });

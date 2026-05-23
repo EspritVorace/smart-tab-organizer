@@ -93,3 +93,24 @@
   - When `true`: a notification appears at each duplicate closure.
   - When `false`: no deduplication notification is emitted.
 - [ ] The two settings are independent: notifications can be enabled for grouping only, deduplication only, both, or neither.
+- [ ] Both settings govern only the **automatic** flows triggered when a tab is opened or auto-deduplicated; they do not gate the notifications fired by the manual "Organize Tabs" action (see US-N006).
+
+---
+
+## US-N006 - Notification after the "Organize Tabs" action
+
+**As a** user clicking on "Organize Tabs" (or triggering it via the keyboard shortcut `Alt+Shift+O`),
+**I want** a single native notification that summarises what happened, including the case where nothing changed,
+**so that** I am never left wondering whether the action actually ran.
+
+### Acceptance criteria
+
+- [ ] A dedicated `notifyOnOrganize` setting (boolean, default `true`) governs **all** notifications fired by the Organize Tabs action: the deduplication summary, the grouping summary, and the noop notification. The toggle lives in the Settings page next to `notifyOnGrouping` and `notifyOnDeduplication`.
+- [ ] `notifyOnGrouping` and `notifyOnDeduplication` continue to gate only the **automatic** notifications (US-N001 / US-N002) and have no effect on the Organize Tabs action.
+- [ ] When `notifyOnOrganize` is `true` and `removedCount === 0 && tabsMoved === 0`, a single noop notification is shown with one of three messages depending on the reason:
+  - `notifNoopEmpty`: the window has zero organizable tabs (only `chrome://`, `chrome-extension://`, `about:` tabs).
+  - `notifNoopNoMatch`: organizable tabs exist but the grouping plan is empty (no rule matches or every potential target group has only one member).
+  - `notifNoopAlreadyOrganized`: the plan is non-empty but every matching tab is already inside its target group, so no tab needs to move.
+- [ ] The grouping summary notification only fires when at least one tab was actually moved into a group (`tabsMoved > 0`); a no-op grouping pass produces the `already-organized` noop notification instead.
+- [ ] When `notifyOnOrganize` is `false`, the Organize Tabs action stays completely silent regardless of the outcome.
+- [ ] The noop notification uses the same title as the success notifications (`extensionName`) and the same browser native notification channel (`browser.notifications.create`).

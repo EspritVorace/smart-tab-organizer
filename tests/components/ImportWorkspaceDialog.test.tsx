@@ -37,6 +37,7 @@ const validPayload = {
     deduplicationKeepStrategy: 'keep-grouped-or-new',
     notifyOnGrouping: true,
     notifyOnDeduplication: true,
+    notifyOnOrganize: true,
   },
   domainRules: [
     {

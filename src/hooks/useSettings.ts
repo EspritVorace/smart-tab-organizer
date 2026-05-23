@@ -45,6 +45,7 @@ function buildSettingsItemMap(items: ScopedItems): SettingsItemMap {
     categories: items.categoriesItem,
     notifyOnGrouping: items.notifyOnGroupingItem,
     notifyOnDeduplication: items.notifyOnDeduplicationItem,
+    notifyOnOrganize: items.notifyOnOrganizeItem,
   } as SettingsItemMap;
 }
 
@@ -58,6 +59,7 @@ async function loadSettingsFromStorage(items: ScopedItems): Promise<AppSettings>
     items.categoriesItem,
     items.notifyOnGroupingItem,
     items.notifyOnDeduplicationItem,
+    items.notifyOnOrganizeItem,
   ]);
 
   const rawRules = results[4].value as DomainRuleSettings;
@@ -82,6 +84,7 @@ async function loadSettingsFromStorage(items: ScopedItems): Promise<AppSettings>
     categories: results[5].value as RuleCategory[],
     notifyOnGrouping: results[6].value as boolean,
     notifyOnDeduplication: results[7].value as boolean,
+    notifyOnOrganize: results[8].value as boolean,
   };
 }
 

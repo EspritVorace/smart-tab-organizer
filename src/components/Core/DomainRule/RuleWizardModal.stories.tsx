@@ -13,6 +13,7 @@ const mockAppSettings: AppSettings = {
   categories: [],
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
+  notifyOnOrganize: true,
   domainRules: [
     {
       id: 'existing-rule-1',
