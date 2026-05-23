@@ -1,6 +1,6 @@
 import React from 'react';
 import { Flex, IconButton, Tooltip } from '@radix-ui/themes';
-import { Monitor, Play, Replace, RotateCcw, RotateCw, Square, Wrench } from 'lucide-react';
+import { Camera, Monitor, Replace, RotateCcw, Square, Wrench } from 'lucide-react';
 import { SplitButton } from '@/components/UI/SplitButton/SplitButton';
 import { getMessage } from '@/utils/i18n';
 import type { Session } from '@/types/session';
@@ -38,7 +38,7 @@ export function SessionRestoreButton({
       {getMessage('sessionRestore')}
     </Flex>
   ) : (
-    <Play size={12} fill="currentColor" />
+    <RotateCcw size={12} aria-hidden="true" />
   );
 
   const splitButton = (
@@ -96,7 +96,7 @@ export function SessionRestoreButton({
           aria-label={getMessage('sessionRefresh')}
           data-testid={testId ? `${testId}-refresh` : undefined}
         >
-          <RotateCw size={isTile ? 14 : 12} aria-hidden="true" />
+          <Camera size={isTile ? 14 : 12} aria-hidden="true" />
         </IconButton>
       </Tooltip>
       {splitButton}

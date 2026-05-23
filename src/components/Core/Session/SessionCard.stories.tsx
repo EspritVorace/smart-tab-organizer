@@ -68,6 +68,7 @@ export const SessionCardDefault: Story = {
     onRestoreCurrentWindow: asyncNoop,
     onRestoreNewWindow: asyncNoop,
     onReplaceCurrentWindow: asyncNoop,
+    onRefresh: noop,
     onRename: asyncNoop,
     onEdit: noop,
     onDelete: noop,
@@ -154,6 +155,7 @@ export const SessionCardWithRelativeDates: Story = {
               onRestoreCurrentWindow={asyncNoop}
               onRestoreNewWindow={asyncNoop}
               onReplaceCurrentWindow={asyncNoop}
+              onRefresh={noop}
               onRename={asyncNoop}
               onEdit={noop}
               onDelete={noop}
@@ -287,6 +289,7 @@ export const SessionCardDeepSearchMatch: Story = {
     onRestoreCurrentWindow: asyncNoop,
     onRestoreNewWindow: asyncNoop,
     onReplaceCurrentWindow: asyncNoop,
+    onRefresh: noop,
     onRename: asyncNoop,
     onEdit: noop,
     onDelete: noop,
