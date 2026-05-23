@@ -160,13 +160,17 @@ test.describe('[US-PO007] Batch deduplication', () => {
     helpers,
   }) => {
     const sw = await getServiceWorkerWithOrganizeFn(extensionContext);
-    await setNotificationPrefs(sw, { notifyOnOrganize: true, notifyOnDeduplication: false, notifyOnGrouping: false });
+    await setNotificationPrefs(sw, { notifyOnOrganize: true });
     await clearAllNotifications(sw);
 
+    // Disable grouping on this rule so only the dedup branch fires a notification.
+    // With notifyOnOrganize gating both dedup and grouping notifications, we can no
+    // longer rely on per-feature toggles to silence the grouping notif here.
     await helpers.addDomainRule({
       label: 'Dedup Rule',
       domainFilter: 'example.com',
       enabled: true,
+      groupingEnabled: false,
       deduplicationEnabled: true,
       deduplicationMatchMode: 'exact',
     });
@@ -190,10 +194,13 @@ test.describe('[US-PO007] Batch deduplication', () => {
     await setNotificationPrefs(sw, { notifyOnOrganize: true });
     await clearAllNotifications(sw);
 
+    // Grouping disabled on the rule so the plan stays empty and the noop
+    // branch (rather than the grouping branch) drives the notification.
     await helpers.addDomainRule({
       label: 'Dedup Rule',
       domainFilter: 'example.com',
       enabled: true,
+      groupingEnabled: false,
       deduplicationEnabled: true,
     });
 
@@ -203,9 +210,6 @@ test.describe('[US-PO007] Batch deduplication', () => {
 
     await triggerOrganizeAllTabsViaSW(extensionContext);
 
-    // With the default new tab plus the two unique example.com tabs, no
-    // dedup or grouping change happens. The noop branch surfaces a single
-    // notification so the user is not left wondering whether anything ran.
     expect(await getNotificationIds(sw)).toHaveLength(1);
   });
 
@@ -221,6 +225,7 @@ test.describe('[US-PO007] Batch deduplication', () => {
       label: 'Dedup Rule',
       domainFilter: 'example.com',
       enabled: true,
+      groupingEnabled: false,
       deduplicationEnabled: true,
     });
 
