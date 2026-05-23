@@ -5,7 +5,7 @@ import { browser } from 'wxt/browser';
 import { ChevronDown, ExternalLink, Pin } from 'lucide-react';
 import { SessionRestoreButton } from '@/components/Core/Session/SessionRestoreButton/SessionRestoreButton';
 import { getMessage } from '@/utils/i18n';
-import { loadSessions } from '@/utils/sessionStorage';
+import { loadActiveSessions, loadPinnedSessions } from '@/utils/sessionStorage';
 import { getFocusedSessionFromDOM } from '@/utils/sessionUtils';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { getActiveTabGroupId } from '@/utils/tabCapture';
@@ -95,9 +95,9 @@ export function PopupProfilesList() {
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    loadSessions().then((all) => {
-      setPinnedSessions(all.filter((s) => s.isPinned));
-      setHasAnySession(all.length > 0);
+    Promise.all([loadPinnedSessions(), loadActiveSessions()]).then(([pinned, active]) => {
+      setPinnedSessions(pinned);
+      setHasAnySession(pinned.length + active.length > 0);
       setLoaded(true);
     });
     popupPinnedEmptyCollapsedItem.getValue().then((v) => setEmptyCollapsed(v ?? false));
