@@ -8,6 +8,13 @@ import {
   deleteSession,
   batchUpdateSessionPositions,
   reorderSessions,
+  loadPinnedSessions,
+  loadActiveSessions,
+  loadArchivedSessions,
+  archiveSession,
+  unarchiveSession,
+  pinSession,
+  unpinSession,
 } from '../src/utils/sessionStorage';
 import type { Session } from '../src/types/session';
 
@@ -200,5 +207,98 @@ describe('reorderSessions', () => {
 
     const loaded = await loadSessions();
     expect(loaded.map(s => s.id)).toEqual(['b', 'a', 'c']);
+  });
+});
+
+describe('bucket-aware storage', () => {
+  it('routes addSession to the right bucket based on flags', async () => {
+    await addSession(makeSession({ id: 'p', name: 'Pinned', isPinned: true }));
+    await addSession(makeSession({ id: 'a', name: 'Active' }));
+    await addSession(makeSession({ id: 'z', name: 'Archived', isArchived: true }));
+
+    expect((await loadPinnedSessions()).map(s => s.id)).toEqual(['p']);
+    expect((await loadActiveSessions()).map(s => s.id)).toEqual(['a']);
+    expect((await loadArchivedSessions()).map(s => s.id)).toEqual(['z']);
+  });
+
+  it('saveSessions partitions a mixed list into the three buckets', async () => {
+    await saveSessions([
+      makeSession({ id: 'p', isPinned: true }),
+      makeSession({ id: 'a' }),
+      makeSession({ id: 'z', isArchived: true }),
+    ]);
+    expect((await loadPinnedSessions()).map(s => s.id)).toEqual(['p']);
+    expect((await loadActiveSessions()).map(s => s.id)).toEqual(['a']);
+    expect((await loadArchivedSessions()).map(s => s.id)).toEqual(['z']);
+  });
+
+  it('archiveSession moves an active session to the archive bucket', async () => {
+    await addSession(makeSession({ id: 's', name: 'Sess' }));
+    await archiveSession('s');
+    expect((await loadActiveSessions())).toHaveLength(0);
+    const archived = await loadArchivedSessions();
+    expect(archived.map(s => s.id)).toEqual(['s']);
+    expect(archived[0].isArchived).toBe(true);
+  });
+
+  it('archiveSession auto-unpins a pinned session', async () => {
+    await addSession(makeSession({ id: 's', name: 'Pinned', isPinned: true }));
+    await archiveSession('s');
+    expect((await loadPinnedSessions())).toHaveLength(0);
+    const [archived] = await loadArchivedSessions();
+    expect(archived.isPinned).toBe(false);
+    expect(archived.isArchived).toBe(true);
+  });
+
+  it('unarchiveSession moves an archived session back to active', async () => {
+    await addSession(makeSession({ id: 's', isArchived: true }));
+    await unarchiveSession('s');
+    expect((await loadArchivedSessions())).toHaveLength(0);
+    const [active] = await loadActiveSessions();
+    expect(active.id).toBe('s');
+    expect(active.isArchived).toBe(false);
+  });
+
+  it('pinSession is a no-op when the session is archived', async () => {
+    await addSession(makeSession({ id: 's', isArchived: true }));
+    await pinSession('s');
+    expect((await loadPinnedSessions())).toHaveLength(0);
+    expect((await loadArchivedSessions())).toHaveLength(1);
+  });
+
+  it('unpinSession moves a pinned session back to active', async () => {
+    await addSession(makeSession({ id: 's', isPinned: true }));
+    await unpinSession('s');
+    expect((await loadPinnedSessions())).toHaveLength(0);
+    const [active] = await loadActiveSessions();
+    expect(active.id).toBe('s');
+    expect(active.isPinned).toBe(false);
+  });
+
+  it('updateSession moves the session when isPinned flips', async () => {
+    await addSession(makeSession({ id: 's' }));
+    await updateSession('s', { isPinned: true });
+    expect((await loadActiveSessions())).toHaveLength(0);
+    expect((await loadPinnedSessions()).map(s => s.id)).toEqual(['s']);
+  });
+
+  it('updateSession normalizes position when moving across buckets', async () => {
+    await addSession(makeSession({ id: 'a', position: 0 }));
+    await addSession(makeSession({ id: 'b', position: 1 }));
+    await addSession(makeSession({ id: 'p1', isPinned: true, position: 0 }));
+    await updateSession('a', { isPinned: true });
+    const pinned = await loadPinnedSessions();
+    const moved = pinned.find(s => s.id === 'a');
+    expect(moved?.position).toBe(pinned.length - 1);
+  });
+
+  it('loadSessions concatenates the three buckets in order pinned > active > archived', async () => {
+    await saveSessions([
+      makeSession({ id: 'a' }),
+      makeSession({ id: 'p', isPinned: true }),
+      makeSession({ id: 'z', isArchived: true }),
+    ]);
+    const all = await loadSessions();
+    expect(all.map(s => s.id)).toEqual(['p', 'a', 'z']);
   });
 });
