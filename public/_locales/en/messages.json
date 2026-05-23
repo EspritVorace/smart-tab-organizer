@@ -196,6 +196,7 @@
   "errorSessionNameUnique": { "message": "Session name must be unique." },
   "loadingText": { "message": "Loading..." },
   "errorZodRequired": { "message": "This field is required" },
+  "errorPresetRequired": { "message": "Please select a preset to continue" },
   "errorZodMaxLength": { "message": "Must not exceed 100 characters" },
   "errorZodInvalid": { "message": "Invalid value" },
   "errorZodInvalidValue": { "message": "Invalid option selected" },

@@ -176,13 +176,14 @@
 }
 
 .ss-item--selected {
-  background: var(--accent-a3);
+  background: var(--accent-a5);
   color: var(--accent-11);
   font-weight: 500;
+  box-shadow: inset 3px 0 0 var(--accent-9);
 }
 
 .ss-item--selected[aria-selected='true'] {
-  background: var(--accent-a4);
+  background: var(--accent-a6);
 }
 
 .ss-item--disabled {
