@@ -14,6 +14,7 @@ import { getMessage } from '@/utils/i18n';
 import { logger } from '@/utils/logger';
 import { foldAccents } from '@/utils/stringUtils';
 import { useShortcuts } from '@/hooks/useShortcuts';
+import { useRelativeTime } from '@/hooks/useRelativeTime';
 import type { AppSettings } from '@/types/syncSettings';
 import type { WorkspaceMeta } from '@/schemas/workspace';
 
@@ -42,6 +43,13 @@ function WorkspaceRow({ workspace, isActive, isDefault, isOnly, searchTerm, onSw
   const deleteBlocked = isDefault || isOnly;
   const deleteTooltip = resolveDeleteTooltip(isDefault, isOnly);
 
+  const isUpdated = workspace.updatedAt !== workspace.createdAt;
+  const relativeDate = isUpdated ? workspace.updatedAt : workspace.createdAt;
+  const relativePrefix = isUpdated
+    ? getMessage('workspaceModifiedPrefix')
+    : getMessage('workspaceCreatedPrefix');
+  const relativeText = useRelativeTime(relativeDate);
+
   return (
     <Card data-testid={`workspace-row-${workspace.id}`} variant="surface">
       <Flex align="center" gap="3">
@@ -64,6 +72,10 @@ function WorkspaceRow({ workspace, isActive, isDefault, isOnly, searchTerm, onSw
           </Flex>
           <Text size="1" color="gray">
             {getMessage('workspaceColorLabelInline', [workspace.accentColor])}
+          </Text>
+          <Text size="1" color="gray" data-testid={`workspace-row-${workspace.id}-relative-time`}>
+            {relativePrefix}{' '}
+            <time dateTime={relativeDate}>{relativeText}</time>
           </Text>
         </Flex>
         <Flex align="center" gap="2">

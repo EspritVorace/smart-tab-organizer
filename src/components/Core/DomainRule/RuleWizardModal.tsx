@@ -415,7 +415,11 @@ export function RuleWizardModal({
 
   const handleFormSubmit = (data: DomainRule) => {
     setStepError(null);
-    onSubmit(data);
+    const nowIso = new Date().toISOString();
+    const stamped: DomainRule = isEditing
+      ? { ...data, createdAt: domainRule?.createdAt, updatedAt: nowIso }
+      : { ...data, createdAt: nowIso, updatedAt: nowIso };
+    onSubmit(stamped);
     reset();
     onClose();
   };

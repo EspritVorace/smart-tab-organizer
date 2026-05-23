@@ -4,6 +4,7 @@ import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/Accessi
 import { getRadixColor } from '@/utils/utils';
 import { deduplicationMatchModeOptions } from '@/schemas/enums';
 import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
+import { useRelativeTime } from '@/hooks/useRelativeTime';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 
 interface RuleDetailPopoverProps {
@@ -13,6 +14,14 @@ interface RuleDetailPopoverProps {
 
 export function RuleDetailPopover({ rule, searchTerm }: RuleDetailPopoverProps) {
   const cat = getRuleCategory(rule.categoryId);
+
+  const hasTimestamp = !!(rule.updatedAt || rule.createdAt);
+  const isUpdated = !!rule.updatedAt && rule.updatedAt !== rule.createdAt;
+  const relativeDate = (isUpdated ? rule.updatedAt : rule.createdAt) ?? '';
+  const relativePrefix = isUpdated
+    ? getMessage('ruleDetailModifiedPrefix')
+    : getMessage('ruleDetailCreatedPrefix');
+  const relativeText = useRelativeTime(relativeDate);
 
   return (
     <Flex direction="column" gap="3">
@@ -108,6 +117,18 @@ export function RuleDetailPopover({ rule, searchTerm }: RuleDetailPopoverProps) 
         <Badge size="1" color={rule.deduplicationEnabled ? 'green' : 'red'} variant="soft" highContrast>
           {rule.deduplicationEnabled ? getMessage('yes') : getMessage('no')}
         </Badge>
+
+        {hasTimestamp && (
+          <>
+            <Text size="1" weight="bold" color="gray" highContrast>
+              {getMessage('ruleDetailTimestampLabel')}
+            </Text>
+            <Text size="2" data-testid="rule-detail-relative-time">
+              {relativePrefix}{' '}
+              <time dateTime={relativeDate}>{relativeText}</time>
+            </Text>
+          </>
+        )}
       </Box>
     </Flex>
   );

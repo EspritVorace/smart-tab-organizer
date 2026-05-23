@@ -37,7 +37,9 @@ export const importDomainRuleSchema = z.object({
   urlExtractionMode: z.enum(['regex', 'query_param']).default('regex'),
   urlQueryParamName: z.string().max(64).optional(),
   enabled: z.boolean(),
-  badge: z.string().optional()
+  badge: z.string().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional()
 });
 
 export type ImportDomainRule = z.infer<typeof importDomainRuleSchema>;
