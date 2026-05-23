@@ -3,7 +3,7 @@ import { Tooltip } from '@radix-ui/themes';
 import { browser } from 'wxt/browser';
 import { Camera, RotateCcw, Wand2 } from 'lucide-react';
 import { getMessage, getPluralMessage } from '@/utils/i18n';
-import { loadSessions } from '@/utils/sessionStorage';
+import { loadActiveSessions, loadPinnedSessions } from '@/utils/sessionStorage';
 import { getActiveTabGroupId, hasCapturableTabs } from '@/utils/tabCapture';
 import { openOptionsWithHash } from '@/utils/openOptions';
 import { useSettings } from '@/hooks/useSettings';
@@ -43,7 +43,9 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
       return;
     }
     if (props.hasSessions == null) {
-      loadSessions().then((sessions) => setHasSessions(sessions.length > 0));
+      Promise.all([loadPinnedSessions(), loadActiveSessions()]).then(
+        ([pinned, active]) => setHasSessions(pinned.length + active.length > 0),
+      );
     }
     if (props.canSave == null) {
       hasCapturableTabs().then(setCanSave);
