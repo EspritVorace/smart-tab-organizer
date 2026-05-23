@@ -25,6 +25,7 @@ import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { updateSession } from '@/utils/sessionStorage';
 import { showSuccessNotification } from '@/utils/notifications';
+import { getActiveTabGroupId } from '@/utils/tabCapture';
 import { browser } from 'wxt/browser';
 import type { Session } from '@/types/session';
 import type { SessionSearchMatch } from '@/utils/sessionUtils';
@@ -64,6 +65,10 @@ interface SessionsPageProps {
   restoreSessionId?: string | null;
   /** Called to clear the restore deep-link once consumed. */
   onRestoreSessionIdChange?: (id: string | null) => void;
+  /** Session id for which a deep-link requests the refresh wizard to open. */
+  refreshSessionId?: string | null;
+  /** Called to clear the refresh deep-link once consumed. */
+  onRefreshSessionIdChange?: (id: string | null) => void;
 }
 
 function SectionHeader({ icon: Icon, titleKey, count }: { icon: LucideIcon; titleKey: string; count: number }) {
@@ -103,6 +108,8 @@ interface SessionSectionProps {
   onRestoreCurrentWindow: (session: Session) => void;
   onRestoreNewWindow: (session: Session) => void;
   onReplaceCurrentWindow: (session: Session) => void;
+  /** Open the refresh wizard for the session (captures current window state). */
+  onRefresh: (session: Session) => void;
   /** Pin/unpin handlers shared with the page-level widget shortcuts. */
   onPin: (session: Session) => void;
   onUnpin: (session: Session) => void;
@@ -312,6 +319,8 @@ export function SessionsPage({
   onSnapshotGroupIdChange,
   restoreSessionId,
   onRestoreSessionIdChange,
+  refreshSessionId,
+  onRefreshSessionIdChange,
 }: SessionsPageProps) {
   const { openImportSessions } = useImportExportWizards();
   const { sessions, isLoaded, createSession, renameSession, removeSession, reload, updateOrder } = useSessions();
@@ -331,6 +340,8 @@ export function SessionsPage({
   }, [onSnapshotWizardOpenChange]);
 
   const [restoreSession, setRestoreSession] = useState<Session | null>(null);
+  const [refreshTarget, setRefreshTarget] = useState<Session | null>(null);
+  const [refreshGroupId, setRefreshGroupId] = useState<number | null>(null);
   const [editTarget, setEditTarget] = useState<Session | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const [bulkExportIds, setBulkExportIds] = useState<string[] | null>(null);
@@ -340,6 +351,45 @@ export function SessionsPage({
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleOpenSnapshotWizard = useCallback(() => setSnapshotOpen(true), []);
+
+  const handleOpenRefreshWizard = useCallback(async (session: Session) => {
+    const groupId = await getActiveTabGroupId();
+    setRefreshGroupId(groupId);
+    setRefreshTarget(session);
+  }, []);
+
+  const handleRefreshTrigger = useCallback(
+    (session: Session) => { void handleOpenRefreshWizard(session); },
+    [handleOpenRefreshWizard],
+  );
+
+  const handleRefreshSession = useCallback(
+    async (updatedSession: Session) => {
+      await updateSession(updatedSession.id, {
+        name: updatedSession.name,
+        note: updatedSession.note,
+        categoryId: updatedSession.categoryId,
+        groups: updatedSession.groups,
+        ungroupedTabs: updatedSession.ungroupedTabs,
+      });
+      await reload();
+    },
+    [reload],
+  );
+
+  // Deep-link: open the refresh wizard when a sessionId has been provided via
+  // URL hash (e.g. from the popup's refresh action). The optional groupId is
+  // consumed from snapshotGroupId (parsed by useDeepLinking).
+  useEffect(() => {
+    if (!refreshSessionId || !isLoaded) return;
+    const found = sessions.find((s) => s.id === refreshSessionId);
+    if (found) {
+      setRefreshGroupId(snapshotGroupId ?? null);
+      setRefreshTarget(found);
+      onRefreshSessionIdChange?.(null);
+      onSnapshotGroupIdChange?.(null);
+    }
+  }, [refreshSessionId, isLoaded, sessions, snapshotGroupId, onRefreshSessionIdChange, onSnapshotGroupIdChange]);
 
   // Quick-restore (no conflict-resolution wizard) handlers shared by the
   // SessionCard split button, the dropdown menu, and the widget-scope
@@ -537,6 +587,7 @@ export function SessionsPage({
     | 'onRestoreCurrentWindow'
     | 'onRestoreNewWindow'
     | 'onReplaceCurrentWindow'
+    | 'onRefresh'
     | 'onPin'
     | 'onUnpin'
   > = {
@@ -551,6 +602,7 @@ export function SessionsPage({
     onRestoreCurrentWindow: handleRestoreCurrentWindow,
     onRestoreNewWindow: handleRestoreNewWindow,
     onReplaceCurrentWindow: handleReplaceCurrentWindow,
+    onRefresh: handleRefreshTrigger,
     onPin: handlePin,
     onUnpin: handleUnpin,
   };
@@ -702,6 +754,21 @@ export function SessionsPage({
             onSave={handleSaveSession}
             existingSessions={sessions}
             initialGroupId={snapshotGroupId ?? undefined}
+          />
+
+          <SnapshotWizard
+            open={refreshTarget !== null}
+            onOpenChange={(open) => {
+              if (!open) {
+                setRefreshTarget(null);
+                setRefreshGroupId(null);
+              }
+            }}
+            onSave={async () => { /* unused in refresh mode */ }}
+            onRefresh={handleRefreshSession}
+            refreshSession={refreshTarget ?? undefined}
+            initialGroupId={refreshGroupId ?? undefined}
+            existingSessions={sessions}
           />
 
           <SessionEditDialog

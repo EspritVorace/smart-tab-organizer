@@ -10,6 +10,7 @@ interface DeepLinkState {
   rulesPendingAction: RulesPendingAction | null;
   snapshotGroupId: number | null;
   restoreSessionId: string | null;
+  refreshSessionId: string | null;
 }
 
 const VALID_SECTIONS = ['home', 'rules', 'importexport', 'sessions', 'stats', 'settings', 'workspaces'] as const;
@@ -38,12 +39,14 @@ export function useDeepLinking(): DeepLinkState & {
   setRulesPendingAction: (action: RulesPendingAction | null) => void;
   setSnapshotGroupId: (id: number | null) => void;
   setRestoreSessionId: (id: string | null) => void;
+  setRefreshSessionId: (id: string | null) => void;
 } {
   const [currentTab, setCurrentTab] = useState<string>('home');
   const [openSnapshotWizard, setOpenSnapshotWizard] = useState(false);
   const [rulesPendingAction, setRulesPendingAction] = useState<RulesPendingAction | null>(null);
   const [snapshotGroupId, setSnapshotGroupId] = useState<number | null>(null);
   const [restoreSessionId, setRestoreSessionId] = useState<string | null>(null);
+  const [refreshSessionId, setRefreshSessionId] = useState<string | null>(null);
 
   useEffect(() => {
     function applySessionsAction(params: URLSearchParams) {
@@ -55,6 +58,11 @@ export function useDeepLinking(): DeepLinkState & {
       } else if (action === 'restore') {
         const sid = params.get('sessionId');
         if (sid) setRestoreSessionId(sid);
+      } else if (action === 'refresh') {
+        const sid = params.get('sessionId');
+        if (sid) setRefreshSessionId(sid);
+        const groupIdParam = params.get('groupId');
+        setSnapshotGroupId(groupIdParam ? parseInt(groupIdParam, 10) : null);
       }
     }
 
@@ -91,5 +99,7 @@ export function useDeepLinking(): DeepLinkState & {
     setSnapshotGroupId,
     restoreSessionId,
     setRestoreSessionId,
+    refreshSessionId,
+    setRefreshSessionId,
   };
 }

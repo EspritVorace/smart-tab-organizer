@@ -351,6 +351,7 @@
   "sessionGroupOne": { "message": "1 groupe" },
   "sessionGroupCount": { "message": "$1 groupes" },
   "sessionRestore": { "message": "Restaurer" },
+  "sessionRefresh": { "message": "Rafraîchir" },
   "sessionRename": { "message": "Renommer" },
   "sessionRenameLabel": { "message": "Nom de la session" },
   "sessionConfirmRename": { "message": "Confirmer le renommage" },
@@ -386,6 +387,12 @@
   "snapshotDefaultName": { "message": "Instantané" },
   "snapshotSaveButton": { "message": "Sauvegarder la session" },
   "snapshotActiveGroupCallout": { "message": "Sélection restreinte au groupe actif. Vous pouvez l'étendre avant de sauvegarder." },
+
+  "refreshTitle": { "message": "Mettre à jour la session" },
+  "refreshDescription": { "message": "Capture les onglets actuels et écrase la session sauvegardée. Le titre, la note et la catégorie sont conservés." },
+  "refreshSaveButton": { "message": "Mettre à jour" },
+  "refreshNotificationTitle": { "message": "Session mise à jour" },
+  "refreshNotificationMessage": { "message": "« $1 » a été mis à jour" },
 
   "restoreTitle": { "message": "Restaurer « $1 »" },
   "restoreStepSelectionDescription": { "message": "Sélectionnez les onglets à restaurer et leur destination." },

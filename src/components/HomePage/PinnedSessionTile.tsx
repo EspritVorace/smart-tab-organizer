@@ -57,6 +57,7 @@ export function PinnedSessionTile({
             onRestoreNewWindow={(s) => onRestore(s, 'new')}
             onReplaceCurrentWindow={(s) => onRestore(s, 'replace')}
             onCustomize={(s) => onRestore(s, 'custom')}
+            onRefresh={(s) => onRestore(s, 'refresh')}
             presentation="tile"
             size="2"
             data-testid={`home-pinned-tile-restore-${session.id}`}

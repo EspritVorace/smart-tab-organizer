@@ -1,6 +1,6 @@
 import React from 'react';
-import { Flex } from '@radix-ui/themes';
-import { Monitor, Play, Replace, RotateCcw, Square, Wrench } from 'lucide-react';
+import { Flex, IconButton, Tooltip } from '@radix-ui/themes';
+import { Monitor, Play, Replace, RotateCcw, RotateCw, Square, Wrench } from 'lucide-react';
 import { SplitButton } from '@/components/UI/SplitButton/SplitButton';
 import { getMessage } from '@/utils/i18n';
 import type { Session } from '@/types/session';
@@ -11,6 +11,8 @@ export interface SessionRestoreButtonProps {
   onRestoreNewWindow: (session: Session) => void;
   onReplaceCurrentWindow: (session: Session) => void;
   onCustomize: (session: Session) => void;
+  /** Optional: when provided, renders a Refresh icon button to the left of the restore split button. */
+  onRefresh?: (session: Session) => void;
   size?: '1' | '2' | '3';
   variant?: 'solid' | 'soft' | 'outline';
   presentation?: 'default' | 'tile';
@@ -23,6 +25,7 @@ export function SessionRestoreButton({
   onRestoreNewWindow,
   onReplaceCurrentWindow,
   onCustomize,
+  onRefresh,
   size = '1',
   variant = 'soft',
   presentation = 'default',
@@ -38,7 +41,7 @@ export function SessionRestoreButton({
     <Play size={12} fill="currentColor" />
   );
 
-  return (
+  const splitButton = (
     <SplitButton
       data-testid={testId}
       label={label}
@@ -78,5 +81,25 @@ export function SessionRestoreButton({
         },
       ]}
     />
+  );
+
+  if (!onRefresh) return splitButton;
+
+  return (
+    <Flex align="center" gap="1">
+      <Tooltip content={getMessage('sessionRefresh')}>
+        <IconButton
+          size={size}
+          variant={variant}
+          color="gray"
+          onClick={() => onRefresh(session)}
+          aria-label={getMessage('sessionRefresh')}
+          data-testid={testId ? `${testId}-refresh` : undefined}
+        >
+          <RotateCw size={isTile ? 14 : 12} aria-hidden="true" />
+        </IconButton>
+      </Tooltip>
+      {splitButton}
+    </Flex>
   );
 }

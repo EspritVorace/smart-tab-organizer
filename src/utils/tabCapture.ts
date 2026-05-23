@@ -43,6 +43,16 @@ export async function hasCapturableTabs(): Promise<boolean> {
   return tabs.some(tab => !isSystemUrl(tab.url));
 }
 
+/**
+ * Returns the Chrome groupId of the active tab in the current window,
+ * or null if the active tab is not in a group (or no active tab).
+ */
+export async function getActiveTabGroupId(): Promise<number | null> {
+  const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+  const groupId = (tabs[0] as { groupId?: number } | undefined)?.groupId;
+  return typeof groupId === 'number' && groupId >= 0 ? groupId : null;
+}
+
 interface GroupEntry {
   savedGroup: SavedTabGroup;
   treeGroup: TabGroupItem;

@@ -351,6 +351,7 @@
   "sessionGroupOne": { "message": "1 group" },
   "sessionGroupCount": { "message": "$1 groups" },
   "sessionRestore": { "message": "Restore" },
+  "sessionRefresh": { "message": "Refresh" },
   "sessionRename": { "message": "Rename" },
   "sessionRenameLabel": { "message": "Session name" },
   "sessionConfirmRename": { "message": "Confirm rename" },
@@ -386,6 +387,12 @@
   "snapshotDefaultName": { "message": "Snapshot" },
   "snapshotSaveButton": { "message": "Save Session" },
   "snapshotActiveGroupCallout": { "message": "Selection limited to the active group. You can extend it before saving." },
+
+  "refreshTitle": { "message": "Refresh Session" },
+  "refreshDescription": { "message": "Capture the current tabs and overwrite this saved session. Title, note and category are preserved." },
+  "refreshSaveButton": { "message": "Update Session" },
+  "refreshNotificationTitle": { "message": "Session Updated" },
+  "refreshNotificationMessage": { "message": "\"$1\" has been updated" },
 
   "restoreTitle": { "message": "Restore \"$1\"" },
   "restoreStepSelectionDescription": { "message": "Select the tabs to restore and their destination." },
