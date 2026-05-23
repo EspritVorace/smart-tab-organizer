@@ -1,5 +1,5 @@
 // options/options.ts
-import React, { lazy, Suspense, useCallback, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { mountExtensionApp } from '@/utils/mountExtensionApp.js';
 import { Flex, Spinner, Text, Theme } from '@radix-ui/themes';
@@ -28,23 +28,25 @@ import { HomePage } from './HomePage';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
 import { Home, Shield, FileText, BarChart3, Settings, Archive, Layers } from 'lucide-react';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
+import { lazyWithTiming } from '@/utils/lazyWithTiming.js';
+import { preloadPage } from './pagePreloaders.js';
 
-const DomainRulesPage = lazy(() =>
+const DomainRulesPage = lazyWithTiming('DomainRulesPage', () =>
     import('./DomainRulesPage').then((m) => ({ default: m.DomainRulesPage })),
 );
-const SessionsPage = lazy(() =>
+const SessionsPage = lazyWithTiming('SessionsPage', () =>
     import('./SessionsPage').then((m) => ({ default: m.SessionsPage })),
 );
-const ImportExportPage = lazy(() =>
+const ImportExportPage = lazyWithTiming('ImportExportPage', () =>
     import('./ImportExportPage').then((m) => ({ default: m.ImportExportPage })),
 );
-const StatisticsPage = lazy(() =>
+const StatisticsPage = lazyWithTiming('StatisticsPage', () =>
     import('./StatisticsPage').then((m) => ({ default: m.StatisticsPage })),
 );
-const SettingsPage = lazy(() =>
+const SettingsPage = lazyWithTiming('SettingsPage', () =>
     import('@/components/UI/SettingsPage/SettingsPage').then((m) => ({ default: m.SettingsPage })),
 );
-const WorkspacesPage = lazy(() =>
+const WorkspacesPage = lazyWithTiming('WorkspacesPage', () =>
     import('./WorkspacesPage').then((m) => ({ default: m.WorkspacesPage })),
 );
 import type { Session } from '@/types/session';
@@ -188,6 +190,7 @@ export function OptionsContent() {
                 onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
                 activeItem={currentTab}
                 onItemClick={handleTabChange}
+                onItemPreload={preloadPage}
                 sections={sidebarSections}
                 headerContent={<OptionsHeader />}
                 headerCollapsedContent={<OptionsHeaderCollapsed />}

@@ -10,6 +10,7 @@ interface SidebarItemsProps {
   isCollapsed?: boolean;
   activeItem?: string;
   onItemClick?: (itemId: string) => void;
+  onItemPreload?: (itemId: string) => void;
   sections: SidebarSection[];
 }
 
@@ -144,6 +145,7 @@ export function SidebarItems({
   isCollapsed = false,
   activeItem,
   onItemClick,
+  onItemPreload,
   sections
 }: SidebarItemsProps) {
   const listRef = useRef<HTMLDivElement>(null);
@@ -217,7 +219,11 @@ export function SidebarItems({
                     variant="ghost"
                     size="3"
                     onClick={() => handleItemClick(item.id, item.onClick)}
-                    onFocus={() => setFocusIndex(itemIndex)}
+                    onMouseEnter={() => onItemPreload?.(item.id)}
+                    onFocus={() => {
+                      setFocusIndex(itemIndex);
+                      onItemPreload?.(item.id);
+                    }}
                     onKeyDown={(e) => handleNavigationKey(e, itemIndex)}
                     tabIndex={itemIndex === focusIndex ? 0 : -1}
                     aria-label={isCollapsed ? item.label : undefined}

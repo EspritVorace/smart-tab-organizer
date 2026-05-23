@@ -6,6 +6,7 @@ interface SidebarContentProps {
   isCollapsed?: boolean;
   activeItem?: string;
   onItemClick?: (itemId: string) => void;
+  onItemPreload?: (itemId: string) => void;
   sections: SidebarSection[];
 }
 
@@ -13,6 +14,7 @@ export function SidebarContent({
   isCollapsed = false,
   activeItem,
   onItemClick,
+  onItemPreload,
   sections
 }: SidebarContentProps) {
   return (
@@ -26,6 +28,7 @@ export function SidebarContent({
           isCollapsed={isCollapsed}
           activeItem={activeItem}
           onItemClick={onItemClick}
+          onItemPreload={onItemPreload}
           sections={sections}
         />
       </Box>
