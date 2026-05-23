@@ -123,6 +123,19 @@ export const DomainRuleCardWithSearch: Story = {
   },
 };
 
+export const DomainRuleCardWithOverlap: Story = {
+  name: 'DomainRuleCard — Overlap warning',
+  args: {
+    ...defaultProps,
+    rule: { ...baseRule, id: 'rule-1', label: 'Gmail', domainFilter: 'mail.google.com' },
+    overlapPrecedenceList: [
+      { ...baseRule, id: 'rule-0', label: 'Google parent', domainFilter: 'google.com' },
+      { ...baseRule, id: 'rule-1', label: 'Gmail', domainFilter: 'mail.google.com' },
+      { ...baseRule, id: 'rule-2', label: 'Workspace', domainFilter: 'google.com' },
+    ],
+  },
+};
+
 /* ── Summary mode stories ────────────────────────────────────────────────────── */
 
 export const DomainRuleCardSummary: Story = {
