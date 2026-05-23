@@ -4,6 +4,9 @@ import { logger } from '@/utils/logger';
 const VALID_RULES_ACTIONS = ['create', 'import'] as const;
 export type RulesPendingAction = typeof VALID_RULES_ACTIONS[number];
 
+export type SessionsSubTab = 'active' | 'archived';
+const VALID_SESSIONS_TABS: readonly SessionsSubTab[] = ['active', 'archived'] as const;
+
 interface DeepLinkState {
   currentTab: string;
   openSnapshotWizard: boolean;
@@ -11,6 +14,7 @@ interface DeepLinkState {
   snapshotGroupId: number | null;
   restoreSessionId: string | null;
   refreshSessionId: string | null;
+  sessionsTab: SessionsSubTab;
 }
 
 const VALID_SECTIONS = ['home', 'rules', 'importexport', 'sessions', 'stats', 'settings', 'workspaces'] as const;
@@ -40,6 +44,7 @@ export function useDeepLinking(): DeepLinkState & {
   setSnapshotGroupId: (id: number | null) => void;
   setRestoreSessionId: (id: string | null) => void;
   setRefreshSessionId: (id: string | null) => void;
+  setSessionsTab: (tab: SessionsSubTab) => void;
 } {
   const [currentTab, setCurrentTab] = useState<string>('home');
   const [openSnapshotWizard, setOpenSnapshotWizard] = useState(false);
@@ -47,9 +52,14 @@ export function useDeepLinking(): DeepLinkState & {
   const [snapshotGroupId, setSnapshotGroupId] = useState<number | null>(null);
   const [restoreSessionId, setRestoreSessionId] = useState<string | null>(null);
   const [refreshSessionId, setRefreshSessionId] = useState<string | null>(null);
+  const [sessionsTab, setSessionsTab] = useState<SessionsSubTab>('active');
 
   useEffect(() => {
     function applySessionsAction(params: URLSearchParams) {
+      const tab = params.get('tab');
+      if (tab && (VALID_SESSIONS_TABS as readonly string[]).includes(tab)) {
+        setSessionsTab(tab as SessionsSubTab);
+      }
       const action = params.get('action');
       if (action === 'snapshot') {
         setOpenSnapshotWizard(true);
@@ -101,5 +111,7 @@ export function useDeepLinking(): DeepLinkState & {
     setRestoreSessionId,
     refreshSessionId,
     setRefreshSessionId,
+    sessionsTab,
+    setSessionsTab,
   };
 }

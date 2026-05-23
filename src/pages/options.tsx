@@ -67,6 +67,7 @@ export function OptionsContent() {
         snapshotGroupId, setSnapshotGroupId,
         restoreSessionId, setRestoreSessionId,
         refreshSessionId, setRefreshSessionId,
+        sessionsTab, setSessionsTab,
     } = useDeepLinking();
 
     const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
@@ -255,6 +256,8 @@ export function OptionsContent() {
                                     onRestoreSessionIdChange={setRestoreSessionId}
                                     refreshSessionId={refreshSessionId}
                                     onRefreshSessionIdChange={setRefreshSessionId}
+                                    sessionsTab={sessionsTab}
+                                    onSessionsTabChange={setSessionsTab}
                                 />
                             )}
                             {currentTab === 'stats' && (
