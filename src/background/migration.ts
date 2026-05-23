@@ -1,10 +1,11 @@
 import { browser, Browser } from 'wxt/browser';
 import { logger } from '@/utils/logger.js';
 import { getBuiltInCategories } from '@/utils/categoriesStore.js';
-import { DEFAULT_WORKSPACE_ID } from '@/utils/workspaceStorage.js';
+import { DEFAULT_WORKSPACE_ID, defineWorkspaceItems, workspacesIndexItem } from '@/utils/workspaceStorage.js';
 import { getActiveScopedItems } from '@/utils/workspaceContext.js';
 import type { WorkspaceMeta, WorkspaceAccentColor } from '@/schemas/workspace.js';
 import { getMessage } from '@/utils/i18n.js';
+import type { Session } from '@/types/session.js';
 
 const SETTINGS_KEYS = [
   'globalGroupingEnabled',
@@ -21,6 +22,7 @@ const MIGRATION_FLAG = 'settingsMigratedToLocal';
 const URL_EXTRACTION_MODE_MIGRATION_FLAG = 'urlExtractionModeMigrated';
 const WORKSPACES_MIGRATION_FLAG = 'workspacesMigrated';
 const UNIFIED_CATEGORIES_MIGRATION_FLAG = 'unifiedCategoriesSeeded';
+const SESSIONS_ARCHIVE_SPLIT_FLAG = 'sessionsArchiveSplitDone';
 export const FIRST_RUN_REDIRECT_FLAG = 'firstRunRedirectDone';
 
 const DEFAULT_WORKSPACE_ACCENT: WorkspaceAccentColor = 'indigo';
@@ -246,5 +248,62 @@ export async function seedBuiltInCategories(): Promise<void> {
     await categoriesSeededItem.setValue(true);
   } catch (error) {
     logger.error('[MIGRATION] Category seeding failed, will retry on next startup:', error);
+  }
+}
+
+function archiveSplitFlagKey(wsId: string): string {
+  return wsId === DEFAULT_WORKSPACE_ID
+    ? SESSIONS_ARCHIVE_SPLIT_FLAG
+    : `ws:${wsId}:${SESSIONS_ARCHIVE_SPLIT_FLAG}`;
+}
+
+/**
+ * Splits the legacy `sessions` array into three workspace-scoped buckets:
+ * `pinnedSessions`, `sessions` (active non-pinned, non-archived), and
+ * `archivedSessions`. Idempotent per workspace via a dedicated flag.
+ * Preserves item identity and renormalizes `position` per bucket.
+ * Runs after `migrateToWorkspaces` so the workspaces index is reliable.
+ */
+export async function migrateSessionsSplitByPinAndArchive(): Promise<void> {
+  try {
+    const wsList = (await workspacesIndexItem.getValue()) ?? [];
+    const wsIds = wsList.length > 0 ? wsList.map((w) => w.id) : [DEFAULT_WORKSPACE_ID];
+
+    for (const wsId of wsIds) {
+      const flagKey = archiveSplitFlagKey(wsId);
+      const flagState = await browser.storage.local.get(flagKey);
+      if (flagState[flagKey]) {
+        logger.debug(`[MIGRATION] Sessions archive split already done for workspace "${wsId}".`);
+        continue;
+      }
+
+      const items = defineWorkspaceItems(wsId);
+      const all: Session[] = (await items.sessionsItem.getValue()) ?? [];
+
+      const pinned: Session[] = [];
+      const active: Session[] = [];
+      const archived: Session[] = [];
+      for (const session of all) {
+        if (session.isArchived) archived.push(session);
+        else if (session.isPinned) pinned.push(session);
+        else active.push(session);
+      }
+
+      const normalize = (list: Session[]): Session[] =>
+        list.map((s, i) => ({ ...s, position: i }));
+
+      await Promise.all([
+        items.pinnedSessionsItem.setValue(normalize(pinned)),
+        items.archivedSessionsItem.setValue(normalize(archived)),
+        items.sessionsItem.setValue(normalize(active)),
+      ]);
+
+      await browser.storage.local.set({ [flagKey]: true });
+      logger.debug(
+        `[MIGRATION] Sessions archive split done for workspace "${wsId}": ${pinned.length} pinned, ${active.length} active, ${archived.length} archived.`,
+      );
+    }
+  } catch (error) {
+    logger.error('[MIGRATION] Sessions archive split failed, will retry on next startup:', error);
   }
 }
