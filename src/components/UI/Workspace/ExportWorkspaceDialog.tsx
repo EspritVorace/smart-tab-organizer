@@ -27,6 +27,7 @@ const EMPTY_PAYLOAD: WorkspaceExportPayload = {
     deduplicationKeepStrategy: 'keep-grouped-or-new',
     notifyOnGrouping: true,
     notifyOnDeduplication: true,
+    notifyOnOrganize: true,
   },
   domainRules: [],
   categories: [],

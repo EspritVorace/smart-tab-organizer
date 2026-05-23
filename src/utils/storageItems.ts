@@ -18,6 +18,7 @@ export const categoriesItem = _defaultItems.categoriesItem;
 export const categoriesSeededItem = _defaultItems.categoriesSeededItem;
 export const notifyOnGroupingItem = _defaultItems.notifyOnGroupingItem;
 export const notifyOnDeduplicationItem = _defaultItems.notifyOnDeduplicationItem;
+export const notifyOnOrganizeItem = _defaultItems.notifyOnOrganizeItem;
 export const statisticsItem = _defaultItems.statisticsItem;
 export const sessionsItem = _defaultItems.sessionsItem;
 export const popupPinnedEmptyCollapsedItem = _defaultItems.popupPinnedEmptyCollapsedItem;
@@ -32,4 +33,5 @@ export const settingsItemMap = {
   categories: categoriesItem,
   notifyOnGrouping: notifyOnGroupingItem,
   notifyOnDeduplication: notifyOnDeduplicationItem,
+  notifyOnOrganize: notifyOnOrganizeItem,
 } as const;

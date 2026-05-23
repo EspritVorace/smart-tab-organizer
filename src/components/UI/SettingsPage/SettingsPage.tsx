@@ -50,6 +50,16 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
                       onCheckedChange={(checked) => updateSettings({ notifyOnDeduplication: checked })}
                     />
                   </Flex>
+
+                  <Flex justify="between" align="center">
+                    <Text size="2">{getMessage('notifyOnOrganize')}</Text>
+                    <Switch
+                      data-testid="page-settings-toggle-notify-organize"
+                      aria-label={getMessage('notifyOnOrganize')}
+                      checked={syncSettings.notifyOnOrganize}
+                      onCheckedChange={(checked) => updateSettings({ notifyOnOrganize: checked })}
+                    />
+                  </Flex>
                 </Flex>
               </Box>
             </Card>

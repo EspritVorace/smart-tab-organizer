@@ -37,6 +37,7 @@ const sampleImportPayload = {
     deduplicationKeepStrategy: 'keep-grouped-or-new',
     notifyOnGrouping: true,
     notifyOnDeduplication: true,
+    notifyOnOrganize: true,
   },
   domainRules: [
     {

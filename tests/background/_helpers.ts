@@ -130,6 +130,8 @@ export function makeSettings(overrides: Partial<AppSettings> = {}): AppSettings 
     deduplicationKeepStrategy: 'keep-old',
     notifyOnGrouping: true,
     notifyOnDeduplication: true,
+    notifyOnOrganize: true,
+    categories: [],
     domainRules: [],
     ...overrides,
   };

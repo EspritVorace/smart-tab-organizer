@@ -128,6 +128,12 @@ describe('settingsUtils', () => {
       expect(settings.notifyOnDeduplication).toBe(false);
     });
 
+    it('updates notifyOnOrganize', async () => {
+      await updateSettings({ notifyOnOrganize: false });
+      const settings = await getSettings();
+      expect(settings.notifyOnOrganize).toBe(false);
+    });
+
     it('updates categories', async () => {
       await updateSettings({ categories: [] });
       const settings = await getSettings();

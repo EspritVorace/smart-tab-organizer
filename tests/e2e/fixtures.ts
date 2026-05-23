@@ -241,6 +241,7 @@ export const test = baseTest.extend<Omit<ExtensionFixtures, 'extensionContext' |
             domainRules: [],
             notifyOnGrouping: true,
             notifyOnDeduplication: true,
+            notifyOnOrganize: true,
           });
         });
       },

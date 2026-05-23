@@ -70,6 +70,7 @@ const importWorkspaceSettingsSchema = z.object({
   ),
   notifyOnGrouping: z.boolean(),
   notifyOnDeduplication: z.boolean(),
+  notifyOnOrganize: z.boolean().optional(),
 });
 
 const importWorkspaceStatisticsSchema = z.object({
