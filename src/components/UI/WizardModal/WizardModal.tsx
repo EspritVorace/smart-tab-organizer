@@ -59,8 +59,8 @@ function WizardModalRoot({
       onOpenAutoFocus={onOpenAutoFocus}
       preventOutsideClose
       maxWidth={maxWidth}
-      minHeight={fillHeight ? undefined : 'min(480px, 80vh)'}
-      maxHeight={fillHeight ? undefined : '80vh'}
+      minHeight={fillHeight ? undefined : 'min(520px, 85vh)'}
+      maxHeight={fillHeight ? undefined : '85vh'}
       contentStyle={contentStyle}
     >
       {children}
