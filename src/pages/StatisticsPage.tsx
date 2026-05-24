@@ -64,9 +64,9 @@ function KpiTile({ icon, label, value, testId }: { icon: React.ReactNode; label:
   );
 }
 
-function SmallKpiTile({ icon, label, value, testId }: { icon: React.ReactNode; label: string; value: React.ReactNode; testId?: string }) {
+function SmallKpiTile({ icon, label, value, testId, minWidth = '110px' }: { icon: React.ReactNode; label: string; value: React.ReactNode; testId?: string; minWidth?: string | number }) {
   return (
-    <Card data-testid={testId} style={{ flex: '1', minWidth: '110px' }}>
+    <Card data-testid={testId} style={{ flex: '1', minWidth }}>
       <Flex direction="column" gap="1" p="2">
         <Flex align="center" gap="1">
           {icon}
@@ -181,32 +181,36 @@ function SessionVolumesCard({ snapshot }: { snapshot: SessionStatisticsSnapshot 
           </Tooltip>
         </Flex>
 
-        <Flex gap="2" wrap="wrap">
+        <Grid columns="4" gap="2">
           <SmallKpiTile
             testId="page-stats-tile-sessions-total"
             icon={<FolderOpen size={14} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
             label={getMessage('statsSessionsTotal')}
             value={volumes.total}
+            minWidth={0}
           />
           <SmallKpiTile
             testId="page-stats-tile-sessions-pinned"
             icon={<Pin size={14} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
             label={getMessage('statsSessionsPinned')}
             value={volumes.pinned}
+            minWidth={0}
           />
           <SmallKpiTile
             testId="page-stats-tile-sessions-active"
             icon={<FolderOpen size={14} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
             label={getMessage('statsSessionsActive')}
             value={volumes.active}
+            minWidth={0}
           />
           <SmallKpiTile
             testId="page-stats-tile-sessions-archived"
             icon={<Archive size={14} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
             label={getMessage('statsSessionsArchived')}
             value={volumes.archived}
+            minWidth={0}
           />
-        </Flex>
+        </Grid>
 
         <Flex gap="2" wrap="wrap">
           <SmallKpiTile
