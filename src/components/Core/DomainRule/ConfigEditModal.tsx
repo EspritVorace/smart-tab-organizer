@@ -170,6 +170,7 @@ export function ConfigEditModal({
       >
         <DomainRuleConfigForm
           idPrefix="edit"
+          autoFocusFirstField
           configMode={configMode}
           onConfigModeChange={handleConfigModeChange}
           presetId={presetId}

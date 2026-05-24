@@ -76,6 +76,7 @@ export function OptionsEditModal({ isOpen, onClose, onApply, initial }: OptionsE
           control={control}
           deduplicationEnabled={deduplicationEnabled}
           errors={errors}
+          autoFocusFirstField
         />
       </Flex>
     </EditModalShell>
