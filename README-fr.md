@@ -9,7 +9,7 @@
 Une extension Chrome et Firefox qui regroupe tes onglets par domaine, supprime les doublons, et capture tes espaces de travail sous forme de sessions à restaurer en un clic.
 
 <p align="center">
-  <img src="assets/store.png" alt="SmartTab Organizer" width="720">
+  <img src="doc/store.png" alt="SmartTab Organizer" width="720">
 </p>
 
 <p align="center">
@@ -35,7 +35,7 @@ Une extension Chrome et Firefox qui regroupe tes onglets par domaine, supprime l
 Tu ouvres un ticket Jira, une PR GitHub, une page de docs : le nouvel onglet atterrit dans le bon groupe instantanément. Le nom du groupe vient du titre de la page, de l'URL, ou d'un préréglage regex (Jira, GitHub, GitLab, Trello, et bien d'autres).
 
 <p align="center">
-  <img src="assets/readme/gifs/regroup.gif" alt="Démo du regroupement automatique" width="640">
+  <img src="doc/readme/gifs/regroup.gif" alt="Démo du regroupement automatique" width="640">
 </p>
 
 ### 🔁 Déduplication
@@ -43,7 +43,7 @@ Tu ouvres un ticket Jira, une PR GitHub, une page de docs : le nouvel onglet att
 Tu ouvres une page déjà ouverte ? Le doublon disparaît. Le mode de comparaison se règle par règle (URL exacte, "contient", ou "ignore ces paramètres"), et tu choisis lequel des deux onglets survit.
 
 <p align="center">
-  <img src="assets/readme/gifs/dedup.gif" alt="Démo de la déduplication" width="640">
+  <img src="doc/readme/gifs/dedup.gif" alt="Démo de la déduplication" width="640">
 </p>
 
 ### 📷 Des sessions vraiment utilisables
@@ -51,7 +51,7 @@ Tu ouvres une page déjà ouverte ? Le doublon disparaît. Le mode de comparaiso
 Capture tes onglets et tes groupes ouverts, nomme-les, épingle ceux dans lesquels tu vis. Restaure dans la fenêtre courante, dans une nouvelle, ou remplace ce que tu as. Chaque session est éditable, cherchable jusqu'au niveau des onglets, et peut porter tes propres notes.
 
 <p align="center">
-  <img src="assets/readme/fr-dark-sessions-list.png" alt="Liste des sessions" width="720">
+  <img src="doc/readme/fr-dark-sessions-list.png" alt="Liste des sessions" width="720">
 </p>
 
 ## Et aussi
