@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
 import { loadArchivedSessions } from '@/utils/sessionStorage';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
 import type { Session } from '@/types/session';
+import { useSessionBucketLoader } from './useSessionBucketLoader';
 
 export interface UseArchivedSessionsOptions {
   /**
@@ -25,28 +25,10 @@ export interface UseArchivedSessionsReturn {
  */
 export function useArchivedSessions({ enabled }: UseArchivedSessionsOptions): UseArchivedSessionsReturn {
   const { scopedItems } = useActiveWorkspaceContext();
-  const item = scopedItems.archivedSessionsItem;
-  const [archivedSessions, setArchivedSessions] = useState<Session[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  const reload = useCallback(async () => {
-    if (!enabled) return;
-    const data = await loadArchivedSessions();
-    setArchivedSessions(data);
-    setIsLoaded(true);
-  }, [enabled]);
-
-  useEffect(() => {
-    if (!enabled) return;
-    reload();
-  }, [enabled, reload]);
-
-  useEffect(() => {
-    if (!enabled) return;
-    return item.watch(() => {
-      reload();
-    });
-  }, [enabled, item, reload]);
-
-  return { archivedSessions, isLoaded, reload };
+  const { sessions, isLoaded, reload } = useSessionBucketLoader({
+    item: scopedItems.archivedSessionsItem,
+    loader: loadArchivedSessions,
+    enabled,
+  });
+  return { archivedSessions: sessions, isLoaded, reload };
 }
