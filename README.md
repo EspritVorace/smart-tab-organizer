@@ -9,7 +9,7 @@
 A Chrome and Firefox extension that groups your tabs by domain, kills duplicates, and snapshots your workspaces as sessions you can restore in one click.
 
 <p align="center">
-  <img src="assets/store.png" alt="SmartTab Organizer" width="720">
+  <img src="doc/store.png" alt="SmartTab Organizer" width="720">
 </p>
 
 <p align="center">
@@ -35,7 +35,7 @@ A Chrome and Firefox extension that groups your tabs by domain, kills duplicates
 Open a Jira ticket, a GitHub PR, a docs page: the new tab lands in the right group instantly. Group names come from the page title, the URL, or a regex preset (Jira, GitHub, GitLab, Trello, and many more).
 
 <p align="center">
-  <img src="assets/readme/gifs/regroup.gif" alt="Auto-grouping in action" width="640">
+  <img src="doc/readme/gifs/regroup.gif" alt="Auto-grouping in action" width="640">
 </p>
 
 ### 🔁 Deduplication
@@ -43,7 +43,7 @@ Open a Jira ticket, a GitHub PR, a docs page: the new tab lands in the right gro
 Open a page that's already open? The duplicate vanishes. Matching is configurable per rule (exact URL, "includes", or "ignore these query params"), and you choose which of the two tabs survives.
 
 <p align="center">
-  <img src="assets/readme/gifs/dedup.gif" alt="Deduplication in action" width="640">
+  <img src="doc/readme/gifs/dedup.gif" alt="Deduplication in action" width="640">
 </p>
 
 ### 📷 Sessions you actually want to use
@@ -51,7 +51,7 @@ Open a page that's already open? The duplicate vanishes. Matching is configurabl
 Snapshot your open tabs and groups, name them, pin the ones you live in. Restore into the current window, a new one, or replace what you have. Every session is editable, searchable across tabs and groups, and can carry your own notes.
 
 <p align="center">
-  <img src="assets/readme/en-dark-sessions-list.png" alt="Sessions list" width="720">
+  <img src="doc/readme/en-dark-sessions-list.png" alt="Sessions list" width="720">
 </p>
 
 ## And there's more
