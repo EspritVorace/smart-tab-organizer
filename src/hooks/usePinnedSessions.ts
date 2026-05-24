@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
 import { loadPinnedSessions } from '@/utils/sessionStorage';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
 import type { Session } from '@/types/session';
+import { useSessionBucketLoader } from './useSessionBucketLoader';
 
 export interface UsePinnedSessionsReturn {
   pinnedSessions: Session[];
@@ -16,25 +16,9 @@ export interface UsePinnedSessionsReturn {
  */
 export function usePinnedSessions(): UsePinnedSessionsReturn {
   const { scopedItems } = useActiveWorkspaceContext();
-  const item = scopedItems.pinnedSessionsItem;
-  const [pinnedSessions, setPinnedSessions] = useState<Session[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  const reload = useCallback(async () => {
-    const data = await loadPinnedSessions();
-    setPinnedSessions(data);
-    setIsLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    reload();
-  }, [reload]);
-
-  useEffect(() => {
-    return item.watch(() => {
-      reload();
-    });
-  }, [item, reload]);
-
-  return { pinnedSessions, isLoaded, reload };
+  const { sessions, isLoaded, reload } = useSessionBucketLoader({
+    item: scopedItems.pinnedSessionsItem,
+    loader: loadPinnedSessions,
+  });
+  return { pinnedSessions: sessions, isLoaded, reload };
 }

@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
 import { loadActiveSessions } from '@/utils/sessionStorage';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
 import type { Session } from '@/types/session';
+import { useSessionBucketLoader } from './useSessionBucketLoader';
 
 export interface UseActiveSessionsReturn {
   activeSessions: Session[];
@@ -15,25 +15,9 @@ export interface UseActiveSessionsReturn {
  */
 export function useActiveSessions(): UseActiveSessionsReturn {
   const { scopedItems } = useActiveWorkspaceContext();
-  const item = scopedItems.sessionsItem;
-  const [activeSessions, setActiveSessions] = useState<Session[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  const reload = useCallback(async () => {
-    const data = await loadActiveSessions();
-    setActiveSessions(data);
-    setIsLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    reload();
-  }, [reload]);
-
-  useEffect(() => {
-    return item.watch(() => {
-      reload();
-    });
-  }, [item, reload]);
-
-  return { activeSessions, isLoaded, reload };
+  const { sessions, isLoaded, reload } = useSessionBucketLoader({
+    item: scopedItems.sessionsItem,
+    loader: loadActiveSessions,
+  });
+  return { activeSessions: sessions, isLoaded, reload };
 }
