@@ -127,6 +127,7 @@ export function IdentityEditModal({
               id={fieldId}
               name="domainFilter"
               data-testid="modal-edit-identity-field-domain"
+              data-autofocus="true"
               value={domainFilter}
               onChange={(e) => handleDomainFilterChange(e.target.value)}
               placeholder={getMessage('domainFilterPlaceholder')}

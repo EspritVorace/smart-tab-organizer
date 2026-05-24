@@ -46,6 +46,8 @@ export interface DomainRuleConfigFormProps {
   urlQueryParamNameError?: FieldError;
   /** Optional prefix for field IDs to avoid collisions when multiple instances coexist. */
   idPrefix?: string;
+  /** Forwards [data-autofocus] to the first interactive control (the active config mode radio). */
+  autoFocusFirstField?: boolean;
 }
 
 /**
@@ -73,6 +75,7 @@ export function DomainRuleConfigForm({
   onUrlQueryParamNameChange,
   urlQueryParamNameError,
   idPrefix,
+  autoFocusFirstField = false,
 }: DomainRuleConfigFormProps) {
   const prefix = idPrefix ? `${idPrefix}-` : '';
   const presetInputId = `${prefix}presetId`;
@@ -97,7 +100,11 @@ export function DomainRuleConfigForm({
       <Flex gap="4" style={{ flex: 1, minHeight: 0, overflow: 'hidden' }} align="stretch">
         {/* Left column: vertical radio list */}
         <Box style={{ width: 240, flexShrink: 0 }}>
-          <ConfigModeSelector value={configMode} onValueChange={onConfigModeChange} />
+          <ConfigModeSelector
+            value={configMode}
+            onValueChange={onConfigModeChange}
+            autoFocusFirstField={autoFocusFirstField}
+          />
         </Box>
 
         {/* Right column: active-mode description heading + mode-specific content */}

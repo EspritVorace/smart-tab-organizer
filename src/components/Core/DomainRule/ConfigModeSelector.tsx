@@ -27,6 +27,8 @@ export const MODE_HELP_LABELS: Record<ConfigMode, Parameters<typeof getMessage>[
 interface ConfigModeSelectorProps {
   value: ConfigMode;
   onValueChange: (mode: ConfigMode) => void;
+  /** Marks the currently selected radio item with [data-autofocus] so DialogShell focuses it on open. */
+  autoFocusFirstField?: boolean;
 }
 
 /**
@@ -34,7 +36,7 @@ interface ConfigModeSelectorProps {
  * The active mode's full description is rendered by the parent (right column).
  * Shared between ConfigEditModal and WizardStep2Config.
  */
-export function ConfigModeSelector({ value, onValueChange }: ConfigModeSelectorProps) {
+export function ConfigModeSelector({ value, onValueChange, autoFocusFirstField = false }: ConfigModeSelectorProps) {
   const labelId = useId();
   return (
     <Flex direction="column" gap="2">
@@ -69,6 +71,7 @@ export function ConfigModeSelector({ value, onValueChange }: ConfigModeSelectorP
                   <RadioGroup.Item
                     value={mode}
                     data-testid={`config-mode-${mode}`}
+                    data-autofocus={autoFocusFirstField && isSelected ? 'true' : undefined}
                     style={{ marginTop: '2px' }}
                   />
                   <Flex direction="column" gap="1">
