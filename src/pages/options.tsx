@@ -32,6 +32,12 @@ import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { getActiveTabGroupId } from '@/utils/tabCapture';
 import { lazyWithTiming } from '@/utils/lazyWithTiming.js';
 import { preloadPage } from './pagePreloaders.js';
+import { DomainRulesPageSkeleton } from './skeletons/DomainRulesPageSkeleton';
+import { SessionsPageSkeleton } from './skeletons/SessionsPageSkeleton';
+import { WorkspacesPageSkeleton } from './skeletons/WorkspacesPageSkeleton';
+import { ImportExportPageSkeleton } from './skeletons/ImportExportPageSkeleton';
+import { StatisticsPageSkeleton } from './skeletons/StatisticsPageSkeleton';
+import { SettingsPageSkeleton } from './skeletons/SettingsPageSkeleton';
 
 const DomainRulesPage = lazyWithTiming('DomainRulesPage', () =>
     import('./DomainRulesPage').then((m) => ({ default: m.DomainRulesPage })),
@@ -55,6 +61,25 @@ import type { Session } from '@/types/session';
 import type { HomeRestoreTarget } from '@/components/HomePage/types';
 import { Toaster } from '@/components/UI/Toaster/Toaster';
 import type { DomainRuleSettings } from '@/types/syncSettings';
+
+function renderLazyFallback(currentTab: string): React.ReactNode {
+    switch (currentTab) {
+        case 'rules':
+            return <DomainRulesPageSkeleton />;
+        case 'sessions':
+            return <SessionsPageSkeleton />;
+        case 'workspaces':
+            return <WorkspacesPageSkeleton />;
+        case 'importexport':
+            return <ImportExportPageSkeleton />;
+        case 'stats':
+            return <StatisticsPageSkeleton />;
+        case 'settings':
+            return <SettingsPageSkeleton />;
+        default:
+            return null;
+    }
+}
 
 export function OptionsContent() {
     const version = browser.runtime.getManifest().version;
@@ -214,14 +239,7 @@ export function OptionsContent() {
                 <OptionsTopbar pageTitle={activePageTitle} />
                 <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
                     <main data-testid="options-content" style={{ flex: 1, overflow: 'auto', padding: '20px 20px 0 20px', minWidth: 0 }}>
-                        <Suspense
-                            fallback={
-                                <Flex align="center" justify="center" gap="2" style={{ height: '100%' }}>
-                                    <Spinner size="3" />
-                                    <Text>{getMessage('loadingText')}</Text>
-                                </Flex>
-                            }
-                        >
+                        <Suspense fallback={renderLazyFallback(currentTab)}>
                             {currentTab === 'home' && (
                                 <HomePage
                                     syncSettings={settings}
