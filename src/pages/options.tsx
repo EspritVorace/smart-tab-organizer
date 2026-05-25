@@ -231,6 +231,7 @@ export function OptionsContent() {
                                     onOpenRuleWizard={handleOpenRuleWizardFromHome}
                                     onOpenShortcutsAside={openShortcuts}
                                     onRestore={handleRestoreFromHome}
+                                    onDefaultRestoreActionChange={(value) => updateSettings({ defaultRestoreAction: value })}
                                 />
                             )}
                             {currentTab === 'rules' && (
@@ -250,6 +251,7 @@ export function OptionsContent() {
                             {currentTab === 'sessions' && (
                                 <SessionsPage
                                     syncSettings={settings}
+                                    updateSettings={updateSettings}
                                     snapshotWizardOpen={openSnapshotWizard}
                                     onSnapshotWizardOpenChange={setOpenSnapshotWizard}
                                     snapshotGroupId={snapshotGroupId}

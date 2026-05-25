@@ -1,5 +1,9 @@
 import type { DomainRule } from '@/schemas/domainRule.js';
-import { type BadgeType, type DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
+import {
+  type BadgeType,
+  type DeduplicationKeepStrategyValue,
+  type DefaultRestoreActionValue
+} from '@/schemas/enums.js';
 import type { RuleCategory } from '@/schemas/category.js';
 
 // Settings types that extend the Zod-inferred types.
@@ -17,6 +21,7 @@ export interface AppSettings {
   globalDeduplicationEnabled: boolean;
   deduplicateUnmatchedDomains: boolean;
   deduplicationKeepStrategy: DeduplicationKeepStrategyValue;
+  defaultRestoreAction: DefaultRestoreActionValue;
   domainRules: DomainRuleSettings;
   categories: RuleCategory[];
   // Notification settings
@@ -31,6 +36,7 @@ export const defaultAppSettings: AppSettings = {
   globalDeduplicationEnabled: true,
   deduplicateUnmatchedDomains: false,
   deduplicationKeepStrategy: 'keep-grouped-or-new',
+  defaultRestoreAction: 'current',
   domainRules: [],
   categories: [],
   notifyOnGrouping: true,

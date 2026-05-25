@@ -85,6 +85,8 @@
   "deduplicationKeepStrategyNewLabel": { "message": "La pestaña recién abierta" },
   "deduplicationKeepStrategyGroupedLabel": { "message": "Gana la pestaña agrupada, si no mantener la existente" },
   "deduplicationKeepStrategyGroupedOrNewLabel": { "message": "Gana la pestaña agrupada, si no mantener la nueva" },
+  "defaultRestoreActionLabel": { "message": "Acción por defecto" },
+  "defaultRestoreActionDescription": { "message": "Elige qué acción dispara el botón principal Restaurar al hacer clic. El menú desplegable sigue disponible con las cuatro opciones." },
   "notificationGroupingTitle": { "message": "📁 Pestañas Agrupadas" },
   "notificationGroupingMessage": { "message": "Pestañas agrupadas en \"{groupName}\"" },
   "notificationDeduplicationTitle": { "message": "✂️ Duplicado Cerrado" },

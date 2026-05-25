@@ -18,6 +18,7 @@ import {
 import { HomePageSkeleton } from '@/components/HomePage/HomePageSkeleton';
 import type { QuickActionId } from '@/components/HomePage/data';
 import type { HomeRestoreTarget } from '@/components/HomePage/types';
+import type { DefaultRestoreActionValue } from '@/schemas/enums';
 
 export interface HomePageProps {
   syncSettings: AppSettings;
@@ -27,6 +28,8 @@ export interface HomePageProps {
   onOpenRuleWizard: () => void;
   onOpenShortcutsAside: () => void;
   onRestore: (session: Session, target: HomeRestoreTarget) => void;
+  /** Persists a new default restore action when the user picks it from a pinned tile dropdown. */
+  onDefaultRestoreActionChange: (value: DefaultRestoreActionValue) => void;
   /** Locale used by mini-stats for thousand-separator formatting. */
   locale?: string;
 }
@@ -47,6 +50,7 @@ export function HomePage({
   onOpenRuleWizard,
   onOpenShortcutsAside,
   onRestore,
+  onDefaultRestoreActionChange,
   locale,
 }: HomePageProps) {
   const { openImportRules } = useImportExportWizards();
@@ -132,6 +136,8 @@ export function HomePage({
                 sessions={pinnedSessions}
                 onSeeAll={handleSeeAllSessions}
                 onRestore={onRestore}
+                defaultRestoreAction={syncSettings.defaultRestoreAction}
+                onDefaultRestoreActionChange={onDefaultRestoreActionChange}
               />
 
               <QuickActionsSection count={QUICK_COUNT_DEFAULT} onAction={handleQuickAction} />

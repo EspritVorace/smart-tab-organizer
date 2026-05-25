@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import { storage } from 'wxt/utils/storage';
 import type { AppSettings, DomainRuleSettings } from '@/types/syncSettings.js';
-import type { DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
+import type { DeduplicationKeepStrategyValue, DefaultRestoreActionValue } from '@/schemas/enums.js';
 import type { RuleCategory } from '@/schemas/category.js';
 import type { ScopedItems } from '@/utils/workspaceStorage.js';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext.js';
@@ -15,6 +15,7 @@ export interface UseSettingsReturn {
   setGlobalDeduplicationEnabled: (value: boolean) => Promise<void>;
   setDeduplicateUnmatchedDomains: (value: boolean) => Promise<void>;
   setDeduplicationKeepStrategy: (value: DeduplicationKeepStrategyValue) => Promise<void>;
+  setDefaultRestoreAction: (value: DefaultRestoreActionValue) => Promise<void>;
   setDomainRules: (value: DomainRuleSettings) => Promise<void>;
   setCategories: (value: RuleCategory[]) => Promise<void>;
 
@@ -23,6 +24,9 @@ export interface UseSettingsReturn {
   onDeduplicateUnmatchedDomainsChange: (callback: (value: boolean) => void) => () => void;
   onDeduplicationKeepStrategyChange: (
     callback: (value: DeduplicationKeepStrategyValue) => void,
+  ) => () => void;
+  onDefaultRestoreActionChange: (
+    callback: (value: DefaultRestoreActionValue) => void,
   ) => () => void;
   onDomainRulesChange: (callback: (value: DomainRuleSettings) => void) => () => void;
   onCategoriesChange: (callback: (value: RuleCategory[]) => void) => () => void;
@@ -41,6 +45,7 @@ function buildSettingsItemMap(items: ScopedItems): SettingsItemMap {
     globalDeduplicationEnabled: items.globalDeduplicationEnabledItem,
     deduplicateUnmatchedDomains: items.deduplicateUnmatchedDomainsItem,
     deduplicationKeepStrategy: items.deduplicationKeepStrategyItem,
+    defaultRestoreAction: items.defaultRestoreActionItem,
     domainRules: items.domainRulesItem,
     categories: items.categoriesItem,
     notifyOnGrouping: items.notifyOnGroupingItem,
@@ -55,6 +60,7 @@ async function loadSettingsFromStorage(items: ScopedItems): Promise<AppSettings>
     items.globalDeduplicationEnabledItem,
     items.deduplicateUnmatchedDomainsItem,
     items.deduplicationKeepStrategyItem,
+    items.defaultRestoreActionItem,
     items.domainRulesItem,
     items.categoriesItem,
     items.notifyOnGroupingItem,
@@ -62,7 +68,7 @@ async function loadSettingsFromStorage(items: ScopedItems): Promise<AppSettings>
     items.notifyOnOrganizeItem,
   ]);
 
-  const rawRules = results[4].value as DomainRuleSettings;
+  const rawRules = results[5].value as DomainRuleSettings;
   // Migrate legacy wildcard syntax: *.example.com -> example.com
   const hasWildcards = rawRules?.some(r => r.domainFilter?.startsWith('*.'));
   const domainRules = hasWildcards
@@ -80,11 +86,12 @@ async function loadSettingsFromStorage(items: ScopedItems): Promise<AppSettings>
     globalDeduplicationEnabled: results[1].value as boolean,
     deduplicateUnmatchedDomains: results[2].value as boolean,
     deduplicationKeepStrategy: results[3].value as DeduplicationKeepStrategyValue,
+    defaultRestoreAction: results[4].value as DefaultRestoreActionValue,
     domainRules,
-    categories: results[5].value as RuleCategory[],
-    notifyOnGrouping: results[6].value as boolean,
-    notifyOnDeduplication: results[7].value as boolean,
-    notifyOnOrganize: results[8].value as boolean,
+    categories: results[6].value as RuleCategory[],
+    notifyOnGrouping: results[7].value as boolean,
+    notifyOnDeduplication: results[8].value as boolean,
+    notifyOnOrganize: results[9].value as boolean,
   };
 }
 
@@ -133,6 +140,7 @@ export function useSettings(): UseSettingsReturn {
     setGlobalDeduplicationEnabled: (v) => update({ globalDeduplicationEnabled: v }),
     setDeduplicateUnmatchedDomains: (v) => update({ deduplicateUnmatchedDomains: v }),
     setDeduplicationKeepStrategy: (v) => update({ deduplicationKeepStrategy: v }),
+    setDefaultRestoreAction: (v) => update({ defaultRestoreAction: v }),
     setDomainRules: (v) => update({ domainRules: v }),
     setCategories: (v) => update({ categories: v }),
 
@@ -140,6 +148,7 @@ export function useSettings(): UseSettingsReturn {
     onGlobalDeduplicationEnabledChange: (cb) => onFieldChange('globalDeduplicationEnabled', cb),
     onDeduplicateUnmatchedDomainsChange: (cb) => onFieldChange('deduplicateUnmatchedDomains', cb),
     onDeduplicationKeepStrategyChange: (cb) => onFieldChange('deduplicationKeepStrategy', cb),
+    onDefaultRestoreActionChange: (cb) => onFieldChange('defaultRestoreAction', cb),
     onDomainRulesChange: (cb) => onFieldChange('domainRules', cb),
     onCategoriesChange: (cb) => onFieldChange('categories', cb),
 

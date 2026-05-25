@@ -17,6 +17,23 @@ export interface SplitButtonMenuItem {
   'data-testid'?: string;
 }
 
+export interface SplitButtonRadioGroupOption {
+  value: string;
+  label: string;
+  'data-testid'?: string;
+}
+
+export interface SplitButtonRadioGroupConfig {
+  /** Visible label rendered above the radio group inside the dropdown. */
+  label: string;
+  /** Currently selected option value. */
+  value: string;
+  /** Available options. */
+  options: SplitButtonRadioGroupOption[];
+  /** Called when the user picks a new option. Selecting an option must not trigger any other action. */
+  onValueChange: (value: string) => void;
+}
+
 export interface SplitButtonProps {
   /** Label of the primary button. Accepts text or any ReactNode (e.g. icon) */
   label: React.ReactNode;
@@ -24,6 +41,12 @@ export interface SplitButtonProps {
   onClick: () => void;
   /** Dropdown menu items */
   menuItems: SplitButtonMenuItem[];
+  /**
+   * Optional radio group rendered at the bottom of the dropdown menu, below
+   * the action items. Selecting a radio item only emits `onValueChange`; it
+   * never triggers any of the action items.
+   */
+  radioGroup?: SplitButtonRadioGroupConfig;
   /** Radix variant */
   variant?: 'solid' | 'soft' | 'outline';
   /** Radix size */
@@ -44,6 +67,7 @@ export function SplitButton({
   label,
   onClick,
   menuItems,
+  radioGroup,
   variant = 'solid',
   size = '2',
   disabled = false,
@@ -118,6 +142,27 @@ export function SplitButton({
                 </DropdownMenu.Item>
               </React.Fragment>
             ))}
+            {radioGroup && (
+              <>
+                <DropdownMenu.Separator />
+                <DropdownMenu.Label>{radioGroup.label}</DropdownMenu.Label>
+                <DropdownMenu.RadioGroup
+                  value={radioGroup.value}
+                  onValueChange={radioGroup.onValueChange}
+                >
+                  {radioGroup.options.map((option) => (
+                    <DropdownMenu.RadioItem
+                      key={option.value}
+                      value={option.value}
+                      data-testid={option['data-testid']}
+                      onSelect={(event) => event.preventDefault()}
+                    >
+                      {option.label}
+                    </DropdownMenu.RadioItem>
+                  ))}
+                </DropdownMenu.RadioGroup>
+              </>
+            )}
           </DropdownMenu.Content>
         </DropdownMenu.Root>
       )}

@@ -4,16 +4,22 @@ import { Pin } from 'lucide-react';
 import type { Session } from '@/types/session';
 import { SessionRestoreButton } from '@/components/Core/Session/SessionRestoreButton/SessionRestoreButton';
 import { getMessage } from '@/utils/i18n';
+import type { DefaultRestoreActionValue } from '@/schemas/enums';
 import type { HomeRestoreTarget } from './types';
 import styles from './PinnedSessionsSection.module.css';
 
 export interface PinnedSessionTileProps {
   session: Session;
   onRestore: (session: Session, target: HomeRestoreTarget) => void;
+  /** Action triggered by the primary Restore button click. */
+  defaultRestoreAction?: DefaultRestoreActionValue;
+  /** Persists a new default action when the user picks it from the dropdown radio group. */
+  onDefaultRestoreActionChange?: (value: DefaultRestoreActionValue) => void;
   tabIndex?: number;
   onKeyDown?: (e: KeyboardEvent<HTMLElement>) => void;
   onFocus?: () => void;
 }
+
 
 function getCounts(session: Session): { groups: number; tabs: number } {
   const groups = session.groups.length;
@@ -24,6 +30,8 @@ function getCounts(session: Session): { groups: number; tabs: number } {
 export function PinnedSessionTile({
   session,
   onRestore,
+  defaultRestoreAction = 'current',
+  onDefaultRestoreActionChange,
   tabIndex = 0,
   onKeyDown,
   onFocus,
@@ -58,6 +66,8 @@ export function PinnedSessionTile({
             onReplaceCurrentWindow={(s) => onRestore(s, 'replace')}
             onCustomize={(s) => onRestore(s, 'custom')}
             onRefresh={(s) => onRestore(s, 'refresh')}
+            defaultRestoreAction={defaultRestoreAction}
+            onDefaultRestoreActionChange={onDefaultRestoreActionChange}
             presentation="tile"
             size="2"
             data-testid={`home-pinned-tile-restore-${session.id}`}

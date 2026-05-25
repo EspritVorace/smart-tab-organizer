@@ -5,6 +5,7 @@ import type { Session } from '@/types/session';
 import { IconBox } from '@/components/UI/IconBox/IconBox';
 import { useListNavigation } from '@/hooks/useListNavigation';
 import { getMessage } from '@/utils/i18n';
+import type { DefaultRestoreActionValue } from '@/schemas/enums';
 import { PinnedSessionTile } from './PinnedSessionTile';
 import type { HomeRestoreTarget } from './types';
 
@@ -12,11 +13,21 @@ export interface PinnedSessionsSectionProps {
   sessions: Session[];
   onSeeAll: () => void;
   onRestore: (session: Session, target: HomeRestoreTarget) => void;
+  /** Action triggered by the primary Restore button click on each tile. */
+  defaultRestoreAction?: DefaultRestoreActionValue;
+  /** Persists a new default action when the user picks it from a tile's dropdown radio group. */
+  onDefaultRestoreActionChange?: (value: DefaultRestoreActionValue) => void;
 }
 
 const MAX_TILES = 6;
 
-export function PinnedSessionsSection({ sessions, onSeeAll, onRestore }: PinnedSessionsSectionProps) {
+export function PinnedSessionsSection({
+  sessions,
+  onSeeAll,
+  onRestore,
+  defaultRestoreAction,
+  onDefaultRestoreActionChange,
+}: PinnedSessionsSectionProps) {
   const visible = sessions.slice(0, MAX_TILES);
   const gridRef = useRef<HTMLDivElement>(null);
   const [focusIndex, setFocusIndex] = useState(0);
@@ -71,6 +82,8 @@ export function PinnedSessionsSection({ sessions, onSeeAll, onRestore }: PinnedS
                 key={s.id}
                 session={s}
                 onRestore={onRestore}
+                defaultRestoreAction={defaultRestoreAction}
+                onDefaultRestoreActionChange={onDefaultRestoreActionChange}
                 tabIndex={i === focusIndex ? 0 : -1}
                 onFocus={() => setFocusIndex(i)}
                 onKeyDown={(e) => handleTileKeyDown(e, i, s)}

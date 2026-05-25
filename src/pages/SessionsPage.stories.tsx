@@ -25,6 +25,7 @@ const mockSyncSettings: AppSettings = {
   globalDeduplicationEnabled: true,
   deduplicateUnmatchedDomains: true,
   deduplicationKeepStrategy: 'keep-old',
+  defaultRestoreAction: 'current',
   categories: [],
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
@@ -45,6 +46,7 @@ const meta: Meta<typeof SessionsPage> = {
   ],
   args: {
     syncSettings: mockSyncSettings,
+    updateSettings: () => {},
   },
 };
 

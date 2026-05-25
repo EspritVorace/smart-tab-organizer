@@ -1,11 +1,13 @@
 import { Box, Flex, Text, Switch, Card, RadioGroup } from '@radix-ui/themes';
-import { Bell, Copy } from 'lucide-react';
+import { Bell, Copy, RotateCcw } from 'lucide-react';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { getMessage } from '@/utils/i18n';
 import type { AppSettings } from '@/types/syncSettings';
 import {
   deduplicationKeepStrategyOptions,
+  defaultRestoreActionOptions,
   type DeduplicationKeepStrategyValue,
+  type DefaultRestoreActionValue,
 } from '@/schemas/enums';
 
 interface SettingsPageProps {
@@ -60,6 +62,47 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
                       onCheckedChange={(checked) => updateSettings({ notifyOnOrganize: checked })}
                     />
                   </Flex>
+                </Flex>
+              </Box>
+            </Card>
+
+            <Card>
+              <Box p="4">
+                <Flex align="center" gap="2" mb="4">
+                  <RotateCcw size={20} style={{ color: 'var(--accent-9)' }} />
+                  <Text size="3" weight="bold">{getMessage('sessionRestore')}</Text>
+                </Flex>
+
+                <Flex direction="column" gap="2">
+                  <Text size="2" id="page-settings-default-restore-action-label">
+                    {getMessage('defaultRestoreActionLabel')}
+                  </Text>
+                  <RadioGroup.Root
+                    id="page-settings-default-restore-action"
+                    data-testid="page-settings-default-restore-action"
+                    aria-labelledby="page-settings-default-restore-action-label"
+                    value={syncSettings.defaultRestoreAction}
+                    onValueChange={(value) =>
+                      updateSettings({ defaultRestoreAction: value as DefaultRestoreActionValue })
+                    }
+                  >
+                    <Flex direction="column" gap="2">
+                      {defaultRestoreActionOptions.map((option) => (
+                        <Text as="label" size="2" key={option.value}>
+                          <Flex gap="2" align="center">
+                            <RadioGroup.Item
+                              value={option.value}
+                              data-testid={`page-settings-default-restore-action-${option.value}`}
+                            />
+                            {getMessage(option.keyLabel)}
+                          </Flex>
+                        </Text>
+                      ))}
+                    </Flex>
+                  </RadioGroup.Root>
+                  <Text size="1" color="gray">
+                    {getMessage('defaultRestoreActionDescription')}
+                  </Text>
                 </Flex>
               </Box>
             </Card>

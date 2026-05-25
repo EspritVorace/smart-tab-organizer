@@ -85,6 +85,8 @@
   "deduplicationKeepStrategyNewLabel": { "message": "The newly opened tab" },
   "deduplicationKeepStrategyGroupedLabel": { "message": "Grouped tab wins, otherwise keep existing" },
   "deduplicationKeepStrategyGroupedOrNewLabel": { "message": "Grouped tab wins, otherwise keep the new one" },
+  "defaultRestoreActionLabel": { "message": "Default action" },
+  "defaultRestoreActionDescription": { "message": "Chooses which action the main Restore button triggers when clicked. The dropdown menu remains available with all four options." },
   "notificationGroupingTitle": { "message": "📁 Tabs Grouped" },
   "notificationGroupingMessage": { "message": "Tabs grouped into \"{groupName}\"" },
   "notificationDeduplicationTitle": { "message": "✂️ Duplicate Closed" },

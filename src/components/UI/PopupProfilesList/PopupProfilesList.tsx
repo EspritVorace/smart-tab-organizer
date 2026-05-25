@@ -13,8 +13,11 @@ import { showSuccessNotification } from '@/utils/notifications';
 import { getRuleCategory } from '@/utils/categoriesStore';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
 import { useListNavigation } from '@/hooks/useListNavigation';
+import { useSettings } from '@/hooks/useSettings';
 import { useShortcuts } from '@/hooks/useShortcuts';
 import type { Session } from '@/types/session';
+import { defaultAppSettings } from '@/types/syncSettings';
+import type { DefaultRestoreActionValue } from '@/schemas/enums';
 import styles from './PopupProfilesList.module.css';
 
 function getCategoryIcon(categoryId: string | null | undefined): React.ReactNode {
@@ -118,6 +121,16 @@ export function PopupProfilesList() {
       })
       .catch(() => {});
   }, []);
+
+  const { settings, setDefaultRestoreAction } = useSettings();
+  const defaultRestoreAction: DefaultRestoreActionValue =
+    settings?.defaultRestoreAction ?? defaultAppSettings.defaultRestoreAction;
+  const handleDefaultRestoreActionChange = useCallback(
+    (value: DefaultRestoreActionValue) => {
+      void setDefaultRestoreAction(value);
+    },
+    [setDefaultRestoreAction],
+  );
 
   const { handleNavigationKey } = useListNavigation(listRef, '[data-popup-pinned-card]');
 
@@ -283,6 +296,8 @@ export function PopupProfilesList() {
                 onReplaceCurrentWindow={(s) => handleRestore(s, 'replace')}
                 onCustomize={(s) => { void openCustomizeRestore(s); }}
                 onRefresh={(s) => { void openRefreshFromPopup(s); }}
+                defaultRestoreAction={defaultRestoreAction}
+                onDefaultRestoreActionChange={handleDefaultRestoreActionChange}
                 data-testid={`popup-profile-btn-restore-${session.id}`}
               />
             </Flex>

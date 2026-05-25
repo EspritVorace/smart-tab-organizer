@@ -4,10 +4,12 @@ import {
   deduplicationMatchModeOptions,
   colorOptions,
   deduplicationKeepStrategyOptions,
+  defaultRestoreActionOptions,
   type GroupNameSourceValue,
   type DeduplicationMatchModeValue,
   type ColorValue,
-  type DeduplicationKeepStrategyValue
+  type DeduplicationKeepStrategyValue,
+  type DefaultRestoreActionValue
 } from './enums.js';
 import { sessionSchema } from './session.js';
 import { ruleCategorySchema } from './category.js';
@@ -71,6 +73,9 @@ const importWorkspaceSettingsSchema = z.object({
   deduplicationKeepStrategy: z.enum(
     deduplicationKeepStrategyOptions.map(opt => opt.value) as [DeduplicationKeepStrategyValue, ...DeduplicationKeepStrategyValue[]],
   ),
+  defaultRestoreAction: z.enum(
+    defaultRestoreActionOptions.map(opt => opt.value) as [DefaultRestoreActionValue, ...DefaultRestoreActionValue[]],
+  ).optional(),
   notifyOnGrouping: z.boolean(),
   notifyOnDeduplication: z.boolean(),
   notifyOnOrganize: z.boolean().optional(),

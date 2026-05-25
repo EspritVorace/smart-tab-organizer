@@ -43,6 +43,11 @@ describe('settingsUtils', () => {
       expect(settings.deduplicationKeepStrategy).toBe('keep-grouped-or-new');
     });
 
+    it('defaults defaultRestoreAction to current when missing from storage', async () => {
+      const settings = await getSettings();
+      expect(settings.defaultRestoreAction).toBe('current');
+    });
+
     it('returns default values on error', async () => {
       vi.spyOn(fakeBrowser.storage.local, 'get').mockRejectedValueOnce(
         new Error('Local storage error'),
@@ -108,6 +113,12 @@ describe('settingsUtils', () => {
       await updateSettings({ deduplicationKeepStrategy: 'keep-old' });
       const settings = await getSettings();
       expect(settings.deduplicationKeepStrategy).toBe('keep-old');
+    });
+
+    it('updates defaultRestoreAction', async () => {
+      await updateSettings({ defaultRestoreAction: 'replace' });
+      const settings = await getSettings();
+      expect(settings.defaultRestoreAction).toBe('replace');
     });
 
     it('updates domainRules', async () => {

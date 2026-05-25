@@ -56,6 +56,7 @@ const baseSettings: AppSettings = {
   globalDeduplicationEnabled: true,
   deduplicateUnmatchedDomains: false,
   deduplicationKeepStrategy: 'keep-grouped-or-new',
+  defaultRestoreAction: 'current',
   categories: [],
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
@@ -110,6 +111,7 @@ const meta: Meta<typeof HomePage> = {
     onOpenRuleWizard: () => {},
     onOpenShortcutsAside: () => {},
     onRestore: () => {},
+    onDefaultRestoreActionChange: () => {},
   },
 };
 

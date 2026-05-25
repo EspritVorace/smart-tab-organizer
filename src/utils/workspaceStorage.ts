@@ -1,7 +1,7 @@
 import { storage, type WxtStorageItem, type StorageItemKey } from 'wxt/utils/storage';
 import type { DomainRuleSettings } from '@/types/syncSettings.js';
 import { defaultAppSettings } from '@/types/syncSettings.js';
-import type { DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
+import type { DeduplicationKeepStrategyValue, DefaultRestoreActionValue } from '@/schemas/enums.js';
 import type { RuleCategory } from '@/schemas/category.js';
 import type { Statistics } from '@/types/statistics.js';
 import { defaultStatistics } from '@/types/statistics.js';
@@ -21,6 +21,7 @@ export const WORKSPACE_SCOPED_KEYS = [
   'globalDeduplicationEnabled',
   'deduplicateUnmatchedDomains',
   'deduplicationKeepStrategy',
+  'defaultRestoreAction',
   'domainRules',
   'categories',
   'categoriesSeeded',
@@ -55,6 +56,7 @@ export interface ScopedItems {
   globalDeduplicationEnabledItem: WxtStorageItem<boolean, Record<string, unknown>>;
   deduplicateUnmatchedDomainsItem: WxtStorageItem<boolean, Record<string, unknown>>;
   deduplicationKeepStrategyItem: WxtStorageItem<DeduplicationKeepStrategyValue, Record<string, unknown>>;
+  defaultRestoreActionItem: WxtStorageItem<DefaultRestoreActionValue, Record<string, unknown>>;
   domainRulesItem: WxtStorageItem<DomainRuleSettings, Record<string, unknown>>;
   categoriesItem: WxtStorageItem<RuleCategory[], Record<string, unknown>>;
   categoriesSeededItem: WxtStorageItem<boolean, Record<string, unknown>>;
@@ -95,6 +97,10 @@ export function defineWorkspaceItems(wsId: string): ScopedItems {
     deduplicationKeepStrategyItem: storage.defineItem<DeduplicationKeepStrategyValue>(
       workspaceStorageKey(wsId, 'deduplicationKeepStrategy'),
       { defaultValue: defaultAppSettings.deduplicationKeepStrategy },
+    ),
+    defaultRestoreActionItem: storage.defineItem<DefaultRestoreActionValue>(
+      workspaceStorageKey(wsId, 'defaultRestoreAction'),
+      { defaultValue: defaultAppSettings.defaultRestoreAction },
     ),
     domainRulesItem: storage.defineItem<DomainRuleSettings>(
       workspaceStorageKey(wsId, 'domainRules'),
