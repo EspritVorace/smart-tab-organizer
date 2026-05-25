@@ -31,6 +31,7 @@ import { browser } from 'wxt/browser';
 import type { Session } from '@/types/session';
 import type { SessionSearchMatch } from '@/utils/sessionUtils';
 import type { AppSettings } from '@/types/syncSettings';
+import type { DefaultRestoreActionValue } from '@/schemas/enums';
 
 type BulkScope = 'pinned' | 'unpinned' | 'archived';
 
@@ -54,6 +55,8 @@ function pruneSelection(prev: Set<string>, visible: readonly { id: string }[]): 
 
 interface SessionsPageProps {
   syncSettings: AppSettings;
+  /** Persist a partial settings update (for example the default restore action). */
+  updateSettings: (updates: Partial<AppSettings>) => void;
   /** Controlled by options.tsx: true when a deep-link requests the snapshot wizard. */
   snapshotWizardOpen?: boolean;
   /** Called by SessionsPage to let options.tsx know the wizard closed (or page unmounted). */
@@ -115,6 +118,10 @@ interface SessionSectionProps {
   onReplaceCurrentWindow: (session: Session) => void;
   /** Open the refresh wizard for the session (captures current window state). */
   onRefresh: (session: Session) => void;
+  /** Action triggered by the primary Restore button click. */
+  defaultRestoreAction: DefaultRestoreActionValue;
+  /** Persists a new default restore action when the user picks it from the dropdown radio group. */
+  onDefaultRestoreActionChange: (value: DefaultRestoreActionValue) => void;
   /** Pin/unpin handlers shared with the page-level widget shortcuts. */
   onPin: (session: Session) => void;
   onUnpin: (session: Session) => void;
@@ -161,6 +168,8 @@ function SessionSection({
   onRestoreNewWindow,
   onReplaceCurrentWindow,
   onRefresh,
+  defaultRestoreAction,
+  onDefaultRestoreActionChange,
   onPin,
   onUnpin,
   onArchive,
@@ -314,6 +323,8 @@ function SessionSection({
                   onRestoreNewWindow={onRestoreNewWindow}
                   onReplaceCurrentWindow={onReplaceCurrentWindow}
                   onRefresh={onRefresh}
+                  defaultRestoreAction={defaultRestoreAction}
+                  onDefaultRestoreActionChange={onDefaultRestoreActionChange}
                   onRename={renameSession}
                   onEdit={onOpenEditDialog}
                   onDelete={onOpenDeleteDialog}
@@ -342,6 +353,7 @@ function SessionSection({
 
 export function SessionsPage({
   syncSettings,
+  updateSettings,
   snapshotWizardOpen = false,
   onSnapshotWizardOpenChange,
   snapshotGroupId,
@@ -699,6 +711,8 @@ export function SessionsPage({
     | 'onRestoreNewWindow'
     | 'onReplaceCurrentWindow'
     | 'onRefresh'
+    | 'defaultRestoreAction'
+    | 'onDefaultRestoreActionChange'
     | 'onPin'
     | 'onUnpin'
     | 'onArchive'
@@ -716,6 +730,8 @@ export function SessionsPage({
     onRestoreNewWindow: handleRestoreNewWindow,
     onReplaceCurrentWindow: handleReplaceCurrentWindow,
     onRefresh: handleRefreshTrigger,
+    defaultRestoreAction: syncSettings.defaultRestoreAction,
+    onDefaultRestoreActionChange: (value) => updateSettings({ defaultRestoreAction: value }),
     onPin: handlePin,
     onUnpin: handleUnpin,
     onArchive: handleArchive,

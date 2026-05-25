@@ -25,6 +25,7 @@ const EMPTY_PAYLOAD: WorkspaceExportPayload = {
     globalDeduplicationEnabled: true,
     deduplicateUnmatchedDomains: false,
     deduplicationKeepStrategy: 'keep-grouped-or-new',
+    defaultRestoreAction: 'current',
     notifyOnGrouping: true,
     notifyOnDeduplication: true,
     notifyOnOrganize: true,

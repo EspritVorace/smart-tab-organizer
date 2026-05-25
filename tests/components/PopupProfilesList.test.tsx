@@ -40,6 +40,17 @@ vi.mock('../../src/utils/sessionStorage', () => ({
   loadActiveSessions: vi.fn(),
 }));
 
+// Mock useSettings to avoid hitting real workspace storage for the new
+// defaultRestoreAction wiring exercised by SessionRestoreButton.
+vi.mock('../../src/hooks/useSettings', () => ({
+  useSettings: () => ({
+    settings: { defaultRestoreAction: 'current' },
+    isLoaded: true,
+    setDefaultRestoreAction: vi.fn(async () => {}),
+    updateSettings: vi.fn(async () => {}),
+  }),
+}));
+
 // Mock tabRestore
 vi.mock('../../src/utils/tabRestore', () => ({
   restoreSessionTabs: vi.fn().mockResolvedValue(undefined),

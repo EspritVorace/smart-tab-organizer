@@ -30,6 +30,7 @@ export interface WorkspaceExportPayload {
     | 'globalDeduplicationEnabled'
     | 'deduplicateUnmatchedDomains'
     | 'deduplicationKeepStrategy'
+    | 'defaultRestoreAction'
     | 'notifyOnGrouping'
     | 'notifyOnDeduplication'
     | 'notifyOnOrganize'
@@ -52,6 +53,7 @@ async function readScopedSnapshot(items: ScopedItems): Promise<{
     items.globalDeduplicationEnabledItem,
     items.deduplicateUnmatchedDomainsItem,
     items.deduplicationKeepStrategyItem,
+    items.defaultRestoreActionItem,
     items.notifyOnGroupingItem,
     items.notifyOnDeduplicationItem,
     items.notifyOnOrganizeItem,
@@ -63,9 +65,9 @@ async function readScopedSnapshot(items: ScopedItems): Promise<{
     items.archivedSessionsItem,
   ]);
 
-  const activeSessions = (results[9].value as Session[]) ?? [];
-  const pinnedSessions = (results[11].value as Session[]) ?? [];
-  const archivedSessions = (results[12].value as Session[]) ?? [];
+  const activeSessions = (results[10].value as Session[]) ?? [];
+  const pinnedSessions = (results[12].value as Session[]) ?? [];
+  const archivedSessions = (results[13].value as Session[]) ?? [];
 
   return {
     settings: {
@@ -73,14 +75,15 @@ async function readScopedSnapshot(items: ScopedItems): Promise<{
       globalDeduplicationEnabled: results[1].value as boolean,
       deduplicateUnmatchedDomains: results[2].value as boolean,
       deduplicationKeepStrategy: results[3].value as AppSettings['deduplicationKeepStrategy'],
-      notifyOnGrouping: results[4].value as boolean,
-      notifyOnDeduplication: results[5].value as boolean,
-      notifyOnOrganize: results[6].value as boolean,
+      defaultRestoreAction: results[4].value as AppSettings['defaultRestoreAction'],
+      notifyOnGrouping: results[5].value as boolean,
+      notifyOnDeduplication: results[6].value as boolean,
+      notifyOnOrganize: results[7].value as boolean,
     },
-    domainRules: (results[7].value as AppSettings['domainRules']) ?? [],
-    categories: (results[8].value as RuleCategory[]) ?? [],
+    domainRules: (results[8].value as AppSettings['domainRules']) ?? [],
+    categories: (results[9].value as RuleCategory[]) ?? [],
     sessions: [...pinnedSessions, ...activeSessions, ...archivedSessions],
-    statistics: results[10].value as Statistics,
+    statistics: results[11].value as Statistics,
   };
 }
 
@@ -130,6 +133,7 @@ async function writeScopedSnapshot(
     { item: items.globalDeduplicationEnabledItem, value: payload.settings.globalDeduplicationEnabled },
     { item: items.deduplicateUnmatchedDomainsItem, value: payload.settings.deduplicateUnmatchedDomains },
     { item: items.deduplicationKeepStrategyItem, value: payload.settings.deduplicationKeepStrategy },
+    { item: items.defaultRestoreActionItem, value: payload.settings.defaultRestoreAction ?? defaultAppSettings.defaultRestoreAction },
     { item: items.notifyOnGroupingItem, value: payload.settings.notifyOnGrouping },
     { item: items.notifyOnDeduplicationItem, value: payload.settings.notifyOnDeduplication },
     { item: items.notifyOnOrganizeItem, value: payload.settings.notifyOnOrganize ?? defaultAppSettings.notifyOnOrganize },

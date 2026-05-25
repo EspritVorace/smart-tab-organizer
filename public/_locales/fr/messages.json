@@ -85,6 +85,8 @@
   "deduplicationKeepStrategyNewLabel": { "message": "Le nouvel onglet ouvert" },
   "deduplicationKeepStrategyGroupedLabel": { "message": "L'onglet groupé gagne, sinon conserver l'existant" },
   "deduplicationKeepStrategyGroupedOrNewLabel": { "message": "L'onglet groupé gagne, sinon conserver le nouveau" },
+  "defaultRestoreActionLabel": { "message": "Action par défaut" },
+  "defaultRestoreActionDescription": { "message": "Choisit l'action déclenchée par le bouton principal Restaurer lors d'un clic. Le menu déroulant reste disponible avec les quatre options." },
   "notificationGroupingTitle": { "message": "📁 Onglets Regroupés" },
   "notificationGroupingMessage": { "message": "Onglets regroupés dans \"{groupName}\"" },
   "notificationDeduplicationTitle": { "message": "✂️ Doublon Fermé" },

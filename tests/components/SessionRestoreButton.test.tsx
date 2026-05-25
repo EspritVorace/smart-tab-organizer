@@ -13,6 +13,7 @@ vi.mock('../../src/utils/i18n', () => ({
       sessionRestoreReplaceCurrentWindow: 'Replace tabs in current window',
       sessionRestoreCustomize: 'Customized restoration',
       sessionRestoreOptions: 'Restore options',
+      defaultRestoreActionLabel: 'Default action',
     };
     return messages[key] || key;
   }),
@@ -147,5 +148,67 @@ describe('SessionRestoreButton', () => {
     expect(primary).toHaveTextContent('Restore');
     fireEvent.click(primary);
     expect(onRestoreCurrentWindow).toHaveBeenCalledWith(session);
+  });
+
+  it('primary click routes to onRestoreNewWindow when defaultRestoreAction is "new"', () => {
+    render(
+      <TestWrapper>
+        <SessionRestoreButton
+          session={session}
+          onRestoreCurrentWindow={onRestoreCurrentWindow}
+          onRestoreNewWindow={onRestoreNewWindow}
+          onReplaceCurrentWindow={onReplaceCurrentWindow}
+          onCustomize={onCustomize}
+          defaultRestoreAction="new"
+          data-testid="restore-btn"
+        />
+      </TestWrapper>,
+    );
+
+    const primary = screen.getByRole('button', { name: /Restore in new window/i });
+    fireEvent.click(primary);
+
+    expect(onRestoreNewWindow).toHaveBeenCalledWith(session);
+    expect(onRestoreCurrentWindow).not.toHaveBeenCalled();
+  });
+
+  it('primary click routes to onReplaceCurrentWindow when defaultRestoreAction is "replace"', () => {
+    render(
+      <TestWrapper>
+        <SessionRestoreButton
+          session={session}
+          onRestoreCurrentWindow={onRestoreCurrentWindow}
+          onRestoreNewWindow={onRestoreNewWindow}
+          onReplaceCurrentWindow={onReplaceCurrentWindow}
+          onCustomize={onCustomize}
+          defaultRestoreAction="replace"
+        />
+      </TestWrapper>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Replace tabs in current window/i }));
+
+    expect(onReplaceCurrentWindow).toHaveBeenCalledWith(session);
+    expect(onRestoreCurrentWindow).not.toHaveBeenCalled();
+  });
+
+  it('primary click routes to onCustomize when defaultRestoreAction is "customize"', () => {
+    render(
+      <TestWrapper>
+        <SessionRestoreButton
+          session={session}
+          onRestoreCurrentWindow={onRestoreCurrentWindow}
+          onRestoreNewWindow={onRestoreNewWindow}
+          onReplaceCurrentWindow={onReplaceCurrentWindow}
+          onCustomize={onCustomize}
+          defaultRestoreAction="customize"
+        />
+      </TestWrapper>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Customized restoration/i }));
+
+    expect(onCustomize).toHaveBeenCalledWith(session);
+    expect(onRestoreCurrentWindow).not.toHaveBeenCalled();
   });
 });

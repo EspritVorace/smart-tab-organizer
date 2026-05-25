@@ -21,6 +21,7 @@ import { getStatusStyle } from '@/utils/statusStyle';
 import { SessionPreviewTree } from './SessionPreviewTree';
 import { SessionRestoreButton } from './SessionRestoreButton/SessionRestoreButton';
 import type { Session } from '@/types/session';
+import type { DefaultRestoreActionValue } from '@/schemas/enums';
 
 interface SessionCardProps extends SessionRestoreCallbacks {
   session: Session;
@@ -84,6 +85,10 @@ interface SessionRestoreCallbacks {
   onRestoreNewWindow?: (session: Session) => void;
   onReplaceCurrentWindow?: (session: Session) => void;
   onRefresh?: (session: Session) => void;
+  /** Action triggered by the primary Restore button click. Defaults to 'current'. */
+  defaultRestoreAction?: DefaultRestoreActionValue;
+  /** Persists a new default action when the user picks it from the dropdown radio group. */
+  onDefaultRestoreActionChange?: (value: DefaultRestoreActionValue) => void;
 }
 
 /* SessionMoreMenu */
@@ -352,6 +357,7 @@ function SessionCardFullHeader({
   isSelected, onSelect,
   onPin, onUnpin, onArchive, onUnarchive,
   onRestore, onRestoreCurrentWindow, onRestoreNewWindow, onReplaceCurrentWindow, onRefresh,
+  defaultRestoreAction, onDefaultRestoreActionChange,
   onEdit, onDelete, onMoveToFirst, onMoveLast,
 }: SessionCardFullHeaderProps) {
   const isArchived = session.isArchived === true;
@@ -470,6 +476,8 @@ function SessionCardFullHeader({
           onReplaceCurrentWindow={onReplaceCurrentWindow}
           onCustomize={onRestore}
           onRefresh={onRefresh}
+          defaultRestoreAction={defaultRestoreAction}
+          onDefaultRestoreActionChange={onDefaultRestoreActionChange}
           data-testid={`session-card-${session.id}-btn-restore`}
         />
       )}
@@ -507,6 +515,8 @@ export function SessionCard({
   onRestoreNewWindow,
   onReplaceCurrentWindow,
   onRefresh,
+  defaultRestoreAction,
+  onDefaultRestoreActionChange,
   onRename,
   onEdit,
   onDelete,
@@ -628,6 +638,8 @@ export function SessionCard({
               onRestoreNewWindow={onRestoreNewWindow}
               onReplaceCurrentWindow={onReplaceCurrentWindow}
               onRefresh={onRefresh}
+              defaultRestoreAction={defaultRestoreAction}
+              onDefaultRestoreActionChange={onDefaultRestoreActionChange}
               onEdit={onEdit}
               onDelete={onDelete}
               onMoveToFirst={onMoveToFirst}
