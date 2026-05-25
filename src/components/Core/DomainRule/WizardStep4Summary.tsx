@@ -9,7 +9,7 @@ import type { DomainRule } from '@/schemas/domainRule';
 
 interface WizardStep4SummaryProps {
   values: DomainRule;
-  configMode: 'preset' | 'ask' | 'manual';
+  configMode: 'preset' | 'ask' | 'manual' | 'label';
   presetName: string | null;
   onEditStep: (step: number) => void;
 }
@@ -54,7 +54,7 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 const URL_SOURCE_MODES = ['url', 'smart', 'smart_label', 'smart_preset', 'smart_manual'];
 
 function buildConfigSummary(
-  configMode: 'preset' | 'ask' | 'manual',
+  configMode: 'preset' | 'ask' | 'manual' | 'label',
   presetName: string | null,
   values: DomainRule,
 ): string {
@@ -63,6 +63,9 @@ function buildConfigSummary(
   }
   if (configMode === 'ask') {
     return getMessage('configSummaryAsk');
+  }
+  if (configMode === 'label') {
+    return getMessage('configSummaryLabel').replace('{label}', values.fallbackLabel?.trim() || values.label);
   }
   // manual
   const sourceOption = groupNameSourceOptions.find(o => o.value === values.groupNameSource);

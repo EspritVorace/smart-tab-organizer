@@ -2,26 +2,29 @@ import { useId } from 'react';
 import { Flex, RadioGroup, Text } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 
-export type ConfigMode = 'preset' | 'ask' | 'manual';
+export type ConfigMode = 'preset' | 'ask' | 'manual' | 'label';
 
-const CONFIG_MODES: ConfigMode[] = ['preset', 'ask', 'manual'];
+const CONFIG_MODES: ConfigMode[] = ['preset', 'ask', 'manual', 'label'];
 
 const MODE_LABELS: Record<ConfigMode, Parameters<typeof getMessage>[0]> = {
   preset: 'configModePreset',
   ask: 'configModeAsk',
   manual: 'configModeManual',
+  label: 'configModeLabel',
 };
 
 const MODE_TAGLINES: Record<ConfigMode, Parameters<typeof getMessage>[0]> = {
   preset: 'configModePresetTagline',
   ask: 'configModeAskTagline',
   manual: 'configModeManualTagline',
+  label: 'configModeLabelTagline',
 };
 
 export const MODE_HELP_LABELS: Record<ConfigMode, Parameters<typeof getMessage>[0]> = {
   preset: 'configModePresetHelp',
   ask: 'configModeAskHelp',
   manual: 'configModeManualHelp',
+  label: 'configModeLabelHelp',
 };
 
 interface ConfigModeSelectorProps {

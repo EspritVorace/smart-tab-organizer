@@ -36,6 +36,7 @@ export function WizardStep2Config({
   const { field: urlField } = useController({ name: 'urlParsingRegEx', control });
   const { field: extractionModeField } = useController({ name: 'urlExtractionMode', control });
   const { field: queryParamNameField } = useController({ name: 'urlQueryParamName', control });
+  const { field: fallbackLabelField } = useController({ name: 'fallbackLabel', control });
 
   return (
     <DomainRuleConfigForm
@@ -58,6 +59,8 @@ export function WizardStep2Config({
       urlQueryParamName={queryParamNameField.value ?? ''}
       onUrlQueryParamNameChange={(value) => queryParamNameField.onChange(value)}
       urlQueryParamNameError={errors.urlQueryParamName}
+      fallbackLabel={fallbackLabelField.value ?? ''}
+      onFallbackLabelChange={(value) => fallbackLabelField.onChange(value)}
     />
   );
 }
