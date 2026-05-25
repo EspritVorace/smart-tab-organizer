@@ -391,7 +391,7 @@ test.describe('Tab Grouping', () => {
       expect(stats.tabGroupsCreatedCount).toBe(1); // Only one group was ever created
     });
 
-    test('creates a new group each time a fresh opener opens a child [US-G005]', async ({ helpers }) => {
+    test('joins the existing same-title same-color group when a fresh opener opens a child [US-G005]', async ({ helpers }) => {
       await helpers.addDomainRule({
         label: 'New Group Test',
         domainFilter: 'example.com',
@@ -410,9 +410,12 @@ test.describe('Tab Grouping', () => {
       await helpers.createTabFromOpener(opener2, 'https://example.com/child2');
       await helpers.waitForGrouping();
 
+      const groups = await helpers.getTabGroups();
       const stats = await helpers.getStatistics();
-      // Two separate openers → two separate groups
-      expect(stats.tabGroupsCreatedCount).toBe(2);
+      // The second fresh opener joins the existing group instead of creating
+      // a duplicate, since the rule produces the same name and color.
+      expect(groups).toHaveLength(1);
+      expect(stats.tabGroupsCreatedCount).toBe(1);
     });
   });
 
