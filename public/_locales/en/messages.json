@@ -17,7 +17,6 @@
   "workspaceFormBtnCreate": { "message": "Create workspace" },
   "workspaceFormErrorDuplicate": { "message": "A workspace with this name already exists." },
   "workspaceColorPickerLabel": { "message": "Workspace accent color" },
-  "workspaceColorLabelInline": { "message": "Color: $1$", "placeholders": { "1": { "content": "$1", "example": "indigo" } } },
   "workspaceSwitchLabel": { "message": "Switch" },
   "workspaceEditLabel": { "message": "Edit" },
   "workspaceDeleteLabel": { "message": "Delete workspace" },

@@ -17,7 +17,6 @@
   "workspaceFormBtnCreate": { "message": "Crear espacio" },
   "workspaceFormErrorDuplicate": { "message": "Ya existe un espacio de trabajo con ese nombre." },
   "workspaceColorPickerLabel": { "message": "Color de acento del espacio" },
-  "workspaceColorLabelInline": { "message": "Color: $1$", "placeholders": { "1": { "content": "$1", "example": "indigo" } } },
   "workspaceSwitchLabel": { "message": "Activar" },
   "workspaceEditLabel": { "message": "Editar" },
   "workspaceDeleteLabel": { "message": "Eliminar espacio" },
