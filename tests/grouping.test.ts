@@ -461,6 +461,49 @@ describe('grouping', () => {
 
         expect(result).toBe('Smart Label Fallback');
       });
+
+      it('prefers fallbackLabel over label when present', () => {
+        const rule = createMockRule({
+          groupNameSource: 'smart_label',
+          label: 'Unique Internal Id',
+          fallbackLabel: 'Human-Friendly Name',
+          presetId: 'preset-1'
+        });
+        const tab = createMockTab({ title: 'No match here' });
+
+        const result = extractGroupNameFromRule(rule, tab);
+
+        expect(result).toBe('Human-Friendly Name');
+      });
+    });
+
+    describe('groupNameSource: label', () => {
+      it('returns the fallbackLabel directly without any extraction', () => {
+        const rule = createMockRule({
+          groupNameSource: 'label',
+          label: 'Identifier Only',
+          fallbackLabel: 'Friendly Group',
+          titleParsingRegEx: '',
+          urlParsingRegEx: ''
+        });
+        const tab = createMockTab({ title: 'Anything', url: 'https://example.com/anything' });
+
+        const result = extractGroupNameFromRule(rule, tab);
+
+        expect(result).toBe('Friendly Group');
+      });
+
+      it('falls back to the rule label when fallbackLabel is missing', () => {
+        const rule = createMockRule({
+          groupNameSource: 'label',
+          label: 'My Rule',
+        });
+        const tab = createMockTab({ title: 'Whatever' });
+
+        const result = extractGroupNameFromRule(rule, tab);
+
+        expect(result).toBe('My Rule');
+      });
     });
 
     describe('groupNameSource: smart_preset', () => {

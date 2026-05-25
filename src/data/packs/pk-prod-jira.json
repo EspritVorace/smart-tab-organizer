@@ -22,7 +22,7 @@
       "label": "Jira: Ticket",
       "titleParsingRegEx": "([A-Z]+-\\d+)",
       "urlParsingRegEx": "browse/([A-Z]+-\\d+)",
-      "groupNameSource": "smart_label",
+      "groupNameSource": "smart",
       "deduplicationMatchMode": "exact",
       "color": "blue",
       "categoryId": "productivity",

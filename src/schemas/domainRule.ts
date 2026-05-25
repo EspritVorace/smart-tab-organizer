@@ -28,6 +28,7 @@ export const domainRuleSchema = z.object({
   label: z.string()
     .min(1)
     .max(100),
+  fallbackLabel: z.string().max(100).optional(),
   titleParsingRegEx: createRegexValidator(true),
   urlParsingRegEx: createRegexValidator(true),
   groupNameSource: z.enum(groupNameSourceOptions.map(opt => opt.value) as [GroupNameSourceValue, ...GroupNameSourceValue[]]),

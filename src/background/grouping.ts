@@ -126,7 +126,7 @@ function tryExtractFromUrl(rule: DomainRuleSetting, openerTab: Browser.tabs.Tab,
 }
 
 function extractRawGroupName(rule: DomainRuleSetting, openerTab: Browser.tabs.Tab): string | null {
-    const fallbackLabel = rule.label || 'SmartGroup';
+    const fallbackLabel = rule.fallbackLabel?.trim() || rule.label || 'SmartGroup';
 
     switch (rule.groupNameSource) {
         case 'title':
@@ -148,7 +148,7 @@ function extractRawGroupName(rule: DomainRuleSetting, openerTab: Browser.tabs.Ta
         case 'smart_label': {
             const extracted = tryExtractGroupNameFromPresetOrFallback(rule, openerTab);
             if (extracted) return extracted;
-            logger.debug(`[GROUPING_DEBUG] Using rule label as fallback: "${fallbackLabel}".`);
+            logger.debug(`[GROUPING_DEBUG] Using rule fallback label: "${fallbackLabel}".`);
             return fallbackLabel;
         }
         case 'smart': {
@@ -159,6 +159,9 @@ function extractRawGroupName(rule: DomainRuleSetting, openerTab: Browser.tabs.Ta
             }
             return extracted;
         }
+        case 'label':
+            logger.debug(`[GROUPING_DEBUG] Label mode: using rule fallback label: "${fallbackLabel}".`);
+            return fallbackLabel;
         default:
             return fallbackLabel;
     }

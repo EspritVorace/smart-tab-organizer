@@ -22,7 +22,7 @@
       "label": "Notion: Page",
       "titleParsingRegEx": "(.+?)\\s*\\|\\s*Notion",
       "urlParsingRegEx": "",
-      "groupNameSource": "smart_label",
+      "groupNameSource": "smart",
       "deduplicationMatchMode": "exact",
       "color": "grey",
       "categoryId": "productivity",

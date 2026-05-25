@@ -19,6 +19,7 @@ export const importDomainRuleSchema = z.object({
   id: z.string().min(1),
   domainFilter: z.string().min(1),
   label: z.string().min(1).max(100),
+  fallbackLabel: z.string().max(100).optional(),
   titleParsingRegEx: z.string(),
   urlParsingRegEx: z.string(),
   groupNameSource: z.enum(

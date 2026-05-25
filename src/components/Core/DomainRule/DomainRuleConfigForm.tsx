@@ -22,6 +22,7 @@ const GROUP_NAME_SOURCE_HELP_KEYS: Record<GroupNameSourceValue, Parameters<typeo
   smart_manual: 'groupNameSourceSmartManualHelp',
   smart_preset: 'groupNameSourceSmartPresetHelp',
   smart_label: 'groupNameSourceSmartLabelHelp',
+  label: 'groupNameSourceLabelHelp',
 };
 
 export interface DomainRuleConfigFormProps {
@@ -44,6 +45,9 @@ export interface DomainRuleConfigFormProps {
   urlQueryParamName: string;
   onUrlQueryParamNameChange: (value: string) => void;
   urlQueryParamNameError?: FieldError;
+  /** Fallback group name used when extraction fails, or directly when configMode === 'label'. */
+  fallbackLabel?: string;
+  onFallbackLabelChange?: (value: string) => void;
   /** Optional prefix for field IDs to avoid collisions when multiple instances coexist. */
   idPrefix?: string;
   /** Forwards [data-autofocus] to the first interactive control (the active config mode radio). */
@@ -74,6 +78,8 @@ export function DomainRuleConfigForm({
   urlQueryParamName,
   onUrlQueryParamNameChange,
   urlQueryParamNameError,
+  fallbackLabel,
+  onFallbackLabelChange,
   idPrefix,
   autoFocusFirstField = false,
 }: DomainRuleConfigFormProps) {
@@ -81,6 +87,7 @@ export function DomainRuleConfigForm({
   const presetInputId = `${prefix}presetId`;
   const groupNameSourceInputId = `${prefix}groupNameSource`;
   const urlExtractionModeInputId = `${prefix}urlExtractionMode`;
+  const fallbackLabelInputId = `${prefix}fallbackLabel`;
 
   const showUrlSection =
     configMode === 'manual' && (groupNameSource === 'url' || groupNameSource.startsWith('smart'));
@@ -140,7 +147,26 @@ export function DomainRuleConfigForm({
             </Flex>
           )}
 
-          {/* Ask mode: nothing extra — description above is sufficient. */}
+          {/* Ask mode: nothing extra, description above is sufficient. */}
+
+          {/* Label mode: free-text fallback name used as group name without extraction. */}
+          {configMode === 'label' && (
+            <FormField label={getMessage('fallbackLabelField')}>
+              {(fieldId) => (
+                <Flex direction="column" gap="1" style={{ marginTop: '4px' }}>
+                  <TextField.Root
+                    id={fieldId || fallbackLabelInputId}
+                    value={fallbackLabel ?? ''}
+                    onChange={(e) => onFallbackLabelChange?.(e.target.value)}
+                    name="fallbackLabel"
+                    maxLength={100}
+                    data-testid="config-fallback-label-input"
+                  />
+                  <Text size="1" color="gray">{getMessage('fallbackLabelFieldHelp')}</Text>
+                </Flex>
+              )}
+            </FormField>
+          )}
 
           {/* Manual mode: groupNameSource selector + contextual help below the field */}
           {configMode === 'manual' && (
@@ -163,9 +189,13 @@ export function DomainRuleConfigForm({
                   {groupNameSourceOptions
                     .filter((option) => {
                       // Always keep the currently selected value visible so the trigger renders it,
-                      // even if it would normally be excluded (e.g. 'smart_preset' inherited from a preset rule).
+                      // even if it would normally be excluded (e.g. 'smart_preset' inherited from a preset rule
+                      // or the deprecated 'smart_label' on legacy rules).
                       if (option.value === groupNameSource) return true;
-                      return option.value !== 'manual' && option.value !== 'smart_preset';
+                      return option.value !== 'manual'
+                        && option.value !== 'smart_preset'
+                        && option.value !== 'smart_label'
+                        && option.value !== 'label';
                     })
                     .map((option) => (
                       <Select.Item key={option.value} value={option.value}>

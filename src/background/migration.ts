@@ -20,6 +20,7 @@ const SETTINGS_KEYS = [
 
 const MIGRATION_FLAG = 'settingsMigratedToLocal';
 const URL_EXTRACTION_MODE_MIGRATION_FLAG = 'urlExtractionModeMigrated';
+const FALLBACK_LABEL_MIGRATION_FLAG = 'fallbackLabelInitialized';
 const WORKSPACES_MIGRATION_FLAG = 'workspacesMigrated';
 const UNIFIED_CATEGORIES_MIGRATION_FLAG = 'unifiedCategoriesSeeded';
 const SESSIONS_ARCHIVE_SPLIT_FLAG = 'sessionsArchiveSplitDone';
@@ -99,6 +100,43 @@ export async function migrateRulesAddUrlExtractionMode(): Promise<void> {
     await browser.storage.local.set({ [URL_EXTRACTION_MODE_MIGRATION_FLAG]: true });
   } catch (error) {
     logger.error('[MIGRATION] urlExtractionMode migration failed:', error);
+  }
+}
+
+/**
+ * Initializes `fallbackLabel = label` for legacy domain rules that lack it.
+ * Idempotent: guarded by a flag in storage.local. On error the flag is not set
+ * so the migration is retried on next startup.
+ */
+export async function migrateRulesAddFallbackLabel(): Promise<void> {
+  try {
+    const flagState = await browser.storage.local.get(FALLBACK_LABEL_MIGRATION_FLAG);
+    if (flagState[FALLBACK_LABEL_MIGRATION_FLAG]) {
+      logger.debug('[MIGRATION] fallbackLabel already initialized.');
+      return;
+    }
+
+    const stored = await browser.storage.local.get('domainRules');
+    const rules = stored.domainRules;
+    if (Array.isArray(rules)) {
+      let changed = false;
+      for (const rule of rules as Array<Record<string, unknown>>) {
+        if (typeof rule.fallbackLabel === 'undefined' && typeof rule.label === 'string') {
+          rule.fallbackLabel = rule.label;
+          changed = true;
+        }
+      }
+      if (changed) {
+        await browser.storage.local.set({ domainRules: rules });
+        logger.debug('[MIGRATION] Initialized fallbackLabel from label on legacy rules.');
+      } else {
+        logger.debug('[MIGRATION] All rules already have fallbackLabel.');
+      }
+    }
+
+    await browser.storage.local.set({ [FALLBACK_LABEL_MIGRATION_FLAG]: true });
+  } catch (error) {
+    logger.error('[MIGRATION] fallbackLabel migration failed:', error);
   }
 }
 

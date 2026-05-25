@@ -24,7 +24,8 @@ interface WizardStep1IdentityProps {
 
 export function WizardStep1Identity({ control, errors, setValue }: WizardStep1IdentityProps) {
   const domainFilter = useWatch({ control, name: 'domainFilter' }) ?? '';
-  const { dirtyFields } = useFormState({ control, name: 'label' });
+  const label = useWatch({ control, name: 'label' }) ?? '';
+  const { dirtyFields } = useFormState({ control, name: ['label', 'fallbackLabel'] });
 
   // Auto-derive the label from the domain as long as the user hasn't
   // edited the label manually. shouldDirty is false so that further URL
@@ -34,6 +35,14 @@ export function WizardStep1Identity({ control, errors, setValue }: WizardStep1Id
     const derived = deriveLabelFromDomain(domainFilter);
     setValue('label', derived, { shouldDirty: false, shouldValidate: true });
   }, [domainFilter, dirtyFields.label, setValue]);
+
+  // Mirror the label into fallbackLabel until the user takes ownership of it
+  // in the Step 2 'label' mode. Keeps the default sensible without leaking the
+  // unique-identifier constraint to the group name.
+  useEffect(() => {
+    if (dirtyFields.fallbackLabel) return;
+    setValue('fallbackLabel', label, { shouldDirty: false });
+  }, [label, dirtyFields.fallbackLabel, setValue]);
 
   return (
     <Flex direction="column" gap="4">

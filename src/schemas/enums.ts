@@ -18,7 +18,8 @@ export const groupNameSourceOptions = [
   { value: 'smart', keyLabel: 'groupNameSourceSmart' },
   { value: 'smart_manual', keyLabel: 'groupNameSourceSmartManual' },
   { value: 'smart_preset', keyLabel: 'groupNameSourceSmartPreset' },
-  { value: 'smart_label', keyLabel: 'groupNameSourceSmartLabel' }
+  { value: 'smart_label', keyLabel: 'groupNameSourceSmartLabel' },
+  { value: 'label', keyLabel: 'groupNameSourceLabel' }
 ] as const;
 
 export const deduplicationMatchModeOptions = [

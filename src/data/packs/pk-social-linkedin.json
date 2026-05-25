@@ -54,7 +54,7 @@
       "label": "LinkedIn: Jobs search",
       "titleParsingRegEx": "",
       "urlParsingRegEx": "",
-      "groupNameSource": "smart_label",
+      "groupNameSource": "smart",
       "deduplicationMatchMode": "exact",
       "color": "cyan",
       "categoryId": "social",
