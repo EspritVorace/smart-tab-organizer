@@ -70,9 +70,6 @@ function WorkspaceRow({ workspace, isActive, isDefault, isOnly, searchTerm, onSw
               </Text>
             ) : null}
           </Flex>
-          <Text size="1" color="gray">
-            {getMessage('workspaceColorLabelInline', [workspace.accentColor])}
-          </Text>
           <Text size="1" color="gray" data-testid={`workspace-row-${workspace.id}-relative-time`}>
             {relativePrefix}{' '}
             <time dateTime={relativeDate}>{relativeText}</time>
