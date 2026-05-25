@@ -60,6 +60,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockedBrowser.tabs.group.mockResolvedValue(99);
   mockedBrowser.tabGroups.update.mockResolvedValue(undefined);
+  mockedBrowser.tabGroups.query.mockResolvedValue([]);
   mockedBrowser.tabs.ungroup.mockResolvedValue(undefined);
   mockedBrowser.windows.get.mockResolvedValue({ id: 1, type: 'normal' });
   mockedIncrementStat.mockResolvedValue(undefined);
@@ -213,6 +214,76 @@ describe('performGroupingOperation', () => {
     expect(targetGroupId).toBe(55);
     expect(groupedTabIds).toEqual([2]);
     expect(mockedBrowser.tabs.group).toHaveBeenCalledWith({ groupId: 55, tabIds: [2] });
+  });
+
+  it('joins an existing group in the same window when title and color match', async () => {
+    mockedBrowser.tabs.get.mockResolvedValue(tab(1, { groupId: -1, windowId: 7 }));
+    mockedBrowser.tabGroups.query.mockResolvedValue([
+      { id: 42, title: 'My Group', color: 'blue', windowId: 7 },
+    ]);
+
+    const { targetGroupId, groupedTabIds, joinedExisting } = await performGroupingOperation(makeContext());
+
+    expect(targetGroupId).toBe(42);
+    expect(groupedTabIds).toEqual([1, 2]);
+    expect(joinedExisting).toBe(true);
+    expect(mockedBrowser.tabGroups.query).toHaveBeenCalledWith({ windowId: 7 });
+    expect(mockedBrowser.tabs.group).toHaveBeenCalledWith({ groupId: 42, tabIds: [1, 2] });
+    // No "create a new group" call (i.e. tabs.group({ tabIds }) without groupId)
+    expect(mockedBrowser.tabs.group).not.toHaveBeenCalledWith({ tabIds: [1, 2] });
+    expect(mockedBrowser.tabGroups.update).toHaveBeenCalledWith(42, { collapsed: false });
+    // No title/color update on the joined group
+    expect(mockedBrowser.tabGroups.update).not.toHaveBeenCalledWith(42, expect.objectContaining({ title: expect.anything() }));
+    expect(mockedIncrementStat).not.toHaveBeenCalled();
+  });
+
+  it('creates a new group when an existing group has the same title but a different color', async () => {
+    mockedBrowser.tabs.get.mockResolvedValue(tab(1, { groupId: -1, windowId: 7 }));
+    mockedBrowser.tabGroups.query.mockResolvedValue([
+      { id: 42, title: 'My Group', color: 'red', windowId: 7 },
+    ]);
+
+    const { targetGroupId, groupedTabIds, joinedExisting } = await performGroupingOperation(makeContext());
+
+    expect(joinedExisting).toBe(false);
+    expect(targetGroupId).toBe(99);
+    expect(groupedTabIds).toEqual([1, 2]);
+    expect(mockedBrowser.tabs.group).toHaveBeenCalledWith({ tabIds: [1, 2] });
+  });
+
+  it('joins on title only when the rule has no color preference', async () => {
+    mockedBrowser.tabs.get.mockResolvedValue(tab(1, { groupId: -1, windowId: 7 }));
+    mockedBrowser.tabGroups.query.mockResolvedValue([
+      { id: 42, title: 'My Group', color: 'red', windowId: 7 },
+    ]);
+
+    const { joinedExisting, targetGroupId } = await performGroupingOperation(
+      makeContext({ groupColor: null }),
+    );
+
+    expect(joinedExisting).toBe(true);
+    expect(targetGroupId).toBe(42);
+    expect(mockedBrowser.tabs.group).toHaveBeenCalledWith({ groupId: 42, tabIds: [1, 2] });
+  });
+
+  it('creates a new group when no existing group matches', async () => {
+    mockedBrowser.tabs.get.mockResolvedValue(tab(1, { groupId: -1, windowId: 7 }));
+    mockedBrowser.tabGroups.query.mockResolvedValue([
+      { id: 42, title: 'Other Group', color: 'blue', windowId: 7 },
+    ]);
+
+    const { joinedExisting } = await performGroupingOperation(makeContext());
+
+    expect(joinedExisting).toBe(false);
+    expect(mockedBrowser.tabs.group).toHaveBeenCalledWith({ tabIds: [1, 2] });
+  });
+
+  it('does not query for existing groups when the opener is already grouped', async () => {
+    mockedBrowser.tabs.get.mockResolvedValue(tab(1, { groupId: 55 }));
+
+    await performGroupingOperation(makeContext());
+
+    expect(mockedBrowser.tabGroups.query).not.toHaveBeenCalled();
   });
 });
 
