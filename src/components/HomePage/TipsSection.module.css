@@ -1,3 +1,13 @@
+.carousel {
+  border-radius: var(--radius-3);
+  outline: none;
+}
+
+.carousel:focus {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
 .tipCard {
   background: var(--accent-a2);
   border-radius: var(--radius-3);

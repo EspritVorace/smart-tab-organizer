@@ -1,4 +1,9 @@
-import { useCallback, useState, type KeyboardEvent } from 'react';
+import {
+  useCallback,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
+} from 'react';
 import {
   Box,
   Card,
@@ -92,10 +97,26 @@ function TipsCardsVariant({ tips }: { tips: ReadonlyArray<TipDef> }) {
     }
   };
 
+  const focusCarouselIfBareClick = (e: ReactMouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    const nearestFocusable = target.closest(
+      'button, a, [tabindex]:not([tabindex="-1"])',
+    );
+    if (nearestFocusable === e.currentTarget) {
+      e.currentTarget.focus();
+    }
+  };
+
   const current = tips[active];
 
   return (
-    <Box tabIndex={0} onKeyDown={handleKey} aria-label={getMessage('homepageTipsNavLabel')}>
+    <Box
+      tabIndex={0}
+      onKeyDown={handleKey}
+      onMouseDown={focusCarouselIfBareClick}
+      aria-label={getMessage('homepageTipsNavLabel')}
+      className={styles.carousel}
+    >
       <Flex direction="column" gap="3">
         <TipsHeader
           trailing={
