@@ -9,6 +9,7 @@ import { handleOrganizeAllTabs } from '@/background/organize.js';
 import { shouldSkipDeduplication } from '@/utils/deduplicationSkip.js';
 import { initCategoriesStore } from '@/utils/categoriesStore.js';
 import { initWorkspaceContext } from '@/utils/workspaceContext.js';
+import { setupActionBadge } from '@/background/actionBadge.js';
 
 export default defineBackground(() => {
     // Initialize all event handlers
@@ -21,6 +22,9 @@ export default defineBackground(() => {
     // Populate the categories cache so grouping.ts (sync) can resolve colors.
     // Fire-and-forget: the watcher will keep the cache in sync afterwards.
     initCategoriesStore().catch(e => logger.error('[CATEGORIES] init failed:', e));
+
+    // Reflect grouping/dedup state on the toolbar icon.
+    setupActionBadge().catch(e => logger.error('[ACTION_BADGE] init failed:', e));
 
     // Start periodic cleanup for deduplication cache
     startPeriodicCleanup();
