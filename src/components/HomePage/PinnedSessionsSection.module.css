@@ -7,7 +7,7 @@
   box-shadow: var(--shadow-3);
 }
 
-.tile:focus-visible {
+.tile:focus {
   outline: 2px solid var(--accent-9);
   outline-offset: 2px;
 }
