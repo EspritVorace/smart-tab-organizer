@@ -1,11 +1,18 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { fakeBrowser } from 'wxt/testing';
 import {
   formatSessionDate,
+  formatSessionDateShort,
   countSessionTabs,
   sessionToTabTreeData,
   createSessionFromSelection,
   matchSessionSearch,
   splitByPinned,
+  splitByBucket,
+  resolveTabUuids,
+  getFocusedSessionFromDOM,
+  getSessionGroupLabel,
+  getSessionTabLabel,
 } from '../../src/utils/sessionUtils';
 import type { Session, SavedTab, SavedTabGroup } from '../../src/types/session';
 
@@ -13,6 +20,23 @@ import type { Session, SavedTab, SavedTabGroup } from '../../src/types/session';
 vi.mock('../../src/utils/utils', () => ({
   generateUUID: vi.fn(() => 'mocked-uuid'),
 }));
+
+// ── i18n stub (used by getSessionGroupLabel / getSessionTabLabel) ──────────────
+
+const mockGetMessage = vi.fn();
+beforeEach(() => {
+  (fakeBrowser as any).i18n = { getMessage: mockGetMessage };
+  mockGetMessage.mockReset();
+  mockGetMessage.mockImplementation((key: string) => {
+    const map: Record<string, string> = {
+      sessionGroupOne: '1 group',
+      sessionGroupCount: '$1 groups',
+      sessionTabOne: '1 tab',
+      sessionTabCount: '$1 tabs',
+    };
+    return map[key] ?? key;
+  });
+});
 
 const makeTab = (overrides: Partial<SavedTab> = {}): SavedTab => ({
   id: 'tab-uuid-1',
@@ -212,6 +236,13 @@ describe('sessionUtils', () => {
       });
       expect(session.categoryId).toBe('development');
     });
+
+    it('applies the note option when provided', () => {
+      const session = createSessionFromSelection([], [], new Set(), 'S', {
+        note: 'sprint planning',
+      });
+      expect(session.note).toBe('sprint planning');
+    });
   });
 
   describe('matchSessionSearch', () => {
@@ -346,6 +377,20 @@ describe('sessionUtils', () => {
       expect(result).not.toBeNull();
       expect(result!.matchesName).toBe(true);
     });
+
+    it('returns matchesNote=true when the session note contains the term', () => {
+      const session = makeSession({ name: 'Other', note: 'Sprint planning notes' });
+      const result = matchSessionSearch(session, 'sprint');
+      expect(result).not.toBeNull();
+      expect(result!.matchesNote).toBe(true);
+      expect(result!.matchesName).toBe(false);
+    });
+
+    it('returns matchesNote=false when the session has no note', () => {
+      const session = makeSession({ name: 'Match' });
+      const result = matchSessionSearch(session, 'match');
+      expect(result!.matchesNote).toBe(false);
+    });
   });
 
   describe('splitByPinned', () => {
@@ -387,6 +432,145 @@ describe('sessionUtils', () => {
       const result = splitByPinned([p1, u1, p2, u2]);
       expect(result.pinned.map(s => s.id)).toEqual(['p1', 'p2']);
       expect(result.unpinned.map(s => s.id)).toEqual(['u1', 'u2']);
+    });
+  });
+
+  describe('getFocusedSessionFromDOM', () => {
+    afterEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    it('returns null when document.activeElement is not inside a session card scope', () => {
+      expect(getFocusedSessionFromDOM([])).toBeNull();
+    });
+
+    it('returns null when focused element lacks the session-card scope attribute', () => {
+      const el = document.createElement('button');
+      document.body.appendChild(el);
+      el.focus();
+      expect(getFocusedSessionFromDOM([])).toBeNull();
+    });
+
+    it('returns null when the session-card element has no data-session-id', () => {
+      const el = document.createElement('div');
+      el.setAttribute('data-shortcut-scope', 'widget:session-card');
+      el.setAttribute('tabindex', '0');
+      document.body.appendChild(el);
+      el.focus();
+      expect(getFocusedSessionFromDOM([])).toBeNull();
+    });
+
+    it('returns null when session id is not found in the provided list', () => {
+      const session = makeSession({ id: 'other-id' });
+      const el = document.createElement('div');
+      el.setAttribute('data-shortcut-scope', 'widget:session-card');
+      el.setAttribute('data-session-id', 'unknown');
+      el.setAttribute('tabindex', '0');
+      document.body.appendChild(el);
+      el.focus();
+      expect(getFocusedSessionFromDOM([session])).toBeNull();
+    });
+
+    it('returns the matching session when a session card is focused', () => {
+      const session = makeSession({ id: 'sess-focused' });
+      const el = document.createElement('div');
+      el.setAttribute('data-shortcut-scope', 'widget:session-card');
+      el.setAttribute('data-session-id', 'sess-focused');
+      el.setAttribute('tabindex', '0');
+      document.body.appendChild(el);
+      el.focus();
+      expect(getFocusedSessionFromDOM([session])).toBe(session);
+    });
+  });
+
+  describe('formatSessionDateShort', () => {
+    it('returns a formatted date string for a valid ISO string', () => {
+      const result = formatSessionDateShort('2025-04-01T10:00:00.000Z');
+      expect(result).toMatch(/Apr|2025/);
+    });
+
+    it('returns a string (fallback) when parsing fails', () => {
+      expect(typeof formatSessionDateShort('not-a-date')).toBe('string');
+    });
+  });
+
+  describe('getSessionGroupLabel', () => {
+    it('returns singular label for 1 group', () => {
+      expect(getSessionGroupLabel(1)).toBe('1 group');
+      expect(mockGetMessage).toHaveBeenCalledWith('sessionGroupOne', undefined);
+    });
+
+    it('returns plural label with count substituted', () => {
+      expect(getSessionGroupLabel(3)).toBe('3 groups');
+      expect(mockGetMessage).toHaveBeenCalledWith('sessionGroupCount', undefined);
+    });
+  });
+
+  describe('getSessionTabLabel', () => {
+    it('returns singular label for 1 tab', () => {
+      expect(getSessionTabLabel(1)).toBe('1 tab');
+      expect(mockGetMessage).toHaveBeenCalledWith('sessionTabOne', undefined);
+    });
+
+    it('returns plural label with count substituted', () => {
+      expect(getSessionTabLabel(5)).toBe('5 tabs');
+      expect(mockGetMessage).toHaveBeenCalledWith('sessionTabCount', undefined);
+    });
+  });
+
+  describe('splitByBucket', () => {
+    it('places archived items in the archived bucket even when isPinned is also true', () => {
+      const item = makeSession({ isPinned: true, isArchived: true });
+      const { archived, pinned, active } = splitByBucket([item]);
+      expect(archived).toHaveLength(1);
+      expect(pinned).toHaveLength(0);
+      expect(active).toHaveLength(0);
+    });
+
+    it('places pinned non-archived items in the pinned bucket', () => {
+      const item = makeSession({ isPinned: true, isArchived: false });
+      const { pinned, archived, active } = splitByBucket([item]);
+      expect(pinned).toHaveLength(1);
+      expect(archived).toHaveLength(0);
+      expect(active).toHaveLength(0);
+    });
+
+    it('places regular items in the active bucket', () => {
+      const item = makeSession({ isPinned: false });
+      const { active, pinned, archived } = splitByBucket([item]);
+      expect(active).toHaveLength(1);
+      expect(pinned).toHaveLength(0);
+      expect(archived).toHaveLength(0);
+    });
+
+    it('handles a mixed list of archived, pinned, and active sessions', () => {
+      const items = [
+        makeSession({ isPinned: false }),
+        makeSession({ isPinned: true }),
+        makeSession({ isArchived: true }),
+      ];
+      const { active, pinned, archived } = splitByBucket(items);
+      expect(active).toHaveLength(1);
+      expect(pinned).toHaveLength(1);
+      expect(archived).toHaveLength(1);
+    });
+  });
+
+  describe('resolveTabUuids', () => {
+    it('maps selected numeric ids to their UUIDs', () => {
+      const mapping = new Map([[1, 'uuid-one'], [2, 'uuid-two'], [3, 'uuid-three']]);
+      const result = resolveTabUuids(new Set([1, 3]), mapping);
+      expect(result).toEqual(new Set(['uuid-one', 'uuid-three']));
+    });
+
+    it('skips numeric ids not present in the mapping', () => {
+      const mapping = new Map([[1, 'uuid-one']]);
+      const result = resolveTabUuids(new Set([1, 99]), mapping);
+      expect(result).toEqual(new Set(['uuid-one']));
+    });
+
+    it('returns an empty set for empty input', () => {
+      expect(resolveTabUuids(new Set(), new Map())).toEqual(new Set());
     });
   });
 });
