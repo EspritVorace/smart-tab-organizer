@@ -21,7 +21,7 @@ interface BucketAccumulators {
   ruleAgg: Record<string, PeriodTotals>;
 }
 
-function accumulateRuleBucket(
+export function accumulateRuleBucket(
   acc: BucketAccumulators,
   windows: DateWindows,
   date: Date,
@@ -46,7 +46,7 @@ function accumulateRuleBucket(
   }
 }
 
-function buildTopRules(
+export function buildTopRules(
   ruleAgg: Record<string, PeriodTotals>,
   domainRules: DomainRuleSetting[],
 ): TopRuleStat[] {
@@ -61,7 +61,7 @@ function buildTopRules(
     .slice(0, 5);
 }
 
-function computeSessionEventAggregates(
+export function computeSessionEventAggregates(
   events: SessionEventCounters | undefined,
   windows: DateWindows,
 ): SessionEventAggregates {
@@ -95,7 +95,7 @@ function computeSessionEventAggregates(
   };
 }
 
-function computeAggregates(
+export function computeAggregates(
   statistics: Statistics | null,
   domainRules: DomainRuleSetting[],
 ): StatisticsAggregates {

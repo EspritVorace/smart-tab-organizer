@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fakeBrowser } from 'wxt/testing';
+import { storage } from 'wxt/utils/storage';
 import {
   getSettings,
   setSettings,
@@ -7,9 +8,15 @@ import {
   watchSettings,
   watchSettingsField,
 } from '../../src/utils/settingsUtils';
+import { _resetWorkspaceContextForTests } from '../../src/utils/workspaceContext';
 import { defaultAppSettings } from '../../src/types/syncSettings';
+import type { AppSettings } from '../../src/types/syncSettings';
 
 // fakeBrowser.reset() runs before each test via tests/setup.ts.
+
+beforeEach(() => {
+  _resetWorkspaceContextForTests();
+});
 
 describe('settingsUtils', () => {
   describe('getSettings', () => {
@@ -49,8 +56,8 @@ describe('settingsUtils', () => {
     });
 
     it('returns default values on error', async () => {
-      vi.spyOn(fakeBrowser.storage.local, 'get').mockRejectedValueOnce(
-        new Error('Local storage error'),
+      vi.spyOn(storage, 'getItems').mockRejectedValueOnce(
+        new Error('Storage error'),
       );
       const settings = await getSettings();
       expect(settings).toEqual(defaultAppSettings);
@@ -163,6 +170,31 @@ describe('settingsUtils', () => {
       const unwatch = watchSettings(vi.fn());
       expect(() => unwatch()).not.toThrow();
     });
+
+    it('calls the callback with current settings when a watched storage key changes', async () => {
+      const callback = vi.fn();
+      const unwatch = watchSettings(callback);
+
+      await fakeBrowser.storage.local.set({ globalGroupingEnabled: false });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(callback).toHaveBeenCalled();
+      const received: AppSettings = callback.mock.calls[0][0];
+      expect(received).toHaveProperty('globalGroupingEnabled');
+
+      unwatch();
+    });
+
+    it('stops calling the callback after unwatch is called', async () => {
+      const callback = vi.fn();
+      const unwatch = watchSettings(callback);
+      unwatch();
+
+      await fakeBrowser.storage.local.set({ globalGroupingEnabled: false });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(callback).not.toHaveBeenCalled();
+    });
   });
 
   describe('watchSettingsField', () => {
@@ -176,6 +208,45 @@ describe('settingsUtils', () => {
       const unwatch = watchSettingsField('deduplicationKeepStrategy', vi.fn());
       expect(typeof unwatch).toBe('function');
       unwatch();
+    });
+
+    it('invokes the callback with the new value when the specific field changes', async () => {
+      const callback = vi.fn();
+      const unwatch = watchSettingsField('globalGroupingEnabled', callback);
+
+      await fakeBrowser.storage.local.set({ globalGroupingEnabled: false });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(callback).toHaveBeenCalledWith(false);
+      unwatch();
+    });
+
+    it('does not fire for a field it is not watching', async () => {
+      const callback = vi.fn();
+      const unwatch = watchSettingsField('globalGroupingEnabled', callback);
+
+      await fakeBrowser.storage.local.set({ globalDeduplicationEnabled: false });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(callback).not.toHaveBeenCalled();
+      unwatch();
+    });
+
+    it('covers all AppSettings field keys without throwing', () => {
+      const fields: Array<keyof AppSettings> = [
+        'globalGroupingEnabled',
+        'globalDeduplicationEnabled',
+        'deduplicateUnmatchedDomains',
+        'deduplicationKeepStrategy',
+        'defaultRestoreAction',
+        'domainRules',
+        'categories',
+        'notifyOnGrouping',
+        'notifyOnDeduplication',
+        'notifyOnOrganize',
+      ];
+      const unwatchers = fields.map((f) => watchSettingsField(f, vi.fn()));
+      expect(() => unwatchers.forEach((u) => u())).not.toThrow();
     });
   });
 });
