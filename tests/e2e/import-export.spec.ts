@@ -475,41 +475,26 @@ test.describe('Import / Export', () => {
       await wizard.expectExportButtonEnabled();
     });
 
-    test('Export step has a split button with Export and chevron/dropdown [US-IE009]', async ({
+    test('Export step exposes JSON file and Clipboard buttons side by side [US-IE009]', async ({
       extensionContext,
       extensionPage,
       extensionId,
     }) => {
       await seedRules(extensionContext, [
-        makeRule('Split Button Rule', 'splitbtn.com', { id: 'r6', groupingEnabled: true, groupNameSource: 'label' }),
+        makeRule('Two Buttons Rule', 'twobuttons.com', { id: 'r6', groupingEnabled: true, groupNameSource: 'label' }),
       ]);
 
       await goToImportExportSection(extensionPage, extensionId);
       const wizard = await openRulesExportWizard(extensionPage);
 
       await expect(wizard.exportFileButton()).toBeVisible();
-      await expect(wizard.exportOptionsButton()).toBeVisible();
-    });
-
-    test('Copy to Clipboard option is available in the export dropdown [US-IE009]', async ({
-      extensionContext,
-      extensionPage,
-      extensionId,
-    }) => {
-      await seedRules(extensionContext, [
-        makeRule('Clipboard Rule', 'clipboard.com', { id: 'r7', groupingEnabled: true, groupNameSource: 'label' }),
-      ]);
-
-      await goToImportExportSection(extensionPage, extensionId);
-      const wizard = await openRulesExportWizard(extensionPage);
-
-      await wizard.exportOptionsButton().click();
       await expect(wizard.exportClipboardButton()).toBeVisible();
     });
 
-    // Regression: when closing the export Dialog from within the split-button
-    // DropdownMenu (clipboard export path), both Radix overlays unmounted in
-    // the same React batch and react-dismissable-layer left
+    // Regression: in the previous split-button UI the clipboard action was
+    // nested inside a DropdownMenu opened on top of the wizard Dialog. Two
+    // Radix overlays closing in the same React batch racing on
+    // react-dismissable-layer's cleanup left
     // `body { pointer-events: none }` stuck. The Options page froze and the
     // Import button became unclickable until reload.
     test('Page stays interactive after clipboard export closes the wizard [US-IE009]', async ({
