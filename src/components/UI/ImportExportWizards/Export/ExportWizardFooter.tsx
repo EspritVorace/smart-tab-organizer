@@ -1,12 +1,17 @@
 import React from 'react';
-import { Button, Dialog } from '@radix-ui/themes';
+import { Button, Dialog, Flex } from '@radix-ui/themes';
+import { ClipboardCopy, FileDown } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
-import { ExportSplitButton } from './ExportSplitButton';
 import type { ExportActions } from './useExportActions';
 
 interface ExportWizardFooterProps {
-  /** i18n key for the primary export button label. */
-  labelKey: string;
+  /**
+   * Kept for backwards compatibility with the previous split-button API.
+   * No longer used: each action now has its own dedicated button labelled
+   * "JSON File" / "Clipboard", which is clearer and avoids the nested
+   * DropdownMenu-inside-Dialog overlay race (see commit history).
+   */
+  labelKey?: string;
   actions: ExportActions;
   disabled: boolean;
   cancelTestId?: string;
@@ -17,11 +22,16 @@ interface ExportWizardFooterProps {
 /**
  * Shared footer for export wizards (rules and sessions).
  *
- * Renders a Cancel button (wrapped in Dialog.Close) and the primary
- * ExportSplitButton offering file and clipboard export options.
+ * Layout: Cancel on the far left (`mr="auto"` absorbs the space inside the
+ * parent `WizardModal.Footer`'s `justify="end"` Flex), and the two action
+ * buttons grouped on the right. This dissociates the "abandon" affordance
+ * from the destination choice, following the common dialog convention.
+ * Splitting the actions into dedicated buttons (instead of the previous
+ * split-button + DropdownMenu) also avoids the Radix
+ * react-dismissable-layer race that leaked `body { pointer-events: none }`
+ * and froze the Options page after a clipboard export.
  */
 export function ExportWizardFooter({
-  labelKey,
   actions,
   disabled,
   cancelTestId,
@@ -31,15 +41,29 @@ export function ExportWizardFooter({
   return (
     <>
       <Dialog.Close>
-        <Button variant="soft" color="gray" data-testid={cancelTestId}>{getMessage('cancel')}</Button>
+        <Button variant="soft" color="gray" mr="auto" data-testid={cancelTestId}>
+          {getMessage('cancel')}
+        </Button>
       </Dialog.Close>
-      <ExportSplitButton
-        labelKey={labelKey}
-        actions={actions}
-        disabled={disabled}
-        primaryTestId={primaryTestId}
-        clipboardTestId={clipboardTestId}
-      />
+      <Flex gap="2">
+        <Button
+          variant="soft"
+          onClick={actions.exportToClipboard}
+          disabled={disabled}
+          data-testid={clipboardTestId}
+        >
+          <ClipboardCopy size={14} aria-hidden="true" />
+          {getMessage('exportToClipboard')}
+        </Button>
+        <Button
+          onClick={actions.exportToFile}
+          disabled={disabled}
+          data-testid={primaryTestId}
+        >
+          <FileDown size={14} aria-hidden="true" />
+          {getMessage('exportToFile')}
+        </Button>
+      </Flex>
     </>
   );
 }

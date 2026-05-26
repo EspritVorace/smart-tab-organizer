@@ -475,36 +475,57 @@ test.describe('Import / Export', () => {
       await wizard.expectExportButtonEnabled();
     });
 
-    test('Export step has a split button with Export and chevron/dropdown [US-IE009]', async ({
+    test('Export step exposes JSON file and Clipboard buttons side by side [US-IE009]', async ({
       extensionContext,
       extensionPage,
       extensionId,
     }) => {
       await seedRules(extensionContext, [
-        makeRule('Split Button Rule', 'splitbtn.com', { id: 'r6', groupingEnabled: true, groupNameSource: 'label' }),
+        makeRule('Two Buttons Rule', 'twobuttons.com', { id: 'r6', groupingEnabled: true, groupNameSource: 'label' }),
       ]);
 
       await goToImportExportSection(extensionPage, extensionId);
       const wizard = await openRulesExportWizard(extensionPage);
 
       await expect(wizard.exportFileButton()).toBeVisible();
-      await expect(wizard.exportOptionsButton()).toBeVisible();
+      await expect(wizard.exportClipboardButton()).toBeVisible();
     });
 
-    test('Copy to Clipboard option is available in the export dropdown [US-IE009]', async ({
+    // Regression: in the previous split-button UI the clipboard action was
+    // nested inside a DropdownMenu opened on top of the wizard Dialog. Two
+    // Radix overlays closing in the same React batch racing on
+    // react-dismissable-layer's cleanup left
+    // `body { pointer-events: none }` stuck. The Options page froze and the
+    // Import button became unclickable until reload.
+    test('Page stays interactive after clipboard export closes the wizard [US-IE009]', async ({
       extensionContext,
       extensionPage,
       extensionId,
     }) => {
+      await extensionPage.context().grantPermissions(['clipboard-read', 'clipboard-write']);
       await seedRules(extensionContext, [
-        makeRule('Clipboard Rule', 'clipboard.com', { id: 'r7', groupingEnabled: true, groupNameSource: 'label' }),
+        makeRule('Frozen UI Repro', 'frozen.com', { id: 'r-frozen', groupingEnabled: true, groupNameSource: 'label' }),
       ]);
 
       await goToImportExportSection(extensionPage, extensionId);
       const wizard = await openRulesExportWizard(extensionPage);
 
-      await wizard.exportOptionsButton().click();
-      await expect(wizard.exportClipboardButton()).toBeVisible();
+      await wizard.clickExportToClipboard();
+      await wizard.expectHidden();
+
+      // If the bug regresses, `body { pointer-events: none }` stays and the
+      // Import card button is no longer clickable.
+      await expect.poll(() =>
+        extensionPage.evaluate(() => document.body.style.pointerEvents),
+      ).not.toBe('none');
+
+      const importBtn = extensionPage
+        .getByTestId('page-import-export-card-import-rules')
+        .getByRole('button');
+      await importBtn.click();
+
+      const importDialog = new DialogPage(extensionPage);
+      await importDialog.expectVisible();
     });
   });
 

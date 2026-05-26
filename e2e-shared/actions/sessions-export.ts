@@ -7,8 +7,8 @@
  * locators.
  *
  * Mirrors the rules-flavoured `exportRulesToFile` / `exportRulesToClipboard`
- * helpers in `rules-import-export.ts`. Both surfaces inherit the same
- * footer split-button from `ExportWizardPageBase`.
+ * helpers in `rules-import-export.ts`. Both surfaces inherit the same two
+ * footer buttons (JSON file + clipboard) from `ExportWizardPageBase`.
  *
  * Callers are expected to have already navigated to the Import/Export
  * section (or any surface that exposes the export-sessions card) before
@@ -140,8 +140,8 @@ export async function exportSessionsToFile(
  * End-to-end "export the selected sessions to the clipboard" flow.
  *
  * Steps: open wizard, optionally fill the note, toggle the requested
- * selection buckets, open the split-button popover, click the "Clipboard"
- * entry, wait for the dialog to close.
+ * selection buckets, click the dedicated "Clipboard" footer button, wait
+ * for the dialog to close.
  *
  * Relevant US: US-IE012 (export to clipboard + dialog closes on success).
  */

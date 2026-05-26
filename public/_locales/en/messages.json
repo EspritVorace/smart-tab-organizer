@@ -272,8 +272,8 @@
   "selectAll": { "message": "Select All" },
   "deselectAll": { "message": "Deselect All" },
   "rulesSelectedCount": { "message": "{count} rule(s) selected" },
-  "exportToFile": { "message": "JSON File" },
-  "exportToClipboard": { "message": "Clipboard" },
+  "exportToFile": { "message": "Export to JSON file" },
+  "exportToClipboard": { "message": "Export to clipboard" },
 
   "next": { "message": "Next" },
   "previous": { "message": "Previous" },

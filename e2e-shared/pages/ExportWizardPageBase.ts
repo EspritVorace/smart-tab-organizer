@@ -5,11 +5,11 @@
  * `SessionsExportWizardPage` (sessions, US-IE012..US-IE013) wrap the same
  * `ExportWizardShell` UI surface: an optional note textarea, a
  * "Select all / Deselect all" toolbar, a selectable list (flat for rules,
- * Pinned/Sessions sub-groups for sessions) and a footer split-button
- * (Export to JSON file / clipboard).
+ * Pinned/Sessions sub-groups for sessions) and two footer action buttons
+ * ("JSON File" + "Clipboard").
  *
  * This base captures the genuinely common parts only: note field, toolbar,
- * primary footer split-button and Cancel button. Anything list-shape
+ * the two footer action buttons and Cancel button. Anything list-shape
  * specific (rule labels, session group headers, pinned separator, ...)
  * stays in the concrete subclasses to keep the inheritance lean.
  *
@@ -30,7 +30,7 @@ export abstract class ExportWizardPageBase extends DialogPage {
   }
 
   /**
-   * Primary "Export" button (defaults to JSON file).
+   * "JSON File" export button. Triggers the native Save As picker.
    *
    * Subclasses override `primaryExportTestId` to point at their specific
    * testid (rules vs. sessions); the base falls back to a role-based
@@ -39,28 +39,18 @@ export abstract class ExportWizardPageBase extends DialogPage {
   exportFileButton(): Locator {
     const testId = this.primaryExportTestId();
     if (testId) return this.dialog().getByTestId(testId);
-    return this.dialog().getByRole('button', { name: /^export$/i });
+    return this.dialog().getByRole('button', { name: /json file/i });
   }
 
   /**
-   * Chevron / "Export options" button that opens the split-button popover
-   * (file vs. clipboard). Locale-agnostic: anchors on the Lucide
-   * `chevron-down` icon used inside the chevron button (see SplitButton).
-   */
-  exportOptionsButton(): Locator {
-    return this.dialog().locator('button:has(svg.lucide-chevron-down)').first();
-  }
-
-  /**
-   * Clipboard menu item inside the split-button popover. Lives outside the
-   * dialog (Radix DropdownMenu.Content is portalled), so we anchor on the
-   * page, not on `dialog()`. Subclasses provide a testid for cross-locale
-   * stability; the base falls back to a role-based lookup.
+   * "Clipboard" export button. Sits next to `exportFileButton()` in the
+   * wizard footer. Subclasses provide a testid for cross-locale stability;
+   * the base falls back to a role-based lookup.
    */
   exportClipboardButton(): Locator {
     const testId = this.clipboardExportTestId();
-    if (testId) return this.page.getByTestId(testId);
-    return this.page.getByRole('menuitem', { name: /clipboard/i });
+    if (testId) return this.dialog().getByTestId(testId);
+    return this.dialog().getByRole('button', { name: /clipboard/i });
   }
 
   // ─── Subclass extension points ───────────────────────────────────────────
@@ -74,7 +64,7 @@ export abstract class ExportWizardPageBase extends DialogPage {
     return undefined;
   }
 
-  /** Optional testid for the clipboard menu item in the split-button popover. */
+  /** Optional testid for the clipboard footer button. */
   protected clipboardExportTestId(): string | undefined {
     return undefined;
   }
@@ -116,9 +106,8 @@ export abstract class ExportWizardPageBase extends DialogPage {
     await this.exportFileButton().click();
   }
 
-  /** Open the split-button popover and click the "Clipboard" entry. */
+  /** Click the dedicated "Clipboard" footer button. */
   async clickExportToClipboard(): Promise<void> {
-    await this.exportOptionsButton().click();
     await this.exportClipboardButton().click();
   }
 

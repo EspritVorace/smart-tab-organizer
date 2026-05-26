@@ -161,8 +161,8 @@ export async function exportRulesToFile(
 /**
  * End-to-end "export the selected rules to the clipboard" flow.
  *
- * Steps: open wizard, optionally fill the note, open the split-button
- * popover, click the "Clipboard" entry, wait for the dialog to close.
+ * Steps: open wizard, optionally fill the note, click the dedicated
+ * "Clipboard" footer button, wait for the dialog to close.
  *
  * The clipboard write itself is performed by `navigator.clipboard.writeText`,
  * which Playwright stubs transparently when the test is granted the
