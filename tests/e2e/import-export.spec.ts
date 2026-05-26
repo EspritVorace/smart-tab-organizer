@@ -506,6 +506,42 @@ test.describe('Import / Export', () => {
       await wizard.exportOptionsButton().click();
       await expect(wizard.exportClipboardButton()).toBeVisible();
     });
+
+    // Regression: when closing the export Dialog from within the split-button
+    // DropdownMenu (clipboard export path), both Radix overlays unmounted in
+    // the same React batch and react-dismissable-layer left
+    // `body { pointer-events: none }` stuck. The Options page froze and the
+    // Import button became unclickable until reload.
+    test('Page stays interactive after clipboard export closes the wizard [US-IE009]', async ({
+      extensionContext,
+      extensionPage,
+      extensionId,
+    }) => {
+      await extensionPage.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+      await seedRules(extensionContext, [
+        makeRule('Frozen UI Repro', 'frozen.com', { id: 'r-frozen', groupingEnabled: true, groupNameSource: 'label' }),
+      ]);
+
+      await goToImportExportSection(extensionPage, extensionId);
+      const wizard = await openRulesExportWizard(extensionPage);
+
+      await wizard.clickExportToClipboard();
+      await wizard.expectHidden();
+
+      // If the bug regresses, `body { pointer-events: none }` stays and the
+      // Import card button is no longer clickable.
+      await expect.poll(() =>
+        extensionPage.evaluate(() => document.body.style.pointerEvents),
+      ).not.toBe('none');
+
+      const importBtn = extensionPage
+        .getByTestId('page-import-export-card-import-rules')
+        .getByRole('button');
+      await importBtn.click();
+
+      const importDialog = new DialogPage(extensionPage);
+      await importDialog.expectVisible();
+    });
   });
 
   // ── Wizard triggers (context-based, no URL routing for import/export) ──────
