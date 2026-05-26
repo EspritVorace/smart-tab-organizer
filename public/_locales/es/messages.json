@@ -272,8 +272,8 @@
   "selectAll": { "message": "Seleccionar todo" },
   "deselectAll": { "message": "Deseleccionar todo" },
   "rulesSelectedCount": { "message": "{count} regla(s) seleccionada(s)" },
-  "exportToFile": { "message": "Archivo JSON" },
-  "exportToClipboard": { "message": "Portapapeles" },
+  "exportToFile": { "message": "Exportar a archivo JSON" },
+  "exportToClipboard": { "message": "Exportar al portapapeles" },
 
   "next": { "message": "Siguiente" },
   "previous": { "message": "Anterior" },
