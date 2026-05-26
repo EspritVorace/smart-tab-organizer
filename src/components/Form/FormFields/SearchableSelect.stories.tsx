@@ -248,8 +248,8 @@ export const SearchableSelectNoResults: Story = {
   },
 };
 
-// Opens the dropdown by clicking the trigger button.
-export const SearchableSelectOpen: Story = {
+// Opens the dropdown, filters results, and selects an option in one flow.
+export const SearchableSelectInteraction: Story = {
   render: () => {
     const [value, setValue] = useState('');
     return (
@@ -267,62 +267,20 @@ export const SearchableSelectOpen: Story = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const trigger = canvas.getByRole('combobox');
-    await userEvent.click(trigger);
     const body = within(canvasElement.ownerDocument.body);
-    await expect(body.getByPlaceholderText('Search a preset...')).toBeInTheDocument();
-  },
-};
 
-// Types in the search box to filter options.
-export const SearchableSelectFiltered: Story = {
-  render: () => {
-    const [value, setValue] = useState('');
-    return (
-      <Wrapper>
-        <SearchableSelect
-          value={value}
-          onValueChange={setValue}
-          groups={devGroups}
-          placeholder="Choose a preset..."
-          searchPlaceholder="Search a preset..."
-          emptyMessage="No preset found."
-        />
-      </Wrapper>
-    );
-  },
-  play: async (context) => {
-    await SearchableSelectOpen.play?.(context);
-    const body = within(context.canvasElement.ownerDocument.body);
+    // Open: search input appears
+    await userEvent.click(canvas.getByRole('combobox'));
+    await expect(body.getByPlaceholderText('Search a preset...')).toBeInTheDocument();
+
+    // Filter: only matching options remain
     const searchInput = body.getByPlaceholderText('Search a preset...');
     await userEvent.type(searchInput, 'jira');
     await expect(body.getByText('Jira Ticket')).toBeInTheDocument();
-  },
-};
 
-// Selects an option from the dropdown.
-export const SearchableSelectChosen: Story = {
-  render: () => {
-    const [value, setValue] = useState('');
-    return (
-      <Wrapper>
-        <SearchableSelect
-          value={value}
-          onValueChange={setValue}
-          groups={devGroups}
-          placeholder="Choose a preset..."
-          searchPlaceholder="Search a preset..."
-          emptyMessage="No preset found."
-        />
-      </Wrapper>
-    );
-  },
-  play: async (context) => {
-    await SearchableSelectOpen.play?.(context);
-    const body = within(context.canvasElement.ownerDocument.body);
+    // Clear filter and select: trigger shows the chosen label
+    await userEvent.clear(searchInput);
     await userEvent.click(body.getByText('GitHub Repository'));
-    // Dropdown closes and trigger shows selected label
-    const canvas = within(context.canvasElement);
     await expect(canvas.getByRole('combobox')).toHaveTextContent('GitHub Repository');
   },
 };
@@ -355,9 +313,10 @@ export const SearchableSelectEmptyResults: Story = {
       </Wrapper>
     );
   },
-  play: async (context) => {
-    await SearchableSelectOpen.play?.(context);
-    const body = within(context.canvasElement.ownerDocument.body);
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const body = within(canvasElement.ownerDocument.body);
+    await userEvent.click(canvas.getByRole('combobox'));
     const searchInput = body.getByPlaceholderText('Search a preset...');
     await userEvent.type(searchInput, 'zzz-no-match');
     await expect(body.getByText('No preset found.')).toBeInTheDocument();
