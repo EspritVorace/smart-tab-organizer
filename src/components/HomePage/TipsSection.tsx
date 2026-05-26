@@ -1,4 +1,10 @@
-import { useCallback, useState, type KeyboardEvent } from 'react';
+import {
+  useCallback,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
+} from 'react';
 import {
   Box,
   Card,
@@ -73,6 +79,7 @@ function TipsHeader({ trailing }: TipsHeaderProps) {
 
 function TipsCardsVariant({ tips }: { tips: ReadonlyArray<TipDef> }) {
   const [active, setActive] = useState(0);
+  const dotsRef = useRef<Array<HTMLButtonElement | null>>([]);
 
   const goPrev = useCallback(() => {
     setActive((i) => (i - 1 + tips.length) % tips.length);
@@ -82,6 +89,7 @@ function TipsCardsVariant({ tips }: { tips: ReadonlyArray<TipDef> }) {
   }, [tips.length]);
 
   const handleKey = (e: KeyboardEvent<HTMLElement>) => {
+    if (e.target !== e.currentTarget) return;
     if (e.key === 'ArrowLeft') {
       e.preventDefault();
       goPrev();
@@ -92,10 +100,57 @@ function TipsCardsVariant({ tips }: { tips: ReadonlyArray<TipDef> }) {
     }
   };
 
+  const focusDot = (rawIndex: number) => {
+    const len = tips.length;
+    const clamped = ((rawIndex % len) + len) % len;
+    setActive(clamped);
+    dotsRef.current[clamped]?.focus();
+  };
+
+  const handleDotKey = (
+    e: KeyboardEvent<HTMLButtonElement>,
+    i: number,
+  ) => {
+    switch (e.key) {
+      case 'ArrowLeft':
+        e.preventDefault();
+        focusDot(i - 1);
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        focusDot(i + 1);
+        break;
+      case 'Home':
+        e.preventDefault();
+        focusDot(0);
+        break;
+      case 'End':
+        e.preventDefault();
+        focusDot(tips.length - 1);
+        break;
+    }
+  };
+
+  const focusCarouselIfBareClick = (e: ReactMouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    const nearestFocusable = target.closest(
+      'button, a, [tabindex]:not([tabindex="-1"])',
+    );
+    if (nearestFocusable === e.currentTarget) {
+      e.currentTarget.focus();
+    }
+  };
+
   const current = tips[active];
 
   return (
-    <Box tabIndex={0} onKeyDown={handleKey} aria-label={getMessage('homepageTipsNavLabel')}>
+    <Box
+      tabIndex={0}
+      onKeyDown={handleKey}
+      onMouseDown={focusCarouselIfBareClick}
+      aria-label={getMessage('homepageTipsNavLabel')}
+      className={styles.carousel}
+    >
       <Flex direction="column" gap="3">
         <TipsHeader
           trailing={
@@ -130,10 +185,15 @@ function TipsCardsVariant({ tips }: { tips: ReadonlyArray<TipDef> }) {
               key={t.id}
               type="button"
               role="tab"
+              ref={(el) => {
+                dotsRef.current[i] = el;
+              }}
               aria-selected={i === active}
               aria-label={getMessage('homepageTipsDotLabel', [String(i + 1)])}
               className={i === active ? `${styles.dot} ${styles.dotActive}` : styles.dot}
+              tabIndex={i === active ? 0 : -1}
               onClick={() => setActive(i)}
+              onKeyDown={(e) => handleDotKey(e, i)}
               data-testid={`home-tips-dot-${i}`}
             />
           ))}

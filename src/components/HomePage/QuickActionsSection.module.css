@@ -11,7 +11,7 @@
   border-radius: var(--radius-3);
 }
 
-.actionButton:focus-visible {
+.actionButton:focus {
   outline: 2px solid var(--accent-9);
   outline-offset: 2px;
 }
