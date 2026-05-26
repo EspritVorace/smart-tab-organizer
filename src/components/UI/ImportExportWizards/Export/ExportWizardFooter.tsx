@@ -22,12 +22,14 @@ interface ExportWizardFooterProps {
 /**
  * Shared footer for export wizards (rules and sessions).
  *
- * Renders a Cancel button (wrapped in Dialog.Close) and two side-by-side
- * action buttons, one per export destination. Splitting the actions into
- * dedicated buttons (instead of the previous split-button + DropdownMenu)
- * avoids the Radix react-dismissable-layer race that leaked
- * `body { pointer-events: none }` and froze the Options page after a
- * clipboard export.
+ * Layout: Cancel on the far left (`mr="auto"` absorbs the space inside the
+ * parent `WizardModal.Footer`'s `justify="end"` Flex), and the two action
+ * buttons grouped on the right. This dissociates the "abandon" affordance
+ * from the destination choice, following the common dialog convention.
+ * Splitting the actions into dedicated buttons (instead of the previous
+ * split-button + DropdownMenu) also avoids the Radix
+ * react-dismissable-layer race that leaked `body { pointer-events: none }`
+ * and froze the Options page after a clipboard export.
  */
 export function ExportWizardFooter({
   actions,
@@ -39,7 +41,9 @@ export function ExportWizardFooter({
   return (
     <>
       <Dialog.Close>
-        <Button variant="soft" color="gray" data-testid={cancelTestId}>{getMessage('cancel')}</Button>
+        <Button variant="soft" color="gray" mr="auto" data-testid={cancelTestId}>
+          {getMessage('cancel')}
+        </Button>
       </Dialog.Close>
       <Flex gap="2">
         <Button
