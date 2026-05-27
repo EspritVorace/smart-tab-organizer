@@ -121,14 +121,24 @@ async function findAcrossBuckets(id: string): Promise<{ bucket: SessionBucket; s
  * the session is moved atomically between buckets, preserving its data and
  * appending it at the end of the destination bucket with `position`
  * normalized.
+ *
+ * `options.touch` defaults to true: `updatedAt` is bumped to "now". Set it
+ * to false for bookkeeping moves (archive, unarchive) that must preserve
+ * the real last-edit timestamp.
  */
-export async function updateSession(id: string, updates: Partial<Session>): Promise<void> {
+export async function updateSession(
+  id: string,
+  updates: Partial<Session>,
+  options: { touch?: boolean } = {},
+): Promise<void> {
+  const { touch = true } = options;
   const found = await findAcrossBuckets(id);
   if (!found) return;
+  const existing = found.sessions[found.index];
   const merged: Session = {
-    ...found.sessions[found.index],
+    ...existing,
     ...updates,
-    updatedAt: new Date().toISOString(),
+    updatedAt: touch ? new Date().toISOString() : existing.updatedAt,
   };
   const targetBucket = bucketOf(merged);
 
@@ -160,13 +170,13 @@ export async function deleteSession(id: string): Promise<void> {
  * unpinned in the process (pin and archive are mutually exclusive).
  */
 export async function archiveSession(id: string): Promise<void> {
-  await updateSession(id, { isArchived: true, isPinned: false });
+  await updateSession(id, { isArchived: true, isPinned: false }, { touch: false });
   await incrementSessionEvent('archived');
 }
 
 /** Move a session out of the archived bucket back into the active bucket. */
 export async function unarchiveSession(id: string): Promise<void> {
-  await updateSession(id, { isArchived: false });
+  await updateSession(id, { isArchived: false }, { touch: false });
 }
 
 /** Pin a session. No-op if it is currently archived. */
