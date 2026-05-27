@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Tooltip } from '@radix-ui/themes';
+import { Kbd, Tooltip } from '@radix-ui/themes';
 import { browser } from 'wxt/browser';
 import { Camera, RotateCcw, Wand2 } from 'lucide-react';
 import { getMessage, getPluralMessage } from '@/utils/i18n';
@@ -132,9 +132,9 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
           <strong className={styles.heroTitle}>{heroTitle}</strong>
           <span className={styles.heroSubtitle}>{heroSubtitle}</span>
         </span>
-        <kbd className={styles.heroKbd} aria-label={getMessage('popupOrganizeShortcut')}>
+        <Kbd size="1" className={styles.heroKbd} aria-label={getMessage('popupOrganizeShortcut')}>
           O
-        </kbd>
+        </Kbd>
       </button>
 
       <div className={styles.metaRow}>
