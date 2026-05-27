@@ -67,11 +67,7 @@ Captura tus pestañas y grupos abiertos, ponles nombre, fija las que más usas. 
 
 ## 📖 Documentación
 
-La guía completa está en [`docs/`](docs/src/content/docs/es/) (Astro Starlight, 3 idiomas, más de 30 páginas con capturas). Lee el MDX directamente en GitHub, o lanza la doc en local :
-
-```bash
-pnpm docs:dev
-```
+Guía completa en línea : [docs.esprit-vorace.fr](https://docs.esprit-vorace.fr/es/) (Astro Starlight, 3 idiomas, más de 30 páginas con capturas). Las fuentes MDX están en [`docs/`](docs/src/content/docs/es/) para los contribuidores.
 
 ## 🛠️ Para contribuir
 

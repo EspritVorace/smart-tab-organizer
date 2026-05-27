@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Badge, Button, Dialog, Flex, Heading, Text } from '@radix-ui/themes';
-import { ArrowUpRight, Bug } from 'lucide-react';
+import { ArrowUpRight, BookOpen, Bug } from 'lucide-react';
 
 function GithubMark({ size = 14 }: { size?: number }) {
   return (
@@ -17,6 +17,7 @@ function GithubMark({ size = 14 }: { size?: number }) {
   );
 }
 import { browser } from 'wxt/browser';
+import { getDocsUrl } from '@/utils/docsUrl';
 import { getMessage } from '@/utils/i18n';
 import { DialogCloseButton } from '@/components/UI/DialogShell';
 import { ExtensionMark } from './ExtensionMark';
@@ -225,6 +226,7 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
   const browserLabel = useMemo(() => detectBrowserLabel(), []);
   const osLabel = useMemo(() => detectOsLabel(), []);
   const { name: languageName, code: languageCode } = useMemo(() => getUiLanguageLabel(), []);
+  const docsUrl = useMemo(() => getDocsUrl(), []);
 
   const sectionStyle: React.CSSProperties = {
     padding: '18px 28px',
@@ -385,6 +387,12 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
                 gap: 4,
               }}
             >
+              <LinkRow
+                href={docsUrl}
+                title={getMessage('aboutDialogLinkDocumentationTitle')}
+                hint={getMessage('aboutDialogLinkDocumentationHint')}
+                icon={<BookOpen size={14} aria-hidden="true" />}
+              />
               <LinkRow
                 href={SOURCE_URL}
                 title={getMessage('aboutDialogLinkSourceTitle')}

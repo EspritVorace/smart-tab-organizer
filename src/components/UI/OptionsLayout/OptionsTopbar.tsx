@@ -1,7 +1,8 @@
+import { useMemo } from 'react';
 import { Flex, IconButton, Link, Text, Tooltip } from '@radix-ui/themes';
-import { HelpCircle } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 import { ThemeToggle } from '@/components/UI/ThemeToggle/ThemeToggle';
-import { useShortcutsControl } from '@/contexts/ShortcutsControlContext';
+import { getDocsUrl } from '@/utils/docsUrl';
 import { getMessage } from '@/utils/i18n';
 
 interface OptionsTopbarProps {
@@ -14,7 +15,7 @@ interface OptionsTopbarProps {
 }
 
 export function OptionsTopbar({ pageTitle, pageSubtitle, parentHref }: OptionsTopbarProps) {
-  const { openShortcuts } = useShortcutsControl();
+  const docsUrl = useMemo(() => getDocsUrl(), []);
   const parentCrumbStyle = { color: 'var(--gray-12)', letterSpacing: '-0.005em' };
   const parentIsLink = Boolean(pageSubtitle && parentHref);
 
@@ -92,16 +93,22 @@ export function OptionsTopbar({ pageTitle, pageSubtitle, parentHref }: OptionsTo
         </Flex>
         <Flex align="center" gap="1">
           <ThemeToggle />
-          <Tooltip content={getMessage('shortcutsPanelToggleAria')}>
+          <Tooltip content={getMessage('topbarDocumentationLinkAria')}>
             <IconButton
-              data-testid="topbar-help"
+              asChild
               variant="ghost"
               size="2"
-              onClick={openShortcuts}
-              aria-label={getMessage('shortcutsPanelToggleAria')}
               style={{ color: 'var(--gray-11)' }}
             >
-              <HelpCircle size={16} aria-hidden="true" />
+              <a
+                href={docsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="topbar-help"
+                aria-label={getMessage('topbarDocumentationLinkAria')}
+              >
+                <BookOpen size={16} aria-hidden="true" />
+              </a>
             </IconButton>
           </Tooltip>
         </Flex>
