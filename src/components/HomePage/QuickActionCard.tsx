@@ -31,6 +31,17 @@ export function QuickActionCard({
       data-testid={`home-quick-action-${action.id}`}
       data-home-quick-action=""
     >
+      {action.shortcutLetter && (
+        <kbd
+          className={styles.kbd}
+          aria-label={getMessage('homepageQuickActionShortcutAriaLabel', [
+            action.shortcutLetter.toUpperCase(),
+          ])}
+          data-testid={`home-quick-action-${action.id}-kbd`}
+        >
+          {action.shortcutLetter.toUpperCase()}
+        </kbd>
+      )}
       <Card className={styles.actionCard}>
         <Flex direction="column" gap="2">
           <IconBox icon={action.icon} size="sm" variant="soft" />

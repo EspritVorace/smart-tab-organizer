@@ -256,3 +256,113 @@ describe('HomePage interactions', () => {
     expect(baseHandlers.onNavigate).toHaveBeenCalledWith('sessions');
   });
 });
+
+describe('HomePage initial focus on mount', () => {
+  it('focuses the import-pack hero button when there are no domain rules', () => {
+    wrap(
+      <HomePage
+        syncSettings={baseSettings}
+        statisticsAggregates={baseAggregates}
+        {...baseHandlers}
+      />,
+    );
+    expect(document.activeElement).toBe(screen.getByTestId('home-hero-import'));
+  });
+
+  it('focuses the organize quick-action card when there are rules but no pinned sessions', () => {
+    wrap(
+      <HomePage
+        syncSettings={{
+          ...baseSettings,
+          domainRules: [{ id: 'r1', label: 'Test', enabled: true } as DomainRuleSetting],
+        }}
+        statisticsAggregates={baseAggregates}
+        {...baseHandlers}
+      />,
+    );
+    expect(document.activeElement).toBe(screen.getByTestId('home-quick-action-organize'));
+  });
+
+  it('focuses the first pinned-session tile when at least one is pinned', () => {
+    const session = makeSession();
+    mockedUseSessions.mockReturnValue({
+      sessions: [session],
+      isLoaded: true,
+      createSession: vi.fn(),
+      renameSession: vi.fn(),
+      removeSession: vi.fn(),
+      reload: vi.fn(),
+      updateOrder: vi.fn(),
+    });
+    wrap(
+      <HomePage
+        syncSettings={{
+          ...baseSettings,
+          domainRules: [{ id: 'r1', label: 'Test', enabled: true } as DomainRuleSetting],
+        }}
+        statisticsAggregates={baseAggregates}
+        {...baseHandlers}
+      />,
+    );
+    expect(document.activeElement).toBe(screen.getByTestId(`home-pinned-tile-${session.id}`));
+  });
+});
+
+describe('HomePage quick-action shortcuts', () => {
+  const renderHomeWithRules = () =>
+    wrap(
+      <HomePage
+        syncSettings={{
+          ...baseSettings,
+          domainRules: [{ id: 'r1', label: 'Test', enabled: true } as DomainRuleSetting],
+        }}
+        statisticsAggregates={baseAggregates}
+        {...baseHandlers}
+      />,
+    );
+
+  it('renders the kbd badge on the five shortcut-bound cards and nothing on shortcuts/workspaces', () => {
+    renderHomeWithRules();
+    for (const id of ['organize', 'snapshot', 'rule', 'io', 'stats']) {
+      expect(screen.getByTestId(`home-quick-action-${id}-kbd`)).toBeInTheDocument();
+    }
+    expect(screen.queryByTestId('home-quick-action-shortcuts-kbd')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('home-quick-action-workspaces-kbd')).not.toBeInTheDocument();
+  });
+
+  it('dispatches the organize message when "o" is pressed', async () => {
+    renderHomeWithRules();
+    (document.activeElement as HTMLElement | null)?.blur();
+    fireEvent.keyDown(document, { key: 'o' });
+    const { browser } = await import('wxt/browser');
+    expect(browser.runtime.sendMessage).toHaveBeenCalledWith({ type: 'ORGANIZE_ALL_TABS' });
+  });
+
+  it('opens the snapshot wizard when "s" is pressed', () => {
+    renderHomeWithRules();
+    (document.activeElement as HTMLElement | null)?.blur();
+    fireEvent.keyDown(document, { key: 's' });
+    expect(baseHandlers.onOpenSnapshotWizard).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens the rule wizard when "n" is pressed', () => {
+    renderHomeWithRules();
+    (document.activeElement as HTMLElement | null)?.blur();
+    fireEvent.keyDown(document, { key: 'n' });
+    expect(baseHandlers.onOpenRuleWizard).toHaveBeenCalledTimes(1);
+  });
+
+  it('navigates to import/export when "i" is pressed', () => {
+    renderHomeWithRules();
+    (document.activeElement as HTMLElement | null)?.blur();
+    fireEvent.keyDown(document, { key: 'i' });
+    expect(baseHandlers.onNavigate).toHaveBeenCalledWith('importexport');
+  });
+
+  it('navigates to stats when "t" is pressed', () => {
+    renderHomeWithRules();
+    (document.activeElement as HTMLElement | null)?.blur();
+    fireEvent.keyDown(document, { key: 't' });
+    expect(baseHandlers.onNavigate).toHaveBeenCalledWith('stats');
+  });
+});
