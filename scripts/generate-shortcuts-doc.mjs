@@ -2,13 +2,12 @@
 /**
  * Generates the Starlight reference page that lists every keyboard shortcut
  * declared in `src/shortcuts/registry.ts`, in three locales. All three
- * locales share the FR-rooted slug `annexes/raccourcis-clavier` so Starlight's
- * i18n routing can resolve them automatically (same convention as
- * `annexes/presets-regex.mdx`):
+ * locales share the FR-rooted slug `reference/raccourcis-clavier` so
+ * Starlight's i18n routing can resolve them automatically:
  *
- *   docs/src/content/docs/annexes/raccourcis-clavier.mdx        (FR, root)
- *   docs/src/content/docs/en/annexes/raccourcis-clavier.mdx     (EN)
- *   docs/src/content/docs/es/annexes/raccourcis-clavier.mdx     (ES)
+ *   docs/src/content/docs/reference/raccourcis-clavier.mdx        (FR, root)
+ *   docs/src/content/docs/en/reference/raccourcis-clavier.mdx     (EN)
+ *   docs/src/content/docs/es/reference/raccourcis-clavier.mdx     (ES)
  *
  * Idempotent: deterministic iteration order, no timestamps. Run via
  * `pnpm shortcuts:doc`.
@@ -27,9 +26,9 @@ const PROJECT_ROOT = join(__dirname, '..');
 const LOCALES = /** @type {const} */ (['fr', 'en', 'es']);
 
 const OUTPUT_PATHS = {
-  fr: 'docs/src/content/docs/annexes/raccourcis-clavier.mdx',
-  en: 'docs/src/content/docs/en/annexes/raccourcis-clavier.mdx',
-  es: 'docs/src/content/docs/es/annexes/raccourcis-clavier.mdx',
+  fr: 'docs/src/content/docs/reference/raccourcis-clavier.mdx',
+  en: 'docs/src/content/docs/en/reference/raccourcis-clavier.mdx',
+  es: 'docs/src/content/docs/es/reference/raccourcis-clavier.mdx',
 };
 
 const SEQUENCE_JOIN = { fr: 'puis', en: 'then', es: 'luego' };

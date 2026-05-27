@@ -1,0 +1,57 @@
+---
+title: Statistiques
+description: Suivre l'activité de groupement et de déduplication. Compteurs par règle, distribution par couleur, tendances et badges, réinitialisation.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import ThemeImage from '../../../components/ThemeImage.astro';
+import statsLight from '../../../assets/screenshots/fr-light-statistics-overview.png';
+import statsDark from '../../../assets/screenshots/fr-dark-statistics-overview.png';
+
+La page **Statistiques** centralise l'activité de l'extension dans le workspace actif. Les compteurs sont cloisonnés par workspace ; basculer d'espace de travail change immédiatement les chiffres affichés.
+
+<ThemeImage
+  lightSrc={statsLight}
+  darkSrc={statsDark}
+  alt="Page Statistiques avec tuiles de compteurs et distribution par couleur de groupe."
+/>
+
+## Ce qui est compté
+
+| Compteur | Quand il s'incrémente |
+|---|---|
+| **Groupes créés** | À chaque création d'un nouveau groupe Chrome. Rejoindre un groupe existant ne compte pas. |
+| **Onglets groupés** | À chaque fois qu'un onglet est placé dans un groupe par une règle. |
+| **Doublons fermés** | À chaque déduplication. L'annulation via le bouton **Annuler** de la notification décrémente le compteur. |
+| **Sessions enregistrées** | Nombre total de sessions actives, épinglées et archivées du workspace. |
+
+## Tuiles par règle
+
+La section **Activité par règle** liste les règles dans l'ordre que vous leur avez donné, avec leur propre compteur de groupes créés et d'onglets traités. Un badge **Actif** signale les règles utilisées au moins une fois dans les sept derniers jours, ce qui aide à repérer les règles dormantes que vous pourriez nettoyer.
+
+## Distribution par couleur
+
+Une mini-vue répartit vos groupes créés selon la couleur du groupe Chrome associé. Pratique pour vérifier qu'une catégorie n'écrase pas les autres, ou détecter qu'une règle déclenche un groupe inattendu.
+
+## Volumes de sessions
+
+Deux tuiles complémentaires synthétisent l'activité côté sessions :
+
+- **Sessions actives et épinglées** : nombre total et nombre d'épinglées.
+- **Sessions archivées** : nombre de sessions mises de côté (voir [Archive](/guides/sessions#archive)).
+
+## Réinitialiser les compteurs
+
+Le bouton **Réinitialiser** en haut à droite remet à zéro tous les compteurs du workspace actif. Une confirmation est demandée. Cette action n'affecte ni les règles, ni les sessions, ni les paramètres : seuls les compteurs sont effacés.
+
+<Aside type="caution">
+La réinitialisation est définitive. Si vous voulez conserver une trace de l'historique avant de remettre à zéro, exportez d'abord le workspace en cochant **Inclure les statistiques** (voir [Import / Export](/guides/import-export#exporter-un-workspace)).
+</Aside>
+
+## Aller plus loin
+
+<CardGrid>
+  <LinkCard title="Règles de domaine" href="/guides/regles-de-domaine" description="Identifier les règles dormantes et les nettoyer." />
+  <LinkCard title="Paramètres" href="/guides/parametres" description="Activer ou désactiver les notifications qui alimentent les compteurs." />
+  <LinkCard title="Import / Export" href="/guides/import-export" description="Sauvegarder les statistiques en même temps que les règles." />
+</CardGrid>

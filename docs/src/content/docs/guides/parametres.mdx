@@ -1,0 +1,94 @@
+---
+title: Paramètres
+description: Configurer le groupement, la déduplication, les notifications, l'action de restauration par défaut, l'indicateur sur l'icône et les options diverses.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import ThemeImage from '../../../components/ThemeImage.astro';
+import settingsLight from '../../../assets/screenshots/fr-light-settings-misc.png';
+import settingsDark from '../../../assets/screenshots/fr-dark-settings-misc.png';
+
+La page **Paramètres** rassemble les réglages qui ne sont pas attachés à une règle particulière. Elle est organisée en sections, du plus impactant (toggles globaux) au plus marginal (apparence).
+
+<ThemeImage
+  lightSrc={settingsLight}
+  darkSrc={settingsDark}
+  alt="Page Paramètres avec les sections Groupement, Déduplication, Sessions et Apparence."
+/>
+
+## Groupement
+
+| Réglage | Effet |
+|---|---|
+| **Groupement global** | Interrupteur maître. Désactivé, aucune règle de groupement ne s'applique, quelles que soient leurs options individuelles. |
+| **Notifier lors d'un groupement** | Affiche une notification système à chaque création de groupe, avec le titre du groupe créé. |
+| **Notifier lors d'une organisation manuelle** | Affiche un récapitulatif après une commande **Organiser tous les onglets** déclenchée depuis la page d'accueil ou la popup. |
+
+## Déduplication
+
+| Réglage | Valeur par défaut | Effet |
+|---|---|---|
+| **Déduplication globale** | Activée | Interrupteur maître. Désactivé, aucun doublon n'est fermé. |
+| **Dédupliquer les onglets sans règle de domaine** | Désactivé | Si activé, les domaines sans règle sont dédupliqués en mode URL exacte. Si désactivé (défaut), seuls les domaines couverts par une règle peuvent être dédupliqués. |
+| **Stratégie : quel onglet garder ?** | L'onglet groupé gagne, sinon le nouveau | Choisit lequel des deux onglets en doublon survit. Voir [Stratégies de conservation](/guides/dedupliquer#strategies-de-conservation). |
+| **Notifier lors d'une déduplication** | Activée | Affiche une notification avec bouton **Annuler** à chaque fermeture de doublon. |
+
+<Aside type="note">
+La stratégie de conservation est globale à l'extension : elle s'applique à toutes les règles. Les modes de correspondance (URL exacte, sans paramètres ignorés, inclusion), eux, sont définis règle par règle.
+</Aside>
+
+## Sessions
+
+### Action de restauration par défaut
+
+Quand vous cliquez sur un profil épinglé (dans la popup ou la page d'accueil) ou que vous appuyez sur `Enter`, la restauration utilise une cible **par défaut** que vous choisissez ici.
+
+| Valeur | Comportement |
+|---|---|
+| **Fenêtre actuelle** (défaut) | Ajoute les onglets de la session à la fenêtre actuellement au premier plan. |
+| **Nouvelle fenêtre** | Ouvre une nouvelle fenêtre dédiée et y restaure les onglets. |
+| **Remplacer la fenêtre actuelle** | Ferme les onglets de la fenêtre actuelle et restaure ceux de la session à leur place. |
+| **Personnalisée** | Ouvre le wizard de restauration et vous laisse choisir au cas par cas. |
+
+Les quatre cibles restent accessibles individuellement via les [raccourcis clavier](/reference/raccourcis-clavier) (`R`, `Shift+R`, `Alt+R`, `Alt+Shift+R`) sur le focus d'un profil. Le réglage **Action de restauration par défaut** détermine uniquement le comportement du clic et de la touche `Enter`.
+
+### Astuces
+
+Active ou désactive le carrousel d'astuces affiché sur la page d'accueil.
+
+## Indicateur sur l'icône
+
+L'extension affiche une pastille sur l'icône de la barre d'outils quand l'un des deux toggles globaux est désactivé. Quatre états possibles :
+
+| Pastille | État |
+|---|---|
+| (vide) | Groupement et déduplication actifs. |
+| **G** orange | Groupement global désactivé. |
+| **D** orange | Déduplication globale désactivée. |
+| **X** rouge | Les deux toggles désactivés. |
+
+Le toggle **Afficher l'indicateur sur l'icône** dans cette section permet de masquer la pastille si vous trouvez le rappel visuel inutile.
+
+<Aside type="note">
+L'indicateur suit le **workspace actif**. Si vous avez désactivé le groupement dans le workspace "Personnel" mais pas dans "Travail", la pastille apparait ou disparait au moment où vous basculez d'espace de travail.
+</Aside>
+
+## Apparence et langue
+
+| Réglage | Effet |
+|---|---|
+| **Thème** | Clair, sombre, ou suit le système. |
+| **Langue** | Français, English, Español. Hérite par défaut de la langue du navigateur. |
+
+## Réinitialiser l'onboarding
+
+Le bouton **Réinitialiser l'onboarding** réaffiche le Hero d'onboarding sur la page d'accueil même si vous avez déjà des règles. Pratique pour redécouvrir les actions de démarrage ou pour faire une démo.
+
+## Aller plus loin
+
+<CardGrid>
+  <LinkCard title="Dédupliquer" href="/guides/dedupliquer" description="Le détail des modes et des stratégies de conservation." />
+  <LinkCard title="Sessions" href="/guides/sessions" description="L'action de restauration par défaut en contexte." />
+  <LinkCard title="Raccourcis clavier" href="/reference/raccourcis-clavier" description="Toutes les combinaisons disponibles." />
+  <LinkCard title="Import / Export" href="/guides/import-export" description="Sauvegarder les paramètres avec le workspace." />
+</CardGrid>

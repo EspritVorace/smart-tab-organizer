@@ -1,0 +1,108 @@
+---
+title: Grouper les onglets automatiquement
+description: Comment SmartTab Organizer place automatiquement les onglets dans des groupes Chrome colorés, et comment piloter le nom et la couleur du groupe via les règles de domaine.
+---
+
+import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import ConditionsDeclenchement from '../../../components/ConditionsDeclenchement.astro';
+
+<Aside type="tip" title="En bref">
+- Le groupement se déclenche quand vous ouvrez un lien dans un nouvel onglet (clic milieu ou clic droit puis **Ouvrir dans un nouvel onglet**).
+- Trois conditions doivent être réunies : toggle global, règle correspondante, option **Groupement** activée sur la règle.
+- Le nom et le mode de nommage du groupe sont configurés dans la règle. La couleur vient de la catégorie associée.
+</Aside>
+
+Quand vous ouvrez un lien depuis un onglet parent, l'extension détecte l'action, consulte vos [règles de domaine](/guides/regles-de-domaine), et place le nouvel onglet dans un groupe Chrome coloré sans intervention manuelle.
+
+## Comment le groupement se déclenche
+
+### Clic milieu sur un lien
+
+Au moment du clic, l'extension mémorise le lien ciblé. Quand le nouvel onglet s'ouvre, elle applique votre règle de domaine et crée le groupe.
+
+### Clic droit puis "Ouvrir dans un nouvel onglet"
+
+Le lien ciblé est mémorisé dès le clic droit. Le reste du mécanisme est identique.
+
+<Aside type="caution">
+Les onglets ouverts depuis la barre d'adresse, par un raccourci clavier ou par l'historique ne déclenchent pas le groupement automatique. Les URL avec des schémas spéciaux (`chrome:`, `chrome-extension:`, `about:`) sont également ignorées.
+</Aside>
+
+## Conditions pour qu'un groupe soit créé
+
+<ConditionsDeclenchement feature="groupement" />
+
+Si l'une des conditions n'est pas remplie, l'onglet s'ouvre sans être groupé.
+
+## Rejoindre un groupe existant
+
+Quand plusieurs onglets enfants sont ouverts successivement depuis le même onglet parent, ils rejoignent tous le même groupe. Aucun groupe supplémentaire n'est créé. Le compteur **Groupes créés** ne s'incrémente qu'à la création d'un nouveau groupe.
+
+Si un second onglet parent distinct déclenche une règle, un nouveau groupe séparé est créé. Pour éviter les doublons de groupes ayant le même nom et la même couleur, l'extension rejoint un groupe préexistant compatible plutôt que d'en créer un nouveau.
+
+## Priorité entre règles
+
+Quand plusieurs règles correspondent au même domaine, la règle placée le plus haut dans votre liste est appliquée. Vous pouvez réordonner par glisser-déposer dans la page [Règles de domaine](/guides/regles-de-domaine).
+
+## Couleur du groupe
+
+La couleur est héritée de la **catégorie** associée à la règle. Les catégories sont globales à l'extension (voir [Catégories et packs](/reference/categories-et-packs)) : changer la couleur d'une catégorie affecte toutes les règles qui la référencent.
+
+Si aucune catégorie n'est définie, Chrome assigne sa couleur par défaut.
+
+## Modes de nommage
+
+Le nom affiché sur le groupe dépend du **mode de nommage** configuré dans la règle. Six modes existent, regroupés en trois familles dans l'assistant de création.
+
+### Intelligent (recommandé)
+
+L'extension utilise les regex héritées du pack importé (ou du preset sélectionné dans l'assistant) pour extraire un nom depuis le titre ou l'URL de l'onglet parent. C'est le choix par défaut pour les sites courants.
+
+Trois variantes existent selon ce qui se passe si l'extraction échoue :
+
+| Mode | Étape 1 | Étape 2 | Étape 3 (filet) |
+|---|---|---|---|
+| **Intelligent** | Extraction titre | Extraction URL | Pas de groupage |
+| **Intelligent + Label** | Extraction titre | Extraction URL | Label de la règle |
+| **Intelligent + Demander** | Extraction titre | Extraction URL | Invite utilisateur, dégroupage si annulation |
+
+<Aside type="tip">
+**Intelligent + Label** garantit qu'un groupe est toujours créé, ce qui évite de retrouver des onglets isolés quand la regex ne correspond pas.
+</Aside>
+
+### Demander
+
+Une invite de saisie apparait à chaque création de groupe. Le label de la règle est proposé comme valeur par défaut. Si vous annulez, les onglets qui venaient d'être regroupés sont immédiatement dégroupés.
+
+### Titre ou URL (manuel)
+
+Vous saisissez vous-même la regex et choisissez où l'appliquer en premier.
+
+| Mode | Étape 1 | Étape 2 | Étape 3 |
+|---|---|---|---|
+| **Titre** | Extraction titre | Extraction URL | Pas de groupage |
+| **URL** | Extraction URL | Extraction titre | Pas de groupage |
+
+L'extension applique la regex et retient le contenu du **premier groupe de capture** `(...)`. Par exemple, `^([^·]+)` sur le titre `PROJ-42 · Mon projet Jira` retourne `PROJ-42`.
+
+<Aside type="note">
+Une regex syntaxiquement invalide est ignorée sans faire planter l'extension. Le traitement passe à l'étape suivante de la chaîne de repli. Pas familier avec les regex ? Le [guide MDN sur les expressions régulières](https://developer.mozilla.org/fr/docs/Web/JavaScript/Guide/Regular_expressions) couvre la syntaxe en français.
+</Aside>
+
+## Activer ou désactiver le groupement
+
+Le groupement se contrôle à deux niveaux indépendants :
+
+- **Niveau global** : le toggle **Groupement** dans la popup ou la page [Paramètres](/guides/parametres). Quand il est désactivé, une pastille **G** orange apparait sur l'icône de l'extension.
+- **Niveau règle** : chaque règle a son propre toggle dans la liste. Désactiver une règle l'exclut du traitement sans la supprimer.
+
+Le toggle global prévaut. Si le toggle global est désactivé, aucune règle ne s'applique, quelles que soient leurs options individuelles.
+
+## Aller plus loin
+
+<CardGrid>
+  <LinkCard title="Règles de domaine" href="/guides/regles-de-domaine" description="Créer, modifier et organiser les règles qui pilotent le groupement." />
+  <LinkCard title="Dédupliquer" href="/guides/dedupliquer" description="Le mécanisme complémentaire pour éviter les doublons." />
+  <LinkCard title="Catégories et packs" href="/reference/categories-et-packs" description="Importer des règles prêtes à l'emploi avec leurs regex et leur couleur." />
+  <LinkCard title="Presets regex" href="/reference/presets-regex" description="Les modèles regex prêts à l'emploi du wizard de création." />
+</CardGrid>

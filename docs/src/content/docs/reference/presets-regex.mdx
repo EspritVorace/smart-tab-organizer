@@ -1,0 +1,56 @@
+---
+title: Presets regex
+description: Modèles regex prêts à l'emploi du wizard de création de règle. Quelques exemples emblématiques ; la liste complète vit dans le wizard de l'extension.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="En bref">
+- Un preset est un modèle regex sélectionnable depuis le dropdown **Preset** du wizard de création de règle.
+- Il configure automatiquement le mode de nommage, la regex de titre et la regex d'URL adaptés au site visé.
+- Les presets sont **partagés** entre tous les workspaces et entre toutes les langues.
+</Aside>
+
+## Différence avec un pack
+
+| Notion | Effet |
+|---|---|
+| **Preset** | Configure **une seule règle**, celle que vous êtes en train de créer. |
+| **Pack** | Ajoute **plusieurs règles** d'un coup. Voir [Catégories et packs](/reference/categories-et-packs). |
+
+Sélectionner un preset n'est pas définitif : vous pouvez ajuster les regex à tout moment depuis l'éditeur de règle après création. La référence au preset est conservée à titre indicatif.
+
+<Aside type="caution">
+Si vous modifiez les regex d'une règle issue d'un preset puis ré-ouvrez le dropdown pour choisir un autre preset, les valeurs modifiées seront écrasées par celles du nouveau preset.
+</Aside>
+
+## Quelques presets emblématiques
+
+Les presets couvrent les 11 catégories d'usage les plus courantes. Voici un échantillon ; la liste complète est parcourable dans le wizard.
+
+| Preset | Cas d'usage |
+|---|---|
+| **GitHub - Issue / PR** | Regrouper par numéro d'issue ou de pull request sur un dépôt GitHub. |
+| **Jira - Clé de ticket dans le titre** | Regrouper par clé `PROJ-123` sur n'importe quel domaine Atlassian. |
+| **Slack - Workspace** | Regrouper par espace de travail Slack. |
+| **YouTube - Chaîne** | Regrouper les vidéos par chaîne. |
+| **Wikipédia - Article** | Regrouper toutes langues confondues par titre d'article. |
+| **Notion - Page** | Regrouper par titre de page Notion. |
+
+## Presets transverses (cross-domaine)
+
+Quelques presets ont une portée volontairement large pour fonctionner quel que soit le domaine. Par exemple **Ticket dans le titre (cross-domaine)** extrait une clé `PROJ-123` depuis n'importe quel onglet dont le titre la mentionne. Utile pour suivre un même ticket à travers GitHub, GitLab, Trello, Slack.
+
+## Liste complète
+
+Plutôt que d'énumérer ici les 65 presets (la liste évolue à chaque version), parcourez le dropdown **Preset** dans le wizard de création de règle ; les presets y sont organisés en catégories repliables et la recherche filtre par nom.
+
+Les manifestes vivent dans [`public/data/presets.json`](https://github.com/EspritVorace/smart-tab-organizer/blob/main/public/data/presets.json) pour qui veut inspecter ou contribuer.
+
+## Aller plus loin
+
+<CardGrid>
+  <LinkCard title="Règles de domaine" href="/guides/regles-de-domaine" description="Le wizard de création et le champ Preset." />
+  <LinkCard title="Catégories et packs" href="/reference/categories-et-packs" description="L'autre voie : importer plusieurs règles d'un coup." />
+  <LinkCard title="Grouper les onglets" href="/guides/grouper-onglets" description="Comment le preset détermine le mode de nommage et les regex." />
+</CardGrid>
