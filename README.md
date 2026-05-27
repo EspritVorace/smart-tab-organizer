@@ -67,11 +67,7 @@ Snapshot your open tabs and groups, name them, pin the ones you live in. Restore
 
 ## 📖 Documentation
 
-The full guide lives in [`docs/`](docs/src/content/docs/en/) (Astro Starlight, 3 languages, 30+ pages with screenshots). Browse the MDX on GitHub, or run it locally:
-
-```bash
-pnpm docs:dev
-```
+Full guide online: [docs.esprit-vorace.fr](https://docs.esprit-vorace.fr/en/) (Astro Starlight, 3 languages, 30+ pages with screenshots). The MDX sources live in [`docs/`](docs/src/content/docs/en/) for contributors.
 
 ## 🛠️ For contributors
 

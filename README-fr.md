@@ -67,11 +67,7 @@ Capture tes onglets et tes groupes ouverts, nomme-les, épingle ceux dans lesque
 
 ## 📖 Documentation
 
-Le guide complet est dans [`docs/`](docs/src/content/docs/) (Astro Starlight, 3 langues, plus de 30 pages avec captures). Lis le MDX directement sur GitHub, ou lance la doc en local :
-
-```bash
-pnpm docs:dev
-```
+Guide complet en ligne : [docs.esprit-vorace.fr](https://docs.esprit-vorace.fr/) (Astro Starlight, 3 langues, plus de 30 pages avec captures). Les sources MDX sont dans [`docs/`](docs/src/content/docs/) pour les contributeurs.
 
 ## 🛠️ Pour les contributeurs
 

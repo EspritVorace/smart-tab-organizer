@@ -3,6 +3,7 @@ import starlight from '@astrojs/starlight';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
+  site: 'https://docs.esprit-vorace.fr',
   redirects: {
     '/introduction/pourquoi': '/decouverte/pourquoi',
     '/demarrage/installation': '/decouverte/installation',

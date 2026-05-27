@@ -21,7 +21,7 @@ pnpm test:e2e:headed          # build + Playwright headed
 
 # Docs
 pnpm storybook                            # Storybook (port 6006)
-pnpm docs:dev / docs:build / docs:preview # Astro Starlight (port 4321)
+pnpm docs:dev / docs:build / docs:preview # Astro Starlight (port 4321, deployed at https://docs.esprit-vorace.fr)
 pnpm screenshots                          # Deterministic multi-locale/theme screenshots
 pnpm doc:scenarios                        # Narrative captures (3 locales x 2 themes matrix)
 pnpm doc:scenarios:audit                  # Audit routing manifests vs output / destinations
