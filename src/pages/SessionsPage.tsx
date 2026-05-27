@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { Box, Flex, Button, Text, Callout, Separator, Badge, SegmentedControl } from '@radix-ui/themes';
+import { Box, Flex, Button, Text, Callout, Separator, Badge, TabNav } from '@radix-ui/themes';
 import { Camera, Archive, ArchiveRestore, CheckCircle, Pin, PinOff, Upload, Trash2, FileDown, Boxes, type LucideIcon } from 'lucide-react';
 import { DragDropProvider, type DragOverEvent, type DragEndEvent } from '@dnd-kit/react';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
@@ -411,12 +411,10 @@ export function SessionsPage({
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleTabChange = useCallback(
-    (next: string) => {
-      if (next !== 'active' && next !== 'archived') return;
-      const tab = next as SessionsSubTab;
-      onSessionsTabChange?.(tab);
+    (next: SessionsSubTab) => {
+      onSessionsTabChange?.(next);
       // Keep the URL hash in sync so back/forward and shareable links work.
-      const nextHash = tab === 'archived' ? '#sessions?tab=archived' : '#sessions';
+      const nextHash = next === 'archived' ? '#sessions/archived' : '#sessions';
       if (window.location.hash !== nextHash) {
         window.location.hash = nextHash;
       }
@@ -773,19 +771,24 @@ export function SessionsPage({
           {/* Sub-tabs: Active vs Archived */}
           {isLoaded && hasAnyOverall && (
             <Box mb="3">
-              <SegmentedControl.Root
-                data-testid="page-sessions-tabs"
-                value={sessionsTab}
-                onValueChange={handleTabChange}
-                size="2"
-              >
-                <SegmentedControl.Item value="active" data-testid="page-sessions-tab-active">
+              <TabNav.Root data-testid="page-sessions-tabs">
+                <TabNav.Link
+                  href="#sessions"
+                  active={sessionsTab === 'active'}
+                  data-testid="page-sessions-tab-active"
+                  onClick={(e) => { e.preventDefault(); handleTabChange('active'); }}
+                >
                   {getMessage('activeSessionsTab')}
-                </SegmentedControl.Item>
-                <SegmentedControl.Item value="archived" data-testid="page-sessions-tab-archived">
+                </TabNav.Link>
+                <TabNav.Link
+                  href="#sessions/archived"
+                  active={sessionsTab === 'archived'}
+                  data-testid="page-sessions-tab-archived"
+                  onClick={(e) => { e.preventDefault(); handleTabChange('archived'); }}
+                >
                   {getMessage('archivedSessionsTab')}
-                </SegmentedControl.Item>
-              </SegmentedControl.Root>
+                </TabNav.Link>
+              </TabNav.Root>
             </Box>
           )}
 

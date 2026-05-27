@@ -5,7 +5,6 @@ const VALID_RULES_ACTIONS = ['create', 'import'] as const;
 export type RulesPendingAction = typeof VALID_RULES_ACTIONS[number];
 
 export type SessionsSubTab = 'active' | 'archived';
-const VALID_SESSIONS_TABS: readonly SessionsSubTab[] = ['active', 'archived'] as const;
 
 interface DeepLinkState {
   currentTab: string;
@@ -21,16 +20,21 @@ const VALID_SECTIONS = ['home', 'rules', 'importexport', 'sessions', 'stats', 's
 
 interface ParsedHash {
   section: string;
+  /** Optional path segment after the section, e.g. "archived" in `#sessions/archived`. */
+  sub: string | null;
   params: URLSearchParams;
 }
 
 function parseHash(hash: string): ParsedHash | null {
   if (!hash.startsWith('#')) return null;
   const questionMark = hash.indexOf('?');
-  const section = questionMark === -1 ? hash.slice(1) : hash.slice(1, questionMark);
+  const pathPart = questionMark === -1 ? hash.slice(1) : hash.slice(1, questionMark);
+  const queryPart = questionMark === -1 ? '' : hash.slice(questionMark + 1);
+  const slashIndex = pathPart.indexOf('/');
+  const section = slashIndex === -1 ? pathPart : pathPart.slice(0, slashIndex);
+  const sub = slashIndex === -1 ? null : pathPart.slice(slashIndex + 1);
   if (!(VALID_SECTIONS as readonly string[]).includes(section)) return null;
-  const params = new URLSearchParams(questionMark === -1 ? '' : hash.slice(questionMark + 1));
-  return { section, params };
+  return { section, sub, params: new URLSearchParams(queryPart) };
 }
 
 /**
@@ -55,11 +59,12 @@ export function useDeepLinking(): DeepLinkState & {
   const [sessionsTab, setSessionsTab] = useState<SessionsSubTab>('active');
 
   useEffect(() => {
-    function applySessionsAction(params: URLSearchParams) {
-      const tab = params.get('tab');
-      if (tab && (VALID_SESSIONS_TABS as readonly string[]).includes(tab)) {
-        setSessionsTab(tab as SessionsSubTab);
-      }
+    function applySessionsAction(sub: string | null, params: URLSearchParams) {
+      // Sub-route drives the active/archived tab. Unknown or absent sub-route
+      // falls back to 'active' so navigating `#sessions/archived` -> `#sessions`
+      // resets the view as users expect.
+      const tab: SessionsSubTab = sub === 'archived' ? 'archived' : 'active';
+      setSessionsTab(tab);
       const action = params.get('action');
       if (action === 'snapshot') {
         setOpenSnapshotWizard(true);
@@ -89,7 +94,7 @@ export function useDeepLinking(): DeepLinkState & {
       const parsed = parseHash(window.location.hash);
       if (!parsed) return;
       setCurrentTab(parsed.section);
-      if (parsed.section === 'sessions') applySessionsAction(parsed.params);
+      if (parsed.section === 'sessions') applySessionsAction(parsed.sub, parsed.params);
       else if (parsed.section === 'rules') applyRulesAction(parsed.params);
     }
 

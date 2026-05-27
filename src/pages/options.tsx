@@ -175,6 +175,13 @@ export function OptionsContent() {
         return getMessage('homeTab');
     }, [sidebarSections, currentTab]);
 
+    const breadcrumb = useMemo<{ pageSubtitle?: string; parentHref?: string }>(() => {
+        if (currentTab === 'sessions' && sessionsTab === 'archived') {
+            return { pageSubtitle: getMessage('archivedSessionsTab'), parentHref: '#sessions' };
+        }
+        return {};
+    }, [currentTab, sessionsTab]);
+
 
     const focusActiveSearch = useCallback(() => {
         const node = document.querySelector<HTMLInputElement>(
@@ -236,7 +243,11 @@ export function OptionsContent() {
                 footerCollapsedContent={<WorkspaceFooterCollapsed onManage={() => handleTabChange('workspaces')} />}
             />
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                <OptionsTopbar pageTitle={activePageTitle} />
+                <OptionsTopbar
+                    pageTitle={activePageTitle}
+                    pageSubtitle={breadcrumb.pageSubtitle}
+                    parentHref={breadcrumb.parentHref}
+                />
                 <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
                     <main data-testid="options-content" style={{ flex: 1, overflow: 'auto', padding: '20px 20px 0 20px', minWidth: 0 }}>
                         <Suspense fallback={renderLazyFallback(currentTab)}>

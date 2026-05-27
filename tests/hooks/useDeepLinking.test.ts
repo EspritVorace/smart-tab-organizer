@@ -189,6 +189,52 @@ describe('useDeepLinking — restore deep link', () => {
   });
 });
 
+describe('useDeepLinking — sessions sub-route', () => {
+  it('defaults sessionsTab to "active" when no hash is set', () => {
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.sessionsTab).toBe('active');
+  });
+
+  it('parses #sessions as the active sub-tab', () => {
+    window.location.hash = '#sessions';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.currentTab).toBe('sessions');
+    expect(result.current.sessionsTab).toBe('active');
+  });
+
+  it('parses #sessions/archived as the archived sub-tab', () => {
+    window.location.hash = '#sessions/archived';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.currentTab).toBe('sessions');
+    expect(result.current.sessionsTab).toBe('archived');
+  });
+
+  it('combines the archived sub-route with the snapshot action', () => {
+    window.location.hash = '#sessions/archived?action=snapshot';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.currentTab).toBe('sessions');
+    expect(result.current.sessionsTab).toBe('archived');
+    expect(result.current.openSnapshotWizard).toBe(true);
+  });
+
+  it('resets the sub-tab to "active" when navigating from archived back to #sessions', () => {
+    window.location.hash = '#sessions/archived';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.sessionsTab).toBe('archived');
+
+    act(() => setHash('#sessions'));
+
+    expect(result.current.sessionsTab).toBe('active');
+  });
+
+  it('falls back to "active" for an unknown sub-route', () => {
+    window.location.hash = '#sessions/foo';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.currentTab).toBe('sessions');
+    expect(result.current.sessionsTab).toBe('active');
+  });
+});
+
 describe('useDeepLinking — setters', () => {
   it('exposes setCurrentTab to override the tab manually', () => {
     const { result } = renderHook(() => useDeepLinking());

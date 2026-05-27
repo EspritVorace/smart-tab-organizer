@@ -1,4 +1,4 @@
-import { Flex, IconButton, Text, Tooltip } from '@radix-ui/themes';
+import { Flex, IconButton, Link, Text, Tooltip } from '@radix-ui/themes';
 import { HelpCircle } from 'lucide-react';
 import { ThemeToggle } from '@/components/UI/ThemeToggle/ThemeToggle';
 import { useShortcutsControl } from '@/contexts/ShortcutsControlContext';
@@ -6,10 +6,17 @@ import { getMessage } from '@/utils/i18n';
 
 interface OptionsTopbarProps {
   pageTitle: string;
+  /** When set, the topbar renders a second crumb after pageTitle. */
+  pageSubtitle?: string;
+  /** href to attach to the parent crumb (`pageTitle`) when a subtitle is shown.
+   *  Makes the parent crumb a clickable link back to the parent route. */
+  parentHref?: string;
 }
 
-export function OptionsTopbar({ pageTitle }: OptionsTopbarProps) {
+export function OptionsTopbar({ pageTitle, pageSubtitle, parentHref }: OptionsTopbarProps) {
   const { openShortcuts } = useShortcutsControl();
+  const parentCrumbStyle = { color: 'var(--gray-12)', letterSpacing: '-0.005em' };
+  const parentIsLink = Boolean(pageSubtitle && parentHref);
 
   return (
     <Flex
@@ -47,14 +54,41 @@ export function OptionsTopbar({ pageTitle }: OptionsTopbarProps) {
           <Text size="2" style={{ color: 'var(--gray-9)' }} aria-hidden="true">
             /
           </Text>
-          <Text
-            size="2"
-            weight="medium"
-            data-testid="topbar-page-title"
-            style={{ color: 'var(--gray-12)', letterSpacing: '-0.005em' }}
-          >
-            {pageTitle}
-          </Text>
+          {parentIsLink ? (
+            <Link
+              size="2"
+              weight="medium"
+              href={parentHref}
+              data-testid="topbar-page-title"
+              style={parentCrumbStyle}
+            >
+              {pageTitle}
+            </Link>
+          ) : (
+            <Text
+              size="2"
+              weight="medium"
+              data-testid="topbar-page-title"
+              style={parentCrumbStyle}
+            >
+              {pageTitle}
+            </Text>
+          )}
+          {pageSubtitle && (
+            <>
+              <Text size="2" style={{ color: 'var(--gray-9)' }} aria-hidden="true">
+                /
+              </Text>
+              <Text
+                size="2"
+                weight="medium"
+                data-testid="topbar-page-subtitle"
+                style={{ color: 'var(--gray-12)', letterSpacing: '-0.005em' }}
+              >
+                {pageSubtitle}
+              </Text>
+            </>
+          )}
         </Flex>
         <Flex align="center" gap="1">
           <ThemeToggle />
