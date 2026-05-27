@@ -1,94 +1,67 @@
 ---
 title: Paramètres
-description: Configurer le groupement, la déduplication, les notifications, l'action de restauration par défaut, l'indicateur sur l'icône et les options diverses.
+description: Configurer les notifications, la portée de la déduplication et l'action de restauration par défaut.
 ---
 
 import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
-import ThemeImage from '../../../components/ThemeImage.astro';
-import settingsLight from '../../../assets/screenshots/fr-light-settings-misc.png';
-import settingsDark from '../../../assets/screenshots/fr-dark-settings-misc.png';
 
-La page **Paramètres** rassemble les réglages qui ne sont pas attachés à une règle particulière. Elle est organisée en sections, du plus impactant (toggles globaux) au plus marginal (apparence).
-
-<ThemeImage
-  lightSrc={settingsLight}
-  darkSrc={settingsDark}
-  alt="Page Paramètres avec les sections Groupement, Déduplication, Sessions et Apparence."
-/>
-
-## Groupement
-
-| Réglage | Effet |
-|---|---|
-| **Groupement global** | Interrupteur maître. Désactivé, aucune règle de groupement ne s'applique, quelles que soient leurs options individuelles. |
-| **Notifier lors d'un groupement** | Affiche une notification système à chaque création de groupe, avec le titre du groupe créé. |
-| **Notifier lors d'une organisation manuelle** | Affiche un récapitulatif après une commande **Organiser tous les onglets** déclenchée depuis la page d'accueil ou la popup. |
-
-## Déduplication
-
-| Réglage | Valeur par défaut | Effet |
-|---|---|---|
-| **Déduplication globale** | Activée | Interrupteur maître. Désactivé, aucun doublon n'est fermé. |
-| **Dédupliquer les onglets sans règle de domaine** | Désactivé | Si activé, les domaines sans règle sont dédupliqués en mode URL exacte. Si désactivé (défaut), seuls les domaines couverts par une règle peuvent être dédupliqués. |
-| **Stratégie : quel onglet garder ?** | L'onglet groupé gagne, sinon le nouveau | Choisit lequel des deux onglets en doublon survit. Voir [Stratégies de conservation](/guides/dedupliquer#strategies-de-conservation). |
-| **Notifier lors d'une déduplication** | Activée | Affiche une notification avec bouton **Annuler** à chaque fermeture de doublon. |
+La page **Paramètres** rassemble les réglages globaux qui ne sont pas attachés à une règle particulière. Elle compte trois sections.
 
 <Aside type="note">
-La stratégie de conservation est globale à l'extension : elle s'applique à toutes les règles. Les modes de correspondance (URL exacte, sans paramètres ignorés, inclusion), eux, sont définis règle par règle.
+Les **toggles globaux** de groupement et de déduplication ne sont pas ici : ils vivent dans la [popup](/guides/popup) (et dans la pastille de l'icône, voir [Tour de l'interface](/decouverte/tour-interface#indicateur-sur-licone)).
 </Aside>
 
-## Sessions
+## Notifications
 
-### Action de restauration par défaut
+Trois toggles indépendants. Chacun contrôle un type de notification système, sans interaction entre eux.
 
-Quand vous cliquez sur un profil épinglé (dans la popup ou la page d'accueil) ou que vous appuyez sur `Enter`, la restauration utilise une cible **par défaut** que vous choisissez ici.
-
-| Valeur | Comportement |
+| Toggle | Effet |
 |---|---|
-| **Fenêtre actuelle** (défaut) | Ajoute les onglets de la session à la fenêtre actuellement au premier plan. |
+| **Notifier lors du regroupement automatique d'onglets** | Affiche une notification à chaque création de groupe, avec le titre du groupe. |
+| **Notifier lors de la fermeture automatique de doublons** | Affiche une notification à chaque déduplication, avec un bouton **Annuler** disponible 5 secondes. |
+| **Notifier après Organiser les onglets** | Affiche un récapitulatif après une commande **Organiser tous les onglets** déclenchée depuis la page d'accueil ou la popup. |
+
+## Portée de la déduplication
+
+Deux réglages qui affinent la déduplication globale.
+
+### Dédupliquer les onglets sans règle de domaine
+
+Quand ce toggle est **activé**, les onglets des domaines que vous n'avez pas configurés sont dédupliqués en mode URL exacte. Quand il est **désactivé** (par défaut), seuls les domaines couverts par une règle peuvent être dédupliqués.
+
+Les règles de domaine restent prioritaires sur ce paramètre. Un domaine avec une règle explicite suit toujours sa règle.
+
+### Lorsqu'un doublon est détecté, conserver
+
+La stratégie qui décide lequel des deux onglets en doublon survit. Quatre valeurs :
+
+| Stratégie | Comportement |
+|---|---|
+| **L'onglet existant** | L'onglet déjà ouvert est conservé. Utile pour préserver un état (scroll, formulaire, session). |
+| **Le nouvel onglet ouvert** | Le nouvel onglet survit. Attention : si l'ancien appartenait à un groupe, il disparait du groupe. |
+| **L'onglet groupé gagne, sinon l'existant** | Si l'un des deux est groupé et l'autre pas, le groupé survit. Sinon retombe sur **L'onglet existant**. |
+| **L'onglet groupé gagne, sinon le nouveau** (défaut) | Si l'un des deux est groupé et l'autre pas, le groupé survit. Sinon retombe sur **Le nouvel onglet ouvert**. Protège les onglets restaurés depuis une session contre une fermeture au profit d'une copie non groupée. |
+
+Voir [Dédupliquer](/guides/dedupliquer#strategies-de-conservation) pour le contexte complet.
+
+## Action par défaut (Restaurer)
+
+Cette section configure ce que fait un **clic** sur le bouton principal **Restaurer** d'une session ou d'un profil. Le menu déroulant à côté du bouton garde toujours les quatre options accessibles individuellement.
+
+| Valeur | Comportement du clic principal |
+|---|---|
+| **Fenêtre actuelle** (défaut) | Ajoute les onglets à la fenêtre actuellement au premier plan. |
 | **Nouvelle fenêtre** | Ouvre une nouvelle fenêtre dédiée et y restaure les onglets. |
 | **Remplacer la fenêtre actuelle** | Ferme les onglets de la fenêtre actuelle et restaure ceux de la session à leur place. |
-| **Personnalisée** | Ouvre le wizard de restauration et vous laisse choisir au cas par cas. |
+| **Personnalisée** | Ouvre le wizard de restauration et laisse choisir au cas par cas. |
 
-Les quatre cibles restent accessibles individuellement via les [raccourcis clavier](/reference/raccourcis-clavier) (`R`, `Shift+R`, `Alt+R`, `Alt+Shift+R`) sur le focus d'un profil. Le réglage **Action de restauration par défaut** détermine uniquement le comportement du clic et de la touche `Enter`.
-
-### Astuces
-
-Active ou désactive le carrousel d'astuces affiché sur la page d'accueil.
-
-## Indicateur sur l'icône
-
-L'extension affiche une pastille sur l'icône de la barre d'outils quand l'un des deux toggles globaux est désactivé. Quatre états possibles :
-
-| Pastille | État |
-|---|---|
-| (vide) | Groupement et déduplication actifs. |
-| **G** orange | Groupement global désactivé. |
-| **D** orange | Déduplication globale désactivée. |
-| **X** rouge | Les deux toggles désactivés. |
-
-Le toggle **Afficher l'indicateur sur l'icône** dans cette section permet de masquer la pastille si vous trouvez le rappel visuel inutile.
-
-<Aside type="note">
-L'indicateur suit le **workspace actif**. Si vous avez désactivé le groupement dans le workspace "Personnel" mais pas dans "Travail", la pastille apparait ou disparait au moment où vous basculez d'espace de travail.
-</Aside>
-
-## Apparence et langue
-
-| Réglage | Effet |
-|---|---|
-| **Thème** | Clair, sombre, ou suit le système. |
-| **Langue** | Français, English, Español. Hérite par défaut de la langue du navigateur. |
-
-## Réinitialiser l'onboarding
-
-Le bouton **Réinitialiser l'onboarding** réaffiche le Hero d'onboarding sur la page d'accueil même si vous avez déjà des règles. Pratique pour redécouvrir les actions de démarrage ou pour faire une démo.
+Les quatre cibles restent accessibles via les [raccourcis clavier](/reference/raccourcis-clavier) (`R`, `Shift+R`, `Alt+R`, `Alt+Shift+R`) sur le focus d'une session ou d'un profil, quelle que soit la valeur de ce réglage.
 
 ## Aller plus loin
 
 <CardGrid>
-  <LinkCard title="Dédupliquer" href="/guides/dedupliquer" description="Le détail des modes et des stratégies de conservation." />
-  <LinkCard title="Sessions" href="/guides/sessions" description="L'action de restauration par défaut en contexte." />
-  <LinkCard title="Raccourcis clavier" href="/reference/raccourcis-clavier" description="Toutes les combinaisons disponibles." />
-  <LinkCard title="Import / Export" href="/guides/import-export" description="Sauvegarder les paramètres avec le workspace." />
+  <LinkCard title="Popup" href="/guides/popup" description="Toggles globaux de groupement et de déduplication." />
+  <LinkCard title="Dédupliquer" href="/guides/dedupliquer" description="Les trois modes de correspondance, contexte de la stratégie de conservation." />
+  <LinkCard title="Sessions" href="/guides/sessions" description="L'action par défaut Restaurer en contexte." />
+  <LinkCard title="Tour de l'interface" href="/decouverte/tour-interface" description="La pastille de l'icône qui reflète l'état des toggles globaux." />
 </CardGrid>
