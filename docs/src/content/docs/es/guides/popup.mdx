@@ -1,0 +1,44 @@
+---
+title: Popup
+description: Lo que contiene el popup de la barra de herramientas, cómo cambiar de espacio de trabajo y restaurar un perfil con un solo clic.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import popupContentLight from '../../../../assets/screenshots/es-light-popup-content.png';
+import popupContentDark from '../../../../assets/screenshots/es-dark-popup-content.png';
+
+El popup se abre al hacer clic en el icono de la extensión en la barra de herramientas. Da una visión rápida de la actividad de agrupación y deduplicación, y ofrece las acciones del día a día.
+
+<ThemeImage
+  lightSrc={popupContentLight}
+  darkSrc={popupContentDark}
+  alt="Contenido detallado del popup con estadísticas, perfiles anclados y acceso rápido."
+/>
+
+## Lo que contiene el popup
+
+- **Estadísticas de sesión**: número de pestañas agrupadas y de duplicados cerrados desde que se abrió el navegador.
+- **Interruptores de agrupación y deduplicación**: conmutadores globales con efecto inmediato sobre toda la extensión. El estado desactivado se refleja en el distintivo del icono (consulta [Tour de la interfaz](/decouverte/tour-interface#indicateur-sur-licone)).
+- **Selector de espacio de trabajo** (`PopupWorkspaceSwitcher`): cambia de espacio de trabajo sin abrir las Opciones. Consulta [Espacios de trabajo](/guides/workspaces#changer-de-workspace-actif).
+- **Perfiles anclados**: la lista de [sesiones ancladas](/guides/sessions#sessions-epinglees) del espacio de trabajo activo. Al hacer clic en un perfil se restaura con la acción por defecto configurada; un menú contextual ofrece los cuatro destinos.
+- **Botones de acceso rápido**: abren las páginas Reglas, Sesiones y Ajustes en una pestaña nueva.
+
+<Aside type="note">
+El popup **nunca** carga las sesiones archivadas. Solo se proyectan en él las sesiones ancladas y activas del espacio de trabajo actual. Para las sesiones archivadas, abre la página [Sesiones](/guides/sessions#archive).
+</Aside>
+
+## Diferencia con la página de inicio
+
+El popup y la [página de inicio](/decouverte/page-accueil) proyectan la misma lista de perfiles anclados, pero con limitaciones de espacio distintas:
+
+- El **popup** muestra los perfiles en una lista compacta con un menú contextual para los cuatro destinos de restauración.
+- La **página de inicio** muestra los perfiles en baldosas más amplias, con los atajos de teclado `R` / `Shift+R` / `Alt+R` / `Alt+Shift+R` directos sobre el foco.
+
+## Siguiente paso
+
+<CardGrid>
+  <LinkCard title="Sesiones" href="/guides/sessions" description="Capturar, restaurar y anclar una sesión." />
+  <LinkCard title="Espacios de trabajo" href="/guides/workspaces" description="Cambiar entre espacios desde el popup o las Opciones." />
+  <LinkCard title="Ajustes" href="/guides/parametres" description="Configurar el distintivo, las notificaciones y la acción por defecto de restauración." />
+</CardGrid>

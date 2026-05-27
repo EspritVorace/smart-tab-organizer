@@ -1,0 +1,146 @@
+---
+title: Sesiones
+description: Capturar una instantánea de pestañas, restaurar una sesión, editarla, anclarla como perfil. Sub-pestaña Archivo para apartar una sesión sin eliminarla.
+---
+
+import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import sessionsListLight from '../../../../assets/screenshots/es-light-journey-sessions-list-with-snapshot.png';
+import sessionsListDark from '../../../../assets/screenshots/es-dark-journey-sessions-list-with-snapshot.png';
+import sessionsCreateLight from '../../../../assets/screenshots/es-light-sessions-create-snapshot.png';
+import sessionsCreateDark from '../../../../assets/screenshots/es-dark-sessions-create-snapshot.png';
+import sessionsRestoreLight from '../../../../assets/screenshots/es-light-sessions-restore-conflict.png';
+import sessionsRestoreDark from '../../../../assets/screenshots/es-dark-sessions-restore-conflict.png';
+
+Una sesión es una instantánea de pestañas que puedes reabrir más tarde con sus grupos, sus nombres y sus URL. Las sesiones quedan aisladas por espacio de trabajo y se organizan en tres compartimentos: ancladas, activas, archivadas.
+
+<ThemeImage
+  lightSrc={sessionsListLight}
+  darkSrc={sessionsListDark}
+  alt="Página Sesiones con una sesión activa recién creada y sus grupos."
+/>
+
+## Los tres compartimentos
+
+| Compartimento | Cuándo usarlo |
+|---|---|
+| **Ancladas** | Contextos a los que vuelves con regularidad (proyecto cliente, entorno de desarrollo, vigilancia). Se proyectan en el popup y en la página de inicio como **perfiles**. |
+| **Activas** | Sesiones corrientes: captura puntual antes de cerrar el navegador, snapshot de una investigación en curso. |
+| **Archivadas** | Sesiones apartadas sin eliminarlas. Quedan fuera de la vista en el popup y en la página de inicio. |
+
+La sub-pestaña **Archivadas** de la página Sesiones es accesible mediante `#sessions/archived` (enlace profundo) o desde el `TabNav` en la parte superior de la página.
+
+## Capturar una instantánea
+
+<ThemeImage
+  lightSrc={sessionsCreateLight}
+  darkSrc={sessionsCreateDark}
+  alt="Asistente para capturar una instantánea de sesión: nombre, selección de pestañas, categoría."
+/>
+
+Desde la página de inicio, el popup o la página Sesiones, pulsa **Tomar instantánea** (atajo `S` en la página de inicio).
+
+<Steps>
+1. **Nombre**: un nombre de sesión prerrellenado con la fecha y la hora. Editable.
+2. **Selección de pestañas**: por defecto, todas las pestañas de la ventana activa. Desmarca las que quieras excluir.
+3. **Categoría** (opcional): añade un emoji a la sesión. Útil para distinguir varios perfiles anclados visualmente.
+4. **Nota** (opcional): texto libre incrustado con la sesión, legible al restaurar o exportar.
+5. Confirma. La sesión aparece de inmediato en la lista de sesiones **activas**.
+</Steps>
+
+## Restaurar una sesión
+
+Hay cuatro destinos de restauración. Con el foco sobre una sesión o un perfil:
+
+| Destino | Atajo | Efecto |
+|---|---|---|
+| **Ventana actual** | `Shift + R` | Añade las pestañas de la sesión a la ventana actualmente en primer plano. |
+| **Ventana nueva** | `Alt + Shift + R` | Abre una nueva ventana dedicada. |
+| **Reemplazar las pestañas de la ventana** | `Alt + R` | Cierra las pestañas de la ventana actual y restaura las de la sesión en su lugar. |
+| **Personalizada** | `R` | Abre el asistente de restauración y muestra el detalle de los conflictos si los hay. |
+
+El clic o la tecla `Enter` usa la **acción por defecto** configurada en [Ajustes](/guides/parametres#action-de-restauration-par-defaut).
+
+### Asistente de conflictos
+
+Cuando algunas pestañas de la sesión ya están abiertas en la ventana de destino, el asistente propone una resolución pestaña por pestaña:
+
+<ThemeImage
+  lightSrc={sessionsRestoreLight}
+  darkSrc={sessionsRestoreDark}
+  alt="Asistente de restauración con resolución de conflicto: opciones Restaurar, Omitir, Reemplazar."
+/>
+
+| Acción | Efecto |
+|---|---|
+| **Restaurar** | Añade la pestaña nueva junto a la existente. Te quedas con las dos. |
+| **Omitir** | Salta esa pestaña. La versión actualmente abierta se conserva intacta. |
+| **Reemplazar** | Cierra la pestaña existente y restaura la de la sesión en su lugar. |
+
+<Aside type="note">
+Las pestañas restauradas desde el asistente quedan protegidas contra una deduplicación inmediata durante 10 segundos (la misma mecánica que [Deshacer una deduplicación](/guides/dedupliquer#notification-et-annulation)).
+</Aside>
+
+## Editar una sesión
+
+Pulsa el icono **Editar** de una tarjeta de sesión o usa `E` sobre el foco. El editor de sesión permite:
+
+- **Renombrar** la sesión.
+- **Eliminar** pestañas individuales.
+- **Reorganizar** las pestañas entre grupos o reagruparlas de otra forma, arrastrando y soltando.
+- **Renombrar** un grupo interno de la sesión.
+- **Cambiar la categoría** o la **nota**.
+
+Las modificaciones se aplican de inmediato. El estado expandido o contraído de cada grupo se conserva entre aperturas.
+
+## Actualizar una sesión
+
+El botón **Actualizar** (atajo `U` sobre el foco de una sesión) reemplaza el contenido de la sesión por el estado actual de la ventana en curso, conservando el nombre y la categoría. Útil para actualizar un perfil anclado tras una sesión de trabajo sin tener que recrear la sesión.
+
+## Sesiones ancladas
+
+El **anclado** promueve una sesión al rango de **perfil**: aparece en el popup y en la página de inicio del espacio de trabajo activo.
+
+<Steps>
+1. En la tarjeta de sesión, pulsa el icono **Fijar** (o pulsa `P` sobre el foco).
+2. La sesión pasa a la sección **Ancladas** en la parte superior de la página y aparece en el popup y en la página de inicio.
+</Steps>
+
+El anclado no altera ni el nombre ni el contenido, solo el estado y la ubicación. Pulsa el icono de nuevo para desanclar.
+
+<Aside type="note">
+Los perfiles están **aislados por espacio de trabajo**. Cambiar de espacio sustituye al instante la lista que aparece en el popup y en la página de inicio. Una misma sesión solo puede anclarse en el espacio de trabajo donde se creó.
+</Aside>
+
+### Categoría para distinguir los perfiles
+
+Asociar una categoría a una sesión anclada hace que su emoji aparezca junto al nombre en el popup. Práctico cuando tienes varios perfiles y quieres distinguirlos de un vistazo.
+
+## Archivo
+
+La sub-pestaña **Archivadas** aloja las sesiones que quieres conservar sin tenerlas a la vista cada día. Una sesión archivada no aparece ni en el popup ni en la página de inicio, pero sigue accesible y restaurable desde la página Sesiones.
+
+### Archivar una sesión
+
+Sobre la tarjeta de una sesión activa, abre el menú contextual y pulsa **Archivar**. La sesión sale al momento de la lista **Activas** y aparece en **Archivadas**. Una sesión **anclada** debe desanclarse primero para poder archivarse.
+
+### Desarchivar
+
+En la sub-pestaña **Archivadas**, pulsa **Desarchivar**. La sesión vuelve a **Activas**. La fecha de actualización se conserva (el archivado no se considera una modificación del contenido).
+
+### Enlace profundo
+
+La URL `chrome-extension://[id]/options.html#sessions/archived` abre directamente la sub-pestaña **Archivadas**. Puedes usarla como marcador para ir a buscar una sesión antigua.
+
+## Búsqueda
+
+La barra de búsqueda sobre la lista filtra por nombre de sesión. También hay una búsqueda **profunda** disponible: inspecciona los títulos de las pestañas capturadas, lo que ayuda a localizar una sesión por uno de sus contenidos.
+
+## Siguiente paso
+
+<CardGrid>
+  <LinkCard title="Espacios de trabajo" href="/guides/workspaces" description="Aislar las sesiones por contexto." />
+  <LinkCard title="Popup" href="/guides/popup" description="El acceso rápido a los perfiles anclados del espacio activo." />
+  <LinkCard title="Ajustes" href="/guides/parametres" description="Acción por defecto de restauración, notificaciones." />
+  <LinkCard title="Importar / Exportar" href="/guides/import-export" description="Guardar tus sesiones en formato JSON." />
+</CardGrid>

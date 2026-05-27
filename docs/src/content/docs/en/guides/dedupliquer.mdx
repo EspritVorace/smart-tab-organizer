@@ -1,0 +1,124 @@
+---
+title: Deduplicate tabs
+description: The three match modes (exact URL, URL without ignored params, includes), the scope levels, the keep strategies, and the undo mechanism.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import ConditionsDeclenchement from '../../../../components/ConditionsDeclenchement.astro';
+
+<Aside type="tip" title="At a glance">
+- Deduplication prevents you from stacking several tabs pointing to the same page.
+- Three match modes configurable per rule (Exact URL, URL without ignored params, URL Includes).
+- A notification with an **Undo** button gives you 5 seconds to revert.
+- A tab reopened via **Undo** is protected against re-deduplication for 10 seconds.
+</Aside>
+
+When you open a link already open in your browser, SmartTab Organizer keeps a single tab and closes the other. The [keep strategy](#strategies-de-conservation) decides which one survives.
+
+## Trigger conditions
+
+<ConditionsDeclenchement feature="deduplication" />
+
+<Aside type="caution">
+URLs with special schemes (`chrome:`, `chrome-extension:`, `about:`) are always ignored by deduplication, regardless of the rule.
+</Aside>
+
+## The three match modes
+
+### Exact URL
+
+Two tabs are considered duplicates only if their URLs match character for character: same protocol, same domain, same path, same query parameters, same fragment.
+
+| Existing URL | New tab | Result |
+|---|---|---|
+| `https://example.com/page?lang=fr` | `https://example.com/page?lang=fr` | Duplicate, closed |
+| `https://example.com/page?lang=fr` | `https://example.com/page?lang=en` | Distinct, kept |
+| `https://example.com/page#section1` | `https://example.com/page#section2` | Distinct, kept |
+
+Best for sites where URL parameters carry meaning (filters, languages, identifiers).
+
+### URL without ignored params
+
+Same as **Exact URL**, but some query parameters are stripped from both URLs **before** comparison. Useful to neutralize tracking parameters (`utm_source`, `fbclid`) or session identifiers that do not affect content.
+
+The parameters to ignore are declared on the rule as a list. Each entry can be:
+
+- an **exact name**, case sensitive: `utm_source` strips only that parameter.
+- a **wildcard pattern** with `*`: `utm_*` strips every parameter starting with `utm_`, `*_id` every parameter ending with `_id`, `*` every parameter.
+
+| Existing URL | New tab | Ignored params | Result |
+|---|---|---|---|
+| `https://example.com/article?id=42&utm_source=twitter` | `https://example.com/article?id=42&utm_source=newsletter` | `utm_*` | Duplicate, closed |
+| `https://example.com/article?id=42&utm_source=twitter` | `https://example.com/article?id=43&utm_source=twitter` | `utm_*` | Distinct, kept |
+| `https://example.com/post?fbclid=abc&ref=home` | `https://example.com/post?ref=home` | `fbclid` | Duplicate, closed |
+
+<Aside type="note">
+At least one pattern must be declared to enable this mode. Without a pattern, it would be equivalent to **Exact URL** and saving the rule is refused.
+</Aside>
+
+### URL Includes
+
+Two tabs are considered duplicates if one URL is contained inside the other (substring, in either direction).
+
+| Existing URL | New tab | Result |
+|---|---|---|
+| `https://example.com/products/item/123` | `https://example.com/products/item` | Duplicate, closed |
+| `https://example.com/products` | `https://example.com/about` | Distinct, kept |
+
+Best for sites where drilling deep into a section should not create duplicates against the parent page.
+
+## Deduplication scope
+
+Three control levels interact, from the most general to the most specific.
+
+### Global toggle
+
+The **Deduplication** toggle in the popup or in the [Settings](/guides/parametres) page is the master switch. When off, no deduplication happens, no matter the rules. An orange **D** badge appears on the extension icon in that case.
+
+### Deduplicate tabs without a matching rule
+
+The setting **Deduplicate tabs without a matching rule** controls what happens on sites you have not configured.
+
+- **On**: tabs on domains without a rule are deduplicated in Exact URL mode when the global toggle is on.
+- **Off** (default): tabs on domains without a rule are never deduplicated.
+
+Domain rules remain authoritative: a domain covered by an explicit rule always follows that rule.
+
+### Per-rule toggle
+
+Every rule has its own **Deduplication** toggle. When off on a rule, duplicates on that domain are kept even if the global toggle is on.
+
+## Keep strategies
+
+On the [Settings](/guides/parametres) page, in the **Deduplication scope** section, you choose which of the two duplicate tabs survives:
+
+| Strategy | Behavior |
+|---|---|
+| **The existing tab** | The already-open tab is kept. Useful when the existing tab holds state (scroll, form, session) you do not want to lose. |
+| **The newly opened tab** | The new tab survives. Heads-up: if the old one was in a group, it disappears from the group. |
+| **Grouped tab wins, otherwise keep existing** | If one of the two is grouped and the other is not, the grouped one survives. Otherwise falls back to **The existing tab**. |
+| **Grouped tab wins, otherwise keep the new one** (default) | If one of the two is grouped and the other is not, the grouped one survives. Otherwise falls back to **The newly opened tab**. Protects grouped tabs from being closed in favor of an ungrouped copy, while still favoring the freshly loaded version when the group does not decide. |
+
+<Aside type="note">
+The strategy is global to the extension: it applies to every rule. It is visually disabled when global deduplication is off.
+</Aside>
+
+## Notification and undo
+
+When the **Notify when duplicates are automatically closed** setting is on, a system notification appears after each duplicate closure. It shows the title of the closed tab and offers an **Undo** button.
+
+Clicking **Undo** reopens the closed tab in the same window and makes it active. If the closed tab was part of a group, the action tries to reattach it to that group; if the group no longer exists, a new one is created.
+
+<Aside type="note">
+To prevent the reopened tab from being immediately re-closed, its deduplication is paused for **10 seconds**. The notification dismisses itself after 5 seconds if you do not interact.
+</Aside>
+
+This setting is independent from the grouping one: you can enable notifications for deduplication only, for grouping only, for both, or for neither.
+
+## Next steps
+
+<CardGrid>
+  <LinkCard title="Group tabs" href="/guides/grouper-onglets" description="The parallel mechanism that organizes tabs into groups." />
+  <LinkCard title="Domain Rules" href="/guides/regles-de-domaine" description="Pick the deduplication mode and ignored parameters per rule." />
+  <LinkCard title="Settings" href="/guides/parametres" description="Global toggles, keep strategy, notifications." />
+</CardGrid>

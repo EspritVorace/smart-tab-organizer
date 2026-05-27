@@ -1,0 +1,63 @@
+---
+title: Interface tour
+description: The two main surfaces of SmartTab Organizer (the popup and the Options page) to get comfortable in a few minutes.
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import popupEmptyLight from '../../../../assets/screenshots/en-light-journey-popup-empty.png';
+import popupEmptyDark from '../../../../assets/screenshots/en-dark-journey-popup-empty.png';
+
+SmartTab Organizer exposes two main surfaces: the **popup**, reachable from the toolbar, and the **Options page**, opened in a dedicated tab.
+
+## The popup on first launch
+
+Right after install, the popup shows an empty state: no rules configured, statistics at zero.
+
+<ThemeImage
+  lightSrc={popupEmptyLight}
+  darkSrc={popupEmptyDark}
+  alt="SmartTab Organizer popup on first launch, with no rule configured."
+/>
+
+From this screen you reach the grouping and deduplication toggles, the global statistics, and the Options pages to configure the rest.
+
+The popup is documented in detail in [Guide: Popup](/guides/popup).
+
+## The Options page
+
+The Options page is built around six main sections, reachable from the left sidebar.
+
+| Section | Purpose |
+|---|---|
+| **Home** | Landing page, aggregates pinned profiles, quick actions and mini-statistics. See [The home page](/decouverte/page-accueil). |
+| **Domain Rules** | Create, edit and organize the rules that drive grouping and deduplication. See [Domain Rules](/guides/regles-de-domaine). |
+| **Sessions** | Capture a snapshot of the open tabs, edit it, or restore a previous one. **Archived** sub-tab for sessions set aside. See [Sessions](/guides/sessions). |
+| **Workspaces** | Isolate rules, sessions and statistics per context. See [Workspaces](/guides/workspaces). |
+| **Statistics** | Track grouping and deduplication activity over time. See [Statistics](/guides/statistiques). |
+| **Import / Export** | Back up or restore your configuration and sessions as JSON. See [Import / Export](/guides/import-export). |
+
+The Options page footer hosts a **workspace switcher** (`WorkspaceSwitcherDropdown`) that lets you change workspace at any moment. The same switcher is available in the popup.
+
+## Badge on the icon
+
+When one of the two global toggles (grouping or deduplication) is off, a badge appears on the extension's icon in the toolbar:
+
+| Badge | Meaning |
+|---|---|
+| (none) | Grouping and deduplication active. Everything is running. |
+| Orange **G** | Global grouping is off. |
+| Orange **D** | Global deduplication is off. |
+| Red **X** | Both toggles are off; the extension does nothing. |
+
+The **G** and **D** badges share the same orange color: only the letter changes to tell you which toggle is off.
+
+You can disable the badge from the [Settings](/guides/parametres) page.
+
+## Next steps
+
+<CardGrid>
+  <LinkCard title="The home page" href="/decouverte/page-accueil" description="Pinned profiles, quick actions, keyboard shortcuts." />
+  <LinkCard title="Popup" href="/guides/popup" description="The popup and its commands in detail." />
+  <LinkCard title="Workspaces" href="/guides/workspaces" description="Isolate rules and sessions per context." />
+</CardGrid>

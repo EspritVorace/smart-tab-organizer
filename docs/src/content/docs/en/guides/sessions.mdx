@@ -1,0 +1,146 @@
+---
+title: Sessions
+description: Capture a snapshot of tabs, restore a session, edit it, pin it as a profile. The Archive sub-tab lets you set a session aside without deleting it.
+---
+
+import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import sessionsListLight from '../../../../assets/screenshots/en-light-journey-sessions-list-with-snapshot.png';
+import sessionsListDark from '../../../../assets/screenshots/en-dark-journey-sessions-list-with-snapshot.png';
+import sessionsCreateLight from '../../../../assets/screenshots/en-light-sessions-create-snapshot.png';
+import sessionsCreateDark from '../../../../assets/screenshots/en-dark-sessions-create-snapshot.png';
+import sessionsRestoreLight from '../../../../assets/screenshots/en-light-sessions-restore-conflict.png';
+import sessionsRestoreDark from '../../../../assets/screenshots/en-dark-sessions-restore-conflict.png';
+
+A session is a snapshot of tabs you can reopen later, with their groups, names, and URLs. Sessions are scoped per workspace and organized in three buckets: pinned, active, archived.
+
+<ThemeImage
+  lightSrc={sessionsListLight}
+  darkSrc={sessionsListDark}
+  alt="Sessions page with a freshly captured active session and its groups."
+/>
+
+## The three buckets
+
+| Bucket | When to use |
+|---|---|
+| **Pinned** | Contexts you come back to regularly (client project, dev environment, ongoing research). Projected in the popup and the home page as **profiles**. |
+| **Active** | Everyday sessions: an ad-hoc capture before closing the browser, a snapshot of an ongoing search. |
+| **Archived** | Sessions set aside without deleting them. Out of sight from the popup and the home page. |
+
+The **Archived** sub-tab of the Sessions page is reachable via `#sessions/archived` (deep link) or via the `TabNav` at the top of the page.
+
+## Take a snapshot
+
+<ThemeImage
+  lightSrc={sessionsCreateLight}
+  darkSrc={sessionsCreateDark}
+  alt="Session snapshot wizard: name, tab selection, category."
+/>
+
+From the home page, the popup, or the Sessions page, click **Take Snapshot** (shortcut `S` on the home page).
+
+<Steps>
+1. **Name**: a session name prefilled with the date and time. Editable.
+2. **Tab selection**: by default every tab of the active window. Uncheck the tabs to leave out.
+3. **Category** (optional): adds an emoji to the session. Handy to tell several pinned profiles apart visually.
+4. **Note** (optional): free text stored with the session, visible on restore or on export.
+5. Confirm. The session appears immediately in the **Active** sessions list.
+</Steps>
+
+## Restore a session
+
+Four restore targets are available. With a session or profile focused:
+
+| Target | Shortcut | Effect |
+|---|---|---|
+| **Restore in current window** | `Shift + R` | Adds the session tabs to the currently foregrounded window. |
+| **Restore in new window** | `Alt + Shift + R` | Opens a new dedicated window. |
+| **Replace tabs in current window** | `Alt + R` | Closes the current window's tabs and restores those of the session in their place. |
+| **Customized restoration** | `R` | Opens the restore wizard and surfaces any conflicts. |
+
+A click or pressing `Enter` uses the **default action** configured in [Settings](/guides/parametres#action-de-restauration-par-defaut).
+
+### Conflict wizard
+
+When tabs from the session are already open in the target window, the wizard offers a per-tab resolution:
+
+<ThemeImage
+  lightSrc={sessionsRestoreLight}
+  darkSrc={sessionsRestoreDark}
+  alt="Restore wizard with conflict resolution: choose between Restore, Skip, Replace."
+/>
+
+| Action | Effect |
+|---|---|
+| **Restore** | Adds the new tab next to the existing one. You keep both. |
+| **Skip** | Skips this tab. The currently open version is left untouched. |
+| **Replace** | Closes the existing tab and restores the session's one in its place. |
+
+<Aside type="note">
+Tabs restored through the wizard are protected against immediate deduplication for 10 seconds (same mechanism as [Undo on deduplication](/guides/dedupliquer#notification-et-annulation)).
+</Aside>
+
+## Edit a session
+
+Click the **Edit** icon on a session card, or use `E` on the focused card. The session editor lets you:
+
+- **Rename** the session.
+- **Delete** individual tabs.
+- **Reorder** tabs between groups or regroup them via drag and drop.
+- **Rename** a group inside the session.
+- **Change the category** or the **note**.
+
+Changes are applied immediately. The expanded or collapsed state of each group is remembered across openings.
+
+## Refresh a session
+
+The **Refresh** button (shortcut `U` on the focused session) replaces the session content with the current state of the current window, while keeping the name and category. Useful to update a pinned profile after a work session without recreating it.
+
+## Pinned sessions
+
+**Pinning** promotes a session to a **profile**: it shows up in the popup and on the home page of the active workspace.
+
+<Steps>
+1. On the session card, click the **Pin** icon (or press `P` when focused).
+2. The session moves to the **Pinned** section at the top of the page, and appears in the popup and on the home page.
+</Steps>
+
+Pinning changes neither the name nor the content, only the status and the placement. Click the icon again to unpin.
+
+<Aside type="note">
+Profiles are **scoped per workspace**. Switching workspace immediately swaps the list shown in the popup and on the home page. A given session can only be pinned in the workspace where it was created.
+</Aside>
+
+### Category to tell profiles apart
+
+Assigning a category to a pinned session surfaces its emoji next to the name in the popup. Handy when you have several profiles and want to tell them apart at a glance.
+
+## Archive
+
+The **Archived** sub-tab holds sessions you want to keep without seeing every day. An archived session does not appear in the popup or on the home page, but stays accessible and restorable from the Sessions page.
+
+### Archive a session
+
+On the card of an active session, open the context menu and click **Archive**. The session leaves the **Active** list immediately and shows up in **Archived**. A **pinned** session must be unpinned first to be archivable.
+
+### Unarchive
+
+In the **Archived** sub-tab, click **Unarchive**. The session moves back to **Active**. The session's last update date is preserved (archiving is not treated as a content change).
+
+### Deep link
+
+The URL `chrome-extension://[id]/options.html#sessions/archived` opens the **Archived** sub-tab directly. You can bookmark it to dig up an old session.
+
+## Search
+
+The search bar above the list filters by session name. A **deep** search is available too: it also looks at the captured tab titles, which helps you find a session by one of its contents.
+
+## Next steps
+
+<CardGrid>
+  <LinkCard title="Workspaces" href="/guides/workspaces" description="Isolate sessions by context." />
+  <LinkCard title="Popup" href="/guides/popup" description="Quick access to the pinned profiles of the active workspace." />
+  <LinkCard title="Settings" href="/guides/parametres" description="Default restore action, notifications." />
+  <LinkCard title="Import / Export" href="/guides/import-export" description="Back up your sessions as JSON." />
+</CardGrid>

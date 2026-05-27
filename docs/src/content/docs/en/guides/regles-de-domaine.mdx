@@ -1,0 +1,102 @@
+---
+title: Domain Rules
+description: The CRUD for domain rules. Create with the wizard, edit, disable, delete, reorder via drag and drop. Domain overlap conflicts.
+---
+
+import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import rulesListLight from '../../../../assets/screenshots/en-light-journey-rules-list-populated.png';
+import rulesListDark from '../../../../assets/screenshots/en-dark-journey-rules-list-populated.png';
+import rulesCreateStep1Light from '../../../../assets/screenshots/en-light-rules-create-step1.png';
+import rulesCreateStep1Dark from '../../../../assets/screenshots/en-dark-rules-create-step1.png';
+
+The **Domain Rules** page is the nerve center of the extension. A rule describes, for a domain: its label, its grouping mode, its deduplication mode, its category. Grouping and deduplication only fire on domains covered by a rule.
+
+<ThemeImage
+  lightSrc={rulesListLight}
+  darkSrc={rulesListDark}
+  alt="Domain Rules list with four entries covering different configuration modes."
+/>
+
+## The list
+
+Each row covers a domain and shows its label, its configuration mode (preset, manual, ask, fallback label), its category (emoji + label), its group color, and its state. Three main actions from the list:
+
+- **Reorder** via drag and drop to adjust priority (the topmost rule wins in case of overlap).
+- **Enable or disable** a rule individually with its toggle, without deleting it.
+- **Open the wizard** to edit an existing rule or create a new one.
+
+A search bar filters the list by rule name or domain. Multi-selection lets you run bulk actions: enable, disable, delete, export.
+
+## Create a rule
+
+Click **Add Rule** at the top of the list. The wizard opens in four steps.
+
+<ThemeImage
+  lightSrc={rulesCreateStep1Light}
+  darkSrc={rulesCreateStep1Dark}
+  alt="Step 1 of the rule creation wizard: identity (domain, label, category)."
+/>
+
+### Step 1: Identity
+
+- **Domain Filter**: the domain pattern covered (for example `github.com`, `*.atlassian.net`). Leave empty for a cross-domain rule.
+- **Label**: the rule's identification name in the list. It is not used as a default group name (see the **Group Name** field of the Fallback Label mode for that).
+- **Category**: pick from the 14 built-in categories (see [Categories and packs](/reference/categories-et-packs)). The category only provides the emoji and the label. It does not affect the color.
+- **Tab group color**: a field distinct from the category. Pick from the nine native Chrome group colors (`grey`, `blue`, `red`, `yellow`, `green`, `pink`, `purple`, `cyan`, `orange`).
+
+### Step 2: Configuration
+
+Four configuration modes are offered via a radio selector:
+
+| Mode | When to use |
+|---|---|
+| **Preset** | The current site is already covered by a [regex preset](/reference/presets-regex). The preset automatically wires the naming mode and the title / URL regexes. |
+| **Ask** | The extension prompts you for the group name on each creation. Handy for sites where you want to name the context on the fly. |
+| **Manual** | You write the regexes yourself and pick the mode among the "Smart / Title / URL" variants. Useful for an internal site or a case not covered by a preset. |
+| **Fallback Label** | No regex, no extraction. Unlocks a **Group Name** field where you type the literal group name. That name also serves as the safety net of the Smart + Label mode. |
+
+For the full breakdown of the eight naming modes and their fallback chains, see [Group tabs](/guides/grouper-onglets#modes-de-nommage).
+
+### Step 3: Options
+
+Configures deduplication for this rule: enabled toggle, **Deduplication Mode** (Exact URL, URL without ignored params, URL Includes) and, when applicable, the list of parameters to ignore. See [Deduplicate](/guides/dedupliquer#les-trois-modes-de-correspondance) for details.
+
+You can leave deduplication off if you only need grouping on this domain.
+
+### Step 4: Summary
+
+A confirmation page summarizes the rule before saving. You can return to previous steps via the arrows or the stepper at the top of the wizard.
+
+## Edit a rule
+
+Click the **Edit** icon on a row (or press `E` when the row is focused). The same wizard opens, prefilled. The change is applied immediately on save, without extra confirmation.
+
+## Disable, delete
+
+| Action | Effect |
+|---|---|
+| **ON/OFF toggle** | Disables the rule without deleting it. The row is greyed out but stays in place. Useful to pause a rule. |
+| **Delete** | Removes the rule. A confirmation is requested. Multi-selection lets you delete several rules in one action. |
+
+## Domain overlap
+
+When two rules partially cover the same domain (for example `*.atlassian.net` and `mycompany.atlassian.net`), an **overlap indicator** appears in the HoverCard of each rule involved, with the list of conflicting rules. The topmost rule wins; you can reorder via drag and drop.
+
+<Aside type="note">
+Overlap is not an error in itself. It can be intentional, with a generic rule as a fallback and more specific rules above it. The indicator is just a reminder.
+</Aside>
+
+## Import a collection of rules
+
+To add several rules at once rather than creating them one by one, import a **pack**. See [Categories and packs](/reference/categories-et-packs) for the gallery of 49 built-in packs and the import flow.
+
+## Next steps
+
+<CardGrid>
+  <LinkCard title="Group tabs" href="/guides/grouper-onglets" description="The grouping mechanism, naming modes and fallback chains." />
+  <LinkCard title="Deduplicate" href="/guides/dedupliquer" description="The three match modes and the keep strategy." />
+  <LinkCard title="Categories and packs" href="/reference/categories-et-packs" description="Import ready-to-use rules by category." />
+  <LinkCard title="Regex presets" href="/reference/presets-regex" description="The regex templates available in the wizard." />
+  <LinkCard title="Import / Export" href="/guides/import-export" description="Back up or restore your rules as JSON." />
+</CardGrid>

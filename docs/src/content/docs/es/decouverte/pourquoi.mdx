@@ -1,0 +1,57 @@
+---
+title: ¿Por qué esta extensión?
+description: El problema que resuelve SmartTab Organizer, sus tres pilares (agrupar, deduplicar, guardar) y su posición frente a las herramientas basadas en IA en línea.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+Hay noches en las que abres el navegador y lo encuentras hecho un desastre, lleno de pestañas de las que ya no sabes cuáles siguen siendo útiles. Te gustaría conservarlas todas, siempre, pero no siempre es viable.
+
+SmartTab Organizer agrupa automáticamente tus pestañas según reglas que defines tú, evita los duplicados y te permite guardar y restaurar tus espacios de trabajo como sesiones nombradas.
+
+## Tres pilares
+
+La extensión se organiza en torno a tres funciones complementarias.
+
+<CardGrid>
+  <LinkCard
+    title="Agrupar automáticamente"
+    href="/guides/grouper-onglets"
+    description="Las pestañas abiertas desde un mismo padre se unen a un grupo de Chrome coloreado, sin tener que hacer nada."
+  />
+  <LinkCard
+    title="Deduplicar"
+    href="/guides/dedupliquer"
+    description="Tres modos de coincidencia (URL exacta, sin parámetros ignorados, inclusión) cierran los duplicados conservando la pestaña más relevante."
+  />
+  <LinkCard
+    title="Guardar tus sesiones"
+    href="/guides/sessions"
+    description="Captura el estado del navegador, ancla los contextos a los que vuelves a menudo y restáuralos con un clic."
+  />
+</CardGrid>
+
+## Todo es local, nada sale a internet
+
+La mayoría de las extensiones de la competencia se apoyan en IA remota: envían la URL y el título de cada pestaña a un servicio externo para decidir el nombre. SmartTab Organizer hace justo lo contrario: ningún dato sale de tu navegador. La agrupación se basa en expresiones regulares (que escribes tú o que vienen de un [pack integrado](/reference/categories-et-packs)), y las sesiones viven en `browser.storage.local`.
+
+<Aside type="note">
+Si sincronizas tus perfiles de Chrome o Firefox, la extensión sigue siendo compatible (los datos acompañan al perfil), pero la propia extensión no inicia ninguna comunicación de red.
+</Aside>
+
+## Para quién
+
+La extensión se ha pensado para usos en los que el navegador es una herramienta de trabajo:
+
+- **Desarrollo**: una pestaña por incidencia, un grupo por repositorio, un espacio de trabajo por cliente.
+- **Soporte y operaciones**: un grupo por ticket (Jira, ServiceNow, Linear), incluso cuando el incidente se gestiona en paralelo desde varias herramientas.
+- **Investigación y vigilancia**: sesiones temáticas que reabres cada semana, sin tener que reconstruir la pila.
+- **Vida cotidiana**: separa lo personal y lo profesional con [espacios de trabajo](/guides/workspaces) distintos, cada uno con su color de acento.
+
+## Siguiente paso
+
+<CardGrid>
+  <LinkCard title="Instalar" href="/decouverte/installation" description="Chrome Web Store, Firefox Add-ons o build local desde el código fuente." />
+  <LinkCard title="Tour de la interfaz" href="/decouverte/tour-interface" description="Popup y página Opciones: lo que ves al primer arranque." />
+  <LinkCard title="La página de inicio" href="/decouverte/page-accueil" description="Onboarding, perfiles anclados, accesos rápidos y mini estadísticas." />
+</CardGrid>
