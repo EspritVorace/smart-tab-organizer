@@ -296,6 +296,48 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'list-home',
     scope: 'page:home',
   },
+  // Page-level quick actions on the Home tab. Yield to focused widgets so a
+  // session card on the page keeps its own bindings authoritative.
+  'home.action.organize': {
+    id: 'home.action.organize',
+    defaultBindings: ['o'],
+    descriptionKey: 'shortcutDescHomeOrganize',
+    group: 'list-home',
+    scope: 'page:home',
+    excludeIfInsideWidget: true,
+  },
+  'home.action.snapshot': {
+    id: 'home.action.snapshot',
+    defaultBindings: ['s'],
+    descriptionKey: 'shortcutDescHomeSnapshot',
+    group: 'list-home',
+    scope: 'page:home',
+    excludeIfInsideWidget: true,
+  },
+  'home.action.newRule': {
+    id: 'home.action.newRule',
+    defaultBindings: ['n'],
+    descriptionKey: 'shortcutDescHomeNewRule',
+    group: 'list-home',
+    scope: 'page:home',
+    excludeIfInsideWidget: true,
+  },
+  'home.action.io': {
+    id: 'home.action.io',
+    defaultBindings: ['i'],
+    descriptionKey: 'shortcutDescHomeImportExport',
+    group: 'list-home',
+    scope: 'page:home',
+    excludeIfInsideWidget: true,
+  },
+  'home.action.stats': {
+    id: 'home.action.stats',
+    defaultBindings: ['t'],
+    descriptionKey: 'shortcutDescHomeStats',
+    group: 'list-home',
+    scope: 'page:home',
+    excludeIfInsideWidget: true,
+  },
 
   // Widget: SessionCard (active when a session card has focus)
   'sessionCard.restore.custom': {
