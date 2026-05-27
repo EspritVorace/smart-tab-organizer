@@ -41,7 +41,7 @@ Cliquez sur **Nouvelle règle** en haut de la liste. L'assistant s'ouvre en quat
 ### Étape 1 : Identité
 
 - **Filtre Domaine** : le pattern de domaine couvert (par exemple `github.com`, `*.atlassian.net`). Laissez vide pour une règle transverse (cross-domaine).
-- **Étiquette** : nom d'affichage de la règle dans la liste, et fallback éventuel pour le nom de groupe.
+- **Étiquette** : nom d'identification de la règle dans la liste. N'est pas utilisé comme nom de groupe par défaut (voir le champ **Nom du groupe** du mode Label de repli pour ça).
 - **Catégorie** : choisissez parmi les 14 catégories intégrées (voir [Catégories et packs](/reference/categories-et-packs)). La catégorie donne uniquement l'emoji et le libellé. Elle n'influe pas sur la couleur.
 - **Couleur du groupe d'onglets** : champ distinct de la catégorie. Choisissez parmi les neuf couleurs natives des groupes Chrome (`grey`, `blue`, `red`, `yellow`, `green`, `pink`, `purple`, `cyan`, `orange`).
 
@@ -54,7 +54,7 @@ Quatre modes de configuration sont proposés via un sélecteur radio :
 | **Preset** | Site courant déjà couvert par un [preset regex](/reference/presets-regex). Le preset configure automatiquement le mode de nommage et les regex de titre / URL. |
 | **Demander** | L'extension demande le nom du groupe à chaque création. Pratique pour des sites où vous voulez nommer le contexte à la volée. |
 | **Manuel** | Vous saisissez vous-même les regex et choisissez le mode parmi les modes "Intelligent / Titre / URL". Utile pour un site interne ou un cas non couvert par un preset. |
-| **Label de repli** | Aucune regex, aucune extraction : tous les onglets du domaine atterrissent dans un groupe au nom fixe (le label de la règle). |
+| **Label de repli** | Aucune regex, aucune extraction. Déverrouille un champ **Nom du groupe** où vous saisissez le nom littéral du groupe. Ce nom est aussi le filet de sécurité du mode Intelligent + Label. |
 
 Pour le détail des huit modes de nommage et leurs chaînes de repli, voir [Grouper les onglets](/guides/grouper-onglets#modes-de-nommage).
 

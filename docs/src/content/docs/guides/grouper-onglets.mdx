@@ -62,7 +62,7 @@ L'extension utilise les regex héritées du preset sélectionné dans l'assistan
 |---|---|---|---|
 | **Intelligent** | Extraction titre | Extraction URL | Pas de groupage |
 | **Intelligent + Preset** | Extraction titre | Extraction URL | Repli sur le preset sélectionné |
-| **Intelligent + Label** | Extraction titre | Extraction URL | Label de la règle |
+| **Intelligent + Label** | Extraction titre | Extraction URL | Repli sur le **label de repli** de la règle (voir ci-dessous) |
 | **Intelligent + Demander** | Extraction titre | Extraction URL | Invite utilisateur, dégroupage si annulation |
 
 <Aside type="tip">
@@ -71,11 +71,11 @@ L'extension utilise les regex héritées du preset sélectionné dans l'assistan
 
 ### Demander
 
-Une invite de saisie apparait à chaque création de groupe. Le label de la règle est proposé comme valeur par défaut. Si vous annulez, les onglets qui venaient d'être regroupés sont immédiatement dégroupés.
+Une invite de saisie apparait à chaque création de groupe. Si vous annulez, les onglets qui venaient d'être regroupés sont immédiatement dégroupés.
 
 ### Label de repli
 
-Le nom du groupe est tout simplement le **label de la règle**. Aucune regex, aucune extraction : chaque onglet qui matche le domaine atterrit dans un groupe portant ce nom fixe.
+Aucune regex, aucune extraction : chaque onglet qui matche le domaine atterrit dans un groupe au nom fixe. Sélectionner ce mode dans l'étape **Configuration** du wizard déverrouille un champ **Nom du groupe** (`fallbackLabel`) où vous saisissez ce nom littéral. Ce champ est indépendant de l'**Étiquette** d'identification de la règle, mais il est aussi le filet de sécurité du mode **Intelligent + Label**.
 
 ### Titre ou URL (manuel)
 
