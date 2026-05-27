@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Flex, IconButton, Link, Text, Tooltip } from '@radix-ui/themes';
 import { BookOpen } from 'lucide-react';
 import { ThemeToggle } from '@/components/UI/ThemeToggle/ThemeToggle';
-import { getDocsUrl } from '@/utils/docsUrl';
+import { getDocsUrlForTab } from '@/utils/docsUrl';
 import { getMessage } from '@/utils/i18n';
 
 interface OptionsTopbarProps {
@@ -12,10 +12,12 @@ interface OptionsTopbarProps {
   /** href to attach to the parent crumb (`pageTitle`) when a subtitle is shown.
    *  Makes the parent crumb a clickable link back to the parent route. */
   parentHref?: string;
+  /** Active tab id used to resolve the docs link to its contextual section. */
+  currentTab?: string;
 }
 
-export function OptionsTopbar({ pageTitle, pageSubtitle, parentHref }: OptionsTopbarProps) {
-  const docsUrl = useMemo(() => getDocsUrl(), []);
+export function OptionsTopbar({ pageTitle, pageSubtitle, parentHref, currentTab }: OptionsTopbarProps) {
+  const docsUrl = useMemo(() => getDocsUrlForTab(currentTab), [currentTab]);
   const parentCrumbStyle = { color: 'var(--gray-12)', letterSpacing: '-0.005em' };
   const parentIsLink = Boolean(pageSubtitle && parentHref);
 

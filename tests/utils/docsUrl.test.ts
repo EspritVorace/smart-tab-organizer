@@ -58,4 +58,59 @@ describe('getDocsUrl', () => {
 
     expect(getDocsUrl().startsWith('https://docs.esprit-vorace.fr/')).toBe(true);
   });
+
+  it('appends a section path with trailing slash', async () => {
+    uiLanguage = 'fr-FR';
+    const { getDocsUrl } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrl('guides/sessions')).toBe('https://docs.esprit-vorace.fr/guides/sessions/');
+  });
+
+  it('combines locale and section', async () => {
+    uiLanguage = 'en-US';
+    const { getDocsUrl } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrl('guides/sessions')).toBe('https://docs.esprit-vorace.fr/en/guides/sessions/');
+  });
+
+  it('strips leading and trailing slashes from the section', async () => {
+    uiLanguage = 'fr-FR';
+    const { getDocsUrl } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrl('/guides/sessions/')).toBe('https://docs.esprit-vorace.fr/guides/sessions/');
+  });
+});
+
+describe('getDocsUrlForTab', () => {
+  it('maps a known tab to its docs section', async () => {
+    uiLanguage = 'es';
+    const { getDocsUrlForTab } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrlForTab('rules')).toBe(
+      'https://docs.esprit-vorace.fr/es/guides/regles-de-domaine/',
+    );
+  });
+
+  it('maps the home tab to the discovery page', async () => {
+    uiLanguage = 'fr-FR';
+    const { getDocsUrlForTab } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrlForTab('home')).toBe(
+      'https://docs.esprit-vorace.fr/decouverte/pourquoi/',
+    );
+  });
+
+  it('falls back to the locale root when the tab is unknown', async () => {
+    uiLanguage = 'fr-FR';
+    const { getDocsUrlForTab } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrlForTab('does-not-exist')).toBe('https://docs.esprit-vorace.fr/');
+  });
+
+  it('falls back to the locale root for an undefined tab', async () => {
+    uiLanguage = 'en-US';
+    const { getDocsUrlForTab } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrlForTab(undefined)).toBe('https://docs.esprit-vorace.fr/en/');
+  });
 });

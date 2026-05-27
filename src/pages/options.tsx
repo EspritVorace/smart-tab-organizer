@@ -16,6 +16,7 @@ import { useStatistics } from '@/hooks/useStatistics.js';
 import { useSessionStatistics } from '@/hooks/useSessionStatistics.js';
 import { useDeepLinking } from '@/hooks/useDeepLinking.js';
 import { useShortcuts, type ShortcutAction } from '@/hooks/useShortcuts.js';
+import { getDocsUrlForTab } from '@/utils/docsUrl';
 import { getMessage } from '@/utils/i18n';
 
 import { Sidebar } from '@/components/UI/Sidebar/Sidebar';
@@ -196,10 +197,15 @@ export function OptionsContent() {
         }
     }, [shortcutsAsideOpen]);
 
+    const handleOpenContextualDocs = useCallback(() => {
+        window.open(getDocsUrlForTab(currentTab), '_blank', 'noopener,noreferrer');
+    }, [currentTab]);
+
     const shortcutBindings = useMemo<Record<string, ShortcutAction>>(() => ({
         'options.search.focus': focusActiveSearch,
         'options.help': () => setShortcutsAsideOpen((open) => !open),
         'options.search.clear': handleEscape,
+        'options.docs.open': handleOpenContextualDocs,
         'options.nav.home': () => handleTabChange('home'),
         'options.nav.rules': () => handleTabChange('rules'),
         'options.nav.sessions': () => handleTabChange('sessions'),
@@ -207,7 +213,7 @@ export function OptionsContent() {
         'options.nav.importexport': () => handleTabChange('importexport'),
         'options.nav.settings': () => handleTabChange('settings'),
         'options.nav.workspaces': () => handleTabChange('workspaces'),
-    }), [handleTabChange, focusActiveSearch, handleEscape]);
+    }), [handleTabChange, focusActiveSearch, handleEscape, handleOpenContextualDocs]);
 
     useShortcuts(shortcutBindings, {
         scope: 'global',
@@ -247,6 +253,7 @@ export function OptionsContent() {
                     pageTitle={activePageTitle}
                     pageSubtitle={breadcrumb.pageSubtitle}
                     parentHref={breadcrumb.parentHref}
+                    currentTab={currentTab}
                 />
                 <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
                     <main data-testid="options-content" style={{ flex: 1, overflow: 'auto', padding: '20px 20px 0 20px', minWidth: 0 }}>
