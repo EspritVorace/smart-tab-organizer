@@ -20,7 +20,7 @@ La page **Règles de domaine** est le centre névralgique de l'extension. Une r�
 
 ## La liste
 
-Chaque ligne couvre un domaine et affiche son label, son mode de configuration (preset, pack, manuel, demander), sa catégorie (avec emoji et couleur) et son état. Trois actions principales depuis la liste :
+Chaque ligne couvre un domaine et affiche son label, son mode de configuration (preset, manuel, demander, label de repli), sa catégorie (emoji + libellé), sa couleur de groupe et son état. Trois actions principales depuis la liste :
 
 - **Réordonner** par glisser-déposer pour ajuster la priorité (la règle la plus haute gagne en cas de chevauchement).
 - **Activer ou désactiver** une règle individuellement via son toggle, sans la supprimer.
@@ -40,29 +40,31 @@ Cliquez sur **Nouvelle règle** en haut de la liste. L'assistant s'ouvre en quat
 
 ### Étape 1 : Identité
 
-- **Domaine** : le pattern de domaine couvert (par exemple `github.com`, `*.atlassian.net`). Laissez vide pour une règle transverse (cross-domaine).
-- **Label** : nom d'affichage de la règle dans la liste et fallback éventuel pour le nom de groupe.
-- **Catégorie** : choisissez parmi les 14 catégories intégrées (voir [Catégories et packs](/reference/categories-et-packs)). La catégorie donne l'emoji et la couleur du groupe Chrome.
+- **Filtre Domaine** : le pattern de domaine couvert (par exemple `github.com`, `*.atlassian.net`). Laissez vide pour une règle transverse (cross-domaine).
+- **Étiquette** : nom d'affichage de la règle dans la liste, et fallback éventuel pour le nom de groupe.
+- **Catégorie** : choisissez parmi les 14 catégories intégrées (voir [Catégories et packs](/reference/categories-et-packs)). La catégorie donne uniquement l'emoji et le libellé. Elle n'influe pas sur la couleur.
+- **Couleur du groupe d'onglets** : champ distinct de la catégorie. Choisissez parmi les neuf couleurs natives des groupes Chrome (`grey`, `blue`, `red`, `yellow`, `green`, `pink`, `purple`, `cyan`, `orange`).
 
-### Étape 2 : Mode de groupement
+### Étape 2 : Configuration
 
-Trois branches d'entrée pour la même règle :
+Quatre modes de configuration sont proposés via un sélecteur radio :
 
-| Branche | Quand l'utiliser |
+| Mode | Quand l'utiliser |
 |---|---|
 | **Preset** | Site courant déjà couvert par un [preset regex](/reference/presets-regex). Le preset configure automatiquement le mode de nommage et les regex de titre / URL. |
-| **Manuel** | Vous saisissez vous-même la regex et choisissez le mode. Utile pour un site interne ou un cas non couvert par un preset. |
 | **Demander** | L'extension demande le nom du groupe à chaque création. Pratique pour des sites où vous voulez nommer le contexte à la volée. |
+| **Manuel** | Vous saisissez vous-même les regex et choisissez le mode parmi les modes "Intelligent / Titre / URL". Utile pour un site interne ou un cas non couvert par un preset. |
+| **Label de repli** | Aucune regex, aucune extraction : tous les onglets du domaine atterrissent dans un groupe au nom fixe (le label de la règle). |
 
-Pour le détail des six modes de nommage et leurs chaînes de repli, voir [Grouper les onglets](/guides/grouper-onglets#modes-de-nommage).
+Pour le détail des huit modes de nommage et leurs chaînes de repli, voir [Grouper les onglets](/guides/grouper-onglets#modes-de-nommage).
 
-### Étape 3 : Déduplication
+### Étape 3 : Options
 
-Choisissez le **mode de correspondance** (URL exacte, sans paramètres ignorés, inclusion) et, si applicable, la liste des paramètres à ignorer. Voir [Dédupliquer](/guides/dedupliquer#les-trois-modes-de-correspondance) pour les détails.
+Configure la déduplication pour cette règle : toggle d'activation, **mode de correspondance** (URL exacte, sans paramètres ignorés, inclusion) et, si applicable, la liste des paramètres à ignorer. Voir [Dédupliquer](/guides/dedupliquer#les-trois-modes-de-correspondance) pour les détails.
 
-Cette étape peut être désactivée si vous n'avez besoin que du groupement sur ce domaine.
+Vous pouvez laisser la déduplication désactivée si vous n'avez besoin que du groupement sur ce domaine.
 
-### Étape 4 : Récapitulatif
+### Étape 4 : Résumé
 
 Une page de confirmation résume le contenu de la règle avant enregistrement. Vous pouvez revenir aux étapes précédentes via les flèches ou le stepper en haut de l'assistant.
 

@@ -8,7 +8,7 @@ import { Aside, CardGrid, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starli
 <Aside type="tip" title="En bref">
 - Un **workspace** est un conteneur isolé avec ses propres règles, sessions et statistiques.
 - Le workspace **Par défaut** existe toujours et ne peut pas être supprimé.
-- Les **catégories** (emoji + couleur) sont **partagées** entre tous les workspaces, contrairement aux règles qui s'en servent.
+- Les **catégories** (emoji + libellé) sont **partagées** entre tous les workspaces, contrairement aux règles qui s'en servent.
 - Une couleur d'accent par workspace permet de reconnaître d'un coup d'oeil le contexte actif.
 </Aside>
 
@@ -25,7 +25,7 @@ Un espace de travail (ou workspace) permet de séparer deux contextes d'usage sa
 | Paramètres globaux (notifications, langue, thème, action de restauration par défaut) | Non, partagés |
 | Presets regex et packs intégrés | Non, partagés |
 
-Les **catégories** sont fournies par l'extension (14 catégories intégrées, voir [Catégories et packs](/reference/categories-et-packs)) et identiques dans tous les workspaces. Une règle exportée d'un workspace à un autre conserve donc sa couleur et son emoji.
+Les **catégories** sont fournies par l'extension (14 catégories intégrées, voir [Catégories et packs](/reference/categories-et-packs)) et identiques dans tous les workspaces. Une règle exportée d'un workspace à un autre garde donc son emoji et son libellé de catégorie. Sa couleur de groupe, qui est un champ propre à la règle, est aussi préservée.
 
 ## Créer un workspace
 

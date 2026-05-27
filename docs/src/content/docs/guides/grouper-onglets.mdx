@@ -9,7 +9,7 @@ import ConditionsDeclenchement from '../../../components/ConditionsDeclenchement
 <Aside type="tip" title="En bref">
 - Le groupement se déclenche quand vous ouvrez un lien dans un nouvel onglet (clic milieu ou clic droit puis **Ouvrir dans un nouvel onglet**).
 - Trois conditions doivent être réunies : toggle global, règle correspondante, option **Groupement** activée sur la règle.
-- Le nom et le mode de nommage du groupe sont configurés dans la règle. La couleur vient de la catégorie associée.
+- Le nom et le mode de nommage du groupe sont configurés dans la règle. La couleur est un champ propre à la règle, indépendant de la catégorie.
 </Aside>
 
 Quand vous ouvrez un lien depuis un onglet parent, l'extension détecte l'action, consulte vos [règles de domaine](/guides/regles-de-domaine), et place le nouvel onglet dans un groupe Chrome coloré sans intervention manuelle.
@@ -46,33 +46,36 @@ Quand plusieurs règles correspondent au même domaine, la règle placée le plu
 
 ## Couleur du groupe
 
-La couleur est héritée de la **catégorie** associée à la règle. Les catégories sont globales à l'extension (voir [Catégories et packs](/reference/categories-et-packs)) : changer la couleur d'une catégorie affecte toutes les règles qui la référencent.
+La couleur du groupe Chrome est définie directement sur la règle, dans le champ **Couleur du groupe d'onglets** de l'étape **Identité** du wizard. Elle est indépendante de la catégorie : deux règles qui partagent la même catégorie peuvent avoir des couleurs différentes.
 
-Si aucune catégorie n'est définie, Chrome assigne sa couleur par défaut.
+Neuf couleurs sont proposées (les couleurs natives des groupes Chrome) : `grey`, `blue`, `red`, `yellow`, `green`, `pink`, `purple`, `cyan`, `orange`.
 
 ## Modes de nommage
 
-Le nom affiché sur le groupe dépend du **mode de nommage** configuré dans la règle. Six modes existent, regroupés en trois familles dans l'assistant de création.
+Le nom affiché sur le groupe dépend du **mode de nommage** (`groupNameSource`) défini dans la règle. Huit modes existent.
 
-### Intelligent (recommandé)
+### Modes "Intelligent" (recommandés)
 
-L'extension utilise les regex héritées du pack importé (ou du preset sélectionné dans l'assistant) pour extraire un nom depuis le titre ou l'URL de l'onglet parent. C'est le choix par défaut pour les sites courants.
-
-Trois variantes existent selon ce qui se passe si l'extraction échoue :
+L'extension utilise les regex héritées du preset sélectionné dans l'assistant pour extraire un nom depuis le titre ou l'URL de l'onglet parent. Quatre variantes selon ce qui se passe si l'extraction échoue :
 
 | Mode | Étape 1 | Étape 2 | Étape 3 (filet) |
 |---|---|---|---|
 | **Intelligent** | Extraction titre | Extraction URL | Pas de groupage |
+| **Intelligent + Preset** | Extraction titre | Extraction URL | Repli sur le preset sélectionné |
 | **Intelligent + Label** | Extraction titre | Extraction URL | Label de la règle |
 | **Intelligent + Demander** | Extraction titre | Extraction URL | Invite utilisateur, dégroupage si annulation |
 
 <Aside type="tip">
-**Intelligent + Label** garantit qu'un groupe est toujours créé, ce qui évite de retrouver des onglets isolés quand la regex ne correspond pas.
+**Intelligent + Label** et **Intelligent + Preset** garantissent qu'un groupe est toujours créé, ce qui évite de retrouver des onglets isolés quand la regex ne correspond pas.
 </Aside>
 
 ### Demander
 
 Une invite de saisie apparait à chaque création de groupe. Le label de la règle est proposé comme valeur par défaut. Si vous annulez, les onglets qui venaient d'être regroupés sont immédiatement dégroupés.
+
+### Label de repli
+
+Le nom du groupe est tout simplement le **label de la règle**. Aucune regex, aucune extraction : chaque onglet qui matche le domaine atterrit dans un groupe portant ce nom fixe.
 
 ### Titre ou URL (manuel)
 
