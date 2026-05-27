@@ -1,5 +1,5 @@
 import type { KeyboardEvent } from 'react';
-import { Card, Flex, Heading, Text } from '@radix-ui/themes';
+import { Card, Flex, Heading, Kbd, Text } from '@radix-ui/themes';
 import { IconBox } from '@/components/UI/IconBox/IconBox';
 import { getMessage } from '@/utils/i18n';
 import type { QuickActionDef } from './data';
@@ -32,7 +32,8 @@ export function QuickActionCard({
       data-home-quick-action=""
     >
       {action.shortcutLetter && (
-        <kbd
+        <Kbd
+          size="1"
           className={styles.kbd}
           aria-label={getMessage('homepageQuickActionShortcutAriaLabel', [
             action.shortcutLetter.toUpperCase(),
@@ -40,7 +41,7 @@ export function QuickActionCard({
           data-testid={`home-quick-action-${action.id}-kbd`}
         >
           {action.shortcutLetter.toUpperCase()}
-        </kbd>
+        </Kbd>
       )}
       <Card className={styles.actionCard}>
         <Flex direction="column" gap="2">
