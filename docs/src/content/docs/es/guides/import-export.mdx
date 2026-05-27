@@ -1,0 +1,142 @@
+---
+title: Importar / Exportar
+description: Guardar o restaurar reglas, sesiones y espacios de trabajo en formato JSON. Validación con esquema Zod, clasificación new/conflicting/identical, resolución propiedad por propiedad.
+---
+
+import { Aside, CardGrid, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import hubLight from '../../../../assets/screenshots/es-light-settings-misc.png';
+import hubDark from '../../../../assets/screenshots/es-dark-settings-misc.png';
+import importDialogLight from '../../../../assets/screenshots/es-light-rules-import-file-dialog.png';
+import importDialogDark from '../../../../assets/screenshots/es-dark-rules-import-file-dialog.png';
+import importConflictsLight from '../../../../assets/screenshots/es-light-rules-import-text-conflicts.png';
+import importConflictsDark from '../../../../assets/screenshots/es-dark-rules-import-text-conflicts.png';
+
+La página **Importar / Exportar** centraliza los tres flujos de copia de seguridad y restauración. Todos los archivos producidos son JSON, validados al importar mediante esquemas Zod estrictos; no se modifica ningún dato mientras no confirmes.
+
+<ThemeImage
+  lightSrc={hubLight}
+  darkSrc={hubDark}
+  alt="Página Importar / Exportar con sus seis acciones: exportar e importar reglas, sesiones y espacio de trabajo."
+/>
+
+## Reglas
+
+### Exportar reglas
+
+<Tabs>
+  <TabItem label="Todas las reglas">
+Desde la página Reglas o desde Importar / Exportar, pulsa el botón **Exportar**. Todas las reglas del espacio de trabajo activo se serializan en JSON, se copian al portapapeles o se descargan como archivo `.json`, según el sub-botón del split button.
+  </TabItem>
+  <TabItem label="Selección">
+En la página Reglas, marca las reglas a exportar con la selección múltiple. El botón **Exportar** de la barra de acciones en masa se limita a la selección.
+  </TabItem>
+</Tabs>
+
+El formato incluye, para cada regla: dominio, etiqueta, regex de título y de URL, modo de configuración, modo de deduplicación, parámetros ignorados, categoría y estado activado. Sin identificador de espacio de trabajo: una regla es portable entre espacios.
+
+### Importar reglas
+
+<ThemeImage
+  lightSrc={importDialogLight}
+  darkSrc={importDialogDark}
+  alt="Asistente de importación: elegir entre archivo, texto pegado o pack."
+/>
+
+<Steps>
+1. Abre el asistente de importación desde la página Reglas o desde Importar / Exportar.
+2. Elige la fuente: un archivo JSON (arrastrar y soltar o examinar), texto pegado o la galería de packs (consulta [Categorías y packs](/reference/categories-et-packs)).
+3. El asistente valida la estructura y **clasifica** cada regla entrante.
+</Steps>
+
+#### Clasificación
+
+Cada regla entrante se compara con las ya presentes en el espacio de trabajo activo:
+
+| Estado | Definición | Acción propuesta |
+|---|---|---|
+| **Nueva** | Ninguna regla con ese dominio y esa etiqueta en el espacio. | Se añade en la importación. |
+| **En conflicto** | Existe una regla con el mismo dominio y la misma etiqueta, pero una o varias propiedades difieren. | Resolución propiedad por propiedad (ver más abajo). |
+| **Idéntica** | Existe una regla con exactamente los mismos valores. | Se ignora. |
+
+#### Resolución propiedad por propiedad
+
+<ThemeImage
+  lightSrc={importConflictsLight}
+  darkSrc={importConflictsDark}
+  alt="Resolución de un conflicto de importación: elección entre versión existente y versión importada, propiedad por propiedad."
+/>
+
+Para cada regla en conflicto, el asistente muestra una tabla con dos columnas: **Actual** e **Importada**. Eliges, para cada propiedad divergente, cuál conservar. Un botón **Todo desde la importación** o **Todo desde lo existente** permite decidir de golpe sobre la regla entera.
+
+## Sesiones
+
+### Exportar sesiones
+
+El asistente de exportación ofrece tres casillas correspondientes a los tres compartimentos:
+
+| Compartimento | Marcada por defecto |
+|---|---|
+| **Ancladas** | Sí |
+| **Activas** | Sí |
+| **Archivadas** | **No** |
+
+Las sesiones archivadas vienen desmarcadas por defecto para que las exportaciones ligeras (copia de seguridad del día a día) no se lleven todo el historial. Marca **Archivadas** si quieres una exportación completa.
+
+La exportación también ofrece un campo **Nota** opcional, incrustado en el archivo y mostrado al importar.
+
+### Importar sesiones
+
+Misma mecánica que las reglas: elección de fuente (archivo, texto pegado), validación con esquema Zod, clasificación new / conflicting / identical según el nombre y el contenido. La resolución se hace caso por caso: conservar la versión existente, sobrescribir o añadir con un sufijo en el nombre.
+
+<Aside type="note">
+Las sesiones importadas van al **espacio de trabajo activo**. Para importar en otro espacio, cambia a él primero.
+</Aside>
+
+## Espacios de trabajo
+
+### Exportar un espacio de trabajo
+
+La exportación de un espacio produce un **archivo autónomo** con toda la configuración del mismo: reglas, sesiones, ajustes y, opcionalmente, estadísticas.
+
+<Steps>
+1. Desde la página Espacios de trabajo o Importar / Exportar, abre **Exportar el espacio activo**.
+2. El diálogo muestra un resumen (número de reglas, número de sesiones).
+3. Opciones: **Nota** (texto libre incrustado) e **Incluir las estadísticas** (desmarcada por defecto, los contadores no son imprescindibles para el traspaso y pueden considerarse personales).
+4. Confirma. El archivo producido sigue el formato `smarttab_organizer_workspace_{slug}.json`.
+</Steps>
+
+La exportación afecta siempre al **espacio activo**. Para exportar otro espacio, cambia a él previamente.
+
+### Importar un espacio de trabajo
+
+<Steps>
+1. Abre **Importar un espacio de trabajo** desde la página Espacios de trabajo o Importar / Exportar.
+2. Selecciona la fuente (archivo JSON o texto pegado).
+3. El diálogo valida la estructura y muestra un resumen (reglas, sesiones, presencia de estadísticas, nota si la hay).
+4. Elige el modo de importación (ver más abajo) y confirma.
+</Steps>
+
+#### Modos de importación
+
+| Modo | Comportamiento |
+|---|---|
+| **Nuevo espacio de trabajo** | Crea un espacio nuevo con el nombre y el color del archivo. Puedes sobrescribir el nombre en el campo **Nombre** antes de confirmar. |
+| **Fusionar con el espacio activo** | Añade las reglas y sesiones del archivo al espacio activo. Los conflictos (ID ya presente) se gestionan caso por caso. |
+
+<Aside type="caution">
+El modo **Fusionar** modifica el espacio activo. Si quieres preservar su contenido actual, usa mejor **Nuevo espacio de trabajo**.
+</Aside>
+
+## Formato JSON
+
+Todos los archivos son JSON Unicode, legibles a simple vista. El esquema de cada tipo de archivo se define en `src/schemas/importExport.ts`. El esquema usado al importar es deliberadamente **relajado** (sin refinements de nivel formulario), para tolerar archivos producidos por versiones anteriores.
+
+## Siguiente paso
+
+<CardGrid>
+  <LinkCard title="Reglas de dominio" href="/guides/regles-de-domaine" description="El CRUD y la selección múltiple." />
+  <LinkCard title="Sesiones" href="/guides/sessions" description="Los tres compartimentos y el archivado." />
+  <LinkCard title="Espacios de trabajo" href="/guides/workspaces" description="Aislar por contexto para exportaciones específicas." />
+  <LinkCard title="Categorías y packs" href="/reference/categories-et-packs" description="La otra vía de importación: la galería de packs integrados." />
+</CardGrid>

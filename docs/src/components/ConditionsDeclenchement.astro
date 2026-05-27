@@ -7,18 +7,85 @@ interface Props {
 
 const { feature } = Astro.props;
 
+const pathname = Astro.url.pathname;
+const locale: 'fr' | 'en' | 'es' = pathname.startsWith('/en/')
+  ? 'en'
+  : pathname.startsWith('/es/')
+    ? 'es'
+    : 'fr';
+
 const labels = {
-  groupement: 'Groupement',
-  deduplication: 'Déduplication',
+  fr: { groupement: 'Groupement', deduplication: 'Déduplication' },
+  en: { groupement: 'Grouping', deduplication: 'Deduplication' },
+  es: { groupement: 'Agrupación', deduplication: 'Deduplicación' },
 };
-const label = labels[feature];
+
+const copy = {
+  fr: {
+    step1: (toggle: string) => ({
+      before: 'Le ',
+      bold: `toggle de ${toggle} global`,
+      after: " est activé (popup ou page Paramètres).",
+    }),
+    step2: {
+      before: 'Une ',
+      bold: 'règle de domaine',
+      after: " correspond au domaine de l'onglet ouvert.",
+    },
+    step3: (label: string) => ({
+      before: 'Cette règle a son option ',
+      bold: label,
+      after: ' activée.',
+    }),
+  },
+  en: {
+    step1: (toggle: string) => ({
+      before: 'The ',
+      bold: `global ${toggle} toggle`,
+      after: ' is on (popup or Settings page).',
+    }),
+    step2: {
+      before: 'A ',
+      bold: 'domain rule',
+      after: ' matches the domain of the tab being opened.',
+    },
+    step3: (label: string) => ({
+      before: 'That rule has its ',
+      bold: label,
+      after: ' option enabled.',
+    }),
+  },
+  es: {
+    step1: (toggle: string) => ({
+      before: 'El ',
+      bold: `interruptor global de ${toggle}`,
+      after: ' está activado (popup o página Ajustes).',
+    }),
+    step2: {
+      before: 'Una ',
+      bold: 'regla de dominio',
+      after: ' coincide con el dominio de la pestaña abierta.',
+    },
+    step3: (label: string) => ({
+      before: 'Esa regla tiene su opción ',
+      bold: label,
+      after: ' activada.',
+    }),
+  },
+};
+
+const label = labels[locale][feature];
 const toggleName = label.toLowerCase();
+const t = copy[locale];
+const s1 = t.step1(toggleName);
+const s2 = t.step2;
+const s3 = t.step3(label);
 ---
 
 <Steps>
   <ol>
-    <li>Le <strong>toggle de {toggleName} global</strong> est activé (popup ou page Paramètres).</li>
-    <li>Une <strong>règle de domaine</strong> correspond au domaine de l'onglet ouvert.</li>
-    <li>Cette règle a son option <strong>{label}</strong> activée.</li>
+    <li>{s1.before}<strong>{s1.bold}</strong>{s1.after}</li>
+    <li>{s2.before}<strong>{s2.bold}</strong>{s2.after}</li>
+    <li>{s3.before}<strong>{s3.bold}</strong>{s3.after}</li>
   </ol>
 </Steps>
