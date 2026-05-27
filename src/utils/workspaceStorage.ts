@@ -15,6 +15,10 @@ export const DEFAULT_WORKSPACE_ID = 'default';
  * Each entry represents a key that lived at the root of `storage.local`
  * before workspaces were introduced and is now prefixed with
  * `local:ws:{wsId}:`.
+ *
+ * `categories` and `categoriesSeeded` are intentionally absent: rule
+ * categories are global constants (sourced from `src/data/categories.json`)
+ * and must resolve to the same value regardless of the active workspace.
  */
 export const WORKSPACE_SCOPED_KEYS = [
   'globalGroupingEnabled',
@@ -23,8 +27,6 @@ export const WORKSPACE_SCOPED_KEYS = [
   'deduplicationKeepStrategy',
   'defaultRestoreAction',
   'domainRules',
-  'categories',
-  'categoriesSeeded',
   'notifyOnGrouping',
   'notifyOnDeduplication',
   'notifyOnOrganize',
@@ -70,6 +72,21 @@ export interface ScopedItems {
   popupPinnedEmptyCollapsedItem: WxtStorageItem<boolean, Record<string, unknown>>;
 }
 
+/**
+ * Rule categories are global constants (not workspace-scoped). They live at
+ * the unprefixed legacy keys (`local:categories`, `local:categoriesSeeded`)
+ * and are reused as-is across all workspaces, so switching workspace does
+ * not require re-seeding or re-loading the cache.
+ */
+const globalCategoriesItem = storage.defineItem<RuleCategory[]>(
+  'local:categories',
+  { defaultValue: defaultAppSettings.categories },
+);
+const globalCategoriesSeededItem = storage.defineItem<boolean>(
+  'local:categoriesSeeded',
+  { defaultValue: false },
+);
+
 const scopedItemsCache = new Map<string, ScopedItems>();
 
 /**
@@ -106,14 +123,8 @@ export function defineWorkspaceItems(wsId: string): ScopedItems {
       workspaceStorageKey(wsId, 'domainRules'),
       { defaultValue: defaultAppSettings.domainRules },
     ),
-    categoriesItem: storage.defineItem<RuleCategory[]>(
-      workspaceStorageKey(wsId, 'categories'),
-      { defaultValue: defaultAppSettings.categories },
-    ),
-    categoriesSeededItem: storage.defineItem<boolean>(
-      workspaceStorageKey(wsId, 'categoriesSeeded'),
-      { defaultValue: false },
-    ),
+    categoriesItem: globalCategoriesItem,
+    categoriesSeededItem: globalCategoriesSeededItem,
     notifyOnGroupingItem: storage.defineItem<boolean>(
       workspaceStorageKey(wsId, 'notifyOnGrouping'),
       { defaultValue: defaultAppSettings.notifyOnGrouping },
