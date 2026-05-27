@@ -259,6 +259,22 @@ describe('bucket-aware storage', () => {
     expect(active.isArchived).toBe(false);
   });
 
+  it('archiveSession preserves updatedAt (real last-edit timestamp)', async () => {
+    const originalUpdatedAt = '2020-01-01T00:00:00.000Z';
+    await addSession(makeSession({ id: 's', updatedAt: originalUpdatedAt }));
+    await archiveSession('s');
+    const [archived] = await loadArchivedSessions();
+    expect(archived.updatedAt).toBe(originalUpdatedAt);
+  });
+
+  it('unarchiveSession preserves updatedAt (real last-edit timestamp)', async () => {
+    const originalUpdatedAt = '2020-01-01T00:00:00.000Z';
+    await addSession(makeSession({ id: 's', isArchived: true, updatedAt: originalUpdatedAt }));
+    await unarchiveSession('s');
+    const [active] = await loadActiveSessions();
+    expect(active.updatedAt).toBe(originalUpdatedAt);
+  });
+
   it('pinSession is a no-op when the session is archived', async () => {
     await addSession(makeSession({ id: 's', isArchived: true }));
     await pinSession('s');
