@@ -155,6 +155,15 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'options',
     scope: 'global',
   },
+  'options.docs.open': {
+    id: 'options.docs.open',
+    defaultBindings: ['F1'],
+    descriptionKey: 'shortcutDescOpenDocs',
+    group: 'options',
+    scope: 'global',
+    allowInTypingTarget: true,
+    allowWhenDialogOpen: true,
+  },
 
   // List-level: Rules
   'list.rules.navigate': {
