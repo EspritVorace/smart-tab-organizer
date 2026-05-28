@@ -87,6 +87,7 @@ export default defineConfig({
             { slug: 'reference/raccourcis-clavier' },
             { slug: 'reference/categories-et-packs' },
             { slug: 'reference/presets-regex' },
+            { slug: 'reference/licences-open-source' },
           ],
         },
         {

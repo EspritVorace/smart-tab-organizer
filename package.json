@@ -1,6 +1,7 @@
 {
   "name": "smart-tab-organizer",
   "version": "1.2.1",
+  "license": "GPL-3.0-only",
   "packageManager": "pnpm@11.1.2",
   "type": "module",
   "engines": {
@@ -21,6 +22,8 @@
     "build:firefox": "wxt build -b firefox",
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
+    "licenses:generate": "node scripts/generate-third-party-licenses.mjs",
+    "prebuild": "node scripts/generate-third-party-licenses.mjs",
     "compile": "tsc --noEmit",
     "lint": "eslint src tests --max-warnings=0",
     "lint:fix": "eslint src tests --fix",
@@ -71,6 +74,7 @@
     "eslint-plugin-sonarjs": "^4.0.3",
     "happy-dom": "^20.9.0",
     "http-server": "14.1.1",
+    "license-checker-rseidelsohn": "^5.0.1",
     "playwright-ctrf-json-reporter": "^0.0.29",
     "postcss": "^8.5.14",
     "sharp": "^0.34.5",
