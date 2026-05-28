@@ -287,6 +287,27 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'list-sessions',
     scope: 'widget:session-card',
   },
+  'sessionCard.moveToFirst': {
+    id: 'sessionCard.moveToFirst',
+    defaultBindings: ['Mod+ArrowUp'],
+    descriptionKey: 'shortcutDescSessionMoveToFirst',
+    group: 'list-sessions',
+    scope: 'widget:session-card',
+  },
+  'sessionCard.moveToLast': {
+    id: 'sessionCard.moveToLast',
+    defaultBindings: ['Mod+ArrowDown'],
+    descriptionKey: 'shortcutDescSessionMoveToLast',
+    group: 'list-sessions',
+    scope: 'widget:session-card',
+  },
+  'sessionCard.archive': {
+    id: 'sessionCard.archive',
+    defaultBindings: ['a'],
+    descriptionKey: 'shortcutDescSessionArchive',
+    group: 'list-sessions',
+    scope: 'widget:session-card',
+  },
   'list.sessions.reorderKeyboard': {
     id: 'list.sessions.reorderKeyboard',
     defaultBindings: ['Space'],

@@ -512,6 +512,14 @@ export function SessionsPage({
     await reload();
   }, [reload]);
 
+  const handleMoveToFirstFromPage = useCallback((session: Session) => {
+    void updateOrder(moveSessionToFirstInGroup(sessions, session.id));
+  }, [sessions, updateOrder]);
+
+  const handleMoveToLastFromPage = useCallback((session: Session) => {
+    void updateOrder(moveSessionToLastInGroup(sessions, session.id));
+  }, [sessions, updateOrder]);
+
   const handleArchive = useCallback(async (session: Session) => {
     await archiveSession(session.id);
     await reload();
@@ -572,6 +580,19 @@ export function SessionsPage({
         if (!focused || focused.isArchived) return;
         const togglePin = focused.isPinned ? handleUnpin : handlePin;
         togglePin(focused).catch(() => {});
+      },
+      'sessionCard.moveToFirst': () => {
+        const focused = getFocusedSession();
+        if (focused) handleMoveToFirstFromPage(focused);
+      },
+      'sessionCard.moveToLast': () => {
+        const focused = getFocusedSession();
+        if (focused) handleMoveToLastFromPage(focused);
+      },
+      'sessionCard.archive': () => {
+        const focused = getFocusedSession();
+        if (!focused || focused.isArchived) return;
+        handleArchive(focused).catch(() => {});
       },
     },
     { scope: 'widget:session-card' },
