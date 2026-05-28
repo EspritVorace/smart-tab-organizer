@@ -262,6 +262,26 @@ export function DomainRulesPage({
           });
         }
       },
+      'ruleCard.moveToFirst': () => {
+        const focused = getFocusedRule();
+        if (focused) handleMoveToFirst(focused.rule.id);
+      },
+      'ruleCard.moveToLast': () => {
+        const focused = getFocusedRule();
+        if (focused) handleMoveToLast(focused.rule.id);
+      },
+      'ruleCard.moveToFirstOfDomain': () => {
+        const focused = getFocusedRule();
+        if (!focused) return;
+        if (getRulesForRootDomain(syncSettings.domainRules, focused.rule.domainFilter).length <= 1) return;
+        handleMoveToFirstOfDomain(focused.rule.id);
+      },
+      'ruleCard.moveToLastOfDomain': () => {
+        const focused = getFocusedRule();
+        if (!focused) return;
+        if (getRulesForRootDomain(syncSettings.domainRules, focused.rule.domainFilter).length <= 1) return;
+        handleMoveToLastOfDomain(focused.rule.id);
+      },
     },
     { scope: 'widget:rule-card' },
   );
