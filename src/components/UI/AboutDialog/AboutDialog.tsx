@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Badge, Button, Dialog, Flex, Heading, Text } from '@radix-ui/themes';
-import { ArrowUpRight, BookOpen, Bug, Scale } from 'lucide-react';
+import { ArrowUpRight, BookOpen, Bug, ChevronDown, Scale } from 'lucide-react';
+import * as Collapsible from '@radix-ui/react-collapsible';
 
 function GithubMark({ size = 14 }: { size?: number }) {
   return (
@@ -248,6 +249,7 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
 
   const [bundledPackages, setBundledPackages] = useState<ThirdPartyPackage[]>([]);
   const [devPackages, setDevPackages] = useState<ThirdPartyPackage[]>([]);
+  const [devToolsOpen, setDevToolsOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -274,6 +276,13 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
     ...sectionTitleStyle,
     fontSize: '10px',
     margin: '16px 0 8px',
+  };
+  const subSectionLabelStyle: React.CSSProperties = {
+    fontSize: '10px',
+    fontFamily: 'var(--code-font-family)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.10em',
+    fontWeight: 500,
   };
 
   return (
@@ -315,6 +324,27 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
           .about-dialog-author-link:hover {
             color: var(--accent-11);
             text-decoration: underline;
+          }
+          .about-dialog-disclosure {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 16px 0 8px;
+            padding: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--gray-11);
+            transition: color 80ms ease;
+          }
+          .about-dialog-disclosure:hover {
+            color: var(--gray-12);
+          }
+          .about-dialog-disclosure__chevron {
+            transition: transform 120ms ease;
+          }
+          .about-dialog-disclosure[data-state="open"] .about-dialog-disclosure__chevron {
+            transform: rotate(180deg);
           }
         `}</style>
 
@@ -461,10 +491,32 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
             )}
 
             {devPackages.length > 0 && (
-              <>
-                <h4 style={subSectionTitleStyle}>{getMessage('aboutDialogSectionCreditsDevTools')}</h4>
-                <CreditChips packages={devPackages} />
-              </>
+              <Collapsible.Root open={devToolsOpen} onOpenChange={setDevToolsOpen}>
+                <Collapsible.Trigger asChild>
+                  <button type="button" className="about-dialog-disclosure">
+                    <span style={subSectionLabelStyle}>
+                      {getMessage('aboutDialogSectionCreditsDevTools')}
+                    </span>
+                    <span
+                      style={{
+                        ...subSectionLabelStyle,
+                        color: 'var(--gray-10)',
+                        letterSpacing: 0,
+                      }}
+                    >
+                      ({devPackages.length})
+                    </span>
+                    <ChevronDown
+                      size={13}
+                      aria-hidden="true"
+                      className="about-dialog-disclosure__chevron"
+                    />
+                  </button>
+                </Collapsible.Trigger>
+                <Collapsible.Content>
+                  <CreditChips packages={devPackages} />
+                </Collapsible.Content>
+              </Collapsible.Root>
             )}
           </div>
         </div>
