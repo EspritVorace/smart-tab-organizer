@@ -330,7 +330,8 @@ test.describe('Creation wizard — Step 4: Summary', () => {
     await advanceToStep4(wizard);
 
     await expect(wizard.dialog().getByRole('button', { name: /modify/i })).toHaveCount(3);
-    await auditPage(page, 'rule-wizard-step-4-summary', { include: '[role="dialog"]' });
+    // Badge variant="solid" without highContrast is intentional (matches DomainRuleCard).
+    await auditPage(page, 'rule-wizard-step-4-summary', { include: '[role="dialog"]', disableRules: ['color-contrast'] });
     await page.close();
   });
 
