@@ -79,7 +79,6 @@ function buildWorkspaceSchema(): ImportJsonSchema {
   describe(p?.workspace, 'jsonDocWorkspace');
   describe(p?.settings, 'jsonDocSettings');
   describe(p?.domainRules, 'jsonDocDomainRules');
-  describe(p?.categories, 'jsonDocCategories');
   describe(p?.sessions, 'jsonDocSessions');
   describe(p?.statistics, 'jsonDocStatistics');
   describeDomainRuleItems(p?.domainRules?.items);

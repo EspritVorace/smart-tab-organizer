@@ -99,7 +99,7 @@ export const importWorkspaceDataSchema = z.object({
   workspace: importWorkspaceMetaSchema,
   settings: importWorkspaceSettingsSchema,
   domainRules: z.array(importDomainRuleSchema),
-  categories: z.array(ruleCategorySchema),
+  categories: z.array(ruleCategorySchema).optional(),
   sessions: z.array(sessionSchema),
   statistics: importWorkspaceStatisticsSchema.optional(),
 });

@@ -64,6 +64,7 @@ export function ExportWizardShell<TItem extends { id: string }>({
       icon={icon}
       title={title}
       description={description}
+      maxWidth={680}
     >
       <WizardModal.Body>
         <Box>

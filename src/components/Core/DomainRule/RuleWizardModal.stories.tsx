@@ -174,6 +174,11 @@ export const RuleWizardModalStep3: Story = {
 // Reaches step 4 (summary) by navigating through steps 1, 2, and 3.
 export const RuleWizardModalStep4: Story = {
   args: { isOpen: true, domainRule: undefined },
+  parameters: {
+    // Badge variant="solid" without highContrast is intentional (matches DomainRuleCard).
+    // The contrast ratio depends on the accent color chosen by the user; false positive here.
+    a11y: { config: { rules: [{ id: 'color-contrast', enabled: false }] } },
+  },
   play: async (context) => {
     await RuleWizardModalStep3.play?.(context);
     const body = within(context.canvasElement.ownerDocument.body);

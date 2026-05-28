@@ -31,7 +31,6 @@ const EMPTY_PAYLOAD: WorkspaceExportPayload = {
     notifyOnOrganize: true,
   },
   domainRules: [],
-  categories: [],
   sessions: [],
 };
 
@@ -85,7 +84,7 @@ export function ExportWorkspaceDialog({ open, onOpenChange }: ExportWorkspaceDia
       title={getMessage('workspaceExportTitle')}
       description={getMessage('workspaceExportDescription', [active?.name ?? ''])}
       data-testid="workspace-export-dialog"
-      maxWidth={520}
+      maxWidth={640}
     >
       <WizardModal.Body>
         <Box>
