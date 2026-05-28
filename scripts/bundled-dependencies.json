@@ -73,7 +73,7 @@
   },
   {
     "name": "@hookform/resolvers",
-    "version": "5.2.2"
+    "version": "5.4.0"
   },
   {
     "name": "@lezer/common",
@@ -97,7 +97,7 @@
   },
   {
     "name": "@preact/signals-core",
-    "version": "1.14.1"
+    "version": "1.14.2"
   },
   {
     "name": "@radix-ui/number",
@@ -333,7 +333,7 @@
   },
   {
     "name": "@wxt-dev/browser",
-    "version": "0.1.40"
+    "version": "0.1.42"
   },
   {
     "name": "@wxt-dev/storage",
@@ -441,7 +441,7 @@
   },
   {
     "name": "lucide-react",
-    "version": "1.14.0"
+    "version": "1.16.0"
   },
   {
     "name": "markdown-it",
@@ -473,7 +473,7 @@
   },
   {
     "name": "react",
-    "version": "19.2.5"
+    "version": "19.2.6"
   },
   {
     "name": "react-accessible-treeview",
@@ -481,11 +481,11 @@
   },
   {
     "name": "react-dom",
-    "version": "19.2.5"
+    "version": "19.2.6"
   },
   {
     "name": "react-hook-form",
-    "version": "7.75.0"
+    "version": "7.76.1"
   },
   {
     "name": "react-remove-scroll",
@@ -549,7 +549,7 @@
   },
   {
     "name": "wxt",
-    "version": "0.20.25"
+    "version": "0.20.26"
   },
   {
     "name": "yaml",

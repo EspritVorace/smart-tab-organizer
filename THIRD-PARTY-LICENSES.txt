@@ -519,7 +519,7 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ==============================================================================
-@hookform/resolvers 5.2.2
+@hookform/resolvers 5.4.0
 License: MIT
 Author: bluebill1049
 Repository: https://github.com/react-hook-form/resolvers
@@ -693,7 +693,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 ==============================================================================
-@preact/signals-core 1.14.1
+@preact/signals-core 1.14.2
 License: MIT
 Repository: https://github.com/preactjs/signals
 ==============================================================================
@@ -2172,33 +2172,70 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ==============================================================================
-@wxt-dev/browser 0.1.40
+@wxt-dev/browser 0.1.42
 License: MIT
 Author: Aaron Klinker
 Repository: https://github.com/wxt-dev/wxt
 ==============================================================================
 
-MIT License
+# `@wxt-dev/browser`
 
-Copyright (c) 2023 Aaron
+Provides access to the `browser` or `chrome` extension APIs and related types.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+```ts
+import { browser, Browser } from '@wxt-dev/browser';
+// Or if you're using WXT:
+// import { browser, Browser } from 'wxt/browser';
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+console.log(browser.runtime.id);
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+const onMessage = (message: any, sender: Browser.runtime.MessageSender) => {
+  console.log(message);
+};
+browser.runtime.onMessage.addListener(onMessage);
+```
+
+## Installation
+
+If you're using WXT, this package is already installed, you don't need to install it manually.
+
+Otherwise, you can install the package from NPM:
+
+```sh
+pnpm install @wxt-dev/browser
+```
+
+## Upgrading to Latest Types
+
+Just run:
+
+```sh
+pnpm upgrade @wxt-dev/browser
+```
+
+This should update both the manually installed version and the subdependency inside WXT.
+
+## Contributing
+
+### Code Generation
+
+Types are generated based on the `@types/chrome` package, and with modifications specifically for use with WXT.
+
+### Updating `@types/chrome` Version
+
+You don't need to do anything! [A github action](https://github.com/wxt-dev/wxt/actions/workflows/update-browser-package.yml) is ran every day to generate and publish this package using the latest `@types/chrome` version.
+
+You can manually generate types via:
+
+```sh
+pnpm gen
+```
+
+### Why not just use `@types/chrome`?
+
+With WXT, you must import the `browser` variable to use the extension APIs. The way `@types/chrome` is implemented forces you to define a global `chrome` variable. With WXT, this isn't acceptable, we don't want to pollute the global (type) scope or introduce conflicts with auto-imports.
+
+Additionally, WXT overrides types to provide additional type safety for some APIs, like `browser.runtime.getURL` and `browser.i18n.getMessage`. With `@types/chrome`'s nested namespace approach, it's not possible to override the types for those functions.
 
 ==============================================================================
 @wxt-dev/storage 1.2.8
@@ -2943,7 +2980,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
 ==============================================================================
-lucide-react 1.14.0
+lucide-react 1.16.0
 License: ISC
 Author: Eric Fennis
 Repository: https://github.com/lucide-icons/lucide
@@ -3218,7 +3255,7 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ==============================================================================
-react 19.2.5
+react 19.2.6
 License: MIT
 Repository: https://github.com/facebook/react
 ==============================================================================
@@ -3263,7 +3300,7 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ==============================================================================
-react-dom 19.2.5
+react-dom 19.2.6
 License: MIT
 Repository: https://github.com/facebook/react
 ==============================================================================
@@ -3291,7 +3328,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ==============================================================================
-react-hook-form 7.75.0
+react-hook-form 7.76.1
 License: MIT
 Author: Beier
 Repository: https://github.com/react-hook-form/react-hook-form
@@ -3769,7 +3806,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 ==============================================================================
-wxt 0.20.25
+wxt 0.20.26
 License: MIT
 Author: Aaron Klinker
 Repository: https://github.com/wxt-dev/wxt
