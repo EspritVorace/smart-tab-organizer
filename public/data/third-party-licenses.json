@@ -89,7 +89,7 @@
   },
   {
     "name": "@hookform/resolvers",
-    "version": "5.2.2",
+    "version": "5.4.0",
     "license": "MIT",
     "publisher": "bluebill1049",
     "repository": "https://github.com/react-hook-form/resolvers",
@@ -105,7 +105,7 @@
   },
   {
     "name": "@playwright/test",
-    "version": "1.59.1",
+    "version": "1.60.0",
     "license": "Apache-2.0",
     "publisher": "Microsoft Corporation",
     "repository": "https://github.com/microsoft/playwright",
@@ -153,7 +153,7 @@
   },
   {
     "name": "@storybook/addon-a11y",
-    "version": "10.3.6",
+    "version": "10.4.1",
     "license": "MIT",
     "publisher": "",
     "repository": "https://github.com/storybookjs/storybook",
@@ -161,7 +161,7 @@
   },
   {
     "name": "@storybook/addon-docs",
-    "version": "10.3.6",
+    "version": "10.4.1",
     "license": "MIT",
     "publisher": "",
     "repository": "https://github.com/storybookjs/storybook",
@@ -169,7 +169,7 @@
   },
   {
     "name": "@storybook/react-vite",
-    "version": "10.3.6",
+    "version": "10.4.1",
     "license": "MIT",
     "publisher": "",
     "repository": "https://github.com/storybookjs/storybook",
@@ -177,7 +177,7 @@
   },
   {
     "name": "@storybook/react",
-    "version": "10.3.6",
+    "version": "10.4.1",
     "license": "MIT",
     "publisher": "",
     "repository": "https://github.com/storybookjs/storybook",
@@ -185,7 +185,7 @@
   },
   {
     "name": "@storybook/test-runner",
-    "version": "0.24.3",
+    "version": "0.24.4",
     "license": "MIT",
     "publisher": "shilman",
     "repository": "https://github.com/storybookjs/test-runner",
@@ -225,7 +225,7 @@
   },
   {
     "name": "@types/react",
-    "version": "19.2.14",
+    "version": "19.2.15",
     "license": "MIT",
     "publisher": "",
     "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped",
@@ -233,7 +233,7 @@
   },
   {
     "name": "@vitejs/plugin-react",
-    "version": "6.0.1",
+    "version": "6.0.2",
     "license": "MIT",
     "publisher": "Evan You",
     "repository": "https://github.com/vitejs/vite-plugin-react",
@@ -241,7 +241,7 @@
   },
   {
     "name": "@vitest/coverage-v8",
-    "version": "4.1.5",
+    "version": "4.1.7",
     "license": "MIT",
     "publisher": "Anthony Fu",
     "repository": "https://github.com/vitest-dev/vitest",
@@ -249,7 +249,7 @@
   },
   {
     "name": "@vitest/eslint-plugin",
-    "version": "1.6.16",
+    "version": "1.6.18",
     "license": "MIT",
     "publisher": "Verite Mugabo",
     "repository": "https://github.com/vitest-dev/eslint-plugin-vitest",
@@ -313,7 +313,7 @@
   },
   {
     "name": "eslint-plugin-playwright",
-    "version": "2.10.2",
+    "version": "2.10.4",
     "license": "MIT",
     "publisher": "Mark Skelton",
     "repository": "https://github.com/mskelton/eslint-plugin-playwright",
@@ -337,7 +337,7 @@
   },
   {
     "name": "eslint",
-    "version": "10.3.0",
+    "version": "10.4.0",
     "license": "MIT",
     "publisher": "Nicholas C. Zakas",
     "repository": "https://github.com/eslint/eslint",
@@ -369,7 +369,7 @@
   },
   {
     "name": "lucide-react",
-    "version": "1.14.0",
+    "version": "1.16.0",
     "license": "ISC",
     "publisher": "Eric Fennis",
     "repository": "https://github.com/lucide-icons/lucide",
@@ -393,7 +393,7 @@
   },
   {
     "name": "postcss",
-    "version": "8.5.14",
+    "version": "8.5.15",
     "license": "MIT",
     "publisher": "Andrey Sitnik",
     "repository": "https://github.com/postcss/postcss",
@@ -409,7 +409,7 @@
   },
   {
     "name": "react-dom",
-    "version": "19.2.5",
+    "version": "19.2.6",
     "license": "MIT",
     "publisher": "",
     "repository": "https://github.com/facebook/react",
@@ -417,7 +417,7 @@
   },
   {
     "name": "react-hook-form",
-    "version": "7.75.0",
+    "version": "7.76.1",
     "license": "MIT",
     "publisher": "Beier",
     "repository": "https://github.com/react-hook-form/react-hook-form",
@@ -425,7 +425,7 @@
   },
   {
     "name": "react",
-    "version": "19.2.5",
+    "version": "19.2.6",
     "license": "MIT",
     "publisher": "",
     "repository": "https://github.com/facebook/react",
@@ -449,7 +449,7 @@
   },
   {
     "name": "storybook",
-    "version": "10.3.6",
+    "version": "10.4.1",
     "license": "MIT",
     "publisher": "",
     "repository": "https://github.com/storybookjs/storybook",
@@ -457,7 +457,7 @@
   },
   {
     "name": "typescript-eslint",
-    "version": "8.59.2",
+    "version": "8.60.0",
     "license": "MIT",
     "publisher": "",
     "repository": "https://github.com/typescript-eslint/typescript-eslint",
@@ -473,7 +473,7 @@
   },
   {
     "name": "vite",
-    "version": "8.0.10",
+    "version": "8.0.14",
     "license": "MIT",
     "publisher": "Evan You",
     "repository": "https://github.com/vitejs/vite",
@@ -489,7 +489,7 @@
   },
   {
     "name": "vitest",
-    "version": "4.1.5",
+    "version": "4.1.7",
     "license": "MIT",
     "publisher": "Anthony Fu",
     "repository": "https://github.com/vitest-dev/vitest",
@@ -505,7 +505,7 @@
   },
   {
     "name": "wxt",
-    "version": "0.20.25",
+    "version": "0.20.26",
     "license": "MIT",
     "publisher": "Aaron Klinker",
     "repository": "https://github.com/wxt-dev/wxt",
