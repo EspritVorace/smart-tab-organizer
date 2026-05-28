@@ -1,4 +1,4 @@
-import { Box, Flex, Heading, IconButton } from '@radix-ui/themes';
+import { Box, Flex, Heading, IconButton, Kbd, Tooltip } from '@radix-ui/themes';
 import { Settings } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 
@@ -36,17 +36,19 @@ export function PopupHeader({ title, onSettingsOpen }: PopupHeaderProps) {
           {title}
         </Heading>
       </Flex>
-      <IconButton
-        data-testid="popup-header-btn-settings"
-        variant="ghost"
-        color="gray"
-        size="2"
-        onClick={onSettingsOpen}
-        title={getMessage('openOptions')}
-        aria-label={getMessage('openOptions')}
-      >
-        <Settings size={18} />
-      </IconButton>
+      <Tooltip content={<Flex align="center" gap="2" aria-hidden="true">{getMessage('openOptions')}<Kbd>P</Kbd></Flex>}>
+        <IconButton
+          data-testid="popup-header-btn-settings"
+          variant="ghost"
+          color="gray"
+          size="2"
+          onClick={onSettingsOpen}
+          aria-label={getMessage('openOptions')}
+          aria-keyshortcuts="P"
+        >
+          <Settings size={18} />
+        </IconButton>
+      </Tooltip>
     </Flex>
   );
 }

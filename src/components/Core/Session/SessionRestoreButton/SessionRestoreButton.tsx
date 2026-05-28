@@ -69,7 +69,7 @@ export function SessionRestoreButton({
   const primaryAriaLabel = getMessage(currentOption.keyLabel);
 
   const restoreTooltip = (
-    <Flex align="center" gap="2">
+    <Flex align="center" gap="2" aria-hidden="true">
       {getMessage(currentOption.keyLabel)}
       <Kbd>{restoreShortcuts[defaultRestoreAction]}</Kbd>
     </Flex>
@@ -149,7 +149,7 @@ export function SessionRestoreButton({
     <Flex align="center" gap="1">
       <Tooltip
         content={
-          <Flex align="center" gap="2">
+          <Flex align="center" gap="2" aria-hidden="true">
             {getMessage('sessionRefresh')}
             <Kbd>U</Kbd>
           </Flex>
