@@ -3,7 +3,7 @@ SmartTab Organizer - Third-party licenses
 ==============================================================================
 
 SmartTab Organizer is distributed under the GNU General Public License v3.0
-(see LICENSE.txt). It bundles the third-party open source components listed
+(see LICENSE.txt). It builds on the third-party open source components listed
 below. Their copyright notices and license texts are reproduced verbatim, as
 required by their respective licenses.
 
