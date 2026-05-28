@@ -62,6 +62,8 @@ export interface JsonCodeEditorProps {
   hasError?: boolean;
   /** Accessible name for the editing area. */
   ariaLabel?: string;
+  /** Focus the editing area once it mounts (e.g. when entering text mode). */
+  focusOnMount?: boolean;
 }
 
 /** Accessible fold marker: a focusable button announced by screen readers. */
@@ -116,6 +118,7 @@ export function JsonCodeEditor({
   placeholder,
   hasError = false,
   ariaLabel,
+  focusOnMount = false,
 }: JsonCodeEditorProps) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === 'dark';
@@ -203,6 +206,7 @@ export function JsonCodeEditor({
     const view = new EditorView({ state, parent: containerRef.current });
     viewRef.current = view;
     applyAutoFold(view);
+    if (focusOnMount) view.focus();
 
     return () => {
       view.destroy();

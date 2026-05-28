@@ -46,6 +46,7 @@ export function JsonTextArea<T>({ source, placeholder, jsonSchema }: JsonTextAre
         placeholder={placeholder}
         hasError={!!source.parseError}
         ariaLabel={getMessage('jsonEditorAriaLabel')}
+        focusOnMount
       />
     </Suspense>
   );
