@@ -8,6 +8,7 @@ import {
   highlightActiveLine,
   highlightActiveLineGutter,
   drawSelection,
+  hoverTooltip,
   placeholder as placeholderExtension,
 } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
@@ -36,6 +37,7 @@ import {
 import {
   jsonCompletion,
   jsonSchemaLinter,
+  jsonSchemaHover,
   handleRefresh,
   stateExtensions,
   updateSchema,
@@ -162,6 +164,7 @@ export function JsonCodeEditor({
         lintGutter(),
         jsonLanguage.data.of({ autocomplete: jsonCompletion() }),
         autocompletion({ activateOnTyping: true, icons: false }),
+        hoverTooltip(jsonSchemaHover()),
         stateExtensions(schemaRef.current as SchemaArg),
         placeholderExtension(placeholderRef.current ?? ''),
         EditorView.contentAttributes.of({

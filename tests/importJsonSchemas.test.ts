@@ -28,4 +28,17 @@ describe('importJsonSchemas', () => {
     });
     expect(sessionsImportJsonSchema.required).toContain('sessions');
   });
+
+  it('documents rule fields and envelope keys for editor assistance', () => {
+    const props = rulesImportJsonSchema.properties as Record<string, { description?: string }>;
+    expect(typeof props.domainRules.description).toBe('string');
+    expect(props.domainRules.description?.length).toBeGreaterThan(0);
+
+    const ruleProps = (rulesImportJsonSchema.properties?.domainRules as {
+      items?: { properties?: Record<string, { description?: string }> };
+    }).items?.properties;
+    expect(typeof ruleProps?.domainFilter.description).toBe('string');
+    expect(ruleProps?.domainFilter.description?.length).toBeGreaterThan(0);
+    expect(typeof ruleProps?.deduplicationMatchMode.description).toBe('string');
+  });
 });
