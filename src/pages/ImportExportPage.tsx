@@ -6,6 +6,7 @@ import { getMessage } from '@/utils/i18n';
 import { ImportExportActionCard } from '@/components/UI/ImportExportWizards/ImportExportActionCard';
 import { useSessions } from '@/hooks/useSessions';
 import { useShortcuts, type ShortcutAction } from '@/hooks/useShortcuts';
+import { getEffectiveBindings } from '@/shortcuts/getEffectiveBindings';
 import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
 import type { AppSettings } from '@/types/syncSettings';
 
@@ -44,6 +45,11 @@ export function ImportExportPage({
     'importexport.export.workspaces': () => openExportWorkspace(),
   };
 
+  function seqKeys(id: string): string[] | undefined {
+    const first = getEffectiveBindings(id)[0];
+    return Array.isArray(first) ? first : undefined;
+  }
+
   useShortcuts(shortcutBindings, {
     scope: 'page:importexport',
     onSequenceState: ({ activePrefix }) => onSequencePrefixChange?.(activePrefix),
@@ -69,6 +75,7 @@ export function ImportExportPage({
               buttonLabel={getMessage('exportButton')}
               onClick={() => openExportRules()}
               disabled={syncSettings.domainRules.length === 0}
+              shortcutKeys={seqKeys('importexport.export.rules')}
             />
 
             <ImportExportActionCard
@@ -78,6 +85,7 @@ export function ImportExportPage({
               description={getMessage('importRulesDescription')}
               buttonLabel={getMessage('importButton')}
               onClick={() => openImportRules()}
+              shortcutKeys={seqKeys('importexport.import.rules')}
             />
 
             <ImportExportActionCard
@@ -88,6 +96,7 @@ export function ImportExportPage({
               buttonLabel={getMessage('exportButton')}
               onClick={() => openExportSessions()}
               disabled={sessions.length === 0}
+              shortcutKeys={seqKeys('importexport.export.sessions')}
             />
 
             <ImportExportActionCard
@@ -97,6 +106,7 @@ export function ImportExportPage({
               description={getMessage('importSessionsDescription')}
               buttonLabel={getMessage('importButton')}
               onClick={() => openImportSessions()}
+              shortcutKeys={seqKeys('importexport.import.sessions')}
             />
 
             <ImportExportActionCard
@@ -106,6 +116,7 @@ export function ImportExportPage({
               description={getMessage('exportWorkspaceDescription')}
               buttonLabel={getMessage('exportButton')}
               onClick={() => openExportWorkspace()}
+              shortcutKeys={seqKeys('importexport.export.workspaces')}
             />
 
             <ImportExportActionCard
@@ -115,6 +126,7 @@ export function ImportExportPage({
               description={getMessage('importWorkspaceDescription')}
               buttonLabel={getMessage('importButton')}
               onClick={() => openImportWorkspace()}
+              shortcutKeys={seqKeys('importexport.import.workspaces')}
             />
           </Grid>
         </Box>

@@ -1,0 +1,13 @@
+.root {
+  position: relative;
+}
+
+.kbdBadge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 2px;
+  pointer-events: none;
+  z-index: 1;
+}

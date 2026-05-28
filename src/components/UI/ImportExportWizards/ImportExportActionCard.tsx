@@ -1,5 +1,6 @@
-import { Box, Button, Card, Flex, Text } from '@radix-ui/themes';
+import { Box, Button, Card, Flex, Kbd, Text } from '@radix-ui/themes';
 import type { LucideIcon } from 'lucide-react';
+import styles from './ImportExportActionCard.module.css';
 
 interface ImportExportActionCardProps {
   testId: string;
@@ -9,6 +10,7 @@ interface ImportExportActionCardProps {
   buttonLabel: string;
   onClick: () => void;
   disabled?: boolean;
+  shortcutKeys?: string[];
 }
 
 /**
@@ -24,8 +26,17 @@ export function ImportExportActionCard({
   buttonLabel,
   onClick,
   disabled = false,
+  shortcutKeys,
 }: ImportExportActionCardProps) {
   return (
+    <div className={styles.root}>
+      {shortcutKeys && shortcutKeys.length > 0 && (
+        <div className={styles.kbdBadge} aria-hidden="true">
+          {shortcutKeys.map((key) => (
+            <Kbd key={key} size="1">{key.toUpperCase()}</Kbd>
+          ))}
+        </div>
+      )}
     <Card data-testid={testId} size="3">
       <Flex direction="column" gap="3" align="start" style={{ height: '100%' }}>
         <Flex align="center" gap="2">
@@ -57,5 +68,6 @@ export function ImportExportActionCard({
         </Button>
       </Flex>
     </Card>
+    </div>
   );
 }
