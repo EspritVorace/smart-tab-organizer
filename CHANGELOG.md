@@ -7,11 +7,36 @@
 - Pack Gallery now flags installed packs and disables fully installed ones
 - Bulk selection and bulk actions on the Sessions page
 - Bulk rules export from the rules toolbar with preselection
+- Keyboard shortcut tooltips with ARIA hints across the entire UI (popup buttons, import/export cards, Add/Snapshot/New buttons)
+- Domain rules "..." menu: Positions submenu (Ctrl+↑/↓/Shift+↑/↓), E for edit, T for toggle, Del for delete
+- Sessions "..." menu: Positions submenu (Ctrl+↑/↓), E for edit, A for archive, Del for delete
+- CodeMirror editor for JSON import (syntax highlighting, line numbers, error markers)
+- Rule overlap: accent rank badge showing precedence order on domain rule cards
+- Contextual docs link per page + F1 shortcut to open documentation
+- Workspace cards keyboard navigation and visible focus ring
+- Session statistics with 2-column paired grid
+- Session refresh button on session cards; U shortcut on focused session card
+- Toolbar badge reflects current grouping/dedup state
+- Session Restore button: default action selectable from UI
+- Active/Archived sub-tabs on the sessions page with dedicated #sessions/archived sub-route
+- Session export with three groups (pinned/active/archived), archives unchecked by default
+- Rule fallbackLabel field and configurable 'label' display mode
+- Feedback notification for the Organize Tabs action
+- Auto-derive identity label from domain filter in the rule wizard
+- HomePage initial focus and single-key shortcuts on quick actions
 - HomePage tips section expanded from 5 to 44 entries
 - Mnemonic M+letter sidebar nav shortcuts (replaces Alt+1..5)
 - Options topbar and UI style tweaks
 
 ### Improvements
+- Replace Suspense spinner with per-page Radix skeletons
+- Preload lazy pages on sidebar hover/focus
+- Sessions page uses TabNav instead of SegmentedControl
+- Restore button popup: Settings link replaces cramped radio group
+- Popup reads only pinned and active sessions, not the archive bucket
+- Radix Kbd component used throughout in place of native kbd
+- Workspace card: redundant color label dropped; category swatches scaled to match color picker
+- Category selector promoted to its own inline row in the rule wizard
 - Migrate package manager to pnpm 11.1.2
 - CI: pnpm store cache and Playwright browser cache across workflows, with hit/miss reporting in job summaries
 - Accessibility violations now block the CI pipeline
@@ -22,6 +47,17 @@
 - Extract shared dedupe helpers, EditModalShell and EditModalFooter wrappers across rule edit modals, sharedSectionProps on SessionSection
 
 ### Bug Fixes
+- Rule categories treated as global, not per-workspace
+- Preserve updatedAt timestamp when archiving or unarchiving a session
+- Options page no longer freezes after a clipboard export
+- HomePage: focus ring shown on mouse click, not only after keyboard navigation
+- Grouping: join an existing same-title same-color group instead of creating a duplicate
+- Session statistics: keep volume tiles on a single row
+- Bump modal max height from 80vh to 85vh
+- Domain rule edit dialogs: focus the first field on open
+- Session refresh button now visible on session cards; icons unified across restore/refresh actions
+- Preset selection UX fixed on RuleWizard step 2
+- Workspace export/import: preserve pinned and archived sessions
 - Fix hydration race conditions in popup and workspaces
 - Pack Gallery: keep search input visible while scrolling the import wizard
 - Rule card vertical padding aligned with SessionCard and reused in pack preview
