@@ -23,7 +23,6 @@
     "zip": "wxt zip",
     "zip:firefox": "wxt zip -b firefox",
     "licenses:generate": "node scripts/generate-third-party-licenses.mjs",
-    "prebuild": "node scripts/generate-third-party-licenses.mjs",
     "compile": "tsc --noEmit",
     "lint": "eslint src tests --max-warnings=0",
     "lint:fix": "eslint src tests --fix",
