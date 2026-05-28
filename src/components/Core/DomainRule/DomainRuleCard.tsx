@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, Text, HoverCard, Flex, Badge, Card, Checkbox, IconButton, DropdownMenu, Kbd } from '@radix-ui/themes';
+import { Switch, Text, HoverCard, Flex, Badge, Card, Checkbox, IconButton, DropdownMenu, Kbd, Tooltip } from '@radix-ui/themes';
 import { Pencil, Trash2, MoreHorizontal, GripVertical, AlertTriangle } from 'lucide-react';
 import { useSortable } from '@dnd-kit/react/sortable';
 import { getStatusStyle, type CardStatus } from '@/utils/statusStyle';
@@ -209,12 +209,15 @@ export function DomainRuleCard({
 
           {/* Right: Switch + Actions */}
           <Flex align="center" gap="3" style={{ flexShrink: 0 }}>
-            <Switch
-              size="1"
-              checked={rule.enabled}
-              onCheckedChange={(checked) => onToggleEnabled?.(rule.id, checked)}
-              aria-label={getMessage('ruleToggleEnabledAriaLabel')}
-            />
+            <Tooltip content={<Flex align="center" gap="2" aria-hidden="true">{getMessage('ruleToggleEnabledAriaLabel')}<Kbd>T</Kbd></Flex>}>
+              <Switch
+                size="1"
+                checked={rule.enabled}
+                onCheckedChange={(checked) => onToggleEnabled?.(rule.id, checked)}
+                aria-label={getMessage('ruleToggleEnabledAriaLabel')}
+                aria-keyshortcuts="T"
+              />
+            </Tooltip>
             <DropdownMenu.Root>
               <DropdownMenu.Trigger>
                 <IconButton
