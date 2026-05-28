@@ -29,11 +29,20 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const checker = require('license-checker-rseidelsohn');
+const pkg = require('../package.json');
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = join(__dirname, '..');
 
 const SELF_PACKAGE = 'smart-tab-organizer';
+
+// Names listed directly in package.json. Only these are surfaced as chips in
+// the About dialog; the full transitive tree stays in the NOTICE files and the
+// documentation page. For direct dependencies we trust the package.json section
+// (runtime vs dev) rather than the transitive scope computed by the checker.
+const RUNTIME_DIRECT = new Set(Object.keys(pkg.dependencies || {}));
+const DEV_DIRECT = new Set(Object.keys(pkg.devDependencies || {}));
+const DIRECT_DEPENDENCIES = new Set([...RUNTIME_DIRECT, ...DEV_DIRECT]);
 
 const LOCALES = /** @type {const} */ (['fr', 'en', 'es']);
 
@@ -167,6 +176,7 @@ async function collectDependencies() {
         repository: normalizeRepository(value.repository),
         licenseText: (value.licenseText || '').trim(),
         scope: prodKeys.has(key) ? 'prod' : 'dev',
+        direct: DIRECT_DEPENDENCIES.has(name),
       };
     })
     .filter((entry) => entry.name !== SELF_PACKAGE);
@@ -184,15 +194,24 @@ async function collectDependencies() {
 
 function buildJson(entries) {
   // licenseText is intentionally omitted to keep this asset light; it is only
-  // used to render the credits chips in the About dialog.
-  const data = entries.map(({ name, version, license, publisher, repository, scope }) => ({
-    name,
-    version,
-    license,
-    publisher,
-    repository,
-    scope,
-  }));
+  // used to render the credits chips in the About dialog. Only direct
+  // dependencies (those listed in package.json) are kept here, so the About
+  // dialog stays readable; the full transitive tree lives in the NOTICE files.
+  // Deduplicated by name (a package can be installed in several versions) and
+  // scoped by its package.json section (runtime = Bundled, dev = Dev tools).
+  const byName = new Map();
+  for (const entry of entries) {
+    if (!entry.direct || byName.has(entry.name)) continue;
+    byName.set(entry.name, {
+      name: entry.name,
+      version: entry.version,
+      license: entry.license,
+      publisher: entry.publisher,
+      repository: entry.repository,
+      scope: RUNTIME_DIRECT.has(entry.name) ? 'prod' : 'dev',
+    });
+  }
+  const data = [...byName.values()];
   return JSON.stringify(data, null, 2) + '\n';
 }
 
