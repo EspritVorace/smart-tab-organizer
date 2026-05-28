@@ -168,7 +168,7 @@
     "scope": "dev"
   },
   {
-    "name": "@storybook/react",
+    "name": "@storybook/react-vite",
     "version": "10.3.6",
     "license": "MIT",
     "publisher": "",
@@ -176,7 +176,7 @@
     "scope": "dev"
   },
   {
-    "name": "@storybook/react-vite",
+    "name": "@storybook/react",
     "version": "10.3.6",
     "license": "MIT",
     "publisher": "",
@@ -216,16 +216,16 @@
     "scope": "dev"
   },
   {
-    "name": "@types/react",
-    "version": "19.2.14",
+    "name": "@types/react-dom",
+    "version": "19.2.3",
     "license": "MIT",
     "publisher": "",
     "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped",
     "scope": "dev"
   },
   {
-    "name": "@types/react-dom",
-    "version": "19.2.3",
+    "name": "@types/react",
+    "version": "19.2.14",
     "license": "MIT",
     "publisher": "",
     "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped",
@@ -304,14 +304,6 @@
     "scope": "dev"
   },
   {
-    "name": "eslint",
-    "version": "10.3.0",
-    "license": "MIT",
-    "publisher": "Nicholas C. Zakas",
-    "repository": "https://github.com/eslint/eslint",
-    "scope": "dev"
-  },
-  {
     "name": "eslint-plugin-jsx-a11y",
     "version": "6.10.2",
     "license": "MIT",
@@ -341,6 +333,14 @@
     "license": "LGPL-3.0-only",
     "publisher": "SonarSource",
     "repository": "https://github.com/SonarSource/SonarJS",
+    "scope": "dev"
+  },
+  {
+    "name": "eslint",
+    "version": "10.3.0",
+    "license": "MIT",
+    "publisher": "Nicholas C. Zakas",
+    "repository": "https://github.com/eslint/eslint",
     "scope": "dev"
   },
   {
@@ -400,14 +400,6 @@
     "scope": "dev"
   },
   {
-    "name": "react",
-    "version": "19.2.5",
-    "license": "MIT",
-    "publisher": "",
-    "repository": "https://github.com/facebook/react",
-    "scope": "prod"
-  },
-  {
     "name": "react-accessible-treeview",
     "version": "2.11.2",
     "license": "MIT",
@@ -432,6 +424,22 @@
     "scope": "prod"
   },
   {
+    "name": "react",
+    "version": "19.2.5",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/facebook/react",
+    "scope": "prod"
+  },
+  {
+    "name": "rollup-plugin-license",
+    "version": "3.7.1",
+    "license": "MIT",
+    "publisher": "Mickael Jeanroy",
+    "repository": "https://github.com/mjeanroy/rollup-plugin-license",
+    "scope": "dev"
+  },
+  {
     "name": "sharp",
     "version": "0.34.5",
     "license": "Apache-2.0",
@@ -448,19 +456,19 @@
     "scope": "dev"
   },
   {
-    "name": "typescript",
-    "version": "6.0.3",
-    "license": "Apache-2.0",
-    "publisher": "Microsoft Corp.",
-    "repository": "https://github.com/microsoft/TypeScript",
-    "scope": "dev"
-  },
-  {
     "name": "typescript-eslint",
     "version": "8.59.2",
     "license": "MIT",
     "publisher": "",
     "repository": "https://github.com/typescript-eslint/typescript-eslint",
+    "scope": "dev"
+  },
+  {
+    "name": "typescript",
+    "version": "6.0.3",
+    "license": "Apache-2.0",
+    "publisher": "Microsoft Corp.",
+    "repository": "https://github.com/microsoft/TypeScript",
     "scope": "dev"
   },
   {
@@ -472,19 +480,19 @@
     "scope": "dev"
   },
   {
-    "name": "vitest",
-    "version": "4.1.5",
-    "license": "MIT",
-    "publisher": "Anthony Fu",
-    "repository": "https://github.com/vitest-dev/vitest",
-    "scope": "dev"
-  },
-  {
     "name": "vitest-ctrf-json-reporter",
     "version": "0.0.3",
     "license": "MIT",
     "publisher": "Ganesh Swami",
     "repository": "https://github.com/avinyaweb/vitest-ctrf-json-reporter",
+    "scope": "dev"
+  },
+  {
+    "name": "vitest",
+    "version": "4.1.5",
+    "license": "MIT",
+    "publisher": "Anthony Fu",
+    "repository": "https://github.com/vitest-dev/vitest",
     "scope": "dev"
   },
   {

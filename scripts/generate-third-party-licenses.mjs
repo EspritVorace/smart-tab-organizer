@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Generates the open source attribution artifacts for the extension and the
- * documentation site, from the actually installed dependency tree:
+ * Generates the open source attribution artifacts, scoped to the packages whose
+ * code actually ends up in the extension bundle:
  *
  *   public/data/third-party-licenses.json   (chips data, fetched by AboutDialog)
  *   public/data/third-party-licenses.txt    (full NOTICE, bundled, linked from AboutDialog)
@@ -10,19 +10,22 @@
  *   docs/src/content/docs/en/reference/licences-open-source.mdx     (EN)
  *   docs/src/content/docs/es/reference/licences-open-source.mdx     (ES)
  *
- * Every installed dependency is included and tagged with its scope:
- *   "prod" (runtime, shipped in the bundle) or "dev" (build/test tooling).
+ * The attributed set comes from scripts/bundled-dependencies.json, a manifest
+ * written by the `build:done` hook in wxt.config.ts (rollup-plugin-license
+ * reports the third-party code present in each bundle). Only redistributed code
+ * is attributed: development tooling is not shipped, so it is not listed.
  *
  * The verbatim license texts (MIT, BSD, ISC, Apache, ...) are reproduced in the
  * .txt NOTICE because permissive licenses require preserving the copyright and
  * permission notice on redistribution.
  *
- * Idempotent: deterministic ordering, no timestamps. Run via
- * `pnpm licenses:generate` (also wired as a `prebuild` step). Compatible with
- * Node 22 (plain ESM, no TypeScript imports, no experimental flags).
+ * Workflow: run `pnpm build` to refresh the manifest, then `pnpm licenses:generate`.
+ *
+ * Idempotent: deterministic ordering, no timestamps. Compatible with Node 22
+ * (plain ESM, no TypeScript imports, no experimental flags).
  */
 
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
@@ -35,11 +38,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = join(__dirname, '..');
 
 const SELF_PACKAGE = 'smart-tab-organizer';
+const BUNDLED_MANIFEST = join(PROJECT_ROOT, 'scripts', 'bundled-dependencies.json');
 
-// Names listed directly in package.json. Only these are surfaced as chips in
-// the About dialog; the full transitive tree stays in the NOTICE files and the
-// documentation page. For direct dependencies we trust the package.json section
-// (runtime vs dev) rather than the transitive scope computed by the checker.
+// Names listed directly in package.json. These drive the (curated) "Built with"
+// chips in the About dialog; the legal attribution below is scoped to the
+// actual bundle instead.
 const RUNTIME_DIRECT = new Set(Object.keys(pkg.dependencies || {}));
 const DEV_DIRECT = new Set(Object.keys(pkg.devDependencies || {}));
 const DIRECT_DEPENDENCIES = new Set([...RUNTIME_DIRECT, ...DEV_DIRECT]);
@@ -58,37 +61,28 @@ const LOCALE_STRINGS = {
   fr: {
     title: 'Licences open source',
     description:
-      'Attribution des composants open source utilisés par SmartTab Organizer et leurs licences.',
+      'Attribution des composants open source embarqués dans SmartTab Organizer et leurs licences.',
     generated:
-      'Cette page est générée depuis package.json. Lancez pnpm licenses:generate pour la mettre à jour.',
+      'Cette page est générée depuis le contenu du bundle. Lancez pnpm licenses:generate pour la mettre à jour.',
     intro:
-      "SmartTab Organizer est distribué sous licence GPLv3. L'extension embarque des composants open source tiers, listés ci-dessous avec leur licence. Les textes de licence complets sont fournis dans le fichier THIRD-PARTY-LICENSES.txt.",
-    runtimeHeading: 'Dépendances embarquées',
-    runtimeIntro:
-      'Bibliothèques incluses dans le bundle distribué de l\'extension.',
-    devHeading: 'Outils de développement',
-    devIntro:
-      'Outils utilisés pour développer, tester et construire le projet (non distribués dans l\'extension).',
+      "SmartTab Organizer est distribué sous licence GPLv3. L'extension embarque les composants open source listés ci-dessous, avec leur licence. Les textes de licence complets sont fournis dans le fichier THIRD-PARTY-LICENSES.txt.",
+    heading: 'Composants embarqués',
     colPackage: 'Paquet',
     colVersion: 'Version',
     colLicense: 'Licence',
     colRepo: 'Dépôt',
     noticeNote:
-      'Les textes de licence intégraux sont disponibles dans THIRD-PARTY-LICENSES.txt (à la racine du dépôt) et embarqués dans l\'extension.',
+      "Les textes de licence intégraux sont disponibles dans THIRD-PARTY-LICENSES.txt (à la racine du dépôt) et embarqués dans l'extension.",
   },
   en: {
     title: 'Open source licenses',
     description:
-      'Attribution of the open source components used by SmartTab Organizer and their licenses.',
+      'Attribution of the open source components bundled in SmartTab Organizer and their licenses.',
     generated:
-      'This page is generated from package.json. Run pnpm licenses:generate to update it.',
+      'This page is generated from the bundle contents. Run pnpm licenses:generate to update it.',
     intro:
-      'SmartTab Organizer is distributed under the GPLv3 license. The extension bundles third-party open source components, listed below with their license. The full license texts are provided in the THIRD-PARTY-LICENSES.txt file.',
-    runtimeHeading: 'Bundled dependencies',
-    runtimeIntro: 'Libraries included in the distributed extension bundle.',
-    devHeading: 'Development tools',
-    devIntro:
-      'Tools used to develop, test and build the project (not shipped in the extension).',
+      'SmartTab Organizer is distributed under the GPLv3 license. The extension bundles the open source components listed below, with their license. The full license texts are provided in the THIRD-PARTY-LICENSES.txt file.',
+    heading: 'Bundled components',
     colPackage: 'Package',
     colVersion: 'Version',
     colLicense: 'License',
@@ -99,16 +93,12 @@ const LOCALE_STRINGS = {
   es: {
     title: 'Licencias de codigo abierto',
     description:
-      'Atribucion de los componentes de codigo abierto usados por SmartTab Organizer y sus licencias.',
+      'Atribucion de los componentes de codigo abierto incluidos en SmartTab Organizer y sus licencias.',
     generated:
-      'Esta pagina se genera desde package.json. Ejecuta pnpm licenses:generate para actualizarla.',
+      'Esta pagina se genera desde el contenido del paquete. Ejecuta pnpm licenses:generate para actualizarla.',
     intro:
-      'SmartTab Organizer se distribuye bajo la licencia GPLv3. La extension incluye componentes de codigo abierto de terceros, listados a continuacion con su licencia. Los textos completos de las licencias estan en el archivo THIRD-PARTY-LICENSES.txt.',
-    runtimeHeading: 'Dependencias incluidas',
-    runtimeIntro: 'Bibliotecas incluidas en el paquete distribuido de la extension.',
-    devHeading: 'Herramientas de desarrollo',
-    devIntro:
-      'Herramientas usadas para desarrollar, probar y construir el proyecto (no incluidas en la extension).',
+      'SmartTab Organizer se distribuye bajo la licencia GPLv3. La extension incluye los componentes de codigo abierto listados a continuacion, con su licencia. Los textos completos de las licencias estan en el archivo THIRD-PARTY-LICENSES.txt.',
+    heading: 'Componentes incluidos',
     colPackage: 'Paquete',
     colVersion: 'Version',
     colLicense: 'Licencia',
@@ -158,36 +148,29 @@ async function collectDependencies() {
     licenseText: '',
   };
 
-  const [all, prod] = await Promise.all([
-    runChecker({ start: PROJECT_ROOT, customFormat }),
-    runChecker({ start: PROJECT_ROOT, production: true, customFormat }),
-  ]);
+  const all = await runChecker({ start: PROJECT_ROOT, customFormat });
 
-  const prodKeys = new Set(Object.keys(prod));
+  const byKey = new Map();
+  for (const [key, value] of Object.entries(all)) {
+    const { name, version } = splitNameVersion(key);
+    if (name === SELF_PACKAGE) continue;
+    byKey.set(`${name}@${version}`, {
+      name,
+      version,
+      license: normalizeLicense(value.licenses),
+      publisher: value.publisher || '',
+      repository: normalizeRepository(value.repository),
+      licenseText: (value.licenseText || '').trim(),
+      direct: DIRECT_DEPENDENCIES.has(name),
+    });
+  }
+  return byKey;
+}
 
-  const entries = Object.entries(all)
-    .map(([key, value]) => {
-      const { name, version } = splitNameVersion(key);
-      return {
-        name,
-        version,
-        license: normalizeLicense(value.licenses),
-        publisher: value.publisher || '',
-        repository: normalizeRepository(value.repository),
-        licenseText: (value.licenseText || '').trim(),
-        scope: prodKeys.has(key) ? 'prod' : 'dev',
-        direct: DIRECT_DEPENDENCIES.has(name),
-      };
-    })
-    .filter((entry) => entry.name !== SELF_PACKAGE);
-
-  entries.sort((a, b) => {
-    const byName = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
-    if (byName !== 0) return byName;
-    return a.version.localeCompare(b.version);
-  });
-
-  return entries;
+/** Load the bundled-package manifest (name@version actually shipped in the bundle). */
+function loadBundledManifest() {
+  if (!existsSync(BUNDLED_MANIFEST)) return null;
+  return JSON.parse(readFileSync(BUNDLED_MANIFEST, 'utf-8'));
 }
 
 /* --- Version grouping --------------------------------------------------- */
@@ -242,7 +225,6 @@ function groupForNotice(entries) {
       groups.push({
         name,
         versions: sortedVersions(sub.map((e) => e.version)),
-        scope: sub.some((e) => e.scope === 'prod') ? 'prod' : 'dev',
         license: latest.license,
         publisher: latest.publisher,
         repository: latest.repository,
@@ -258,7 +240,7 @@ function groupForNotice(entries) {
   return groups;
 }
 
-/** Group packages for the documentation tables: one row per name, versions joined. */
+/** Group packages for the documentation table: one row per name, versions joined. */
 function groupForTable(entries) {
   const groups = [];
   for (const [name, list] of groupByName(entries)) {
@@ -266,7 +248,6 @@ function groupForTable(entries) {
     groups.push({
       name,
       versions: sortedVersions(list.map((e) => e.version)),
-      scope: list.some((e) => e.scope === 'prod') ? 'prod' : 'dev',
       license: [...new Set(list.map((e) => e.license))].join(', '),
       repository: latest.repository,
     });
@@ -277,15 +258,14 @@ function groupForTable(entries) {
 
 /* --- Artifact builders ------------------------------------------------- */
 
-function buildJson(entries) {
+function buildJson(byKey) {
   // licenseText is intentionally omitted to keep this asset light; it is only
   // used to render the credits chips in the About dialog. Only direct
-  // dependencies (those listed in package.json) are kept here, so the About
-  // dialog stays readable; the full transitive tree lives in the NOTICE files.
-  // Deduplicated by name (a package can be installed in several versions) and
-  // scoped by its package.json section (runtime = Bundled, dev = Dev tools).
+  // dependencies (those listed in package.json) are kept here, deduplicated by
+  // name and scoped by their package.json section (runtime = Bundled, dev = Dev
+  // tools). The full bundle attribution lives in the NOTICE files.
   const byName = new Map();
-  for (const entry of entries) {
+  for (const entry of byKey.values()) {
     if (!entry.direct || byName.has(entry.name)) continue;
     byName.set(entry.name, {
       name: entry.name,
@@ -296,36 +276,25 @@ function buildJson(entries) {
       scope: RUNTIME_DIRECT.has(entry.name) ? 'prod' : 'dev',
     });
   }
-  const data = [...byName.values()];
-  return JSON.stringify(data, null, 2) + '\n';
+  return JSON.stringify([...byName.values()], null, 2) + '\n';
 }
 
-function buildNotice(entries, { bundledOnly = false } = {}) {
+function buildNotice(entries) {
   const line = '='.repeat(78);
   let out = '';
   out += `${line}\n`;
   out += 'SmartTab Organizer - Third-party licenses\n';
   out += `${line}\n\n`;
-  if (bundledOnly) {
-    out +=
-      'SmartTab Organizer is distributed under the GNU General Public License v3.0\n' +
-      '(see LICENSE.txt). The components listed below are bundled in the extension\n' +
-      'package. Their copyright notices and license texts are reproduced verbatim, as\n' +
-      'required by their respective licenses. The full list including development\n' +
-      'tooling is available at THIRD-PARTY-LICENSES.txt in the source repository.\n\n';
-  } else {
-    out +=
-      'SmartTab Organizer is distributed under the GNU General Public License v3.0\n' +
-      '(see LICENSE.txt). It builds on the third-party open source components listed\n' +
-      'below. Their copyright notices and license texts are reproduced verbatim, as\n' +
-      'required by their respective licenses.\n\n';
-    out += 'Scope: [prod] = shipped in the extension bundle, [dev] = build/test tooling.\n\n';
-  }
+  out +=
+    'SmartTab Organizer is distributed under the GNU General Public License v3.0\n' +
+    '(see LICENSE.txt). The open source components listed below are bundled in the\n' +
+    'extension package. Their copyright notices and license texts are reproduced\n' +
+    'verbatim, as required by their respective licenses.\n\n';
 
   for (const group of groupForNotice(entries)) {
     const versions = group.versions.join(', ');
     out += `${line}\n`;
-    out += `${group.name} ${versions}  [${group.scope}]\n`;
+    out += `${group.name} ${versions}\n`;
     out += `License: ${group.license}\n`;
     if (group.publisher) out += `Author: ${group.publisher}\n`;
     if (group.repository) out += `Repository: ${group.repository}\n`;
@@ -366,8 +335,6 @@ function renderTable(entries, strings) {
 
 function buildDocPage(entries, locale) {
   const strings = LOCALE_STRINGS[locale];
-  const runtime = entries.filter((e) => e.scope === 'prod');
-  const dev = entries.filter((e) => e.scope === 'dev');
 
   let md = '---\n';
   md += `title: ${strings.title}\n`;
@@ -376,13 +343,8 @@ function buildDocPage(entries, locale) {
   md += `{/* ${strings.generated} */}\n\n`;
   md += `${strings.intro}\n\n`;
 
-  md += `## ${strings.runtimeHeading}\n\n`;
-  md += `${strings.runtimeIntro}\n\n`;
-  md += renderTable(runtime, strings) + '\n';
-
-  md += `## ${strings.devHeading}\n\n`;
-  md += `${strings.devIntro}\n\n`;
-  md += renderTable(dev, strings) + '\n';
+  md += `## ${strings.heading}\n\n`;
+  md += renderTable(entries, strings) + '\n';
 
   md += `:::note\n${strings.noticeNote}\n:::\n`;
 
@@ -397,31 +359,43 @@ function writeFile(absPath, contents) {
 }
 
 async function main() {
-  const entries = await collectDependencies();
+  const manifest = loadBundledManifest();
+  if (!manifest) {
+    process.stderr.write(
+      'No scripts/bundled-dependencies.json found. Run `pnpm build` first to capture ' +
+        'the bundled packages, then re-run `pnpm licenses:generate`. Skipping.\n',
+    );
+    return;
+  }
 
-  const prodEntries = entries.filter((e) => e.scope === 'prod');
+  const byKey = await collectDependencies();
 
-  const json = buildJson(entries);
-  // The bundled NOTICE only needs the components actually shipped in the
-  // extension (prod). Dev tooling is not redistributed, so it does not have to
-  // travel with the package; it stays in the exhaustive root NOTICE.
-  const bundledNotice = buildNotice(prodEntries, { bundledOnly: true });
-  const fullNotice = buildNotice(entries);
+  // Resolve every bundled package against the installed metadata. A bundled
+  // package must always be attributed, so fall back to a minimal entry if the
+  // license checker did not surface it.
+  const bundledEntries = manifest.map(({ name, version }) => {
+    const entry = byKey.get(`${name}@${version}`);
+    if (entry) return entry;
+    return { name, version, license: 'UNKNOWN', publisher: '', repository: '', licenseText: '' };
+  });
+
+  const json = buildJson(byKey);
+  const notice = buildNotice(bundledEntries);
 
   const jsonPath = join(PROJECT_ROOT, 'public', 'data', 'third-party-licenses.json');
   const bundledNoticePath = join(PROJECT_ROOT, 'public', 'data', 'third-party-licenses.txt');
   const rootNoticePath = join(PROJECT_ROOT, 'THIRD-PARTY-LICENSES.txt');
 
   writeFile(jsonPath, json);
-  writeFile(bundledNoticePath, bundledNotice);
-  writeFile(rootNoticePath, fullNotice);
+  writeFile(bundledNoticePath, notice);
+  writeFile(rootNoticePath, notice);
 
-  process.stdout.write(`Generated public/data/third-party-licenses.json (${entries.length} packages)\n`);
-  process.stdout.write(`Generated public/data/third-party-licenses.txt (${prodEntries.length} bundled packages)\n`);
-  process.stdout.write(`Generated THIRD-PARTY-LICENSES.txt (${entries.length} packages)\n`);
+  process.stdout.write(`Generated public/data/third-party-licenses.json (chips)\n`);
+  process.stdout.write(`Generated public/data/third-party-licenses.txt (${bundledEntries.length} bundled packages)\n`);
+  process.stdout.write(`Generated THIRD-PARTY-LICENSES.txt (${bundledEntries.length} bundled packages)\n`);
 
   for (const locale of LOCALES) {
-    const md = buildDocPage(entries, locale);
+    const md = buildDocPage(bundledEntries, locale);
     writeFile(join(PROJECT_ROOT, DOC_OUTPUT_PATHS[locale]), md);
     process.stdout.write(`Generated ${DOC_OUTPUT_PATHS[locale]}\n`);
   }
