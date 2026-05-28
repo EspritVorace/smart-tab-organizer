@@ -190,6 +190,91 @@ async function collectDependencies() {
   return entries;
 }
 
+/* --- Version grouping --------------------------------------------------- */
+
+/** Compare two version strings numerically (semver-ish), falling back to string order. */
+function compareVersions(a, b) {
+  const pa = a.split('.');
+  const pb = b.split('.');
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const x = parseInt(pa[i] ?? '0', 10);
+    const y = parseInt(pb[i] ?? '0', 10);
+    if (Number.isNaN(x) || Number.isNaN(y)) return a.localeCompare(b);
+    if (x !== y) return x - y;
+  }
+  return 0;
+}
+
+function sortedVersions(versions) {
+  return [...new Set(versions)].sort(compareVersions);
+}
+
+function pickLatest(list) {
+  return list.reduce((acc, e) => (compareVersions(e.version, acc.version) >= 0 ? e : acc));
+}
+
+function groupByName(entries) {
+  const byName = new Map();
+  for (const entry of entries) {
+    if (!byName.has(entry.name)) byName.set(entry.name, []);
+    byName.get(entry.name).push(entry);
+  }
+  return byName;
+}
+
+/**
+ * Group packages for the NOTICE: one block per (name, distinct license text).
+ * Identical license texts across versions are merged and the versions listed
+ * together. Distinct texts (a package that changed its license) stay separate,
+ * so every distinct copyright/permission notice is preserved.
+ */
+function groupForNotice(entries) {
+  const groups = [];
+  for (const [name, list] of groupByName(entries)) {
+    const byText = new Map();
+    for (const entry of list) {
+      const key = entry.licenseText ? `t:${entry.licenseText}` : `n:${entry.license}`;
+      if (!byText.has(key)) byText.set(key, []);
+      byText.get(key).push(entry);
+    }
+    for (const sub of byText.values()) {
+      const latest = pickLatest(sub);
+      groups.push({
+        name,
+        versions: sortedVersions(sub.map((e) => e.version)),
+        scope: sub.some((e) => e.scope === 'prod') ? 'prod' : 'dev',
+        license: latest.license,
+        publisher: latest.publisher,
+        repository: latest.repository,
+        licenseText: latest.licenseText,
+      });
+    }
+  }
+  groups.sort((a, b) => {
+    const byName = a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    if (byName !== 0) return byName;
+    return compareVersions(a.versions[0], b.versions[0]);
+  });
+  return groups;
+}
+
+/** Group packages for the documentation tables: one row per name, versions joined. */
+function groupForTable(entries) {
+  const groups = [];
+  for (const [name, list] of groupByName(entries)) {
+    const latest = pickLatest(list);
+    groups.push({
+      name,
+      versions: sortedVersions(list.map((e) => e.version)),
+      scope: list.some((e) => e.scope === 'prod') ? 'prod' : 'dev',
+      license: [...new Set(list.map((e) => e.license))].join(', '),
+      repository: latest.repository,
+    });
+  }
+  groups.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+  return groups;
+}
+
 /* --- Artifact builders ------------------------------------------------- */
 
 function buildJson(entries) {
@@ -237,17 +322,18 @@ function buildNotice(entries, { bundledOnly = false } = {}) {
     out += 'Scope: [prod] = shipped in the extension bundle, [dev] = build/test tooling.\n\n';
   }
 
-  for (const entry of entries) {
+  for (const group of groupForNotice(entries)) {
+    const versions = group.versions.join(', ');
     out += `${line}\n`;
-    out += `${entry.name} ${entry.version}  [${entry.scope}]\n`;
-    out += `License: ${entry.license}\n`;
-    if (entry.publisher) out += `Author: ${entry.publisher}\n`;
-    if (entry.repository) out += `Repository: ${entry.repository}\n`;
+    out += `${group.name} ${versions}  [${group.scope}]\n`;
+    out += `License: ${group.license}\n`;
+    if (group.publisher) out += `Author: ${group.publisher}\n`;
+    if (group.repository) out += `Repository: ${group.repository}\n`;
     out += `${line}\n\n`;
-    if (entry.licenseText) {
-      out += `${entry.licenseText}\n\n`;
+    if (group.licenseText) {
+      out += `${group.licenseText}\n\n`;
     } else {
-      out += `License: ${entry.license} (no license file shipped by this package).\n\n`;
+      out += `License: ${group.license} (no license file shipped by this package).\n\n`;
     }
   }
 
@@ -262,15 +348,15 @@ function renderTable(entries, strings) {
   const header =
     `| ${strings.colPackage} | ${strings.colVersion} | ${strings.colLicense} | ${strings.colRepo} |\n` +
     '| --- | --- | --- | --- |\n';
-  const rows = entries
-    .map((entry) => {
-      const repo = entry.repository
-        ? `[${escapeTableCell(entry.repository.replace(/^https?:\/\//, ''))}](${entry.repository})`
+  const rows = groupForTable(entries)
+    .map((group) => {
+      const repo = group.repository
+        ? `[${escapeTableCell(group.repository.replace(/^https?:\/\//, ''))}](${group.repository})`
         : '';
       return (
-        `| ${escapeTableCell(entry.name)} ` +
-        `| ${escapeTableCell(entry.version)} ` +
-        `| ${escapeTableCell(entry.license)} ` +
+        `| ${escapeTableCell(group.name)} ` +
+        `| ${escapeTableCell(group.versions.join(', '))} ` +
+        `| ${escapeTableCell(group.license)} ` +
         `| ${repo} |`
       );
     })
