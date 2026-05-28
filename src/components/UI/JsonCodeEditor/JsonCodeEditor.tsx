@@ -140,6 +140,11 @@ export function JsonCodeEditor({
   useEffect(() => {
     if (!containerRef.current) return;
 
+    // Keep an empty editor neutral (no lint markers) like the former textarea.
+    const parseLinterSource = jsonParseLinter();
+    const schemaLinterSource = jsonSchemaLinter();
+    const isBlankDoc = (view: EditorView) => view.state.doc.toString().trim().length === 0;
+
     const state = EditorState.create({
       doc: valueRef.current,
       extensions: [
@@ -159,8 +164,8 @@ export function JsonCodeEditor({
         syntaxHighlighting(jsonHighlightStyle),
         syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
         json(),
-        linter(jsonParseLinter()),
-        linter(jsonSchemaLinter(), { needsRefresh: handleRefresh }),
+        linter((view) => (isBlankDoc(view) ? [] : parseLinterSource(view))),
+        linter((view) => (isBlankDoc(view) ? [] : schemaLinterSource(view)), { needsRefresh: handleRefresh }),
         lintGutter(),
         jsonLanguage.data.of({ autocomplete: jsonCompletion() }),
         autocompletion({ activateOnTyping: true, icons: false }),

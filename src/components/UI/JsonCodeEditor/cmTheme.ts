@@ -42,6 +42,9 @@ export function createEditorTheme(isDark: boolean): Extension {
         lineHeight: '1.6',
       },
       '.cm-content': { padding: '8px 0' },
+      // Keep a stable editing height even when empty (the old textarea used
+      // rows={8}); the content and gutter grow together up to the max height.
+      '.cm-content, .cm-gutter': { minHeight: '180px' },
       '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--gray-12)' },
       '.cm-gutters': {
         backgroundColor: 'transparent',
