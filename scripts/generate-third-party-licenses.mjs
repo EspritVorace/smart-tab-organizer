@@ -67,6 +67,9 @@ const LOCALE_STRINGS = {
     intro:
       "SmartTab Organizer est distribué sous licence GPLv3. L'extension embarque les composants open source listés ci-dessous, avec leur licence. Les textes de licence complets sont fournis dans le fichier THIRD-PARTY-LICENSES.txt.",
     heading: 'Composants embarqués',
+    devHeading: 'Outils de développement',
+    devIntro:
+      "Outils utilisés pour développer, tester et construire le projet. Ils ne sont pas redistribués dans l'extension : ils sont cités ici par reconnaissance envers le travail de leurs auteurs.",
     colPackage: 'Paquet',
     colVersion: 'Version',
     colLicense: 'Licence',
@@ -83,6 +86,9 @@ const LOCALE_STRINGS = {
     intro:
       'SmartTab Organizer is distributed under the GPLv3 license. The extension bundles the open source components listed below, with their license. The full license texts are provided in the THIRD-PARTY-LICENSES.txt file.',
     heading: 'Bundled components',
+    devHeading: 'Development tools',
+    devIntro:
+      'Tools used to develop, test and build the project. They are not shipped in the extension: they are listed here to acknowledge the work of their authors.',
     colPackage: 'Package',
     colVersion: 'Version',
     colLicense: 'License',
@@ -99,6 +105,9 @@ const LOCALE_STRINGS = {
     intro:
       'SmartTab Organizer se distribuye bajo la licencia GPLv3. La extension incluye los componentes de codigo abierto listados a continuacion, con su licencia. Los textos completos de las licencias estan en el archivo THIRD-PARTY-LICENSES.txt.',
     heading: 'Componentes incluidos',
+    devHeading: 'Herramientas de desarrollo',
+    devIntro:
+      'Herramientas usadas para desarrollar, probar y construir el proyecto. No se incluyen en la extension: se listan aqui en reconocimiento al trabajo de sus autores.',
     colPackage: 'Paquete',
     colVersion: 'Version',
     colLicense: 'Licencia',
@@ -333,7 +342,7 @@ function renderTable(entries, strings) {
   return header + rows + '\n';
 }
 
-function buildDocPage(entries, locale) {
+function buildDocPage(bundledEntries, devEntries, locale) {
   const strings = LOCALE_STRINGS[locale];
 
   let md = '---\n';
@@ -344,9 +353,18 @@ function buildDocPage(entries, locale) {
   md += `${strings.intro}\n\n`;
 
   md += `## ${strings.heading}\n\n`;
-  md += renderTable(entries, strings) + '\n';
+  md += renderTable(bundledEntries, strings) + '\n';
 
-  md += `:::note\n${strings.noticeNote}\n:::\n`;
+  md += `:::note\n${strings.noticeNote}\n:::\n\n`;
+
+  // Courtesy listing of the direct development tooling. These packages are not
+  // redistributed in the extension, so no license text is reproduced; only a
+  // link to their repository is provided.
+  if (devEntries.length > 0) {
+    md += `## ${strings.devHeading}\n\n`;
+    md += `${strings.devIntro}\n\n`;
+    md += renderTable(devEntries, strings) + '\n';
+  }
 
   return md;
 }
@@ -379,6 +397,14 @@ async function main() {
     return { name, version, license: 'UNKNOWN', publisher: '', repository: '', licenseText: '' };
   });
 
+  // Direct development dependencies, listed by courtesy in the documentation
+  // (names + repository link, no license text). Packages already shown in the
+  // bundled table are skipped to avoid duplication.
+  const bundledNames = new Set(bundledEntries.map((e) => e.name));
+  const devEntries = [...byKey.values()].filter(
+    (e) => DEV_DIRECT.has(e.name) && !bundledNames.has(e.name),
+  );
+
   const json = buildJson(byKey);
   const notice = buildNotice(bundledEntries);
 
@@ -395,7 +421,7 @@ async function main() {
   process.stdout.write(`Generated THIRD-PARTY-LICENSES.txt (${bundledEntries.length} bundled packages)\n`);
 
   for (const locale of LOCALES) {
-    const md = buildDocPage(bundledEntries, locale);
+    const md = buildDocPage(bundledEntries, devEntries, locale);
     writeFile(join(PROJECT_ROOT, DOC_OUTPUT_PATHS[locale]), md);
     process.stdout.write(`Generated ${DOC_OUTPUT_PATHS[locale]}\n`);
   }
