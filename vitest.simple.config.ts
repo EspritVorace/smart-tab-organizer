@@ -18,6 +18,10 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     globals: true,
+    // codemirror-json-schema ships ESM with extensionless relative imports
+    // (e.g. `./features/completion`), which Node's native loader cannot
+    // resolve. Inlining routes it through Vite's resolver, like the WXT build.
+    server: { deps: { inline: ['codemirror-json-schema'] } },
     include: [
       'tests/**/*.test.ts',
       'tests/**/*.test.tsx'

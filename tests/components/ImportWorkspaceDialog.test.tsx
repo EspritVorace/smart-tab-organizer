@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { Theme } from '@radix-ui/themes';
+import { waitForJsonEditor } from '../../src/components/UI/JsonCodeEditor/setJsonEditorValue';
 
 vi.mock('../../src/utils/i18n', () => ({
   getMessage: vi.fn((key: string, subs?: string[]) =>
@@ -59,13 +60,18 @@ const validPayload = {
   sessions: [],
 };
 
-/** Switches the source segmented to "text" and pastes JSON in the textarea. */
-function pasteJson(json: string) {
+/** Switches the source segmented to "text" and sets JSON on the CodeMirror editor. */
+async function pasteJson(json: string) {
   // The shared SourceModeSegmented uses Radix SegmentedControl, which renders
   // both a visible label and a hidden layout duplicate. Click the first match.
   fireEvent.click(screen.getAllByText('sourceText')[0]);
-  const textarea = screen.getByPlaceholderText(/workspace/i) as HTMLTextAreaElement;
-  fireEvent.change(textarea, { target: { value: json } });
+  // The editor is lazily mounted and exposes no <textarea>; drive it directly.
+  // Wait for the view outside act() so Suspense can resolve, then dispatch the
+  // document change inside act() so the React validation state flushes.
+  const view = await waitForJsonEditor(document.body);
+  await act(async () => {
+    view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: json } });
+  });
 }
 
 beforeEach(() => {
@@ -89,9 +95,9 @@ describe('ImportWorkspaceDialog', () => {
     expect(screen.getByTestId('workspace-import-btn-confirm')).toBeDisabled();
   });
 
-  it('shows an error callout when invalid JSON is pasted', () => {
+  it('shows an error callout when invalid JSON is pasted', async () => {
     wrap(<ImportWorkspaceDialog open onOpenChange={() => {}} />);
-    pasteJson('{not valid json');
+    await pasteJson('{not valid json');
     expect(screen.getByTestId('workspace-import-btn-confirm')).toBeDisabled();
     // Parse error rendered by the shared ImportErrorCallout (i18n key surfaced by the mock).
     expect(screen.getByText('invalidJson')).toBeInTheDocument();
@@ -99,7 +105,7 @@ describe('ImportWorkspaceDialog', () => {
 
   it('shows the import summary and pre-fills the name override on success', async () => {
     wrap(<ImportWorkspaceDialog open onOpenChange={() => {}} />);
-    pasteJson(JSON.stringify(validPayload));
+    await pasteJson(JSON.stringify(validPayload));
     await waitFor(() => {
       expect(screen.getByTestId('workspace-import-summary')).toBeInTheDocument();
     });
@@ -111,7 +117,7 @@ describe('ImportWorkspaceDialog', () => {
   it('disables the merge mode when there is no active workspace', async () => {
     useActiveWorkspaceContextMock.mockReturnValue({ active: null });
     wrap(<ImportWorkspaceDialog open onOpenChange={() => {}} />);
-    pasteJson(JSON.stringify(validPayload));
+    await pasteJson(JSON.stringify(validPayload));
     await waitFor(() => {
       expect(screen.getByTestId('workspace-import-mode-merge')).toBeDisabled();
     });
@@ -120,7 +126,7 @@ describe('ImportWorkspaceDialog', () => {
   it('imports as a new workspace on confirm', async () => {
     const onOpenChange = vi.fn();
     wrap(<ImportWorkspaceDialog open onOpenChange={onOpenChange} />);
-    pasteJson(JSON.stringify(validPayload));
+    await pasteJson(JSON.stringify(validPayload));
     await waitFor(() => {
       expect(screen.getByTestId('workspace-import-btn-confirm')).toBeEnabled();
     });
@@ -153,7 +159,7 @@ describe('ImportWorkspaceDialog', () => {
   it('shows an error callout when applyAsNew throws', async () => {
     applyAsNew.mockRejectedValueOnce(new Error('apply failed'));
     wrap(<ImportWorkspaceDialog open onOpenChange={() => {}} />);
-    pasteJson(JSON.stringify(validPayload));
+    await pasteJson(JSON.stringify(validPayload));
     await waitFor(() => {
       expect(screen.getByTestId('workspace-import-btn-confirm')).toBeEnabled();
     });

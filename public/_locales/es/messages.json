@@ -307,6 +307,12 @@
   "dragHandle": { "message": "Arrastrar para reordenar" },
   "browse": { "message": "Examinar..." },
   "invalidJson": { "message": "Formato JSON inválido" },
+
+  "jsonEditorAriaLabel": { "message": "Editor JSON" },
+  "jsonEditorLoading": { "message": "Cargando el editor..." },
+  "jsonEditorFoldRange": { "message": "Plegar el bloque de código" },
+  "jsonEditorUnfoldRange": { "message": "Desplegar el bloque de código" },
+
   "rulesFoundCount": { "message": "{count} regla(s) encontrada(s)" },
 
   "newRulesGroup": { "message": "Nuevas reglas ({count})" },

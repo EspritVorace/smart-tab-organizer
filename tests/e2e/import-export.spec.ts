@@ -112,7 +112,7 @@ test.describe('Import / Export', () => {
       await expect(wizard.browseButton()).toBeVisible();
     });
 
-    test('switching to Text mode shows a textarea for raw JSON [US-IE001]', async ({
+    test('switching to Text mode shows the JSON editor for raw JSON [US-IE001]', async ({
       extensionPage,
       extensionId,
     }) => {

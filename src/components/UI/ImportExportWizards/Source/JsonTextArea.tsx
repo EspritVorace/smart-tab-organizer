@@ -1,20 +1,52 @@
-import React from 'react';
-import { TextArea } from '@radix-ui/themes';
+import React, { Suspense } from 'react';
+import { Flex, Spinner, Text } from '@radix-ui/themes';
+import { lazyWithTiming } from '@/utils/lazyWithTiming';
+import { getMessage } from '@/utils/i18n';
+import type { ImportJsonSchema } from '@/utils/importJsonSchemas';
 import type { JsonSourceInputState } from './useJsonSourceInput';
+
+// Loaded only when an import wizard reaches the "text" source mode, keeping
+// CodeMirror and its JSON-schema tooling out of the popup/options entry chunk.
+const LazyJsonCodeEditor = lazyWithTiming(
+  'JsonCodeEditor',
+  () => import('@/components/UI/JsonCodeEditor/JsonCodeEditor'),
+);
 
 interface JsonTextAreaProps<T> {
   source: JsonSourceInputState<T>;
   placeholder: string;
+  jsonSchema?: ImportJsonSchema;
 }
 
-export function JsonTextArea<T>({ source, placeholder }: JsonTextAreaProps<T>) {
+function EditorFallback() {
   return (
-    <TextArea
-      value={source.jsonText}
-      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => source.handleTextChange(e.target.value)}
-      placeholder={placeholder}
-      rows={8}
-      style={{ fontFamily: 'monospace', fontSize: 12 }}
-    />
+    <Flex
+      align="center"
+      justify="center"
+      gap="2"
+      style={{
+        minHeight: 200,
+        border: '1px solid var(--gray-a6)',
+        borderRadius: 'var(--radius-3)',
+      }}
+    >
+      <Spinner />
+      <Text size="1" color="gray">{getMessage('jsonEditorLoading')}</Text>
+    </Flex>
+  );
+}
+
+export function JsonTextArea<T>({ source, placeholder, jsonSchema }: JsonTextAreaProps<T>) {
+  return (
+    <Suspense fallback={<EditorFallback />}>
+      <LazyJsonCodeEditor
+        value={source.jsonText}
+        onChange={source.handleTextChange}
+        jsonSchema={jsonSchema}
+        placeholder={placeholder}
+        hasError={!!source.parseError}
+        ariaLabel={getMessage('jsonEditorAriaLabel')}
+      />
+    </Suspense>
   );
 }

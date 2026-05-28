@@ -3,6 +3,7 @@ import { FileUp } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast } from '@/utils/toast';
 import { importDataSchema, type ImportDomainRule } from '@/schemas/importExport';
+import { rulesImportJsonSchema } from '@/utils/importJsonSchemas';
 import {
   classifyImportedRules,
   type ConflictingRule,
@@ -140,6 +141,7 @@ export function ImportWizard({
       maxWidth="min(960px, 95vw)"
       fillHeight
       availableModes={RULES_AVAILABLE_MODES}
+      jsonSchema={rulesImportJsonSchema}
       packGalleryNode={
         <PackGallery
           packs={packs}

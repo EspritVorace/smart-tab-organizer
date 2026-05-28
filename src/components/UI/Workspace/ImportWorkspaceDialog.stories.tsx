@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent } from 'storybook/test';
+import { setJsonEditorValue } from '@/components/UI/JsonCodeEditor/setJsonEditorValue';
 import { ActiveWorkspaceContext, type ActiveWorkspaceContextValue } from '@/contexts/ActiveWorkspaceContext';
 import { defineWorkspaceItems, DEFAULT_WORKSPACE_ID } from '@/utils/workspaceStorage';
 import type { WorkspaceMeta } from '@/schemas/workspace';
@@ -112,8 +113,7 @@ export const ImportWorkspaceDialogValidPayload: Story = {
       (el) => el.closest('.rt-SegmentedControlItem'),
     );
     if (textItem) await userEvent.click(textItem);
-    const textarea = body.getByPlaceholderText(/workspace/i);
-    await userEvent.click(textarea);
-    await userEvent.paste(JSON.stringify(sampleImportPayload, null, 2));
+    // The editor exposes no <textarea>; set its document directly.
+    await setJsonEditorValue(canvasElement.ownerDocument.body, JSON.stringify(sampleImportPayload, null, 2));
   },
 };

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent, expect } from 'storybook/test';
+import { within, userEvent, expect, waitFor } from 'storybook/test';
 import { ImportSessionsWizard } from './ImportSessionsWizard';
+import { setJsonEditorValue } from '@/components/UI/JsonCodeEditor/setJsonEditorValue';
 
 // Valid import payload: two new sessions (no existing sessions seeded).
 const validImportJson = JSON.stringify({
@@ -70,14 +71,12 @@ export const ImportSessionsWizardStep1: Story = {
     const textTab = body.getAllByText('Text').find(el => el.closest('button'));
     if (textTab) await userEvent.click(textTab);
 
-    // Paste valid session JSON
-    const textarea = await body.findByPlaceholderText(/sessions/);
-    await userEvent.click(textarea);
-    await userEvent.paste(validImportJson);
+    // Set the JSON straight on the CodeMirror editor (no textarea anymore).
+    await setJsonEditorValue(canvasElement.ownerDocument.body, validImportJson);
 
-    // Advance to step 1
+    // Advance to step 1 once validation has enabled the Next button.
     const nextBtn = body.getByText('Next').closest('button') as HTMLButtonElement;
-    await expect(nextBtn).not.toBeDisabled();
+    await waitFor(() => expect(nextBtn).not.toBeDisabled());
     await userEvent.click(nextBtn);
   },
 };
