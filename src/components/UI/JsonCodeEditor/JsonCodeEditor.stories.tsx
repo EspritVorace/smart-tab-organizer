@@ -77,8 +77,8 @@ export const JsonCodeEditorEmpty: Story = {
   args: { initialValue: '' },
   play: async ({ canvasElement }) => {
     const editor = within(canvasElement).getByTestId('json-code-editor');
+    await waitFor(() => expect(editor.querySelector('.cm-content')).not.toBeNull());
     const content = editor.querySelector<HTMLElement>('.cm-content');
-    await waitFor(() => expect(content).not.toBeNull());
     expect(content?.getAttribute('aria-label')).toBe('JSON editor');
     expect(content?.getAttribute('spellcheck')).toBe('false');
   },
@@ -92,8 +92,9 @@ export const JsonCodeEditorInvalidJson: Story = {
   args: { initialValue: invalidJson, hasError: true },
   play: async ({ canvasElement }) => {
     const editor = within(canvasElement).getByTestId('json-code-editor');
-    const content = editor.querySelector<HTMLElement>('.cm-content');
-    expect(content?.getAttribute('aria-invalid')).toBe('true');
+    await waitFor(() => {
+      expect(editor.querySelector('.cm-content')?.getAttribute('aria-invalid')).toBe('true');
+    });
   },
 };
 

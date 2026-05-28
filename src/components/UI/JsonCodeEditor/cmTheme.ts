@@ -48,29 +48,23 @@ export function createEditorTheme(isDark: boolean): Extension {
       '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--gray-12)' },
       '.cm-gutters': {
         backgroundColor: 'transparent',
-        color: 'var(--gray-a9)',
+        color: 'var(--gray-11)',
         border: 'none',
       },
       '.cm-activeLine': { backgroundColor: 'var(--gray-a2)' },
       '.cm-activeLineGutter': { backgroundColor: 'var(--gray-a3)' },
+      '.cm-placeholder': { color: 'var(--gray-11)' },
       '.cm-selectionBackground, &.cm-focused .cm-selectionBackground, ::selection': {
         backgroundColor: 'var(--accent-a4)',
       },
       '&.cm-focused .cm-selectionBackground': { backgroundColor: 'var(--accent-a5)' },
       '.cm-foldGutter .cm-foldMarker': {
-        background: 'transparent',
-        border: 'none',
         cursor: 'pointer',
-        color: 'var(--gray-a10)',
+        color: 'var(--gray-11)',
         padding: '0 2px',
-        font: 'inherit',
         lineHeight: '1',
       },
       '.cm-foldGutter .cm-foldMarker:hover': { color: 'var(--gray-12)' },
-      '.cm-foldGutter .cm-foldMarker:focus-visible': {
-        outline: '2px solid var(--accent-8)',
-        borderRadius: '2px',
-      },
       '.cm-foldPlaceholder': {
         backgroundColor: 'var(--gray-a3)',
         border: '1px solid var(--gray-a5)',

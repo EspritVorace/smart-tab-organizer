@@ -66,16 +66,19 @@ export interface JsonCodeEditorProps {
   focusOnMount?: boolean;
 }
 
-/** Accessible fold marker: a focusable button announced by screen readers. */
+/**
+ * Fold marker for the gutter. CodeMirror marks the whole gutter
+ * `aria-hidden`, so the marker stays a non-focusable decorative element:
+ * keyboard folding is handled by `foldKeymap` and the folded state is
+ * announced through the `cm-foldPlaceholder` in the content.
+ */
 function createFoldMarker(open: boolean): HTMLElement {
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = 'cm-foldMarker';
-  const label = getMessage(open ? 'jsonEditorFoldRange' : 'jsonEditorUnfoldRange');
-  button.setAttribute('aria-label', label);
-  button.title = label;
-  button.textContent = open ? '▾' : '▸';
-  return button;
+  const marker = document.createElement('span');
+  marker.className = 'cm-foldMarker';
+  marker.setAttribute('aria-hidden', 'true');
+  marker.title = getMessage(open ? 'jsonEditorFoldRange' : 'jsonEditorUnfoldRange');
+  marker.textContent = open ? '▾' : '▸';
+  return marker;
 }
 
 /**
@@ -205,6 +208,9 @@ export function JsonCodeEditor({
 
     const view = new EditorView({ state, parent: containerRef.current });
     viewRef.current = view;
+    // Make the scroll viewport reachable by keyboard so a bounded, overflowing
+    // editor can be scrolled without a pointer (axe scrollable-region-focusable).
+    view.scrollDOM.setAttribute('tabindex', '0');
     applyAutoFold(view);
     if (focusOnMount) view.focus();
 
