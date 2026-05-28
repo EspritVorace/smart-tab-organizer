@@ -90,3 +90,7 @@ Merci d'ouvrir une issue avant de soumettre une pull request importante.
 ## 📜 Licence
 
 GNU General Public License v3.0.
+
+## 🗝️ Licences tierces
+
+SmartTab Organizer embarque des composants open source (React, Radix UI, Lucide, Zod, CodeMirror, dnd-kit et d'autres). Leurs mentions de copyright et textes de licence complets sont listés dans [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt) et sur la [page d'attribution](https://docs.esprit-vorace.fr/reference/licences-open-source/).

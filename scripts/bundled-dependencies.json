@@ -1,0 +1,566 @@
+[
+  {
+    "name": "@codemirror/autocomplete",
+    "version": "6.20.2"
+  },
+  {
+    "name": "@codemirror/commands",
+    "version": "6.10.3"
+  },
+  {
+    "name": "@codemirror/lang-json",
+    "version": "6.0.2"
+  },
+  {
+    "name": "@codemirror/language",
+    "version": "6.12.3"
+  },
+  {
+    "name": "@codemirror/lint",
+    "version": "6.9.6"
+  },
+  {
+    "name": "@codemirror/state",
+    "version": "6.6.0"
+  },
+  {
+    "name": "@codemirror/view",
+    "version": "6.43.0"
+  },
+  {
+    "name": "@dnd-kit/abstract",
+    "version": "0.4.0"
+  },
+  {
+    "name": "@dnd-kit/collision",
+    "version": "0.4.0"
+  },
+  {
+    "name": "@dnd-kit/dom",
+    "version": "0.4.0"
+  },
+  {
+    "name": "@dnd-kit/geometry",
+    "version": "0.4.0"
+  },
+  {
+    "name": "@dnd-kit/helpers",
+    "version": "0.4.0"
+  },
+  {
+    "name": "@dnd-kit/react",
+    "version": "0.4.0"
+  },
+  {
+    "name": "@dnd-kit/state",
+    "version": "0.4.0"
+  },
+  {
+    "name": "@floating-ui/core",
+    "version": "1.7.5"
+  },
+  {
+    "name": "@floating-ui/dom",
+    "version": "1.7.6"
+  },
+  {
+    "name": "@floating-ui/react-dom",
+    "version": "2.1.8"
+  },
+  {
+    "name": "@floating-ui/utils",
+    "version": "0.2.11"
+  },
+  {
+    "name": "@hookform/resolvers",
+    "version": "5.2.2"
+  },
+  {
+    "name": "@lezer/common",
+    "version": "1.5.2"
+  },
+  {
+    "name": "@lezer/highlight",
+    "version": "1.2.3"
+  },
+  {
+    "name": "@lezer/json",
+    "version": "1.0.3"
+  },
+  {
+    "name": "@lezer/lr",
+    "version": "1.4.10"
+  },
+  {
+    "name": "@marijn/find-cluster-break",
+    "version": "1.0.2"
+  },
+  {
+    "name": "@preact/signals-core",
+    "version": "1.14.1"
+  },
+  {
+    "name": "@radix-ui/number",
+    "version": "1.1.1"
+  },
+  {
+    "name": "@radix-ui/primitive",
+    "version": "1.1.3"
+  },
+  {
+    "name": "@radix-ui/react-alert-dialog",
+    "version": "1.1.15"
+  },
+  {
+    "name": "@radix-ui/react-arrow",
+    "version": "1.1.7"
+  },
+  {
+    "name": "@radix-ui/react-avatar",
+    "version": "1.1.10"
+  },
+  {
+    "name": "@radix-ui/react-checkbox",
+    "version": "1.3.3"
+  },
+  {
+    "name": "@radix-ui/react-collapsible",
+    "version": "1.1.12"
+  },
+  {
+    "name": "@radix-ui/react-collection",
+    "version": "1.1.7"
+  },
+  {
+    "name": "@radix-ui/react-compose-refs",
+    "version": "1.1.2"
+  },
+  {
+    "name": "@radix-ui/react-context",
+    "version": "1.1.2"
+  },
+  {
+    "name": "@radix-ui/react-dialog",
+    "version": "1.1.15"
+  },
+  {
+    "name": "@radix-ui/react-direction",
+    "version": "1.1.1"
+  },
+  {
+    "name": "@radix-ui/react-dismissable-layer",
+    "version": "1.1.11"
+  },
+  {
+    "name": "@radix-ui/react-dropdown-menu",
+    "version": "2.1.16"
+  },
+  {
+    "name": "@radix-ui/react-focus-guards",
+    "version": "1.1.3"
+  },
+  {
+    "name": "@radix-ui/react-focus-scope",
+    "version": "1.1.7"
+  },
+  {
+    "name": "@radix-ui/react-hover-card",
+    "version": "1.1.15"
+  },
+  {
+    "name": "@radix-ui/react-id",
+    "version": "1.1.1"
+  },
+  {
+    "name": "@radix-ui/react-label",
+    "version": "2.1.8"
+  },
+  {
+    "name": "@radix-ui/react-menu",
+    "version": "2.1.16"
+  },
+  {
+    "name": "@radix-ui/react-navigation-menu",
+    "version": "1.2.14"
+  },
+  {
+    "name": "@radix-ui/react-popover",
+    "version": "1.1.15"
+  },
+  {
+    "name": "@radix-ui/react-popper",
+    "version": "1.2.8"
+  },
+  {
+    "name": "@radix-ui/react-portal",
+    "version": "1.1.9"
+  },
+  {
+    "name": "@radix-ui/react-presence",
+    "version": "1.1.5"
+  },
+  {
+    "name": "@radix-ui/react-primitive",
+    "version": "2.1.3"
+  },
+  {
+    "name": "@radix-ui/react-primitive",
+    "version": "2.1.4"
+  },
+  {
+    "name": "@radix-ui/react-radio-group",
+    "version": "1.3.8"
+  },
+  {
+    "name": "@radix-ui/react-roving-focus",
+    "version": "1.1.11"
+  },
+  {
+    "name": "@radix-ui/react-scroll-area",
+    "version": "1.2.10"
+  },
+  {
+    "name": "@radix-ui/react-select",
+    "version": "2.2.6"
+  },
+  {
+    "name": "@radix-ui/react-slot",
+    "version": "1.2.3"
+  },
+  {
+    "name": "@radix-ui/react-slot",
+    "version": "1.2.4"
+  },
+  {
+    "name": "@radix-ui/react-switch",
+    "version": "1.2.6"
+  },
+  {
+    "name": "@radix-ui/react-toast",
+    "version": "1.2.15"
+  },
+  {
+    "name": "@radix-ui/react-toggle",
+    "version": "1.1.10"
+  },
+  {
+    "name": "@radix-ui/react-toggle-group",
+    "version": "1.1.11"
+  },
+  {
+    "name": "@radix-ui/react-tooltip",
+    "version": "1.2.8"
+  },
+  {
+    "name": "@radix-ui/react-use-callback-ref",
+    "version": "1.1.1"
+  },
+  {
+    "name": "@radix-ui/react-use-controllable-state",
+    "version": "1.2.2"
+  },
+  {
+    "name": "@radix-ui/react-use-escape-keydown",
+    "version": "1.1.1"
+  },
+  {
+    "name": "@radix-ui/react-use-is-hydrated",
+    "version": "0.1.0"
+  },
+  {
+    "name": "@radix-ui/react-use-layout-effect",
+    "version": "1.1.1"
+  },
+  {
+    "name": "@radix-ui/react-use-previous",
+    "version": "1.1.1"
+  },
+  {
+    "name": "@radix-ui/react-use-size",
+    "version": "1.1.1"
+  },
+  {
+    "name": "@radix-ui/react-visually-hidden",
+    "version": "1.2.3"
+  },
+  {
+    "name": "@radix-ui/react-visually-hidden",
+    "version": "1.2.4"
+  },
+  {
+    "name": "@radix-ui/themes",
+    "version": "3.3.0"
+  },
+  {
+    "name": "@sagold/json-pointer",
+    "version": "5.1.2"
+  },
+  {
+    "name": "@sagold/json-query",
+    "version": "6.2.0"
+  },
+  {
+    "name": "@shikijs/core",
+    "version": "1.29.2"
+  },
+  {
+    "name": "@shikijs/engine-oniguruma",
+    "version": "1.29.2"
+  },
+  {
+    "name": "@shikijs/langs",
+    "version": "1.29.2"
+  },
+  {
+    "name": "@shikijs/markdown-it",
+    "version": "1.29.2"
+  },
+  {
+    "name": "@shikijs/themes",
+    "version": "1.29.2"
+  },
+  {
+    "name": "@shikijs/types",
+    "version": "1.29.2"
+  },
+  {
+    "name": "@shikijs/vscode-textmate",
+    "version": "10.0.2"
+  },
+  {
+    "name": "@webext-core/match-patterns",
+    "version": "1.0.3"
+  },
+  {
+    "name": "@wxt-dev/browser",
+    "version": "0.1.40"
+  },
+  {
+    "name": "@wxt-dev/storage",
+    "version": "1.2.8"
+  },
+  {
+    "name": "aria-hidden",
+    "version": "1.2.6"
+  },
+  {
+    "name": "async-mutex",
+    "version": "0.5.0"
+  },
+  {
+    "name": "best-effort-json-parser",
+    "version": "1.4.1"
+  },
+  {
+    "name": "ccount",
+    "version": "2.0.1"
+  },
+  {
+    "name": "character-entities-html4",
+    "version": "2.1.0"
+  },
+  {
+    "name": "character-entities-legacy",
+    "version": "3.0.0"
+  },
+  {
+    "name": "classnames",
+    "version": "2.5.1"
+  },
+  {
+    "name": "cmdk",
+    "version": "1.1.1"
+  },
+  {
+    "name": "codemirror-json-schema",
+    "version": "0.8.1"
+  },
+  {
+    "name": "comma-separated-tokens",
+    "version": "2.0.3"
+  },
+  {
+    "name": "crelt",
+    "version": "1.0.6"
+  },
+  {
+    "name": "deepmerge",
+    "version": "4.3.1"
+  },
+  {
+    "name": "dequal",
+    "version": "2.0.3"
+  },
+  {
+    "name": "ebnf",
+    "version": "1.9.1"
+  },
+  {
+    "name": "entities",
+    "version": "4.5.0"
+  },
+  {
+    "name": "fast-copy",
+    "version": "3.0.2"
+  },
+  {
+    "name": "fast-deep-equal",
+    "version": "3.1.3"
+  },
+  {
+    "name": "get-nonce",
+    "version": "1.0.1"
+  },
+  {
+    "name": "hast-util-to-html",
+    "version": "9.0.5"
+  },
+  {
+    "name": "hast-util-whitespace",
+    "version": "3.0.0"
+  },
+  {
+    "name": "html-void-elements",
+    "version": "3.0.0"
+  },
+  {
+    "name": "json-schema-library",
+    "version": "9.3.5"
+  },
+  {
+    "name": "json5",
+    "version": "2.2.3"
+  },
+  {
+    "name": "linkify-it",
+    "version": "5.0.1"
+  },
+  {
+    "name": "loglevel",
+    "version": "1.9.2"
+  },
+  {
+    "name": "lucide-react",
+    "version": "1.14.0"
+  },
+  {
+    "name": "markdown-it",
+    "version": "14.2.0"
+  },
+  {
+    "name": "mdurl",
+    "version": "2.0.0"
+  },
+  {
+    "name": "nearley",
+    "version": "2.20.1"
+  },
+  {
+    "name": "next-themes",
+    "version": "0.4.6"
+  },
+  {
+    "name": "prop-types",
+    "version": "15.8.1"
+  },
+  {
+    "name": "property-information",
+    "version": "7.1.0"
+  },
+  {
+    "name": "punycode.js",
+    "version": "2.3.1"
+  },
+  {
+    "name": "react",
+    "version": "19.2.5"
+  },
+  {
+    "name": "react-accessible-treeview",
+    "version": "2.11.2"
+  },
+  {
+    "name": "react-dom",
+    "version": "19.2.5"
+  },
+  {
+    "name": "react-hook-form",
+    "version": "7.75.0"
+  },
+  {
+    "name": "react-remove-scroll",
+    "version": "2.7.2"
+  },
+  {
+    "name": "react-remove-scroll-bar",
+    "version": "2.3.8"
+  },
+  {
+    "name": "react-style-singleton",
+    "version": "2.2.3"
+  },
+  {
+    "name": "scheduler",
+    "version": "0.27.0"
+  },
+  {
+    "name": "smtp-address-parser",
+    "version": "1.0.10"
+  },
+  {
+    "name": "space-separated-tokens",
+    "version": "2.0.2"
+  },
+  {
+    "name": "stringify-entities",
+    "version": "4.0.4"
+  },
+  {
+    "name": "style-mod",
+    "version": "4.1.3"
+  },
+  {
+    "name": "tslib",
+    "version": "2.8.1"
+  },
+  {
+    "name": "uc.micro",
+    "version": "2.1.0"
+  },
+  {
+    "name": "use-callback-ref",
+    "version": "1.3.3"
+  },
+  {
+    "name": "use-sidecar",
+    "version": "1.1.3"
+  },
+  {
+    "name": "use-sync-external-store",
+    "version": "1.6.0"
+  },
+  {
+    "name": "valid-url",
+    "version": "1.0.9"
+  },
+  {
+    "name": "w3c-keyname",
+    "version": "2.2.8"
+  },
+  {
+    "name": "wxt",
+    "version": "0.20.25"
+  },
+  {
+    "name": "yaml",
+    "version": "2.9.0"
+  },
+  {
+    "name": "zod",
+    "version": "4.4.3"
+  },
+  {
+    "name": "zwitch",
+    "version": "2.0.4"
+  }
+]
