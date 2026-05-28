@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, DropdownMenu, Flex, Kbd } from '@radix-ui/themes';
+import { Button, DropdownMenu, Flex, Kbd, Tooltip } from '@radix-ui/themes';
 import { ChevronDown } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { AriaButton } from '@/components/UI/AriaButton/AriaButton';
@@ -59,6 +59,8 @@ export interface SplitButtonProps {
   ariaLabel?: string;
   /** Aria-label for the primary button. Required when label is not textual */
   primaryAriaLabel?: string;
+  /** Tooltip content shown on hover over the primary button (not the chevron). */
+  tooltip?: React.ReactNode;
   /** data-testid forwarded to the primary button */
   'data-testid'?: string;
 }
@@ -74,6 +76,7 @@ export function SplitButton({
   disabledReason,
   ariaLabel,
   primaryAriaLabel,
+  tooltip,
   'data-testid': testId,
 }: SplitButtonProps) {
   const chevronStyle = {
@@ -85,20 +88,28 @@ export function SplitButton({
     minWidth: 28,
   };
 
+  const primaryButton = (
+    <AriaButton
+      data-testid={testId}
+      variant={variant}
+      size={size}
+      onClick={onClick}
+      ariaDisabled={disabled}
+      disabledReason={disabledReason}
+      aria-label={typeof label === 'string' ? undefined : primaryAriaLabel}
+      style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+    >
+      {label}
+    </AriaButton>
+  );
+
   return (
     <Flex gap="0">
-      <AriaButton
-        data-testid={testId}
-        variant={variant}
-        size={size}
-        onClick={onClick}
-        ariaDisabled={disabled}
-        disabledReason={disabledReason}
-        aria-label={typeof label === 'string' ? undefined : primaryAriaLabel}
-        style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
-      >
-        {label}
-      </AriaButton>
+      {tooltip && !disabled && !disabledReason ? (
+        <Tooltip content={tooltip}>{primaryButton}</Tooltip>
+      ) : (
+        primaryButton
+      )}
       {disabled ? (
         <Button
           variant={variant}

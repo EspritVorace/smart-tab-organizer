@@ -6,6 +6,13 @@ import { getMessage } from '@/utils/i18n';
 import type { Session } from '@/types/session';
 import { defaultRestoreActionOptions, type DefaultRestoreActionValue } from '@/schemas/enums';
 
+const restoreShortcuts: Record<DefaultRestoreActionValue, string> = {
+  current: 'Shift+R',
+  new: 'Alt+Shift+R',
+  replace: 'Alt+R',
+  customize: 'R',
+};
+
 export interface SessionRestoreButtonProps {
   session: Session;
   onRestoreCurrentWindow: (session: Session) => void;
@@ -58,6 +65,13 @@ export function SessionRestoreButton({
     ?? defaultRestoreActionOptions[0];
   const primaryAriaLabel = getMessage(currentOption.keyLabel);
 
+  const restoreTooltip = (
+    <Flex align="center" gap="2">
+      {getMessage(currentOption.keyLabel)}
+      <Kbd>{restoreShortcuts[defaultRestoreAction]}</Kbd>
+    </Flex>
+  );
+
   const radioGroup: SplitButtonRadioGroupConfig | undefined = onDefaultRestoreActionChange
     ? {
         label: getMessage('defaultRestoreActionLabel'),
@@ -76,6 +90,7 @@ export function SessionRestoreButton({
       data-testid={testId}
       label={label}
       primaryAriaLabel={primaryAriaLabel}
+      tooltip={restoreTooltip}
       onClick={() => primaryHandlers[defaultRestoreAction](session)}
       size={size}
       variant={variant}
