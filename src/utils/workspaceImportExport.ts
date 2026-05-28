@@ -14,7 +14,6 @@ import type { AppSettings } from '@/types/syncSettings.js';
 import { defaultAppSettings } from '@/types/syncSettings.js';
 import type { Statistics } from '@/types/statistics.js';
 import type { Session } from '@/types/session.js';
-import type { RuleCategory } from '@/schemas/category.js';
 import type { ImportWorkspaceData } from '@/schemas/importExport.js';
 
 /**
@@ -36,7 +35,6 @@ export interface WorkspaceExportPayload {
     | 'notifyOnOrganize'
   >;
   domainRules: AppSettings['domainRules'];
-  categories: RuleCategory[];
   sessions: Session[];
   statistics?: Statistics;
 }
@@ -44,7 +42,6 @@ export interface WorkspaceExportPayload {
 async function readScopedSnapshot(items: ScopedItems): Promise<{
   settings: WorkspaceExportPayload['settings'];
   domainRules: AppSettings['domainRules'];
-  categories: RuleCategory[];
   sessions: Session[];
   statistics: Statistics;
 }> {
@@ -58,16 +55,15 @@ async function readScopedSnapshot(items: ScopedItems): Promise<{
     items.notifyOnDeduplicationItem,
     items.notifyOnOrganizeItem,
     items.domainRulesItem,
-    items.categoriesItem,
     items.sessionsItem,
     items.statisticsItem,
     items.pinnedSessionsItem,
     items.archivedSessionsItem,
   ]);
 
-  const activeSessions = (results[10].value as Session[]) ?? [];
-  const pinnedSessions = (results[12].value as Session[]) ?? [];
-  const archivedSessions = (results[13].value as Session[]) ?? [];
+  const activeSessions = (results[9].value as Session[]) ?? [];
+  const pinnedSessions = (results[11].value as Session[]) ?? [];
+  const archivedSessions = (results[12].value as Session[]) ?? [];
 
   return {
     settings: {
@@ -81,9 +77,8 @@ async function readScopedSnapshot(items: ScopedItems): Promise<{
       notifyOnOrganize: results[7].value as boolean,
     },
     domainRules: (results[8].value as AppSettings['domainRules']) ?? [],
-    categories: (results[9].value as RuleCategory[]) ?? [],
     sessions: [...pinnedSessions, ...activeSessions, ...archivedSessions],
-    statistics: results[11].value as Statistics,
+    statistics: results[10].value as Statistics,
   };
 }
 
@@ -103,7 +98,6 @@ export async function collectWorkspaceExport(
     workspace: { name: workspace.name, accentColor: workspace.accentColor },
     settings: snapshot.settings,
     domainRules: snapshot.domainRules,
-    categories: snapshot.categories,
     sessions: snapshot.sessions,
   };
   if (options.note?.trim()) payload.note = options.note.trim();
@@ -138,7 +132,6 @@ async function writeScopedSnapshot(
     { item: items.notifyOnDeduplicationItem, value: payload.settings.notifyOnDeduplication },
     { item: items.notifyOnOrganizeItem, value: payload.settings.notifyOnOrganize ?? defaultAppSettings.notifyOnOrganize },
     { item: items.domainRulesItem, value: payload.domainRules as AppSettings['domainRules'] },
-    { item: items.categoriesItem, value: payload.categories },
     { item: items.sessionsItem, value: active },
     { item: items.pinnedSessionsItem, value: pinned },
     { item: items.archivedSessionsItem, value: archived },

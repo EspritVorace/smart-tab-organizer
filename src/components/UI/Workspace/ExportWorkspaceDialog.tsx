@@ -31,7 +31,6 @@ const EMPTY_PAYLOAD: WorkspaceExportPayload = {
     notifyOnOrganize: true,
   },
   domainRules: [],
-  categories: [],
   sessions: [],
 };
 
