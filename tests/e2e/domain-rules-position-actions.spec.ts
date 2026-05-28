@@ -2,6 +2,7 @@
  * E2E tests for domain rule position actions in the "…" dropdown menu.
  * Covers: Move to top, Move to bottom, First of domain, Last of domain.
  */
+import { type Page } from '@playwright/test';
 import { test, expect } from './fixtures';
 import { goToDomainRulesSection } from './helpers/navigation';
 
@@ -12,6 +13,17 @@ test.beforeEach(async ({ helpers }) => {
 async function getDomainRuleLabels(helpers: any): Promise<string[]> {
   const settings = await helpers.getSettings();
   return (settings.domainRules as any[]).map((r: any) => r.label);
+}
+
+/**
+ * Selecting an item inside the "Positions" submenu closes the dropdown but
+ * leaves the collapsed menu/submenu nodes mounted with data-state="closed",
+ * so a detach check no longer holds. Assert instead that no menu stays in
+ * the open state.
+ */
+async function expectMenusClosed(page: Page): Promise<void> {
+  // allow-inline-dom: generic Radix menu-state probe, not a Page Object surface.
+  await expect(page.locator('[role="menu"][data-state="open"]')).toHaveCount(0);
 }
 
 // ---------------------------------------------------------------------------
@@ -30,7 +42,7 @@ test.describe('Move to top', () => {
     await page.getByRole('listitem', { name: /Rule C/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /positions/i }).click();
     await page.getByRole('menuitem', { name: /move to top/i }).click();
-    await expect(page.locator('[role="menu"][data-state="open"]')).toHaveCount(0);
+    await expectMenusClosed(page);
     await page.close();
 
     const labels = await getDomainRuleLabels(helpers);
@@ -49,7 +61,7 @@ test.describe('Move to top', () => {
     await page.getByRole('listitem', { name: /Rule A/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /positions/i }).click();
     await page.getByRole('menuitem', { name: /move to top/i }).click();
-    await expect(page.locator('[role="menu"][data-state="open"]')).toHaveCount(0);
+    await expectMenusClosed(page);
     await page.close();
 
     const labels = await getDomainRuleLabels(helpers);
@@ -73,7 +85,7 @@ test.describe('Move to bottom', () => {
     await page.getByRole('listitem', { name: /Rule A/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /positions/i }).click();
     await page.getByRole('menuitem', { name: /move to bottom/i }).click();
-    await expect(page.locator('[role="menu"][data-state="open"]')).toHaveCount(0);
+    await expectMenusClosed(page);
     await page.close();
 
     const labels = await getDomainRuleLabels(helpers);
@@ -104,7 +116,7 @@ test.describe('First of domain / Last of domain', () => {
     await page.getByRole('listitem', { name: /Sub Example/i }).getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /positions/i }).click();
     await page.getByRole('menuitem', { name: /first of domain/i }).click();
-    await expect(page.locator('[role="menu"][data-state="open"]')).toHaveCount(0);
+    await expectMenusClosed(page);
     await page.close();
 
     const labels = await getDomainRuleLabels(helpers);
@@ -133,7 +145,7 @@ test.describe('First of domain / Last of domain', () => {
     await page.getByRole('listitem', { name: /Example/i }).first().getByLabel('More actions').click();
     await page.getByRole('menuitem', { name: /positions/i }).click();
     await page.getByRole('menuitem', { name: /last of domain/i }).click();
-    await expect(page.locator('[role="menu"][data-state="open"]')).toHaveCount(0);
+    await expectMenusClosed(page);
     await page.close();
 
     const labels = await getDomainRuleLabels(helpers);
