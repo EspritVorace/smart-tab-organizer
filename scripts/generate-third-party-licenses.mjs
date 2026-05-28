@@ -215,18 +215,27 @@ function buildJson(entries) {
   return JSON.stringify(data, null, 2) + '\n';
 }
 
-function buildNotice(entries) {
+function buildNotice(entries, { bundledOnly = false } = {}) {
   const line = '='.repeat(78);
   let out = '';
   out += `${line}\n`;
   out += 'SmartTab Organizer - Third-party licenses\n';
   out += `${line}\n\n`;
-  out +=
-    'SmartTab Organizer is distributed under the GNU General Public License v3.0\n' +
-    '(see LICENSE.txt). It bundles the third-party open source components listed\n' +
-    'below. Their copyright notices and license texts are reproduced verbatim, as\n' +
-    'required by their respective licenses.\n\n';
-  out += 'Scope: [prod] = shipped in the extension bundle, [dev] = build/test tooling.\n\n';
+  if (bundledOnly) {
+    out +=
+      'SmartTab Organizer is distributed under the GNU General Public License v3.0\n' +
+      '(see LICENSE.txt). The components listed below are bundled in the extension\n' +
+      'package. Their copyright notices and license texts are reproduced verbatim, as\n' +
+      'required by their respective licenses. The full list including development\n' +
+      'tooling is available at THIRD-PARTY-LICENSES.txt in the source repository.\n\n';
+  } else {
+    out +=
+      'SmartTab Organizer is distributed under the GNU General Public License v3.0\n' +
+      '(see LICENSE.txt). It builds on the third-party open source components listed\n' +
+      'below. Their copyright notices and license texts are reproduced verbatim, as\n' +
+      'required by their respective licenses.\n\n';
+    out += 'Scope: [prod] = shipped in the extension bundle, [dev] = build/test tooling.\n\n';
+  }
 
   for (const entry of entries) {
     out += `${line}\n`;
@@ -304,20 +313,26 @@ function writeFile(absPath, contents) {
 async function main() {
   const entries = await collectDependencies();
 
+  const prodEntries = entries.filter((e) => e.scope === 'prod');
+
   const json = buildJson(entries);
-  const notice = buildNotice(entries);
+  // The bundled NOTICE only needs the components actually shipped in the
+  // extension (prod). Dev tooling is not redistributed, so it does not have to
+  // travel with the package; it stays in the exhaustive root NOTICE.
+  const bundledNotice = buildNotice(prodEntries, { bundledOnly: true });
+  const fullNotice = buildNotice(entries);
 
   const jsonPath = join(PROJECT_ROOT, 'public', 'data', 'third-party-licenses.json');
   const bundledNoticePath = join(PROJECT_ROOT, 'public', 'data', 'third-party-licenses.txt');
   const rootNoticePath = join(PROJECT_ROOT, 'THIRD-PARTY-LICENSES.txt');
 
   writeFile(jsonPath, json);
-  writeFile(bundledNoticePath, notice);
-  writeFile(rootNoticePath, notice);
+  writeFile(bundledNoticePath, bundledNotice);
+  writeFile(rootNoticePath, fullNotice);
 
   process.stdout.write(`Generated public/data/third-party-licenses.json (${entries.length} packages)\n`);
-  process.stdout.write('Generated public/data/third-party-licenses.txt\n');
-  process.stdout.write('Generated THIRD-PARTY-LICENSES.txt\n');
+  process.stdout.write(`Generated public/data/third-party-licenses.txt (${prodEntries.length} bundled packages)\n`);
+  process.stdout.write(`Generated THIRD-PARTY-LICENSES.txt (${entries.length} packages)\n`);
 
   for (const locale of LOCALES) {
     const md = buildDocPage(entries, locale);
