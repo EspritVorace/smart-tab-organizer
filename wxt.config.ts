@@ -11,6 +11,12 @@ import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'fs';
 // set is written to a manifest in the `build:done` hook and consumed by
 // `scripts/generate-third-party-licenses.mjs` to scope the attribution to what
 // is really redistributed.
+//
+// Capture is opt-in (CAPTURE_LICENSES=true) so ordinary builds, e2e runs and
+// screenshot pipelines pay no cost and never touch the manifest. It is enabled
+// only by the `pnpm licenses:generate` script.
+const CAPTURE_LICENSES = process.env.CAPTURE_LICENSES === 'true';
+
 const bundledDependencies = new Map<string, { name: string; version: string }>();
 
 const BUNDLED_MANIFEST = resolve('scripts/bundled-dependencies.json');
@@ -57,7 +63,9 @@ export default defineConfig({
     'build:done': () => {
       // All Vite sub-builds have run; persist the union of bundled packages so
       // the license generator can scope the attribution to what is shipped.
-      writeBundledManifest();
+      // Only when capture is explicitly requested, to avoid clobbering the
+      // manifest (the accumulator is empty when the plugin is disabled).
+      if (CAPTURE_LICENSES) writeBundledManifest();
     },
   },
   manifest: {
@@ -111,22 +119,28 @@ export default defineConfig({
       // Collect the third-party packages actually included in each bundle.
       // `multipleVersions` keeps distinct versions apart (a package may change
       // its license between versions). The output callback only accumulates;
-      // the manifest is written once in the `build:done` hook above.
-      license({
-        thirdParty: {
-          includePrivate: false,
-          multipleVersions: true,
-          output: (dependencies) => {
-            for (const dep of dependencies) {
-              if (!dep.name || !dep.version) continue;
-              bundledDependencies.set(`${dep.name}@${dep.version}`, {
-                name: dep.name,
-                version: dep.version,
-              });
-            }
-          },
-        },
-      }),
+      // the manifest is written once in the `build:done` hook above. Enabled
+      // only when CAPTURE_LICENSES=true (set by `pnpm licenses:generate`), so
+      // ordinary builds are not slowed down by the dependency scan.
+      ...(CAPTURE_LICENSES
+        ? [
+            license({
+              thirdParty: {
+                includePrivate: false,
+                multipleVersions: true,
+                output: (dependencies) => {
+                  for (const dep of dependencies) {
+                    if (!dep.name || !dep.version) continue;
+                    bundledDependencies.set(`${dep.name}@${dep.version}`, {
+                      name: dep.name,
+                      version: dep.version,
+                    });
+                  }
+                },
+              },
+            }),
+          ]
+        : []),
     ],
     resolve: {
       tsconfigPaths: true,

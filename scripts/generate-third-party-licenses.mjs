@@ -19,7 +19,10 @@
  * .txt NOTICE because permissive licenses require preserving the copyright and
  * permission notice on redistribution.
  *
- * Workflow: run `pnpm build` to refresh the manifest, then `pnpm licenses:generate`.
+ * Workflow: `pnpm licenses:generate` does everything (a capture build refreshes
+ * scripts/bundled-dependencies.json, then this script regenerates the artifacts).
+ * Ordinary `pnpm build` does not touch the manifest (capture is opt-in via the
+ * CAPTURE_LICENSES env var set by that script).
  *
  * Idempotent: deterministic ordering, no timestamps. Compatible with Node 22
  * (plain ESM, no TypeScript imports, no experimental flags).
