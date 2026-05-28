@@ -124,7 +124,7 @@ export const DomainRuleCardWithSearch: Story = {
 };
 
 export const DomainRuleCardWithOverlap: Story = {
-  name: 'DomainRuleCard — Overlap warning',
+  name: 'DomainRuleCard — Overlap rank badge',
   args: {
     ...defaultProps,
     rule: { ...baseRule, id: 'rule-1', label: 'Gmail', domainFilter: 'mail.google.com' },

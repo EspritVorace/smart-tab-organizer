@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { Theme, Box, Flex, Text } from '@radix-ui/themes';
-import { RuleOverlapWarning } from './RuleOverlapWarning';
+import { RuleOverlapBadge } from './RuleOverlapBadge';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 
 const makeRule = (
@@ -35,9 +35,9 @@ const fourRules: DomainRuleSetting[] = [
   makeRule('4', 'Maps', 'maps.google.com'),
 ];
 
-const meta: Meta<typeof RuleOverlapWarning> = {
-  title: 'Components/Core/DomainRule/RuleOverlapWarning',
-  component: RuleOverlapWarning,
+const meta: Meta<typeof RuleOverlapBadge> = {
+  title: 'Components/Core/DomainRule/RuleOverlapBadge',
+  component: RuleOverlapBadge,
   parameters: { layout: 'padded' },
   decorators: [
     (Story) => (
@@ -56,21 +56,21 @@ const meta: Meta<typeof RuleOverlapWarning> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const RuleOverlapWarningTwoRules: Story = {
+export const RuleOverlapBadgeTwoRules: Story = {
   args: {
     currentRuleId: '2',
     precedenceList: twoRules,
   },
 };
 
-export const RuleOverlapWarningFourRules: Story = {
+export const RuleOverlapBadgeFourRules: Story = {
   args: {
     currentRuleId: '2',
     precedenceList: fourRules,
   },
 };
 
-export const RuleOverlapWarningCurrentRuleIsFirst: Story = {
+export const RuleOverlapBadgeCurrentRuleIsFirst: Story = {
   args: {
     currentRuleId: '1',
     precedenceList: fourRules,
