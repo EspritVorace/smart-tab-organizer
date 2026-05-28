@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { Box, Flex, Button, Text, Callout, Separator, Badge, TabNav } from '@radix-ui/themes';
+import { Box, Flex, Button, Text, Callout, Separator, Badge, TabNav, Kbd, Tooltip } from '@radix-ui/themes';
 import { Camera, Archive, ArchiveRestore, CheckCircle, Pin, PinOff, Upload, Trash2, FileDown, Boxes, type LucideIcon } from 'lucide-react';
 import { DragDropProvider, type DragOverEvent, type DragEndEvent } from '@dnd-kit/react';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
@@ -802,16 +802,19 @@ export function SessionsPage({
               onSearchChange={setSearchQuery}
               action={
                 !archivedOnlyView ? (
-                  <Button
-                    data-testid="page-sessions-btn-snapshot"
-                    variant="solid"
-                    size="2"
-                    onClick={() => setSnapshotOpen(true)}
-                    style={{ color: 'white' }}
-                  >
-                    <Camera size={16} />
-                    {getMessage('sessionSnapshotButton')}
-                  </Button>
+                  <Tooltip content={<Flex align="center" gap="2" aria-hidden="true">{getMessage('sessionSnapshotButton')}<Kbd>N</Kbd></Flex>}>
+                    <Button
+                      data-testid="page-sessions-btn-snapshot"
+                      variant="solid"
+                      size="2"
+                      onClick={() => setSnapshotOpen(true)}
+                      style={{ color: 'white' }}
+                      aria-keyshortcuts="N"
+                    >
+                      <Camera size={16} />
+                      {getMessage('sessionSnapshotButton')}
+                    </Button>
+                  </Tooltip>
                 ) : undefined
               }
             />
