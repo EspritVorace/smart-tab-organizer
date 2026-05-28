@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { Button, Flex, Box } from '@radix-ui/themes';
+import { Button, Flex, Box, Kbd, Tooltip } from '@radix-ui/themes';
 import { Plus, Eye, EyeOff, Shield, AlertCircle, Upload, Trash2, FileDown } from 'lucide-react';
 import { DragDropProvider, type DragEndEvent, type DragOverEvent } from '@dnd-kit/react';
 import { move } from '@dnd-kit/helpers';
@@ -332,10 +332,12 @@ export function DomainRulesPage({
                 searchValue={searchTerm}
                 onSearchChange={setSearchTerm}
                 action={
-                  <Button data-testid="page-rules-btn-add" onClick={handleAddRule}>
-                    <Plus size={16} />
-                    {getMessage('addRule')}
-                  </Button>
+                  <Tooltip content={<Flex align="center" gap="2" aria-hidden="true">{getMessage('addRule')}<Kbd>N</Kbd></Flex>}>
+                    <Button data-testid="page-rules-btn-add" onClick={handleAddRule} aria-keyshortcuts="N">
+                      <Plus size={16} />
+                      {getMessage('addRule')}
+                    </Button>
+                  </Tooltip>
                 }
               />
             )}
