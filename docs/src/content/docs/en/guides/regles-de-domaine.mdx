@@ -1,6 +1,6 @@
 ---
 title: Domain Rules
-description: The CRUD for domain rules. Create with the wizard, edit, disable, delete, reorder via drag and drop. Domain overlap conflicts.
+description: The CRUD for domain rules. Create with the wizard, edit, disable, delete, reorder via drag and drop. Domain overlap and rule evaluation order.
 ---
 
 import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
@@ -22,7 +22,7 @@ The **Domain Rules** page is the nerve center of the extension. A rule describes
 
 Each row covers a domain and shows its label, its configuration mode (preset, manual, ask, fallback label), its category (emoji + label), its group color, and its state. Three main actions from the list:
 
-- **Reorder** via drag and drop to adjust priority (the topmost rule wins in case of overlap).
+- **Reorder** via drag and drop to adjust priority (the first applicable rule wins in case of overlap).
 - **Enable or disable** a rule individually with its toggle, without deleting it.
 - **Open the wizard** to edit an existing rule or create a new one.
 
@@ -81,10 +81,12 @@ Click the **Edit** icon on a row (or press `E` when the row is focused). The sam
 
 ## Domain overlap
 
-When two rules partially cover the same domain (for example `*.atlassian.net` and `mycompany.atlassian.net`), an **overlap indicator** appears in the HoverCard of each rule involved, with the list of conflicting rules. The topmost rule wins; you can reorder via drag and drop.
+When several rules cover the same domain (for example `*.atlassian.net` and `mycompany.atlassian.net`), a small **rank badge** in the accent color appears next to each rule involved. The number is the rule's position in the evaluation order for that domain. No badge appears when a domain is covered by a single rule.
+
+Hover the badge to open a HoverCard listing every rule covering the domain, in order, with the current one in bold. The rules are evaluated in this order, and the first one that can actually apply (grouping enabled and a group name produced) wins. You can reorder them via drag and drop.
 
 <Aside type="note">
-Overlap is not an error in itself. It can be intentional, with a generic rule as a fallback and more specific rules above it. The indicator is just a reminder.
+Overlap is not an error in itself. It can be intentional, with a generic rule as a fallback and more specific rules above it. The rank badge is just an informational reminder of the evaluation order.
 </Aside>
 
 ## Import a collection of rules

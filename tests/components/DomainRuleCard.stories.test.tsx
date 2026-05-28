@@ -58,17 +58,17 @@ describe('DomainRuleCard (portable stories)', () => {
     expect(screen.getByTestId('rule-card-rule-1')).toBeInTheDocument();
   });
 
-  it('shows the overlap warning when overlapPrecedenceList has 2+ entries', () => {
+  it('shows the overlap rank badge when overlapPrecedenceList has 2+ entries', () => {
     render(<DomainRuleCardWithOverlap />);
-    const warning = screen.getByTestId('rule-overlap-warning');
-    expect(warning).toBeInTheDocument();
-    expect(warning.tagName).toBe('BUTTON');
-    expect(warning).toHaveAttribute('aria-label');
+    const badge = screen.getByTestId('rule-overlap-badge');
+    expect(badge).toBeInTheDocument();
+    expect(badge.tagName).toBe('BUTTON');
+    expect(badge).toHaveAttribute('aria-label');
   });
 
-  it('does not show the overlap warning when overlapPrecedenceList is missing', () => {
+  it('does not show the overlap rank badge when overlapPrecedenceList is missing', () => {
     render(<DomainRuleCardDefault />);
-    expect(screen.queryByTestId('rule-overlap-warning')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('rule-overlap-badge')).not.toBeInTheDocument();
   });
 
   it("renders the badge with the category's color and emoji when category != null", () => {

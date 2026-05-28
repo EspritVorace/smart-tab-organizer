@@ -1,6 +1,6 @@
 ---
 title: Règles de domaine
-description: Le CRUD des règles de domaine. Créer via le wizard, modifier, désactiver, supprimer, réordonner par glisser-déposer. Conflits de chevauchement.
+description: Le CRUD des règles de domaine. Créer via le wizard, modifier, désactiver, supprimer, réordonner par glisser-déposer. Chevauchement de domaines et ordre d'évaluation des règles.
 ---
 
 import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
@@ -22,7 +22,7 @@ La page **Règles de domaine** est le centre névralgique de l'extension. Une r�
 
 Chaque ligne couvre un domaine et affiche son label, son mode de configuration (preset, manuel, demander, label de repli), sa catégorie (emoji + libellé), sa couleur de groupe et son état. Trois actions principales depuis la liste :
 
-- **Réordonner** par glisser-déposer pour ajuster la priorité (la règle la plus haute gagne en cas de chevauchement).
+- **Réordonner** par glisser-déposer pour ajuster la priorité (la première règle applicable gagne en cas de chevauchement).
 - **Activer ou désactiver** une règle individuellement via son toggle, sans la supprimer.
 - **Ouvrir l'assistant** pour modifier une règle existante ou en créer une nouvelle.
 
@@ -81,10 +81,12 @@ Cliquez sur l'icône **Modifier** d'une ligne (ou pressez `E` quand la ligne a l
 
 ## Chevauchement de domaines
 
-Quand deux règles couvrent partiellement le même domaine (par exemple `*.atlassian.net` et `mycompany.atlassian.net`), un **indicateur de chevauchement** apparait dans la HoverCard de chaque règle concernée, avec la liste des règles en conflit. La règle la plus haute dans la liste gagne ; vous pouvez réordonner par glisser-déposer.
+Quand plusieurs règles couvrent le même domaine (par exemple `*.atlassian.net` et `mycompany.atlassian.net`), un petit **badge de rang** à la couleur d'accentuation apparait à côté de chaque règle concernée. Le numéro indique la position de la règle dans l'ordre d'évaluation pour ce domaine. Aucun badge n'apparait quand un domaine n'est couvert que par une seule règle.
+
+Au survol du badge, une HoverCard liste toutes les règles couvrant le domaine, dans l'ordre, la règle courante étant en gras. Les règles sont évaluées dans cet ordre, et la première qui peut réellement s'appliquer (groupement activé et nom de groupe produit) l'emporte. Vous pouvez les réordonner par glisser-déposer.
 
 <Aside type="note">
-Le chevauchement n'est pas une erreur en soi. Il peut être intentionnel pour avoir une règle générique en repli et des règles plus spécifiques au-dessus. L'indicateur sert simplement à vous le rappeler.
+Le chevauchement n'est pas une erreur en soi. Il peut être intentionnel pour avoir une règle générique en repli et des règles plus spécifiques au-dessus. Le badge de rang sert simplement à rappeler l'ordre d'évaluation.
 </Aside>
 
 ## Importer une collection de règles

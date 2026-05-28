@@ -4,7 +4,7 @@ import { Pencil, Trash2, MoreHorizontal, GripVertical, AlertTriangle } from 'luc
 import { useSortable } from '@dnd-kit/react/sortable';
 import { getStatusStyle, type CardStatus } from '@/utils/statusStyle';
 import { RuleDetailPopover } from './RuleDetailPopover';
-import { RuleOverlapWarning } from './RuleOverlapWarning';
+import { RuleOverlapBadge } from './RuleOverlapBadge';
 import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 import { getMessage } from '@/utils/i18n';
 import { getRadixColor } from '@/utils/utils';
@@ -33,8 +33,8 @@ export interface DomainRuleCardProps {
   searchTerm?: string;
   /**
    * In full mode, list of enabled rules sharing the same domain space as
-   * `rule` (including `rule` itself), in runtime precedence order. When the
-   * list has 2+ entries, the card shows an orange overlap warning.
+   * `rule` (including `rule` itself), in runtime evaluation order. When the
+   * list has 2+ entries, the card shows an accent rank badge.
    */
   overlapPrecedenceList?: DomainRuleSetting[];
   index?: number;
@@ -199,7 +199,7 @@ export function DomainRuleCard({
             <Flex align="center" gap="2" style={{ minWidth: 0, maxWidth: '100%' }}>
               {domainText}
               {overlapPrecedenceList && overlapPrecedenceList.length > 1 && (
-                <RuleOverlapWarning
+                <RuleOverlapBadge
                   currentRuleId={rule.id}
                   precedenceList={overlapPrecedenceList}
                 />
