@@ -18,6 +18,7 @@ import {
   type JsonSourceValidationResult,
 } from '@/components/UI/ImportExportWizards/Source';
 import { useDialogReset } from '@/components/UI/ImportExportWizards/Shared';
+import { workspaceImportJsonSchema } from '@/utils/importJsonSchemas';
 import { getMessage } from '@/utils/i18n.js';
 import { logger } from '@/utils/logger.js';
 
@@ -101,7 +102,7 @@ export function ImportWorkspaceDialog({ open, onOpenChange }: ImportWorkspaceDia
             {source.sourceMode === 'file' ? (
               <FileDropZone source={source} />
             ) : (
-              <JsonTextArea source={source} placeholder='{"workspace": {...}, ...}' />
+              <JsonTextArea source={source} placeholder='{"workspace": {...}, ...}' jsonSchema={workspaceImportJsonSchema} />
             )}
           </Box>
 

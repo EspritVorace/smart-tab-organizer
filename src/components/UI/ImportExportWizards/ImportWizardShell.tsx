@@ -13,6 +13,7 @@ import {
 import { ImportWizardFooter } from './ImportWizardFooter';
 import { ImportedNoteCallout, SourceStep, type SourceMode } from './Source';
 import type { ImportWizardState } from './useImportWizardState';
+import type { ImportJsonSchema } from '@/utils/importJsonSchemas';
 
 export interface ImportWizardShellLabels {
   title: string;
@@ -45,6 +46,8 @@ interface ImportWizardShellProps<TItem extends { id: string }, TConflict>
   availableModes?: readonly SourceMode[];
   /** Optional gallery node rendered when `sourceMode === 'pack'`. */
   packGalleryNode?: React.ReactNode;
+  /** JSON Schema fed to the text-mode editor for autocompletion and linting. */
+  jsonSchema?: ImportJsonSchema;
   /** Pack-mode footer wiring: the rule count drives the Next button's disabled state, the callback triggers the confirmation. */
   packFooter?: {
     ruleCount: number;
@@ -80,6 +83,7 @@ export function ImportWizardShell<TItem extends { id: string }, TConflict>({
   fillHeight,
   availableModes,
   packGalleryNode,
+  jsonSchema,
   packFooter,
 }: ImportWizardShellProps<TItem, TConflict>) {
   const {
@@ -111,6 +115,7 @@ export function ImportWizardShell<TItem extends { id: string }, TConflict>({
             successCountMessageKey={successCountMessageKey}
             availableModes={availableModes}
             packGalleryNode={packGalleryNode}
+            jsonSchema={jsonSchema}
           />
         )}
 

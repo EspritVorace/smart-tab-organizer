@@ -6,6 +6,7 @@ import { JsonTextArea } from './JsonTextArea';
 import { ImportErrorCallout } from './ImportErrorCallout';
 import { ImportSuccessCallout } from './ImportSuccessCallout';
 import type { JsonSourceInputState, SourceMode } from './useJsonSourceInput';
+import type { ImportJsonSchema } from '@/utils/importJsonSchemas';
 
 interface SourceStepProps<T extends readonly unknown[]> {
   source: JsonSourceInputState<T>;
@@ -13,6 +14,8 @@ interface SourceStepProps<T extends readonly unknown[]> {
   successCountMessageKey: string;
   availableModes?: readonly SourceMode[];
   packGalleryNode?: React.ReactNode;
+  /** JSON Schema fed to the editor for autocompletion and linting in text mode. */
+  jsonSchema?: ImportJsonSchema;
 }
 
 /**
@@ -25,6 +28,7 @@ export function SourceStep<T extends readonly unknown[]>({
   successCountMessageKey,
   availableModes,
   packGalleryNode,
+  jsonSchema,
 }: SourceStepProps<T>) {
   return (
     <Box mt="4">
@@ -33,7 +37,7 @@ export function SourceStep<T extends readonly unknown[]>({
       <Box mt="3">
         {source.sourceMode === 'file' && <FileDropZone source={source} />}
         {source.sourceMode === 'text' && (
-          <JsonTextArea source={source} placeholder={textareaPlaceholder} />
+          <JsonTextArea source={source} placeholder={textareaPlaceholder} jsonSchema={jsonSchema} />
         )}
         {source.sourceMode === 'pack' && packGalleryNode}
       </Box>
