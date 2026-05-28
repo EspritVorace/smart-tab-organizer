@@ -110,13 +110,13 @@ export class SessionEditorPage extends DialogPage {
   /**
    * Open the editor from the More-actions dropdown on the (only) visible
    * session card. The seeded-then-rendered Sessions list exposes a single
-   * "More actions" trigger when one session is present; the menu item
-   * has the localised "Edit" label (regex tolerates extra whitespace and
-   * matches both English and French i18n variants of the same word).
+   * "More actions" trigger when one session is present; the Edit item is
+   * targeted by its stable `*-menu-edit` testid (locale-agnostic, and
+   * unaffected by the trailing keyboard-shortcut Kbd hint).
    */
   async openFromFirstSessionMenu(): Promise<void> {
     await this.page.getByRole('button', { name: /more actions/i }).click();
-    await this.page.getByRole('menuitem', { name: /^edit$/i }).click();
+    await this.page.locator('[data-testid$="-menu-edit"]').click();
     await this.expectVisible();
   }
 

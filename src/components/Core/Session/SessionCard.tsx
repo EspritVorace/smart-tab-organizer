@@ -3,7 +3,7 @@ import * as Collapsible from '@radix-ui/react-collapsible';
 import { useSortable } from '@dnd-kit/react/sortable';
 import {
   Card, Flex, Text, IconButton, TextField,
-  DropdownMenu, HoverCard, Tooltip, Badge, Box, Checkbox,
+  DropdownMenu, HoverCard, Tooltip, Badge, Box, Checkbox, Kbd,
 } from '@radix-ui/themes';
 import {
   MoreHorizontal, Pencil, Trash2, Check, X,
@@ -123,22 +123,54 @@ function SessionMoreMenu({
         </IconButton>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content>
-        <DropdownMenu.Item onClick={() => onEdit(session)}>
-          <Pencil size={14} />
-          {getMessage('sessionEdit')}
+        <DropdownMenu.Item
+          data-testid={`session-card-${session.id}-menu-edit`}
+          onClick={() => onEdit(session)}
+        >
+          <Flex align="center" justify="between" gap="3" width="100%">
+            <Flex align="center" gap="2">
+              <Pencil size={14} />
+              {getMessage('sessionEdit')}
+            </Flex>
+            <Kbd size="1">E</Kbd>
+          </Flex>
         </DropdownMenu.Item>
 
-        {(onMoveToFirst || onMoveLast) && <DropdownMenu.Separator />}
-
-        {onMoveToFirst && (
-          <DropdownMenu.Item onClick={onMoveToFirst} disabled={isDragDisabled}>
-            {getMessage('sessionMoveToFirst')}
-          </DropdownMenu.Item>
-        )}
-        {onMoveLast && (
-          <DropdownMenu.Item onClick={onMoveLast} disabled={isDragDisabled}>
-            {getMessage('sessionMoveLast')}
-          </DropdownMenu.Item>
+        {(onMoveToFirst || onMoveLast) && (
+          <>
+            <DropdownMenu.Separator />
+            <DropdownMenu.Sub>
+              <DropdownMenu.SubTrigger>
+                {getMessage('sessionPositionsMenu')}
+              </DropdownMenu.SubTrigger>
+              <DropdownMenu.SubContent>
+                {onMoveToFirst && (
+                  <DropdownMenu.Item
+                    data-testid={`session-card-${session.id}-menu-move-first`}
+                    onClick={onMoveToFirst}
+                    disabled={isDragDisabled}
+                  >
+                    <Flex align="center" justify="between" gap="3" width="100%">
+                      {getMessage('sessionMoveToFirst')}
+                      <Kbd size="1">Ctrl+↑</Kbd>
+                    </Flex>
+                  </DropdownMenu.Item>
+                )}
+                {onMoveLast && (
+                  <DropdownMenu.Item
+                    data-testid={`session-card-${session.id}-menu-move-last`}
+                    onClick={onMoveLast}
+                    disabled={isDragDisabled}
+                  >
+                    <Flex align="center" justify="between" gap="3" width="100%">
+                      {getMessage('sessionMoveLast')}
+                      <Kbd size="1">Ctrl+↓</Kbd>
+                    </Flex>
+                  </DropdownMenu.Item>
+                )}
+              </DropdownMenu.SubContent>
+            </DropdownMenu.Sub>
+          </>
         )}
 
         {(onArchive || onUnarchive) && <DropdownMenu.Separator />}
@@ -147,8 +179,13 @@ function SessionMoreMenu({
             data-testid={`session-card-${session.id}-menu-archive`}
             onClick={() => onArchive(session)}
           >
-            <Archive size={14} />
-            {getMessage('archiveAction')}
+            <Flex align="center" justify="between" gap="3" width="100%">
+              <Flex align="center" gap="2">
+                <Archive size={14} />
+                {getMessage('archiveAction')}
+              </Flex>
+              <Kbd size="1">A</Kbd>
+            </Flex>
           </DropdownMenu.Item>
         )}
         {isArchived && onUnarchive && (
@@ -156,15 +193,26 @@ function SessionMoreMenu({
             data-testid={`session-card-${session.id}-menu-unarchive`}
             onClick={() => onUnarchive(session)}
           >
-            <ArchiveRestore size={14} />
-            {getMessage('unarchiveAction')}
+            <Flex align="center" gap="2">
+              <ArchiveRestore size={14} />
+              {getMessage('unarchiveAction')}
+            </Flex>
           </DropdownMenu.Item>
         )}
 
         <DropdownMenu.Separator />
-        <DropdownMenu.Item color="red" onClick={() => onDelete(session)}>
-          <Trash2 size={14} />
-          {getMessage('delete')}
+        <DropdownMenu.Item
+          data-testid={`session-card-${session.id}-menu-delete`}
+          color="red"
+          onClick={() => onDelete(session)}
+        >
+          <Flex align="center" justify="between" gap="3" width="100%">
+            <Flex align="center" gap="2">
+              <Trash2 size={14} />
+              {getMessage('delete')}
+            </Flex>
+            <Kbd size="1">Del</Kbd>
+          </Flex>
         </DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>

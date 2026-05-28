@@ -7,11 +7,12 @@
 
 /* Hero (Organize) */
 .hero {
+  position: relative;
   display: flex;
   align-items: center;
   width: 100%;
   gap: 10px;
-  padding: 12px 14px;
+  padding: 12px 34px 12px 14px;
   background: var(--accent-9);
   color: #fff;
   border: 0;
@@ -69,7 +70,10 @@
 }
 
 .heroKbd {
-  flex-shrink: 0;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  pointer-events: none;
 }
 
 /* Meta row (Save, Restore) */

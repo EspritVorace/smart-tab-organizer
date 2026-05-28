@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, Text, HoverCard, Flex, Badge, Card, Checkbox, IconButton, DropdownMenu } from '@radix-ui/themes';
+import { Switch, Text, HoverCard, Flex, Badge, Card, Checkbox, IconButton, DropdownMenu, Kbd, Tooltip } from '@radix-ui/themes';
 import { Pencil, Trash2, MoreHorizontal, GripVertical, AlertTriangle } from 'lucide-react';
 import { useSortable } from '@dnd-kit/react/sortable';
 import { getStatusStyle, type CardStatus } from '@/utils/statusStyle';
@@ -209,12 +209,15 @@ export function DomainRuleCard({
 
           {/* Right: Switch + Actions */}
           <Flex align="center" gap="3" style={{ flexShrink: 0 }}>
-            <Switch
-              size="1"
-              checked={rule.enabled}
-              onCheckedChange={(checked) => onToggleEnabled?.(rule.id, checked)}
-              aria-label={getMessage('ruleToggleEnabledAriaLabel')}
-            />
+            <Tooltip content={<Flex align="center" gap="2" aria-hidden="true">{getMessage('ruleToggleEnabledAriaLabel')}<Kbd>T</Kbd></Flex>}>
+              <Switch
+                size="1"
+                checked={rule.enabled}
+                onCheckedChange={(checked) => onToggleEnabled?.(rule.id, checked)}
+                aria-label={getMessage('ruleToggleEnabledAriaLabel')}
+                aria-keyshortcuts="T"
+              />
+            </Tooltip>
             <DropdownMenu.Root>
               <DropdownMenu.Trigger>
                 <IconButton
@@ -232,44 +235,74 @@ export function DomainRuleCard({
                   data-testid={`rule-card-${rule.id}-menu-edit`}
                   onClick={() => onEdit?.(rule)}
                 >
-                  <Pencil size={14} />
-                  {getMessage('edit')}
+                  <Flex align="center" justify="between" gap="3" width="100%">
+                    <Flex align="center" gap="2">
+                      <Pencil size={14} />
+                      {getMessage('edit')}
+                    </Flex>
+                    <Kbd size="1">E</Kbd>
+                  </Flex>
                 </DropdownMenu.Item>
                 <DropdownMenu.Separator />
-                <DropdownMenu.Item
-                  data-testid={`rule-card-${rule.id}-menu-move-first`}
-                  onClick={() => onMoveToFirst?.(rule.id)}
-                >
-                  {getMessage('ruleMoveToFirst')}
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  data-testid={`rule-card-${rule.id}-menu-move-last`}
-                  onClick={() => onMoveToLast?.(rule.id)}
-                >
-                  {getMessage('ruleMoveToLast')}
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  data-testid={`rule-card-${rule.id}-menu-move-first-domain`}
-                  disabled={isDomainActionDisabled}
-                  onClick={() => !isDomainActionDisabled && onMoveToFirstOfDomain?.(rule.id)}
-                >
-                  {getMessage('ruleMoveToFirstOfDomain')}
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  data-testid={`rule-card-${rule.id}-menu-move-last-domain`}
-                  disabled={isDomainActionDisabled}
-                  onClick={() => !isDomainActionDisabled && onMoveToLastOfDomain?.(rule.id)}
-                >
-                  {getMessage('ruleMoveToLastOfDomain')}
-                </DropdownMenu.Item>
+                <DropdownMenu.Sub>
+                  <DropdownMenu.SubTrigger>
+                    {getMessage('rulePositionsMenu')}
+                  </DropdownMenu.SubTrigger>
+                  <DropdownMenu.SubContent>
+                    <DropdownMenu.Item
+                      data-testid={`rule-card-${rule.id}-menu-move-first`}
+                      onClick={() => onMoveToFirst?.(rule.id)}
+                    >
+                      <Flex align="center" justify="between" gap="3" width="100%">
+                        {getMessage('ruleMoveToFirst')}
+                        <Kbd size="1">Ctrl+↑</Kbd>
+                      </Flex>
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item
+                      data-testid={`rule-card-${rule.id}-menu-move-last`}
+                      onClick={() => onMoveToLast?.(rule.id)}
+                    >
+                      <Flex align="center" justify="between" gap="3" width="100%">
+                        {getMessage('ruleMoveToLast')}
+                        <Kbd size="1">Ctrl+↓</Kbd>
+                      </Flex>
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Separator />
+                    <DropdownMenu.Item
+                      data-testid={`rule-card-${rule.id}-menu-move-first-domain`}
+                      disabled={isDomainActionDisabled}
+                      onClick={() => !isDomainActionDisabled && onMoveToFirstOfDomain?.(rule.id)}
+                    >
+                      <Flex align="center" justify="between" gap="3" width="100%">
+                        {getMessage('ruleMoveToFirstOfDomain')}
+                        <Kbd size="1">Ctrl+Shift+↑</Kbd>
+                      </Flex>
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item
+                      data-testid={`rule-card-${rule.id}-menu-move-last-domain`}
+                      disabled={isDomainActionDisabled}
+                      onClick={() => !isDomainActionDisabled && onMoveToLastOfDomain?.(rule.id)}
+                    >
+                      <Flex align="center" justify="between" gap="3" width="100%">
+                        {getMessage('ruleMoveToLastOfDomain')}
+                        <Kbd size="1">Ctrl+Shift+↓</Kbd>
+                      </Flex>
+                    </DropdownMenu.Item>
+                  </DropdownMenu.SubContent>
+                </DropdownMenu.Sub>
                 <DropdownMenu.Separator />
                 <DropdownMenu.Item
                   data-testid={`rule-card-${rule.id}-menu-delete`}
                   color="red"
                   onClick={() => onDeleteRequest?.(rule.id, index)}
                 >
-                  <Trash2 size={14} />
-                  {getMessage('delete')}
+                  <Flex align="center" justify="between" gap="3" width="100%">
+                    <Flex align="center" gap="2">
+                      <Trash2 size={14} />
+                      {getMessage('delete')}
+                    </Flex>
+                    <Kbd size="1">Del</Kbd>
+                  </Flex>
                 </DropdownMenu.Item>
               </DropdownMenu.Content>
             </DropdownMenu.Root>

@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Box, Button, Card, Flex, IconButton, Text, Tooltip } from '@radix-ui/themes';
+import { Box, Button, Card, Flex, IconButton, Kbd, Text, Tooltip } from '@radix-ui/themes';
 import { AlertCircle, Pencil, Plus, Trash2 } from 'lucide-react';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { ListToolbar } from '@/components/UI/ListToolbar';
@@ -214,14 +214,17 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
               searchValue={searchTerm}
               onSearchChange={setSearchTerm}
               action={
-                <Button
-                  data-testid="workspace-create-button"
-                  variant="solid"
-                  onClick={handleOpenCreate}
-                >
-                  <Plus size={16} />
-                  {getMessage('workspaceCreateLabel')}
-                </Button>
+                <Tooltip content={<Flex align="center" gap="2" aria-hidden="true">{getMessage('workspaceCreateLabel')}<Kbd>N</Kbd></Flex>}>
+                  <Button
+                    data-testid="workspace-create-button"
+                    variant="solid"
+                    onClick={handleOpenCreate}
+                    aria-keyshortcuts="N"
+                  >
+                    <Plus size={16} />
+                    {getMessage('workspaceCreateLabel')}
+                  </Button>
+                </Tooltip>
               }
             />
           )}

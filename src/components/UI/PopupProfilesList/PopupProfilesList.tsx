@@ -6,6 +6,7 @@ import { ChevronDown, ExternalLink, Pin } from 'lucide-react';
 import { SessionRestoreButton } from '@/components/Core/Session/SessionRestoreButton/SessionRestoreButton';
 import { getMessage } from '@/utils/i18n';
 import { loadActiveSessions, loadPinnedSessions } from '@/utils/sessionStorage';
+import { openOptionsWithHash } from '@/utils/openOptions';
 import { getFocusedSessionFromDOM } from '@/utils/sessionUtils';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { getActiveTabGroupId } from '@/utils/tabCapture';
@@ -122,15 +123,9 @@ export function PopupProfilesList() {
       .catch(() => {});
   }, []);
 
-  const { settings, setDefaultRestoreAction } = useSettings();
+  const { settings } = useSettings();
   const defaultRestoreAction: DefaultRestoreActionValue =
     settings?.defaultRestoreAction ?? defaultAppSettings.defaultRestoreAction;
-  const handleDefaultRestoreActionChange = useCallback(
-    (value: DefaultRestoreActionValue) => {
-      void setDefaultRestoreAction(value);
-    },
-    [setDefaultRestoreAction],
-  );
 
   const { handleNavigationKey } = useListNavigation(listRef, '[data-popup-pinned-card]');
 
@@ -297,7 +292,7 @@ export function PopupProfilesList() {
                 onCustomize={(s) => { void openCustomizeRestore(s); }}
                 onRefresh={(s) => { void openRefreshFromPopup(s); }}
                 defaultRestoreAction={defaultRestoreAction}
-                onDefaultRestoreActionChange={handleDefaultRestoreActionChange}
+                onSettingsClick={() => void openOptionsWithHash('#settings')}
                 data-testid={`popup-profile-btn-restore-${session.id}`}
               />
             </Flex>

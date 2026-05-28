@@ -44,3 +44,15 @@ export const ImportExportActionCardDisabled: Story = {
     disabled: true,
   },
 };
+
+export const ImportExportActionCardWithShortcut: Story = {
+  args: {
+    testId: 'action-card-with-shortcut',
+    icon: Download,
+    title: 'Export Rules',
+    description: 'Export your domain rules to a JSON file.',
+    buttonLabel: 'Export',
+    onClick: () => {},
+    shortcutKeys: ['E', 'R'],
+  },
+};
