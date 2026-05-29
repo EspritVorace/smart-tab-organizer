@@ -1,0 +1,95 @@
+---
+import { Icon } from 'astro-icon/components';
+import { getLocale } from '../../i18n/locale';
+import { landing } from '../../i18n/landing';
+
+const locale = getLocale(Astro.url.pathname);
+const t = landing[locale].privacy;
+---
+
+<section class="privacy-band" aria-labelledby="privacy-title">
+  <div class="privacy-inner">
+    <div class="privacy-head">
+      <h2 id="privacy-title">{t.title}</h2>
+      <p>{t.subtitle}</p>
+    </div>
+    <ul class="privacy-points" role="list">
+      {
+        t.points.map((point) => (
+          <li>
+            <span class="privacy-icon" aria-hidden="true">
+              <Icon name={point.icon} />
+            </span>
+            <span>{point.label}</span>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="privacy-note">{t.note}</p>
+  </div>
+</section>
+
+<style>
+  .privacy-band {
+    margin-block: 4rem;
+    background: var(--blog-muted);
+    border: 1px solid var(--blog-border);
+    border-radius: 1.1rem;
+    padding: 2.5rem 1.75rem;
+  }
+
+  .privacy-inner {
+    max-width: 52rem;
+    margin-inline: auto;
+  }
+
+  .privacy-head {
+    text-align: center;
+    margin-block-end: 2rem;
+  }
+
+  .privacy-head h2 {
+    font-size: clamp(1.5rem, 1rem + 2vw, 2.1rem);
+    margin-block-end: 0.5rem;
+  }
+
+  .privacy-head p {
+    margin: 0;
+    color: var(--sl-color-gray-2);
+  }
+
+  .privacy-points {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1rem 1.5rem;
+  }
+
+  .privacy-points li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+  }
+
+  .privacy-icon {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  .privacy-icon :global(svg) {
+    width: 1.75rem;
+    height: 1.75rem;
+    display: block;
+  }
+
+  .privacy-note {
+    margin-block-start: 2rem;
+    margin-block-end: 0;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--sl-color-gray-3);
+  }
+</style>
