@@ -1,5 +1,46 @@
 # Changelog
 
+## 1.2.2 — since 1.2.1
+
+### New Features
+- Sessions split into pinned/active/archived buckets, with Active/Archived sub-tabs and per-bucket loading
+- Popup reads only pinned and active sessions, never the archive
+- Session export grouped into three sets (pinned, active, archived) with archives unchecked by default
+- Configurable default action for the session Restore button (US-S022)
+- Session statistics block laid out as a 2-column paired grid
+- U shortcut refreshes the focused session card
+- Domain rules: overlap surfaced on cards via a hovercard plus an accent rank badge
+- Domain rules: new fallbackLabel field and 'label' config mode
+- Grouping joins an existing same-title same-color group instead of creating a duplicate
+- Relative-time labels on rules and workspaces, aligned with sessions
+- Toolbar icon badge reflecting grouping and dedup state
+- Import: JSON textarea replaced with a CodeMirror editor (syntax highlighting and validation) (US-IE016)
+- Keyboard shortcut badges and tooltips across the UI
+- Contextual documentation link per page plus F1 shortcut, pointing to docs.esprit-vorace.fr
+- Workspaces: keyboard navigation and focus ring on workspace cards
+- HomePage: initial focus and single-key shortcuts on quick actions
+- Per-page Radix skeletons replacing the Suspense spinner
+- Open source license attribution
+
+### Improvements
+- Starlight documentation restructured around task-oriented guides
+- Radix Kbd replaces native kbd markup
+- Workspace card drops the redundant color label
+- Shared useSessionBucketLoader hook extracted from the session bucket hooks
+- Dependency upgrades (patches and minors), pnpm 11.1.2 to 11.4.0, @astrojs/starlight 0.39.2
+- Unit tests added for sessionUtils and workspace import/export, plus bucket routing and archive classification coverage; story interactions consolidated
+- Screenshots consolidated under /doc/, legacy /assets/ folder dropped
+
+### Bug Fixes
+- Workspaces: rule categories treated as global, not per-workspace, and removed from workspace export
+- Workspaces: pinned and archived sessions preserved across export/import
+- Sessions: updatedAt preserved when archiving or unarchiving; refresh button shown and icons unified
+- Import/export: Options page no longer frozen after a clipboard export
+- Domain rules: first field focused when opening edit dialogs
+- Statistics: session volume tiles kept on a single row
+- Wizard: modal max height raised from 80vh to 85vh
+- HomePage: focus ring shown on mouse click, not only after arrow-key navigation
+
 ## 1.2.1 — since 1.2.0
 
 ### New Features
