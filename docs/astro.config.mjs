@@ -48,6 +48,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'SmartTab Organizer',
+      favicon: '/favicon.svg',
       customCss: ['./src/styles/global.css'],
       defaultLocale: 'root',
       locales: {
