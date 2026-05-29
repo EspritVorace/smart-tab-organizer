@@ -9,7 +9,7 @@
 A Chrome and Firefox extension that groups your tabs by domain, kills duplicates, and snapshots your workspaces as sessions you can restore in one click.
 
 <p align="center">
-  <img src="assets/store.png" alt="SmartTab Organizer" width="720">
+  <img src="doc/store.png" alt="SmartTab Organizer" width="720">
 </p>
 
 <p align="center">
@@ -35,7 +35,7 @@ A Chrome and Firefox extension that groups your tabs by domain, kills duplicates
 Open a Jira ticket, a GitHub PR, a docs page: the new tab lands in the right group instantly. Group names come from the page title, the URL, or a regex preset (Jira, GitHub, GitLab, Trello, and many more).
 
 <p align="center">
-  <img src="assets/readme/gifs/regroup.gif" alt="Auto-grouping in action" width="640">
+  <img src="doc/readme/gifs/regroup.gif" alt="Auto-grouping in action" width="640">
 </p>
 
 ### 🔁 Deduplication
@@ -43,7 +43,7 @@ Open a Jira ticket, a GitHub PR, a docs page: the new tab lands in the right gro
 Open a page that's already open? The duplicate vanishes. Matching is configurable per rule (exact URL, "includes", or "ignore these query params"), and you choose which of the two tabs survives.
 
 <p align="center">
-  <img src="assets/readme/gifs/dedup.gif" alt="Deduplication in action" width="640">
+  <img src="doc/readme/gifs/dedup.gif" alt="Deduplication in action" width="640">
 </p>
 
 ### 📷 Sessions you actually want to use
@@ -51,7 +51,7 @@ Open a page that's already open? The duplicate vanishes. Matching is configurabl
 Snapshot your open tabs and groups, name them, pin the ones you live in. Restore into the current window, a new one, or replace what you have. Every session is editable, searchable across tabs and groups, and can carry your own notes.
 
 <p align="center">
-  <img src="assets/readme/en-dark-sessions-list.png" alt="Sessions list" width="720">
+  <img src="doc/readme/en-dark-sessions-list.png" alt="Sessions list" width="720">
 </p>
 
 ## And there's more
@@ -67,11 +67,7 @@ Snapshot your open tabs and groups, name them, pin the ones you live in. Restore
 
 ## 📖 Documentation
 
-The full guide lives in [`docs/`](docs/src/content/docs/en/) (Astro Starlight, 3 languages, 30+ pages with screenshots). Browse the MDX on GitHub, or run it locally:
-
-```bash
-pnpm docs:dev
-```
+Full guide online: [docs.esprit-vorace.fr](https://docs.esprit-vorace.fr/en/) (Astro Starlight, 3 languages, 30+ pages with screenshots). The MDX sources live in [`docs/`](docs/src/content/docs/en/) for contributors.
 
 ## 🛠️ For contributors
 
@@ -94,3 +90,7 @@ Please open an issue before submitting a large pull request.
 ## 📜 License
 
 GNU General Public License v3.0.
+
+## 🗝️ Third-party licenses
+
+SmartTab Organizer bundles open source components (React, Radix UI, Lucide, Zod, CodeMirror, dnd-kit, and more). Their copyright notices and full license texts are listed in [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt) and on the [attribution page](https://docs.esprit-vorace.fr/en/reference/licences-open-source/).

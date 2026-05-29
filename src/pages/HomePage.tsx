@@ -1,7 +1,8 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { browser } from 'wxt/browser';
 import { Box, Flex } from '@radix-ui/themes';
 import { useSessions } from '@/hooks/useSessions';
+import { useShortcuts, type ShortcutAction } from '@/hooks/useShortcuts';
 import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
 import type { AppSettings } from '@/types/syncSettings';
 import type { Session } from '@/types/session';
@@ -18,6 +19,7 @@ import {
 import { HomePageSkeleton } from '@/components/HomePage/HomePageSkeleton';
 import type { QuickActionId } from '@/components/HomePage/data';
 import type { HomeRestoreTarget } from '@/components/HomePage/types';
+import type { DefaultRestoreActionValue } from '@/schemas/enums';
 
 export interface HomePageProps {
   syncSettings: AppSettings;
@@ -27,6 +29,8 @@ export interface HomePageProps {
   onOpenRuleWizard: () => void;
   onOpenShortcutsAside: () => void;
   onRestore: (session: Session, target: HomeRestoreTarget) => void;
+  /** Persists a new default restore action when the user picks it from a pinned tile dropdown. */
+  onDefaultRestoreActionChange: (value: DefaultRestoreActionValue) => void;
   /** Locale used by mini-stats for thousand-separator formatting. */
   locale?: string;
 }
@@ -47,6 +51,7 @@ export function HomePage({
   onOpenRuleWizard,
   onOpenShortcutsAside,
   onRestore,
+  onDefaultRestoreActionChange,
   locale,
 }: HomePageProps) {
   const { openImportRules } = useImportExportWizards();
@@ -69,33 +74,67 @@ export function HomePage({
   const totalSessions = sessions.length;
   const showStats = totalGrouping + totalDedup + totalSessions > 0;
 
-  const handleQuickAction = (id: QuickActionId) => {
-    switch (id) {
-      case 'organize':
-        browser.runtime.sendMessage({ type: 'ORGANIZE_ALL_TABS' }).catch(() => {
-          // Ignore: extension context may have been invalidated.
-        });
-        return;
-      case 'snapshot':
-        onOpenSnapshotWizard();
-        return;
-      case 'rule':
-        onOpenRuleWizard();
-        return;
-      case 'io':
-        onNavigate('importexport');
-        return;
-      case 'stats':
-        onNavigate('stats');
-        return;
-      case 'shortcuts':
-        onOpenShortcutsAside();
-        return;
-      case 'workspaces':
-        onNavigate('workspaces');
-        return;
+  const handleQuickAction = useCallback(
+    (id: QuickActionId) => {
+      switch (id) {
+        case 'organize':
+          browser.runtime.sendMessage({ type: 'ORGANIZE_ALL_TABS' }).catch(() => {
+            // Ignore: extension context may have been invalidated.
+          });
+          return;
+        case 'snapshot':
+          onOpenSnapshotWizard();
+          return;
+        case 'rule':
+          onOpenRuleWizard();
+          return;
+        case 'io':
+          onNavigate('importexport');
+          return;
+        case 'stats':
+          onNavigate('stats');
+          return;
+        case 'shortcuts':
+          onOpenShortcutsAside();
+          return;
+        case 'workspaces':
+          onNavigate('workspaces');
+          return;
+      }
+    },
+    [onOpenSnapshotWizard, onOpenRuleWizard, onNavigate, onOpenShortcutsAside],
+  );
+
+  const homeShortcutBindings = useMemo<Record<string, ShortcutAction>>(
+    () => ({
+      'home.action.organize': () => handleQuickAction('organize'),
+      'home.action.snapshot': () => handleQuickAction('snapshot'),
+      'home.action.newRule': () => handleQuickAction('rule'),
+      'home.action.io': () => handleQuickAction('io'),
+      'home.action.stats': () => handleQuickAction('stats'),
+    }),
+    [handleQuickAction],
+  );
+
+  useShortcuts(homeShortcutBindings, { scope: 'page:home', enabled: !isLoading });
+
+  const hasFocusedOnMount = useRef(false);
+  useEffect(() => {
+    if (isLoading) return;
+    if (hasFocusedOnMount.current) return;
+    hasFocusedOnMount.current = true;
+
+    let selector: string;
+    if (isEmpty) {
+      selector = '[data-testid="home-hero-import"]';
+    } else if (pinnedSessions.length === 0) {
+      selector = '[data-testid="home-quick-action-organize"]';
+    } else {
+      selector = `[data-testid="home-pinned-tile-${pinnedSessions[0].id}"]`;
     }
-  };
+    const el = document.querySelector<HTMLElement>(selector);
+    el?.focus();
+  }, [isLoading, isEmpty, pinnedSessions]);
 
   const handleMiniStatNavigate = (route: MiniStatRoute) => {
     onNavigate(route);
@@ -132,6 +171,8 @@ export function HomePage({
                 sessions={pinnedSessions}
                 onSeeAll={handleSeeAllSessions}
                 onRestore={onRestore}
+                defaultRestoreAction={syncSettings.defaultRestoreAction}
+                onDefaultRestoreActionChange={onDefaultRestoreActionChange}
               />
 
               <QuickActionsSection count={QUICK_COUNT_DEFAULT} onAction={handleQuickAction} />

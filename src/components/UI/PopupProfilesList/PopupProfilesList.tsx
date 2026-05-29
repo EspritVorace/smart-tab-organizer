@@ -5,15 +5,20 @@ import { browser } from 'wxt/browser';
 import { ChevronDown, ExternalLink, Pin } from 'lucide-react';
 import { SessionRestoreButton } from '@/components/Core/Session/SessionRestoreButton/SessionRestoreButton';
 import { getMessage } from '@/utils/i18n';
-import { loadSessions } from '@/utils/sessionStorage';
+import { loadActiveSessions, loadPinnedSessions } from '@/utils/sessionStorage';
+import { openOptionsWithHash } from '@/utils/openOptions';
 import { getFocusedSessionFromDOM } from '@/utils/sessionUtils';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
+import { getActiveTabGroupId } from '@/utils/tabCapture';
 import { showSuccessNotification } from '@/utils/notifications';
 import { getRuleCategory } from '@/utils/categoriesStore';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
 import { useListNavigation } from '@/hooks/useListNavigation';
+import { useSettings } from '@/hooks/useSettings';
 import { useShortcuts } from '@/hooks/useShortcuts';
 import type { Session } from '@/types/session';
+import { defaultAppSettings } from '@/types/syncSettings';
+import type { DefaultRestoreActionValue } from '@/schemas/enums';
 import styles from './PopupProfilesList.module.css';
 
 function getCategoryIcon(categoryId: string | null | undefined): React.ReactNode {
@@ -76,6 +81,14 @@ async function openCustomizeRestore(session: Session) {
   await openSessionsPage(`?action=restore&sessionId=${encodeURIComponent(session.id)}`);
 }
 
+async function openRefreshFromPopup(session: Session) {
+  const groupId = await getActiveTabGroupId();
+  const suffix = groupId !== null
+    ? `?action=refresh&sessionId=${encodeURIComponent(session.id)}&groupId=${groupId}`
+    : `?action=refresh&sessionId=${encodeURIComponent(session.id)}`;
+  await openSessionsPage(suffix);
+}
+
 export function PopupProfilesList() {
   const { scopedItems } = useActiveWorkspaceContext();
   const popupPinnedEmptyCollapsedItem = scopedItems.popupPinnedEmptyCollapsedItem;
@@ -86,9 +99,9 @@ export function PopupProfilesList() {
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    loadSessions().then((all) => {
-      setPinnedSessions(all.filter((s) => s.isPinned));
-      setHasAnySession(all.length > 0);
+    Promise.all([loadPinnedSessions(), loadActiveSessions()]).then(([pinned, active]) => {
+      setPinnedSessions(pinned);
+      setHasAnySession(pinned.length + active.length > 0);
       setLoaded(true);
     });
     popupPinnedEmptyCollapsedItem.getValue().then((v) => setEmptyCollapsed(v ?? false));
@@ -109,6 +122,10 @@ export function PopupProfilesList() {
       })
       .catch(() => {});
   }, []);
+
+  const { settings } = useSettings();
+  const defaultRestoreAction: DefaultRestoreActionValue =
+    settings?.defaultRestoreAction ?? defaultAppSettings.defaultRestoreAction;
 
   const { handleNavigationKey } = useListNavigation(listRef, '[data-popup-pinned-card]');
 
@@ -142,6 +159,10 @@ export function PopupProfilesList() {
       'sessionCard.restore.new': () => {
         const focused = getFocusedSession();
         if (focused) handleRestore(focused, 'new');
+      },
+      'sessionCard.refresh': () => {
+        const focused = getFocusedSession();
+        if (focused) void openRefreshFromPopup(focused);
       },
     },
     { scope: 'widget:session-card' },
@@ -269,6 +290,9 @@ export function PopupProfilesList() {
                 onRestoreNewWindow={(s) => handleRestore(s, 'new')}
                 onReplaceCurrentWindow={(s) => handleRestore(s, 'replace')}
                 onCustomize={(s) => { void openCustomizeRestore(s); }}
+                onRefresh={(s) => { void openRefreshFromPopup(s); }}
+                defaultRestoreAction={defaultRestoreAction}
+                onSettingsClick={() => void openOptionsWithHash('#settings')}
                 data-testid={`popup-profile-btn-restore-${session.id}`}
               />
             </Flex>

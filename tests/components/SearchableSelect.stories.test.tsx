@@ -6,9 +6,7 @@ import * as stories from '../../src/components/Form/FormFields/SearchableSelect.
 const {
   SearchableSelectDefault,
   SearchableSelectDisabled,
-  SearchableSelectOpen,
-  SearchableSelectFiltered,
-  SearchableSelectChosen,
+  SearchableSelectInteraction,
   SearchableSelectEmptyResults,
 } = composeStories(stories);
 
@@ -25,20 +23,8 @@ describe('SearchableSelect — static renders', () => {
 });
 
 describe('SearchableSelect — interactions', () => {
-  it('opens the dropdown and shows the search input', async () => {
-    await SearchableSelectOpen.run();
-
-    expect(screen.getByPlaceholderText('Search a preset...')).toBeInTheDocument();
-  });
-
-  it('filters options by search term', async () => {
-    await SearchableSelectFiltered.run();
-
-    expect(screen.getByText('Jira Ticket')).toBeInTheDocument();
-  });
-
-  it('selects an option and shows it in the trigger', async () => {
-    await SearchableSelectChosen.run();
+  it('opens, filters, selects, and shows the chosen label in the trigger', async () => {
+    await SearchableSelectInteraction.run();
 
     expect(screen.getByRole('combobox')).toHaveTextContent('GitHub Repository');
   });

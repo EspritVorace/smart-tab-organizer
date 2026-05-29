@@ -52,6 +52,42 @@ describe('domainRuleSchema', () => {
     expect(result.success).toBe(false);
   });
 
+  describe('fallbackLabel', () => {
+    it('accepts a rule without a fallbackLabel (optional field)', () => {
+      const { ...rest } = validRule;
+      const result = domainRuleSchema.safeParse(rest);
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts a rule with a fallbackLabel value', () => {
+      const result = domainRuleSchema.safeParse({ ...validRule, fallbackLabel: 'Friendly Name' });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a fallbackLabel exceeding 100 characters', () => {
+      const tooLong = 'x'.repeat(101);
+      const result = domainRuleSchema.safeParse({ ...validRule, fallbackLabel: tooLong });
+      expect(result.success).toBe(false);
+    });
+
+    it('does not enforce uniqueness on fallbackLabel across rules', () => {
+      const r1 = { ...validRule, id: 'a', label: 'Rule A', fallbackLabel: 'Shared Group' };
+      const r2 = { ...validRule, id: 'b', label: 'Rule B', fallbackLabel: 'Shared Group' };
+      const result = domainRulesSchema.safeParse([r1, r2]);
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts a rule with groupNameSource="label"', () => {
+      const result = domainRuleSchema.safeParse({
+        ...validRule,
+        presetId: null,
+        groupNameSource: 'label' as const,
+        fallbackLabel: 'My Group',
+      });
+      expect(result.success).toBe(true);
+    });
+  });
+
   describe('conditional refinement: titleParsingRegEx required when groupNameSource=title and presetId=null', () => {
     it('rejects when titleParsingRegEx is empty and source is title', () => {
       const rule = { ...validRule, presetId: null, groupNameSource: 'title' as const, titleParsingRegEx: '' };
@@ -188,6 +224,26 @@ describe('domainRuleSchema', () => {
       };
       expect(domainRuleSchema.safeParse(rule).success).toBe(true);
     });
+  });
+});
+
+describe('createdAt / updatedAt optional timestamps', () => {
+  it('accepts a rule with both timestamps present', () => {
+    const rule = {
+      ...validRule,
+      createdAt: '2026-05-01T10:00:00.000Z',
+      updatedAt: '2026-05-23T12:00:00.000Z',
+    };
+    expect(domainRuleSchema.safeParse(rule).success).toBe(true);
+  });
+
+  it('accepts a rule without any timestamps (backward compatibility)', () => {
+    expect(domainRuleSchema.safeParse(validRule).success).toBe(true);
+  });
+
+  it('accepts a rule with only createdAt', () => {
+    const rule = { ...validRule, createdAt: '2026-05-01T10:00:00.000Z' };
+    expect(domainRuleSchema.safeParse(rule).success).toBe(true);
   });
 });
 

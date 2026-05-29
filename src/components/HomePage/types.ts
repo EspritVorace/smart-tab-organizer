@@ -1,1 +1,1 @@
-export type HomeRestoreTarget = 'current' | 'new' | 'replace' | 'custom';
+export type HomeRestoreTarget = 'current' | 'new' | 'replace' | 'custom' | 'refresh';

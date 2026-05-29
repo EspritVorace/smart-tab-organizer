@@ -1,37 +1,18 @@
 import { useCallback, useMemo } from 'react';
-import type { Statistics, StatisticsAggregates, TopRuleStat } from '@/types/statistics.js';
-import { defaultStatistics } from '@/types/statistics.js';
+import type {
+  Statistics,
+  StatisticsAggregates,
+  TopRuleStat,
+  SessionEventAggregates,
+  SessionEventCounters,
+} from '@/types/statistics.js';
+import { defaultStatistics, defaultSessionEventCounters } from '@/types/statistics.js';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext.js';
 import { useStorageState } from './useStorageState.js';
 import type { DomainRuleSetting } from '@/types/syncSettings.js';
-
-function getMondayOfWeek(date: Date): Date {
-  const d = new Date(date);
-  const day = d.getDay();
-  d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day));
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
+import { computeDateWindows, type DateWindows } from '@/utils/statisticsDateUtils.js';
 
 interface PeriodTotals { grouping: number; dedup: number }
-interface DateWindows {
-  thisWeekStart: Date;
-  lastWeekStart: Date;
-  lastWeekEnd: Date;
-  thirtyDaysAgo: Date;
-}
-
-function computeDateWindows(today: Date): DateWindows {
-  const thisWeekStart = getMondayOfWeek(today);
-  const lastWeekStart = new Date(thisWeekStart);
-  lastWeekStart.setDate(lastWeekStart.getDate() - 7);
-  const lastWeekEnd = new Date(thisWeekStart);
-  lastWeekEnd.setDate(lastWeekEnd.getDate() - 1);
-  const thirtyDaysAgo = new Date(today);
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  thirtyDaysAgo.setHours(0, 0, 0, 0);
-  return { thisWeekStart, lastWeekStart, lastWeekEnd, thirtyDaysAgo };
-}
 
 interface BucketAccumulators {
   thisWeek: PeriodTotals;
@@ -40,7 +21,7 @@ interface BucketAccumulators {
   ruleAgg: Record<string, PeriodTotals>;
 }
 
-function accumulateRuleBucket(
+export function accumulateRuleBucket(
   acc: BucketAccumulators,
   windows: DateWindows,
   date: Date,
@@ -65,7 +46,7 @@ function accumulateRuleBucket(
   }
 }
 
-function buildTopRules(
+export function buildTopRules(
   ruleAgg: Record<string, PeriodTotals>,
   domainRules: DomainRuleSetting[],
 ): TopRuleStat[] {
@@ -80,10 +61,50 @@ function buildTopRules(
     .slice(0, 5);
 }
 
-function computeAggregates(
+export function computeSessionEventAggregates(
+  events: SessionEventCounters | undefined,
+  windows: DateWindows,
+): SessionEventAggregates {
+  const counters = events ?? defaultSessionEventCounters;
+  const thisWeek = { created: 0, restored: 0, tabsRestored: 0 };
+  const lastWeek = { created: 0, restored: 0, tabsRestored: 0 };
+
+  for (const [dateStr, bucket] of Object.entries(counters.dailyBuckets ?? {})) {
+    const date = new Date(dateStr + 'T00:00:00');
+    if (date >= windows.thisWeekStart) {
+      thisWeek.created += bucket.created;
+      thisWeek.restored += bucket.restored;
+      thisWeek.tabsRestored += bucket.tabsRestored;
+    }
+    if (date >= windows.lastWeekStart && date <= windows.lastWeekEnd) {
+      lastWeek.created += bucket.created;
+      lastWeek.restored += bucket.restored;
+      lastWeek.tabsRestored += bucket.tabsRestored;
+    }
+  }
+
+  return {
+    totals: {
+      created: counters.created,
+      restored: counters.restored,
+      tabsRestored: counters.tabsRestored,
+      archived: counters.archived,
+    },
+    thisWeek,
+    lastWeek,
+  };
+}
+
+export function computeAggregates(
   statistics: Statistics | null,
   domainRules: DomainRuleSetting[],
 ): StatisticsAggregates {
+  const emptyEvents: SessionEventAggregates = {
+    totals: { created: 0, restored: 0, tabsRestored: 0, archived: 0 },
+    thisWeek: { created: 0, restored: 0, tabsRestored: 0 },
+    lastWeek: { created: 0, restored: 0, tabsRestored: 0 },
+  };
+
   const empty: StatisticsAggregates = {
     totalGrouping: 0,
     totalDedup: 0,
@@ -92,6 +113,7 @@ function computeAggregates(
     lastWeek: { grouping: 0, dedup: 0 },
     thisMonth: { grouping: 0, dedup: 0 },
     topRules: [],
+    sessionEvents: emptyEvents,
   };
 
   if (!statistics) return empty;
@@ -119,6 +141,7 @@ function computeAggregates(
     lastWeek: acc.lastWeek,
     thisMonth: acc.thisMonth,
     topRules: buildTopRules(acc.ruleAgg, domainRules),
+    sessionEvents: computeSessionEventAggregates(statistics.sessionEvents, windows),
   };
 }
 

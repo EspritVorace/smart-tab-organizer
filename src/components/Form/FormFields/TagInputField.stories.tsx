@@ -96,6 +96,7 @@ export const TagInputFieldWithValidation: Story = {
 };
 
 // Types a tag name and presses Enter to add it.
+// Verifies that tags are committed via Enter and comma separators.
 export const TagInputFieldAddTag: Story = {
   render: () => (
     <TagInputFieldWrapper
@@ -110,22 +111,6 @@ export const TagInputFieldAddTag: Story = {
     const input = canvas.getByLabelText('Ignored query parameters');
     await userEvent.type(input, 'utm_source{Enter}');
     await expect(canvas.getByText('utm_source')).toBeInTheDocument();
-  },
-};
-
-// Adds a tag via comma separator.
-export const TagInputFieldAddTagViaComma: Story = {
-  render: () => (
-    <TagInputFieldWrapper
-      label="Ignored query parameters"
-      placeholder="Press Enter or comma to add"
-      helpText="Use * as a wildcard. Example: utm_*"
-      removeTagAriaLabel="Remove parameter"
-    />
-  ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    const input = canvas.getByLabelText('Ignored query parameters');
     await userEvent.type(input, 'fbclid,');
     await expect(canvas.getByText('fbclid')).toBeInTheDocument();
   },

@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Tooltip } from '@radix-ui/themes';
+import { Flex, Kbd, Tooltip } from '@radix-ui/themes';
 import { browser } from 'wxt/browser';
 import { Camera, RotateCcw, Wand2 } from 'lucide-react';
 import { getMessage, getPluralMessage } from '@/utils/i18n';
-import { loadSessions } from '@/utils/sessionStorage';
-import { hasCapturableTabs } from '@/utils/tabCapture';
+import { loadActiveSessions, loadPinnedSessions } from '@/utils/sessionStorage';
+import { getActiveTabGroupId, hasCapturableTabs } from '@/utils/tabCapture';
 import { openOptionsWithHash } from '@/utils/openOptions';
 import { useSettings } from '@/hooks/useSettings';
 import styles from './PopupToolbar.module.css';
@@ -18,8 +18,8 @@ export interface PopupToolbarProps {
   activeTabGroupId?: number | null;
 }
 
-function withOptionalTooltip(reason: string | undefined, node: React.ReactElement) {
-  return reason ? <Tooltip content={reason}>{node}</Tooltip> : node;
+function withTooltip(content: React.ReactNode, node: React.ReactElement) {
+  return <Tooltip content={content}>{node}</Tooltip>;
 }
 
 export function PopupToolbar(props: PopupToolbarProps = {}) {
@@ -43,7 +43,9 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
       return;
     }
     if (props.hasSessions == null) {
-      loadSessions().then((sessions) => setHasSessions(sessions.length > 0));
+      Promise.all([loadPinnedSessions(), loadActiveSessions()]).then(
+        ([pinned, active]) => setHasSessions(pinned.length + active.length > 0),
+      );
     }
     if (props.canSave == null) {
       hasCapturableTabs().then(setCanSave);
@@ -52,10 +54,7 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
       browser.tabs.query({ currentWindow: true }).then((tabs) => setTabCount(tabs.length));
     }
     if (props.activeTabGroupId === undefined) {
-      browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-        const groupId = (tabs[0] as { groupId?: number } | undefined)?.groupId;
-        setActiveTabGroupId(typeof groupId === 'number' && groupId >= 0 ? groupId : null);
-      });
+      getActiveTabGroupId().then(setActiveTabGroupId);
     }
   }, [props.tabCount, props.hasSessions, props.canSave, props.activeTabGroupId]);
 
@@ -76,6 +75,13 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
     ? getMessage('popupSaveActiveGroup')
     : getMessage('popupSaveSession');
 
+  const saveTooltip: React.ReactNode = saveDisabledHint ?? (
+    <Flex align="center" gap="2" aria-hidden="true">{saveAriaLabel}<Kbd>S</Kbd></Flex>
+  );
+  const restoreTooltip: React.ReactNode = restoreDisabledHint ?? (
+    <Flex align="center" gap="2" aria-hidden="true">{getMessage('popupRestoreSession')}<Kbd>R</Kbd></Flex>
+  );
+
   const heroTitle = isOrganizing
     ? getMessage('organizingTabs')
     : getPluralMessage(tabCount, 'popupOrganizeTabsCountOne', 'popupOrganizeTabsCount');
@@ -95,6 +101,7 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
       aria-disabled={!canSave || undefined}
       onClick={canSave ? () => void openOptionsWithHash(saveHash) : undefined}
       aria-label={saveAriaLabel}
+      aria-keyshortcuts="S"
     >
       <Camera size={13} className={styles.metaIcon} aria-hidden="true" />
       <span className={styles.metaLabel}>{getMessage('popupSaveSession')}</span>
@@ -109,6 +116,7 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
       aria-disabled={!hasSessions || undefined}
       onClick={hasSessions ? () => void openOptionsWithHash('#sessions') : undefined}
       aria-label={getMessage('popupRestoreSession')}
+      aria-keyshortcuts="R"
     >
       <RotateCcw size={13} className={styles.metaIcon} aria-hidden="true" />
       <span className={styles.metaLabel}>{getMessage('popupRestoreSession')}</span>
@@ -133,14 +141,14 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
           <strong className={styles.heroTitle}>{heroTitle}</strong>
           <span className={styles.heroSubtitle}>{heroSubtitle}</span>
         </span>
-        <kbd className={styles.heroKbd} aria-label={getMessage('popupOrganizeShortcut')}>
+        <Kbd size="1" className={styles.heroKbd} aria-label={getMessage('popupOrganizeShortcut')}>
           O
-        </kbd>
+        </Kbd>
       </button>
 
       <div className={styles.metaRow}>
-        {withOptionalTooltip(saveDisabledHint, saveButton)}
-        {withOptionalTooltip(restoreDisabledHint, restoreButton)}
+        {withTooltip(saveTooltip, saveButton)}
+        {withTooltip(restoreTooltip, restoreButton)}
       </div>
     </div>
   );

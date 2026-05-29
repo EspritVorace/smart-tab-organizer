@@ -22,7 +22,7 @@
       "label": "Zoom: Meeting",
       "titleParsingRegEx": "Zoom Meeting ID: (\\d+)",
       "urlParsingRegEx": "zoom\\.us/j/(\\d+)",
-      "groupNameSource": "smart_label",
+      "groupNameSource": "smart",
       "deduplicationMatchMode": "exact",
       "color": "blue",
       "categoryId": null,

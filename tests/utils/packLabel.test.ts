@@ -8,6 +8,14 @@ import {
   resolvePackOptionLabel,
   resolvePackCategoryLabel,
 } from '../../src/utils/packLabel';
+import {
+  _resetCategoriesStoreForTests,
+  _setCategoriesForTests,
+} from '../../src/utils/categoriesStore';
+
+vi.mock('../../src/utils/i18n', () => ({
+  getMessage: vi.fn((key: string) => `i18n(${key})`),
+}));
 
 const mockGetUILanguage = vi.fn();
 
@@ -16,6 +24,7 @@ beforeEach(() => {
     getUILanguage: mockGetUILanguage,
   };
   mockGetUILanguage.mockReset();
+  _resetCategoriesStoreForTests();
 });
 
 afterEach(() => {
@@ -129,24 +138,49 @@ describe('resolvePackOptionLabel', () => {
 });
 
 describe('resolvePackCategoryLabel', () => {
-  it('resolves a PackCategory.label', () => {
-    mockGetUILanguage.mockReturnValue('en');
+  it('resolves a RuleCategory with a labelKey via getMessage', () => {
     expect(
-      resolvePackCategoryLabel({ id: 'cloud', label: { en: 'Cloud' } } as never),
-    ).toBe('Cloud');
+      resolvePackCategoryLabel({
+        id: 'cloud',
+        emoji: '☁️',
+        labelKey: 'category_cloud',
+        builtIn: true,
+      }),
+    ).toBe('i18n(category_cloud)');
   });
 
-  it('returns empty string for a PackCategory whose label is undefined', () => {
+  it('resolves a custom RuleCategory via its raw label', () => {
     expect(
-      resolvePackCategoryLabel({ id: 'cloud', label: undefined } as never),
-    ).toBe('');
+      resolvePackCategoryLabel({
+        id: 'gaming',
+        emoji: '🎮',
+        label: 'Gaming',
+        builtIn: false,
+      }),
+    ).toBe('Gaming');
   });
 
-  it('uses the category id as fallback when label record is empty', () => {
-    mockGetUILanguage.mockReturnValue('en');
+  it('resolves a PackManifest.categoryId via the categoriesStore cache', () => {
+    _setCategoriesForTests([
+      { id: 'cloud', emoji: '☁️', labelKey: 'category_cloud', builtIn: true },
+    ]);
     expect(
-      resolvePackCategoryLabel({ id: 'cloud', label: {} } as never),
-    ).toBe('cloud');
+      resolvePackCategoryLabel({
+        id: 'p1',
+        name: 'Pack',
+        categoryId: 'cloud',
+      } as never),
+    ).toBe('i18n(category_cloud)');
+  });
+
+  it('falls back to the manifest categoryId when the category is unknown', () => {
+    expect(
+      resolvePackCategoryLabel({
+        id: 'p1',
+        name: 'Pack',
+        categoryId: 'unknown-id',
+      } as never),
+    ).toBe('unknown-id');
   });
 
   it('resolves PackManifest.category when set', () => {

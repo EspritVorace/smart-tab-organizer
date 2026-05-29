@@ -137,7 +137,10 @@ async function commitDeduplication(toRemove: Set<number>, toReload: Set<number>)
     return removeIds.length;
 }
 
-async function batchDeduplicateTabs(windowId: number, settings: AppSettings): Promise<number> {
+async function batchDeduplicateTabs(
+    windowId: number,
+    settings: AppSettings,
+): Promise<{ removedCount: number; organizableTabCount: number }> {
     const allTabs = await browser.tabs.query({ windowId });
     const organizable = allTabs
         .filter(t => isOrganizableUrl(t.url))
@@ -158,7 +161,7 @@ async function batchDeduplicateTabs(windowId: number, settings: AppSettings): Pr
 
     const removedCount = await commitDeduplication(toRemove, toReload);
     logger.debug(`[ORGANIZE] Dedup complete: ${removedCount} tab(s) removed.`);
-    return removedCount;
+    return { removedCount, organizableTabCount: organizable.length };
 }
 
 // ---------------------------------------------------------------------------
@@ -255,8 +258,8 @@ async function moveEntriesIntoTargetGroup(
 async function applyOrganizePlan(
     plan: PlanEntry[],
     windowId: number,
-): Promise<{ tabsGrouped: number; groupCount: number }> {
-    if (plan.length === 0) return { tabsGrouped: 0, groupCount: 0 };
+): Promise<{ tabsGrouped: number; tabsMoved: number; groupCount: number }> {
+    if (plan.length === 0) return { tabsGrouped: 0, tabsMoved: 0, groupCount: 0 };
 
     const existingGroups = await (browser.tabGroups as unknown as ChromeTabGroupsExtended).query({ windowId });
     const existingByTitle = new Map<string, number>();
@@ -267,6 +270,7 @@ async function applyOrganizePlan(
     const byName = groupPlanByName(plan);
 
     let tabsGrouped = 0;
+    let tabsMoved = 0;
     let groupCount = 0;
 
     for (const [targetName, entries] of byName) {
@@ -284,13 +288,14 @@ async function applyOrganizePlan(
             const { created } = await moveEntriesIntoTargetGroup(targetName, entries, tabsToMove, existingGroupId);
             if (created) groupCount += 1;
             tabsGrouped += entries.length;
+            tabsMoved += tabsToMove.length;
         } catch (e) {
             logger.error(`[ORGANIZE] Error grouping tabs for "${targetName}":`, e);
         }
     }
 
-    logger.debug(`[ORGANIZE] Grouping complete: ${tabsGrouped} tab(s) grouped into ${groupCount} group(s).`);
-    return { tabsGrouped, groupCount: byName.size };
+    logger.debug(`[ORGANIZE] Grouping complete: ${tabsGrouped} tab(s) grouped (${tabsMoved} moved) into ${groupCount} group(s).`);
+    return { tabsGrouped, tabsMoved, groupCount: byName.size };
 }
 
 // ---------------------------------------------------------------------------
@@ -334,51 +339,89 @@ async function repositionAndCollapseGroups(windowId: number): Promise<void> {
 // Main exported handler
 // ---------------------------------------------------------------------------
 
+export type NoopReason = 'empty' | 'no-match' | 'already-organized';
+
+export interface OrganizeResult {
+    removedCount: number;
+    tabsGrouped: number;
+    tabsMoved: number;
+    groupCount: number;
+    noopReason: NoopReason | null;
+}
+
+function noopMessageKey(reason: NoopReason): string {
+    if (reason === 'empty') return 'notifNoopEmpty';
+    if (reason === 'no-match') return 'notifNoopNoMatch';
+    return 'notifNoopAlreadyOrganized';
+}
+
+function deriveNoopReason(organizableTabCount: number, planLength: number): NoopReason {
+    if (organizableTabCount === 0) return 'empty';
+    if (planLength === 0) return 'no-match';
+    return 'already-organized';
+}
+
+function notify(messageKey: string, substitutions?: string[]): void {
+    (browser as unknown as { notifications: ChromeNotificationsAPI }).notifications.create({
+        type: 'basic',
+        iconUrl: browser.runtime.getURL('/icons/128.png'),
+        title: getMessage('extensionName'),
+        message: getMessage(messageKey, substitutions),
+    });
+}
+
 /**
  * Orchestrates the full "Organize All Tabs" action:
  * 1. Batch deduplication
  * 2. Build grouping plan
  * 3. Apply plan
  * 4. Reposition & collapse groups
- * 5. Show notifications
+ * 5. Show a single notification (dedup, grouping, or noop) gated by `notifyOnOrganize`.
+ *
+ * The return value is informational (used by tests and logging). The popup
+ * handler is fire-and-forget; it closes itself immediately after dispatching
+ * the message and does not await the response.
  */
-export async function handleOrganizeAllTabs(windowId: number): Promise<void> {
+export async function handleOrganizeAllTabs(windowId: number): Promise<OrganizeResult> {
     logger.debug(`[ORGANIZE] Starting organize for window ${windowId}.`);
 
     const settings = await getSettings();
 
     // ── 1. Deduplication ────────────────────────────────────────────────────
-    const removedCount = await batchDeduplicateTabs(windowId, settings);
+    // batchDeduplicateTabs also reports the organizable count before any removal,
+    // which is reused below to distinguish an empty window from a no-match case.
+    const { removedCount, organizableTabCount } = await batchDeduplicateTabs(windowId, settings);
 
-    if (removedCount > 0 && settings.notifyOnDeduplication) {
-        (browser as unknown as { notifications: ChromeNotificationsAPI }).notifications.create({
-            type: 'basic',
-            iconUrl: browser.runtime.getURL('/icons/128.png'),
-            title: getMessage('extensionName'),
-            message: getMessage('notifDeduplication', [String(removedCount)]),
-        });
+    if (removedCount > 0 && settings.notifyOnOrganize) {
+        notify('notifDeduplication', [String(removedCount)]);
     }
 
     // ── 2. Plan grouping ────────────────────────────────────────────────────
     const plan = await buildOrganizePlan(windowId, settings);
 
     // ── 3. Apply plan ───────────────────────────────────────────────────────
-    const { tabsGrouped, groupCount } = await applyOrganizePlan(plan, windowId);
+    const { tabsGrouped, tabsMoved, groupCount } = await applyOrganizePlan(plan, windowId);
 
     // ── 4. Reposition & collapse ────────────────────────────────────────────
     await repositionAndCollapseGroups(windowId);
 
-    // ── 5. Grouping notification ────────────────────────────────────────────
-    if (tabsGrouped > 0 && settings.notifyOnGrouping) {
-        (browser as unknown as { notifications: ChromeNotificationsAPI }).notifications.create({
-            type: 'basic',
-            iconUrl: browser.runtime.getURL('/icons/128.png'),
-            title: getMessage('extensionName'),
-            message: getMessage('notifGrouping', [String(tabsGrouped), String(groupCount)]),
-        });
+    // ── 5. Grouping notification (only when tabs actually moved) ────────────
+    if (tabsMoved > 0 && settings.notifyOnOrganize) {
+        notify('notifGrouping', [String(tabsGrouped), String(groupCount)]);
+    }
+
+    // ── 6. Noop notification when nothing changed at all ────────────────────
+    let noopReason: NoopReason | null = null;
+    if (removedCount === 0 && tabsMoved === 0) {
+        noopReason = deriveNoopReason(organizableTabCount, plan.length);
+        if (settings.notifyOnOrganize) {
+            notify(noopMessageKey(noopReason));
+        }
     }
 
     logger.debug(
-        `[ORGANIZE] Done. Removed: ${removedCount} dup(s). Grouped: ${tabsGrouped} tab(s) in ${groupCount} group(s).`,
+        `[ORGANIZE] Done. Removed: ${removedCount} dup(s). Grouped: ${tabsGrouped} tab(s) (${tabsMoved} moved) in ${groupCount} group(s). NoopReason: ${noopReason ?? 'none'}.`,
     );
+
+    return { removedCount, tabsGrouped, tabsMoved, groupCount, noopReason };
 }

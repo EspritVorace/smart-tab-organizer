@@ -9,7 +9,7 @@
 Una extensión para Chrome y Firefox que agrupa tus pestañas por dominio, elimina los duplicados y captura tus espacios de trabajo como sesiones que puedes restaurar con un clic.
 
 <p align="center">
-  <img src="assets/store.png" alt="SmartTab Organizer" width="720">
+  <img src="doc/store.png" alt="SmartTab Organizer" width="720">
 </p>
 
 <p align="center">
@@ -35,7 +35,7 @@ Una extensión para Chrome y Firefox que agrupa tus pestañas por dominio, elimi
 Abres un ticket de Jira, una PR de GitHub, una página de docs : la nueva pestaña aterriza al instante en el grupo correcto. El nombre del grupo viene del título de la página, de la URL, o de un preajuste regex (Jira, GitHub, GitLab, Trello, y muchos más).
 
 <p align="center">
-  <img src="assets/readme/gifs/regroup.gif" alt="Demo de agrupación automática" width="640">
+  <img src="doc/readme/gifs/regroup.gif" alt="Demo de agrupación automática" width="640">
 </p>
 
 ### 🔁 Deduplicación
@@ -43,7 +43,7 @@ Abres un ticket de Jira, una PR de GitHub, una página de docs : la nueva pesta�
 ¿Abres una página que ya estaba abierta ? El duplicado desaparece. El modo de comparación se ajusta por regla (URL exacta, "contiene", o "ignora estos parámetros"), y tú eliges cuál de las dos pestañas sobrevive.
 
 <p align="center">
-  <img src="assets/readme/gifs/dedup.gif" alt="Demo de deduplicación" width="640">
+  <img src="doc/readme/gifs/dedup.gif" alt="Demo de deduplicación" width="640">
 </p>
 
 ### 📷 Sesiones que de verdad usarás
@@ -51,7 +51,7 @@ Abres un ticket de Jira, una PR de GitHub, una página de docs : la nueva pesta�
 Captura tus pestañas y grupos abiertos, ponles nombre, fija las que más usas. Restaura en la ventana actual, en una nueva, o reemplaza lo que tienes. Cada sesión es editable, buscable hasta el nivel de pestaña, y puede llevar tus propias notas.
 
 <p align="center">
-  <img src="assets/readme/es-dark-sessions-list.png" alt="Lista de sesiones" width="720">
+  <img src="doc/readme/es-dark-sessions-list.png" alt="Lista de sesiones" width="720">
 </p>
 
 ## Y además
@@ -67,11 +67,7 @@ Captura tus pestañas y grupos abiertos, ponles nombre, fija las que más usas. 
 
 ## 📖 Documentación
 
-La guía completa está en [`docs/`](docs/src/content/docs/es/) (Astro Starlight, 3 idiomas, más de 30 páginas con capturas). Lee el MDX directamente en GitHub, o lanza la doc en local :
-
-```bash
-pnpm docs:dev
-```
+Guía completa en línea : [docs.esprit-vorace.fr](https://docs.esprit-vorace.fr/es/) (Astro Starlight, 3 idiomas, más de 30 páginas con capturas). Las fuentes MDX están en [`docs/`](docs/src/content/docs/es/) para los contribuidores.
 
 ## 🛠️ Para contribuir
 
@@ -94,3 +90,7 @@ Por favor, abre una issue antes de enviar una pull request grande.
 ## 📜 Licencia
 
 GNU General Public License v3.0.
+
+## 🗝️ Licencias de terceros
+
+SmartTab Organizer incluye componentes de codigo abierto (React, Radix UI, Lucide, Zod, CodeMirror, dnd-kit y otros). Sus avisos de copyright y textos de licencia completos estan listados en [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt) y en la [pagina de atribucion](https://docs.esprit-vorace.fr/es/reference/licences-open-source/).

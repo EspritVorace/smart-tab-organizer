@@ -35,6 +35,13 @@
   border-radius: var(--radius-3);
 }
 
+/* Focus ring for workspace cards: visible on click or keyboard focus */
+[data-workspace-card]:focus {
+  outline: 2px solid var(--accent-9);
+  outline-offset: -2px;
+  border-radius: var(--radius-3);
+}
+
 /* Focusable controls using aria-disabled instead of native disabled (keeps element in tab order). */
 [aria-disabled="true"] {
   opacity: 0.5;

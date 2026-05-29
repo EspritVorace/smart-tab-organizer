@@ -30,6 +30,7 @@ export const SettingsPageNotificationsDisabled: Story = {
       ...defaultAppSettings,
       notifyOnGrouping: false,
       notifyOnDeduplication: false,
+      notifyOnOrganize: false,
     },
     updateSettings: (settings) => console.log('Settings updated:', settings),
   },
@@ -108,6 +109,19 @@ export const SettingsPageToggleNotifyDedup: Story = {
   play: async ({ canvasElement }) => {
     const body = within(canvasElement.ownerDocument.body);
     const toggle = await body.findByTestId('page-settings-toggle-notify-dedup');
+    await userEvent.click(toggle);
+  },
+};
+
+// Clicks the "notify after Organize Tabs" switch.
+export const SettingsPageToggleNotifyOrganize: Story = {
+  args: {
+    syncSettings: defaultAppSettings,
+    updateSettings: () => {},
+  },
+  play: async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body);
+    const toggle = await body.findByTestId('page-settings-toggle-notify-organize');
     await userEvent.click(toggle);
   },
 };

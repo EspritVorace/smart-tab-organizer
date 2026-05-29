@@ -1,0 +1,98 @@
+---
+title: Estadísticas
+description: Seguir la actividad de agrupación y deduplicación. Totales históricos, comparativa semanal, volúmenes y actividad de sesiones, top reglas / categorías / dominios, vista global.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import statsLight from '../../../../assets/screenshots/es-light-statistics-overview.png';
+import statsDark from '../../../../assets/screenshots/es-dark-statistics-overview.png';
+
+La página **Estadísticas** centraliza la actividad de la extensión en el espacio de trabajo activo. Los contadores quedan aislados por espacio; cambiar de espacio de trabajo modifica al instante las cifras mostradas.
+
+<ThemeImage
+  lightSrc={statsLight}
+  darkSrc={statsDark}
+  alt="Página Estadísticas con sus secciones Totales, Esta semana, Volúmenes de sesiones y Actividad de sesiones."
+/>
+
+## Totales
+
+Dos contadores acumulados desde el primer uso:
+
+- **Grupos Creados**: por cada creación de un grupo nuevo de Chrome. Unirse a un grupo existente no cuenta.
+- **Pestañas Deduplicadas**: por cada cierre de duplicado. Una **acción Deshacer** desde el botón **Deshacer** de la notificación decrementa el contador.
+
+Debajo aparecen dos indicadores contextuales: el **número de reglas activas** y la fecha de inicio de uso.
+
+## Esta semana
+
+Compara la actividad de la semana en curso con la semana anterior, con dos series:
+
+- **Agrupaciones**: número de grupos creados.
+- **Deduplicaciones**: número de duplicados cerrados.
+
+El delta (por ejemplo `+15 vs sem. ant.`) indica la variación respecto a la semana anterior.
+
+## Volúmenes de sesiones
+
+Sintetiza la foto actual de tus sesiones, **archivadas excluidas** por defecto:
+
+| Baldosa | Contenido |
+|---|---|
+| **Total** | Sesiones activas y ancladas. |
+| **Fijadas** | Perfiles mostrados en el popup y la página de inicio. |
+| **Activas** | Sesiones corrientes no ancladas. |
+| **Archivadas** | Sesiones archivadas (consulta [Sesiones, archivo](/guides/sessions#archive)). |
+| **Pestañas guardadas** | Suma de las pestañas contenidas en las sesiones activas y ancladas. |
+| **Grupos guardados** | Suma de los grupos de Chrome contenidos en las sesiones. |
+
+Bajo las baldosas, tres indicadores cualitativos: media de pestañas por sesión, la sesión más grande, el porcentaje de sesiones categorizadas y el porcentaje con nota.
+
+## Actividad de sesiones
+
+Dos contadores semanales sobre las acciones efectuadas:
+
+- **Sesiones creadas**: cuántas instantáneas has capturado esta semana.
+- **Pestañas restauradas**: cuántas pestañas se han abierto desde una sesión.
+
+Cada uno se acompaña de un mini distintivo de tendencia (en alza, en baja, estable) respecto a la semana anterior.
+
+Un subtítulo **Total** recuerda los acumulados históricos de sesiones creadas, restauradas y archivadas.
+
+## Reglas más activas (30 días)
+
+Clasificación de las reglas por volumen de eventos (agrupaciones y deduplicaciones) de los últimos 30 días. Práctica para detectar las reglas que tiran del peso y las que se han vuelto dormidas y pueden limpiarse.
+
+## Categorías de sesiones
+
+Distribución de tus sesiones por categoría. Aparece un guion como marcador cuando ninguna sesión tiene categoría asignada. Ayuda a ver si una categoría domina o si la cobertura está equilibrada.
+
+## Dominios más presentes
+
+Clasificación de los dominios que más aparecen en tus sesiones guardadas. Da una idea de los sitios que realmente estructuran tu trabajo.
+
+## Resumen de sesiones
+
+Tres mini vistas complementarias:
+
+- **Cronología**: la sesión más antigua y la modificada más recientemente, más el número de sesiones creadas esta semana.
+- **Distribución de colores de grupos**: un histograma horizontal que agrega los colores de los grupos de Chrome en todas las sesiones.
+- **Sesiones más grandes**: top de sesiones por número de pestañas.
+
+## Reiniciar los contadores
+
+El icono **Reiniciar Stats** en la cabecera de la página pone a cero todos los contadores del espacio de trabajo activo. Se pide confirmación. Esta acción no afecta ni a las reglas, ni a las sesiones, ni a los ajustes: solo se borran los contadores.
+
+<Aside type="caution">
+El reinicio es definitivo. Si quieres conservar un rastro del histórico antes de poner a cero, exporta antes el espacio de trabajo marcando **Incluir el historial de estadísticas** (consulta [Importar / Exportar, espacios de trabajo](/guides/import-export#workspaces)).
+</Aside>
+
+## Siguiente paso
+
+<CardGrid>
+  <LinkCard title="Reglas de dominio" href="/guides/regles-de-domaine" description="Identificar las reglas dormidas con la clasificación de top reglas." />
+  <LinkCard title="Sesiones" href="/guides/sessions" description="El detalle de los compartimentos y del archivo." />
+  <LinkCard title="Ajustes" href="/guides/parametres" description="Notificaciones que alimentan los contadores." />
+  <LinkCard title="Importar / Exportar" href="/guides/import-export" description="Guardar las estadísticas junto con el espacio de trabajo." />
+</CardGrid>

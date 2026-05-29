@@ -1,9 +1,10 @@
 import React from 'react';
-import { Switch, Text, HoverCard, Flex, Badge, Card, Checkbox, IconButton, DropdownMenu } from '@radix-ui/themes';
+import { Switch, Text, HoverCard, Flex, Badge, Card, Checkbox, IconButton, DropdownMenu, Kbd, Tooltip } from '@radix-ui/themes';
 import { Pencil, Trash2, MoreHorizontal, GripVertical, AlertTriangle } from 'lucide-react';
 import { useSortable } from '@dnd-kit/react/sortable';
 import { getStatusStyle, type CardStatus } from '@/utils/statusStyle';
 import { RuleDetailPopover } from './RuleDetailPopover';
+import { RuleOverlapBadge } from './RuleOverlapBadge';
 import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 import { getMessage } from '@/utils/i18n';
 import { getRadixColor } from '@/utils/utils';
@@ -30,6 +31,12 @@ export interface DomainRuleCardProps {
   trailing?: React.ReactNode;
   /** Search term used for highlighting (optional in summary mode). */
   searchTerm?: string;
+  /**
+   * In full mode, list of enabled rules sharing the same domain space as
+   * `rule` (including `rule` itself), in runtime evaluation order. When the
+   * list has 2+ entries, the card shows an accent rank badge.
+   */
+  overlapPrecedenceList?: DomainRuleSetting[];
   index?: number;
   isSelected?: boolean;
   isDragDisabled?: boolean;
@@ -52,6 +59,7 @@ export function DomainRuleCard({
   leading,
   trailing,
   searchTerm = '',
+  overlapPrecedenceList,
   index = 0,
   isSelected = false,
   isDragDisabled = false,
@@ -188,17 +196,28 @@ export function DomainRuleCard({
           {/* Center: label badge stacked on the domain filter */}
           <Flex direction="column" gap="1" align="start" style={{ flex: 1, minWidth: 0 }}>
             {labelBadge}
-            {domainText}
+            <Flex align="center" gap="2" style={{ minWidth: 0, maxWidth: '100%' }}>
+              {domainText}
+              {overlapPrecedenceList && overlapPrecedenceList.length > 1 && (
+                <RuleOverlapBadge
+                  currentRuleId={rule.id}
+                  precedenceList={overlapPrecedenceList}
+                />
+              )}
+            </Flex>
           </Flex>
 
           {/* Right: Switch + Actions */}
           <Flex align="center" gap="3" style={{ flexShrink: 0 }}>
-            <Switch
-              size="1"
-              checked={rule.enabled}
-              onCheckedChange={(checked) => onToggleEnabled?.(rule.id, checked)}
-              aria-label={getMessage('ruleToggleEnabledAriaLabel')}
-            />
+            <Tooltip content={<Flex align="center" gap="2" aria-hidden="true">{getMessage('ruleToggleEnabledAriaLabel')}<Kbd>T</Kbd></Flex>}>
+              <Switch
+                size="1"
+                checked={rule.enabled}
+                onCheckedChange={(checked) => onToggleEnabled?.(rule.id, checked)}
+                aria-label={getMessage('ruleToggleEnabledAriaLabel')}
+                aria-keyshortcuts="T"
+              />
+            </Tooltip>
             <DropdownMenu.Root>
               <DropdownMenu.Trigger>
                 <IconButton
@@ -216,44 +235,74 @@ export function DomainRuleCard({
                   data-testid={`rule-card-${rule.id}-menu-edit`}
                   onClick={() => onEdit?.(rule)}
                 >
-                  <Pencil size={14} />
-                  {getMessage('edit')}
+                  <Flex align="center" justify="between" gap="3" width="100%">
+                    <Flex align="center" gap="2">
+                      <Pencil size={14} />
+                      {getMessage('edit')}
+                    </Flex>
+                    <Kbd size="1">E</Kbd>
+                  </Flex>
                 </DropdownMenu.Item>
                 <DropdownMenu.Separator />
-                <DropdownMenu.Item
-                  data-testid={`rule-card-${rule.id}-menu-move-first`}
-                  onClick={() => onMoveToFirst?.(rule.id)}
-                >
-                  {getMessage('ruleMoveToFirst')}
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  data-testid={`rule-card-${rule.id}-menu-move-last`}
-                  onClick={() => onMoveToLast?.(rule.id)}
-                >
-                  {getMessage('ruleMoveToLast')}
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  data-testid={`rule-card-${rule.id}-menu-move-first-domain`}
-                  disabled={isDomainActionDisabled}
-                  onClick={() => !isDomainActionDisabled && onMoveToFirstOfDomain?.(rule.id)}
-                >
-                  {getMessage('ruleMoveToFirstOfDomain')}
-                </DropdownMenu.Item>
-                <DropdownMenu.Item
-                  data-testid={`rule-card-${rule.id}-menu-move-last-domain`}
-                  disabled={isDomainActionDisabled}
-                  onClick={() => !isDomainActionDisabled && onMoveToLastOfDomain?.(rule.id)}
-                >
-                  {getMessage('ruleMoveToLastOfDomain')}
-                </DropdownMenu.Item>
+                <DropdownMenu.Sub>
+                  <DropdownMenu.SubTrigger>
+                    {getMessage('rulePositionsMenu')}
+                  </DropdownMenu.SubTrigger>
+                  <DropdownMenu.SubContent>
+                    <DropdownMenu.Item
+                      data-testid={`rule-card-${rule.id}-menu-move-first`}
+                      onClick={() => onMoveToFirst?.(rule.id)}
+                    >
+                      <Flex align="center" justify="between" gap="3" width="100%">
+                        {getMessage('ruleMoveToFirst')}
+                        <Kbd size="1">Ctrl+↑</Kbd>
+                      </Flex>
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item
+                      data-testid={`rule-card-${rule.id}-menu-move-last`}
+                      onClick={() => onMoveToLast?.(rule.id)}
+                    >
+                      <Flex align="center" justify="between" gap="3" width="100%">
+                        {getMessage('ruleMoveToLast')}
+                        <Kbd size="1">Ctrl+↓</Kbd>
+                      </Flex>
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Separator />
+                    <DropdownMenu.Item
+                      data-testid={`rule-card-${rule.id}-menu-move-first-domain`}
+                      disabled={isDomainActionDisabled}
+                      onClick={() => !isDomainActionDisabled && onMoveToFirstOfDomain?.(rule.id)}
+                    >
+                      <Flex align="center" justify="between" gap="3" width="100%">
+                        {getMessage('ruleMoveToFirstOfDomain')}
+                        <Kbd size="1">Ctrl+Shift+↑</Kbd>
+                      </Flex>
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item
+                      data-testid={`rule-card-${rule.id}-menu-move-last-domain`}
+                      disabled={isDomainActionDisabled}
+                      onClick={() => !isDomainActionDisabled && onMoveToLastOfDomain?.(rule.id)}
+                    >
+                      <Flex align="center" justify="between" gap="3" width="100%">
+                        {getMessage('ruleMoveToLastOfDomain')}
+                        <Kbd size="1">Ctrl+Shift+↓</Kbd>
+                      </Flex>
+                    </DropdownMenu.Item>
+                  </DropdownMenu.SubContent>
+                </DropdownMenu.Sub>
                 <DropdownMenu.Separator />
                 <DropdownMenu.Item
                   data-testid={`rule-card-${rule.id}-menu-delete`}
                   color="red"
                   onClick={() => onDeleteRequest?.(rule.id, index)}
                 >
-                  <Trash2 size={14} />
-                  {getMessage('delete')}
+                  <Flex align="center" justify="between" gap="3" width="100%">
+                    <Flex align="center" gap="2">
+                      <Trash2 size={14} />
+                      {getMessage('delete')}
+                    </Flex>
+                    <Kbd size="1">Del</Kbd>
+                  </Flex>
                 </DropdownMenu.Item>
               </DropdownMenu.Content>
             </DropdownMenu.Root>

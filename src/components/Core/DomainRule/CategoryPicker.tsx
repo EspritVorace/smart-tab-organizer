@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Popover, Tooltip } from '@radix-ui/themes';
+import { useState } from 'react';
+import { Popover } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
-import { useSettings } from '@/hooks/useSettings';
+import { CategoryRadioGroup } from './CategoryRadioGroup';
 import styles from './CategoryPicker.module.css';
 
 export interface CategoryPickerProps {
@@ -12,10 +12,10 @@ export interface CategoryPickerProps {
 
 export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
   const [open, setOpen] = useState(false);
-  const { settings } = useSettings();
-  const categories = settings?.categories ?? [];
   const selectedCategory = getRuleCategory(value);
-  const selectedLabel = selectedCategory ? getCategoryLabel(selectedCategory) : getMessage('categoryNone');
+  const selectedLabel = selectedCategory
+    ? getCategoryLabel(selectedCategory)
+    : getMessage('categoryNone');
 
   function handleSelect(id: string | null) {
     onChange(id);
@@ -34,43 +34,8 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
           {selectedCategory ? selectedCategory.emoji : null}
         </button>
       </Popover.Trigger>
-      <Popover.Content side="bottom" align="start" style={{ padding: 'var(--space-3)' }}>
-        <div
-          className={styles.grid}
-          role="radiogroup"
-          aria-label={getMessage('categoryPickerLabel')}
-        >
-          {/* None option */}
-          <Tooltip content={getMessage('categoryNone')}>
-            <button
-              type="button"
-              role="radio"
-              aria-checked={!value}
-              aria-label={getMessage('categoryNone')}
-              className={`${styles.swatch} ${styles.swatchNone} ${!value ? styles.swatchActive : ''}`}
-              onClick={() => handleSelect(null)}
-            />
-          </Tooltip>
-
-          {/* Category options */}
-          {categories.map((category) => {
-            const label = getCategoryLabel(category);
-            return (
-              <Tooltip key={category.id} content={label}>
-                <button
-                  type="button"
-                  role="radio"
-                  aria-checked={value === category.id}
-                  aria-label={label}
-                  className={`${styles.swatch} ${value === category.id ? styles.swatchActive : ''}`}
-                  onClick={() => handleSelect(category.id)}
-                >
-                  {category.emoji}
-                </button>
-              </Tooltip>
-            );
-          })}
-        </div>
+      <Popover.Content side="bottom" align="start" style={{ padding: 'var(--space-3)', width: 176 }}>
+        <CategoryRadioGroup value={value} onChange={handleSelect} selectOnFocus={false} />
       </Popover.Content>
     </Popover.Root>
   );

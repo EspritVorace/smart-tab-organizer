@@ -1,6 +1,60 @@
 ---
 title: FAQ
-description: Réponses aux questions fréquentes sur SmartTab Organizer.
+description: Réponses aux questions fréquentes sur SmartTab Organizer. Permissions, vie privée, comportement attendu, dépannage.
 ---
 
-{/* TODO: contenu à rédiger */}
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## Mes onglets ne sont pas regroupés, pourquoi ?
+
+Trois conditions doivent être réunies pour qu'un groupe soit créé : le **toggle global Groupement** est activé, une **règle de domaine** correspond au domaine de l'onglet, et l'option **Groupement** est activée sur cette règle. Voir [Grouper les onglets, conditions](/guides/grouper-onglets#conditions-pour-quun-groupe-soit-cree).
+
+Autre piste : seuls les onglets ouverts via **clic milieu** ou **clic droit puis Ouvrir dans un nouvel onglet** déclenchent le groupement. Les onglets ouverts depuis la barre d'adresse ou un raccourci clavier ne le font pas.
+
+Vérifiez aussi la pastille sur l'icône : un **G** orange signale que le toggle global est désactivé.
+
+## Quelle est la différence entre un pack et un preset ?
+
+Un **pack** ajoute plusieurs règles d'un coup à votre workspace (galerie d'import). Un **preset** pré-remplit une seule règle, celle que vous êtes en train de créer dans le wizard. Voir [Catégories et packs](/reference/categories-et-packs) et [Presets regex](/reference/presets-regex).
+
+## Pourquoi un onglet revient après une déduplication ?
+
+Si vous avez cliqué sur **Annuler** dans la notification, l'onglet est volontairement rouvert et protégé pendant 10 secondes pour éviter qu'il soit refermé immédiatement. Voir [Dédupliquer, notification et annulation](/guides/dedupliquer#notification-et-annulation).
+
+Si vous n'avez pas annulé et que l'onglet réapparait, vérifiez que la stratégie de conservation correspond bien à ce que vous voulez : par défaut (**L'onglet groupé gagne, sinon le nouveau**), l'extension privilégie le tab fraîchement chargé sur le tab existant quand aucun des deux n'appartient à un groupe.
+
+## Est-ce que mes données partent sur internet ?
+
+Non. L'extension ne fait **aucune** requête réseau. Le groupement repose sur des expressions régulières exécutées localement, et toutes les données (règles, sessions, paramètres) vivent dans `browser.storage.local` du navigateur. Voir [Pourquoi cette extension](/decouverte/pourquoi#tout-est-local-rien-ne-part-en-ligne).
+
+## Est-ce que mes règles et sessions se synchronisent entre appareils ?
+
+Pas par l'extension elle-même. Mais si vous synchronisez votre profil Chrome ou Firefox (via Google ou Firefox Sync), `browser.storage.local` est inclus dans la synchronisation, donc vos règles et sessions vous suivent. L'extension reste compatible avec ce mécanisme natif sans le déclencher elle-même.
+
+## Comment migrer mes règles d'un navigateur à l'autre ?
+
+Exportez vos règles depuis le navigateur source (page Import / Export, bouton **Exporter**), puis importez le fichier JSON dans le navigateur cible. Pour une migration complète (règles + sessions + paramètres), exportez plutôt le **workspace** entier. Voir [Import / Export, workspaces](/guides/import-export#workspaces).
+
+## Compatibilité avec Firefox
+
+Oui, Firefox est supporté via une build MV2 dédiée (`pnpm build:firefox` en local, ou Firefox Add-ons pour l'installation publique). Les API utilisées sont communes aux deux plateformes. Voir [Installation](/decouverte/installation).
+
+## L'extension peut-elle lire le contenu de mes pages ?
+
+Non. Les permissions demandées sont `tabs`, `storage`, `notifications` et `scripting`. Le `scripting` est utilisé uniquement pour injecter un petit script qui capture les **clics** sur les liens (pour mémoriser le lien ciblé avant que l'onglet ne s'ouvre). Aucune lecture du DOM ni du contenu des pages.
+
+## Comment réinitialiser l'extension complètement ?
+
+Désinstaller puis réinstaller l'extension purge complètement `browser.storage.local`. Si vous voulez seulement vider les compteurs sans tout supprimer, utilisez le bouton **Réinitialiser** sur la page [Statistiques](/guides/statistiques#reinitialiser-les-compteurs).
+
+## Où signaler un bug ou suggérer une fonctionnalité ?
+
+Sur le [tracker d'issues GitHub](https://github.com/EspritVorace/smart-tab-organizer/issues). Précisez le navigateur (Chrome / Edge / Firefox + version), une description du comportement attendu vs observé, et idéalement les étapes pour reproduire.
+
+## Aller plus loin
+
+<CardGrid>
+  <LinkCard title="Pourquoi cette extension" href="/decouverte/pourquoi" description="Le positionnement et la philosophie locale-first." />
+  <LinkCard title="Installation" href="/decouverte/installation" description="Stores et build local, permissions détaillées." />
+  <LinkCard title="Paramètres" href="/guides/parametres" description="Tous les réglages globaux." />
+</CardGrid>

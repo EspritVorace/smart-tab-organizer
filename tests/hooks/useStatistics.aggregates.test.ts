@@ -1,204 +1,298 @@
 import { describe, it, expect } from 'vitest';
-import type { Statistics } from '../../src/types/statistics';
+import {
+  accumulateRuleBucket,
+  buildTopRules,
+  computeSessionEventAggregates,
+  computeAggregates,
+} from '../../src/hooks/useStatistics';
+import { computeDateWindows } from '../../src/utils/statisticsDateUtils';
+import type { Statistics, SessionEventCounters } from '../../src/types/statistics';
+import type { DomainRuleSetting } from '../../src/types/syncSettings';
 
-// computeAggregates is not exported, so we cannot import it directly.
-// The tests below replicate the same logic against the public types.
-
-function getMondayOfWeek(date: Date): Date {
-  const d = new Date(date);
-  const day = d.getDay();
-  d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day));
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function isoDate(date: Date): string {
-  return date.toISOString().slice(0, 10);
-}
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function daysAgo(n: number): string {
   const d = new Date();
   d.setDate(d.getDate() - n);
-  return isoDate(d);
+  return d.toISOString().slice(0, 10);
 }
 
-function buildStats(overrides: Partial<Statistics> = {}): Statistics {
+function emptyAcc() {
   return {
-    tabGroupsCreatedCount: 0,
-    tabsDeduplicatedCount: 0,
-    dailyBuckets: {},
-    ...overrides,
+    thisWeek: { grouping: 0, dedup: 0 },
+    lastWeek: { grouping: 0, dedup: 0 },
+    thisMonth: { grouping: 0, dedup: 0 },
+    ruleAgg: {} as Record<string, { grouping: number; dedup: number }>,
   };
 }
 
-// Replicates the computeAggregates logic for unit tests.
-function computeWeeklyTotals(stats: Statistics) {
-  const today = new Date();
-  const thisWeekStart = getMondayOfWeek(today);
-  const lastWeekStart = new Date(thisWeekStart);
-  lastWeekStart.setDate(lastWeekStart.getDate() - 7);
-  const lastWeekEnd = new Date(thisWeekStart);
-  lastWeekEnd.setDate(lastWeekEnd.getDate() - 1);
+const today = new Date();
+const windows = computeDateWindows(today);
 
-  const thisWeek = { grouping: 0, dedup: 0 };
-  const lastWeek = { grouping: 0, dedup: 0 };
+// ── accumulateRuleBucket ──────────────────────────────────────────────────────
 
-  for (const [dateStr, dayBucket] of Object.entries(stats.dailyBuckets ?? {})) {
-    const date = new Date(dateStr + 'T00:00:00');
-    for (const ruleBucket of Object.values(dayBucket)) {
-      if (date >= thisWeekStart) {
-        thisWeek.grouping += ruleBucket.grouping;
-        thisWeek.dedup += ruleBucket.dedup;
-      }
-      if (date >= lastWeekStart && date <= lastWeekEnd) {
-        lastWeek.grouping += ruleBucket.grouping;
-        lastWeek.dedup += ruleBucket.dedup;
-      }
-    }
-  }
-  return { thisWeek, lastWeek };
-}
+describe('accumulateRuleBucket', () => {
+  it('counts an event from today in thisWeek and thisMonth but not lastWeek', () => {
+    const acc = emptyAcc();
+    const date = new Date(today);
+    accumulateRuleBucket(acc, windows, date, 'r1', { grouping: 2, dedup: 1 });
 
-function computeTopRules(stats: Statistics, labelMap: Record<string, string> = {}) {
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  thirtyDaysAgo.setHours(0, 0, 0, 0);
-
-  const ruleAgg: Record<string, { grouping: number; dedup: number }> = {};
-  for (const [dateStr, dayBucket] of Object.entries(stats.dailyBuckets ?? {})) {
-    const date = new Date(dateStr + 'T00:00:00');
-    if (date < thirtyDaysAgo) continue;
-    for (const [ruleId, ruleBucket] of Object.entries(dayBucket)) {
-      if (!ruleAgg[ruleId]) ruleAgg[ruleId] = { grouping: 0, dedup: 0 };
-      ruleAgg[ruleId].grouping += ruleBucket.grouping;
-      ruleAgg[ruleId].dedup += ruleBucket.dedup;
-    }
-  }
-
-  return Object.entries(ruleAgg)
-    .map(([ruleId, agg]) => ({
-      ruleId,
-      label: labelMap[ruleId] ?? ruleId,
-      grouping: agg.grouping,
-      dedup: agg.dedup,
-      total: agg.grouping + agg.dedup,
-    }))
-    .sort((a, b) => b.total - a.total)
-    .slice(0, 5);
-}
-
-describe('statisticsAggregates - weekly computation', () => {
-  it('counts only buckets in the current week', () => {
-    const today = isoDate(new Date());
-    const stats = buildStats({
-      dailyBuckets: {
-        [today]: { 'rule-1': { grouping: 3, dedup: 1 } },
-        [daysAgo(8)]: { 'rule-1': { grouping: 10, dedup: 5 } },
-      },
-    });
-    const { thisWeek } = computeWeeklyTotals(stats);
-    expect(thisWeek.grouping).toBe(3);
-    expect(thisWeek.dedup).toBe(1);
+    expect(acc.thisWeek.grouping).toBe(2);
+    expect(acc.thisWeek.dedup).toBe(1);
+    expect(acc.lastWeek.grouping).toBe(0);
+    expect(acc.thisMonth.grouping).toBe(2);
+    expect(acc.ruleAgg['r1']).toEqual({ grouping: 2, dedup: 1 });
   });
 
-  it('counts only buckets in the previous week', () => {
-    const lastWeekDay = (() => {
-      const d = getMondayOfWeek(new Date());
-      d.setDate(d.getDate() - 3);
-      return isoDate(d);
-    })();
-    const stats = buildStats({
-      dailyBuckets: {
-        [lastWeekDay]: { 'rule-1': { grouping: 7, dedup: 2 } },
-      },
-    });
-    const { lastWeek } = computeWeeklyTotals(stats);
-    expect(lastWeek.grouping).toBe(7);
-    expect(lastWeek.dedup).toBe(2);
+  it('counts an event from mid-last-week in thisMonth (but not thisWeek)', () => {
+    const acc = emptyAcc();
+    const midLastWeek = new Date(windows.lastWeekStart);
+    midLastWeek.setDate(midLastWeek.getDate() + 3);
+
+    accumulateRuleBucket(acc, windows, midLastWeek, 'r2', { grouping: 3, dedup: 0 });
+
+    expect(acc.thisWeek.grouping).toBe(0);
+    expect(acc.lastWeek.grouping).toBe(3);
+    expect(acc.thisMonth.grouping).toBe(3);
+    expect(acc.ruleAgg['r2']).toEqual({ grouping: 3, dedup: 0 });
   });
 
-  it('returns zeros when there are no buckets', () => {
-    const stats = buildStats();
-    const { thisWeek, lastWeek } = computeWeeklyTotals(stats);
-    expect(thisWeek).toEqual({ grouping: 0, dedup: 0 });
-    expect(lastWeek).toEqual({ grouping: 0, dedup: 0 });
+  it('ignores an event from 31+ days ago (outside all windows)', () => {
+    const acc = emptyAcc();
+    const oldDate = new Date(today);
+    oldDate.setDate(oldDate.getDate() - 40);
+
+    accumulateRuleBucket(acc, windows, oldDate, 'r3', { grouping: 5, dedup: 5 });
+
+    expect(acc.thisWeek.grouping).toBe(0);
+    expect(acc.lastWeek.grouping).toBe(0);
+    expect(acc.thisMonth.grouping).toBe(0);
+    expect(acc.ruleAgg['r3']).toBeUndefined();
   });
 
-  it('sums multiple rules in the same week', () => {
-    const today = isoDate(new Date());
-    const stats = buildStats({
-      dailyBuckets: {
-        [today]: {
-          'rule-1': { grouping: 2, dedup: 1 },
-          'rule-2': { grouping: 3, dedup: 0 },
-        },
-      },
-    });
-    const { thisWeek } = computeWeeklyTotals(stats);
-    expect(thisWeek.grouping).toBe(5);
-    expect(thisWeek.dedup).toBe(1);
+  it('initialises ruleAgg for a new ruleId and accumulates on subsequent calls', () => {
+    const acc = emptyAcc();
+    const date = new Date(today);
+    accumulateRuleBucket(acc, windows, date, 'r4', { grouping: 1, dedup: 0 });
+    accumulateRuleBucket(acc, windows, date, 'r4', { grouping: 2, dedup: 1 });
+
+    expect(acc.ruleAgg['r4']).toEqual({ grouping: 3, dedup: 1 });
+  });
+
+  it('accumulates across multiple distinct rule IDs independently', () => {
+    const acc = emptyAcc();
+    const date = new Date(today);
+    accumulateRuleBucket(acc, windows, date, 'rA', { grouping: 1, dedup: 0 });
+    accumulateRuleBucket(acc, windows, date, 'rB', { grouping: 0, dedup: 2 });
+
+    expect(acc.ruleAgg['rA'].grouping).toBe(1);
+    expect(acc.ruleAgg['rB'].dedup).toBe(2);
+    expect(acc.thisWeek).toEqual({ grouping: 1, dedup: 2 });
   });
 });
 
-describe('statisticsAggregates - top rules', () => {
-  it('returns the 5 most active rules over 30 days', () => {
-    const today = isoDate(new Date());
-    const stats = buildStats({
-      dailyBuckets: {
-        [today]: {
-          'r1': { grouping: 10, dedup: 0 },
-          'r2': { grouping: 8, dedup: 0 },
-          'r3': { grouping: 6, dedup: 0 },
-          'r4': { grouping: 4, dedup: 0 },
-          'r5': { grouping: 2, dedup: 0 },
-          'r6': { grouping: 1, dedup: 0 },
-        },
-      },
-    });
-    const top = computeTopRules(stats);
-    expect(top).toHaveLength(5);
-    expect(top[0].ruleId).toBe('r1');
-    expect(top[4].ruleId).toBe('r5');
+// ── buildTopRules ─────────────────────────────────────────────────────────────
+
+const mockRules: DomainRuleSetting[] = [
+  { id: 'r-github', label: 'GitHub', domainFilter: '*.github.com', enabled: true, badge: null } as DomainRuleSetting,
+  { id: 'r-jira', label: 'Jira', domainFilter: '*.jira.com', enabled: true, badge: null } as DomainRuleSetting,
+  { id: 'r-notion', label: 'Notion', domainFilter: '*.notion.so', enabled: true, badge: null } as DomainRuleSetting,
+];
+
+describe('buildTopRules', () => {
+  it('returns an empty array when ruleAgg is empty', () => {
+    expect(buildTopRules({}, mockRules)).toEqual([]);
   });
 
-  it('excludes buckets older than 30 days', () => {
-    const old = daysAgo(31);
-    const stats = buildStats({
-      dailyBuckets: {
-        [old]: { 'rule-old': { grouping: 100, dedup: 50 } },
-      },
-    });
-    expect(computeTopRules(stats)).toHaveLength(0);
+  it('resolves the rule label from the domain rules list', () => {
+    const ruleAgg = { 'r-github': { grouping: 5, dedup: 2 } };
+    const [top] = buildTopRules(ruleAgg, mockRules);
+    expect(top.label).toBe('GitHub');
+    expect(top.total).toBe(7);
   });
 
-  it('uses ruleId as the label when the rule has been deleted', () => {
-    const today = isoDate(new Date());
-    const stats = buildStats({
-      dailyBuckets: {
-        [today]: { 'deleted-rule-id': { grouping: 5, dedup: 0 } },
-      },
-    });
-    const top = computeTopRules(stats, {});
-    expect(top[0].label).toBe('deleted-rule-id');
+  it('falls back to ruleId when no matching rule is found', () => {
+    const ruleAgg = { 'unknown-rule': { grouping: 1, dedup: 0 } };
+    const [top] = buildTopRules(ruleAgg, mockRules);
+    expect(top.label).toBe('unknown-rule');
   });
 
-  it('sorts by total descending', () => {
-    const today = isoDate(new Date());
-    const stats = buildStats({
-      dailyBuckets: {
-        [today]: {
-          'low': { grouping: 1, dedup: 0 },
-          'high': { grouping: 5, dedup: 5 },
-          'mid': { grouping: 3, dedup: 2 },
-        },
-      },
-    });
-    const top = computeTopRules(stats);
-    expect(top[0].ruleId).toBe('high');
-    expect(top[1].ruleId).toBe('mid');
-    expect(top[2].ruleId).toBe('low');
+  it('sorts rules by total (grouping + dedup) descending', () => {
+    const ruleAgg = {
+      'r-github': { grouping: 1, dedup: 1 },
+      'r-jira': { grouping: 10, dedup: 5 },
+      'r-notion': { grouping: 3, dedup: 0 },
+    };
+    const result = buildTopRules(ruleAgg, mockRules);
+    expect(result[0].ruleId).toBe('r-jira');
+    expect(result[1].ruleId).toBe('r-notion');
+    expect(result[2].ruleId).toBe('r-github');
+  });
+
+  it('caps results at 5 entries even with more rules', () => {
+    const ruleAgg: Record<string, { grouping: number; dedup: number }> = {};
+    for (let i = 0; i < 10; i++) ruleAgg[`rule-${i}`] = { grouping: i, dedup: 0 };
+    expect(buildTopRules(ruleAgg, [])).toHaveLength(5);
   });
 });
+
+// ── computeSessionEventAggregates ─────────────────────────────────────────────
+
+describe('computeSessionEventAggregates', () => {
+  it('returns zero totals and zero periods when events is undefined', () => {
+    const result = computeSessionEventAggregates(undefined, windows);
+    expect(result.totals).toEqual({ created: 0, restored: 0, tabsRestored: 0, archived: 0 });
+    expect(result.thisWeek).toEqual({ created: 0, restored: 0, tabsRestored: 0 });
+    expect(result.lastWeek).toEqual({ created: 0, restored: 0, tabsRestored: 0 });
+  });
+
+  it('counts dailyBucket entries from today in thisWeek', () => {
+    const events: SessionEventCounters = {
+      created: 3, restored: 1, tabsRestored: 5, archived: 0,
+      dailyBuckets: {
+        [daysAgo(0)]: { created: 3, restored: 1, tabsRestored: 5, archived: 0 },
+      },
+    };
+    const result = computeSessionEventAggregates(events, windows);
+    expect(result.thisWeek.created).toBe(3);
+    expect(result.thisWeek.restored).toBe(1);
+    expect(result.thisWeek.tabsRestored).toBe(5);
+    expect(result.lastWeek.created).toBe(0);
+  });
+
+  it('counts events from mid-last-week only in lastWeek (not thisWeek)', () => {
+    const midLastWeek = new Date(windows.lastWeekStart);
+    midLastWeek.setDate(midLastWeek.getDate() + 3);
+    const dateStr = midLastWeek.toISOString().slice(0, 10);
+
+    const events: SessionEventCounters = {
+      created: 2, restored: 0, tabsRestored: 0, archived: 0,
+      dailyBuckets: {
+        [dateStr]: { created: 2, restored: 0, tabsRestored: 0, archived: 0 },
+      },
+    };
+    const result = computeSessionEventAggregates(events, windows);
+    expect(result.thisWeek.created).toBe(0);
+    expect(result.lastWeek.created).toBe(2);
+  });
+
+  it('ignores events from more than 14 days ago in weekly periods', () => {
+    const events: SessionEventCounters = {
+      created: 10, restored: 0, tabsRestored: 0, archived: 0,
+      dailyBuckets: {
+        [daysAgo(20)]: { created: 10, restored: 0, tabsRestored: 0, archived: 0 },
+      },
+    };
+    const result = computeSessionEventAggregates(events, windows);
+    expect(result.thisWeek.created).toBe(0);
+    expect(result.lastWeek.created).toBe(0);
+  });
+
+  it('always reflects lifetime totals from the counters regardless of date windows', () => {
+    const events: SessionEventCounters = {
+      created: 42, restored: 7, tabsRestored: 100, archived: 3,
+      dailyBuckets: {},
+    };
+    const result = computeSessionEventAggregates(events, windows);
+    expect(result.totals.created).toBe(42);
+    expect(result.totals.archived).toBe(3);
+  });
+});
+
+// ── computeAggregates ─────────────────────────────────────────────────────────
+
+describe('computeAggregates', () => {
+  it('returns an empty aggregate when statistics is null', () => {
+    const result = computeAggregates(null, []);
+    expect(result.totalGrouping).toBe(0);
+    expect(result.totalDedup).toBe(0);
+    expect(result.firstUsedAt).toBeNull();
+    expect(result.topRules).toEqual([]);
+  });
+
+  it('maps totalGrouping and totalDedup from the statistics counters', () => {
+    const stats: Statistics = {
+      tabGroupsCreatedCount: 12,
+      tabsDeduplicatedCount: 5,
+      dailyBuckets: {},
+    };
+    const result = computeAggregates(stats, []);
+    expect(result.totalGrouping).toBe(12);
+    expect(result.totalDedup).toBe(5);
+  });
+
+  it('parses firstUsedAt into a Date object when present', () => {
+    const stats: Statistics = {
+      tabGroupsCreatedCount: 0,
+      tabsDeduplicatedCount: 0,
+      dailyBuckets: {},
+      firstUsedAt: '2025-01-15T10:00:00.000Z',
+    };
+    const result = computeAggregates(stats, []);
+    expect(result.firstUsedAt).toBeInstanceOf(Date);
+    expect(result.firstUsedAt?.getFullYear()).toBe(2025);
+  });
+
+  it('sets firstUsedAt to null when statistics does not have the field', () => {
+    const stats: Statistics = { tabGroupsCreatedCount: 0, tabsDeduplicatedCount: 0, dailyBuckets: {} };
+    expect(computeAggregates(stats, []).firstUsedAt).toBeNull();
+  });
+
+  it('aggregates dailyBuckets into thisWeek for entries from today', () => {
+    const stats: Statistics = {
+      tabGroupsCreatedCount: 3,
+      tabsDeduplicatedCount: 1,
+      dailyBuckets: {
+        [daysAgo(0)]: { 'r-test': { grouping: 3, dedup: 1 } },
+      },
+    };
+    const result = computeAggregates(stats, []);
+    expect(result.thisWeek.grouping).toBe(3);
+    expect(result.thisWeek.dedup).toBe(1);
+    expect(result.thisMonth.grouping).toBe(3);
+    expect(result.lastWeek.grouping).toBe(0);
+  });
+
+  it('builds topRules from the dailyBuckets rule aggregates', () => {
+    const rules: DomainRuleSetting[] = [
+      { id: 'r-1', label: 'Rule One', domainFilter: '*.r1.com', enabled: true, badge: null } as DomainRuleSetting,
+    ];
+    const stats: Statistics = {
+      tabGroupsCreatedCount: 5,
+      tabsDeduplicatedCount: 0,
+      dailyBuckets: {
+        [daysAgo(0)]: { 'r-1': { grouping: 5, dedup: 0 } },
+      },
+    };
+    const result = computeAggregates(stats, rules);
+    expect(result.topRules).toHaveLength(1);
+    expect(result.topRules[0].label).toBe('Rule One');
+    expect(result.topRules[0].total).toBe(5);
+  });
+
+  it('passes sessionEvents through computeSessionEventAggregates', () => {
+    const stats: Statistics = {
+      tabGroupsCreatedCount: 0,
+      tabsDeduplicatedCount: 0,
+      dailyBuckets: {},
+      sessionEvents: {
+        created: 7, restored: 2, tabsRestored: 10, archived: 1,
+        dailyBuckets: {},
+      },
+    };
+    const result = computeAggregates(stats, []);
+    expect(result.sessionEvents.totals.created).toBe(7);
+  });
+
+  it('returns zero sessionEvents when sessionEvents is absent', () => {
+    const stats: Statistics = { tabGroupsCreatedCount: 0, tabsDeduplicatedCount: 0, dailyBuckets: {} };
+    const result = computeAggregates(stats, []);
+    expect(result.sessionEvents.totals.created).toBe(0);
+    expect(result.sessionEvents.thisWeek.created).toBe(0);
+  });
+});
+
+// ── trend indicator ───────────────────────────────────────────────────────────
 
 describe('trend indicator', () => {
   type TrendDirection = 'new' | 'up' | 'down' | 'stable';

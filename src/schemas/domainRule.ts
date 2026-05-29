@@ -28,6 +28,7 @@ export const domainRuleSchema = z.object({
   label: z.string()
     .min(1)
     .max(100),
+  fallbackLabel: z.string().max(100).optional(),
   titleParsingRegEx: createRegexValidator(true),
   urlParsingRegEx: createRegexValidator(true),
   groupNameSource: z.enum(groupNameSourceOptions.map(opt => opt.value) as [GroupNameSourceValue, ...GroupNameSourceValue[]]),
@@ -47,7 +48,9 @@ export const domainRuleSchema = z.object({
   urlQueryParamName: z.string().max(64).refine(
     (val) => val === '' || queryParamNamePattern.test(val),
     { error: () => getMessage('errorInvalidQueryParamName') }
-  ).optional()
+  ).optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional()
 }).refine((data) => {
   // When presetId is null, the conditional validations below apply.
   if (data.presetId === null) {

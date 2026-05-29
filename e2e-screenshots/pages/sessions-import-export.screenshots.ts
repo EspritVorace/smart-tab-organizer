@@ -114,8 +114,8 @@ test.describe('Sessions import/export screenshots', () => {
         await dialog.locator('button.rt-SegmentedControlItem').nth(1).click();
         await page.waitForTimeout(400);
 
-        // Fill textarea with the sessions JSON array
-        const textarea = page.locator('textarea');
+        // Fill the JSON editor (CodeMirror) with the sessions JSON array
+        const textarea = page.locator('[data-testid="json-code-editor"] .cm-content');
         await textarea.waitFor({ state: 'visible', timeout: 4_000 });
         await textarea.fill(conflictJson);
 

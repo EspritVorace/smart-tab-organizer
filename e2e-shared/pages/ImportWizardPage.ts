@@ -37,9 +37,13 @@ export class ImportWizardPage extends DialogPage {
 
   // ─── Locators ────────────────────────────────────────────────────────────
 
-  /** Textarea for raw JSON input (visible in Text mode). */
+  /**
+   * Raw JSON input (visible in Text mode). Backed by the lazily mounted
+   * CodeMirror editor: its `contenteditable` `.cm-content` accepts
+   * Playwright `fill()` and reports visibility like the former textarea.
+   */
   textArea(): Locator {
-    return this.dialog().locator('textarea').first();
+    return this.dialog().locator('[data-testid="json-code-editor"] .cm-content');
   }
 
   /** "Drag and drop" zone (visible in File mode). */
@@ -128,6 +132,7 @@ export class ImportWizardPage extends DialogPage {
    */
   async selectTextMode(): Promise<void> {
     await this.dialog().getByTestId('source-mode-text').click();
+    // The editor is code-split and mounts after its chunk loads.
     await this.textArea().waitFor({ state: 'visible' });
   }
 
@@ -142,9 +147,8 @@ export class ImportWizardPage extends DialogPage {
   }
 
   /**
-   * Ensure Text mode is active and fill the textarea with `json`.
-   * Idempotent: if Text mode is already active, only the textarea is
-   * filled.
+   * Ensure Text mode is active and fill the editor with `json`.
+   * Idempotent: if Text mode is already active, only the editor is filled.
    */
   async pasteJson(json: string): Promise<void> {
     if (!(await this.textArea().isVisible())) {

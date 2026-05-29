@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, DropdownMenu, Flex, Kbd } from '@radix-ui/themes';
+import { Button, DropdownMenu, Flex, Kbd, Tooltip } from '@radix-ui/themes';
 import { ChevronDown } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { AriaButton } from '@/components/UI/AriaButton/AriaButton';
@@ -17,6 +17,23 @@ export interface SplitButtonMenuItem {
   'data-testid'?: string;
 }
 
+export interface SplitButtonRadioGroupOption {
+  value: string;
+  label: string;
+  'data-testid'?: string;
+}
+
+export interface SplitButtonRadioGroupConfig {
+  /** Visible label rendered above the radio group inside the dropdown. */
+  label: string;
+  /** Currently selected option value. */
+  value: string;
+  /** Available options. */
+  options: SplitButtonRadioGroupOption[];
+  /** Called when the user picks a new option. Selecting an option must not trigger any other action. */
+  onValueChange: (value: string) => void;
+}
+
 export interface SplitButtonProps {
   /** Label of the primary button. Accepts text or any ReactNode (e.g. icon) */
   label: React.ReactNode;
@@ -24,6 +41,12 @@ export interface SplitButtonProps {
   onClick: () => void;
   /** Dropdown menu items */
   menuItems: SplitButtonMenuItem[];
+  /**
+   * Optional radio group rendered at the bottom of the dropdown menu, below
+   * the action items. Selecting a radio item only emits `onValueChange`; it
+   * never triggers any of the action items.
+   */
+  radioGroup?: SplitButtonRadioGroupConfig;
   /** Radix variant */
   variant?: 'solid' | 'soft' | 'outline';
   /** Radix size */
@@ -36,6 +59,8 @@ export interface SplitButtonProps {
   ariaLabel?: string;
   /** Aria-label for the primary button. Required when label is not textual */
   primaryAriaLabel?: string;
+  /** Tooltip content shown on hover over the primary button (not the chevron). */
+  tooltip?: React.ReactNode;
   /** data-testid forwarded to the primary button */
   'data-testid'?: string;
 }
@@ -44,12 +69,14 @@ export function SplitButton({
   label,
   onClick,
   menuItems,
+  radioGroup,
   variant = 'solid',
   size = '2',
   disabled = false,
   disabledReason,
   ariaLabel,
   primaryAriaLabel,
+  tooltip,
   'data-testid': testId,
 }: SplitButtonProps) {
   const chevronStyle = {
@@ -61,20 +88,28 @@ export function SplitButton({
     minWidth: 28,
   };
 
+  const primaryButton = (
+    <AriaButton
+      data-testid={testId}
+      variant={variant}
+      size={size}
+      onClick={onClick}
+      ariaDisabled={disabled}
+      disabledReason={disabledReason}
+      aria-label={typeof label === 'string' ? undefined : primaryAriaLabel}
+      style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+    >
+      {label}
+    </AriaButton>
+  );
+
   return (
     <Flex gap="0">
-      <AriaButton
-        data-testid={testId}
-        variant={variant}
-        size={size}
-        onClick={onClick}
-        ariaDisabled={disabled}
-        disabledReason={disabledReason}
-        aria-label={typeof label === 'string' ? undefined : primaryAriaLabel}
-        style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
-      >
-        {label}
-      </AriaButton>
+      {tooltip && !disabled && !disabledReason ? (
+        <Tooltip content={tooltip}>{primaryButton}</Tooltip>
+      ) : (
+        primaryButton
+      )}
       {disabled ? (
         <Button
           variant={variant}
@@ -118,6 +153,27 @@ export function SplitButton({
                 </DropdownMenu.Item>
               </React.Fragment>
             ))}
+            {radioGroup && (
+              <>
+                <DropdownMenu.Separator />
+                <DropdownMenu.Label>{radioGroup.label}</DropdownMenu.Label>
+                <DropdownMenu.RadioGroup
+                  value={radioGroup.value}
+                  onValueChange={radioGroup.onValueChange}
+                >
+                  {radioGroup.options.map((option) => (
+                    <DropdownMenu.RadioItem
+                      key={option.value}
+                      value={option.value}
+                      data-testid={option['data-testid']}
+                      onSelect={(event) => event.preventDefault()}
+                    >
+                      {option.label}
+                    </DropdownMenu.RadioItem>
+                  ))}
+                </DropdownMenu.RadioGroup>
+              </>
+            )}
           </DropdownMenu.Content>
         </DropdownMenu.Root>
       )}

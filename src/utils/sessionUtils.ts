@@ -168,6 +168,28 @@ export function splitByPinned<T extends { isPinned: boolean }>(items: T[]): { pi
 }
 
 /**
+ * Split a list of items into the three logical buckets used by the storage
+ * layer: pinned, active (non-pinned, non-archived) and archived. Items where
+ * both `isPinned` and `isArchived` are true are treated as archived (archive
+ * wins over pin, mirroring the storage layer invariant).
+ */
+export function splitByBucket<T extends { isPinned: boolean; isArchived?: boolean }>(items: T[]): {
+  pinned: T[];
+  active: T[];
+  archived: T[];
+} {
+  const pinned: T[] = [];
+  const active: T[] = [];
+  const archived: T[] = [];
+  for (const item of items) {
+    if (item.isArchived) archived.push(item);
+    else if (item.isPinned) pinned.push(item);
+    else active.push(item);
+  }
+  return { pinned, active, archived };
+}
+
+/**
  * Resolve a set of numeric TabTree IDs to their corresponding SavedTab UUIDs.
  * Used by wizards that maintain a numericIdToSavedTabId mapping between the
  * TabTree component (which operates with sequential integer IDs) and the

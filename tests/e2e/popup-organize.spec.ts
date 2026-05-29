@@ -160,13 +160,17 @@ test.describe('[US-PO007] Batch deduplication', () => {
     helpers,
   }) => {
     const sw = await getServiceWorkerWithOrganizeFn(extensionContext);
-    await setNotificationPrefs(sw, { notifyOnDeduplication: true, notifyOnGrouping: false });
+    await setNotificationPrefs(sw, { notifyOnOrganize: true });
     await clearAllNotifications(sw);
 
+    // Disable grouping on this rule so only the dedup branch fires a notification.
+    // With notifyOnOrganize gating both dedup and grouping notifications, we can no
+    // longer rely on per-feature toggles to silence the grouping notif here.
     await helpers.addDomainRule({
       label: 'Dedup Rule',
       domainFilter: 'example.com',
       enabled: true,
+      groupingEnabled: false,
       deduplicationEnabled: true,
       deduplicationMatchMode: 'exact',
     });
@@ -182,18 +186,46 @@ test.describe('[US-PO007] Batch deduplication', () => {
     expect(await getNotificationIds(sw)).toHaveLength(1);
   });
 
-  test('no notification when no duplicates found [US-PO007]', async ({
+  test('noop notification fires when no duplicates and no group changes [US-PO007 / US-N006]', async ({
     extensionContext,
     helpers,
   }) => {
     const sw = await getServiceWorkerWithOrganizeFn(extensionContext);
-    await setNotificationPrefs(sw, { notifyOnDeduplication: true, notifyOnGrouping: false });
+    await setNotificationPrefs(sw, { notifyOnOrganize: true });
+    await clearAllNotifications(sw);
+
+    // Grouping disabled on the rule so the plan stays empty and the noop
+    // branch (rather than the grouping branch) drives the notification.
+    await helpers.addDomainRule({
+      label: 'Dedup Rule',
+      domainFilter: 'example.com',
+      enabled: true,
+      groupingEnabled: false,
+      deduplicationEnabled: true,
+    });
+
+    await helpers.createTab('https://example.com/unique1');
+    await helpers.createTab('https://example.com/unique2');
+    await new Promise(r => setTimeout(r, 500));
+
+    await triggerOrganizeAllTabsViaSW(extensionContext);
+
+    expect(await getNotificationIds(sw)).toHaveLength(1);
+  });
+
+  test('noop notification is suppressed when notifyOnOrganize is off [US-PO007 / US-N006]', async ({
+    extensionContext,
+    helpers,
+  }) => {
+    const sw = await getServiceWorkerWithOrganizeFn(extensionContext);
+    await setNotificationPrefs(sw, { notifyOnOrganize: false });
     await clearAllNotifications(sw);
 
     await helpers.addDomainRule({
       label: 'Dedup Rule',
       domainFilter: 'example.com',
       enabled: true,
+      groupingEnabled: false,
       deduplicationEnabled: true,
     });
 
@@ -407,7 +439,7 @@ test.describe('[US-PO008] Batch grouping', () => {
     helpers,
   }) => {
     const sw = await getServiceWorkerWithOrganizeFn(extensionContext);
-    await setNotificationPrefs(sw, { notifyOnGrouping: true, notifyOnDeduplication: false });
+    await setNotificationPrefs(sw, { notifyOnOrganize: true, notifyOnGrouping: false, notifyOnDeduplication: false });
     await clearAllNotifications(sw);
 
     await helpers.addDomainRule({
@@ -427,12 +459,12 @@ test.describe('[US-PO008] Batch grouping', () => {
     expect(await getNotificationIds(sw)).toHaveLength(1);
   });
 
-  test('no grouping notification when no tabs are grouped [US-PO008]', async ({
+  test('noop notification fires when only a single-member group is planned [US-PO008 / US-N006]', async ({
     extensionContext,
     helpers,
   }) => {
     const sw = await getServiceWorkerWithOrganizeFn(extensionContext);
-    await setNotificationPrefs(sw, { notifyOnGrouping: true, notifyOnDeduplication: false });
+    await setNotificationPrefs(sw, { notifyOnOrganize: true });
     await clearAllNotifications(sw);
 
     await helpers.addDomainRule({
@@ -448,7 +480,9 @@ test.describe('[US-PO008] Batch grouping', () => {
 
     await triggerOrganizeAllTabsViaSW(extensionContext);
 
-    expect(await getNotificationIds(sw)).toHaveLength(0);
+    // No tab is grouped (single-member target excluded by US-PO008), so the
+    // noop branch surfaces a "no-match" notification.
+    expect(await getNotificationIds(sw)).toHaveLength(1);
   });
 
   test('tabGroupsCreatedCount incremented for new groups [US-PO008]', async ({

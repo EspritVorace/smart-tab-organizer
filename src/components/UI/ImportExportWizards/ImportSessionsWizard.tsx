@@ -4,6 +4,7 @@ import { getMessage } from '@/utils/i18n';
 import { showSuccessToast } from '@/utils/toast';
 import { sessionsArraySchema } from '@/schemas/session';
 import { importSessionsDataSchema } from '@/schemas/importExport';
+import { sessionsImportJsonSchema } from '@/utils/importJsonSchemas';
 import {
   classifyImportedSessions,
   type ConflictingSession,
@@ -125,6 +126,7 @@ export function ImportSessionsWizard({ open, onOpenChange }: ImportSessionsWizar
       countLabelKey="sessionsToImportCount"
       overwriteWarningKey="sessionImportOverwriteWarning"
       state={state}
+      jsonSchema={sessionsImportJsonSchema}
       renderNewItem={(session) => (
         <SessionRow
           key={session.id}

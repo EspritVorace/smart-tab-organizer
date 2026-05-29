@@ -25,11 +25,12 @@ const EMPTY_PAYLOAD: WorkspaceExportPayload = {
     globalDeduplicationEnabled: true,
     deduplicateUnmatchedDomains: false,
     deduplicationKeepStrategy: 'keep-grouped-or-new',
+    defaultRestoreAction: 'current',
     notifyOnGrouping: true,
     notifyOnDeduplication: true,
+    notifyOnOrganize: true,
   },
   domainRules: [],
-  categories: [],
   sessions: [],
 };
 
@@ -83,7 +84,7 @@ export function ExportWorkspaceDialog({ open, onOpenChange }: ExportWorkspaceDia
       title={getMessage('workspaceExportTitle')}
       description={getMessage('workspaceExportDescription', [active?.name ?? ''])}
       data-testid="workspace-export-dialog"
-      maxWidth={520}
+      maxWidth={640}
     >
       <WizardModal.Body>
         <Box>

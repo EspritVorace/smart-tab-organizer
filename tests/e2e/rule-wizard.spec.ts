@@ -52,17 +52,80 @@ test.describe('Creation wizard — Step 1: Identity', () => {
     await page.close();
   });
 
-  test('step 1 — Next is blocked when label is empty', async ({
+  test('step 1 — Next is blocked when fields are empty', async ({
     extensionContext, extensionId,
   }) => {
     const page = await extensionContext.newPage();
     const wizard = await openCreateWizard(page, extensionId);
 
-    await wizard.fillDomainFilter('test.com');
+    // Click Next without filling anything: label is empty (and so is the
+    // auto-derived value from an empty domain), so validation must block.
     await wizard.clickNext();
 
     // Still on step 1.
     await expect(wizard.labelInput()).toBeVisible();
+    await page.close();
+  });
+
+  test('step 1 — label is auto-derived from the domain filter', async ({
+    extensionContext, extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    const wizard = await openCreateWizard(page, extensionId);
+
+    await wizard.fillDomainFilter('mail.google.com');
+    await expect(wizard.labelInput()).toHaveValue('Google');
+
+    // Once the user owns the label, further domain edits do not overwrite it.
+    await wizard.fillLabel('Custom Label');
+    await wizard.fillDomainFilter('atlassian.net');
+    await expect(wizard.labelInput()).toHaveValue('Custom Label');
+    await page.close();
+  });
+
+  test('step 1 — category radiogroup is visible and selection persists across steps', async ({
+    extensionContext, extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    const wizard = await openCreateWizard(page, extensionId);
+
+    await expect(wizard.categoryField()).toBeVisible();
+    await wizard.selectCategory('Development');
+    const developmentRadio = wizard.categoryField().getByTestId('wizard-rule-category-development');
+    await expect(developmentRadio).toHaveAttribute('aria-checked', 'true');
+
+    await wizard.fillLabel('Cat Rule');
+    await wizard.fillDomainFilter('catrule.com');
+    await wizard.clickNext();
+    await wizard.expectOnStep(2);
+
+    await wizard.clickBack();
+    await expect(wizard.categoryField().getByTestId('wizard-rule-category-development'))
+      .toHaveAttribute('aria-checked', 'true');
+    await page.close();
+  });
+
+  test('step 1 — category radiogroup supports arrow-key navigation', async ({
+    extensionContext, extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    const wizard = await openCreateWizard(page, extensionId);
+
+    const noneSwatch = wizard.categoryField().getByTestId('wizard-rule-category-none');
+    await noneSwatch.focus();
+    await expect(noneSwatch).toBeFocused();
+    await expect(noneSwatch).toHaveAttribute('aria-checked', 'true');
+
+    // Selection-follows-focus: ArrowRight selects the next swatch (the first
+    // built-in category by registry order).
+    await page.keyboard.press('ArrowRight');
+    const checkedAfterArrow = wizard.categoryField().getByRole('radio', { checked: true });
+    await expect(checkedAfterArrow).not.toHaveAttribute('data-testid', 'wizard-rule-category-none');
+
+    // Home key cycles back to the first swatch (None).
+    await page.keyboard.press('Home');
+    await expect(noneSwatch).toBeFocused();
+    await expect(noneSwatch).toHaveAttribute('aria-checked', 'true');
     await page.close();
   });
 
@@ -189,6 +252,8 @@ test.describe('Creation wizard — Step 2: Configuration', () => {
 test.describe('Creation wizard — Step 3: Options', () => {
   async function advanceToStep3(wizard: RuleWizardPage): Promise<void> {
     await advanceToStep2(wizard);
+    // Switch to Ask mode so step 2 does not require a preset selection.
+    await wizard.selectConfigMode('ask');
     await wizard.clickNext();
     await wizard.deduplicationSwitch().waitFor({ state: 'visible' });
   }
@@ -249,6 +314,8 @@ test.describe('Creation wizard — Step 3: Options', () => {
 test.describe('Creation wizard — Step 4: Summary', () => {
   async function advanceToStep4(wizard: RuleWizardPage): Promise<void> {
     await advanceToStep2(wizard);
+    // Switch to Ask mode so step 2 does not require a preset selection.
+    await wizard.selectConfigMode('ask');
     await wizard.clickNext(); // step 3
     await wizard.deduplicationSwitch().waitFor({ state: 'visible' });
     await wizard.clickNext(); // step 4
@@ -263,7 +330,8 @@ test.describe('Creation wizard — Step 4: Summary', () => {
     await advanceToStep4(wizard);
 
     await expect(wizard.dialog().getByRole('button', { name: /modify/i })).toHaveCount(3);
-    await auditPage(page, 'rule-wizard-step-4-summary', { include: '[role="dialog"]' });
+    // Badge variant="solid" without highContrast is intentional (matches DomainRuleCard).
+    await auditPage(page, 'rule-wizard-step-4-summary', { include: '[role="dialog"]', disableRules: ['color-contrast'] });
     await page.close();
   });
 

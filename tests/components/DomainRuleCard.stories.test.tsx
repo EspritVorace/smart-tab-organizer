@@ -21,6 +21,7 @@ const {
   DomainRuleCardDragDisabled,
   DomainRuleCardDomainActionsDisabled,
   DomainRuleCardWithSearch,
+  DomainRuleCardWithOverlap,
 } = composeStories(stories);
 
 describe('DomainRuleCard (portable stories)', () => {
@@ -55,6 +56,19 @@ describe('DomainRuleCard (portable stories)', () => {
   it('renders the card with the search highlight applied', () => {
     render(<DomainRuleCardWithSearch />);
     expect(screen.getByTestId('rule-card-rule-1')).toBeInTheDocument();
+  });
+
+  it('shows the overlap rank badge when overlapPrecedenceList has 2+ entries', () => {
+    render(<DomainRuleCardWithOverlap />);
+    const badge = screen.getByTestId('rule-overlap-badge');
+    expect(badge).toBeInTheDocument();
+    expect(badge.tagName).toBe('BUTTON');
+    expect(badge).toHaveAttribute('aria-label');
+  });
+
+  it('does not show the overlap rank badge when overlapPrecedenceList is missing', () => {
+    render(<DomainRuleCardDefault />);
+    expect(screen.queryByTestId('rule-overlap-badge')).not.toBeInTheDocument();
   });
 
   it("renders the badge with the category's color and emoji when category != null", () => {

@@ -18,7 +18,8 @@ export const groupNameSourceOptions = [
   { value: 'smart', keyLabel: 'groupNameSourceSmart' },
   { value: 'smart_manual', keyLabel: 'groupNameSourceSmartManual' },
   { value: 'smart_preset', keyLabel: 'groupNameSourceSmartPreset' },
-  { value: 'smart_label', keyLabel: 'groupNameSourceSmartLabel' }
+  { value: 'smart_label', keyLabel: 'groupNameSourceSmartLabel' },
+  { value: 'label', keyLabel: 'groupNameSourceLabel' }
 ] as const;
 
 export const deduplicationMatchModeOptions = [
@@ -39,6 +40,13 @@ export const deduplicationKeepStrategyOptions = [
   { value: 'keep-grouped-or-new', keyLabel: 'deduplicationKeepStrategyGroupedOrNewLabel' }
 ] as const;
 
+export const defaultRestoreActionOptions = [
+  { value: 'current', keyLabel: 'sessionRestoreCurrentWindow' },
+  { value: 'new', keyLabel: 'sessionRestoreNewWindow' },
+  { value: 'replace', keyLabel: 'sessionRestoreReplaceCurrentWindow' },
+  { value: 'customize', keyLabel: 'sessionRestoreCustomize' }
+] as const;
+
 export const badgeOptions = [
   { value: 'NEW', color: 'green', keyLabel: 'badge_new' },
   { value: 'WARNING', color: 'orange', keyLabel: 'badge_warning' },
@@ -50,5 +58,6 @@ export type ColorValue = typeof colorOptions[number]['value'];
 export type GroupNameSourceValue = typeof groupNameSourceOptions[number]['value'];
 export type DeduplicationMatchModeValue = typeof deduplicationMatchModeOptions[number]['value'];
 export type DeduplicationKeepStrategyValue = typeof deduplicationKeepStrategyOptions[number]['value'];
+export type DefaultRestoreActionValue = typeof defaultRestoreActionOptions[number]['value'];
 export type BadgeType = typeof badgeOptions[number]['value'];
 export type UrlExtractionModeValue = typeof urlExtractionModeOptions[number]['value'];

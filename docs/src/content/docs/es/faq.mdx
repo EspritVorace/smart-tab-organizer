@@ -1,6 +1,60 @@
 ---
 title: FAQ
-description: Respuestas a las preguntas frecuentes sobre SmartTab Organizer.
+description: Respuestas a las preguntas frecuentes sobre SmartTab Organizer. Permisos, privacidad, comportamiento esperado y resolución de problemas.
 ---
 
-{/* TODO: contenido por redactar */}
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## Mis pestañas no se agrupan, ¿por qué?
+
+Para crear un grupo deben cumplirse tres condiciones: el **interruptor global de Agrupación** está activado, una **regla de dominio** coincide con el dominio de la pestaña y la opción **Agrupación** está activada en esa regla. Consulta [Agrupar pestañas, condiciones](/guides/grouper-onglets#conditions-pour-quun-groupe-soit-cree).
+
+Otra pista: solo las pestañas abiertas mediante **clic central** o **clic derecho seguido de Abrir en una pestaña nueva** disparan la agrupación. Las pestañas abiertas desde la barra de direcciones o con un atajo de teclado no lo hacen.
+
+Comprueba también el distintivo del icono: una **G** naranja indica que el interruptor global está desactivado.
+
+## ¿Qué diferencia hay entre un pack y un preset?
+
+Un **pack** añade varias reglas de golpe a tu espacio de trabajo (galería de importación). Un **preset** rellena previamente una sola regla, la que estás creando en el asistente. Consulta [Categorías y packs](/reference/categories-et-packs) y [Presets de regex](/reference/presets-regex).
+
+## ¿Por qué una pestaña vuelve a aparecer después de una deduplicación?
+
+Si has pulsado **Deshacer** en la notificación, la pestaña se reabre de forma intencionada y queda protegida durante 10 segundos para evitar que se cierre al instante. Consulta [Deduplicar, notificación y deshacer](/guides/dedupliquer#notification-et-annulation).
+
+Si no la has deshecho y la pestaña reaparece, comprueba que la estrategia de conservación coincide con lo que quieres: por defecto (**Gana la pestaña agrupada, si no mantener la nueva**), la extensión prioriza la pestaña recién cargada sobre la existente cuando ninguna pertenece a un grupo.
+
+## ¿Mis datos salen a internet?
+
+No. La extensión no realiza **ninguna** solicitud de red. La agrupación se basa en expresiones regulares ejecutadas localmente, y todos los datos (reglas, sesiones, ajustes) viven en `browser.storage.local` del navegador. Consulta [Por qué esta extensión](/decouverte/pourquoi#tout-est-local-rien-ne-part-en-ligne).
+
+## ¿Mis reglas y sesiones se sincronizan entre dispositivos?
+
+No directamente desde la extensión. Pero si sincronizas tu perfil de Chrome o Firefox (mediante Google o Firefox Sync), `browser.storage.local` se incluye en la sincronización, así que tus reglas y sesiones te siguen. La extensión es compatible con ese mecanismo nativo sin activarlo por su cuenta.
+
+## ¿Cómo migrar mis reglas de un navegador a otro?
+
+Exporta tus reglas desde el navegador de origen (página Importar / Exportar, botón **Exportar**) y luego importa el archivo JSON en el navegador de destino. Para una migración completa (reglas + sesiones + ajustes), exporta mejor el **espacio de trabajo** entero. Consulta [Importar / Exportar, espacios de trabajo](/guides/import-export#workspaces).
+
+## Compatibilidad con Firefox
+
+Sí, Firefox es compatible mediante una build MV2 dedicada (`pnpm build:firefox` en local, o Firefox Add-ons para la instalación pública). Las API utilizadas son comunes a ambas plataformas. Consulta [Instalación](/decouverte/installation).
+
+## ¿Puede la extensión leer el contenido de mis páginas?
+
+No. Los permisos solicitados son `tabs`, `storage`, `notifications` y `scripting`. El permiso `scripting` se usa únicamente para inyectar un pequeño script que captura los **clics** en los enlaces (para memorizar el enlace de destino antes de que se abra la pestaña). No se lee el DOM ni el contenido de las páginas.
+
+## ¿Cómo restablezco la extensión por completo?
+
+Desinstalar y reinstalar la extensión vacía por completo `browser.storage.local`. Si solo quieres vaciar los contadores sin borrar todo lo demás, usa el botón **Reiniciar** en la página [Estadísticas](/guides/statistiques#reinitialiser-les-compteurs).
+
+## ¿Dónde reportar un bug o sugerir una funcionalidad?
+
+En el [tracker de incidencias de GitHub](https://github.com/EspritVorace/smart-tab-organizer/issues). Indica el navegador (Chrome / Edge / Firefox y versión), una descripción del comportamiento esperado frente al observado y, a ser posible, los pasos para reproducirlo.
+
+## Siguiente paso
+
+<CardGrid>
+  <LinkCard title="Por qué esta extensión" href="/decouverte/pourquoi" description="El planteamiento y la filosofía local-first." />
+  <LinkCard title="Instalación" href="/decouverte/installation" description="Tiendas y build local, permisos detallados." />
+  <LinkCard title="Ajustes" href="/guides/parametres" description="Todos los ajustes globales." />
+</CardGrid>

@@ -1,9 +1,17 @@
 import React from 'react';
-import { Flex } from '@radix-ui/themes';
-import { Monitor, Play, Replace, RotateCcw, Square, Wrench } from 'lucide-react';
-import { SplitButton } from '@/components/UI/SplitButton/SplitButton';
+import { Flex, IconButton, Kbd, Tooltip } from '@radix-ui/themes';
+import { Camera, Monitor, Replace, RotateCcw, Settings, Square, Wrench } from 'lucide-react';
+import { SplitButton, type SplitButtonRadioGroupConfig } from '@/components/UI/SplitButton/SplitButton';
 import { getMessage } from '@/utils/i18n';
 import type { Session } from '@/types/session';
+import { defaultRestoreActionOptions, type DefaultRestoreActionValue } from '@/schemas/enums';
+
+const restoreShortcuts: Record<DefaultRestoreActionValue, string> = {
+  current: 'Shift+R',
+  new: 'Alt+Shift+R',
+  replace: 'Alt+R',
+  customize: 'R',
+};
 
 export interface SessionRestoreButtonProps {
   session: Session;
@@ -11,6 +19,14 @@ export interface SessionRestoreButtonProps {
   onRestoreNewWindow: (session: Session) => void;
   onReplaceCurrentWindow: (session: Session) => void;
   onCustomize: (session: Session) => void;
+  /** Optional: when provided, renders a Refresh icon button to the left of the restore split button. */
+  onRefresh?: (session: Session) => void;
+  /** Action triggered by the primary button click. Defaults to 'current' for backwards compatibility. */
+  defaultRestoreAction?: DefaultRestoreActionValue;
+  /** Called when the user picks a new default action from the dropdown radio group. */
+  onDefaultRestoreActionChange?: (value: DefaultRestoreActionValue) => void;
+  /** When provided, replaces the radio group with a settings link at the bottom of the dropdown. */
+  onSettingsClick?: () => void;
   size?: '1' | '2' | '3';
   variant?: 'solid' | 'soft' | 'outline';
   presentation?: 'default' | 'tile';
@@ -23,6 +39,10 @@ export function SessionRestoreButton({
   onRestoreNewWindow,
   onReplaceCurrentWindow,
   onCustomize,
+  onRefresh,
+  defaultRestoreAction = 'current',
+  onDefaultRestoreActionChange,
+  onSettingsClick,
   size = '1',
   variant = 'soft',
   presentation = 'default',
@@ -35,17 +55,59 @@ export function SessionRestoreButton({
       {getMessage('sessionRestore')}
     </Flex>
   ) : (
-    <Play size={12} fill="currentColor" />
+    <RotateCcw size={12} aria-hidden="true" />
   );
 
-  return (
+  const primaryHandlers: Record<DefaultRestoreActionValue, (s: Session) => void> = {
+    current: onRestoreCurrentWindow,
+    new: onRestoreNewWindow,
+    replace: onReplaceCurrentWindow,
+    customize: onCustomize,
+  };
+  const currentOption = defaultRestoreActionOptions.find((o) => o.value === defaultRestoreAction)
+    ?? defaultRestoreActionOptions[0];
+  const primaryAriaLabel = getMessage(currentOption.keyLabel);
+
+  const restoreTooltip = (
+    <Flex align="center" gap="2" aria-hidden="true">
+      {getMessage(currentOption.keyLabel)}
+      <Kbd>{restoreShortcuts[defaultRestoreAction]}</Kbd>
+    </Flex>
+  );
+
+  const radioGroup: SplitButtonRadioGroupConfig | undefined = onDefaultRestoreActionChange
+    ? {
+        label: getMessage('defaultRestoreActionLabel'),
+        value: defaultRestoreAction,
+        onValueChange: (v) => onDefaultRestoreActionChange(v as DefaultRestoreActionValue),
+        options: defaultRestoreActionOptions.map((option) => ({
+          value: option.value,
+          label: getMessage(option.keyLabel),
+          'data-testid': `session-restore-default-${option.value}`,
+        })),
+      }
+    : undefined;
+
+  const settingsMenuItem = onSettingsClick
+    ? {
+        label: getMessage('settingsTab'),
+        icon: <Settings size={14} />,
+        onClick: onSettingsClick,
+        separator: true,
+        'data-testid': 'session-restore-menu-settings',
+      }
+    : null;
+
+  const splitButton = (
     <SplitButton
       data-testid={testId}
       label={label}
-      primaryAriaLabel={getMessage('sessionRestoreCurrentWindow')}
-      onClick={() => onRestoreCurrentWindow(session)}
+      primaryAriaLabel={primaryAriaLabel}
+      tooltip={restoreTooltip}
+      onClick={() => primaryHandlers[defaultRestoreAction](session)}
       size={size}
       variant={variant}
+      radioGroup={onSettingsClick ? undefined : radioGroup}
       menuItems={[
         {
           label: getMessage('sessionRestoreCurrentWindow'),
@@ -76,7 +138,36 @@ export function SessionRestoreButton({
           separator: isTile,
           'data-testid': 'session-restore-menu-customize',
         },
+        ...(settingsMenuItem ? [settingsMenuItem] : []),
       ]}
     />
+  );
+
+  if (!onRefresh) return splitButton;
+
+  return (
+    <Flex align="center" gap="1">
+      <Tooltip
+        content={
+          <Flex align="center" gap="2" aria-hidden="true">
+            {getMessage('sessionRefresh')}
+            <Kbd>U</Kbd>
+          </Flex>
+        }
+      >
+        <IconButton
+          size={size}
+          variant={variant}
+          color="gray"
+          onClick={() => onRefresh(session)}
+          aria-label={getMessage('sessionRefresh')}
+          aria-keyshortcuts="U"
+          data-testid={testId ? `${testId}-refresh` : undefined}
+        >
+          <Camera size={isTile ? 14 : 12} aria-hidden="true" />
+        </IconButton>
+      </Tooltip>
+      {splitButton}
+    </Flex>
   );
 }

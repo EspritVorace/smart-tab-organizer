@@ -1,18 +1,24 @@
 ---
 title: SmartTab Organizer
-description: Extension navigateur pour organiser, dédupliquer et sauvegarder vos onglets automatiquement.
+description: Extension navigateur (Chrome / Firefox) qui groupe vos onglets par règles, dédupliquer les doublons et sauvegarde vos sessions de travail. Tout est local, rien ne part en ligne.
 template: splash
 hero:
-  tagline: Organisez vos onglets intelligemment.
+  tagline: Organisez vos onglets intelligemment, sans envoyer la moindre URL en ligne.
   actions:
     - text: Commencer
-      link: /introduction/pourquoi/
+      link: /decouverte/pourquoi/
       icon: right-arrow
       variant: primary
+    - text: Installer
+      link: /decouverte/installation/
+      icon: external
+      variant: secondary
     - text: Voir sur GitHub
       link: https://github.com/EspritVorace/smart-tab-organizer
       icon: external
       variant: minimal
 ---
 
-SmartTab Organizer est une extension Chrome et Firefox qui groupe automatiquement vos onglets par domaine, élimine les doublons et vous permet de sauvegarder des sessions pour les retrouver plus tard.
+SmartTab Organizer est une extension Chrome et Firefox qui regroupe automatiquement vos onglets par domaine, élimine les doublons et vous permet de sauvegarder des sessions de travail nommées pour les retrouver d'un clic.
+
+Les règles s'appuient sur des expressions régulières que vous écrivez vous-même ou qui viennent de packs intégrés (49 packs prêts à l'emploi). Aucune IA distante, aucune télémétrie, aucune requête réseau : tout vit dans `browser.storage.local`.

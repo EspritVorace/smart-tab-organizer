@@ -9,7 +9,7 @@ import type { DomainRule } from '@/schemas/domainRule';
 
 interface WizardStep4SummaryProps {
   values: DomainRule;
-  configMode: 'preset' | 'ask' | 'manual';
+  configMode: 'preset' | 'ask' | 'manual' | 'label';
   presetName: string | null;
   onEditStep: (step: number) => void;
 }
@@ -54,7 +54,7 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 const URL_SOURCE_MODES = ['url', 'smart', 'smart_label', 'smart_preset', 'smart_manual'];
 
 function buildConfigSummary(
-  configMode: 'preset' | 'ask' | 'manual',
+  configMode: 'preset' | 'ask' | 'manual' | 'label',
   presetName: string | null,
   values: DomainRule,
 ): string {
@@ -63,6 +63,9 @@ function buildConfigSummary(
   }
   if (configMode === 'ask') {
     return getMessage('configSummaryAsk');
+  }
+  if (configMode === 'label') {
+    return getMessage('configSummaryLabel').replace('{label}', values.fallbackLabel?.trim() || values.label);
   }
   // manual
   const sourceOption = groupNameSourceOptions.find(o => o.value === values.groupNameSource);
@@ -100,7 +103,7 @@ export function WizardStep4Summary({ values, configMode, presetName, onEditStep 
           <Flex gap="2" align="baseline">
             <Text size="2" color="gray" highContrast style={{ minWidth: 130, flexShrink: 0 }}>{getMessage('labelLabel')}</Text>
             <Flex align="center" gap="2">
-              <Badge color={values.color ? getRadixColor(values.color) : 'gray'} variant="solid" highContrast size="1">
+              <Badge color={values.color ? getRadixColor(values.color) : 'gray'} variant="solid" size="1">
                 {category ? `${category.emoji} ` : ''}{values.label}
               </Badge>
               {category && (

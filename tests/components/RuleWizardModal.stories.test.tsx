@@ -10,6 +10,7 @@ const {
   RuleWizardModalEditDeduplicationDisabled,
   RuleWizardModalClosed,
   RuleWizardModalStep2,
+  RuleWizardModalStep2PresetRequired,
   RuleWizardModalStep3,
   RuleWizardModalStep4,
   RuleWizardModalCreateComplete,
@@ -61,6 +62,13 @@ describe('RuleWizardModal — step navigation', () => {
     await RuleWizardModalStep3.run();
 
     expect(screen.getByTestId('wizard-rule-step-3')).toBeInTheDocument();
+  });
+
+  it('blocks step 2 → step 3 in preset mode until a preset is selected', async () => {
+    await RuleWizardModalStep2PresetRequired.run();
+
+    expect(screen.getByTestId('wizard-rule-step-2')).toBeInTheDocument();
+    expect(screen.getByTestId('wizard-rule-btn-next')).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('reaches step 4 (summary) after navigating through all previous steps', async () => {

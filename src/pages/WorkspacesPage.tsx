@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { Box, Button, Card, Flex, IconButton, Text, Tooltip } from '@radix-ui/themes';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { Box, Button, Card, Flex, IconButton, Kbd, Text, Tooltip } from '@radix-ui/themes';
 import { AlertCircle, Pencil, Plus, Trash2 } from 'lucide-react';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { ListToolbar } from '@/components/UI/ListToolbar';
@@ -14,6 +14,8 @@ import { getMessage } from '@/utils/i18n';
 import { logger } from '@/utils/logger';
 import { foldAccents } from '@/utils/stringUtils';
 import { useShortcuts } from '@/hooks/useShortcuts';
+import { useListNavigation } from '@/hooks/useListNavigation';
+import { useRelativeTime } from '@/hooks/useRelativeTime';
 import type { AppSettings } from '@/types/syncSettings';
 import type { WorkspaceMeta } from '@/schemas/workspace';
 
@@ -27,6 +29,8 @@ interface WorkspaceRowProps {
   isDefault: boolean;
   isOnly: boolean;
   searchTerm: string;
+  index: number;
+  onKeyDown: (e: React.KeyboardEvent<HTMLElement>, index: number) => void;
   onSwitch: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -38,12 +42,26 @@ function resolveDeleteTooltip(isDefault: boolean, isOnly: boolean): string {
   return getMessage('workspaceDeleteLabel');
 }
 
-function WorkspaceRow({ workspace, isActive, isDefault, isOnly, searchTerm, onSwitch, onEdit, onDelete }: WorkspaceRowProps) {
+function WorkspaceRow({ workspace, isActive, isDefault, isOnly, searchTerm, index, onKeyDown, onSwitch, onEdit, onDelete }: WorkspaceRowProps) {
   const deleteBlocked = isDefault || isOnly;
   const deleteTooltip = resolveDeleteTooltip(isDefault, isOnly);
 
+  const isUpdated = workspace.updatedAt !== workspace.createdAt;
+  const relativeDate = isUpdated ? workspace.updatedAt : workspace.createdAt;
+  const relativePrefix = isUpdated
+    ? getMessage('workspaceModifiedPrefix')
+    : getMessage('workspaceCreatedPrefix');
+  const relativeText = useRelativeTime(relativeDate);
+
   return (
-    <Card data-testid={`workspace-row-${workspace.id}`} variant="surface">
+    <Card
+      data-testid={`workspace-row-${workspace.id}`}
+      data-workspace-card=""
+      variant="surface"
+      role="listitem"
+      tabIndex={0}
+      onKeyDown={(e) => onKeyDown(e, index)}
+    >
       <Flex align="center" gap="3">
         <WorkspaceAvatar name={workspace.name} accentColor={workspace.accentColor} size="md" />
         <Flex direction="column" gap="1" style={{ flex: 1, minWidth: 0 }}>
@@ -62,8 +80,9 @@ function WorkspaceRow({ workspace, isActive, isDefault, isOnly, searchTerm, onSw
               </Text>
             ) : null}
           </Flex>
-          <Text size="1" color="gray">
-            {getMessage('workspaceColorLabelInline', [workspace.accentColor])}
+          <Text size="1" color="gray" data-testid={`workspace-row-${workspace.id}-relative-time`}>
+            {relativePrefix}{' '}
+            <time dateTime={relativeDate}>{relativeText}</time>
           </Text>
         </Flex>
         <Flex align="center" gap="2">
@@ -122,6 +141,17 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
   const [editing, setEditing] = useState<WorkspaceMeta | null>(null);
   const [deleting, setDeleting] = useState<WorkspaceMeta | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const listRef = useRef<HTMLDivElement>(null);
+  const { handleNavigationKey } = useListNavigation(listRef, '[data-workspace-card]');
+
+  const handleCardKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLElement>, index: number) => {
+      if (e.target !== e.currentTarget) return;
+      handleNavigationKey(e, index);
+    },
+    [handleNavigationKey],
+  );
 
   const takenNames = workspaces.map((w) => w.name);
 
@@ -184,14 +214,17 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
               searchValue={searchTerm}
               onSearchChange={setSearchTerm}
               action={
-                <Button
-                  data-testid="workspace-create-button"
-                  variant="solid"
-                  onClick={handleOpenCreate}
-                >
-                  <Plus size={16} />
-                  {getMessage('workspaceCreateLabel')}
-                </Button>
+                <Tooltip content={<Flex align="center" gap="2" aria-hidden="true">{getMessage('workspaceCreateLabel')}<Kbd>N</Kbd></Flex>}>
+                  <Button
+                    data-testid="workspace-create-button"
+                    variant="solid"
+                    onClick={handleOpenCreate}
+                    aria-keyshortcuts="N"
+                  >
+                    <Plus size={16} />
+                    {getMessage('workspaceCreateLabel')}
+                  </Button>
+                </Tooltip>
               }
             />
           )}
@@ -202,8 +235,8 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
 
           {filteredWorkspaces.length > 0 && (
             <Box data-testid="workspace-list">
-              <Flex direction="column" gap="2">
-                {filteredWorkspaces.map((ws) => (
+              <Flex ref={listRef} direction="column" gap="2" role="list">
+                {filteredWorkspaces.map((ws, index) => (
                   <WorkspaceRow
                     key={ws.id}
                     workspace={ws}
@@ -211,6 +244,8 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
                     isDefault={ws.id === DEFAULT_WORKSPACE_ID}
                     isOnly={workspaces.length === 1}
                     searchTerm={searchTerm}
+                    index={index}
+                    onKeyDown={handleCardKeyDown}
                     onSwitch={() => void switchTo(ws.id)}
                     onEdit={() => setEditing(ws)}
                     onDelete={() => setDeleting(ws)}

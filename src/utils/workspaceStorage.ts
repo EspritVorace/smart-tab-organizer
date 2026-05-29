@@ -1,7 +1,7 @@
 import { storage, type WxtStorageItem, type StorageItemKey } from 'wxt/utils/storage';
 import type { DomainRuleSettings } from '@/types/syncSettings.js';
 import { defaultAppSettings } from '@/types/syncSettings.js';
-import type { DeduplicationKeepStrategyValue } from '@/schemas/enums.js';
+import type { DeduplicationKeepStrategyValue, DefaultRestoreActionValue } from '@/schemas/enums.js';
 import type { RuleCategory } from '@/schemas/category.js';
 import type { Statistics } from '@/types/statistics.js';
 import { defaultStatistics } from '@/types/statistics.js';
@@ -15,19 +15,25 @@ export const DEFAULT_WORKSPACE_ID = 'default';
  * Each entry represents a key that lived at the root of `storage.local`
  * before workspaces were introduced and is now prefixed with
  * `local:ws:{wsId}:`.
+ *
+ * `categories` and `categoriesSeeded` are intentionally absent: rule
+ * categories are global constants (sourced from `src/data/categories.json`)
+ * and must resolve to the same value regardless of the active workspace.
  */
 export const WORKSPACE_SCOPED_KEYS = [
   'globalGroupingEnabled',
   'globalDeduplicationEnabled',
   'deduplicateUnmatchedDomains',
   'deduplicationKeepStrategy',
+  'defaultRestoreAction',
   'domainRules',
-  'categories',
-  'categoriesSeeded',
   'notifyOnGrouping',
   'notifyOnDeduplication',
+  'notifyOnOrganize',
   'statistics',
   'sessions',
+  'pinnedSessions',
+  'archivedSessions',
   'popupPinnedEmptyCollapsed',
 ] as const;
 
@@ -52,15 +58,34 @@ export interface ScopedItems {
   globalDeduplicationEnabledItem: WxtStorageItem<boolean, Record<string, unknown>>;
   deduplicateUnmatchedDomainsItem: WxtStorageItem<boolean, Record<string, unknown>>;
   deduplicationKeepStrategyItem: WxtStorageItem<DeduplicationKeepStrategyValue, Record<string, unknown>>;
+  defaultRestoreActionItem: WxtStorageItem<DefaultRestoreActionValue, Record<string, unknown>>;
   domainRulesItem: WxtStorageItem<DomainRuleSettings, Record<string, unknown>>;
   categoriesItem: WxtStorageItem<RuleCategory[], Record<string, unknown>>;
   categoriesSeededItem: WxtStorageItem<boolean, Record<string, unknown>>;
   notifyOnGroupingItem: WxtStorageItem<boolean, Record<string, unknown>>;
   notifyOnDeduplicationItem: WxtStorageItem<boolean, Record<string, unknown>>;
+  notifyOnOrganizeItem: WxtStorageItem<boolean, Record<string, unknown>>;
   statisticsItem: WxtStorageItem<Statistics, Record<string, unknown>>;
   sessionsItem: WxtStorageItem<Session[], Record<string, unknown>>;
+  pinnedSessionsItem: WxtStorageItem<Session[], Record<string, unknown>>;
+  archivedSessionsItem: WxtStorageItem<Session[], Record<string, unknown>>;
   popupPinnedEmptyCollapsedItem: WxtStorageItem<boolean, Record<string, unknown>>;
 }
+
+/**
+ * Rule categories are global constants (not workspace-scoped). They live at
+ * the unprefixed legacy keys (`local:categories`, `local:categoriesSeeded`)
+ * and are reused as-is across all workspaces, so switching workspace does
+ * not require re-seeding or re-loading the cache.
+ */
+const globalCategoriesItem = storage.defineItem<RuleCategory[]>(
+  'local:categories',
+  { defaultValue: defaultAppSettings.categories },
+);
+const globalCategoriesSeededItem = storage.defineItem<boolean>(
+  'local:categoriesSeeded',
+  { defaultValue: false },
+);
 
 const scopedItemsCache = new Map<string, ScopedItems>();
 
@@ -90,18 +115,16 @@ export function defineWorkspaceItems(wsId: string): ScopedItems {
       workspaceStorageKey(wsId, 'deduplicationKeepStrategy'),
       { defaultValue: defaultAppSettings.deduplicationKeepStrategy },
     ),
+    defaultRestoreActionItem: storage.defineItem<DefaultRestoreActionValue>(
+      workspaceStorageKey(wsId, 'defaultRestoreAction'),
+      { defaultValue: defaultAppSettings.defaultRestoreAction },
+    ),
     domainRulesItem: storage.defineItem<DomainRuleSettings>(
       workspaceStorageKey(wsId, 'domainRules'),
       { defaultValue: defaultAppSettings.domainRules },
     ),
-    categoriesItem: storage.defineItem<RuleCategory[]>(
-      workspaceStorageKey(wsId, 'categories'),
-      { defaultValue: defaultAppSettings.categories },
-    ),
-    categoriesSeededItem: storage.defineItem<boolean>(
-      workspaceStorageKey(wsId, 'categoriesSeeded'),
-      { defaultValue: false },
-    ),
+    categoriesItem: globalCategoriesItem,
+    categoriesSeededItem: globalCategoriesSeededItem,
     notifyOnGroupingItem: storage.defineItem<boolean>(
       workspaceStorageKey(wsId, 'notifyOnGrouping'),
       { defaultValue: defaultAppSettings.notifyOnGrouping },
@@ -110,12 +133,24 @@ export function defineWorkspaceItems(wsId: string): ScopedItems {
       workspaceStorageKey(wsId, 'notifyOnDeduplication'),
       { defaultValue: defaultAppSettings.notifyOnDeduplication },
     ),
+    notifyOnOrganizeItem: storage.defineItem<boolean>(
+      workspaceStorageKey(wsId, 'notifyOnOrganize'),
+      { defaultValue: defaultAppSettings.notifyOnOrganize },
+    ),
     statisticsItem: storage.defineItem<Statistics>(
       workspaceStorageKey(wsId, 'statistics'),
       { defaultValue: defaultStatistics },
     ),
     sessionsItem: storage.defineItem<Session[]>(
       workspaceStorageKey(wsId, 'sessions'),
+      { defaultValue: [] },
+    ),
+    pinnedSessionsItem: storage.defineItem<Session[]>(
+      workspaceStorageKey(wsId, 'pinnedSessions'),
+      { defaultValue: [] },
+    ),
+    archivedSessionsItem: storage.defineItem<Session[]>(
+      workspaceStorageKey(wsId, 'archivedSessions'),
       { defaultValue: [] },
     ),
     popupPinnedEmptyCollapsedItem: storage.defineItem<boolean>(

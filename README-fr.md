@@ -9,7 +9,7 @@
 Une extension Chrome et Firefox qui regroupe tes onglets par domaine, supprime les doublons, et capture tes espaces de travail sous forme de sessions à restaurer en un clic.
 
 <p align="center">
-  <img src="assets/store.png" alt="SmartTab Organizer" width="720">
+  <img src="doc/store.png" alt="SmartTab Organizer" width="720">
 </p>
 
 <p align="center">
@@ -35,7 +35,7 @@ Une extension Chrome et Firefox qui regroupe tes onglets par domaine, supprime l
 Tu ouvres un ticket Jira, une PR GitHub, une page de docs : le nouvel onglet atterrit dans le bon groupe instantanément. Le nom du groupe vient du titre de la page, de l'URL, ou d'un préréglage regex (Jira, GitHub, GitLab, Trello, et bien d'autres).
 
 <p align="center">
-  <img src="assets/readme/gifs/regroup.gif" alt="Démo du regroupement automatique" width="640">
+  <img src="doc/readme/gifs/regroup.gif" alt="Démo du regroupement automatique" width="640">
 </p>
 
 ### 🔁 Déduplication
@@ -43,7 +43,7 @@ Tu ouvres un ticket Jira, une PR GitHub, une page de docs : le nouvel onglet att
 Tu ouvres une page déjà ouverte ? Le doublon disparaît. Le mode de comparaison se règle par règle (URL exacte, "contient", ou "ignore ces paramètres"), et tu choisis lequel des deux onglets survit.
 
 <p align="center">
-  <img src="assets/readme/gifs/dedup.gif" alt="Démo de la déduplication" width="640">
+  <img src="doc/readme/gifs/dedup.gif" alt="Démo de la déduplication" width="640">
 </p>
 
 ### 📷 Des sessions vraiment utilisables
@@ -51,7 +51,7 @@ Tu ouvres une page déjà ouverte ? Le doublon disparaît. Le mode de comparaiso
 Capture tes onglets et tes groupes ouverts, nomme-les, épingle ceux dans lesquels tu vis. Restaure dans la fenêtre courante, dans une nouvelle, ou remplace ce que tu as. Chaque session est éditable, cherchable jusqu'au niveau des onglets, et peut porter tes propres notes.
 
 <p align="center">
-  <img src="assets/readme/fr-dark-sessions-list.png" alt="Liste des sessions" width="720">
+  <img src="doc/readme/fr-dark-sessions-list.png" alt="Liste des sessions" width="720">
 </p>
 
 ## Et aussi
@@ -67,11 +67,7 @@ Capture tes onglets et tes groupes ouverts, nomme-les, épingle ceux dans lesque
 
 ## 📖 Documentation
 
-Le guide complet est dans [`docs/`](docs/src/content/docs/) (Astro Starlight, 3 langues, plus de 30 pages avec captures). Lis le MDX directement sur GitHub, ou lance la doc en local :
-
-```bash
-pnpm docs:dev
-```
+Guide complet en ligne : [docs.esprit-vorace.fr](https://docs.esprit-vorace.fr/) (Astro Starlight, 3 langues, plus de 30 pages avec captures). Les sources MDX sont dans [`docs/`](docs/src/content/docs/) pour les contributeurs.
 
 ## 🛠️ Pour les contributeurs
 
@@ -94,3 +90,7 @@ Merci d'ouvrir une issue avant de soumettre une pull request importante.
 ## 📜 Licence
 
 GNU General Public License v3.0.
+
+## 🗝️ Licences tierces
+
+SmartTab Organizer embarque des composants open source (React, Radix UI, Lucide, Zod, CodeMirror, dnd-kit et d'autres). Leurs mentions de copyright et textes de licence complets sont listés dans [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt) et sur la [page d'attribution](https://docs.esprit-vorace.fr/reference/licences-open-source/).

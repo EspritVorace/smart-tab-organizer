@@ -1,0 +1,116 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
+let uiLanguage: string | (() => string) = 'fr';
+
+vi.mock('wxt/browser', () => ({
+  browser: {
+    i18n: {
+      getUILanguage: () => {
+        if (typeof uiLanguage === 'function') return uiLanguage();
+        return uiLanguage;
+      },
+    },
+  },
+}));
+
+beforeEach(() => {
+  uiLanguage = 'fr';
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe('getDocsUrl', () => {
+  it('returns the English subpath when the UI language is en', async () => {
+    uiLanguage = 'en-US';
+    const { getDocsUrl } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrl()).toBe('https://docs.esprit-vorace.fr/en/');
+  });
+
+  it('returns the Spanish subpath when the UI language is es', async () => {
+    uiLanguage = 'es';
+    const { getDocsUrl } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrl()).toBe('https://docs.esprit-vorace.fr/es/');
+  });
+
+  it('returns the root URL for the French UI language', async () => {
+    uiLanguage = 'fr-FR';
+    const { getDocsUrl } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrl()).toBe('https://docs.esprit-vorace.fr/');
+  });
+
+  it('returns the root URL for unknown languages', async () => {
+    uiLanguage = 'de';
+    const { getDocsUrl } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrl()).toBe('https://docs.esprit-vorace.fr/');
+  });
+
+  it('returns a docs URL even when getUILanguage throws', async () => {
+    uiLanguage = () => {
+      throw new Error('boom');
+    };
+    const { getDocsUrl } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrl().startsWith('https://docs.esprit-vorace.fr/')).toBe(true);
+  });
+
+  it('appends a section path with trailing slash', async () => {
+    uiLanguage = 'fr-FR';
+    const { getDocsUrl } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrl('guides/sessions')).toBe('https://docs.esprit-vorace.fr/guides/sessions/');
+  });
+
+  it('combines locale and section', async () => {
+    uiLanguage = 'en-US';
+    const { getDocsUrl } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrl('guides/sessions')).toBe('https://docs.esprit-vorace.fr/en/guides/sessions/');
+  });
+
+  it('strips leading and trailing slashes from the section', async () => {
+    uiLanguage = 'fr-FR';
+    const { getDocsUrl } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrl('/guides/sessions/')).toBe('https://docs.esprit-vorace.fr/guides/sessions/');
+  });
+});
+
+describe('getDocsUrlForTab', () => {
+  it('maps a known tab to its docs section', async () => {
+    uiLanguage = 'es';
+    const { getDocsUrlForTab } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrlForTab('rules')).toBe(
+      'https://docs.esprit-vorace.fr/es/guides/regles-de-domaine/',
+    );
+  });
+
+  it('maps the home tab to the discovery page', async () => {
+    uiLanguage = 'fr-FR';
+    const { getDocsUrlForTab } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrlForTab('home')).toBe(
+      'https://docs.esprit-vorace.fr/decouverte/pourquoi/',
+    );
+  });
+
+  it('falls back to the locale root when the tab is unknown', async () => {
+    uiLanguage = 'fr-FR';
+    const { getDocsUrlForTab } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrlForTab('does-not-exist')).toBe('https://docs.esprit-vorace.fr/');
+  });
+
+  it('falls back to the locale root for an undefined tab', async () => {
+    uiLanguage = 'en-US';
+    const { getDocsUrlForTab } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrlForTab(undefined)).toBe('https://docs.esprit-vorace.fr/en/');
+  });
+});

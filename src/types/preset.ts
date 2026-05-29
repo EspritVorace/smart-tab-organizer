@@ -33,11 +33,10 @@ export const presetSchema = z.object({
     { message: 'urlQueryParamName is required when urlExtractionMode is query_param', path: ['urlQueryParamName'] }
   );
 
-// Schema for a preset category.
+// Schema for a preset category. Labels and emojis are resolved from the
+// unified category source (src/data/categories.json) via categoriesStore.
 export const presetCategorySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
+  id: z.string().min(1),
   presets: z.array(presetSchema)
 });
 

@@ -34,7 +34,7 @@ test.describe('[US-A11Y001] Rule creation wizard', () => {
     await helpers.clearDomainRules();
   });
 
-  test('opening the wizard focuses the label input, not the close button', async ({
+  test('opening the wizard focuses the domain input, not the close button', async ({
     extensionContext,
     extensionId,
   }) => {
@@ -44,8 +44,8 @@ test.describe('[US-A11Y001] Rule creation wizard', () => {
     await page.getByTestId('page-rules-btn-add').click();
     await page.getByTestId('wizard-rule').waitFor({ state: 'visible' });
 
-    // Label input must have focus
-    await expect(page.getByTestId('wizard-rule-field-label')).toBeFocused();
+    // Domain filter input must have focus (label is auto-derived from it).
+    await expect(page.getByTestId('wizard-rule-field-domain')).toBeFocused();
     // Close button must NOT have focus
     expect(await isCloseFocused(page)).toBe(false);
 

@@ -11,7 +11,7 @@
   border-radius: var(--radius-3);
 }
 
-.statButton:focus-visible {
+.statButton:focus {
   outline: 2px solid var(--accent-9);
   outline-offset: 2px;
 }

@@ -21,20 +21,24 @@ export async function getSettings(): Promise<AppSettings> {
       items.globalDeduplicationEnabledItem,
       items.deduplicateUnmatchedDomainsItem,
       items.deduplicationKeepStrategyItem,
+      items.defaultRestoreActionItem,
       items.domainRulesItem,
       items.categoriesItem,
       items.notifyOnGroupingItem,
       items.notifyOnDeduplicationItem,
+      items.notifyOnOrganizeItem,
     ]);
     return {
       globalGroupingEnabled: results[0].value as boolean,
       globalDeduplicationEnabled: results[1].value as boolean,
       deduplicateUnmatchedDomains: results[2].value as boolean,
       deduplicationKeepStrategy: results[3].value as AppSettings['deduplicationKeepStrategy'],
-      domainRules: results[4].value as AppSettings['domainRules'],
-      categories: results[5].value as AppSettings['categories'],
-      notifyOnGrouping: results[6].value as boolean,
-      notifyOnDeduplication: results[7].value as boolean,
+      defaultRestoreAction: results[4].value as AppSettings['defaultRestoreAction'],
+      domainRules: results[5].value as AppSettings['domainRules'],
+      categories: results[6].value as AppSettings['categories'],
+      notifyOnGrouping: results[7].value as boolean,
+      notifyOnDeduplication: results[8].value as boolean,
+      notifyOnOrganize: results[9].value as boolean,
     };
   } catch (error) {
     logger.error('Error getting settings:', error);
@@ -50,10 +54,12 @@ export async function setSettings(settings: AppSettings): Promise<void> {
       { item: items.globalDeduplicationEnabledItem, value: settings.globalDeduplicationEnabled },
       { item: items.deduplicateUnmatchedDomainsItem, value: settings.deduplicateUnmatchedDomains },
       { item: items.deduplicationKeepStrategyItem, value: settings.deduplicationKeepStrategy },
+      { item: items.defaultRestoreActionItem, value: settings.defaultRestoreAction },
       { item: items.domainRulesItem, value: settings.domainRules },
       { item: items.categoriesItem, value: settings.categories },
       { item: items.notifyOnGroupingItem, value: settings.notifyOnGrouping },
       { item: items.notifyOnDeduplicationItem, value: settings.notifyOnDeduplication },
+      { item: items.notifyOnOrganizeItem, value: settings.notifyOnOrganize },
     ]);
   } catch (error) {
     logger.error('Error setting settings:', error);
@@ -72,6 +78,8 @@ export async function updateSettings(updates: Partial<AppSettings>): Promise<voi
       writes.push({ item: items.deduplicateUnmatchedDomainsItem, value: updates.deduplicateUnmatchedDomains! });
     if ('deduplicationKeepStrategy' in updates)
       writes.push({ item: items.deduplicationKeepStrategyItem, value: updates.deduplicationKeepStrategy! });
+    if ('defaultRestoreAction' in updates)
+      writes.push({ item: items.defaultRestoreActionItem, value: updates.defaultRestoreAction! });
     if ('domainRules' in updates)
       writes.push({ item: items.domainRulesItem, value: updates.domainRules! });
     if ('categories' in updates)
@@ -80,6 +88,8 @@ export async function updateSettings(updates: Partial<AppSettings>): Promise<voi
       writes.push({ item: items.notifyOnGroupingItem, value: updates.notifyOnGrouping! });
     if ('notifyOnDeduplication' in updates)
       writes.push({ item: items.notifyOnDeduplicationItem, value: updates.notifyOnDeduplication! });
+    if ('notifyOnOrganize' in updates)
+      writes.push({ item: items.notifyOnOrganizeItem, value: updates.notifyOnOrganize! });
     if (writes.length > 0) await storage.setItems(writes);
   } catch (error) {
     logger.error('Error updating settings:', error);
@@ -99,10 +109,12 @@ export function watchSettings(
     items.globalDeduplicationEnabledItem.watch(() => getSettings().then(callback)),
     items.deduplicateUnmatchedDomainsItem.watch(() => getSettings().then(callback)),
     items.deduplicationKeepStrategyItem.watch(() => getSettings().then(callback)),
+    items.defaultRestoreActionItem.watch(() => getSettings().then(callback)),
     items.domainRulesItem.watch(() => getSettings().then(callback)),
     items.categoriesItem.watch(() => getSettings().then(callback)),
     items.notifyOnGroupingItem.watch(() => getSettings().then(callback)),
     items.notifyOnDeduplicationItem.watch(() => getSettings().then(callback)),
+    items.notifyOnOrganizeItem.watch(() => getSettings().then(callback)),
   ];
   return () => unwatchers.forEach(u => u());
 }
@@ -117,10 +129,12 @@ export function watchSettingsField<K extends keyof AppSettings>(
     globalDeduplicationEnabled: items.globalDeduplicationEnabledItem,
     deduplicateUnmatchedDomains: items.deduplicateUnmatchedDomainsItem,
     deduplicationKeepStrategy: items.deduplicationKeepStrategyItem,
+    defaultRestoreAction: items.defaultRestoreActionItem,
     domainRules: items.domainRulesItem,
     categories: items.categoriesItem,
     notifyOnGrouping: items.notifyOnGroupingItem,
     notifyOnDeduplication: items.notifyOnDeduplicationItem,
+    notifyOnOrganize: items.notifyOnOrganizeItem,
   };
   return fieldToItem[field].watch((newValue) => callback(newValue as AppSettings[K]));
 }

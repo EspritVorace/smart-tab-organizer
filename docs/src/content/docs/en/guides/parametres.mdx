@@ -1,0 +1,67 @@
+---
+title: Settings
+description: Configure notifications, the deduplication scope, and the default restore action.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+The **Settings** page gathers the global preferences that are not tied to a specific rule. It is built around three sections.
+
+<Aside type="note">
+The **global toggles** for grouping and deduplication are not here: they live in the [popup](/guides/popup) (and in the icon badge, see [Interface tour](/decouverte/tour-interface#indicateur-sur-licone)).
+</Aside>
+
+## Notifications
+
+Three independent toggles. Each one controls a kind of system notification, with no interaction between them.
+
+| Toggle | Effect |
+|---|---|
+| **Notify when tabs are automatically grouped** | Shows a notification on every group creation, with the group's title. |
+| **Notify when duplicates are automatically closed** | Shows a notification on every deduplication, with an **Undo** button available for 5 seconds. |
+| **Notify after Organize Tabs** | Shows a summary after an **Organize tabs** command triggered from the home page or the popup. |
+
+## Deduplication scope
+
+Two settings that fine-tune the global deduplication.
+
+### Deduplicate tabs without a matching rule
+
+When this toggle is **on**, tabs on domains you have not configured are deduplicated in Exact URL mode. When **off** (default), only domains covered by a rule can be deduplicated.
+
+Domain rules remain authoritative over this setting. A domain with an explicit rule always follows its rule.
+
+### When a duplicate is detected, keep
+
+The strategy that decides which of the two duplicate tabs survives. Four values:
+
+| Strategy | Behavior |
+|---|---|
+| **The existing tab** | The already-open tab is kept. Useful to preserve state (scroll, form, session). |
+| **The newly opened tab** | The new tab survives. Heads-up: if the old one was in a group, it disappears from the group. |
+| **Grouped tab wins, otherwise keep existing** | If one of the two is grouped and the other is not, the grouped one survives. Otherwise falls back to **The existing tab**. |
+| **Grouped tab wins, otherwise keep the new one** (default) | If one of the two is grouped and the other is not, the grouped one survives. Otherwise falls back to **The newly opened tab**. Protects tabs restored from a session from being closed in favor of an ungrouped copy. |
+
+See [Deduplicate](/guides/dedupliquer#strategies-de-conservation) for the full context.
+
+## Default action (Restore)
+
+This section configures what a **click** on the main **Restore** button of a session or a profile does. The dropdown next to the button always exposes the four options individually.
+
+| Value | Behavior of the main click |
+|---|---|
+| **Restore in current window** (default) | Adds the tabs to the currently foregrounded window. |
+| **Restore in new window** | Opens a new dedicated window and restores the tabs there. |
+| **Replace tabs in current window** | Closes the current window's tabs and restores those of the session in their place. |
+| **Customized restoration** | Opens the restore wizard and lets you pick case by case. |
+
+The four targets remain reachable via the [keyboard shortcuts](/reference/raccourcis-clavier) (`R`, `Shift+R`, `Alt+R`, `Alt+Shift+R`) on a focused session or profile, no matter the value of this setting.
+
+## Next steps
+
+<CardGrid>
+  <LinkCard title="Popup" href="/guides/popup" description="Global grouping and deduplication toggles." />
+  <LinkCard title="Deduplicate" href="/guides/dedupliquer" description="The three match modes, context for the keep strategy." />
+  <LinkCard title="Sessions" href="/guides/sessions" description="The default Restore action in context." />
+  <LinkCard title="Interface tour" href="/decouverte/tour-interface" description="The icon badge that reflects the state of the global toggles." />
+</CardGrid>

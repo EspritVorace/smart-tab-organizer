@@ -10,6 +10,7 @@ export interface GroupDiff {
 export interface SessionDiff {
   name?: { current: string; imported: string };
   isPinned?: { current: boolean; imported: boolean };
+  isArchived?: { current: boolean; imported: boolean };
   categoryId?: { current: string | null | undefined; imported: string | null | undefined };
   note?: { current: string | undefined; imported: string | undefined };
   groupsAdded: string[];       // titles
@@ -65,6 +66,7 @@ export function areSessionsEqual(a: Session, b: Session): boolean {
   return (
     a.name === b.name &&
     a.isPinned === b.isPinned &&
+    (a.isArchived ?? false) === (b.isArchived ?? false) &&
     (a.categoryId ?? null) === (b.categoryId ?? null) &&
     (a.note ?? '') === (b.note ?? '') &&
     areGroupArraysEqual(a.groups, b.groups) &&
@@ -169,6 +171,12 @@ export function getSessionDiff(existing: Session, imported: Session): SessionDif
 
   if (existing.isPinned !== imported.isPinned) {
     diff.isPinned = { current: existing.isPinned, imported: imported.isPinned };
+  }
+
+  const existingArchived = existing.isArchived ?? false;
+  const importedArchived = imported.isArchived ?? false;
+  if (existingArchived !== importedArchived) {
+    diff.isArchived = { current: existingArchived, imported: importedArchived };
   }
 
   const existingCat = existing.categoryId ?? null;

@@ -42,6 +42,7 @@ export function SearchableInlineList({
   'aria-labelledby': ariaLabelledBy,
 }: SearchableInlineListProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const listboxId = useId();
 
   // cmdk's Command.Input overrides the `id` prop with its internal useId,
@@ -56,6 +57,18 @@ export function SearchableInlineList({
     return () => clearTimeout(t);
   }, [autoFocus]);
 
+  // Center the pre-selected item on mount so the user does not have to scroll
+  // to find it (e.g. edit-mode dialogs reopening on a saved value).
+  useEffect(() => {
+    if (!value) return;
+    const t = setTimeout(() => {
+      const selected = containerRef.current?.querySelector<HTMLElement>('.ss-item--selected');
+      selected?.scrollIntoView({ block: 'center', behavior: 'auto' });
+    }, 0);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const renderItem = (option: SearchableSelectOption) => (
     <SearchableSelectItem
       key={option.value}
@@ -67,6 +80,7 @@ export function SearchableInlineList({
 
   return (
     <div
+      ref={containerRef}
       className={['ss-inline', className].filter(Boolean).join(' ')}
       aria-label={ariaLabelledBy ? undefined : ariaLabel}
       aria-labelledby={ariaLabelledBy}

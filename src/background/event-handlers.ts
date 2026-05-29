@@ -1,6 +1,6 @@
 import { browser, Browser } from 'wxt/browser';
 import { initializeDefaults, migrateRuleColorsFromCategories } from '@/utils/migration.js';
-import { migrateSettingsFromSyncToLocal, migrateRulesAddUrlExtractionMode, migrateToWorkspaces, seedBuiltInCategories, initializeFirstRunRedirectFlag, FIRST_RUN_REDIRECT_FLAG } from './migration.js';
+import { migrateSettingsFromSyncToLocal, migrateRulesAddUrlExtractionMode, migrateRulesAddFallbackLabel, migrateToWorkspaces, migrateSessionsSplitByPinAndArchive, seedBuiltInCategories, seedUnifiedCategories, initializeFirstRunRedirectFlag, FIRST_RUN_REDIRECT_FLAG } from './migration.js';
 import { initCategoriesStore } from '@/utils/categoriesStore.js';
 import { logger } from '@/utils/logger.js';
 import {
@@ -24,9 +24,12 @@ export function setupInstallationHandler(): void {
         logger.debug("SmartTab Organizer installed/updated.", details.reason);
         await migrateSettingsFromSyncToLocal();
         await migrateRulesAddUrlExtractionMode();
+        await migrateRulesAddFallbackLabel();
         await migrateToWorkspaces();
+        await migrateSessionsSplitByPinAndArchive();
         await initializeDefaults();
         await seedBuiltInCategories();
+        await seedUnifiedCategories();
         await migrateRuleColorsFromCategories();
         await initCategoriesStore();
         await initializeFirstRunRedirectFlag(details.reason);

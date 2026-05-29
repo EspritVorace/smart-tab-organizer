@@ -1,0 +1,111 @@
+---
+title: Agrupar las pestañas automáticamente
+description: Cómo SmartTab Organizer coloca automáticamente las pestañas en grupos de Chrome coloreados y cómo controlar el nombre y el color del grupo desde las reglas de dominio.
+---
+
+import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import ConditionsDeclenchement from '../../../../components/ConditionsDeclenchement.astro';
+
+<Aside type="tip" title="En resumen">
+- La agrupación se dispara al abrir un enlace en una pestaña nueva (clic central o clic derecho seguido de **Abrir en una pestaña nueva**).
+- Deben cumplirse tres condiciones: interruptor global, regla coincidente y opción **Agrupación** activada en la regla.
+- El nombre y el modo de nombrado del grupo se configuran en la regla. El color es un campo propio de la regla, independiente de la categoría.
+</Aside>
+
+Cuando abres un enlace desde una pestaña padre, la extensión detecta la acción, consulta tus [reglas de dominio](/guides/regles-de-domaine) y coloca la nueva pestaña en un grupo de Chrome coloreado sin intervención manual.
+
+## Cómo se dispara la agrupación
+
+### Clic central sobre un enlace
+
+En el momento del clic, la extensión memoriza el enlace de destino. Cuando se abre la nueva pestaña, aplica tu regla de dominio y crea el grupo.
+
+### Clic derecho seguido de "Abrir en una pestaña nueva"
+
+El enlace de destino se memoriza desde el propio clic derecho. El resto del mecanismo es idéntico.
+
+<Aside type="caution">
+Las pestañas abiertas desde la barra de direcciones, mediante un atajo de teclado o desde el historial no disparan la agrupación automática. Las URL con esquemas especiales (`chrome:`, `chrome-extension:`, `about:`) también se ignoran.
+</Aside>
+
+## Condiciones para que se cree un grupo
+
+<ConditionsDeclenchement feature="groupement" />
+
+Si alguna de las condiciones no se cumple, la pestaña se abre sin agruparse.
+
+## Unirse a un grupo existente
+
+Cuando se abren varias pestañas hijas en sucesión desde la misma pestaña padre, todas se unen al mismo grupo. No se crea ningún grupo adicional. El contador **Grupos creados** solo aumenta cuando se crea un grupo nuevo.
+
+Si una segunda pestaña padre distinta dispara una regla, se crea un grupo separado nuevo. Para evitar grupos duplicados con el mismo nombre y color, la extensión se une a un grupo preexistente compatible en lugar de crear otro.
+
+## Prioridad entre reglas
+
+Cuando varias reglas coinciden con el mismo dominio, se aplica la regla colocada más arriba en tu lista. Puedes reordenarlas arrastrando y soltando en la página [Reglas de dominio](/guides/regles-de-domaine).
+
+## Color del grupo
+
+El color del grupo de Chrome se define directamente en la regla, en el campo **Color del grupo de pestañas** del paso **Identidad** del asistente. Es independiente de la categoría: dos reglas que comparten la misma categoría pueden tener colores distintos.
+
+Se ofrecen nueve colores (los nativos de los grupos de Chrome): `grey`, `blue`, `red`, `yellow`, `green`, `pink`, `purple`, `cyan`, `orange`.
+
+## Modos de nombrado
+
+El nombre que se muestra en el grupo depende del **modo de nombrado** (`groupNameSource`) definido en la regla. Existen ocho modos.
+
+### Modos "Inteligente" (recomendados)
+
+La extensión usa las regex heredadas del preset seleccionado en el asistente para extraer un nombre del título o de la URL de la pestaña padre. Cuatro variantes según lo que sucede si la extracción falla:
+
+| Modo | Paso 1 | Paso 2 | Paso 3 (red de seguridad) |
+|---|---|---|---|
+| **Inteligente** | Extracción del título | Extracción de la URL | Sin agrupación |
+| **Inteligente + Preset** | Extracción del título | Extracción de la URL | Recurso al preset seleccionado |
+| **Inteligente + Etiqueta** | Extracción del título | Extracción de la URL | Recurso a la **etiqueta de reserva** de la regla (ver más abajo) |
+| **Inteligente + Preguntar** | Extracción del título | Extracción de la URL | Aviso al usuario, desagrupación si se cancela |
+
+<Aside type="tip">
+**Inteligente + Etiqueta** e **Inteligente + Preset** garantizan que siempre se cree un grupo, lo que evita encontrarte pestañas sueltas cuando la regex no coincide.
+</Aside>
+
+### Preguntar
+
+Aparece un aviso de entrada en cada creación de grupo. Si lo cancelas, las pestañas que acababan de agruparse se desagrupan inmediatamente.
+
+### Etiqueta de reserva
+
+Sin regex y sin extracción: cada pestaña que coincide con el dominio cae en un grupo con un nombre fijo. Al seleccionar este modo en el paso **Configuración** del asistente se desbloquea un campo **Nombre del grupo** (`fallbackLabel`) donde escribes ese nombre literal. Este campo es independiente de la **Etiqueta** que identifica la regla, pero también es la red de seguridad del modo **Inteligente + Etiqueta**.
+
+### Título o URL (manual)
+
+Tú mismo escribes la regex y eliges dónde aplicarla primero.
+
+| Modo | Paso 1 | Paso 2 | Paso 3 |
+|---|---|---|---|
+| **Título** | Extracción del título | Extracción de la URL | Sin agrupación |
+| **URL** | Extracción de la URL | Extracción del título | Sin agrupación |
+
+La extensión aplica la regex y se queda con el contenido del **primer grupo de captura** `(...)`. Por ejemplo, `^([^·]+)` aplicado al título `PROJ-42 · Mi proyecto Jira` devuelve `PROJ-42`.
+
+<Aside type="note">
+Una regex con sintaxis inválida se ignora sin hacer caer la extensión. El procesamiento pasa al paso siguiente de la cadena de reserva. ¿No tienes soltura con las regex? La [guía MDN sobre expresiones regulares](https://developer.mozilla.org/es/docs/Web/JavaScript/Guide/Regular_expressions) cubre la sintaxis en español.
+</Aside>
+
+## Activar o desactivar la agrupación
+
+La agrupación se controla en dos niveles independientes:
+
+- **Nivel global**: el interruptor **Agrupación** del popup o de la página [Ajustes](/guides/parametres). Cuando está desactivado, aparece un distintivo **G** naranja en el icono de la extensión.
+- **Nivel regla**: cada regla tiene su propio interruptor en la lista. Desactivar una regla la excluye del procesamiento sin eliminarla.
+
+El interruptor global tiene prioridad. Si está desactivado, no se aplica ninguna regla, sean cuales sean sus opciones individuales.
+
+## Siguiente paso
+
+<CardGrid>
+  <LinkCard title="Reglas de dominio" href="/guides/regles-de-domaine" description="Crear, modificar y organizar las reglas que controlan la agrupación." />
+  <LinkCard title="Deduplicar" href="/guides/dedupliquer" description="El mecanismo complementario para evitar duplicados." />
+  <LinkCard title="Categorías y packs" href="/reference/categories-et-packs" description="Importar reglas listas para usar con sus regex y su color." />
+  <LinkCard title="Presets de regex" href="/reference/presets-regex" description="Los modelos de regex listos para el asistente de creación." />
+</CardGrid>

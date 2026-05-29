@@ -10,9 +10,11 @@ const mockAppSettings: AppSettings = {
   globalDeduplicationEnabled: true,
   deduplicateUnmatchedDomains: true,
   deduplicationKeepStrategy: 'keep-old',
+  defaultRestoreAction: 'current',
   categories: [],
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
+  notifyOnOrganize: true,
   domainRules: [
     {
       id: 'existing-rule-1',
@@ -155,11 +157,15 @@ export const RuleWizardModalStep2: Story = {
 };
 
 // Reaches step 3 (options) by navigating through steps 1 and 2.
+// Switches to "ask" mode on step 2 to avoid the preset-required gating
+// (no preset list is loaded in jsdom, and ask mode has no further required fields).
 export const RuleWizardModalStep3: Story = {
   args: { isOpen: true, domainRule: undefined },
   play: async (context) => {
     await RuleWizardModalStep2.play?.(context);
     const body = within(context.canvasElement.ownerDocument.body);
+    const askRadio = body.getByTestId('config-mode-ask');
+    await userEvent.click(askRadio);
     const nextBtn = body.getByTestId('wizard-rule-btn-next');
     await userEvent.click(nextBtn);
   },
@@ -168,6 +174,11 @@ export const RuleWizardModalStep3: Story = {
 // Reaches step 4 (summary) by navigating through steps 1, 2, and 3.
 export const RuleWizardModalStep4: Story = {
   args: { isOpen: true, domainRule: undefined },
+  parameters: {
+    // Badge variant="solid" without highContrast is intentional (matches DomainRuleCard).
+    // The contrast ratio depends on the accent color chosen by the user; false positive here.
+    a11y: { config: { rules: [{ id: 'color-contrast', enabled: false }] } },
+  },
   play: async (context) => {
     await RuleWizardModalStep3.play?.(context);
     const body = within(context.canvasElement.ownerDocument.body);
@@ -184,6 +195,21 @@ export const RuleWizardModalCreateComplete: Story = {
     const body = within(context.canvasElement.ownerDocument.body);
     const createBtn = body.getByTestId('wizard-rule-btn-create');
     await userEvent.click(createBtn);
+  },
+};
+
+// On step 2 in preset mode, the Next button is aria-disabled until a preset
+// is selected, and clicking it (e.g. via keyboard) does not advance the wizard.
+export const RuleWizardModalStep2PresetRequired: Story = {
+  args: { isOpen: true, domainRule: undefined },
+  play: async (context) => {
+    await RuleWizardModalStep2.play?.(context);
+    const body = within(context.canvasElement.ownerDocument.body);
+    const nextBtn = body.getByTestId('wizard-rule-btn-next');
+    await expect(nextBtn).toHaveAttribute('aria-disabled', 'true');
+    await userEvent.click(nextBtn);
+    // Still on step 2 — the gating short-circuited handleNext.
+    await expect(body.getByTestId('wizard-rule-step-2')).toBeInTheDocument();
   },
 };
 

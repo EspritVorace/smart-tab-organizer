@@ -7,7 +7,6 @@ const {
   TagInputFieldDefault,
   TagInputFieldWithValues,
   TagInputFieldAddTag,
-  TagInputFieldAddTagViaComma,
   TagInputFieldRemoveTag,
   TagInputFieldRejectInvalid,
 } = composeStories(stories);
@@ -28,15 +27,10 @@ describe('TagInputField — static renders', () => {
 });
 
 describe('TagInputField — interactions', () => {
-  it('adds a tag on Enter', async () => {
+  it('adds a tag on Enter and on comma separator', async () => {
     await TagInputFieldAddTag.run();
 
     expect(screen.getByText('utm_source')).toBeInTheDocument();
-  });
-
-  it('adds a tag on comma separator', async () => {
-    await TagInputFieldAddTagViaComma.run();
-
     expect(screen.getByText('fbclid')).toBeInTheDocument();
   });
 

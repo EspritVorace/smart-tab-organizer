@@ -12,7 +12,6 @@ import {
   packParamSchema,
   packManifestSchema,
   packFileSchema,
-  packCategoriesFileSchema,
 } from '../../src/schemas/pack';
 import { importDataSchema } from '../../src/schemas/importExport';
 
@@ -167,18 +166,3 @@ describe('packFileSchema', () => {
   });
 });
 
-describe('packCategoriesFileSchema', () => {
-  it('accepte une liste vide', () => {
-    expect(packCategoriesFileSchema.safeParse({ categories: [] }).success).toBe(true);
-  });
-
-  it('accepte des categories avec label localized record', () => {
-    const result = packCategoriesFileSchema.safeParse({
-      categories: [
-        { id: 'cloud', label: { en: 'Cloud', fr: 'Cloud' } },
-        { id: 'dev', label: 'Development' },
-      ],
-    });
-    expect(result.success).toBe(true);
-  });
-});

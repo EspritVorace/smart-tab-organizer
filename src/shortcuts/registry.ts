@@ -155,6 +155,15 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'options',
     scope: 'global',
   },
+  'options.docs.open': {
+    id: 'options.docs.open',
+    defaultBindings: ['F1'],
+    descriptionKey: 'shortcutDescOpenDocs',
+    group: 'options',
+    scope: 'global',
+    allowInTypingTarget: true,
+    allowWhenDialogOpen: true,
+  },
 
   // List-level: Rules
   'list.rules.navigate': {
@@ -200,6 +209,34 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     id: 'ruleCard.delete',
     defaultBindings: ['Delete'],
     descriptionKey: 'shortcutDescListDelete',
+    group: 'list-rules',
+    scope: 'widget:rule-card',
+  },
+  'ruleCard.moveToFirst': {
+    id: 'ruleCard.moveToFirst',
+    defaultBindings: ['Mod+ArrowUp'],
+    descriptionKey: 'shortcutDescRuleMoveToFirst',
+    group: 'list-rules',
+    scope: 'widget:rule-card',
+  },
+  'ruleCard.moveToLast': {
+    id: 'ruleCard.moveToLast',
+    defaultBindings: ['Mod+ArrowDown'],
+    descriptionKey: 'shortcutDescRuleMoveToLast',
+    group: 'list-rules',
+    scope: 'widget:rule-card',
+  },
+  'ruleCard.moveToFirstOfDomain': {
+    id: 'ruleCard.moveToFirstOfDomain',
+    defaultBindings: ['Mod+Shift+ArrowUp'],
+    descriptionKey: 'shortcutDescRuleMoveToFirstOfDomain',
+    group: 'list-rules',
+    scope: 'widget:rule-card',
+  },
+  'ruleCard.moveToLastOfDomain': {
+    id: 'ruleCard.moveToLastOfDomain',
+    defaultBindings: ['Mod+Shift+ArrowDown'],
+    descriptionKey: 'shortcutDescRuleMoveToLastOfDomain',
     group: 'list-rules',
     scope: 'widget:rule-card',
   },
@@ -250,6 +287,27 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'list-sessions',
     scope: 'widget:session-card',
   },
+  'sessionCard.moveToFirst': {
+    id: 'sessionCard.moveToFirst',
+    defaultBindings: ['Mod+ArrowUp'],
+    descriptionKey: 'shortcutDescSessionMoveToFirst',
+    group: 'list-sessions',
+    scope: 'widget:session-card',
+  },
+  'sessionCard.moveToLast': {
+    id: 'sessionCard.moveToLast',
+    defaultBindings: ['Mod+ArrowDown'],
+    descriptionKey: 'shortcutDescSessionMoveToLast',
+    group: 'list-sessions',
+    scope: 'widget:session-card',
+  },
+  'sessionCard.archive': {
+    id: 'sessionCard.archive',
+    defaultBindings: ['a'],
+    descriptionKey: 'shortcutDescSessionArchive',
+    group: 'list-sessions',
+    scope: 'widget:session-card',
+  },
   'list.sessions.reorderKeyboard': {
     id: 'list.sessions.reorderKeyboard',
     defaultBindings: ['Space'],
@@ -296,6 +354,48 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'list-home',
     scope: 'page:home',
   },
+  // Page-level quick actions on the Home tab. Yield to focused widgets so a
+  // session card on the page keeps its own bindings authoritative.
+  'home.action.organize': {
+    id: 'home.action.organize',
+    defaultBindings: ['o'],
+    descriptionKey: 'shortcutDescHomeOrganize',
+    group: 'list-home',
+    scope: 'page:home',
+    excludeIfInsideWidget: true,
+  },
+  'home.action.snapshot': {
+    id: 'home.action.snapshot',
+    defaultBindings: ['s'],
+    descriptionKey: 'shortcutDescHomeSnapshot',
+    group: 'list-home',
+    scope: 'page:home',
+    excludeIfInsideWidget: true,
+  },
+  'home.action.newRule': {
+    id: 'home.action.newRule',
+    defaultBindings: ['n'],
+    descriptionKey: 'shortcutDescHomeNewRule',
+    group: 'list-home',
+    scope: 'page:home',
+    excludeIfInsideWidget: true,
+  },
+  'home.action.io': {
+    id: 'home.action.io',
+    defaultBindings: ['i'],
+    descriptionKey: 'shortcutDescHomeImportExport',
+    group: 'list-home',
+    scope: 'page:home',
+    excludeIfInsideWidget: true,
+  },
+  'home.action.stats': {
+    id: 'home.action.stats',
+    defaultBindings: ['t'],
+    descriptionKey: 'shortcutDescHomeStats',
+    group: 'list-home',
+    scope: 'page:home',
+    excludeIfInsideWidget: true,
+  },
 
   // Widget: SessionCard (active when a session card has focus)
   'sessionCard.restore.custom': {
@@ -323,6 +423,13 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     id: 'sessionCard.restore.new',
     defaultBindings: ['Alt+Shift+r'],
     descriptionKey: 'shortcutDescSessionRestoreNew',
+    group: 'session-card',
+    scope: 'widget:session-card',
+  },
+  'sessionCard.refresh': {
+    id: 'sessionCard.refresh',
+    defaultBindings: ['u'],
+    descriptionKey: 'shortcutDescSessionRefresh',
     group: 'session-card',
     scope: 'widget:session-card',
   },

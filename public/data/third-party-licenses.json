@@ -1,0 +1,530 @@
+[
+  {
+    "name": "@axe-core/playwright",
+    "version": "4.11.3",
+    "license": "MPL-2.0",
+    "publisher": "",
+    "repository": "https://github.com/dequelabs/axe-core-npm",
+    "scope": "dev"
+  },
+  {
+    "name": "@codemirror/autocomplete",
+    "version": "6.20.2",
+    "license": "MIT",
+    "publisher": "Marijn Haverbeke",
+    "repository": "https://code.haverbeke.berlin/codemirror/autocomplete",
+    "scope": "prod"
+  },
+  {
+    "name": "@codemirror/commands",
+    "version": "6.10.3",
+    "license": "MIT",
+    "publisher": "Marijn Haverbeke",
+    "repository": "https://github.com/codemirror/commands",
+    "scope": "prod"
+  },
+  {
+    "name": "@codemirror/lang-json",
+    "version": "6.0.2",
+    "license": "MIT",
+    "publisher": "Marijn Haverbeke",
+    "repository": "https://github.com/codemirror/lang-json",
+    "scope": "prod"
+  },
+  {
+    "name": "@codemirror/language",
+    "version": "6.12.3",
+    "license": "MIT",
+    "publisher": "Marijn Haverbeke",
+    "repository": "https://github.com/codemirror/language",
+    "scope": "prod"
+  },
+  {
+    "name": "@codemirror/lint",
+    "version": "6.9.6",
+    "license": "MIT",
+    "publisher": "Marijn Haverbeke",
+    "repository": "https://code.haverbeke.berlin/codemirror/lint",
+    "scope": "prod"
+  },
+  {
+    "name": "@codemirror/state",
+    "version": "6.6.0",
+    "license": "MIT",
+    "publisher": "Marijn Haverbeke",
+    "repository": "https://github.com/codemirror/state",
+    "scope": "prod"
+  },
+  {
+    "name": "@codemirror/view",
+    "version": "6.43.0",
+    "license": "MIT",
+    "publisher": "Marijn Haverbeke",
+    "repository": "https://code.haverbeke.berlin/codemirror/view",
+    "scope": "prod"
+  },
+  {
+    "name": "@dnd-kit/abstract",
+    "version": "0.4.0",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/clauderic/dnd-kit",
+    "scope": "prod"
+  },
+  {
+    "name": "@dnd-kit/helpers",
+    "version": "0.4.0",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/clauderic/dnd-kit",
+    "scope": "prod"
+  },
+  {
+    "name": "@dnd-kit/react",
+    "version": "0.4.0",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/clauderic/dnd-kit",
+    "scope": "prod"
+  },
+  {
+    "name": "@hookform/resolvers",
+    "version": "5.4.0",
+    "license": "MIT",
+    "publisher": "bluebill1049",
+    "repository": "https://github.com/react-hook-form/resolvers",
+    "scope": "prod"
+  },
+  {
+    "name": "@lezer/highlight",
+    "version": "1.2.3",
+    "license": "MIT",
+    "publisher": "Marijn Haverbeke",
+    "repository": "https://github.com/lezer-parser/highlight",
+    "scope": "prod"
+  },
+  {
+    "name": "@playwright/test",
+    "version": "1.60.0",
+    "license": "Apache-2.0",
+    "publisher": "Microsoft Corporation",
+    "repository": "https://github.com/microsoft/playwright",
+    "scope": "dev"
+  },
+  {
+    "name": "@radix-ui/react-collapsible",
+    "version": "1.1.12",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/radix-ui/primitives",
+    "scope": "prod"
+  },
+  {
+    "name": "@radix-ui/react-label",
+    "version": "2.1.7",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/radix-ui/primitives",
+    "scope": "prod"
+  },
+  {
+    "name": "@radix-ui/react-toast",
+    "version": "1.2.15",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/radix-ui/primitives",
+    "scope": "prod"
+  },
+  {
+    "name": "@radix-ui/react-visually-hidden",
+    "version": "1.2.3",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/radix-ui/primitives",
+    "scope": "prod"
+  },
+  {
+    "name": "@radix-ui/themes",
+    "version": "3.3.0",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/radix-ui/themes",
+    "scope": "prod"
+  },
+  {
+    "name": "@storybook/addon-a11y",
+    "version": "10.4.1",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/storybookjs/storybook",
+    "scope": "dev"
+  },
+  {
+    "name": "@storybook/addon-docs",
+    "version": "10.4.1",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/storybookjs/storybook",
+    "scope": "dev"
+  },
+  {
+    "name": "@storybook/react-vite",
+    "version": "10.4.1",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/storybookjs/storybook",
+    "scope": "dev"
+  },
+  {
+    "name": "@storybook/react",
+    "version": "10.4.1",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/storybookjs/storybook",
+    "scope": "dev"
+  },
+  {
+    "name": "@storybook/test-runner",
+    "version": "0.24.4",
+    "license": "MIT",
+    "publisher": "shilman",
+    "repository": "https://github.com/storybookjs/test-runner",
+    "scope": "dev"
+  },
+  {
+    "name": "@testing-library/dom",
+    "version": "10.4.1",
+    "license": "MIT",
+    "publisher": "Kent C. Dodds",
+    "repository": "https://github.com/testing-library/dom-testing-library",
+    "scope": "dev"
+  },
+  {
+    "name": "@testing-library/jest-dom",
+    "version": "6.9.1",
+    "license": "MIT",
+    "publisher": "Ernesto Garcia",
+    "repository": "https://github.com/testing-library/jest-dom",
+    "scope": "dev"
+  },
+  {
+    "name": "@testing-library/react",
+    "version": "16.3.2",
+    "license": "MIT",
+    "publisher": "Kent C. Dodds",
+    "repository": "https://github.com/testing-library/react-testing-library",
+    "scope": "dev"
+  },
+  {
+    "name": "@types/react-dom",
+    "version": "19.2.3",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped",
+    "scope": "dev"
+  },
+  {
+    "name": "@types/react",
+    "version": "19.2.15",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/DefinitelyTyped/DefinitelyTyped",
+    "scope": "dev"
+  },
+  {
+    "name": "@vitejs/plugin-react",
+    "version": "6.0.2",
+    "license": "MIT",
+    "publisher": "Evan You",
+    "repository": "https://github.com/vitejs/vite-plugin-react",
+    "scope": "prod"
+  },
+  {
+    "name": "@vitest/coverage-v8",
+    "version": "4.1.7",
+    "license": "MIT",
+    "publisher": "Anthony Fu",
+    "repository": "https://github.com/vitest-dev/vitest",
+    "scope": "dev"
+  },
+  {
+    "name": "@vitest/eslint-plugin",
+    "version": "1.6.18",
+    "license": "MIT",
+    "publisher": "Verite Mugabo",
+    "repository": "https://github.com/vitest-dev/eslint-plugin-vitest",
+    "scope": "dev"
+  },
+  {
+    "name": "@wxt-dev/auto-icons",
+    "version": "1.1.1",
+    "license": "MIT",
+    "publisher": "Florian Metz",
+    "repository": "https://github.com/wxt-dev/wxt",
+    "scope": "dev"
+  },
+  {
+    "name": "axe-playwright",
+    "version": "2.2.2",
+    "license": "MIT",
+    "publisher": "Abhinaba Ghosh",
+    "repository": "https://github.com/abhinaba-ghosh/axe-playwright",
+    "scope": "dev"
+  },
+  {
+    "name": "cmdk",
+    "version": "1.1.1",
+    "license": "MIT",
+    "publisher": "Paco",
+    "repository": "https://github.com/pacocoursey/cmdk",
+    "scope": "prod"
+  },
+  {
+    "name": "codemirror-json-schema",
+    "version": "0.8.1",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/acao/codemirror-json-schema",
+    "scope": "prod"
+  },
+  {
+    "name": "concurrently",
+    "version": "9.2.1",
+    "license": "MIT",
+    "publisher": "Kimmo Brunfeldt",
+    "repository": "https://github.com/open-cli-tools/concurrently",
+    "scope": "dev"
+  },
+  {
+    "name": "esbuild-wasm",
+    "version": "0.28.0",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/evanw/esbuild",
+    "scope": "dev"
+  },
+  {
+    "name": "eslint-plugin-jsx-a11y",
+    "version": "6.10.2",
+    "license": "MIT",
+    "publisher": "Ethan Cohen",
+    "repository": "https://github.com/jsx-eslint/eslint-plugin-jsx-a11y",
+    "scope": "dev"
+  },
+  {
+    "name": "eslint-plugin-playwright",
+    "version": "2.10.4",
+    "license": "MIT",
+    "publisher": "Mark Skelton",
+    "repository": "https://github.com/mskelton/eslint-plugin-playwright",
+    "scope": "dev"
+  },
+  {
+    "name": "eslint-plugin-react-hooks",
+    "version": "7.1.1",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/facebook/react",
+    "scope": "dev"
+  },
+  {
+    "name": "eslint-plugin-sonarjs",
+    "version": "4.0.3",
+    "license": "LGPL-3.0-only",
+    "publisher": "SonarSource",
+    "repository": "https://github.com/SonarSource/SonarJS",
+    "scope": "dev"
+  },
+  {
+    "name": "eslint",
+    "version": "10.4.0",
+    "license": "MIT",
+    "publisher": "Nicholas C. Zakas",
+    "repository": "https://github.com/eslint/eslint",
+    "scope": "dev"
+  },
+  {
+    "name": "happy-dom",
+    "version": "20.9.0",
+    "license": "MIT",
+    "publisher": "David Ortner",
+    "repository": "https://github.com/capricorn86/happy-dom",
+    "scope": "dev"
+  },
+  {
+    "name": "http-server",
+    "version": "14.1.1",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/http-party/http-server",
+    "scope": "dev"
+  },
+  {
+    "name": "license-checker-rseidelsohn",
+    "version": "5.0.1",
+    "license": "BSD-3-Clause",
+    "publisher": "Roman Seidelsohn",
+    "repository": "https://github.com/RSeidelsohn/license-checker-rseidelsohn",
+    "scope": "dev"
+  },
+  {
+    "name": "lucide-react",
+    "version": "1.16.0",
+    "license": "ISC",
+    "publisher": "Eric Fennis",
+    "repository": "https://github.com/lucide-icons/lucide",
+    "scope": "prod"
+  },
+  {
+    "name": "next-themes",
+    "version": "0.4.6",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/pacocoursey/next-themes",
+    "scope": "prod"
+  },
+  {
+    "name": "playwright-ctrf-json-reporter",
+    "version": "0.0.29",
+    "license": "MIT",
+    "publisher": "Matthew Poulton-White",
+    "repository": "https://github.com/ctrf-io/playwright-ctrf-json-reporter",
+    "scope": "dev"
+  },
+  {
+    "name": "postcss",
+    "version": "8.5.15",
+    "license": "MIT",
+    "publisher": "Andrey Sitnik",
+    "repository": "https://github.com/postcss/postcss",
+    "scope": "dev"
+  },
+  {
+    "name": "react-accessible-treeview",
+    "version": "2.11.2",
+    "license": "MIT",
+    "publisher": "lissitz",
+    "repository": "https://github.com/dgreene1/react-accessible-treeview",
+    "scope": "prod"
+  },
+  {
+    "name": "react-dom",
+    "version": "19.2.6",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/facebook/react",
+    "scope": "prod"
+  },
+  {
+    "name": "react-hook-form",
+    "version": "7.76.1",
+    "license": "MIT",
+    "publisher": "Beier",
+    "repository": "https://github.com/react-hook-form/react-hook-form",
+    "scope": "prod"
+  },
+  {
+    "name": "react",
+    "version": "19.2.6",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/facebook/react",
+    "scope": "prod"
+  },
+  {
+    "name": "rollup-plugin-license",
+    "version": "3.7.1",
+    "license": "MIT",
+    "publisher": "Mickael Jeanroy",
+    "repository": "https://github.com/mjeanroy/rollup-plugin-license",
+    "scope": "dev"
+  },
+  {
+    "name": "sharp",
+    "version": "0.34.5",
+    "license": "Apache-2.0",
+    "publisher": "Lovell Fuller",
+    "repository": "https://github.com/lovell/sharp",
+    "scope": "dev"
+  },
+  {
+    "name": "storybook",
+    "version": "10.4.1",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/storybookjs/storybook",
+    "scope": "dev"
+  },
+  {
+    "name": "typescript-eslint",
+    "version": "8.60.0",
+    "license": "MIT",
+    "publisher": "",
+    "repository": "https://github.com/typescript-eslint/typescript-eslint",
+    "scope": "dev"
+  },
+  {
+    "name": "typescript",
+    "version": "6.0.3",
+    "license": "Apache-2.0",
+    "publisher": "Microsoft Corp.",
+    "repository": "https://github.com/microsoft/TypeScript",
+    "scope": "dev"
+  },
+  {
+    "name": "vite",
+    "version": "8.0.14",
+    "license": "MIT",
+    "publisher": "Evan You",
+    "repository": "https://github.com/vitejs/vite",
+    "scope": "dev"
+  },
+  {
+    "name": "vitest-ctrf-json-reporter",
+    "version": "0.0.3",
+    "license": "MIT",
+    "publisher": "Ganesh Swami",
+    "repository": "https://github.com/avinyaweb/vitest-ctrf-json-reporter",
+    "scope": "dev"
+  },
+  {
+    "name": "vitest",
+    "version": "4.1.7",
+    "license": "MIT",
+    "publisher": "Anthony Fu",
+    "repository": "https://github.com/vitest-dev/vitest",
+    "scope": "dev"
+  },
+  {
+    "name": "wait-on",
+    "version": "7.2.0",
+    "license": "MIT",
+    "publisher": "Jeff Barczewski",
+    "repository": "https://github.com/jeffbski/wait-on",
+    "scope": "dev"
+  },
+  {
+    "name": "wxt",
+    "version": "0.20.26",
+    "license": "MIT",
+    "publisher": "Aaron Klinker",
+    "repository": "https://github.com/wxt-dev/wxt",
+    "scope": "dev"
+  },
+  {
+    "name": "xvfb-maybe",
+    "version": "0.2.1",
+    "license": "MIT",
+    "publisher": "Paul Betts",
+    "repository": "https://github.com/paulcbetts/xvfb-maybe",
+    "scope": "dev"
+  },
+  {
+    "name": "zod",
+    "version": "4.4.3",
+    "license": "MIT",
+    "publisher": "Colin McDonnell",
+    "repository": "https://github.com/colinhacks/zod",
+    "scope": "prod"
+  }
+]

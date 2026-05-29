@@ -34,9 +34,21 @@ vi.mock('../../src/contexts/ActiveWorkspaceContext', () => ({
   }),
 }));
 
-// Mock sessionStorage
+// Mock sessionStorage (popup only reads pinned + active; never the archive)
 vi.mock('../../src/utils/sessionStorage', () => ({
-  loadSessions: vi.fn(),
+  loadPinnedSessions: vi.fn(),
+  loadActiveSessions: vi.fn(),
+}));
+
+// Mock useSettings to avoid hitting real workspace storage for the new
+// defaultRestoreAction wiring exercised by SessionRestoreButton.
+vi.mock('../../src/hooks/useSettings', () => ({
+  useSettings: () => ({
+    settings: { defaultRestoreAction: 'current' },
+    isLoaded: true,
+    setDefaultRestoreAction: vi.fn(async () => {}),
+    updateSettings: vi.fn(async () => {}),
+  }),
 }));
 
 // Mock tabRestore
@@ -63,15 +75,22 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('PopupProfilesList', () => {
-  let mockLoadSessions: any;
+  let mockLoadPinned: any;
+  let mockLoadActive: any;
+
+  function seedSessions(all: Session[]) {
+    mockLoadPinned.mockResolvedValue(all.filter((s) => s.isPinned));
+    mockLoadActive.mockResolvedValue(all.filter((s) => !s.isPinned && !s.isArchived));
+  }
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockLoadSessions = vi.mocked(sessionStorageModule.loadSessions);
+    mockLoadPinned = vi.mocked(sessionStorageModule.loadPinnedSessions);
+    mockLoadActive = vi.mocked(sessionStorageModule.loadActiveSessions);
   });
 
   it('should not render when no pinned sessions exist', async () => {
-    mockLoadSessions.mockResolvedValue([]);
+    seedSessions([]);
 
     const { container } = render(
       <TestWrapper>
@@ -81,7 +100,7 @@ describe('PopupProfilesList', () => {
 
     // Wait for loadSessions to be called and state to update
     await waitFor(() => {
-      expect(mockLoadSessions).toHaveBeenCalled();
+      expect(mockLoadPinned).toHaveBeenCalled();
     });
 
     // PopupProfilesList returns null, so no pinned sessions section should be rendered
@@ -121,7 +140,7 @@ describe('PopupProfilesList', () => {
       },
     ];
 
-    mockLoadSessions.mockResolvedValue(sessions);
+    seedSessions(sessions);
 
     render(
       <TestWrapper>
@@ -131,7 +150,7 @@ describe('PopupProfilesList', () => {
 
     // Wait for loadSessions to resolve and component to render
     await waitFor(() => {
-      expect(mockLoadSessions).toHaveBeenCalled();
+      expect(mockLoadPinned).toHaveBeenCalled();
     });
 
     // Get pinned session items
@@ -185,7 +204,7 @@ describe('PopupProfilesList', () => {
       },
     ];
 
-    mockLoadSessions.mockResolvedValue(sessions);
+    seedSessions(sessions);
 
     render(
       <TestWrapper>
@@ -225,7 +244,7 @@ describe('PopupProfilesList', () => {
       },
     ];
 
-    mockLoadSessions.mockResolvedValue(sessions);
+    seedSessions(sessions);
 
     render(
       <TestWrapper>
@@ -255,7 +274,7 @@ describe('PopupProfilesList', () => {
       },
     ];
 
-    mockLoadSessions.mockResolvedValue(sessions);
+    seedSessions(sessions);
     mockSetValue.mockClear();
 
     render(
@@ -285,7 +304,7 @@ describe('PopupProfilesList', () => {
       },
     ];
 
-    mockLoadSessions.mockResolvedValue(sessions);
+    seedSessions(sessions);
 
     render(
       <TestWrapper>
@@ -319,7 +338,7 @@ describe('PopupProfilesList', () => {
         groups: [],
       },
     ];
-    mockLoadSessions.mockResolvedValue(sessions);
+    seedSessions(sessions);
 
     render(
       <TestWrapper>
@@ -348,7 +367,7 @@ describe('PopupProfilesList', () => {
       },
     ];
 
-    mockLoadSessions.mockResolvedValue(sessions);
+    seedSessions(sessions);
 
     render(
       <TestWrapper>

@@ -1,0 +1,100 @@
+---
+title: Règles de domaine
+description: Le CRUD des règles de domaine. Créer via le wizard, modifier, désactiver, supprimer, réordonner par glisser-déposer. Chevauchement de domaines et ordre d'évaluation des règles.
+---
+
+import { CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import ThemeImage from '../../../components/ThemeImage.astro';
+import rulesListLight from '../../../assets/screenshots/fr-light-journey-rules-list-populated.png';
+import rulesListDark from '../../../assets/screenshots/fr-dark-journey-rules-list-populated.png';
+import rulesCreateStep1Light from '../../../assets/screenshots/fr-light-rules-create-step1.png';
+import rulesCreateStep1Dark from '../../../assets/screenshots/fr-dark-rules-create-step1.png';
+
+La page **Règles de domaine** est le centre névralgique de l'extension. Une règle décrit pour un domaine : son label, son mode de groupement, son mode de déduplication, sa catégorie. Le groupement et la déduplication ne fonctionnent que sur les domaines couverts par une règle.
+
+<ThemeImage
+  lightSrc={rulesListLight}
+  darkSrc={rulesListDark}
+  alt="Liste des règles de domaine avec quatre entrées couvrant différents modes de configuration."
+/>
+
+## La liste
+
+Chaque ligne couvre un domaine et affiche son label, son mode de configuration (preset, manuel, demander, label de repli), sa catégorie (emoji + libellé), sa couleur de groupe et son état. Trois actions principales depuis la liste :
+
+- **Réordonner** par glisser-déposer pour ajuster la priorité (la première règle applicable gagne en cas de chevauchement).
+- **Activer ou désactiver** une règle individuellement via son toggle, sans la supprimer.
+- **Ouvrir l'assistant** pour modifier une règle existante ou en créer une nouvelle.
+
+Une barre de recherche filtre la liste par nom de règle ou par domaine. Une sélection multiple permet d'effectuer des actions en masse : activation, désactivation, suppression, export.
+
+## Créer une règle
+
+Cliquez sur **Nouvelle règle** en haut de la liste. L'assistant s'ouvre en quatre étapes.
+
+<ThemeImage
+  lightSrc={rulesCreateStep1Light}
+  darkSrc={rulesCreateStep1Dark}
+  alt="Étape 1 de l'assistant de création de règle : identité (domaine, label, catégorie)."
+/>
+
+### Étape 1 : Identité
+
+- **Filtre Domaine** : le pattern de domaine couvert (par exemple `github.com`, `*.atlassian.net`). Laissez vide pour une règle transverse (cross-domaine).
+- **Étiquette** : nom d'identification de la règle dans la liste. N'est pas utilisé comme nom de groupe par défaut (voir le champ **Nom du groupe** du mode Label de repli pour ça).
+- **Catégorie** : choisissez parmi les 14 catégories intégrées (voir [Catégories et packs](/reference/categories-et-packs)). La catégorie donne uniquement l'emoji et le libellé. Elle n'influe pas sur la couleur.
+- **Couleur du groupe d'onglets** : champ distinct de la catégorie. Choisissez parmi les neuf couleurs natives des groupes Chrome (`grey`, `blue`, `red`, `yellow`, `green`, `pink`, `purple`, `cyan`, `orange`).
+
+### Étape 2 : Configuration
+
+Quatre modes de configuration sont proposés via un sélecteur radio :
+
+| Mode | Quand l'utiliser |
+|---|---|
+| **Preset** | Site courant déjà couvert par un [preset regex](/reference/presets-regex). Le preset configure automatiquement le mode de nommage et les regex de titre / URL. |
+| **Demander** | L'extension demande le nom du groupe à chaque création. Pratique pour des sites où vous voulez nommer le contexte à la volée. |
+| **Manuel** | Vous saisissez vous-même les regex et choisissez le mode parmi les modes "Intelligent / Titre / URL". Utile pour un site interne ou un cas non couvert par un preset. |
+| **Label de repli** | Aucune regex, aucune extraction. Déverrouille un champ **Nom du groupe** où vous saisissez le nom littéral du groupe. Ce nom est aussi le filet de sécurité du mode Intelligent + Label. |
+
+Pour le détail des huit modes de nommage et leurs chaînes de repli, voir [Grouper les onglets](/guides/grouper-onglets#modes-de-nommage).
+
+### Étape 3 : Options
+
+Configure la déduplication pour cette règle : toggle d'activation, **mode de correspondance** (URL exacte, sans paramètres ignorés, inclusion) et, si applicable, la liste des paramètres à ignorer. Voir [Dédupliquer](/guides/dedupliquer#les-trois-modes-de-correspondance) pour les détails.
+
+Vous pouvez laisser la déduplication désactivée si vous n'avez besoin que du groupement sur ce domaine.
+
+### Étape 4 : Résumé
+
+Une page de confirmation résume le contenu de la règle avant enregistrement. Vous pouvez revenir aux étapes précédentes via les flèches ou le stepper en haut de l'assistant.
+
+## Modifier une règle
+
+Cliquez sur l'icône **Modifier** d'une ligne (ou pressez `E` quand la ligne a le focus). Le même assistant s'ouvre, pré-rempli. La modification est appliquée immédiatement à l'enregistrement, sans confirmation supplémentaire.
+
+## Désactiver, supprimer
+
+| Action | Effet |
+|---|---|
+| **Toggle ON/OFF** | Désactive la règle sans la supprimer. La ligne est grisée mais reste à sa position. Utile pour mettre une règle en pause. |
+| **Supprimer** | Retire la règle. Une confirmation est demandée. La sélection multiple permet de supprimer plusieurs règles en une action. |
+
+## Chevauchement de domaines
+
+Quand plusieurs règles couvrent le même domaine (par exemple `*.atlassian.net` et `mycompany.atlassian.net`), un petit **badge de rang** apparait à côté de chaque règle concernée. Le numéro indique la position de la règle dans l'ordre d'évaluation pour ce domaine. Aucun badge n'apparait quand un domaine n'est couvert que par une seule règle.
+
+Au survol du badge, une HoverCard liste toutes les règles couvrant le domaine, dans l'ordre, la règle courante étant en gras. Les règles sont évaluées dans cet ordre, et la première qui peut réellement s'appliquer (groupement activé et nom de groupe produit) l'emporte. Vous pouvez les réordonner par glisser-déposer. Un chevauchement peut être intentionnel : une règle générique en repli et des règles plus spécifiques au-dessus.
+
+## Importer une collection de règles
+
+Pour ajouter plusieurs règles d'un coup, plutôt que de les créer une à une, importez un **pack**. Voir [Catégories et packs](/reference/categories-et-packs) pour la galerie des 49 packs intégrés et la mécanique d'import.
+
+## Aller plus loin
+
+<CardGrid>
+  <LinkCard title="Grouper les onglets" href="/guides/grouper-onglets" description="Le mécanisme de groupement, modes de nommage et chaînes de repli." />
+  <LinkCard title="Dédupliquer" href="/guides/dedupliquer" description="Les trois modes de correspondance et la stratégie de conservation." />
+  <LinkCard title="Catégories et packs" href="/reference/categories-et-packs" description="Importer des règles prêtes à l'emploi par catégorie." />
+  <LinkCard title="Presets regex" href="/reference/presets-regex" description="Les modèles regex disponibles dans le wizard." />
+  <LinkCard title="Import / Export" href="/guides/import-export" description="Sauvegarder ou restaurer vos règles au format JSON." />
+</CardGrid>

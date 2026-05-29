@@ -32,6 +32,7 @@ function session(overrides: Partial<Session> = {}): Session {
     groups: overrides.groups ?? [],
     ungroupedTabs: overrides.ungroupedTabs ?? [],
     isPinned: overrides.isPinned ?? false,
+    isArchived: overrides.isArchived,
     categoryId: overrides.categoryId,
     note: overrides.note,
   };
@@ -54,6 +55,18 @@ describe('areSessionsEqual', () => {
     const a = session({ isPinned: true });
     const b = session({ isPinned: false });
     expect(areSessionsEqual(a, b)).toBe(false);
+  });
+
+  it('returns false when isArchived differs', () => {
+    const a = session({ isArchived: true });
+    const b = session({ isArchived: false });
+    expect(areSessionsEqual(a, b)).toBe(false);
+  });
+
+  it('treats undefined isArchived as equivalent to false', () => {
+    const a = session({ isArchived: undefined });
+    const b = session({ isArchived: false });
+    expect(areSessionsEqual(a, b)).toBe(true);
   });
 
   it('normalizes null vs undefined categoryId', () => {
@@ -165,6 +178,13 @@ describe('getSessionDiff', () => {
     const imported = session({ name: 'Same' });
     const diff = getSessionDiff(existing, imported);
     expect(diff.name).toBeUndefined();
+  });
+
+  it('populates isArchived diff', () => {
+    const existing = session({ isArchived: false });
+    const imported = session({ isArchived: true });
+    const diff = getSessionDiff(existing, imported);
+    expect(diff.isArchived).toEqual({ current: false, imported: true });
   });
 
   it('populates isPinned diff', () => {

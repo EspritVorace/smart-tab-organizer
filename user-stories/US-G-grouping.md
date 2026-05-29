@@ -72,7 +72,8 @@
 - [ ] A first child tab creates a new group; the `tabGroupsCreatedCount` counter goes to 1.
 - [ ] A second child tab opened from the **same** parent tab is added to the existing group without creating a new one.
 - [ ] The number of tabs in the group increases with each added child.
-- [ ] A new (distinct) parent tab creates a **new** separate group; `tabGroupsCreatedCount` increments.
+- [ ] A child opened from a new (distinct) parent tab joins an existing group in the same window when that group's title and color match what the rule would produce; the counter does **not** increment in that case.
+- [ ] When no existing group matches (different title, or different color when the rule specifies one), a **new** separate group is created and `tabGroupsCreatedCount` increments.
 
 ---
 

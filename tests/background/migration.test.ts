@@ -3,6 +3,7 @@ import { fakeBrowser } from 'wxt/testing';
 import {
   migrateSettingsFromSyncToLocal,
   migrateRulesAddUrlExtractionMode,
+  migrateRulesAddFallbackLabel,
   initializeFirstRunRedirectFlag,
 } from '../../src/background/migration';
 
@@ -86,6 +87,52 @@ describe('migrateRulesAddUrlExtractionMode', () => {
     await expect(migrateRulesAddUrlExtractionMode()).resolves.toBeUndefined();
     const state = await fakeBrowser.storage.local.get('urlExtractionModeMigrated');
     expect(state.urlExtractionModeMigrated).toBe(true);
+  });
+});
+
+describe('migrateRulesAddFallbackLabel', () => {
+  it('initializes fallbackLabel from label on legacy rules that lack it', async () => {
+    await fakeBrowser.storage.local.set({
+      domainRules: [
+        { id: 'r1', label: 'Foo' },
+        { id: 'r2', label: 'Bar', fallbackLabel: 'Custom Bar' },
+      ],
+    });
+
+    await migrateRulesAddFallbackLabel();
+
+    const result = await fakeBrowser.storage.local.get('domainRules');
+    const rules = result.domainRules as Array<{ id: string; fallbackLabel?: string }>;
+    expect(rules[0].fallbackLabel).toBe('Foo');
+    expect(rules[1].fallbackLabel).toBe('Custom Bar');
+  });
+
+  it('sets the migration flag after running', async () => {
+    await migrateRulesAddFallbackLabel();
+    const state = await fakeBrowser.storage.local.get('fallbackLabelInitialized');
+    expect(state.fallbackLabelInitialized).toBe(true);
+  });
+
+  it('is idempotent when called twice', async () => {
+    await fakeBrowser.storage.local.set({
+      domainRules: [{ id: 'r1', label: 'Foo' }],
+    });
+
+    await migrateRulesAddFallbackLabel();
+    const after1 = await fakeBrowser.storage.local.get('domainRules');
+    (after1.domainRules as Array<{ fallbackLabel?: string }>)[0].fallbackLabel = undefined;
+    await fakeBrowser.storage.local.set({ domainRules: after1.domainRules });
+
+    await migrateRulesAddFallbackLabel();
+
+    const after2 = await fakeBrowser.storage.local.get('domainRules');
+    expect((after2.domainRules as Array<{ fallbackLabel?: string }>)[0].fallbackLabel).toBeUndefined();
+  });
+
+  it('completes without error when domainRules is missing', async () => {
+    await expect(migrateRulesAddFallbackLabel()).resolves.toBeUndefined();
+    const state = await fakeBrowser.storage.local.get('fallbackLabelInitialized');
+    expect(state.fallbackLabelInitialized).toBe(true);
   });
 });
 

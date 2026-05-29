@@ -1,4 +1,5 @@
 .actionButton {
+  position: relative;
   background: transparent;
   border: 0;
   padding: 0;
@@ -11,9 +12,17 @@
   border-radius: var(--radius-3);
 }
 
-.actionButton:focus-visible {
+.actionButton:focus {
   outline: 2px solid var(--accent-9);
   outline-offset: 2px;
+}
+
+.kbd {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  pointer-events: none;
 }
 
 .actionCard {

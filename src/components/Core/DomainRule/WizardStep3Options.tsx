@@ -9,11 +9,18 @@ interface WizardStep3OptionsProps {
   control: Control<DomainRule>;
   deduplicationEnabled: boolean;
   errors?: FieldErrors<DomainRule>;
+  /** Marks the deduplication Switch with [data-autofocus] so DialogShell focuses it on open. */
+  autoFocusFirstField?: boolean;
 }
 
 const IGNORED_PARAM_PATTERN = /^[A-Za-z0-9_\-.*]+$/;
 
-export function WizardStep3Options({ control, deduplicationEnabled, errors }: WizardStep3OptionsProps) {
+export function WizardStep3Options({
+  control,
+  deduplicationEnabled,
+  errors,
+  autoFocusFirstField = false,
+}: WizardStep3OptionsProps) {
   const matchMode = useWatch({ control, name: 'deduplicationMatchMode' });
   const showIgnoredParams = deduplicationEnabled && matchMode === 'exact_ignore_params';
 
@@ -32,6 +39,7 @@ export function WizardStep3Options({ control, deduplicationEnabled, errors }: Wi
                   aria-label={getMessage('enableDeduplication')}
                   checked={field.value}
                   onCheckedChange={field.onChange}
+                  data-autofocus={autoFocusFirstField ? 'true' : undefined}
                 />
               )}
             />

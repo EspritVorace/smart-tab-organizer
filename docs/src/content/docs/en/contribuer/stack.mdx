@@ -1,0 +1,55 @@
+---
+title: Tech stack
+description: The technologies SmartTab Organizer is built on. Compatible with Chromium MV3 and Firefox MV2, with no server or third-party service.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+SmartTab Organizer is a cross-browser extension (Chromium MV3 and Firefox MV2), written entirely in TypeScript. No part of the application relies on a server or a third-party service: the whole codebase runs in the browser.
+
+## Application stack
+
+| Layer | Technology |
+|---|---|
+| Build and packaging | [WXT](https://wxt.dev) (multi-target extension framework) |
+| UI | React 19, [Radix Themes](https://www.radix-ui.com/themes) and [Radix Primitives](https://www.radix-ui.com/primitives) |
+| Types and validation | Strict TypeScript, [Zod](https://zod.dev) for runtime schemas |
+| Unit tests | [Vitest](https://vitest.dev) + Testing Library |
+| E2E tests | [Playwright](https://playwright.dev) (Chrome MV3) |
+| Storybook | Storybook 8 + addon-a11y and test-runner with axe-core |
+| Documentation | [Astro Starlight](https://starlight.astro.build) (this site) |
+| Lint and format | ESLint, Prettier |
+
+## Browser targets
+
+| Browser | Manifest | Status |
+|---|---|---|
+| Chrome | MV3 | Primary target |
+| Edge, Brave, Vivaldi, Arc, Opera (Chromium-based) | MV3 | Compatible (same artifact as Chrome) |
+| Firefox | MV2 | Compatible (targets `pnpm build:firefox`, `pnpm zip:firefox`) |
+
+Browser APIs are accessed through `wxt/browser`, which normalizes the differences between `chrome.*` and `browser.*`. The extension uses a subset that exists on both: `browser.tabs`, `browser.tabGroups`, `browser.storage`, `browser.action` / `browser.browserAction`, `browser.notifications`, `browser.scripting`.
+
+## Storage
+
+| Backend | Contents |
+|---|---|
+| `browser.storage.local` | Domain rules, settings, sessions (pinned, active, archived), workspaces, categories, UI preferences (expanded state, etc.) |
+| `browser.storage.session` | Profile-window map, session drafts, editing reentrancy guard |
+
+No cookies. No network requests beyond what the browser does on its own.
+
+## Architecture at a glance
+
+See [Architecture](/contribuer/architecture) for pointers to entry points, background modules, and the core hooks.
+
+## Contributing
+
+The repository welcomes contributions. Project conventions (logger, accessibility, i18n, Storybook, writing style) are described in [`CLAUDE.md`](https://github.com/EspritVorace/smart-tab-organizer/blob/main/CLAUDE.md). Guidelines for adding a pack or a preset live in `src/data/packs/README.md` and `public/data/presets.json`.
+
+## Next steps
+
+<CardGrid>
+  <LinkCard title="Architecture" href="/contribuer/architecture" description="Background modules, entry points, core hooks, storage." />
+  <LinkCard title="GitHub repository" href="https://github.com/EspritVorace/smart-tab-organizer" description="Sources, issues, pull requests." />
+</CardGrid>

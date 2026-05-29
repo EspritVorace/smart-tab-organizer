@@ -1,0 +1,104 @@
+---
+title: Workspaces
+description: Scope rules, sessions and statistics per context. Create, switch, delete a workspace. Popup profiles, categories shared across workspaces.
+---
+
+import { Aside, CardGrid, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="At a glance">
+- A **workspace** is an isolated container with its own rules, sessions, and statistics.
+- The **Default** workspace always exists and cannot be deleted.
+- **Categories** (emoji + label) are **shared** across every workspace, unlike the rules that use them.
+- A per-workspace accent color lets you spot the active context at a glance.
+</Aside>
+
+A workspace lets you separate two usage contexts without letting their configurations mix: work and personal, project A and project B, client environment and R&D environment. Each context keeps its rules, its sessions, and its counters.
+
+## What a workspace scopes
+
+| Data | Scoped? |
+|---|---|
+| Domain rules | Yes |
+| Sessions (pinned, active, archived) | Yes |
+| Statistics | Yes |
+| **Categories** | No, shared |
+| Global settings (notifications, language, theme, default restore action) | No, shared |
+| Regex presets and built-in packs | No, shared |
+
+The **categories** are provided by the extension (14 built-in categories, see [Categories and packs](/reference/categories-et-packs)) and identical across all workspaces. A rule exported from one workspace to another therefore keeps its emoji and its category label. Its group color, a rule-level field, is also preserved.
+
+## Create a workspace
+
+<Steps>
+1. On the **Workspaces** page, click **New workspace**.
+2. Type a name (1 to 40 characters, unique among existing workspaces).
+3. Pick an accent color (default `jade`). 20 Radix colors are offered; neutrals (gray, mauve, slate) and metallics (bronze, gold) are excluded because they read poorly as an accent.
+4. The preview at the top of the form shows the avatar and color as they will appear.
+5. Confirm. The workspace shows up in the list, ready to be activated.
+</Steps>
+
+Creating a workspace does not make it active automatically. To switch to it, use the **Switch** button on its card.
+
+## Switch the active workspace
+
+<Tabs>
+  <TabItem label="From Options">
+The `WorkspaceSwitcherDropdown` lives in the Options footer. Click it to open the list, then pick the target workspace.
+  </TabItem>
+  <TabItem label="From the popup">
+The `PopupWorkspaceSwitcher` mirrors the same mechanism in the popup. Handy to switch without opening Options: the list of profiles and the restore buttons follow the change immediately.
+  </TabItem>
+</Tabs>
+
+When you switch workspace:
+
+- the **Rules** page only shows the rules of the target workspace;
+- the **Sessions** page only shows the sessions of that workspace;
+- the **popup** and the **home page** only show the profiles of the target workspace;
+- **statistics** reflect the counters of the target workspace;
+- **global settings** do not change, they are shared.
+
+The active workspace is persisted in `browser.storage.local`: the next time you open the browser, you start from the last workspace used.
+
+## Rename or change the color
+
+Click the **Edit** icon (pencil) on the card. The same form as creation opens, prefilled. The same constraints apply (1 to 40 characters, uniqueness).
+
+## Delete a workspace
+
+<Steps>
+1. On the workspace card, click the **Delete** icon (trash).
+2. A dialog reminds you that all rules, sessions, and statistics of the workspace will be lost.
+3. Confirm to perform the deletion.
+</Steps>
+
+<Aside type="caution">
+Two situations block deletion:
+
+- The **Default** workspace can never be deleted.
+- The **last remaining workspace** cannot be deleted either.
+
+If you delete the currently active workspace, the extension switches to **Default** automatically.
+</Aside>
+
+## Profiles in the popup
+
+When a session is pinned in a workspace, it is projected as a **profile** in two places:
+
+- the **popup** (`PopupProfilesList` component);
+- the **home page** (`PinnedSessionsSection` component).
+
+Profiles are **scoped per workspace**: switching swaps the list shown immediately. For the restore shortcuts, see [Sessions, pinned sessions](/guides/sessions#sessions-epinglees).
+
+## Export or import a workspace
+
+Exporting a workspace produces a complete JSON archive (rules, sessions, settings) that you can reimport into another Chrome profile or share with a teammate. See [Import / Export](/guides/import-export#workspaces).
+
+## Next steps
+
+<CardGrid>
+  <LinkCard title="Sessions" href="/guides/sessions" description="The other piece scoped per workspace." />
+  <LinkCard title="Domain Rules" href="/guides/regles-de-domaine" description="The other piece scoped per workspace." />
+  <LinkCard title="Import / Export" href="/guides/import-export" description="Back up a complete workspace as JSON." />
+  <LinkCard title="Categories and packs" href="/reference/categories-et-packs" description="The shared categories and the reusable packs." />
+</CardGrid>

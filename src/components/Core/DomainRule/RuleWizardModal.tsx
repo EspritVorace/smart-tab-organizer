@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { getMessage } from '@/utils/i18n';
 import { WizardModal } from '@/components/UI/WizardModal';
 import { WizardStepper } from '@/components/UI/WizardStepper/WizardStepper';
+import { AriaButton } from '@/components/UI/AriaButton/AriaButton';
 import { WizardStep1Identity } from './WizardStep1Identity';
 import { WizardStep2Config } from './WizardStep2Config';
 import { WizardStep3Options } from './WizardStep3Options';
@@ -62,6 +63,7 @@ const getDefaultValues = (rule?: DomainRule): Partial<DomainRule> => {
     id: rule.id,
     domainFilter: rule.domainFilter,
     label: rule.label,
+    fallbackLabel: rule.fallbackLabel ?? rule.label,
     titleParsingRegEx: rule.titleParsingRegEx,
     urlParsingRegEx: rule.urlParsingRegEx,
     groupNameSource: (VALID_GROUP_NAME_SOURCES.includes(rule.groupNameSource) ? rule.groupNameSource : 'title') as GroupNameSourceValue,
@@ -77,6 +79,7 @@ const getDefaultValues = (rule?: DomainRule): Partial<DomainRule> => {
     id: generateUUID(),
     domainFilter: '',
     label: '',
+    fallbackLabel: '',
     titleParsingRegEx: '',
     urlParsingRegEx: '',
     groupNameSource: 'title',
@@ -94,6 +97,7 @@ const getDefaultValues = (rule?: DomainRule): Partial<DomainRule> => {
 function inferConfigMode(rule?: DomainRule): ConfigMode {
   if (!rule) return 'preset';
   if (rule.presetId) return 'preset';
+  if (rule.groupNameSource === 'label') return 'label';
   if (rule.groupNameSource === 'manual') return 'ask';
   return 'manual';
 }
@@ -286,30 +290,47 @@ export function RuleWizardModal({
     }
   }, [captureSnapshot, getValues]);
 
+  const restorePresetMode = useCallback(() => {
+    setValue('presetId', lastPresetState.current.presetId);
+    applySnapshot(lastPresetState.current);
+  }, [setValue, applySnapshot]);
+
+  const restoreManualMode = useCallback(() => {
+    setValue('presetId', null);
+    applySnapshot(lastManualState.current);
+  }, [setValue, applySnapshot]);
+
+  const enterAskMode = useCallback(() => {
+    setValue('presetId', null);
+    setValue('groupNameSource', 'manual');
+  }, [setValue]);
+
+  const enterLabelMode = useCallback(() => {
+    setValue('presetId', null);
+    setValue('groupNameSource', 'label');
+    setValue('titleParsingRegEx', '');
+    setValue('urlParsingRegEx', '');
+    setValue('urlQueryParamName', '');
+    const currentFallback = getValues('fallbackLabel');
+    if (!currentFallback || currentFallback.trim() === '') {
+      setValue('fallbackLabel', getValues('label') ?? '');
+    }
+  }, [setValue, getValues]);
+
   const handleConfigModeChange = useCallback((newMode: ConfigMode) => {
     const prevMode = configMode;
-    if (prevMode === 'manual' && newMode === 'preset') {
+    if (prevMode !== newMode) {
       saveCurrentModeState(prevMode);
-      setValue('presetId', lastPresetState.current.presetId);
-      applySnapshot(lastPresetState.current);
-    } else if (prevMode === 'preset' && newMode === 'manual') {
-      saveCurrentModeState(prevMode);
-      setValue('presetId', null);
-      applySnapshot(lastManualState.current);
-    } else if (newMode === 'ask') {
-      saveCurrentModeState(prevMode);
-      setValue('presetId', null);
-      setValue('groupNameSource', 'manual');
-    } else if (prevMode === 'ask' && newMode === 'preset') {
-      setValue('presetId', lastPresetState.current.presetId);
-      applySnapshot(lastPresetState.current);
-    } else if (prevMode === 'ask' && newMode === 'manual') {
-      setValue('presetId', null);
-      applySnapshot(lastManualState.current);
+    }
+    switch (newMode) {
+      case 'preset': restorePresetMode(); break;
+      case 'manual': restoreManualMode(); break;
+      case 'ask': enterAskMode(); break;
+      case 'label': enterLabelMode(); break;
     }
     setConfigMode(newMode);
     trigger();
-  }, [configMode, saveCurrentModeState, setValue, applySnapshot, trigger]);
+  }, [configMode, saveCurrentModeState, restorePresetMode, restoreManualMode, enterAskMode, enterLabelMode, trigger]);
 
   const announceStep = (newStep: number) => {
     const label = getMessage(STEP_LABELS_KEYS[newStep]);
@@ -338,8 +359,15 @@ export function RuleWizardModal({
     return [];
   };
 
+  const isPresetSelectionMissing =
+    step === 1 && configMode === 'preset' && !watchedPresetId;
+
   const handleNext = async () => {
     setStepError(null);
+    if (isPresetSelectionMissing) {
+      setStepError(getMessage('errorPresetRequired'));
+      return;
+    }
     const fieldsToValidate = computeFieldsToValidate();
     const valid = fieldsToValidate.length === 0 || await trigger(fieldsToValidate);
     if (!valid) return;
@@ -384,8 +412,12 @@ export function RuleWizardModal({
     setValue('urlParsingRegEx', values.urlParsingRegEx);
     setValue('urlExtractionMode', values.urlExtractionMode);
     setValue('urlQueryParamName', values.urlQueryParamName);
+    setValue('fallbackLabel', values.fallbackLabel, { shouldDirty: true });
     if (values.configMode === 'ask') {
       setValue('groupNameSource', 'manual');
+    }
+    if (values.configMode === 'label') {
+      setValue('groupNameSource', 'label');
     }
     trigger();
     // Refresh preset name
@@ -407,7 +439,15 @@ export function RuleWizardModal({
 
   const handleFormSubmit = (data: DomainRule) => {
     setStepError(null);
-    onSubmit(data);
+    const nowIso = new Date().toISOString();
+    const normalized: DomainRule = {
+      ...data,
+      fallbackLabel: data.fallbackLabel?.trim() || data.label,
+    };
+    const stamped: DomainRule = isEditing
+      ? { ...normalized, createdAt: domainRule?.createdAt, updatedAt: nowIso }
+      : { ...normalized, createdAt: nowIso, updatedAt: nowIso };
+    onSubmit(stamped);
     reset();
     onClose();
   };
@@ -434,6 +474,7 @@ export function RuleWizardModal({
   const currentConfigValues: ConfigEditValues = {
     configMode,
     presetId: getValues('presetId') ?? null,
+    fallbackLabel: getValues('fallbackLabel') ?? '',
     ...readModeState(),
   };
 
@@ -460,7 +501,7 @@ export function RuleWizardModal({
       fillHeight={!isEditing && step === 1}
       onOpenAutoFocus={(e) => {
         e.preventDefault();
-        const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[name="label"]');
+        const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[name="domainFilter"]');
         input?.focus();
       }}
     >
@@ -507,7 +548,7 @@ export function RuleWizardModal({
               <>
                 {step === 0 && (
                   <Box data-testid="wizard-rule-step-1">
-                    <WizardStep1Identity control={control} errors={errors} />
+                    <WizardStep1Identity control={control} errors={errors} setValue={setValue} />
                   </Box>
                 )}
                 {step === 1 && (
@@ -579,7 +620,15 @@ export function RuleWizardModal({
                 </Button>
               )}
               {step < 3 && (
-                <Button data-testid="wizard-rule-btn-next" type="button" onClick={handleNext}>{getMessage('next')}</Button>
+                <AriaButton
+                  data-testid="wizard-rule-btn-next"
+                  type="button"
+                  onClick={handleNext}
+                  ariaDisabled={isPresetSelectionMissing}
+                  disabledReason={isPresetSelectionMissing ? getMessage('errorPresetRequired') : undefined}
+                >
+                  {getMessage('next')}
+                </AriaButton>
               )}
               {step === 3 && (
                 <Button data-testid="wizard-rule-btn-create" type="submit">{getMessage('create')}</Button>

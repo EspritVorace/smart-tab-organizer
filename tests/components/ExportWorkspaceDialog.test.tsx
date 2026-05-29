@@ -45,6 +45,7 @@ const samplePayload = {
     deduplicationKeepStrategy: 'keep-grouped-or-new',
     notifyOnGrouping: true,
     notifyOnDeduplication: true,
+    notifyOnOrganize: true,
   },
   domainRules: [{ id: 'r1' }, { id: 'r2' }, { id: 'r3' }],
   categories: [],

@@ -22,7 +22,7 @@
       "label": "Linear: Issue",
       "titleParsingRegEx": "([A-Z]+-\\d+)",
       "urlParsingRegEx": "/issue/([A-Z]+-\\d+)",
-      "groupNameSource": "smart_label",
+      "groupNameSource": "smart",
       "deduplicationMatchMode": "exact",
       "color": "purple",
       "categoryId": "productivity",

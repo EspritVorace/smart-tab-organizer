@@ -1,30 +1,31 @@
-import React, { createContext, lazy, Suspense, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, Suspense, useCallback, useContext, useMemo, useState } from 'react';
 import { useSettings } from '@/hooks/useSettings.js';
+import { lazyWithTiming } from '@/utils/lazyWithTiming.js';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 import type { SourceMode } from '@/components/UI/ImportExportWizards/Source';
 
-const ImportWizard = lazy(() =>
+const ImportWizard = lazyWithTiming('ImportWizard', () =>
   import('@/components/UI/ImportExportWizards/ImportWizard').then((m) => ({ default: m.ImportWizard })),
 );
-const ExportWizard = lazy(() =>
+const ExportWizard = lazyWithTiming('ExportWizard', () =>
   import('@/components/UI/ImportExportWizards/ExportWizard').then((m) => ({ default: m.ExportWizard })),
 );
-const ImportSessionsWizard = lazy(() =>
+const ImportSessionsWizard = lazyWithTiming('ImportSessionsWizard', () =>
   import('@/components/UI/ImportExportWizards/ImportSessionsWizard').then((m) => ({
     default: m.ImportSessionsWizard,
   })),
 );
-const ExportSessionsWizard = lazy(() =>
+const ExportSessionsWizard = lazyWithTiming('ExportSessionsWizard', () =>
   import('@/components/UI/ImportExportWizards/ExportSessionsWizard').then((m) => ({
     default: m.ExportSessionsWizard,
   })),
 );
-const ImportWorkspaceDialog = lazy(() =>
+const ImportWorkspaceDialog = lazyWithTiming('ImportWorkspaceDialog', () =>
   import('@/components/UI/Workspace/ImportWorkspaceDialog').then((m) => ({
     default: m.ImportWorkspaceDialog,
   })),
 );
-const ExportWorkspaceDialog = lazy(() =>
+const ExportWorkspaceDialog = lazyWithTiming('ExportWorkspaceDialog', () =>
   import('@/components/UI/Workspace/ExportWorkspaceDialog').then((m) => ({
     default: m.ExportWorkspaceDialog,
   })),

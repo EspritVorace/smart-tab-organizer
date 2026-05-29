@@ -1,6 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Badge, Button, Dialog, Flex, Heading, Text } from '@radix-ui/themes';
-import { ArrowUpRight, Bug } from 'lucide-react';
+import { ArrowUpRight, BookOpen, Bug, ChevronDown, Scale } from 'lucide-react';
+import * as Collapsible from '@radix-ui/react-collapsible';
 
 function GithubMark({ size = 14 }: { size?: number }) {
   return (
@@ -17,7 +18,9 @@ function GithubMark({ size = 14 }: { size?: number }) {
   );
 }
 import { browser } from 'wxt/browser';
+import { getDocsUrl } from '@/utils/docsUrl';
 import { getMessage } from '@/utils/i18n';
+import { loadThirdPartyLicenses, type ThirdPartyPackage } from '@/utils/thirdPartyLicenses';
 import { DialogCloseButton } from '@/components/UI/DialogShell';
 import { ExtensionMark } from './ExtensionMark';
 
@@ -30,18 +33,6 @@ const SOURCE_URL = 'https://github.com/EspritVorace/smart-tab-organizer/tree/mai
 const ISSUE_URL = 'https://github.com/EspritVorace/smart-tab-organizer/issues/new';
 const CHANGELOG_URL = 'https://github.com/EspritVorace/smart-tab-organizer/releases';
 const AUTHOR_URL = 'https://esprit-vorace.fr';
-
-const CREDITS = [
-  'WXT',
-  'React 19',
-  'TypeScript',
-  'Radix Themes',
-  'Lucide',
-  'Zod',
-  'Vitest',
-  'Playwright',
-  'Storybook',
-];
 
 function detectBrowserLabel(): string {
   if (typeof navigator === 'undefined') return '';
@@ -213,6 +204,34 @@ function LinkRow({ href, title, hint, icon }: LinkRowProps) {
   );
 }
 
+interface CreditChipsProps {
+  packages: ThirdPartyPackage[];
+}
+
+function CreditChips({ packages }: CreditChipsProps) {
+  return (
+    <Flex wrap="wrap" gap="2">
+      {packages.map((pkg) =>
+        pkg.repository ? (
+          <a
+            key={`${pkg.name}@${pkg.version}`}
+            href={pkg.repository}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="about-dialog-credit-chip"
+          >
+            {pkg.name}
+          </a>
+        ) : (
+          <span key={`${pkg.name}@${pkg.version}`} className="about-dialog-credit-chip">
+            {pkg.name}
+          </span>
+        ),
+      )}
+    </Flex>
+  );
+}
+
 export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
   const version = useMemo(() => {
     try {
@@ -225,6 +244,20 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
   const browserLabel = useMemo(() => detectBrowserLabel(), []);
   const osLabel = useMemo(() => detectOsLabel(), []);
   const { name: languageName, code: languageCode } = useMemo(() => getUiLanguageLabel(), []);
+  const docsUrl = useMemo(() => getDocsUrl(), []);
+  const licensesUrl = useMemo(() => browser.runtime.getURL('/data/third-party-licenses.txt'), []);
+
+  const [bundledPackages, setBundledPackages] = useState<ThirdPartyPackage[]>([]);
+  const [devPackages, setDevPackages] = useState<ThirdPartyPackage[]>([]);
+  const [devToolsOpen, setDevToolsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    loadThirdPartyLicenses().then((packages) => {
+      setBundledPackages(packages.filter((p) => p.scope === 'prod'));
+      setDevPackages(packages.filter((p) => p.scope === 'dev'));
+    });
+  }, [open]);
 
   const sectionStyle: React.CSSProperties = {
     padding: '18px 28px',
@@ -238,6 +271,18 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
     color: 'var(--gray-11)',
     fontWeight: 500,
     margin: '0 0 12px',
+  };
+  const subSectionTitleStyle: React.CSSProperties = {
+    ...sectionTitleStyle,
+    fontSize: '10px',
+    margin: '16px 0 8px',
+  };
+  const subSectionLabelStyle: React.CSSProperties = {
+    fontSize: '10px',
+    fontFamily: 'var(--code-font-family)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.10em',
+    fontWeight: 500,
   };
 
   return (
@@ -270,6 +315,7 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
             color: var(--gray-11);
             font-family: var(--code-font-family);
             transition: color 80ms ease, border-color 80ms ease;
+            text-decoration: none;
           }
           .about-dialog-credit-chip:hover {
             color: var(--gray-12);
@@ -278,6 +324,27 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
           .about-dialog-author-link:hover {
             color: var(--accent-11);
             text-decoration: underline;
+          }
+          .about-dialog-disclosure {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 16px 0 8px;
+            padding: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--gray-11);
+            transition: color 80ms ease;
+          }
+          .about-dialog-disclosure:hover {
+            color: var(--gray-12);
+          }
+          .about-dialog-disclosure__chevron {
+            transition: transform 120ms ease;
+          }
+          .about-dialog-disclosure[data-state="open"] .about-dialog-disclosure__chevron {
+            transform: rotate(180deg);
           }
         `}</style>
 
@@ -386,6 +453,12 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
               }}
             >
               <LinkRow
+                href={docsUrl}
+                title={getMessage('aboutDialogLinkDocumentationTitle')}
+                hint={getMessage('aboutDialogLinkDocumentationHint')}
+                icon={<BookOpen size={14} aria-hidden="true" />}
+              />
+              <LinkRow
                 href={SOURCE_URL}
                 title={getMessage('aboutDialogLinkSourceTitle')}
                 hint={getMessage('aboutDialogLinkSourceHint')}
@@ -397,19 +470,54 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
                 hint={getMessage('aboutDialogLinkIssueHint')}
                 icon={<Bug size={14} aria-hidden="true" />}
               />
+              <LinkRow
+                href={licensesUrl}
+                title={getMessage('aboutDialogLinkLicensesTitle')}
+                hint={getMessage('aboutDialogLinkLicensesHint')}
+                icon={<Scale size={14} aria-hidden="true" />}
+              />
             </div>
           </div>
 
           {/* Credits */}
           <div style={sectionStyle}>
             <h3 style={sectionTitleStyle}>{getMessage('aboutDialogSectionCredits')}</h3>
-            <Flex wrap="wrap" gap="2">
-              {CREDITS.map((c) => (
-                <span key={c} className="about-dialog-credit-chip">
-                  {c}
-                </span>
-              ))}
-            </Flex>
+
+            {bundledPackages.length > 0 && (
+              <>
+                <h4 style={subSectionTitleStyle}>{getMessage('aboutDialogSectionCreditsBundled')}</h4>
+                <CreditChips packages={bundledPackages} />
+              </>
+            )}
+
+            {devPackages.length > 0 && (
+              <Collapsible.Root open={devToolsOpen} onOpenChange={setDevToolsOpen}>
+                <Collapsible.Trigger asChild>
+                  <button type="button" className="about-dialog-disclosure">
+                    <span style={subSectionLabelStyle}>
+                      {getMessage('aboutDialogSectionCreditsDevTools')}
+                    </span>
+                    <span
+                      style={{
+                        ...subSectionLabelStyle,
+                        color: 'var(--gray-10)',
+                        letterSpacing: 0,
+                      }}
+                    >
+                      ({devPackages.length})
+                    </span>
+                    <ChevronDown
+                      size={13}
+                      aria-hidden="true"
+                      className="about-dialog-disclosure__chevron"
+                    />
+                  </button>
+                </Collapsible.Trigger>
+                <Collapsible.Content>
+                  <CreditChips packages={devPackages} />
+                </Collapsible.Content>
+              </Collapsible.Root>
+            )}
           </div>
         </div>
 

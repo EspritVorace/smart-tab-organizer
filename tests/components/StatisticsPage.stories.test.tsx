@@ -20,8 +20,10 @@ describe('StatisticsPage — static renders', () => {
 
   it('renders populated stat counts', () => {
     render(<StatisticsPageWithData />);
-    expect(screen.getByText('142')).toBeInTheDocument();
-    expect(screen.getByText('57')).toBeInTheDocument();
+    const groupsCard = screen.getByTestId('page-stats-card-groups');
+    const dedupCard = screen.getByTestId('page-stats-card-dedup');
+    expect(groupsCard).toHaveTextContent('142');
+    expect(dedupCard).toHaveTextContent('57');
   });
 });
 

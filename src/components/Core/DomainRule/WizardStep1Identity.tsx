@@ -1,49 +1,113 @@
+import { useEffect } from 'react';
 import { Flex, TextField } from '@radix-ui/themes';
-import { Controller, type Control, type FieldErrors } from 'react-hook-form';
+import {
+  Controller,
+  useFormState,
+  useWatch,
+  type Control,
+  type FieldErrors,
+  type UseFormSetValue,
+} from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
 import { FormField } from '@/components/Form/FormFields';
-import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
+import { CategoryRadioGroup } from '@/components/Core/DomainRule/CategoryRadioGroup';
 import { ChromeColorPicker } from '@/components/Core/TabTree/ChromeColorPicker';
+import { deriveLabelFromDomain } from '@/utils/labelFromDomain';
 import type { DomainRule } from '@/schemas/domainRule';
 import type { ChromeGroupColor } from '@/types/tabTree';
 
 interface WizardStep1IdentityProps {
   control: Control<DomainRule>;
   errors: FieldErrors<DomainRule>;
+  setValue: UseFormSetValue<DomainRule>;
 }
 
-export function WizardStep1Identity({ control, errors }: WizardStep1IdentityProps) {
+export function WizardStep1Identity({ control, errors, setValue }: WizardStep1IdentityProps) {
+  const domainFilter = useWatch({ control, name: 'domainFilter' }) ?? '';
+  const label = useWatch({ control, name: 'label' }) ?? '';
+  const { dirtyFields } = useFormState({ control, name: ['label', 'fallbackLabel'] });
+
+  // Auto-derive the label from the domain as long as the user hasn't
+  // edited the label manually. shouldDirty is false so that further URL
+  // changes keep triggering the autofill until the user takes ownership.
+  useEffect(() => {
+    if (dirtyFields.label) return;
+    const derived = deriveLabelFromDomain(domainFilter);
+    setValue('label', derived, { shouldDirty: false, shouldValidate: true });
+  }, [domainFilter, dirtyFields.label, setValue]);
+
+  // Mirror the label into fallbackLabel until the user takes ownership of it
+  // in the Step 2 'label' mode. Keeps the default sensible without leaking the
+  // unique-identifier constraint to the group name.
+  useEffect(() => {
+    if (dirtyFields.fallbackLabel) return;
+    setValue('fallbackLabel', label, { shouldDirty: false });
+  }, [label, dirtyFields.fallbackLabel, setValue]);
+
   return (
     <Flex direction="column" gap="4">
-      {/* Label + Category */}
+      {/* Domain Filter */}
+      <FormField
+        label={getMessage('domainFilter')}
+        required={true}
+        error={errors.domainFilter}
+      >
+        {(fieldId) => (
+          <Controller
+            name="domainFilter"
+            control={control}
+            render={({ field }) => (
+              <TextField.Root
+                {...field}
+                id={fieldId}
+                data-testid="wizard-rule-field-domain"
+                name="domainFilter"
+                placeholder={getMessage('domainFilterPlaceholder')}
+                style={{ marginTop: '4px' }}
+              />
+            )}
+          />
+        )}
+      </FormField>
+
+      {/* Label */}
       <FormField
         label={getMessage('labelLabel')}
         required={true}
         error={errors.label}
       >
         {(fieldId) => (
+          <Controller
+            name="label"
+            control={control}
+            render={({ field }) => (
+              <TextField.Root
+                {...field}
+                value={field.value ?? ''}
+                id={fieldId}
+                data-testid="wizard-rule-field-label"
+                name="label"
+                placeholder={getMessage('labelPlaceholder')}
+                style={{ marginTop: '4px' }}
+              />
+            )}
+          />
+        )}
+      </FormField>
+
+      {/* Category */}
+      <FormField label={getMessage('categoryPickerLabel')} error={errors.categoryId}>
+        {() => (
           <div style={{ marginTop: '4px' }}>
             <Controller
-              name="label"
+              name="categoryId"
               control={control}
-              render={({ field: labelField }) => (
-                <Controller
-                  name="categoryId"
-                  control={control}
-                  render={({ field: catField }) => (
-                    <TextFieldWithCategory
-                      id={fieldId}
-                      ref={labelField.ref}
-                      name={labelField.name}
-                      value={labelField.value ?? ''}
-                      onChange={labelField.onChange}
-                      onBlur={labelField.onBlur}
-                      data-testid="wizard-rule-field-label"
-                      placeholder={getMessage('labelPlaceholder')}
-                      categoryId={catField.value as string | null | undefined}
-                      onCategoryChange={catField.onChange}
-                    />
-                  )}
+              render={({ field }) => (
+                <CategoryRadioGroup
+                  value={field.value as string | null | undefined}
+                  onChange={field.onChange}
+                  data-testid="wizard-rule-field-category"
+                  swatchTestIdPrefix="wizard-rule-category"
                 />
               )}
             />
@@ -66,30 +130,6 @@ export function WizardStep1Identity({ control, errors }: WizardStep1IdentityProp
               )}
             />
           </div>
-        )}
-      </FormField>
-
-      {/* Domain Filter */}
-      <FormField
-        label={getMessage('domainFilter')}
-        required={true}
-        error={errors.domainFilter}
-      >
-        {(fieldId) => (
-          <Controller
-            name="domainFilter"
-            control={control}
-            render={({ field }) => (
-              <TextField.Root
-                {...field}
-                id={fieldId}
-                data-testid="wizard-rule-field-domain"
-                name="domainFilter"
-                placeholder={getMessage('domainFilterPlaceholder')}
-                style={{ marginTop: '4px' }}
-              />
-            )}
-          />
         )}
       </FormField>
     </Flex>

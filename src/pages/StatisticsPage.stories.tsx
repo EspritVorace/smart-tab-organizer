@@ -4,6 +4,7 @@ import { StatisticsPage } from './StatisticsPage';
 import type { AppSettings } from '@/types/syncSettings';
 import { defaultAppSettings } from '@/types/syncSettings';
 import type { StatisticsAggregates } from '@/types/statistics';
+import type { SessionStatisticsSnapshot } from '@/hooks/useSessionStatistics';
 
 const mockSettings: AppSettings = {
   ...defaultAppSettings,
@@ -14,6 +15,18 @@ const mockSettings: AppSettings = {
   ],
 };
 
+const emptySessionEvents = {
+  totals: { created: 0, restored: 0, tabsRestored: 0, archived: 0 },
+  thisWeek: { created: 0, restored: 0, tabsRestored: 0 },
+  lastWeek: { created: 0, restored: 0, tabsRestored: 0 },
+};
+
+const richSessionEvents = {
+  totals: { created: 24, restored: 11, tabsRestored: 187, archived: 6 },
+  thisWeek: { created: 3, restored: 2, tabsRestored: 27 },
+  lastWeek: { created: 1, restored: 1, tabsRestored: 9 },
+};
+
 const emptyData: StatisticsAggregates = {
   totalGrouping: 0,
   totalDedup: 0,
@@ -22,6 +35,7 @@ const emptyData: StatisticsAggregates = {
   lastWeek: { grouping: 0, dedup: 0 },
   thisMonth: { grouping: 0, dedup: 0 },
   topRules: [],
+  sessionEvents: emptySessionEvents,
 };
 
 const richData: StatisticsAggregates = {
@@ -36,6 +50,80 @@ const richData: StatisticsAggregates = {
     { ruleId: 'rule-2', label: 'Jira', grouping: 10, dedup: 8, total: 18 },
     { ruleId: 'rule-deleted', label: 'rule-deleted', grouping: 5, dedup: 2, total: 7 },
   ],
+  sessionEvents: richSessionEvents,
+};
+
+const emptySessionStats: SessionStatisticsSnapshot = {
+  volumes: {
+    total: 0, pinned: 0, active: 0, archived: 0,
+    totalTabs: 0, totalGroups: 0,
+    averageTabsPerSession: 0,
+    largest: null,
+    percentWithNote: 0, percentWithCategory: 0,
+  },
+  composition: {
+    topCategories: [],
+    topDomains: [],
+    groupColorDistribution: [],
+    topSessionsByTabs: [],
+  },
+  temporal: {
+    oldest: null,
+    mostRecentlyUpdated: null,
+    createdThisWeek: 0,
+    createdLastWeek: 0,
+    updatedThisWeek: 0,
+  },
+  isLoaded: true,
+};
+
+const richSessionStats: SessionStatisticsSnapshot = {
+  volumes: {
+    total: 18, pinned: 3, active: 9, archived: 6,
+    totalTabs: 142, totalGroups: 28,
+    averageTabsPerSession: 11.8,
+    largest: { name: 'Q1 research', tabCount: 42 },
+    percentWithNote: 58, percentWithCategory: 75,
+  },
+  composition: {
+    topCategories: [
+      { id: 'development', count: 6 },
+      { id: 'productivity', count: 4 },
+      { id: 'communication', count: 3 },
+      { id: 'media', count: 2 },
+      { id: 'news', count: 1 },
+    ],
+    topDomains: [
+      { host: 'github.com', count: 24 },
+      { host: 'docs.google.com', count: 15 },
+      { host: 'notion.so', count: 12 },
+      { host: 'stackoverflow.com', count: 8 },
+      { host: 'youtube.com', count: 5 },
+    ],
+    groupColorDistribution: [
+      { color: 'blue', count: 8 },
+      { color: 'green', count: 6 },
+      { color: 'purple', count: 5 },
+      { color: 'orange', count: 4 },
+      { color: 'red', count: 3 },
+      { color: 'yellow', count: 2 },
+    ],
+    topSessionsByTabs: [
+      { id: 's-1', name: 'Q1 research', tabCount: 42 },
+      { id: 's-2', name: 'Reading list', tabCount: 28 },
+      { id: 's-3', name: 'Daily work', tabCount: 19 },
+      { id: 's-4', name: 'Side project', tabCount: 14 },
+      { id: 's-5', name: 'Inspiration', tabCount: 11 },
+    ],
+  },
+  temporal: {
+    oldest: { id: 's-old', name: 'First snapshot', createdAt: '2026-01-15T10:00:00Z' },
+    mostRecentlyUpdated: { id: 's-recent', name: 'Daily work', updatedAt: '2026-05-22T18:30:00Z' },
+    createdThisWeek: 3,
+    createdLastWeek: 1,
+    updatedThisWeek: 7,
+  },
+  isLoaded: true,
 };
 
 const meta: Meta<typeof StatisticsPage> = {
@@ -52,11 +140,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const StatisticsPageDefault: Story = {
-  args: { statisticsData: emptyData },
+  args: { statisticsData: emptyData, sessionStats: emptySessionStats },
 };
 
 export const StatisticsPageWithData: Story = {
-  args: { statisticsData: richData },
+  args: { statisticsData: richData, sessionStats: richSessionStats },
 };
 
 export const StatisticsPageTrendingDown: Story = {
@@ -66,21 +154,31 @@ export const StatisticsPageTrendingDown: Story = {
       thisWeek: { grouping: 3, dedup: 1 },
       lastWeek: { grouping: 8, dedup: 6 },
     },
+    sessionStats: richSessionStats,
   },
 };
 
 export const StatisticsPageNoTopRules: Story = {
   args: {
     statisticsData: { ...richData, topRules: [] },
+    sessionStats: richSessionStats,
   },
 };
 
+export const StatisticsPageEmptySessions: Story = {
+  args: { statisticsData: richData, sessionStats: emptySessionStats },
+};
+
+export const StatisticsPageWithSessionData: Story = {
+  args: { statisticsData: emptyData, sessionStats: richSessionStats },
+};
+
 export const StatisticsPageNull: Story = {
-  args: { statisticsData: null },
+  args: { statisticsData: null, sessionStats: null },
 };
 
 export const StatisticsPageResetClick: Story = {
-  args: { statisticsData: richData },
+  args: { statisticsData: richData, sessionStats: richSessionStats },
   play: async ({ canvasElement }) => {
     const body = within(canvasElement.ownerDocument.body);
     const resetBtn = await body.findByTestId('page-stats-btn-reset');

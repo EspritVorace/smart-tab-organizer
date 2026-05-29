@@ -34,8 +34,10 @@ export interface Session {
   groups: SavedTabGroup[];
   /** Ungrouped tabs in this session */
   ungroupedTabs: SavedTab[];
-  /** If true, this session is pinned as a profile */
+  /** If true, this session is pinned as a profile (mutually exclusive with isArchived) */
   isPinned: boolean;
+  /** If true, this session is archived and stored separately from active sessions */
+  isArchived?: boolean;
   /** Optional category ID (resolved via src/utils/categoriesStore.ts) */
   categoryId?: string | null;
   /** Optional free-text note associated with the session */

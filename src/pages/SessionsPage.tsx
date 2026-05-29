@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { Box, Flex, Button, Text, Callout, Separator, Badge } from '@radix-ui/themes';
-import { Camera, Archive, CheckCircle, Pin, PinOff, Upload, Trash2, FileDown, type LucideIcon } from 'lucide-react';
+import { Box, Flex, Button, Text, Callout, Separator, Badge, TabNav, Kbd, Tooltip } from '@radix-ui/themes';
+import { Camera, Archive, ArchiveRestore, CheckCircle, Pin, PinOff, Upload, Trash2, FileDown, Boxes, type LucideIcon } from 'lucide-react';
 import { DragDropProvider, type DragOverEvent, type DragEndEvent } from '@dnd-kit/react';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { move } from '@dnd-kit/helpers';
@@ -19,18 +19,21 @@ import { foldAccents } from '@/utils/stringUtils';
 import { matchSessionSearch, splitByPinned, getFocusedSessionFromDOM } from '@/utils/sessionUtils';
 import { moveSessionToFirstInGroup, moveSessionToLastInGroup } from '@/utils/sessionOrderUtils';
 import { useSessions } from '@/hooks/useSessions';
+import type { SessionsSubTab } from '@/hooks/useDeepLinking';
 import { useShortcuts } from '@/hooks/useShortcuts';
 import { useListNavigation } from '@/hooks/useListNavigation';
 import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { updateSession } from '@/utils/sessionStorage';
 import { showSuccessNotification } from '@/utils/notifications';
+import { getActiveTabGroupId } from '@/utils/tabCapture';
 import { browser } from 'wxt/browser';
 import type { Session } from '@/types/session';
 import type { SessionSearchMatch } from '@/utils/sessionUtils';
 import type { AppSettings } from '@/types/syncSettings';
+import type { DefaultRestoreActionValue } from '@/schemas/enums';
 
-type BulkScope = 'pinned' | 'unpinned';
+type BulkScope = 'pinned' | 'unpinned' | 'archived';
 
 type DeleteTarget =
   | { type: 'single'; session: Session }
@@ -52,6 +55,8 @@ function pruneSelection(prev: Set<string>, visible: readonly { id: string }[]): 
 
 interface SessionsPageProps {
   syncSettings: AppSettings;
+  /** Persist a partial settings update (for example the default restore action). */
+  updateSettings: (updates: Partial<AppSettings>) => void;
   /** Controlled by options.tsx: true when a deep-link requests the snapshot wizard. */
   snapshotWizardOpen?: boolean;
   /** Called by SessionsPage to let options.tsx know the wizard closed (or page unmounted). */
@@ -64,6 +69,14 @@ interface SessionsPageProps {
   restoreSessionId?: string | null;
   /** Called to clear the restore deep-link once consumed. */
   onRestoreSessionIdChange?: (id: string | null) => void;
+  /** Session id for which a deep-link requests the refresh wizard to open. */
+  refreshSessionId?: string | null;
+  /** Called to clear the refresh deep-link once consumed. */
+  onRefreshSessionIdChange?: (id: string | null) => void;
+  /** Currently selected sub-tab (active vs archived), driven by useDeepLinking. */
+  sessionsTab?: SessionsSubTab;
+  /** Called when the user switches sub-tabs, so the hash reflects the new tab. */
+  onSessionsTabChange?: (tab: SessionsSubTab) => void;
 }
 
 function SectionHeader({ icon: Icon, titleKey, count }: { icon: LucideIcon; titleKey: string; count: number }) {
@@ -81,9 +94,9 @@ interface SessionSectionProps {
   titleKey: string;
   emptyTitleKey: string;
   emptyDescriptionKey?: string;
-  /** Whether this section lists the pinned sessions (drives drag reorder layout). */
-  isPinned: boolean;
-  /** Sessions displayed in this section (already filtered by search + split by pinned state). */
+  /** Logical bucket this section renders. Drives drag layout and reorder routing. */
+  bucket: 'pinned' | 'active' | 'archived';
+  /** Sessions displayed in this section (already filtered by search + split by bucket). */
   sessions: Session[];
   /** Full ordered session list, used to recompute the global order after a drag and for move-to-first/last. */
   allSessions: Session[];
@@ -103,17 +116,36 @@ interface SessionSectionProps {
   onRestoreCurrentWindow: (session: Session) => void;
   onRestoreNewWindow: (session: Session) => void;
   onReplaceCurrentWindow: (session: Session) => void;
+  /** Open the refresh wizard for the session (captures current window state). */
+  onRefresh: (session: Session) => void;
+  /** Action triggered by the primary Restore button click. */
+  defaultRestoreAction: DefaultRestoreActionValue;
+  /** Persists a new default restore action when the user picks it from the dropdown radio group. */
+  onDefaultRestoreActionChange: (value: DefaultRestoreActionValue) => void;
   /** Pin/unpin handlers shared with the page-level widget shortcuts. */
   onPin: (session: Session) => void;
   onUnpin: (session: Session) => void;
-  /** Section-local bulk selection (independent between pinned and unpinned). */
+  /** Archive/unarchive single-card handlers. */
+  onArchive: (session: Session) => void;
+  onUnarchive: (session: Session) => void;
+  /** Section-local bulk selection (independent between buckets). */
   selectedIds: Set<string>;
   onSelectionChange: (next: Set<string>) => void;
   onBulkDeleteRequest: (ids: string[]) => void;
   onBulkExportRequest: (ids: string[]) => void;
-  /** Bulk pin (in unpinned section) / unpin (in pinned section). */
-  onBulkPinToggle: (ids: string[]) => void;
-  /** Suffix appended to bulk testIds (e.g. 'pinned' / 'unpinned'). */
+  /**
+   * Section-specific bulk action buttons. Each renders inside the
+   * BulkActionsBar before the shared Export/Delete buttons. Order matters:
+   * the first action is visually the primary one (e.g. archive in the
+   * active section, unarchive in the archived section).
+   */
+  bulkExtraActions?: ReadonlyArray<{
+    testId: string;
+    icon: LucideIcon;
+    label: string;
+    onClick: (ids: string[]) => void;
+  }>;
+  /** Suffix appended to bulk testIds (e.g. 'pinned' / 'unpinned' / 'archived'). */
   testIdSuffix: BulkScope;
 }
 
@@ -122,7 +154,7 @@ function SessionSection({
   titleKey,
   emptyTitleKey,
   emptyDescriptionKey,
-  isPinned,
+  bucket,
   sessions,
   allSessions,
   searchQuery,
@@ -135,13 +167,18 @@ function SessionSection({
   onRestoreCurrentWindow,
   onRestoreNewWindow,
   onReplaceCurrentWindow,
+  onRefresh,
+  defaultRestoreAction,
+  onDefaultRestoreActionChange,
   onPin,
   onUnpin,
+  onArchive,
+  onUnarchive,
   selectedIds,
   onSelectionChange,
   onBulkDeleteRequest,
   onBulkExportRequest,
-  onBulkPinToggle,
+  bulkExtraActions,
   testIdSuffix,
 }: SessionSectionProps) {
   const [dragItems, setDragItems] = useState<Session[] | null>(null);
@@ -156,24 +193,27 @@ function SessionSection({
     if (!event.canceled) {
       const source = dragItems ?? sessions;
       const reordered = move(source, event) as Session[];
-      const others = allSessions.filter(s => s.isPinned !== isPinned);
-      const buildOrder = (section: Session[]) =>
-        isPinned ? [...section, ...others] : [...others, ...section];
-      if (reordered !== source) {
-        void updateOrder(buildOrder(reordered));
-      } else if (dragItems) {
-        void updateOrder(buildOrder(dragItems));
+      if (bucket === 'archived') {
+        // Archived sessions never interleave with the other buckets; just persist the bucket order.
+        const target = reordered !== source ? reordered : dragItems ?? sessions;
+        void updateOrder(target);
+      } else {
+        const isPinned = bucket === 'pinned';
+        const others = allSessions.filter(s => !!s.isPinned !== isPinned && !s.isArchived);
+        const buildOrder = (section: Session[]) =>
+          isPinned ? [...section, ...others] : [...others, ...section];
+        if (reordered !== source) {
+          void updateOrder(buildOrder(reordered));
+        } else if (dragItems) {
+          void updateOrder(buildOrder(dragItems));
+        }
       }
     }
     setDragItems(null);
-  }, [dragItems, sessions, allSessions, isPinned, updateOrder]);
+  }, [dragItems, sessions, allSessions, bucket, updateOrder]);
 
   const { handleNavigationKey } = useListNavigation(listRef, '[data-session-card]');
 
-  // Card-level keydown is now navigation-only; per-card actions
-  // (r/Shift+r/Alt+r/Alt+Shift+r/e/Delete/p) are dispatched at document level
-  // through `useShortcuts({...}, { scope: 'widget:session-card' })` in
-  // SessionsPage.
   const handleCardKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLElement>, index: number) => {
       if (e.target !== e.currentTarget) return;
@@ -209,10 +249,6 @@ function SessionSection({
   return (
     <Box>
       <SectionHeader icon={icon} titleKey={titleKey} count={sessions.length} />
-      {/* This wrapper extends from below the SectionHeader to the bottom of
-       * the cards list. It is the containing block for the sticky
-       * BulkActionsBar so the bar stays visible while any card of this
-       * section is in view (independent of the other section's bar). */}
       <Box mt="3">
         {selectedIds.size > 0 && (
           <BulkActionsBar
@@ -222,15 +258,21 @@ function SessionSection({
             isIndeterminate={isIndeterminate}
             onSelectAll={handleSelectAll}
           >
-            <Button
-              size="1"
-              variant="ghost"
-              data-testid={`page-sessions-bulk-btn-${isPinned ? 'unpin' : 'pin'}-${testIdSuffix}`}
-              onClick={() => onBulkPinToggle(Array.from(selectedIds))}
-            >
-              {isPinned ? <PinOff size={14} /> : <Pin size={14} />}
-              {getMessage(isPinned ? 'unpinSelected' : 'pinSelected')}
-            </Button>
+            {(bulkExtraActions ?? []).map((action) => {
+              const ActionIcon = action.icon;
+              return (
+                <Button
+                  key={action.testId}
+                  size="1"
+                  variant="ghost"
+                  data-testid={action.testId}
+                  onClick={() => action.onClick(Array.from(selectedIds))}
+                >
+                  <ActionIcon size={14} />
+                  {action.label}
+                </Button>
+              );
+            })}
             <Button
               size="1"
               variant="ghost"
@@ -280,11 +322,16 @@ function SessionSection({
                   onRestoreCurrentWindow={onRestoreCurrentWindow}
                   onRestoreNewWindow={onRestoreNewWindow}
                   onReplaceCurrentWindow={onReplaceCurrentWindow}
+                  onRefresh={onRefresh}
+                  defaultRestoreAction={defaultRestoreAction}
+                  onDefaultRestoreActionChange={onDefaultRestoreActionChange}
                   onRename={renameSession}
                   onEdit={onOpenEditDialog}
                   onDelete={onOpenDeleteDialog}
                   onPin={onPin}
                   onUnpin={onUnpin}
+                  onArchive={onArchive}
+                  onUnarchive={onUnarchive}
                   forcePreviewOpen={searchMatch?.matchesTabs === true || searchMatch?.matchesNote === true}
                   searchMatchingGroupIds={searchMatch?.matchingGroupIds}
                   searchQuery={searchQuery || undefined}
@@ -306,15 +353,37 @@ function SessionSection({
 
 export function SessionsPage({
   syncSettings,
+  updateSettings,
   snapshotWizardOpen = false,
   onSnapshotWizardOpenChange,
   snapshotGroupId,
   onSnapshotGroupIdChange,
   restoreSessionId,
   onRestoreSessionIdChange,
+  refreshSessionId,
+  onRefreshSessionIdChange,
+  sessionsTab = 'active',
+  onSessionsTabChange,
 }: SessionsPageProps) {
   const { openImportSessions } = useImportExportWizards();
-  const { sessions, isLoaded, createSession, renameSession, removeSession, reload, updateOrder } = useSessions();
+  const [bulkExportIds, setBulkExportIds] = useState<string[] | null>(null);
+  // Archives are loaded only when the archived tab is open or the export wizard is opened
+  // (so the user can still export archived items even from the active tab).
+  const includeArchived = sessionsTab === 'archived' || bulkExportIds != null;
+  const {
+    sessions,
+    pinnedSessions: pinnedBucket,
+    activeSessions: activeBucket,
+    archivedSessions: archivedBucket,
+    isLoaded,
+    createSession,
+    renameSession,
+    removeSession,
+    reload,
+    updateOrder,
+    archiveSession,
+    unarchiveSession,
+  } = useSessions({ includeArchived });
   // Internal open state; initialized from external prop so the wizard opens immediately on mount.
   const [snapshotOpen, setSnapshotOpen] = useState(snapshotWizardOpen);
 
@@ -331,15 +400,71 @@ export function SessionsPage({
   }, [onSnapshotWizardOpenChange]);
 
   const [restoreSession, setRestoreSession] = useState<Session | null>(null);
+  const [refreshTarget, setRefreshTarget] = useState<Session | null>(null);
+  const [refreshGroupId, setRefreshGroupId] = useState<number | null>(null);
   const [editTarget, setEditTarget] = useState<Session | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
-  const [bulkExportIds, setBulkExportIds] = useState<string[] | null>(null);
   const [selectedPinnedIds, setSelectedPinnedIds] = useState<Set<string>>(new Set());
   const [selectedUnpinnedIds, setSelectedUnpinnedIds] = useState<Set<string>>(new Set());
+  const [selectedArchivedIds, setSelectedArchivedIds] = useState<Set<string>>(new Set());
   const [quickRestoreMessage, setQuickRestoreMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const handleTabChange = useCallback(
+    (next: SessionsSubTab) => {
+      onSessionsTabChange?.(next);
+      // Keep the URL hash in sync so back/forward and shareable links work.
+      const nextHash = next === 'archived' ? '#sessions/archived' : '#sessions';
+      if (window.location.hash !== nextHash) {
+        window.location.hash = nextHash;
+      }
+      // Reset cross-tab selection state so a stale selection doesn't drive
+      // the wrong BulkActionsBar after switching tabs.
+      setSearchQuery('');
+    },
+    [onSessionsTabChange],
+  );
+
   const handleOpenSnapshotWizard = useCallback(() => setSnapshotOpen(true), []);
+
+  const handleOpenRefreshWizard = useCallback(async (session: Session) => {
+    const groupId = await getActiveTabGroupId();
+    setRefreshGroupId(groupId);
+    setRefreshTarget(session);
+  }, []);
+
+  const handleRefreshTrigger = useCallback(
+    (session: Session) => { void handleOpenRefreshWizard(session); },
+    [handleOpenRefreshWizard],
+  );
+
+  const handleRefreshSession = useCallback(
+    async (updatedSession: Session) => {
+      await updateSession(updatedSession.id, {
+        name: updatedSession.name,
+        note: updatedSession.note,
+        categoryId: updatedSession.categoryId,
+        groups: updatedSession.groups,
+        ungroupedTabs: updatedSession.ungroupedTabs,
+      });
+      await reload();
+    },
+    [reload],
+  );
+
+  // Deep-link: open the refresh wizard when a sessionId has been provided via
+  // URL hash (e.g. from the popup's refresh action). The optional groupId is
+  // consumed from snapshotGroupId (parsed by useDeepLinking).
+  useEffect(() => {
+    if (!refreshSessionId || !isLoaded) return;
+    const found = sessions.find((s) => s.id === refreshSessionId);
+    if (found) {
+      setRefreshGroupId(snapshotGroupId ?? null);
+      setRefreshTarget(found);
+      onRefreshSessionIdChange?.(null);
+      onSnapshotGroupIdChange?.(null);
+    }
+  }, [refreshSessionId, isLoaded, sessions, snapshotGroupId, onRefreshSessionIdChange, onSnapshotGroupIdChange]);
 
   // Quick-restore (no conflict-resolution wizard) handlers shared by the
   // SessionCard split button, the dropdown menu, and the widget-scope
@@ -387,6 +512,32 @@ export function SessionsPage({
     await reload();
   }, [reload]);
 
+  const handleMoveToFirstFromPage = useCallback((session: Session) => {
+    void updateOrder(moveSessionToFirstInGroup(sessions, session.id));
+  }, [sessions, updateOrder]);
+
+  const handleMoveToLastFromPage = useCallback((session: Session) => {
+    void updateOrder(moveSessionToLastInGroup(sessions, session.id));
+  }, [sessions, updateOrder]);
+
+  const handleArchive = useCallback(async (session: Session) => {
+    await archiveSession(session.id);
+    await reload();
+    void showSuccessNotification(
+      getMessage('sessionArchivedNotificationTitle'),
+      getMessage('sessionArchivedNotificationMessage', [session.name]),
+    );
+  }, [archiveSession, reload]);
+
+  const handleUnarchive = useCallback(async (session: Session) => {
+    await unarchiveSession(session.id);
+    await reload();
+    void showSuccessNotification(
+      getMessage('sessionUnarchivedNotificationTitle'),
+      getMessage('sessionUnarchivedNotificationMessage', [session.name]),
+    );
+  }, [unarchiveSession, reload]);
+
   const getFocusedSession = useCallback(
     () => getFocusedSessionFromDOM(sessions),
     [sessions],
@@ -412,6 +563,10 @@ export function SessionsPage({
         const focused = getFocusedSession();
         if (focused) handleRestoreNewWindow(focused);
       },
+      'sessionCard.refresh': () => {
+        const focused = getFocusedSession();
+        if (focused) handleRefreshTrigger(focused);
+      },
       'sessionCard.edit': () => {
         const focused = getFocusedSession();
         if (focused) setEditTarget(focused);
@@ -422,9 +577,22 @@ export function SessionsPage({
       },
       'sessionCard.pin': () => {
         const focused = getFocusedSession();
-        if (!focused) return;
+        if (!focused || focused.isArchived) return;
         const togglePin = focused.isPinned ? handleUnpin : handlePin;
         togglePin(focused).catch(() => {});
+      },
+      'sessionCard.moveToFirst': () => {
+        const focused = getFocusedSession();
+        if (focused) handleMoveToFirstFromPage(focused);
+      },
+      'sessionCard.moveToLast': () => {
+        const focused = getFocusedSession();
+        if (focused) handleMoveToLastFromPage(focused);
+      },
+      'sessionCard.archive': () => {
+        const focused = getFocusedSession();
+        if (!focused || focused.isArchived) return;
+        handleArchive(focused).catch(() => {});
       },
     },
     { scope: 'widget:session-card' },
@@ -441,25 +609,27 @@ export function SessionsPage({
     }
   }, [restoreSessionId, isLoaded, sessions, onRestoreSessionIdChange]);
 
-  // Order: use storage order directly (reorderSessions saves them in the correct order)
-  const sortedSessions = sessions;
-
   // Deep search: name + group titles + tab titles + tab URLs
+  const visibleBucket = useMemo<Session[]>(
+    () => sessionsTab === 'archived' ? archivedBucket : [...pinnedBucket, ...activeBucket],
+    [sessionsTab, pinnedBucket, activeBucket, archivedBucket],
+  );
+
   const sessionSearchMatches = useMemo<Map<string, SessionSearchMatch> | null>(() => {
     if (!searchQuery) return null;
     const term = foldAccents(searchQuery);
     const map = new Map<string, SessionSearchMatch>();
-    for (const session of sortedSessions) {
+    for (const session of visibleBucket) {
       const match = matchSessionSearch(session, term);
       if (match) map.set(session.id, match);
     }
     return map;
-  }, [sortedSessions, searchQuery]);
+  }, [visibleBucket, searchQuery]);
 
   const displayedSessions = useMemo(() => {
-    if (!sessionSearchMatches) return sortedSessions;
-    return sortedSessions.filter(s => sessionSearchMatches.has(s.id));
-  }, [sortedSessions, sessionSearchMatches]);
+    if (!sessionSearchMatches) return visibleBucket;
+    return visibleBucket.filter(s => sessionSearchMatches.has(s.id));
+  }, [visibleBucket, sessionSearchMatches]);
 
   const { pinned: pinnedSessions, unpinned: unpinnedSessions } = useMemo(
     () => splitByPinned(displayedSessions),
@@ -467,8 +637,8 @@ export function SessionsPage({
   );
 
   // Cleanup: drop selected ids that are no longer in their section (deleted,
-  // pinned/unpinned, or filtered out by the search). This keeps the master
-  // checkbox count in sync with what the user actually sees.
+  // pinned/unpinned, archived, or filtered out by the search). Keeps the
+  // master checkbox count in sync with what the user actually sees.
   useEffect(() => {
     setSelectedPinnedIds(prev => pruneSelection(prev, pinnedSessions));
   }, [pinnedSessions]);
@@ -476,6 +646,10 @@ export function SessionsPage({
   useEffect(() => {
     setSelectedUnpinnedIds(prev => pruneSelection(prev, unpinnedSessions));
   }, [unpinnedSessions]);
+
+  useEffect(() => {
+    setSelectedArchivedIds(prev => pruneSelection(prev, displayedSessions));
+  }, [displayedSessions]);
 
   const handleSaveSession = useCallback(
     async (session: Session) => {
@@ -506,6 +680,23 @@ export function SessionsPage({
     await reload();
   }, [reload]);
 
+  const handleBulkArchive = useCallback(async (ids: string[]) => {
+    for (const id of ids) {
+      await archiveSession(id);
+    }
+    await reload();
+    setSelectedPinnedIds(new Set());
+    setSelectedUnpinnedIds(new Set());
+  }, [archiveSession, reload]);
+
+  const handleBulkUnarchive = useCallback(async (ids: string[]) => {
+    for (const id of ids) {
+      await unarchiveSession(id);
+    }
+    await reload();
+    setSelectedArchivedIds(new Set());
+  }, [unarchiveSession, reload]);
+
   const handleDeleteConfirm = useCallback(async () => {
     if (!deleteTarget) return;
     if (deleteTarget.type === 'single') {
@@ -515,7 +706,8 @@ export function SessionsPage({
         await removeSession(id);
       }
       if (deleteTarget.scope === 'pinned') setSelectedPinnedIds(new Set());
-      else setSelectedUnpinnedIds(new Set());
+      else if (deleteTarget.scope === 'unpinned') setSelectedUnpinnedIds(new Set());
+      else setSelectedArchivedIds(new Set());
     }
     setDeleteTarget(null);
   }, [deleteTarget, removeSession]);
@@ -537,10 +729,15 @@ export function SessionsPage({
     | 'onRestoreCurrentWindow'
     | 'onRestoreNewWindow'
     | 'onReplaceCurrentWindow'
+    | 'onRefresh'
+    | 'defaultRestoreAction'
+    | 'onDefaultRestoreActionChange'
     | 'onPin'
     | 'onUnpin'
+    | 'onArchive'
+    | 'onUnarchive'
   > = {
-    allSessions: sortedSessions,
+    allSessions: sessions,
     searchQuery,
     searchMatches: sessionSearchMatches,
     updateOrder,
@@ -551,8 +748,13 @@ export function SessionsPage({
     onRestoreCurrentWindow: handleRestoreCurrentWindow,
     onRestoreNewWindow: handleRestoreNewWindow,
     onReplaceCurrentWindow: handleReplaceCurrentWindow,
+    onRefresh: handleRefreshTrigger,
+    defaultRestoreAction: syncSettings.defaultRestoreAction,
+    onDefaultRestoreActionChange: (value) => updateSettings({ defaultRestoreAction: value }),
     onPin: handlePin,
     onUnpin: handleUnpin,
+    onArchive: handleArchive,
+    onUnarchive: handleUnarchive,
   };
 
   const deleteDialogTitle = deleteTarget?.type === 'bulk'
@@ -566,10 +768,15 @@ export function SessionsPage({
     )
     : getMessage('confirmDeleteSession').replace('{name}', singleDeleteName);
 
+  const archivedOnlyView = sessionsTab === 'archived';
+  const totalForTab = archivedOnlyView ? archivedBucket.length : pinnedBucket.length + activeBucket.length;
+  const hasAnyOverall = pinnedBucket.length + activeBucket.length + archivedBucket.length > 0;
+
   return (
     <PageLayout
       titleKey="sessionsTab"
       descriptionKey="sessionsPageDescription"
+      descriptionOverride={archivedOnlyView ? getMessage('archivedSessionsPageDescription') : undefined}
       syncSettings={syncSettings}
     >
       {() => (
@@ -582,8 +789,32 @@ export function SessionsPage({
             minHeight: 0,
           }}
         >
+          {/* Sub-tabs: Active vs Archived */}
+          {isLoaded && hasAnyOverall && (
+            <Box mb="3">
+              <TabNav.Root data-testid="page-sessions-tabs">
+                <TabNav.Link
+                  href="#sessions"
+                  active={sessionsTab === 'active'}
+                  data-testid="page-sessions-tab-active"
+                  onClick={(e) => { e.preventDefault(); handleTabChange('active'); }}
+                >
+                  {getMessage('activeSessionsTab')}
+                </TabNav.Link>
+                <TabNav.Link
+                  href="#sessions/archived"
+                  active={sessionsTab === 'archived'}
+                  data-testid="page-sessions-tab-archived"
+                  onClick={(e) => { e.preventDefault(); handleTabChange('archived'); }}
+                >
+                  {getMessage('archivedSessionsTab')}
+                </TabNav.Link>
+              </TabNav.Root>
+            </Box>
+          )}
+
           {/* Toolbar: Search + Actions (hidden when no sessions exist) */}
-          {isLoaded && sessions.length > 0 && (
+          {isLoaded && totalForTab > 0 && (
             <ListToolbar
               testId="page-sessions-toolbar"
               searchTestId="page-sessions-search"
@@ -591,16 +822,21 @@ export function SessionsPage({
               searchValue={searchQuery}
               onSearchChange={setSearchQuery}
               action={
-                <Button
-                  data-testid="page-sessions-btn-snapshot"
-                  variant="solid"
-                  size="2"
-                  onClick={() => setSnapshotOpen(true)}
-                  style={{ color: 'white' }}
-                >
-                  <Camera size={16} />
-                  {getMessage('sessionSnapshotButton')}
-                </Button>
+                !archivedOnlyView ? (
+                  <Tooltip content={<Flex align="center" gap="2" aria-hidden="true">{getMessage('sessionSnapshotButton')}<Kbd>N</Kbd></Flex>}>
+                    <Button
+                      data-testid="page-sessions-btn-snapshot"
+                      variant="solid"
+                      size="2"
+                      onClick={() => setSnapshotOpen(true)}
+                      style={{ color: 'white' }}
+                      aria-keyshortcuts="N"
+                    >
+                      <Camera size={16} />
+                      {getMessage('sessionSnapshotButton')}
+                    </Button>
+                  </Tooltip>
+                ) : undefined
               }
             />
           )}
@@ -624,7 +860,7 @@ export function SessionsPage({
                 {getMessage('loadingText')}
               </Text>
             )}
-            {isLoaded && sessions.length === 0 && !searchQuery && (
+            {isLoaded && !archivedOnlyView && pinnedBucket.length + activeBucket.length === 0 && !searchQuery && (
               <EmptyState
                 data-testid="page-sessions-empty"
                 icon={Archive}
@@ -648,23 +884,38 @@ export function SessionsPage({
                 }
               />
             )}
-            {isLoaded && sessions.length > 0 && displayedSessions.length === 0 && searchQuery && (
+            {isLoaded && archivedOnlyView && archivedBucket.length === 0 && !searchQuery && (
+              <EmptyState
+                data-testid="page-sessions-archived-empty"
+                icon={Boxes}
+                title={getMessage('archivedSessionsEmptyTitle')}
+                description={getMessage('archivedSessionsEmptyDescription')}
+              />
+            )}
+            {isLoaded && totalForTab > 0 && displayedSessions.length === 0 && searchQuery && (
               <EmptyState compact icon={Archive} message={getMessage('noSessionsFound')} />
             )}
-            {isLoaded && displayedSessions.length > 0 && (
+            {isLoaded && !archivedOnlyView && displayedSessions.length > 0 && (
               <Flex data-testid="page-sessions-list" direction="column" gap="3">
                 <SessionSection
                   icon={Pin}
                   titleKey="pinnedSessionsSection"
                   emptyTitleKey="pinnedSessionsEmptyTitle"
                   emptyDescriptionKey="pinnedSessionsEmptyDescription"
-                  isPinned={true}
+                  bucket="pinned"
                   sessions={pinnedSessions}
                   selectedIds={selectedPinnedIds}
                   onSelectionChange={setSelectedPinnedIds}
                   onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'pinned', ids })}
                   onBulkExportRequest={(ids) => setBulkExportIds(ids)}
-                  onBulkPinToggle={(ids) => handleBulkPinToggle(ids, false)}
+                  bulkExtraActions={[
+                    {
+                      testId: 'page-sessions-bulk-btn-unpin-pinned',
+                      icon: PinOff,
+                      label: getMessage('unpinSelected'),
+                      onClick: (ids) => handleBulkPinToggle(ids, false),
+                    },
+                  ]}
                   testIdSuffix="pinned"
                   {...sharedSectionProps}
                 />
@@ -676,14 +927,53 @@ export function SessionsPage({
                   titleKey="sessionsSection"
                   emptyTitleKey="unpinnedSessionsEmptyTitle"
                   emptyDescriptionKey="unpinnedSessionsEmptyDescription"
-                  isPinned={false}
+                  bucket="active"
                   sessions={unpinnedSessions}
                   selectedIds={selectedUnpinnedIds}
                   onSelectionChange={setSelectedUnpinnedIds}
                   onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'unpinned', ids })}
                   onBulkExportRequest={(ids) => setBulkExportIds(ids)}
-                  onBulkPinToggle={(ids) => handleBulkPinToggle(ids, true)}
+                  bulkExtraActions={[
+                    {
+                      testId: 'page-sessions-bulk-btn-pin-unpinned',
+                      icon: Pin,
+                      label: getMessage('pinSelected'),
+                      onClick: (ids) => handleBulkPinToggle(ids, true),
+                    },
+                    {
+                      testId: 'page-sessions-bulk-btn-archive-unpinned',
+                      icon: Archive,
+                      label: getMessage('bulkArchiveAction'),
+                      onClick: handleBulkArchive,
+                    },
+                  ]}
                   testIdSuffix="unpinned"
+                  {...sharedSectionProps}
+                />
+              </Flex>
+            )}
+            {isLoaded && archivedOnlyView && displayedSessions.length > 0 && (
+              <Flex data-testid="page-sessions-archived-list" direction="column" gap="3">
+                <SessionSection
+                  icon={Boxes}
+                  titleKey="archivedSessionsSection"
+                  emptyTitleKey="archivedSessionsEmptyTitle"
+                  emptyDescriptionKey="archivedSessionsEmptyDescription"
+                  bucket="archived"
+                  sessions={displayedSessions}
+                  selectedIds={selectedArchivedIds}
+                  onSelectionChange={setSelectedArchivedIds}
+                  onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'archived', ids })}
+                  onBulkExportRequest={(ids) => setBulkExportIds(ids)}
+                  bulkExtraActions={[
+                    {
+                      testId: 'page-sessions-bulk-btn-unarchive-archived',
+                      icon: ArchiveRestore,
+                      label: getMessage('bulkUnarchiveAction'),
+                      onClick: handleBulkUnarchive,
+                    },
+                  ]}
+                  testIdSuffix="archived"
                   {...sharedSectionProps}
                 />
               </Flex>
@@ -702,6 +992,21 @@ export function SessionsPage({
             onSave={handleSaveSession}
             existingSessions={sessions}
             initialGroupId={snapshotGroupId ?? undefined}
+          />
+
+          <SnapshotWizard
+            open={refreshTarget !== null}
+            onOpenChange={(open) => {
+              if (!open) {
+                setRefreshTarget(null);
+                setRefreshGroupId(null);
+              }
+            }}
+            onSave={async () => { /* unused in refresh mode */ }}
+            onRefresh={handleRefreshSession}
+            refreshSession={refreshTarget ?? undefined}
+            initialGroupId={refreshGroupId ?? undefined}
+            existingSessions={sessions}
           />
 
           <SessionEditDialog

@@ -4,10 +4,12 @@ import {
   deduplicationMatchModeOptions,
   colorOptions,
   deduplicationKeepStrategyOptions,
+  defaultRestoreActionOptions,
   type GroupNameSourceValue,
   type DeduplicationMatchModeValue,
   type ColorValue,
-  type DeduplicationKeepStrategyValue
+  type DeduplicationKeepStrategyValue,
+  type DefaultRestoreActionValue
 } from './enums.js';
 import { sessionSchema } from './session.js';
 import { ruleCategorySchema } from './category.js';
@@ -19,6 +21,7 @@ export const importDomainRuleSchema = z.object({
   id: z.string().min(1),
   domainFilter: z.string().min(1),
   label: z.string().min(1).max(100),
+  fallbackLabel: z.string().max(100).optional(),
   titleParsingRegEx: z.string(),
   urlParsingRegEx: z.string(),
   groupNameSource: z.enum(
@@ -37,7 +40,9 @@ export const importDomainRuleSchema = z.object({
   urlExtractionMode: z.enum(['regex', 'query_param']).default('regex'),
   urlQueryParamName: z.string().max(64).optional(),
   enabled: z.boolean(),
-  badge: z.string().optional()
+  badge: z.string().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional()
 });
 
 export type ImportDomainRule = z.infer<typeof importDomainRuleSchema>;
@@ -68,8 +73,12 @@ const importWorkspaceSettingsSchema = z.object({
   deduplicationKeepStrategy: z.enum(
     deduplicationKeepStrategyOptions.map(opt => opt.value) as [DeduplicationKeepStrategyValue, ...DeduplicationKeepStrategyValue[]],
   ),
+  defaultRestoreAction: z.enum(
+    defaultRestoreActionOptions.map(opt => opt.value) as [DefaultRestoreActionValue, ...DefaultRestoreActionValue[]],
+  ).optional(),
   notifyOnGrouping: z.boolean(),
   notifyOnDeduplication: z.boolean(),
+  notifyOnOrganize: z.boolean().optional(),
 });
 
 const importWorkspaceStatisticsSchema = z.object({
@@ -90,7 +99,7 @@ export const importWorkspaceDataSchema = z.object({
   workspace: importWorkspaceMetaSchema,
   settings: importWorkspaceSettingsSchema,
   domainRules: z.array(importDomainRuleSchema),
-  categories: z.array(ruleCategorySchema),
+  categories: z.array(ruleCategorySchema).optional(),
   sessions: z.array(sessionSchema),
   statistics: importWorkspaceStatisticsSchema.optional(),
 });

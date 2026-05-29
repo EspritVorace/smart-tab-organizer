@@ -1,5 +1,5 @@
 // options/options.ts
-import React, { lazy, Suspense, useCallback, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { mountExtensionApp } from '@/utils/mountExtensionApp.js';
 import { Flex, Spinner, Text, Theme } from '@radix-ui/themes';
@@ -13,8 +13,10 @@ import { ImportExportWizardsProvider } from '@/contexts/ImportExportWizardsConte
 
 import { useSettings } from '@/hooks/useSettings.js';
 import { useStatistics } from '@/hooks/useStatistics.js';
+import { useSessionStatistics } from '@/hooks/useSessionStatistics.js';
 import { useDeepLinking } from '@/hooks/useDeepLinking.js';
 import { useShortcuts, type ShortcutAction } from '@/hooks/useShortcuts.js';
+import { getDocsUrlForTab } from '@/utils/docsUrl';
 import { getMessage } from '@/utils/i18n';
 
 import { Sidebar } from '@/components/UI/Sidebar/Sidebar';
@@ -28,23 +30,32 @@ import { HomePage } from './HomePage';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
 import { Home, Shield, FileText, BarChart3, Settings, Archive, Layers } from 'lucide-react';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
+import { getActiveTabGroupId } from '@/utils/tabCapture';
+import { lazyWithTiming } from '@/utils/lazyWithTiming.js';
+import { preloadPage } from './pagePreloaders.js';
+import { DomainRulesPageSkeleton } from './skeletons/DomainRulesPageSkeleton';
+import { SessionsPageSkeleton } from './skeletons/SessionsPageSkeleton';
+import { WorkspacesPageSkeleton } from './skeletons/WorkspacesPageSkeleton';
+import { ImportExportPageSkeleton } from './skeletons/ImportExportPageSkeleton';
+import { StatisticsPageSkeleton } from './skeletons/StatisticsPageSkeleton';
+import { SettingsPageSkeleton } from './skeletons/SettingsPageSkeleton';
 
-const DomainRulesPage = lazy(() =>
+const DomainRulesPage = lazyWithTiming('DomainRulesPage', () =>
     import('./DomainRulesPage').then((m) => ({ default: m.DomainRulesPage })),
 );
-const SessionsPage = lazy(() =>
+const SessionsPage = lazyWithTiming('SessionsPage', () =>
     import('./SessionsPage').then((m) => ({ default: m.SessionsPage })),
 );
-const ImportExportPage = lazy(() =>
+const ImportExportPage = lazyWithTiming('ImportExportPage', () =>
     import('./ImportExportPage').then((m) => ({ default: m.ImportExportPage })),
 );
-const StatisticsPage = lazy(() =>
+const StatisticsPage = lazyWithTiming('StatisticsPage', () =>
     import('./StatisticsPage').then((m) => ({ default: m.StatisticsPage })),
 );
-const SettingsPage = lazy(() =>
+const SettingsPage = lazyWithTiming('SettingsPage', () =>
     import('@/components/UI/SettingsPage/SettingsPage').then((m) => ({ default: m.SettingsPage })),
 );
-const WorkspacesPage = lazy(() =>
+const WorkspacesPage = lazyWithTiming('WorkspacesPage', () =>
     import('./WorkspacesPage').then((m) => ({ default: m.WorkspacesPage })),
 );
 import type { Session } from '@/types/session';
@@ -52,17 +63,39 @@ import type { HomeRestoreTarget } from '@/components/HomePage/types';
 import { Toaster } from '@/components/UI/Toaster/Toaster';
 import type { DomainRuleSettings } from '@/types/syncSettings';
 
+function renderLazyFallback(currentTab: string): React.ReactNode {
+    switch (currentTab) {
+        case 'rules':
+            return <DomainRulesPageSkeleton />;
+        case 'sessions':
+            return <SessionsPageSkeleton />;
+        case 'workspaces':
+            return <WorkspacesPageSkeleton />;
+        case 'importexport':
+            return <ImportExportPageSkeleton />;
+        case 'stats':
+            return <StatisticsPageSkeleton />;
+        case 'settings':
+            return <SettingsPageSkeleton />;
+        default:
+            return null;
+    }
+}
+
 export function OptionsContent() {
     const version = browser.runtime.getManifest().version;
 
     const { settings, updateSettings } = useSettings();
     const { statisticsAggregates, resetStatistics } = useStatistics(settings?.domainRules ?? []);
+    const { snapshot: sessionStatsSnapshot } = useSessionStatistics();
     const {
         currentTab, setCurrentTab,
         openSnapshotWizard, setOpenSnapshotWizard,
         rulesPendingAction, setRulesPendingAction,
         snapshotGroupId, setSnapshotGroupId,
         restoreSessionId, setRestoreSessionId,
+        refreshSessionId, setRefreshSessionId,
+        sessionsTab, setSessionsTab,
     } = useDeepLinking();
 
     const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
@@ -97,8 +130,15 @@ export function OptionsContent() {
             handleTabChange('sessions');
             return;
         }
+        if (target === 'refresh') {
+            const groupId = await getActiveTabGroupId();
+            setSnapshotGroupId(groupId);
+            setRefreshSessionId(session.id);
+            handleTabChange('sessions');
+            return;
+        }
         await restoreSessionTabs(session, target as RestoreTarget);
-    }, [setRestoreSessionId, handleTabChange]);
+    }, [setRestoreSessionId, setRefreshSessionId, setSnapshotGroupId, handleTabChange]);
 
     const sidebarSections: SidebarSection[] = useMemo(() => [
         {
@@ -136,6 +176,13 @@ export function OptionsContent() {
         return getMessage('homeTab');
     }, [sidebarSections, currentTab]);
 
+    const breadcrumb = useMemo<{ pageSubtitle?: string; parentHref?: string }>(() => {
+        if (currentTab === 'sessions' && sessionsTab === 'archived') {
+            return { pageSubtitle: getMessage('archivedSessionsTab'), parentHref: '#sessions' };
+        }
+        return {};
+    }, [currentTab, sessionsTab]);
+
 
     const focusActiveSearch = useCallback(() => {
         const node = document.querySelector<HTMLInputElement>(
@@ -150,10 +197,15 @@ export function OptionsContent() {
         }
     }, [shortcutsAsideOpen]);
 
+    const handleOpenContextualDocs = useCallback(() => {
+        window.open(getDocsUrlForTab(currentTab), '_blank', 'noopener,noreferrer');
+    }, [currentTab]);
+
     const shortcutBindings = useMemo<Record<string, ShortcutAction>>(() => ({
         'options.search.focus': focusActiveSearch,
         'options.help': () => setShortcutsAsideOpen((open) => !open),
         'options.search.clear': handleEscape,
+        'options.docs.open': handleOpenContextualDocs,
         'options.nav.home': () => handleTabChange('home'),
         'options.nav.rules': () => handleTabChange('rules'),
         'options.nav.sessions': () => handleTabChange('sessions'),
@@ -161,7 +213,7 @@ export function OptionsContent() {
         'options.nav.importexport': () => handleTabChange('importexport'),
         'options.nav.settings': () => handleTabChange('settings'),
         'options.nav.workspaces': () => handleTabChange('workspaces'),
-    }), [handleTabChange, focusActiveSearch, handleEscape]);
+    }), [handleTabChange, focusActiveSearch, handleEscape, handleOpenContextualDocs]);
 
     useShortcuts(shortcutBindings, {
         scope: 'global',
@@ -188,6 +240,7 @@ export function OptionsContent() {
                 onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
                 activeItem={currentTab}
                 onItemClick={handleTabChange}
+                onItemPreload={preloadPage}
                 sections={sidebarSections}
                 headerContent={<OptionsHeader />}
                 headerCollapsedContent={<OptionsHeaderCollapsed />}
@@ -196,17 +249,15 @@ export function OptionsContent() {
                 footerCollapsedContent={<WorkspaceFooterCollapsed onManage={() => handleTabChange('workspaces')} />}
             />
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                <OptionsTopbar pageTitle={activePageTitle} />
+                <OptionsTopbar
+                    pageTitle={activePageTitle}
+                    pageSubtitle={breadcrumb.pageSubtitle}
+                    parentHref={breadcrumb.parentHref}
+                    currentTab={currentTab}
+                />
                 <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
                     <main data-testid="options-content" style={{ flex: 1, overflow: 'auto', padding: '20px 20px 0 20px', minWidth: 0 }}>
-                        <Suspense
-                            fallback={
-                                <Flex align="center" justify="center" gap="2" style={{ height: '100%' }}>
-                                    <Spinner size="3" />
-                                    <Text>{getMessage('loadingText')}</Text>
-                                </Flex>
-                            }
-                        >
+                        <Suspense fallback={renderLazyFallback(currentTab)}>
                             {currentTab === 'home' && (
                                 <HomePage
                                     syncSettings={settings}
@@ -216,6 +267,7 @@ export function OptionsContent() {
                                     onOpenRuleWizard={handleOpenRuleWizardFromHome}
                                     onOpenShortcutsAside={openShortcuts}
                                     onRestore={handleRestoreFromHome}
+                                    onDefaultRestoreActionChange={(value) => updateSettings({ defaultRestoreAction: value })}
                                 />
                             )}
                             {currentTab === 'rules' && (
@@ -235,16 +287,26 @@ export function OptionsContent() {
                             {currentTab === 'sessions' && (
                                 <SessionsPage
                                     syncSettings={settings}
+                                    updateSettings={updateSettings}
                                     snapshotWizardOpen={openSnapshotWizard}
                                     onSnapshotWizardOpenChange={setOpenSnapshotWizard}
                                     snapshotGroupId={snapshotGroupId}
                                     onSnapshotGroupIdChange={setSnapshotGroupId}
                                     restoreSessionId={restoreSessionId}
                                     onRestoreSessionIdChange={setRestoreSessionId}
+                                    refreshSessionId={refreshSessionId}
+                                    onRefreshSessionIdChange={setRefreshSessionId}
+                                    sessionsTab={sessionsTab}
+                                    onSessionsTabChange={setSessionsTab}
                                 />
                             )}
                             {currentTab === 'stats' && (
-                                <StatisticsPage syncSettings={settings} statisticsData={statisticsAggregates} onReset={handleResetStats} />
+                                <StatisticsPage
+                                    syncSettings={settings}
+                                    statisticsData={statisticsAggregates}
+                                    sessionStats={sessionStatsSnapshot}
+                                    onReset={handleResetStats}
+                                />
                             )}
                             {currentTab === 'settings' && (
                                 <SettingsPage syncSettings={settings} updateSettings={updateSettings} />

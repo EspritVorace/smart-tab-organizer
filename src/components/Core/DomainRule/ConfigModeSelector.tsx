@@ -2,31 +2,36 @@ import { useId } from 'react';
 import { Flex, RadioGroup, Text } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 
-export type ConfigMode = 'preset' | 'ask' | 'manual';
+export type ConfigMode = 'preset' | 'ask' | 'manual' | 'label';
 
-const CONFIG_MODES: ConfigMode[] = ['preset', 'ask', 'manual'];
+const CONFIG_MODES: ConfigMode[] = ['preset', 'ask', 'manual', 'label'];
 
 const MODE_LABELS: Record<ConfigMode, Parameters<typeof getMessage>[0]> = {
   preset: 'configModePreset',
   ask: 'configModeAsk',
   manual: 'configModeManual',
+  label: 'configModeLabel',
 };
 
 const MODE_TAGLINES: Record<ConfigMode, Parameters<typeof getMessage>[0]> = {
   preset: 'configModePresetTagline',
   ask: 'configModeAskTagline',
   manual: 'configModeManualTagline',
+  label: 'configModeLabelTagline',
 };
 
 export const MODE_HELP_LABELS: Record<ConfigMode, Parameters<typeof getMessage>[0]> = {
   preset: 'configModePresetHelp',
   ask: 'configModeAskHelp',
   manual: 'configModeManualHelp',
+  label: 'configModeLabelHelp',
 };
 
 interface ConfigModeSelectorProps {
   value: ConfigMode;
   onValueChange: (mode: ConfigMode) => void;
+  /** Marks the currently selected radio item with [data-autofocus] so DialogShell focuses it on open. */
+  autoFocusFirstField?: boolean;
 }
 
 /**
@@ -34,7 +39,7 @@ interface ConfigModeSelectorProps {
  * The active mode's full description is rendered by the parent (right column).
  * Shared between ConfigEditModal and WizardStep2Config.
  */
-export function ConfigModeSelector({ value, onValueChange }: ConfigModeSelectorProps) {
+export function ConfigModeSelector({ value, onValueChange, autoFocusFirstField = false }: ConfigModeSelectorProps) {
   const labelId = useId();
   return (
     <Flex direction="column" gap="2">
@@ -69,6 +74,7 @@ export function ConfigModeSelector({ value, onValueChange }: ConfigModeSelectorP
                   <RadioGroup.Item
                     value={mode}
                     data-testid={`config-mode-${mode}`}
+                    data-autofocus={autoFocusFirstField && isSelected ? 'true' : undefined}
                     style={{ marginTop: '2px' }}
                   />
                   <Flex direction="column" gap="1">

@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent, expect } from 'storybook/test';
+import { within, userEvent, expect, waitFor } from 'storybook/test';
 import { ImportWizard } from './ImportWizard';
 import type { DomainRuleSetting } from '@/types/syncSettings';
+import { setJsonEditorValue } from '@/components/UI/JsonCodeEditor/setJsonEditorValue';
 
 const existingRules: DomainRuleSetting[] = [
   {
@@ -89,14 +90,12 @@ export const ImportWizardStep1Classification: Story = {
     const textTab = body.getAllByText('Text').find(el => el.closest('button'));
     if (textTab) await userEvent.click(textTab);
 
-    // Paste valid JSON
-    const textarea = await body.findByPlaceholderText('{"domainRules": [...]}');
-    await userEvent.click(textarea);
-    await userEvent.paste(validImportJson);
+    // Set the JSON straight on the CodeMirror editor (no textarea anymore).
+    await setJsonEditorValue(canvasElement.ownerDocument.body, validImportJson);
 
-    // Advance to step 1
+    // Advance to step 1 once validation has enabled the Next button.
     const nextBtn = body.getByText('Next').closest('button') as HTMLButtonElement;
-    await expect(nextBtn).not.toBeDisabled();
+    await waitFor(() => expect(nextBtn).not.toBeDisabled());
     await userEvent.click(nextBtn);
   },
 };

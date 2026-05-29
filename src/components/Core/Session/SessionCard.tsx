@@ -3,12 +3,12 @@ import * as Collapsible from '@radix-ui/react-collapsible';
 import { useSortable } from '@dnd-kit/react/sortable';
 import {
   Card, Flex, Text, IconButton, TextField,
-  DropdownMenu, HoverCard, Tooltip, Badge, Box, Checkbox,
+  DropdownMenu, HoverCard, Tooltip, Badge, Box, Checkbox, Kbd,
 } from '@radix-ui/themes';
 import {
   MoreHorizontal, Pencil, Trash2, Check, X,
   Pin, PinOff, ChevronDown, ChevronRight,
-  GripVertical, AlertTriangle,
+  GripVertical, AlertTriangle, Archive, ArchiveRestore,
 } from 'lucide-react';
 import { getMessage, getPluralMessage } from '@/utils/i18n';
 import { countSessionTabs, formatSessionDate } from '@/utils/sessionUtils';
@@ -21,6 +21,7 @@ import { getStatusStyle } from '@/utils/statusStyle';
 import { SessionPreviewTree } from './SessionPreviewTree';
 import { SessionRestoreButton } from './SessionRestoreButton/SessionRestoreButton';
 import type { Session } from '@/types/session';
+import type { DefaultRestoreActionValue } from '@/schemas/enums';
 
 interface SessionCardProps extends SessionRestoreCallbacks {
   session: Session;
@@ -49,6 +50,8 @@ interface SessionCardProps extends SessionRestoreCallbacks {
   onDelete?: (session: Session) => void;
   onPin?: (session: Session) => void;
   onUnpin?: (session: Session) => void;
+  onArchive?: (session: Session) => void;
+  onUnarchive?: (session: Session) => void;
   /**
    * When true, the collapsible preview is forced open (e.g. search matched a tab/group).
    * The user can still manually close it by clicking the trigger.
@@ -81,6 +84,11 @@ interface SessionRestoreCallbacks {
   onRestoreCurrentWindow?: (session: Session) => void;
   onRestoreNewWindow?: (session: Session) => void;
   onReplaceCurrentWindow?: (session: Session) => void;
+  onRefresh?: (session: Session) => void;
+  /** Action triggered by the primary Restore button click. Defaults to 'current'. */
+  defaultRestoreAction?: DefaultRestoreActionValue;
+  /** Persists a new default action when the user picks it from the dropdown radio group. */
+  onDefaultRestoreActionChange?: (value: DefaultRestoreActionValue) => void;
 }
 
 /* SessionMoreMenu */
@@ -92,9 +100,15 @@ interface SessionMoreMenuProps {
   onDelete: (session: Session) => void;
   onMoveToFirst?: () => void;
   onMoveLast?: () => void;
+  onArchive?: (session: Session) => void;
+  onUnarchive?: (session: Session) => void;
 }
 
-function SessionMoreMenu({ session, isDragDisabled, onEdit, onDelete, onMoveToFirst, onMoveLast }: SessionMoreMenuProps) {
+function SessionMoreMenu({
+  session, isDragDisabled, onEdit, onDelete, onMoveToFirst, onMoveLast,
+  onArchive, onUnarchive,
+}: SessionMoreMenuProps) {
+  const isArchived = session.isArchived === true;
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
@@ -109,28 +123,96 @@ function SessionMoreMenu({ session, isDragDisabled, onEdit, onDelete, onMoveToFi
         </IconButton>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content>
-        <DropdownMenu.Item onClick={() => onEdit(session)}>
-          <Pencil size={14} />
-          {getMessage('sessionEdit')}
+        <DropdownMenu.Item
+          data-testid={`session-card-${session.id}-menu-edit`}
+          onClick={() => onEdit(session)}
+        >
+          <Flex align="center" justify="between" gap="3" width="100%">
+            <Flex align="center" gap="2">
+              <Pencil size={14} />
+              {getMessage('sessionEdit')}
+            </Flex>
+            <Kbd size="1">E</Kbd>
+          </Flex>
         </DropdownMenu.Item>
 
-        {(onMoveToFirst || onMoveLast) && <DropdownMenu.Separator />}
+        {(onMoveToFirst || onMoveLast) && (
+          <>
+            <DropdownMenu.Separator />
+            <DropdownMenu.Sub>
+              <DropdownMenu.SubTrigger>
+                {getMessage('sessionPositionsMenu')}
+              </DropdownMenu.SubTrigger>
+              <DropdownMenu.SubContent>
+                {onMoveToFirst && (
+                  <DropdownMenu.Item
+                    data-testid={`session-card-${session.id}-menu-move-first`}
+                    onClick={onMoveToFirst}
+                    disabled={isDragDisabled}
+                  >
+                    <Flex align="center" justify="between" gap="3" width="100%">
+                      {getMessage('sessionMoveToFirst')}
+                      <Kbd size="1">Ctrl+↑</Kbd>
+                    </Flex>
+                  </DropdownMenu.Item>
+                )}
+                {onMoveLast && (
+                  <DropdownMenu.Item
+                    data-testid={`session-card-${session.id}-menu-move-last`}
+                    onClick={onMoveLast}
+                    disabled={isDragDisabled}
+                  >
+                    <Flex align="center" justify="between" gap="3" width="100%">
+                      {getMessage('sessionMoveLast')}
+                      <Kbd size="1">Ctrl+↓</Kbd>
+                    </Flex>
+                  </DropdownMenu.Item>
+                )}
+              </DropdownMenu.SubContent>
+            </DropdownMenu.Sub>
+          </>
+        )}
 
-        {onMoveToFirst && (
-          <DropdownMenu.Item onClick={onMoveToFirst} disabled={isDragDisabled}>
-            {getMessage('sessionMoveToFirst')}
+        {(onArchive || onUnarchive) && <DropdownMenu.Separator />}
+        {!isArchived && onArchive && (
+          <DropdownMenu.Item
+            data-testid={`session-card-${session.id}-menu-archive`}
+            onClick={() => onArchive(session)}
+          >
+            <Flex align="center" justify="between" gap="3" width="100%">
+              <Flex align="center" gap="2">
+                <Archive size={14} />
+                {getMessage('archiveAction')}
+              </Flex>
+              <Kbd size="1">A</Kbd>
+            </Flex>
           </DropdownMenu.Item>
         )}
-        {onMoveLast && (
-          <DropdownMenu.Item onClick={onMoveLast} disabled={isDragDisabled}>
-            {getMessage('sessionMoveLast')}
+        {isArchived && onUnarchive && (
+          <DropdownMenu.Item
+            data-testid={`session-card-${session.id}-menu-unarchive`}
+            onClick={() => onUnarchive(session)}
+          >
+            <Flex align="center" gap="2">
+              <ArchiveRestore size={14} />
+              {getMessage('unarchiveAction')}
+            </Flex>
           </DropdownMenu.Item>
         )}
 
         <DropdownMenu.Separator />
-        <DropdownMenu.Item color="red" onClick={() => onDelete(session)}>
-          <Trash2 size={14} />
-          {getMessage('delete')}
+        <DropdownMenu.Item
+          data-testid={`session-card-${session.id}-menu-delete`}
+          color="red"
+          onClick={() => onDelete(session)}
+        >
+          <Flex align="center" justify="between" gap="3" width="100%">
+            <Flex align="center" gap="2">
+              <Trash2 size={14} />
+              {getMessage('delete')}
+            </Flex>
+            <Kbd size="1">Del</Kbd>
+          </Flex>
         </DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>
@@ -306,6 +388,8 @@ interface SessionCardFullHeaderProps extends SessionRestoreCallbacks {
   onSelect?: (id: string, checked: boolean) => void;
   onPin?: (session: Session) => void;
   onUnpin?: (session: Session) => void;
+  onArchive?: (session: Session) => void;
+  onUnarchive?: (session: Session) => void;
   onEdit?: (session: Session) => void;
   onDelete?: (session: Session) => void;
   onMoveToFirst?: () => void;
@@ -319,9 +403,12 @@ function SessionCardFullHeader({
   handleRenameSubmit, handleRenameCancel, handleKeyDown,
   searchQuery, category, hoverCardContent,
   isSelected, onSelect,
-  onPin, onUnpin, onRestore, onRestoreCurrentWindow, onRestoreNewWindow, onReplaceCurrentWindow,
+  onPin, onUnpin, onArchive, onUnarchive,
+  onRestore, onRestoreCurrentWindow, onRestoreNewWindow, onReplaceCurrentWindow, onRefresh,
+  defaultRestoreAction, onDefaultRestoreActionChange,
   onEdit, onDelete, onMoveToFirst, onMoveLast,
 }: SessionCardFullHeaderProps) {
+  const isArchived = session.isArchived === true;
   return (
     <>
       {/* Drag handle */}
@@ -353,8 +440,8 @@ function SessionCardFullHeader({
         />
       )}
 
-      {/* Pin / Unpin button */}
-      {!isRenaming && (
+      {/* Pin / Unpin button: hidden for archived sessions (mutually exclusive with pin). */}
+      {!isRenaming && !isArchived && (
         <Tooltip content={session.isPinned ? getMessage('sessionUnpin') : getMessage('sessionPin')}>
           <IconButton
             size="1"
@@ -436,6 +523,9 @@ function SessionCardFullHeader({
           onRestoreNewWindow={onRestoreNewWindow}
           onReplaceCurrentWindow={onReplaceCurrentWindow}
           onCustomize={onRestore}
+          onRefresh={onRefresh}
+          defaultRestoreAction={defaultRestoreAction}
+          onDefaultRestoreActionChange={onDefaultRestoreActionChange}
           data-testid={`session-card-${session.id}-btn-restore`}
         />
       )}
@@ -449,6 +539,8 @@ function SessionCardFullHeader({
           onDelete={onDelete}
           onMoveToFirst={onMoveToFirst}
           onMoveLast={onMoveLast}
+          onArchive={onArchive}
+          onUnarchive={onUnarchive}
         />
       )}
     </>
@@ -470,11 +562,16 @@ export function SessionCard({
   onRestoreCurrentWindow,
   onRestoreNewWindow,
   onReplaceCurrentWindow,
+  onRefresh,
+  defaultRestoreAction,
+  onDefaultRestoreActionChange,
   onRename,
   onEdit,
   onDelete,
   onPin,
   onUnpin,
+  onArchive,
+  onUnarchive,
   forcePreviewOpen = false,
   searchMatchingGroupIds,
   searchQuery,
@@ -582,10 +679,15 @@ export function SessionCard({
               onSelect={onSelect}
               onPin={onPin}
               onUnpin={onUnpin}
+              onArchive={onArchive}
+              onUnarchive={onUnarchive}
               onRestore={onRestore}
               onRestoreCurrentWindow={onRestoreCurrentWindow}
               onRestoreNewWindow={onRestoreNewWindow}
               onReplaceCurrentWindow={onReplaceCurrentWindow}
+              onRefresh={onRefresh}
+              defaultRestoreAction={defaultRestoreAction}
+              onDefaultRestoreActionChange={onDefaultRestoreActionChange}
               onEdit={onEdit}
               onDelete={onDelete}
               onMoveToFirst={onMoveToFirst}

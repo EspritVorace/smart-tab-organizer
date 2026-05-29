@@ -63,14 +63,16 @@ export interface QuickActionDef {
   icon: LucideIcon;
   titleKey: string;
   descKey: string;
+  /** Single-key shortcut letter rendered as a kbd badge on the card. */
+  shortcutLetter?: string;
 }
 
 export const QUICK_ACTIONS: ReadonlyArray<QuickActionDef> = [
-  { id: 'organize',   icon: Wand2,     titleKey: 'homepageQuickOrganizeTitle',   descKey: 'homepageQuickOrganizeDesc' },
-  { id: 'snapshot',   icon: Camera,    titleKey: 'homepageQuickSnapshotTitle',   descKey: 'homepageQuickSnapshotDesc' },
-  { id: 'rule',       icon: Plus,      titleKey: 'homepageQuickRuleTitle',       descKey: 'homepageQuickRuleDesc' },
-  { id: 'io',         icon: Upload,    titleKey: 'homepageQuickIoTitle',         descKey: 'homepageQuickIoDesc' },
-  { id: 'stats',      icon: BarChart3, titleKey: 'homepageQuickStatsTitle',      descKey: 'homepageQuickStatsDesc' },
+  { id: 'organize',   icon: Wand2,     titleKey: 'homepageQuickOrganizeTitle',   descKey: 'homepageQuickOrganizeDesc',   shortcutLetter: 'o' },
+  { id: 'snapshot',   icon: Camera,    titleKey: 'homepageQuickSnapshotTitle',   descKey: 'homepageQuickSnapshotDesc',   shortcutLetter: 's' },
+  { id: 'rule',       icon: Plus,      titleKey: 'homepageQuickRuleTitle',       descKey: 'homepageQuickRuleDesc',       shortcutLetter: 'n' },
+  { id: 'io',         icon: Upload,    titleKey: 'homepageQuickIoTitle',         descKey: 'homepageQuickIoDesc',         shortcutLetter: 'i' },
+  { id: 'stats',      icon: BarChart3, titleKey: 'homepageQuickStatsTitle',      descKey: 'homepageQuickStatsDesc',      shortcutLetter: 't' },
   { id: 'shortcuts',  icon: Settings,  titleKey: 'homepageQuickShortcutsTitle',  descKey: 'homepageQuickShortcutsDesc' },
   { id: 'workspaces', icon: Layers,    titleKey: 'homepageQuickWorkspacesTitle', descKey: 'homepageQuickWorkspacesDesc' },
 ];

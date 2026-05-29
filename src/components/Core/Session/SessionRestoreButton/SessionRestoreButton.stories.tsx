@@ -66,3 +66,19 @@ export const SessionRestoreButtonTile: Story = {
     size: '2',
   },
 };
+
+export const SessionRestoreButtonWithRefresh: Story = {
+  args: {
+    ...SessionRestoreButtonDefault.args,
+    onRefresh: noop,
+  },
+};
+
+export const SessionRestoreButtonTileWithRefresh: Story = {
+  args: {
+    ...SessionRestoreButtonDefault.args,
+    presentation: 'tile',
+    size: '2',
+    onRefresh: noop,
+  },
+};

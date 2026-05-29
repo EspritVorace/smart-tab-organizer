@@ -1,0 +1,70 @@
+---
+title: The home page
+description: The central hub of Options. Onboarding while no rule exists, then pinned profiles, quick actions, mini-statistics and tips.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="At a glance">
+- The home page is the first screen shown when you open Options.
+- While no rule exists, an onboarding hero offers **Create my first rule** or **Import a rules pack**.
+- Otherwise, the page aggregates pinned profiles, quick actions, mini-statistics and tips.
+- Keyboard focus lands on the first action; quick action buttons have single-key shortcuts.
+</Aside>
+
+## Onboarding hero
+
+When no rule is yet defined in the active workspace, the onboarding hero occupies the top of the page. Two actions:
+
+- **Create my first rule**: opens the rule creation wizard directly.
+- **Import a rules pack**: opens the [packs gallery](/reference/categories-et-packs) inside the import wizard.
+
+As soon as a rule exists, the onboarding hero disappears and the other sections take over.
+
+## Pinned profiles
+
+This section gathers up to 6 [pinned sessions](/guides/sessions#sessions-epinglees) from the active workspace, sorted by most recently updated. Each profile is rendered as a clickable tile, navigable with the keyboard (left/right arrows).
+
+Four shortcuts drive restoration of the focused profile:
+
+| Shortcut | Target | Behavior |
+|---|---|---|
+| `R` | Customized restoration | Opens the restore wizard and lets you pick the mode. |
+| `Shift + R` | Restore in current window | Adds the tabs to the window currently in the foreground. |
+| `Alt + R` | Replace tabs in current window | Closes the current tabs and restores the profile in the same window. |
+| `Alt + Shift + R` | Restore in new window | Opens a new dedicated window and restores the tabs there. |
+
+These four targets are also exposed in the popup. See [Sessions, profiles in the popup](/guides/sessions#profils-dans-la-popup).
+
+The action triggered by a click or by `Enter` is configurable in [Settings](/guides/parametres) (under **Default action**).
+
+## Quick actions
+
+A grid of everyday actions, each reachable with a single-key shortcut while the home page has focus:
+
+| Shortcut | Action |
+|---|---|
+| `O` | Organize all tabs using the active rules. |
+| `S` | Save a snapshot of the current window. |
+| `N` | Create a new domain rule. |
+| `I` | Go to Import / Export. |
+| `T` | Go to Statistics. |
+
+Arrow keys move focus between cards; `Home` and `End` jump to the extremes.
+
+## Mini-statistics
+
+Three summary counters: **groups created**, **duplicates closed**, **sessions saved**. Each counter is clickable and takes you to the matching detailed page. The section only appears when at least one counter is non-zero.
+
+## Tips
+
+A lightweight rotating carousel of tips (Smart mode, shortcuts, pinned sessions, packs). Its visibility can be disabled from [Settings](/guides/parametres).
+
+## Next steps
+
+<CardGrid>
+  <LinkCard title="Interface tour" href="/decouverte/tour-interface" description="Overview of the Options and popup screens." />
+  <LinkCard title="Sessions" href="/guides/sessions" description="Capture, restore, pin a session." />
+  <LinkCard title="Categories and packs" href="/reference/categories-et-packs" description="The action offered by the onboarding hero." />
+  <LinkCard title="Keyboard shortcuts" href="/reference/raccourcis-clavier" description="All available combinations, by surface." />
+</CardGrid>

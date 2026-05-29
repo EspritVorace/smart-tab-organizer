@@ -37,6 +37,7 @@ export interface ConfigEditValues {
   urlParsingRegEx: string;
   urlExtractionMode: UrlExtractionModeValue;
   urlQueryParamName: string;
+  fallbackLabel: string;
 }
 
 interface ConfigEditModalProps {
@@ -63,6 +64,7 @@ export function ConfigEditModal({
   const [urlParsingRegEx, setUrlParsingRegEx] = useState(initial.urlParsingRegEx);
   const [urlExtractionMode, setUrlExtractionMode] = useState<UrlExtractionModeValue>(initial.urlExtractionMode);
   const [urlQueryParamName, setUrlQueryParamName] = useState(initial.urlQueryParamName);
+  const [fallbackLabel, setFallbackLabel] = useState(initial.fallbackLabel);
 
   // Reset to initial values whenever modal opens
   useEffect(() => {
@@ -74,6 +76,7 @@ export function ConfigEditModal({
       setUrlParsingRegEx(initial.urlParsingRegEx);
       setUrlExtractionMode(initial.urlExtractionMode);
       setUrlQueryParamName(initial.urlQueryParamName);
+      setFallbackLabel(initial.fallbackLabel);
     }
   }, [isOpen, initial]);
 
@@ -81,13 +84,16 @@ export function ConfigEditModal({
     setConfigMode(newMode);
     // Clear presetId when leaving preset mode: otherwise inferConfigMode silently
     // re-classifies the rule as 'preset' on next open, undoing the user's mode change
-    // (presetId would also be persisted alongside a non-preset configMode — corrupt state).
+    // (presetId would also be persisted alongside a non-preset configMode, corrupt state).
     if (newMode !== 'preset') {
       setPresetId(null);
     }
-    // Ask mode persists groupNameSource as 'manual' — matches RuleWizardModal convention.
+    // Ask mode persists groupNameSource as 'manual', matches RuleWizardModal convention.
     if (newMode === 'ask') {
       setGroupNameSource('manual');
+    }
+    if (newMode === 'label') {
+      setGroupNameSource('label');
     }
   }, []);
 
@@ -141,6 +147,7 @@ export function ConfigEditModal({
       urlParsingRegEx,
       urlExtractionMode,
       urlQueryParamName,
+      fallbackLabel,
     });
     onClose();
   };
@@ -170,6 +177,7 @@ export function ConfigEditModal({
       >
         <DomainRuleConfigForm
           idPrefix="edit"
+          autoFocusFirstField
           configMode={configMode}
           onConfigModeChange={handleConfigModeChange}
           presetId={presetId}
@@ -189,6 +197,8 @@ export function ConfigEditModal({
           urlQueryParamName={urlQueryParamName}
           onUrlQueryParamNameChange={setUrlQueryParamName}
           urlQueryParamNameError={queryParamNameError}
+          fallbackLabel={fallbackLabel}
+          onFallbackLabelChange={setFallbackLabel}
         />
       </Flex>
     </EditModalShell>

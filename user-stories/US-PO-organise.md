@@ -34,8 +34,8 @@
 - [ ] The kept tab is reloaded (`chrome.tabs.reload`).
 - [ ] All deduplicated tabs are closed via `chrome.tabs.remove` in a single batch operation (single call with an array of IDs).
 - [ ] The `tabsDeduplicatedCount` counter is incremented by the number of closed tabs.
-- [ ] If no duplicate is found, no notification is shown for deduplication.
-- [ ] If at least one duplicate is found, a single Chrome notification is shown at the end indicating the total number of closed tabs (e.g. "3 duplicate tabs removed"), without an individual notification per tab.
+- [ ] If at least one duplicate is found, a single Chrome notification is shown at the end indicating the total number of closed tabs (e.g. "3 duplicate tabs removed"), without an individual notification per tab. The notification is gated by `notifyOnOrganize` (see US-N006).
+- [ ] If no duplicate is found AND no grouping change happens either, the noop notification described in US-N006 takes over.
 - [ ] Tabs with special schemes (`chrome:`, `chrome-extension:`, `about:`) are ignored.
 
 ---
@@ -74,8 +74,8 @@
 
 **Notifications**
 
-- [ ] If at least one group was created or modified, a single Chrome notification is shown at the end (e.g. "5 tabs grouped into 3 groups").
-- [ ] If no tab was grouped, no notification is shown.
+- [ ] If at least one tab was actually moved into a group, a single Chrome notification is shown at the end (e.g. "5 tabs grouped into 3 groups"). The notification is gated by `notifyOnOrganize` (see US-N006).
+- [ ] If no tab was moved (plan empty, single-member targets, or every matching tab was already in its target group), the noop notification described in US-N006 takes over.
 
 ---
 

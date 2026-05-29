@@ -320,7 +320,7 @@ test.describe('Rules screenshots', () => {
         await dialog.locator('button.rt-SegmentedControlItem').nth(1).click();
         await page.waitForTimeout(400);
 
-        const textarea = page.locator('textarea');
+        const textarea = page.locator('[data-testid="json-code-editor"] .cm-content');
         await textarea.waitFor({ state: 'visible', timeout: 4_000 });
         await textarea.fill(conflictJson);
 

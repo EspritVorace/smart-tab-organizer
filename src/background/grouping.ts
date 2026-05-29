@@ -6,6 +6,7 @@ import { promptForGroupName } from './messaging.js';
 import { showNotification, type UndoAction } from '@/utils/notifications.js';
 import { getMessage } from '@/utils/i18n.js';
 import type { DomainRuleSetting, AppSettings } from '@/types/syncSettings.js';
+import type { ChromeTabGroupsExtended } from '@/types/chromeApi.js';
 import { getRuleCategory } from '@/utils/categoriesStore.js';
 import { logger } from '@/utils/logger.js';
 
@@ -126,7 +127,7 @@ function tryExtractFromUrl(rule: DomainRuleSetting, openerTab: Browser.tabs.Tab,
 }
 
 function extractRawGroupName(rule: DomainRuleSetting, openerTab: Browser.tabs.Tab): string | null {
-    const fallbackLabel = rule.label || 'SmartGroup';
+    const fallbackLabel = rule.fallbackLabel?.trim() || rule.label || 'SmartGroup';
 
     switch (rule.groupNameSource) {
         case 'title':
@@ -148,7 +149,7 @@ function extractRawGroupName(rule: DomainRuleSetting, openerTab: Browser.tabs.Ta
         case 'smart_label': {
             const extracted = tryExtractGroupNameFromPresetOrFallback(rule, openerTab);
             if (extracted) return extracted;
-            logger.debug(`[GROUPING_DEBUG] Using rule label as fallback: "${fallbackLabel}".`);
+            logger.debug(`[GROUPING_DEBUG] Using rule fallback label: "${fallbackLabel}".`);
             return fallbackLabel;
         }
         case 'smart': {
@@ -159,6 +160,9 @@ function extractRawGroupName(rule: DomainRuleSetting, openerTab: Browser.tabs.Ta
             }
             return extracted;
         }
+        case 'label':
+            logger.debug(`[GROUPING_DEBUG] Label mode: using rule fallback label: "${fallbackLabel}".`);
+            return fallbackLabel;
         default:
             return fallbackLabel;
     }
@@ -232,6 +236,29 @@ export async function addToExistingGroup(
     await browser.tabGroups.update(groupId, updatePayload);
 }
 
+// Looks up a tab group in `windowId` whose title matches `groupName`.
+// When the rule provides a `groupColor`, the group's color must match too;
+// when `groupColor` is null the rule has no color preference, so any color
+// is accepted.
+export async function findMatchingExistingGroup(
+    windowId: number | undefined,
+    groupName: string,
+    groupColor: string | null
+): Promise<number | null> {
+    if (windowId === undefined) return null;
+    try {
+        const groups = await (browser.tabGroups as unknown as ChromeTabGroupsExtended).query({ windowId });
+        const match = groups.find(g =>
+            g.title === groupName &&
+            (groupColor === null || g.color === groupColor)
+        );
+        return match?.id ?? null;
+    } catch (e) {
+        logger.warn('[GROUPING_DEBUG] findMatchingExistingGroup: tabGroups.query failed.', describeError(e));
+        return null;
+    }
+}
+
 export async function handleManualGroupNaming(
     rule: DomainRuleSetting,
     targetGroupId: number,
@@ -257,7 +284,7 @@ export async function handleManualGroupNaming(
     }
 }
 
-export async function performGroupingOperation(context: GroupingContext): Promise<{targetGroupId: number, groupedTabIds: number[]}> {
+export async function performGroupingOperation(context: GroupingContext): Promise<{targetGroupId: number, groupedTabIds: number[], joinedExisting: boolean}> {
     const openerTabId = context.openerTab.id;
     const newTabId = context.newTab.id;
     if (openerTabId === undefined || newTabId === undefined) {
@@ -272,12 +299,28 @@ export async function performGroupingOperation(context: GroupingContext): Promis
 
     let targetGroupId: number;
     let groupedTabIds: number[];
+    let joinedExisting = false;
 
     if (openerGroupId === browser.tabs.TAB_ID_NONE || typeof openerGroupId !== 'number' || openerGroupId <= 0) {
-        logger.debug(`[GROUPING_DEBUG] Opener tab ${currentOpenerTabId} is not in a group. Creating new group.`);
-        const tabsToGroup = [currentOpenerTabId, newTabId];
-        groupedTabIds = tabsToGroup.slice();
-        targetGroupId = await createNewGroup(tabsToGroup, context.groupName, context.groupColor, context.rule.id);
+        const matchingGroupId = await findMatchingExistingGroup(
+            currentOpenerTab.windowId,
+            context.groupName,
+            context.groupColor
+        );
+
+        if (matchingGroupId !== null) {
+            logger.debug(`[GROUPING_DEBUG] Opener tab ${currentOpenerTabId} is not grouped; joining existing group ${matchingGroupId} matching name "${context.groupName}" and color "${context.groupColor ?? '(any)'}".`);
+            targetGroupId = matchingGroupId;
+            groupedTabIds = [currentOpenerTabId, newTabId];
+            await browser.tabs.group({ groupId: matchingGroupId, tabIds: [currentOpenerTabId, newTabId] });
+            await browser.tabGroups.update(matchingGroupId, { collapsed: false });
+            joinedExisting = true;
+        } else {
+            logger.debug(`[GROUPING_DEBUG] Opener tab ${currentOpenerTabId} is not in a group and no matching existing group found. Creating new group.`);
+            const tabsToGroup = [currentOpenerTabId, newTabId];
+            groupedTabIds = tabsToGroup.slice();
+            targetGroupId = await createNewGroup(tabsToGroup, context.groupName, context.groupColor, context.rule.id);
+        }
     } else {
         logger.debug(`[GROUPING_DEBUG] Opener tab ${currentOpenerTabId} already in group ${openerGroupId}.`);
         targetGroupId = openerGroupId;
@@ -285,7 +328,7 @@ export async function performGroupingOperation(context: GroupingContext): Promis
         await addToExistingGroup(openerGroupId, newTabId);
     }
 
-    return { targetGroupId, groupedTabIds };
+    return { targetGroupId, groupedTabIds, joinedExisting };
 }
 
 export async function processGroupingForNewTab(openerTab: Browser.tabs.Tab, newTab: Browser.tabs.Tab): Promise<void> {
@@ -318,14 +361,16 @@ export async function processGroupingForNewTab(openerTab: Browser.tabs.Tab, newT
     logger.debug(`[GROUPING_DEBUG] Rule found: "${rule.label}", groupName: "${context.groupName}"`);
 
     try {
-        const { targetGroupId, groupedTabIds } = await performGroupingOperation(context);
+        const { targetGroupId, groupedTabIds, joinedExisting } = await performGroupingOperation(context);
         logger.debug(`[GROUPING_DEBUG] Grouping completed for new tab ${newTab.id}. Color: ${context.groupColor || 'Chrome default'}.`);
 
         // For smart_manual: only prompt when extraction failed (user story: "extracts name OR falls back to manual prompt").
         // For plain manual: always prompt.
+        // Skip manual naming when we joined an existing group: its name is already settled.
         const needsManualNaming =
-            rule.groupNameSource === 'manual' ||
-            (rule.groupNameSource === 'smart_manual' && !tryExtractGroupNameFromPresetOrFallback(rule, openerTab));
+            !joinedExisting &&
+            (rule.groupNameSource === 'manual' ||
+                (rule.groupNameSource === 'smart_manual' && !tryExtractGroupNameFromPresetOrFallback(rule, openerTab)));
         if (needsManualNaming && openerTab.id !== undefined) {
             await handleManualGroupNaming(rule, targetGroupId, context.groupName, groupedTabIds, openerTab.id);
         }

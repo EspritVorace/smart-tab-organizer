@@ -1,15 +1,31 @@
-import type { Statistics, DailyBuckets } from '@/types/statistics.js';
-import { defaultStatistics } from '@/types/statistics.js';
+import type {
+  Statistics,
+  DailyBuckets,
+  SessionDailyBuckets,
+  SessionEventType,
+} from '@/types/statistics.js';
+import { defaultStatistics, defaultSessionEventCounters } from '@/types/statistics.js';
 import { logger } from './logger.js';
 import { getActiveScopedItems, getActiveScopedItemsSync } from './workspaceContext.js';
 
-export function purgeOldBuckets(buckets: DailyBuckets, maxDays = 90): DailyBuckets {
+function purgeBucketsByDate<T extends Record<string, unknown>>(buckets: T, maxDays: number): T {
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - maxDays);
   const cutoffStr = cutoff.toISOString().slice(0, 10);
   return Object.fromEntries(
     Object.entries(buckets).filter(([date]) => date >= cutoffStr),
-  );
+  ) as T;
+}
+
+export function purgeOldBuckets(buckets: DailyBuckets, maxDays = 90): DailyBuckets {
+  return purgeBucketsByDate(buckets, maxDays);
+}
+
+export function purgeOldSessionBuckets(
+  buckets: SessionDailyBuckets,
+  maxDays = 90,
+): SessionDailyBuckets {
+  return purgeBucketsByDate(buckets, maxDays);
 }
 
 export async function getStatisticsData(): Promise<Statistics> {
@@ -70,6 +86,50 @@ export async function incrementStat(type: 'grouping' | 'dedup', ruleId: string):
     await setStatisticsData(updated);
   } catch (error) {
     logger.error(`Error incrementing stat ${type} for rule ${ruleId}:`, error);
+  }
+}
+
+export async function incrementSessionEvent(
+  event: SessionEventType,
+  opts?: { tabsRestored?: number },
+): Promise<void> {
+  try {
+    const current = await getStatisticsData();
+    const events = current.sessionEvents ?? defaultSessionEventCounters;
+    const today = new Date().toISOString().slice(0, 10);
+
+    const buckets = events.dailyBuckets ?? {};
+    const dayBucket = buckets[today] ?? {
+      created: 0,
+      restored: 0,
+      tabsRestored: 0,
+      archived: 0,
+    };
+
+    const tabsRestoredDelta = event === 'restored' ? (opts?.tabsRestored ?? 0) : 0;
+
+    const updatedDayBucket = {
+      ...dayBucket,
+      [event]: dayBucket[event] + 1,
+      tabsRestored: dayBucket.tabsRestored + tabsRestoredDelta,
+    };
+
+    const updatedEvents = {
+      ...events,
+      [event]: events[event] + 1,
+      tabsRestored: events.tabsRestored + tabsRestoredDelta,
+      dailyBuckets: purgeOldSessionBuckets({ ...buckets, [today]: updatedDayBucket }),
+    };
+
+    const updated: Statistics = {
+      ...current,
+      sessionEvents: updatedEvents,
+      firstUsedAt: current.firstUsedAt ?? new Date().toISOString(),
+    };
+
+    await setStatisticsData(updated);
+  } catch (error) {
+    logger.error(`Error incrementing session event ${event}:`, error);
   }
 }
 

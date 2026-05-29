@@ -11,9 +11,9 @@ import {
 } from './workspaceStorage.js';
 import type { WorkspaceMeta, WorkspaceAccentColor } from '@/schemas/workspace.js';
 import type { AppSettings } from '@/types/syncSettings.js';
+import { defaultAppSettings } from '@/types/syncSettings.js';
 import type { Statistics } from '@/types/statistics.js';
 import type { Session } from '@/types/session.js';
-import type { RuleCategory } from '@/schemas/category.js';
 import type { ImportWorkspaceData } from '@/schemas/importExport.js';
 
 /**
@@ -29,11 +29,12 @@ export interface WorkspaceExportPayload {
     | 'globalDeduplicationEnabled'
     | 'deduplicateUnmatchedDomains'
     | 'deduplicationKeepStrategy'
+    | 'defaultRestoreAction'
     | 'notifyOnGrouping'
     | 'notifyOnDeduplication'
+    | 'notifyOnOrganize'
   >;
   domainRules: AppSettings['domainRules'];
-  categories: RuleCategory[];
   sessions: Session[];
   statistics?: Statistics;
 }
@@ -41,7 +42,6 @@ export interface WorkspaceExportPayload {
 async function readScopedSnapshot(items: ScopedItems): Promise<{
   settings: WorkspaceExportPayload['settings'];
   domainRules: AppSettings['domainRules'];
-  categories: RuleCategory[];
   sessions: Session[];
   statistics: Statistics;
 }> {
@@ -50,13 +50,20 @@ async function readScopedSnapshot(items: ScopedItems): Promise<{
     items.globalDeduplicationEnabledItem,
     items.deduplicateUnmatchedDomainsItem,
     items.deduplicationKeepStrategyItem,
+    items.defaultRestoreActionItem,
     items.notifyOnGroupingItem,
     items.notifyOnDeduplicationItem,
+    items.notifyOnOrganizeItem,
     items.domainRulesItem,
-    items.categoriesItem,
     items.sessionsItem,
     items.statisticsItem,
+    items.pinnedSessionsItem,
+    items.archivedSessionsItem,
   ]);
+
+  const activeSessions = (results[9].value as Session[]) ?? [];
+  const pinnedSessions = (results[11].value as Session[]) ?? [];
+  const archivedSessions = (results[12].value as Session[]) ?? [];
 
   return {
     settings: {
@@ -64,13 +71,14 @@ async function readScopedSnapshot(items: ScopedItems): Promise<{
       globalDeduplicationEnabled: results[1].value as boolean,
       deduplicateUnmatchedDomains: results[2].value as boolean,
       deduplicationKeepStrategy: results[3].value as AppSettings['deduplicationKeepStrategy'],
-      notifyOnGrouping: results[4].value as boolean,
-      notifyOnDeduplication: results[5].value as boolean,
+      defaultRestoreAction: results[4].value as AppSettings['defaultRestoreAction'],
+      notifyOnGrouping: results[5].value as boolean,
+      notifyOnDeduplication: results[6].value as boolean,
+      notifyOnOrganize: results[7].value as boolean,
     },
-    domainRules: (results[6].value as AppSettings['domainRules']) ?? [],
-    categories: (results[7].value as RuleCategory[]) ?? [],
-    sessions: (results[8].value as Session[]) ?? [],
-    statistics: results[9].value as Statistics,
+    domainRules: (results[8].value as AppSettings['domainRules']) ?? [],
+    sessions: [...pinnedSessions, ...activeSessions, ...archivedSessions],
+    statistics: results[10].value as Statistics,
   };
 }
 
@@ -90,7 +98,6 @@ export async function collectWorkspaceExport(
     workspace: { name: workspace.name, accentColor: workspace.accentColor },
     settings: snapshot.settings,
     domainRules: snapshot.domainRules,
-    categories: snapshot.categories,
     sessions: snapshot.sessions,
   };
   if (options.note?.trim()) payload.note = options.note.trim();
@@ -103,16 +110,31 @@ async function writeScopedSnapshot(
   payload: ImportWorkspaceData,
   { includeStatistics }: { includeStatistics: boolean },
 ): Promise<void> {
+  // Partition the imported flat session list into the three bucket items so
+  // archives and pins land in their own storage keys (matches the runtime
+  // contract enforced by `sessionStorage`).
+  const pinned: Session[] = [];
+  const active: Session[] = [];
+  const archived: Session[] = [];
+  for (const session of payload.sessions as Session[]) {
+    if (session.isArchived) archived.push(session);
+    else if (session.isPinned) pinned.push(session);
+    else active.push(session);
+  }
+
   const writes: Parameters<typeof storage.setItems>[0] = [
     { item: items.globalGroupingEnabledItem, value: payload.settings.globalGroupingEnabled },
     { item: items.globalDeduplicationEnabledItem, value: payload.settings.globalDeduplicationEnabled },
     { item: items.deduplicateUnmatchedDomainsItem, value: payload.settings.deduplicateUnmatchedDomains },
     { item: items.deduplicationKeepStrategyItem, value: payload.settings.deduplicationKeepStrategy },
+    { item: items.defaultRestoreActionItem, value: payload.settings.defaultRestoreAction ?? defaultAppSettings.defaultRestoreAction },
     { item: items.notifyOnGroupingItem, value: payload.settings.notifyOnGrouping },
     { item: items.notifyOnDeduplicationItem, value: payload.settings.notifyOnDeduplication },
+    { item: items.notifyOnOrganizeItem, value: payload.settings.notifyOnOrganize ?? defaultAppSettings.notifyOnOrganize },
     { item: items.domainRulesItem, value: payload.domainRules as AppSettings['domainRules'] },
-    { item: items.categoriesItem, value: payload.categories },
-    { item: items.sessionsItem, value: payload.sessions },
+    { item: items.sessionsItem, value: active },
+    { item: items.pinnedSessionsItem, value: pinned },
+    { item: items.archivedSessionsItem, value: archived },
   ];
   if (includeStatistics && payload.statistics) {
     writes.push({ item: items.statisticsItem, value: payload.statistics as Statistics });

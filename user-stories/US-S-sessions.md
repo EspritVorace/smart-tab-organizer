@@ -232,3 +232,22 @@
 - [ ] A system notification (title "Session activated", message `Switched to session "{name}"`) confirms the switch after the restore.
 - [ ] Automatic deduplication is neutralized for the duration of the restore (cf. corresponding US-D): if a kept pinned tab shares a URL with a session tab, both tabs coexist.
 - [ ] From the popup, the popup automatically closes after triggering the replacement.
+
+## US-S022: Choice of the default action for the Restore button
+
+**As a** user,
+**I want** to choose which restore action is triggered by the primary Restore button (among: current window, new window, replace, customize),
+**so that** I can trigger the action I use most often in one click without going through the dropdown menu.
+
+### Acceptance criteria
+
+- [ ] A new `defaultRestoreAction` field is added to `AppSettings`, with possible values `current`, `new`, `replace`, `customize`. Default value is `current`, preserving prior behavior.
+- [ ] The setting is persisted in `browser.storage.local`, scoped per workspace, through the existing pipeline (`getSettings`, `setSettings`, `updateSettings`, `useSettings`, `getActiveScopedItems`, `WORKSPACE_SCOPED_KEYS`), and included in the workspace import/export payload.
+- [ ] Clicking the primary (left) part of the `SessionRestoreButton` triggers the action matching `defaultRestoreAction`. When the value is `customize`, the primary click opens the customized restore flow.
+- [ ] The `aria-label` of the primary part reflects the current action.
+- [ ] The dropdown menu keeps its 4 clickable actions (immediate execution) with their `data-testid` and shortcuts unchanged. Below them, a `Separator` and a `RadioGroup` titled "Default action" list the same 4 options; the radio matching `defaultRestoreAction` is announced as selected, and picking a radio updates the setting without triggering any restoration.
+- [ ] Each `RadioItem` of the menu carries a stable `data-testid` of the form `session-restore-default-{current|new|replace|customize}`.
+- [ ] The Settings page exposes a `RadioGroup` titled "Default action" with a localized label and description, allowing the user to change `defaultRestoreAction` outside any session card. Changes made there are reflected on all session cards (and vice versa) without manual reload.
+- [ ] The Sessions page, the popup (`PopupProfilesList`) and the HomePage pinned tiles all respect `defaultRestoreAction` for the primary click. The Sessions page, the popup and the pinned tiles also expose the `RadioGroup` in their dropdown so the default can be changed in place; the HomePage tiles map `customize` to the existing `custom` `HomeRestoreTarget` without introducing a new value.
+- [ ] All strings (group label, description) exist in `fr`, `en` and `es`. Existing keys (`sessionRestoreCurrentWindow`, etc.) are reused for the per-option labels.
+- [ ] The keyboard shortcuts of the 4 menu actions (Shift+R, Alt+Shift+R, Alt+R, R) remain attached to those entries and continue to trigger their specific action regardless of `defaultRestoreAction`.

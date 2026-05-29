@@ -111,12 +111,12 @@ describe('SHORTCUTS_REGISTRY', () => {
   it('contains the expected number of entries per group (parity with legacy panel)', () => {
     expect(getShortcutsByGroup('global')).toHaveLength(3);
     expect(getShortcutsByGroup('popup')).toHaveLength(5);
-    expect(getShortcutsByGroup('options')).toHaveLength(10);
-    expect(getShortcutsByGroup('list-rules')).toHaveLength(7);
-    expect(getShortcutsByGroup('list-sessions')).toHaveLength(6);
+    expect(getShortcutsByGroup('options')).toHaveLength(11);
+    expect(getShortcutsByGroup('list-rules')).toHaveLength(11);
+    expect(getShortcutsByGroup('list-sessions')).toHaveLength(9);
     expect(getShortcutsByGroup('list-workspaces')).toHaveLength(1);
-    expect(getShortcutsByGroup('list-home')).toHaveLength(4);
-    expect(getShortcutsByGroup('session-card')).toHaveLength(4);
+    expect(getShortcutsByGroup('list-home')).toHaveLength(9);
+    expect(getShortcutsByGroup('session-card')).toHaveLength(5);
     expect(getShortcutsByGroup('importexport')).toHaveLength(6);
   });
 
@@ -160,10 +160,10 @@ describe('registry helpers', () => {
     expect(popupEntries.length).toBe(5);
 
     const cardEntries = getShortcutsByScope('widget:session-card');
-    expect(cardEntries.length).toBe(7);
+    expect(cardEntries.length).toBe(11);
 
     const ruleCardEntries = getShortcutsByScope('widget:rule-card');
-    expect(ruleCardEntries.length).toBe(4);
+    expect(ruleCardEntries.length).toBe(8);
   });
 
   it('getShortcutsByGroup returns only entries of the requested group', () => {
