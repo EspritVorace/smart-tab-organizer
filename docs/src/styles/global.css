@@ -140,3 +140,27 @@ button:focus-visible,
 .sl-link-button.primary:hover {
   color: var(--blog-background);
 }
+
+/* ----- Landing hero: centered to match the sections below ----- */
+/* This site ships no hero image. Starlight's splash hero still reserves a
+   second (image) grid column (7fr 4fr), so the copy stays stranded on the
+   left with an empty right column. Force a single centered column so the
+   hero lines up with the centered landing sections rendered underneath. */
+.hero {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+
+.hero .stack {
+  align-items: center;
+}
+
+.hero .copy {
+  align-items: center;
+  text-align: center;
+  max-width: 50rem;
+}
+
+.hero .actions {
+  justify-content: center;
+}
