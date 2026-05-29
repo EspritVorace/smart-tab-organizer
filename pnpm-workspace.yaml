@@ -9,6 +9,8 @@ overrides:
   brace-expansion@5: ^5.0.5
   rollup: npm:@rollup/wasm-node@^4.0.0
   vite-node: ^6.0.0
+  tmp: ^0.2.6
+  uuid: ^11.1.1
 allowBuilds:
   esbuild: true
   spawn-sync: true
