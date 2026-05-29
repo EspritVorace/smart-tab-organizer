@@ -6,7 +6,6 @@ const locale = getLocale(Astro.url.pathname);
 const t = landing[locale].cta;
 
 const installHref = localizePath(locale, t.installPath);
-const startHref = localizePath(locale, t.startPath);
 ---
 
 <section class="closing-cta" aria-labelledby="cta-title">
@@ -14,7 +13,6 @@ const startHref = localizePath(locale, t.startPath);
   <p>{t.subtitle}</p>
   <div class="cta-actions">
     <a class="cta-button cta-primary" href={installHref}>{t.install}</a>
-    <a class="cta-button cta-secondary" href={startHref}>{t.start}</a>
     <a class="cta-button cta-minimal" href={t.githubHref} rel="noopener" target="_blank">
       {t.github}
     </a>
@@ -70,16 +68,6 @@ const startHref = localizePath(locale, t.startPath);
   .cta-primary {
     background: var(--blog-accent);
     color: var(--blog-background);
-  }
-
-  .cta-secondary {
-    background: transparent;
-    color: var(--blog-accent);
-    border-color: var(--blog-accent);
-  }
-
-  .cta-secondary:hover {
-    background: var(--sl-color-bg-sidebar);
   }
 
   .cta-minimal {

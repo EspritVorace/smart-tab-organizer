@@ -64,8 +64,6 @@ export interface LandingCopy {
     subtitle: string;
     install: string;
     installPath: string;
-    start: string;
-    startPath: string;
     github: string;
     githubHref: string;
   };
@@ -204,8 +202,6 @@ export const landing: Record<Locale, LandingCopy> = {
       subtitle: 'Installation en quelques secondes, sans compte ni configuration obligatoire.',
       install: 'Installer',
       installPath: '/decouverte/installation',
-      start: 'Commencer',
-      startPath: '/decouverte/pourquoi',
       github: 'Voir sur GitHub',
       githubHref: GITHUB_URL,
     },
@@ -341,8 +337,6 @@ export const landing: Record<Locale, LandingCopy> = {
       subtitle: 'Install in seconds, with no account and no mandatory setup.',
       install: 'Install',
       installPath: '/decouverte/installation',
-      start: 'Get started',
-      startPath: '/decouverte/pourquoi',
       github: 'View on GitHub',
       githubHref: GITHUB_URL,
     },
@@ -478,8 +472,6 @@ export const landing: Record<Locale, LandingCopy> = {
       subtitle: 'Instalacion en segundos, sin cuenta ni configuracion obligatoria.',
       install: 'Instalar',
       installPath: '/decouverte/installation',
-      start: 'Empezar',
-      startPath: '/decouverte/pourquoi',
       github: 'Ver en GitHub',
       githubHref: GITHUB_URL,
     },
