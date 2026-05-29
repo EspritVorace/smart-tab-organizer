@@ -1,0 +1,104 @@
+---
+import { Icon } from 'astro-icon/components';
+import { getLocale } from '../../i18n/locale';
+import { landing } from '../../i18n/landing';
+
+const locale = getLocale(Astro.url.pathname);
+const t = landing[locale].features;
+---
+
+<section class="landing-features" aria-labelledby="features-title">
+  <div class="landing-section-head">
+    <h2 id="features-title">{t.title}</h2>
+    <p>{t.subtitle}</p>
+  </div>
+  <ul class="feature-grid" role="list">
+    {
+      t.items.map((item) => (
+        <li class="feature-card">
+          <span class="feature-icon" aria-hidden="true">
+            <Icon name={item.icon} />
+          </span>
+          <h3>{item.title}</h3>
+          <p>{item.description}</p>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .landing-features {
+    margin-block: 4rem;
+  }
+
+  .landing-section-head {
+    text-align: center;
+    max-width: 48rem;
+    margin-inline: auto;
+    margin-block-end: 2.5rem;
+  }
+
+  .landing-section-head h2 {
+    font-size: clamp(1.6rem, 1rem + 2.4vw, 2.4rem);
+    margin-block-end: 0.5rem;
+  }
+
+  .landing-section-head p {
+    color: var(--sl-color-gray-2);
+    font-size: 1.05rem;
+    margin: 0;
+  }
+
+  .feature-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1.25rem;
+  }
+
+  .feature-card {
+    background: var(--sl-color-bg-sidebar);
+    border: 1px solid var(--blog-border);
+    border-radius: 0.9rem;
+    padding: 1.5rem;
+    transition:
+      transform 0.15s ease,
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--blog-accent);
+    box-shadow: 0 8px 24px -16px var(--blog-accent);
+  }
+
+  .feature-icon {
+    display: inline-flex;
+    padding: 0.6rem;
+    border-radius: 0.75rem;
+    background: var(--blog-muted);
+    margin-block-end: 0.9rem;
+  }
+
+  .feature-icon :global(svg) {
+    width: 2.25rem;
+    height: 2.25rem;
+    display: block;
+  }
+
+  .feature-card h3 {
+    font-size: 1.15rem;
+    margin: 0 0 0.4rem;
+  }
+
+  .feature-card p {
+    margin: 0;
+    color: var(--sl-color-gray-2);
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+</style>
