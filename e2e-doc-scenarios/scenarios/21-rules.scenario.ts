@@ -67,10 +67,9 @@ test('rules feature screens', async (
     );
     const list = new DomainRulesListPage(page);
     await list.expectListVisible();
-    // Select the first two rule checkboxes to reveal the bulk action bar.
-    const checkboxes = page.locator('[role="listitem"] button[role="checkbox"]');
-    await checkboxes.nth(0).click();
-    await checkboxes.nth(1).click();
+    // Select two rules to reveal the bulk action bar.
+    await list.selectRule('sc-rule-jira');
+    await list.selectRule('sc-rule-github');
     await page.waitForTimeout(400);
     await captureStep(page, 'rules-bulk-actions', {
       description: 'Rules list with two rules selected and the bulk action bar visible.',
