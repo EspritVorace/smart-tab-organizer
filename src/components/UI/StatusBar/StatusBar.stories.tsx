@@ -3,17 +3,12 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { StatusBar } from './StatusBar';
 import { ShortcutsControlProvider } from '@/contexts/ShortcutsControlContext';
 
-interface StatusBarStoryArgs {
-  version: string;
-}
-
-const meta: Meta<StatusBarStoryArgs> = {
+const meta: Meta<typeof StatusBar> = {
   title: 'Components/UI/StatusBar/StatusBar',
   component: StatusBar,
   parameters: { layout: 'padded' },
-  args: { version: '1.1.4' },
-  render: ({ version }) => (
-    <ShortcutsControlProvider openShortcuts={() => undefined} version={version}>
+  render: () => (
+    <ShortcutsControlProvider openShortcuts={() => undefined}>
       <div style={{ width: 480, border: '1px dashed var(--gray-a5)' }}>
         <StatusBar />
       </div>
@@ -22,10 +17,6 @@ const meta: Meta<StatusBarStoryArgs> = {
 };
 
 export default meta;
-type Story = StoryObj<StatusBarStoryArgs>;
+type Story = StoryObj<typeof StatusBar>;
 
 export const StatusBarDefault: Story = {};
-
-export const StatusBarShortVersion: Story = {
-  args: { version: '2.0.0' },
-};
