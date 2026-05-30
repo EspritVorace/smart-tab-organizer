@@ -36,6 +36,19 @@ export async function clearExtensionStorage(context: BrowserContext): Promise<vo
   });
 }
 
+/** Seed an arbitrary set of `chrome.storage.local` keys (e.g. `statistics`,
+ * `workspaces`). Generic escape hatch for scenarios that need a storage shape
+ * the dedicated helpers do not cover. */
+export async function seedStorage(
+  context: BrowserContext,
+  items: Record<string, unknown>,
+): Promise<void> {
+  const sw = await waitForServiceWorker(context);
+  await sw.evaluate(async (data) => {
+    await chrome.storage.local.set(data);
+  }, items as unknown as Parameters<typeof sw.evaluate>[1]);
+}
+
 /** Seed `domainRules` directly into `chrome.storage.local`. */
 export async function seedDomainRules<T>(
   context: BrowserContext,

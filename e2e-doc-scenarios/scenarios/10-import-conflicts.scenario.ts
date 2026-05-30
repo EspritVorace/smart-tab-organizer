@@ -1,7 +1,7 @@
 /**
  * Satellite scenario `10-import-conflicts`.
  *
- * Starts with 4 seeded rules (reused from `e2e-screenshots/fixtures/rules-seed.ts`),
+ * Starts with the shared seeded rules (`../fixtures/seed-data.ts`),
  * opens the rules import wizard, pastes a JSON crafted to produce one new,
  * one conflicting and one identical rule (`buildConflictJson()`), and
  * captures every step of the classification + conflict-mode resolution.
@@ -20,8 +20,7 @@ import {
   openRulesImportWizard,
   seedDomainRules,
 } from '../../e2e-shared/actions/index.js';
-import { SCREENSHOT_RULES } from '../../e2e-screenshots/fixtures/rules-seed.js';
-import { buildConflictJson } from '../../e2e-screenshots/fixtures/conflicts-seed.js';
+import { SCREENSHOT_RULES, buildConflictJson } from '../fixtures/seed-data.js';
 import { IMPORT_CONFLICTS_MANIFEST } from './10-import-conflicts.routing.js';
 
 const SCENARIO_ID = '10-import-conflicts';

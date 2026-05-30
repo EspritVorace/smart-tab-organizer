@@ -83,6 +83,7 @@ export {
 
 export {
   clearExtensionStorage,
+  seedStorage,
   seedDomainRules,
   seedSessions,
 } from './storage-seed.js';

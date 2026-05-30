@@ -4,8 +4,8 @@
  *
  * Resyncs every destination root (`doc/readme/`, `doc/chrome-web-store/`, and
  * the Starlight assets directory) from the captures already cached under
- * `e2e-doc-scenarios/output/` and `docs/src/assets/screenshots/`, without
- * re-running Playwright. Reuses `e2e-shared/sharp-save.ts` semantics: every
+ * `e2e-doc-scenarios/output/`, without re-running Playwright. Reuses
+ * `e2e-shared/sharp-save.ts` semantics: every
  * file is re-encoded through `sharp` to strip ancillary PNG chunks and stay
  * byte-stable across runs.
  *
@@ -36,10 +36,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 
-const SCREENSHOTS_OUTPUT_DIR = path.join(PROJECT_ROOT, 'docs/src/assets/screenshots');
 const SCENARIOS_OUTPUT_ROOT = path.join(PROJECT_ROOT, 'e2e-doc-scenarios/output');
 const SCENARIOS_DIR = path.join(PROJECT_ROOT, 'e2e-doc-scenarios/scenarios');
-const SCREENSHOTS_ROUTING = path.join(PROJECT_ROOT, 'e2e-screenshots/routing.ts');
 
 const ALL_LOCALES = ['en', 'fr', 'es'];
 const ALL_THEMES = ['light', 'dark'];
@@ -90,27 +88,6 @@ async function importManifest(absolutePath, exportNames) {
   throw new Error(`No manifest export found in ${absolutePath}`);
 }
 
-function listScreenshotCaptures(dir) {
-  if (!fs.existsSync(dir)) return [];
-  const captures = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (!entry.isFile() || !entry.name.endsWith('.png')) continue;
-    const base = entry.name.slice(0, -'.png'.length);
-    const parts = base.split('-');
-    if (parts.length < 3) continue;
-    const [locale, theme, ...rest] = parts;
-    if (!ALL_LOCALES.includes(locale)) continue;
-    if (!ALL_THEMES.includes(theme)) continue;
-    captures.push({
-      locale,
-      theme,
-      capture: rest.join('-'),
-      sourcePath: path.join(dir, entry.name),
-    });
-  }
-  return captures;
-}
-
 function listScenarioCaptures(scenarioId) {
   const captures = [];
   if (!fs.existsSync(SCENARIOS_OUTPUT_ROOT)) return captures;
@@ -158,18 +135,6 @@ function walkDestination(root) {
 
 async function loadPipelines() {
   const pipelines = [];
-
-  const screenshotsManifest = await importManifest(SCREENSHOTS_ROUTING, [
-    'SCREENSHOTS_MANIFEST',
-  ]);
-  pipelines.push({
-    id: 'e2e-screenshots',
-    manifest: screenshotsManifest,
-    capturesPresent: listScreenshotCaptures(SCREENSHOTS_OUTPUT_DIR),
-    locales: ALL_LOCALES,
-    themes: ALL_THEMES,
-    primaryDestination: 'starlight',
-  });
 
   if (fs.existsSync(SCENARIOS_DIR)) {
     const scenarioFiles = fs
