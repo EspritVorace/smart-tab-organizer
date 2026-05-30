@@ -49,13 +49,13 @@ test.describe('Popup overview store screenshots', () => {
         clip: { x: 0, y: 0, width: 1280, height: 800 },
       });
 
-      const filename = `${locale}-light-popup-overview`;
+      const filename = `${locale}-light-popup-store-overview`;
       await savePng(buffer, filename, {
         outputDir: DOCS_DIR,
         locale,
         theme: 'light',
         manifests: [SCREENSHOTS_MANIFEST],
-        capture: 'popup-overview',
+        capture: 'popup-store-overview',
       });
       console.log(`  ✓ ${filename}.png`);
     } finally {

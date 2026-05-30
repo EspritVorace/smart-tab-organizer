@@ -99,11 +99,11 @@ export const SCREENSHOTS_MANIFEST: Manifest = {
       ],
     },
     {
-      capture: 'popup-overview',
+      capture: 'popup-store-overview',
       destinations: [
         {
           target: 'chrome-web-store',
-          path: 'popup-overview',
+          path: 'popup-store-overview',
           locales: [...ALL_LOCALES],
           themes: ['light'],
         },
