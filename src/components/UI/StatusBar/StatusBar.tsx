@@ -5,7 +5,7 @@ import { useShortcutsControl } from '@/contexts/ShortcutsControlContext';
 import styles from './StatusBar.module.css';
 
 export function StatusBar() {
-  const { openShortcuts, version } = useShortcutsControl();
+  const { openShortcuts } = useShortcutsControl();
 
   return (
     <div data-testid="status-bar" className={styles.statusBar}>
@@ -20,9 +20,6 @@ export function StatusBar() {
         <Kbd size="1">?</Kbd>
         <Text size="1">{getMessage('statusBarShortcutsLabel')}</Text>
       </button>
-      <span data-testid="status-bar-version" className={styles.version}>
-        v{version}
-      </span>
     </div>
   );
 }

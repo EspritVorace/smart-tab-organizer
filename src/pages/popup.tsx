@@ -24,7 +24,6 @@ import { StatusBar } from '@/components/UI/StatusBar/StatusBar';
 export function PopupContent() {
   const { settings, isLoaded, setGlobalGroupingEnabled, setGlobalDeduplicationEnabled } = useSettings();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
-  const version = browser.runtime.getManifest().version;
   const openShortcuts = useCallback(() => setShortcutsOpen(true), []);
 
   const openOptionsPage = useCallback(() => {
@@ -72,7 +71,7 @@ export function PopupContent() {
   const hasRules = isLoaded && (settings?.domainRules?.length ?? 0) > 0;
 
   return (
-    <ShortcutsControlProvider openShortcuts={openShortcuts} version={version}>
+    <ShortcutsControlProvider openShortcuts={openShortcuts}>
     <Box data-testid="popup" role="main" aria-label={getMessage('popupTitle')} width="400px" style={{ background: "var(--gray-a2)", borderRadius: "var(--radius-3)", overflow: "hidden" }}>
       <Box p="4">
         <Flex gap="3" direction="column" width="100%">
