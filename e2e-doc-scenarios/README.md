@@ -1,14 +1,15 @@
 # `e2e-doc-scenarios/` — narrative documentation captures
 
-This pipeline produces screenshots organised in **narrative scenarios** (full
-user journeys) for the Starlight documentation, the README, and the Chrome
-Web Store listing. It coexists with two other pipelines:
+This pipeline is the **single source for every screenshot** used by the
+Starlight documentation, the README, and the Chrome Web Store listing. It
+produces both **narrative scenarios** (full user journeys, `00`..`13`) and
+standalone **feature screens** (`20`..`25`). It coexists with the functional
+pipeline:
 
 | Pipeline | Question it answers | Where it lives |
 |---|---|---|
 | `tests/e2e/` | Does the feature work in every case (happy path + edge cases)? | unchanged |
-| `e2e-screenshots/` | Does each individual screen render correctly across locales/themes? | unchanged |
-| `e2e-doc-scenarios/` (this) | Does the nominal user journey produce the right screens, in narrative order? | here |
+| `e2e-doc-scenarios/` (this) | Do the documented screens (journeys + feature screens) render correctly across locales/themes? | here |
 
 ## Layout
 
@@ -103,9 +104,9 @@ export const MAIN_JOURNEY_MANIFEST: Manifest = {
 ```
 
 Filenames without `{locale}` / `{theme}` placeholders are automatically
-prefixed with `{locale}-{theme}-` to keep the existing naming convention used
-by `e2e-screenshots/`. Use the placeholders explicitly when you need a custom
-layout (e.g. one folder per locale).
+prefixed with `{locale}-{theme}-` (the standard naming convention). Use the
+placeholders explicitly when you need a custom layout (e.g. one folder per
+locale).
 
 After adding a route, the next `pnpm doc:scenarios` run will copy the matching
 PNG to the destination root. Use `pnpm doc:scenarios:sync` to refresh
@@ -131,6 +132,7 @@ import imgDark  from '../../assets/screenshots/fr-dark-journey-rules-list-popula
 <ThemeImage lightSrc={imgLight} darkSrc={imgDark} alt="…" />
 ```
 
-Prefix narrative captures with `journey-` when routing them to Starlight to
-keep them visually distinct from `e2e-screenshots/` exports (which use the
-bare feature name, e.g. `rules-list.png`).
+Prefix narrative-journey captures with `journey-` when routing them to
+Starlight to keep them visually distinct from the standalone feature screens,
+which use the bare feature name (e.g. `popup-content.png`,
+`settings-misc.png`).

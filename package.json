@@ -36,7 +36,6 @@
     "a11y:e2e": "A11Y_ENABLED=true wxt build && A11Y_ENABLED=true xvfb-maybe playwright test",
     "a11y:report": "node scripts/a11y-report.mjs",
     "a11y": "pnpm a11y:storybook && pnpm a11y:e2e && pnpm a11y:report",
-    "screenshots": "pnpm build && xvfb-maybe playwright test --config=e2e-screenshots/playwright.screenshots.config.ts",
     "doc:scenarios": "pnpm build && xvfb-maybe playwright test --config=e2e-doc-scenarios/playwright.doc.config.ts",
     "doc:scenarios:audit": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/doc-scenarios-audit.mjs",
     "doc:scenarios:sync": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/doc-scenarios-sync.mjs",

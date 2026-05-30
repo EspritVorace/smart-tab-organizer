@@ -2,7 +2,7 @@
 /**
  * Routing audit (US-DS010, sub-issue of #257).
  *
- * Cross-checks every manifest declared under `e2e-screenshots/` and
+ * Cross-checks every routing manifest declared under
  * `e2e-doc-scenarios/scenarios/` against:
  *   1. the captures actually written by each pipeline,
  *   2. the files currently sitting under each destination root.
@@ -30,10 +30,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 
-const SCREENSHOTS_OUTPUT_DIR = path.join(PROJECT_ROOT, 'docs/src/assets/screenshots');
 const SCENARIOS_OUTPUT_ROOT = path.join(PROJECT_ROOT, 'e2e-doc-scenarios/output');
 const SCENARIOS_DIR = path.join(PROJECT_ROOT, 'e2e-doc-scenarios/scenarios');
-const SCREENSHOTS_ROUTING = path.join(PROJECT_ROOT, 'e2e-screenshots/routing.ts');
 const REPORT_PATH = path.join(PROJECT_ROOT, 'reports/routing-audit.md');
 
 const ALL_LOCALES = ['en', 'fr', 'es'];
@@ -54,22 +52,6 @@ async function importManifest(absolutePath, exportNames) {
   );
   if (candidate) return candidate;
   throw new Error(`No manifest export found in ${absolutePath}`);
-}
-
-function listScreenshotCaptures(dir) {
-  if (!fs.existsSync(dir)) return [];
-  const captures = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (!entry.isFile() || !entry.name.endsWith('.png')) continue;
-    const base = entry.name.slice(0, -'.png'.length);
-    const parts = base.split('-');
-    if (parts.length < 3) continue;
-    const [locale, theme, ...rest] = parts;
-    if (!ALL_LOCALES.includes(locale)) continue;
-    if (!ALL_THEMES.includes(theme)) continue;
-    captures.push({ locale, theme, capture: rest.join('-') });
-  }
-  return captures;
 }
 
 function listScenarioCaptures(scenarioId) {
@@ -114,18 +96,6 @@ function walkDestination(root) {
 
 async function loadPipelines() {
   const pipelines = [];
-
-  const screenshotsManifest = await importManifest(SCREENSHOTS_ROUTING, [
-    'SCREENSHOTS_MANIFEST',
-  ]);
-  pipelines.push({
-    id: 'e2e-screenshots',
-    manifest: screenshotsManifest,
-    capturesPresent: listScreenshotCaptures(SCREENSHOTS_OUTPUT_DIR),
-    locales: ALL_LOCALES,
-    themes: ALL_THEMES,
-    primaryDestination: 'starlight',
-  });
 
   if (fs.existsSync(SCENARIOS_DIR)) {
     const scenarioFiles = fs
