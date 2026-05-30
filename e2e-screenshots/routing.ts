@@ -98,5 +98,16 @@ export const SCREENSHOTS_MANIFEST: Manifest = {
         },
       ],
     },
+    {
+      capture: 'popup-store-overview',
+      destinations: [
+        {
+          target: 'chrome-web-store',
+          path: 'popup-store-overview',
+          locales: [...ALL_LOCALES],
+          themes: ['light'],
+        },
+      ],
+    },
   ],
 };
