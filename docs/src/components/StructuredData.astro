@@ -1,0 +1,158 @@
+---
+// Emits a single schema.org JSON-LD `@graph` for the current page.
+//
+// Every page reinforces the product entity (SoftwareApplication), the site
+// (WebSite) and its publisher (Organization). On top of that, the page type
+// adds a tailored node:
+//   - splash homepage -> WebPage
+//   - FAQ page         -> FAQPage (questions parsed from the markdown body)
+//   - any other page   -> TechArticle + BreadcrumbList
+//
+// Cross-references use stable `@id` anchors so the graph stays consistent.
+import {
+  APP_NAME,
+  appDescription,
+  featureList,
+  homeLabel,
+  parseFaq,
+  sectionLabels,
+  type DocLocale,
+} from '../lib/structured-data';
+
+const route = Astro.locals.starlightRoute;
+const { entry } = route;
+
+const site = (Astro.site?.href ?? 'https://docs.esprit-vorace.fr/').replace(/\/$/, '');
+const pathname = Astro.url.pathname;
+
+const locale: DocLocale =
+  pathname.startsWith('/en/') || pathname === '/en'
+    ? 'en'
+    : pathname.startsWith('/es/') || pathname === '/es'
+      ? 'es'
+      : 'fr';
+
+const pageUrl = new URL(pathname, `${site}/`).href;
+
+// Stable graph anchors for cross-references.
+const websiteId = `${site}/#website`;
+const orgId = `${site}/#organization`;
+const appId = `${site}/#software`;
+
+const GITHUB = 'https://github.com/EspritVorace/smart-tab-organizer';
+const ORG_URL = 'https://esprit-vorace.fr';
+
+const title = entry.data.title;
+const description = entry.data.description ?? appDescription[locale];
+
+const organization = {
+  '@type': 'Organization',
+  '@id': orgId,
+  name: 'Esprit Vorace',
+  url: ORG_URL,
+  sameAs: [GITHUB],
+};
+
+const website = {
+  '@type': 'WebSite',
+  '@id': websiteId,
+  name: APP_NAME,
+  url: `${site}/`,
+  inLanguage: locale,
+  publisher: { '@id': orgId },
+};
+
+const softwareApplication = {
+  '@type': 'SoftwareApplication',
+  '@id': appId,
+  name: APP_NAME,
+  applicationCategory: 'BrowserApplication',
+  operatingSystem: 'Chrome, Firefox, Edge',
+  description: appDescription[locale],
+  featureList: featureList[locale],
+  url: `${site}/`,
+  inLanguage: locale,
+  isAccessibleForFree: true,
+  softwareHelp: { '@type': 'CreativeWork', url: pageUrl },
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+  publisher: { '@id': orgId },
+  sameAs: [GITHUB],
+};
+
+const graph: Record<string, unknown>[] = [organization, website, softwareApplication];
+
+const isHome =
+  entry.data.template === 'splash' ||
+  pathname === '/' ||
+  pathname === '/en/' ||
+  pathname === '/es/';
+const isFaq = entry.id.replace(/^(en|es)\//, '') === 'faq';
+
+if (isHome) {
+  graph.push({
+    '@type': 'WebPage',
+    '@id': `${pageUrl}#webpage`,
+    url: pageUrl,
+    name: title,
+    description,
+    inLanguage: locale,
+    isPartOf: { '@id': websiteId },
+    about: { '@id': appId },
+  });
+} else if (isFaq) {
+  const faqItems = parseFaq(entry.body ?? '');
+  graph.push({
+    '@type': 'FAQPage',
+    '@id': `${pageUrl}#faq`,
+    url: pageUrl,
+    name: title,
+    description,
+    inLanguage: locale,
+    isPartOf: { '@id': websiteId },
+    about: { '@id': appId },
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.question,
+      acceptedAnswer: { '@type': 'Answer', text: item.answer },
+    })),
+  });
+} else {
+  // Breadcrumb: Home > [section] > current page (locale segment stripped).
+  const segments = pathname.replace(/^\/(en|es)\//, '/').split('/').filter(Boolean);
+  const crumbs: Record<string, unknown>[] = [
+    { '@type': 'ListItem', position: 1, name: homeLabel[locale], item: `${site}/` },
+  ];
+  let position = 2;
+  const sectionId = segments[0];
+  if (sectionId && sectionLabels[sectionId]) {
+    crumbs.push({ '@type': 'ListItem', position, name: sectionLabels[sectionId][locale] });
+    position += 1;
+  }
+  crumbs.push({ '@type': 'ListItem', position, name: title, item: pageUrl });
+
+  graph.push({
+    '@type': 'TechArticle',
+    '@id': `${pageUrl}#article`,
+    headline: title,
+    description,
+    inLanguage: locale,
+    url: pageUrl,
+    isPartOf: { '@id': websiteId },
+    about: { '@id': appId },
+    author: { '@id': orgId },
+    publisher: { '@id': orgId },
+  });
+  graph.push({
+    '@type': 'BreadcrumbList',
+    '@id': `${pageUrl}#breadcrumb`,
+    itemListElement: crumbs,
+  });
+}
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': graph,
+};
+---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />

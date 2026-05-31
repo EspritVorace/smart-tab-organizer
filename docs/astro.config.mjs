@@ -50,6 +50,10 @@ export default defineConfig({
       title: 'SmartTab Organizer',
       favicon: '/favicon.svg',
       customCss: ['./src/styles/global.css'],
+      components: {
+        // Inject schema.org JSON-LD structured data (GEO) on every page.
+        Head: './src/components/Head.astro',
+      },
       defaultLocale: 'root',
       locales: {
         root: { label: 'Français', lang: 'fr' },
