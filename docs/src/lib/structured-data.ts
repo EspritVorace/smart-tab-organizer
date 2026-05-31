@@ -97,6 +97,21 @@ export function breadcrumbList(id: string, crumbs: Crumb[]): Record<string, unkn
   };
 }
 
+/**
+ * Serialize a JSON-LD object for safe embedding inside a `<script>` element.
+ *
+ * `JSON.stringify` does not escape `<`, `>` or `&`, so a literal `</script>`
+ * (or `<!--`) in any string value could otherwise terminate the script tag
+ * and inject markup. Escaping these characters as `\uXXXX` keeps the JSON
+ * valid (parsers decode the escapes) while neutralizing any breakout.
+ */
+export function serializeJsonLd(data: unknown): string {
+  return JSON.stringify(data).replace(
+    /[<>&\u2028\u2029]/g,
+    (char) => `\\u${char.charCodeAt(0).toString(16).padStart(4, '0')}`
+  );
+}
+
 export interface FaqItem {
   question: string;
   answer: string;
@@ -132,9 +147,15 @@ function stripMarkdown(md: string): string {
  * an empty answer that is then skipped.
  */
 export function parseFaq(body: string): FaqItem[] {
-  const cleaned = body
-    .replace(/^import[^\n]*$/gm, '') // ESM import lines
-    .replace(/<[^>]+>/g, ''); // JSX / HTML tags (single-line in these files)
+  let cleaned = body.replace(/^import[^\n]*$/gm, ''); // ESM import lines
+  // Strip JSX / HTML tags. Repeat until the string is stable so that
+  // overlapping or nested angle-bracket sequences cannot survive a single
+  // pass (a one-shot replace is bypassable, e.g. `<<tag>tag>`).
+  let previous: string;
+  do {
+    previous = cleaned;
+    cleaned = cleaned.replace(/<[^>]*>/g, '');
+  } while (cleaned !== previous);
 
   const items: FaqItem[] = [];
   const sections = cleaned.split(/^##\s+/m).slice(1); // drop pre-heading intro

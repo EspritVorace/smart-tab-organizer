@@ -17,6 +17,7 @@ import {
   homeLabel,
   parseFaq,
   sectionLabels,
+  serializeJsonLd,
   type Crumb,
   type DocLocale,
 } from '../lib/structured-data';
@@ -164,4 +165,4 @@ const jsonLd = {
 };
 ---
 
-<script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+<script type="application/ld+json" is:inline set:html={serializeJsonLd(jsonLd)} />
