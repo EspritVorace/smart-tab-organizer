@@ -27,6 +27,19 @@ pnpm doc:scenarios:audit                  # Audit routing manifests vs output / 
 pnpm doc:scenarios:sync                   # Re-route output to dest dirs (without re-running Playwright)
 ```
 
+> **The Starlight docs (`docs/`) are a separate pnpm project, NOT part of
+> the root workspace.** They have their own `package.json` and their own
+> `node_modules`, which the root `pnpm install` does not populate.
+>
+> - Build the docs with `pnpm docs:build` (the root `pnpm build` builds
+>   the WXT extension, not the docs). The `docs:*` scripts just delegate
+>   via `pnpm --dir docs ...`.
+> - Before the first docs build/dev in a fresh checkout, install the docs
+>   deps: `pnpm --dir docs install` (or `cd docs && pnpm install`).
+>   Symptom of a missing install: `sh: 1: astro: not found`.
+> - Build output is `docs/dist/`. Static files in `docs/public/` (e.g.
+>   `robots.txt`, `favicon.svg`, fonts) are served as-is at the site root.
+
 ## Architecture
 
 **Cross-browser extension** (WXT framework), Chrome MV3 / Firefox MV2.
