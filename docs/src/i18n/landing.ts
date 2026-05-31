@@ -95,68 +95,68 @@ export const landing: Record<Locale, LandingCopy> = {
     features: {
       title: 'Tout ce dont vos onglets ont besoin',
       subtitle:
-        'Six fonctions complementaires pour transformer un navigateur surcharge en outil de travail organise.',
+        'Six fonctions complémentaires pour transformer un navigateur surchargé en outil de travail organisé.',
       items: [
         {
           icon: 'flat-color-icons:tree-structure',
           title: 'Groupement automatique',
           description:
-            "Les onglets ouverts depuis un meme parent rejoignent un groupe colore, selon vos regles, sans intervention manuelle.",
+            "Les onglets ouverts depuis un même parent rejoignent un groupe coloré, selon vos règles, sans intervention manuelle.",
         },
         {
           icon: 'flat-color-icons:reuse',
-          title: 'Deduplication',
+          title: 'Déduplication',
           description:
-            'Trois modes de correspondance (URL exacte, sans parametres ignores, inclusion) ferment les doublons en gardant le bon onglet.',
+            'Trois modes de correspondance (URL exacte, sans paramètres ignorés, inclusion) ferment les doublons en gardant le bon onglet.',
         },
         {
           icon: 'flat-color-icons:data-backup',
           title: 'Sessions et profils',
           description:
-            "Capturez l'etat du navigateur, epinglez les contextes recurrents, restaurez-les en un clic avec resolution des conflits.",
+            "Capturez l'état du navigateur, épinglez les contextes récurrents, restaurez-les en un clic avec résolution des conflits.",
         },
         {
           icon: 'flat-color-icons:rules',
-          title: 'Regles et packs regex',
+          title: 'Règles et packs regex',
           description:
-            "Ecrivez vos expressions regulieres ou partez de 49 packs prets a l'emploi, classes par categorie.",
+            "Écrivez vos expressions régulières ou partez de 49 packs prêts à l'emploi, classés par catégorie.",
         },
         {
           icon: 'flat-color-icons:data-configuration',
           title: 'Import et export',
           description:
-            'Sauvegardez et partagez vos regles et sessions en JSON valide, avec detection et resolution des conflits.',
+            'Sauvegardez et partagez vos règles et sessions en JSON valide, avec détection et résolution des conflits.',
         },
         {
           icon: 'flat-color-icons:briefcase',
           title: 'Espaces de travail',
           description:
-            "Separez travail et perso via des espaces distincts, chacun avec sa couleur d'accent et son exclusivite de fenetre.",
+            "Séparez travail et perso via des espaces distincts, chacun avec sa couleur d'accent et son exclusivité de fenêtre.",
         },
       ],
     },
     privacy: {
       title: 'Tout est local, rien ne part en ligne',
       subtitle:
-        "L'inverse exact des outils qui envoient vos URL a un service distant. Ici, vos donnees ne quittent jamais le navigateur.",
+        "L'inverse exact des outils qui envoient vos URL à un service distant. Ici, vos données ne quittent jamais le navigateur.",
       points: [
         { icon: 'flat-color-icons:data-protection', label: 'Stockage dans browser.storage.local, sur votre machine.' },
-        { icon: 'flat-color-icons:broken-link', label: 'Zero requete reseau initiee par l\'extension.' },
-        { icon: 'flat-color-icons:privacy', label: 'Zero telemetrie, zero analytics, zero pistage.' },
-        { icon: 'flat-color-icons:lock', label: 'Zero compte, zero cloud, zero IA distante.' },
+        { icon: 'flat-color-icons:broken-link', label: 'Zéro requête réseau initiée par l\'extension.' },
+        { icon: 'flat-color-icons:privacy', label: 'Zéro télémétrie, zéro analytics, zéro pistage.' },
+        { icon: 'flat-color-icons:lock', label: 'Zéro compte, zéro cloud, zéro IA distante.' },
       ],
-      note: 'Si vous synchronisez vos profils Chrome ou Firefox, les donnees suivent le profil, mais aucune communication reseau n\'est initiee par l\'extension elle-meme.',
+      note: 'Si vous synchronisez vos profils Chrome ou Firefox, les données suivent le profil, mais aucune communication réseau n\'est initiée par l\'extension elle-même.',
     },
     comparison: {
       title: 'Pourquoi pas une alternative ?',
       subtitle:
-        'Comparaison avec les categories courantes : gestionnaires cloud, outils de nommage par IA, extensions a abonnement.',
-      columnCriterion: 'Critere',
+        'Comparaison avec les catégories courantes : gestionnaires cloud, outils de nommage par IA, extensions à abonnement.',
+      columnCriterion: 'Critère',
       columnSto: 'Smart Tab Organizer',
       columnOthers: 'Alternatives courantes',
       rows: [
         {
-          criterion: 'Stockage des donnees',
+          criterion: 'Stockage des données',
           sto: { ok: true, text: '100% local' },
           others: { ok: false, text: 'Souvent dans le cloud' },
         },
@@ -168,7 +168,7 @@ export const landing: Record<Locale, LandingCopy> = {
         {
           criterion: 'Code source',
           sto: { ok: true, text: 'Open source' },
-          others: { ok: false, text: 'Souvent proprietaire' },
+          others: { ok: false, text: 'Souvent propriétaire' },
         },
         {
           criterion: 'Compte utilisateur',
@@ -176,17 +176,17 @@ export const landing: Record<Locale, LandingCopy> = {
           others: { ok: false, text: 'Compte souvent requis' },
         },
         {
-          criterion: 'Tracking et telemetrie',
+          criterion: 'Tracking et télémétrie',
           sto: { ok: true, text: 'Aucun' },
-          others: { ok: false, text: 'Frequent' },
+          others: { ok: false, text: 'Fréquent' },
         },
         {
           criterion: 'Nommage des groupes',
-          sto: { ok: true, text: 'Regles regex locales' },
-          others: { ok: false, text: 'IA distante (URL envoyees)' },
+          sto: { ok: true, text: 'Règles regex locales' },
+          others: { ok: false, text: 'IA distante (URL envoyées)' },
         },
         {
-          criterion: 'Accessibilite',
+          criterion: 'Accessibilité',
           sto: { ok: true, text: 'Polices dys, audits axe-core' },
           others: { ok: false, text: 'Variable' },
         },
@@ -194,54 +194,54 @@ export const landing: Record<Locale, LandingCopy> = {
     },
     values: {
       title: 'Des valeurs, pas seulement des fonctions',
-      subtitle: 'Ce qui guide chaque decision de conception.',
+      subtitle: 'Ce qui guide chaque décision de conception.',
       items: [
         {
           icon: 'flat-color-icons:copyleft',
           title: 'Open source',
           description:
-            'Code ouvert, verifiable et contribuable. Vous savez exactement ce que fait l\'extension, ligne par ligne.',
+            'Code ouvert, vérifiable et contribuable. Vous savez exactement ce que fait l\'extension, ligne par ligne.',
         },
         {
           icon: 'flat-color-icons:reading',
-          title: 'Accessibilite',
+          title: 'Accessibilité',
           description:
-            'Polices adaptees aux troubles dys (Luciole, Atkinson Hyperlegible), focus visibles, audits axe-core en continu.',
+            'Polices adaptées aux troubles dys (Luciole, Atkinson Hyperlegible), focus visibles, audits axe-core en continu.',
         },
         {
           icon: 'flat-color-icons:donate',
           title: 'Gratuit pour toujours',
           description:
-            'Pas de version payante, pas de palier premium, pas de fonction bridee. Tout, gratuitement, durablement.',
+            'Pas de version payante, pas de palier premium, pas de fonction bridée. Tout, gratuitement, durablement.',
         },
       ],
     },
     showcase: {
-      title: 'Un apercu en images',
-      subtitle: 'Vos regles groupent les onglets, vos sessions sauvegardent vos contextes de travail.',
+      title: 'Un aperçu en images',
+      subtitle: 'Vos règles groupent les onglets, vos sessions sauvegardent vos contextes de travail.',
       items: [
         {
           screen: 'journey-rules-list-populated',
-          alt: 'Page Options de SmartTab Organizer affichant une liste de regles de domaine.',
-          caption: 'Des regles de domaine qui groupent vos onglets automatiquement.',
+          alt: 'Page Options de SmartTab Organizer affichant une liste de règles de domaine.',
+          caption: 'Des règles de domaine qui groupent vos onglets automatiquement.',
         },
         {
           screen: 'journey-sessions-list-with-snapshot',
-          alt: 'Liste des sessions de SmartTab Organizer avec un instantane enregistre.',
-          caption: 'Vos sessions de travail, sauvegardees et restaurables en un clic.',
+          alt: 'Liste des sessions de SmartTab Organizer avec un instantané enregistré.',
+          caption: 'Vos sessions de travail, sauvegardées et restaurables en un clic.',
         },
       ],
     },
     cta: {
-      title: 'Reprenez le controle de vos onglets',
+      title: 'Reprenez le contrôle de vos onglets',
       subtitle: 'Installation en quelques secondes, sans compte ni configuration obligatoire.',
       install: 'Installer',
       installPath: '/decouverte/installation',
       github: 'Voir sur GitHub',
       githubHref: GITHUB_URL,
-      chrome: 'Ajouter a Chrome',
+      chrome: 'Ajouter à Chrome',
       chromeHref: CHROME_URL,
-      firefox: 'Ajouter a Firefox',
+      firefox: 'Ajouter à Firefox',
       firefoxHref: FIREFOX_URL,
     },
   },
@@ -403,39 +403,39 @@ export const landing: Record<Locale, LandingCopy> = {
 
   es: {
     features: {
-      title: 'Todo lo que tus pestanas necesitan',
+      title: 'Todo lo que tus pestañas necesitan',
       subtitle:
         'Seis funciones complementarias que convierten un navegador sobrecargado en una herramienta de trabajo organizada.',
       items: [
         {
           icon: 'flat-color-icons:tree-structure',
-          title: 'Agrupacion automatica',
+          title: 'Agrupación automática',
           description:
-            'Las pestanas abiertas desde un mismo padre se unen a un grupo de color, segun tus reglas, sin intervencion manual.',
+            'Las pestañas abiertas desde un mismo padre se unen a un grupo de color, según tus reglas, sin intervención manual.',
         },
         {
           icon: 'flat-color-icons:reuse',
-          title: 'Deduplicacion',
+          title: 'Deduplicación',
           description:
-            'Tres modos de coincidencia (URL exacta, sin parametros ignorados, inclusion) cierran los duplicados conservando la pestana correcta.',
+            'Tres modos de coincidencia (URL exacta, sin parámetros ignorados, inclusión) cierran los duplicados conservando la pestaña correcta.',
         },
         {
           icon: 'flat-color-icons:data-backup',
           title: 'Sesiones y perfiles',
           description:
-            'Captura el estado del navegador, fija los contextos recurrentes, restauralos con un clic y resolucion de conflictos.',
+            'Captura el estado del navegador, fija los contextos recurrentes, restáuralos con un clic y resolución de conflictos.',
         },
         {
           icon: 'flat-color-icons:rules',
           title: 'Reglas y paquetes regex',
           description:
-            'Escribe tus expresiones regulares o parte de 49 paquetes listos para usar, ordenados por categoria.',
+            'Escribe tus expresiones regulares o parte de 49 paquetes listos para usar, ordenados por categoría.',
         },
         {
           icon: 'flat-color-icons:data-configuration',
           title: 'Importar y exportar',
           description:
-            'Guarda y comparte tus reglas y sesiones en JSON validado, con deteccion y resolucion de conflictos.',
+            'Guarda y comparte tus reglas y sesiones en JSON validado, con detección y resolución de conflictos.',
         },
         {
           icon: 'flat-color-icons:briefcase',
@@ -448,19 +448,19 @@ export const landing: Record<Locale, LandingCopy> = {
     privacy: {
       title: 'Todo es local, nada sale a internet',
       subtitle:
-        'Lo contrario exacto de las herramientas que envian tus URL a un servicio remoto. Aqui, tus datos nunca salen del navegador.',
+        'Lo contrario exacto de las herramientas que envían tus URL a un servicio remoto. Aquí, tus datos nunca salen del navegador.',
       points: [
         { icon: 'flat-color-icons:data-protection', label: 'Almacenamiento en browser.storage.local, en tu equipo.' },
-        { icon: 'flat-color-icons:broken-link', label: 'Cero solicitudes de red iniciadas por la extension.' },
-        { icon: 'flat-color-icons:privacy', label: 'Cero telemetria, cero analiticas, cero rastreo.' },
+        { icon: 'flat-color-icons:broken-link', label: 'Cero solicitudes de red iniciadas por la extensión.' },
+        { icon: 'flat-color-icons:privacy', label: 'Cero telemetría, cero analíticas, cero rastreo.' },
         { icon: 'flat-color-icons:lock', label: 'Cero cuenta, cero nube, cero IA remota.' },
       ],
-      note: 'Si sincronizas tus perfiles de Chrome o Firefox, los datos siguen al perfil, pero la extension nunca inicia ninguna comunicacion de red por si misma.',
+      note: 'Si sincronizas tus perfiles de Chrome o Firefox, los datos siguen al perfil, pero la extensión nunca inicia ninguna comunicación de red por sí misma.',
     },
     comparison: {
-      title: 'Por que no una alternativa?',
+      title: '¿Por qué no una alternativa?',
       subtitle:
-        'Comparacion con las categorias habituales: gestores en la nube, herramientas de nombrado por IA, extensiones de suscripcion.',
+        'Comparación con las categorías habituales: gestores en la nube, herramientas de nombrado por IA, extensiones de suscripción.',
       columnCriterion: 'Criterio',
       columnSto: 'Smart Tab Organizer',
       columnOthers: 'Alternativas habituales',
@@ -473,11 +473,11 @@ export const landing: Record<Locale, LandingCopy> = {
         {
           criterion: 'Precio',
           sto: { ok: true, text: 'Gratis, para siempre' },
-          others: { ok: false, text: 'Freemium o suscripcion' },
+          others: { ok: false, text: 'Freemium o suscripción' },
         },
         {
-          criterion: 'Codigo fuente',
-          sto: { ok: true, text: 'Codigo abierto' },
+          criterion: 'Código fuente',
+          sto: { ok: true, text: 'Código abierto' },
           others: { ok: false, text: 'A menudo propietario' },
         },
         {
@@ -486,7 +486,7 @@ export const landing: Record<Locale, LandingCopy> = {
           others: { ok: false, text: 'Cuenta a menudo requerida' },
         },
         {
-          criterion: 'Rastreo y telemetria',
+          criterion: 'Rastreo y telemetría',
           sto: { ok: true, text: 'Ninguno' },
           others: { ok: false, text: 'Frecuente' },
         },
@@ -497,61 +497,61 @@ export const landing: Record<Locale, LandingCopy> = {
         },
         {
           criterion: 'Accesibilidad',
-          sto: { ok: true, text: 'Fuentes dys, auditorias axe-core' },
+          sto: { ok: true, text: 'Fuentes dys, auditorías axe-core' },
           others: { ok: false, text: 'Variable' },
         },
       ],
     },
     values: {
       title: 'Valores, no solo funciones',
-      subtitle: 'Lo que guia cada decision de diseno.',
+      subtitle: 'Lo que guía cada decisión de diseño.',
       items: [
         {
           icon: 'flat-color-icons:copyleft',
-          title: 'Codigo abierto',
+          title: 'Código abierto',
           description:
-            'Codigo abierto, verificable y al que puedes contribuir. Sabes exactamente que hace la extension, linea por linea.',
+            'Código abierto, verificable y al que puedes contribuir. Sabes exactamente qué hace la extensión, línea por línea.',
         },
         {
           icon: 'flat-color-icons:reading',
           title: 'Accesibilidad',
           description:
-            'Fuentes adaptadas a la dislexia (Luciole, Atkinson Hyperlegible), foco visible, auditorias axe-core continuas.',
+            'Fuentes adaptadas a la dislexia (Luciole, Atkinson Hyperlegible), foco visible, auditorías axe-core continuas.',
         },
         {
           icon: 'flat-color-icons:donate',
           title: 'Gratis para siempre',
           description:
-            'Sin version de pago, sin nivel premium, sin funciones bloqueadas. Todo, gratis, de forma duradera.',
+            'Sin versión de pago, sin nivel premium, sin funciones bloqueadas. Todo, gratis, de forma duradera.',
         },
       ],
     },
     showcase: {
-      title: 'Un vistazo en imagenes',
-      subtitle: 'Tus reglas agrupan las pestanas, tus sesiones guardan tus contextos de trabajo.',
+      title: 'Un vistazo en imágenes',
+      subtitle: 'Tus reglas agrupan las pestañas, tus sesiones guardan tus contextos de trabajo.',
       items: [
         {
           screen: 'journey-rules-list-populated',
-          alt: 'Pagina de Opciones de SmartTab Organizer mostrando una lista de reglas de dominio.',
-          caption: 'Reglas de dominio que agrupan tus pestanas automaticamente.',
+          alt: 'Página de Opciones de SmartTab Organizer mostrando una lista de reglas de dominio.',
+          caption: 'Reglas de dominio que agrupan tus pestañas automáticamente.',
         },
         {
           screen: 'journey-sessions-list-with-snapshot',
-          alt: 'Lista de sesiones de SmartTab Organizer con una instantanea guardada.',
+          alt: 'Lista de sesiones de SmartTab Organizer con una instantánea guardada.',
           caption: 'Tus sesiones de trabajo, guardadas y restaurables con un clic.',
         },
       ],
     },
     cta: {
-      title: 'Recupera el control de tus pestanas',
-      subtitle: 'Instalacion en segundos, sin cuenta ni configuracion obligatoria.',
+      title: 'Recupera el control de tus pestañas',
+      subtitle: 'Instalación en segundos, sin cuenta ni configuración obligatoria.',
       install: 'Instalar',
       installPath: '/decouverte/installation',
       github: 'Ver en GitHub',
       githubHref: GITHUB_URL,
-      chrome: 'Anadir a Chrome',
+      chrome: 'Añadir a Chrome',
       chromeHref: CHROME_URL,
-      firefox: 'Anadir a Firefox',
+      firefox: 'Añadir a Firefox',
       firefoxHref: FIREFOX_URL,
     },
   },
