@@ -4,6 +4,10 @@ description: Extensión de navegador (Chrome / Firefox) que agrupa tus pestañas
 template: splash
 hero:
   tagline: Organiza tus pestañas de forma inteligente, sin enviar ni una sola URL a internet.
+  image:
+    alt: La ventana emergente de SmartTab Organizer con sus perfiles fijados y su selector de espacio de trabajo.
+    light: ../../../assets/screenshots/es-light-journey-popup-with-pinned-and-workspace.png
+    dark: ../../../assets/screenshots/es-dark-journey-popup-with-pinned-and-workspace.png
   actions:
     - text: Empezar
       link: /es/decouverte/pourquoi/
@@ -20,12 +24,14 @@ hero:
 ---
 
 import FeatureGrid from '../../../components/landing/FeatureGrid.astro';
+import Showcase from '../../../components/landing/Showcase.astro';
 import PrivacyBand from '../../../components/landing/PrivacyBand.astro';
 import ComparisonTable from '../../../components/landing/ComparisonTable.astro';
 import ValuesBand from '../../../components/landing/ValuesBand.astro';
 import ClosingCTA from '../../../components/landing/ClosingCTA.astro';
 
 <FeatureGrid />
+<Showcase />
 <PrivacyBand />
 <ComparisonTable />
 <ValuesBand />

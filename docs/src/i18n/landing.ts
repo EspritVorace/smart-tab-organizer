@@ -34,6 +34,13 @@ export interface ValueItem {
   description: string;
 }
 
+export interface ShowcaseItem {
+  /** Screen name suffix in docs/src/assets/screenshots/{locale}-{theme}-{screen}.png. */
+  screen: string;
+  alt: string;
+  caption: string;
+}
+
 export interface LandingCopy {
   features: {
     title: string;
@@ -59,6 +66,11 @@ export interface LandingCopy {
     subtitle: string;
     items: ValueItem[];
   };
+  showcase: {
+    title: string;
+    subtitle: string;
+    items: ShowcaseItem[];
+  };
   cta: {
     title: string;
     subtitle: string;
@@ -66,10 +78,17 @@ export interface LandingCopy {
     installPath: string;
     github: string;
     githubHref: string;
+    chrome: string;
+    chromeHref: string;
+    firefox: string;
+    firefoxHref: string;
   };
 }
 
 const GITHUB_URL = 'https://github.com/EspritVorace/smart-tab-organizer';
+const CHROME_URL =
+  'https://chromewebstore.google.com/detail/smarttab-organizer/ijnpdkkcbmfikocmboibffjgbohhlmah';
+const FIREFOX_URL = 'https://addons.mozilla.org/firefox/addon/smarttab-organizer/';
 
 export const landing: Record<Locale, LandingCopy> = {
   fr: {
@@ -149,7 +168,7 @@ export const landing: Record<Locale, LandingCopy> = {
         {
           criterion: 'Code source',
           sto: { ok: true, text: 'Open source' },
-          others: { ok: false, text: 'Proprietaire' },
+          others: { ok: false, text: 'Souvent proprietaire' },
         },
         {
           criterion: 'Compte utilisateur',
@@ -197,6 +216,22 @@ export const landing: Record<Locale, LandingCopy> = {
         },
       ],
     },
+    showcase: {
+      title: 'Un apercu en images',
+      subtitle: 'Vos regles groupent les onglets, vos sessions sauvegardent vos contextes de travail.',
+      items: [
+        {
+          screen: 'journey-rules-list-populated',
+          alt: 'Page Options de SmartTab Organizer affichant une liste de regles de domaine.',
+          caption: 'Des regles de domaine qui groupent vos onglets automatiquement.',
+        },
+        {
+          screen: 'journey-sessions-list-with-snapshot',
+          alt: 'Liste des sessions de SmartTab Organizer avec un instantane enregistre.',
+          caption: 'Vos sessions de travail, sauvegardees et restaurables en un clic.',
+        },
+      ],
+    },
     cta: {
       title: 'Reprenez le controle de vos onglets',
       subtitle: 'Installation en quelques secondes, sans compte ni configuration obligatoire.',
@@ -204,6 +239,10 @@ export const landing: Record<Locale, LandingCopy> = {
       installPath: '/decouverte/installation',
       github: 'Voir sur GitHub',
       githubHref: GITHUB_URL,
+      chrome: 'Ajouter a Chrome',
+      chromeHref: CHROME_URL,
+      firefox: 'Ajouter a Firefox',
+      firefoxHref: FIREFOX_URL,
     },
   },
 
@@ -284,7 +323,7 @@ export const landing: Record<Locale, LandingCopy> = {
         {
           criterion: 'Source code',
           sto: { ok: true, text: 'Open source' },
-          others: { ok: false, text: 'Proprietary' },
+          others: { ok: false, text: 'Often proprietary' },
         },
         {
           criterion: 'User account',
@@ -332,6 +371,22 @@ export const landing: Record<Locale, LandingCopy> = {
         },
       ],
     },
+    showcase: {
+      title: 'A look in pictures',
+      subtitle: 'Your rules group the tabs, your sessions save your work contexts.',
+      items: [
+        {
+          screen: 'journey-rules-list-populated',
+          alt: 'SmartTab Organizer Options page showing a list of domain rules.',
+          caption: 'Domain rules that group your tabs automatically.',
+        },
+        {
+          screen: 'journey-sessions-list-with-snapshot',
+          alt: 'SmartTab Organizer sessions list with a saved snapshot.',
+          caption: 'Your work sessions, saved and restorable in one click.',
+        },
+      ],
+    },
     cta: {
       title: 'Take back control of your tabs',
       subtitle: 'Install in seconds, with no account and no mandatory setup.',
@@ -339,6 +394,10 @@ export const landing: Record<Locale, LandingCopy> = {
       installPath: '/decouverte/installation',
       github: 'View on GitHub',
       githubHref: GITHUB_URL,
+      chrome: 'Add to Chrome',
+      chromeHref: CHROME_URL,
+      firefox: 'Add to Firefox',
+      firefoxHref: FIREFOX_URL,
     },
   },
 
@@ -419,7 +478,7 @@ export const landing: Record<Locale, LandingCopy> = {
         {
           criterion: 'Codigo fuente',
           sto: { ok: true, text: 'Codigo abierto' },
-          others: { ok: false, text: 'Propietario' },
+          others: { ok: false, text: 'A menudo propietario' },
         },
         {
           criterion: 'Cuenta de usuario',
@@ -467,6 +526,22 @@ export const landing: Record<Locale, LandingCopy> = {
         },
       ],
     },
+    showcase: {
+      title: 'Un vistazo en imagenes',
+      subtitle: 'Tus reglas agrupan las pestanas, tus sesiones guardan tus contextos de trabajo.',
+      items: [
+        {
+          screen: 'journey-rules-list-populated',
+          alt: 'Pagina de Opciones de SmartTab Organizer mostrando una lista de reglas de dominio.',
+          caption: 'Reglas de dominio que agrupan tus pestanas automaticamente.',
+        },
+        {
+          screen: 'journey-sessions-list-with-snapshot',
+          alt: 'Lista de sesiones de SmartTab Organizer con una instantanea guardada.',
+          caption: 'Tus sesiones de trabajo, guardadas y restaurables con un clic.',
+        },
+      ],
+    },
     cta: {
       title: 'Recupera el control de tus pestanas',
       subtitle: 'Instalacion en segundos, sin cuenta ni configuracion obligatoria.',
@@ -474,6 +549,10 @@ export const landing: Record<Locale, LandingCopy> = {
       installPath: '/decouverte/installation',
       github: 'Ver en GitHub',
       githubHref: GITHUB_URL,
+      chrome: 'Anadir a Chrome',
+      chromeHref: CHROME_URL,
+      firefox: 'Anadir a Firefox',
+      firefoxHref: FIREFOX_URL,
     },
   },
 };

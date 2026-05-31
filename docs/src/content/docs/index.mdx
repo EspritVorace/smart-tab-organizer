@@ -4,6 +4,10 @@ description: Extension navigateur (Chrome / Firefox) qui groupe vos onglets par 
 template: splash
 hero:
   tagline: Organisez vos onglets intelligemment, sans envoyer la moindre URL en ligne.
+  image:
+    alt: La popup de SmartTab Organizer avec ses profils epingles et son selecteur d'espace de travail.
+    light: ../../assets/screenshots/fr-light-journey-popup-with-pinned-and-workspace.png
+    dark: ../../assets/screenshots/fr-dark-journey-popup-with-pinned-and-workspace.png
   actions:
     - text: Commencer
       link: /decouverte/pourquoi/
@@ -20,12 +24,14 @@ hero:
 ---
 
 import FeatureGrid from '../../components/landing/FeatureGrid.astro';
+import Showcase from '../../components/landing/Showcase.astro';
 import PrivacyBand from '../../components/landing/PrivacyBand.astro';
 import ComparisonTable from '../../components/landing/ComparisonTable.astro';
 import ValuesBand from '../../components/landing/ValuesBand.astro';
 import ClosingCTA from '../../components/landing/ClosingCTA.astro';
 
 <FeatureGrid />
+<Showcase />
 <PrivacyBand />
 <ComparisonTable />
 <ValuesBand />
