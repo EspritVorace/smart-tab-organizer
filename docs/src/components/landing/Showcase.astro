@@ -1,0 +1,100 @@
+---
+import type { ImageMetadata } from 'astro';
+import ThemeImage from '../ThemeImage.astro';
+import { getLocale } from '../../i18n/locale';
+import { landing } from '../../i18n/landing';
+
+const locale = getLocale(Astro.url.pathname);
+const t = landing[locale].showcase;
+
+// Eagerly load every screenshot so we can pick the locale/theme variant by name.
+const screenshots = import.meta.glob<{ default: ImageMetadata }>(
+  '../../assets/screenshots/*.png',
+  { eager: true },
+);
+
+function variant(theme: 'light' | 'dark', screen: string): ImageMetadata {
+  const key = `../../assets/screenshots/${locale}-${theme}-${screen}.png`;
+  const mod = screenshots[key];
+  if (!mod) {
+    throw new Error(`Showcase: missing screenshot ${key}`);
+  }
+  return mod.default;
+}
+---
+
+<section class="showcase" aria-labelledby="showcase-title">
+  <div class="landing-section-head">
+    <h2 id="showcase-title">{t.title}</h2>
+    <p>{t.subtitle}</p>
+  </div>
+  <div class="showcase-grid">
+    {
+      t.items.map((item) => (
+        <figure class="showcase-card">
+          <ThemeImage
+            lightSrc={variant('light', item.screen)}
+            darkSrc={variant('dark', item.screen)}
+            alt={item.alt}
+          />
+          <figcaption>{item.caption}</figcaption>
+        </figure>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .showcase {
+    margin-block: 4rem;
+  }
+
+  .landing-section-head {
+    text-align: center;
+    max-width: 48rem;
+    margin-inline: auto;
+    margin-block-end: 2.5rem;
+  }
+
+  .landing-section-head h2 {
+    font-size: clamp(1.6rem, 1rem + 2.4vw, 2.4rem);
+    margin-block-end: 0.5rem;
+  }
+
+  .landing-section-head p {
+    color: var(--sl-color-gray-2);
+    margin: 0;
+  }
+
+  .showcase-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .showcase-card {
+    margin: 0;
+    border: 1px solid var(--blog-border);
+    border-radius: 0.9rem;
+    overflow: hidden;
+    background: var(--sl-color-bg-sidebar);
+  }
+
+  .showcase-card :global(.theme-image) {
+    display: block;
+  }
+
+  .showcase-card :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .showcase-card figcaption {
+    padding: 0.85rem 1rem;
+    font-size: 0.95rem;
+    color: var(--sl-color-gray-2);
+    border-top: 1px solid var(--blog-border);
+  }
+</style>

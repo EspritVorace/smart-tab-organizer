@@ -12,7 +12,13 @@ const installHref = localizePath(locale, t.installPath);
   <h2 id="cta-title">{t.title}</h2>
   <p>{t.subtitle}</p>
   <div class="cta-actions">
-    <a class="cta-button cta-primary" href={installHref}>{t.install}</a>
+    <a class="cta-button cta-primary" href={t.chromeHref} rel="noopener" target="_blank">
+      {t.chrome}
+    </a>
+    <a class="cta-button cta-store" href={t.firefoxHref} rel="noopener" target="_blank">
+      {t.firefox}
+    </a>
+    <a class="cta-button cta-minimal" href={installHref}>{t.install}</a>
     <a class="cta-button cta-minimal" href={t.githubHref} rel="noopener" target="_blank">
       {t.github}
     </a>
@@ -68,6 +74,16 @@ const installHref = localizePath(locale, t.installPath);
   .cta-primary {
     background: var(--blog-accent);
     color: var(--blog-background);
+  }
+
+  .cta-store {
+    background: transparent;
+    color: var(--blog-accent);
+    border-color: var(--blog-accent);
+  }
+
+  .cta-store:hover {
+    background: var(--blog-muted);
   }
 
   .cta-minimal {

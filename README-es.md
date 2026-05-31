@@ -57,7 +57,7 @@ Captura tus pestañas y grupos abiertos, ponles nombre, fija las que más usas. 
 ## Y además
 
 - **Espacios de trabajo** : reglas, sesiones y estadísticas separadas por contexto (trabajo, personal, side project)
-- **20+ packs de reglas** listos para importar para herramientas populares (GitHub, GitLab, Jira, AWS, asistentes de IA, Discord...)
+- **49 packs de reglas** listos para importar para herramientas populares (GitHub, GitLab, Jira, AWS, asistentes de IA, Discord...)
 - **Importar / exportar** con resolución de conflictos para reglas y sesiones
 - **Estadísticas locales** : ve cuántas agrupaciones y deduplicaciones te ahorran tiempo
 - **Atajos de teclado** con panel de ayuda integrado
@@ -83,7 +83,7 @@ pnpm storybook    # Explorador de componentes (puerto 6006)
 pnpm build        # Build de producción
 ```
 
-El stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) y las convenciones de código están documentadas en [`CLAUDE.md`](CLAUDE.md) y el [anexo stack técnico](docs/src/content/docs/annexes/stack-technique.mdx).
+El stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) y las convenciones de código están documentadas en [`CLAUDE.md`](CLAUDE.md) y el [anexo stack técnico](docs/src/content/docs/contribuer/stack.mdx).
 
 Por favor, abre una issue antes de enviar una pull request grande.
 

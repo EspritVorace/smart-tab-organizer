@@ -57,7 +57,7 @@ Capture tes onglets et tes groupes ouverts, nomme-les, épingle ceux dans lesque
 ## Et aussi
 
 - **Espaces de travail** : règles, sessions et stats séparés par contexte (pro, perso, projet annexe)
-- **20+ packs de règles** prêts à importer pour les outils courants (GitHub, GitLab, Jira, AWS, assistants IA, Discord...)
+- **49 packs de règles** prêts à importer pour les outils courants (GitHub, GitLab, Jira, AWS, assistants IA, Discord...)
 - **Import / export** avec résolution de conflits pour les règles comme pour les sessions
 - **Statistiques locales** : vois combien de regroupements et de déduplications te font gagner du temps
 - **Raccourcis clavier** avec panneau d'aide intégré
@@ -83,7 +83,7 @@ pnpm storybook    # Explorateur de composants (port 6006)
 pnpm build        # Build production
 ```
 
-La stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) et les conventions de code sont documentées dans [`CLAUDE.md`](CLAUDE.md) et l'[annexe stack technique](docs/src/content/docs/annexes/stack-technique.mdx).
+La stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) et les conventions de code sont documentées dans [`CLAUDE.md`](CLAUDE.md) et l'[annexe stack technique](docs/src/content/docs/contribuer/stack.mdx).
 
 Merci d'ouvrir une issue avant de soumettre une pull request importante.
 
