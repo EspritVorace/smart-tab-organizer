@@ -74,6 +74,29 @@ export const sectionLabels: Record<string, Record<DocLocale, string>> = {
   faq: { fr: 'FAQ', en: 'FAQ', es: 'FAQ' },
 };
 
+/** A single breadcrumb entry. `item` (URL) is omitted for non-linked crumbs. */
+export interface Crumb {
+  name: string;
+  item?: string;
+}
+
+/** Build a schema.org BreadcrumbList node, numbering positions from 1. */
+export function breadcrumbList(id: string, crumbs: Crumb[]): Record<string, unknown> {
+  return {
+    '@type': 'BreadcrumbList',
+    '@id': id,
+    itemListElement: crumbs.map((crumb, index) => {
+      const node: Record<string, unknown> = {
+        '@type': 'ListItem',
+        position: index + 1,
+        name: crumb.name,
+      };
+      if (crumb.item) node.item = crumb.item;
+      return node;
+    }),
+  };
+}
+
 export interface FaqItem {
   question: string;
   answer: string;

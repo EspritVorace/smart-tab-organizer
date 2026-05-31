@@ -12,10 +12,12 @@
 import {
   APP_NAME,
   appDescription,
+  breadcrumbList,
   featureList,
   homeLabel,
   parseFaq,
   sectionLabels,
+  type Crumb,
   type DocLocale,
 } from '../lib/structured-data';
 
@@ -41,6 +43,13 @@ const appId = `${site}/#software`;
 
 const GITHUB = 'https://github.com/EspritVorace/smart-tab-organizer';
 const ORG_URL = 'https://esprit-vorace.fr';
+const CHROME_STORE =
+  'https://chromewebstore.google.com/detail/smarttab-organizer/ijnpdkkcbmfikocmboibffjgbohhlmah';
+const FIREFOX_STORE = 'https://addons.mozilla.org/firefox/addon/smarttab-organizer/';
+
+// The product lives on three platforms: those listings are the same entity
+// as the docs, which strengthens entity resolution for search/LLM engines.
+const APP_SAME_AS = [GITHUB, CHROME_STORE, FIREFOX_STORE];
 
 const title = entry.data.title;
 const description = entry.data.description ?? appDescription[locale];
@@ -74,9 +83,10 @@ const softwareApplication = {
   inLanguage: locale,
   isAccessibleForFree: true,
   softwareHelp: { '@type': 'CreativeWork', url: pageUrl },
+  downloadUrl: CHROME_STORE,
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
   publisher: { '@id': orgId },
-  sameAs: [GITHUB],
+  sameAs: APP_SAME_AS,
 };
 
 const graph: Record<string, unknown>[] = [organization, website, softwareApplication];
@@ -116,19 +126,22 @@ if (isHome) {
       acceptedAnswer: { '@type': 'Answer', text: item.answer },
     })),
   });
+  // FAQ breadcrumb: Home > FAQ.
+  graph.push(
+    breadcrumbList(`${pageUrl}#breadcrumb`, [
+      { name: homeLabel[locale], item: `${site}/` },
+      { name: title, item: pageUrl },
+    ])
+  );
 } else {
   // Breadcrumb: Home > [section] > current page (locale segment stripped).
   const segments = pathname.replace(/^\/(en|es)\//, '/').split('/').filter(Boolean);
-  const crumbs: Record<string, unknown>[] = [
-    { '@type': 'ListItem', position: 1, name: homeLabel[locale], item: `${site}/` },
-  ];
-  let position = 2;
+  const crumbs: Crumb[] = [{ name: homeLabel[locale], item: `${site}/` }];
   const sectionId = segments[0];
   if (sectionId && sectionLabels[sectionId]) {
-    crumbs.push({ '@type': 'ListItem', position, name: sectionLabels[sectionId][locale] });
-    position += 1;
+    crumbs.push({ name: sectionLabels[sectionId][locale] });
   }
-  crumbs.push({ '@type': 'ListItem', position, name: title, item: pageUrl });
+  crumbs.push({ name: title, item: pageUrl });
 
   graph.push({
     '@type': 'TechArticle',
@@ -142,11 +155,7 @@ if (isHome) {
     author: { '@id': orgId },
     publisher: { '@id': orgId },
   });
-  graph.push({
-    '@type': 'BreadcrumbList',
-    '@id': `${pageUrl}#breadcrumb`,
-    itemListElement: crumbs,
-  });
+  graph.push(breadcrumbList(`${pageUrl}#breadcrumb`, crumbs));
 }
 
 const jsonLd = {
