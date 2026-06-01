@@ -17,15 +17,21 @@ export interface PrivacyPoint {
 }
 
 export interface ComparisonCell {
-  /** true => positive (green check), false => negative (red cross). */
-  ok: boolean;
+  /**
+   * 'yes' => positive (green check), 'no' => negative (red cross),
+   * 'neutral' => not comparable / varies (no mark, text only).
+   */
+  state: 'yes' | 'no' | 'neutral';
   text: string;
 }
 
 export interface ComparisonRow {
   criterion: string;
   sto: ComparisonCell;
-  others: ComparisonCell;
+  /** Local regex grouping extensions (the real browser competitors). */
+  localRegex: ComparisonCell;
+  /** Tools that name groups through a remote AI service. */
+  aiTools: ComparisonCell;
 }
 
 export interface ValueItem {
@@ -58,7 +64,8 @@ export interface LandingCopy {
     subtitle: string;
     columnCriterion: string;
     columnSto: string;
-    columnOthers: string;
+    columnLocalRegex: string;
+    columnAiTools: string;
     rows: ComparisonRow[];
   };
   values: {
@@ -138,7 +145,7 @@ export const landing: Record<Locale, LandingCopy> = {
     privacy: {
       title: 'Tout est local, rien ne part en ligne',
       subtitle:
-        "L'inverse exact des outils qui envoient vos URL à un service distant. Ici, vos données ne quittent jamais le navigateur.",
+        "L'inverse exact des outils de nommage par IA, qui envoient vos URL à un service distant. Ici, vos données ne quittent jamais le navigateur.",
       points: [
         { icon: 'flat-color-icons:data-protection', label: 'Stockage dans browser.storage.local, sur votre machine.' },
         { icon: 'flat-color-icons:broken-link', label: 'Zéro requête réseau initiée par l\'extension.' },
@@ -150,45 +157,41 @@ export const landing: Record<Locale, LandingCopy> = {
     comparison: {
       title: 'Pourquoi pas une alternative ?',
       subtitle:
-        'Comparaison avec les catégories courantes : gestionnaires cloud, outils de nommage par IA, extensions à abonnement.',
+        "Face aux deux familles d'alternatives : les extensions de groupement par regex locales, et les outils qui nomment les groupes via une IA distante.",
       columnCriterion: 'Critère',
       columnSto: 'Smart Tab Organizer',
-      columnOthers: 'Alternatives courantes',
+      columnLocalRegex: 'Extensions regex locales',
+      columnAiTools: 'Outils de nommage par IA',
       rows: [
         {
-          criterion: 'Stockage des données',
-          sto: { ok: true, text: '100% local' },
-          others: { ok: false, text: 'Souvent dans le cloud' },
+          criterion: 'Nom de groupe',
+          sto: { state: 'yes', text: "Extrait de l'URL ou du titre" },
+          localRegex: { state: 'no', text: 'Fixe, une règle par valeur' },
+          aiTools: { state: 'no', text: 'Généré par IA distante' },
+        },
+        {
+          criterion: 'Données envoyées en ligne',
+          sto: { state: 'yes', text: 'Aucune' },
+          localRegex: { state: 'yes', text: 'Aucune' },
+          aiTools: { state: 'no', text: 'URL et titre envoyés à un tiers' },
         },
         {
           criterion: 'Prix',
-          sto: { ok: true, text: 'Gratuit, pour toujours' },
-          others: { ok: false, text: 'Freemium ou abonnement' },
+          sto: { state: 'yes', text: 'Gratuit, open source GPLv3' },
+          localRegex: { state: 'neutral', text: 'Souvent gratuit' },
+          aiTools: { state: 'neutral', text: 'Souvent freemium' },
         },
         {
           criterion: 'Code source',
-          sto: { ok: true, text: 'Open source' },
-          others: { ok: false, text: 'Souvent propriétaire' },
-        },
-        {
-          criterion: 'Compte utilisateur',
-          sto: { ok: true, text: 'Aucun compte' },
-          others: { ok: false, text: 'Compte souvent requis' },
-        },
-        {
-          criterion: 'Tracking et télémétrie',
-          sto: { ok: true, text: 'Aucun' },
-          others: { ok: false, text: 'Fréquent' },
-        },
-        {
-          criterion: 'Nommage des groupes',
-          sto: { ok: true, text: 'Règles regex locales' },
-          others: { ok: false, text: 'IA distante (URL envoyées)' },
+          sto: { state: 'yes', text: 'Open source (GPLv3)' },
+          localRegex: { state: 'neutral', text: 'Variable' },
+          aiTools: { state: 'neutral', text: 'Variable' },
         },
         {
           criterion: 'Accessibilité',
-          sto: { ok: true, text: 'Polices dys, audits axe-core' },
-          others: { ok: false, text: 'Variable' },
+          sto: { state: 'yes', text: 'Polices dys, audits axe-core' },
+          localRegex: { state: 'neutral', text: 'Variable' },
+          aiTools: { state: 'neutral', text: 'Variable' },
         },
       ],
     },
@@ -293,7 +296,7 @@ export const landing: Record<Locale, LandingCopy> = {
     privacy: {
       title: 'Everything is local, nothing goes online',
       subtitle:
-        'The exact opposite of tools that send your URLs to a remote service. Here, your data never leaves the browser.',
+        'The exact opposite of AI naming tools, which send your URLs to a remote service. Here, your data never leaves the browser.',
       points: [
         { icon: 'flat-color-icons:data-protection', label: 'Stored in browser.storage.local, on your machine.' },
         { icon: 'flat-color-icons:broken-link', label: 'Zero network request initiated by the extension.' },
@@ -305,45 +308,41 @@ export const landing: Record<Locale, LandingCopy> = {
     comparison: {
       title: 'Why not an alternative?',
       subtitle:
-        'Compared with the usual categories: cloud managers, AI naming tools, subscription extensions.',
+        'Compared with the two families of alternatives: local regex grouping extensions, and tools that name groups through remote AI.',
       columnCriterion: 'Criterion',
       columnSto: 'Smart Tab Organizer',
-      columnOthers: 'Common alternatives',
+      columnLocalRegex: 'Local regex extensions',
+      columnAiTools: 'AI naming tools',
       rows: [
         {
-          criterion: 'Data storage',
-          sto: { ok: true, text: '100% local' },
-          others: { ok: false, text: 'Often in the cloud' },
+          criterion: 'Group naming',
+          sto: { state: 'yes', text: 'Extracted from the URL or title' },
+          localRegex: { state: 'no', text: 'Fixed, one rule per value' },
+          aiTools: { state: 'no', text: 'Generated by remote AI' },
+        },
+        {
+          criterion: 'Data sent online',
+          sto: { state: 'yes', text: 'None' },
+          localRegex: { state: 'yes', text: 'None' },
+          aiTools: { state: 'no', text: 'URL and title sent to a third party' },
         },
         {
           criterion: 'Price',
-          sto: { ok: true, text: 'Free, forever' },
-          others: { ok: false, text: 'Freemium or subscription' },
+          sto: { state: 'yes', text: 'Free, open source GPLv3' },
+          localRegex: { state: 'neutral', text: 'Often free' },
+          aiTools: { state: 'neutral', text: 'Often freemium' },
         },
         {
           criterion: 'Source code',
-          sto: { ok: true, text: 'Open source' },
-          others: { ok: false, text: 'Often proprietary' },
-        },
-        {
-          criterion: 'User account',
-          sto: { ok: true, text: 'No account' },
-          others: { ok: false, text: 'Account often required' },
-        },
-        {
-          criterion: 'Tracking and telemetry',
-          sto: { ok: true, text: 'None' },
-          others: { ok: false, text: 'Frequent' },
-        },
-        {
-          criterion: 'Group naming',
-          sto: { ok: true, text: 'Local regex rules' },
-          others: { ok: false, text: 'Remote AI (URLs sent)' },
+          sto: { state: 'yes', text: 'Open source (GPLv3)' },
+          localRegex: { state: 'neutral', text: 'Varies' },
+          aiTools: { state: 'neutral', text: 'Varies' },
         },
         {
           criterion: 'Accessibility',
-          sto: { ok: true, text: 'Dys fonts, axe-core audits' },
-          others: { ok: false, text: 'Varies' },
+          sto: { state: 'yes', text: 'Dys fonts, axe-core audits' },
+          localRegex: { state: 'neutral', text: 'Varies' },
+          aiTools: { state: 'neutral', text: 'Varies' },
         },
       ],
     },
@@ -448,7 +447,7 @@ export const landing: Record<Locale, LandingCopy> = {
     privacy: {
       title: 'Todo es local, nada sale a internet',
       subtitle:
-        'Lo contrario exacto de las herramientas que envían tus URL a un servicio remoto. Aquí, tus datos nunca salen del navegador.',
+        'Lo contrario exacto de las herramientas de nombrado por IA, que envían tus URL a un servicio remoto. Aquí, tus datos nunca salen del navegador.',
       points: [
         { icon: 'flat-color-icons:data-protection', label: 'Almacenamiento en browser.storage.local, en tu equipo.' },
         { icon: 'flat-color-icons:broken-link', label: 'Cero solicitudes de red iniciadas por la extensión.' },
@@ -460,45 +459,41 @@ export const landing: Record<Locale, LandingCopy> = {
     comparison: {
       title: '¿Por qué no una alternativa?',
       subtitle:
-        'Comparación con las categorías habituales: gestores en la nube, herramientas de nombrado por IA, extensiones de suscripción.',
+        'Frente a las dos familias de alternativas: las extensiones de agrupación por regex locales y las herramientas que nombran los grupos mediante IA remota.',
       columnCriterion: 'Criterio',
       columnSto: 'Smart Tab Organizer',
-      columnOthers: 'Alternativas habituales',
+      columnLocalRegex: 'Extensiones regex locales',
+      columnAiTools: 'Herramientas de nombrado por IA',
       rows: [
         {
-          criterion: 'Almacenamiento de datos',
-          sto: { ok: true, text: '100% local' },
-          others: { ok: false, text: 'A menudo en la nube' },
+          criterion: 'Nombre de grupo',
+          sto: { state: 'yes', text: 'Extraído de la URL o del título' },
+          localRegex: { state: 'no', text: 'Fijo, una regla por valor' },
+          aiTools: { state: 'no', text: 'Generado por IA remota' },
+        },
+        {
+          criterion: 'Datos enviados en línea',
+          sto: { state: 'yes', text: 'Ninguno' },
+          localRegex: { state: 'yes', text: 'Ninguno' },
+          aiTools: { state: 'no', text: 'URL y título enviados a un tercero' },
         },
         {
           criterion: 'Precio',
-          sto: { ok: true, text: 'Gratis, para siempre' },
-          others: { ok: false, text: 'Freemium o suscripción' },
+          sto: { state: 'yes', text: 'Gratis, código abierto GPLv3' },
+          localRegex: { state: 'neutral', text: 'A menudo gratis' },
+          aiTools: { state: 'neutral', text: 'A menudo freemium' },
         },
         {
           criterion: 'Código fuente',
-          sto: { ok: true, text: 'Código abierto' },
-          others: { ok: false, text: 'A menudo propietario' },
-        },
-        {
-          criterion: 'Cuenta de usuario',
-          sto: { ok: true, text: 'Sin cuenta' },
-          others: { ok: false, text: 'Cuenta a menudo requerida' },
-        },
-        {
-          criterion: 'Rastreo y telemetría',
-          sto: { ok: true, text: 'Ninguno' },
-          others: { ok: false, text: 'Frecuente' },
-        },
-        {
-          criterion: 'Nombrado de grupos',
-          sto: { ok: true, text: 'Reglas regex locales' },
-          others: { ok: false, text: 'IA remota (URL enviadas)' },
+          sto: { state: 'yes', text: 'Código abierto (GPLv3)' },
+          localRegex: { state: 'neutral', text: 'Variable' },
+          aiTools: { state: 'neutral', text: 'Variable' },
         },
         {
           criterion: 'Accesibilidad',
-          sto: { ok: true, text: 'Fuentes dys, auditorías axe-core' },
-          others: { ok: false, text: 'Variable' },
+          sto: { state: 'yes', text: 'Fuentes dys, auditorías axe-core' },
+          localRegex: { state: 'neutral', text: 'Variable' },
+          aiTools: { state: 'neutral', text: 'Variable' },
         },
       ],
     },

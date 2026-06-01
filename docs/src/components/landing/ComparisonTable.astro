@@ -18,7 +18,8 @@ const t = landing[locale].comparison;
         <tr>
           <th scope="col">{t.columnCriterion}</th>
           <th scope="col" class="col-sto">{t.columnSto}</th>
-          <th scope="col">{t.columnOthers}</th>
+          <th scope="col">{t.columnLocalRegex}</th>
+          <th scope="col">{t.columnAiTools}</th>
         </tr>
       </thead>
       <tbody>
@@ -28,18 +29,47 @@ const t = landing[locale].comparison;
               <th scope="row">{row.criterion}</th>
               <td class="cell-sto">
                 <span class="cell">
-                  <span class="mark mark-ok" aria-hidden="true">
-                    <Icon name="flat-color-icons:ok" />
-                  </span>
+                  {row.sto.state === 'yes' && (
+                    <span class="mark mark-ok" aria-hidden="true">
+                      <Icon name="flat-color-icons:ok" />
+                    </span>
+                  )}
+                  {row.sto.state === 'no' && (
+                    <span class="mark mark-no" aria-hidden="true">
+                      <Icon name="flat-color-icons:cancel" />
+                    </span>
+                  )}
                   {row.sto.text}
                 </span>
               </td>
               <td>
                 <span class="cell">
-                  <span class="mark mark-no" aria-hidden="true">
-                    <Icon name="flat-color-icons:cancel" />
-                  </span>
-                  {row.others.text}
+                  {row.localRegex.state === 'yes' && (
+                    <span class="mark mark-ok" aria-hidden="true">
+                      <Icon name="flat-color-icons:ok" />
+                    </span>
+                  )}
+                  {row.localRegex.state === 'no' && (
+                    <span class="mark mark-no" aria-hidden="true">
+                      <Icon name="flat-color-icons:cancel" />
+                    </span>
+                  )}
+                  {row.localRegex.text}
+                </span>
+              </td>
+              <td>
+                <span class="cell">
+                  {row.aiTools.state === 'yes' && (
+                    <span class="mark mark-ok" aria-hidden="true">
+                      <Icon name="flat-color-icons:ok" />
+                    </span>
+                  )}
+                  {row.aiTools.state === 'no' && (
+                    <span class="mark mark-no" aria-hidden="true">
+                      <Icon name="flat-color-icons:cancel" />
+                    </span>
+                  )}
+                  {row.aiTools.text}
                 </span>
               </td>
             </tr>
@@ -79,7 +109,7 @@ const t = landing[locale].comparison;
   .comparison-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 38rem;
+    min-width: 52rem;
   }
 
   .comparison-table th,
