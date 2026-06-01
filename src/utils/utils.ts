@@ -13,7 +13,7 @@ export function domainToRegex(domainFilter: string | null): RegExp | null {
     const cleaned = trimmed.startsWith('*.') ? trimmed.slice(2) : trimmed;
     // Plain domain: only letters, digits, dots and hyphens — not localhost
     const isPlainDomain = cleaned !== 'localhost' && /^[a-zA-Z0-9][a-zA-Z0-9.\-]*$/.test(cleaned);
-    const escaped = cleaned.replace(/\./g, '\\.');
+    const escaped = cleaned.replace(/[\\.]/g, '\\$&');
     const p = isPlainDomain ? `([^.]+\\.)*${escaped}` : escaped;
     return new RegExp(`^https?:\\/\\/(${p})(\\/|$)`, 'i');
   } catch (e) {

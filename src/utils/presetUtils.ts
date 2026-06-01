@@ -39,7 +39,7 @@ export async function getPresetsForDomain(domain: string): Promise<Preset[]> {
   const presets = await getAllPresets();
   return presets.filter(preset =>
     preset.domainFilters.some(filter =>
-      filter === '*' || domain.includes(filter.replace('*', ''))
+      filter === '*' || domain.includes(filter.split('*').join(''))
     )
   );
 }
