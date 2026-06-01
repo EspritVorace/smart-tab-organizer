@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import icon from 'astro-icon';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
@@ -47,7 +48,12 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'SmartTab Organizer',
+      favicon: '/favicon.svg',
       customCss: ['./src/styles/global.css'],
+      components: {
+        // Inject schema.org JSON-LD structured data (GEO) on every page.
+        Head: './src/components/Head.astro',
+      },
       defaultLocale: 'root',
       locales: {
         root: { label: 'Français', lang: 'fr' },
@@ -109,6 +115,7 @@ export default defineConfig({
         { icon: 'github', label: 'GitHub', href: 'https://github.com/EspritVorace/smart-tab-organizer' },
       ],
     }),
+    icon(),
   ],
   vite: {
     plugins: [tailwindcss()],

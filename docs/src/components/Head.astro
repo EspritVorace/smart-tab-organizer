@@ -1,0 +1,9 @@
+---
+// Override of Starlight's `<Head>`: keep the default tags (canonical,
+// OpenGraph, Twitter, ...) and append our schema.org JSON-LD for GEO.
+import Default from '@astrojs/starlight/components/Head.astro';
+import StructuredData from './StructuredData.astro';
+---
+
+<Default />
+<StructuredData />

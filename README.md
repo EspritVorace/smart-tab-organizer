@@ -57,7 +57,7 @@ Snapshot your open tabs and groups, name them, pin the ones you live in. Restore
 ## And there's more
 
 - **Workspaces** : keep separate rules, sessions and stats per context (work, personal, side project)
-- **20+ rule packs** for popular tools (GitHub, GitLab, Jira, AWS, AI assistants, Discord...) ready to import
+- **49 rule packs** for popular tools (GitHub, GitLab, Jira, AWS, AI assistants, Discord...) ready to import
 - **Import / export** with conflict resolution for both rules and sessions
 - **Local statistics** : see how much grouping and dedup actually saves you
 - **Keyboard shortcuts** with a built-in help panel
@@ -83,7 +83,7 @@ pnpm storybook    # Component explorer (port 6006)
 pnpm build        # Production build
 ```
 
-The stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) and code conventions are documented in [`CLAUDE.md`](CLAUDE.md) and the [stack technique annex](docs/src/content/docs/annexes/stack-technique.mdx).
+The stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) and code conventions are documented in [`CLAUDE.md`](CLAUDE.md) and the [stack technique annex](docs/src/content/docs/contribuer/stack.mdx).
 
 Please open an issue before submitting a large pull request.
 

@@ -1,9 +1,13 @@
 ---
 title: SmartTab Organizer
-description: Extension navigateur (Chrome / Firefox) qui groupe vos onglets par règles, dédupliquer les doublons et sauvegarde vos sessions de travail. Tout est local, rien ne part en ligne.
+description: Extension navigateur (Chrome / Firefox) qui groupe vos onglets par règles, déduplique les doublons et sauvegarde vos sessions de travail. Tout est local, rien ne part en ligne.
 template: splash
 hero:
   tagline: Organisez vos onglets intelligemment, sans envoyer la moindre URL en ligne.
+  image:
+    alt: La popup de SmartTab Organizer avec ses profils epingles et son selecteur d'espace de travail.
+    light: ../../assets/screenshots/fr-light-journey-popup-with-pinned-and-workspace.png
+    dark: ../../assets/screenshots/fr-dark-journey-popup-with-pinned-and-workspace.png
   actions:
     - text: Commencer
       link: /decouverte/pourquoi/
@@ -19,6 +23,16 @@ hero:
       variant: minimal
 ---
 
-SmartTab Organizer est une extension Chrome et Firefox qui regroupe automatiquement vos onglets par domaine, élimine les doublons et vous permet de sauvegarder des sessions de travail nommées pour les retrouver d'un clic.
+import FeatureGrid from '../../components/landing/FeatureGrid.astro';
+import Showcase from '../../components/landing/Showcase.astro';
+import PrivacyBand from '../../components/landing/PrivacyBand.astro';
+import ComparisonTable from '../../components/landing/ComparisonTable.astro';
+import ValuesBand from '../../components/landing/ValuesBand.astro';
+import ClosingCTA from '../../components/landing/ClosingCTA.astro';
 
-Les règles s'appuient sur des expressions régulières que vous écrivez vous-même ou qui viennent de packs intégrés (49 packs prêts à l'emploi). Aucune IA distante, aucune télémétrie, aucune requête réseau : tout vit dans `browser.storage.local`.
+<FeatureGrid />
+<Showcase />
+<PrivacyBand />
+<ComparisonTable />
+<ValuesBand />
+<ClosingCTA />

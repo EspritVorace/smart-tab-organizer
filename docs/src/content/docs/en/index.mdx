@@ -4,6 +4,10 @@ description: A Chrome and Firefox browser extension that groups your tabs by rul
 template: splash
 hero:
   tagline: Organize your tabs intelligently, without sending a single URL anywhere.
+  image:
+    alt: The SmartTab Organizer popup with its pinned profiles and workspace switcher.
+    light: ../../../assets/screenshots/en-light-journey-popup-with-pinned-and-workspace.png
+    dark: ../../../assets/screenshots/en-dark-journey-popup-with-pinned-and-workspace.png
   actions:
     - text: Get started
       link: /en/decouverte/pourquoi/
@@ -19,6 +23,16 @@ hero:
       variant: minimal
 ---
 
-SmartTab Organizer is a Chrome and Firefox extension that automatically groups your tabs by domain, removes duplicates, and lets you save named work sessions to recall in a single click.
+import FeatureGrid from '../../../components/landing/FeatureGrid.astro';
+import Showcase from '../../../components/landing/Showcase.astro';
+import PrivacyBand from '../../../components/landing/PrivacyBand.astro';
+import ComparisonTable from '../../../components/landing/ComparisonTable.astro';
+import ValuesBand from '../../../components/landing/ValuesBand.astro';
+import ClosingCTA from '../../../components/landing/ClosingCTA.astro';
 
-Rules rely on regular expressions you write yourself or that come from built-in packs (49 packs ready to use). No remote AI, no telemetry, no network requests: everything lives in `browser.storage.local`.
+<FeatureGrid />
+<Showcase />
+<PrivacyBand />
+<ComparisonTable />
+<ValuesBand />
+<ClosingCTA />

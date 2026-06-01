@@ -13,6 +13,8 @@ overrides:
   brace-expansion@5: ^5.0.5
   rollup: npm:@rollup/wasm-node@^4.0.0
   vite-node: ^6.0.0
+  tmp: ^0.2.6
+  uuid: ^11.1.1
 
 patchedDependencies:
   vitest-ctrf-json-reporter@0.0.3: e56f5cb2f141b2f8ed1b495711c717270944b40570eea82b2949db99e2582378
@@ -6575,8 +6577,8 @@ packages:
     resolution: {integrity: sha512-azl+t0z7pw/z958Gy9svOTuzqIk6xq+NSheJzn5MMWtWTFywIacg2wUlzKFGtt3cthx0r2SxMK0yzJOR0IES7Q==}
     engines: {node: '>=14.0.0'}
 
-  tmp@0.2.5:
-    resolution: {integrity: sha512-voyz6MApa1rQGUxT3E+BK7/ROe8itEx7vD8/HEvt4xwXucvQ5G5oeEiHkmHZJuBO21RpOf+YYm9MOivj709jow==}
+  tmp@0.2.7:
+    resolution: {integrity: sha512-e0votIpp4Uo2AJYSzVHV6xCcawuiez3DzqDAbrTc3YxBkplN6e+dM13ZeIcZnDg/QpSuU2zfZ3rzwY8ukEnaXw==}
     engines: {node: '>=14.14'}
 
   tmpl@1.0.5:
@@ -6790,9 +6792,8 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
-  uuid@8.3.2:
-    resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
-    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+  uuid@11.1.1:
+    resolution: {integrity: sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==}
     hasBin: true
 
   v8-to-istanbul@9.3.0:
@@ -9498,7 +9499,7 @@ snapshots:
       playwright-core: 1.60.0
       rimraf: 3.0.2
       storybook: 10.4.1(@emnapi/core@1.10.0)(@emnapi/runtime@1.10.0)(@testing-library/dom@10.4.1)(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      uuid: 8.3.2
+      uuid: 11.1.1
     transitivePeerDependencies:
       - '@swc/helpers'
       - '@types/node'
@@ -11834,7 +11835,7 @@ snapshots:
       istanbul-lib-coverage: 3.2.2
       p-map: 3.0.0
       rimraf: 3.0.2
-      uuid: 8.3.2
+      uuid: 11.1.1
 
   istanbul-lib-report@3.0.1:
     dependencies:
@@ -12001,7 +12002,7 @@ snapshots:
     dependencies:
       mkdirp: 1.0.4
       strip-ansi: 6.0.1
-      uuid: 8.3.2
+      uuid: 11.1.1
       xml: 1.0.1
 
   jest-leak-detector@30.4.1:
@@ -12770,7 +12771,7 @@ snapshots:
       is-wsl: 2.2.0
       semver: 7.8.1
       shellwords: 0.1.1
-      uuid: 8.3.2
+      uuid: 11.1.1
       which: 2.0.2
 
   node-preload@0.2.1:
@@ -14175,7 +14176,7 @@ snapshots:
 
   tinyspy@4.0.4: {}
 
-  tmp@0.2.5: {}
+  tmp@0.2.7: {}
 
   tmpl@1.0.5: {}
 
@@ -14432,7 +14433,7 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  uuid@8.3.2: {}
+  uuid@11.1.1: {}
 
   v8-to-istanbul@9.3.0:
     dependencies:
@@ -14581,7 +14582,7 @@ snapshots:
       source-map-support: 0.5.21
       strip-bom: 5.0.0
       strip-json-comments: 5.0.2
-      tmp: 0.2.5
+      tmp: 0.2.7
       update-notifier: 7.3.1
       watchpack: 2.4.4
       zip-dir: 2.0.0

@@ -45,11 +45,21 @@ export class DomainRulesListPage {
     return this.card(ruleId).getByRole('switch').first();
   }
 
+  /** Bulk-selection checkbox inside a rule card. */
+  selectionCheckbox(ruleId: string): Locator {
+    return this.card(ruleId).getByRole('checkbox').first();
+  }
+
   // ─── Atomic actions ──────────────────────────────────────────────────────
 
   /** Click the rule's enable/disable Switch. */
   async toggleRuleEnabled(ruleId: string): Promise<void> {
     await this.enableSwitch(ruleId).click();
+  }
+
+  /** Tick the rule's bulk-selection checkbox (reveals the bulk action bar). */
+  async selectRule(ruleId: string): Promise<void> {
+    await this.selectionCheckbox(ruleId).click();
   }
 
   // ─── Atomic assertions ───────────────────────────────────────────────────

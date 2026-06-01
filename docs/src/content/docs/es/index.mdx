@@ -4,13 +4,17 @@ description: Extensión de navegador (Chrome / Firefox) que agrupa tus pestañas
 template: splash
 hero:
   tagline: Organiza tus pestañas de forma inteligente, sin enviar ni una sola URL a internet.
+  image:
+    alt: La ventana emergente de SmartTab Organizer con sus perfiles fijados y su selector de espacio de trabajo.
+    light: ../../../assets/screenshots/es-light-journey-popup-with-pinned-and-workspace.png
+    dark: ../../../assets/screenshots/es-dark-journey-popup-with-pinned-and-workspace.png
   actions:
     - text: Empezar
-      link: /decouverte/pourquoi/
+      link: /es/decouverte/pourquoi/
       icon: right-arrow
       variant: primary
     - text: Instalar
-      link: /decouverte/installation/
+      link: /es/decouverte/installation/
       icon: external
       variant: secondary
     - text: Ver en GitHub
@@ -19,6 +23,16 @@ hero:
       variant: minimal
 ---
 
-SmartTab Organizer es una extensión para Chrome y Firefox que agrupa automáticamente tus pestañas por dominio, elimina los duplicados y te deja guardar sesiones de trabajo nombradas para recuperarlas con un solo clic.
+import FeatureGrid from '../../../components/landing/FeatureGrid.astro';
+import Showcase from '../../../components/landing/Showcase.astro';
+import PrivacyBand from '../../../components/landing/PrivacyBand.astro';
+import ComparisonTable from '../../../components/landing/ComparisonTable.astro';
+import ValuesBand from '../../../components/landing/ValuesBand.astro';
+import ClosingCTA from '../../../components/landing/ClosingCTA.astro';
 
-Las reglas se basan en expresiones regulares que escribes tú o que provienen de paquetes integrados (49 packs listos para usar). Sin IA remota, sin telemetría, sin solicitudes de red: todo vive en `browser.storage.local`.
+<FeatureGrid />
+<Showcase />
+<PrivacyBand />
+<ComparisonTable />
+<ValuesBand />
+<ClosingCTA />

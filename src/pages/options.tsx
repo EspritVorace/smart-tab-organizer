@@ -1,6 +1,5 @@
 // options/options.ts
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
-import { browser } from 'wxt/browser';
 import { mountExtensionApp } from '@/utils/mountExtensionApp.js';
 import { Flex, Spinner, Text, Theme } from '@radix-ui/themes';
 import { ThemeProvider } from 'next-themes';
@@ -83,8 +82,6 @@ function renderLazyFallback(currentTab: string): React.ReactNode {
 }
 
 export function OptionsContent() {
-    const version = browser.runtime.getManifest().version;
-
     const { settings, updateSettings } = useSettings();
     const { statisticsAggregates, resetStatistics } = useStatistics(settings?.domainRules ?? []);
     const { snapshot: sessionStatsSnapshot } = useSessionStatistics();
@@ -232,7 +229,7 @@ export function OptionsContent() {
     }
 
     return (
-        <ShortcutsControlProvider openShortcuts={openShortcuts} version={version}>
+        <ShortcutsControlProvider openShortcuts={openShortcuts}>
         <ImportExportWizardsProvider>
         <div id="options-inner" data-testid="options" style={{ display: 'flex', height: '100vh' }}>
             <Sidebar

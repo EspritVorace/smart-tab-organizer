@@ -51,6 +51,22 @@ Uninstalling then reinstalling the extension fully wipes `browser.storage.local`
 
 On the [GitHub issue tracker](https://github.com/EspritVorace/smart-tab-organizer/issues). Please include the browser (Chrome / Edge / Firefox + version), a description of the expected vs observed behavior, and ideally the steps to reproduce.
 
+## Does the extension use AI?
+
+No. No AI, neither local nor remote. Group naming relies solely on regular expressions executed in your browser (your own, or those from a built-in pack). See [Why this extension](/decouverte/pourquoi#tout-est-local-rien-ne-part-en-ligne).
+
+## Is it really free? What is the business model?
+
+Yes, free with no strings attached: no paid version, no premium tier, no gated feature. The extension is open source under the GPL v3 license, so anyone can audit it and contribute. See the [open source attribution page](/reference/licences-open-source).
+
+## How is it different from the browser's native tab groups?
+
+Chrome's native groups are created and named by hand. SmartTab Organizer creates them automatically based on your domain rules, closes duplicates, and saves your tab state as restorable sessions. It builds on native groups, it does not replace them. See [Grouping tabs](/guides/grouper-onglets).
+
+## Does it work offline?
+
+Yes. The extension needs no connection: grouping, deduplication, sessions, and statistics all run entirely locally. The only time the network is involved is when you open a page in a tab yourself.
+
 ## Next steps
 
 <CardGrid>

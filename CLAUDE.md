@@ -22,11 +22,23 @@ pnpm test:e2e:headed          # build + Playwright headed
 # Docs
 pnpm storybook                            # Storybook (port 6006)
 pnpm docs:dev / docs:build / docs:preview # Astro Starlight (port 4321, deployed at https://docs.esprit-vorace.fr)
-pnpm screenshots                          # Deterministic multi-locale/theme screenshots
-pnpm doc:scenarios                        # Narrative captures (3 locales x 2 themes matrix)
+pnpm doc:scenarios                        # All screenshots: narrative journeys + feature screens (3 locales x 2 themes matrix)
 pnpm doc:scenarios:audit                  # Audit routing manifests vs output / destinations
 pnpm doc:scenarios:sync                   # Re-route output to dest dirs (without re-running Playwright)
 ```
+
+> **The Starlight docs (`docs/`) are a separate pnpm project, NOT part of
+> the root workspace.** They have their own `package.json` and their own
+> `node_modules`, which the root `pnpm install` does not populate.
+>
+> - Build the docs with `pnpm docs:build` (the root `pnpm build` builds
+>   the WXT extension, not the docs). The `docs:*` scripts just delegate
+>   via `pnpm --dir docs ...`.
+> - Before the first docs build/dev in a fresh checkout, install the docs
+>   deps: `pnpm --dir docs install` (or `cd docs && pnpm install`).
+>   Symptom of a missing install: `sh: 1: astro: not found`.
+> - Build output is `docs/dist/`. Static files in `docs/public/` (e.g.
+>   `robots.txt`, `favicon.svg`, fonts) are served as-is at the site root.
 
 ## Architecture
 
@@ -95,17 +107,16 @@ src/
 tests/             # Vitest unit tests
 tests/e2e/         # Playwright E2E tests (functional)
 e2e-shared/        # Shared Page Objects, Domain Actions, fixtures-base, matchers
-e2e-doc-scenarios/ # Narrative captures (Starlight, README, Chrome Web Store)
-e2e-screenshots/   # Chrome Web Store screenshots (out of scope of Page Objects epic)
+e2e-doc-scenarios/ # All documentation captures (Starlight, README, Chrome Web Store)
 ```
 
 ### E2E architecture (Page Objects + Domain Actions)
 
-Three Playwright pipelines (`tests/e2e/`, `e2e-doc-scenarios/`,
-`e2e-screenshots/`) consume one shared bundle under
-[`e2e-shared/`](./e2e-shared/README.md). The convergence guarantees that
-a DOM evolution breaks every pipeline at the same call site, which keeps
-the `e2e-flaky-detector` agent honest.
+Two Playwright pipelines (`tests/e2e/` for functional tests,
+`e2e-doc-scenarios/` for all documentation captures) consume one shared
+bundle under [`e2e-shared/`](./e2e-shared/README.md). The convergence
+guarantees that a DOM evolution breaks both pipelines at the same call
+site, which keeps the `e2e-flaky-detector` agent honest.
 
 Layered model:
 
@@ -220,10 +231,11 @@ logger.debug('[MY_MODULE] Something happened:', value);
 
 ### Doc-scenarios (narrative captures)
 
-Pipeline `e2e-doc-scenarios/` is distinct from `e2e-screenshots/`: it
-captures complete user journeys (initial state, creation, real usage,
-sessions, import/export, advanced states) across 3 locales x 2 themes.
-See [`e2e-doc-scenarios/README.md`](./e2e-doc-scenarios/README.md) for
+Pipeline `e2e-doc-scenarios/` is the single source for every screenshot:
+narrative user journeys (initial state, creation, real usage, sessions,
+import/export, advanced states) plus standalone feature screens, across
+3 locales x 2 themes. See
+[`e2e-doc-scenarios/README.md`](./e2e-doc-scenarios/README.md) for
 details.
 
 - Scenarios under `e2e-doc-scenarios/scenarios/NN-name.scenario.ts`,
@@ -234,8 +246,9 @@ details.
   `doc/readme/` or `doc/chrome-web-store/`.
 - Dedicated CI workflow: `.github/workflows/doc-scenarios.yml`
   (`workflow_dispatch` + tag push + weekly cron). Not triggered on PRs.
-- For a Starlight integration, prefix the route `path` with `journey-`
-  to avoid collisions with the `e2e-screenshots/` pipeline names.
+- For a narrative Starlight capture, prefix the route `path` with
+  `journey-` to keep it visually distinct from the standalone feature
+  screens (e.g. `popup-content`, `settings-misc`).
 
 ### Accessibility audits (axe-core)
 Two layers run axe-core and share the same consolidated report:

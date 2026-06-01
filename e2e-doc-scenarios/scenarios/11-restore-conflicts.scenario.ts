@@ -20,7 +20,7 @@ import {
   seedSessions,
 } from '../../e2e-shared/actions/index.js';
 import { SessionsListPage } from '../../e2e-shared/pages/index.js';
-import { SESSION_FOR_CONFLICT } from '../../e2e-screenshots/fixtures/sessions-seed.js';
+import { SESSION_FOR_CONFLICT } from '../fixtures/seed-data.js';
 import { RESTORE_CONFLICTS_MANIFEST } from './11-restore-conflicts.routing.js';
 
 const SCENARIO_ID = '11-restore-conflicts';

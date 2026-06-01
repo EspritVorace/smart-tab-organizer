@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SmartTab Organizer · Your command center</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f4f5f9;
+    --bg-2: #eef0f6;
+    --surface: #ffffff;
+    --text: #1f2328;
+    --text-soft: #57606a;
+    --text-dim: #8b949e;
+    --border: #e1e4e8;
+    --border-soft: #eaecef;
+    --accent: #6e56cf;
+    --indigo: #5046e5;
+    --green: #1a7f37;
+  }
+
+  body {
+    width: 1280px;
+    height: 800px;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(110, 86, 207, 0.1) 0%, transparent 55%),
+      radial-gradient(circle at 85% 80%, rgba(80, 70, 229, 0.08) 0%, transparent 55%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    padding: 32px 70px 24px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .header h1 .accent {
+    color: var(--accent);
+  }
+
+  .header p {
+    font-size: 16px;
+    color: var(--text-soft);
+    font-weight: 500;
+  }
+
+  /* MAIN LAYOUT : 3 colonnes */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 440px 1fr;
+    gap: 28px;
+    flex: 1;
+    align-items: center;
+  }
+
+  /* POPUP */
+  .popup-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .popup-img {
+    width: 440px;
+    height: auto;
+    border-radius: 16px;
+    box-shadow:
+      0 25px 60px rgba(15, 23, 42, 0.18),
+      0 8px 18px rgba(15, 23, 42, 0.08),
+      0 0 0 1px var(--border);
+  }
+
+  /* Conteneur relatif pour positionner les pastilles */
+  .popup-stage {
+    position: relative;
+    width: 440px;
+  }
+
+  /* Pastilles numérotées sur la popup */
+  .marker {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid white;
+    box-shadow: 0 3px 10px rgba(110, 86, 207, 0.45);
+    z-index: 5;
+    transform: translate(-50%, -50%);
+  }
+
+  /* ANNOTATIONS COLUMNS */
+  .annotations {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  .annotations.left { padding-right: 6px; }
+  .annotations.right { padding-left: 6px; }
+
+  .annotation {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .annotations.left .annotation {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .annotation-num {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(110, 86, 207, 0.3);
+    margin-top: 2px;
+  }
+
+  .annotation-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .annotation-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .annotation-desc {
+    font-size: 13px;
+    color: var(--text-soft);
+    line-height: 1.45;
+  }
+
+  .annotation-desc strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* FOOTER badges */
+  .footer-badges {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .footer-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-soft);
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+  }
+
+  .footer-badge .icon {
+    font-size: 14px;
+  }
+
+  .footer-badge.privacy { color: var(--green); }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Your <span class="accent">command center</span></h1>
+    <p>One click to organize, switch workspaces, restore sessions. All from your toolbar.</p>
+  </div>
+
+  <div class="main">
+    <!-- ANNOTATIONS LEFT -->
+    <div class="annotations left">
+      <div class="annotation">
+        <div class="annotation-num">1</div>
+        <div class="annotation-content">
+          <div class="annotation-title">One-click organize</div>
+          <div class="annotation-desc">See exactly <strong>how many tabs and rules</strong> will apply, then group and deduplicate everything in one click.</div>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <div class="annotation-num">2</div>
+        <div class="annotation-content">
+          <div class="annotation-title">Save and restore</div>
+          <div class="annotation-desc">Capture the current workspace as a session, or <strong>bring back any saved set of tabs</strong> instantly.</div>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <div class="annotation-num">3</div>
+        <div class="annotation-content">
+          <div class="annotation-title">Workspaces</div>
+          <div class="annotation-desc">Switch between <strong>Personal, Work or custom workspaces</strong>, each with its own rules and sessions.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- POPUP -->
+    <div class="popup-wrapper">
+      <div class="popup-stage">
+        <img src="popup-en.png" alt="SmartTab Organizer popup" class="popup-img">
+        <!-- Pastilles cote gauche (1,2,3) -->
+        <div class="marker" style="left: 1%; top: 24%;">1</div>
+        <div class="marker" style="left: 1%; top: 37%;">2</div>
+        <div class="marker" style="left: 1%; top: 50%;">3</div>
+        <!-- Pastilles cote droit (4,5,6) -->
+        <div class="marker" style="left: 99%; top: 9%;">4</div>
+        <div class="marker" style="left: 99%; top: 71%;">5</div>
+        <div class="marker" style="left: 99%; top: 86%;">6</div>
+      </div>
+    </div>
+
+    <!-- ANNOTATIONS RIGHT -->
+    <div class="annotations right">
+      <div class="annotation">
+        <div class="annotation-num">4</div>
+        <div class="annotation-content">
+          <div class="annotation-title">Full settings</div>
+          <div class="annotation-desc">Open the gear for the <strong>full control panel</strong>: domain rules, sessions, import / export and statistics.</div>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <div class="annotation-num">5</div>
+        <div class="annotation-content">
+          <div class="annotation-title">Pinned sessions</div>
+          <div class="annotation-desc">Promote a session with a <strong>custom icon</strong> for one-click restore of your most-used setups.</div>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <div class="annotation-num">6</div>
+        <div class="annotation-content">
+          <div class="annotation-title">Global toggles</div>
+          <div class="annotation-desc">Pause auto-grouping or deduplication anytime, <strong>without disabling rules one by one</strong>.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-badges">
+    <span class="footer-badge privacy"><span class="icon">🔒</span>100% local</span>
+    <span class="footer-badge"><span class="icon">⚡</span>No AI, no tracking</span>
+    <span class="footer-badge"><span class="icon">⌨</span>Keyboard friendly</span>
+    <span class="footer-badge"><span class="icon">🌐</span>EN · FR · ES</span>
+  </div>
+
+</body>
+</html>
