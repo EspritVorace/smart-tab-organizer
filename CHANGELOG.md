@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.2.3 — since 1.2.2
+
+### New Features
+- Annotated popup-overview slide for the Chrome Web Store
+- Starlight home turned into a visitor-oriented landing page
+
+### Improvements
+- Visitor-oriented review of landing and docs (visuals, FAQ, quick start)
+- Landing hero aligned with the closing CTA card style
+- Schema.org JSON-LD structured data added for GEO
+- robots.txt now explicitly allows AI crawlers
+- Version number removed from the options and popup footers
+- pnpm screenshots converged into the doc:scenarios pipeline
+- Transitive dependency vulnerabilities patched via pnpm overrides (extension and docs sub-project)
+
+### Bug Fixes
+- Security: CodeQL js/incomplete-sanitization alerts addressed
+- Docs: first capture of the Import/Export page corrected
+
 ## 1.2.2 — since 1.2.1
 
 ### New Features
