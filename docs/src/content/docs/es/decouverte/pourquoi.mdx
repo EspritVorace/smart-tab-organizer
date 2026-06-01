@@ -1,6 +1,6 @@
 ---
 title: ¿Por qué esta extensión?
-description: El problema que resuelve SmartTab Organizer, sus tres pilares (agrupar, deduplicar, guardar) y su posición frente a las herramientas basadas en IA en línea.
+description: "El problema que resuelve SmartTab Organizer, sus tres pilares (agrupar, deduplicar, guardar) y su verdadero diferenciador: el nombre de grupo extraído de la URL o del título, en local."
 ---
 
 import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
@@ -41,7 +41,9 @@ La extensión se organiza en torno a tres funciones complementarias.
 
 ## Todo es local, nada sale a internet
 
-La mayoría de las extensiones de la competencia se apoyan en IA remota: envían la URL y el título de cada pestaña a un servicio externo para decidir el nombre. SmartTab Organizer hace justo lo contrario: ningún dato sale de tu navegador. La agrupación se basa en expresiones regulares (que escribes tú o que vienen de un [pack integrado](/reference/categories-et-packs)), y las sesiones viven en `browser.storage.local`.
+Las extensiones de agrupación existentes requieren un nombre de grupo fijo, escrito a mano, con una regla por valor. SmartTab Organizer extrae el nombre directamente de la URL o del título mediante una expresión regular: se crea automáticamente un grupo por repositorio, por ticket o por cliente, sin multiplicar las reglas. Por ejemplo, una URL de repositorio como `github.com/EspritVorace/smart-tab-organizer` produce un grupo con el nombre del repositorio, sin una regla dedicada a ese repositorio concreto.
+
+La agrupación se basa en expresiones regulares ejecutadas localmente, y todos los datos viven en `browser.storage.local`. Ningún dato sale del navegador, y ninguna IA, local o remota, interviene.
 
 <Aside type="note">
 Si sincronizas tus perfiles de Chrome o Firefox, la extensión sigue siendo compatible (los datos acompañan al perfil), pero la propia extensión no inicia ninguna comunicación de red.
