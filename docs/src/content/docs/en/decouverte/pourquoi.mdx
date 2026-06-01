@@ -1,6 +1,6 @@
 ---
 title: Why this extension?
-description: The problem SmartTab Organizer solves, its three pillars (group, deduplicate, save) and how it stands apart from tools based on remote AI.
+description: "The problem SmartTab Organizer solves, its three pillars (group, deduplicate, save) and its real differentiator: the group name extracted from the URL or title, locally."
 ---
 
 import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
@@ -41,7 +41,9 @@ The extension is built around three complementary functions.
 
 ## Everything local, nothing goes online
 
-Most competing extensions rely on remote AI: they send the URL and title of every tab to a third-party service to decide the naming. SmartTab Organizer does the exact opposite: no data ever leaves your browser. Grouping is driven by regular expressions (which you write yourself or that come from a [built-in pack](/reference/categories-et-packs)), and sessions live in `browser.storage.local`.
+Existing grouping extensions require a fixed group name, typed by hand, with one rule per value. SmartTab Organizer extracts the name straight from the URL or title using a regular expression: a group per repository, per ticket or per client is created automatically, without multiplying rules. For example, a repository URL such as `github.com/EspritVorace/smart-tab-organizer` produces a group named after the repository, with no rule dedicated to that specific repository.
+
+Grouping relies on regular expressions run locally, and all data lives in `browser.storage.local`. No data leaves the browser, and no AI, local or remote, is involved.
 
 <Aside type="note">
 If you sync your Chrome or Firefox profile, the extension stays compatible (data follows the profile), but no network communication is ever initiated by the extension itself.
