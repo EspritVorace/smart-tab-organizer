@@ -235,6 +235,47 @@ describe('useDeepLinking — sessions sub-route', () => {
   });
 });
 
+describe('useDeepLinking — stats sub-route', () => {
+  it('defaults statsTab to "summary" when no hash is set', () => {
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.statsTab).toBe('summary');
+  });
+
+  it('parses #stats as the summary sub-tab', () => {
+    window.location.hash = '#stats';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.currentTab).toBe('stats');
+    expect(result.current.statsTab).toBe('summary');
+  });
+
+  it.each(['rules', 'sessions', 'storage'] as const)(
+    'parses #stats/%s as the matching sub-tab',
+    (sub) => {
+      window.location.hash = `#stats/${sub}`;
+      const { result } = renderHook(() => useDeepLinking());
+      expect(result.current.currentTab).toBe('stats');
+      expect(result.current.statsTab).toBe(sub);
+    },
+  );
+
+  it('resets the sub-tab to "summary" when navigating from storage back to #stats', () => {
+    window.location.hash = '#stats/storage';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.statsTab).toBe('storage');
+
+    act(() => setHash('#stats'));
+
+    expect(result.current.statsTab).toBe('summary');
+  });
+
+  it('falls back to "summary" for an unknown sub-route', () => {
+    window.location.hash = '#stats/foo';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.currentTab).toBe('stats');
+    expect(result.current.statsTab).toBe('summary');
+  });
+});
+
 describe('useDeepLinking — setters', () => {
   it('exposes setCurrentTab to override the tab manually', () => {
     const { result } = renderHook(() => useDeepLinking());

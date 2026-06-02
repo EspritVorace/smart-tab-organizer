@@ -160,6 +160,8 @@ const meta: Meta<typeof StatisticsPage> = {
     syncSettings: mockSettings,
     storageUsage: richStorageUsage,
     onReset: () => {},
+    statsTab: 'summary',
+    onStatsTabChange: () => {},
   },
 };
 
@@ -204,8 +206,20 @@ export const StatisticsPageNull: Story = {
   args: { statisticsData: null, sessionStats: null, storageUsage: emptyStorageUsage },
 };
 
+export const StatisticsPageRules: Story = {
+  args: { statisticsData: richData, sessionStats: richSessionStats, statsTab: 'rules' },
+};
+
+export const StatisticsPageSessions: Story = {
+  args: { statisticsData: richData, sessionStats: richSessionStats, statsTab: 'sessions' },
+};
+
+export const StatisticsPageStorage: Story = {
+  args: { statisticsData: richData, sessionStats: richSessionStats, statsTab: 'storage' },
+};
+
 export const StatisticsPageResetClick: Story = {
-  args: { statisticsData: richData, sessionStats: richSessionStats },
+  args: { statisticsData: richData, sessionStats: richSessionStats, statsTab: 'rules' },
   play: async ({ canvasElement }) => {
     const body = within(canvasElement.ownerDocument.body);
     const resetBtn = await body.findByTestId('page-stats-btn-reset');
