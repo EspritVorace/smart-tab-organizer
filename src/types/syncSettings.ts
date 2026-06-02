@@ -4,7 +4,6 @@ import {
   type DeduplicationKeepStrategyValue,
   type DefaultRestoreActionValue
 } from '@/schemas/enums.js';
-import type { RuleCategory } from '@/schemas/category.js';
 
 // Settings types that extend the Zod-inferred types.
 export interface DomainRuleSetting extends DomainRule {
@@ -23,7 +22,6 @@ export interface AppSettings {
   deduplicationKeepStrategy: DeduplicationKeepStrategyValue;
   defaultRestoreAction: DefaultRestoreActionValue;
   domainRules: DomainRuleSettings;
-  categories: RuleCategory[];
   // Notification settings
   notifyOnGrouping: boolean;
   notifyOnDeduplication: boolean;
@@ -38,7 +36,6 @@ export const defaultAppSettings: AppSettings = {
   deduplicationKeepStrategy: 'keep-grouped-or-new',
   defaultRestoreAction: 'current',
   domainRules: [],
-  categories: [],
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
   notifyOnOrganize: true

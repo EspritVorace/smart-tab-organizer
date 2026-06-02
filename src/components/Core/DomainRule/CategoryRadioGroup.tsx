@@ -1,8 +1,7 @@
 import { useRef } from 'react';
 import { Flex, Tooltip } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
-import { getCategoryLabel } from '@/utils/categoriesStore';
-import { useSettings } from '@/hooks/useSettings';
+import { getAllCategories, getCategoryLabel } from '@/utils/categoriesStore';
 import { useListNavigation } from '@/hooks/useListNavigation';
 import styles from './CategoryPicker.module.css';
 
@@ -29,8 +28,7 @@ export function CategoryRadioGroup({
   swatchTestIdPrefix,
   selectOnFocus = true,
 }: CategoryRadioGroupProps) {
-  const { settings } = useSettings();
-  const categories = settings?.categories ?? [];
+  const categories = getAllCategories();
   const listRef = useRef<HTMLDivElement>(null);
   const { handleNavigationKey } = useListNavigation(listRef, '[role="radio"]', {
     axis: 'horizontal',

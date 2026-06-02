@@ -57,7 +57,6 @@ const baseSettings: AppSettings = {
   deduplicateUnmatchedDomains: false,
   deduplicationKeepStrategy: 'keep-grouped-or-new',
   defaultRestoreAction: 'current',
-  categories: [],
   notifyOnGrouping: true,
   notifyOnDeduplication: true,
   notifyOnOrganize: true,

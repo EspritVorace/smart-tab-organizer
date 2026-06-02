@@ -23,7 +23,6 @@ export async function getSettings(): Promise<AppSettings> {
       items.deduplicationKeepStrategyItem,
       items.defaultRestoreActionItem,
       items.domainRulesItem,
-      items.categoriesItem,
       items.notifyOnGroupingItem,
       items.notifyOnDeduplicationItem,
       items.notifyOnOrganizeItem,
@@ -35,10 +34,9 @@ export async function getSettings(): Promise<AppSettings> {
       deduplicationKeepStrategy: results[3].value as AppSettings['deduplicationKeepStrategy'],
       defaultRestoreAction: results[4].value as AppSettings['defaultRestoreAction'],
       domainRules: results[5].value as AppSettings['domainRules'],
-      categories: results[6].value as AppSettings['categories'],
-      notifyOnGrouping: results[7].value as boolean,
-      notifyOnDeduplication: results[8].value as boolean,
-      notifyOnOrganize: results[9].value as boolean,
+      notifyOnGrouping: results[6].value as boolean,
+      notifyOnDeduplication: results[7].value as boolean,
+      notifyOnOrganize: results[8].value as boolean,
     };
   } catch (error) {
     logger.error('Error getting settings:', error);
@@ -56,7 +54,6 @@ export async function setSettings(settings: AppSettings): Promise<void> {
       { item: items.deduplicationKeepStrategyItem, value: settings.deduplicationKeepStrategy },
       { item: items.defaultRestoreActionItem, value: settings.defaultRestoreAction },
       { item: items.domainRulesItem, value: settings.domainRules },
-      { item: items.categoriesItem, value: settings.categories },
       { item: items.notifyOnGroupingItem, value: settings.notifyOnGrouping },
       { item: items.notifyOnDeduplicationItem, value: settings.notifyOnDeduplication },
       { item: items.notifyOnOrganizeItem, value: settings.notifyOnOrganize },
@@ -82,8 +79,6 @@ export async function updateSettings(updates: Partial<AppSettings>): Promise<voi
       writes.push({ item: items.defaultRestoreActionItem, value: updates.defaultRestoreAction! });
     if ('domainRules' in updates)
       writes.push({ item: items.domainRulesItem, value: updates.domainRules! });
-    if ('categories' in updates)
-      writes.push({ item: items.categoriesItem, value: updates.categories! });
     if ('notifyOnGrouping' in updates)
       writes.push({ item: items.notifyOnGroupingItem, value: updates.notifyOnGrouping! });
     if ('notifyOnDeduplication' in updates)
@@ -111,7 +106,6 @@ export function watchSettings(
     items.deduplicationKeepStrategyItem.watch(() => getSettings().then(callback)),
     items.defaultRestoreActionItem.watch(() => getSettings().then(callback)),
     items.domainRulesItem.watch(() => getSettings().then(callback)),
-    items.categoriesItem.watch(() => getSettings().then(callback)),
     items.notifyOnGroupingItem.watch(() => getSettings().then(callback)),
     items.notifyOnDeduplicationItem.watch(() => getSettings().then(callback)),
     items.notifyOnOrganizeItem.watch(() => getSettings().then(callback)),
@@ -131,7 +125,6 @@ export function watchSettingsField<K extends keyof AppSettings>(
     deduplicationKeepStrategy: items.deduplicationKeepStrategyItem,
     defaultRestoreAction: items.defaultRestoreActionItem,
     domainRules: items.domainRulesItem,
-    categories: items.categoriesItem,
     notifyOnGrouping: items.notifyOnGroupingItem,
     notifyOnDeduplication: items.notifyOnDeduplicationItem,
     notifyOnOrganize: items.notifyOnOrganizeItem,

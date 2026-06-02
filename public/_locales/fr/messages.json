@@ -655,7 +655,6 @@
   "statsStorageCatSessionsPinned": { "message": "Profils épinglés" },
   "statsStorageCatSessionsArchived": { "message": "Sessions archivées" },
   "statsStorageCatStatistics": { "message": "Statistiques" },
-  "statsStorageCatCategories": { "message": "Catégories" },
   "statsStorageCatSettings": { "message": "Réglages divers" },
   "statsStorageUnitBytes": { "message": "{value} o" },
   "statsStorageUnitKb": { "message": "{value} Ko" },

@@ -129,13 +129,6 @@ const CATEGORY_DESCRIPTORS: CategoryDescriptor[] = [
     keysFor: (ws) => [workspaceStorageKey(ws, 'statistics')],
   },
   {
-    // Rule categories are global (shared across workspaces), stored at the
-    // unprefixed legacy key.
-    id: 'categories',
-    labelKey: 'statsStorageCatCategories',
-    keysFor: () => ['local:categories' as StorageItemKey],
-  },
-  {
     id: 'settings',
     labelKey: 'statsStorageCatSettings',
     keysFor: (ws) => SETTINGS_FIELDS.map((field) => workspaceStorageKey(ws, field)),

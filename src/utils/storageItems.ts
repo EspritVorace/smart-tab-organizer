@@ -14,8 +14,6 @@ export const globalDeduplicationEnabledItem = _defaultItems.globalDeduplicationE
 export const deduplicateUnmatchedDomainsItem = _defaultItems.deduplicateUnmatchedDomainsItem;
 export const deduplicationKeepStrategyItem = _defaultItems.deduplicationKeepStrategyItem;
 export const domainRulesItem = _defaultItems.domainRulesItem;
-export const categoriesItem = _defaultItems.categoriesItem;
-export const categoriesSeededItem = _defaultItems.categoriesSeededItem;
 export const notifyOnGroupingItem = _defaultItems.notifyOnGroupingItem;
 export const notifyOnDeduplicationItem = _defaultItems.notifyOnDeduplicationItem;
 export const notifyOnOrganizeItem = _defaultItems.notifyOnOrganizeItem;
@@ -30,7 +28,6 @@ export const settingsItemMap = {
   deduplicateUnmatchedDomains: deduplicateUnmatchedDomainsItem,
   deduplicationKeepStrategy: deduplicationKeepStrategyItem,
   domainRules: domainRulesItem,
-  categories: categoriesItem,
   notifyOnGrouping: notifyOnGroupingItem,
   notifyOnDeduplication: notifyOnDeduplicationItem,
   notifyOnOrganize: notifyOnOrganizeItem,

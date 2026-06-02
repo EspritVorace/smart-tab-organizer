@@ -152,11 +152,6 @@ describe('settingsUtils', () => {
       expect(settings.notifyOnOrganize).toBe(false);
     });
 
-    it('updates categories', async () => {
-      await updateSettings({ categories: [] });
-      const settings = await getSettings();
-      expect(settings.categories).toEqual([]);
-    });
   });
 
   describe('watchSettings', () => {
@@ -240,7 +235,6 @@ describe('settingsUtils', () => {
         'deduplicationKeepStrategy',
         'defaultRestoreAction',
         'domainRules',
-        'categories',
         'notifyOnGrouping',
         'notifyOnDeduplication',
         'notifyOnOrganize',
