@@ -5,6 +5,7 @@ import type { AppSettings } from '@/types/syncSettings';
 import { defaultAppSettings } from '@/types/syncSettings';
 import type { StatisticsAggregates } from '@/types/statistics';
 import type { SessionStatisticsSnapshot } from '@/hooks/useSessionStatistics';
+import type { StorageUsageSnapshot } from '@/hooks/useStorageUsage';
 
 const mockSettings: AppSettings = {
   ...defaultAppSettings,
@@ -126,12 +127,39 @@ const richSessionStats: SessionStatisticsSnapshot = {
   isLoaded: true,
 };
 
+const emptyStorageUsage: StorageUsageSnapshot = {
+  categories: [],
+  workspaceTotalBytes: 0,
+  globalTotalBytes: 0,
+  quotaBytes: 10_485_760,
+  quotaPercent: 0,
+  isLoaded: true,
+};
+
+const richStorageUsage: StorageUsageSnapshot = {
+  categories: [
+    { id: 'sessions-archived', labelKey: 'statsStorageCatSessionsArchived', bytes: 184_320 },
+    { id: 'sessions-active', labelKey: 'statsStorageCatSessionsActive', bytes: 96_400 },
+    { id: 'domain-rules', labelKey: 'statsStorageCatDomainRules', bytes: 41_200 },
+    { id: 'statistics', labelKey: 'statsStorageCatStatistics', bytes: 22_800 },
+    { id: 'sessions-pinned', labelKey: 'statsStorageCatSessionsPinned', bytes: 18_100 },
+    { id: 'categories', labelKey: 'statsStorageCatCategories', bytes: 9_600 },
+    { id: 'settings', labelKey: 'statsStorageCatSettings', bytes: 240 },
+  ],
+  workspaceTotalBytes: 372_660,
+  globalTotalBytes: 512_000,
+  quotaBytes: 10_485_760,
+  quotaPercent: (512_000 / 10_485_760) * 100,
+  isLoaded: true,
+};
+
 const meta: Meta<typeof StatisticsPage> = {
   title: 'Pages/StatisticsPage',
   component: StatisticsPage,
   parameters: { layout: 'fullscreen' },
   args: {
     syncSettings: mockSettings,
+    storageUsage: richStorageUsage,
     onReset: () => {},
   },
 };
@@ -174,7 +202,7 @@ export const StatisticsPageWithSessionData: Story = {
 };
 
 export const StatisticsPageNull: Story = {
-  args: { statisticsData: null, sessionStats: null },
+  args: { statisticsData: null, sessionStats: null, storageUsage: emptyStorageUsage },
 };
 
 export const StatisticsPageResetClick: Story = {

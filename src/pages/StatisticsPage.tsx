@@ -2,11 +2,12 @@ import { useMemo } from 'react';
 import { Box, Flex, Text, Button, Card, Separator, Heading, Grid, Tooltip, Badge } from '@radix-ui/themes';
 import {
   RotateCcw, Layers, Copy, Archive, Pin, FolderOpen, ListTree,
-  Globe, Palette, Clock, Calendar, Info, Tag,
+  Globe, Palette, Clock, Calendar, Info, Tag, HardDrive,
 } from 'lucide-react';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { getMessage } from '@/utils/i18n';
 import { formatSessionDate } from '@/utils/sessionUtils';
+import { formatBytes } from '@/utils/formatBytes';
 import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
 import { TrendBadge } from '@/components/Core/Statistics/TrendBadge';
 import type { AppSettings } from '@/types/syncSettings';
@@ -15,12 +16,14 @@ import type {
   SessionStatisticsSnapshot,
   GroupColorStat,
 } from '@/hooks/useSessionStatistics';
+import type { StorageUsageSnapshot } from '@/hooks/useStorageUsage';
 import type { ChromeGroupColor } from '@/types/tabTree';
 
 interface StatisticsPageProps {
   syncSettings: AppSettings;
   statisticsData: StatisticsAggregates | null;
   sessionStats: SessionStatisticsSnapshot | null;
+  storageUsage: StorageUsageSnapshot;
   onReset: () => void;
 }
 
@@ -87,9 +90,11 @@ interface BarRowProps {
   index: number;
   testId?: string;
   rightDetail?: string;
+  /** Overrides the displayed value (e.g. a formatted size). The bar width still uses `value`. */
+  valueLabel?: string;
 }
 
-function BarRow({ label, value, maxValue, index, testId, rightDetail }: BarRowProps) {
+function BarRow({ label, value, maxValue, index, testId, rightDetail, valueLabel }: BarRowProps) {
   const widthPct = maxValue > 0 ? Math.round((value / maxValue) * 100) : 0;
   return (
     <Box data-testid={testId}>
@@ -98,7 +103,7 @@ function BarRow({ label, value, maxValue, index, testId, rightDetail }: BarRowPr
           {index + 1}. {label}
         </Text>
         <Flex direction="column" align="end" gap="1">
-          <Text size="2" weight="bold">{value}</Text>
+          <Text size="2" weight="bold">{valueLabel ?? value}</Text>
           {rightDetail && <Text size="1" color="gray">{rightDetail}</Text>}
         </Flex>
       </Flex>
@@ -471,7 +476,65 @@ function SessionsOverviewCard({ snapshot, events }: { snapshot: SessionStatistic
   );
 }
 
-export function StatisticsPage({ syncSettings, statisticsData, sessionStats, onReset }: StatisticsPageProps) {
+function StorageUsageCard({ usage }: { usage: StorageUsageSnapshot }) {
+  const maxBytes = usage.categories.length > 0 ? usage.categories[0].bytes : 0;
+  const quotaPct = usage.quotaBytes > 0 ? Math.min(100, Math.round(usage.quotaPercent)) : 0;
+
+  return (
+    <Card data-testid="page-stats-card-storage">
+      <Flex direction="column" gap="4" p="2">
+        <Flex align="center" gap="2">
+          <HardDrive size={16} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />
+          <Heading size="3">{getMessage('statsStorageTitle')}</Heading>
+        </Flex>
+
+        <Box>
+          <Text size="2" color="gray">
+            {getMessage('statsStorageQuota')
+              .replace('{used}', formatBytes(usage.globalTotalBytes))
+              .replace('{quota}', formatBytes(usage.quotaBytes))
+              .replace('{percent}', String(quotaPct))}
+          </Text>
+          <Box mt="2" style={{
+            height: '14px',
+            borderRadius: 'var(--radius-2)',
+            backgroundColor: 'var(--gray-a3)',
+            overflow: 'hidden',
+          }}>
+            <Box style={{
+              height: '100%',
+              width: `${quotaPct}%`,
+              backgroundColor: 'var(--accent-9)',
+              borderRadius: 'var(--radius-2)',
+            }} />
+          </Box>
+        </Box>
+
+        <Separator size="4" />
+
+        {usage.categories.length > 0 ? (
+          <Flex direction="column" gap="3">
+            {usage.categories.map((cat, index) => (
+              <BarRow
+                key={cat.id}
+                index={index}
+                label={getMessage(cat.labelKey)}
+                value={cat.bytes}
+                valueLabel={formatBytes(cat.bytes)}
+                maxValue={maxBytes}
+                testId={`page-stats-storage-row-${cat.id}`}
+              />
+            ))}
+          </Flex>
+        ) : (
+          <Text size="2" color="gray">—</Text>
+        )}
+      </Flex>
+    </Card>
+  );
+}
+
+export function StatisticsPage({ syncSettings, statisticsData, sessionStats, storageUsage, onReset }: StatisticsPageProps) {
   const activeRulesCount = syncSettings.domainRules.filter(r => r.enabled).length;
 
   const firstUsedAtFormatted = statisticsData?.firstUsedAt
@@ -595,6 +658,11 @@ export function StatisticsPage({ syncSettings, statisticsData, sessionStats, onR
             {/* Row 4: full-width sessions overview */}
             <Box style={{ gridColumn: '1 / -1' }}>
               <SessionsOverviewCard snapshot={snapshot} events={data.sessionEvents} />
+            </Box>
+
+            {/* Row 5: full-width local storage usage */}
+            <Box style={{ gridColumn: '1 / -1' }}>
+              <StorageUsageCard usage={storageUsage} />
             </Box>
           </Grid>
 
