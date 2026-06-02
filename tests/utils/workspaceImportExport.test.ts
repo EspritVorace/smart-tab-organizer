@@ -58,7 +58,6 @@ async function seedDefaultWorkspaceData(): Promise<void> {
       enabled: true,
     },
   ]);
-  await items.categoriesItem.setValue([]);
   await items.sessionsItem.setValue([]);
   await items.statisticsItem.setValue({
     tabGroupsCreatedCount: 12,

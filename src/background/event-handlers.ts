@@ -1,7 +1,6 @@
 import { browser, Browser } from 'wxt/browser';
 import { initializeDefaults, migrateRuleColorsFromCategories } from '@/utils/migration.js';
-import { migrateSettingsFromSyncToLocal, migrateRulesAddUrlExtractionMode, migrateRulesAddFallbackLabel, migrateToWorkspaces, migrateSessionsSplitByPinAndArchive, seedBuiltInCategories, seedUnifiedCategories, initializeFirstRunRedirectFlag, FIRST_RUN_REDIRECT_FLAG } from './migration.js';
-import { initCategoriesStore } from '@/utils/categoriesStore.js';
+import { migrateSettingsFromSyncToLocal, migrateRulesAddUrlExtractionMode, migrateRulesAddFallbackLabel, migrateToWorkspaces, migrateSessionsSplitByPinAndArchive, cleanupLegacyCategoriesStorage, initializeFirstRunRedirectFlag, FIRST_RUN_REDIRECT_FLAG } from './migration.js';
 import { logger } from '@/utils/logger.js';
 import {
     handleMiddleClickMessage,
@@ -28,10 +27,8 @@ export function setupInstallationHandler(): void {
         await migrateToWorkspaces();
         await migrateSessionsSplitByPinAndArchive();
         await initializeDefaults();
-        await seedBuiltInCategories();
-        await seedUnifiedCategories();
+        await cleanupLegacyCategoriesStorage();
         await migrateRuleColorsFromCategories();
-        await initCategoriesStore();
         await initializeFirstRunRedirectFlag(details.reason);
     });
 }

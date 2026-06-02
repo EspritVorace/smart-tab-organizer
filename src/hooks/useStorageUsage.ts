@@ -81,7 +81,6 @@ export function useStorageUsage(): StorageUsageSnapshot {
       scopedItems.pinnedSessionsItem,
       scopedItems.archivedSessionsItem,
       scopedItems.statisticsItem,
-      scopedItems.categoriesItem,
     ];
     const unwatchers = watched.map((item) => item.watch(() => void recompute()));
 

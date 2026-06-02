@@ -654,7 +654,6 @@
   "statsStorageCatSessionsPinned": { "message": "Pinned profiles" },
   "statsStorageCatSessionsArchived": { "message": "Archived sessions" },
   "statsStorageCatStatistics": { "message": "Statistics" },
-  "statsStorageCatCategories": { "message": "Categories" },
   "statsStorageCatSettings": { "message": "Miscellaneous settings" },
   "statsStorageUnitBytes": { "message": "{value} B" },
   "statsStorageUnitKb": { "message": "{value} KB" },

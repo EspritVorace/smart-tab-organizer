@@ -155,22 +155,6 @@ describe('useSettings', () => {
     expect(result.current.settings?.deduplicationKeepStrategy).toBe('keep-old');
   });
 
-  it('updates the categories', async () => {
-    const { result } = renderHook(() => useSettings());
-
-    await waitFor(() => expect(result.current.isLoaded).toBe(true));
-
-    const newCategories = [
-      { id: 'work', emoji: '💼', label: 'Work', builtIn: false },
-    ] as never;
-
-    await act(async () => {
-      await result.current.setCategories(newCategories);
-    });
-
-    expect(result.current.settings?.categories).toEqual(newCategories);
-  });
-
   it('migrates legacy wildcards `*.example.com` -> `example.com`', async () => {
     await fakeBrowser.storage.local.set({
       domainRules: [
@@ -203,7 +187,6 @@ describe('useSettings', () => {
         result.current.onDeduplicateUnmatchedDomainsChange(cb),
         result.current.onDeduplicationKeepStrategyChange(cb),
         result.current.onDomainRulesChange(cb),
-        result.current.onCategoriesChange(cb),
       ];
       for (const u of unwatchers) {
         expect(typeof u).toBe('function');
