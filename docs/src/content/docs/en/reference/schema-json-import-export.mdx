@@ -1,0 +1,125 @@
+---
+title: Import / export JSON schema
+description: Reference of the JSON format fields used to import and export rules, sessions and workspaces.
+---
+
+{/* This page is generated from src/utils/importJsonSchemas.ts. Run pnpm json-schema:doc to update it. */}
+
+This page documents the JSON format accepted by the import / export wizard. The same descriptions appear as tooltips in the extension editor. Fields marked as required must be present; the others are optional.
+
+## Rules export
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `note` | string | No | Optional free-form note attached to this export. |
+| `domainRules` | array of objects | Yes | List of domain rules to import. |
+
+## Sessions export
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `note` | string | No | Optional free-form note attached to this export. |
+| `sessions` | array of objects | Yes | List of saved tab sessions to import. |
+
+## Workspace export
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `note` | string | No | Optional free-form note attached to this export. |
+| `workspace` | object | Yes | Workspace metadata (name and accent color). |
+| `settings` | object | Yes | Grouping, deduplication and notification preferences. |
+| `domainRules` | array of objects | Yes | List of domain rules to import. |
+| `sessions` | array of objects | Yes | List of saved tab sessions to import. |
+| `statistics` | object | No | Optional grouping and deduplication counters. |
+
+## Objects
+
+The formats above reference the objects detailed here.
+
+### Domain rule object
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | string | Yes | Unique identifier of the rule (UUID). |
+| `domainFilter` | string | Yes | Domain that activates the rule (for example github.com). |
+| `label` | string | Yes | Name shown on the created tab group. |
+| `fallbackLabel` | string | No | Group name used when extraction returns nothing. |
+| `titleParsingRegEx` | string | Yes | Regular expression, with a capture group, applied to the tab title. |
+| `urlParsingRegEx` | string | Yes | Regular expression, with a capture group, applied to the tab URL. |
+| `groupNameSource` | values: `title`, `url`, `manual`, `smart`, `smart_manual`, `smart_preset`, `smart_label`, `label` | Yes | Source used to derive the group name. |
+| `deduplicationMatchMode` | values: `exact`, `includes`, `exact_ignore_params` | Yes | How duplicate tabs are matched for this rule. |
+| `color` | values: `grey`, `blue`, `red`, `yellow`, `green`, `pink`, `purple`, `cyan`, `orange` | No | Optional color of the tab group. |
+| `categoryId` | string (nullable) | No | Optional category this rule belongs to. |
+| `deduplicationEnabled` | boolean (default: `true`) | No | Whether deduplication is enabled for this rule (default true). |
+| `ignoredQueryParams` | array of string (default: `[]`) | No | Query parameters ignored when comparing URLs. |
+| `presetId` | string (nullable) | Yes | Identifier of a regex preset, or null for a custom rule. |
+| `urlExtractionMode` | values: `regex`, `query_param` (default: `"regex"`) | No | How the value is extracted from the URL: regex or query_param. |
+| `urlQueryParamName` | string | No | Query parameter name used when the extraction mode is query_param. |
+| `enabled` | boolean | Yes | Whether the rule is active. |
+| `badge` | string | No | Optional short badge text shown on the rule. |
+| `createdAt` | string | No | ISO 8601 timestamp of when the rule was created. |
+| `updatedAt` | string | No | ISO 8601 timestamp of the last rule update. |
+
+### Session object
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | string | Yes | Unique identifier of the session (UUID). |
+| `name` | string | Yes | Display name of the session. |
+| `createdAt` | string | Yes | ISO 8601 timestamp of when the session was captured. |
+| `updatedAt` | string | Yes | ISO 8601 timestamp of the last session update. |
+| `groups` | array of objects | Yes | Tab groups saved in this session. |
+| `ungroupedTabs` | array of objects | Yes | Tabs saved outside any group. |
+| `isPinned` | boolean | Yes | Whether the session is a pinned profile. |
+| `isArchived` | boolean | No | Whether the session is archived. |
+| `categoryId` | string (nullable) | No | Optional category this session belongs to. |
+| `note` | string | No | Optional free-form note attached to the session. |
+| `position` | number | No | Optional position used to order the session in the list. |
+
+### Tab group object
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | string | Yes | Unique identifier of the tab group (UUID). |
+| `title` | string | Yes | Title of the tab group. |
+| `color` | values: `grey`, `blue`, `red`, `yellow`, `green`, `pink`, `purple`, `cyan`, `orange` | Yes | Color of the tab group. |
+| `tabs` | array of objects | Yes | Tabs contained in this group. |
+| `collapsed` | boolean | No | Whether the group is collapsed. |
+
+### Tab object
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | string | Yes | Unique identifier of the tab (UUID). |
+| `title` | string | Yes | Title of the tab. |
+| `url` | string | Yes | URL of the tab. |
+| `favIconUrl` | string | No | Optional favicon URL of the tab. |
+
+### Workspace metadata
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `name` | string | Yes | Name of the workspace. |
+| `accentColor` | values: `tomato`, `red`, `ruby`, `crimson`, `pink`, `plum`, `purple`, `violet`, `iris`, `indigo`, `blue`, `cyan`, `teal`, `jade`, `green`, `grass`, `orange`, `amber`, `yellow`, `lime` | Yes | Accent color of the workspace. |
+
+### Settings
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `globalGroupingEnabled` | boolean | Yes | Whether automatic grouping is enabled globally. |
+| `globalDeduplicationEnabled` | boolean | Yes | Whether deduplication is enabled globally. |
+| `deduplicateUnmatchedDomains` | boolean | Yes | Whether tabs on domains without a matching rule are deduplicated. |
+| `deduplicationKeepStrategy` | values: `keep-old`, `keep-new`, `keep-grouped`, `keep-grouped-or-new` | Yes | Which of two matching tabs is kept during deduplication. |
+| `defaultRestoreAction` | values: `current`, `new`, `replace`, `customize` | No | Default action used when restoring a session. |
+| `notifyOnGrouping` | boolean | Yes | Whether a notification is shown when tabs are grouped. |
+| `notifyOnDeduplication` | boolean | Yes | Whether a notification is shown when tabs are deduplicated. |
+| `notifyOnOrganize` | boolean | No | Whether a notification is shown after organizing all tabs. |
+
+### Statistics
+
+| Field | Type | Required | Description |
+| --- | --- | --- | --- |
+| `tabGroupsCreatedCount` | number | Yes | Total number of tab groups created. |
+| `tabsDeduplicatedCount` | number | Yes | Total number of tabs deduplicated. |
+| `dailyBuckets` | object (default: `{}`) | No | Per-day grouping and deduplication counters. |
+| `firstUsedAt` | string | No | ISO 8601 timestamp of first recorded usage. |
