@@ -1,0 +1,125 @@
+---
+title: Esquema JSON de importación / exportación
+description: Referencia de los campos del formato JSON usado para importar y exportar reglas, sesiones y espacios de trabajo.
+---
+
+{/* Esta página se genera a partir de src/utils/importJsonSchemas.ts. Ejecuta pnpm json-schema:doc para actualizarla. */}
+
+Esta página documenta el formato JSON aceptado por el asistente de importación / exportación. Las mismas descripciones aparecen como información sobre herramientas en el editor de la extensión. Los campos marcados como requeridos deben estar presentes; los demás son opcionales.
+
+## Exportación de reglas
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `note` | string | No | Nota libre opcional adjunta a esta exportación. |
+| `domainRules` | arreglo de objetos | Sí | Lista de reglas de dominio a importar. |
+
+## Exportación de sesiones
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `note` | string | No | Nota libre opcional adjunta a esta exportación. |
+| `sessions` | arreglo de objetos | Sí | Lista de sesiones de pestañas guardadas a importar. |
+
+## Exportación de espacio de trabajo
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `note` | string | No | Nota libre opcional adjunta a esta exportación. |
+| `workspace` | object | Sí | Metadatos del espacio de trabajo (nombre y color de acento). |
+| `settings` | object | Sí | Preferencias de agrupación, deduplicación y notificaciones. |
+| `domainRules` | arreglo de objetos | Sí | Lista de reglas de dominio a importar. |
+| `sessions` | arreglo de objetos | Sí | Lista de sesiones de pestañas guardadas a importar. |
+| `statistics` | object | No | Contadores opcionales de agrupación y deduplicación. |
+
+## Objetos
+
+Los formatos anteriores hacen referencia a los objetos detallados aquí.
+
+### Objeto regla de dominio
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `id` | string | Sí | Identificador único de la regla (UUID). |
+| `domainFilter` | string | Sí | Dominio que activa la regla (por ejemplo github.com). |
+| `label` | string | Sí | Nombre mostrado en el grupo de pestañas creado. |
+| `fallbackLabel` | string | No | Nombre de grupo usado cuando la extracción no devuelve nada. |
+| `titleParsingRegEx` | string | Sí | Expresión regular, con un grupo de captura, aplicada al título de la pestaña. |
+| `urlParsingRegEx` | string | Sí | Expresión regular, con un grupo de captura, aplicada a la URL de la pestaña. |
+| `groupNameSource` | valores: `title`, `url`, `manual`, `smart`, `smart_manual`, `smart_preset`, `smart_label`, `label` | Sí | Origen usado para determinar el nombre del grupo. |
+| `deduplicationMatchMode` | valores: `exact`, `includes`, `exact_ignore_params` | Sí | Cómo se detectan las pestañas duplicadas para esta regla. |
+| `color` | valores: `grey`, `blue`, `red`, `yellow`, `green`, `pink`, `purple`, `cyan`, `orange` | No | Color opcional del grupo de pestañas. |
+| `categoryId` | string (nullable) | No | Categoría opcional a la que pertenece la regla. |
+| `deduplicationEnabled` | boolean (predeterminado: `true`) | No | Indica si la deduplicación está activada para esta regla (true por defecto). |
+| `ignoredQueryParams` | arreglo de string (predeterminado: `[]`) | No | Parámetros de URL ignorados al comparar URL. |
+| `presetId` | string (nullable) | Sí | Identificador de un preajuste de regex, o null para una regla personalizada. |
+| `urlExtractionMode` | valores: `regex`, `query_param` (predeterminado: `"regex"`) | No | Modo de extracción desde la URL: regex o query_param. |
+| `urlQueryParamName` | string | No | Nombre del parámetro de URL usado cuando el modo de extracción es query_param. |
+| `enabled` | boolean | Sí | Indica si la regla está activa. |
+| `badge` | string | No | Texto corto opcional mostrado como insignia en la regla. |
+| `createdAt` | string | No | Marca de tiempo ISO 8601 de creación de la regla. |
+| `updatedAt` | string | No | Marca de tiempo ISO 8601 de la última modificación de la regla. |
+
+### Objeto sesión
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `id` | string | Sí | Identificador único de la sesión (UUID). |
+| `name` | string | Sí | Nombre mostrado de la sesión. |
+| `createdAt` | string | Sí | Marca de tiempo ISO 8601 de captura de la sesión. |
+| `updatedAt` | string | Sí | Marca de tiempo ISO 8601 de la última modificación de la sesión. |
+| `groups` | arreglo de objetos | Sí | Grupos de pestañas guardados en esta sesión. |
+| `ungroupedTabs` | arreglo de objetos | Sí | Pestañas guardadas fuera de cualquier grupo. |
+| `isPinned` | boolean | Sí | Indica si la sesión es un perfil fijado. |
+| `isArchived` | boolean | No | Indica si la sesión está archivada. |
+| `categoryId` | string (nullable) | No | Categoría opcional a la que pertenece la sesión. |
+| `note` | string | No | Nota libre opcional adjunta a la sesión. |
+| `position` | number | No | Posición opcional usada para ordenar la sesión en la lista. |
+
+### Objeto grupo de pestañas
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `id` | string | Sí | Identificador único del grupo de pestañas (UUID). |
+| `title` | string | Sí | Título del grupo de pestañas. |
+| `color` | valores: `grey`, `blue`, `red`, `yellow`, `green`, `pink`, `purple`, `cyan`, `orange` | Sí | Color del grupo de pestañas. |
+| `tabs` | arreglo de objetos | Sí | Pestañas contenidas en este grupo. |
+| `collapsed` | boolean | No | Indica si el grupo está contraído. |
+
+### Objeto pestaña
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `id` | string | Sí | Identificador único de la pestaña (UUID). |
+| `title` | string | Sí | Título de la pestaña. |
+| `url` | string | Sí | URL de la pestaña. |
+| `favIconUrl` | string | No | URL opcional del favicon de la pestaña. |
+
+### Metadatos del espacio de trabajo
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `name` | string | Sí | Nombre del espacio de trabajo. |
+| `accentColor` | valores: `tomato`, `red`, `ruby`, `crimson`, `pink`, `plum`, `purple`, `violet`, `iris`, `indigo`, `blue`, `cyan`, `teal`, `jade`, `green`, `grass`, `orange`, `amber`, `yellow`, `lime` | Sí | Color de acento del espacio de trabajo. |
+
+### Ajustes
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `globalGroupingEnabled` | boolean | Sí | Indica si la agrupación automática está activada globalmente. |
+| `globalDeduplicationEnabled` | boolean | Sí | Indica si la deduplicación está activada globalmente. |
+| `deduplicateUnmatchedDomains` | boolean | Sí | Indica si se deduplican las pestañas de dominios sin una regla correspondiente. |
+| `deduplicationKeepStrategy` | valores: `keep-old`, `keep-new`, `keep-grouped`, `keep-grouped-or-new` | Sí | Cuál de las dos pestañas coincidentes se conserva durante la deduplicación. |
+| `defaultRestoreAction` | valores: `current`, `new`, `replace`, `customize` | No | Acción predeterminada usada al restaurar una sesión. |
+| `notifyOnGrouping` | boolean | Sí | Indica si se muestra una notificación al agrupar pestañas. |
+| `notifyOnDeduplication` | boolean | Sí | Indica si se muestra una notificación al deduplicar pestañas. |
+| `notifyOnOrganize` | boolean | No | Indica si se muestra una notificación tras organizar todas las pestañas. |
+
+### Estadísticas
+
+| Campo | Tipo | Requerido | Descripción |
+| --- | --- | --- | --- |
+| `tabGroupsCreatedCount` | number | Sí | Número total de grupos de pestañas creados. |
+| `tabsDeduplicatedCount` | number | Sí | Número total de pestañas deduplicadas. |
+| `dailyBuckets` | object (predeterminado: `{}`) | No | Contadores diarios de agrupación y deduplicación. |
+| `firstUsedAt` | string | No | Marca de tiempo ISO 8601 del primer uso registrado. |
