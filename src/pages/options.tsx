@@ -14,7 +14,7 @@ import { useSettings } from '@/hooks/useSettings.js';
 import { useStatistics } from '@/hooks/useStatistics.js';
 import { useSessionStatistics } from '@/hooks/useSessionStatistics.js';
 import { useStorageUsage } from '@/hooks/useStorageUsage.js';
-import { useDeepLinking } from '@/hooks/useDeepLinking.js';
+import { useDeepLinking, type StatsSubTab } from '@/hooks/useDeepLinking.js';
 import { useShortcuts, type ShortcutAction } from '@/hooks/useShortcuts.js';
 import { getDocsUrlForTab } from '@/utils/docsUrl';
 import { getMessage } from '@/utils/i18n';
@@ -63,7 +63,7 @@ import type { HomeRestoreTarget } from '@/components/HomePage/types';
 import { Toaster } from '@/components/UI/Toaster/Toaster';
 import type { DomainRuleSettings } from '@/types/syncSettings';
 
-function renderLazyFallback(currentTab: string): React.ReactNode {
+function renderLazyFallback(currentTab: string, statsTab: StatsSubTab): React.ReactNode {
     switch (currentTab) {
         case 'rules':
             return <DomainRulesPageSkeleton />;
@@ -74,7 +74,7 @@ function renderLazyFallback(currentTab: string): React.ReactNode {
         case 'importexport':
             return <ImportExportPageSkeleton />;
         case 'stats':
-            return <StatisticsPageSkeleton />;
+            return <StatisticsPageSkeleton statsTab={statsTab} />;
         case 'settings':
             return <SettingsPageSkeleton />;
         default:
@@ -95,6 +95,7 @@ export function OptionsContent() {
         restoreSessionId, setRestoreSessionId,
         refreshSessionId, setRefreshSessionId,
         sessionsTab, setSessionsTab,
+        statsTab, setStatsTab,
     } = useDeepLinking();
 
     const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
@@ -179,8 +180,16 @@ export function OptionsContent() {
         if (currentTab === 'sessions' && sessionsTab === 'archived') {
             return { pageSubtitle: getMessage('archivedSessionsTab'), parentHref: '#sessions' };
         }
+        if (currentTab === 'stats' && statsTab !== 'summary') {
+            const statsTabKeys = {
+                rules: 'statsRulesTab',
+                sessions: 'statsSessionsTab',
+                storage: 'statsStorageTab',
+            } as const;
+            return { pageSubtitle: getMessage(statsTabKeys[statsTab]), parentHref: '#stats' };
+        }
         return {};
-    }, [currentTab, sessionsTab]);
+    }, [currentTab, sessionsTab, statsTab]);
 
 
     const focusActiveSearch = useCallback(() => {
@@ -256,7 +265,7 @@ export function OptionsContent() {
                 />
                 <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
                     <main data-testid="options-content" style={{ flex: 1, overflow: 'auto', padding: '20px 20px 0 20px', minWidth: 0 }}>
-                        <Suspense fallback={renderLazyFallback(currentTab)}>
+                        <Suspense fallback={renderLazyFallback(currentTab, statsTab)}>
                             {currentTab === 'home' && (
                                 <HomePage
                                     syncSettings={settings}
@@ -306,6 +315,8 @@ export function OptionsContent() {
                                     sessionStats={sessionStatsSnapshot}
                                     storageUsage={storageUsage}
                                     onReset={handleResetStats}
+                                    statsTab={statsTab}
+                                    onStatsTabChange={setStatsTab}
                                 />
                             )}
                             {currentTab === 'settings' && (

@@ -6,24 +6,32 @@ import * as stories from '../../src/pages/StatisticsPage.stories';
 const {
   StatisticsPageDefault,
   StatisticsPageWithData,
+  StatisticsPageRules,
   StatisticsPageResetClick,
 } = composeStories(stories);
 
 describe('StatisticsPage — static renders', () => {
-  it('renders zero counts by default', () => {
+  it('renders the summary tab with headline KPIs by default', () => {
     render(<StatisticsPageDefault />);
     expect(screen.getByTestId('page-stats')).toBeInTheDocument();
+    expect(screen.getByTestId('page-stats-tabs')).toBeInTheDocument();
+    expect(screen.getByTestId('page-stats-summary')).toBeInTheDocument();
     expect(screen.getByTestId('page-stats-card-groups')).toBeInTheDocument();
     expect(screen.getByTestId('page-stats-card-dedup')).toBeInTheDocument();
-    expect(screen.getByTestId('page-stats-btn-reset')).toBeInTheDocument();
   });
 
-  it('renders populated stat counts', () => {
+  it('renders populated stat counts on the summary tab', () => {
     render(<StatisticsPageWithData />);
     const groupsCard = screen.getByTestId('page-stats-card-groups');
     const dedupCard = screen.getByTestId('page-stats-card-dedup');
     expect(groupsCard).toHaveTextContent('142');
     expect(dedupCard).toHaveTextContent('57');
+  });
+
+  it('exposes the reset button on the rules tab', () => {
+    render(<StatisticsPageRules />);
+    expect(screen.getByTestId('page-stats-rules')).toBeInTheDocument();
+    expect(screen.getByTestId('page-stats-btn-reset')).toBeInTheDocument();
   });
 });
 
