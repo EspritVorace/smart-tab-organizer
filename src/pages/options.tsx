@@ -13,6 +13,7 @@ import { ImportExportWizardsProvider } from '@/contexts/ImportExportWizardsConte
 import { useSettings } from '@/hooks/useSettings.js';
 import { useStatistics } from '@/hooks/useStatistics.js';
 import { useSessionStatistics } from '@/hooks/useSessionStatistics.js';
+import { useStorageUsage } from '@/hooks/useStorageUsage.js';
 import { useDeepLinking } from '@/hooks/useDeepLinking.js';
 import { useShortcuts, type ShortcutAction } from '@/hooks/useShortcuts.js';
 import { getDocsUrlForTab } from '@/utils/docsUrl';
@@ -85,6 +86,7 @@ export function OptionsContent() {
     const { settings, updateSettings } = useSettings();
     const { statisticsAggregates, resetStatistics } = useStatistics(settings?.domainRules ?? []);
     const { snapshot: sessionStatsSnapshot } = useSessionStatistics();
+    const storageUsage = useStorageUsage();
     const {
         currentTab, setCurrentTab,
         openSnapshotWizard, setOpenSnapshotWizard,
@@ -302,6 +304,7 @@ export function OptionsContent() {
                                     syncSettings={settings}
                                     statisticsData={statisticsAggregates}
                                     sessionStats={sessionStatsSnapshot}
+                                    storageUsage={storageUsage}
                                     onReset={handleResetStats}
                                 />
                             )}

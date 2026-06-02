@@ -8,6 +8,7 @@ const CARDS: Array<{ heading: string; body: number }> = [
   { heading: '140px', body: 100 },
   { heading: '120px', body: 150 },
   { heading: '160px', body: 200 },
+  { heading: '150px', body: 160 },
 ];
 
 export function StatisticsPageSkeleton() {
