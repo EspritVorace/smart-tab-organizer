@@ -160,7 +160,9 @@ function makeT(messages) {
 }
 
 function escapeTableCell(value) {
-  return value.replace(/\|/g, '\\|');
+  // Escape backslashes first, then the Markdown table cell delimiter, so the
+  // escaping stays complete even if a description ever contains a backslash.
+  return value.replace(/\\/g, '\\\\').replace(/\|/g, '\\|');
 }
 
 /** Human-readable type cell for a JSON-schema property node. */
