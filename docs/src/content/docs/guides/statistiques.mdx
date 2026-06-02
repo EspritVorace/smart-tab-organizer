@@ -1,22 +1,53 @@
 ---
 title: Statistiques
-description: Suivre l'activité de groupement et de déduplication. Totaux historiques, comparatif hebdomadaire, volumes et activité côté sessions, top règles / catégories / domaines, vue d'ensemble.
+description: Suivre l'activité de l'extension via quatre sous-pages dédiées (Résumé, Règles, Sessions, Stockage), chacune avec son propre lien profond.
 ---
 
 import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
 import ThemeImage from '../../../components/ThemeImage.astro';
-import statsLight from '../../../assets/screenshots/fr-light-statistics-overview.png';
-import statsDark from '../../../assets/screenshots/fr-dark-statistics-overview.png';
+import summaryLight from '../../../assets/screenshots/fr-light-statistics-overview.png';
+import summaryDark from '../../../assets/screenshots/fr-dark-statistics-overview.png';
+import rulesLight from '../../../assets/screenshots/fr-light-statistics-rules.png';
+import rulesDark from '../../../assets/screenshots/fr-dark-statistics-rules.png';
+import sessionsLight from '../../../assets/screenshots/fr-light-statistics-sessions.png';
+import sessionsDark from '../../../assets/screenshots/fr-dark-statistics-sessions.png';
+import storageLight from '../../../assets/screenshots/fr-light-statistics-storage.png';
+import storageDark from '../../../assets/screenshots/fr-dark-statistics-storage.png';
 
 La page **Statistiques** centralise l'activité de l'extension dans le workspace actif. Les compteurs sont cloisonnés par workspace ; basculer d'espace de travail change immédiatement les chiffres affichés.
 
+Elle est découpée en **quatre sous-pages** que vous parcourez via la barre d'onglets en haut de la page : **Résumé**, **Règles**, **Sessions** et **Stockage**. Chaque sous-page possède son propre lien profond (`#stats`, `#stats/rules`, `#stats/sessions`, `#stats/storage`) et la sous-page active apparaît dans le fil d'Ariane de l'en-tête.
+
+## Résumé
+
+La vue d'entrée rassemble les indicateurs clés et un aperçu de la semaine.
+
 <ThemeImage
-  lightSrc={statsLight}
-  darkSrc={statsDark}
-  alt="Page Statistiques avec ses sections Totaux, Cette semaine, Volumes des sessions et Activité des sessions."
+  lightSrc={summaryLight}
+  darkSrc={summaryDark}
+  alt="Sous-page Résumé des statistiques avec ses six indicateurs clés et le bloc Cette semaine."
 />
 
-## Totaux
+Six tuiles principales :
+
+- **Groupes Créés** : total cumulé des groupes Chrome créés.
+- **Onglets Dédupliqués** : total cumulé des doublons fermés.
+- **Stockage local** : taille totale occupée dans le stockage local.
+- **Épinglées**, **Actives**, **Archivées** : nombre de sessions par compartiment.
+
+En dessous, le bloc **Cette semaine** compare l'activité de la semaine en cours à la précédente, avec deux séries (**Groupages** et **Déduplications**) accompagnées d'un mini-badge de tendance.
+
+## Règles
+
+Le détail de l'activité de groupement et de déduplication.
+
+<ThemeImage
+  lightSrc={rulesLight}
+  darkSrc={rulesDark}
+  alt="Sous-page Règles des statistiques avec les Totaux, Cette semaine et le classement des règles les plus actives."
+/>
+
+### Totaux
 
 Deux compteurs cumulés depuis la première utilisation :
 
@@ -25,16 +56,33 @@ Deux compteurs cumulés depuis la première utilisation :
 
 En dessous figurent deux indicateurs contextuels : le **nombre de règles actives** et la date du début d'utilisation.
 
-## Cette semaine
+### Cette semaine
 
-Compare l'activité de la semaine en cours à la semaine précédente, avec deux séries :
+Compare l'activité de la semaine en cours à la semaine précédente : **Groupages** (groupes créés) et **Déduplications** (doublons fermés). Le delta (`+15 vs sem. préc.` par exemple) indique la variation par rapport à la semaine précédente.
 
-- **Groupages** : nombre de groupes créés.
-- **Déduplications** : nombre de doublons fermés.
+### Règles les plus actives (30 jours)
 
-Le delta (`+15 vs sem. préc.` par exemple) indique la variation par rapport à la semaine précédente.
+Classement des règles par volume d'événements (groupages + déduplications) sur les 30 derniers jours. Pratique pour repérer les règles qui tirent leur poids et celles qui sont devenues dormantes et peuvent être nettoyées.
 
-## Volumes des sessions
+### Réinitialiser les compteurs
+
+Le bouton **Réinitialiser Stats** en bas de la sous-page Règles remet à zéro tous les compteurs du workspace actif. Une confirmation est demandée. Cette action n'affecte ni les règles, ni les sessions, ni les paramètres : seuls les compteurs sont effacés.
+
+<Aside type="caution">
+La réinitialisation est définitive. Si vous voulez conserver une trace de l'historique avant de remettre à zéro, exportez d'abord le workspace en cochant **Inclure les statistiques** (voir [Import / Export, workspaces](/guides/import-export#workspaces)).
+</Aside>
+
+## Sessions
+
+Toutes les métriques liées à vos sessions.
+
+<ThemeImage
+  lightSrc={sessionsLight}
+  darkSrc={sessionsDark}
+  alt="Sous-page Sessions des statistiques avec les volumes, l'activité, les catégories et domaines, et la vue d'ensemble."
+/>
+
+### Volumes des sessions
 
 Synthétise la photo actuelle de vos sessions, **archives exclues** par défaut :
 
@@ -49,30 +97,21 @@ Synthétise la photo actuelle de vos sessions, **archives exclues** par défaut 
 
 Sous les tuiles, trois indicateurs qualitatifs : moyenne d'onglets par session, la session la plus grande, le pourcentage de sessions catégorisées et le pourcentage avec une note.
 
-## Activité des sessions
+### Activité des sessions
 
 Deux compteurs hebdomadaires sur les actions effectuées :
 
 - **Sessions créées** : combien de snapshots vous avez capturé cette semaine.
 - **Onglets restaurés** : combien d'onglets ont été ouverts depuis une session.
 
-Chacun s'accompagne d'un mini-badge de tendance (en hausse, en baisse, stable) par rapport à la semaine précédente.
+Chacun s'accompagne d'un mini-badge de tendance (en hausse, en baisse, stable) par rapport à la semaine précédente. Un sous-titre **Cumul** rappelle les totaux historiques de sessions créées, restaurées et archivées.
 
-Un sous-titre **Cumul** rappelle les totaux historiques de sessions créées, restaurées et archivées.
+### Catégories et domaines
 
-## Règles les plus actives (30 jours)
+- **Catégories de sessions** : distribution de vos sessions par catégorie. Un tiret quand aucune session n'a de catégorie assignée.
+- **Domaines les plus présents** : classement des domaines qui apparaissent le plus dans vos sessions sauvegardées.
 
-Classement des règles par volume d'événements (groupages + déduplications) sur les 30 derniers jours. Pratique pour repérer les règles qui tirent leur poids et celles qui sont devenues dormantes et peuvent être nettoyées.
-
-## Catégories de sessions
-
-Distribution de vos sessions par catégorie. Un tiret `—` quand aucune session n'a de catégorie assignée. Aide à voir si une catégorie domine ou si la couverture est équilibrée.
-
-## Domaines les plus présents
-
-Classement des domaines qui apparaissent le plus dans vos sessions sauvegardées. Donne une idée des sites qui structurent vraiment votre travail.
-
-## Vue d'ensemble des sessions
+### Vue d'ensemble des sessions
 
 Trois mini-vues complémentaires :
 
@@ -80,13 +119,17 @@ Trois mini-vues complémentaires :
 - **Répartition des couleurs de groupes** : un histogramme horizontal qui agrège les couleurs des groupes Chrome dans toutes les sessions.
 - **Plus grandes sessions** : top des sessions par nombre d'onglets.
 
-## Réinitialiser les compteurs
+## Stockage
 
-L'icône **Réinitialiser Stats** dans l'en-tête de la page remet à zéro tous les compteurs du workspace actif. Une confirmation est demandée. Cette action n'affecte ni les règles, ni les sessions, ni les paramètres : seuls les compteurs sont effacés.
+Le détail de l'espace occupé dans le stockage local du navigateur.
 
-<Aside type="caution">
-La réinitialisation est définitive. Si vous voulez conserver une trace de l'historique avant de remettre à zéro, exportez d'abord le workspace en cochant **Inclure les statistiques** (voir [Import / Export, workspaces](/guides/import-export#workspaces)).
-</Aside>
+<ThemeImage
+  lightSrc={storageLight}
+  darkSrc={storageDark}
+  alt="Sous-page Stockage des statistiques avec la barre de quota et la répartition par catégorie."
+/>
+
+Une barre de quota indique la part utilisée par rapport au maximum autorisé par le navigateur. En dessous, la consommation est ventilée par catégorie : règles de domaine, sessions actives, profils épinglés, sessions archivées, statistiques et paramètres divers.
 
 ## Aller plus loin
 
