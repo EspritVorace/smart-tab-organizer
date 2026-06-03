@@ -15,6 +15,15 @@ import { ConfigEditModal, type ConfigEditValues } from './ConfigEditModal';
 import { IdentityEditModal, type IdentityEditValues } from './IdentityEditModal';
 import { OptionsEditModal, type OptionsEditValues } from './OptionsEditModal';
 import type { ConfigMode } from './ConfigModeSelector';
+import {
+  type ConfigFields,
+  type ConfigSnapshots,
+  applyPresetSelection,
+  enterModePatch,
+  inferConfigMode,
+  initSnapshots,
+  saveModeSnapshot,
+} from './configModeState';
 import { generateUUID } from '@/utils/utils';
 import { createDomainRuleSchemaWithUniqueness, type DomainRule } from '@/schemas/domainRule';
 import { groupNameSourceOptions, type GroupNameSourceValue, type UrlExtractionModeValue } from '@/schemas/enums';
@@ -32,31 +41,6 @@ interface RuleWizardModalProps {
 }
 
 const VALID_GROUP_NAME_SOURCES = groupNameSourceOptions.map(o => o.value) as GroupNameSourceValue[];
-
-interface ModeStateSnapshot {
-  groupNameSource: GroupNameSourceValue;
-  titleParsingRegEx: string;
-  urlParsingRegEx: string;
-  urlExtractionMode: UrlExtractionModeValue;
-  urlQueryParamName: string;
-}
-
-interface PresetStateSnapshot extends ModeStateSnapshot {
-  presetId: string | null;
-}
-
-const emptyModeState: ModeStateSnapshot = {
-  groupNameSource: 'title',
-  titleParsingRegEx: '',
-  urlParsingRegEx: '',
-  urlExtractionMode: 'regex',
-  urlQueryParamName: '',
-};
-
-const emptyPresetState: PresetStateSnapshot = {
-  presetId: null,
-  ...emptyModeState,
-};
 
 const getDefaultValues = (rule?: DomainRule): Partial<DomainRule> => {
   return rule ? {
@@ -94,12 +78,20 @@ const getDefaultValues = (rule?: DomainRule): Partial<DomainRule> => {
   };
 };
 
-function inferConfigMode(rule?: DomainRule): ConfigMode {
-  if (!rule) return 'preset';
-  if (rule.presetId) return 'preset';
-  if (rule.groupNameSource === 'label') return 'label';
-  if (rule.groupNameSource === 'manual') return 'ask';
-  return 'manual';
+/** Build the snapshot-relevant fields from the rule being edited (or empty). */
+function ruleToFields(rule?: DomainRule): ConfigFields {
+  const groupNameSource = (rule && VALID_GROUP_NAME_SOURCES.includes(rule.groupNameSource)
+    ? rule.groupNameSource
+    : 'title') as GroupNameSourceValue;
+  return {
+    presetId: rule?.presetId ?? null,
+    groupNameSource,
+    titleParsingRegEx: rule?.titleParsingRegEx ?? '',
+    urlParsingRegEx: rule?.urlParsingRegEx ?? '',
+    urlExtractionMode: rule?.urlExtractionMode ?? 'regex',
+    urlQueryParamName: rule?.urlQueryParamName ?? '',
+    fallbackLabel: rule?.fallbackLabel ?? rule?.label ?? '',
+  };
 }
 
 function getManualModeFieldsToValidate(
@@ -153,9 +145,10 @@ export function RuleWizardModal({
   // aria-live announcement
   const [stepAnnouncement, setStepAnnouncement] = useState('');
 
-  // State preservation refs for mode switching
-  const lastManualState = useRef<ModeStateSnapshot>({ ...emptyModeState });
-  const lastPresetState = useRef<PresetStateSnapshot>({ ...emptyPresetState });
+  // Per-mode internal state preserved across mode switches for the modal session.
+  const snapshotsRef = useRef<ConfigSnapshots>(
+    initSnapshots(ruleToFields(domainRule), inferConfigMode(domainRule)),
+  );
 
   const {
     control,
@@ -180,6 +173,28 @@ export function RuleWizardModal({
   // Reactive snapshot of the full rule, used to feed the edit-mode summary so
   // it refreshes after each sub-dialog Apply (getValues() is not reactive).
   const watchedValues = useWatch({ control }) as DomainRule;
+
+  // Read the current snapshot-relevant fields from the form.
+  const readFields = useCallback((): ConfigFields => ({
+    presetId: getValues('presetId') ?? null,
+    groupNameSource: getValues('groupNameSource') as GroupNameSourceValue,
+    titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
+    urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
+    urlExtractionMode: (getValues('urlExtractionMode') ?? 'regex') as UrlExtractionModeValue,
+    urlQueryParamName: getValues('urlQueryParamName') ?? '',
+    fallbackLabel: getValues('fallbackLabel') ?? '',
+  }), [getValues]);
+
+  // Apply a partial field patch onto the form (only provided fields change).
+  const writeFields = useCallback((patch: Partial<ConfigFields>) => {
+    if (patch.presetId !== undefined) setValue('presetId', patch.presetId);
+    if (patch.groupNameSource !== undefined) setValue('groupNameSource', patch.groupNameSource);
+    if (patch.titleParsingRegEx !== undefined) setValue('titleParsingRegEx', patch.titleParsingRegEx);
+    if (patch.urlParsingRegEx !== undefined) setValue('urlParsingRegEx', patch.urlParsingRegEx);
+    if (patch.urlExtractionMode !== undefined) setValue('urlExtractionMode', patch.urlExtractionMode);
+    if (patch.urlQueryParamName !== undefined) setValue('urlQueryParamName', patch.urlQueryParamName);
+    if (patch.fallbackLabel !== undefined) setValue('fallbackLabel', patch.fallbackLabel);
+  }, [setValue]);
 
   // Load presets when modal opens
   useEffect(() => {
@@ -211,126 +226,32 @@ export function RuleWizardModal({
     setIsOptionsModalOpen(false);
     const mode = inferConfigMode(domainRule);
     setConfigMode(mode);
-    if (!domainRule || domainRule.groupNameSource === 'manual') {
-      lastManualState.current = { ...emptyModeState };
-      lastPresetState.current = { ...emptyPresetState };
-    } else if (domainRule.presetId) {
-      const snapshot: ModeStateSnapshot = {
-        groupNameSource: domainRule.groupNameSource,
-        titleParsingRegEx: domainRule.titleParsingRegEx ?? '',
-        urlParsingRegEx: domainRule.urlParsingRegEx ?? '',
-        urlExtractionMode: domainRule.urlExtractionMode ?? 'regex',
-        urlQueryParamName: domainRule.urlQueryParamName ?? '',
-      };
-      lastPresetState.current = { presetId: domainRule.presetId, ...snapshot };
-      lastManualState.current = { ...snapshot };
-    } else {
-      lastManualState.current = {
-        groupNameSource: domainRule.groupNameSource as GroupNameSourceValue,
-        titleParsingRegEx: domainRule.titleParsingRegEx ?? '',
-        urlParsingRegEx: domainRule.urlParsingRegEx ?? '',
-        urlExtractionMode: domainRule.urlExtractionMode ?? 'regex',
-        urlQueryParamName: domainRule.urlQueryParamName ?? '',
-      };
-      lastPresetState.current = { ...emptyPresetState };
-    }
+    snapshotsRef.current = initSnapshots(ruleToFields(domainRule), mode);
   }, [domainRule, isOpen, reset]);
 
   const handlePresetChange = useCallback(async (selectedPresetId: string) => {
     if (!selectedPresetId) { setValue('presetId', null); return; }
     const preset = await getPresetById(selectedPresetId);
-    if (preset) {
-      setValue('presetId', selectedPresetId);
-      setValue('groupNameSource', preset.groupNameSource);
-      if (preset.titleRegex) setValue('titleParsingRegEx', preset.titleRegex);
-      if (preset.urlRegex) setValue('urlParsingRegEx', preset.urlRegex);
-      const presetExtractionMode = (preset.urlExtractionMode ?? 'regex') as UrlExtractionModeValue;
-      setValue('urlExtractionMode', presetExtractionMode);
-      if (preset.urlQueryParamName) setValue('urlQueryParamName', preset.urlQueryParamName);
-      setPresetName(preset.name);
-      const snapshot: ModeStateSnapshot = {
-        groupNameSource: preset.groupNameSource,
-        titleParsingRegEx: preset.titleRegex ?? '',
-        urlParsingRegEx: preset.urlRegex ?? '',
-        urlExtractionMode: presetExtractionMode,
-        urlQueryParamName: preset.urlQueryParamName ?? '',
-      };
-      lastPresetState.current = { presetId: selectedPresetId, ...snapshot };
-      lastManualState.current = { ...snapshot };
-      trigger();
-    }
-  }, [setValue, trigger]);
-
-  const readModeState = useCallback((): ModeStateSnapshot => ({
-    groupNameSource: getValues('groupNameSource') as GroupNameSourceValue,
-    titleParsingRegEx: getValues('titleParsingRegEx') ?? '',
-    urlParsingRegEx: getValues('urlParsingRegEx') ?? '',
-    urlExtractionMode: (getValues('urlExtractionMode') ?? 'regex') as UrlExtractionModeValue,
-    urlQueryParamName: getValues('urlQueryParamName') ?? '',
-  }), [getValues]);
-
-  const captureSnapshot = readModeState;
-
-  const applySnapshot = useCallback((snapshot: ModeStateSnapshot) => {
-    setValue('groupNameSource', snapshot.groupNameSource);
-    setValue('titleParsingRegEx', snapshot.titleParsingRegEx);
-    setValue('urlParsingRegEx', snapshot.urlParsingRegEx);
-    setValue('urlExtractionMode', snapshot.urlExtractionMode);
-    setValue('urlQueryParamName', snapshot.urlQueryParamName);
-  }, [setValue]);
-
-  const saveCurrentModeState = useCallback((prevMode: ConfigMode) => {
-    if (prevMode === 'manual') {
-      lastManualState.current = captureSnapshot();
-    } else if (prevMode === 'preset') {
-      lastPresetState.current = {
-        presetId: getValues('presetId') ?? null,
-        ...captureSnapshot(),
-      };
-    }
-  }, [captureSnapshot, getValues]);
-
-  const restorePresetMode = useCallback(() => {
-    setValue('presetId', lastPresetState.current.presetId);
-    applySnapshot(lastPresetState.current);
-  }, [setValue, applySnapshot]);
-
-  const restoreManualMode = useCallback(() => {
-    setValue('presetId', null);
-    applySnapshot(lastManualState.current);
-  }, [setValue, applySnapshot]);
-
-  const enterAskMode = useCallback(() => {
-    setValue('presetId', null);
-    setValue('groupNameSource', 'manual');
-  }, [setValue]);
-
-  const enterLabelMode = useCallback(() => {
-    setValue('presetId', null);
-    setValue('groupNameSource', 'label');
-    setValue('titleParsingRegEx', '');
-    setValue('urlParsingRegEx', '');
-    setValue('urlQueryParamName', '');
-    const currentFallback = getValues('fallbackLabel');
-    if (!currentFallback || currentFallback.trim() === '') {
-      setValue('fallbackLabel', getValues('label') ?? '');
-    }
-  }, [setValue, getValues]);
+    if (!preset) return;
+    const { snapshots, fields } = applyPresetSelection(snapshotsRef.current, selectedPresetId, preset);
+    snapshotsRef.current = snapshots;
+    writeFields(fields);
+    setPresetName(preset.name);
+    trigger();
+  }, [setValue, writeFields, trigger]);
 
   const handleConfigModeChange = useCallback((newMode: ConfigMode) => {
     const prevMode = configMode;
     if (prevMode !== newMode) {
-      saveCurrentModeState(prevMode);
+      snapshotsRef.current = saveModeSnapshot(snapshotsRef.current, prevMode, readFields());
     }
-    switch (newMode) {
-      case 'preset': restorePresetMode(); break;
-      case 'manual': restoreManualMode(); break;
-      case 'ask': enterAskMode(); break;
-      case 'label': enterLabelMode(); break;
-    }
+    writeFields(enterModePatch(snapshotsRef.current, newMode, {
+      label: getValues('label') ?? '',
+      fallbackLabel: getValues('fallbackLabel') ?? '',
+    }));
     setConfigMode(newMode);
     trigger();
-  }, [configMode, saveCurrentModeState, restorePresetMode, restoreManualMode, enterAskMode, enterLabelMode, trigger]);
+  }, [configMode, readFields, writeFields, getValues, trigger]);
 
   const announceStep = (newStep: number) => {
     const label = getMessage(STEP_LABELS_KEYS[newStep]);
@@ -404,21 +325,20 @@ export function RuleWizardModal({
   };
 
   const handleApplyConfig = (values: ConfigEditValues) => {
-    saveCurrentModeState(configMode);
     setConfigMode(values.configMode);
-    setValue('presetId', values.presetId);
-    setValue('groupNameSource', values.groupNameSource);
-    setValue('titleParsingRegEx', values.titleParsingRegEx);
-    setValue('urlParsingRegEx', values.urlParsingRegEx);
-    setValue('urlExtractionMode', values.urlExtractionMode);
-    setValue('urlQueryParamName', values.urlQueryParamName);
+    const fields: ConfigFields = {
+      presetId: values.presetId,
+      groupNameSource: values.groupNameSource,
+      titleParsingRegEx: values.titleParsingRegEx,
+      urlParsingRegEx: values.urlParsingRegEx,
+      urlExtractionMode: values.urlExtractionMode,
+      urlQueryParamName: values.urlQueryParamName,
+      fallbackLabel: values.fallbackLabel,
+    };
+    writeFields(fields);
     setValue('fallbackLabel', values.fallbackLabel, { shouldDirty: true });
-    if (values.configMode === 'ask') {
-      setValue('groupNameSource', 'manual');
-    }
-    if (values.configMode === 'label') {
-      setValue('groupNameSource', 'label');
-    }
+    // Keep the per-mode snapshots consistent with the applied configuration.
+    snapshotsRef.current = initSnapshots(fields, values.configMode);
     trigger();
     // Refresh preset name
     if (values.presetId) {
@@ -473,9 +393,7 @@ export function RuleWizardModal({
 
   const currentConfigValues: ConfigEditValues = {
     configMode,
-    presetId: getValues('presetId') ?? null,
-    fallbackLabel: getValues('fallbackLabel') ?? '',
-    ...readModeState(),
+    ...readFields(),
   };
 
   const currentIdentityValues: IdentityEditValues = {

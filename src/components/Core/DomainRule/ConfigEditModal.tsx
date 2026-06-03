@@ -1,5 +1,5 @@
 import { Flex } from '@radix-ui/themes';
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
 import { type GroupNameSourceValue, type UrlExtractionModeValue } from '@/schemas/enums';
@@ -9,6 +9,14 @@ import { getPresetById } from '@/utils/presetUtils';
 import { logger } from '@/utils/logger';
 import { DomainRuleConfigForm } from './DomainRuleConfigForm';
 import type { ConfigMode } from './ConfigModeSelector';
+import {
+  type ConfigFields,
+  type ConfigSnapshots,
+  applyPresetSelection,
+  enterModePatch,
+  initSnapshots,
+  saveModeSnapshot,
+} from './configModeState';
 import { EditModalShell } from './EditModalShell';
 
 const regexValidator = createRegexValidator(true);
@@ -49,6 +57,18 @@ interface ConfigEditModalProps {
   isLoadingPresets: boolean;
 }
 
+function initialToFields(initial: ConfigEditValues): ConfigFields {
+  return {
+    presetId: initial.presetId,
+    groupNameSource: initial.groupNameSource,
+    titleParsingRegEx: initial.titleParsingRegEx,
+    urlParsingRegEx: initial.urlParsingRegEx,
+    urlExtractionMode: initial.urlExtractionMode,
+    urlQueryParamName: initial.urlQueryParamName,
+    fallbackLabel: initial.fallbackLabel,
+  };
+}
+
 export function ConfigEditModal({
   isOpen,
   onClose,
@@ -66,6 +86,9 @@ export function ConfigEditModal({
   const [urlQueryParamName, setUrlQueryParamName] = useState(initial.urlQueryParamName);
   const [fallbackLabel, setFallbackLabel] = useState(initial.fallbackLabel);
 
+  // Per-mode internal state preserved across mode switches for the modal session.
+  const snapshotsRef = useRef<ConfigSnapshots>(initSnapshots(initialToFields(initial), initial.configMode));
+
   // Reset to initial values whenever modal opens
   useEffect(() => {
     if (isOpen) {
@@ -77,25 +100,37 @@ export function ConfigEditModal({
       setUrlExtractionMode(initial.urlExtractionMode);
       setUrlQueryParamName(initial.urlQueryParamName);
       setFallbackLabel(initial.fallbackLabel);
+      snapshotsRef.current = initSnapshots(initialToFields(initial), initial.configMode);
     }
   }, [isOpen, initial]);
 
-  const handleConfigModeChange = useCallback((newMode: ConfigMode) => {
-    setConfigMode(newMode);
-    // Clear presetId when leaving preset mode: otherwise inferConfigMode silently
-    // re-classifies the rule as 'preset' on next open, undoing the user's mode change
-    // (presetId would also be persisted alongside a non-preset configMode, corrupt state).
-    if (newMode !== 'preset') {
-      setPresetId(null);
-    }
-    // Ask mode persists groupNameSource as 'manual', matches RuleWizardModal convention.
-    if (newMode === 'ask') {
-      setGroupNameSource('manual');
-    }
-    if (newMode === 'label') {
-      setGroupNameSource('label');
-    }
+  const readFields = useCallback((): ConfigFields => ({
+    presetId,
+    groupNameSource,
+    titleParsingRegEx,
+    urlParsingRegEx,
+    urlExtractionMode,
+    urlQueryParamName,
+    fallbackLabel,
+  }), [presetId, groupNameSource, titleParsingRegEx, urlParsingRegEx, urlExtractionMode, urlQueryParamName, fallbackLabel]);
+
+  const applyPatch = useCallback((patch: Partial<ConfigFields>) => {
+    if (patch.presetId !== undefined) setPresetId(patch.presetId);
+    if (patch.groupNameSource !== undefined) setGroupNameSource(patch.groupNameSource);
+    if (patch.titleParsingRegEx !== undefined) setTitleParsingRegEx(patch.titleParsingRegEx);
+    if (patch.urlParsingRegEx !== undefined) setUrlParsingRegEx(patch.urlParsingRegEx);
+    if (patch.urlExtractionMode !== undefined) setUrlExtractionMode(patch.urlExtractionMode);
+    if (patch.urlQueryParamName !== undefined) setUrlQueryParamName(patch.urlQueryParamName);
+    if (patch.fallbackLabel !== undefined) setFallbackLabel(patch.fallbackLabel);
   }, []);
+
+  const handleConfigModeChange = useCallback((newMode: ConfigMode) => {
+    if (configMode !== newMode) {
+      snapshotsRef.current = saveModeSnapshot(snapshotsRef.current, configMode, readFields());
+    }
+    applyPatch(enterModePatch(snapshotsRef.current, newMode, { label: '', fallbackLabel }));
+    setConfigMode(newMode);
+  }, [configMode, readFields, applyPatch, fallbackLabel]);
 
   const handlePresetChange = useCallback(async (selectedPresetId: string) => {
     if (!selectedPresetId) {
@@ -105,17 +140,14 @@ export function ConfigEditModal({
     try {
       const preset = await getPresetById(selectedPresetId);
       if (preset) {
-        setPresetId(selectedPresetId);
-        setGroupNameSource(preset.groupNameSource as GroupNameSourceValue);
-        if (preset.titleRegex) setTitleParsingRegEx(preset.titleRegex);
-        if (preset.urlRegex) setUrlParsingRegEx(preset.urlRegex);
-        if (preset.urlExtractionMode) setUrlExtractionMode(preset.urlExtractionMode);
-        if (preset.urlQueryParamName) setUrlQueryParamName(preset.urlQueryParamName);
+        const { snapshots, fields } = applyPresetSelection(snapshotsRef.current, selectedPresetId, preset);
+        snapshotsRef.current = snapshots;
+        applyPatch(fields);
       }
     } catch (error) {
       logger.debug('[ConfigEditModal] Error loading preset:', error);
     }
-  }, []);
+  }, [applyPatch]);
 
   const titleFieldVisible =
     configMode === 'manual' && (groupNameSource === 'title' || groupNameSource.startsWith('smart'));
