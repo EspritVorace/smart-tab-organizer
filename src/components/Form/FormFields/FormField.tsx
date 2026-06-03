@@ -10,11 +10,12 @@ interface FormFieldProps {
     message?: string;
   };
   /**
-   * Children can be a ReactNode or a render function receiving the generated id.
-   * Use the render function to associate a non-wrappable control (TextField, TextArea,
-   * Select.Trigger, SearchableSelect) with the field's <label>.
+   * Children can be a ReactNode or a render function receiving the generated
+   * field id and the error element id. Use the render function to associate a
+   * non-wrappable control (TextField, TextArea, Select.Trigger, SearchableSelect)
+   * with the field's <label>, and optionally wire `aria-describedby` to the error.
    */
-  children: React.ReactNode | ((id: string) => React.ReactNode);
+  children: React.ReactNode | ((id: string, errorId: string) => React.ReactNode);
   /** Explicit id for the field control. Defaults to a useId(). */
   id?: string;
 }
@@ -28,11 +29,12 @@ export function FormField({
 }: FormFieldProps) {
   const fallbackId = useId();
   const fieldId = id ?? fallbackId;
+  const errorId = `${fieldId}-error`;
   return (
     <Box>
       <FieldLabel required={required} htmlFor={fieldId}>{label}</FieldLabel>
-      {typeof children === 'function' ? children(fieldId) : children}
-      <FieldError error={error} />
+      {typeof children === 'function' ? children(fieldId, errorId) : children}
+      <FieldError error={error} id={error ? errorId : undefined} />
     </Box>
   );
 }

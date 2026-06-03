@@ -95,6 +95,8 @@
   "domainFilterPlaceholder": { "message": "ej: atlassian.net" },
   "titleRegex": { "message": "RegEx Título" },
   "urlRegex": { "message": "RegEx URL" },
+  "titleRegexEditorAriaLabel": { "message": "Editor de expresión regular del título" },
+  "urlRegexEditorAriaLabel": { "message": "Editor de expresión regular de la URL" },
   "deduplicationMode": { "message": "Modo Deduplicación" },
   "exactMatch": { "message": "URL Exacta" },
   "includesMatch": { "message": "URL Incluida" },
