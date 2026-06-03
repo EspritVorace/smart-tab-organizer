@@ -1,0 +1,56 @@
+import type { Extension } from '@codemirror/state';
+import { EditorView } from '@codemirror/view';
+
+/**
+ * Single-line editor chrome for the domain field. Mirrors the visible look of a
+ * Radix `TextField` (size 2), exactly like `cmRegexTheme.ts`, and adds the four
+ * domain-part colors. Every color is a Radix token so the field follows the
+ * active accent and flips automatically between light and dark appearances.
+ *
+ * Part colors:
+ * - subdomain: muted (it is optional / less significant)
+ * - domain: accent + medium weight (the meaningful part)
+ * - tld (extension): a distinct stable hue
+ * - dot: discreet separators
+ */
+export function createDomainEditorTheme(isDark: boolean): Extension {
+  return EditorView.theme(
+    {
+      '&': {
+        color: 'var(--gray-12)',
+        backgroundColor: 'var(--color-surface)',
+        fontSize: 'var(--font-size-2)',
+        border: '1px solid var(--gray-a7)',
+        borderRadius: 'var(--radius-3)',
+      },
+      '&.cm-focused': {
+        outline: '2px solid var(--accent-8)',
+        outlineOffset: '-1px',
+      },
+      '.cm-scroller': {
+        fontFamily:
+          'var(--code-font-family, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace)',
+        lineHeight: '1.5',
+        alignItems: 'center',
+        overflowX: 'auto',
+      },
+      // Single editing line, vertically centered, matching a Radix size-2 input.
+      '.cm-content': {
+        padding: '0 var(--space-2)',
+        minHeight: '28px',
+        caretColor: 'var(--gray-12)',
+      },
+      '.cm-line': { padding: '0' },
+      '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--gray-12)' },
+      '.cm-placeholder': { color: 'var(--gray-a9)' },
+      '.cm-selectionBackground, ::selection': { backgroundColor: 'var(--accent-a4)' },
+      '&.cm-focused .cm-selectionBackground': { backgroundColor: 'var(--accent-a5)' },
+      // Domain part colors.
+      '.cm-domain-subdomain': { color: 'var(--gray-a11)' },
+      '.cm-domain-domain': { color: 'var(--accent-11)', fontWeight: '500' },
+      '.cm-domain-tld': { color: 'var(--jade-11)' },
+      '.cm-domain-dot': { color: 'var(--gray-a8)' },
+    },
+    { dark: isDark },
+  );
+}

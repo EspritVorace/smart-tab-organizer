@@ -93,6 +93,7 @@
   "addRule": { "message": "Ajouter une Règle" },
   "domainFilter": { "message": "Filtre Domaine" },
   "domainFilterPlaceholder": { "message": "ex: atlassian.net" },
+  "domainFilterEditorAriaLabel": { "message": "Éditeur du filtre de domaine" },
   "titleRegex": { "message": "RegEx Titre" },
   "urlRegex": { "message": "RegEx URL" },
   "titleRegexEditorAriaLabel": { "message": "Éditeur d'expression régulière du titre" },

@@ -241,7 +241,8 @@ test.describe('Creation wizard — Step 2: Configuration', () => {
     await wizard.clickBack();
 
     await expect(wizard.labelInput()).toHaveValue('Preserved Label');
-    await expect(wizard.domainFilterInput()).toHaveValue('preserved.com');
+    // CodeMirror editor has no form value: assert its rendered text instead.
+    await expect(wizard.domainFilterInput().locator('.cm-content')).toHaveText('preserved.com');
     await page.close();
   });
 });
