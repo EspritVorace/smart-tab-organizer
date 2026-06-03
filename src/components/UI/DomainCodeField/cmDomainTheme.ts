@@ -42,7 +42,9 @@ export function createDomainEditorTheme(isDark: boolean): Extension {
       },
       '.cm-line': { padding: '0' },
       '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--gray-12)' },
-      '.cm-placeholder': { color: 'var(--gray-a9)' },
+      // gray-a11 is the most muted gray that still meets WCAG AA (4.5:1) for
+      // text; gray-a9/a10 (Radix's default placeholder tone) fail axe contrast.
+      '.cm-placeholder': { color: 'var(--gray-a11)' },
       '.cm-selectionBackground, ::selection': { backgroundColor: 'var(--accent-a4)' },
       '&.cm-focused .cm-selectionBackground': { backgroundColor: 'var(--accent-a5)' },
       // Domain part colors.
