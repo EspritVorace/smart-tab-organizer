@@ -28,8 +28,9 @@ export function createDomainEditorTheme(isDark: boolean): Extension {
         outlineOffset: '-1px',
       },
       '.cm-scroller': {
-        fontFamily:
-          'var(--code-font-family, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace)',
+        // A domain is not code: use the UI font (like the sibling Radix
+        // TextField) so dots are not spaced out by monospace cells.
+        fontFamily: 'var(--default-font-family, system-ui, sans-serif)',
         lineHeight: '1.5',
         alignItems: 'center',
         overflowX: 'auto',
