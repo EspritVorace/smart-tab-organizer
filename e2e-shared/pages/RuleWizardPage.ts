@@ -113,6 +113,16 @@ export class RuleWizardPage extends DialogPage {
     return this.dialog().locator('#presetId');
   }
 
+  /** Single-line CodeMirror editor for the title parsing regex (manual mode). */
+  titleRegexField(): Locator {
+    return this.dialog().getByTestId('title-regex-field');
+  }
+
+  /** Single-line CodeMirror editor for the URL parsing regex (manual + regex mode). */
+  urlRegexField(): Locator {
+    return this.dialog().getByTestId('url-regex-field');
+  }
+
   /** Deduplication enable/disable switch on step 3. */
   deduplicationSwitch(): Locator {
     return this.dialog().locator('[role="switch"]');
@@ -221,6 +231,29 @@ export class RuleWizardPage extends DialogPage {
       .getByRole('option', { name: new RegExp(`^${labels[source]}`, 'i') })
       .first()
       .click();
+  }
+
+  /**
+   * Type a pattern into a CodeMirror regex field. The editor exposes no
+   * `<input>`, so we focus the `.cm-content` node and drive it through the
+   * keyboard (a `.fill()` would target a non-existent form value).
+   */
+  private async typeRegexField(field: Locator, pattern: string): Promise<void> {
+    const content = field.locator('.cm-content');
+    await content.click();
+    await this.page.keyboard.press('ControlOrMeta+a');
+    await this.page.keyboard.press('Delete');
+    if (pattern) await this.page.keyboard.type(pattern);
+  }
+
+  /** Fill the title parsing regex editor (manual mode, title-based source). */
+  async fillTitleRegex(pattern: string): Promise<void> {
+    await this.typeRegexField(this.titleRegexField(), pattern);
+  }
+
+  /** Fill the URL parsing regex editor (manual mode, URL regex extraction). */
+  async fillUrlRegex(pattern: string): Promise<void> {
+    await this.typeRegexField(this.urlRegexField(), pattern);
   }
 
   // ─── Atomic actions: options (step 3) ────────────────────────────────────

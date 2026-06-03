@@ -211,8 +211,8 @@ test.describe('Creation wizard — Step 2: Configuration', () => {
     await expect(wizard.configModeRadio('ask')).toHaveAttribute('data-state', 'checked');
 
     await expect(wizard.dialog().getByTestId('config-mode-description')).toBeVisible();
-    await expect(wizard.dialog().locator('input[name="titleParsingRegEx"]')).not.toBeAttached();
-    await expect(wizard.dialog().locator('input[name="urlParsingRegEx"]')).not.toBeAttached();
+    await expect(wizard.dialog().getByTestId('title-regex-field')).toHaveCount(0);
+    await expect(wizard.dialog().getByTestId('url-regex-field')).toHaveCount(0);
     await page.close();
   });
 
