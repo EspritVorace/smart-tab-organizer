@@ -44,8 +44,11 @@ test.describe('[US-A11Y001] Rule creation wizard', () => {
     await page.getByTestId('page-rules-btn-add').click();
     await page.getByTestId('wizard-rule').waitFor({ state: 'visible' });
 
-    // Domain filter input must have focus (label is auto-derived from it).
-    await expect(page.getByTestId('wizard-rule-field-domain')).toBeFocused();
+    // Domain filter editor must have focus (label is auto-derived from it).
+    // It is a CodeMirror editor, so focus lands on its contenteditable node.
+    await expect(
+      page.getByTestId('wizard-rule-field-domain').locator('.cm-content'),
+    ).toBeFocused();
     // Close button must NOT have focus
     expect(await isCloseFocused(page)).toBe(false);
 

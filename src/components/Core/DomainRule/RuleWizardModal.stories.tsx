@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { within, userEvent, expect } from 'storybook/test';
 import { RuleWizardModal } from './RuleWizardModal';
+import { setDomainFieldValue } from '@/components/UI/DomainCodeField';
 const action = (name: string) => (...args: unknown[]) => console.log(name, ...args);
 import type { DomainRule } from '@/schemas/domainRule';
 import type { AppSettings } from '@/types/syncSettings';
@@ -145,9 +146,8 @@ export const RuleWizardModalStep2: Story = {
     await userEvent.clear(labelInput);
     await userEvent.type(labelInput, 'GitHub');
 
-    const domainInput = body.getByTestId('wizard-rule-field-domain');
-    await userEvent.clear(domainInput);
-    await userEvent.type(domainInput, 'github.com');
+    // Domain filter is a CodeMirror editor (no <input>): drive it via the seam.
+    await setDomainFieldValue(canvasElement.ownerDocument.body, 'wizard-rule-field-domain', 'github.com');
 
     const nextBtn = body.getByTestId('wizard-rule-btn-next');
     await expect(nextBtn).not.toBeDisabled();

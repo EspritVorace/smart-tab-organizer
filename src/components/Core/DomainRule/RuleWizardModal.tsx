@@ -419,8 +419,12 @@ export function RuleWizardModal({
       fillHeight={!isEditing && step === 1}
       onOpenAutoFocus={(e) => {
         e.preventDefault();
-        const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[name="domainFilter"]');
-        input?.focus();
+        // The domain filter is a CodeMirror editor (no <input>): focus its
+        // contenteditable content node so step 1 still lands on the domain.
+        const content = (e.currentTarget as HTMLElement).querySelector<HTMLElement>(
+          '[data-testid="wizard-rule-field-domain"] .cm-content',
+        );
+        content?.focus();
       }}
     >
       <form onSubmit={handleSubmit(handleFormSubmit)} style={{ display: 'contents' }}>

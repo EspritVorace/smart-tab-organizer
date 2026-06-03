@@ -151,7 +151,15 @@ export async function editRule(
       await modal.getByTestId('modal-edit-identity-field-label').fill(patch.label);
     }
     if (patch.domainFilter !== undefined) {
-      await modal.getByTestId('modal-edit-identity-field-domain').fill(patch.domainFilter);
+      // The domain filter is a CodeMirror editor (no <input>): drive its
+      // contenteditable content node through the keyboard.
+      const domainContent = modal
+        .getByTestId('modal-edit-identity-field-domain')
+        .locator('.cm-content');
+      await domainContent.click();
+      await page.keyboard.press('ControlOrMeta+a');
+      await page.keyboard.press('Delete');
+      if (patch.domainFilter) await page.keyboard.type(patch.domainFilter);
     }
     await modal.getByTestId('modal-edit-identity-btn-apply').click();
   }

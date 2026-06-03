@@ -178,9 +178,9 @@ export class RuleWizardPage extends DialogPage {
     await this.labelInput().fill(label);
   }
 
-  /** Fill the domain filter input. */
+  /** Fill the domain filter editor (CodeMirror, no `<input>`). */
   async fillDomainFilter(domain: string): Promise<void> {
-    await this.domainFilterInput().fill(domain);
+    await this.typeCodeField(this.domainFilterInput(), domain);
   }
 
   /**
@@ -234,26 +234,26 @@ export class RuleWizardPage extends DialogPage {
   }
 
   /**
-   * Type a pattern into a CodeMirror regex field. The editor exposes no
+   * Type into a CodeMirror field (regex or domain). The editor exposes no
    * `<input>`, so we focus the `.cm-content` node and drive it through the
    * keyboard (a `.fill()` would target a non-existent form value).
    */
-  private async typeRegexField(field: Locator, pattern: string): Promise<void> {
+  private async typeCodeField(field: Locator, text: string): Promise<void> {
     const content = field.locator('.cm-content');
     await content.click();
     await this.page.keyboard.press('ControlOrMeta+a');
     await this.page.keyboard.press('Delete');
-    if (pattern) await this.page.keyboard.type(pattern);
+    if (text) await this.page.keyboard.type(text);
   }
 
   /** Fill the title parsing regex editor (manual mode, title-based source). */
   async fillTitleRegex(pattern: string): Promise<void> {
-    await this.typeRegexField(this.titleRegexField(), pattern);
+    await this.typeCodeField(this.titleRegexField(), pattern);
   }
 
   /** Fill the URL parsing regex editor (manual mode, URL regex extraction). */
   async fillUrlRegex(pattern: string): Promise<void> {
-    await this.typeRegexField(this.urlRegexField(), pattern);
+    await this.typeCodeField(this.urlRegexField(), pattern);
   }
 
   // ─── Atomic actions: options (step 3) ────────────────────────────────────

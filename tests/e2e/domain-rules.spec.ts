@@ -133,7 +133,10 @@ test.describe('Edit rule via dropdown', () => {
     await dialog.getByRole('button', { name: /modify/i }).first().click();
     const identityModal = page.getByTestId('modal-edit-identity');
     await expect(identityModal.getByTestId('modal-edit-identity-field-label')).toHaveValue('Notion');
-    await expect(identityModal.getByTestId('modal-edit-identity-field-domain')).toHaveValue('notion.so');
+    // CodeMirror editor has no form value: assert its rendered text instead.
+    await expect(
+      identityModal.getByTestId('modal-edit-identity-field-domain').locator('.cm-content'),
+    ).toHaveText('notion.so');
     await page.close();
   });
 });
