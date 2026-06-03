@@ -32,13 +32,15 @@ export function createDomainEditorTheme(isDark: boolean): Extension {
         // TextField) so dots are not spaced out by monospace cells.
         fontFamily: 'var(--default-font-family, system-ui, sans-serif)',
         lineHeight: '1.5',
+        // Hold the size-2 input height here (not on .cm-content) so the single
+        // line is vertically centered by alignItems instead of pinned to top.
+        minHeight: '28px',
         alignItems: 'center',
         overflowX: 'auto',
       },
-      // Single editing line, vertically centered, matching a Radix size-2 input.
+      // Single editing line, vertically centered by the scroller above.
       '.cm-content': {
         padding: '0 var(--space-2)',
-        minHeight: '28px',
         caretColor: 'var(--gray-12)',
       },
       '.cm-line': { padding: '0' },
