@@ -155,11 +155,15 @@ export default defineConfig({
     },
     build: {
       emptyOutDir: true,
+      // JsonCodeEditor (CodeMirror + codemirror-json-schema) is already lazy-loaded
+      // and only imported when the import wizard is opened. Extension chunks are
+      // served locally so network cost does not apply; suppress the warning.
+      chunkSizeWarningLimit: 600,
       rollupOptions: {
         output: {
           assetFileNames: 'assets/[name].[hash].[ext]',
           chunkFileNames: 'chunks/[name].[hash].js',
-          entryFileNames: 'chunks/[name].[hash].js'
+          entryFileNames: 'chunks/[name].[hash].js',
         }
       }
     },
