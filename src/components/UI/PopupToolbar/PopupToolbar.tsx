@@ -6,6 +6,7 @@ import { getMessage, getPluralMessage } from '@/utils/i18n';
 import { loadActiveSessions, loadPinnedSessions } from '@/utils/sessionStorage';
 import { getActiveTabGroupId, hasCapturableTabs } from '@/utils/tabCapture';
 import { openOptionsWithHash } from '@/utils/openOptions';
+import { buildSnapshotHash } from '@/utils/snapshotHash';
 import { useSettings } from '@/hooks/useSettings';
 import styles from './PopupToolbar.module.css';
 
@@ -70,9 +71,7 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
   const restoreDisabledHint = !hasSessions ? getMessage('popupRestoreDisabledHint') : undefined;
 
   const isInGroup = activeTabGroupId !== null && canSave;
-  const saveHash = isInGroup
-    ? `#sessions?action=snapshot&groupId=${activeTabGroupId}`
-    : '#sessions?action=snapshot';
+  const saveHash = buildSnapshotHash(isInGroup ? activeTabGroupId : null);
   const saveAriaLabel = isInGroup
     ? getMessage('popupSaveActiveGroup')
     : getMessage('popupSaveSession');
