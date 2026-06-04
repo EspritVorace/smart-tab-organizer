@@ -359,4 +359,63 @@ test.describe('[US-KB-popup-pinned] Popup pinned card shortcuts', () => {
     await newPage.close();
     await page.close().catch(() => {});
   });
+
+  // The pinned card only claims r/Shift+r/Alt+r/Alt+Shift+r/u. The remaining
+  // popup-level shortcuts (s/o/p) must keep firing even while a card is
+  // focused, instead of being swallowed by `excludeIfInsideWidget`. (`o`
+  // sends ORGANIZE_ALL_TABS then closes the popup with no observable page,
+  // so it is covered by the useShortcuts unit tests instead.)
+  test('S on a focused pinned card opens the snapshot page (not swallowed by the card)', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const session = createPinnedSession({ name: 'Pin A' });
+    await seedSessions(extensionContext, [session]);
+
+    const page = await extensionContext.newPage();
+    await goToPopup(page, extensionId);
+
+    const card = page.getByTestId(`popup-profile-item-${session.id}`);
+    await card.focus();
+    await expect(card).toBeFocused();
+
+    const [newPage] = await Promise.all([
+      extensionContext.waitForEvent('page'),
+      page.keyboard.press('s'),
+    ]);
+    await newPage.waitForLoadState('domcontentloaded');
+    expect(newPage.url()).toContain('options.html');
+    expect(newPage.url()).toContain('action=snapshot');
+
+    await newPage.close();
+    await page.close().catch(() => {});
+  });
+
+  test('P on a focused pinned card opens the options page (not swallowed by the card)', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const session = createPinnedSession({ name: 'Pin A' });
+    await seedSessions(extensionContext, [session]);
+
+    const page = await extensionContext.newPage();
+    await goToPopup(page, extensionId);
+
+    const card = page.getByTestId(`popup-profile-item-${session.id}`);
+    await card.focus();
+    await expect(card).toBeFocused();
+
+    const [newPage] = await Promise.all([
+      extensionContext.waitForEvent('page'),
+      page.keyboard.press('p'),
+    ]);
+    await newPage.waitForLoadState('domcontentloaded');
+    expect(newPage.url()).toContain('options.html');
+    // Distinguishes the global options action from the card's own restore
+    // (which would carry action=restore).
+    expect(newPage.url()).not.toContain('action=restore');
+
+    await newPage.close();
+    await page.close().catch(() => {});
+  });
 });

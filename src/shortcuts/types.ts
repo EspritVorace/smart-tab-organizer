@@ -56,10 +56,11 @@ export interface ShortcutEntry {
 
   /**
    * When true (only meaningful for `global` and `page:*` scopes), the
-   * shortcut is suppressed if the event target is inside any element flagged
-   * with `data-shortcut-scope="widget:..."`. Lets a focused widget claim
-   * conflicting key combos (e.g. `r` belongs to the focused session card,
-   * not the popup-level restore action).
+   * shortcut is suppressed only when the focused widget actually registers a
+   * binding for the same combo. Lets a focused widget claim the conflicting
+   * combos it owns (e.g. `r` belongs to the focused session card, not the
+   * popup-level restore action) while leaving the others (`o`/`s`/`p`), which
+   * no widget claims, free to fire the page-level action.
    */
   excludeIfInsideWidget?: boolean;
 
