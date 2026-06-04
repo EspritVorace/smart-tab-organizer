@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useRef, type ReactNode } from 'react';
 import { render, renderHook } from '@testing-library/react';
 import {
@@ -150,5 +150,134 @@ describe('useListNavigation', () => {
       </Harness>,
     );
     expect(getByTestId('list')).toBeDefined();
+  });
+});
+
+describe('useListNavigation autoFocus', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+  });
+
+  function makeList(itemCount: number): HTMLDivElement {
+    const list = document.createElement('div');
+    for (let i = 0; i < itemCount; i++) {
+      const btn = document.createElement('button');
+      btn.setAttribute('data-item', '');
+      btn.setAttribute('tabindex', '0');
+      btn.textContent = `Item ${i}`;
+      list.appendChild(btn);
+    }
+    document.body.appendChild(list);
+    return list;
+  }
+
+  it('focuses the first item on mount when ready (default true)', () => {
+    const list = makeList(3);
+    renderHook(() => {
+      const ref = useRef<HTMLDivElement | null>(list);
+      return useListNavigation(ref, '[data-item]', { autoFocus: {} });
+    });
+    expect(document.activeElement).toBe(list.querySelector('[data-item]'));
+  });
+
+  it('falls back to fallbackSelector when the list has no items', () => {
+    const list = makeList(0);
+    const fallback = document.createElement('button');
+    fallback.setAttribute('data-testid', 'fallback-btn');
+    document.body.appendChild(fallback);
+    renderHook(() => {
+      const ref = useRef<HTMLDivElement | null>(list);
+      return useListNavigation(ref, '[data-item]', {
+        autoFocus: { fallbackSelector: '[data-testid="fallback-btn"]' },
+      });
+    });
+    expect(document.activeElement).toBe(fallback);
+  });
+
+  it('falls back when the list ref is null (list not rendered)', () => {
+    const fallback = document.createElement('button');
+    fallback.setAttribute('data-testid', 'fallback-btn');
+    document.body.appendChild(fallback);
+    renderHook(() => {
+      const ref = useRef<HTMLDivElement | null>(null);
+      return useListNavigation(ref, '[data-item]', {
+        autoFocus: { fallbackSelector: '[data-testid="fallback-btn"]' },
+      });
+    });
+    expect(document.activeElement).toBe(fallback);
+  });
+
+  it('does not focus while not ready, then focuses once ready flips', () => {
+    const list = makeList(2);
+    const { rerender } = renderHook(
+      ({ ready }: { ready: boolean }) => {
+        const ref = useRef<HTMLDivElement | null>(list);
+        return useListNavigation(ref, '[data-item]', { autoFocus: { ready } });
+      },
+      { initialProps: { ready: false } },
+    );
+    expect(document.activeElement).not.toBe(list.querySelector('[data-item]'));
+    rerender({ ready: true });
+    expect(document.activeElement).toBe(list.querySelector('[data-item]'));
+  });
+
+  it('focuses only once across re-renders', () => {
+    const list = makeList(2);
+    const first = list.querySelector<HTMLButtonElement>('[data-item]')!;
+    const { rerender } = renderHook(() => {
+      const ref = useRef<HTMLDivElement | null>(list);
+      return useListNavigation(ref, '[data-item]', { autoFocus: {} });
+    });
+    expect(document.activeElement).toBe(first);
+    // Move focus elsewhere, then re-render: the guard must not steal it back.
+    const other = document.createElement('button');
+    document.body.appendChild(other);
+    other.focus();
+    rerender();
+    expect(document.activeElement).toBe(other);
+  });
+
+  it('focuses with preventScroll to avoid scroll jumps', () => {
+    const list = makeList(1);
+    const item = list.querySelector<HTMLButtonElement>('[data-item]')!;
+    const focusSpy = vi.spyOn(item, 'focus');
+    renderHook(() => {
+      const ref = useRef<HTMLDivElement | null>(list);
+      return useListNavigation(ref, '[data-item]', { autoFocus: {} });
+    });
+    expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+  });
+
+  it('does not steal focus already inside the list', () => {
+    const list = makeList(2);
+    const items = list.querySelectorAll<HTMLButtonElement>('[data-item]');
+    // Simulate the user/test having tabbed to the second item before the effect.
+    items[1].focus();
+    renderHook(() => {
+      const ref = useRef<HTMLDivElement | null>(list);
+      return useListNavigation(ref, '[data-item]', { autoFocus: {} });
+    });
+    expect(document.activeElement).toBe(items[1]);
+  });
+
+  it('still focuses when current focus is outside the list (e.g. sidebar)', () => {
+    const list = makeList(2);
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    outside.focus();
+    renderHook(() => {
+      const ref = useRef<HTMLDivElement | null>(list);
+      return useListNavigation(ref, '[data-item]', { autoFocus: {} });
+    });
+    expect(document.activeElement).toBe(list.querySelector('[data-item]'));
+  });
+
+  it('does nothing when autoFocus is not set', () => {
+    const list = makeList(2);
+    renderHook(() => {
+      const ref = useRef<HTMLDivElement | null>(list);
+      return useListNavigation(ref, '[data-item]');
+    });
+    expect(document.activeElement).toBe(document.body);
   });
 });

@@ -772,6 +772,19 @@ export function SessionsPage({
   const totalForTab = archivedOnlyView ? archivedBucket.length : pinnedBucket.length + activeBucket.length;
   const hasAnyOverall = pinnedBucket.length + activeBucket.length + archivedBucket.length > 0;
 
+  // Initial focus on arrival (active view): focus the first session card
+  // (pinned section renders before unpinned, so the first card is pinned when
+  // any), or fall back to the empty-state snapshot button when there is none.
+  // This page-level instance is used only for the autofocus; per-section arrow
+  // navigation keeps its own useListNavigation hooks.
+  const sessionsListRef = useRef<HTMLDivElement>(null);
+  useListNavigation(sessionsListRef, '[data-session-card]', {
+    autoFocus: {
+      ready: isLoaded && !archivedOnlyView,
+      fallbackSelector: '[data-testid="page-sessions-btn-snapshot"]',
+    },
+  });
+
   return (
     <PageLayout
       titleKey="sessionsTab"
@@ -896,7 +909,7 @@ export function SessionsPage({
               <EmptyState compact icon={Archive} message={getMessage('noSessionsFound')} />
             )}
             {isLoaded && !archivedOnlyView && displayedSessions.length > 0 && (
-              <Flex data-testid="page-sessions-list" direction="column" gap="3">
+              <Flex data-testid="page-sessions-list" direction="column" gap="3" ref={sessionsListRef}>
                 <SessionSection
                   icon={Pin}
                   titleKey="pinnedSessionsSection"
