@@ -43,10 +43,12 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     commandName: '_execute_action',
   },
 
-  // Popup. The four action-binding shortcuts (s/r/o/p) yield to a focused
-  // pinned card so the card's own widget bindings (sessionCard.restore.*)
-  // stay authoritative; `?` is intentionally never widget-suppressed so the
-  // help drawer can be summoned from anywhere in the popup.
+  // Popup. The four action-binding shortcuts (s/r/o/p) only yield a combo a
+  // focused pinned card actually claims: `r` belongs to the card's own widget
+  // bindings (sessionCard.restore.*), while o/s/p, which no card registers,
+  // keep firing the popup-level action even when a card has focus. `?` is
+  // intentionally never widget-suppressed so the help drawer can be summoned
+  // from anywhere in the popup.
   'popup.save': {
     id: 'popup.save',
     defaultBindings: ['s'],
