@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { mountExtensionApp } from '@/utils/mountExtensionApp.js';
 import { Box, Flex, Separator, Theme } from '@radix-ui/themes';
@@ -25,6 +25,17 @@ export function PopupContent() {
   const { settings, isLoaded, setGlobalGroupingEnabled, setGlobalDeduplicationEnabled } = useSettings();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const openShortcuts = useCallback(() => setShortcutsOpen(true), []);
+
+  // Initial focus: land on the first pinned session card when one exists, and
+  // fall back to the "Organize tabs" button otherwise. PopupProfilesList focuses
+  // its own first card and reports `hasPinned` here once sessions have loaded.
+  const organizeButtonRef = useRef<HTMLButtonElement>(null);
+  const initialFocusDoneRef = useRef(false);
+  const handleProfilesLoaded = useCallback((hasPinned: boolean) => {
+    if (initialFocusDoneRef.current) return;
+    initialFocusDoneRef.current = true;
+    if (!hasPinned) organizeButtonRef.current?.focus();
+  }, []);
 
   const openOptionsPage = useCallback(() => {
     browser.runtime.openOptionsPage();
@@ -77,7 +88,7 @@ export function PopupContent() {
         <Flex gap="3" direction="column" width="100%">
           <PopupHeader title={getMessage('popupTitle')} onSettingsOpen={openOptionsPage} />
 
-          <PopupToolbar />
+          <PopupToolbar organizeButtonRef={organizeButtonRef} />
 
           <PopupWorkspaceSwitcher onManage={handleManageWorkspaces} />
 
@@ -90,7 +101,7 @@ export function PopupContent() {
             />
           ) : null}
 
-          <PopupProfilesList />
+          <PopupProfilesList autoFocusFirstPinned onLoaded={handleProfilesLoaded} />
 
           {hasRules ? (
             <>

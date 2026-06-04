@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, type Ref } from 'react';
 import { Flex, Kbd, Tooltip } from '@radix-ui/themes';
 import { browser } from 'wxt/browser';
 import { Camera, RotateCcw, Wand2 } from 'lucide-react';
@@ -16,6 +16,8 @@ export interface PopupToolbarProps {
   canSave?: boolean;
   isOrganizing?: boolean;
   activeTabGroupId?: number | null;
+  /** Ref forwarded to the "Organize tabs" button so the popup can manage initial focus. */
+  organizeButtonRef?: Ref<HTMLButtonElement>;
 }
 
 function withTooltip(content: React.ReactNode, node: React.ReactElement) {
@@ -126,6 +128,7 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
   return (
     <div data-testid="popup-toolbar" className={styles.toolbar}>
       <button
+        ref={props.organizeButtonRef}
         type="button"
         data-testid="popup-toolbar-btn-organize"
         className={styles.hero}
