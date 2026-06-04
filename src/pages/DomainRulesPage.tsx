@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button, Flex, Box, Kbd, Tooltip } from '@radix-ui/themes';
-import { Plus, Eye, EyeOff, Shield, AlertCircle, Upload, Trash2, FileDown } from 'lucide-react';
+import { Plus, Eye, EyeOff, Shield, AlertCircle, Trash2, FileDown, PackagePlus } from 'lucide-react';
 import { DragDropProvider, type DragEndEvent, type DragOverEvent } from '@dnd-kit/react';
 import { move } from '@dnd-kit/helpers';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
@@ -80,6 +80,8 @@ export function DomainRulesPage({
       setIsModalOpen(true);
     } else if (pendingAction === 'import') {
       openImportRules();
+    } else if (pendingAction === 'import-pack') {
+      openImportRules({ initialSourceMode: 'pack' });
     }
     onPendingActionConsumed?.();
   }, [pendingAction, openImportRules, onPendingActionConsumed]);
@@ -411,13 +413,17 @@ export function DomainRulesPage({
                   description={getMessage('rulesEmptyDescription')}
                   actions={
                     <Flex gap="2">
-                      <Button data-testid="page-rules-btn-add" variant="soft" onClick={handleAddRule}>
+                      <Button
+                        data-testid="page-rules-btn-import-pack"
+                        variant="solid"
+                        onClick={() => openImportRules({ initialSourceMode: 'pack' })}
+                      >
+                        <PackagePlus size={14} />
+                        {getMessage('rulesEmptyImportPack')}
+                      </Button>
+                      <Button data-testid="page-rules-btn-add" variant="outline" onClick={handleAddRule}>
                         <Plus size={14} />
                         {getMessage('addRule')}
-                      </Button>
-                      <Button variant="soft" onClick={() => openImportRules()}>
-                        <Upload size={14} />
-                        {getMessage('importRulesButton')}
                       </Button>
                     </Flex>
                   }

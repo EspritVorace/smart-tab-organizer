@@ -80,8 +80,8 @@ describe('PopupApp rendu', () => {
     });
     render(<PopupApp />);
     expect(screen.queryByTestId('settings-toggles')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'popupCreateRule' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'popupImportRules' })).toBeInTheDocument();
+    expect(screen.getByTestId('popup-empty-add-rule')).toBeInTheDocument();
+    expect(screen.getByTestId('popup-empty-import-pack')).toBeInTheDocument();
   });
 
   it('renders SettingsToggles with rules (hasRules=true)', () => {
@@ -93,8 +93,8 @@ describe('PopupApp rendu', () => {
     });
     render(<PopupApp />);
     expect(screen.getByTestId('settings-toggles')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'popupCreateRule' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'popupImportRules' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('popup-empty-add-rule')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('popup-empty-import-pack')).not.toBeInTheDocument();
   });
 
   it("n'affiche aucun SettingsToggles pendant le chargement (isLoaded=false)", () => {
@@ -106,7 +106,7 @@ describe('PopupApp rendu', () => {
     });
     render(<PopupApp />);
     expect(screen.queryByTestId('settings-toggles')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'popupCreateRule' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('popup-empty-add-rule')).not.toBeInTheDocument();
   });
 });
 
@@ -129,10 +129,10 @@ describe('empty-state rule buttons', () => {
     vi.spyOn(window, 'close').mockImplementation(() => {});
   });
 
-  it('"Create rule" opens options with #rules?action=create', async () => {
+  it('"Add rule" opens options with #rules?action=create', async () => {
     mockedTabsQuery.mockResolvedValue([]);
     render(<PopupApp />);
-    fireEvent.click(screen.getByRole('button', { name: 'popupCreateRule' }));
+    fireEvent.click(screen.getByTestId('popup-empty-add-rule'));
     await waitFor(() => {
       expect(browser.tabs.create).toHaveBeenCalledWith(
         expect.objectContaining({ url: expect.stringContaining('#rules?action=create') }),
@@ -141,13 +141,13 @@ describe('empty-state rule buttons', () => {
     });
   });
 
-  it('"Import rules" opens options with #rules?action=import', async () => {
+  it('"Import a rules pack" opens options with #rules?action=import-pack', async () => {
     mockedTabsQuery.mockResolvedValue([]);
     render(<PopupApp />);
-    fireEvent.click(screen.getByRole('button', { name: 'popupImportRules' }));
+    fireEvent.click(screen.getByTestId('popup-empty-import-pack'));
     await waitFor(() => {
       expect(browser.tabs.create).toHaveBeenCalledWith(
-        expect.objectContaining({ url: expect.stringContaining('#rules?action=import') }),
+        expect.objectContaining({ url: expect.stringContaining('#rules?action=import-pack') }),
       );
       expect(window.close).toHaveBeenCalled();
     });
