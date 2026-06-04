@@ -85,7 +85,12 @@ function renderGroupTable(groupId, t, locale) {
     `| --- | --- |\n`;
   const rows = entries
     .map((entry) => {
-      const combo = escapeTableCell(formatBindings(entry.defaultBindings, locale));
+      // Commands assignable by the user but shipped without a default key
+      // (empty bindings) are surfaced as "not set" rather than a blank cell.
+      const combo =
+        entry.defaultBindings.length === 0
+          ? escapeTableCell(t('shortcutNotSet'))
+          : escapeTableCell(formatBindings(entry.defaultBindings, locale));
       const action = escapeTableCell(t(entry.descriptionKey));
       return `| ${combo} | ${action} |`;
     })

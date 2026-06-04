@@ -914,7 +914,7 @@
   "homepageTipsT37Title": { "message": "Acciones rápidas desde el popup" },
   "homepageTipsT37Text": { "message": "Una sola tecla: s guarda, r restaura, o organiza, p abre las opciones." },
   "homepageTipsT38Title": { "message": "Atajos globales del navegador" },
-  "homepageTipsT38Text": { "message": "Alt+Shift+O organiza sin abrir el popup. Alt+Shift+S captura la ventana actual. Personalizables en chrome://extensions/shortcuts." },
+  "homepageTipsT38Text": { "message": "Ctrl+Shift+1 abre el popup; desde ahí pulsa O para organizar o S para guardar la ventana actual. Asigna tus propios atajos en chrome://extensions/shortcuts." },
   "homepageTipsT39Title": { "message": "Búsqueda instantánea" },
   "homepageTipsT39Text": { "message": "Pulsa / para enfocar la barra de búsqueda de una lista. Esc la vacía." },
   "homepageTipsT40Title": { "message": "Contadores clicables" },

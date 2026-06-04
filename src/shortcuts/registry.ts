@@ -11,10 +11,16 @@ import type { ShortcutEntry, ShortcutGroupId, ShortcutScope } from './types';
 export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
   // Browser-wide commands declared in the manifest. Bindings shown in the panel
   // come from `browser.commands.getAll()`, not from `defaultBindings` (those
-  // serve as documentation and Storybook fallback).
+  // serve as documentation and Storybook fallback). Only the popup ships a
+  // default (`Ctrl+Shift+1`); organize/save have no default binding because
+  // every letter combo clashes with a browser built-in (Firefox treats
+  // `Alt+Shift+<letter>` as the page accesskey modifier, and most
+  // `Ctrl+Shift+<letter>` are Firefox built-ins). They stay assignable by the
+  // user via chrome://extensions/shortcuts, and are reachable from the popup
+  // (`popup.organize` = o, `popup.save` = s).
   'global.organize': {
     id: 'global.organize',
-    defaultBindings: ['Alt+Shift+O'],
+    defaultBindings: [],
     descriptionKey: 'shortcutDescOrganize',
     group: 'global',
     scope: 'global',
@@ -22,7 +28,7 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
   },
   'global.saveSession': {
     id: 'global.saveSession',
-    defaultBindings: ['Alt+Shift+S'],
+    defaultBindings: [],
     descriptionKey: 'shortcutDescSaveSession',
     group: 'global',
     scope: 'global',
@@ -30,7 +36,7 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
   },
   'global.openPopup': {
     id: 'global.openPopup',
-    defaultBindings: ['Alt+Shift+P'],
+    defaultBindings: ['Ctrl+Shift+1'],
     descriptionKey: 'shortcutDescOpenPopup',
     group: 'global',
     scope: 'global',

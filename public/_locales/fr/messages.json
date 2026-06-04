@@ -914,7 +914,7 @@
   "homepageTipsT37Title": { "message": "Actions express depuis le popup" },
   "homepageTipsT37Text": { "message": "Une seule touche : s sauvegarde, r restaure, o organise, p ouvre les options." },
   "homepageTipsT38Title": { "message": "Raccourcis globaux navigateur" },
-  "homepageTipsT38Text": { "message": "Alt+Shift+O organise sans ouvrir le popup. Alt+Shift+S capture la fenêtre courante. Personnalisables dans chrome://extensions/shortcuts." },
+  "homepageTipsT38Text": { "message": "Ctrl+Shift+1 ouvre le popup ; ensuite, appuyez sur O pour organiser ou S pour enregistrer la fenêtre courante. Attribuez vos propres raccourcis dans chrome://extensions/shortcuts." },
   "homepageTipsT39Title": { "message": "Recherche instantanée" },
   "homepageTipsT39Text": { "message": "Tape / pour mettre le focus dans la barre de recherche d'une liste. Échap pour la vider." },
   "homepageTipsT40Title": { "message": "Compteurs cliquables" },
