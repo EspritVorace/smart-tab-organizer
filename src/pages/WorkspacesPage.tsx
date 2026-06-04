@@ -135,6 +135,7 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
     renameWorkspace,
     setWorkspaceColor,
     removeWorkspace,
+    isLoaded,
   } = useActiveWorkspaceContext();
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -143,7 +144,9 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const listRef = useRef<HTMLDivElement>(null);
-  const { handleNavigationKey } = useListNavigation(listRef, '[data-workspace-card]');
+  const { handleNavigationKey } = useListNavigation(listRef, '[data-workspace-card]', {
+    autoFocus: { ready: isLoaded },
+  });
 
   const handleCardKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLElement>, index: number) => {

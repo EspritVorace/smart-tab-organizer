@@ -45,6 +45,15 @@ export class SessionsListPage {
     return this.page.getByTestId(`session-card-${sessionId}`);
   }
 
+  /**
+   * First session card in the list (pinned section renders first, so a
+   * pinned session takes priority over an unpinned one). Anchors on the
+   * `data-session-card` attribute borne by `SessionCard`.
+   */
+  firstCard(): Locator {
+    return this.list().locator('[data-session-card]').first();
+  }
+
   /** HoverCard trigger anchored on the session card name. */
   cardNameTrigger(sessionId: string): Locator {
     return this.page.getByTestId(`session-card-${sessionId}-name`);

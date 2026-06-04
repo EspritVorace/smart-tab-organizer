@@ -199,7 +199,9 @@ export function DomainRulesPage({
 
   const listRef = useRef<HTMLDivElement>(null);
 
-  const { handleNavigationKey } = useListNavigation(listRef, '[role="listitem"]');
+  const { handleNavigationKey } = useListNavigation(listRef, '[role="listitem"]', {
+    autoFocus: { fallbackSelector: '[data-testid="page-rules-btn-import-pack"]' },
+  });
 
   // The card keydown handler now only forwards arrow/Home/End to
   // useListNavigation. The Enter binding is kept here because Enter to
