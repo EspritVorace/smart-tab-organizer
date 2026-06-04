@@ -1,8 +1,8 @@
-import { Box, Button, Card, Flex, Grid, Heading, Separator, Text } from '@radix-ui/themes';
+import { Box, Button, Card, Flex, Grid, Heading, Text } from '@radix-ui/themes';
 import { Layers, Copy, RotateCcw } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
-import { TrendBadge } from '@/components/Core/Statistics/TrendBadge';
 import { KpiTile, BarRow } from '@/components/Core/Statistics/primitives';
+import { ThisWeekStatsCard } from './ThisWeekStatsCard';
 import type { StatisticsAggregates } from '@/types/statistics';
 
 interface StatisticsRulesDetailProps {
@@ -40,7 +40,7 @@ function TopRulesCard({ data }: { data: StatisticsAggregates }) {
             })}
           </Flex>
         ) : (
-          <Text size="2" color="gray">—</Text>
+          <Text size="2" color="gray">-</Text>
         )}
       </Flex>
     </Card>
@@ -85,28 +85,7 @@ export function StatisticsRulesDetail({ data, activeRulesCount, firstUsedAtForma
           </Flex>
         </Card>
 
-        <Card data-testid="page-stats-card-this-week">
-          <Flex direction="column" gap="3" p="2">
-            <Heading size="3">{getMessage('statsThisWeekTitle')}</Heading>
-            <Flex direction="column" gap="2">
-              <Flex justify="between" align="center">
-                <Text size="2" weight="medium">{getMessage('statsGroupings')}</Text>
-                <Flex align="center" gap="3">
-                  <Text size="4" weight="bold">{data.thisWeek.grouping}</Text>
-                  <TrendBadge current={data.thisWeek.grouping} previous={data.lastWeek.grouping} />
-                </Flex>
-              </Flex>
-              <Separator size="4" />
-              <Flex justify="between" align="center">
-                <Text size="2" weight="medium">{getMessage('statsDeduplications')}</Text>
-                <Flex align="center" gap="3">
-                  <Text size="4" weight="bold">{data.thisWeek.dedup}</Text>
-                  <TrendBadge current={data.thisWeek.dedup} previous={data.lastWeek.dedup} />
-                </Flex>
-              </Flex>
-            </Flex>
-          </Flex>
-        </Card>
+        <ThisWeekStatsCard data={data} testId="page-stats-card-this-week" />
 
         <Box style={{ gridColumn: '1 / -1' }}>
           <TopRulesCard data={data} />
