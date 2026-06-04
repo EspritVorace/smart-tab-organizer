@@ -143,6 +143,13 @@ describe('useDeepLinking — rules deep link', () => {
     expect(result.current.rulesPendingAction).toBe('import');
   });
 
+  it('exposes rulesPendingAction=import-pack when hash is #rules?action=import-pack', () => {
+    window.location.hash = '#rules?action=import-pack';
+    const { result } = renderHook(() => useDeepLinking());
+    expect(result.current.currentTab).toBe('rules');
+    expect(result.current.rulesPendingAction).toBe('import-pack');
+  });
+
   it('leaves rulesPendingAction null when action is unknown', () => {
     window.location.hash = '#rules?action=other';
     const { result } = renderHook(() => useDeepLinking());

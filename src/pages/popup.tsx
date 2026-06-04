@@ -49,7 +49,7 @@ export function PopupContent() {
   }, []);
 
   const handlePopupImportRules = useCallback(() => {
-    void openOptionsWithHash('#rules?action=import');
+    void openOptionsWithHash('#rules?action=import-pack');
     window.close();
   }, []);
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { logger } from '@/utils/logger';
 
-const VALID_RULES_ACTIONS = ['create', 'import'] as const;
+const VALID_RULES_ACTIONS = ['create', 'import', 'import-pack'] as const;
 export type RulesPendingAction = typeof VALID_RULES_ACTIONS[number];
 
 export type SessionsSubTab = 'active' | 'archived';

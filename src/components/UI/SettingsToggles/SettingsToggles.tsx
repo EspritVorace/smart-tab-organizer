@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Card, Flex, Skeleton, Switch, Text } from '@radix-ui/themes';
-import { Copy, Layers, Plus, Shield, Upload } from 'lucide-react';
+import { Copy, Layers, PackagePlus, Plus, Shield } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 
 interface SettingsTogglesProps {
@@ -38,17 +38,32 @@ export function SettingsToggles({
       <Card role="group" aria-label={getMessage('settingsTab')}>
         <Flex direction="column" align="center" gap="3" py="2">
           <Shield size={28} style={{ color: 'var(--gray-8)' }} />
-          <Text size="2" color="gray" align="center">
-            {getMessage('popupNoRulesTitle')}
+          <Text size="2" color="gray" align="center" weight="medium">
+            {getMessage('rulesEmptyTitle')}
           </Text>
-          <Flex gap="2">
-            <Button variant="soft" size="2" onClick={onCreateRule}>
-              <Plus size={14} />
-              {getMessage('popupCreateRule')}
+          <Text size="1" color="gray" align="center">
+            {getMessage('rulesEmptyDescription')}
+          </Text>
+          <Flex direction="column" gap="2" width="100%">
+            <Button
+              data-testid="popup-empty-import-pack"
+              variant="solid"
+              size="2"
+              style={{ width: '100%' }}
+              onClick={onImportRules}
+            >
+              <PackagePlus size={14} />
+              {getMessage('rulesEmptyImportPack')}
             </Button>
-            <Button variant="soft" size="2" onClick={onImportRules}>
-              <Upload size={14} />
-              {getMessage('popupImportRules')}
+            <Button
+              data-testid="popup-empty-add-rule"
+              variant="outline"
+              size="2"
+              style={{ width: '100%' }}
+              onClick={onCreateRule}
+            >
+              <Plus size={14} />
+              {getMessage('addRule')}
             </Button>
           </Flex>
         </Flex>
