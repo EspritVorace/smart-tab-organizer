@@ -12,6 +12,8 @@ import { PopupProfilesList } from '@/components/UI/PopupProfilesList/PopupProfil
 import { PopupWorkspaceSwitcher } from '@/components/UI/Workspace/PopupWorkspaceSwitcher';
 import { ShortcutsDrawer } from '@/components/UI/ShortcutsPanel';
 import { openOptionsWithHash } from '@/utils/openOptions';
+import { getActiveTabGroupId } from '@/utils/tabCapture';
+import { buildSnapshotHash } from '@/utils/snapshotHash';
 import { useSettings } from '@/hooks/useSettings';
 import { useShortcuts } from '@/hooks/useShortcuts';
 import {
@@ -51,8 +53,12 @@ export function PopupContent() {
     window.close();
   }, []);
 
-  const handlePopupSave = useCallback(() => {
-    void openOptionsWithHash('#sessions?action=snapshot');
+  const handlePopupSave = useCallback(async () => {
+    // Mirror the toolbar Save button: when the active tab sits in a group,
+    // scope the snapshot to that group so the wizard pre-fills its name and
+    // filters on it. Pressing `s` must behave exactly like clicking the button.
+    const groupId = await getActiveTabGroupId();
+    void openOptionsWithHash(buildSnapshotHash(groupId));
   }, []);
 
   const handlePopupRestore = useCallback(() => {
