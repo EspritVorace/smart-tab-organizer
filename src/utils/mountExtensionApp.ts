@@ -1,7 +1,17 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, type Root } from 'react-dom/client';
 import { browser } from 'wxt/browser';
 import { logger } from './logger.js';
+
+/**
+ * Container augmented with the React root we created for it. Reusing the root
+ * across an HMR re-execution of an entrypoint avoids mounting a second
+ * parallel React tree on the same node, which would leave the first tree's
+ * document-level listeners attached and fire every keyboard shortcut twice
+ * (or more, after further hot reloads). No effect in production: each
+ * entrypoint mounts exactly once.
+ */
+type RootContainer = HTMLElement & { __extReactRoot?: Root };
 
 /**
  * Bootstrap utility shared by all extension entry points.
@@ -26,12 +36,13 @@ export function mountExtensionApp(rootId: string, app: React.ReactNode): void {
     logger.debug('[mountExtensionApp] getUILanguage unavailable, falling back to HTML default lang.', err);
   }
 
-  const container = document.getElementById(rootId);
+  const container = document.getElementById(rootId) as RootContainer | null;
   if (!container) {
     logger.error(`[mountExtensionApp] DOM element #${rootId} not found. Cannot mount app.`);
     return;
   }
 
-  const root = createRoot(container);
+  const root = container.__extReactRoot ?? createRoot(container);
+  container.__extReactRoot = root;
   root.render(app);
 }
