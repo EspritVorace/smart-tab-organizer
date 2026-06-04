@@ -1,5 +1,6 @@
 import type { Extension } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
+import { cmBaseThemeStyles } from '@/components/UI/shared/cmBaseTheme.js';
 
 /**
  * Single-line editor chrome for the regex field. Mirrors the visible look of a
@@ -12,35 +13,21 @@ import { EditorView } from '@codemirror/view';
 export function createRegexEditorTheme(isDark: boolean): Extension {
   return EditorView.theme(
     {
-      '&': {
-        color: 'var(--gray-12)',
-        backgroundColor: 'var(--color-surface)',
-        fontSize: 'var(--font-size-2)',
-        border: '1px solid var(--gray-a7)',
-        borderRadius: 'var(--radius-3)',
-      },
-      '&.cm-focused': {
-        outline: '2px solid var(--accent-8)',
-        outlineOffset: '-1px',
-      },
+      ...cmBaseThemeStyles,
       '.cm-scroller': {
+        ...cmBaseThemeStyles['.cm-scroller'],
         fontFamily:
           'var(--code-font-family, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace)',
-        lineHeight: '1.5',
-        alignItems: 'center',
-        overflowX: 'auto',
       },
       // Single editing line, vertically centered, matching a Radix size-2 input.
       '.cm-content': {
-        padding: '0 var(--space-2)',
+        ...cmBaseThemeStyles['.cm-content'],
         minHeight: '28px',
-        caretColor: 'var(--gray-12)',
       },
-      '.cm-line': { padding: '0' },
-      '.cm-cursor, .cm-dropCursor': { borderLeftColor: 'var(--gray-12)' },
+      // gray-a9 is intentional here: regex patterns are code, and a slightly
+      // more muted placeholder (vs gray-a11 used by the domain field) suits
+      // the monospace context. This intentionally overrides the base.
       '.cm-placeholder': { color: 'var(--gray-a9)' },
-      '.cm-selectionBackground, ::selection': { backgroundColor: 'var(--accent-a4)' },
-      '&.cm-focused .cm-selectionBackground': { backgroundColor: 'var(--accent-a5)' },
     },
     { dark: isDark },
   );

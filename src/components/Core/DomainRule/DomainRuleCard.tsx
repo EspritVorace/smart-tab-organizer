@@ -1,6 +1,7 @@
 import React from 'react';
 import { Switch, Text, HoverCard, Flex, Badge, Card, Checkbox, IconButton, DropdownMenu, Kbd, Tooltip } from '@radix-ui/themes';
-import { Pencil, Trash2, MoreHorizontal, GripVertical, AlertTriangle } from 'lucide-react';
+import { Pencil, MoreHorizontal, GripVertical, AlertTriangle } from 'lucide-react';
+import { DeleteMenuItem } from '@/components/UI/DeleteMenuItem/DeleteMenuItem';
 import { useSortable } from '@dnd-kit/react/sortable';
 import { getStatusStyle, type CardStatus } from '@/utils/statusStyle';
 import { RuleDetailPopover } from './RuleDetailPopover';
@@ -291,19 +292,10 @@ export function DomainRuleCard({
                   </DropdownMenu.SubContent>
                 </DropdownMenu.Sub>
                 <DropdownMenu.Separator />
-                <DropdownMenu.Item
+                <DeleteMenuItem
                   data-testid={`rule-card-${rule.id}-menu-delete`}
-                  color="red"
                   onClick={() => onDeleteRequest?.(rule.id, index)}
-                >
-                  <Flex align="center" justify="between" gap="3" width="100%">
-                    <Flex align="center" gap="2">
-                      <Trash2 size={14} />
-                      {getMessage('delete')}
-                    </Flex>
-                    <Kbd size="1">Del</Kbd>
-                  </Flex>
-                </DropdownMenu.Item>
+                />
               </DropdownMenu.Content>
             </DropdownMenu.Root>
           </Flex>

@@ -5,8 +5,7 @@ import {
 import { getMessage } from '@/utils/i18n';
 import { formatSessionDate } from '@/utils/sessionUtils';
 import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
-import { TrendBadge } from '@/components/Core/Statistics/TrendBadge';
-import { SmallKpiTile, BarRow, GroupColorBar } from '@/components/Core/Statistics/primitives';
+import { SmallKpiTile, BarRow, GroupColorBar, MetricRow, TwoMetricCard } from '@/components/Core/Statistics/primitives';
 import type { StatisticsAggregates } from '@/types/statistics';
 import type { SessionStatisticsSnapshot } from '@/hooks/useSessionStatistics';
 
@@ -107,38 +106,30 @@ function SessionVolumesCard({ snapshot }: { snapshot: SessionStatisticsSnapshot 
 
 function SessionActivityCard({ events }: { events: StatisticsAggregates['sessionEvents'] }) {
   return (
-    <Card data-testid="page-stats-card-session-activity">
-      <Flex direction="column" gap="3" p="2">
-        <Heading size="3">{getMessage('statsSessionsActivityTitle')}</Heading>
-
-        <Flex direction="column" gap="2">
-          <Flex justify="between" align="center">
-            <Text size="2" weight="medium">{getMessage('statsSessionsCreated')}</Text>
-            <Flex align="center" gap="3">
-              <Text size="4" weight="bold">{events.thisWeek.created}</Text>
-              <TrendBadge current={events.thisWeek.created} previous={events.lastWeek.created} />
-            </Flex>
-          </Flex>
-
-          <Separator size="4" />
-
-          <Flex justify="between" align="center">
-            <Text size="2" weight="medium">{getMessage('statsTabsRestored')}</Text>
-            <Flex align="center" gap="3">
-              <Text size="4" weight="bold">{events.thisWeek.tabsRestored}</Text>
-              <TrendBadge current={events.thisWeek.tabsRestored} previous={events.lastWeek.tabsRestored} />
-            </Flex>
-          </Flex>
-        </Flex>
-
+    <TwoMetricCard
+      testId="page-stats-card-session-activity"
+      title={getMessage('statsSessionsActivityTitle')}
+      metric1={{
+        label: getMessage('statsSessionsCreated'),
+        value: events.thisWeek.created,
+        current: events.thisWeek.created,
+        previous: events.lastWeek.created,
+      }}
+      metric2={{
+        label: getMessage('statsTabsRestored'),
+        value: events.thisWeek.tabsRestored,
+        current: events.thisWeek.tabsRestored,
+        previous: events.lastWeek.tabsRestored,
+      }}
+      footer={
         <Text size="1" color="gray">
           {getMessage('statsSessionsLifetime')
             .replace('{created}', String(events.totals.created))
             .replace('{restored}', String(events.totals.restored))
             .replace('{archived}', String(events.totals.archived))}
         </Text>
-      </Flex>
-    </Card>
+      }
+    />
   );
 }
 
@@ -234,13 +225,14 @@ function SessionsOverviewCard({ snapshot, events }: { snapshot: SessionStatistic
                 </Text>
               </Flex>
             )}
-            <Flex justify="between" align="center" gap="3" wrap="wrap">
-              <Text size="2" color="gray">{getMessage('statsSessionsCreatedThisWeek')}</Text>
-              <Flex align="center" gap="3">
-                <Text size="3" weight="bold">{temporal.createdThisWeek}</Text>
-                <TrendBadge current={temporal.createdThisWeek} previous={temporal.createdLastWeek} />
-              </Flex>
-            </Flex>
+            <MetricRow
+              label={getMessage('statsSessionsCreatedThisWeek')}
+              value={temporal.createdThisWeek}
+              current={temporal.createdThisWeek}
+              previous={temporal.createdLastWeek}
+              valueSize="3"
+              labelColor="gray"
+            />
           </Flex>
         </Flex>
 

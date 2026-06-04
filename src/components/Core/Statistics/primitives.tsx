@@ -1,7 +1,87 @@
-import { Box, Card, Flex, Text, Tooltip } from '@radix-ui/themes';
+import { Box, Card, Flex, Heading, Separator, Text, Tooltip } from '@radix-ui/themes';
+import type { MarginProps } from '@radix-ui/themes/dist/esm/props/margin.props.js';
 import { getMessage } from '@/utils/i18n';
+import { TrendBadge } from '@/components/Core/Statistics/TrendBadge';
 import type { GroupColorStat } from '@/hooks/useSessionStatistics';
 import type { ChromeGroupColor } from '@/types/tabTree';
+import React from 'react';
+
+interface MetricRowProps {
+  label: string;
+  value: React.ReactNode;
+  current: number;
+  previous: number;
+  /** Text size for the value. Defaults to "4". */
+  valueSize?: '3' | '4';
+  /** Color applied to the label text. Defaults to no color (weight="medium"). */
+  labelColor?: 'gray';
+}
+
+/**
+ * A single metric row: label on the left, bold value + TrendBadge on the right.
+ * Used in TwoMetricCard (and therefore ThisWeekStatsCard and SessionActivityCard).
+ */
+export function MetricRow({ label, value, current, previous, valueSize = '4', labelColor }: MetricRowProps) {
+  return (
+    <Flex justify="between" align="center">
+      {labelColor ? (
+        <Text size="2" color={labelColor}>{label}</Text>
+      ) : (
+        <Text size="2" weight="medium">{label}</Text>
+      )}
+      <Flex align="center" gap="3">
+        <Text size={valueSize} weight="bold">{value}</Text>
+        <TrendBadge current={current} previous={previous} />
+      </Flex>
+    </Flex>
+  );
+}
+
+interface TwoMetricCardMetric {
+  label: string;
+  value: number;
+  current: number;
+  previous: number;
+}
+
+interface TwoMetricCardProps extends MarginProps {
+  title: string;
+  metric1: TwoMetricCardMetric;
+  metric2: TwoMetricCardMetric;
+  /** Optional content rendered below the two metrics (e.g. a lifetime summary text). */
+  footer?: React.ReactNode;
+  testId?: string;
+}
+
+/**
+ * Card shell containing a heading, two MetricRows separated by a Separator,
+ * and an optional footer node. Shared by ThisWeekStatsCard and SessionActivityCard.
+ */
+export function TwoMetricCard({ title, metric1, metric2, footer, testId, ...marginProps }: TwoMetricCardProps) {
+  return (
+    <Card data-testid={testId} {...marginProps}>
+      <Flex direction="column" gap="3" p="2">
+        <Heading size="3">{title}</Heading>
+        <Flex direction="column" gap="2">
+          <MetricRow
+            label={metric1.label}
+            value={metric1.value}
+            current={metric1.current}
+            previous={metric1.previous}
+          />
+          <Separator size="4" />
+          <MetricRow
+            label={metric2.label}
+            value={metric2.value}
+            current={metric2.current}
+            previous={metric2.previous}
+          />
+        </Flex>
+        {footer}
+      </Flex>
+    </Card>
+  );
+}
 
 export const GROUP_COLOR_CSS: Record<ChromeGroupColor, string> = {
   grey: 'var(--gray-9)',
