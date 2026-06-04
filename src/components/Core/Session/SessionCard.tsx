@@ -6,11 +6,12 @@ import {
   DropdownMenu, HoverCard, Tooltip, Badge, Box, Checkbox, Kbd,
 } from '@radix-ui/themes';
 import {
-  MoreHorizontal, Pencil, Trash2, Check, X,
+  MoreHorizontal, Pencil, Check, X,
   Pin, PinOff, ChevronDown, ChevronRight,
   GripVertical, AlertTriangle, Archive, ArchiveRestore,
 } from 'lucide-react';
 import { getMessage, getPluralMessage } from '@/utils/i18n';
+import { DeleteMenuItem } from '@/components/UI/DeleteMenuItem/DeleteMenuItem';
 import { countSessionTabs, formatSessionDate } from '@/utils/sessionUtils';
 import { useRelativeTime } from '@/hooks/useRelativeTime';
 import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
@@ -201,19 +202,10 @@ function SessionMoreMenu({
         )}
 
         <DropdownMenu.Separator />
-        <DropdownMenu.Item
+        <DeleteMenuItem
           data-testid={`session-card-${session.id}-menu-delete`}
-          color="red"
           onClick={() => onDelete(session)}
-        >
-          <Flex align="center" justify="between" gap="3" width="100%">
-            <Flex align="center" gap="2">
-              <Trash2 size={14} />
-              {getMessage('delete')}
-            </Flex>
-            <Kbd size="1">Del</Kbd>
-          </Flex>
-        </DropdownMenu.Item>
+        />
       </DropdownMenu.Content>
     </DropdownMenu.Root>
   );
