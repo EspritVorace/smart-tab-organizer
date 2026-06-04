@@ -60,6 +60,27 @@ export default defineConfig({
         delete manifest.commands._execute_action;
       }
     },
+    'build:publicAssets': (_wxt, files) => {
+      // Minify every public JSON asset on the way out: WXT copies public/
+      // verbatim (pretty-printed), so the shipped files keep their indentation.
+      // Stripping it saves ~30 KB total (presets, the three i18n catalogs, the
+      // licenses file) while the committed sources stay pretty and
+      // hand-editable. Transform each CopiedPublicFile (absoluteSrc) into a
+      // GeneratedPublicFile (contents): WXT writes `contents` when `absoluteSrc`
+      // is absent (build-entrypoints: `if ("absoluteSrc" in file) copyFile`).
+      for (const file of files) {
+        if (!file.relativeDest.endsWith('.json')) continue;
+        const f = file as {
+          relativeDest: string;
+          absoluteSrc?: string;
+          contents?: string;
+        };
+        if (!f.absoluteSrc) continue; // already generated, nothing to read
+        const minified = JSON.stringify(JSON.parse(readFileSync(f.absoluteSrc, 'utf-8')));
+        delete f.absoluteSrc; // switch WXT to the writeFile(contents) branch
+        f.contents = minified;
+      }
+    },
     'build:done': () => {
       // All Vite sub-builds have run; persist the union of bundled packages so
       // the license generator can scope the attribution to what is shipped.
