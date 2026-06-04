@@ -13,6 +13,7 @@
  */
 import { test, expect } from './fixtures';
 import type { Page } from '@playwright/test';
+import { SessionsListPage, WorkspaceListPage } from '../../e2e-shared/pages/index.js';
 import { goToDomainRulesSection, goToSessionsSection } from './helpers/navigation';
 import {
   seedSessions,
@@ -24,7 +25,7 @@ import {
 async function goToWorkspacesSection(page: Page, extensionId: string): Promise<void> {
   await page.goto(`chrome-extension://${extensionId}/options.html#workspaces`);
   await page.waitForLoadState('domcontentloaded');
-  await page.getByTestId('workspace-list').waitFor({ state: 'visible', timeout: 10_000 });
+  await new WorkspaceListPage(page).list().waitFor({ state: 'visible', timeout: 10_000 });
 }
 
 // ---------------------------------------------------------------------------
@@ -110,7 +111,7 @@ test.describe('[focus-management] Sessions initial focus', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    const firstCard = page.locator('[data-testid="page-sessions-list"] [data-session-card]').first();
+    const firstCard = new SessionsListPage(page).firstCard();
     await expect(firstCard).toBeFocused();
     // It must be the pinned session, not the normal one.
     await expect(firstCard).toHaveAttribute('data-session-id', pinned.id);
@@ -143,9 +144,7 @@ test.describe('[focus-management] Workspaces initial focus', () => {
     const page = await extensionContext.newPage();
     await goToWorkspacesSection(page, extensionId);
 
-    await expect(
-      page.locator('[data-testid="workspace-list"] [data-workspace-card]').first(),
-    ).toBeFocused();
+    await expect(new WorkspaceListPage(page).firstCard()).toBeFocused();
 
     await page.close();
   });

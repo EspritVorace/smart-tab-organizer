@@ -26,6 +26,7 @@ export {
   type GroupConflictAction,
 } from './RestoreWizardPage.js';
 export { SessionsListPage } from './SessionsListPage.js';
+export { WorkspaceListPage } from './WorkspaceListPage.js';
 export { SessionEditorPage } from './SessionEditorPage.js';
 export { DomainRulesListPage } from './DomainRulesListPage.js';
 export {
