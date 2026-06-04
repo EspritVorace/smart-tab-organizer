@@ -913,7 +913,7 @@
   "homepageTipsT37Title": { "message": "Express popup actions" },
   "homepageTipsT37Text": { "message": "A single key: s saves, r restores, o organizes, p opens the options page." },
   "homepageTipsT38Title": { "message": "Browser-wide shortcuts" },
-  "homepageTipsT38Text": { "message": "Alt+Shift+O organizes without opening the popup. Alt+Shift+S captures the current window. Customizable in chrome://extensions/shortcuts." },
+  "homepageTipsT38Text": { "message": "Ctrl+Shift+1 opens the popup; from there press O to organize or S to save the current window. Assign your own shortcuts in chrome://extensions/shortcuts." },
   "homepageTipsT39Title": { "message": "Instant search" },
   "homepageTipsT39Text": { "message": "Press / to focus the search bar of a list. Esc clears it." },
   "homepageTipsT40Title": { "message": "Clickable counters" },

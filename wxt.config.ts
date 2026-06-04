@@ -91,16 +91,24 @@ export default defineConfig({
     permissions: ['tabs', 'tabGroups', 'storage', 'notifications'],
     host_permissions: ['<all_urls>'],
     commands: {
+      // `organize-all-tabs` and `save-current-window-session` ship without a
+      // `suggested_key` on purpose. Any letter-based default clashes with
+      // built-in browser bindings: on Firefox `Alt+Shift+<letter>` is the
+      // web-page accesskey modifier (silently shadowed by pages), and almost
+      // every `Ctrl+Shift+<letter>` is already a Firefox built-in. These two
+      // stay assignable by the user via chrome://extensions/shortcuts; day to
+      // day they are reachable from the popup (open it, then press O / S).
       'organize-all-tabs': {
-        suggested_key: { default: 'Alt+Shift+O' },
         description: '__MSG_cmdOrganizeAllTabs__',
       },
       'save-current-window-session': {
-        suggested_key: { default: 'Alt+Shift+S' },
         description: '__MSG_cmdSaveSession__',
       },
+      // Single global default: a digit combo avoids the letter conflicts above
+      // and is free on Chrome and Firefox (Ctrl+Shift+digit is unbound; plain
+      // Ctrl+1..8 selects tabs). On macOS Cmd+Shift+1 is not OS-reserved.
       _execute_action: {
-        suggested_key: { default: 'Alt+Shift+P' },
+        suggested_key: { default: 'Ctrl+Shift+1' },
       },
     },
     action: {
