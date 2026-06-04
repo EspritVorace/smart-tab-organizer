@@ -1,7 +1,7 @@
-import { Card, Flex, Heading, Separator, Text } from '@radix-ui/themes';
+import { Card, Flex, Heading, Separator } from '@radix-ui/themes';
 import type { MarginProps } from '@radix-ui/themes/dist/esm/props/margin.props.js';
 import { getMessage } from '@/utils/i18n';
-import { TrendBadge } from '@/components/Core/Statistics/TrendBadge';
+import { MetricRow } from '@/components/Core/Statistics/primitives';
 import type { StatisticsAggregates } from '@/types/statistics';
 
 interface ThisWeekStatsCardProps extends MarginProps {
@@ -21,21 +21,19 @@ export function ThisWeekStatsCard({ data, testId, ...marginProps }: ThisWeekStat
       <Flex direction="column" gap="3" p="2">
         <Heading size="3">{getMessage('statsThisWeekTitle')}</Heading>
         <Flex direction="column" gap="2">
-          <Flex justify="between" align="center">
-            <Text size="2" weight="medium">{getMessage('statsGroupings')}</Text>
-            <Flex align="center" gap="3">
-              <Text size="4" weight="bold">{data.thisWeek.grouping}</Text>
-              <TrendBadge current={data.thisWeek.grouping} previous={data.lastWeek.grouping} />
-            </Flex>
-          </Flex>
+          <MetricRow
+            label={getMessage('statsGroupings')}
+            value={data.thisWeek.grouping}
+            current={data.thisWeek.grouping}
+            previous={data.lastWeek.grouping}
+          />
           <Separator size="4" />
-          <Flex justify="between" align="center">
-            <Text size="2" weight="medium">{getMessage('statsDeduplications')}</Text>
-            <Flex align="center" gap="3">
-              <Text size="4" weight="bold">{data.thisWeek.dedup}</Text>
-              <TrendBadge current={data.thisWeek.dedup} previous={data.lastWeek.dedup} />
-            </Flex>
-          </Flex>
+          <MetricRow
+            label={getMessage('statsDeduplications')}
+            value={data.thisWeek.dedup}
+            current={data.thisWeek.dedup}
+            previous={data.lastWeek.dedup}
+          />
         </Flex>
       </Flex>
     </Card>

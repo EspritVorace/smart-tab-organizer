@@ -1,7 +1,39 @@
 import { Box, Card, Flex, Text, Tooltip } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
+import { TrendBadge } from '@/components/Core/Statistics/TrendBadge';
 import type { GroupColorStat } from '@/hooks/useSessionStatistics';
 import type { ChromeGroupColor } from '@/types/tabTree';
+
+interface MetricRowProps {
+  label: string;
+  value: React.ReactNode;
+  current: number;
+  previous: number;
+  /** Text size for the value. Defaults to "4". */
+  valueSize?: '3' | '4';
+  /** Color applied to the label text. Defaults to no color (weight="medium"). */
+  labelColor?: 'gray';
+}
+
+/**
+ * A single metric row: label on the left, bold value + TrendBadge on the right.
+ * Used in ThisWeekStatsCard and SessionActivityCard.
+ */
+export function MetricRow({ label, value, current, previous, valueSize = '4', labelColor }: MetricRowProps) {
+  return (
+    <Flex justify="between" align="center">
+      {labelColor ? (
+        <Text size="2" color={labelColor}>{label}</Text>
+      ) : (
+        <Text size="2" weight="medium">{label}</Text>
+      )}
+      <Flex align="center" gap="3">
+        <Text size={valueSize} weight="bold">{value}</Text>
+        <TrendBadge current={current} previous={previous} />
+      </Flex>
+    </Flex>
+  );
+}
 
 export const GROUP_COLOR_CSS: Record<ChromeGroupColor, string> = {
   grey: 'var(--gray-9)',
