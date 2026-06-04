@@ -5,7 +5,7 @@ import {
 import { getMessage } from '@/utils/i18n';
 import { formatSessionDate } from '@/utils/sessionUtils';
 import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
-import { SmallKpiTile, BarRow, GroupColorBar, MetricRow } from '@/components/Core/Statistics/primitives';
+import { SmallKpiTile, BarRow, GroupColorBar, MetricRow, TwoMetricCard } from '@/components/Core/Statistics/primitives';
 import type { StatisticsAggregates } from '@/types/statistics';
 import type { SessionStatisticsSnapshot } from '@/hooks/useSessionStatistics';
 
@@ -106,36 +106,30 @@ function SessionVolumesCard({ snapshot }: { snapshot: SessionStatisticsSnapshot 
 
 function SessionActivityCard({ events }: { events: StatisticsAggregates['sessionEvents'] }) {
   return (
-    <Card data-testid="page-stats-card-session-activity">
-      <Flex direction="column" gap="3" p="2">
-        <Heading size="3">{getMessage('statsSessionsActivityTitle')}</Heading>
-
-        <Flex direction="column" gap="2">
-          <MetricRow
-            label={getMessage('statsSessionsCreated')}
-            value={events.thisWeek.created}
-            current={events.thisWeek.created}
-            previous={events.lastWeek.created}
-          />
-
-          <Separator size="4" />
-
-          <MetricRow
-            label={getMessage('statsTabsRestored')}
-            value={events.thisWeek.tabsRestored}
-            current={events.thisWeek.tabsRestored}
-            previous={events.lastWeek.tabsRestored}
-          />
-        </Flex>
-
+    <TwoMetricCard
+      testId="page-stats-card-session-activity"
+      title={getMessage('statsSessionsActivityTitle')}
+      metric1={{
+        label: getMessage('statsSessionsCreated'),
+        value: events.thisWeek.created,
+        current: events.thisWeek.created,
+        previous: events.lastWeek.created,
+      }}
+      metric2={{
+        label: getMessage('statsTabsRestored'),
+        value: events.thisWeek.tabsRestored,
+        current: events.thisWeek.tabsRestored,
+        previous: events.lastWeek.tabsRestored,
+      }}
+      footer={
         <Text size="1" color="gray">
           {getMessage('statsSessionsLifetime')
             .replace('{created}', String(events.totals.created))
             .replace('{restored}', String(events.totals.restored))
             .replace('{archived}', String(events.totals.archived))}
         </Text>
-      </Flex>
-    </Card>
+      }
+    />
   );
 }
 
