@@ -150,6 +150,7 @@
   "confirmDeleteSelected": { "message": "Supprimer les règles sélectionnées ?" },
   "confirmDeleteSelectedDescription": { "message": "Les règles sélectionnées seront définitivement supprimées. Cette action est irréversible." },
   "searchRules": { "message": "Rechercher des règles..." },
+  "clearSearch": { "message": "Effacer la recherche" },
   "searchSessions": { "message": "Rechercher des sessions..." },
   "searchWorkspaces": { "message": "Rechercher des espaces..." },
   "noRulesFound": { "message": "Aucune règle trouvée" },

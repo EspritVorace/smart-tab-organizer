@@ -1,7 +1,8 @@
 import React from 'react';
-import { Box, Flex, Kbd, TextField } from '@radix-ui/themes';
-import { Search } from 'lucide-react';
+import { Box, Flex, IconButton, Kbd, TextField } from '@radix-ui/themes';
+import { Search, X } from 'lucide-react';
 import { getEffectiveBindings } from '@/shortcuts/getEffectiveBindings';
+import { getMessage } from '@/utils/i18n';
 
 /** Keyboard shortcut that focuses the active search field (see registry). */
 const focusBinding = getEffectiveBindings('options.search.focus')[0];
@@ -59,6 +60,21 @@ export function ListToolbar({
           {SEARCH_SHORTCUT && searchValue.length === 0 && (
             <TextField.Slot side="right">
               <Kbd size="1" aria-hidden="true">{SEARCH_SHORTCUT}</Kbd>
+            </TextField.Slot>
+          )}
+          {searchValue.length > 0 && (
+            <TextField.Slot side="right">
+              <IconButton
+                size="1"
+                variant="ghost"
+                color="gray"
+                data-testid={searchTestId ? `${searchTestId}-clear` : undefined}
+                aria-label={getMessage('clearSearch')}
+                title={getMessage('clearSearch')}
+                onClick={() => onSearchChange('')}
+              >
+                <X size={16} aria-hidden="true" />
+              </IconButton>
             </TextField.Slot>
           )}
         </TextField.Root>
