@@ -316,23 +316,6 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'list-sessions',
     scope: 'widget:session-card',
   },
-  // Expand / collapse the focused card's tab-and-group preview. Handled
-  // locally on the card (it owns the `previewOpen` state); the registry entry
-  // is documentation-only, like `list.sessions.navigate`.
-  'sessionCard.expandPreview': {
-    id: 'sessionCard.expandPreview',
-    defaultBindings: ['ArrowRight'],
-    descriptionKey: 'shortcutDescSessionExpandPreview',
-    group: 'list-sessions',
-    scope: 'widget:session-card',
-  },
-  'sessionCard.collapsePreview': {
-    id: 'sessionCard.collapsePreview',
-    defaultBindings: ['ArrowLeft'],
-    descriptionKey: 'shortcutDescSessionCollapsePreview',
-    group: 'list-sessions',
-    scope: 'widget:session-card',
-  },
   // Jump between session sections (pinned -> active -> archived). Crosses the
   // active/archived sub-tab boundary when needed (handled in SessionsPage).
   'sessionCard.sectionNext': {
@@ -471,6 +454,23 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     id: 'sessionCard.refresh',
     defaultBindings: ['u'],
     descriptionKey: 'shortcutDescSessionRefresh',
+    group: 'session-card',
+    scope: 'widget:session-card',
+  },
+  // Expand / collapse the focused card's tab-and-group preview. Handled
+  // locally on the card (it owns the `previewOpen` state); the registry entry
+  // is documentation-only, like `list.sessions.navigate`.
+  'sessionCard.expandPreview': {
+    id: 'sessionCard.expandPreview',
+    defaultBindings: ['ArrowRight'],
+    descriptionKey: 'shortcutDescSessionExpandPreview',
+    group: 'session-card',
+    scope: 'widget:session-card',
+  },
+  'sessionCard.collapsePreview': {
+    id: 'sessionCard.collapsePreview',
+    defaultBindings: ['ArrowLeft'],
+    descriptionKey: 'shortcutDescSessionCollapsePreview',
     group: 'session-card',
     scope: 'widget:session-card',
   },
