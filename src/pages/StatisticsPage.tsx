@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Box, TabNav } from '@radix-ui/themes';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { getMessage } from '@/utils/i18n';
+import { useShortcuts } from '@/hooks/useShortcuts';
 import { StatisticsSummary } from '@/components/Core/Statistics/StatisticsSummary';
 import { StatisticsRulesDetail } from '@/components/Core/Statistics/StatisticsRulesDetail';
 import { StatisticsSessionsDetail } from '@/components/Core/Statistics/StatisticsSessionsDetail';
@@ -28,6 +29,9 @@ const SUB_TAB_HASH: Record<StatsSubTab, string> = {
   sessions: '#stats/sessions',
   storage: '#stats/storage',
 };
+
+/** Left-to-right order of the sub-tabs, used by the PageUp/PageDown shortcuts. */
+const SUB_TAB_ORDER: readonly StatsSubTab[] = ['summary', 'rules', 'sessions', 'storage'];
 
 const SUB_TAB_DESCRIPTION_KEY: Record<Exclude<StatsSubTab, 'summary'>, string> = {
   rules: 'statsRulesPageDescription',
@@ -83,14 +87,37 @@ export function StatisticsPage({ syncSettings, statisticsData, sessionStats, sto
 
   const snapshot = sessionStats ?? emptySessionStats;
 
-  const handleTabChange = (next: StatsSubTab) => {
-    onStatsTabChange(next);
-    // Keep the URL hash in sync so back/forward and shareable links work.
-    const nextHash = SUB_TAB_HASH[next];
-    if (window.location.hash !== nextHash) {
-      window.location.hash = nextHash;
-    }
-  };
+  const handleTabChange = useCallback(
+    (next: StatsSubTab) => {
+      onStatsTabChange(next);
+      // Keep the URL hash in sync so back/forward and shareable links work.
+      const nextHash = SUB_TAB_HASH[next];
+      if (window.location.hash !== nextHash) {
+        window.location.hash = nextHash;
+      }
+    },
+    [onStatsTabChange],
+  );
+
+  // PageDown / PageUp move to the adjacent sub-tab, clamped at the ends (no
+  // wrap-around), mirroring the Sessions page section jumps.
+  const shiftTab = useCallback(
+    (direction: 1 | -1) => {
+      const currentIndex = SUB_TAB_ORDER.indexOf(statsTab);
+      const nextIndex = currentIndex + direction;
+      if (nextIndex < 0 || nextIndex >= SUB_TAB_ORDER.length) return;
+      handleTabChange(SUB_TAB_ORDER[nextIndex]);
+    },
+    [statsTab, handleTabChange],
+  );
+
+  useShortcuts(
+    {
+      'list.stats.tabNext': () => shiftTab(1),
+      'list.stats.tabPrev': () => shiftTab(-1),
+    },
+    { scope: 'page:stats' },
+  );
 
   const descriptionOverride = statsTab === 'summary'
     ? undefined

@@ -17,6 +17,7 @@ export type ShortcutGroupId =
   | 'popup'
   | 'list-rules'
   | 'list-sessions'
+  | 'list-stats'
   | 'list-workspaces'
   | 'list-home'
   | 'session-card'
