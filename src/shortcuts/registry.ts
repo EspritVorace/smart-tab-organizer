@@ -42,6 +42,16 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     scope: 'global',
     commandName: '_execute_action',
   },
+  // Cycles the theme (light -> dark -> system), mirroring the header
+  // ThemeToggle button. Mnemonic `d` ("Dark"). Document-level so the same
+  // shortcut works on the options pages and inside the popup.
+  'theme.toggle': {
+    id: 'theme.toggle',
+    defaultBindings: ['d'],
+    descriptionKey: 'shortcutDescToggleTheme',
+    group: 'global',
+    scope: 'global',
+  },
 
   // Popup. The four action-binding shortcuts (s/r/o/p) only yield a combo a
   // focused pinned card actually claims: `r` belongs to the card's own widget

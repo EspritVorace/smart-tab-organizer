@@ -16,6 +16,7 @@ import { getActiveTabGroupId } from '@/utils/tabCapture';
 import { buildSnapshotHash } from '@/utils/snapshotHash';
 import { useSettings } from '@/hooks/useSettings';
 import { useShortcuts } from '@/hooks/useShortcuts';
+import { useThemeToggleShortcut } from '@/hooks/useThemeToggleShortcut';
 import {
   ActiveWorkspaceProvider,
   useActiveWorkspaceContext,
@@ -84,6 +85,8 @@ export function PopupContent() {
     },
     { scope: 'page:popup' },
   );
+
+  useThemeToggleShortcut();
 
   const hasRules = isLoaded && (settings?.domainRules?.length ?? 0) > 0;
 

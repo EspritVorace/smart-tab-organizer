@@ -16,6 +16,7 @@ import { useSessionStatistics } from '@/hooks/useSessionStatistics.js';
 import { useStorageUsage } from '@/hooks/useStorageUsage.js';
 import { useDeepLinking, type StatsSubTab } from '@/hooks/useDeepLinking.js';
 import { useShortcuts, type ShortcutAction } from '@/hooks/useShortcuts.js';
+import { useThemeToggleShortcut } from '@/hooks/useThemeToggleShortcut.js';
 import { getDocsUrlForTab } from '@/utils/docsUrl';
 import { getMessage } from '@/utils/i18n';
 
@@ -227,6 +228,8 @@ export function OptionsContent() {
         scope: 'global',
         onSequenceState: ({ activePrefix }) => setSequencePrefix(activePrefix),
     });
+
+    useThemeToggleShortcut();
 
     const openShortcuts = useCallback(() => setShortcutsAsideOpen(true), []);
 

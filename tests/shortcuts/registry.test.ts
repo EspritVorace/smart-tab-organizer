@@ -109,7 +109,7 @@ describe('SHORTCUTS_REGISTRY', () => {
   });
 
   it('contains the expected number of entries per group (parity with legacy panel)', () => {
-    expect(getShortcutsByGroup('global')).toHaveLength(3);
+    expect(getShortcutsByGroup('global')).toHaveLength(4);
     expect(getShortcutsByGroup('popup')).toHaveLength(5);
     expect(getShortcutsByGroup('options')).toHaveLength(11);
     expect(getShortcutsByGroup('list-rules')).toHaveLength(11);
