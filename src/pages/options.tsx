@@ -11,6 +11,8 @@ import { ShortcutsControlProvider } from '@/contexts/ShortcutsControlContext';
 import { ImportExportWizardsProvider } from '@/contexts/ImportExportWizardsContext';
 
 import { useSettings } from '@/hooks/useSettings.js';
+import { useActiveSessions } from '@/hooks/useActiveSessions.js';
+import { usePinnedSessions } from '@/hooks/usePinnedSessions.js';
 import { useStatistics } from '@/hooks/useStatistics.js';
 import { useSessionStatistics } from '@/hooks/useSessionStatistics.js';
 import { useStorageUsage } from '@/hooks/useStorageUsage.js';
@@ -85,6 +87,9 @@ function renderLazyFallback(currentTab: string, statsTab: StatsSubTab): React.Re
 
 export function OptionsContent() {
     const { settings, updateSettings } = useSettings();
+    const { workspaces } = useActiveWorkspaceContext();
+    const { activeSessions } = useActiveSessions();
+    const { pinnedSessions } = usePinnedSessions();
     const { statisticsAggregates, resetStatistics } = useStatistics(settings?.domainRules ?? []);
     const { snapshot: sessionStatsSnapshot } = useSessionStatistics();
     const storageUsage = useStorageUsage();
@@ -141,14 +146,21 @@ export function OptionsContent() {
         await restoreSessionTabs(session, target as RestoreTarget);
     }, [setRestoreSessionId, setRefreshSessionId, setSnapshotGroupId, handleTabChange]);
 
+    const rulesCount = useMemo(
+        () => (settings?.domainRules ?? []).filter((rule) => rule.enabled).length,
+        [settings?.domainRules],
+    );
+    const sessionsCount = activeSessions.length + pinnedSessions.length;
+    const workspacesCount = workspaces.length;
+
     const sidebarSections: SidebarSection[] = useMemo(() => [
         {
             id: 'tools',
             label: getMessage('sidebarSectionTools'),
             items: [
                 { id: 'home', label: getMessage('homeTab'), icon: Home, accentColor: 'indigo' },
-                { id: 'rules', label: getMessage('domainRulesTab'), icon: Shield, accentColor: 'indigo' },
-                { id: 'sessions', label: getMessage('sessionsTab'), icon: Archive, accentColor: 'indigo' },
+                { id: 'rules', label: getMessage('domainRulesTab'), icon: Shield, accentColor: 'indigo', badge: rulesCount || undefined },
+                { id: 'sessions', label: getMessage('sessionsTab'), icon: Archive, accentColor: 'indigo', badge: sessionsCount || undefined },
             ],
         },
         {
@@ -164,10 +176,10 @@ export function OptionsContent() {
             items: [
                 { id: 'importexport', label: getMessage('importExportTab'), icon: FileText, accentColor: 'indigo' },
                 { id: 'settings', label: getMessage('settingsTab'), icon: Settings, accentColor: 'indigo' },
-                { id: 'workspaces', label: getMessage('workspacesTab'), icon: Layers, accentColor: 'indigo' },
+                { id: 'workspaces', label: getMessage('workspacesTab'), icon: Layers, accentColor: 'indigo', badge: workspacesCount || undefined },
             ],
         },
-    ], []);
+    ], [rulesCount, sessionsCount, workspacesCount]);
 
     const activePageTitle = useMemo(() => {
         for (const section of sidebarSections) {
