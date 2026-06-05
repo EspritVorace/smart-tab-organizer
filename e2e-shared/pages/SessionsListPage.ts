@@ -55,6 +55,24 @@ export class SessionsListPage {
     return this.page.getByTestId('page-sessions-archived-list');
   }
 
+  /** "Active" sub-tab link. */
+  activeTab(): Locator {
+    return this.page.getByTestId('page-sessions-tab-active');
+  }
+
+  /** "Archived" sub-tab link. */
+  archivedTab(): Locator {
+    return this.page.getByTestId('page-sessions-tab-archived');
+  }
+
+  /**
+   * First card of the archived sub-tab list (mirrors {@link firstCard} for the
+   * archived bucket).
+   */
+  firstArchivedCard(): Locator {
+    return this.archivedList().locator('[data-session-card]').first();
+  }
+
   /**
    * First session card in the list (pinned section renders first, so a
    * pinned session takes priority over an unpinned one). Anchors on the

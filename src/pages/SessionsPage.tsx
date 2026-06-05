@@ -431,6 +431,30 @@ export function SessionsPage({
     [onSessionsTabChange],
   );
 
+  // Manual sub-tab click: switch tabs, then mirror the initial-arrival
+  // autofocus by landing on the first card of the newly shown sub-tab once it
+  // has rendered. The page never remounts on a tab switch, so the
+  // useListNavigation autofocus guard stays applied and would not re-fire on
+  // its own; we drive the focus through the same deferred resolver
+  // (`pendingBucketFocus`) the PageUp/PageDown jumps use. Section jumps keep
+  // calling `handleTabChange` directly, so their section-specific targeting is
+  // untouched.
+  const handleTabClick = useCallback(
+    (next: SessionsSubTab) => {
+      const switching = next !== sessionsTab;
+      handleTabChange(next);
+      if (!switching) return;
+      if (next === 'archived') {
+        if (archivedBucket.length > 0) setPendingBucketFocus('archived');
+      } else if (pinnedBucket.length > 0) {
+        setPendingBucketFocus('pinned');
+      } else if (activeBucket.length > 0) {
+        setPendingBucketFocus('active');
+      }
+    },
+    [sessionsTab, handleTabChange, archivedBucket.length, pinnedBucket.length, activeBucket.length],
+  );
+
   const handleOpenSnapshotWizard = useCallback(() => setSnapshotOpen(true), []);
 
   const handleOpenRefreshWizard = useCallback(async (session: Session) => {
@@ -897,7 +921,7 @@ export function SessionsPage({
                   href="#sessions"
                   active={sessionsTab === 'active'}
                   data-testid="page-sessions-tab-active"
-                  onClick={(e) => { e.preventDefault(); handleTabChange('active'); }}
+                  onClick={(e) => { e.preventDefault(); handleTabClick('active'); }}
                 >
                   {getMessage('activeSessionsTab')}
                 </TabNav.Link>
@@ -905,7 +929,7 @@ export function SessionsPage({
                   href="#sessions/archived"
                   active={sessionsTab === 'archived'}
                   data-testid="page-sessions-tab-archived"
-                  onClick={(e) => { e.preventDefault(); handleTabChange('archived'); }}
+                  onClick={(e) => { e.preventDefault(); handleTabClick('archived'); }}
                 >
                   {getMessage('archivedSessionsTab')}
                 </TabNav.Link>

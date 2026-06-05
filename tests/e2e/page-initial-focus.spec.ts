@@ -130,6 +130,35 @@ test.describe('[focus-management] Sessions initial focus', () => {
 
     await page.close();
   });
+
+  test('re-focuses the first card when switching between the active and archived sub-tabs', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const pinned = createPinnedSession({ name: 'Pinned One' });
+    const normal = createTestSession({ name: 'Normal One' });
+    const archived = createTestSession({ name: 'Archived One', isArchived: true });
+    await seedSessions(extensionContext, [pinned, normal, archived]);
+
+    const page = await extensionContext.newPage();
+    await goToSessionsSection(page, extensionId);
+    const sessions = new SessionsListPage(page);
+
+    // Initial arrival focuses the first (pinned) card.
+    await expect(sessions.card(pinned.id)).toBeFocused();
+
+    // Switching to the archived sub-tab lands on its first card.
+    await sessions.archivedTab().click();
+    await expect(sessions.archivedList()).toBeVisible();
+    await expect(sessions.card(archived.id)).toBeFocused();
+
+    // Switching back to the active sub-tab returns focus to the first card.
+    await sessions.activeTab().click();
+    await expect(sessions.list()).toBeVisible();
+    await expect(sessions.card(pinned.id)).toBeFocused();
+
+    await page.close();
+  });
 });
 
 // ---------------------------------------------------------------------------
