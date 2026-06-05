@@ -45,6 +45,16 @@ export class SessionsListPage {
     return this.page.getByTestId(`session-card-${sessionId}`);
   }
 
+  /** Expand/collapse toggle for a card's tab-and-group preview. */
+  previewToggle(sessionId: string): Locator {
+    return this.page.getByTestId(`session-card-${sessionId}-preview-toggle`);
+  }
+
+  /** Archived sessions list flex (rendered on the archived sub-tab). */
+  archivedList(): Locator {
+    return this.page.getByTestId('page-sessions-archived-list');
+  }
+
   /**
    * First session card in the list (pinned section renders first, so a
    * pinned session takes priority over an unpinned one). Anchors on the

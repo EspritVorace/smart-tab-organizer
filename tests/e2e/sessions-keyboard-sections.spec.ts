@@ -9,11 +9,7 @@
 import { test, expect } from './fixtures';
 import { goToSessionsSection } from './helpers/navigation';
 import { seedSessions, clearSessions, createTestSession } from './helpers/seed';
-
-/** Returns the data-session-id of the currently focused element (or null). */
-async function focusedSessionId(page: import('@playwright/test').Page): Promise<string | null> {
-  return page.evaluate(() => document.activeElement?.getAttribute('data-session-id') ?? null);
-}
+import { SessionsListPage } from '../../e2e-shared/pages/index.js';
 
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
@@ -29,11 +25,10 @@ test.describe('[KBD-SECTIONS] Sessions section + preview shortcuts', () => {
 
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
+    const sessions = new SessionsListPage(page);
 
-    const card = page.locator(`[data-session-id="${s.id}"]`);
-    const toggle = page.getByTestId(`session-card-${s.id}-preview-toggle`);
-
-    await card.focus();
+    const toggle = sessions.previewToggle(s.id);
+    await sessions.card(s.id).focus();
     await expect(toggle).toHaveAttribute('data-state', 'closed');
 
     await page.keyboard.press('ArrowRight');
@@ -55,23 +50,16 @@ test.describe('[KBD-SECTIONS] Sessions section + preview shortcuts', () => {
 
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
+    const sessions = new SessionsListPage(page);
 
-    await page.locator(`[data-session-id="${pinned.id}"]`).focus();
-    expect(await focusedSessionId(page)).toBe(pinned.id);
+    await sessions.card(pinned.id).focus();
+    await expect(sessions.card(pinned.id)).toBeFocused();
 
     await page.keyboard.press('PageDown');
-    await page.waitForFunction(
-      (id) => document.activeElement?.getAttribute('data-session-id') === id,
-      normal.id,
-      { timeout: 5000 },
-    );
+    await expect(sessions.card(normal.id)).toBeFocused();
 
     await page.keyboard.press('PageUp');
-    await page.waitForFunction(
-      (id) => document.activeElement?.getAttribute('data-session-id') === id,
-      pinned.id,
-      { timeout: 5000 },
-    );
+    await expect(sessions.card(pinned.id)).toBeFocused();
 
     await page.close();
   });
@@ -86,27 +74,19 @@ test.describe('[KBD-SECTIONS] Sessions section + preview shortcuts', () => {
 
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
+    const sessions = new SessionsListPage(page);
 
-    await page.locator(`[data-session-id="${normal.id}"]`).focus();
-    expect(await focusedSessionId(page)).toBe(normal.id);
+    await sessions.card(normal.id).focus();
+    await expect(sessions.card(normal.id)).toBeFocused();
 
     // Jump forward: switch to the archived tab and land on the first archived card.
     await page.keyboard.press('PageDown');
-    await page.waitForFunction(
-      (id) => document.activeElement?.getAttribute('data-session-id') === id,
-      archived.id,
-      { timeout: 5000 },
-    );
-    // The archived sub-tab is now the one rendered.
-    await expect(page.getByTestId('page-sessions-archived-list')).toBeVisible();
+    await expect(sessions.archivedList()).toBeVisible();
+    await expect(sessions.card(archived.id)).toBeFocused();
 
     // Jump back: return to the active tab and focus the first normal card.
     await page.keyboard.press('PageUp');
-    await page.waitForFunction(
-      (id) => document.activeElement?.getAttribute('data-session-id') === id,
-      normal.id,
-      { timeout: 5000 },
-    );
+    await expect(sessions.card(normal.id)).toBeFocused();
 
     await page.close();
   });
