@@ -85,6 +85,24 @@ export async function goToImportExportSection(page: Page, extensionId: string): 
   await page.getByTestId('page-import-export-card-import-rules').waitFor({ state: 'visible' });
 }
 
+/**
+ * Navigate to the Statistics section via hash routing and wait until the
+ * sub-tab bar is rendered (settings loaded + StatisticsPage mounted).
+ */
+export async function goToStatsSection(page: Page, extensionId: string): Promise<void> {
+  await page.goto(`chrome-extension://${extensionId}/options.html#stats`);
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForFunction(
+    () => {
+      const body = document.body.textContent ?? '';
+      return !body.includes('Chargement') && body.length > 50;
+    },
+    null,
+    { timeout: 10_000 },
+  );
+  await page.getByTestId('page-stats-tabs').waitFor({ state: 'visible', timeout: 10_000 });
+}
+
 /** Navigate to the extension popup page. */
 export async function goToPopup(page: Page, extensionId: string): Promise<void> {
   await page.goto(`chrome-extension://${extensionId}/popup.html`);

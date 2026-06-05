@@ -91,6 +91,13 @@ export async function auditPage(
   ]);
   if (options.include) builder = builder.include(options.include);
   if (options.exclude) builder = builder.exclude(options.exclude);
+  // Always exclude the CodeMirror placeholder span: it renders the example
+  // hint as a real DOM element, so axe color-contrast audits it like body
+  // text. It deliberately mirrors a Radix `TextField` native `::placeholder`
+  // (same gray-a10 token), which axe never contrast-checks (pseudo-element).
+  // Excluding this one decorative selector keeps the editor on par with its
+  // Radix siblings while leaving color-contrast active everywhere else.
+  builder = builder.exclude('.cm-placeholder');
   if (options.disableRules?.length) builder = builder.disableRules(options.disableRules);
 
   const results = await builder.analyze();

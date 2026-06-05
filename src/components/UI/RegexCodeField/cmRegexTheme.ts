@@ -19,13 +19,13 @@ export function createRegexEditorTheme(isDark: boolean): Extension {
         fontFamily:
           'var(--code-font-family, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace)',
       },
-      // Single editing line, vertically centered, matching a Radix size-2 input.
+      // Height and vertical centering come from cmBaseThemeStyles, so the
+      // single line matches a Radix size-2 input.
       '.cm-content': {
         ...cmBaseThemeStyles['.cm-content'],
-        minHeight: '28px',
       },
       // gray-a9 is intentional here: regex patterns are code, and a slightly
-      // more muted placeholder (vs gray-a11 used by the domain field) suits
+      // more muted placeholder (vs gray-a10 used by the domain field) suits
       // the monospace context. This intentionally overrides the base.
       '.cm-placeholder': { color: 'var(--gray-a9)' },
     },

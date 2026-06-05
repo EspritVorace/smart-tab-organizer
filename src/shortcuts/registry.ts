@@ -340,6 +340,24 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     scope: 'page:sessions',
   },
 
+  // List-level: Statistics. PageDown / PageUp move between the stats sub-tabs
+  // (summary -> rules -> sessions -> storage), clamped at the ends. Handled in
+  // StatisticsPage.
+  'list.stats.tabNext': {
+    id: 'list.stats.tabNext',
+    defaultBindings: ['PageDown'],
+    descriptionKey: 'shortcutDescStatsTabNext',
+    group: 'list-stats',
+    scope: 'page:stats',
+  },
+  'list.stats.tabPrev': {
+    id: 'list.stats.tabPrev',
+    defaultBindings: ['PageUp'],
+    descriptionKey: 'shortcutDescStatsTabPrev',
+    group: 'list-stats',
+    scope: 'page:stats',
+  },
+
   // List-level: Workspaces
   'list.workspaces.new': {
     id: 'list.workspaces.new',

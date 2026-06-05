@@ -23,11 +23,8 @@ export function createDomainEditorTheme(isDark: boolean): Extension {
         // A domain is not code: use the UI font (like the sibling Radix
         // TextField) so dots are not spaced out by monospace cells.
         fontFamily: 'var(--default-font-family, system-ui, sans-serif)',
-        // Hold the size-2 input height here (not on .cm-content) so the single
-        // line is vertically centered by alignItems instead of pinned to top.
-        minHeight: '28px',
       },
-      // Single editing line, vertically centered by the scroller above.
+      // Height and vertical centering come from cmBaseThemeStyles.
       '.cm-content': {
         ...cmBaseThemeStyles['.cm-content'],
       },

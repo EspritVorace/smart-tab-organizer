@@ -114,6 +114,7 @@ describe('SHORTCUTS_REGISTRY', () => {
     expect(getShortcutsByGroup('options')).toHaveLength(11);
     expect(getShortcutsByGroup('list-rules')).toHaveLength(11);
     expect(getShortcutsByGroup('list-sessions')).toHaveLength(11);
+    expect(getShortcutsByGroup('list-stats')).toHaveLength(2);
     expect(getShortcutsByGroup('list-workspaces')).toHaveLength(1);
     expect(getShortcutsByGroup('list-home')).toHaveLength(9);
     expect(getShortcutsByGroup('session-card')).toHaveLength(7);
