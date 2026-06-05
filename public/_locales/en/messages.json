@@ -150,6 +150,7 @@
   "confirmDeleteSelected": { "message": "Delete the selected rules?" },
   "confirmDeleteSelectedDescription": { "message": "This will permanently delete the selected rules. This action cannot be undone." },
   "searchRules": { "message": "Search rules..." },
+  "clearSearch": { "message": "Clear search" },
   "searchSessions": { "message": "Search sessions..." },
   "searchWorkspaces": { "message": "Search workspaces..." },
   "noRulesFound": { "message": "No rules found" },
