@@ -618,6 +618,29 @@ export function SessionCard({
 
   const hoverCardContent = <SessionMetadataHoverContent session={session} />;
 
+  // Arrow Right/Left expand/collapse the preview when the card root itself has
+  // focus (same guard as SessionSection's nav handler). `previewOpen` lives
+  // here, so this stays local; the registry entries are documentation-only.
+  // Anything else (including up/down navigation) is delegated to onCardKeyDown.
+  const handleRootKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLElement>) => {
+      if (e.target === e.currentTarget) {
+        if (e.key === 'ArrowRight' && !previewOpen) {
+          e.preventDefault();
+          setPreviewOpen(true);
+          return;
+        }
+        if (e.key === 'ArrowLeft' && previewOpen) {
+          e.preventDefault();
+          setPreviewOpen(false);
+          return;
+        }
+      }
+      onCardKeyDown?.(e);
+    },
+    [previewOpen, onCardKeyDown],
+  );
+
   return (
     <Card
       ref={isSummary ? null : ref}
@@ -627,7 +650,7 @@ export function SessionCard({
       data-shortcut-scope={isSummary ? undefined : 'widget:session-card'}
       role={isSummary ? 'listitem' : undefined}
       tabIndex={isSummary ? undefined : 0}
-      onKeyDown={isSummary ? undefined : onCardKeyDown}
+      onKeyDown={isSummary ? undefined : handleRootKeyDown}
       size="2"
       style={{
         ...dragStyle,

@@ -113,7 +113,7 @@ describe('SHORTCUTS_REGISTRY', () => {
     expect(getShortcutsByGroup('popup')).toHaveLength(5);
     expect(getShortcutsByGroup('options')).toHaveLength(11);
     expect(getShortcutsByGroup('list-rules')).toHaveLength(11);
-    expect(getShortcutsByGroup('list-sessions')).toHaveLength(9);
+    expect(getShortcutsByGroup('list-sessions')).toHaveLength(13);
     expect(getShortcutsByGroup('list-workspaces')).toHaveLength(1);
     expect(getShortcutsByGroup('list-home')).toHaveLength(9);
     expect(getShortcutsByGroup('session-card')).toHaveLength(5);
@@ -160,7 +160,7 @@ describe('registry helpers', () => {
     expect(popupEntries.length).toBe(5);
 
     const cardEntries = getShortcutsByScope('widget:session-card');
-    expect(cardEntries.length).toBe(11);
+    expect(cardEntries.length).toBe(15);
 
     const ruleCardEntries = getShortcutsByScope('widget:rule-card');
     expect(ruleCardEntries.length).toBe(8);

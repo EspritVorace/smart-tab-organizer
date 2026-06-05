@@ -24,7 +24,7 @@ import { useShortcuts } from '@/hooks/useShortcuts';
 import { useListNavigation } from '@/hooks/useListNavigation';
 import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
-import { updateSession } from '@/utils/sessionStorage';
+import { updateSession, type SessionBucket } from '@/utils/sessionStorage';
 import { showSuccessNotification } from '@/utils/notifications';
 import { getActiveTabGroupId } from '@/utils/tabCapture';
 import { browser } from 'wxt/browser';
@@ -95,7 +95,7 @@ interface SessionSectionProps {
   emptyTitleKey: string;
   emptyDescriptionKey?: string;
   /** Logical bucket this section renders. Drives drag layout and reorder routing. */
-  bucket: 'pinned' | 'active' | 'archived';
+  bucket: SessionBucket;
   /** Sessions displayed in this section (already filtered by search + split by bucket). */
   sessions: Session[];
   /** Full ordered session list, used to recompute the global order after a drag and for move-to-first/last. */
@@ -367,9 +367,12 @@ export function SessionsPage({
 }: SessionsPageProps) {
   const { openImportSessions } = useImportExportWizards();
   const [bulkExportIds, setBulkExportIds] = useState<string[] | null>(null);
-  // Archives are loaded only when the archived tab is open or the export wizard is opened
-  // (so the user can still export archived items even from the active tab).
-  const includeArchived = sessionsTab === 'archived' || bulkExportIds != null;
+  // Archives are watched continuously here: the PageUp/PageDown section
+  // navigation needs to know whether an archived block exists (and reach its
+  // first card) while the active sub-tab is showing. The cost is one extra
+  // storage subscription on the options page; the rendered list stays driven
+  // by `sessionsTab`, so nothing changes visually on the active tab.
+  const includeArchived = true;
   const {
     sessions,
     pinnedSessions: pinnedBucket,
@@ -409,6 +412,9 @@ export function SessionsPage({
   const [selectedArchivedIds, setSelectedArchivedIds] = useState<Set<string>>(new Set());
   const [quickRestoreMessage, setQuickRestoreMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  // Section a pending PageUp/PageDown jump should land on once the (possibly
+  // freshly switched) sub-tab has rendered its cards. Null when idle.
+  const [pendingBucketFocus, setPendingBucketFocus] = useState<SessionBucket | null>(null);
 
   const handleTabChange = useCallback(
     (next: SessionsSubTab) => {
@@ -635,6 +641,87 @@ export function SessionsPage({
     () => splitByPinned(displayedSessions),
     [displayedSessions],
   );
+
+  // --- PageUp/PageDown navigation between session sections ---
+  // Logical block order is pinned -> active -> archived. Archived lives on a
+  // separate sub-tab, so a jump into/out of it switches tabs and defers the
+  // focus to `pendingBucketFocus` (resolved by the effect below once rendered).
+  const focusCardById = useCallback((id: string | undefined): boolean => {
+    if (!id) return false;
+    const el = document.querySelector<HTMLElement>(`[data-session-id="${CSS.escape(id)}"]`);
+    if (!el) return false;
+    el.focus();
+    return true;
+  }, []);
+
+  // First focusable card id of a block. Same-tab blocks use the currently
+  // displayed (search-filtered) arrays; cross-tab blocks use the raw buckets
+  // (the search resets on tab switch).
+  const firstIdForBucket = useCallback(
+    (bucket: SessionBucket): string | undefined => {
+      if (bucket === 'archived') {
+        return (sessionsTab === 'archived' ? displayedSessions : archivedBucket)[0]?.id;
+      }
+      if (sessionsTab === 'active') {
+        return (bucket === 'pinned' ? pinnedSessions : unpinnedSessions)[0]?.id;
+      }
+      return (bucket === 'pinned' ? pinnedBucket : activeBucket)[0]?.id;
+    },
+    [sessionsTab, displayedSessions, archivedBucket, pinnedSessions, unpinnedSessions, pinnedBucket, activeBucket],
+  );
+
+  const handleSectionJump = useCallback(
+    (direction: 'next' | 'prev') => {
+      const focused = getFocusedSession();
+      if (!focused) return;
+      const order: SessionBucket[] = ['pinned', 'active', 'archived'];
+      let current: SessionBucket = 'active';
+      if (focused.isArchived) current = 'archived';
+      else if (focused.isPinned) current = 'pinned';
+      const startIndex = order.indexOf(current);
+      const candidates =
+        direction === 'next'
+          ? order.slice(startIndex + 1)
+          : order.slice(0, startIndex).reverse();
+      // Try the next/previous block, skipping empty ones; stop at the first hit.
+      for (const bucket of candidates) {
+        const firstId = firstIdForBucket(bucket);
+        if (!firstId) continue;
+        const targetTab: SessionsSubTab = bucket === 'archived' ? 'archived' : 'active';
+        if (targetTab === sessionsTab) {
+          focusCardById(firstId);
+        } else {
+          setPendingBucketFocus(bucket);
+          handleTabChange(targetTab);
+        }
+        return;
+      }
+    },
+    [getFocusedSession, firstIdForBucket, sessionsTab, focusCardById, handleTabChange],
+  );
+
+  useShortcuts(
+    {
+      'sessionCard.sectionNext': () => handleSectionJump('next'),
+      'sessionCard.sectionPrev': () => handleSectionJump('prev'),
+    },
+    { scope: 'widget:session-card' },
+  );
+
+  // Resolve a deferred cross-tab jump: once the target sub-tab has loaded and
+  // rendered its cards, focus the block's first card. Give up if the block
+  // turned out empty after loading.
+  useEffect(() => {
+    if (!pendingBucketFocus || !isLoaded) return;
+    const wantTab: SessionsSubTab = pendingBucketFocus === 'archived' ? 'archived' : 'active';
+    if (sessionsTab !== wantTab) return;
+    const firstId = firstIdForBucket(pendingBucketFocus);
+    if (!firstId) {
+      setPendingBucketFocus(null);
+      return;
+    }
+    if (focusCardById(firstId)) setPendingBucketFocus(null);
+  }, [pendingBucketFocus, isLoaded, sessionsTab, firstIdForBucket, focusCardById]);
 
   // Cleanup: drop selected ids that are no longer in their section (deleted,
   // pinned/unpinned, archived, or filtered out by the search). Keeps the
