@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Flex, IconButton, Kbd, TextField } from '@radix-ui/themes';
+import { Box, Flex, IconButton, Kbd, TextField, Tooltip } from '@radix-ui/themes';
 import { Search, X } from 'lucide-react';
 import { getEffectiveBindings } from '@/shortcuts/getEffectiveBindings';
 import { getMessage } from '@/utils/i18n';
@@ -64,17 +64,26 @@ export function ListToolbar({
           )}
           {searchValue.length > 0 && (
             <TextField.Slot side="right">
-              <IconButton
-                size="1"
-                variant="ghost"
-                color="gray"
-                data-testid={searchTestId ? `${searchTestId}-clear` : undefined}
-                aria-label={getMessage('clearSearch')}
-                title={getMessage('clearSearch')}
-                onClick={() => onSearchChange('')}
+              <Tooltip
+                content={
+                  <Flex align="center" gap="2" aria-hidden="true">
+                    {getMessage('clearSearch')}
+                    <Kbd>Esc</Kbd>
+                  </Flex>
+                }
               >
-                <X size={16} aria-hidden="true" />
-              </IconButton>
+                <IconButton
+                  size="1"
+                  variant="ghost"
+                  color="gray"
+                  data-testid={searchTestId ? `${searchTestId}-clear` : undefined}
+                  aria-label={getMessage('clearSearch')}
+                  aria-keyshortcuts="Escape"
+                  onClick={() => onSearchChange('')}
+                >
+                  <X size={16} aria-hidden="true" />
+                </IconButton>
+              </Tooltip>
             </TextField.Slot>
           )}
         </TextField.Root>
