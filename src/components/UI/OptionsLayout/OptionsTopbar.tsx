@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Flex, IconButton, Link, Text, Tooltip } from '@radix-ui/themes';
+import { Flex, IconButton, Kbd, Link, Text, Tooltip } from '@radix-ui/themes';
 import { BookOpen } from 'lucide-react';
 import { ThemeToggle } from '@/components/UI/ThemeToggle/ThemeToggle';
 import { getDocsUrlForTab } from '@/utils/docsUrl';
@@ -95,7 +95,14 @@ export function OptionsTopbar({ pageTitle, pageSubtitle, parentHref, currentTab 
         </Flex>
         <Flex align="center" gap="1">
           <ThemeToggle />
-          <Tooltip content={getMessage('topbarDocumentationLinkAria')}>
+          <Tooltip
+            content={
+              <Flex align="center" gap="2" aria-hidden="true">
+                {getMessage('topbarDocumentationLinkAria')}
+                <Kbd>F1</Kbd>
+              </Flex>
+            }
+          >
             <IconButton
               asChild
               variant="ghost"
@@ -108,6 +115,7 @@ export function OptionsTopbar({ pageTitle, pageSubtitle, parentHref, currentTab 
                 rel="noopener noreferrer"
                 data-testid="topbar-help"
                 aria-label={getMessage('topbarDocumentationLinkAria')}
+                aria-keyshortcuts="F1"
               >
                 <BookOpen size={16} aria-hidden="true" />
               </a>
