@@ -130,6 +130,7 @@ const richSessionStats: SessionStatisticsSnapshot = {
 const emptyStorageUsage: StorageUsageSnapshot = {
   categories: [],
   workspaceTotalBytes: 0,
+  workspaces: [],
   globalTotalBytes: 0,
   quotaBytes: 10_485_760,
   quotaPercent: 0,
@@ -146,10 +147,47 @@ const richStorageUsage: StorageUsageSnapshot = {
     { id: 'settings', labelKey: 'statsStorageCatSettings', bytes: 240 },
   ],
   workspaceTotalBytes: 363_060,
+  workspaces: [],
   globalTotalBytes: 512_000,
   quotaBytes: 10_485_760,
   quotaPercent: (512_000 / 10_485_760) * 100,
   isLoaded: true,
+};
+
+const multiWorkspaceStorageUsage: StorageUsageSnapshot = {
+  ...richStorageUsage,
+  globalTotalBytes: 506_180,
+  quotaPercent: (506_180 / 10_485_760) * 100,
+  workspaces: [
+    {
+      workspaceId: 'default',
+      name: 'Personnel',
+      accentColor: 'indigo',
+      totalBytes: 322_620,
+      categories: [
+        { id: 'sessions-archived', labelKey: 'statsStorageCatSessionsArchived', bytes: 184_320 },
+        { id: 'sessions-active', labelKey: 'statsStorageCatSessionsActive', bytes: 96_400 },
+        { id: 'domain-rules', labelKey: 'statsStorageCatDomainRules', bytes: 41_200 },
+        { id: 'statistics', labelKey: 'statsStorageCatStatistics', bytes: 700 },
+        { id: 'sessions-pinned', labelKey: 'statsStorageCatSessionsPinned', bytes: 0 },
+        { id: 'settings', labelKey: 'statsStorageCatSettings', bytes: 0 },
+      ],
+    },
+    {
+      workspaceId: 'ws-work',
+      name: 'Travail',
+      accentColor: 'jade',
+      totalBytes: 183_560,
+      categories: [
+        { id: 'domain-rules', labelKey: 'statsStorageCatDomainRules', bytes: 102_400 },
+        { id: 'sessions-pinned', labelKey: 'statsStorageCatSessionsPinned', bytes: 58_300 },
+        { id: 'statistics', labelKey: 'statsStorageCatStatistics', bytes: 22_100 },
+        { id: 'settings', labelKey: 'statsStorageCatSettings', bytes: 760 },
+        { id: 'sessions-active', labelKey: 'statsStorageCatSessionsActive', bytes: 0 },
+        { id: 'sessions-archived', labelKey: 'statsStorageCatSessionsArchived', bytes: 0 },
+      ],
+    },
+  ],
 };
 
 const meta: Meta<typeof StatisticsPage> = {
@@ -216,6 +254,15 @@ export const StatisticsPageSessions: Story = {
 
 export const StatisticsPageStorage: Story = {
   args: { statisticsData: richData, sessionStats: richSessionStats, statsTab: 'storage' },
+};
+
+export const StatisticsPageStorageMultiWorkspace: Story = {
+  args: {
+    statisticsData: richData,
+    sessionStats: richSessionStats,
+    statsTab: 'storage',
+    storageUsage: multiWorkspaceStorageUsage,
+  },
 };
 
 export const StatisticsPageResetClick: Story = {

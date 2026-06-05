@@ -4,6 +4,7 @@ import {
   measureKeysBytes,
   measureGlobalStorageUsage,
   measureWorkspaceStorageUsage,
+  measureAllWorkspacesStorageUsage,
   getStorageQuotaBytes,
 } from '../src/utils/storageUsageUtils';
 
@@ -75,6 +76,34 @@ describe('measureWorkspaceStorageUsage', () => {
     for (const cat of usage.categories) {
       expect(cat.labelKey).toMatch(/^statsStorageCat/);
     }
+  });
+});
+
+describe('measureAllWorkspacesStorageUsage', () => {
+  it('measures each workspace independently, tagging results with the id', async () => {
+    const defaultRules = [{ id: 'r1', domainFilter: 'example.com' }];
+    const workRules = [{ id: 'r2', domainFilter: 'work.com' }, { id: 'r3', domainFilter: 'crm.com' }];
+    await fakeBrowser.storage.local.set({
+      // Default workspace keeps legacy unprefixed keys.
+      domainRules: defaultRules,
+      // Extra workspace uses the namespaced form `ws:{id}:{field}`.
+      'ws:work:domainRules': workRules,
+    });
+
+    const entries = await measureAllWorkspacesStorageUsage(['default', 'work']);
+
+    expect(entries.map((e) => e.workspaceId)).toEqual(['default', 'work']);
+
+    const defaultEntry = entries.find((e) => e.workspaceId === 'default')!;
+    const workEntry = entries.find((e) => e.workspaceId === 'work')!;
+
+    const defaultDomainRules = defaultEntry.categories.find((c) => c.id === 'domain-rules');
+    const workDomainRules = workEntry.categories.find((c) => c.id === 'domain-rules');
+
+    expect(defaultDomainRules?.bytes).toBe(entryBytes('domainRules', defaultRules));
+    expect(workDomainRules?.bytes).toBe(entryBytes('ws:work:domainRules', workRules));
+    // Each workspace only counts its own keys.
+    expect(workEntry.workspaceTotalBytes).toBe(entryBytes('ws:work:domainRules', workRules));
   });
 });
 

@@ -700,6 +700,7 @@
   "statsStorageCatSessionsArchived": { "message": "Archived sessions" },
   "statsStorageCatStatistics": { "message": "Statistics" },
   "statsStorageCatSettings": { "message": "Miscellaneous settings" },
+  "statsStorageByWorkspace": { "message": "By workspace" },
   "statsStorageUnitBytes": { "message": "{value} B" },
   "statsStorageUnitKb": { "message": "{value} KB" },
   "statsStorageUnitMb": { "message": "{value} MB" },
