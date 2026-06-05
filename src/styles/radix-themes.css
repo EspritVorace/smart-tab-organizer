@@ -42,6 +42,16 @@
   border-radius: var(--radius-3);
 }
 
+/* Focus ring for the keyboard-scrollable statistics content region.
+ * The region is focusable (tabindex=0) so keyboard users can reach it and
+ * scroll with the arrow keys on sub-tabs that hold no other focusable control.
+ * focus-visible keeps the outline off on pointer interaction. */
+[data-testid="page-stats-scroll"]:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: -2px;
+  border-radius: var(--radius-3);
+}
+
 /* Focusable controls using aria-disabled instead of native disabled (keeps element in tab order). */
 [aria-disabled="true"] {
   opacity: 0.5;
