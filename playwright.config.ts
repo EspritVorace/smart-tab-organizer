@@ -29,6 +29,12 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 1, // Retry once locally too
   workers,
   timeout: 30000, // Timeout for extension loading
+  // Web-first assertions default to a 5s ceiling. With 2 workers sharing the CI runner,
+  // a list render can occasionally exceed 5s and make UI assertions (toBeVisible /
+  // toHaveCount) flaky. Raising the ceiling to 10s absorbs that contention; it costs
+  // nothing on passing assertions (a met condition resolves immediately) and only lets a
+  // genuinely failing assertion take 10s instead of 5s to surface.
+  expect: { timeout: 10_000 },
   globalTeardown: './tests/e2e/helpers/a11y-teardown.ts',
 
   use: {
