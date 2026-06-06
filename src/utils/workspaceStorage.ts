@@ -6,6 +6,7 @@ import type { Statistics } from '@/types/statistics.js';
 import { defaultStatistics } from '@/types/statistics.js';
 import type { Session } from '@/types/session.js';
 import type { WorkspaceMeta } from '@/schemas/workspace.js';
+import { type RuleViewState, DEFAULT_RULE_VIEW_STATE } from '@/utils/ruleViewUtils.js';
 
 export const DEFAULT_WORKSPACE_ID = 'default';
 
@@ -34,6 +35,7 @@ export const WORKSPACE_SCOPED_KEYS = [
   'pinnedSessions',
   'archivedSessions',
   'popupPinnedEmptyCollapsed',
+  'rulesViewState',
 ] as const;
 
 export type WorkspaceScopedKey = (typeof WORKSPACE_SCOPED_KEYS)[number];
@@ -67,6 +69,7 @@ export interface ScopedItems {
   pinnedSessionsItem: WxtStorageItem<Session[], Record<string, unknown>>;
   archivedSessionsItem: WxtStorageItem<Session[], Record<string, unknown>>;
   popupPinnedEmptyCollapsedItem: WxtStorageItem<boolean, Record<string, unknown>>;
+  rulesViewStateItem: WxtStorageItem<RuleViewState, Record<string, unknown>>;
 }
 
 const scopedItemsCache = new Map<string, ScopedItems>();
@@ -136,6 +139,10 @@ export function defineWorkspaceItems(wsId: string): ScopedItems {
     popupPinnedEmptyCollapsedItem: storage.defineItem<boolean>(
       workspaceStorageKey(wsId, 'popupPinnedEmptyCollapsed'),
       { defaultValue: false },
+    ),
+    rulesViewStateItem: storage.defineItem<RuleViewState>(
+      workspaceStorageKey(wsId, 'rulesViewState'),
+      { defaultValue: DEFAULT_RULE_VIEW_STATE },
     ),
   };
 

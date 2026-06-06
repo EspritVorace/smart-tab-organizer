@@ -19,6 +19,8 @@ interface ListToolbarProps {
   searchPlaceholder: string;
   searchValue: string;
   onSearchChange: (value: string) => void;
+  /** Optional view control (filter/sort/group menu) rendered between the search field and the action. */
+  filter?: React.ReactNode;
   /** Action button (Add Rule / Take Snapshot) supplied by the caller. */
   action: React.ReactNode;
 }
@@ -29,6 +31,7 @@ export function ListToolbar({
   searchPlaceholder,
   searchValue,
   onSearchChange,
+  filter,
   action,
 }: ListToolbarProps) {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -88,6 +91,7 @@ export function ListToolbar({
           )}
         </TextField.Root>
       </Box>
+      {filter}
       {action}
     </Flex>
   );

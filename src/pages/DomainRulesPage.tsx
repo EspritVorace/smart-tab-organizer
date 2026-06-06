@@ -11,6 +11,8 @@ import { ExportWizard } from '@/components/UI/ImportExportWizards/ExportWizard';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
 import { ListToolbar } from '@/components/UI/ListToolbar';
 import { BulkActionsBar } from '@/components/UI/BulkActionsBar';
+import { RuleViewMenu } from '@/components/UI/RuleViewMenu';
+import { RuleGroupHeader } from '@/components/Core/DomainRule/RuleGroupHeader';
 import { getMessage } from '@/utils/i18n';
 import { foldAccents } from '@/utils/stringUtils';
 import { generateUUID } from '@/utils/utils';
@@ -18,6 +20,7 @@ import { DomainRuleCard } from '@/components/Core/DomainRule/DomainRuleCard';
 import { useShortcuts } from '@/hooks/useShortcuts';
 import { useListNavigation } from '@/hooks/useListNavigation';
 import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
+import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
 import type { RulesPendingAction } from '@/hooks/useDeepLinking';
 import {
   moveToFirst,
@@ -27,6 +30,13 @@ import {
   getRulesForRootDomain,
 } from '@/utils/ruleOrderUtils';
 import { getOverlapPrecedenceList } from '@/utils/ruleOverlapUtils';
+import {
+  computeRuleView,
+  applySubsetReorder,
+  normalizeRuleViewState,
+  DEFAULT_RULE_VIEW_STATE,
+  type RuleViewState,
+} from '@/utils/ruleViewUtils';
 import type { AppSettings, DomainRuleSetting } from '@/types/syncSettings';
 import type { DomainRule } from '@/schemas/domainRule';
 
@@ -51,6 +61,61 @@ function confirmDeleteDescription(
   return getMessage('confirmDeleteDescription').replace('{item}', ruleLabel);
 }
 
+interface RuleCardListProps {
+  rules: DomainRuleSetting[];
+  dragDisabled: boolean;
+  ariaLabel: string;
+  allRules: DomainRuleSetting[];
+  selectedIds: Set<string>;
+  searchTerm: string;
+  overlap: Map<string, DomainRuleSetting[]>;
+  navIndexById: Map<string, number>;
+  onSelect: (id: string, checked: boolean) => void;
+  onToggleEnabled: (id: string, enabled: boolean) => void;
+  onEdit: (rule: DomainRuleSetting) => void;
+  onDeleteRequest: (ruleId: string) => void;
+  onMoveToFirst: (id: string) => void;
+  onMoveToLast: (id: string) => void;
+  onMoveToFirstOfDomain: (id: string) => void;
+  onMoveToLastOfDomain: (id: string) => void;
+  onCardKeyDown: (e: React.KeyboardEvent, rule: DomainRuleSetting, navIndex: number) => void;
+}
+
+/**
+ * Renders one section's rule cards inside an ARIA list. The per-section
+ * sortable `index` is the card's position within `rules`; the keyboard
+ * navigation index is the card's global DOM position (`navIndexById`).
+ */
+function RuleCardList(props: RuleCardListProps) {
+  return (
+    <Flex direction="column" gap="3" role="list" aria-label={props.ariaLabel}>
+      {props.rules.map((rule, i) => (
+        <DomainRuleCard
+          key={rule.id}
+          rule={rule}
+          index={i}
+          isSelected={props.selectedIds.has(rule.id)}
+          searchTerm={props.searchTerm}
+          isDragDisabled={props.dragDisabled}
+          isDomainActionDisabled={
+            getRulesForRootDomain(props.allRules, rule.domainFilter).length <= 1
+          }
+          overlapPrecedenceList={props.overlap.get(rule.id)}
+          onSelect={props.onSelect}
+          onToggleEnabled={props.onToggleEnabled}
+          onEdit={props.onEdit}
+          onDeleteRequest={props.onDeleteRequest}
+          onMoveToFirst={props.onMoveToFirst}
+          onMoveToLast={props.onMoveToLast}
+          onMoveToFirstOfDomain={props.onMoveToFirstOfDomain}
+          onMoveToLastOfDomain={props.onMoveToLastOfDomain}
+          onKeyDown={e => props.onCardKeyDown(e, rule, props.navIndexById.get(rule.id) ?? 0)}
+        />
+      ))}
+    </Flex>
+  );
+}
+
 interface DomainRulesPageProps {
   syncSettings: AppSettings;
   updateRules: (rules: DomainRuleSetting[]) => void;
@@ -69,9 +134,22 @@ export function DomainRulesPage({
   onPendingActionConsumed,
 }: DomainRulesPageProps) {
   const { openImportRules } = useImportExportWizards();
+  const { scopedItems } = useActiveWorkspaceContext();
+  const rulesViewStateItem = scopedItems.rulesViewStateItem;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<DomainRule | undefined>(undefined);
-  const [dragItems, setDragItems] = useState<DomainRuleSetting[] | null>(null);
+  // Transient drag preview scoped to the section (group key, or '__ungrouped__') being dragged.
+  const [dragSection, setDragSection] = useState<{ key: string; items: DomainRuleSetting[] } | null>(null);
+  const [viewState, setViewState] = useState<RuleViewState>(DEFAULT_RULE_VIEW_STATE);
+
+  useEffect(() => {
+    rulesViewStateItem.getValue().then(v => setViewState(normalizeRuleViewState(v)));
+  }, [rulesViewStateItem]);
+
+  const handleViewChange = useCallback((next: RuleViewState) => {
+    setViewState(next);
+    rulesViewStateItem.setValue(next).catch(() => {});
+  }, [rulesViewStateItem]);
 
   useEffect(() => {
     if (!pendingAction) return;
@@ -127,14 +205,43 @@ export function DomainRulesPage({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const filteredRules = useMemo(() => {
-    if (!searchTerm) return syncSettings.domainRules;
+  const searchPredicate = useMemo(() => {
+    if (!searchTerm) return undefined;
     const term = foldAccents(searchTerm);
-    return syncSettings.domainRules.filter(rule =>
-      foldAccents(rule.label).includes(term) ||
-      foldAccents(rule.domainFilter).includes(term)
-    );
-  }, [syncSettings.domainRules, searchTerm]);
+    return (rule: DomainRuleSetting) =>
+      foldAccents(rule.label).includes(term) || foldAccents(rule.domainFilter).includes(term);
+  }, [searchTerm]);
+
+  const viewResult = useMemo(
+    () =>
+      computeRuleView(syncSettings.domainRules, viewState, {
+        searchPredicate,
+        searchActive: searchTerm.length > 0,
+      }),
+    [syncSettings.domainRules, viewState, searchPredicate, searchTerm],
+  );
+
+  const visibleRules = useMemo(
+    () => [...viewResult.groups.flatMap(g => g.rules), ...viewResult.ungrouped],
+    [viewResult],
+  );
+  const visibleIds = useMemo(() => visibleRules.map(r => r.id), [visibleRules]);
+  // Global DOM position of each visible card, used by keyboard list navigation
+  // (independent of the per-group sortable index passed to dnd-kit).
+  const navIndexById = useMemo(() => {
+    const map = new Map<string, number>();
+    visibleRules.forEach((r, i) => map.set(r.id, i));
+    return map;
+  }, [visibleRules]);
+
+  // Drag-and-drop mutates the real order, so we only allow it for domain
+  // auto-groups when the displayed order still maps to the real order
+  // (no search, no active filter).
+  const filtersActive =
+    viewState.filterColors.length > 0 ||
+    viewState.filterCategories.length > 0 ||
+    viewState.filterStatus.length === 1;
+  const domainDndAllowed = !searchTerm && !filtersActive;
 
   const overlapPrecedenceByRuleId = useMemo(() => {
     const map = new Map<string, DomainRuleSetting[]>();
@@ -156,11 +263,23 @@ export function DomainRulesPage({
   }, []);
 
   const handleSelectAll = useCallback((checked: boolean) => {
-    setSelectedIds(checked ? new Set(filteredRules.map(r => r.id)) : new Set());
-  }, [filteredRules]);
+    setSelectedIds(checked ? new Set(visibleIds) : new Set());
+  }, [visibleIds]);
 
-  const isAllSelected = filteredRules.length > 0 && selectedIds.size === filteredRules.length;
-  const isIndeterminate = selectedIds.size > 0 && selectedIds.size < filteredRules.length;
+  const handleSelectGroup = useCallback((ruleIds: string[], checked: boolean) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      for (const id of ruleIds) {
+        if (checked) next.add(id);
+        else next.delete(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const selectedVisibleCount = visibleIds.filter(id => selectedIds.has(id)).length;
+  const isAllSelected = visibleRules.length > 0 && selectedVisibleCount === visibleRules.length;
+  const isIndeterminate = selectedVisibleCount > 0 && selectedVisibleCount < visibleRules.length;
 
   const handleEditRule = useCallback((rule: DomainRuleSetting) => {
     setEditingRule(stripUiOnlyFields(rule));
@@ -181,21 +300,31 @@ export function DomainRulesPage({
       e: typeof event,
     ) => DomainRuleSetting[])(rules, event);
 
-  const handleDragOver = useCallback((event: DragOverEvent) => {
-    setDragItems(prev => moveRules(prev ?? syncSettings.domainRules, event));
-  }, [syncSettings.domainRules]);
+  // Per-section drag handlers. `isFullList` is true only for the pristine
+  // ungrouped list (drop reorders the whole array); otherwise the dropped
+  // subset is woven back into the real array via applySubsetReorder.
+  const handleSectionDragOver =
+    (sectionKey: string, baseRules: DomainRuleSetting[]) => (event: DragOverEvent) => {
+      setDragSection(prev => {
+        const base = prev && prev.key === sectionKey ? prev.items : baseRules;
+        return { key: sectionKey, items: moveRules(base, event) };
+      });
+    };
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    if (!event.canceled) {
-      const reordered = moveRules(dragItems ?? syncSettings.domainRules, event);
-      if (reordered !== (dragItems ?? syncSettings.domainRules)) {
-        updateRules(reordered);
-      } else if (dragItems) {
-        updateRules(dragItems);
-      }
-    }
-    setDragItems(null);
-  }, [dragItems, syncSettings.domainRules, updateRules]);
+  const handleSectionDragEnd =
+    (sectionKey: string, baseRules: DomainRuleSetting[], isFullList: boolean) =>
+    (event: DragEndEvent) => {
+      setDragSection(prev => {
+        if (!event.canceled) {
+          const base = prev && prev.key === sectionKey ? prev.items : baseRules;
+          const reordered = moveRules(base, event);
+          updateRules(
+            isFullList ? reordered : applySubsetReorder(syncSettings.domainRules, reordered),
+          );
+        }
+        return null;
+      });
+    };
 
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -312,6 +441,17 @@ export function DomainRulesPage({
     setEditingRule(undefined);
   };
 
+  // Resolves the deleted card's position from the live DOM (independent of the
+  // per-group sortable index) so keyboard focus moves to a sensible neighbour.
+  const requestDelete = useCallback((ruleId: string) => {
+    const cards = listRef.current?.querySelectorAll<HTMLElement>('[role="listitem"]');
+    let focusIndex: number | undefined;
+    cards?.forEach((card, i) => {
+      if (card.getAttribute('data-rule-id') === ruleId) focusIndex = i;
+    });
+    setDeleteTarget({ type: 'single', ruleId, focusIndex });
+  }, []);
+
   const handleConfirmDelete = useCallback(() => {
     if (!deleteTarget) return;
     if (deleteTarget.type === 'single') {
@@ -329,6 +469,24 @@ export function DomainRulesPage({
     }
     setDeleteTarget(null);
   }, [deleteTarget, handleDeleteRule, handleBulkDelete]);
+
+  // Props shared by every RuleCardList section (groups + ungrouped).
+  const cardListCommon = {
+    allRules: syncSettings.domainRules,
+    selectedIds,
+    searchTerm,
+    overlap: overlapPrecedenceByRuleId,
+    navIndexById,
+    onSelect: handleRowSelect,
+    onToggleEnabled: handleToggleEnabled,
+    onEdit: handleEditRule,
+    onDeleteRequest: requestDelete,
+    onMoveToFirst: handleMoveToFirst,
+    onMoveToLast: handleMoveToLast,
+    onMoveToFirstOfDomain: handleMoveToFirstOfDomain,
+    onMoveToLastOfDomain: handleMoveToLastOfDomain,
+    onCardKeyDown: handleCardKeyDown,
+  };
 
   return (
     <>
@@ -355,6 +513,13 @@ export function DomainRulesPage({
                 searchPlaceholder={getMessage('searchRules')}
                 searchValue={searchTerm}
                 onSearchChange={setSearchTerm}
+                filter={
+                  <RuleViewMenu
+                    value={viewState}
+                    onChange={handleViewChange}
+                    testId="page-rules-btn-view"
+                  />
+                }
                 action={
                   <Tooltip content={<Flex align="center" gap="2" aria-hidden="true">{getMessage('addRule')}<Kbd>N</Kbd></Flex>}>
                     <Button data-testid="page-rules-btn-add" onClick={handleAddRule} aria-keyshortcuts="N">
@@ -407,7 +572,7 @@ export function DomainRulesPage({
               data-testid="page-rules-scroll"
               style={{ flex: 1, overflow: 'auto', minHeight: 0 }}
             >
-              {filteredRules.length === 0 && syncSettings.domainRules.length === 0 && !searchTerm && (
+              {syncSettings.domainRules.length === 0 && !searchTerm && (
                 <EmptyState
                   data-testid="page-rules-empty"
                   icon={Shield}
@@ -431,35 +596,65 @@ export function DomainRulesPage({
                   }
                 />
               )}
-              {filteredRules.length === 0 && (syncSettings.domainRules.length > 0 || searchTerm) && (
+              {viewResult.visibleCount === 0 && (syncSettings.domainRules.length > 0 || searchTerm) && (
                 <EmptyState compact icon={AlertCircle} message={getMessage('noRulesFound')} />
               )}
-              {filteredRules.length > 0 && (
-                <DragDropProvider modifiers={[RestrictToVerticalAxis]} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-                  <Flex data-testid="page-rules-list" direction="column" gap="3" role="list" aria-label={getMessage('domainRulesTab')} ref={listRef}>
-                    {(dragItems ?? filteredRules).map((rule, index) => (
-                      <DomainRuleCard
-                        key={rule.id}
-                        rule={rule}
-                        index={index}
-                        isSelected={selectedIds.has(rule.id)}
-                        searchTerm={searchTerm}
-                        isDragDisabled={!!searchTerm}
-                        isDomainActionDisabled={getRulesForRootDomain(syncSettings.domainRules, rule.domainFilter).length <= 1}
-                        overlapPrecedenceList={overlapPrecedenceByRuleId.get(rule.id)}
-                        onSelect={handleRowSelect}
-                        onToggleEnabled={handleToggleEnabled}
-                        onEdit={handleEditRule}
-                        onDeleteRequest={(ruleId, focusIndex) => setDeleteTarget({ type: 'single', ruleId, focusIndex })}
-                        onMoveToFirst={handleMoveToFirst}
-                        onMoveToLast={handleMoveToLast}
-                        onMoveToFirstOfDomain={handleMoveToFirstOfDomain}
-                        onMoveToLastOfDomain={handleMoveToLastOfDomain}
-                        onKeyDown={(e) => handleCardKeyDown(e, rule, index)}
+              {viewResult.visibleCount > 0 && (
+                <Flex data-testid="page-rules-list" direction="column" gap="2" ref={listRef}>
+                  {viewResult.groups.map(group => {
+                    const dndEnabled = group.isDndEnabled && domainDndAllowed;
+                    const displayRules =
+                      dragSection?.key === group.key ? dragSection.items : group.rules;
+                    return (
+                      <Box key={group.key}>
+                        <RuleGroupHeader
+                          group={group}
+                          testId={`page-rules-group-${group.key}`}
+                          selectedCount={group.ruleIds.filter(id => selectedIds.has(id)).length}
+                          onSelectGroup={handleSelectGroup}
+                        />
+                        <DragDropProvider
+                          modifiers={[RestrictToVerticalAxis]}
+                          onDragOver={dndEnabled ? handleSectionDragOver(group.key, group.rules) : undefined}
+                          onDragEnd={dndEnabled ? handleSectionDragEnd(group.key, group.rules, false) : undefined}
+                        >
+                          <RuleCardList
+                            {...cardListCommon}
+                            rules={displayRules}
+                            dragDisabled={!dndEnabled}
+                            ariaLabel={group.label}
+                          />
+                        </DragDropProvider>
+                      </Box>
+                    );
+                  })}
+                  {viewResult.ungrouped.length > 0 && (
+                    <DragDropProvider
+                      modifiers={[RestrictToVerticalAxis]}
+                      onDragOver={
+                        viewResult.isUngroupedDndEnabled
+                          ? handleSectionDragOver('__ungrouped__', viewResult.ungrouped)
+                          : undefined
+                      }
+                      onDragEnd={
+                        viewResult.isUngroupedDndEnabled
+                          ? handleSectionDragEnd('__ungrouped__', viewResult.ungrouped, true)
+                          : undefined
+                      }
+                    >
+                      <RuleCardList
+                        {...cardListCommon}
+                        rules={
+                          dragSection?.key === '__ungrouped__'
+                            ? dragSection.items
+                            : viewResult.ungrouped
+                        }
+                        dragDisabled={!viewResult.isUngroupedDndEnabled}
+                        ariaLabel={getMessage('domainRulesTab')}
                       />
-                    ))}
-                  </Flex>
-                </DragDropProvider>
+                    </DragDropProvider>
+                  )}
+                </Flex>
               )}
             </Box>
           </Box>
