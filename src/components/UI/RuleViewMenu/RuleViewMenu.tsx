@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { Box, DropdownMenu, Flex } from '@radix-ui/themes';
 import { RotateCcw } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
@@ -21,6 +22,13 @@ const NONE = '__none__';
 export interface RuleViewMenuProps {
   value: RuleViewState;
   onChange: (next: RuleViewState) => void;
+  /**
+   * Called once the menu closes after at least one filter/sort/group change,
+   * so the caller can move focus to the first resulting rule (accessibility:
+   * keep the keyboard user on the first visible result). Not fired when the
+   * menu is opened and closed without any change.
+   */
+  onApplied?: () => void;
   /** Categories used to populate the category filter sub-menu. Defaults to the built-in set. */
   categories?: RuleCategory[];
   testId?: string;
@@ -48,23 +56,41 @@ function ColorSwatch({ color }: { color: ColorValue }) {
   );
 }
 
-export function RuleViewMenu({ value, onChange, categories, testId }: RuleViewMenuProps) {
+export function RuleViewMenu({ value, onChange, onApplied, categories, testId }: RuleViewMenuProps) {
   const activeOps = countActiveViewOps(value);
   const isActive = activeOps > 0;
+  // Tracks whether a change happened while the menu was open, so we only move
+  // focus to the first result on close when the view actually changed.
+  const changedRef = useRef(false);
+
+  // On close, if the view changed, prevent Radix from returning focus to the
+  // trigger and let the caller move focus to the first resulting rule instead.
+  const handleCloseAutoFocus = (event: Event) => {
+    if (changedRef.current && onApplied) {
+      changedRef.current = false;
+      event.preventDefault();
+      onApplied();
+    }
+  };
+
+  const apply = (next: RuleViewState) => {
+    changedRef.current = true;
+    onChange(next);
+  };
 
   const setColor = (color: ColorValue | '__none__', checked: boolean) =>
-    onChange({ ...value, filterColors: toggleInArray(value.filterColors, color, checked) });
+    apply({ ...value, filterColors: toggleInArray(value.filterColors, color, checked) });
 
   const setCategory = (id: string, checked: boolean) =>
-    onChange({ ...value, filterCategories: toggleInArray(value.filterCategories, id, checked) });
+    apply({ ...value, filterCategories: toggleInArray(value.filterCategories, id, checked) });
 
   const setStatus = (status: RuleStatusFilter, checked: boolean) =>
-    onChange({ ...value, filterStatus: toggleInArray(value.filterStatus, status, checked) });
+    apply({ ...value, filterStatus: toggleInArray(value.filterStatus, status, checked) });
 
-  const setSort = (sort: RuleSortMode) => onChange({ ...value, sort });
-  const setDirection = (sortDirection: RuleSortDirection) => onChange({ ...value, sortDirection });
-  const setGroup = (group: RuleGroupMode) => onChange({ ...value, group });
-  const reset = () => onChange({ ...DEFAULT_RULE_VIEW_STATE });
+  const setSort = (sort: RuleSortMode) => apply({ ...value, sort });
+  const setDirection = (sortDirection: RuleSortDirection) => apply({ ...value, sortDirection });
+  const setGroup = (group: RuleGroupMode) => apply({ ...value, group });
+  const reset = () => apply({ ...DEFAULT_RULE_VIEW_STATE });
 
   // Keep the menu open when toggling filters / radio items.
   const keepOpen = (event: Event) => event.preventDefault();
@@ -78,7 +104,7 @@ export function RuleViewMenu({ value, onChange, categories, testId }: RuleViewMe
         testId={testId}
       />
 
-      <DropdownMenu.Content>
+      <DropdownMenu.Content onCloseAutoFocus={handleCloseAutoFocus}>
         {/* ── Filter ── */}
         <DropdownMenu.Label>{getMessage('ruleViewFilterLabel')}</DropdownMenu.Label>
 

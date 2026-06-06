@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { DropdownMenu, Flex } from '@radix-ui/themes';
 import { RotateCcw } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
@@ -48,16 +48,17 @@ export function SessionViewMenu({
   testIdPrefix = 'page-sessions-view',
 }: SessionViewMenuProps) {
   const activeOps = countActiveSessionViewOps(value);
-  const [open, setOpen] = useState(false);
   // Tracks whether a change happened while the menu was open, so we only move
   // focus to the first result on close when the view actually changed.
   const changedRef = useRef(false);
 
-  const handleOpenChange = (next: boolean) => {
-    setOpen(next);
-    if (!next && changedRef.current) {
+  // On close, if the view changed, prevent Radix from returning focus to the
+  // trigger and let the caller move focus to the first resulting card instead.
+  const handleCloseAutoFocus = (event: Event) => {
+    if (changedRef.current && onApplied) {
       changedRef.current = false;
-      onApplied?.();
+      event.preventDefault();
+      onApplied();
     }
   };
 
@@ -78,7 +79,7 @@ export function SessionViewMenu({
   const keepOpen = (event: Event) => event.preventDefault();
 
   return (
-    <DropdownMenu.Root open={open} onOpenChange={handleOpenChange}>
+    <DropdownMenu.Root>
       <ViewMenuTrigger
         activeOps={activeOps}
         label={getMessage('sessionViewMenu')}
@@ -87,7 +88,7 @@ export function SessionViewMenu({
         size="1"
       />
 
-      <DropdownMenu.Content>
+      <DropdownMenu.Content onCloseAutoFocus={handleCloseAutoFocus}>
         {/* ── Filter ── */}
         <DropdownMenu.Label>{getMessage('sessionViewFilterLabel')}</DropdownMenu.Label>
         <CategoryFilterSubMenu

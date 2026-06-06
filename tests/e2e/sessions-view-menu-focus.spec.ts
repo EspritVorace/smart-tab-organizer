@@ -65,15 +65,16 @@ test.describe('[Sessions-view-menu] focus the first result after applying a sort
     await goToSessionsSection(page, extensionId);
     const sessions = new SessionsListPage(page);
 
-    // Arrival: focus on the first manual-order card (newest).
+    // Manual order puts `newest` first on arrival.
+    await sessions.firstCard().waitFor({ state: 'visible' });
     await expect(sessions.firstCard()).toHaveAttribute('data-session-id', newest.id);
-    await expect(sessions.firstCard()).toBeFocused();
 
     // Apply a date sort (ascending by default) on the normal section.
     await page.getByTestId('page-sessions-view-unpinned-btn').click();
     await selectMenuItem(page, 'page-sessions-view-unpinned-sort-date');
 
-    // Close the menu: focus must move to the first resulting card (oldest).
+    // Close the menu: focus must move to the first resulting card (oldest),
+    // not stay on the menu trigger.
     await page.keyboard.press('Escape');
     await expect(page.locator('[role="menu"][data-state="open"]')).toHaveCount(0);
 

@@ -341,3 +341,35 @@ test.describe('View menu initial focus', () => {
     await page2.close();
   });
 });
+
+test.describe('View menu focus after applying', () => {
+  test('moves focus to the first result when the menu closes after a sort', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    // Insertion (manual) order puts "Zzz" first; sorting by domain ascending
+    // makes "Aaa" the first rule.
+    await helpers.addDomainRule({ label: 'Zzz Rule', domainFilter: 'zzz.com' });
+    await helpers.addDomainRule({ label: 'Aaa Rule', domainFilter: 'aaa.com' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    const firstCard = () => page.getByTestId('page-rules-list').getByRole('listitem').first();
+
+    // Manual order puts "Zzz" first on arrival.
+    await expect(firstCard()).toHaveAttribute('aria-label', /Zzz Rule/);
+
+    // Apply a domain sort, then close the menu.
+    await openViewMenu(page);
+    await selectMenuItem(page, 'page-rules-view-sort-domain');
+    await closeMenus(page);
+
+    // On close, focus must move to the first resulting rule (Aaa).
+    await expect(firstCard()).toHaveAttribute('aria-label', /Aaa Rule/);
+    await expect(firstCard()).toBeFocused();
+
+    await page.close();
+  });
+});
