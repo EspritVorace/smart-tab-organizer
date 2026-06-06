@@ -472,13 +472,28 @@ export function SessionsPage({
   const archivedSessionsViewStateItem = scopedItems.archivedSessionsViewStateItem;
   const [normalViewState, setNormalViewState] = useState<SessionViewState>(DEFAULT_SESSION_VIEW_STATE);
   const [archivedViewState, setArchivedViewState] = useState<SessionViewState>(DEFAULT_SESSION_VIEW_STATE);
+  // Tracks whether the persisted view (sort/filter) has been applied, so the
+  // arrival autofocus waits for the sorted order instead of landing on the
+  // first manual-order card and ending up stale once the sort kicks in.
+  const [viewLoaded, setViewLoaded] = useState(false);
 
   useEffect(() => {
-    sessionsViewStateItem.getValue().then(v => setNormalViewState(normalizeSessionViewState(v)));
-  }, [sessionsViewStateItem]);
-  useEffect(() => {
-    archivedSessionsViewStateItem.getValue().then(v => setArchivedViewState(normalizeSessionViewState(v)));
-  }, [archivedSessionsViewStateItem]);
+    let normalDone = false;
+    let archivedDone = false;
+    const settle = () => {
+      if (normalDone && archivedDone) setViewLoaded(true);
+    };
+    sessionsViewStateItem.getValue().then(v => {
+      setNormalViewState(normalizeSessionViewState(v));
+      normalDone = true;
+      settle();
+    });
+    archivedSessionsViewStateItem.getValue().then(v => {
+      setArchivedViewState(normalizeSessionViewState(v));
+      archivedDone = true;
+      settle();
+    });
+  }, [sessionsViewStateItem, archivedSessionsViewStateItem]);
 
   const handleNormalViewChange = useCallback((next: SessionViewState) => {
     setNormalViewState(next);
@@ -980,7 +995,9 @@ export function SessionsPage({
   const sessionsListRef = useRef<HTMLDivElement>(null);
   useListNavigation(sessionsListRef, '[data-session-card]', {
     autoFocus: {
-      ready: isLoaded && !archivedOnlyView,
+      // Wait for the persisted view so the focus lands on the first *sorted*
+      // visible card, not the first manual-order one.
+      ready: isLoaded && viewLoaded && !archivedOnlyView,
       fallbackSelector: '[data-testid="page-sessions-btn-snapshot"]',
     },
   });
