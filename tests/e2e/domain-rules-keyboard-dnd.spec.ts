@@ -29,9 +29,7 @@ test.describe('[KBD-DND] Domain rules keyboard drag-and-drop', () => {
 
     // allow-inline-dom: drag-handle is a DnD atom selector, not a dialog/wizard surface.
     const handle = page.locator('[data-testid$="-drag-handle"]').first();
-    // Prefer toBeAttached over toBeVisible: the handle is always in the DOM (just visually
-    // hidden if search is active), so we avoid a fragile visibility check that can flicker.
-    await expect(handle).toBeAttached();
+    await expect(handle).toBeVisible();
 
     const tagName = await handle.evaluate((el) => el.tagName.toLowerCase());
     expect(tagName).toBe('button');
@@ -40,14 +38,9 @@ test.describe('[KBD-DND] Domain rules keyboard drag-and-drop', () => {
     await expect(handle).toHaveAttribute('aria-label', /reorder|réordonner|reordenar/i);
 
     await handle.focus();
-    // Use the elevated timeout from expect.timeout (10s) instead of default 5s,
-    // as 2-worker contention can delay focus event processing.
-    await expect(handle, 'Handle should be focused after explicit focus() call').toBeFocused();
+    await expect(handle).toBeFocused();
 
-    // Guard against closing the last page (causes context/browser closure on next test).
-    if (extensionContext.pages().length > 1) {
-      await page.close();
-    }
+    await page.close();
   });
 
   test('keyboard reorders rules via Space + ArrowDown + Space', async ({
@@ -84,15 +77,16 @@ test.describe('[KBD-DND] Domain rules keyboard drag-and-drop', () => {
       return opacity < 0.5;
     }, undefined, { timeout: 5000 });
 
-    // The opacity flip confirms dnd-kit entered the dragging state, and its
-    // KeyboardSensor listener should now be active. A subsequent waitForFunction
-    // for move completion provides a deterministic sync point instead of a fixed sleep.
+    // The opacity flip confirms dnd-kit entered the dragging state, but its
+    // KeyboardSensor attaches the keydown listener a tick later. This short grace
+    // lets that listener register so the arrow presses are not dropped on slow CI.
+    // eslint-disable-next-line playwright/no-wait-for-timeout -- waiting on a DnD activation race with no DOM signal to anchor on
+    await page.waitForTimeout(100);
+
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('Space');
 
-    // Wait for the reorder to complete by observing the final position change.
-    // This avoids a race where the move events complete after a fixed sleep ends.
     await page.waitForFunction(() => {
       const rows = [...document.querySelectorAll('[role="listitem"]')];
       const iA = rows.findIndex(r => r.getAttribute('aria-label')?.includes('Rule A'));
@@ -100,10 +94,7 @@ test.describe('[KBD-DND] Domain rules keyboard drag-and-drop', () => {
       return iA > -1 && iC > -1 && iA > iC;
     }, undefined, { timeout: 5000 });
 
-    // Guard against closing the last page (causes context/browser closure on next test).
-    if (extensionContext.pages().length > 1) {
-      await page.close();
-    }
+    await page.close();
 
     const labels = await getDomainRuleLabels(helpers);
     const idxA = labels.indexOf('Rule A');
@@ -146,16 +137,15 @@ test.describe('[KBD-DND] Domain rules keyboard drag-and-drop', () => {
       return opacity < 0.5;
     }, undefined, { timeout: 5000 });
 
-    // Send the arrow key to start a potential move, then cancel immediately.
-    // The waitForFunction above ensures dnd-kit is in a drag state.
+    // See the reorder test above: let dnd-kit's KeyboardSensor finish attaching
+    // its keydown listener before the arrow press, otherwise it can be dropped.
+    // eslint-disable-next-line playwright/no-wait-for-timeout -- waiting on a DnD activation race with no DOM signal to anchor on
+    await page.waitForTimeout(100);
+
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('Escape');
     await expect(handleA).toBeFocused();
-
-    // Guard against closing the last page (causes context/browser closure on next test).
-    if (extensionContext.pages().length > 1) {
-      await page.close();
-    }
+    await page.close();
 
     const after = await getDomainRuleLabels(helpers);
     expect(after).toEqual(before);
@@ -177,9 +167,6 @@ test.describe('[KBD-DND] Domain rules keyboard drag-and-drop', () => {
     const handle = page.locator('[data-testid$="-drag-handle"]').first();
     await expect(handle).toBeDisabled();
 
-    // Guard against closing the last page (causes context/browser closure on next test).
-    if (extensionContext.pages().length > 1) {
-      await page.close();
-    }
+    await page.close();
   });
 });
