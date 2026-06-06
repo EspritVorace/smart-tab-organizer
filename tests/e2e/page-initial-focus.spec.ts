@@ -12,7 +12,7 @@
  * Powered by the `autoFocus` option of useListNavigation.
  */
 import { test, expect } from './fixtures';
-import type { Page } from '@playwright/test';
+import type { BrowserContext, Page } from '@playwright/test';
 import { SessionsListPage, WorkspaceListPage } from '../../e2e-shared/pages/index.js';
 import { goToDomainRulesSection, goToSessionsSection } from './helpers/navigation';
 import {
@@ -26,6 +26,38 @@ async function goToWorkspacesSection(page: Page, extensionId: string): Promise<v
   await page.goto(`chrome-extension://${extensionId}/options.html#workspaces`);
   await page.waitForLoadState('domcontentloaded');
   await new WorkspaceListPage(page).list().waitFor({ state: 'visible', timeout: 10_000 });
+}
+
+async function getServiceWorker(context: BrowserContext): Promise<Page> {
+  let sw = context.serviceWorkers()[0];
+  if (sw) return sw as unknown as Page;
+  const deadline = Date.now() + 5000;
+  while (Date.now() < deadline) {
+    sw = context.serviceWorkers()[0];
+    if (sw) return sw as unknown as Page;
+    await new Promise(r => setTimeout(r, 200));
+  }
+  throw new Error('Service worker not available after 5 s (idle termination?)');
+}
+
+/** Persist the per-section sessions view state (sort/filter) in storage.local. */
+async function setSessionsViewState(
+  context: BrowserContext,
+  value: { filterCategories: string[]; sort: string; sortDirection: string },
+): Promise<void> {
+  const sw = await getServiceWorker(context);
+  await sw.evaluate(v => chrome.storage.local.set({ sessionsViewState: v }), value);
+  await new Promise(r => setTimeout(r, 100));
+}
+
+/** The persisted view state leaks between tests in the same worker; reset it. */
+async function resetSessionsViewState(context: BrowserContext): Promise<void> {
+  const sw = await getServiceWorker(context).catch(() => null);
+  if (sw) {
+    await sw.evaluate(() =>
+      chrome.storage.local.remove(['sessionsViewState', 'archivedSessionsViewState']),
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -98,6 +130,7 @@ test.describe('[focus-management] Domain Rules initial focus', () => {
 test.describe('[focus-management] Sessions initial focus', () => {
   test.beforeEach(async ({ extensionContext }) => {
     await clearSessions(extensionContext);
+    await resetSessionsViewState(extensionContext);
   });
 
   test('focuses the first (pinned) session card when sessions exist', async ({
@@ -115,6 +148,38 @@ test.describe('[focus-management] Sessions initial focus', () => {
     await expect(firstCard).toBeFocused();
     // It must be the pinned session, not the normal one.
     await expect(firstCard).toHaveAttribute('data-session-id', pinned.id);
+
+    await page.close();
+  });
+
+  test('focuses the first sorted card when a date sort is persisted (no pinned sessions)', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const base = Date.parse('2026-01-01T00:00:00.000Z');
+    const iso = (offsetMs: number) => new Date(base + offsetMs).toISOString();
+    const oldest = createTestSession({ name: 'Oldest', createdAt: iso(0), updatedAt: iso(0) });
+    const middle = createTestSession({ name: 'Middle', createdAt: iso(60_000), updatedAt: iso(60_000) });
+    const newest = createTestSession({ name: 'Newest', createdAt: iso(120_000), updatedAt: iso(120_000) });
+
+    // Seed in an order that does NOT match the sorted order: the manual order
+    // would put `oldest` first, so a stale (pre-sort) autofocus would land on
+    // it instead of `newest`.
+    await seedSessions(extensionContext, [oldest, middle, newest]);
+    await setSessionsViewState(extensionContext, {
+      filterCategories: [],
+      sort: 'date',
+      sortDirection: 'desc',
+    });
+
+    const page = await extensionContext.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    const firstCard = new SessionsListPage(page).firstCard();
+    await expect(firstCard).toBeFocused();
+    // date desc => newest first; the focus must wait for the persisted sort and
+    // land on `newest`, not on the first card of the manual order.
+    await expect(firstCard).toHaveAttribute('data-session-id', newest.id);
 
     await page.close();
   });
