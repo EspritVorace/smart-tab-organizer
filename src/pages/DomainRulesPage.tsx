@@ -314,16 +314,19 @@ export function DomainRulesPage({
   const handleSectionDragEnd =
     (sectionKey: string, baseRules: DomainRuleSetting[], isFullList: boolean) =>
     (event: DragEndEvent) => {
-      setDragSection(prev => {
-        if (!event.canceled) {
-          const base = prev && prev.key === sectionKey ? prev.items : baseRules;
-          const reordered = moveRules(base, event);
-          updateRules(
-            isFullList ? reordered : applySubsetReorder(syncSettings.domainRules, reordered),
-          );
-        }
-        return null;
-      });
+      // Read the live preview from the closure (refreshed each render by the
+      // onDragOver updates), NOT from inside a setState updater: calling
+      // updateRules there would be a side effect during React's update phase
+      // and the parent state change would be dropped.
+      if (!event.canceled) {
+        const base =
+          dragSection && dragSection.key === sectionKey ? dragSection.items : baseRules;
+        const reordered = moveRules(base, event);
+        updateRules(
+          isFullList ? reordered : applySubsetReorder(syncSettings.domainRules, reordered),
+        );
+      }
+      setDragSection(null);
     };
 
   const listRef = useRef<HTMLDivElement>(null);
