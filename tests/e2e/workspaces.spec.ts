@@ -11,12 +11,25 @@
  */
 
 import { test, expect } from './fixtures';
+import type { BrowserContext } from '@playwright/test';
 import { goToOptionsPage } from './helpers/navigation';
 
 async function goToWorkspaces(page: import('@playwright/test').Page, extensionId: string) {
   await page.goto(`chrome-extension://${extensionId}/options.html#workspaces`);
   await page.waitForLoadState('domcontentloaded');
   await page.getByTestId('workspace-create-button').waitFor({ state: 'visible', timeout: 10_000 });
+}
+
+async function getServiceWorker(context: BrowserContext): Promise<import('@playwright/test').Page> {
+  let sw = context.serviceWorkers()[0];
+  if (sw) return sw;
+  const deadline = Date.now() + 5000;
+  while (Date.now() < deadline) {
+    sw = context.serviceWorkers()[0];
+    if (sw) return sw;
+    await new Promise(r => setTimeout(r, 200));
+  }
+  throw new Error('Service worker not available after 5 s (idle termination?)');
 }
 
 // Other spec files in the same worker (notably workspaces-search.spec.ts) call
@@ -27,7 +40,7 @@ async function goToWorkspaces(page: import('@playwright/test').Page, extensionId
 // rejects names that already exist). Reset to a post-migration baseline
 // before each test: only the default workspace, and it is active.
 test.beforeEach(async ({ extensionContext }) => {
-  const sw = extensionContext.serviceWorkers()[0];
+  const sw = await getServiceWorker(extensionContext).catch(() => null);
   if (!sw) return;
   await sw
     .evaluate(async () => {

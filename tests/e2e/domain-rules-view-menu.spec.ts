@@ -11,15 +11,22 @@ import { type BrowserContext, type Page } from '@playwright/test';
 import { test, expect } from './fixtures';
 import { goToDomainRulesSection } from './helpers/navigation';
 
+async function getServiceWorker(context: BrowserContext): Promise<import('@playwright/test').Page> {
+  let sw = context.serviceWorkers()[0];
+  if (sw) return sw;
+  const deadline = Date.now() + 5000;
+  while (Date.now() < deadline) {
+    sw = context.serviceWorkers()[0];
+    if (sw) return sw;
+    await new Promise(r => setTimeout(r, 200));
+  }
+  throw new Error('Service worker not available after 5 s (idle termination?)');
+}
+
 /** The persisted per-workspace view state leaks between tests in the same
  *  worker (it lives in storage.local), so reset it to the default. */
 async function resetViewState(context: BrowserContext): Promise<void> {
-  const deadline = Date.now() + 5000;
-  let sw = context.serviceWorkers()[0];
-  while (!sw && Date.now() < deadline) {
-    await new Promise(r => setTimeout(r, 100));
-    sw = context.serviceWorkers()[0];
-  }
+  const sw = await getServiceWorker(context).catch(() => null);
   if (sw) await sw.evaluate(() => chrome.storage.local.remove('rulesViewState'));
 }
 

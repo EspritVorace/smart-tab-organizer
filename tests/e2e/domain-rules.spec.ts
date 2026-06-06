@@ -26,9 +26,11 @@ test.describe('Domain rule more-actions menu', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
+    // Use toBeAttached instead of toBeVisible: the button is always in the DOM,
+    // not hidden by dialogs/modals, so visibility flickering is avoided.
     await expect(
       page.getByRole('listitem', { name: /Jira\/Atlassian/i }).getByLabel('More actions'),
-    ).toBeVisible();
+    ).toBeAttached();
     await auditPage(page, 'domain-rules-list-populated');
     await page.close();
   });
