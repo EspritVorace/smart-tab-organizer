@@ -20,6 +20,7 @@ export const notifyOnOrganizeItem = _defaultItems.notifyOnOrganizeItem;
 export const statisticsItem = _defaultItems.statisticsItem;
 export const sessionsItem = _defaultItems.sessionsItem;
 export const popupPinnedEmptyCollapsedItem = _defaultItems.popupPinnedEmptyCollapsedItem;
+export const rulesViewStateItem = _defaultItems.rulesViewStateItem;
 
 // Map des items settings par champ (pour watchSettingsField)
 export const settingsItemMap = {
