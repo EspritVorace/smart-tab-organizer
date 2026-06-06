@@ -1,11 +1,11 @@
-import React from 'react';
-import { Badge, Box, DropdownMenu, Flex, IconButton } from '@radix-ui/themes';
-import { ListFilter, RotateCcw } from 'lucide-react';
+import { Box, DropdownMenu, Flex } from '@radix-ui/themes';
+import { RotateCcw } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { getRadixColor } from '@/utils/utils';
 import { colorOptions, type ColorValue } from '@/schemas/enums';
-import { getAllCategories, getCategoryLabel } from '@/utils/categoriesStore';
 import type { RuleCategory } from '@/schemas/category';
+import { ViewMenuTrigger } from '@/components/UI/ViewMenuTrigger/ViewMenuTrigger';
+import { CategoryFilterSubMenu } from '@/components/UI/CategoryFilterSubMenu/CategoryFilterSubMenu';
 import {
   DEFAULT_RULE_VIEW_STATE,
   countActiveViewOps,
@@ -49,7 +49,6 @@ function ColorSwatch({ color }: { color: ColorValue }) {
 }
 
 export function RuleViewMenu({ value, onChange, categories, testId }: RuleViewMenuProps) {
-  const cats = categories ?? getAllCategories();
   const activeOps = countActiveViewOps(value);
   const isActive = activeOps > 0;
 
@@ -67,46 +66,17 @@ export function RuleViewMenu({ value, onChange, categories, testId }: RuleViewMe
   const setGroup = (group: RuleGroupMode) => onChange({ ...value, group });
   const reset = () => onChange({ ...DEFAULT_RULE_VIEW_STATE });
 
-  const triggerLabel = isActive ? getMessage('ruleViewMenuActive') : getMessage('ruleViewMenu');
-
   // Keep the menu open when toggling filters / radio items.
   const keepOpen = (event: Event) => event.preventDefault();
 
   return (
     <DropdownMenu.Root>
-      <Box position="relative" style={{ display: 'inline-flex', flexShrink: 0 }}>
-        <DropdownMenu.Trigger>
-          <IconButton
-            data-testid={testId}
-            data-active={isActive || undefined}
-            variant={isActive ? 'solid' : 'ghost'}
-            color={isActive ? undefined : 'gray'}
-            aria-label={triggerLabel}
-            title={triggerLabel}
-          >
-            <ListFilter size={16} aria-hidden="true" />
-          </IconButton>
-        </DropdownMenu.Trigger>
-        {isActive && (
-          <Badge
-            color="indigo"
-            variant="solid"
-            radius="full"
-            size="1"
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              top: -6,
-              right: -6,
-              minWidth: 16,
-              justifyContent: 'center',
-              pointerEvents: 'none',
-            }}
-          >
-            {activeOps}
-          </Badge>
-        )}
-      </Box>
+      <ViewMenuTrigger
+        activeOps={activeOps}
+        label={getMessage('ruleViewMenu')}
+        activeLabel={getMessage('ruleViewMenuActive')}
+        testId={testId}
+      />
 
       <DropdownMenu.Content>
         {/* ── Filter ── */}
@@ -142,35 +112,14 @@ export function RuleViewMenu({ value, onChange, categories, testId }: RuleViewMe
           </DropdownMenu.SubContent>
         </DropdownMenu.Sub>
 
-        <DropdownMenu.Sub>
-          <DropdownMenu.SubTrigger data-testid="page-rules-view-sub-category">
-            {getMessage('ruleViewFilterByCategory')}
-          </DropdownMenu.SubTrigger>
-          <DropdownMenu.SubContent>
-            {cats.map(cat => (
-              <DropdownMenu.CheckboxItem
-                key={cat.id}
-                data-testid={`page-rules-view-category-${cat.id}`}
-                checked={value.filterCategories.includes(cat.id)}
-                onCheckedChange={checked => setCategory(cat.id, checked)}
-                onSelect={keepOpen}
-              >
-                <Flex align="center" gap="2">
-                  <span aria-hidden="true">{cat.emoji}</span>
-                  {getCategoryLabel(cat)}
-                </Flex>
-              </DropdownMenu.CheckboxItem>
-            ))}
-            <DropdownMenu.CheckboxItem
-              data-testid="page-rules-view-category-none"
-              checked={value.filterCategories.includes(NONE)}
-              onCheckedChange={checked => setCategory(NONE, checked)}
-              onSelect={keepOpen}
-            >
-              {getMessage('ruleViewNoCategory')}
-            </DropdownMenu.CheckboxItem>
-          </DropdownMenu.SubContent>
-        </DropdownMenu.Sub>
+        <CategoryFilterSubMenu
+          selected={value.filterCategories}
+          onToggle={setCategory}
+          testIdPrefix="page-rules-view"
+          subLabel={getMessage('ruleViewFilterByCategory')}
+          noneLabel={getMessage('ruleViewNoCategory')}
+          categories={categories}
+        />
 
         <DropdownMenu.Sub>
           <DropdownMenu.SubTrigger data-testid="page-rules-view-sub-status">
