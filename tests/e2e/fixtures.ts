@@ -223,10 +223,22 @@ export const test = baseTest.extend<Omit<ExtensionFixtures, 'extensionContext' |
         await new Promise(resolve => setTimeout(resolve, 150));
       },
 
-      // Clear all domain rules
+      // Clear all domain rules AND the persisted rules view state.
+      // rulesViewState (filter/sort/group) survives across spec files running in
+      // the same worker. Under 2 workers, files are distributed dynamically, so a
+      // filter left by another spec (e.g. domain-rules-view-menu) can leak into the
+      // next domain-rules spec and hide a freshly seeded rule, surfacing as a flaky
+      // "listitem not found". Resetting it here gives every domain-rules test an
+      // unfiltered list. Covers the default-workspace key (`rulesViewState`) and any
+      // workspace-scoped variant (`ws:{id}:rulesViewState`).
       clearDomainRules: async () => {
         const sw = await getServiceWorker();
-        await localSet(sw, { domainRules: [] });
+        await sw.evaluate(async () => {
+          const all = await chrome.storage.local.get(null);
+          const viewStateKeys = Object.keys(all).filter((k) => k.endsWith('rulesViewState'));
+          await chrome.storage.local.set({ domainRules: [] });
+          if (viewStateKeys.length > 0) await chrome.storage.local.remove(viewStateKeys);
+        });
         // Wait for storage to fully persist before returning
         await new Promise(resolve => setTimeout(resolve, 150));
       },
