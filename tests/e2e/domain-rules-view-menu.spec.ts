@@ -60,6 +60,7 @@ async function selectMenuItem(page: Page, testId: string): Promise<void> {
 async function closeMenus(page: Page): Promise<void> {
   await page.keyboard.press('Escape');
   await page.keyboard.press('Escape');
+  // allow-inline-dom: generic Radix menu-state probe, not a Page Object surface.
   await expect(page.locator('[role="menu"][data-state="open"]')).toHaveCount(0);
 }
 
@@ -108,6 +109,7 @@ test.describe('View menu active indicator', () => {
     await selectMenuItem(page, 'page-rules-view-group-color');
     await page.getByTestId('page-rules-view-reset').click();
 
+    // allow-inline-dom: generic Radix menu-state probe, not a Page Object surface.
     await expect(page.locator('[role="menu"][data-state="open"]')).toHaveCount(0);
     await expect(viewBtn).not.toHaveAttribute('data-active', 'true');
     // Grouping is gone: no group header remains.
