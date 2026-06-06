@@ -104,6 +104,14 @@ export function ActiveWorkspaceProvider({ children }: ActiveWorkspaceProviderPro
   }, []);
 
   const switchTo = useCallback(async (id: string) => {
+    // Stamp lastActivatedAt on the target workspace. The default workspace may
+    // be absent from the index: the map leaves it untouched, and we still flip
+    // the active id below so the switch always happens.
+    const current = (await workspacesIndexItem.getValue()) ?? [];
+    const next = current.map((w) =>
+      w.id === id ? { ...w, lastActivatedAt: new Date().toISOString() } : w,
+    );
+    await workspacesIndexItem.setValue(next);
     await activeWorkspaceIdItem.setValue(id);
   }, []);
 

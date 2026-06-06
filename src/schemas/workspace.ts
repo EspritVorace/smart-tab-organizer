@@ -19,6 +19,8 @@ export const workspaceMetaSchema = z.object({
   accentColor: z.enum(workspaceAccentColors),
   createdAt: z.string().min(1),
   updatedAt: z.string().min(1),
+  // ISO 8601 timestamp of the last time this workspace became the active one.
+  lastActivatedAt: z.string().optional(),
 });
 
 export type WorkspaceMeta = z.infer<typeof workspaceMetaSchema>;

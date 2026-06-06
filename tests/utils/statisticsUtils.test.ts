@@ -6,6 +6,7 @@ import {
   setStatisticsData,
   updateStatisticsData,
   incrementStat,
+  stampRuleLastUsed,
   resetStatisticsData,
   watchStatisticsData,
   purgeOldBuckets,
@@ -123,6 +124,40 @@ describe('statisticsUtils', () => {
       await incrementStat('grouping', 'rule-1');
       const stats = await getStatisticsData();
       expect(stats.firstUsedAt).toBe(existingDate);
+    });
+  });
+
+  describe('stampRuleLastUsed', () => {
+    type StoredRule = { id: string; lastUsedAt?: string };
+
+    async function readRules(): Promise<StoredRule[]> {
+      return (await fakeBrowser.storage.local.get('domainRules')).domainRules as StoredRule[];
+    }
+
+    it('stamps lastUsedAt on the matching rule only', async () => {
+      await fakeBrowser.storage.local.set({
+        domainRules: [{ id: 'r1' }, { id: 'r2' }],
+      });
+      await stampRuleLastUsed('r1');
+      const rules = await readRules();
+      expect(rules.find((r) => r.id === 'r1')?.lastUsedAt).toBeDefined();
+      expect(rules.find((r) => r.id === 'r2')?.lastUsedAt).toBeUndefined();
+    });
+
+    it("ignores the synthetic '__unmatched__' id", async () => {
+      await fakeBrowser.storage.local.set({ domainRules: [{ id: 'r1' }] });
+      await stampRuleLastUsed('__unmatched__');
+      expect((await readRules())[0].lastUsedAt).toBeUndefined();
+    });
+
+    it('does nothing when the rule id is unknown', async () => {
+      await fakeBrowser.storage.local.set({ domainRules: [{ id: 'r1' }] });
+      await stampRuleLastUsed('does-not-exist');
+      expect((await readRules())[0].lastUsedAt).toBeUndefined();
+    });
+
+    it('does not throw when there are no rules', async () => {
+      await expect(stampRuleLastUsed('r1')).resolves.toBeUndefined();
     });
   });
 

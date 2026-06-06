@@ -14,6 +14,7 @@ vi.mock('wxt/browser', async () => ({ browser: (await import('./_helpers')).brow
 
 vi.mock('../../src/utils/statisticsUtils.js', () => ({
   incrementStat: vi.fn().mockResolvedValue(undefined),
+  stampRuleLastUsed: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('../../src/background/settings.js', () => ({

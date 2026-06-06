@@ -34,7 +34,8 @@ vi.mock('wxt/browser', () => {
 
 // Mock dependencies.
 vi.mock('../src/utils/statisticsUtils.js', () => ({
-  incrementStat: vi.fn()
+  incrementStat: vi.fn(),
+  stampRuleLastUsed: vi.fn()
 }));
 
 vi.mock('../src/background/settings.js', () => ({

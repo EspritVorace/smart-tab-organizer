@@ -44,4 +44,6 @@ export interface Session {
   note?: string;
   /** Display order (lower index = first); assigned automatically if missing */
   position?: number;
+  /** ISO 8601 date string: last time this session was restored (not an edit) */
+  lastRestoredAt?: string;
 }
