@@ -113,11 +113,14 @@ export function RuleViewMenu({ value, onChange, categories, testId }: RuleViewMe
         <DropdownMenu.Label>{getMessage('ruleViewFilterLabel')}</DropdownMenu.Label>
 
         <DropdownMenu.Sub>
-          <DropdownMenu.SubTrigger>{getMessage('ruleViewFilterByColor')}</DropdownMenu.SubTrigger>
+          <DropdownMenu.SubTrigger data-testid="page-rules-view-sub-color">
+            {getMessage('ruleViewFilterByColor')}
+          </DropdownMenu.SubTrigger>
           <DropdownMenu.SubContent>
             {colorOptions.map(option => (
               <DropdownMenu.CheckboxItem
                 key={option.value}
+                data-testid={`page-rules-view-color-${option.value}`}
                 checked={value.filterColors.includes(option.value)}
                 onCheckedChange={checked => setColor(option.value, checked)}
                 onSelect={keepOpen}
@@ -129,6 +132,7 @@ export function RuleViewMenu({ value, onChange, categories, testId }: RuleViewMe
               </DropdownMenu.CheckboxItem>
             ))}
             <DropdownMenu.CheckboxItem
+              data-testid="page-rules-view-color-none"
               checked={value.filterColors.includes(NONE)}
               onCheckedChange={checked => setColor(NONE, checked)}
               onSelect={keepOpen}
@@ -139,11 +143,14 @@ export function RuleViewMenu({ value, onChange, categories, testId }: RuleViewMe
         </DropdownMenu.Sub>
 
         <DropdownMenu.Sub>
-          <DropdownMenu.SubTrigger>{getMessage('ruleViewFilterByCategory')}</DropdownMenu.SubTrigger>
+          <DropdownMenu.SubTrigger data-testid="page-rules-view-sub-category">
+            {getMessage('ruleViewFilterByCategory')}
+          </DropdownMenu.SubTrigger>
           <DropdownMenu.SubContent>
             {cats.map(cat => (
               <DropdownMenu.CheckboxItem
                 key={cat.id}
+                data-testid={`page-rules-view-category-${cat.id}`}
                 checked={value.filterCategories.includes(cat.id)}
                 onCheckedChange={checked => setCategory(cat.id, checked)}
                 onSelect={keepOpen}
@@ -155,6 +162,7 @@ export function RuleViewMenu({ value, onChange, categories, testId }: RuleViewMe
               </DropdownMenu.CheckboxItem>
             ))}
             <DropdownMenu.CheckboxItem
+              data-testid="page-rules-view-category-none"
               checked={value.filterCategories.includes(NONE)}
               onCheckedChange={checked => setCategory(NONE, checked)}
               onSelect={keepOpen}
@@ -165,9 +173,12 @@ export function RuleViewMenu({ value, onChange, categories, testId }: RuleViewMe
         </DropdownMenu.Sub>
 
         <DropdownMenu.Sub>
-          <DropdownMenu.SubTrigger>{getMessage('ruleViewFilterByStatus')}</DropdownMenu.SubTrigger>
+          <DropdownMenu.SubTrigger data-testid="page-rules-view-sub-status">
+            {getMessage('ruleViewFilterByStatus')}
+          </DropdownMenu.SubTrigger>
           <DropdownMenu.SubContent>
             <DropdownMenu.CheckboxItem
+              data-testid="page-rules-view-status-enabled"
               checked={value.filterStatus.includes('enabled')}
               onCheckedChange={checked => setStatus('enabled', checked)}
               onSelect={keepOpen}
@@ -175,6 +186,7 @@ export function RuleViewMenu({ value, onChange, categories, testId }: RuleViewMe
               {getMessage('ruleViewStatusEnabled')}
             </DropdownMenu.CheckboxItem>
             <DropdownMenu.CheckboxItem
+              data-testid="page-rules-view-status-disabled"
               checked={value.filterStatus.includes('disabled')}
               onCheckedChange={checked => setStatus('disabled', checked)}
               onSelect={keepOpen}
@@ -192,19 +204,19 @@ export function RuleViewMenu({ value, onChange, categories, testId }: RuleViewMe
           value={value.sort}
           onValueChange={v => setSort(v as RuleSortMode)}
         >
-          <DropdownMenu.RadioItem value="manual" onSelect={keepOpen}>
+          <DropdownMenu.RadioItem value="manual" data-testid="page-rules-view-sort-manual" onSelect={keepOpen}>
             {getMessage('ruleViewSortManual')}
           </DropdownMenu.RadioItem>
-          <DropdownMenu.RadioItem value="date" onSelect={keepOpen}>
+          <DropdownMenu.RadioItem value="date" data-testid="page-rules-view-sort-date" onSelect={keepOpen}>
             {getMessage('ruleViewSortDate')}
           </DropdownMenu.RadioItem>
-          <DropdownMenu.RadioItem value="category" onSelect={keepOpen}>
+          <DropdownMenu.RadioItem value="category" data-testid="page-rules-view-sort-category" onSelect={keepOpen}>
             {getMessage('ruleViewSortCategory')}
           </DropdownMenu.RadioItem>
-          <DropdownMenu.RadioItem value="color" onSelect={keepOpen}>
+          <DropdownMenu.RadioItem value="color" data-testid="page-rules-view-sort-color" onSelect={keepOpen}>
             {getMessage('ruleViewSortColor')}
           </DropdownMenu.RadioItem>
-          <DropdownMenu.RadioItem value="domain" onSelect={keepOpen}>
+          <DropdownMenu.RadioItem value="domain" data-testid="page-rules-view-sort-domain" onSelect={keepOpen}>
             {getMessage('ruleViewSortDomain')}
           </DropdownMenu.RadioItem>
         </DropdownMenu.RadioGroup>
@@ -216,10 +228,10 @@ export function RuleViewMenu({ value, onChange, categories, testId }: RuleViewMe
               value={value.sortDirection}
               onValueChange={v => setDirection(v as RuleSortDirection)}
             >
-              <DropdownMenu.RadioItem value="asc" onSelect={keepOpen}>
+              <DropdownMenu.RadioItem value="asc" data-testid="page-rules-view-dir-asc" onSelect={keepOpen}>
                 {getMessage('ruleViewSortAscending')}
               </DropdownMenu.RadioItem>
-              <DropdownMenu.RadioItem value="desc" onSelect={keepOpen}>
+              <DropdownMenu.RadioItem value="desc" data-testid="page-rules-view-dir-desc" onSelect={keepOpen}>
                 {getMessage('ruleViewSortDescending')}
               </DropdownMenu.RadioItem>
             </DropdownMenu.RadioGroup>
@@ -234,16 +246,16 @@ export function RuleViewMenu({ value, onChange, categories, testId }: RuleViewMe
           value={value.group}
           onValueChange={v => setGroup(v as RuleGroupMode)}
         >
-          <DropdownMenu.RadioItem value="none" onSelect={keepOpen}>
+          <DropdownMenu.RadioItem value="none" data-testid="page-rules-view-group-none" onSelect={keepOpen}>
             {getMessage('ruleViewGroupNone')}
           </DropdownMenu.RadioItem>
-          <DropdownMenu.RadioItem value="category" onSelect={keepOpen}>
+          <DropdownMenu.RadioItem value="category" data-testid="page-rules-view-group-category" onSelect={keepOpen}>
             {getMessage('ruleViewGroupCategory')}
           </DropdownMenu.RadioItem>
-          <DropdownMenu.RadioItem value="color" onSelect={keepOpen}>
+          <DropdownMenu.RadioItem value="color" data-testid="page-rules-view-group-color" onSelect={keepOpen}>
             {getMessage('ruleViewGroupColor')}
           </DropdownMenu.RadioItem>
-          <DropdownMenu.RadioItem value="status" onSelect={keepOpen}>
+          <DropdownMenu.RadioItem value="status" data-testid="page-rules-view-group-status" onSelect={keepOpen}>
             {getMessage('ruleViewGroupStatus')}
           </DropdownMenu.RadioItem>
         </DropdownMenu.RadioGroup>
@@ -251,7 +263,7 @@ export function RuleViewMenu({ value, onChange, categories, testId }: RuleViewMe
         {isActive && (
           <>
             <DropdownMenu.Separator />
-            <DropdownMenu.Item onSelect={reset}>
+            <DropdownMenu.Item data-testid="page-rules-view-reset" onSelect={reset}>
               <Flex align="center" gap="2">
                 <RotateCcw size={14} aria-hidden="true" />
                 {getMessage('ruleViewResetLabel')}
