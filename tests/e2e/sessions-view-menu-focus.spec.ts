@@ -76,6 +76,7 @@ test.describe('[Sessions-view-menu] focus the first result after applying a sort
     // Close the menu: focus must move to the first resulting card (oldest),
     // not stay on the menu trigger.
     await page.keyboard.press('Escape');
+    // allow-inline-dom: generic Radix menu-state probe, not a Page Object surface.
     await expect(page.locator('[role="menu"][data-state="open"]')).toHaveCount(0);
 
     const firstCard = sessions.firstCard();
