@@ -12,6 +12,18 @@ import { goToPopup } from './helpers/navigation';
 import { clearSessions } from './helpers/seed';
 import type { BrowserContext } from '@playwright/test';
 
+async function getServiceWorker(context: BrowserContext): Promise<import('@playwright/test').Page> {
+  let sw = context.serviceWorkers()[0];
+  if (sw) return sw;
+  const deadline = Date.now() + 5000;
+  while (Date.now() < deadline) {
+    sw = context.serviceWorkers()[0];
+    if (sw) return sw;
+    await new Promise(r => setTimeout(r, 200));
+  }
+  throw new Error('Service worker not available after 5 s (idle termination?)');
+}
+
 test.beforeEach(async ({ extensionContext }) => {
   await clearSessions(extensionContext);
   await closeAllCapturableTabs(extensionContext);
@@ -26,7 +38,7 @@ const CAPTURABLE_URL = 'https://example.com';
  * for callout-presence assertions in the SnapshotWizard tests.
  */
 async function closeAllCapturableTabs(extensionContext: BrowserContext): Promise<void> {
-  const sw = extensionContext.serviceWorkers()[0];
+  const sw = await getServiceWorker(extensionContext).catch(() => null);
   if (!sw) return;
   await sw.evaluate(async () => {
     const SYSTEM_URL_PREFIXES = [
@@ -60,7 +72,7 @@ async function createTabGroupWithTitle(
   title: string,
   color: string = 'blue',
 ): Promise<{ groupId: number; tabId: number }> {
-  const sw = extensionContext.serviceWorkers()[0];
+  const sw = await getServiceWorker(extensionContext);
 
   // Use a real (non-system) URL so captureCurrentTabs() includes it
   const result = await sw.evaluate(
@@ -76,7 +88,7 @@ async function createTabGroupWithTitle(
 }
 
 async function createTab(extensionContext: BrowserContext, url: string): Promise<number> {
-  const sw = extensionContext.serviceWorkers()[0];
+  const sw = await getServiceWorker(extensionContext);
   const tabId = await sw.evaluate(async (u: string) => {
     const tab = await chrome.tabs.create({ url: u, active: false });
     return tab.id!;
@@ -85,7 +97,7 @@ async function createTab(extensionContext: BrowserContext, url: string): Promise
 }
 
 async function closeTab(extensionContext: BrowserContext, tabId: number): Promise<void> {
-  const sw = extensionContext.serviceWorkers()[0];
+  const sw = await getServiceWorker(extensionContext);
   await sw.evaluate(async (id: number) => {
     await chrome.tabs.remove(id);
   }, tabId);

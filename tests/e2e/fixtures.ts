@@ -218,15 +218,17 @@ export const test = baseTest.extend<Omit<ExtensionFixtures, 'extensionContext' |
           return rules;
         }, rule);
         await localSet(sw, { domainRules: updatedRules });
-        // Wait for storage to propagate
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Wait for storage to fully persist before returning (prevents race
+        // where a subsequent getSettings() reads stale data).
+        await new Promise(resolve => setTimeout(resolve, 150));
       },
 
       // Clear all domain rules
       clearDomainRules: async () => {
         const sw = await getServiceWorker();
         await localSet(sw, { domainRules: [] });
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Wait for storage to fully persist before returning
+        await new Promise(resolve => setTimeout(resolve, 150));
       },
 
       // Get current settings
@@ -328,9 +330,24 @@ export const test = baseTest.extend<Omit<ExtensionFixtures, 'extensionContext' |
           await newPage.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
         }
 
-        // Give the natural event chain time to complete:
-        // onTabCreated → findMiddleClickOpener → handleGroupingWithRetry → onUpdated(complete) → processGroupingForNewTab
-        await new Promise(r => setTimeout(r, 2000));
+        // Poll for a brief stable window to indicate the event chain has started processing.
+        // The full grouping/dedup logic is async and completes on onUpdated(complete),
+        // so tests should call waitForGrouping()/waitForTabGrouped() after this to wait
+        // for the final result. This avoids an arbitrary fixed sleep.
+        let lastGroupCount = -1;
+        let stableMs = 0;
+        const deadline = Date.now() + 1000; // 1s max for initial detection
+        while (Date.now() < deadline) {
+          const groups = await helpers.getTabGroups();
+          if (groups.length === lastGroupCount) {
+            stableMs += 50;
+            if (stableMs >= 100) break;
+          } else {
+            lastGroupCount = groups.length;
+            stableMs = 0;
+          }
+          await new Promise(r => setTimeout(r, 50));
+        }
 
         return newPage ?? extensionContext.pages()[extensionContext.pages().length - 1];
       },
