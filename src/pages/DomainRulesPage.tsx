@@ -65,6 +65,8 @@ interface RuleCardListProps {
   rules: DomainRuleSetting[];
   dragDisabled: boolean;
   ariaLabel: string;
+  /** Indents the cards to the right to mark them as children of a group header (mirrors the session sections). */
+  indent?: boolean;
   allRules: DomainRuleSetting[];
   selectedIds: Set<string>;
   searchTerm: string;
@@ -88,7 +90,13 @@ interface RuleCardListProps {
  */
 function RuleCardList(props: RuleCardListProps) {
   return (
-    <Flex direction="column" gap="3" role="list" aria-label={props.ariaLabel}>
+    <Flex
+      direction="column"
+      gap="3"
+      role="list"
+      aria-label={props.ariaLabel}
+      pl={props.indent ? '6' : undefined}
+    >
       {props.rules.map((rule, i) => (
         <DomainRuleCard
           key={rule.id}
@@ -668,6 +676,7 @@ export function DomainRulesPage({
                             rules={displayRules}
                             dragDisabled={!dndEnabled}
                             ariaLabel={group.label}
+                            indent
                           />
                         </DragDropProvider>
                       </Box>
