@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { DropdownMenu, Flex } from '@radix-ui/themes';
 import { RotateCcw } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
@@ -15,6 +16,13 @@ import {
 export interface SessionViewMenuProps {
   value: SessionViewState;
   onChange: (next: SessionViewState) => void;
+  /**
+   * Called once the menu closes after at least one filter/sort change, so the
+   * caller can move focus to the first resulting card (accessibility: keep the
+   * keyboard user on the first visible result). Not fired when the menu is
+   * opened and closed without any change.
+   */
+  onApplied?: () => void;
   /** Categories used to populate the category filter sub-menu. Defaults to the built-in set. */
   categories?: RuleCategory[];
   /** Prefix for the `data-testid` attributes (e.g. `page-sessions-view-unpinned`). */
@@ -35,24 +43,42 @@ function toggleInArray<T>(arr: readonly T[], item: T, checked: boolean): T[] {
 export function SessionViewMenu({
   value,
   onChange,
+  onApplied,
   categories,
   testIdPrefix = 'page-sessions-view',
 }: SessionViewMenuProps) {
   const activeOps = countActiveSessionViewOps(value);
+  const [open, setOpen] = useState(false);
+  // Tracks whether a change happened while the menu was open, so we only move
+  // focus to the first result on close when the view actually changed.
+  const changedRef = useRef(false);
+
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next);
+    if (!next && changedRef.current) {
+      changedRef.current = false;
+      onApplied?.();
+    }
+  };
+
+  const apply = (next: SessionViewState) => {
+    changedRef.current = true;
+    onChange(next);
+  };
 
   const setCategory = (id: string, checked: boolean) =>
-    onChange({ ...value, filterCategories: toggleInArray(value.filterCategories, id, checked) });
+    apply({ ...value, filterCategories: toggleInArray(value.filterCategories, id, checked) });
 
-  const setSort = (sort: SessionSortMode) => onChange({ ...value, sort });
+  const setSort = (sort: SessionSortMode) => apply({ ...value, sort });
   const setDirection = (sortDirection: SessionSortDirection) =>
-    onChange({ ...value, sortDirection });
-  const reset = () => onChange({ ...DEFAULT_SESSION_VIEW_STATE });
+    apply({ ...value, sortDirection });
+  const reset = () => apply({ ...DEFAULT_SESSION_VIEW_STATE });
 
   // Keep the menu open when toggling filters / radio items.
   const keepOpen = (event: Event) => event.preventDefault();
 
   return (
-    <DropdownMenu.Root>
+    <DropdownMenu.Root open={open} onOpenChange={handleOpenChange}>
       <ViewMenuTrigger
         activeOps={activeOps}
         label={getMessage('sessionViewMenu')}

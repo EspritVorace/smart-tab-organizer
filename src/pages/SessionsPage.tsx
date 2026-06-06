@@ -223,6 +223,15 @@ function SessionSection({
   // filter is active (the displayed order no longer maps to the real order).
   const dragDisabled = !!searchQuery || !dndEnabled;
 
+  // After a filter/sort change (menu close), move focus to the first resulting
+  // card so a keyboard/screen-reader user lands on the first visible result.
+  // Deferred so it runs after Radix restores focus to the menu trigger on close.
+  const focusFirstCard = useCallback(() => {
+    requestAnimationFrame(() => {
+      listRef.current?.querySelector<HTMLElement>('[data-session-card]')?.focus();
+    });
+  }, []);
+
   // Drag: reorder within this section, then splice back into the global order.
   const handleDragOver = useCallback((event: DragOverEvent) => {
     setDragItems(prev => move(prev ?? sessions, event));
@@ -296,6 +305,7 @@ function SessionSection({
             <SessionViewMenu
               value={viewState}
               onChange={onViewChange}
+              onApplied={focusFirstCard}
               categories={getAllCategories()}
               testIdPrefix={`page-sessions-view-${testIdSuffix}`}
             />
