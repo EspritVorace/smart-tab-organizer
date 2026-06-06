@@ -23,7 +23,16 @@ vi.mock('wxt/browser', () => {
   };
 });
 
+// updateSession touches workspace-scoped storage, which the minimal browser
+// mock above does not provide. Stub it so we can assert the restore stamping.
+vi.mock('../src/utils/sessionStorage', () => ({
+  updateSession: vi.fn(),
+}));
+
 import { browser } from 'wxt/browser';
+import { updateSession } from '../src/utils/sessionStorage';
+
+const mockUpdateSession = updateSession as ReturnType<typeof vi.fn>;
 
 const mockTabsCreate = browser.tabs.create as ReturnType<typeof vi.fn>;
 const mockTabsRemove = browser.tabs.remove as ReturnType<typeof vi.fn>;
@@ -56,6 +65,48 @@ beforeEach(() => {
   mockTabGroupsUpdate.mockResolvedValue(undefined);
   mockTabsQuery.mockResolvedValue([]);
   mockTabsRemove.mockResolvedValue(undefined);
+});
+
+describe('restoreTabs — lastRestoredAt stamping', () => {
+  it('stamps lastRestoredAt (touch:false) when a sessionId is given and tabs are created', async () => {
+    mockWindowsCreate.mockResolvedValue({ id: 42, tabs: [{ id: 1 }] });
+
+    await restoreTabs({
+      tabs: [makeTab('https://a.com')],
+      groups: [],
+      target: 'new',
+      sessionId: 'session-1',
+    });
+
+    expect(mockUpdateSession).toHaveBeenCalledTimes(1);
+    const [id, updates, options] = mockUpdateSession.mock.calls[0];
+    expect(id).toBe('session-1');
+    expect(typeof (updates as { lastRestoredAt?: string }).lastRestoredAt).toBe('string');
+    expect(options).toEqual({ touch: false });
+  });
+
+  it('does not stamp when no sessionId is provided', async () => {
+    mockWindowsCreate.mockResolvedValue({ id: 42, tabs: [{ id: 1 }] });
+
+    await restoreTabs({
+      tabs: [makeTab('https://a.com')],
+      groups: [],
+      target: 'new',
+    });
+
+    expect(mockUpdateSession).not.toHaveBeenCalled();
+  });
+
+  it('does not stamp when no tab was created', async () => {
+    await restoreTabs({
+      tabs: [],
+      groups: [],
+      target: 'current',
+      sessionId: 'session-1',
+    });
+
+    expect(mockUpdateSession).not.toHaveBeenCalled();
+  });
 });
 
 describe('restoreTabs — new window', () => {

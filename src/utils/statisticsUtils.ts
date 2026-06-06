@@ -89,6 +89,29 @@ export async function incrementStat(type: 'grouping' | 'dedup', ruleId: string):
   }
 }
 
+/**
+ * Stamp `lastUsedAt` (ISO 8601) on the rule that just grouped tabs or closed a
+ * duplicate. Re-reads the active-workspace rules right before writing to keep
+ * the race window with a concurrent user edit minimal. The synthetic
+ * `'__unmatched__'` id (used by dedup when no rule matched) is ignored.
+ */
+export async function stampRuleLastUsed(ruleId: string): Promise<void> {
+  if (!ruleId || ruleId === '__unmatched__') return;
+  try {
+    const { domainRulesItem } = await getActiveScopedItems();
+    const rules = (await domainRulesItem.getValue()) ?? [];
+    let changed = false;
+    const next = rules.map((rule) => {
+      if (rule.id !== ruleId) return rule;
+      changed = true;
+      return { ...rule, lastUsedAt: new Date().toISOString() };
+    });
+    if (changed) await domainRulesItem.setValue(next);
+  } catch (error) {
+    logger.error(`Error stamping lastUsedAt for rule ${ruleId}:`, error);
+  }
+}
+
 export async function incrementSessionEvent(
   event: SessionEventType,
   opts?: { tabsRestored?: number },

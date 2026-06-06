@@ -136,6 +136,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
         conflictResolution: target === 'current' ? conflictResolution : undefined,
         conflictAnalysis: target === 'current' ? analysis ?? undefined : undefined,
         protectedTabId,
+        sessionId: session.id,
       });
 
       onOpenChange(false);

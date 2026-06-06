@@ -41,7 +41,8 @@ export const importDomainRuleSchema = z.object({
   enabled: z.boolean(),
   badge: z.string().optional(),
   createdAt: z.string().optional(),
-  updatedAt: z.string().optional()
+  updatedAt: z.string().optional(),
+  lastUsedAt: z.string().optional()
 });
 
 export type ImportDomainRule = z.infer<typeof importDomainRuleSchema>;

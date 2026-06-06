@@ -34,6 +34,9 @@ export const sessionSchema = z.object({
   categoryId: z.string().optional().nullable(),
   note: z.string().optional(),
   position: z.number().optional(),
+  // ISO 8601 timestamp of the last time this session was restored. Distinct
+  // from updatedAt (last edit): a restore does not modify the session content.
+  lastRestoredAt: z.string().optional(),
 });
 
 export const sessionsArraySchema = z.array(sessionSchema);
