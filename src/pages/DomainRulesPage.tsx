@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { Button, Flex, Box, Kbd, Tooltip } from '@radix-ui/themes';
+import { Button, Flex, Box, Kbd, Tooltip, Separator } from '@radix-ui/themes';
 import { Plus, Eye, EyeOff, Shield, AlertCircle, Trash2, FileDown, PackagePlus } from 'lucide-react';
 import { DragDropProvider, type DragEndEvent, type DragOverEvent } from '@dnd-kit/react';
 import { move } from '@dnd-kit/helpers';
@@ -141,9 +141,16 @@ export function DomainRulesPage({
   // Transient drag preview scoped to the section (group key, or '__ungrouped__') being dragged.
   const [dragSection, setDragSection] = useState<{ key: string; items: DomainRuleSetting[] } | null>(null);
   const [viewState, setViewState] = useState<RuleViewState>(DEFAULT_RULE_VIEW_STATE);
+  // The persisted view state loads asynchronously; gate the initial list focus
+  // on it so autofocus targets the first rule of the *actual* (sorted/filtered/
+  // grouped) list rather than the transient default render.
+  const [viewLoaded, setViewLoaded] = useState(false);
 
   useEffect(() => {
-    rulesViewStateItem.getValue().then(v => setViewState(normalizeRuleViewState(v)));
+    rulesViewStateItem.getValue().then(v => {
+      setViewState(normalizeRuleViewState(v));
+      setViewLoaded(true);
+    });
   }, [rulesViewStateItem]);
 
   const handleViewChange = useCallback((next: RuleViewState) => {
@@ -221,8 +228,10 @@ export function DomainRulesPage({
     [syncSettings.domainRules, viewState, searchPredicate, searchTerm],
   );
 
+  // DOM render order: isolated (ungrouped) rules first, then the domain groups.
+  // Keep this in sync with the JSX below so keyboard navigation indices match.
   const visibleRules = useMemo(
-    () => [...viewResult.groups.flatMap(g => g.rules), ...viewResult.ungrouped],
+    () => [...viewResult.ungrouped, ...viewResult.groups.flatMap(g => g.rules)],
     [viewResult],
   );
   const visibleIds = useMemo(() => visibleRules.map(r => r.id), [visibleRules]);
@@ -332,7 +341,7 @@ export function DomainRulesPage({
   const listRef = useRef<HTMLDivElement>(null);
 
   const { handleNavigationKey } = useListNavigation(listRef, '[role="listitem"]', {
-    autoFocus: { fallbackSelector: '[data-testid="page-rules-btn-import-pack"]' },
+    autoFocus: { ready: viewLoaded, fallbackSelector: '[data-testid="page-rules-btn-import-pack"]' },
   });
 
   // The card keydown handler now only forwards arrow/Home/End to
@@ -604,6 +613,39 @@ export function DomainRulesPage({
               )}
               {viewResult.visibleCount > 0 && (
                 <Flex data-testid="page-rules-list" direction="column" gap="2" ref={listRef}>
+                  {/* Isolated rules (ungrouped / single-domain) render first. */}
+                  {viewResult.ungrouped.length > 0 && (
+                    <DragDropProvider
+                      modifiers={[RestrictToVerticalAxis]}
+                      onDragOver={
+                        viewResult.isUngroupedDndEnabled
+                          ? handleSectionDragOver('__ungrouped__', viewResult.ungrouped)
+                          : undefined
+                      }
+                      onDragEnd={
+                        viewResult.isUngroupedDndEnabled
+                          ? handleSectionDragEnd('__ungrouped__', viewResult.ungrouped, true)
+                          : undefined
+                      }
+                    >
+                      <RuleCardList
+                        {...cardListCommon}
+                        rules={
+                          dragSection?.key === '__ungrouped__'
+                            ? dragSection.items
+                            : viewResult.ungrouped
+                        }
+                        dragDisabled={!viewResult.isUngroupedDndEnabled}
+                        ariaLabel={getMessage('domainRulesTab')}
+                      />
+                    </DragDropProvider>
+                  )}
+
+                  {/* Separator between the isolated rules and the domain groups. */}
+                  {viewResult.ungrouped.length > 0 && viewResult.groups.length > 0 && (
+                    <Separator size="4" my="2" data-testid="page-rules-groups-separator" />
+                  )}
+
                   {viewResult.groups.map(group => {
                     const dndEnabled = group.isDndEnabled && domainDndAllowed;
                     const displayRules =
@@ -631,32 +673,6 @@ export function DomainRulesPage({
                       </Box>
                     );
                   })}
-                  {viewResult.ungrouped.length > 0 && (
-                    <DragDropProvider
-                      modifiers={[RestrictToVerticalAxis]}
-                      onDragOver={
-                        viewResult.isUngroupedDndEnabled
-                          ? handleSectionDragOver('__ungrouped__', viewResult.ungrouped)
-                          : undefined
-                      }
-                      onDragEnd={
-                        viewResult.isUngroupedDndEnabled
-                          ? handleSectionDragEnd('__ungrouped__', viewResult.ungrouped, true)
-                          : undefined
-                      }
-                    >
-                      <RuleCardList
-                        {...cardListCommon}
-                        rules={
-                          dragSection?.key === '__ungrouped__'
-                            ? dragSection.items
-                            : viewResult.ungrouped
-                        }
-                        dragDisabled={!viewResult.isUngroupedDndEnabled}
-                        ariaLabel={getMessage('domainRulesTab')}
-                      />
-                    </DragDropProvider>
-                  )}
                 </Flex>
               )}
             </Box>

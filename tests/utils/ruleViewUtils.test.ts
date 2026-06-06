@@ -215,6 +215,21 @@ describe('computeRuleView - domain auto-grouping', () => {
     expect(ids(res.ungrouped)).toEqual(['solo']);
   });
 
+  it('never groups regex/wildcard or empty domains, even with 2+ rules', () => {
+    const rules = [
+      makeRule('rx1', { domainFilter: '.*\\.example\\.com' }),
+      makeRule('rx2', { domainFilter: 'foo.*' }),
+      makeRule('g1', { domainFilter: 'github.com' }),
+      makeRule('g2', { domainFilter: 'docs.github.com' }),
+    ];
+    const res = computeRuleView(rules, view({ sort: 'domain' }), noSearch);
+    // Only the real github.com domain forms a group.
+    expect(res.groups.map(g => g.key)).toEqual(['domain:github.com']);
+    // The two regex rules stay isolated despite being 2.
+    expect(ids(res.ungrouped)).toEqual(expect.arrayContaining(['rx1', 'rx2']));
+    expect(res.groups.some(g => g.key.includes('__regex__'))).toBe(false);
+  });
+
   it('domain group rules follow real order even when filtered', () => {
     const rules = [
       makeRule('g2', { domainFilter: 'b.github.com', color: 'blue' }),

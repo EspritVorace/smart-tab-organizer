@@ -266,4 +266,71 @@ test.describe('View menu sort by domain', () => {
     expect(labels.indexOf('GH Two')).toBeLessThan(labels.indexOf('GH One'));
     expect(labels).toContain('Solo');
   });
+
+  test('isolated rules (incl. regex) render before the domain groups, separated', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    await helpers.addDomainRule({ label: 'GH One', domainFilter: 'github.com' });
+    await helpers.addDomainRule({ label: 'GH Two', domainFilter: 'docs.github.com' });
+    await helpers.addDomainRule({ label: 'Solo', domainFilter: 'solo.com' });
+    await helpers.addDomainRule({ label: 'Regexy', domainFilter: '.*\\.example\\.com' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    await openViewMenu(page);
+    await selectMenuItem(page, 'page-rules-view-sort-domain');
+    await closeMenus(page);
+
+    // Only the real github.com domain forms a group; regex rules are never grouped.
+    const ghGroup = page.getByTestId('page-rules-group-domain:github.com');
+    await expect(ghGroup).toBeVisible();
+    await expect(page.getByTestId('page-rules-group-domain:__regex__')).toHaveCount(0);
+    await expect(page.getByRole('listitem', { name: /Regexy/i })).toBeVisible();
+
+    // A separator divides the isolated rules from the groups.
+    await expect(page.getByTestId('page-rules-groups-separator')).toBeVisible();
+
+    // Isolated rules (Solo, Regexy) render ABOVE the github group (lower y).
+    const soloBox = await page.getByRole('listitem', { name: /Solo/i }).boundingBox();
+    const ghHeaderBox = await ghGroup.boundingBox();
+    expect(soloBox!.y).toBeLessThan(ghHeaderBox!.y);
+
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Initial focus with a persisted filter (regression)
+// ---------------------------------------------------------------------------
+test.describe('View menu initial focus', () => {
+  test('initial focus targets the first visible rule when a filter is persisted', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    await helpers.addDomainRule({ label: 'Active One', domainFilter: 'a.com', enabled: true });
+    await helpers.addDomainRule({ label: 'Disabled One', domainFilter: 'b.com', enabled: false });
+
+    // Apply (and persist) a status filter that hides the first rule.
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+    await openViewMenu(page);
+    await openSubmenu(page, 'page-rules-view-sub-status');
+    await selectMenuItem(page, 'page-rules-view-status-disabled');
+    await closeMenus(page);
+    await expect(page.getByRole('listitem')).toHaveCount(1);
+    await page.close();
+
+    // Re-open the page: autofocus must land on the first *visible* (filtered)
+    // rule, not the now-hidden first rule of the unfiltered list.
+    const page2 = await extensionContext.newPage();
+    await goToDomainRulesSection(page2, extensionId);
+    const firstCard = page2.getByTestId('page-rules-list').getByRole('listitem').first();
+    await expect(firstCard).toBeFocused();
+    await expect(firstCard).toHaveAttribute('aria-label', /Disabled One/);
+    await page2.close();
+  });
 });
