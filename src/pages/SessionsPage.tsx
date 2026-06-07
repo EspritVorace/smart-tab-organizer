@@ -14,10 +14,19 @@ import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
 import { ListToolbar } from '@/components/UI/ListToolbar';
 import { BulkActionsBar } from '@/components/UI/BulkActionsBar';
 import { ExportSessionsWizard } from '@/components/UI/ImportExportWizards/ExportSessionsWizard';
+import { SessionViewMenu } from '@/components/UI/SessionViewMenu/SessionViewMenu';
 import { getMessage } from '@/utils/i18n';
 import { foldAccents } from '@/utils/stringUtils';
 import { matchSessionSearch, splitByPinned, getFocusedSessionFromDOM } from '@/utils/sessionUtils';
 import { moveSessionToFirstInGroup, moveSessionToLastInGroup } from '@/utils/sessionOrderUtils';
+import {
+  computeSessionView,
+  normalizeSessionViewState,
+  DEFAULT_SESSION_VIEW_STATE,
+  type SessionViewState,
+} from '@/utils/sessionViewUtils';
+import { getAllCategories } from '@/utils/categoriesStore';
+import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
 import { useSessions } from '@/hooks/useSessions';
 import type { SessionsSubTab } from '@/hooks/useDeepLinking';
 import { useShortcuts } from '@/hooks/useShortcuts';
@@ -79,12 +88,24 @@ interface SessionsPageProps {
   onSessionsTabChange?: (tab: SessionsSubTab) => void;
 }
 
-function SectionHeader({ icon: Icon, titleKey, count }: { icon: LucideIcon; titleKey: string; count: number }) {
+function SectionHeader({
+  icon: Icon,
+  titleKey,
+  count,
+  action,
+}: {
+  icon: LucideIcon;
+  titleKey: string;
+  count: number;
+  /** Optional control rendered on the right of the header (e.g. the filter/sort menu). */
+  action?: React.ReactNode;
+}) {
   return (
     <Flex align="center" gap="2">
       <Icon size={16} aria-hidden="true" style={{ color: 'var(--accent-9)' }} />
       <Text size="3" weight="bold">{getMessage(titleKey)}</Text>
       <Badge variant="soft" size="1">{count}</Badge>
+      {action && <Box style={{ marginLeft: 'auto' }}>{action}</Box>}
     </Flex>
   );
 }
@@ -147,6 +168,18 @@ interface SessionSectionProps {
   }>;
   /** Suffix appended to bulk testIds (e.g. 'pinned' / 'unpinned' / 'archived'). */
   testIdSuffix: BulkScope;
+  /**
+   * Filter/sort view state for this section. When provided, the section header
+   * renders a SessionViewMenu on the right. Omitted for the pinned section.
+   */
+  viewState?: SessionViewState;
+  onViewChange?: (next: SessionViewState) => void;
+  /**
+   * Whether drag-and-drop reordering is allowed. Defaults to true. False when a
+   * non-manual sort or a category filter is active (display order differs from
+   * the real order), in addition to the existing search guard.
+   */
+  dndEnabled?: boolean;
 }
 
 function SessionSection({
@@ -180,9 +213,24 @@ function SessionSection({
   onBulkExportRequest,
   bulkExtraActions,
   testIdSuffix,
+  viewState,
+  onViewChange,
+  dndEnabled = true,
 }: SessionSectionProps) {
   const [dragItems, setDragItems] = useState<Session[] | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  // Drag is off during search, and whenever a non-manual sort or a category
+  // filter is active (the displayed order no longer maps to the real order).
+  const dragDisabled = !!searchQuery || !dndEnabled;
+
+  // After a filter/sort change (menu close), move focus to the first resulting
+  // card so a keyboard/screen-reader user lands on the first visible result.
+  // Deferred so it runs after Radix restores focus to the menu trigger on close.
+  const focusFirstCard = useCallback(() => {
+    requestAnimationFrame(() => {
+      listRef.current?.querySelector<HTMLElement>('[data-session-card]')?.focus();
+    });
+  }, []);
 
   // Drag: reorder within this section, then splice back into the global order.
   const handleDragOver = useCallback((event: DragOverEvent) => {
@@ -248,7 +296,22 @@ function SessionSection({
   if (sessions.length === 0 && searchQuery) return null;
   return (
     <Box>
-      <SectionHeader icon={icon} titleKey={titleKey} count={sessions.length} />
+      <SectionHeader
+        icon={icon}
+        titleKey={titleKey}
+        count={sessions.length}
+        action={
+          viewState && onViewChange ? (
+            <SessionViewMenu
+              value={viewState}
+              onChange={onViewChange}
+              onApplied={focusFirstCard}
+              categories={getAllCategories()}
+              testIdPrefix={`page-sessions-view-${testIdSuffix}`}
+            />
+          ) : undefined
+        }
+      />
       <Box mt="3">
         {selectedIds.size > 0 && (
           <BulkActionsBar
@@ -336,7 +399,7 @@ function SessionSection({
                   searchMatchingGroupIds={searchMatch?.matchingGroupIds}
                   searchQuery={searchQuery || undefined}
                   index={index}
-                  isDragDisabled={!!searchQuery}
+                  isDragDisabled={dragDisabled}
                   onMoveToFirst={() => handleMoveToFirst(session)}
                   onMoveLast={() => handleMoveLast(session)}
                   onCardKeyDown={(e) => handleCardKeyDown(e, index)}
@@ -366,6 +429,7 @@ export function SessionsPage({
   onSessionsTabChange,
 }: SessionsPageProps) {
   const { openImportSessions } = useImportExportWizards();
+  const { scopedItems } = useActiveWorkspaceContext();
   const [bulkExportIds, setBulkExportIds] = useState<string[] | null>(null);
   // Archives are watched continuously here: the PageUp/PageDown section
   // navigation needs to know whether an archived block exists (and reach its
@@ -412,6 +476,43 @@ export function SessionsPage({
   const [selectedArchivedIds, setSelectedArchivedIds] = useState<Set<string>>(new Set());
   const [quickRestoreMessage, setQuickRestoreMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Per-section filter/sort view state, persisted independently (workspace-scoped).
+  const sessionsViewStateItem = scopedItems.sessionsViewStateItem;
+  const archivedSessionsViewStateItem = scopedItems.archivedSessionsViewStateItem;
+  const [normalViewState, setNormalViewState] = useState<SessionViewState>(DEFAULT_SESSION_VIEW_STATE);
+  const [archivedViewState, setArchivedViewState] = useState<SessionViewState>(DEFAULT_SESSION_VIEW_STATE);
+  // Tracks whether the persisted view (sort/filter) has been applied, so the
+  // arrival autofocus waits for the sorted order instead of landing on the
+  // first manual-order card and ending up stale once the sort kicks in.
+  const [viewLoaded, setViewLoaded] = useState(false);
+
+  useEffect(() => {
+    let normalDone = false;
+    let archivedDone = false;
+    const settle = () => {
+      if (normalDone && archivedDone) setViewLoaded(true);
+    };
+    sessionsViewStateItem.getValue().then(v => {
+      setNormalViewState(normalizeSessionViewState(v));
+      normalDone = true;
+      settle();
+    });
+    archivedSessionsViewStateItem.getValue().then(v => {
+      setArchivedViewState(normalizeSessionViewState(v));
+      archivedDone = true;
+      settle();
+    });
+  }, [sessionsViewStateItem, archivedSessionsViewStateItem]);
+
+  const handleNormalViewChange = useCallback((next: SessionViewState) => {
+    setNormalViewState(next);
+    sessionsViewStateItem.setValue(next).catch(() => {});
+  }, [sessionsViewStateItem]);
+  const handleArchivedViewChange = useCallback((next: SessionViewState) => {
+    setArchivedViewState(next);
+    archivedSessionsViewStateItem.setValue(next).catch(() => {});
+  }, [archivedSessionsViewStateItem]);
   // Section a pending PageUp/PageDown jump should land on once the (possibly
   // freshly switched) sub-tab has rendered its cards. Null when idle.
   const [pendingBucketFocus, setPendingBucketFocus] = useState<SessionBucket | null>(null);
@@ -666,6 +767,19 @@ export function SessionsPage({
     [displayedSessions],
   );
 
+  // Apply the per-section filter/sort view on top of the search-filtered lists.
+  const searchActive = searchQuery.length > 0;
+  const normalView = useMemo(
+    () => computeSessionView(unpinnedSessions, normalViewState, { searchActive }),
+    [unpinnedSessions, normalViewState, searchActive],
+  );
+  const archivedView = useMemo(
+    () => computeSessionView(displayedSessions, archivedViewState, { searchActive }),
+    [displayedSessions, archivedViewState, searchActive],
+  );
+  const normalSessions = normalView.sessions;
+  const archivedSessions = archivedView.sessions;
+
   // --- PageUp/PageDown navigation between session sections ---
   // Logical block order is pinned -> active -> archived. Archived lives on a
   // separate sub-tab, so a jump into/out of it switches tabs and defers the
@@ -684,14 +798,14 @@ export function SessionsPage({
   const firstIdForBucket = useCallback(
     (bucket: SessionBucket): string | undefined => {
       if (bucket === 'archived') {
-        return (sessionsTab === 'archived' ? displayedSessions : archivedBucket)[0]?.id;
+        return (sessionsTab === 'archived' ? archivedSessions : archivedBucket)[0]?.id;
       }
       if (sessionsTab === 'active') {
-        return (bucket === 'pinned' ? pinnedSessions : unpinnedSessions)[0]?.id;
+        return (bucket === 'pinned' ? pinnedSessions : normalSessions)[0]?.id;
       }
       return (bucket === 'pinned' ? pinnedBucket : activeBucket)[0]?.id;
     },
-    [sessionsTab, displayedSessions, archivedBucket, pinnedSessions, unpinnedSessions, pinnedBucket, activeBucket],
+    [sessionsTab, archivedSessions, archivedBucket, pinnedSessions, normalSessions, pinnedBucket, activeBucket],
   );
 
   const handleSectionJump = useCallback(
@@ -755,12 +869,12 @@ export function SessionsPage({
   }, [pinnedSessions]);
 
   useEffect(() => {
-    setSelectedUnpinnedIds(prev => pruneSelection(prev, unpinnedSessions));
-  }, [unpinnedSessions]);
+    setSelectedUnpinnedIds(prev => pruneSelection(prev, normalSessions));
+  }, [normalSessions]);
 
   useEffect(() => {
-    setSelectedArchivedIds(prev => pruneSelection(prev, displayedSessions));
-  }, [displayedSessions]);
+    setSelectedArchivedIds(prev => pruneSelection(prev, archivedSessions));
+  }, [archivedSessions]);
 
   const handleSaveSession = useCallback(
     async (session: Session) => {
@@ -891,7 +1005,9 @@ export function SessionsPage({
   const sessionsListRef = useRef<HTMLDivElement>(null);
   useListNavigation(sessionsListRef, '[data-session-card]', {
     autoFocus: {
-      ready: isLoaded && !archivedOnlyView,
+      // Wait for the persisted view so the focus lands on the first *sorted*
+      // visible card, not the first manual-order one.
+      ready: isLoaded && viewLoaded && !archivedOnlyView,
       fallbackSelector: '[data-testid="page-sessions-btn-snapshot"]',
     },
   });
@@ -1052,7 +1168,10 @@ export function SessionsPage({
                   emptyTitleKey="unpinnedSessionsEmptyTitle"
                   emptyDescriptionKey="unpinnedSessionsEmptyDescription"
                   bucket="active"
-                  sessions={unpinnedSessions}
+                  sessions={normalSessions}
+                  viewState={normalViewState}
+                  onViewChange={handleNormalViewChange}
+                  dndEnabled={normalView.isDndEnabled}
                   selectedIds={selectedUnpinnedIds}
                   onSelectionChange={setSelectedUnpinnedIds}
                   onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'unpinned', ids })}
@@ -1084,7 +1203,10 @@ export function SessionsPage({
                   emptyTitleKey="archivedSessionsEmptyTitle"
                   emptyDescriptionKey="archivedSessionsEmptyDescription"
                   bucket="archived"
-                  sessions={displayedSessions}
+                  sessions={archivedSessions}
+                  viewState={archivedViewState}
+                  onViewChange={handleArchivedViewChange}
+                  dndEnabled={archivedView.isDndEnabled}
                   selectedIds={selectedArchivedIds}
                   onSelectionChange={setSelectedArchivedIds}
                   onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'archived', ids })}
