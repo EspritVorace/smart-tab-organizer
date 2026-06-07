@@ -1,6 +1,5 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import starlightLlmsTxt from 'starlight-llms-txt';
 import icon from 'astro-icon';
 import tailwindcss from '@tailwindcss/vite';
 
@@ -50,13 +49,6 @@ export default defineConfig({
     starlight({
       title: 'SmartTab Organizer',
       favicon: '/favicon.svg',
-      plugins: [
-        starlightLlmsTxt({
-          projectName: 'SmartTab Organizer',
-          description:
-            "Documentation de l'extension SmartTab Organizer (groupement, deduplication, sessions).",
-        }),
-      ],
       customCss: ['./src/styles/global.css'],
       components: {
         // Inject schema.org JSON-LD structured data (GEO) on every page.

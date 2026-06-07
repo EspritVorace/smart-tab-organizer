@@ -20,7 +20,6 @@
     "astro": "^6.3.8",
     "astro-icon": "^1.1.5",
     "sharp": "^0.34.5",
-    "starlight-llms-txt": "^0.10.0",
     "tailwindcss": "^4.2.2"
   },
   "devDependencies": {
