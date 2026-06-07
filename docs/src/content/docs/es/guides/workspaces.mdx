@@ -59,6 +59,24 @@ El `PopupWorkspaceSwitcher` ofrece la misma mecánica en el popup. Práctico par
   </TabItem>
 </Tabs>
 
+### Con el teclado
+
+Tres secuencias de teclado recorren los espacios de trabajo sin pasar por el
+selector, desde la página Opciones o el popup:
+
+| Secuencia | Efecto |
+|---|---|
+| `W` y luego `N` | Pasar al espacio siguiente |
+| `W` y luego `P` | Pasar al espacio anterior |
+| `W` y luego `L` | Volver al último espacio utilizado |
+
+Para cambiar desde cualquier pestaña del navegador, también existen tres
+**comandos globales**: `switch-workspace-next`, `switch-workspace-prev` y
+`switch-workspace-last`. No están asignados a ninguna tecla por defecto; tú les
+asignas el atajo que prefieras desde `chrome://extensions/shortcuts`.
+
+Consulta [Atajos de teclado](/reference/raccourcis-clavier) para la lista completa.
+
 Al cambiar de espacio de trabajo:
 
 - la página **Reglas** ya solo muestra las reglas del espacio de destino;

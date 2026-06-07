@@ -59,6 +59,24 @@ Le `PopupWorkspaceSwitcher` reprend la même mécanique dans la popup. Pratique 
   </TabItem>
 </Tabs>
 
+### Au clavier
+
+Trois séquences clavier font défiler les workspaces sans passer par le sélecteur,
+depuis la page Options ou la popup :
+
+| Séquence | Effet |
+|---|---|
+| `W` puis `N` | Passer au workspace suivant |
+| `W` puis `P` | Passer au workspace précédent |
+| `W` puis `L` | Revenir au dernier workspace utilisé |
+
+Pour basculer depuis n'importe quel onglet du navigateur, trois **commandes
+globales** existent aussi : `switch-workspace-next`, `switch-workspace-prev` et
+`switch-workspace-last`. Elles ne sont liées à aucune touche par défaut ; vous
+leur assignez le raccourci de votre choix depuis `chrome://extensions/shortcuts`.
+
+Voir [Raccourcis clavier](/reference/raccourcis-clavier) pour la liste complète.
+
 Quand vous changez de workspace :
 
 - la page **Règles** n'affiche plus que les règles du workspace cible ;

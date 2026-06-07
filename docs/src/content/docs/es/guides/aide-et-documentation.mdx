@@ -1,0 +1,67 @@
+---
+title: Ayuda y documentación
+description: "La ayuda integrada en la extensión: panel de atajos, documentación contextual (F1), consejos de la página de inicio y pantalla de bienvenida."
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+La extensión incorpora varios puntos de ayuda para que nunca tengas que buscar:
+un panel de atajos, una documentación contextual, consejos en la página de inicio
+y una pantalla de bienvenida para los recién llegados.
+
+## El panel de atajos
+
+Pulsa `?` desde el popup o la página Opciones para abrir el **panel de atajos**.
+Es una referencia rápida de todos los comandos de teclado disponibles, agrupados
+por superficie (popup, navegación de Opciones, listas de reglas o de sesiones,
+acciones de tarjeta, atajos globales).
+
+El contenido del panel se deriva del registro central de atajos, por lo que
+siempre se mantiene sincronizado con los atajos realmente activos. Los comandos
+globales muestran la tecla que les hayas asignado en el navegador en lugar de un
+valor por defecto.
+
+## Documentación contextual
+
+Pulsa `F1` desde la página Opciones para abrir, en una pestaña nueva, la página
+de esta documentación que corresponde a la pestaña actual. No hace falta buscar
+la página correcta: la extensión te lleva directamente, en el idioma de la
+interfaz (francés, inglés o español).
+
+| Pestaña de Opciones | Página abierta |
+|---|---|
+| Inicio | Por qué esta extensión |
+| Reglas | Reglas de dominio |
+| Sesiones | Sesiones |
+| Estadísticas | Estadísticas |
+| Importar / Exportar | Importar / Exportar |
+| Ajustes | Ajustes |
+| Espacios de trabajo | Espacios de trabajo |
+
+También hay un botón de documentación en la cabecera, junto al selector de tema.
+
+## Consejos de la página de inicio
+
+La página de inicio muestra una sección de **Consejos** que destaca funciones
+útiles, a menudo desconocidas. Los consejos se desplazan en un carrusel, con
+navegación por flechas y puntos.
+
+## La bienvenida de incorporación
+
+En el primer arranque, la página de inicio muestra una pantalla de bienvenida que
+resume los tres pilares de la extensión (agrupar, deduplicar, guardar) y ofrece
+dos acciones directas: **importar un pack** de reglas listas para usar, o **crear
+una primera regla**.
+
+<Aside type="tip">
+Toda la documentación sigue siendo accesible sin conexión mediante `F1` una vez
+que el navegador almacena la página en caché, y en línea en [docs.esprit-vorace.fr](https://docs.esprit-vorace.fr).
+</Aside>
+
+## Siguiente paso
+
+<CardGrid>
+  <LinkCard title="Atajos de teclado" href="/reference/raccourcis-clavier" description="La lista completa de atajos, por superficie." />
+  <LinkCard title="La página de inicio" href="/decouverte/page-accueil" description="Perfiles anclados, acciones rápidas y consejos." />
+  <LinkCard title="Reglas de dominio" href="/guides/regles-de-domaine" description="El centro neurálgico de la extensión." />
+</CardGrid>
