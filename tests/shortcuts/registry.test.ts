@@ -110,7 +110,8 @@ describe('SHORTCUTS_REGISTRY', () => {
   });
 
   it('contains the expected number of entries per group (parity with legacy panel)', () => {
-    expect(getShortcutsByGroup('global')).toHaveLength(4);
+    expect(getShortcutsByGroup('global')).toHaveLength(7);
+    expect(getShortcutsByGroup('workspace')).toHaveLength(3);
     expect(getShortcutsByGroup('popup')).toHaveLength(5);
     expect(getShortcutsByGroup('options')).toHaveLength(11);
     expect(getShortcutsByGroup('list-rules')).toHaveLength(11);
@@ -141,12 +142,34 @@ describe('SHORTCUTS_REGISTRY', () => {
     expect(offending).toEqual([]);
   });
 
+  it('reserves w as a sequence prefix in the global scope', () => {
+    const globalScope = getShortcutsByScope('global');
+    expect(globalScope.length).toBeGreaterThan(0);
+
+    const offending: { id: string; combo: string }[] = [];
+    for (const entry of globalScope) {
+      for (const binding of entry.defaultBindings) {
+        // Only simple combos can shadow a sequence prefix; sequences are fine.
+        const combos = typeof binding === 'string' ? [binding] : [];
+        for (const combo of combos) {
+          if (parseCombo(combo).key === 'w') {
+            offending.push({ id: entry.id, combo });
+          }
+        }
+      }
+    }
+    expect(offending).toEqual([]);
+  });
+
   it('attaches commandName only on global manifest entries', () => {
     const withCommand = Object.values(SHORTCUTS_REGISTRY).filter((e) => e.commandName);
     expect(withCommand.map((e) => e.commandName).sort()).toEqual([
       '_execute_action',
       'organize-all-tabs',
       'save-current-window-session',
+      'switch-workspace-last',
+      'switch-workspace-next',
+      'switch-workspace-prev',
     ]);
     for (const entry of withCommand) {
       expect(entry.scope).toBe('global');

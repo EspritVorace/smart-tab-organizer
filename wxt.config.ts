@@ -125,6 +125,19 @@ export default defineConfig({
       'save-current-window-session': {
         description: '__MSG_cmdSaveSession__',
       },
+      // Workspace switching from any tab. No `suggested_key` (same letter
+      // -conflict reasoning as the two commands above); the user assigns them
+      // via chrome://extensions/shortcuts. In the popup/options the `w n`/`w p`
+      // /`w l` in-page sequences cover the same actions.
+      'switch-workspace-next': {
+        description: '__MSG_cmdSwitchWorkspaceNext__',
+      },
+      'switch-workspace-prev': {
+        description: '__MSG_cmdSwitchWorkspacePrev__',
+      },
+      'switch-workspace-last': {
+        description: '__MSG_cmdSwitchWorkspaceLast__',
+      },
       // Single global default: a digit combo avoids the letter conflicts above
       // and is free on Chrome and Firefox (Ctrl+Shift+digit is unbound; plain
       // Ctrl+1..8 selects tabs). On macOS Cmd+Shift+1 is not OS-reserved.

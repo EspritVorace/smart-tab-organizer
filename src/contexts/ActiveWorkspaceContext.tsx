@@ -10,6 +10,8 @@ import {
   type ScopedItems,
 } from '@/utils/workspaceStorage.js';
 import type { WorkspaceMeta, WorkspaceAccentColor } from '@/schemas/workspace.js';
+import { performWorkspaceSwitch } from '@/utils/workspaceSwitch.js';
+import { previousWorkspaceIdItem } from '@/utils/workspaceStorage.js';
 import { logger } from '@/utils/logger.js';
 
 export interface ActiveWorkspaceContextValue {
@@ -104,15 +106,11 @@ export function ActiveWorkspaceProvider({ children }: ActiveWorkspaceProviderPro
   }, []);
 
   const switchTo = useCallback(async (id: string) => {
-    // Stamp lastActivatedAt on the target workspace. The default workspace may
-    // be absent from the index: the map leaves it untouched, and we still flip
-    // the active id below so the switch always happens.
-    const current = (await workspacesIndexItem.getValue()) ?? [];
-    const next = current.map((w) =>
-      w.id === id ? { ...w, lastActivatedAt: new Date().toISOString() } : w,
-    );
-    await workspacesIndexItem.setValue(next);
-    await activeWorkspaceIdItem.setValue(id);
+    // Delegate to the shared switch routine so the "previous workspace" pointer
+    // (powering the "last used" shortcut) stays in sync no matter how the
+    // switch was triggered. It stamps lastActivatedAt on the target and records
+    // the outgoing workspace as the previous one.
+    await performWorkspaceSwitch(id);
   }, []);
 
   const createWorkspace = useCallback(
@@ -127,6 +125,12 @@ export function ActiveWorkspaceProvider({ children }: ActiveWorkspaceProviderPro
       };
       const current = (await workspacesIndexItem.getValue()) ?? [];
       await workspacesIndexItem.setValue([...current, meta]);
+      // Creating a workspace auto-switches to it: record the outgoing one as
+      // the previous pointer so "last used" can jump straight back.
+      const outgoing = (await activeWorkspaceIdItem.getValue()) ?? DEFAULT_WORKSPACE_ID;
+      if (outgoing !== meta.id) {
+        await previousWorkspaceIdItem.setValue(outgoing);
+      }
       await activeWorkspaceIdItem.setValue(meta.id);
       return meta;
     },
@@ -169,6 +173,13 @@ export function ActiveWorkspaceProvider({ children }: ActiveWorkspaceProviderPro
     if (currentActive === id) {
       const fallback = next.find((w) => w.id === DEFAULT_WORKSPACE_ID) ?? next[0];
       await activeWorkspaceIdItem.setValue(fallback.id);
+    }
+
+    // Drop a now-dangling "last used" pointer so the shortcut never targets a
+    // deleted workspace.
+    const previous = await previousWorkspaceIdItem.getValue();
+    if (previous === id) {
+      await previousWorkspaceIdItem.setValue(null);
     }
 
     await deleteScopedKeys(id);

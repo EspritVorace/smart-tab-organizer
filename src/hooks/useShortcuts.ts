@@ -166,6 +166,12 @@ export function useShortcuts(
       for (const { entry, action } of scoped) {
         for (const binding of entry.defaultBindings) {
           if (!matchesBinding(candidateBuffer, binding as Binding, event)) continue;
+          // A single-key action must not fire when the key was already consumed
+          // by an earlier-registered handler, typically the tail of a sequence
+          // in another hook (e.g. `w p` switching workspaces in the popup must
+          // not also trigger the `p` "open options" action). Sequence bindings
+          // are unaffected: they keep completing even after preventDefault.
+          if (typeof binding === 'string' && event.defaultPrevented) continue;
           if (!passesContextualFilters(entry, event)) {
             reset();
             return true;

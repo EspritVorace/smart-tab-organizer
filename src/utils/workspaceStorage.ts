@@ -182,6 +182,18 @@ export const activeWorkspaceIdItem = storage.defineItem<string>(
   { defaultValue: DEFAULT_WORKSPACE_ID },
 );
 
+/**
+ * ID of the workspace that was active right before the current one. Powers the
+ * "last used workspace" shortcut (a two-entry MRU: a single back-and-forth
+ * pointer, not a full ring). `null` until the first switch happens. Updated by
+ * every switch path (`performWorkspaceSwitch`) so the keyboard, the dropdown
+ * and the background command layer stay consistent.
+ */
+export const previousWorkspaceIdItem = storage.defineItem<string | null>(
+  'local:previousWorkspaceId',
+  { defaultValue: null },
+);
+
 /** Test-only helper to clear the scoped-items memo. */
 export function _resetWorkspaceItemsCacheForTests(): void {
   scopedItemsCache.clear();

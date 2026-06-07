@@ -77,7 +77,9 @@ first key must never be reused as a simple combo within the same scope
 ```
 
 `tests/shortcuts/registry.test.ts` enforces that the prefixes `i` and `e` are
-not also reserved by simple combos on `page:importexport`.
+not also reserved by simple combos on `page:importexport`, and that `w` (the
+workspace-switch prefix: `w n` / `w p` / `w l`) stays free as a simple combo on
+the `global` scope.
 
 ## Adding a widget shortcut (focused card)
 

@@ -92,6 +92,36 @@ describe('useShortcuts (facade)', () => {
     dispatch({ key: '/' });
     expect(action).toHaveBeenCalledTimes(1);
   });
+
+  it('does not fire a single-key action consumed as a sequence tail by an earlier hook', () => {
+    const switchPrev = vi.fn();
+    const openOptions = vi.fn();
+    // The workspace (global) hook is registered first, so it runs first and
+    // completes `w p`, calling preventDefault. The popup `p` single-key action
+    // must then be suppressed instead of double-firing.
+    renderHook(() => {
+      useShortcuts({ 'workspace.prev': switchPrev }, { scope: 'global' });
+      useShortcuts({ 'popup.options': openOptions }, { scope: 'page:popup' });
+    });
+
+    dispatch({ key: 'w' });
+    dispatch({ key: 'p' });
+
+    expect(switchPrev).toHaveBeenCalledTimes(1);
+    expect(openOptions).not.toHaveBeenCalled();
+  });
+
+  it('still fires a lone single-key action that is not preceded by a sequence', () => {
+    const openOptions = vi.fn();
+    renderHook(() => {
+      useShortcuts({ 'workspace.prev': vi.fn() }, { scope: 'global' });
+      useShortcuts({ 'popup.options': openOptions }, { scope: 'page:popup' });
+    });
+
+    // A bare `p` (no `w` prefix buffered) must still open options.
+    dispatch({ key: 'p' });
+    expect(openOptions).toHaveBeenCalledTimes(1);
+  });
 });
 
 function dispatchOn(

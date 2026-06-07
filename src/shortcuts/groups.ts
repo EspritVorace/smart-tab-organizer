@@ -32,6 +32,7 @@ export const GROUP_DESCRIPTORS: Record<ShortcutGroupId, ShortcutGroupDescriptor>
   global: { id: 'global', titleKey: 'shortcutsGroupGlobal', topLevel: true },
   options: { id: 'options', titleKey: 'shortcutsGroupOptions', topLevel: true },
   popup: { id: 'popup', titleKey: 'shortcutsGroupPopup', topLevel: true },
+  workspace: { id: 'workspace', titleKey: 'shortcutsGroupWorkspace', topLevel: true },
   'list-home': {
     id: 'list-home',
     titleKey: 'shortcutsGroupListHome',
@@ -85,6 +86,7 @@ export const TOP_LEVEL_GROUP_ORDER: ShortcutGroupId[] = [
   'list-stats',
   'importexport',
   'list-workspaces',
+  'workspace',
   'options',
   'popup',
   'global',
@@ -104,6 +106,7 @@ export const VISIBLE_GROUPS_BY_SURFACE: Record<Surface, ShortcutGroupId[]> = {
     'list-stats',
     'importexport',
     'list-workspaces',
+    'workspace',
     'options',
     'popup',
     'global',
@@ -159,6 +162,11 @@ export function isGroupOpenByDefault(
     case 'global':
     case 'options':
       return true;
+    case 'workspace':
+      // Relevant everywhere (works on every surface); open by default in the
+      // drawer and when managing workspaces, collapsed on other options pages
+      // to keep them tidy.
+      return pageContext === undefined || pageContext === 'workspaces';
     case 'popup':
       return pageContext === undefined;
     case 'list-home':

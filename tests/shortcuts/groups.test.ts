@@ -27,7 +27,7 @@ describe('getDisplayTree("popup")', () => {
 });
 
 describe('getDisplayTree("options")', () => {
-  it('returns the 9 top-level groups in sidebar order (page groups first, options/popup next, global last)', () => {
+  it('returns the 10 top-level groups in sidebar order (page groups first, workspace/options/popup next, global last)', () => {
     const tree = getDisplayTree('options');
     expect(tree.map((n) => n.descriptor.id)).toEqual([
       'list-home',
@@ -36,6 +36,7 @@ describe('getDisplayTree("options")', () => {
       'list-stats',
       'importexport',
       'list-workspaces',
+      'workspace',
       'options',
       'popup',
       'global',
@@ -49,7 +50,7 @@ describe('getDisplayTree("options")', () => {
     );
     expect(subIdsByGroup['list-home']).toEqual(['session-card']);
     expect(subIdsByGroup['list-sessions']).toEqual(['session-card']);
-    for (const id of ['global', 'list-rules', 'list-workspaces', 'importexport', 'options', 'popup'] as const) {
+    for (const id of ['global', 'list-rules', 'list-workspaces', 'workspace', 'importexport', 'options', 'popup'] as const) {
       expect(subIdsByGroup[id]).toEqual([]);
     }
   });
