@@ -368,6 +368,15 @@ export function DomainRulesPage({
     autoFocus: { ready: viewLoaded, fallbackSelector: '[data-testid="page-rules-btn-import-pack"]' },
   });
 
+  // After a filter/sort/group change (view menu close), move focus to the first
+  // resulting rule so a keyboard/screen-reader user lands on the first visible
+  // result. Deferred so it runs after Radix restores focus to the menu trigger.
+  const focusFirstRule = useCallback(() => {
+    requestAnimationFrame(() => {
+      listRef.current?.querySelector<HTMLElement>('[role="listitem"]')?.focus();
+    });
+  }, []);
+
   // The card keydown handler now only forwards arrow/Home/End to
   // useListNavigation. The Enter binding is kept here because Enter to
   // open the editor is a card-local interaction that is not in the registry
@@ -553,6 +562,7 @@ export function DomainRulesPage({
                   <RuleViewMenu
                     value={viewState}
                     onChange={handleViewChange}
+                    onApplied={focusFirstRule}
                     testId="page-rules-btn-view"
                   />
                 }

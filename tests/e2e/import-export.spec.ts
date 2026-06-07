@@ -66,11 +66,23 @@ function makeRuleJson(...rules: SeedRule[]): string {
 }
 
 async function setStorage(context: BrowserContext, data: Record<string, unknown>): Promise<void> {
-  const sw = context.serviceWorkers()[0];
+  const sw = await getServiceWorker(context);
   await sw.evaluate(async (d: Record<string, unknown>) => {
     await chrome.storage.local.set(d);
   }, data);
   await new Promise(r => setTimeout(r, 200));
+}
+
+async function getServiceWorker(context: BrowserContext): Promise<import('@playwright/test').Page> {
+  let sw = context.serviceWorkers()[0];
+  if (sw) return sw;
+  const deadline = Date.now() + 5000;
+  while (Date.now() < deadline) {
+    sw = context.serviceWorkers()[0];
+    if (sw) return sw;
+    await new Promise(r => setTimeout(r, 200));
+  }
+  throw new Error('Service worker not available after 5 s (idle termination?)');
 }
 
 const seedRules = (context: BrowserContext, rules: SeedRule[]) =>

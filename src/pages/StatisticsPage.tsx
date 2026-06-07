@@ -39,6 +39,14 @@ const SUB_TAB_DESCRIPTION_KEY: Record<Exclude<StatsSubTab, 'summary'>, string> =
   storage: 'statsStoragePageDescription',
 };
 
+/** Tab label per sub-tab, reused as the accessible name of the scroll region. */
+const SUB_TAB_LABEL_KEY: Record<StatsSubTab, string> = {
+  summary: 'statsSummaryTab',
+  rules: 'statsRulesTab',
+  sessions: 'statsSessionsTab',
+  storage: 'statsStorageTab',
+};
+
 export function StatisticsPage({ syncSettings, statisticsData, sessionStats, storageUsage, onReset, statsTab, onStatsTabChange }: StatisticsPageProps) {
   const activeRulesCount = syncSettings.domainRules.filter(r => r.enabled).length;
 
@@ -131,7 +139,10 @@ export function StatisticsPage({ syncSettings, statisticsData, sessionStats, sto
       syncSettings={syncSettings}
     >
       {() => (
-        <Box data-testid="page-stats">
+        <Box
+          data-testid="page-stats"
+          style={{ height: '100%', display: 'flex', flexDirection: 'column', minHeight: 0 }}
+        >
           <Box mb="3">
             <TabNav.Root data-testid="page-stats-tabs">
               <TabNav.Link
@@ -169,23 +180,35 @@ export function StatisticsPage({ syncSettings, statisticsData, sessionStats, sto
             </TabNav.Root>
           </Box>
 
-          {statsTab === 'summary' && (
-            <StatisticsSummary data={data} snapshot={snapshot} storageUsage={storageUsage} />
-          )}
-          {statsTab === 'rules' && (
-            <StatisticsRulesDetail
-              data={data}
-              activeRulesCount={activeRulesCount}
-              firstUsedAtFormatted={firstUsedAtFormatted}
-              onReset={onReset}
-            />
-          )}
-          {statsTab === 'sessions' && (
-            <StatisticsSessionsDetail snapshot={snapshot} events={data.sessionEvents} />
-          )}
-          {statsTab === 'storage' && (
-            <StatisticsStorageDetail usage={storageUsage} />
-          )}
+          {/* Only the sub-tab content scrolls; the tabs above stay fixed. The
+              region is focusable (tabIndex={0}) so keyboard users get a tab stop
+              and native arrow / PageUp-Down / Space scrolling on pages that have
+              no other focusable content (e.g. the summary sub-tab). */}
+          <Box
+            data-testid="page-stats-scroll"
+            role="region"
+            aria-label={getMessage(SUB_TAB_LABEL_KEY[statsTab])}
+            tabIndex={0}
+            style={{ flex: 1, overflow: 'auto', minHeight: 0 }}
+          >
+            {statsTab === 'summary' && (
+              <StatisticsSummary data={data} snapshot={snapshot} storageUsage={storageUsage} />
+            )}
+            {statsTab === 'rules' && (
+              <StatisticsRulesDetail
+                data={data}
+                activeRulesCount={activeRulesCount}
+                firstUsedAtFormatted={firstUsedAtFormatted}
+                onReset={onReset}
+              />
+            )}
+            {statsTab === 'sessions' && (
+              <StatisticsSessionsDetail snapshot={snapshot} events={data.sessionEvents} />
+            )}
+            {statsTab === 'storage' && (
+              <StatisticsStorageDetail usage={storageUsage} />
+            )}
+          </Box>
         </Box>
       )}
     </PageLayout>

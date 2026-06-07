@@ -11,15 +11,22 @@ import { type BrowserContext, type Page } from '@playwright/test';
 import { test, expect } from './fixtures';
 import { goToDomainRulesSection } from './helpers/navigation';
 
+async function getServiceWorker(context: BrowserContext): Promise<import('@playwright/test').Page> {
+  let sw = context.serviceWorkers()[0];
+  if (sw) return sw;
+  const deadline = Date.now() + 5000;
+  while (Date.now() < deadline) {
+    sw = context.serviceWorkers()[0];
+    if (sw) return sw;
+    await new Promise(r => setTimeout(r, 200));
+  }
+  throw new Error('Service worker not available after 5 s (idle termination?)');
+}
+
 /** The persisted per-workspace view state leaks between tests in the same
  *  worker (it lives in storage.local), so reset it to the default. */
 async function resetViewState(context: BrowserContext): Promise<void> {
-  const deadline = Date.now() + 5000;
-  let sw = context.serviceWorkers()[0];
-  while (!sw && Date.now() < deadline) {
-    await new Promise(r => setTimeout(r, 100));
-    sw = context.serviceWorkers()[0];
-  }
+  const sw = await getServiceWorker(context).catch(() => null);
   if (sw) await sw.evaluate(() => chrome.storage.local.remove('rulesViewState'));
 }
 
@@ -332,5 +339,37 @@ test.describe('View menu initial focus', () => {
     await expect(firstCard).toBeFocused();
     await expect(firstCard).toHaveAttribute('aria-label', /Disabled One/);
     await page2.close();
+  });
+});
+
+test.describe('View menu focus after applying', () => {
+  test('moves focus to the first result when the menu closes after a sort', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    // Insertion (manual) order puts "Zzz" first; sorting by domain ascending
+    // makes "Aaa" the first rule.
+    await helpers.addDomainRule({ label: 'Zzz Rule', domainFilter: 'zzz.com' });
+    await helpers.addDomainRule({ label: 'Aaa Rule', domainFilter: 'aaa.com' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    const firstCard = () => page.getByTestId('page-rules-list').getByRole('listitem').first();
+
+    // Manual order puts "Zzz" first on arrival.
+    await expect(firstCard()).toHaveAttribute('aria-label', /Zzz Rule/);
+
+    // Apply a domain sort, then close the menu.
+    await openViewMenu(page);
+    await selectMenuItem(page, 'page-rules-view-sort-domain');
+    await closeMenus(page);
+
+    // On close, focus must move to the first resulting rule (Aaa).
+    await expect(firstCard()).toHaveAttribute('aria-label', /Aaa Rule/);
+    await expect(firstCard()).toBeFocused();
+
+    await page.close();
   });
 });

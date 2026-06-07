@@ -7,6 +7,7 @@ import { defaultStatistics } from '@/types/statistics.js';
 import type { Session } from '@/types/session.js';
 import type { WorkspaceMeta } from '@/schemas/workspace.js';
 import { type RuleViewState, DEFAULT_RULE_VIEW_STATE } from '@/utils/ruleViewUtils.js';
+import { type SessionViewState, DEFAULT_SESSION_VIEW_STATE } from '@/utils/sessionViewUtils.js';
 
 export const DEFAULT_WORKSPACE_ID = 'default';
 
@@ -36,6 +37,8 @@ export const WORKSPACE_SCOPED_KEYS = [
   'archivedSessions',
   'popupPinnedEmptyCollapsed',
   'rulesViewState',
+  'sessionsViewState',
+  'archivedSessionsViewState',
 ] as const;
 
 export type WorkspaceScopedKey = (typeof WORKSPACE_SCOPED_KEYS)[number];
@@ -70,6 +73,8 @@ export interface ScopedItems {
   archivedSessionsItem: WxtStorageItem<Session[], Record<string, unknown>>;
   popupPinnedEmptyCollapsedItem: WxtStorageItem<boolean, Record<string, unknown>>;
   rulesViewStateItem: WxtStorageItem<RuleViewState, Record<string, unknown>>;
+  sessionsViewStateItem: WxtStorageItem<SessionViewState, Record<string, unknown>>;
+  archivedSessionsViewStateItem: WxtStorageItem<SessionViewState, Record<string, unknown>>;
 }
 
 const scopedItemsCache = new Map<string, ScopedItems>();
@@ -143,6 +148,14 @@ export function defineWorkspaceItems(wsId: string): ScopedItems {
     rulesViewStateItem: storage.defineItem<RuleViewState>(
       workspaceStorageKey(wsId, 'rulesViewState'),
       { defaultValue: DEFAULT_RULE_VIEW_STATE },
+    ),
+    sessionsViewStateItem: storage.defineItem<SessionViewState>(
+      workspaceStorageKey(wsId, 'sessionsViewState'),
+      { defaultValue: DEFAULT_SESSION_VIEW_STATE },
+    ),
+    archivedSessionsViewStateItem: storage.defineItem<SessionViewState>(
+      workspaceStorageKey(wsId, 'archivedSessionsViewState'),
+      { defaultValue: DEFAULT_SESSION_VIEW_STATE },
     ),
   };
 

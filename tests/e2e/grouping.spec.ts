@@ -25,6 +25,19 @@ import * as http from 'http';
 /** Port used for fake local pages in the content-script integration tests. */
 const FAKE_PORT = 7654;
 
+/** Retry-enabled service worker getter to avoid race conditions when SW is idle-terminated. */
+async function getServiceWorker(context: BrowserContext): Promise<import('@playwright/test').Page> {
+  let sw = context.serviceWorkers()[0];
+  if (sw) return sw;
+  const deadline = Date.now() + 5000;
+  while (Date.now() < deadline) {
+    sw = context.serviceWorkers()[0];
+    if (sw) return sw;
+    await new Promise(r => setTimeout(r, 200));
+  }
+  throw new Error('Service worker not available after 5 s (idle termination?)');
+}
+
 /** Serve two pages via extensionContext.route so the content script can inject into them. */
 async function setupFakePages(extensionContext: BrowserContext) {
   await extensionContext.route(`http://localhost:${FAKE_PORT}/**`, (route: any, request: any) => {
@@ -618,7 +631,7 @@ test.describe('Tab Grouping', () => {
       await helpers.waitForGrouping();
 
       // Get the opener tab ID
-      const sw = extensionContext.serviceWorkers()[0];
+      const sw = await getServiceWorker(extensionContext);
       const openerTabId = await sw.evaluate(async (url: string) => {
         const tabs = await chrome.tabs.query({});
         return tabs.find(t => t.url === url)?.id ?? null;
@@ -739,7 +752,7 @@ test.describe('Tab Grouping', () => {
 
       // Content script has now sent middleClickLink → background stored (childUrl → openerTabId)
       // Create the child tab with openerTabId to trigger onTabCreated naturally
-      const sw = extensionContext.serviceWorkers()[0];
+      const sw = await getServiceWorker(extensionContext);
       const openerTabId = await sw.evaluate(async (openerUrl: string) => {
         const tabs = await chrome.tabs.query({});
         return tabs.find(t => t.url === openerUrl || t.pendingUrl === openerUrl)?.id ?? null;
@@ -780,7 +793,7 @@ test.describe('Tab Grouping', () => {
       await opener.goto(`http://localhost:${FAKE_PORT}/opener.html`, { waitUntil: 'domcontentloaded' });
 
       // Create a child tab with openerTabId but WITHOUT any middleClickLink message
-      const sw = extensionContext.serviceWorkers()[0];
+      const sw = await getServiceWorker(extensionContext);
       const openerTabId = await sw.evaluate(async (openerUrl: string) => {
         const tabs = await chrome.tabs.query({});
         return tabs.find(t => t.url === openerUrl)?.id ?? null;
@@ -837,7 +850,7 @@ test.describe('Tab Grouping', () => {
       }, childUrl);
 
       // Simulate "Open in new tab" from the extensionContext menu: create tab with openerTabId
-      const sw = extensionContext.serviceWorkers()[0];
+      const sw = await getServiceWorker(extensionContext);
       const openerTabId = await sw.evaluate(async (openerUrl: string) => {
         const tabs = await chrome.tabs.query({});
         return tabs.find(t => t.url === openerUrl || t.pendingUrl === openerUrl)?.id ?? null;
