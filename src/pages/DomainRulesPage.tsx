@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { Button, Flex, Box, Kbd, Tooltip, Separator } from '@radix-ui/themes';
-import { Plus, Eye, EyeOff, Shield, AlertCircle, Trash2, FileDown, PackagePlus } from 'lucide-react';
+import { Plus, Eye, EyeOff, Shield, AlertCircle, Trash2, FileDown, PackagePlus, Download, Upload } from 'lucide-react';
 import { DragDropProvider, type DragEndEvent, type DragOverEvent } from '@dnd-kit/react';
 import { move } from '@dnd-kit/helpers';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/UI/EmptyState';
 import { RuleWizardModal } from '@/components/Core/DomainRule/RuleWizardModal';
 import { ExportWizard } from '@/components/UI/ImportExportWizards/ExportWizard';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
-import { ListToolbar } from '@/components/UI/ListToolbar';
+import { ListToolbar, ListToolbarMenu } from '@/components/UI/ListToolbar';
 import { BulkActionsBar } from '@/components/UI/BulkActionsBar';
 import { RuleViewMenu } from '@/components/UI/RuleViewMenu';
 import { RuleGroupHeader } from '@/components/Core/DomainRule/RuleGroupHeader';
@@ -142,7 +142,7 @@ export function DomainRulesPage({
   pendingAction,
   onPendingActionConsumed,
 }: DomainRulesPageProps) {
-  const { openImportRules } = useImportExportWizards();
+  const { openImportRules, openExportRules } = useImportExportWizards();
   const { scopedItems } = useActiveWorkspaceContext();
   const rulesViewStateItem = scopedItems.rulesViewStateItem;
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -573,6 +573,27 @@ export function DomainRulesPage({
                       {getMessage('addRule')}
                     </Button>
                   </Tooltip>
+                }
+                menu={
+                  <ListToolbarMenu
+                    testId="page-rules-toolbar-menu"
+                    items={[
+                      {
+                        key: 'export',
+                        testId: 'page-rules-toolbar-menu-export',
+                        icon: Download,
+                        label: getMessage('exportRulesTitle'),
+                        onSelect: () => openExportRules(),
+                      },
+                      {
+                        key: 'import',
+                        testId: 'page-rules-toolbar-menu-import',
+                        icon: Upload,
+                        label: getMessage('importRulesTitle'),
+                        onSelect: () => openImportRules(),
+                      },
+                    ]}
+                  />
                 }
               />
             )}

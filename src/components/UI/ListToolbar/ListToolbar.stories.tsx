@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { Button } from '@radix-ui/themes';
-import { Plus, Camera } from 'lucide-react';
+import { Plus, Camera, Download, Upload } from 'lucide-react';
 import { ListToolbar } from './ListToolbar';
+import { ListToolbarMenu } from './ListToolbarMenu';
 import { RuleViewMenu } from '@/components/UI/RuleViewMenu';
 import { DEFAULT_RULE_VIEW_STATE, type RuleViewState } from '@/utils/ruleViewUtils';
 
@@ -85,6 +86,32 @@ export const ListToolbarWithFilter: Story = {
         <Plus size={16} />
         Add Rule
       </Button>
+    ),
+  },
+  render: (args) => <ControlledListToolbar {...args} />,
+};
+
+export const ListToolbarWithMenu: Story = {
+  args: {
+    testId: 'page-rules-toolbar',
+    searchTestId: 'page-rules-search',
+    searchPlaceholder: 'Search rules',
+    searchValue: '',
+    onSearchChange: () => {},
+    action: (
+      <Button onClick={() => {}}>
+        <Plus size={16} />
+        Add Rule
+      </Button>
+    ),
+    menu: (
+      <ListToolbarMenu
+        testId="page-rules-toolbar-menu"
+        items={[
+          { key: 'export', icon: Download, label: 'Export rules', onSelect: () => {} },
+          { key: 'import', icon: Upload, label: 'Import rules', onSelect: () => {} },
+        ]}
+      />
     ),
   },
   render: (args) => <ControlledListToolbar {...args} />,

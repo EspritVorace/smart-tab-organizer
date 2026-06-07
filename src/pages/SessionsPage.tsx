@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Box, Flex, Button, Text, Callout, Separator, Badge, TabNav, Kbd, Tooltip } from '@radix-ui/themes';
-import { Camera, Archive, ArchiveRestore, CheckCircle, Pin, PinOff, Upload, Trash2, FileDown, Boxes, type LucideIcon } from 'lucide-react';
+import { Camera, Archive, ArchiveRestore, CheckCircle, Pin, PinOff, Upload, Download, Trash2, FileDown, Boxes, type LucideIcon } from 'lucide-react';
 import { DragDropProvider, type DragOverEvent, type DragEndEvent } from '@dnd-kit/react';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { move } from '@dnd-kit/helpers';
@@ -11,7 +11,7 @@ import { SessionEditDialog } from '@/components/Core/Session/SessionEditDialog';
 import { SnapshotWizard } from '@/components/UI/SessionWizards/SnapshotWizard';
 import { RestoreWizard } from '@/components/UI/SessionWizards/RestoreWizard';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
-import { ListToolbar } from '@/components/UI/ListToolbar';
+import { ListToolbar, ListToolbarMenu } from '@/components/UI/ListToolbar';
 import { BulkActionsBar } from '@/components/UI/BulkActionsBar';
 import { ExportSessionsWizard } from '@/components/UI/ImportExportWizards/ExportSessionsWizard';
 import { SessionViewMenu } from '@/components/UI/SessionViewMenu/SessionViewMenu';
@@ -428,7 +428,7 @@ export function SessionsPage({
   sessionsTab = 'active',
   onSessionsTabChange,
 }: SessionsPageProps) {
-  const { openImportSessions } = useImportExportWizards();
+  const { openImportSessions, openExportSessions } = useImportExportWizards();
   const { scopedItems } = useActiveWorkspaceContext();
   const [bulkExportIds, setBulkExportIds] = useState<string[] | null>(null);
   // Archives are watched continuously here: the PageUp/PageDown section
@@ -1077,6 +1077,27 @@ export function SessionsPage({
                     </Button>
                   </Tooltip>
                 ) : undefined
+              }
+              menu={
+                <ListToolbarMenu
+                  testId="page-sessions-toolbar-menu"
+                  items={[
+                    {
+                      key: 'export',
+                      testId: 'page-sessions-toolbar-menu-export',
+                      icon: Download,
+                      label: getMessage('exportSessionsTitle'),
+                      onSelect: () => openExportSessions(),
+                    },
+                    {
+                      key: 'import',
+                      testId: 'page-sessions-toolbar-menu-import',
+                      icon: Upload,
+                      label: getMessage('importSessionsTitle'),
+                      onSelect: () => openImportSessions(),
+                    },
+                  ]}
+                />
               }
             />
           )}

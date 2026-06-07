@@ -23,6 +23,9 @@ page-rules                        # Main page container
 page-rules-toolbar                # Toolbar area (search + add button), hidden when no rules
 page-rules-search                 # Search input
 page-rules-btn-add                # "Add rule" button (toolbar OR empty placeholder, mutually exclusive)
+page-rules-toolbar-menu           # Toolbar "..." overflow menu trigger
+page-rules-toolbar-menu-export    # Overflow menu: export rules
+page-rules-toolbar-menu-import    # Overflow menu: import rules
 page-rules-list                   # List container (role="grid")
 page-rules-empty                  # Empty state container
 page-rules-bulk-bar               # Bulk action bar
@@ -34,6 +37,9 @@ page-sessions                     # Main page container
 page-sessions-toolbar             # Toolbar area (search + snapshot button), hidden when no sessions
 page-sessions-search              # Search input
 page-sessions-btn-snapshot        # "Snapshot" button (toolbar OR empty placeholder, mutually exclusive)
+page-sessions-toolbar-menu        # Toolbar "..." overflow menu trigger
+page-sessions-toolbar-menu-export # Overflow menu: export sessions
+page-sessions-toolbar-menu-import # Overflow menu: import sessions
 page-sessions-list                # Sessions list container
 page-sessions-empty               # Empty state message
 ```

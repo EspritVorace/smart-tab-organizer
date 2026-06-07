@@ -23,6 +23,8 @@ interface ListToolbarProps {
   filter?: React.ReactNode;
   /** Action button (Add Rule / Take Snapshot) supplied by the caller. */
   action: React.ReactNode;
+  /** Optional overflow ("...") menu rendered at the right edge, after the action (e.g. import/export). */
+  menu?: React.ReactNode;
 }
 
 export function ListToolbar({
@@ -33,6 +35,7 @@ export function ListToolbar({
   onSearchChange,
   filter,
   action,
+  menu,
 }: ListToolbarProps) {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== 'Escape') return;
@@ -93,6 +96,7 @@ export function ListToolbar({
       </Box>
       {filter}
       {action}
+      {menu}
     </Flex>
   );
 }
