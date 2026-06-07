@@ -87,7 +87,24 @@ export class SessionsListPage {
     return this.page.getByTestId(`session-card-${sessionId}-name`);
   }
 
+  /**
+   * "..." (More actions) dropdown trigger on the first session card. Anchored
+   * on the `session-card-{uuid}-btn-dropdown` testid so it stays distinct from
+   * the page toolbar's own "..." menu (`page-sessions-toolbar-menu`) and works
+   * across the locale matrix.
+   */
+  firstCardMenuButton(): Locator {
+    return this.page
+      .locator('[data-testid^="session-card-"][data-testid$="-btn-dropdown"]')
+      .first();
+  }
+
   // ─── Atomic actions ──────────────────────────────────────────────────────
+
+  /** Open the "..." (More actions) dropdown on the first session card. */
+  async openFirstCardMenu(): Promise<void> {
+    await this.firstCardMenuButton().click();
+  }
 
   /**
    * Type a query into the search input. Search filtering is purely
