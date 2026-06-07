@@ -207,7 +207,7 @@ test.describe('[US-S07] Delete', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.locator('[data-testid^="session-card-"][data-testid$="-btn-dropdown"]').click();
     await expect(page.getByRole('menuitem', { name: /delete/i })).toBeVisible();
     await page.close();
   });
@@ -219,7 +219,7 @@ test.describe('[US-S07] Delete', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.locator('[data-testid^="session-card-"][data-testid$="-btn-dropdown"]').click();
     await page.getByRole('menuitem', { name: /delete/i }).click();
 
     await expect(page.getByRole('alertdialog')).toBeVisible();
@@ -233,7 +233,7 @@ test.describe('[US-S07] Delete', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.locator('[data-testid^="session-card-"][data-testid$="-btn-dropdown"]').click();
     await page.getByRole('menuitem', { name: /delete/i }).click();
     await page.getByTestId('confirm-dialog-btn-confirm').click();
 
@@ -249,7 +249,7 @@ test.describe('[US-S07] Delete', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.locator('[data-testid^="session-card-"][data-testid$="-btn-dropdown"]').click();
     await page.getByRole('menuitem', { name: /delete/i }).click();
     await page.getByTestId('confirm-dialog-btn-cancel').click();
 
@@ -376,7 +376,7 @@ test.describe('[US-S04][US-S06] Restore — More actions menu', () => {
     const page = await extensionContext.newPage();
     await goToSessionsSection(page, extensionId);
 
-    await expect(page.getByRole('button', { name: 'More actions' }).first()).toBeVisible();
+    await expect(page.locator('[data-testid^="session-card-"][data-testid$="-btn-dropdown"]')).toBeVisible();
     await page.close();
   });
 

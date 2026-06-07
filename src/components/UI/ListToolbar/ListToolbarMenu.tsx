@@ -17,7 +17,7 @@ export interface ListToolbarMenuItem {
 interface ListToolbarMenuProps {
   /** Trigger testid (e.g. "page-rules-toolbar-menu"). */
   testId?: string;
-  /** Accessible label for the icon-only trigger. Defaults to getMessage('importExportMenu'). */
+  /** Accessible label for the icon-only trigger. Defaults to getMessage('moreActions'). */
   ariaLabel?: string;
   items: ListToolbarMenuItem[];
 }
@@ -28,7 +28,7 @@ interface ListToolbarMenuProps {
  * points (export + import on rules and sessions, import only on workspaces).
  */
 export function ListToolbarMenu({ testId, ariaLabel, items }: ListToolbarMenuProps) {
-  const label = ariaLabel ?? getMessage('importExportMenu');
+  const label = ariaLabel ?? getMessage('moreActions');
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger>
