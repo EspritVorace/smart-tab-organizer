@@ -4,6 +4,9 @@ description: Aislar reglas, sesiones y estadísticas por contexto. Crear, cambia
 ---
 
 import { Aside, CardGrid, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import workspacesPageLight from '../../../../assets/screenshots/es-light-workspaces-page.png';
+import workspacesPageDark from '../../../../assets/screenshots/es-dark-workspaces-page.png';
 
 <Aside type="tip" title="En resumen">
 - Un **espacio de trabajo** es un contenedor aislado con sus propias reglas, sesiones y estadísticas.
@@ -13,6 +16,12 @@ import { Aside, CardGrid, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starli
 </Aside>
 
 Un espacio de trabajo (o workspace) permite separar dos contextos de uso sin que sus configuraciones se mezclen: trabajo y personal, proyecto A y proyecto B, entorno cliente y entorno de I+D. Cada contexto conserva sus reglas, sus sesiones y sus contadores.
+
+<ThemeImage
+  lightSrc={workspacesPageLight}
+  darkSrc={workspacesPageDark}
+  alt="Página de espacios de trabajo: el espacio activo y uno inactivo con su botón Activar y su menú de acciones."
+/>
 
 ## Qué aísla un espacio de trabajo
 

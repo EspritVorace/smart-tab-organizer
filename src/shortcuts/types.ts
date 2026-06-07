@@ -9,7 +9,8 @@ export type ShortcutScope =
   | 'page:workspaces'
   | 'page:popup'
   | 'widget:session-card'
-  | 'widget:rule-card';
+  | 'widget:rule-card'
+  | 'widget:workspace-card';
 
 export type ShortcutGroupId =
   | 'global'

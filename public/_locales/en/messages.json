@@ -18,6 +18,7 @@
   "workspaceFormErrorDuplicate": { "message": "A workspace with this name already exists." },
   "workspaceColorPickerLabel": { "message": "Workspace accent color" },
   "workspaceSwitchLabel": { "message": "Switch" },
+  "workspaceMoreActions": { "message": "More actions" },
   "workspaceEditLabel": { "message": "Edit" },
   "workspaceDeleteLabel": { "message": "Delete workspace" },
   "workspaceDeleteTitle": { "message": "Delete this workspace?" },

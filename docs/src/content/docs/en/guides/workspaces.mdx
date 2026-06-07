@@ -4,6 +4,9 @@ description: Scope rules, sessions and statistics per context. Create, switch, d
 ---
 
 import { Aside, CardGrid, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import workspacesPageLight from '../../../../assets/screenshots/en-light-workspaces-page.png';
+import workspacesPageDark from '../../../../assets/screenshots/en-dark-workspaces-page.png';
 
 <Aside type="tip" title="At a glance">
 - A **workspace** is an isolated container with its own rules, sessions, and statistics.
@@ -13,6 +16,12 @@ import { Aside, CardGrid, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starli
 </Aside>
 
 A workspace lets you separate two usage contexts without letting their configurations mix: work and personal, project A and project B, client environment and R&D environment. Each context keeps its rules, its sessions, and its counters.
+
+<ThemeImage
+  lightSrc={workspacesPageLight}
+  darkSrc={workspacesPageDark}
+  alt="Workspaces page: the active workspace and an inactive one exposing its Switch button and its overflow menu."
+/>
 
 ## What a workspace scopes
 

@@ -376,6 +376,24 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'list-workspaces',
     scope: 'page:workspaces',
   },
+  // Per-card actions on the Workspaces page (Edit/Delete). Group stays
+  // `list-workspaces` so the help panel keeps them under "Workspaces list"
+  // while the scope ties them to the focused workspace card. Enter (activate)
+  // stays a card-local interaction, like Enter on a rule card.
+  'workspaceCard.edit': {
+    id: 'workspaceCard.edit',
+    defaultBindings: ['e'],
+    descriptionKey: 'shortcutDescListEdit',
+    group: 'list-workspaces',
+    scope: 'widget:workspace-card',
+  },
+  'workspaceCard.delete': {
+    id: 'workspaceCard.delete',
+    defaultBindings: ['Delete'],
+    descriptionKey: 'shortcutDescListDelete',
+    group: 'list-workspaces',
+    scope: 'widget:workspace-card',
+  },
 
   // List-level: Home
   'list.home.navigate': {
