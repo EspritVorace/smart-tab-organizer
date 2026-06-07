@@ -1,9 +1,10 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Box, Button, Card, Flex, IconButton, Kbd, Text, Tooltip } from '@radix-ui/themes';
-import { AlertCircle, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Box, Button, Card, DropdownMenu, Flex, IconButton, Kbd, Text, Tooltip } from '@radix-ui/themes';
+import { AlertCircle, Check, MoreHorizontal, Pencil, Plus } from 'lucide-react';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { ListToolbar } from '@/components/UI/ListToolbar';
 import { EmptyState } from '@/components/UI/EmptyState';
+import { DeleteMenuItem } from '@/components/UI/DeleteMenuItem/DeleteMenuItem';
 import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
 import { WorkspaceAvatar } from '@/components/UI/Workspace/WorkspaceAvatar';
@@ -36,15 +37,8 @@ interface WorkspaceRowProps {
   onDelete: () => void;
 }
 
-function resolveDeleteTooltip(isDefault: boolean, isOnly: boolean): string {
-  if (isDefault) return getMessage('workspaceDeleteDisabledDefault');
-  if (isOnly) return getMessage('workspaceDeleteDisabledLast');
-  return getMessage('workspaceDeleteLabel');
-}
-
 function WorkspaceRow({ workspace, isActive, isDefault, isOnly, searchTerm, index, onKeyDown, onSwitch, onEdit, onDelete }: WorkspaceRowProps) {
   const deleteBlocked = isDefault || isOnly;
-  const deleteTooltip = resolveDeleteTooltip(isDefault, isOnly);
 
   const isUpdated = workspace.updatedAt !== workspace.createdAt;
   const relativeDate = isUpdated ? workspace.updatedAt : workspace.createdAt;
@@ -57,6 +51,8 @@ function WorkspaceRow({ workspace, isActive, isDefault, isOnly, searchTerm, inde
     <Card
       data-testid={`workspace-row-${workspace.id}`}
       data-workspace-card=""
+      data-workspace-id={workspace.id}
+      data-shortcut-scope="widget:workspace-card"
       variant="surface"
       role="listitem"
       tabIndex={0}
@@ -85,41 +81,53 @@ function WorkspaceRow({ workspace, isActive, isDefault, isOnly, searchTerm, inde
             <time dateTime={relativeDate}>{relativeText}</time>
           </Text>
         </Flex>
-        <Flex align="center" gap="2">
+        <Flex align="center" gap="3" style={{ flexShrink: 0 }}>
           {!isActive ? (
-            <Button
-              data-testid={`workspace-row-${workspace.id}-switch`}
-              variant="soft"
-              size="2"
-              onClick={onSwitch}
-            >
-              {getMessage('workspaceSwitchLabel')}
-            </Button>
+            <Tooltip content={<Flex align="center" gap="2" aria-hidden="true">{getMessage('workspaceSwitchLabel')}<Kbd>Enter</Kbd></Flex>}>
+              <Button
+                data-testid={`workspace-row-${workspace.id}-switch`}
+                variant="soft"
+                size="2"
+                onClick={onSwitch}
+              >
+                <Check size={16} />
+                {getMessage('workspaceSwitchLabel')}
+              </Button>
+            </Tooltip>
           ) : null}
-          <Tooltip content={getMessage('workspaceEditLabel')}>
-            <IconButton
-              data-testid={`workspace-row-${workspace.id}-edit`}
-              variant="ghost"
-              size="2"
-              aria-label={getMessage('workspaceEditLabel')}
-              onClick={onEdit}
-            >
-              <Pencil size={16} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip content={deleteTooltip}>
-            <IconButton
-              data-testid={`workspace-row-${workspace.id}-delete`}
-              variant="ghost"
-              size="2"
-              color="red"
-              disabled={deleteBlocked}
-              aria-label={getMessage('workspaceDeleteLabel')}
-              onClick={onDelete}
-            >
-              <Trash2 size={16} />
-            </IconButton>
-          </Tooltip>
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger>
+              <IconButton
+                data-testid={`workspace-row-${workspace.id}-btn-dropdown`}
+                size="2"
+                variant="ghost"
+                color="gray"
+                aria-label={getMessage('workspaceMoreActions')}
+              >
+                <MoreHorizontal size={16} />
+              </IconButton>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content>
+              <DropdownMenu.Item
+                data-testid={`workspace-row-${workspace.id}-menu-edit`}
+                onClick={onEdit}
+              >
+                <Flex align="center" justify="between" gap="3" width="100%">
+                  <Flex align="center" gap="2">
+                    <Pencil size={14} aria-hidden="true" />
+                    {getMessage('workspaceEditLabel')}
+                  </Flex>
+                  <Kbd size="1">E</Kbd>
+                </Flex>
+              </DropdownMenu.Item>
+              <DropdownMenu.Separator />
+              <DeleteMenuItem
+                data-testid={`workspace-row-${workspace.id}-menu-delete`}
+                disabled={deleteBlocked}
+                onClick={onDelete}
+              />
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
         </Flex>
       </Flex>
     </Card>
@@ -148,12 +156,33 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
     autoFocus: { ready: isLoaded },
   });
 
+  // Resolves the workspace whose card currently has keyboard focus, so the
+  // widget-scoped shortcuts (`e`, `Delete`) and Enter-to-activate act on the
+  // right row. Mirrors `getFocusedRule` in DomainRulesPage.
+  const getFocusedWorkspace = useCallback((): WorkspaceMeta | null => {
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement)) return null;
+    if (!active.matches('[data-shortcut-scope="widget:workspace-card"]')) return null;
+    const id = active.getAttribute('data-workspace-id');
+    if (!id) return null;
+    return workspaces.find((w) => w.id === id) ?? null;
+  }, [workspaces]);
+
   const handleCardKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLElement>, index: number) => {
       if (e.target !== e.currentTarget) return;
-      handleNavigationKey(e, index);
+      if (handleNavigationKey(e, index)) return;
+      // Enter activates the focused workspace (card-local, like Enter on a rule
+      // card). The registry only owns `e` / `Delete` for this scope.
+      if (e.key === 'Enter' && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+        const focused = getFocusedWorkspace();
+        if (focused && focused.id !== activeId) {
+          e.preventDefault();
+          void switchTo(focused.id);
+        }
+      }
     },
-    [handleNavigationKey],
+    [handleNavigationKey, getFocusedWorkspace, activeId, switchTo],
   );
 
   const takenNames = workspaces.map((w) => w.name);
@@ -167,6 +196,22 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
   const handleOpenCreate = useCallback(() => setCreateOpen(true), []);
 
   useShortcuts({ 'list.workspaces.new': handleOpenCreate }, { scope: 'page:workspaces' });
+
+  useShortcuts(
+    {
+      'workspaceCard.edit': () => {
+        const focused = getFocusedWorkspace();
+        if (focused) setEditing(focused);
+      },
+      'workspaceCard.delete': () => {
+        const focused = getFocusedWorkspace();
+        if (!focused) return;
+        const deleteBlocked = focused.id === DEFAULT_WORKSPACE_ID || workspaces.length === 1;
+        if (!deleteBlocked) setDeleting(focused);
+      },
+    },
+    { scope: 'widget:workspace-card' },
+  );
 
   const handleCreate = useCallback(
     async ({ name, accentColor }: { name: string; accentColor: WorkspaceMeta['accentColor'] }) => {

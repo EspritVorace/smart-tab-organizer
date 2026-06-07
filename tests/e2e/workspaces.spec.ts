@@ -76,8 +76,11 @@ test.describe('Workspaces — baseline', () => {
   test('default workspace cannot be deleted', async ({ optionsPage, extensionId }) => {
     await goToWorkspaces(optionsPage, extensionId);
 
-    const deleteBtn = optionsPage.getByTestId('workspace-row-default-delete');
-    await expect(deleteBtn).toBeDisabled();
+    // Delete now lives in the row's "..." menu; the item is disabled for the
+    // default workspace.
+    await optionsPage.getByTestId('workspace-row-default-btn-dropdown').click();
+    const deleteItem = optionsPage.getByTestId('workspace-row-default-menu-delete');
+    await expect(deleteItem).toHaveAttribute('aria-disabled', 'true');
   });
 });
 
@@ -122,7 +125,9 @@ test.describe('Workspaces — create + switch + delete', () => {
 
     const personalRowId = await personalRow.getAttribute('data-testid');
     const wsId = personalRowId!.replace('workspace-row-', '');
-    await optionsPage.getByTestId(`workspace-row-${wsId}-delete`).click();
+    // Open the row's "..." menu, then trigger delete.
+    await optionsPage.getByTestId(`workspace-row-${wsId}-btn-dropdown`).click();
+    await optionsPage.getByTestId(`workspace-row-${wsId}-menu-delete`).click();
 
     // Confirmation requires retyping the name.
     const dialog = optionsPage.getByTestId('workspace-delete-dialog');

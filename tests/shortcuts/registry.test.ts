@@ -35,6 +35,7 @@ const VALID_SCOPES: readonly ShortcutScope[] = [
   'page:popup',
   'widget:session-card',
   'widget:rule-card',
+  'widget:workspace-card',
 ];
 
 describe('SHORTCUTS_REGISTRY', () => {
@@ -115,7 +116,7 @@ describe('SHORTCUTS_REGISTRY', () => {
     expect(getShortcutsByGroup('list-rules')).toHaveLength(11);
     expect(getShortcutsByGroup('list-sessions')).toHaveLength(11);
     expect(getShortcutsByGroup('list-stats')).toHaveLength(2);
-    expect(getShortcutsByGroup('list-workspaces')).toHaveLength(1);
+    expect(getShortcutsByGroup('list-workspaces')).toHaveLength(3);
     expect(getShortcutsByGroup('list-home')).toHaveLength(9);
     expect(getShortcutsByGroup('session-card')).toHaveLength(7);
     expect(getShortcutsByGroup('importexport')).toHaveLength(6);
