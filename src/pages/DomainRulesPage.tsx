@@ -4,6 +4,7 @@ import { Plus, Eye, EyeOff, Shield, AlertCircle, Trash2, FileDown, PackagePlus }
 import { DragDropProvider, type DragEndEvent, type DragOverEvent } from '@dnd-kit/react';
 import { move } from '@dnd-kit/helpers';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
+import * as Collapsible from '@radix-ui/react-collapsible';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { EmptyState } from '@/components/UI/EmptyState';
 import { RuleWizardModal } from '@/components/Core/DomainRule/RuleWizardModal';
@@ -65,6 +66,8 @@ interface RuleCardListProps {
   rules: DomainRuleSetting[];
   dragDisabled: boolean;
   ariaLabel: string;
+  /** Indents the cards to the right to mark them as children of a group header (mirrors the session sections). */
+  indent?: boolean;
   allRules: DomainRuleSetting[];
   selectedIds: Set<string>;
   searchTerm: string;
@@ -88,7 +91,13 @@ interface RuleCardListProps {
  */
 function RuleCardList(props: RuleCardListProps) {
   return (
-    <Flex direction="column" gap="3" role="list" aria-label={props.ariaLabel}>
+    <Flex
+      direction="column"
+      gap="3"
+      role="list"
+      aria-label={props.ariaLabel}
+      pl={props.indent ? '6' : undefined}
+    >
       {props.rules.map((rule, i) => (
         <DomainRuleCard
           key={rule.id}
@@ -157,6 +166,21 @@ export function DomainRulesPage({
     setViewState(next);
     rulesViewStateItem.setValue(next).catch(() => {});
   }, [rulesViewStateItem]);
+
+  const collapsedGroups = useMemo(
+    () => new Set(viewState.collapsedGroups),
+    [viewState.collapsedGroups],
+  );
+
+  const handleToggleGroupCollapsed = useCallback((key: string, collapsed: boolean) => {
+    const next = new Set(viewState.collapsedGroups);
+    if (collapsed) {
+      next.add(key);
+    } else {
+      next.delete(key);
+    }
+    handleViewChange({ ...viewState, collapsedGroups: [...next] });
+  }, [viewState, handleViewChange]);
 
   useEffect(() => {
     if (!pendingAction) return;
@@ -660,27 +684,36 @@ export function DomainRulesPage({
                     const dndEnabled = group.isDndEnabled && domainDndAllowed;
                     const displayRules =
                       dragSection?.key === group.key ? dragSection.items : group.rules;
+                    const isCollapsed = collapsedGroups.has(group.key);
                     return (
-                      <Box key={group.key}>
+                      <Collapsible.Root
+                        key={group.key}
+                        open={!isCollapsed}
+                        onOpenChange={open => handleToggleGroupCollapsed(group.key, !open)}
+                      >
                         <RuleGroupHeader
                           group={group}
+                          collapsed={isCollapsed}
                           testId={`page-rules-group-${group.key}`}
                           selectedCount={group.ruleIds.filter(id => selectedIds.has(id)).length}
                           onSelectGroup={handleSelectGroup}
                         />
-                        <DragDropProvider
-                          modifiers={[RestrictToVerticalAxis]}
-                          onDragOver={dndEnabled ? handleSectionDragOver(group.key, group.rules) : undefined}
-                          onDragEnd={dndEnabled ? handleSectionDragEnd(group.key, group.rules, false) : undefined}
-                        >
-                          <RuleCardList
-                            {...cardListCommon}
-                            rules={displayRules}
-                            dragDisabled={!dndEnabled}
-                            ariaLabel={group.label}
-                          />
-                        </DragDropProvider>
-                      </Box>
+                        <Collapsible.Content>
+                          <DragDropProvider
+                            modifiers={[RestrictToVerticalAxis]}
+                            onDragOver={dndEnabled ? handleSectionDragOver(group.key, group.rules) : undefined}
+                            onDragEnd={dndEnabled ? handleSectionDragEnd(group.key, group.rules, false) : undefined}
+                          >
+                            <RuleCardList
+                              {...cardListCommon}
+                              rules={displayRules}
+                              dragDisabled={!dndEnabled}
+                              ariaLabel={group.label}
+                              indent
+                            />
+                          </DragDropProvider>
+                        </Collapsible.Content>
+                      </Collapsible.Root>
                     );
                   })}
                 </Flex>

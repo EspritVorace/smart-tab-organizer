@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { Box, Theme } from '@radix-ui/themes';
+import { Box, Text, Theme } from '@radix-ui/themes';
+import * as Collapsible from '@radix-ui/react-collapsible';
 import { RuleGroupHeader } from './RuleGroupHeader';
 import type { RuleViewGroup } from '@/utils/ruleViewUtils';
 
@@ -54,14 +55,25 @@ function ControlledHeader({
   initialSelected?: string[];
 }) {
   const [selected, setSelected] = useState<Set<string>>(new Set(initialSelected));
+  const [open, setOpen] = useState(true);
   return (
-    <RuleGroupHeader
-      group={group}
-      selectedCount={selected.size}
-      onSelectGroup={(ids, checked) =>
-        setSelected(() => (checked ? new Set(ids) : new Set()))
-      }
-    />
+    <Collapsible.Root open={open} onOpenChange={setOpen}>
+      <RuleGroupHeader
+        group={group}
+        collapsed={!open}
+        selectedCount={selected.size}
+        onSelectGroup={(ids, checked) =>
+          setSelected(() => (checked ? new Set(ids) : new Set()))
+        }
+      />
+      <Collapsible.Content>
+        <Box pl="6" pt="2">
+          <Text size="2" color="gray">
+            {group.ruleIds.length} rule(s) in this group
+          </Text>
+        </Box>
+      </Collapsible.Content>
+    </Collapsible.Root>
   );
 }
 
