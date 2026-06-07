@@ -10,6 +10,7 @@ import { SettingsToggles } from '@/components/UI/SettingsToggles/SettingsToggles
 import { PopupToolbar } from '@/components/UI/PopupToolbar/PopupToolbar';
 import { PopupProfilesList } from '@/components/UI/PopupProfilesList/PopupProfilesList';
 import { PopupWorkspaceSwitcher } from '@/components/UI/Workspace/PopupWorkspaceSwitcher';
+import { WorkspaceSwitchShortcuts } from '@/components/UI/Workspace/WorkspaceSwitchShortcuts';
 import { ShortcutsDrawer } from '@/components/UI/ShortcutsPanel';
 import { openOptionsWithHash } from '@/utils/openOptions';
 import { getActiveTabGroupId } from '@/utils/tabCapture';
@@ -100,6 +101,7 @@ export function PopupContent() {
           <PopupToolbar organizeButtonRef={organizeButtonRef} />
 
           <PopupWorkspaceSwitcher onManage={handleManageWorkspaces} />
+          <WorkspaceSwitchShortcuts />
 
           {isLoaded && !hasRules ? (
             <SettingsToggles

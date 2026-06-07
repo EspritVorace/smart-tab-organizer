@@ -761,6 +761,9 @@
 
   "cmdOrganizeAllTabs": { "message": "Organiser tous les onglets de la fenêtre" },
   "cmdSaveSession": { "message": "Enregistrer la fenêtre courante en session" },
+  "cmdSwitchWorkspaceNext": { "message": "Passer à l'espace de travail suivant" },
+  "cmdSwitchWorkspacePrev": { "message": "Passer à l'espace de travail précédent" },
+  "cmdSwitchWorkspaceLast": { "message": "Passer au dernier espace de travail utilisé" },
 
   "shortcutsPanelTitle": { "message": "Raccourcis clavier" },
   "shortcutsPanelDescription": { "message": "Référence rapide de tous les raccourcis disponibles." },
@@ -784,6 +787,7 @@
   "shortcutsGroupGlobal": { "message": "Globaux navigateur" },
   "shortcutsGroupPopup": { "message": "Popup" },
   "shortcutsGroupOptions": { "message": "Page d'options" },
+  "shortcutsGroupWorkspace": { "message": "Changement d'espace" },
   "shortcutsGroupListHome": { "message": "Page d'accueil" },
   "shortcutsGroupListRules": { "message": "Liste des règles" },
   "shortcutsGroupListSessions": { "message": "Liste des sessions" },
@@ -815,6 +819,16 @@
   "shortcutDescNavigateImportExport": { "message": "Aller à Import / Export" },
   "shortcutDescNavigateSettings": { "message": "Aller aux réglages" },
   "shortcutDescNavigateWorkspaces": { "message": "Aller aux espaces de travail" },
+  "shortcutDescWorkspaceNext": { "message": "Passer à l'espace suivant" },
+  "shortcutDescWorkspacePrev": { "message": "Passer à l'espace précédent" },
+  "shortcutDescWorkspaceLast": { "message": "Passer au dernier espace utilisé" },
+  "workspaceSwitchedAnnounce": {
+    "message": "Espace de travail actif : $NAME$",
+    "placeholders": {
+      "name": { "content": "$1", "example": "Personnel" }
+    }
+  },
+  "workspaceSwitchUnavailableAnnounce": { "message": "Aucun autre espace de travail disponible" },
   "shortcutDescFocusSearch": { "message": "Focus sur le champ de recherche" },
   "shortcutDescClearSearch": { "message": "Effacer la recherche ou fermer le panneau" },
   "shortcutDescListNavigate": { "message": "Déplacer le focus entre les cartes" },

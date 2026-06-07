@@ -11,6 +11,7 @@ import {
 import { processTabForDeduplication } from './deduplication.js';
 import { processGroupingForNewTab } from './grouping.js';
 import { handleOrganizeAllTabs } from './organize.js';
+import { switchWorkspaceRelative, type WorkspaceSwitchDirection } from '@/utils/workspaceSwitch.js';
 import { openOptionsWithHash } from '@/utils/openOptions.js';
 import type { BackgroundMessage, MessageResponse } from '@/types/messages.js';
 
@@ -18,6 +19,13 @@ function isBackgroundMessage(value: unknown): value is BackgroundMessage {
     return typeof value === 'object' && value !== null && 'type' in value
         && typeof (value as { type: unknown }).type === 'string';
 }
+
+// Maps the workspace-switch manifest commands to the shared switch direction.
+const WORKSPACE_COMMAND_DIRECTIONS: Record<string, WorkspaceSwitchDirection> = {
+    'switch-workspace-next': 'next',
+    'switch-workspace-prev': 'prev',
+    'switch-workspace-last': 'last',
+};
 export function setupInstallationHandler(): void {
     browser.runtime.onInstalled.addListener(async (details: Browser.runtime.InstalledDetails) => {
         logger.debug("SmartTab Organizer installed/updated.", details.reason);
@@ -70,6 +78,12 @@ export function setupCommandHandler(): void {
         if (name === 'save-current-window-session') {
             openOptionsWithHash('#sessions?action=snapshot')
                 .catch(e => logger.error('[COMMANDS] save-current-window-session failed:', e));
+            return;
+        }
+        const workspaceDirection = WORKSPACE_COMMAND_DIRECTIONS[name];
+        if (workspaceDirection) {
+            switchWorkspaceRelative(workspaceDirection)
+                .catch(e => logger.error(`[COMMANDS] ${name} failed:`, e));
         }
     });
 }

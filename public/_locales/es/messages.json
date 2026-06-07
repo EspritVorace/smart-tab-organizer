@@ -761,6 +761,9 @@
 
   "cmdOrganizeAllTabs": { "message": "Organizar todas las pestañas de la ventana" },
   "cmdSaveSession": { "message": "Guardar la ventana actual como sesión" },
+  "cmdSwitchWorkspaceNext": { "message": "Cambiar al siguiente espacio de trabajo" },
+  "cmdSwitchWorkspacePrev": { "message": "Cambiar al espacio de trabajo anterior" },
+  "cmdSwitchWorkspaceLast": { "message": "Cambiar al último espacio de trabajo usado" },
 
   "shortcutsPanelTitle": { "message": "Atajos de teclado" },
   "shortcutsPanelDescription": { "message": "Referencia rápida de todos los atajos disponibles." },
@@ -784,6 +787,7 @@
   "shortcutsGroupGlobal": { "message": "Globales (navegador)" },
   "shortcutsGroupPopup": { "message": "Popup" },
   "shortcutsGroupOptions": { "message": "Página de opciones" },
+  "shortcutsGroupWorkspace": { "message": "Cambio de espacio" },
   "shortcutsGroupListHome": { "message": "Página de inicio" },
   "shortcutsGroupListRules": { "message": "Lista de reglas" },
   "shortcutsGroupListSessions": { "message": "Lista de sesiones" },
@@ -815,6 +819,16 @@
   "shortcutDescNavigateImportExport": { "message": "Ir a Importar / Exportar" },
   "shortcutDescNavigateSettings": { "message": "Ir a los ajustes" },
   "shortcutDescNavigateWorkspaces": { "message": "Ir a los espacios de trabajo" },
+  "shortcutDescWorkspaceNext": { "message": "Cambiar al espacio siguiente" },
+  "shortcutDescWorkspacePrev": { "message": "Cambiar al espacio anterior" },
+  "shortcutDescWorkspaceLast": { "message": "Cambiar al último espacio usado" },
+  "workspaceSwitchedAnnounce": {
+    "message": "Espacio de trabajo activo: $NAME$",
+    "placeholders": {
+      "name": { "content": "$1", "example": "Personal" }
+    }
+  },
+  "workspaceSwitchUnavailableAnnounce": { "message": "No hay otro espacio de trabajo disponible" },
   "shortcutDescFocusSearch": { "message": "Enfocar el campo de búsqueda" },
   "shortcutDescClearSearch": { "message": "Borrar la búsqueda o cerrar el panel" },
   "shortcutDescListNavigate": { "message": "Mover el foco entre tarjetas" },

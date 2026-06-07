@@ -27,6 +27,7 @@ import type { SidebarSection } from '@/components/UI/Sidebar/Sidebar';
 import { OptionsHeader, OptionsHeaderCollapsed } from '@/components/UI/OptionsLayout/OptionsHeader';
 import { OptionsTopbar } from '@/components/UI/OptionsLayout/OptionsTopbar';
 import { WorkspaceFooter, WorkspaceFooterCollapsed } from '@/components/UI/Workspace/WorkspaceFooter';
+import { WorkspaceSwitchShortcuts } from '@/components/UI/Workspace/WorkspaceSwitchShortcuts';
 import { ShortcutsAside, type PageContext } from '@/components/UI/ShortcutsPanel';
 import { SequenceIndicator } from '@/components/UI/SequenceIndicator';
 import { HomePage } from './HomePage';
@@ -362,6 +363,7 @@ export function OptionsContent() {
                 color="orange"
             />
             <SequenceIndicator activePrefix={sequencePrefix} />
+            <WorkspaceSwitchShortcuts onSequenceState={({ activePrefix }) => setSequencePrefix(activePrefix)} />
         </div>
         </ImportExportWizardsProvider>
         </ShortcutsControlProvider>

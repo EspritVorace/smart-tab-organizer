@@ -16,6 +16,7 @@ export type ShortcutGroupId =
   | 'global'
   | 'options'
   | 'popup'
+  | 'workspace'
   | 'list-rules'
   | 'list-sessions'
   | 'list-stats'

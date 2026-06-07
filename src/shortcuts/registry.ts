@@ -42,6 +42,35 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     scope: 'global',
     commandName: '_execute_action',
   },
+  // Browser-layer workspace switching: manifest commands without a default key
+  // (every letter combo clashes with a browser built-in), assignable by the
+  // user via chrome://extensions/shortcuts so they work from any tab. The in
+  // -page `w`-prefixed sequences (group `workspace`) cover the popup/options
+  // surfaces; both layers call the same `switchWorkspaceRelative` handler.
+  'global.workspaceNext': {
+    id: 'global.workspaceNext',
+    defaultBindings: [],
+    descriptionKey: 'shortcutDescWorkspaceNext',
+    group: 'global',
+    scope: 'global',
+    commandName: 'switch-workspace-next',
+  },
+  'global.workspacePrev': {
+    id: 'global.workspacePrev',
+    defaultBindings: [],
+    descriptionKey: 'shortcutDescWorkspacePrev',
+    group: 'global',
+    scope: 'global',
+    commandName: 'switch-workspace-prev',
+  },
+  'global.workspaceLast': {
+    id: 'global.workspaceLast',
+    defaultBindings: [],
+    descriptionKey: 'shortcutDescWorkspaceLast',
+    group: 'global',
+    scope: 'global',
+    commandName: 'switch-workspace-last',
+  },
   // Cycles the theme (light -> dark -> system), mirroring the header
   // ThemeToggle button. Mnemonic `d` ("Dark"). Document-level so the same
   // shortcut works on the options pages and inside the popup.
@@ -50,6 +79,34 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     defaultBindings: ['d'],
     descriptionKey: 'shortcutDescToggleTheme',
     group: 'global',
+    scope: 'global',
+  },
+
+  // Workspace switching (in-page layer). Mnemonic two-key sequences prefixed by
+  // `w` (workspace): `w n` next, `w p` previous, `w l` last used. The `w` letter
+  // is reserved as a sequence prefix at the `global` scope (same rule as `m`):
+  // no simple combo may use it so the sequence timeout never delays a keypress.
+  // Switching only flips the active context; it never moves a tab. Document
+  // -level so the same gestures work in the popup and on the options pages.
+  'workspace.next': {
+    id: 'workspace.next',
+    defaultBindings: [['w', 'n']],
+    descriptionKey: 'shortcutDescWorkspaceNext',
+    group: 'workspace',
+    scope: 'global',
+  },
+  'workspace.prev': {
+    id: 'workspace.prev',
+    defaultBindings: [['w', 'p']],
+    descriptionKey: 'shortcutDescWorkspacePrev',
+    group: 'workspace',
+    scope: 'global',
+  },
+  'workspace.last': {
+    id: 'workspace.last',
+    defaultBindings: [['w', 'l']],
+    descriptionKey: 'shortcutDescWorkspaceLast',
+    group: 'workspace',
     scope: 'global',
   },
 
