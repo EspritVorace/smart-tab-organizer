@@ -743,6 +743,7 @@
   "statsStorageCatSessionsArchived": { "message": "Sessions archivées" },
   "statsStorageCatStatistics": { "message": "Statistiques" },
   "statsStorageCatSettings": { "message": "Réglages divers" },
+  "statsStorageByWorkspace": { "message": "Par espace de travail" },
   "statsStorageUnitBytes": { "message": "{value} o" },
   "statsStorageUnitKb": { "message": "{value} Ko" },
   "statsStorageUnitMb": { "message": "{value} Mo" },

@@ -154,3 +154,23 @@ export async function measureWorkspaceStorageUsage(
   const workspaceTotalBytes = categories.reduce((sum, c) => sum + c.bytes, 0);
   return { categories, workspaceTotalBytes };
 }
+
+export interface WorkspaceStorageUsageEntry extends WorkspaceStorageUsage {
+  workspaceId: string;
+}
+
+/**
+ * Measures the per-category `storage.local` usage of several workspaces in
+ * parallel, tagging each result with its workspace ID. Used to split the
+ * storage breakdown by workspace when more than one exists.
+ */
+export async function measureAllWorkspacesStorageUsage(
+  wsIds: string[],
+): Promise<WorkspaceStorageUsageEntry[]> {
+  return Promise.all(
+    wsIds.map(async (id) => ({
+      workspaceId: id,
+      ...(await measureWorkspaceStorageUsage(id)),
+    })),
+  );
+}
