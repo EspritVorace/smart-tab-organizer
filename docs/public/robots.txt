@@ -34,3 +34,8 @@ User-agent: Applebot-Extended
 Allow: /
 
 Sitemap: https://docs.esprit-vorace.fr/sitemap-index.xml
+
+# Index Markdown pour LLM (llmstxt.org). Chaque page est aussi disponible
+# en Markdown via son URL suffixee de .md, ou via l'en-tete HTTP
+# `Accept: text/markdown`.
+# https://docs.esprit-vorace.fr/llms.txt
