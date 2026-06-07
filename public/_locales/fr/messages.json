@@ -19,6 +19,7 @@
   "workspaceColorPickerLabel": { "message": "Couleur d'accentuation de l'espace" },
   "workspaceSwitchLabel": { "message": "Activer" },
   "workspaceMoreActions": { "message": "Plus d'actions" },
+  "moreActions": { "message": "Plus d'actions" },
   "workspaceEditLabel": { "message": "Modifier" },
   "workspaceDeleteLabel": { "message": "Supprimer l'espace" },
   "workspaceDeleteTitle": { "message": "Supprimer cet espace de travail ?" },

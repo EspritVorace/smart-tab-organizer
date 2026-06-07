@@ -42,8 +42,14 @@ vi.mock('../../src/components/UI/PageLayout/PageLayout', () => ({
 }));
 
 import { WorkspacesPage } from '../../src/pages/WorkspacesPage';
+import { MockImportExportWizardsProvider } from '../../src/test-utils/MockImportExportWizardsProvider';
 
-const wrap = (ui: React.ReactNode) => render(<Theme>{ui}</Theme>);
+const wrap = (ui: React.ReactNode) =>
+  render(
+    <Theme>
+      <MockImportExportWizardsProvider>{ui}</MockImportExportWizardsProvider>
+    </Theme>,
+  );
 
 const baseSettings: AppSettings = {
   globalGroupingEnabled: true,

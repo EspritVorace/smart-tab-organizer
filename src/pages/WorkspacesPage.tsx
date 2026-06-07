@@ -1,12 +1,13 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Box, Button, Card, DropdownMenu, Flex, IconButton, Kbd, Text, Tooltip } from '@radix-ui/themes';
-import { AlertCircle, Check, MoreHorizontal, Pencil, Plus } from 'lucide-react';
+import { AlertCircle, Check, MoreHorizontal, Pencil, Plus, Upload } from 'lucide-react';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
-import { ListToolbar } from '@/components/UI/ListToolbar';
+import { ListToolbar, ListToolbarMenu } from '@/components/UI/ListToolbar';
 import { EmptyState } from '@/components/UI/EmptyState';
 import { DeleteMenuItem } from '@/components/UI/DeleteMenuItem/DeleteMenuItem';
 import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
+import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
 import { WorkspaceAvatar } from '@/components/UI/Workspace/WorkspaceAvatar';
 import { WorkspaceFormDialog } from '@/components/UI/Workspace/WorkspaceFormDialog';
 import { WorkspaceDeleteConfirmDialog } from '@/components/UI/Workspace/WorkspaceDeleteConfirmDialog';
@@ -145,6 +146,7 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
     removeWorkspace,
     isLoaded,
   } = useActiveWorkspaceContext();
+  const { openImportWorkspace } = useImportExportWizards();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<WorkspaceMeta | null>(null);
@@ -273,6 +275,20 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
                     {getMessage('workspaceCreateLabel')}
                   </Button>
                 </Tooltip>
+              }
+              menu={
+                <ListToolbarMenu
+                  testId="page-workspaces-toolbar-menu"
+                  items={[
+                    {
+                      key: 'import',
+                      testId: 'page-workspaces-toolbar-menu-import',
+                      icon: Upload,
+                      label: getMessage('importWorkspaceTitle'),
+                      onSelect: () => openImportWorkspace(),
+                    },
+                  ]}
+                />
               }
             />
           )}
