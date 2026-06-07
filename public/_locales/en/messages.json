@@ -19,7 +19,7 @@
   "workspaceColorPickerLabel": { "message": "Workspace accent color" },
   "workspaceSwitchLabel": { "message": "Switch" },
   "workspaceMoreActions": { "message": "More actions" },
-  "moreActions": { "message": "More actions" },
+  "importExportMenu": { "message": "Import and export" },
   "workspaceEditLabel": { "message": "Edit" },
   "workspaceDeleteLabel": { "message": "Delete workspace" },
   "workspaceDeleteTitle": { "message": "Delete this workspace?" },

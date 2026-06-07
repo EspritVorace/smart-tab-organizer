@@ -279,6 +279,7 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
               menu={
                 <ListToolbarMenu
                   testId="page-workspaces-toolbar-menu"
+                  ariaLabel={getMessage('importWorkspaceTitle')}
                   items={[
                     {
                       key: 'import',
