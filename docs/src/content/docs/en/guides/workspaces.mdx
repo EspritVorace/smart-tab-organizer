@@ -59,6 +59,24 @@ The `PopupWorkspaceSwitcher` mirrors the same mechanism in the popup. Handy to s
   </TabItem>
 </Tabs>
 
+### From the keyboard
+
+Three key sequences cycle through workspaces without going through the switcher,
+from the Options page or the popup:
+
+| Sequence | Effect |
+|---|---|
+| `W` then `N` | Switch to the next workspace |
+| `W` then `P` | Switch to the previous workspace |
+| `W` then `L` | Go back to the last used workspace |
+
+To switch from anywhere in the browser, three **global commands** also exist:
+`switch-workspace-next`, `switch-workspace-prev` and `switch-workspace-last`.
+They are bound to no key by default; you assign the shortcut of your choice from
+`chrome://extensions/shortcuts`.
+
+See [Keyboard shortcuts](/reference/raccourcis-clavier) for the full list.
+
 When you switch workspace:
 
 - the **Rules** page only shows the rules of the target workspace;

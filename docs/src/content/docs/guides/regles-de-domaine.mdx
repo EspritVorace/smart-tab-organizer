@@ -28,6 +28,23 @@ Chaque ligne couvre un domaine et affiche son label, son mode de configuration (
 
 Une barre de recherche filtre la liste par nom de règle ou par domaine. Une sélection multiple permet d'effectuer des actions en masse : activation, désactivation, suppression, export.
 
+## Filtrer, trier et grouper la liste
+
+À côté de la recherche, un bouton de vue ouvre un menu pour réorganiser
+l'affichage de la liste. Il agit uniquement sur la présentation : il ne modifie
+ni les règles ni leur priorité d'évaluation (qui reste l'ordre manuel).
+
+| Réglage | Options |
+|---|---|
+| **Tri** | Ordre manuel (glisser-déposer), par date, par catégorie, par couleur, ou par domaine (regroupe les règles d'un même domaine racine). Sens croissant ou décroissant. |
+| **Filtre** | Par couleur (les neuf couleurs ou « sans couleur »), par catégorie (ou « sans catégorie »), par état (activée ou désactivée). |
+| **Groupage** | Aucun, par catégorie, par couleur, ou par état. |
+
+Quand un groupage est actif, chaque section reçoit un entête repliable avec une
+case à cocher tri-état pour sélectionner d'un coup toutes les règles du groupe.
+La vue choisie (tri, filtre, groupage) est mémorisée séparément pour chaque
+espace de travail.
+
 ## Créer une règle
 
 Cliquez sur **Nouvelle règle** en haut de la liste. L'assistant s'ouvre en quatre étapes.

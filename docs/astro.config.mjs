@@ -84,6 +84,7 @@ export default defineConfig({
             { slug: 'guides/import-export' },
             { slug: 'guides/statistiques' },
             { slug: 'guides/parametres' },
+            { slug: 'guides/aide-et-documentation' },
           ],
         },
         {
