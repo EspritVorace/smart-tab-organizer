@@ -4,6 +4,9 @@ description: Cloisonner règles, sessions et statistiques par contexte. Créer, 
 ---
 
 import { Aside, CardGrid, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+import ThemeImage from '../../../components/ThemeImage.astro';
+import workspacesPageLight from '../../../assets/screenshots/fr-light-workspaces-page.png';
+import workspacesPageDark from '../../../assets/screenshots/fr-dark-workspaces-page.png';
 
 <Aside type="tip" title="En bref">
 - Un **workspace** est un conteneur isolé avec ses propres règles, sessions et statistiques.
@@ -13,6 +16,12 @@ import { Aside, CardGrid, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starli
 </Aside>
 
 Un espace de travail (ou workspace) permet de séparer deux contextes d'usage sans que leurs configurations se mélangent : travail et perso, projet A et projet B, environnement client et environnement R&D. Chaque contexte garde ses règles, ses sessions et ses compteurs.
+
+<ThemeImage
+  lightSrc={workspacesPageLight}
+  darkSrc={workspacesPageDark}
+  alt="Page Espaces de travail : l'espace actif et un espace inactif avec son bouton Activer et son menu d'actions."
+/>
 
 ## Ce que cloisonne un workspace
 
