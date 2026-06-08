@@ -774,7 +774,6 @@
   "statusBarShortcutsLabel": { "message": "Show shortcuts" },
   "shortcutsCustomize": { "message": "Customize browser shortcuts" },
   "shortcutsCustomizeFirefoxHint": { "message": "Firefox: open the gear menu, then 'Manage Extension Shortcuts'." },
-  "shortcutsUnboundWarning": { "message": "Some browser shortcuts are not bound. The browser does not auto-apply suggested keys after an extension update; bind them via 'Customize browser shortcuts' below." },
   "shortcutNotSet": { "message": "Not set" },
 
   "docsKeyboardShortcutsTitle": { "message": "Keyboard shortcuts" },

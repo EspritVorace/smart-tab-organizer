@@ -127,13 +127,6 @@ export function ShortcutsContent({ surface, pageContext }: ShortcutsContentProps
     );
   return (
     <Flex direction="column" gap="4" data-testid="shortcuts-content" onKeyDown={handleTriggerKeyDown}>
-      {hasUnbound && (
-        <Box className={styles.unboundBanner} data-testid="shortcuts-unbound-banner">
-          <Text size="1" as="p">
-            {getMessage('shortcutsUnboundWarning')}
-          </Text>
-        </Box>
-      )}
       {tree.map((node) => (
         <CollapsibleGroup
           key={node.descriptor.id}

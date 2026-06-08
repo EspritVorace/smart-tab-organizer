@@ -75,14 +75,6 @@
   color: var(--gray-11);
 }
 
-.unboundBanner {
-  padding: 8px 10px;
-  background: var(--amber-a3);
-  border: 1px solid var(--amber-a5);
-  border-radius: var(--radius-2);
-  color: var(--amber-12);
-}
-
 .unboundLabel {
   font-size: 11px;
   font-style: italic;

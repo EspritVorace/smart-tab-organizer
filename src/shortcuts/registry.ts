@@ -18,6 +18,16 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
   // `Ctrl+Shift+<letter>` are Firefox built-ins). They stay assignable by the
   // user via chrome://extensions/shortcuts, and are reachable from the popup
   // (`popup.organize` = o, `popup.save` = s).
+  // Opening the popup is the only browser command that ships a default binding,
+  // so it leads the group in the panel.
+  'global.openPopup': {
+    id: 'global.openPopup',
+    defaultBindings: ['Ctrl+Shift+1'],
+    descriptionKey: 'shortcutDescOpenPopup',
+    group: 'global',
+    scope: 'global',
+    commandName: '_execute_action',
+  },
   'global.organize': {
     id: 'global.organize',
     defaultBindings: [],
@@ -33,14 +43,6 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'global',
     scope: 'global',
     commandName: 'save-current-window-session',
-  },
-  'global.openPopup': {
-    id: 'global.openPopup',
-    defaultBindings: ['Ctrl+Shift+1'],
-    descriptionKey: 'shortcutDescOpenPopup',
-    group: 'global',
-    scope: 'global',
-    commandName: '_execute_action',
   },
   // Browser-layer workspace switching: manifest commands without a default key
   // (every letter combo clashes with a browser built-in), assignable by the
