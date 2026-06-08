@@ -8,7 +8,7 @@ export function WorkspacesPageSkeleton() {
   return (
     <PageLayoutSkeleton titleKey="workspacesTab" descriptionKey="workspacesDescription">
       <Box data-testid="page-workspaces-skeleton">
-        <ListToolbarSkeleton />
+        <ListToolbarSkeleton hasMenu />
         <Flex direction="column" gap="2">
           {ROWS.map((i) => (
             <Card key={i} variant="surface">

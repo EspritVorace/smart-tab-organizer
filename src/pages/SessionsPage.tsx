@@ -1012,6 +1012,16 @@ export function SessionsPage({
     },
   });
 
+  // Enter in the search field jumps to the first result card (works on both the
+  // active and archived sub-tabs via the shared scroll container), or keeps
+  // focus in the field when there is no result.
+  const focusFirstResultCard = useCallback(() => {
+    document
+      .querySelector('[data-testid="page-sessions-scroll"]')
+      ?.querySelector<HTMLElement>('[data-session-card]')
+      ?.focus();
+  }, []);
+
   return (
     <PageLayout
       titleKey="sessionsTab"
@@ -1061,6 +1071,7 @@ export function SessionsPage({
               searchPlaceholder={getMessage('searchSessions')}
               searchValue={searchQuery}
               onSearchChange={setSearchQuery}
+              onSearchSubmit={focusFirstResultCard}
               action={
                 !archivedOnlyView ? (
                   <Tooltip content={<Flex align="center" gap="2" aria-hidden="true">{getMessage('sessionSnapshotButton')}<Kbd>N</Kbd></Flex>}>
@@ -1114,7 +1125,10 @@ export function SessionsPage({
 
           <Box
             data-testid="page-sessions-scroll"
-            style={{ flex: 1, overflow: 'auto', minHeight: 0 }}
+            // Vertical scroll only: clip overflow-x so the Radix ghost buttons'
+            // negative margins (card dropdowns) don't trigger a spurious
+            // horizontal scrollbar (mirrors PageLayoutFrame's content box).
+            style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}
           >
             {!isLoaded && (
               <Text size="2" color="gray">

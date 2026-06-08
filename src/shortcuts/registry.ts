@@ -18,6 +18,16 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
   // `Ctrl+Shift+<letter>` are Firefox built-ins). They stay assignable by the
   // user via chrome://extensions/shortcuts, and are reachable from the popup
   // (`popup.organize` = o, `popup.save` = s).
+  // Opening the popup is the only browser command that ships a default binding,
+  // so it leads the group in the panel.
+  'global.openPopup': {
+    id: 'global.openPopup',
+    defaultBindings: ['Ctrl+Shift+1'],
+    descriptionKey: 'shortcutDescOpenPopup',
+    group: 'global',
+    scope: 'global',
+    commandName: '_execute_action',
+  },
   'global.organize': {
     id: 'global.organize',
     defaultBindings: [],
@@ -33,14 +43,6 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'global',
     scope: 'global',
     commandName: 'save-current-window-session',
-  },
-  'global.openPopup': {
-    id: 'global.openPopup',
-    defaultBindings: ['Ctrl+Shift+1'],
-    descriptionKey: 'shortcutDescOpenPopup',
-    group: 'global',
-    scope: 'global',
-    commandName: '_execute_action',
   },
   // Browser-layer workspace switching: manifest commands without a default key
   // (every letter combo clashes with a browser built-in), assignable by the
@@ -321,6 +323,31 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     descriptionKey: 'shortcutDescListReorderKeyboard',
     group: 'list-rules',
     scope: 'page:rules',
+  },
+  // Group headers (visible when a grouping is active). Handled locally on the
+  // focused header in DomainRulesPage; these entries are documentation-only,
+  // like `sessionCard.expandPreview` / `collapsePreview`. Up/Down navigation
+  // across headers and cards stays covered by `list.rules.navigate`.
+  'ruleGroup.expand': {
+    id: 'ruleGroup.expand',
+    defaultBindings: ['ArrowRight'],
+    descriptionKey: 'shortcutDescRuleGroupExpand',
+    group: 'list-rules',
+    scope: 'widget:rule-group',
+  },
+  'ruleGroup.collapse': {
+    id: 'ruleGroup.collapse',
+    defaultBindings: ['ArrowLeft'],
+    descriptionKey: 'shortcutDescRuleGroupCollapse',
+    group: 'list-rules',
+    scope: 'widget:rule-group',
+  },
+  'ruleGroup.toggleSelection': {
+    id: 'ruleGroup.toggleSelection',
+    defaultBindings: ['Space'],
+    descriptionKey: 'shortcutDescRuleGroupToggleSelection',
+    group: 'list-rules',
+    scope: 'widget:rule-group',
   },
 
   // List-level: Sessions

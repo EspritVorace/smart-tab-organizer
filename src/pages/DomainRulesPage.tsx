@@ -37,6 +37,7 @@ import {
   normalizeRuleViewState,
   DEFAULT_RULE_VIEW_STATE,
   type RuleViewState,
+  type RuleViewGroup,
 } from '@/utils/ruleViewUtils';
 import type { AppSettings, DomainRuleSetting } from '@/types/syncSettings';
 import type { DomainRule } from '@/schemas/domainRule';
@@ -68,11 +69,12 @@ interface RuleCardListProps {
   ariaLabel: string;
   /** Indents the cards to the right to mark them as children of a group header (mirrors the session sections). */
   indent?: boolean;
+  /** Key of the group these cards belong to (omitted for the ungrouped section). Lets a focused card collapse its parent group with ArrowLeft. */
+  groupKey?: string;
   allRules: DomainRuleSetting[];
   selectedIds: Set<string>;
   searchTerm: string;
   overlap: Map<string, DomainRuleSetting[]>;
-  navIndexById: Map<string, number>;
   onSelect: (id: string, checked: boolean) => void;
   onToggleEnabled: (id: string, enabled: boolean) => void;
   onEdit: (rule: DomainRuleSetting) => void;
@@ -81,13 +83,14 @@ interface RuleCardListProps {
   onMoveToLast: (id: string) => void;
   onMoveToFirstOfDomain: (id: string) => void;
   onMoveToLastOfDomain: (id: string) => void;
-  onCardKeyDown: (e: React.KeyboardEvent, rule: DomainRuleSetting, navIndex: number) => void;
+  onCardKeyDown: (e: React.KeyboardEvent, rule: DomainRuleSetting, groupKey?: string) => void;
 }
 
 /**
  * Renders one section's rule cards inside an ARIA list. The per-section
  * sortable `index` is the card's position within `rules`; the keyboard
- * navigation index is the card's global DOM position (`navIndexById`).
+ * navigation index is resolved live from the DOM by the page handler
+ * (`[data-rules-nav-item]` order), so collapsed groups never desync it.
  */
 function RuleCardList(props: RuleCardListProps) {
   return (
@@ -118,7 +121,7 @@ function RuleCardList(props: RuleCardListProps) {
           onMoveToLast={props.onMoveToLast}
           onMoveToFirstOfDomain={props.onMoveToFirstOfDomain}
           onMoveToLastOfDomain={props.onMoveToLastOfDomain}
-          onKeyDown={e => props.onCardKeyDown(e, rule, props.navIndexById.get(rule.id) ?? 0)}
+          onKeyDown={e => props.onCardKeyDown(e, rule, props.groupKey)}
         />
       ))}
     </Flex>
@@ -234,6 +237,11 @@ export function DomainRulesPage({
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const [bulkExportIds, setBulkExportIds] = useState<string[] | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  // While a search is active, every group is force-expanded so a match never
+  // hides inside a collapsed group. The persisted `collapsedGroups` is left
+  // untouched and restored when the search clears; collapse toggles are no-ops
+  // meanwhile.
+  const searchActive = searchTerm.length > 0;
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const searchPredicate = useMemo(() => {
@@ -253,19 +261,15 @@ export function DomainRulesPage({
   );
 
   // DOM render order: isolated (ungrouped) rules first, then the domain groups.
-  // Keep this in sync with the JSX below so keyboard navigation indices match.
+  // Drives the "select all visible" set. Keyboard navigation no longer reads a
+  // precomputed index from here: it resolves the focused element's position
+  // live from the DOM (`[data-rules-nav-item]`), which stays correct even when
+  // a collapsed group unmounts its cards.
   const visibleRules = useMemo(
     () => [...viewResult.ungrouped, ...viewResult.groups.flatMap(g => g.rules)],
     [viewResult],
   );
   const visibleIds = useMemo(() => visibleRules.map(r => r.id), [visibleRules]);
-  // Global DOM position of each visible card, used by keyboard list navigation
-  // (independent of the per-group sortable index passed to dnd-kit).
-  const navIndexById = useMemo(() => {
-    const map = new Map<string, number>();
-    visibleRules.forEach((r, i) => map.set(r.id, i));
-    return map;
-  }, [visibleRules]);
 
   // Drag-and-drop mutates the real order, so we only allow it for domain
   // auto-groups when the displayed order still maps to the real order
@@ -364,33 +368,100 @@ export function DomainRulesPage({
 
   const listRef = useRef<HTMLDivElement>(null);
 
-  const { handleNavigationKey } = useListNavigation(listRef, '[role="listitem"]', {
+  // Group headers and rule cards share one vertical navigation sequence, both
+  // tagged `[data-rules-nav-item]`. Up/Down/Home/End flow through the whole
+  // tree; a collapsed group simply unmounts its cards, so they drop out of the
+  // live query.
+  const NAV_ITEM_SELECTOR = '[data-rules-nav-item]';
+  const { handleNavigationKey } = useListNavigation(listRef, NAV_ITEM_SELECTOR, {
     autoFocus: { ready: viewLoaded, fallbackSelector: '[data-testid="page-rules-btn-import-pack"]' },
   });
 
+  // Live DOM position of a nav item (header or card) among its siblings. Read at
+  // event time so collapsing/expanding a group never desyncs the index.
+  const navIndexOf = useCallback((el: HTMLElement): number => {
+    const items = listRef.current?.querySelectorAll<HTMLElement>(NAV_ITEM_SELECTOR);
+    if (!items) return -1;
+    return Array.prototype.indexOf.call(items, el);
+  }, []);
+
   // After a filter/sort/group change (view menu close), move focus to the first
-  // resulting rule so a keyboard/screen-reader user lands on the first visible
-  // result. Deferred so it runs after Radix restores focus to the menu trigger.
+  // resulting nav item (group header or rule) so a keyboard/screen-reader user
+  // lands on the first visible result. Deferred so it runs after Radix restores
+  // focus to the menu trigger.
   const focusFirstRule = useCallback(() => {
     requestAnimationFrame(() => {
-      listRef.current?.querySelector<HTMLElement>('[role="listitem"]')?.focus();
+      listRef.current?.querySelector<HTMLElement>(NAV_ITEM_SELECTOR)?.focus();
     });
   }, []);
 
-  // The card keydown handler now only forwards arrow/Home/End to
-  // useListNavigation. The Enter binding is kept here because Enter to
-  // open the editor is a card-local interaction that is not in the registry
-  // (the registry exposes `e` for editing, surfaced via widget shortcuts
-  // below). All other key actions (e, t, Space, Delete) are dispatched at
-  // document level via `useShortcuts({...}, { scope: 'widget:rule-card' })`.
-  const handleCardKeyDown = useCallback((e: React.KeyboardEvent, rule: DomainRuleSetting, index: number) => {
+  // Enter in the search field jumps to the first result card (a rule, not a
+  // group header), or keeps focus in the field when there is no result.
+  const focusFirstResultCard = useCallback(() => {
+    listRef.current?.querySelector<HTMLElement>('[role="listitem"]')?.focus();
+  }, []);
+
+  // The card keydown handler only forwards arrow/Home/End to useListNavigation
+  // (index resolved live from the DOM). The Enter binding is kept here because
+  // Enter to open the editor is a card-local interaction that is not in the
+  // registry (the registry exposes `e` for editing, surfaced via widget
+  // shortcuts below). All other key actions (e, t, Space, Delete) are
+  // dispatched at document level via `useShortcuts({...}, { scope: 'widget:rule-card' })`.
+  const handleCardKeyDown = useCallback((e: React.KeyboardEvent, rule: DomainRuleSetting, groupKey?: string) => {
     if (e.target !== e.currentTarget) return;
-    if (handleNavigationKey(e as React.KeyboardEvent<HTMLElement>, index)) return;
+    if (handleNavigationKey(e as React.KeyboardEvent<HTMLElement>, navIndexOf(e.currentTarget as HTMLElement))) return;
+    // ArrowLeft on a grouped card collapses its parent group (tree behaviour).
+    // The card unmounts on collapse, so move focus up to the group header.
+    // Disabled during a search (groups stay force-expanded then).
+    if (e.key === 'ArrowLeft' && groupKey) {
+      e.preventDefault();
+      if (!searchActive && !collapsedGroups.has(groupKey)) {
+        handleToggleGroupCollapsed(groupKey, true);
+        requestAnimationFrame(() => {
+          listRef.current
+            ?.querySelector<HTMLElement>(`[data-testid="page-rules-group-${groupKey}-toggle"]`)
+            ?.focus();
+        });
+      }
+      return;
+    }
     if (e.key === 'Enter' && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
       e.preventDefault();
       handleEditRule(rule);
     }
-  }, [handleNavigationKey, handleEditRule]);
+  }, [handleNavigationKey, navIndexOf, searchActive, collapsedGroups, handleToggleGroupCollapsed, handleEditRule]);
+
+  // Keyboard handler for a group header's toggle button. Up/Down/Home/End reuse
+  // the shared list navigation; Right expands, Left collapses, Space toggles the
+  // whole group's selection (preventDefault stops the native button click that
+  // would otherwise toggle the Collapsible).
+  const handleGroupHeaderKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLButtonElement>, group: RuleViewGroup) => {
+      if (e.target !== e.currentTarget) return;
+      if (handleNavigationKey(e as React.KeyboardEvent<HTMLElement>, navIndexOf(e.currentTarget))) return;
+      const isCollapsed = collapsedGroups.has(group.key);
+      // preventDefault unconditionally on Left/Right so the page never
+      // horizontally scrolls, even when the toggle is a no-op (group already in
+      // the target state, or a search forcing every group open).
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (!searchActive && isCollapsed) handleToggleGroupCollapsed(group.key, false);
+        return;
+      }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (!searchActive && !isCollapsed) handleToggleGroupCollapsed(group.key, true);
+        return;
+      }
+      if (e.key === ' ') {
+        e.preventDefault();
+        const selected = group.ruleIds.filter(id => selectedIds.has(id)).length;
+        handleSelectGroup(group.ruleIds, selected < group.ruleIds.length);
+      }
+      // Enter falls through to Radix Collapsible.Trigger (toggles collapse).
+    },
+    [handleNavigationKey, navIndexOf, searchActive, collapsedGroups, handleToggleGroupCollapsed, selectedIds, handleSelectGroup],
+  );
 
   const handleAddRule = useCallback(() => {
     setEditingRule(undefined);
@@ -521,7 +592,6 @@ export function DomainRulesPage({
     selectedIds,
     searchTerm,
     overlap: overlapPrecedenceByRuleId,
-    navIndexById,
     onSelect: handleRowSelect,
     onToggleEnabled: handleToggleEnabled,
     onEdit: handleEditRule,
@@ -557,6 +627,7 @@ export function DomainRulesPage({
                 searchTestId="page-rules-search"
                 searchPlaceholder={getMessage('searchRules')}
                 searchValue={searchTerm}
+                onSearchSubmit={focusFirstResultCard}
                 onSearchChange={setSearchTerm}
                 filter={
                   <RuleViewMenu
@@ -705,12 +776,14 @@ export function DomainRulesPage({
                     const dndEnabled = group.isDndEnabled && domainDndAllowed;
                     const displayRules =
                       dragSection?.key === group.key ? dragSection.items : group.rules;
-                    const isCollapsed = collapsedGroups.has(group.key);
+                    // A search forces every group open (a match must never hide
+                    // in a collapsed group); the persisted state is preserved.
+                    const isCollapsed = !searchActive && collapsedGroups.has(group.key);
                     return (
                       <Collapsible.Root
                         key={group.key}
                         open={!isCollapsed}
-                        onOpenChange={open => handleToggleGroupCollapsed(group.key, !open)}
+                        onOpenChange={open => { if (!searchActive) handleToggleGroupCollapsed(group.key, !open); }}
                       >
                         <RuleGroupHeader
                           group={group}
@@ -718,6 +791,7 @@ export function DomainRulesPage({
                           testId={`page-rules-group-${group.key}`}
                           selectedCount={group.ruleIds.filter(id => selectedIds.has(id)).length}
                           onSelectGroup={handleSelectGroup}
+                          onKeyDown={e => handleGroupHeaderKeyDown(e, group)}
                         />
                         <Collapsible.Content>
                           <DragDropProvider
@@ -731,6 +805,7 @@ export function DomainRulesPage({
                               dragDisabled={!dndEnabled}
                               ariaLabel={group.label}
                               indent
+                              groupKey={group.key}
                             />
                           </DragDropProvider>
                         </Collapsible.Content>

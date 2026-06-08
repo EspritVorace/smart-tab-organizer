@@ -373,3 +373,153 @@ test.describe('View menu focus after applying', () => {
     await page.close();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Keyboard: unified tree navigation on group headers
+// ---------------------------------------------------------------------------
+test.describe('Group header keyboard navigation', () => {
+  test('arrows fold/unfold and navigate, Space toggles the whole group', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    await helpers.addDomainRule({ label: 'Blue One', domainFilter: 'a.com', color: 'blue' });
+    await helpers.addDomainRule({ label: 'Blue Two', domainFilter: 'b.com', color: 'blue' });
+    await helpers.addDomainRule({ label: 'Red One', domainFilter: 'c.com', color: 'red' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    await openViewMenu(page);
+    await selectMenuItem(page, 'page-rules-view-group-color');
+    await closeMenus(page);
+
+    const blueToggle = page.getByTestId('page-rules-group-color:blue-toggle');
+    const blueOne = page.getByRole('listitem', { name: /Blue One/i });
+    await expect(blueToggle).toBeVisible();
+
+    // Closing the menu defers an autofocus onto the first nav item. Wait for it
+    // to settle so it does not race (and steal) our explicit header focus below.
+    // allow-inline-dom: generic settle-probe on the shared nav selector.
+    await expect(page.locator('[data-rules-nav-item]').first()).toBeFocused();
+
+    // Focus the group header and step Down into its first card (unified tree).
+    await blueToggle.focus();
+    await expect(blueToggle).toBeFocused();
+
+    // The focus ring must actually paint: the toggle carries an inline
+    // `all: unset` that resets `outline`, so the focus rule needs `!important`
+    // to win. Assert a non-zero solid outline rather than trust the CSS.
+    const outline = await blueToggle.evaluate(el => {
+      const s = getComputedStyle(el);
+      return { width: s.outlineWidth, style: s.outlineStyle };
+    });
+    expect(outline.style).toBe('solid');
+    expect(parseFloat(outline.width)).toBeGreaterThan(0);
+
+    await page.keyboard.press('ArrowDown');
+    await expect(blueOne).toBeFocused();
+
+    // ArrowLeft on a grouped card collapses its parent group and lands focus
+    // back on the header (the card unmounts on collapse).
+    await page.keyboard.press('ArrowLeft');
+    await expect(blueToggle).toBeFocused();
+    await expect(blueOne).toHaveCount(0);
+
+    // Right on the header re-expands; the cards come back.
+    await page.keyboard.press('ArrowRight');
+    await expect(blueOne).toBeVisible();
+    await expect(blueToggle).toBeFocused();
+
+    // Left on the header collapses again; focus stays on the header.
+    await page.keyboard.press('ArrowLeft');
+    await expect(blueOne).toHaveCount(0);
+    await expect(blueToggle).toBeFocused();
+
+    // Re-expand for the Space assertions below.
+    await page.keyboard.press('ArrowRight');
+    await expect(blueOne).toBeVisible();
+    await expect(blueToggle).toBeFocused();
+
+    // Space selects the whole blue group (2 rules) without collapsing it.
+    await page.keyboard.press('Space');
+    await expect(page.getByTestId('page-rules-bulk-bar')).toContainText('2');
+    await expect(blueOne).toBeVisible();
+
+    // Space again clears the selection (bulk bar disappears).
+    await page.keyboard.press('Space');
+    await expect(page.getByTestId('page-rules-bulk-bar')).toHaveCount(0);
+
+    await page.close();
+  });
+
+  test('a search force-expands collapsed groups, then restores them on clear', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    await helpers.addDomainRule({ label: 'Blue One', domainFilter: 'a.com', color: 'blue' });
+    await helpers.addDomainRule({ label: 'Blue Two', domainFilter: 'b.com', color: 'blue' });
+    await helpers.addDomainRule({ label: 'Red One', domainFilter: 'c.com', color: 'red' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    await openViewMenu(page);
+    await selectMenuItem(page, 'page-rules-view-group-color');
+    await closeMenus(page);
+
+    const blueToggle = page.getByTestId('page-rules-group-color:blue-toggle');
+    const blueOne = page.getByRole('listitem', { name: /Blue One/i });
+    await expect(blueOne).toBeVisible();
+
+    // Collapse the blue group via its header toggle.
+    await blueToggle.click();
+    await expect(blueOne).toHaveCount(0);
+
+    // A search matching a blue rule force-expands the (collapsed) group so the
+    // result is not hidden.
+    await page.getByTestId('page-rules-search').fill('Blue One');
+    await expect(blueOne).toBeVisible();
+
+    // Clearing the search restores the persisted collapsed state.
+    await page.getByTestId('page-rules-search').fill('');
+    await expect(blueOne).toHaveCount(0);
+
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Search: Enter jumps to the first result card
+// ---------------------------------------------------------------------------
+test.describe('Search Enter to first result', () => {
+  test('Enter focuses the first matching rule, or stays in the field when empty', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    await helpers.addDomainRule({ label: 'Alpha Rule', domainFilter: 'alpha.com' });
+    await helpers.addDomainRule({ label: 'Beta Rule', domainFilter: 'beta.com' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    const search = page.getByTestId('page-rules-search');
+    const betaCard = page.getByRole('listitem', { name: /Beta Rule/i });
+
+    // A matching search + Enter lands focus on the first result card.
+    await search.fill('Beta');
+    await expect(betaCard).toBeVisible();
+    await search.press('Enter');
+    await expect(betaCard).toBeFocused();
+
+    // A non-matching search keeps focus in the field (no result).
+    await search.fill('zzz-no-such-rule');
+    await expect(page.getByTestId('page-rules-list')).toHaveCount(0);
+    await search.press('Enter');
+    await expect(search).toBeFocused();
+
+    await page.close();
+  });
+});

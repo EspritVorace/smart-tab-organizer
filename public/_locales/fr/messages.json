@@ -775,7 +775,6 @@
   "statusBarShortcutsLabel": { "message": "Afficher raccourcis" },
   "shortcutsCustomize": { "message": "Personnaliser les raccourcis du navigateur" },
   "shortcutsCustomizeFirefoxHint": { "message": "Firefox : ouvrez le menu d'engrenage, puis 'Gérer les raccourcis des extensions'." },
-  "shortcutsUnboundWarning": { "message": "Certains raccourcis navigateur ne sont pas définis. Le navigateur n'applique pas automatiquement les raccourcis suggérés après une mise à jour de l'extension ; définissez-les via 'Personnaliser les raccourcis' ci-dessous." },
   "shortcutNotSet": { "message": "Non défini" },
 
   "docsKeyboardShortcutsTitle": { "message": "Raccourcis clavier" },
@@ -843,6 +842,9 @@
   "shortcutDescRuleMoveToLast": { "message": "En dernier dans la liste" },
   "shortcutDescRuleMoveToFirstOfDomain": { "message": "Première règle du domaine" },
   "shortcutDescRuleMoveToLastOfDomain": { "message": "Dernière règle du domaine" },
+  "shortcutDescRuleGroupExpand": { "message": "Déplier le groupe focus" },
+  "shortcutDescRuleGroupCollapse": { "message": "Replier le groupe focus" },
+  "shortcutDescRuleGroupToggleSelection": { "message": "Cocher ou décocher tout le groupe" },
   "rulePositionsMenu": { "message": "Positions" },
   "shortcutDescSessionMoveToFirst": { "message": "En premier dans la liste" },
   "shortcutDescSessionMoveToLast": { "message": "En dernier dans la liste" },

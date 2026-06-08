@@ -463,4 +463,37 @@ test.describe('[US-S-SEARCH] Cross-session filtering', () => {
     await expect(page.getByText('Session Beta', { exact: true })).toBeVisible();
     await page.close();
   });
+
+  test('Enter focuses the first result card, or stays in the field when empty', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    await seedSessions(extensionContext, [
+      createTestSession({ name: 'Session Alpha' }),
+      createTestSession({ name: 'Session Beta' }),
+    ]);
+
+    const page = await extensionContext.newPage();
+    await goToSessionsSection(page, extensionId);
+
+    const search = page.getByTestId('page-sessions-search');
+
+    // A matching search + Enter lands focus on the first result card. ('Beta'
+    // matches only 'Session Beta'; its name is highlighted, so assert on the
+    // filtered card count rather than the split text node.)
+    await search.fill('Beta');
+    // allow-inline-dom: `[data-session-card]` is the card root atom, not a dialog/wizard surface.
+    await expect(page.locator('[data-session-card]')).toHaveCount(1);
+    await search.press('Enter');
+    // allow-inline-dom: `[data-session-card]` is the card root atom, not a dialog/wizard surface.
+    await expect(page.locator('[data-session-card]').first()).toBeFocused();
+
+    // A non-matching search keeps focus in the field (no result).
+    await search.fill('zzz-no-such-session');
+    await expect(page.getByText('No sessions found')).toBeVisible();
+    await search.press('Enter');
+    await expect(search).toBeFocused();
+
+    await page.close();
+  });
 });

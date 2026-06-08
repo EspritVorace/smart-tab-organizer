@@ -53,7 +53,13 @@ export function PageLayoutFrame({
       <Box
         data-testid={contentTestId}
         pt="4"
-        style={{ flex: 1, overflow: 'auto', minHeight: 0 }}
+        // Vertical scroll only. overflow-x is clipped because Radix ghost
+        // buttons (the toolbar "..." menu, row dropdowns) carry intentional
+        // negative margins whose border-box pokes ~6px past the content edge;
+        // on `overflow: auto` that empty margin space triggered a spurious
+        // horizontal scrollbar. No page scrolls horizontally here (the stats
+        // page owns its own inner scroll region).
+        style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}
       >
         {children}
       </Box>
