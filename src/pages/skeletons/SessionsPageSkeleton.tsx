@@ -31,13 +31,34 @@ function SessionCardSkeleton() {
   );
 }
 
-function SectionHeaderSkeleton() {
+function SectionHeaderSkeleton({ withViewMenu = false }: { withViewMenu?: boolean }) {
   return (
     <Flex align="center" gap="2">
       <Skeleton width="16px" height="16px" />
       <Skeleton width="120px" height="20px" />
       <Skeleton width="24px" height="20px" />
+      {withViewMenu && (
+        <Box style={{ marginLeft: 'auto' }}>
+          <Skeleton width="32px" height="32px" />
+        </Box>
+      )}
     </Flex>
+  );
+}
+
+/** Mirrors the Active / Archived TabNav rendered above the toolbar. */
+function SubTabsSkeleton() {
+  return (
+    <Box mb="3">
+      <Flex
+        gap="4"
+        align="center"
+        style={{ borderBottom: '1px solid var(--gray-a5)', paddingBottom: '8px' }}
+      >
+        <Skeleton width="64px" height="20px" />
+        <Skeleton width="80px" height="20px" />
+      </Flex>
+    </Box>
   );
 }
 
@@ -45,7 +66,8 @@ export function SessionsPageSkeleton() {
   return (
     <PageLayoutSkeleton titleKey="sessionsTab" descriptionKey="sessionsPageDescription">
       <Box data-testid="page-sessions-skeleton">
-        <ListToolbarSkeleton />
+        <SubTabsSkeleton />
+        <ListToolbarSkeleton hasMenu />
         <Flex direction="column" gap="3">
           <Box>
             <SectionHeaderSkeleton />
@@ -57,7 +79,7 @@ export function SessionsPageSkeleton() {
           </Box>
           <Separator size="4" />
           <Box>
-            <SectionHeaderSkeleton />
+            <SectionHeaderSkeleton withViewMenu />
             <Flex direction="column" gap="3" pl="6" mt="3">
               {UNPINNED.map((i) => (
                 <SessionCardSkeleton key={`unpinned-${i}`} />
