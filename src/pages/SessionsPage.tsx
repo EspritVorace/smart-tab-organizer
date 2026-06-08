@@ -1125,7 +1125,10 @@ export function SessionsPage({
 
           <Box
             data-testid="page-sessions-scroll"
-            style={{ flex: 1, overflow: 'auto', minHeight: 0 }}
+            // Vertical scroll only: clip overflow-x so the Radix ghost buttons'
+            // negative margins (card dropdowns) don't trigger a spurious
+            // horizontal scrollbar (mirrors PageLayoutFrame's content box).
+            style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}
           >
             {!isLoaded && (
               <Text size="2" color="gray">
