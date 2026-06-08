@@ -145,6 +145,7 @@ export function DomainRuleCard({
       ref={isSummary ? null : ref}
       data-testid={`rule-card-${rule.id}`}
       data-rule-id={isSummary ? undefined : rule.id}
+      data-rules-nav-item={isSummary ? undefined : ''}
       data-shortcut-scope={isSummary ? undefined : 'widget:rule-card'}
       variant="surface"
       size="2"

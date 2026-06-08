@@ -322,6 +322,31 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'list-rules',
     scope: 'page:rules',
   },
+  // Group headers (visible when a grouping is active). Handled locally on the
+  // focused header in DomainRulesPage; these entries are documentation-only,
+  // like `sessionCard.expandPreview` / `collapsePreview`. Up/Down navigation
+  // across headers and cards stays covered by `list.rules.navigate`.
+  'ruleGroup.expand': {
+    id: 'ruleGroup.expand',
+    defaultBindings: ['ArrowRight'],
+    descriptionKey: 'shortcutDescRuleGroupExpand',
+    group: 'list-rules',
+    scope: 'widget:rule-group',
+  },
+  'ruleGroup.collapse': {
+    id: 'ruleGroup.collapse',
+    defaultBindings: ['ArrowLeft'],
+    descriptionKey: 'shortcutDescRuleGroupCollapse',
+    group: 'list-rules',
+    scope: 'widget:rule-group',
+  },
+  'ruleGroup.toggleSelection': {
+    id: 'ruleGroup.toggleSelection',
+    defaultBindings: ['Space'],
+    descriptionKey: 'shortcutDescRuleGroupToggleSelection',
+    group: 'list-rules',
+    scope: 'widget:rule-group',
+  },
 
   // List-level: Sessions
   'list.sessions.navigate': {

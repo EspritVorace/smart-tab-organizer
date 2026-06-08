@@ -19,6 +19,13 @@ export interface RuleGroupHeaderProps {
   /** Whether the group is currently collapsed (drives the chevron and the trigger label). */
   collapsed: boolean;
   onSelectGroup: (ruleIds: string[], checked: boolean) => void;
+  /**
+   * Keyboard handler for the toggle button, built by the page so it can reach
+   * the live navigation index, the collapse state and the group selection.
+   * Handles Up/Down/Home/End (list navigation), Left/Right (collapse/expand)
+   * and Space (toggle the whole group's selection).
+   */
+  onKeyDown?: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
   testId?: string;
 }
 
@@ -27,6 +34,7 @@ export function RuleGroupHeader({
   selectedCount,
   collapsed,
   onSelectGroup,
+  onKeyDown,
   testId,
 }: RuleGroupHeaderProps) {
   const total = group.ruleIds.length;
@@ -51,6 +59,9 @@ export function RuleGroupHeader({
           aria-label={toggleLabel}
           title={toggleLabel}
           data-testid={testId ? `${testId}-toggle` : undefined}
+          data-rules-nav-item=""
+          data-shortcut-scope="widget:rule-group"
+          onKeyDown={onKeyDown}
           style={{
             all: 'unset',
             display: 'flex',

@@ -28,6 +28,19 @@
   border-radius: var(--radius-3);
 }
 
+/* Focus ring for the group-header toggle (DomainRulesPage). The button carries
+ * an inline `all: unset` (which also resets `outline`); an inline declaration
+ * beats a stylesheet selector, so the ring needs `!important` to win. Uses
+ * `:focus` (not `:focus-visible`) so it shows on programmatic focus too: list
+ * navigation and the post-apply autofocus move focus via `.focus()`, which
+ * Chrome does not always treat as focus-visible. Only headers are buttons, so
+ * this never doubles up with the card rule above. */
+button[data-rules-nav-item]:focus {
+  outline: 2px solid var(--accent-9) !important;
+  outline-offset: 2px;
+  border-radius: var(--radius-2);
+}
+
 /* Focus ring for session cards: visible on click or keyboard focus */
 [data-session-card]:focus {
   outline: 2px solid var(--accent-9);

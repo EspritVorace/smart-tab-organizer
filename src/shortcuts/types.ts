@@ -10,6 +10,7 @@ export type ShortcutScope =
   | 'page:popup'
   | 'widget:session-card'
   | 'widget:rule-card'
+  | 'widget:rule-group'
   | 'widget:workspace-card';
 
 export type ShortcutGroupId =
