@@ -482,8 +482,10 @@ test.describe('[US-S-SEARCH] Cross-session filtering', () => {
     // matches only 'Session Beta'; its name is highlighted, so assert on the
     // filtered card count rather than the split text node.)
     await search.fill('Beta');
+    // allow-inline-dom: `[data-session-card]` is the card root atom, not a dialog/wizard surface.
     await expect(page.locator('[data-session-card]')).toHaveCount(1);
     await search.press('Enter');
+    // allow-inline-dom: `[data-session-card]` is the card root atom, not a dialog/wizard surface.
     await expect(page.locator('[data-session-card]').first()).toBeFocused();
 
     // A non-matching search keeps focus in the field (no result).
