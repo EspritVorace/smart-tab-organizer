@@ -395,6 +395,12 @@ export function DomainRulesPage({
     });
   }, []);
 
+  // Enter in the search field jumps to the first result card (a rule, not a
+  // group header), or keeps focus in the field when there is no result.
+  const focusFirstResultCard = useCallback(() => {
+    listRef.current?.querySelector<HTMLElement>('[role="listitem"]')?.focus();
+  }, []);
+
   // The card keydown handler only forwards arrow/Home/End to useListNavigation
   // (index resolved live from the DOM). The Enter binding is kept here because
   // Enter to open the editor is a card-local interaction that is not in the
@@ -621,6 +627,7 @@ export function DomainRulesPage({
                 searchTestId="page-rules-search"
                 searchPlaceholder={getMessage('searchRules')}
                 searchValue={searchTerm}
+                onSearchSubmit={focusFirstResultCard}
                 onSearchChange={setSearchTerm}
                 filter={
                   <RuleViewMenu

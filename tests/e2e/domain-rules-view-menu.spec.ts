@@ -489,3 +489,37 @@ test.describe('Group header keyboard navigation', () => {
     await page.close();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Search: Enter jumps to the first result card
+// ---------------------------------------------------------------------------
+test.describe('Search Enter to first result', () => {
+  test('Enter focuses the first matching rule, or stays in the field when empty', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    await helpers.addDomainRule({ label: 'Alpha Rule', domainFilter: 'alpha.com' });
+    await helpers.addDomainRule({ label: 'Beta Rule', domainFilter: 'beta.com' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    const search = page.getByTestId('page-rules-search');
+    const betaCard = page.getByRole('listitem', { name: /Beta Rule/i });
+
+    // A matching search + Enter lands focus on the first result card.
+    await search.fill('Beta');
+    await expect(betaCard).toBeVisible();
+    await search.press('Enter');
+    await expect(betaCard).toBeFocused();
+
+    // A non-matching search keeps focus in the field (no result).
+    await search.fill('zzz-no-such-rule');
+    await expect(page.getByTestId('page-rules-list')).toHaveCount(0);
+    await search.press('Enter');
+    await expect(search).toBeFocused();
+
+    await page.close();
+  });
+});

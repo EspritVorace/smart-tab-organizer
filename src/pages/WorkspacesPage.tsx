@@ -187,6 +187,12 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
     [handleNavigationKey, getFocusedWorkspace, activeId, switchTo],
   );
 
+  // Enter in the search field jumps to the first result card, or keeps focus in
+  // the field when there is no result.
+  const focusFirstResultCard = useCallback(() => {
+    listRef.current?.querySelector<HTMLElement>('[data-workspace-card]')?.focus();
+  }, []);
+
   const takenNames = workspaces.map((w) => w.name);
 
   const filteredWorkspaces = useMemo(() => {
@@ -263,6 +269,7 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
               searchPlaceholder={getMessage('searchWorkspaces')}
               searchValue={searchTerm}
               onSearchChange={setSearchTerm}
+              onSearchSubmit={focusFirstResultCard}
               action={
                 <Tooltip content={<Flex align="center" gap="2" aria-hidden="true">{getMessage('workspaceCreateLabel')}<Kbd>N</Kbd></Flex>}>
                   <Button

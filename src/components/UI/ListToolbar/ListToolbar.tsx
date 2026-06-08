@@ -19,6 +19,12 @@ interface ListToolbarProps {
   searchPlaceholder: string;
   searchValue: string;
   onSearchChange: (value: string) => void;
+  /**
+   * Called when the user presses Enter in the search field. Pages use it to
+   * move focus to the first result card (and do nothing, keeping focus in the
+   * field, when there is no result).
+   */
+  onSearchSubmit?: () => void;
   /** Optional view control (filter/sort/group menu) rendered between the search field and the action. */
   filter?: React.ReactNode;
   /** Action button (Add Rule / Take Snapshot) supplied by the caller. */
@@ -33,11 +39,19 @@ export function ListToolbar({
   searchPlaceholder,
   searchValue,
   onSearchChange,
+  onSearchSubmit,
   filter,
   action,
   menu,
 }: ListToolbarProps) {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      if (onSearchSubmit) {
+        event.preventDefault();
+        onSearchSubmit();
+      }
+      return;
+    }
     if (event.key !== 'Escape') return;
     if (searchValue.length > 0) {
       event.preventDefault();

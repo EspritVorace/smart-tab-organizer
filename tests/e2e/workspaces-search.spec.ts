@@ -126,4 +126,29 @@ test.describe('Workspaces keyboard shortcuts', () => {
 
     await expect(optionsPage.getByTestId('workspace-form-dialog')).toBeVisible();
   });
+
+  test('Enter focuses the first result card, or stays in the field when empty', async ({
+    optionsPage,
+    extensionId,
+  }) => {
+    await goToWorkspaces(optionsPage, extensionId);
+    // Unique name: this spec does not clear workspaces between tests, so a
+    // generic name could collide with a row created earlier in the worker.
+    await createWorkspace(optionsPage, 'EnterFirstTarget');
+
+    const search = optionsPage.getByTestId('page-workspaces-search');
+
+    // A matching search + Enter lands focus on the (single) result card.
+    await search.fill('EnterFirstTarget');
+    const targetCard = optionsPage.locator('[data-workspace-card]', { hasText: 'EnterFirstTarget' });
+    await expect(targetCard).toBeVisible();
+    await search.press('Enter');
+    await expect(targetCard).toBeFocused();
+
+    // A non-matching search keeps focus in the field (no result).
+    await search.fill('zzz-no-such-workspace-xyz');
+    await expect(optionsPage.locator('[data-workspace-card]')).toHaveCount(0);
+    await search.press('Enter');
+    await expect(search).toBeFocused();
+  });
 });
