@@ -57,14 +57,15 @@ button[data-rules-nav-item]:focus {
   border-radius: var(--radius-3);
 }
 
-/* Focus ring for the keyboard-scrollable statistics content region.
- * The region is focusable (tabindex=0) so keyboard users can reach it and
- * scroll with the arrow keys on sub-tabs that hold no other focusable control.
- * focus-visible keeps the outline off on pointer interaction. */
+/* The statistics content region is focusable (tabindex=0) only to enable
+ * keyboard scrolling (arrow keys / PageUp-Down / Space). It is auto-focused on
+ * arrival (see StatisticsPage), so we suppress the focus outline to avoid a
+ * frame drawn around the whole page. Targeting both :focus and :focus-visible
+ * guarantees no outline ever shows, even if the browser flips to focus-visible
+ * after an arrow keypress. */
+[data-testid="page-stats-scroll"]:focus,
 [data-testid="page-stats-scroll"]:focus-visible {
-  outline: 2px solid var(--accent-9);
-  outline-offset: -2px;
-  border-radius: var(--radius-3);
+  outline: none;
 }
 
 /* Focusable controls using aria-disabled instead of native disabled (keeps element in tab order). */

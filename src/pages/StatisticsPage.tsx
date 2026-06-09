@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Box, TabNav } from '@radix-ui/themes';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { getMessage } from '@/utils/i18n';
@@ -49,6 +49,20 @@ const SUB_TAB_LABEL_KEY: Record<StatsSubTab, string> = {
 
 export function StatisticsPage({ syncSettings, statisticsData, sessionStats, storageUsage, onReset, statsTab, onStatsTabChange }: StatisticsPageProps) {
   const activeRulesCount = syncSettings.domainRules.filter(r => r.enabled).length;
+
+  // The scrollable content region carries tabIndex={0} so keyboard users can
+  // scroll it with the arrow keys / PageUp-Down / Space. Give it the focus once
+  // on mount so those keys work right away, without an initial click or tab.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    // Don't steal focus the user already moved inside the region between mount
+    // and this effect firing; focus coming from outside (sidebar, body on a
+    // fresh load) is fair game.
+    if (el.contains(document.activeElement)) return;
+    el.focus({ preventScroll: true });
+  }, []);
 
   const firstUsedAtFormatted = statisticsData?.firstUsedAt
     ? new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'long', year: 'numeric' }).format(statisticsData.firstUsedAt)
@@ -183,8 +197,11 @@ export function StatisticsPage({ syncSettings, statisticsData, sessionStats, sto
           {/* Only the sub-tab content scrolls; the tabs above stay fixed. The
               region is focusable (tabIndex={0}) so keyboard users get a tab stop
               and native arrow / PageUp-Down / Space scrolling on pages that have
-              no other focusable content (e.g. the summary sub-tab). */}
+              no other focusable content (e.g. the summary sub-tab). It is
+              auto-focused on mount (see effect above) so those keys work on
+              arrival; its focus outline is suppressed in radix-themes.css. */}
           <Box
+            ref={scrollRef}
             data-testid="page-stats-scroll"
             role="region"
             aria-label={getMessage(SUB_TAB_LABEL_KEY[statsTab])}
