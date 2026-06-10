@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-let uiLanguage: string | (() => string) = 'fr';
+let uiLanguage: string | (() => string) = 'en';
 
 vi.mock('wxt/browser', () => ({
   browser: {
@@ -14,7 +14,7 @@ vi.mock('wxt/browser', () => ({
 }));
 
 beforeEach(() => {
-  uiLanguage = 'fr';
+  uiLanguage = 'en';
 });
 
 afterEach(() => {
@@ -22,11 +22,18 @@ afterEach(() => {
 });
 
 describe('getDocsUrl', () => {
-  it('returns the English subpath when the UI language is en', async () => {
+  it('returns the root URL when the UI language is en', async () => {
     uiLanguage = 'en-US';
     const { getDocsUrl } = await import('../../src/utils/docsUrl');
 
-    expect(getDocsUrl()).toBe('https://docs.esprit-vorace.fr/en/');
+    expect(getDocsUrl()).toBe('https://docs.esprit-vorace.fr/');
+  });
+
+  it('returns the French subpath when the UI language is fr', async () => {
+    uiLanguage = 'fr-FR';
+    const { getDocsUrl } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrl()).toBe('https://docs.esprit-vorace.fr/fr/');
   });
 
   it('returns the Spanish subpath when the UI language is es', async () => {
@@ -34,13 +41,6 @@ describe('getDocsUrl', () => {
     const { getDocsUrl } = await import('../../src/utils/docsUrl');
 
     expect(getDocsUrl()).toBe('https://docs.esprit-vorace.fr/es/');
-  });
-
-  it('returns the root URL for the French UI language', async () => {
-    uiLanguage = 'fr-FR';
-    const { getDocsUrl } = await import('../../src/utils/docsUrl');
-
-    expect(getDocsUrl()).toBe('https://docs.esprit-vorace.fr/');
   });
 
   it('returns the root URL for unknown languages', async () => {
@@ -60,21 +60,21 @@ describe('getDocsUrl', () => {
   });
 
   it('appends a section path with trailing slash', async () => {
-    uiLanguage = 'fr-FR';
+    uiLanguage = 'en-US';
     const { getDocsUrl } = await import('../../src/utils/docsUrl');
 
     expect(getDocsUrl('guides/sessions')).toBe('https://docs.esprit-vorace.fr/guides/sessions/');
   });
 
   it('combines locale and section', async () => {
-    uiLanguage = 'en-US';
+    uiLanguage = 'fr-FR';
     const { getDocsUrl } = await import('../../src/utils/docsUrl');
 
-    expect(getDocsUrl('guides/sessions')).toBe('https://docs.esprit-vorace.fr/en/guides/sessions/');
+    expect(getDocsUrl('guides/sessions')).toBe('https://docs.esprit-vorace.fr/fr/guides/sessions/');
   });
 
   it('strips leading and trailing slashes from the section', async () => {
-    uiLanguage = 'fr-FR';
+    uiLanguage = 'en-US';
     const { getDocsUrl } = await import('../../src/utils/docsUrl');
 
     expect(getDocsUrl('/guides/sessions/')).toBe('https://docs.esprit-vorace.fr/guides/sessions/');
@@ -87,7 +87,7 @@ describe('getDocsUrlForTab', () => {
     const { getDocsUrlForTab } = await import('../../src/utils/docsUrl');
 
     expect(getDocsUrlForTab('rules')).toBe(
-      'https://docs.esprit-vorace.fr/es/guides/regles-de-domaine/',
+      'https://docs.esprit-vorace.fr/es/guides/domain-rules/',
     );
   });
 
@@ -96,7 +96,7 @@ describe('getDocsUrlForTab', () => {
     const { getDocsUrlForTab } = await import('../../src/utils/docsUrl');
 
     expect(getDocsUrlForTab('home')).toBe(
-      'https://docs.esprit-vorace.fr/decouverte/pourquoi/',
+      'https://docs.esprit-vorace.fr/fr/discover/why/',
     );
   });
 
@@ -104,13 +104,13 @@ describe('getDocsUrlForTab', () => {
     uiLanguage = 'fr-FR';
     const { getDocsUrlForTab } = await import('../../src/utils/docsUrl');
 
-    expect(getDocsUrlForTab('does-not-exist')).toBe('https://docs.esprit-vorace.fr/');
+    expect(getDocsUrlForTab('does-not-exist')).toBe('https://docs.esprit-vorace.fr/fr/');
   });
 
   it('falls back to the locale root for an undefined tab', async () => {
     uiLanguage = 'en-US';
     const { getDocsUrlForTab } = await import('../../src/utils/docsUrl');
 
-    expect(getDocsUrlForTab(undefined)).toBe('https://docs.esprit-vorace.fr/en/');
+    expect(getDocsUrlForTab(undefined)).toBe('https://docs.esprit-vorace.fr/');
   });
 });

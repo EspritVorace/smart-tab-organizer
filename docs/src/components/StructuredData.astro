@@ -29,11 +29,11 @@ const site = (Astro.site?.href ?? 'https://docs.esprit-vorace.fr/').replace(/\/$
 const pathname = Astro.url.pathname;
 
 const locale: DocLocale =
-  pathname.startsWith('/en/') || pathname === '/en'
-    ? 'en'
+  pathname.startsWith('/fr/') || pathname === '/fr'
+    ? 'fr'
     : pathname.startsWith('/es/') || pathname === '/es'
       ? 'es'
-      : 'fr';
+      : 'en';
 
 const pageUrl = new URL(pathname, `${site}/`).href;
 
@@ -95,9 +95,9 @@ const graph: Record<string, unknown>[] = [organization, website, softwareApplica
 const isHome =
   entry.data.template === 'splash' ||
   pathname === '/' ||
-  pathname === '/en/' ||
+  pathname === '/fr/' ||
   pathname === '/es/';
-const isFaq = entry.id.replace(/^(en|es)\//, '') === 'faq';
+const isFaq = entry.id.replace(/^(fr|es)\//, '') === 'faq';
 
 if (isHome) {
   graph.push({
@@ -136,7 +136,7 @@ if (isHome) {
   );
 } else {
   // Breadcrumb: Home > [section] > current page (locale segment stripped).
-  const segments = pathname.replace(/^\/(en|es)\//, '/').split('/').filter(Boolean);
+  const segments = pathname.replace(/^\/(fr|es)\//, '/').split('/').filter(Boolean);
   const crumbs: Crumb[] = [{ name: homeLabel[locale], item: `${site}/` }];
   const sectionId = segments[0];
   if (sectionId && sectionLabels[sectionId]) {

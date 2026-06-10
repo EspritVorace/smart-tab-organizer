@@ -1,0 +1,93 @@
+---
+title: Architecture
+description: Entry points, background modules, core hooks, schemas. A map to find your way around before contributing.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+This page gives a high-level view of the code to help you orient before contributing. The detailed reference (conventions, Claude agents, E2E testing conventions) lives in the [`CLAUDE.md`](https://github.com/EspritVorace/smart-tab-organizer/blob/main/CLAUDE.md) file of the repository.
+
+## Entry points
+
+| File | Role |
+|---|---|
+| `src/entrypoints/background.ts` | Service worker (MV3) or background script (MV2). Delegates to `src/background/`. |
+| `src/entrypoints/content.content.ts` | Content script injected on every page. Captures middle-clicks and right-clicks on links. |
+| `src/entrypoints/popup.html` | HTML shell of the popup. Logic lives in `src/popup.tsx`. |
+| `src/entrypoints/options.html` | HTML shell of the Options page. Logic lives in `src/options.tsx`. |
+
+## Background modules
+
+In `src/background/`:
+
+| Module | Role |
+|---|---|
+| `index.ts` | Background bootstrap: registers listeners, wires the badge, initializes workspaces. |
+| `grouping.ts` | Creates Chrome groups from rules. Name extraction via regex on title / URL. |
+| `deduplication.ts` | Detects and closes duplicates. Handles undo via `deduplicationSkip`. |
+| `organize.ts` | The **Organize tabs** action: applies rules to already-open tabs. |
+| `event-handlers.ts` | Binds `tabs.onCreated`, `tabs.onUpdated`, `tabs.onRemoved` listeners, etc. |
+| `messaging.ts` | Background ↔ popup messages (group name prompt, notifications). |
+| `migration.ts` | One-shot migrations: sync to local, addition of the `fallbackLabel` field, session archive. |
+| `settings.ts` | Reads settings with a fallback to defaults. |
+| `actionBadge.ts` | **G** / **D** / **X** badge on the icon, tracks the global toggles of the active workspace. |
+
+## Core hooks
+
+In `src/hooks/`:
+
+| Hook | Role |
+|---|---|
+| `useSettings` | Read-write access to global settings. Uses refs to prevent races. |
+| `useStorageState` | Unified facade over `browser.storage.local` and `browser.storage.session`. |
+| `useSessions` | Facade for the three buckets (pinned, active, archived) with per-bucket hooks. |
+| `useSessionEditor` | Session editing: drag-drop, rename, tab deletion, reentrancy guard. |
+| `useStatistics` | Per-workspace scoped counters. |
+| `useDeepLinking` | Synchronizes the URL hash with the UI state (e.g. `#sessions/archived`). |
+
+## Zod schemas
+
+In `src/schemas/`:
+
+| Schema | Covers |
+|---|---|
+| `common.ts` | Shared primitive types. |
+| `domainRule.ts` | A domain rule. |
+| `enums.ts` | Enumerations (naming modes, dedup strategies, restore actions, badges). |
+| `importExport.ts` | Import-export archive format, relaxed version to tolerate older files. |
+| `session.ts` | A session with its tabs and internal groups. |
+| `workspace.ts` | Workspace metadata. |
+| `pack.ts` | Pack manifest (`packFileSchema`). |
+| `category.ts` | A category (emoji, label, builtIn). |
+
+## Components
+
+In `src/components/`:
+
+- **`Core/`**: components tied to a business concept. `DomainRule/`, `Session/`, `Statistics/`, `TabTree/`.
+- **`UI/`**: cross-cutting interface components. `Header/`, `PopupHeader/`, `PopupToolbar/`, `Sidebar/`, `WizardStepper/`, `ImportExportWizards/`, `SessionWizards/`, `SettingsPage/`, etc.
+- **`Form/`**: reusable form fields (`FormFields/`).
+
+The split is documented in [`CLAUDE.md`](https://github.com/EspritVorace/smart-tab-organizer/blob/main/CLAUDE.md#component-organization).
+
+## Internationalization
+
+`getMessage()` in `src/utils/i18n.ts` is the single entry point for labels. Messages live in `public/_locales/{en,fr,es}/messages.json`. Every UI string (label, aria-label, title, placeholder) goes through `getMessage()`. No hardcoded strings.
+
+## Tests
+
+Three pipelines:
+
+- **Vitest** (`tests/`): unit tests for utils, hooks, background modules.
+- **Playwright E2E** (`tests/e2e/`): functional journeys on Chrome MV3.
+- **Playwright doc-scenarios** (`e2e-doc-scenarios/`): narrative captures for the documentation. Not run on PRs.
+
+The shared architecture across the three pipelines (Page Objects, Domain Actions, fixtures-base) lives in [`e2e-shared/`](https://github.com/EspritVorace/smart-tab-organizer/tree/main/e2e-shared) and is documented in its README.
+
+## Next steps
+
+<CardGrid>
+  <LinkCard title="Tech stack" href="/contributing/stack" description="The underlying technologies." />
+  <LinkCard title="GitHub repository" href="https://github.com/EspritVorace/smart-tab-organizer" description="Sources, issues, pull requests." />
+  <LinkCard title="CLAUDE.md" href="https://github.com/EspritVorace/smart-tab-organizer/blob/main/CLAUDE.md" description="Detailed project conventions." />
+</CardGrid>

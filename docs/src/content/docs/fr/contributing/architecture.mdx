@@ -1,0 +1,93 @@
+---
+title: Architecture
+description: Entry points, modules background, hooks centraux, schémas. Pour comprendre où aller chercher quand on veut contribuer.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+Cette page donne une vue d'ensemble du code pour s'orienter avant une contribution. La référence détaillée (conventions, agents Claude, conventions de tests E2E) vit dans le fichier [`CLAUDE.md`](https://github.com/EspritVorace/smart-tab-organizer/blob/main/CLAUDE.md) du dépôt.
+
+## Entry points
+
+| Fichier | Rôle |
+|---|---|
+| `src/entrypoints/background.ts` | Service worker (MV3) ou background script (MV2). Délègue à `src/background/`. |
+| `src/entrypoints/content.content.ts` | Content script injecté dans toutes les pages. Capture les clics milieu et clics droits sur les liens. |
+| `src/entrypoints/popup.html` | Coquille HTML de la popup. La logique vit dans `src/popup.tsx`. |
+| `src/entrypoints/options.html` | Coquille HTML de la page Options. La logique vit dans `src/options.tsx`. |
+
+## Modules background
+
+Dans `src/background/` :
+
+| Module | Rôle |
+|---|---|
+| `index.ts` | Démarrage du background : enregistre les listeners, branche le badge, initialise les workspaces. |
+| `grouping.ts` | Création de groupes Chrome à partir des règles. Extraction de nom via regex sur titre / URL. |
+| `deduplication.ts` | Détection et fermeture des doublons. Gestion de l'annulation via `deduplicationSkip`. |
+| `organize.ts` | Action **Organiser tous les onglets** : applique les règles aux onglets déjà ouverts. |
+| `event-handlers.ts` | Bind des listeners `tabs.onCreated`, `tabs.onUpdated`, `tabs.onRemoved`, etc. |
+| `messaging.ts` | Messages background ↔ popup (invite de nom de groupe, notifications). |
+| `migration.ts` | Migrations one-shot : sync→local, ajout du champ `fallbackLabel`, archive sessions. |
+| `settings.ts` | Lecture des paramètres avec fallback sur les valeurs par défaut. |
+| `actionBadge.ts` | Pastille **G** / **D** / **X** sur l'icône, suit les toggles globaux du workspace actif. |
+
+## Hooks centraux
+
+Dans `src/hooks/` :
+
+| Hook | Rôle |
+|---|---|
+| `useSettings` | Lecture-écriture des paramètres globaux. Utilise des refs pour prévenir les races. |
+| `useStorageState` | Façade unifiée pour `browser.storage.local` et `browser.storage.session`. |
+| `useSessions` | Façade pour les trois compartiments (pinned, active, archived) avec hooks par bucket. |
+| `useSessionEditor` | Édition d'une session : drag-drop, rename, suppression d'onglets, anti-réentrance. |
+| `useStatistics` | Compteurs cloisonnés par workspace. |
+| `useDeepLinking` | Synchronisation du hash de l'URL avec l'état UI (par exemple `#sessions/archived`). |
+
+## Schémas Zod
+
+Dans `src/schemas/` :
+
+| Schéma | Couvre |
+|---|---|
+| `common.ts` | Types primitifs partagés. |
+| `domainRule.ts` | Une règle de domaine. |
+| `enums.ts` | Énumérations (modes de nommage, stratégies de dédup, actions de restauration, badges). |
+| `importExport.ts` | Format des archives d'import-export, version relaxée pour tolérer les anciens fichiers. |
+| `session.ts` | Une session avec ses onglets et ses groupes internes. |
+| `workspace.ts` | Métadonnées d'un workspace. |
+| `pack.ts` | Manifeste d'un pack (`packFileSchema`). |
+| `category.ts` | Une catégorie (emoji, label, builtIn). |
+
+## Composants
+
+Dans `src/components/` :
+
+- **`Core/`** : composants liés à un domaine métier. `DomainRule/`, `Session/`, `Statistics/`, `TabTree/`.
+- **`UI/`** : composants d'interface transverses. `Header/`, `PopupHeader/`, `PopupToolbar/`, `Sidebar/`, `WizardStepper/`, `ImportExportWizards/`, `SessionWizards/`, `SettingsPage/`, etc.
+- **`Form/`** : champs de formulaire réutilisables (`FormFields/`).
+
+Le découpage est documenté dans [`CLAUDE.md`](https://github.com/EspritVorace/smart-tab-organizer/blob/main/CLAUDE.md#component-organization).
+
+## Internationalisation
+
+`getMessage()` dans `src/utils/i18n.ts` est l'unique point d'accès aux libellés. Les messages vivent dans `public/_locales/{en,fr,es}/messages.json`. Toute chaîne UI (label, aria-label, title, placeholder) passe par `getMessage()`. Pas de string codée en dur.
+
+## Tests
+
+Trois pipelines :
+
+- **Vitest** (`tests/`) : tests unitaires des utils, hooks, modules background.
+- **Playwright E2E** (`tests/e2e/`) : parcours fonctionnels sur Chrome MV3.
+- **Playwright doc-scenarios** (`e2e-doc-scenarios/`) : captures narratives pour la documentation. Pas exécuté sur les PRs.
+
+L'architecture partagée des trois pipelines (Page Objects, Domain Actions, fixtures-base) vit dans [`e2e-shared/`](https://github.com/EspritVorace/smart-tab-organizer/tree/main/e2e-shared) et est documentée dans son README.
+
+## Aller plus loin
+
+<CardGrid>
+  <LinkCard title="Stack technique" href="/contributing/stack" description="Les technologies de fond." />
+  <LinkCard title="Dépôt GitHub" href="https://github.com/EspritVorace/smart-tab-organizer" description="Sources, issues, pull requests." />
+  <LinkCard title="CLAUDE.md" href="https://github.com/EspritVorace/smart-tab-organizer/blob/main/CLAUDE.md" description="Conventions détaillées du projet." />
+</CardGrid>

@@ -1,142 +1,142 @@
 ---
 title: Import / Export
-description: Sauvegarder ou restaurer règles, sessions et workspaces au format JSON. Validation par schéma Zod, classification new/conflicting/identical, résolution propriété par propriété.
+description: Back up or restore rules, sessions, and workspaces as JSON. Zod schema validation, new/conflicting/identical classification, property-by-property resolution.
 ---
 
 import { Aside, CardGrid, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 import ThemeImage from '../../../components/ThemeImage.astro';
-import hubLight from '../../../assets/screenshots/fr-light-import-export-overview.png';
-import hubDark from '../../../assets/screenshots/fr-dark-import-export-overview.png';
-import importDialogLight from '../../../assets/screenshots/fr-light-rules-import-file-dialog.png';
-import importDialogDark from '../../../assets/screenshots/fr-dark-rules-import-file-dialog.png';
-import importConflictsLight from '../../../assets/screenshots/fr-light-rules-import-text-conflicts.png';
-import importConflictsDark from '../../../assets/screenshots/fr-dark-rules-import-text-conflicts.png';
+import hubLight from '../../../assets/screenshots/en-light-import-export-overview.png';
+import hubDark from '../../../assets/screenshots/en-dark-import-export-overview.png';
+import importDialogLight from '../../../assets/screenshots/en-light-rules-import-file-dialog.png';
+import importDialogDark from '../../../assets/screenshots/en-dark-rules-import-file-dialog.png';
+import importConflictsLight from '../../../assets/screenshots/en-light-rules-import-text-conflicts.png';
+import importConflictsDark from '../../../assets/screenshots/en-dark-rules-import-text-conflicts.png';
 
-La page **Import / Export** centralise les trois flux de sauvegarde et restauration. Tous les fichiers produits sont du JSON, validés à l'import par des schémas Zod stricts ; aucune donnée n'est modifiée tant que vous n'avez pas confirmé.
+The **Import / Export** page centralizes the three backup and restore flows. All files produced are JSON, validated on import by strict Zod schemas; nothing is written until you confirm.
 
 <ThemeImage
   lightSrc={hubLight}
   darkSrc={hubDark}
-  alt="Page Import / Export avec ses six actions : exporter/importer règles, sessions et workspace."
+  alt="Import / Export page with its six actions: export/import rules, sessions, and workspace."
 />
 
-## Règles
+## Rules
 
-### Exporter des règles
+### Export rules
 
 <Tabs>
-  <TabItem label="Toutes les règles">
-Depuis la page Règles ou Import / Export, cliquez sur le bouton **Exporter**. Toutes les règles du workspace actif sont sérialisées en JSON, copiées dans le presse-papier ou téléchargées en fichier `.json` selon le sous-bouton du split button.
+  <TabItem label="All rules">
+From the Rules page or Import / Export, click the **Export** button. Every rule in the active workspace is serialized to JSON, copied to the clipboard, or downloaded as a `.json` file depending on the split button sub-action.
   </TabItem>
-  <TabItem label="Sélection">
-Sur la page Règles, cochez les règles à exporter via la sélection multiple. Le bouton **Exporter** dans la barre d'actions en masse se limite à la sélection.
+  <TabItem label="Selection">
+On the Rules page, check the rules to export through multi-selection. The **Export Selected** button in the bulk actions bar limits the export to the selection.
   </TabItem>
 </Tabs>
 
-Le format embarque pour chaque règle : domaine, label, regex de titre et d'URL, mode de configuration, mode de déduplication, paramètres ignorés, catégorie, état activé. Pas d'identifiant de workspace : une règle est portable entre workspaces.
+The format embeds, for every rule: domain, label, title and URL regexes, configuration mode, deduplication mode, ignored parameters, category, enabled state. No workspace identifier: a rule is portable across workspaces.
 
-### Importer des règles
+### Import rules
 
 <ThemeImage
   lightSrc={importDialogLight}
   darkSrc={importDialogDark}
-  alt="Wizard d'import : choisir entre fichier, texte collé ou pack."
+  alt="Import wizard: choose between File, Text, or Pack."
 />
 
 <Steps>
-1. Ouvrez le wizard d'import depuis la page Règles ou Import / Export.
-2. Choisissez la source : un fichier JSON (drag and drop ou parcours), du texte collé, ou la galerie de packs (voir [Catégories et packs](/reference/categories-et-packs)).
-3. Le wizard valide la structure et **classifie** chaque règle entrante.
+1. Open the import wizard from the Rules page or from Import / Export.
+2. Pick the source: a JSON file (drag and drop or browse), pasted text, or the packs gallery (see [Categories and packs](/reference/categories-and-packs)).
+3. The wizard validates the structure and **classifies** each incoming rule.
 </Steps>
 
 #### Classification
 
-Chaque règle entrante est comparée aux règles déjà présentes dans le workspace actif :
+Each incoming rule is compared against the rules already in the active workspace:
 
-| Statut | Définition | Action proposée |
+| Status | Definition | Proposed action |
 |---|---|---|
-| **Nouvelle** | Aucune règle avec ce domaine et ce label dans le workspace. | Ajoutée à l'import. |
-| **En conflit** | Une règle existe avec le même domaine et le même label, mais une ou plusieurs propriétés diffèrent. | Résolution propriété par propriété (voir ci-dessous). |
-| **Identique** | Une règle existe avec exactement les mêmes valeurs. | Ignorée. |
+| **New** | No rule with this domain and this label in the workspace. | Added on import. |
+| **Conflicting** | A rule exists with the same domain and label, but one or more properties differ. | Property-by-property resolution (see below). |
+| **Identical** | A rule exists with the exact same values. | Skipped. |
 
-#### Résolution propriété par propriété
+#### Property-by-property resolution
 
 <ThemeImage
   lightSrc={importConflictsLight}
   darkSrc={importConflictsDark}
-  alt="Résolution d'un conflit d'import : choix entre version existante et version importée, propriété par propriété."
+  alt="Resolving an import conflict: choose between current and imported version, property by property."
 />
 
-Pour chaque règle en conflit, le wizard affiche un tableau à deux colonnes : **Existant** et **Importé**. Vous choisissez, pour chaque propriété divergente, laquelle conserver. Un bouton **Tout depuis l'import** ou **Tout depuis l'existant** permet de trancher d'un coup sur la règle entière.
+For each conflicting rule, the wizard shows a two-column table: **Current** and **Imported**. For every differing property, you pick which one to keep. A **Use imported for all** or **Use current for all** button settles the whole rule in one click.
 
 ## Sessions
 
-### Exporter des sessions
+### Export sessions
 
-Le wizard d'export propose trois cases à cocher correspondant aux trois compartiments :
+The export wizard offers three checkboxes for the three buckets:
 
-| Compartiment | Coché par défaut |
+| Bucket | Checked by default |
 |---|---|
-| **Épinglées** | Oui |
-| **Actives** | Oui |
-| **Archivées** | **Non** |
+| **Pinned** | Yes |
+| **Active** | Yes |
+| **Archived** | **No** |
 
-Les sessions archivées sont décochées par défaut pour que les exports légers (sauvegarde du quotidien) n'embarquent pas tout l'historique. Cochez **Archivées** si vous voulez un export complet.
+Archived sessions are unchecked by default so a light export (a daily backup) does not drag along the whole archive. Check **Archived** for a complete export.
 
-L'export propose également un champ **Note** optionnel, embarqué dans l'archive et affiché à l'import.
+The export also exposes an optional **Note** field, embedded in the archive and shown on import.
 
-### Importer des sessions
+### Import sessions
 
-Même mécanique que pour les règles : choix de la source (fichier, texte collé), validation par schéma Zod, classification new / conflicting / identical sur la base du nom et du contenu. La résolution se fait au cas par cas : conserver la version existante, écraser, ou ajouter en suffixant le nom.
+Same mechanism as for rules: pick the source (file, pasted text), Zod schema validation, classification into new / conflicting / identical based on name and content. Resolution is case by case: keep the existing version, overwrite, or add by suffixing the name.
 
 <Aside type="note">
-Les sessions importées vont dans le **workspace actif**. Pour importer dans un autre workspace, basculez d'abord dessus.
+Imported sessions land in the **active workspace**. To import into another workspace, switch to it first.
 </Aside>
 
 ## Workspaces
 
-### Exporter un workspace
+### Export a workspace
 
-L'export d'un workspace produit une **archive autonome** contenant l'intégralité de la configuration de cet espace : règles, sessions, paramètres, et éventuellement statistiques.
-
-<Steps>
-1. Depuis la page Espaces de travail ou Import / Export, ouvrez **Exporter le workspace actif**.
-2. Le dialog affiche un récapitulatif (nombre de règles, nombre de sessions).
-3. Options : **Note** (texte libre embarqué) et **Inclure les statistiques** (décochée par défaut, les compteurs ne sont pas indispensables au transfert et peuvent être considérés comme personnels).
-4. Validez. Le fichier produit suit le format `smarttab_organizer_workspace_{slug}.json`.
-</Steps>
-
-L'export concerne toujours le **workspace actif**. Pour exporter un autre workspace, basculez dessus au préalable.
-
-### Importer un workspace
+Exporting a workspace produces a **self-contained archive** with the entire configuration of that workspace: rules, sessions, settings, and optionally statistics.
 
 <Steps>
-1. Ouvrez **Importer un workspace** depuis la page Espaces de travail ou Import / Export.
-2. Sélectionnez la source (fichier JSON ou texte collé).
-3. Le dialog valide la structure et affiche un récapitulatif (règles, sessions, présence de statistiques, note éventuelle).
-4. Choisissez le mode d'import (voir ci-dessous) et validez.
+1. From the Workspaces page or from Import / Export, open **Export Workspace**.
+2. The dialog shows a summary (rule count, session count).
+3. Options: **Note** (free text embedded) and **Include statistics history** (unchecked by default; counters are not essential to the transfer and can be considered personal).
+4. Confirm. The file produced follows the format `smarttab_organizer_workspace_{slug}.json`.
 </Steps>
 
-#### Modes d'import
+The export always targets the **active workspace**. To export another workspace, switch to it first.
 
-| Mode | Comportement |
+### Import a workspace
+
+<Steps>
+1. Open **Import Workspace** from the Workspaces page or from Import / Export.
+2. Pick the source (JSON file or pasted text).
+3. The dialog validates the structure and shows a summary (rules, sessions, statistics presence, optional note).
+4. Pick the import mode (see below) and confirm.
+</Steps>
+
+#### Import modes
+
+| Mode | Behavior |
 |---|---|
-| **Nouveau workspace** | Crée un workspace neuf avec le nom et la couleur fournis par l'archive. Vous pouvez surcharger le nom dans le champ **Nom** avant validation. |
-| **Fusionner dans le workspace actif** | Ajoute les règles et sessions de l'archive au workspace actif. Les conflits éventuels (ID déjà présent) sont gérés au cas par cas. |
+| **Create a new workspace from this export** | Creates a fresh workspace with the name and color provided by the archive. You can override the name in the **Workspace name** field before confirming. |
+| **Replace the contents of the active workspace** | Adds the archive's rules and sessions to the active workspace. Any conflicts (already-present IDs) are handled case by case. |
 
 <Aside type="caution">
-Le mode **Fusionner** modifie le workspace actif. Si vous voulez préserver son contenu actuel, utilisez plutôt **Nouveau workspace**.
+The **Replace** mode mutates the active workspace. If you want to preserve its current contents, use **Create a new workspace** instead.
 </Aside>
 
-## Format JSON
+## JSON format
 
-Toutes les archives sont du JSON Unicode, lisibles à l'oeil nu. Le schéma de chaque type d'archive est défini dans `src/schemas/importExport.ts`. Le schéma utilisé à l'import est volontairement **relaxé** (pas de refinements de niveau formulaire), pour tolérer des archives produites par des versions antérieures.
+Every archive is Unicode JSON, readable by eye. The schema for each archive type lives in `src/schemas/importExport.ts`. The schema used on import is intentionally **relaxed** (no form-level refinements), so it tolerates archives produced by older versions.
 
-## Aller plus loin
+## Next steps
 
 <CardGrid>
-  <LinkCard title="Règles de domaine" href="/guides/regles-de-domaine" description="Le CRUD et la sélection multiple." />
-  <LinkCard title="Sessions" href="/guides/sessions" description="Les trois compartiments et l'archivage." />
-  <LinkCard title="Espaces de travail" href="/guides/workspaces" description="Cloisonner par contexte pour des exports ciblés." />
-  <LinkCard title="Catégories et packs" href="/reference/categories-et-packs" description="L'autre voie d'import : la galerie de packs intégrés." />
+  <LinkCard title="Domain Rules" href="/guides/domain-rules" description="The CRUD and the multi-selection." />
+  <LinkCard title="Sessions" href="/guides/sessions" description="The three buckets and archiving." />
+  <LinkCard title="Workspaces" href="/guides/workspaces" description="Scope by context for targeted exports." />
+  <LinkCard title="Categories and packs" href="/reference/categories-and-packs" description="The other import path: the gallery of built-in packs." />
 </CardGrid>

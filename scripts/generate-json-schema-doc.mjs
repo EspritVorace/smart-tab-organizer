@@ -12,13 +12,13 @@
  * `description === <i18n key>`; this script then maps each key to its
  * localized text.
  *
- * All three locales share the FR-rooted slug
- * `reference/schema-json-import-export` so Starlight i18n routing resolves
+ * All three locales share the EN-rooted slug
+ * `reference/import-export-json-schema` so Starlight i18n routing resolves
  * them automatically:
  *
- *   docs/src/content/docs/reference/schema-json-import-export.mdx        (FR, root)
- *   docs/src/content/docs/en/reference/schema-json-import-export.mdx     (EN)
- *   docs/src/content/docs/es/reference/schema-json-import-export.mdx     (ES)
+ *   docs/src/content/docs/reference/import-export-json-schema.mdx        (EN, root)
+ *   docs/src/content/docs/fr/reference/import-export-json-schema.mdx     (FR)
+ *   docs/src/content/docs/es/reference/import-export-json-schema.mdx     (ES)
  *
  * Idempotent: deterministic iteration order, no timestamps. Run via
  * `pnpm json-schema:doc`.
@@ -40,9 +40,9 @@ const PROJECT_ROOT = join(__dirname, '..');
 const LOCALES = /** @type {const} */ (['fr', 'en', 'es']);
 
 const OUTPUT_PATHS = {
-  fr: 'docs/src/content/docs/reference/schema-json-import-export.mdx',
-  en: 'docs/src/content/docs/en/reference/schema-json-import-export.mdx',
-  es: 'docs/src/content/docs/es/reference/schema-json-import-export.mdx',
+  en: 'docs/src/content/docs/reference/import-export-json-schema.mdx',
+  fr: 'docs/src/content/docs/fr/reference/import-export-json-schema.mdx',
+  es: 'docs/src/content/docs/es/reference/import-export-json-schema.mdx',
 };
 
 /**

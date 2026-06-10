@@ -1,0 +1,131 @@
+---
+title: Espaces de travail
+description: Cloisonner règles, sessions et statistiques par contexte. Créer, basculer, supprimer un workspace. Profils popup, catégories partagées entre workspaces.
+---
+
+import { Aside, CardGrid, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import workspacesPageLight from '../../../../assets/screenshots/fr-light-workspaces-page.png';
+import workspacesPageDark from '../../../../assets/screenshots/fr-dark-workspaces-page.png';
+
+<Aside type="tip" title="En bref">
+- Un **workspace** est un conteneur isolé avec ses propres règles, sessions et statistiques.
+- Le workspace **Par défaut** existe toujours et ne peut pas être supprimé.
+- Les **catégories** (emoji + libellé) sont **partagées** entre tous les workspaces, contrairement aux règles qui s'en servent.
+- Une couleur d'accent par workspace permet de reconnaître d'un coup d'oeil le contexte actif.
+</Aside>
+
+Un espace de travail (ou workspace) permet de séparer deux contextes d'usage sans que leurs configurations se mélangent : travail et perso, projet A et projet B, environnement client et environnement R&D. Chaque contexte garde ses règles, ses sessions et ses compteurs.
+
+<ThemeImage
+  lightSrc={workspacesPageLight}
+  darkSrc={workspacesPageDark}
+  alt="Page Espaces de travail : l'espace actif et un espace inactif avec son bouton Activer et son menu d'actions."
+/>
+
+## Ce que cloisonne un workspace
+
+| Donnée | Cloisonnée ? |
+|---|---|
+| Règles de domaine | Oui |
+| Sessions (épinglées, actives, archivées) | Oui |
+| Statistiques | Oui |
+| **Catégories** | Non, partagées |
+| Paramètres globaux (notifications, langue, thème, action de restauration par défaut) | Non, partagés |
+| Presets regex et packs intégrés | Non, partagés |
+
+Les **catégories** sont fournies par l'extension (14 catégories intégrées, voir [Catégories et packs](/reference/categories-and-packs)) et identiques dans tous les workspaces. Une règle exportée d'un workspace à un autre garde donc son emoji et son libellé de catégorie. Sa couleur de groupe, qui est un champ propre à la règle, est aussi préservée.
+
+## Créer un workspace
+
+<Steps>
+1. Sur la page **Espaces de travail**, cliquez sur **Nouveau workspace**.
+2. Saisissez un nom (1 à 40 caractères, unique parmi les workspaces existants).
+3. Choisissez une couleur d'accent (par défaut `jade`). 20 couleurs Radix sont proposées ; les neutres (gray, mauve, slate) et métalliques (bronze, gold) sont exclues car elles rendent mal en accent.
+4. L'aperçu en haut du formulaire montre l'avatar et la couleur tels qu'ils apparaitront.
+5. Validez. Le workspace apparait dans la liste, prêt à être activé.
+</Steps>
+
+Créer un workspace ne le rend pas automatiquement actif. Pour basculer dessus, utilisez le bouton **Basculer** de sa carte.
+
+## Changer de workspace actif
+
+<Tabs>
+  <TabItem label="Depuis les Options">
+Le `WorkspaceSwitcherDropdown` est intégré au footer des Options. Cliquez dessus pour ouvrir la liste, puis sélectionnez le workspace cible.
+  </TabItem>
+  <TabItem label="Depuis la popup">
+Le `PopupWorkspaceSwitcher` reprend la même mécanique dans la popup. Pratique pour basculer sans ouvrir la page Options : la liste de profils et les boutons de restauration suivent immédiatement le changement.
+  </TabItem>
+</Tabs>
+
+### Au clavier
+
+Trois séquences clavier font défiler les workspaces sans passer par le sélecteur,
+depuis la page Options ou la popup :
+
+| Séquence | Effet |
+|---|---|
+| `W` puis `N` | Passer au workspace suivant |
+| `W` puis `P` | Passer au workspace précédent |
+| `W` puis `L` | Revenir au dernier workspace utilisé |
+
+Pour basculer depuis n'importe quel onglet du navigateur, trois **commandes
+globales** existent aussi : `switch-workspace-next`, `switch-workspace-prev` et
+`switch-workspace-last`. Elles ne sont liées à aucune touche par défaut ; vous
+leur assignez le raccourci de votre choix depuis `chrome://extensions/shortcuts`.
+
+Voir [Raccourcis clavier](/reference/keyboard-shortcuts) pour la liste complète.
+
+Quand vous changez de workspace :
+
+- la page **Règles** n'affiche plus que les règles du workspace cible ;
+- la page **Sessions** ne montre plus que les sessions de ce workspace ;
+- la **popup** et la **page d'accueil** n'affichent plus que les profils du workspace cible ;
+- les **statistiques** reflètent les compteurs du workspace cible ;
+- les **paramètres globaux** ne changent pas, ils sont partagés.
+
+Le workspace actif est mémorisé dans `browser.storage.local` : à la prochaine ouverture du navigateur, vous repartez du dernier workspace utilisé.
+
+## Renommer ou changer la couleur
+
+Cliquez sur l'icône **Modifier** (crayon) de la carte. Le même formulaire que la création s'ouvre, pré-rempli. Les contraintes restent identiques (1 à 40 caractères, unicité).
+
+## Supprimer un workspace
+
+<Steps>
+1. Sur la carte du workspace, cliquez sur l'icône **Supprimer** (corbeille).
+2. Une boite de dialogue rappelle que toutes les règles, sessions et statistiques du workspace seront perdues.
+3. Confirmez pour effectuer la suppression.
+</Steps>
+
+<Aside type="caution">
+Deux situations empêchent la suppression :
+
+- Le workspace **Par défaut** ne peut jamais être supprimé.
+- Le **dernier workspace restant** ne peut pas être supprimé non plus.
+
+Si vous supprimez le workspace actuellement actif, l'extension bascule automatiquement sur **Par défaut**.
+</Aside>
+
+## Profils dans la popup
+
+Quand une session est épinglée dans un workspace, elle est projetée comme **profil** dans deux endroits :
+
+- la **popup** (composant `PopupProfilesList`) ;
+- la **page d'accueil** (section `PinnedSessionsSection`).
+
+Les profils sont **cloisonnés par workspace** : basculer change immédiatement la liste affichée. Pour le détail des raccourcis de restauration, voir [Sessions, sessions épinglées](/guides/sessions#sessions-epinglees).
+
+## Exporter ou importer un workspace
+
+L'export d'un workspace produit une archive JSON complète (règles, sessions, paramètres) que vous pouvez réimporter dans un autre profil Chrome ou partager avec un collègue. Voir [Import / Export](/guides/import-export#workspaces).
+
+## Aller plus loin
+
+<CardGrid>
+  <LinkCard title="Sessions" href="/guides/sessions" description="L'autre brique cloisonnée par workspace." />
+  <LinkCard title="Règles de domaine" href="/guides/domain-rules" description="L'autre brique cloisonnée par workspace." />
+  <LinkCard title="Import / Export" href="/guides/import-export" description="Sauvegarder un workspace complet en JSON." />
+  <LinkCard title="Catégories et packs" href="/reference/categories-and-packs" description="Les catégories partagées et les packs réutilisables." />
+</CardGrid>

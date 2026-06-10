@@ -7,7 +7,7 @@ import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
 ## Mis pestañas no se agrupan, ¿por qué?
 
-Para crear un grupo deben cumplirse tres condiciones: el **interruptor global de Agrupación** está activado, una **regla de dominio** coincide con el dominio de la pestaña y la opción **Agrupación** está activada en esa regla. Consulta [Agrupar pestañas, condiciones](/guides/grouper-onglets#conditions-pour-quun-groupe-soit-cree).
+Para crear un grupo deben cumplirse tres condiciones: el **interruptor global de Agrupación** está activado, una **regla de dominio** coincide con el dominio de la pestaña y la opción **Agrupación** está activada en esa regla. Consulta [Agrupar pestañas, condiciones](/guides/group-tabs#conditions-pour-quun-groupe-soit-cree).
 
 Otra pista: solo las pestañas abiertas mediante **clic central** o **clic derecho seguido de Abrir en una pestaña nueva** disparan la agrupación. Las pestañas abiertas desde la barra de direcciones o con un atajo de teclado no lo hacen.
 
@@ -15,17 +15,17 @@ Comprueba también el distintivo del icono: una **G** naranja indica que el inte
 
 ## ¿Qué diferencia hay entre un pack y un preset?
 
-Un **pack** añade varias reglas de golpe a tu espacio de trabajo (galería de importación). Un **preset** rellena previamente una sola regla, la que estás creando en el asistente. Consulta [Categorías y packs](/reference/categories-et-packs) y [Presets de regex](/reference/presets-regex).
+Un **pack** añade varias reglas de golpe a tu espacio de trabajo (galería de importación). Un **preset** rellena previamente una sola regla, la que estás creando en el asistente. Consulta [Categorías y packs](/reference/categories-and-packs) y [Presets de regex](/reference/regex-presets).
 
 ## ¿Por qué una pestaña vuelve a aparecer después de una deduplicación?
 
-Si has pulsado **Deshacer** en la notificación, la pestaña se reabre de forma intencionada y queda protegida durante 10 segundos para evitar que se cierre al instante. Consulta [Deduplicar, notificación y deshacer](/guides/dedupliquer#notification-et-annulation).
+Si has pulsado **Deshacer** en la notificación, la pestaña se reabre de forma intencionada y queda protegida durante 10 segundos para evitar que se cierre al instante. Consulta [Deduplicar, notificación y deshacer](/guides/deduplicate#notification-et-annulation).
 
 Si no la has deshecho y la pestaña reaparece, comprueba que la estrategia de conservación coincide con lo que quieres: por defecto (**Gana la pestaña agrupada, si no mantener la nueva**), la extensión prioriza la pestaña recién cargada sobre la existente cuando ninguna pertenece a un grupo.
 
 ## ¿Mis datos salen a internet?
 
-No. La extensión no realiza **ninguna** solicitud de red. La agrupación se basa en expresiones regulares ejecutadas localmente, y todos los datos (reglas, sesiones, ajustes) viven en `browser.storage.local` del navegador. Consulta [Por qué esta extensión](/decouverte/pourquoi#tout-est-local-rien-ne-part-en-ligne).
+No. La extensión no realiza **ninguna** solicitud de red. La agrupación se basa en expresiones regulares ejecutadas localmente, y todos los datos (reglas, sesiones, ajustes) viven en `browser.storage.local` del navegador. Consulta [Por qué esta extensión](/discover/why#tout-est-local-rien-ne-part-en-ligne).
 
 ## ¿Mis reglas y sesiones se sincronizan entre dispositivos?
 
@@ -37,7 +37,7 @@ Exporta tus reglas desde el navegador de origen (página Importar / Exportar, bo
 
 ## Compatibilidad con Firefox
 
-Sí, Firefox es compatible mediante una build MV2 dedicada (`pnpm build:firefox` en local, o Firefox Add-ons para la instalación pública). Las API utilizadas son comunes a ambas plataformas. Consulta [Instalación](/decouverte/installation).
+Sí, Firefox es compatible mediante una build MV2 dedicada (`pnpm build:firefox` en local, o Firefox Add-ons para la instalación pública). Las API utilizadas son comunes a ambas plataformas. Consulta [Instalación](/discover/installation).
 
 ## ¿Puede la extensión leer el contenido de mis páginas?
 
@@ -45,7 +45,7 @@ No. Los permisos solicitados son `tabs`, `storage`, `notifications` y `scripting
 
 ## ¿Cómo restablezco la extensión por completo?
 
-Desinstalar y reinstalar la extensión vacía por completo `browser.storage.local`. Si solo quieres vaciar los contadores sin borrar todo lo demás, usa el botón **Reiniciar** en la página [Estadísticas](/guides/statistiques#reinitialiser-les-compteurs).
+Desinstalar y reinstalar la extensión vacía por completo `browser.storage.local`. Si solo quieres vaciar los contadores sin borrar todo lo demás, usa el botón **Reiniciar** en la página [Estadísticas](/guides/statistics#reinitialiser-les-compteurs).
 
 ## ¿Dónde reportar un bug o sugerir una funcionalidad?
 
@@ -53,15 +53,15 @@ En el [tracker de incidencias de GitHub](https://github.com/EspritVorace/smart-t
 
 ## ¿La extensión utiliza IA?
 
-No. Ninguna IA, ni local ni remota. El nombrado de los grupos se basa únicamente en expresiones regulares ejecutadas en tu navegador (las tuyas o las de un pack integrado). Consulta [Por qué esta extensión](/decouverte/pourquoi#tout-est-local-rien-ne-part-en-ligne).
+No. Ninguna IA, ni local ni remota. El nombrado de los grupos se basa únicamente en expresiones regulares ejecutadas en tu navegador (las tuyas o las de un pack integrado). Consulta [Por qué esta extensión](/discover/why#tout-est-local-rien-ne-part-en-ligne).
 
 ## ¿Es realmente gratis? ¿Cuál es el modelo de negocio?
 
-Sí, gratis y sin contrapartidas: sin versión de pago, sin nivel premium, sin funciones bloqueadas. La extensión es de código abierto bajo licencia GPL v3, así que cualquiera puede auditarla y contribuir. Consulta la [página de atribución de código abierto](/reference/licences-open-source).
+Sí, gratis y sin contrapartidas: sin versión de pago, sin nivel premium, sin funciones bloqueadas. La extensión es de código abierto bajo licencia GPL v3, así que cualquiera puede auditarla y contribuir. Consulta la [página de atribución de código abierto](/reference/open-source-licenses).
 
 ## ¿En qué se diferencia de los grupos de pestañas nativos del navegador?
 
-Los grupos nativos de Chrome se crean y se nombran a mano. SmartTab Organizer los crea automáticamente según tus reglas de dominio, cierra los duplicados y guarda el estado de tus pestañas como sesiones restaurables. Se apoya en los grupos nativos, no los reemplaza. Consulta [Agrupar pestañas](/guides/grouper-onglets).
+Los grupos nativos de Chrome se crean y se nombran a mano. SmartTab Organizer los crea automáticamente según tus reglas de dominio, cierra los duplicados y guarda el estado de tus pestañas como sesiones restaurables. Se apoya en los grupos nativos, no los reemplaza. Consulta [Agrupar pestañas](/guides/group-tabs).
 
 ## ¿Funciona sin conexión?
 
@@ -70,7 +70,7 @@ Sí. La extensión no necesita conexión: agrupación, deduplicación, sesiones 
 ## Siguiente paso
 
 <CardGrid>
-  <LinkCard title="Por qué esta extensión" href="/decouverte/pourquoi" description="El planteamiento y la filosofía local-first." />
-  <LinkCard title="Instalación" href="/decouverte/installation" description="Tiendas y build local, permisos detallados." />
-  <LinkCard title="Ajustes" href="/guides/parametres" description="Todos los ajustes globales." />
+  <LinkCard title="Por qué esta extensión" href="/discover/why" description="El planteamiento y la filosofía local-first." />
+  <LinkCard title="Instalación" href="/discover/installation" description="Tiendas y build local, permisos detallados." />
+  <LinkCard title="Ajustes" href="/guides/settings" description="Todos los ajustes globales." />
 </CardGrid>

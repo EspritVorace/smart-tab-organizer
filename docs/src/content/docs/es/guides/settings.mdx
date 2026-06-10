@@ -1,0 +1,67 @@
+---
+title: Ajustes
+description: Configurar las notificaciones, el alcance de la deduplicación y la acción por defecto de restauración.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+La página **Ajustes** reúne las opciones globales que no están vinculadas a una regla concreta. Consta de tres secciones.
+
+<Aside type="note">
+Los **interruptores globales** de agrupación y de deduplicación no están aquí: viven en el [popup](/guides/popup) (y en el distintivo del icono, consulta [Tour de la interfaz](/discover/interface-tour#indicateur-sur-licone)).
+</Aside>
+
+## Notificaciones
+
+Tres interruptores independientes. Cada uno controla un tipo de notificación del sistema, sin interacción entre ellos.
+
+| Interruptor | Efecto |
+|---|---|
+| **Notificar al agrupar pestañas automáticamente** | Muestra una notificación en cada creación de grupo, con el título del grupo. |
+| **Notificar al cerrar duplicados automáticamente** | Muestra una notificación en cada deduplicación, con un botón **Deshacer** disponible 5 segundos. |
+| **Notificar tras Organizar pestañas** | Muestra un resumen tras un comando **Organizar pestañas** lanzado desde la página de inicio o el popup. |
+
+## Alcance de la deduplicación
+
+Dos opciones que afinan la deduplicación global.
+
+### Deduplicar pestañas sin regla de dominio
+
+Cuando este interruptor está **activado**, las pestañas de los dominios que no has configurado se deduplican en modo URL exacta. Cuando está **desactivado** (por defecto), solo pueden deduplicarse los dominios cubiertos por una regla.
+
+Las reglas de dominio siguen teniendo prioridad sobre este ajuste. Un dominio con una regla explícita siempre sigue su regla.
+
+### Cuando se detecta un duplicado, conservar
+
+La estrategia que decide cuál de las dos pestañas duplicadas sobrevive. Cuatro valores:
+
+| Estrategia | Comportamiento |
+|---|---|
+| **La pestaña existente** | Se conserva la pestaña ya abierta. Útil para preservar un estado (scroll, formulario, sesión). |
+| **La pestaña recién abierta** | Sobrevive la pestaña nueva. Atención: si la antigua pertenecía a un grupo, desaparece del grupo. |
+| **Gana la pestaña agrupada, si no mantener la existente** | Si una de las dos está agrupada y la otra no, sobrevive la agrupada. Si no, se cae en **La pestaña existente**. |
+| **Gana la pestaña agrupada, si no mantener la nueva** (por defecto) | Si una de las dos está agrupada y la otra no, sobrevive la agrupada. Si no, se cae en **La pestaña recién abierta**. Protege las pestañas restauradas desde una sesión frente a un cierre en favor de una copia sin grupo. |
+
+Consulta [Deduplicar](/guides/deduplicate#strategies-de-conservation) para el contexto completo.
+
+## Acción por defecto (Restaurar)
+
+Esta sección configura lo que hace un **clic** sobre el botón principal **Restaurar** de una sesión o de un perfil. El menú desplegable junto al botón siempre mantiene accesibles las cuatro opciones individualmente.
+
+| Valor | Comportamiento del clic principal |
+|---|---|
+| **Restaurar en la ventana actual** (por defecto) | Añade las pestañas a la ventana actualmente en primer plano. |
+| **Restaurar en una ventana nueva** | Abre una ventana dedicada y restaura las pestañas allí. |
+| **Reemplazar las pestañas de esta ventana** | Cierra las pestañas de la ventana actual y restaura las de la sesión en su lugar. |
+| **Restauración personalizada** | Abre el asistente de restauración y deja elegir caso por caso. |
+
+Los cuatro destinos siguen accesibles mediante los [atajos de teclado](/reference/keyboard-shortcuts) (`R`, `Shift+R`, `Alt+R`, `Alt+Shift+R`) sobre el foco de una sesión o un perfil, sea cual sea el valor de este ajuste.
+
+## Siguiente paso
+
+<CardGrid>
+  <LinkCard title="Popup" href="/guides/popup" description="Interruptores globales de agrupación y deduplicación." />
+  <LinkCard title="Deduplicar" href="/guides/deduplicate" description="Los tres modos de coincidencia y el contexto de la estrategia de conservación." />
+  <LinkCard title="Sesiones" href="/guides/sessions" description="La acción por defecto de restauración en contexto." />
+  <LinkCard title="Tour de la interfaz" href="/discover/interface-tour" description="El distintivo del icono que refleja el estado de los interruptores globales." />
+</CardGrid>

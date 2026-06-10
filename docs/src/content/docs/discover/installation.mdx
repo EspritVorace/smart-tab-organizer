@@ -1,0 +1,109 @@
+---
+title: Installation
+description: Install SmartTab Organizer from the Chrome Web Store, Firefox Add-ons, or locally from the sources. Permissions requested and first launch.
+---
+
+import { Aside, CardGrid, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="At a glance">
+- Available on the Chrome Web Store and on Firefox Add-ons.
+- Four permissions requested, all used locally (tabs, storage, notifications, scripting).
+- Local build possible with `pnpm install && pnpm build` (or `pnpm build:firefox`).
+</Aside>
+
+## Install from a store
+
+<Tabs>
+  <TabItem label="Chrome / Edge / Brave">
+[SmartTab Organizer on the Chrome Web Store](https://chromewebstore.google.com/detail/smarttab-organizer/ijnpdkkcbmfikocmboibffjgbohhlmah). Compatible with every Chromium-based browser (Chrome, Edge, Brave, Vivaldi, Arc, Opera).
+
+<Steps>
+1. Click **Add to Chrome**.
+2. Accept the permissions in the browser dialog.
+3. Pin the icon to the toolbar via the **Extensions** menu for quick access.
+</Steps>
+  </TabItem>
+  <TabItem label="Firefox">
+[SmartTab Organizer on Firefox Add-ons](https://addons.mozilla.org/firefox/addon/smarttab-organizer/).
+
+<Steps>
+1. Click **Add to Firefox**.
+2. Accept the permissions in the dialog.
+3. The icon is pinned to the toolbar automatically.
+</Steps>
+  </TabItem>
+</Tabs>
+
+## Permissions requested
+
+The extension asks for four permissions, all used exclusively locally. None of them allows any network communication.
+
+| Permission | Why |
+|---|---|
+| `tabs` | Read tab URLs and titles to group them and detect duplicates. |
+| `storage` | Persist your rules, sessions and settings in `browser.storage.local`. |
+| `notifications` | Show grouping and deduplication notifications, with the **Undo** button. |
+| `scripting` | Inject the content script that captures middle-clicks and right-clicks on links, to trigger grouping. |
+
+<Aside type="caution">
+The extension does **not** request broad `host permissions` or `webRequest`. It cannot inspect network traffic and never reads page contents beyond the clicked links.
+</Aside>
+
+## Install locally from the sources
+
+To develop or test an unreleased version:
+
+<Tabs>
+  <TabItem label="Chrome / Chromium">
+
+```bash
+git clone https://github.com/EspritVorace/smart-tab-organizer.git
+cd smart-tab-organizer
+pnpm install
+pnpm build
+```
+
+<Steps>
+1. Open `chrome://extensions` in Chrome.
+2. Toggle developer mode in the top right.
+3. Click **Load unpacked** and pick the `.output/chrome-mv3/` folder.
+</Steps>
+  </TabItem>
+  <TabItem label="Firefox">
+
+```bash
+git clone https://github.com/EspritVorace/smart-tab-organizer.git
+cd smart-tab-organizer
+pnpm install
+pnpm build:firefox
+```
+
+<Steps>
+1. Open `about:debugging#/runtime/this-firefox`.
+2. Click **Load Temporary Add-on**.
+3. Select the `.output/firefox-mv2/manifest.json` file.
+</Steps>
+
+<Aside type="note">
+A temporary install in Firefox is lost when the browser closes. For permanent use from the sources, run `pnpm zip:firefox` and sign the `.xpi`.
+</Aside>
+  </TabItem>
+</Tabs>
+
+## First launch
+
+Once the extension is installed:
+
+<Steps>
+1. Click the SmartTab Organizer icon in the toolbar. The popup opens empty, with no rule or session saved.
+2. Click **Open Options** to open the full page. The **Home** tab offers two actions: **Create my first rule** or **Import a rules pack**.
+3. Importing a pack is the fastest way to get a feel for the extension. See [Categories and packs](/reference/categories-and-packs).
+</Steps>
+
+## Next steps
+
+<CardGrid>
+  <LinkCard title="Interface tour" href="/discover/interface-tour" description="Popup and Options page in two minutes." />
+  <LinkCard title="The home page" href="/discover/home-page" description="The Options hub after onboarding." />
+  <LinkCard title="Categories and packs" href="/reference/categories-and-packs" description="Import a collection of rules in one click." />
+</CardGrid>

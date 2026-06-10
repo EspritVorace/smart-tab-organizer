@@ -1,0 +1,67 @@
+---
+title: Pourquoi cette extension ?
+description: "Le problème que résout SmartTab Organizer, ses trois piliers (grouper, dédupliquer, sauvegarder) et son vrai différenciateur : le nom de groupe extrait de l'URL ou du titre, en local."
+---
+
+import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="Démarrage rapide">
+<Steps>
+1. Installez l'extension depuis le [Chrome Web Store ou Firefox Add-ons](/discover/installation).
+2. Ouvrez les Options et [importez un pack de règles](/reference/categories-and-packs), le chemin le plus rapide pour découvrir l'extension.
+3. Clic milieu sur un lien : le nouvel onglet rejoint automatiquement son groupe.
+</Steps>
+</Aside>
+
+Il y a des soirs où l'on retrouve son navigateur dans un état lamentable, rempli d'onglets dont on ne sait plus lesquels sont encore utiles. On aimerait tout garder, tout le temps, mais ce n'est pas toujours possible.
+
+SmartTab Organizer regroupe automatiquement vos onglets selon des règles que vous définissez, évite les doublons, et vous permet de sauvegarder et restaurer vos espaces de travail sous forme de sessions nommées.
+
+## Trois piliers
+
+L'extension s'organise autour de trois fonctions complémentaires.
+
+<CardGrid>
+  <LinkCard
+    title="Grouper automatiquement"
+    href="/guides/group-tabs"
+    description="Les onglets ouverts depuis un même parent rejoignent un groupe Chrome coloré, sans intervention manuelle."
+  />
+  <LinkCard
+    title="Dédupliquer"
+    href="/guides/deduplicate"
+    description="Trois modes de correspondance (URL exacte, sans paramètres ignorés, inclusion) ferment les doublons en gardant l'onglet le plus pertinent."
+  />
+  <LinkCard
+    title="Sauvegarder vos sessions"
+    href="/guides/sessions"
+    description="Capturez l'état de votre navigateur, épinglez les contextes auxquels vous revenez souvent, restaurez-les en un clic."
+  />
+</CardGrid>
+
+## Tout est local, rien ne part en ligne
+
+Les extensions de groupement existantes demandent un nom de groupe fixe, saisi à la main, avec une règle par valeur. SmartTab Organizer extrait le nom directement de l'URL ou du titre via une expression régulière : un groupe par dépôt, par ticket ou par client se crée automatiquement, sans multiplier les règles. Par exemple, une URL de dépôt comme `github.com/EspritVorace/smart-tab-organizer` produit un groupe nommé d'après le dépôt, sans règle dédiée à ce dépôt précis.
+
+Le groupement repose sur des expressions régulières exécutées localement, et toutes les données vivent dans `browser.storage.local`. Aucune donnée ne quitte le navigateur, et aucune IA, locale ou distante, n'intervient.
+
+<Aside type="note">
+Si vous synchronisez vos profils Chrome ou Firefox, l'extension reste compatible (les données suivent le profil), mais aucune communication réseau n'est initiée par l'extension elle-même.
+</Aside>
+
+## Pour qui
+
+L'extension a été pensée pour des usages où le navigateur sert d'outil de travail :
+
+- **Développement** : un onglet par issue, un groupe par dépôt, un workspace par client.
+- **Support et exploitation** : un groupe par ticket (Jira, ServiceNow, Linear), même quand l'incident est suivi sur plusieurs outils en parallèle.
+- **Recherche et veille** : sessions thématiques que l'on rouvre toutes les semaines, sans avoir à reconstituer la pile.
+- **Vie courante** : séparer travail et perso via des [espaces de travail](/guides/workspaces) distincts, avec leur couleur d'accent.
+
+## Aller plus loin
+
+<CardGrid>
+  <LinkCard title="Installer" href="/discover/installation" description="Chrome Web Store, Firefox Add-ons, ou build local depuis les sources." />
+  <LinkCard title="Tour de l'interface" href="/discover/interface-tour" description="Popup et page Options : ce que vous voyez au premier lancement." />
+  <LinkCard title="La page d'accueil" href="/discover/home-page" description="Onboarding, profils épinglés, actions rapides, mini-statistiques." />
+</CardGrid>

@@ -1,0 +1,64 @@
+---
+title: Help and documentation
+description: "The help built into the extension: shortcuts panel, contextual documentation (F1), home page tips and the onboarding welcome screen."
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+The extension ships several help touchpoints so you never have to go hunting: a
+shortcuts panel, contextual documentation, tips on the home page, and a welcome
+screen for newcomers.
+
+## The shortcuts panel
+
+Press `?` from the popup or the Options page to open the **shortcuts panel**. It
+is a quick reference of every available keyboard command, grouped by surface
+(popup, Options navigation, rule or session lists, card actions, global
+shortcuts).
+
+The panel content is derived from the central shortcuts registry, so it always
+stays in sync with the shortcuts that are actually active. Global commands show
+the key you assigned them in the browser rather than a default value.
+
+## Contextual documentation
+
+Press `F1` from the Options page to open, in a new tab, the page of this
+documentation matching the current tab. No need to look for the right page: the
+extension takes you straight there, in the interface language (French, English
+or Spanish).
+
+| Options tab | Page opened |
+|---|---|
+| Home | Why this extension |
+| Rules | Domain rules |
+| Sessions | Sessions |
+| Statistics | Statistics |
+| Import / Export | Import / Export |
+| Settings | Settings |
+| Workspaces | Workspaces |
+
+A documentation button is also present in the header, next to the theme toggle.
+
+## Home page tips
+
+The home page shows a **Tips** section that highlights useful, often overlooked
+features. The tips scroll through a carousel, with arrow and dot navigation.
+
+## The onboarding welcome
+
+On first launch, the home page shows a welcome screen summarizing the three
+pillars of the extension (group, deduplicate, save) and offering two direct
+actions: **import a pack** of ready-to-use rules, or **create a first rule**.
+
+<Aside type="tip">
+The whole documentation stays reachable offline via `F1` once the page is cached
+by the browser, and online at [docs.esprit-vorace.fr](https://docs.esprit-vorace.fr).
+</Aside>
+
+## Next steps
+
+<CardGrid>
+  <LinkCard title="Keyboard shortcuts" href="/reference/keyboard-shortcuts" description="The full list of shortcuts, by surface." />
+  <LinkCard title="The home page" href="/discover/home-page" description="Pinned profiles, quick actions and tips." />
+  <LinkCard title="Domain rules" href="/guides/domain-rules" description="The nerve center of the extension." />
+</CardGrid>

@@ -1,0 +1,141 @@
+---
+title: Estadísticas
+description: Seguir la actividad de la extensión mediante cuatro subpáginas dedicadas (Resumen, Reglas, Sesiones, Almacenamiento), cada una con su propio enlace profundo.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import summaryLight from '../../../../assets/screenshots/es-light-statistics-overview.png';
+import summaryDark from '../../../../assets/screenshots/es-dark-statistics-overview.png';
+import rulesLight from '../../../../assets/screenshots/es-light-statistics-rules.png';
+import rulesDark from '../../../../assets/screenshots/es-dark-statistics-rules.png';
+import sessionsLight from '../../../../assets/screenshots/es-light-statistics-sessions.png';
+import sessionsDark from '../../../../assets/screenshots/es-dark-statistics-sessions.png';
+import storageLight from '../../../../assets/screenshots/es-light-statistics-storage.png';
+import storageDark from '../../../../assets/screenshots/es-dark-statistics-storage.png';
+
+La página **Estadísticas** centraliza la actividad de la extensión en el espacio de trabajo activo. Los contadores quedan aislados por espacio; cambiar de espacio de trabajo modifica al instante las cifras mostradas.
+
+Está dividida en **cuatro subpáginas** que recorres mediante la barra de pestañas en la parte superior: **Resumen**, **Reglas**, **Sesiones** y **Almacenamiento**. Cada subpágina tiene su propio enlace profundo (`#stats`, `#stats/rules`, `#stats/sessions`, `#stats/storage`) y la subpágina activa aparece en la ruta de navegación de la cabecera.
+
+## Resumen
+
+La vista de entrada reúne los indicadores clave y un vistazo a la semana.
+
+<ThemeImage
+  lightSrc={summaryLight}
+  darkSrc={summaryDark}
+  alt="Subpágina Resumen de las estadísticas con sus seis indicadores clave y el bloque Esta semana."
+/>
+
+Seis baldosas principales:
+
+- **Grupos Creados**: total acumulado de grupos de Chrome creados.
+- **Pestañas Deduplicadas**: total acumulado de duplicados cerrados.
+- **Almacenamiento local**: tamaño total ocupado en el almacenamiento local.
+- **Fijadas**, **Activas**, **Archivadas**: número de sesiones por compartimento.
+
+Debajo, el bloque **Esta semana** compara la actividad de la semana en curso con la anterior, con dos series (**Agrupaciones** y **Deduplicaciones**) acompañadas de un mini distintivo de tendencia.
+
+## Reglas
+
+El detalle de la actividad de agrupación y deduplicación.
+
+<ThemeImage
+  lightSrc={rulesLight}
+  darkSrc={rulesDark}
+  alt="Subpágina Reglas de las estadísticas con los Totales, Esta semana y la clasificación de las reglas más activas."
+/>
+
+### Totales
+
+Dos contadores acumulados desde el primer uso:
+
+- **Grupos Creados**: por cada creación de un grupo nuevo de Chrome. Unirse a un grupo existente no cuenta.
+- **Pestañas Deduplicadas**: por cada cierre de duplicado. Una **acción Deshacer** desde el botón **Deshacer** de la notificación decrementa el contador.
+
+Debajo aparecen dos indicadores contextuales: el **número de reglas activas** y la fecha de inicio de uso.
+
+### Esta semana
+
+Compara la actividad de la semana en curso con la semana anterior: **Agrupaciones** (grupos creados) y **Deduplicaciones** (duplicados cerrados). El delta (por ejemplo `+15 vs sem. ant.`) indica la variación respecto a la semana anterior.
+
+### Reglas más activas (30 días)
+
+Clasificación de las reglas por volumen de eventos (agrupaciones y deduplicaciones) de los últimos 30 días. Práctica para detectar las reglas que tiran del peso y las que se han vuelto dormidas y pueden limpiarse.
+
+### Reiniciar los contadores
+
+El botón **Reiniciar Stats** al final de la subpágina Reglas pone a cero todos los contadores del espacio de trabajo activo. Se pide confirmación. Esta acción no afecta ni a las reglas, ni a las sesiones, ni a los ajustes: solo se borran los contadores.
+
+<Aside type="caution">
+El reinicio es definitivo. Si quieres conservar un rastro del histórico antes de poner a cero, exporta antes el espacio de trabajo marcando **Incluir el historial de estadísticas** (consulta [Importar / Exportar, espacios de trabajo](/guides/import-export#workspaces)).
+</Aside>
+
+## Sesiones
+
+Todas las métricas ligadas a tus sesiones.
+
+<ThemeImage
+  lightSrc={sessionsLight}
+  darkSrc={sessionsDark}
+  alt="Subpágina Sesiones de las estadísticas con los volúmenes, la actividad, las categorías y dominios, y el resumen."
+/>
+
+### Volúmenes de sesiones
+
+Sintetiza la foto actual de tus sesiones, **archivadas excluidas** por defecto:
+
+| Baldosa | Contenido |
+|---|---|
+| **Total** | Sesiones activas y ancladas. |
+| **Fijadas** | Perfiles mostrados en el popup y la página de inicio. |
+| **Activas** | Sesiones corrientes no ancladas. |
+| **Archivadas** | Sesiones archivadas (consulta [Sesiones, archivo](/guides/sessions#archive)). |
+| **Pestañas guardadas** | Suma de las pestañas contenidas en las sesiones activas y ancladas. |
+| **Grupos guardados** | Suma de los grupos de Chrome contenidos en las sesiones. |
+
+Bajo las baldosas, tres indicadores cualitativos: media de pestañas por sesión, la sesión más grande, el porcentaje de sesiones categorizadas y el porcentaje con nota.
+
+### Actividad de sesiones
+
+Dos contadores semanales sobre las acciones efectuadas:
+
+- **Sesiones creadas**: cuántas instantáneas has capturado esta semana.
+- **Pestañas restauradas**: cuántas pestañas se han abierto desde una sesión.
+
+Cada uno se acompaña de un mini distintivo de tendencia (en alza, en baja, estable) respecto a la semana anterior. Un subtítulo **Total** recuerda los acumulados históricos de sesiones creadas, restauradas y archivadas.
+
+### Categorías y dominios
+
+- **Categorías de sesiones**: distribución de tus sesiones por categoría. Un guion cuando ninguna sesión tiene categoría asignada.
+- **Dominios más presentes**: clasificación de los dominios que más aparecen en tus sesiones guardadas.
+
+### Resumen de sesiones
+
+Tres mini vistas complementarias:
+
+- **Cronología**: la sesión más antigua y la modificada más recientemente, más el número de sesiones creadas esta semana.
+- **Distribución de colores de grupos**: un histograma horizontal que agrega los colores de los grupos de Chrome en todas las sesiones.
+- **Sesiones más grandes**: top de sesiones por número de pestañas.
+
+## Almacenamiento
+
+El detalle del espacio ocupado en el almacenamiento local del navegador.
+
+<ThemeImage
+  lightSrc={storageLight}
+  darkSrc={storageDark}
+  alt="Subpágina Almacenamiento de las estadísticas con la barra de cuota y el desglose por categoría."
+/>
+
+Una barra de cuota indica la parte utilizada respecto al máximo permitido por el navegador. Debajo, el consumo se desglosa por categoría: reglas de dominio, sesiones activas, perfiles fijados, sesiones archivadas, estadísticas y ajustes diversos.
+
+## Siguiente paso
+
+<CardGrid>
+  <LinkCard title="Reglas de dominio" href="/guides/domain-rules" description="Identificar las reglas dormidas con la clasificación de top reglas." />
+  <LinkCard title="Sesiones" href="/guides/sessions" description="El detalle de los compartimentos y del archivo." />
+  <LinkCard title="Ajustes" href="/guides/settings" description="Notificaciones que alimentan los contadores." />
+  <LinkCard title="Importar / Exportar" href="/guides/import-export" description="Guardar las estadísticas junto con el espacio de trabajo." />
+</CardGrid>

@@ -1,0 +1,124 @@
+---
+title: Deduplicar las pestañas
+description: Los tres modos de coincidencia (URL exacta, sin parámetros ignorados, inclusión), los niveles de alcance, las estrategias de conservación y la mecánica de deshacer.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import ConditionsDeclenchement from '../../../../components/ConditionsDeclenchement.astro';
+
+<Aside type="tip" title="En resumen">
+- La deduplicación evita acumular varias pestañas que apuntan a la misma página.
+- Tres modos de coincidencia configurables regla por regla (URL exacta, URL sin parámetros ignorados, URL incluida).
+- Una notificación con botón **Deshacer** permite revertir durante 5 segundos.
+- La pestaña reabierta mediante **Deshacer** queda protegida contra una nueva deduplicación durante 10 segundos.
+</Aside>
+
+Cuando abres un enlace que ya está abierto en tu navegador, SmartTab Organizer conserva una sola pestaña y cierra la otra. La [estrategia de conservación](#strategies-de-conservation) determina cuál sobrevive.
+
+## Condiciones de activación
+
+<ConditionsDeclenchement feature="deduplication" />
+
+<Aside type="caution">
+Las URL con esquemas especiales (`chrome:`, `chrome-extension:`, `about:`) siempre se ignoran en la deduplicación, sea cual sea la regla.
+</Aside>
+
+## Los tres modos de coincidencia
+
+### URL exacta
+
+Dos pestañas se consideran duplicadas solo si sus URL son idénticas carácter a carácter: mismo protocolo, mismo dominio, misma ruta, mismos parámetros de consulta, mismo fragmento.
+
+| URL existente | Pestaña nueva | Resultado |
+|---|---|---|
+| `https://example.com/page?lang=es` | `https://example.com/page?lang=es` | Duplicado, cerrada |
+| `https://example.com/page?lang=es` | `https://example.com/page?lang=en` | Distinta, conservada |
+| `https://example.com/page#section1` | `https://example.com/page#section2` | Distinta, conservada |
+
+Adecuado para sitios donde los parámetros de URL tienen un significado funcional (filtros, idiomas, identificadores).
+
+### URL sin parámetros ignorados
+
+Igual que el modo **URL exacta**, pero algunos parámetros de consulta se retiran de ambas URL **antes** de la comparación. Práctico para neutralizar los parámetros de seguimiento (`utm_source`, `fbclid`) o los identificadores de sesión que no afectan al contenido.
+
+Los parámetros a ignorar se declaran en la regla como una lista. Cada entrada puede ser:
+
+- un **nombre exacto**, sensible a mayúsculas: `utm_source` solo retira ese parámetro.
+- un **patrón con comodín** `*`: `utm_*` retira todo parámetro que empiece por `utm_`, `*_id` todo parámetro que termine en `_id`, `*` todos los parámetros.
+
+| URL existente | Pestaña nueva | Parámetros ignorados | Resultado |
+|---|---|---|---|
+| `https://example.com/article?id=42&utm_source=twitter` | `https://example.com/article?id=42&utm_source=newsletter` | `utm_*` | Duplicado, cerrada |
+| `https://example.com/article?id=42&utm_source=twitter` | `https://example.com/article?id=43&utm_source=twitter` | `utm_*` | Distinta, conservada |
+| `https://example.com/post?fbclid=abc&ref=home` | `https://example.com/post?ref=home` | `fbclid` | Duplicado, cerrada |
+
+<Aside type="note">
+Debe declararse al menos un patrón para activar este modo. Sin patrones equivaldría al modo **URL exacta** y el guardado de la regla se rechaza.
+</Aside>
+
+### URL incluida
+
+Dos pestañas se consideran duplicadas si la URL de una está contenida en la URL de la otra (subcadena, en cualquier sentido).
+
+| URL existente | Pestaña nueva | Resultado |
+|---|---|---|
+| `https://example.com/products/item/123` | `https://example.com/products/item` | Duplicado, cerrada |
+| `https://example.com/products` | `https://example.com/about` | Distinta, conservada |
+
+Adecuado para sitios donde navegar en profundidad por una sección no debería crear duplicados respecto de la página padre.
+
+## Alcance de la deduplicación
+
+Interactúan tres niveles de control, del más general al más fino.
+
+### Interruptor global
+
+El interruptor **Deduplicación** del popup o de la página [Ajustes](/guides/settings) actúa como interruptor maestro. Si está desactivado, no ocurre ninguna deduplicación, sea cual sea la regla. En ese caso aparece un distintivo **D** naranja en el icono de la extensión.
+
+### Deduplicar dominios sin regla
+
+El ajuste **Deduplicar pestañas sin regla de dominio** define lo que ocurre en los sitios que no has configurado.
+
+- **Activado**: las pestañas de dominios sin regla se deduplican en modo URL exacta cuando el interruptor global está activo.
+- **Desactivado** (por defecto): las pestañas de dominios sin regla nunca se deduplican.
+
+Las reglas de dominio mantienen su prioridad: un dominio cubierto por una regla explícita sigue siempre esa regla.
+
+### Interruptor por regla
+
+Cada regla tiene su propio interruptor **Deduplicación**. Si lo desactivas en una regla, los duplicados de ese dominio se conservan aunque el interruptor global esté activo.
+
+## Estrategias de conservación
+
+En la página [Ajustes](/guides/settings), sección **Deduplicación**, eliges cuál de las dos pestañas duplicadas sobrevive:
+
+| Estrategia | Comportamiento |
+|---|---|
+| **La pestaña existente** | Se conserva la pestaña ya abierta. Útil cuando la pestaña existente tiene un estado (scroll, formulario, sesión) que no quieres perder. |
+| **La pestaña recién abierta** | Sobrevive la pestaña nueva. Atención: si la antigua pertenecía a un grupo, desaparece del grupo. |
+| **Gana la pestaña agrupada, si no mantener la existente** | Si una de las dos está agrupada y la otra no, sobrevive la agrupada. Si no, se cae en **La pestaña existente**. |
+| **Gana la pestaña agrupada, si no mantener la nueva** (por defecto) | Si una de las dos está agrupada y la otra no, sobrevive la agrupada. Si no, se cae en **La pestaña recién abierta**. Protege las pestañas agrupadas frente a un cierre en favor de una copia sin grupo, manteniendo la versión recién cargada cuando el grupo no decide. |
+
+<Aside type="note">
+La estrategia es global a la extensión: se aplica a todas las reglas. Se desactiva visualmente si la deduplicación global está apagada.
+</Aside>
+
+## Notificación y deshacer
+
+Cuando el ajuste **Notificar al cerrar duplicados automáticamente** está activo, aparece una notificación del sistema tras cada cierre de duplicado. Muestra el título de la pestaña cerrada y ofrece un botón **Deshacer**.
+
+Al pulsar **Deshacer** se reabre la pestaña cerrada en la misma ventana y se activa. Si la pestaña cerrada pertenecía a un grupo, la acción intenta reincorporarla a ese grupo; si el grupo ya no existe, se crea uno nuevo.
+
+<Aside type="note">
+Para evitar que la pestaña reabierta se vuelva a cerrar de inmediato, su deduplicación se suspende durante **10 segundos**. La notificación se cierra automáticamente a los 5 segundos si no interactúas.
+</Aside>
+
+Este ajuste es independiente del de agrupación: puedes activar las notificaciones solo para la deduplicación, solo para la agrupación, para ambas o para ninguna.
+
+## Siguiente paso
+
+<CardGrid>
+  <LinkCard title="Agrupar las pestañas" href="/guides/group-tabs" description="El mecanismo paralelo para organizar las pestañas en grupos." />
+  <LinkCard title="Reglas de dominio" href="/guides/domain-rules" description="Elegir el modo de deduplicación y los parámetros ignorados regla por regla." />
+  <LinkCard title="Ajustes" href="/guides/settings" description="Interruptores globales, estrategia de conservación, notificaciones." />
+</CardGrid>

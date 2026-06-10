@@ -1,0 +1,41 @@
+---
+title: SmartTab Organizer
+description: Extension navigateur (Chrome / Firefox) qui groupe vos onglets par règles, déduplique les doublons et sauvegarde vos sessions de travail. Tout est local, rien ne part en ligne.
+template: splash
+head:
+  - tag: title
+    content: SmartTab Organizer · Onglets groupés par règles, sans IA ni cloud
+hero:
+  tagline: Organisez vos onglets intelligemment, sans envoyer la moindre URL en ligne.
+  image:
+    alt: La popup de SmartTab Organizer avec ses profils epingles et son selecteur d'espace de travail.
+    light: ../../../assets/screenshots/fr-light-journey-popup-with-pinned-and-workspace.png
+    dark: ../../../assets/screenshots/fr-dark-journey-popup-with-pinned-and-workspace.png
+  actions:
+    - text: Commencer
+      link: /fr/discover/why/
+      icon: right-arrow
+      variant: primary
+    - text: Installer
+      link: /fr/discover/installation/
+      icon: external
+      variant: secondary
+    - text: Voir sur GitHub
+      link: https://github.com/EspritVorace/smart-tab-organizer
+      icon: external
+      variant: minimal
+---
+
+import FeatureGrid from '../../../components/landing/FeatureGrid.astro';
+import Showcase from '../../../components/landing/Showcase.astro';
+import PrivacyBand from '../../../components/landing/PrivacyBand.astro';
+import ComparisonTable from '../../../components/landing/ComparisonTable.astro';
+import ValuesBand from '../../../components/landing/ValuesBand.astro';
+import ClosingCTA from '../../../components/landing/ClosingCTA.astro';
+
+<FeatureGrid />
+<Showcase />
+<PrivacyBand />
+<ComparisonTable />
+<ValuesBand />
+<ClosingCTA />
