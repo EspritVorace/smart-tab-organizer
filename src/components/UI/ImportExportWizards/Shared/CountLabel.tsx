@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text } from '@radix-ui/themes';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 
 interface CountLabelProps {
   /** i18n key with a `{count}` placeholder. */
@@ -16,7 +16,7 @@ interface CountLabelProps {
 export function CountLabel({ messageKey, count }: CountLabelProps) {
   return (
     <Text size="2" color="gray" mt="3">
-      {getMessage(messageKey).replace('{count}', String(count))}
+      {getMessage(messageKey as MessageKey).replace('{count}', String(count))}
     </Text>
   );
 }

@@ -15,7 +15,7 @@ import { ListToolbar, ListToolbarMenu } from '@/components/UI/ListToolbar';
 import { BulkActionsBar } from '@/components/UI/BulkActionsBar';
 import { ExportSessionsWizard } from '@/components/UI/ImportExportWizards/ExportSessionsWizard';
 import { SessionViewMenu } from '@/components/UI/SessionViewMenu/SessionViewMenu';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 import { foldAccents } from '@/utils/stringUtils';
 import { matchSessionSearch, splitByPinned, getFocusedSessionFromDOM } from '@/utils/sessionUtils';
 import { moveSessionToFirstInGroup, moveSessionToLastInGroup } from '@/utils/sessionOrderUtils';
@@ -103,7 +103,7 @@ function SectionHeader({
   return (
     <Flex align="center" gap="2">
       <Icon size={16} aria-hidden="true" style={{ color: 'var(--accent-9)' }} />
-      <Text size="3" weight="bold">{getMessage(titleKey)}</Text>
+      <Text size="3" weight="bold">{getMessage(titleKey as MessageKey)}</Text>
       <Badge variant="soft" size="1">{count}</Badge>
       {action && <Box style={{ marginLeft: 'auto' }}>{action}</Box>}
     </Flex>
@@ -360,8 +360,8 @@ function SessionSection({
         {sessions.length === 0 ? (
           <EmptyState
             icon={icon}
-            title={getMessage(emptyTitleKey)}
-            description={emptyDescriptionKey ? getMessage(emptyDescriptionKey) : undefined}
+            title={getMessage(emptyTitleKey as MessageKey)}
+            description={emptyDescriptionKey ? getMessage(emptyDescriptionKey as MessageKey) : undefined}
             descriptionMaxWidth="none"
             minHeight={100}
           />

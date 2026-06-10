@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 import { showSuccessToast } from '@/utils/toast';
 
 export interface ExportActionsConfig {
@@ -33,7 +33,7 @@ function resolveMessage(
 ): string {
   return typeof notifyMessage === 'function'
     ? notifyMessage(count)
-    : getMessage(notifyMessage);
+    : getMessage(notifyMessage as MessageKey);
 }
 
 /**
@@ -46,7 +46,7 @@ export function useExportActions(config: ExportActionsConfig): ExportActions {
 
   const notify = useCallback(() => {
     showSuccessToast(
-      getMessage(notifyTitleKey),
+      getMessage(notifyTitleKey as MessageKey),
       resolveMessage(notifyMessage, selected.length),
     );
   }, [notifyTitleKey, notifyMessage, selected.length]);

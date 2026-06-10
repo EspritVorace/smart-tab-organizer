@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import license from 'rollup-plugin-license';
 import { resolve } from 'path';
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'fs';
+import { generateI18nTypes } from './scripts/generate-i18n-types.mjs';
 
 // Packages whose code actually ends up in the extension bundle. WXT runs
 // several Vite builds in a single process (background, content scripts, HTML
@@ -51,6 +52,12 @@ export default defineConfig({
     developmentIndicator: 'overlay',
   },
   hooks: {
+    // Keep the committed `wxt-i18n-structure.d.ts` in sync with the English
+    // catalog on every `wxt prepare` (postinstall) and build. The write is
+    // idempotent, so this never dirties git unless the keys actually changed.
+    'prepare:types': async () => {
+      await generateI18nTypes();
+    },
     'build:manifestGenerated': (wxt, manifest) => {
       // Firefox MV2 uses `_execute_browser_action`; only Chromium MV3 accepts
       // `_execute_action`. Without this rename the popup hotkey (and on some

@@ -17,6 +17,7 @@
     "e2e-shared/pages/**/*",
     "e2e-shared/actions/**/*",
     "e2e-shared/matchers/**/*",
-    ".wxt/wxt.d.ts"
+    ".wxt/wxt.d.ts",
+    "wxt-i18n-structure.d.ts"
   ]
 }

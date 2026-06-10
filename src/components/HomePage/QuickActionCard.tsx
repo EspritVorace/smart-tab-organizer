@@ -1,7 +1,7 @@
 import type { KeyboardEvent } from 'react';
 import { Card, Flex, Heading, Kbd, Text } from '@radix-ui/themes';
 import { IconBox } from '@/components/UI/IconBox/IconBox';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 import type { QuickActionDef } from './data';
 import styles from './QuickActionsSection.module.css';
 
@@ -47,10 +47,10 @@ export function QuickActionCard({
         <Flex direction="column" gap="2">
           <IconBox icon={action.icon} size="sm" variant="soft" />
           <Heading as="h3" size="2" weight="medium">
-            {getMessage(action.titleKey)}
+            {getMessage(action.titleKey as MessageKey)}
           </Heading>
           <Text as="p" size="1" color="gray">
-            {getMessage(action.descKey)}
+            {getMessage(action.descKey as MessageKey)}
           </Text>
         </Flex>
       </Card>

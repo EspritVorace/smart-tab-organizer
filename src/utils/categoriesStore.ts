@@ -1,6 +1,6 @@
 import builtInCategoriesFile from '@/data/categories.json';
 import { categoriesFileSchema, type RuleCategory } from '@/schemas/category.js';
-import { getMessage } from './i18n.js';
+import { getMessage, type MessageKey } from './i18n.js';
 
 /**
  * Rule categories are read-only constants sourced from
@@ -20,7 +20,7 @@ export function getRuleCategory(categoryId?: string | null): RuleCategory | null
 }
 
 export function getCategoryLabel(category: RuleCategory): string {
-  if (category.labelKey) return getMessage(category.labelKey);
+  if (category.labelKey) return getMessage(category.labelKey as MessageKey);
   return category.label ?? '';
 }
 

@@ -9,7 +9,7 @@ import {
 } from './grouping.js';
 import { getMatchMode, isUrlMatch } from './deduplication.js';
 import { getStatisticsData, updateStatisticsData } from '@/utils/statisticsUtils.js';
-import { getMessage } from '@/utils/i18n.js';
+import { getMessage, type MessageKey } from '@/utils/i18n.js';
 import { logger } from '@/utils/logger.js';
 import type { DomainRuleSetting, AppSettings } from '@/types/syncSettings.js';
 import type { ChromeTabGroupsExtended, ChromeNotificationsAPI } from '@/types/chromeApi.js';
@@ -366,7 +366,7 @@ function notify(messageKey: string, substitutions?: string[]): void {
         type: 'basic',
         iconUrl: browser.runtime.getURL('/icons/128.png'),
         title: getMessage('extensionName'),
-        message: getMessage(messageKey, substitutions),
+        message: getMessage(messageKey as MessageKey, substitutions),
     });
 }
 
