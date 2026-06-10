@@ -89,6 +89,10 @@ export interface LandingCopy {
     chromeHref: string;
     firefox: string;
     firefoxHref: string;
+    /** Localized alt text for the official Chrome Web Store badge image. */
+    chromeBadgeAlt: string;
+    /** Localized alt text for the official Firefox Add-ons badge image. */
+    firefoxBadgeAlt: string;
   };
 }
 
@@ -246,6 +250,8 @@ export const landing: Record<Locale, LandingCopy> = {
       chromeHref: CHROME_URL,
       firefox: 'Ajouter à Firefox',
       firefoxHref: FIREFOX_URL,
+      chromeBadgeAlt: 'Disponible sur le Chrome Web Store',
+      firefoxBadgeAlt: 'Disponible sur Firefox Add-ons',
     },
   },
 
@@ -397,6 +403,8 @@ export const landing: Record<Locale, LandingCopy> = {
       chromeHref: CHROME_URL,
       firefox: 'Add to Firefox',
       firefoxHref: FIREFOX_URL,
+      chromeBadgeAlt: 'Available in the Chrome Web Store',
+      firefoxBadgeAlt: 'Get the add-on for Firefox',
     },
   },
 
@@ -548,6 +556,8 @@ export const landing: Record<Locale, LandingCopy> = {
       chromeHref: CHROME_URL,
       firefox: 'Añadir a Firefox',
       firefoxHref: FIREFOX_URL,
+      chromeBadgeAlt: 'Disponible en Chrome Web Store',
+      firefoxBadgeAlt: 'Disponible en Firefox Add-ons',
     },
   },
 };

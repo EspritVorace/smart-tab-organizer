@@ -1,9 +1,22 @@
 ---
 // Override of Starlight's `<Head>`: keep the default tags (canonical,
-// OpenGraph, Twitter, ...) and append our schema.org JSON-LD for GEO.
+// OpenGraph, Twitter, ...), add a per-locale social preview image, and append
+// our schema.org JSON-LD for GEO. Starlight's `<Default />` already emits
+// og:title / og:description from the page title / description, so we only add
+// the image and twitter:card tags here (no duplicates).
 import Default from '@astrojs/starlight/components/Head.astro';
 import StructuredData from './StructuredData.astro';
+import { getLocale } from '../i18n/locale';
+
+const site = (Astro.site?.href ?? 'https://docs.esprit-vorace.fr/').replace(/\/$/, '');
+const locale = getLocale(Astro.url.pathname);
+// Absolute URL (crawlers require it). Files live in public/og/{en,fr,es}.png.
+const ogImage = `${site}/og/${locale}.png`;
 ---
 
 <Default />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:image" content={ogImage} />
 <StructuredData />

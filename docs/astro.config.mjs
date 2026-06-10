@@ -15,6 +15,8 @@ export default defineConfig({
       components: {
         // Inject schema.org JSON-LD structured data (GEO) on every page.
         Head: './src/components/Head.astro',
+        // Append the official store badges below the splash hero actions.
+        Hero: './src/components/Hero.astro',
       },
       defaultLocale: 'root',
       locales: {
