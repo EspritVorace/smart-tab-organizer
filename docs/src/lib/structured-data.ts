@@ -67,10 +67,10 @@ export const homeLabel: Record<DocLocale, string> = {
  * sidebar group labels. Used to build the intermediate breadcrumb crumb.
  */
 export const sectionLabels: Record<string, Record<DocLocale, string>> = {
-  decouverte: { fr: 'Découverte', en: 'Discover', es: 'Descubrir' },
+  discover: { fr: 'Découverte', en: 'Discover', es: 'Descubrir' },
   guides: { fr: 'Guides', en: 'Guides', es: 'Guías' },
   reference: { fr: 'Référence', en: 'Reference', es: 'Referencia' },
-  contribuer: { fr: 'Contribuer', en: 'Contributing', es: 'Contribuir' },
+  contributing: { fr: 'Contribuer', en: 'Contributing', es: 'Contribuir' },
   faq: { fr: 'FAQ', en: 'FAQ', es: 'FAQ' },
 };
 

@@ -8,11 +8,11 @@ interface Props {
 const { feature } = Astro.props;
 
 const pathname = Astro.url.pathname;
-const locale: 'fr' | 'en' | 'es' = pathname.startsWith('/en/')
-  ? 'en'
+const locale: 'fr' | 'en' | 'es' = pathname.startsWith('/fr/')
+  ? 'fr'
   : pathname.startsWith('/es/')
     ? 'es'
-    : 'fr';
+    : 'en';
 
 const labels = {
   fr: { groupement: 'Groupement', deduplication: 'Déduplication' },

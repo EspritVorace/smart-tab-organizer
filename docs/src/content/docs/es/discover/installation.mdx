@@ -1,0 +1,109 @@
+---
+title: Instalación
+description: Instalar SmartTab Organizer desde el Chrome Web Store, Firefox Add-ons o en local desde el código fuente. Permisos solicitados y primera apertura.
+---
+
+import { Aside, CardGrid, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="En resumen">
+- Disponible en el Chrome Web Store y en Firefox Add-ons.
+- Cuatro permisos solicitados, todos locales (tabs, storage, notifications, scripting).
+- Build local posible con `pnpm install && pnpm build` (o `pnpm build:firefox`).
+</Aside>
+
+## Instalar desde una tienda
+
+<Tabs>
+  <TabItem label="Chrome / Edge / Brave">
+[SmartTab Organizer en el Chrome Web Store](https://chromewebstore.google.com/detail/smarttab-organizer/ijnpdkkcbmfikocmboibffjgbohhlmah). Compatible con todos los navegadores basados en Chromium (Chrome, Edge, Brave, Vivaldi, Arc, Opera).
+
+<Steps>
+1. Haz clic en **Añadir a Chrome**.
+2. Acepta los permisos en el cuadro de diálogo del navegador.
+3. Ancla el icono a la barra de herramientas desde el menú **Extensiones** para acceder rápidamente.
+</Steps>
+  </TabItem>
+  <TabItem label="Firefox">
+[SmartTab Organizer en Firefox Add-ons](https://addons.mozilla.org/firefox/addon/smarttab-organizer/).
+
+<Steps>
+1. Haz clic en **Añadir a Firefox**.
+2. Acepta los permisos en el cuadro de diálogo.
+3. El icono se ancla automáticamente a la barra de herramientas.
+</Steps>
+  </TabItem>
+</Tabs>
+
+## Permisos solicitados
+
+La extensión solicita cuatro permisos, todos ellos utilizados exclusivamente en local. Ninguno autoriza una comunicación de red.
+
+| Permiso | Para qué sirve |
+|---|---|
+| `tabs` | Leer las URL y los títulos de las pestañas para poder agruparlas y detectar duplicados. |
+| `storage` | Persistir tus reglas, sesiones y ajustes en `browser.storage.local`. |
+| `notifications` | Mostrar las notificaciones de agrupación y deduplicación, con el botón **Deshacer**. |
+| `scripting` | Inyectar el content script que captura los clics centrales y los clics derechos sobre los enlaces, para disparar la agrupación. |
+
+<Aside type="caution">
+La extensión **no** solicita permisos de host extendidos ni `webRequest`. No puede inspeccionar el tráfico de red ni lee jamás el contenido de las páginas más allá de los enlaces en los que haces clic.
+</Aside>
+
+## Instalar en local desde el código fuente
+
+Para desarrollar o probar una versión no publicada:
+
+<Tabs>
+  <TabItem label="Chrome / Chromium">
+
+```bash
+git clone https://github.com/EspritVorace/smart-tab-organizer.git
+cd smart-tab-organizer
+pnpm install
+pnpm build
+```
+
+<Steps>
+1. Abre `chrome://extensions` en Chrome.
+2. Activa el modo desarrollador arriba a la derecha.
+3. Haz clic en **Cargar extensión sin empaquetar** y selecciona la carpeta `.output/chrome-mv3/`.
+</Steps>
+  </TabItem>
+  <TabItem label="Firefox">
+
+```bash
+git clone https://github.com/EspritVorace/smart-tab-organizer.git
+cd smart-tab-organizer
+pnpm install
+pnpm build:firefox
+```
+
+<Steps>
+1. Abre `about:debugging#/runtime/this-firefox`.
+2. Haz clic en **Cargar un complemento temporal**.
+3. Selecciona el archivo `.output/firefox-mv2/manifest.json`.
+</Steps>
+
+<Aside type="note">
+Una instalación temporal en Firefox se pierde al cerrar el navegador. Para un uso permanente desde el código fuente, usa `pnpm zip:firefox` y firma el `.xpi`.
+</Aside>
+  </TabItem>
+</Tabs>
+
+## Primer arranque
+
+Una vez instalada la extensión:
+
+<Steps>
+1. Haz clic en el icono de SmartTab Organizer en la barra de herramientas. El popup se abre vacío, sin ninguna regla ni sesión guardada.
+2. Pulsa en **Opciones** para abrir la página completa. La pestaña **Inicio** te ofrece dos acciones: **Crear mi primera regla** o **Importar un pack**.
+3. Importar un pack es la vía más rápida para descubrir la extensión. Consulta [Categorías y packs](/reference/categories-and-packs).
+</Steps>
+
+## Siguiente paso
+
+<CardGrid>
+  <LinkCard title="Tour de la interfaz" href="/discover/interface-tour" description="Popup y página Opciones en dos minutos." />
+  <LinkCard title="La página de inicio" href="/discover/home-page" description="El hub de las Opciones tras el onboarding." />
+  <LinkCard title="Categorías y packs" href="/reference/categories-and-packs" description="Importar una colección de reglas con un solo clic." />
+</CardGrid>

@@ -67,7 +67,7 @@ Snapshot your open tabs and groups, name them, pin the ones you live in. Restore
 
 ## 📖 Documentation
 
-Full guide online: [docs.esprit-vorace.fr](https://docs.esprit-vorace.fr/en/) (Astro Starlight, 3 languages, 30+ pages with screenshots). The MDX sources live in [`docs/`](docs/src/content/docs/en/) for contributors.
+Full guide online: [docs.esprit-vorace.fr](https://docs.esprit-vorace.fr/) (Astro Starlight, 3 languages, 30+ pages with screenshots). The MDX sources live in [`docs/`](docs/src/content/docs/) for contributors.
 
 ## 🛠️ For contributors
 
@@ -83,7 +83,7 @@ pnpm storybook    # Component explorer (port 6006)
 pnpm build        # Production build
 ```
 
-The stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) and code conventions are documented in [`CLAUDE.md`](CLAUDE.md) and the [stack technique annex](docs/src/content/docs/contribuer/stack.mdx).
+The stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) and code conventions are documented in [`CLAUDE.md`](CLAUDE.md) and the [stack technique annex](docs/src/content/docs/contributing/stack.mdx).
 
 Please open an issue before submitting a large pull request.
 
@@ -93,4 +93,4 @@ GNU General Public License v3.0.
 
 ## 🗝️ Third-party licenses
 
-SmartTab Organizer bundles open source components (React, Radix UI, Lucide, Zod, CodeMirror, dnd-kit, and more). Their copyright notices and full license texts are listed in [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt) and on the [attribution page](https://docs.esprit-vorace.fr/en/reference/licences-open-source/).
+SmartTab Organizer bundles open source components (React, Radix UI, Lucide, Zod, CodeMirror, dnd-kit, and more). Their copyright notices and full license texts are listed in [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt) and on the [attribution page](https://docs.esprit-vorace.fr/reference/open-source-licenses/).

@@ -83,7 +83,7 @@ pnpm storybook    # Explorador de componentes (puerto 6006)
 pnpm build        # Build de producción
 ```
 
-El stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) y las convenciones de código están documentadas en [`CLAUDE.md`](CLAUDE.md) y el [anexo stack técnico](docs/src/content/docs/contribuer/stack.mdx).
+El stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) y las convenciones de código están documentadas en [`CLAUDE.md`](CLAUDE.md) y el [anexo stack técnico](docs/src/content/docs/es/contributing/stack.mdx).
 
 Por favor, abre una issue antes de enviar una pull request grande.
 
@@ -93,4 +93,4 @@ GNU General Public License v3.0.
 
 ## 🗝️ Licencias de terceros
 
-SmartTab Organizer incluye componentes de codigo abierto (React, Radix UI, Lucide, Zod, CodeMirror, dnd-kit y otros). Sus avisos de copyright y textos de licencia completos estan listados en [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt) y en la [pagina de atribucion](https://docs.esprit-vorace.fr/es/reference/licences-open-source/).
+SmartTab Organizer incluye componentes de codigo abierto (React, Radix UI, Lucide, Zod, CodeMirror, dnd-kit y otros). Sus avisos de copyright y textos de licencia completos estan listados en [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt) y en la [pagina de atribucion](https://docs.esprit-vorace.fr/es/reference/open-source-licenses/).

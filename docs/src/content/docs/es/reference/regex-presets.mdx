@@ -1,0 +1,56 @@
+---
+title: Presets de regex
+description: Modelos regex listos para usar en el asistente de creación de regla. Algunos ejemplos emblemáticos; la lista completa vive en el asistente de la extensión.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+<Aside type="tip" title="En resumen">
+- Un preset es un modelo regex seleccionable desde el desplegable **Preset** del asistente de creación de regla.
+- Configura automáticamente el modo de nombrado, la regex de título y la regex de URL adaptados al sitio en cuestión.
+- Los presets están **compartidos** entre todos los espacios de trabajo y entre todos los idiomas.
+</Aside>
+
+## Diferencia con un pack
+
+| Concepto | Efecto |
+|---|---|
+| **Preset** | Configura **una sola regla**, la que estás creando. |
+| **Pack** | Añade **varias reglas** de golpe. Consulta [Categorías y packs](/reference/categories-and-packs). |
+
+Seleccionar un preset no es definitivo: puedes ajustar las regex en cualquier momento desde el editor de regla después de crearla. La referencia al preset se conserva a título informativo.
+
+<Aside type="caution">
+Si modificas las regex de una regla creada a partir de un preset y luego reabres el desplegable para elegir otro preset, los valores modificados se sobrescriben con los del nuevo preset.
+</Aside>
+
+## Algunos presets emblemáticos
+
+Los presets cubren las 11 categorías de uso más habituales. He aquí una muestra; la lista completa puede recorrerse en el asistente.
+
+| Preset | Caso de uso |
+|---|---|
+| **GitHub - Issue / PR** | Agrupar por número de issue o de pull request en un repositorio de GitHub. |
+| **Jira - Clave de ticket en el título** | Agrupar por clave `PROJ-123` en cualquier dominio Atlassian. |
+| **Slack - Workspace** | Agrupar por espacio de trabajo de Slack. |
+| **YouTube - Canal** | Agrupar los vídeos por canal. |
+| **Wikipedia - Artículo** | Agrupar todos los idiomas por título de artículo. |
+| **Notion - Página** | Agrupar por título de página de Notion. |
+
+## Presets transversales (entre dominios)
+
+Algunos presets tienen un alcance amplio a propósito para funcionar sea cual sea el dominio. Por ejemplo, **Ticket en el título (entre dominios)** extrae una clave `PROJ-123` desde cualquier pestaña cuyo título la mencione. Útil para seguir un mismo ticket a través de GitHub, GitLab, Trello o Slack.
+
+## Lista completa
+
+En lugar de enumerar aquí la lista completa de presets (cambia en cada versión), recorre el desplegable **Preset** del asistente de creación de regla; los presets se organizan en categorías plegables y la búsqueda filtra por nombre.
+
+Los manifiestos viven en [`public/data/presets.json`](https://github.com/EspritVorace/smart-tab-organizer/blob/main/public/data/presets.json) para quien quiera inspeccionar o contribuir.
+
+## Siguiente paso
+
+<CardGrid>
+  <LinkCard title="Reglas de dominio" href="/guides/domain-rules" description="El asistente de creación y el campo Preset." />
+  <LinkCard title="Categorías y packs" href="/reference/categories-and-packs" description="La otra vía: importar varias reglas de golpe." />
+  <LinkCard title="Agrupar las pestañas" href="/guides/group-tabs" description="Cómo el preset determina el modo de nombrado y las regex." />
+</CardGrid>

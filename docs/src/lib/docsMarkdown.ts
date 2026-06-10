@@ -4,24 +4,26 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 //
 // Choix produit : le Markdown est servi *uniquement en anglais*, quelle que
 // soit la locale de la page demandee (voir worker/index.ts pour la
-// negociation). On ne genere donc que les entrees anglaises, exposees aux
-// chemins racine (sans prefixe de locale) : `index`, `guides/...`, etc.
+// negociation). L'anglais etant desormais la locale racine, on ne garde que
+// les entrees racine (sans prefixe `fr/` ni `es/`) : `index`, `guides/...`.
 
 export interface EnglishDoc {
-  /** Slug de sortie sous la racine du site : 'index', 'guides/dedupliquer'... */
+  /** Slug de sortie sous la racine du site : 'index', 'guides/deduplicate'... */
   slug: string;
   entry: CollectionEntry<'docs'>;
 }
 
-const EN_PREFIX = 'en/';
+// Prefixe (ou id exact) des locales non racine : `fr`, `es`, `fr/...`, `es/...`.
+const LOCALE_PREFIX = /^(fr|es)(\/|$)/;
 
-/** Retourne les pages anglaises, mappees vers leur slug de sortie sans prefixe. */
+/** Retourne les pages anglaises (racine), mappees vers leur slug de sortie. */
 export async function getEnglishDocs(): Promise<EnglishDoc[]> {
   const docs = await getCollection('docs');
   return docs
-    .filter((entry) => entry.id === 'en' || entry.id.startsWith(EN_PREFIX))
+    .filter((entry) => !LOCALE_PREFIX.test(entry.id))
     .map((entry) => ({
-      slug: entry.id === 'en' ? 'index' : entry.id.slice(EN_PREFIX.length),
+      // L'index racine porte l'id '' (ou 'index' selon Astro) : on le normalise.
+      slug: entry.id === '' || entry.id === 'index' ? 'index' : entry.id,
       entry,
     }))
     .sort((a, b) => {

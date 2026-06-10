@@ -3,7 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import { getEnglishDocs, entryToMarkdown } from '../lib/docsMarkdown';
 
 // Sert la version Markdown (anglaise) de chaque page de doc, accessible a
-// `<url>.md` (ex. /guides/dedupliquer.md). Combine au Worker de negociation
+// `<url>.md` (ex. /guides/deduplicate.md). Combine au Worker de negociation
 // (worker/index.ts), cela permet de repondre en Markdown quand un client
 // envoie `Accept: text/markdown` ("Markdown for Agents" de Cloudflare).
 

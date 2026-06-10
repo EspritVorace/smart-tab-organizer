@@ -41,6 +41,7 @@
     "doc:scenarios:sync": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/doc-scenarios-sync.mjs",
     "shortcuts:doc": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/generate-shortcuts-doc.mjs",
     "json-schema:doc": "node --experimental-strip-types --no-warnings=ExperimentalWarning --loader ./scripts/json-schema-doc/loader.mjs scripts/generate-json-schema-doc.mjs",
+    "docs:redirects": "node scripts/generate-docs-redirects.mjs",
     "docs:dev": "pnpm --dir docs dev",
     "docs:build": "pnpm --dir docs build",
     "docs:preview": "pnpm --dir docs preview",

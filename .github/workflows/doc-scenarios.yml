@@ -58,13 +58,13 @@ jobs:
 
       - name: Verify keyboard shortcuts reference is up to date
         run: |
-          if ! git diff --quiet -- docs/src/content/docs/annexes/raccourcis-clavier.mdx \
-                docs/src/content/docs/en/annexes/raccourcis-clavier.mdx \
-                docs/src/content/docs/es/annexes/raccourcis-clavier.mdx; then
-            echo "::error::docs/src/content/docs/**/annexes/raccourcis-clavier.mdx is out of sync with src/shortcuts/registry.ts. Run 'pnpm shortcuts:doc' and commit the result."
-            git --no-pager diff -- docs/src/content/docs/annexes/raccourcis-clavier.mdx \
-              docs/src/content/docs/en/annexes/raccourcis-clavier.mdx \
-              docs/src/content/docs/es/annexes/raccourcis-clavier.mdx
+          if ! git diff --quiet -- docs/src/content/docs/reference/keyboard-shortcuts.mdx \
+                docs/src/content/docs/fr/reference/keyboard-shortcuts.mdx \
+                docs/src/content/docs/es/reference/keyboard-shortcuts.mdx; then
+            echo "::error::docs/src/content/docs/**/reference/keyboard-shortcuts.mdx is out of sync with src/shortcuts/registry.ts. Run 'pnpm shortcuts:doc' and commit the result."
+            git --no-pager diff -- docs/src/content/docs/reference/keyboard-shortcuts.mdx \
+              docs/src/content/docs/fr/reference/keyboard-shortcuts.mdx \
+              docs/src/content/docs/es/reference/keyboard-shortcuts.mdx
             exit 1
           fi
 

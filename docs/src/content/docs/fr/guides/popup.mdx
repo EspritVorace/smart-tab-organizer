@@ -1,0 +1,44 @@
+---
+title: Popup
+description: Ce que contient la popup de la barre d'outils, comment basculer de workspace et restaurer un profil en un clic.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import popupContentLight from '../../../../assets/screenshots/fr-light-popup-content.png';
+import popupContentDark from '../../../../assets/screenshots/fr-dark-popup-content.png';
+
+La popup s'ouvre en cliquant sur l'icône de l'extension dans la barre d'outils. Elle donne un aperçu rapide de l'activité de groupement et de déduplication, et propose les actions du quotidien.
+
+<ThemeImage
+  lightSrc={popupContentLight}
+  darkSrc={popupContentDark}
+  alt="Contenu détaillé de la popup avec statistiques, profils épinglés et accès rapide."
+/>
+
+## Ce que contient la popup
+
+- **Statistiques de session** : nombre d'onglets groupés et de doublons fermés depuis l'ouverture du navigateur.
+- **Toggles de groupement et de déduplication** : interrupteurs globaux à effet immédiat sur l'extension entière. L'état désactivé est reflété par la pastille sur l'icône (voir [Tour de l'interface](/discover/interface-tour#indicateur-sur-licone)).
+- **Sélecteur de workspace** (`PopupWorkspaceSwitcher`) : bascule d'espace de travail sans ouvrir les Options. Voir [Espaces de travail](/guides/workspaces#changer-de-workspace-actif).
+- **Profils épinglés** : la liste des [sessions épinglées](/guides/sessions#sessions-epinglees) du workspace actif. Cliquer sur un profil le restaure avec l'action par défaut configurée ; un menu contextuel propose les quatre cibles.
+- **Boutons d'accès rapide** : ouvrent les pages Règles, Sessions et Paramètres dans un nouvel onglet.
+
+<Aside type="note">
+La popup ne charge **jamais** les sessions archivées. Seules les sessions épinglées et actives du workspace courant y sont projetées. Pour les sessions archivées, ouvrez la page [Sessions](/guides/sessions#archive).
+</Aside>
+
+## Différence avec la page d'accueil
+
+La popup et la [page d'accueil](/discover/home-page) projettent la même liste de profils épinglés, mais avec des contraintes d'espace différentes :
+
+- La **popup** affiche les profils en liste compacte avec un menu contextuel pour les quatre cibles de restauration.
+- La **page d'accueil** affiche les profils en tuiles plus larges, avec raccourcis clavier `R` / `Shift+R` / `Alt+R` / `Alt+Shift+R` directement sur le focus.
+
+## Aller plus loin
+
+<CardGrid>
+  <LinkCard title="Sessions" href="/guides/sessions" description="Capturer, restaurer, épingler une session." />
+  <LinkCard title="Espaces de travail" href="/guides/workspaces" description="Basculer entre workspaces depuis la popup ou les Options." />
+  <LinkCard title="Paramètres" href="/guides/settings" description="Configurer le badge, les notifications et l'action de restauration par défaut." />
+</CardGrid>

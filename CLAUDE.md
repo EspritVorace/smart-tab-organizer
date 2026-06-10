@@ -167,7 +167,7 @@ Central registry: `src/shortcuts/registry.ts`. Detailed developer docs:
 2. Add `descriptionKey` to all three
    `public/_locales/{fr,en,es}/messages.json` files.
 3. In the component: `useShortcuts({ 'my.id': handler }, { scope })`.
-4. `pnpm shortcuts:doc` regenerates the Starlight `annexes/raccourcis-clavier` page.
+4. `pnpm shortcuts:doc` regenerates the Starlight `reference/keyboard-shortcuts` page.
 
 **Combo format**
 

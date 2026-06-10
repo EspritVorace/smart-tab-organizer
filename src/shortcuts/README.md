@@ -2,7 +2,7 @@
 
 Developer documentation for the shortcut system. The matching user-facing page
 is generated at
-`docs/src/content/docs/{,en/,es/}annexes/raccourcis-clavier.mdx` by
+`docs/src/content/docs/{,fr/,es/}reference/keyboard-shortcuts.mdx` by
 `pnpm shortcuts:doc`.
 
 ## Overview
@@ -128,8 +128,8 @@ when customization ships.
 pnpm shortcuts:doc
 ```
 
-Generates three MDX files (`raccourcis-clavier.mdx` at the root plus `en/`
-and `es/`) under `docs/src/content/docs/annexes/`. Idempotent: two
+Generates three MDX files (`reference/keyboard-shortcuts.mdx` at the root plus
+`fr/` and `es/`) under `docs/src/content/docs/`. Idempotent: two
 consecutive runs produce the same file. CI
 (`.github/workflows/doc-scenarios.yml`) runs the command and then checks via
 `git diff --exit-code` that the commit ships the updated docs.

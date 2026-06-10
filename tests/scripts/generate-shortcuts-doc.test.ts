@@ -24,9 +24,9 @@ type Locale = 'fr' | 'en' | 'es';
 const PROJECT_ROOT = join(__dirname, '..', '..');
 
 const DOC_PATHS: Record<Locale, string> = {
-  fr: 'docs/src/content/docs/reference/raccourcis-clavier.mdx',
-  en: 'docs/src/content/docs/en/reference/raccourcis-clavier.mdx',
-  es: 'docs/src/content/docs/es/reference/raccourcis-clavier.mdx',
+  en: 'docs/src/content/docs/reference/keyboard-shortcuts.mdx',
+  fr: 'docs/src/content/docs/fr/reference/keyboard-shortcuts.mdx',
+  es: 'docs/src/content/docs/es/reference/keyboard-shortcuts.mdx',
 };
 
 function readDoc(locale: Locale): string {
