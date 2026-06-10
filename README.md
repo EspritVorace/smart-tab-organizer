@@ -4,9 +4,9 @@
 
 # SmartTab Organizer
 
-> **Tame your tabs. No cloud, no AI, no tracking.**
+> **Your tabs sort and name themselves. No cloud, no tracking.**
 
-A Chrome and Firefox extension that groups your tabs by domain, kills duplicates, and snapshots your workspaces as sessions you can restore in one click.
+SmartTab Organizer reads the group name straight from the URL or title, so a group per repository, per ticket or per client appears on its own, without piling up one rule per value. Everything runs in your browser: no cloud, no AI, no tracking. It also kills duplicate tabs and snapshots your workspaces as sessions you can restore in one click. [See it in action](https://docs.esprit-vorace.fr/).
 
 <p align="center">
   <img src="doc/store.png" alt="SmartTab Organizer" width="720">
@@ -24,8 +24,8 @@ A Chrome and Firefox extension that groups your tabs by domain, kills duplicates
 
 ## Why?
 
-- Your tabs pile up faster than you can close them. SmartTab puts them in their place, automatically.
-- Other tools either ship your data to a cloud or shove AI in your face. This one runs entirely in your browser, with zero telemetry.
+- Other extensions make you type a fixed group name, one rule per value. SmartTab extracts it from the URL or title, so a group per repo, ticket or client appears automatically, without multiplying rules.
+- No cloud, no AI, no telemetry. Everything runs in your browser and your data never leaves it.
 - The workspace you built deserves to come back tomorrow. Save it, name it, restore it.
 
 ## What it does

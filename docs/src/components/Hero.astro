@@ -1,0 +1,26 @@
+---
+// Override of Starlight's `<Hero>`: render the default splash hero (title,
+// tagline, popup image, "Get started" / "View on GitHub" actions) and append
+// the two official store badges below the actions, inside a shared card. The
+// store CTAs stay above the fold, the badges read their localized alt text and
+// store URLs from landing[locale].cta. The badges are served from
+// public/badges/ as static files (stable URLs, no asset processing).
+import Default from '@astrojs/starlight/components/Hero.astro';
+import { getLocale } from '../i18n/locale';
+import { landing } from '../i18n/landing';
+
+const locale = getLocale(Astro.url.pathname);
+const t = landing[locale].cta;
+---
+
+<div class="hero-card">
+  <Default />
+  <div class="hero-store-badges">
+    <a href={t.chromeHref} rel="noopener" target="_blank">
+      <img src="/badges/chrome-web-store.png" alt={t.chromeBadgeAlt} width="206" height="58" />
+    </a>
+    <a href={t.firefoxHref} rel="noopener" target="_blank">
+      <img src="/badges/firefox-get-the-addon.svg" alt={t.firefoxBadgeAlt} width="172" height="60" />
+    </a>
+  </div>
+</div>
