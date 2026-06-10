@@ -1,7 +1,7 @@
 import React from 'react';
 import { Callout } from '@radix-ui/themes';
 import { AlertTriangle } from 'lucide-react';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 
 interface ConflictWarningCalloutProps {
   /** Whether the warning should actually be shown. */
@@ -17,7 +17,7 @@ export function ConflictWarningCallout({ when, messageKey }: ConflictWarningCall
       <Callout.Icon>
         <AlertTriangle size={16} />
       </Callout.Icon>
-      <Callout.Text>{getMessage(messageKey)}</Callout.Text>
+      <Callout.Text>{getMessage(messageKey as MessageKey)}</Callout.Text>
     </Callout.Root>
   );
 }

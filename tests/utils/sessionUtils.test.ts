@@ -497,24 +497,24 @@ describe('sessionUtils', () => {
   describe('getSessionGroupLabel', () => {
     it('returns singular label for 1 group', () => {
       expect(getSessionGroupLabel(1)).toBe('1 group');
-      expect(mockGetMessage).toHaveBeenCalledWith('sessionGroupOne', undefined);
+      expect(mockGetMessage).toHaveBeenCalledWith('sessionGroupOne');
     });
 
     it('returns plural label with count substituted', () => {
       expect(getSessionGroupLabel(3)).toBe('3 groups');
-      expect(mockGetMessage).toHaveBeenCalledWith('sessionGroupCount', undefined);
+      expect(mockGetMessage).toHaveBeenCalledWith('sessionGroupCount');
     });
   });
 
   describe('getSessionTabLabel', () => {
     it('returns singular label for 1 tab', () => {
       expect(getSessionTabLabel(1)).toBe('1 tab');
-      expect(mockGetMessage).toHaveBeenCalledWith('sessionTabOne', undefined);
+      expect(mockGetMessage).toHaveBeenCalledWith('sessionTabOne');
     });
 
     it('returns plural label with count substituted', () => {
       expect(getSessionTabLabel(5)).toBe('5 tabs');
-      expect(mockGetMessage).toHaveBeenCalledWith('sessionTabCount', undefined);
+      expect(mockGetMessage).toHaveBeenCalledWith('sessionTabCount');
     });
   });
 

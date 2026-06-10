@@ -2,7 +2,7 @@ import { Box, Card, Flex, Grid, Text } from '@radix-ui/themes';
 import { Group, Copy, Archive } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { IconBox } from '@/components/UI/IconBox/IconBox';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 import styles from './MiniStatsSection.module.css';
 
 export type MiniStatRoute = 'stats' | 'sessions';
@@ -52,7 +52,7 @@ export function MiniStatsSection({ stats, onNavigate, locale = 'fr-FR' }: MiniSt
                   <Flex align="center" gap="2">
                     <IconBox icon={it.icon} size="sm" variant="soft" />
                     <Text as="span" size="1" color="gray">
-                      {getMessage(it.labelKey)}
+                      {getMessage(it.labelKey as MessageKey)}
                     </Text>
                   </Flex>
                   <Text as="span" size="7" weight="bold" className={styles.value}>

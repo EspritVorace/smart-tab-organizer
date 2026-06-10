@@ -1,6 +1,6 @@
 import { Box, Card, Flex, Heading, Separator, Text, Theme } from '@radix-ui/themes';
 import { HardDrive } from 'lucide-react';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 import { formatBytes } from '@/utils/formatBytes';
 import { BarRow } from '@/components/Core/Statistics/primitives';
 import { WorkspaceAvatar } from '@/components/UI/Workspace/WorkspaceAvatar';
@@ -24,7 +24,7 @@ function CategoryBreakdown({ categories }: { categories: StorageUsageSnapshot['c
         <BarRow
           key={cat.id}
           index={index}
-          label={getMessage(cat.labelKey)}
+          label={getMessage(cat.labelKey as MessageKey)}
           value={cat.bytes}
           valueLabel={formatBytes(cat.bytes)}
           maxValue={maxBytes}
@@ -78,7 +78,7 @@ function WorkspaceSection({
               <BarRow
                 key={cat.id}
                 index={index}
-                label={getMessage(cat.labelKey)}
+                label={getMessage(cat.labelKey as MessageKey)}
                 value={cat.bytes}
                 valueLabel={formatBytes(cat.bytes)}
                 maxValue={maxBytes}

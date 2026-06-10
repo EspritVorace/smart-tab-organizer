@@ -4,7 +4,7 @@ import {
   importSessionsDataSchema,
   importWorkspaceDataSchema,
 } from '@/schemas/importExport';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 
 /**
  * JSON Schema objects fed to the import editor for autocompletion, linting and
@@ -29,7 +29,7 @@ interface MutableSchema {
 }
 
 function describe(node: MutableSchema | undefined, messageKey: string): void {
-  if (node) node.description = getMessage(messageKey);
+  if (node) node.description = getMessage(messageKey as MessageKey);
 }
 
 /** Documents every property of a single domain-rule object node. */

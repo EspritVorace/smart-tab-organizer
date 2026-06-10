@@ -2,7 +2,7 @@ import React from 'react';
 import { Flex, IconButton, Kbd, Tooltip } from '@radix-ui/themes';
 import { Sun, Moon, Monitor, LucideProps } from 'lucide-react';
 import { useThemeCycle, type ThemeValue } from '@/hooks/useThemeCycle';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 
 interface ThemeMeta {
   labelKey: string;
@@ -20,7 +20,7 @@ export function ThemeToggle() {
 
   const currentMeta = THEME_META[theme];
   const CurrentIcon = currentMeta.icon;
-  const label = getMessage(currentMeta.labelKey);
+  const label = getMessage(currentMeta.labelKey as MessageKey);
 
   return (
     <Tooltip

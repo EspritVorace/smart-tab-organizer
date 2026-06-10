@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box } from '@radix-ui/themes';
 import type { LucideIcon } from 'lucide-react';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 import { WizardModal } from '@/components/UI/WizardModal';
 import {
   ClassificationGroup,
@@ -103,7 +103,7 @@ export function ImportWizardShell<TItem extends { id: string }, TConflict>({
       onOpenChange={onOpenChange}
       icon={icon}
       title={title}
-      description={getMessage(stepDescriptionKeys[step])}
+      description={getMessage(stepDescriptionKeys[step] as MessageKey)}
       maxWidth={maxWidth}
       fillHeight={fillHeight}
     >

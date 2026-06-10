@@ -1,4 +1,4 @@
-import { getMessage } from './i18n.js';
+import { getMessage, type MessageKey } from './i18n.js';
 
 const KB = 1024;
 const MB = KB * 1024;
@@ -18,7 +18,7 @@ export function formatBytes(bytes: number): string {
     return getMessage('statsStorageUnitBytes').replace('{value}', String(Math.round(safe)));
   }
 
-  const [value, key] =
+  const [value, key]: [number, MessageKey] =
     safe < MB ? [safe / KB, 'statsStorageUnitKb'] : [safe / MB, 'statsStorageUnitMb'];
 
   const rounded = value.toFixed(1).replace(/\.0$/, '');

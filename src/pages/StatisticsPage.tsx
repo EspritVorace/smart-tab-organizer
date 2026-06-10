@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Box, TabNav } from '@radix-ui/themes';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 import { useShortcuts } from '@/hooks/useShortcuts';
 import { StatisticsSummary } from '@/components/Core/Statistics/StatisticsSummary';
 import { StatisticsRulesDetail } from '@/components/Core/Statistics/StatisticsRulesDetail';
@@ -143,7 +143,7 @@ export function StatisticsPage({ syncSettings, statisticsData, sessionStats, sto
 
   const descriptionOverride = statsTab === 'summary'
     ? undefined
-    : getMessage(SUB_TAB_DESCRIPTION_KEY[statsTab]);
+    : getMessage(SUB_TAB_DESCRIPTION_KEY[statsTab] as MessageKey);
 
   return (
     <PageLayout
@@ -204,7 +204,7 @@ export function StatisticsPage({ syncSettings, statisticsData, sessionStats, sto
             ref={scrollRef}
             data-testid="page-stats-scroll"
             role="region"
-            aria-label={getMessage(SUB_TAB_LABEL_KEY[statsTab])}
+            aria-label={getMessage(SUB_TAB_LABEL_KEY[statsTab] as MessageKey)}
             tabIndex={0}
             style={{ flex: 1, overflow: 'auto', minHeight: 0 }}
           >

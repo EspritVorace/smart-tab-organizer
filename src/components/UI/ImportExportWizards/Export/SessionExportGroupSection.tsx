@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Checkbox, Flex, Text } from '@radix-ui/themes';
 import type { LucideIcon } from 'lucide-react';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 import { SelectableSessionRow } from './SelectableSessionRow';
 import type { Session } from '@/types/session';
 import type { ToggleSetState } from '@/components/UI/ImportExportWizards/Shared';
@@ -34,12 +34,12 @@ export function SessionExportGroupSection({
       <Flex align="center" justify="between" mb="2">
         <Flex align="center" gap="1">
           <Icon size={14} aria-hidden="true" style={{ color: 'var(--accent-9)' }} />
-          <Text size="2" weight="bold">{getMessage(titleKey)}</Text>
+          <Text size="2" weight="bold">{getMessage(titleKey as MessageKey)}</Text>
         </Flex>
         <Checkbox
           checked={groupCheckedState}
           onCheckedChange={onToggleGroup}
-          aria-label={getMessage(titleKey)}
+          aria-label={getMessage(titleKey as MessageKey)}
         />
       </Flex>
       <Flex direction="column" gap="2" role="list">

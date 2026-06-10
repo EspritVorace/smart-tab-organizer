@@ -1,5 +1,5 @@
 import { Flex, Text, Box, Badge } from '@radix-ui/themes';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/AccessibleHighlight';
 import { getRadixColor } from '@/utils/utils';
 import { deduplicationMatchModeOptions } from '@/schemas/enums';
@@ -63,7 +63,7 @@ export function RuleDetailPopover({ rule, searchTerm }: RuleDetailPopoverProps) 
         <Text size="2">
           {getMessage(`groupNameSource${rule.groupNameSource.split('_').map(
             (part: string) => part.charAt(0).toUpperCase() + part.slice(1)
-          ).join('')}`)}
+          ).join('')}` as MessageKey)}
         </Text>
 
         {rule.presetId && (

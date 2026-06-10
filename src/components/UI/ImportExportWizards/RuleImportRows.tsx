@@ -1,5 +1,5 @@
 import { Flex, Badge, Checkbox } from '@radix-ui/themes';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 import type { ConflictingRule } from '@/utils/importClassification';
 import { DiffPopover, DiffPropertyValues } from './Shared';
@@ -50,7 +50,7 @@ export function ConflictRuleRow({ conflict }: ConflictRuleRowProps) {
             {conflict.differences.map((diff) => (
               <DiffPropertyValues
                 key={diff.property}
-                label={getMessage(diff.property) || diff.property}
+                label={getMessage(diff.property as MessageKey) || diff.property}
                 current={String(diff.currentValue)}
                 imported={String(diff.importedValue)}
               />

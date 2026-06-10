@@ -1,6 +1,6 @@
 import { Box, Card, Flex, Heading, Separator, Text, Tooltip } from '@radix-ui/themes';
 import type { MarginProps } from '@radix-ui/themes/dist/esm/props/margin.props.js';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 import { TrendBadge } from '@/components/Core/Statistics/TrendBadge';
 import type { GroupColorStat } from '@/hooks/useSessionStatistics';
 import type { ChromeGroupColor } from '@/types/tabTree';
@@ -198,7 +198,7 @@ export function GroupColorBar({ distribution }: { distribution: GroupColorStat[]
         data-testid="page-stats-color-distribution"
       >
         {distribution.map(d => (
-          <Tooltip key={d.color} content={`${getMessage(GROUP_COLOR_LABEL_KEY[d.color])} (${d.count})`}>
+          <Tooltip key={d.color} content={`${getMessage(GROUP_COLOR_LABEL_KEY[d.color] as MessageKey)} (${d.count})`}>
             <Box
               style={{
                 width: `${(d.count / total) * 100}%`,
@@ -217,7 +217,7 @@ export function GroupColorBar({ distribution }: { distribution: GroupColorStat[]
               borderRadius: 'var(--radius-1)',
               backgroundColor: GROUP_COLOR_CSS[d.color],
             }} />
-            <Text size="1" color="gray">{getMessage(GROUP_COLOR_LABEL_KEY[d.color])} ({d.count})</Text>
+            <Text size="1" color="gray">{getMessage(GROUP_COLOR_LABEL_KEY[d.color] as MessageKey)} ({d.count})</Text>
           </Flex>
         ))}
       </Flex>
