@@ -47,8 +47,7 @@ test('onboarding suggestions feature screen', async (
     .waitFor({ state: 'visible', timeout: 10_000 });
   await captureStep(home, 'home-hero-suggestions', {
     description:
-      'Contextual onboarding hero suggesting the packs that match the open tabs.',
-    elementSelector: 'section[aria-labelledby="home-hero-suggest-title"]',
+      'Home page in onboarding state: the contextual hero suggests the packs that match the open tabs.',
   });
   await home.close();
 
