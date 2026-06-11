@@ -103,6 +103,29 @@ export function setupMessageHandler(): void {
             return false;
         }
 
+        if (request.type === 'ORGANIZE_ALL_TABS_AWAIT') {
+            browser.windows.getCurrent()
+                .then(win => (win.id != null ? handleOrganizeAllTabs(win.id) : null))
+                .then(result => {
+                    sendResponse({
+                        status: 'received',
+                        organize: result
+                            ? {
+                                  tabsGrouped: result.tabsGrouped,
+                                  groupCount: result.groupCount,
+                                  removedCount: result.removedCount,
+                                  noop: result.noopReason !== null,
+                              }
+                            : undefined,
+                    });
+                })
+                .catch(e => {
+                    logger.error('[ORGANIZE_ALL_TABS_AWAIT] Error:', e);
+                    sendResponse({ status: 'error', message: String(e) });
+                });
+            return true;
+        }
+
         if (request.type === 'middleClickLink') {
             handleMiddleClickMessage(request, sender, sendResponse);
             return true;

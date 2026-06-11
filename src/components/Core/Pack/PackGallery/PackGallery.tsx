@@ -27,9 +27,33 @@ interface PackGalleryProps {
   selections: Record<string, PackSelectionState>;
   onSelectionChange: (packId: string, next: PackSelectionState) => void;
   existingRuleIds?: ReadonlySet<string>;
+  /** Matched-tab count per pack id; drives relevance ordering + the indicator. */
+  matchedTabsByPackId?: ReadonlyMap<string, number>;
 }
 
 const EMPTY_RULE_IDS: ReadonlySet<string> = new Set();
+const EMPTY_MATCHED_TABS: ReadonlyMap<string, number> = new Map();
+
+/**
+ * Stable sort that lifts packs matching open tabs to the top, keeping the
+ * existing catalog order for ties. No-op (preserves order) when there is no
+ * match, so the gallery is unchanged without open-tab relevance.
+ */
+function orderByRelevance(
+  list: PackFile[],
+  matchedTabs: ReadonlyMap<string, number>,
+): PackFile[] {
+  if (matchedTabs.size === 0) return list;
+  return list
+    .map((pack, index) => ({ pack, index }))
+    .sort((a, b) => {
+      const am = matchedTabs.get(a.pack.pack.id) ?? 0;
+      const bm = matchedTabs.get(b.pack.pack.id) ?? 0;
+      if (am !== bm) return bm - am;
+      return a.index - b.index;
+    })
+    .map((entry) => entry.pack);
+}
 
 function matchesSearch(pack: PackFile, normalized: string): boolean {
   if (!normalized) return true;
@@ -64,6 +88,7 @@ export function PackGallery({
   selections,
   onSelectionChange,
   existingRuleIds = EMPTY_RULE_IDS,
+  matchedTabsByPackId = EMPTY_MATCHED_TABS,
 }: PackGalleryProps) {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>(ALL_CATEGORIES);
@@ -73,9 +98,15 @@ export function PackGallery({
     [search],
   );
 
+  // Matched packs rise to the top within every view; ties keep catalog order.
+  const orderedPacks = useMemo(
+    () => orderByRelevance(packs, matchedTabsByPackId),
+    [packs, matchedTabsByPackId],
+  );
+
   const searchFilteredPacks = useMemo(
-    () => packs.filter((pack) => matchesSearch(pack, normalizedSearch)),
-    [packs, normalizedSearch],
+    () => orderedPacks.filter((pack) => matchesSearch(pack, normalizedSearch)),
+    [orderedPacks, normalizedSearch],
   );
 
   const isSearching = normalizedSearch.length > 0;
@@ -98,18 +129,34 @@ export function PackGallery({
     );
   }, [activeCategory, isSearching, searchFilteredPacks]);
 
+  // Packs matching open tabs, in relevance order. In the default grouped view
+  // they are pinned into a dedicated section on top (and removed from their
+  // category bucket) so the user does not have to hunt for them.
+  const suggestedPacks = useMemo(
+    () =>
+      filteredPacks.filter(
+        (pack) => (matchedTabsByPackId.get(pack.pack.id) ?? 0) > 0,
+      ),
+    [filteredPacks, matchedTabsByPackId],
+  );
+  const suggestedIds = useMemo(
+    () => new Set(suggestedPacks.map((pack) => pack.pack.id)),
+    [suggestedPacks],
+  );
+
   const grouped = useMemo(() => {
     if (isSearching) return null;
     if (activeCategory !== ALL_CATEGORIES) return null;
     const map = new Map<string | null, PackFile[]>();
     for (const pack of filteredPacks) {
+      if (suggestedIds.has(pack.pack.id)) continue;
       const key = pack.pack.categoryId ?? null;
       const list = map.get(key) ?? [];
       list.push(pack);
       map.set(key, list);
     }
     return map;
-  }, [activeCategory, filteredPacks, isSearching]);
+  }, [activeCategory, filteredPacks, isSearching, suggestedIds]);
 
   if (packs.length === 0) {
     return (
@@ -143,6 +190,7 @@ export function PackGallery({
         selected={sel?.selected ?? false}
         onSelectionChange={(next) => onSelectionChange(pack.pack.id, next)}
         installInfo={installInfo}
+        matchesOpenTabs={(matchedTabsByPackId.get(pack.pack.id) ?? 0) > 0}
       />
     );
   };
@@ -262,6 +310,17 @@ export function PackGallery({
         activeCategory !== ALL_CATEGORIES && (
           <Box className={styles.packList}>{filteredPacks.map(renderPack)}</Box>
         )}
+
+      {grouped && suggestedPacks.length > 0 && (
+        <Box data-testid="pack-gallery-suggested">
+          <PackCategoryHeader
+            label={getMessage('packGallerySuggestedSectionTitle')}
+            icon="✨"
+            count={suggestedPacks.length}
+          />
+          <Box className={styles.packList}>{suggestedPacks.map(renderPack)}</Box>
+        </Box>
+      )}
 
       {filteredPacks.length > 0 && !isSearching && grouped && (
         <Flex direction="column" gap="1">

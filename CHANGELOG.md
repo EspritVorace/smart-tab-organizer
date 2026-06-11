@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### New Features
+- Onboarding hero now suggests rule packs matching your open tabs, pre-selected, behind a single "Import and organize" button (local analysis, persistent dismissal)
+- "Organize now" reward offered right after a pack import to rearrange open tabs immediately, with the outcome announced to screen readers
+- Pack gallery lifts packs matching your open tabs to the top and flags them with a "Matches your open tabs" label
+
 ## 1.2.3 — since 1.2.2
 
 ### New Features

@@ -4,17 +4,30 @@ description: El hub central de las Opciones. Onboarding mientras no exista ningu
 ---
 
 import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import heroSuggestionsLight from '../../../../assets/screenshots/es-light-home-hero-suggestions.png';
+import heroSuggestionsDark from '../../../../assets/screenshots/es-dark-home-hero-suggestions.png';
 
 <Aside type="tip" title="En resumen">
 - La página de inicio es la primera pantalla que aparece al abrir las Opciones.
-- Mientras no haya ninguna regla, un Hero de onboarding propone **Crear mi primera regla** o **Importar un pack**.
+- Mientras no haya ninguna regla, un Hero de onboarding propone sugerencias de packs contextuales que coinciden con tus pestañas abiertas (o, como alternativa, **Crear mi primera regla** / **Importar un pack**).
 - En caso contrario, la página agrega perfiles anclados, accesos rápidos, mini estadísticas y consejos.
 - El foco del teclado se coloca en la primera acción; los botones de accesos rápidos tienen atajos de una sola tecla.
 </Aside>
 
 ## Hero de onboarding
 
-Cuando todavía no hay ninguna regla definida en el espacio de trabajo activo, el Hero de onboarding ocupa la parte superior. Dos acciones:
+<ThemeImage
+  lightSrc={heroSuggestionsLight}
+  darkSrc={heroSuggestionsDark}
+  alt="La página de inicio en estado de onboarding: el Hero contextual sugiere los packs que coinciden con las pestañas abiertas, preseleccionados, tras un botón Importar y organizar."
+/>
+
+Cuando todavía no hay ninguna regla definida en el espacio de trabajo activo, el Hero de onboarding ocupa la parte superior.
+
+Si algunas de tus pestañas abiertas coinciden con un pack listo para usar, el Hero se vuelve contextual: muestra los packs coincidentes (con el número de pestañas afectadas por pack), preseleccionados, tras un único botón **Importar y organizar**. El análisis es local (las pestañas abiertas se leen solo en el navegador, nada sale del equipo) y las sugerencias permanecen mientras no exista ninguna regla. Tras la importación, un botón **Organizar ahora** ordena tus pestañas abiertas de inmediato.
+
+En caso contrario, el Hero ofrece dos acciones genéricas:
 
 - **Crear mi primera regla**: abre directamente el asistente de creación de regla.
 - **Importar un pack**: abre la [galería de packs](/reference/categories-and-packs) en el asistente de importación.

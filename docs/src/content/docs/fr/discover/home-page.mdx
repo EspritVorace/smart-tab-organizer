@@ -4,17 +4,30 @@ description: Le hub central des Options. Onboarding tant qu'aucune règle n'exis
 ---
 
 import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import heroSuggestionsLight from '../../../../assets/screenshots/fr-light-home-hero-suggestions.png';
+import heroSuggestionsDark from '../../../../assets/screenshots/fr-dark-home-hero-suggestions.png';
 
 <Aside type="tip" title="En bref">
 - La page d'accueil est le premier écran affiché à l'ouverture des Options.
-- Tant qu'aucune règle n'existe, un Hero d'onboarding propose **Créer ma première règle** ou **Importer un pack**.
+- Tant qu'aucune règle n'existe, un Hero d'onboarding propose des suggestions de packs contextuelles correspondant aux onglets ouverts (ou, en repli, **Créer ma première règle** / **Importer un pack**).
 - Sinon, la page agrège profils épinglés, actions rapides, mini-statistiques et astuces.
 - Le focus clavier est posé sur la première action ; les boutons d'actions rapides ont des raccourcis à une touche.
 </Aside>
 
 ## Hero d'onboarding
 
-Quand aucune règle n'est encore définie dans le workspace actif, le Hero d'onboarding occupe la partie haute. Deux actions :
+<ThemeImage
+  lightSrc={heroSuggestionsLight}
+  darkSrc={heroSuggestionsDark}
+  alt="La page d'accueil en état d'onboarding : le Hero contextuel suggère les packs qui correspondent aux onglets ouverts, pré-sélectionnés, derrière un bouton Importer et organiser."
+/>
+
+Quand aucune règle n'est encore définie dans le workspace actif, le Hero d'onboarding occupe la partie haute.
+
+Si certains onglets ouverts correspondent à un pack prêt à l'emploi, le Hero devient contextuel : il liste les packs correspondants (avec le nombre d'onglets concernés par pack), pré-sélectionnés, derrière un unique bouton **Importer et organiser**. L'analyse est locale (les onglets ouverts sont lus dans le navigateur uniquement, rien ne quitte la machine) et les suggestions restent affichées tant qu'aucune règle n'existe. Après l'import, un bouton **Organiser maintenant** range immédiatement les onglets ouverts.
+
+Sinon, le Hero propose deux actions génériques :
 
 - **Créer ma première règle** : ouvre directement l'assistant de création de règle.
 - **Importer un pack** : ouvre la [galerie de packs](/reference/categories-and-packs) dans le wizard d'import.
