@@ -6,7 +6,6 @@
  * - US-PA002: the onboarding hero becomes contextual when open tabs match a
  *   pack, listing the matching packs (with tab counts) pre-selected.
  * - US-PA002: fallback to the generic hero when no tab matches.
- * - US-PA002: persistent dismissal of the suggestions.
  * - US-PA003: the "Organize now" reward after a hero-initiated import.
  *
  * NOTE: these specs are written but not run automatically (per the issue, only
@@ -79,31 +78,6 @@ test.describe('Onboarding pack suggestions (US-PA002/003/004)', () => {
     await goToOptionsPage(page, extensionId);
     await waitForHomeLoaded(page);
 
-    await expect(page.getByTestId('home-hero-import')).toBeVisible();
-    await expect(page.getByTestId('home-hero-suggest-import')).toHaveCount(0);
-  });
-
-  test('dismissing the suggestions is persistent', async ({
-    extensionContext,
-    extensionId,
-    helpers,
-  }) => {
-    await routeGithubStub(extensionContext);
-    await helpers.createTab('https://github.com/a');
-    await helpers.createTab('https://github.com/b');
-
-    const page = await extensionContext.newPage();
-    await goToOptionsPage(page, extensionId);
-    await waitForHomeLoaded(page);
-    await expect(page.getByTestId('home-hero-suggest-import')).toBeVisible();
-
-    await page.getByTestId('home-hero-suggest-dismiss').click();
-    // After dismissal the generic hero takes over.
-    await expect(page.getByTestId('home-hero-import')).toBeVisible();
-
-    // The dismissal survives a reload (stored in storage.local).
-    await page.reload();
-    await waitForHomeLoaded(page);
     await expect(page.getByTestId('home-hero-import')).toBeVisible();
     await expect(page.getByTestId('home-hero-suggest-import')).toHaveCount(0);
   });

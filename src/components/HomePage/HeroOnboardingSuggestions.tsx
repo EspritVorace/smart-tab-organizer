@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Button, Flex, Heading, Text } from '@radix-ui/themes';
+import { Box, Flex, Heading, Text } from '@radix-ui/themes';
 import { Check, ShieldCheck, Sparkles } from 'lucide-react';
 import { IconBox } from '@/components/UI/IconBox/IconBox';
 import { AriaButton } from '@/components/UI/AriaButton/AriaButton';
@@ -12,20 +12,18 @@ export interface HeroOnboardingSuggestionsProps {
   suggestions: SuggestedPack[];
   /** Called with the ids of the packs the user kept selected. */
   onImportAndOrganize: (selectedPackIds: string[]) => void;
-  /** Persistently dismisses the contextual hero (falls back to the generic one). */
-  onDismiss: () => void;
 }
 
 /**
  * Contextual onboarding hero (issue #433): lists the packs matching the user's
  * open tabs, pre-selected, with a one-click "import and organize" CTA. Each
  * suggestion is a whole-surface toggle (voice-control friendly), keyboard
- * reachable, with its selected state announced via `aria-pressed`.
+ * reachable, with its selected state announced via `aria-pressed`. Shown as
+ * long as the active workspace has no rule.
  */
 export function HeroOnboardingSuggestions({
   suggestions,
   onImportAndOrganize,
-  onDismiss,
 }: HeroOnboardingSuggestionsProps) {
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(suggestions.map((s) => s.pack.pack.id)),
@@ -124,15 +122,6 @@ export function HeroOnboardingSuggestions({
               <Sparkles size={16} aria-hidden="true" />
               {getMessage('homepageHeroSuggestImportOrganize')}
             </AriaButton>
-            <Button
-              size="3"
-              variant="ghost"
-              color="gray"
-              onClick={onDismiss}
-              data-testid="home-hero-suggest-dismiss"
-            >
-              {getMessage('homepageHeroSuggestDismiss')}
-            </Button>
           </Flex>
         </Flex>
       </section>

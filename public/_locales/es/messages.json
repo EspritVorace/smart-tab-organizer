@@ -885,7 +885,6 @@
   "homepageHeroSuggestSubtitle": { "message": "Impórtalos para agrupar tus pestañas de inmediato. Están preseleccionados: ajusta la selección a tu gusto." },
   "homepageHeroSuggestTransparency": { "message": "Análisis local de tus pestañas abiertas. Nada sale del navegador." },
   "homepageHeroSuggestImportOrganize": { "message": "Importar y organizar" },
-  "homepageHeroSuggestDismiss": { "message": "Descartar las sugerencias" },
   "homepageHeroSuggestTabCount": { "message": "$1 pestañas" },
   "homepageHeroSuggestItemLabel": { "message": "$1, $2 pestañas coincidentes" },
   "homepageHeroSuggestDisabledTooltip": { "message": "Selecciona al menos un paquete para importar." },

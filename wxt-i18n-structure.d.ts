@@ -837,7 +837,6 @@ export type GeneratedI18nStructure = {
   "homepageHeroSuggestSubtitle": { substitutions: 0, plural: false };
   "homepageHeroSuggestTransparency": { substitutions: 0, plural: false };
   "homepageHeroSuggestImportOrganize": { substitutions: 0, plural: false };
-  "homepageHeroSuggestDismiss": { substitutions: 0, plural: false };
   "homepageHeroSuggestTabCount": { substitutions: 1, plural: false };
   "homepageHeroSuggestItemLabel": { substitutions: 2, plural: false };
   "homepageHeroSuggestDisabledTooltip": { substitutions: 0, plural: false };

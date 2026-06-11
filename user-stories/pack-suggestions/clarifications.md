@@ -35,9 +35,10 @@ code and tests adapt to them, never the other way around.
    stays reachable once rules already exist.
 
 8. **Contextual hero display condition**: only in the onboarding state (zero
-   rule in the active workspace) AND at least one pack above the threshold. The
-   dismissal is persistent (`browser.storage.local`), falling back to the
-   generic hero. Fallback also applies when there is no match.
+   rule in the active workspace) AND at least one pack above the threshold.
+   Revised after first review: there is no dismiss control. The contextual hero
+   is shown for as long as the workspace has no rule; the generic hero is the
+   fallback only when no pack matches.
 
 9. **Workspaces**: scoring and install status are computed in the active
    workspace context (the `domainRules` exposed by `useSettings` / `syncSettings`

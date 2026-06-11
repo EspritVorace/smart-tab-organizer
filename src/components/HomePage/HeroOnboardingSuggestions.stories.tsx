@@ -45,7 +45,6 @@ const meta = {
   tags: ['autodocs'],
   args: {
     onImportAndOrganize: () => {},
-    onDismiss: () => {},
   },
 } satisfies Meta<typeof HeroOnboardingSuggestions>;
 

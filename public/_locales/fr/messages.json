@@ -885,7 +885,6 @@
   "homepageHeroSuggestSubtitle": { "message": "Importez-les pour ranger vos onglets tout de suite. Ils sont pré-sélectionnés : ajustez la sélection selon vos besoins." },
   "homepageHeroSuggestTransparency": { "message": "Analyse locale des onglets ouverts. Rien ne quitte le navigateur." },
   "homepageHeroSuggestImportOrganize": { "message": "Importer et organiser" },
-  "homepageHeroSuggestDismiss": { "message": "Ignorer les suggestions" },
   "homepageHeroSuggestTabCount": { "message": "$1 onglets" },
   "homepageHeroSuggestItemLabel": { "message": "$1, $2 onglets correspondants" },
   "homepageHeroSuggestDisabledTooltip": { "message": "Sélectionnez au moins un pack à importer." },

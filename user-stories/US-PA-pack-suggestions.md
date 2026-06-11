@@ -55,8 +55,8 @@
       via `getMessage()`.
 - [ ] Storybook story for the contextual variant (with and without
       suggestions); axe-core audit passing.
-- [ ] Dismissing the suggestions is persistent (`browser.storage.local`); the
-      contextual hero does not reappear and falls back to the generic hero.
+- [ ] The contextual hero is shown as long as the active workspace has no rule;
+      there is no dismiss control (decision revised after first review).
 
 ---
 

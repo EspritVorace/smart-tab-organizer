@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { browser } from 'wxt/browser';
 import { Box, Flex } from '@radix-ui/themes';
 import { useSessions } from '@/hooks/useSessions';
@@ -6,7 +6,6 @@ import { useShortcuts, type ShortcutAction } from '@/hooks/useShortcuts';
 import { usePackSuggestions } from '@/hooks/usePackSuggestions';
 import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
 import { buildPackSelections } from '@/components/Core/Pack/PackGallery/usePackSelections';
-import { onboardingSuggestionsDismissedItem } from '@/utils/storageItems';
 import type { AppSettings } from '@/types/syncSettings';
 import type { Session } from '@/types/session';
 import type { StatisticsAggregates } from '@/types/statistics';
@@ -81,26 +80,8 @@ export function HomePage({
   );
   const { suggestions } = usePackSuggestions(existingRuleIds);
 
-  const [suggestionsDismissed, setSuggestionsDismissed] = useState(false);
-  useEffect(() => {
-    let cancelled = false;
-    onboardingSuggestionsDismissedItem.getValue().then((value) => {
-      if (!cancelled) setSuggestionsDismissed(value ?? false);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const showContextualHero =
-    isEmpty && !suggestionsDismissed && suggestions.length > 0;
-
-  const handleDismissSuggestions = useCallback(() => {
-    setSuggestionsDismissed(true);
-    onboardingSuggestionsDismissedItem.setValue(true).catch(() => {
-      // Ignore: a failed persist only means the hint may reappear later.
-    });
-  }, []);
+  // Suggestions show as long as the workspace has no rule (no dismissal).
+  const showContextualHero = isEmpty && suggestions.length > 0;
 
   const handleImportAndOrganize = useCallback(
     (selectedPackIds: string[]) => {
@@ -216,7 +197,6 @@ export function HomePage({
                   <HeroOnboardingSuggestions
                     suggestions={suggestions}
                     onImportAndOrganize={handleImportAndOrganize}
-                    onDismiss={handleDismissSuggestions}
                   />
                 ) : (
                   <HeroOnboarding

@@ -884,7 +884,6 @@
   "homepageHeroSuggestSubtitle": { "message": "Import them to group your tabs right away. They are pre-selected; adjust the selection as you like." },
   "homepageHeroSuggestTransparency": { "message": "Local analysis of your open tabs. Nothing leaves your browser." },
   "homepageHeroSuggestImportOrganize": { "message": "Import and organize" },
-  "homepageHeroSuggestDismiss": { "message": "Dismiss suggestions" },
   "homepageHeroSuggestTabCount": { "message": "$1 tabs" },
   "homepageHeroSuggestItemLabel": { "message": "$1, $2 matching tabs" },
   "homepageHeroSuggestDisabledTooltip": { "message": "Select at least one pack to import." },
