@@ -264,6 +264,14 @@
     "scope": "dev"
   },
   {
+    "name": "@wxt-dev/i18n",
+    "version": "0.2.5",
+    "license": "MIT",
+    "publisher": "Aaron Klinker",
+    "repository": "https://github.com/wxt-dev/wxt",
+    "scope": "dev"
+  },
+  {
     "name": "axe-playwright",
     "version": "2.2.2",
     "license": "MIT",
