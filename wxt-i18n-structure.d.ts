@@ -842,6 +842,7 @@ export type GeneratedI18nStructure = {
   "homepageHeroSuggestItemLabel": { substitutions: 2, plural: false };
   "homepageHeroSuggestDisabledTooltip": { substitutions: 0, plural: false };
   "packGalleryMatchesTabsBadge": { substitutions: 0, plural: false };
+  "packGallerySuggestedSectionTitle": { substitutions: 0, plural: false };
   "organizeRewardTitle": { substitutions: 0, plural: false };
   "organizeRewardMessage": { substitutions: 0, plural: false };
   "organizeRewardOrganizeNow": { substitutions: 0, plural: false };

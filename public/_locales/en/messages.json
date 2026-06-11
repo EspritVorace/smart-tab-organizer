@@ -889,6 +889,7 @@
   "homepageHeroSuggestItemLabel": { "message": "$1, $2 matching tabs" },
   "homepageHeroSuggestDisabledTooltip": { "message": "Select at least one pack to import." },
   "packGalleryMatchesTabsBadge": { "message": "Matches your open tabs" },
+  "packGallerySuggestedSectionTitle": { "message": "Suggested for your open tabs" },
   "organizeRewardTitle": { "message": "Rules imported" },
   "organizeRewardMessage": { "message": "Organize your open tabs now to see them grouped right away." },
   "organizeRewardOrganizeNow": { "message": "Organize now" },

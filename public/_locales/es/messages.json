@@ -890,6 +890,7 @@
   "homepageHeroSuggestItemLabel": { "message": "$1, $2 pestañas coincidentes" },
   "homepageHeroSuggestDisabledTooltip": { "message": "Selecciona al menos un paquete para importar." },
   "packGalleryMatchesTabsBadge": { "message": "Coincide con tus pestañas" },
+  "packGallerySuggestedSectionTitle": { "message": "Sugeridos para tus pestañas abiertas" },
   "organizeRewardTitle": { "message": "Reglas importadas" },
   "organizeRewardMessage": { "message": "Organiza tus pestañas abiertas ahora para verlas agrupadas de inmediato." },
   "organizeRewardOrganizeNow": { "message": "Organizar ahora" },

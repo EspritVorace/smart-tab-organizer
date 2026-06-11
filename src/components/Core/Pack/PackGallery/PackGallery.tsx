@@ -129,18 +129,34 @@ export function PackGallery({
     );
   }, [activeCategory, isSearching, searchFilteredPacks]);
 
+  // Packs matching open tabs, in relevance order. In the default grouped view
+  // they are pinned into a dedicated section on top (and removed from their
+  // category bucket) so the user does not have to hunt for them.
+  const suggestedPacks = useMemo(
+    () =>
+      filteredPacks.filter(
+        (pack) => (matchedTabsByPackId.get(pack.pack.id) ?? 0) > 0,
+      ),
+    [filteredPacks, matchedTabsByPackId],
+  );
+  const suggestedIds = useMemo(
+    () => new Set(suggestedPacks.map((pack) => pack.pack.id)),
+    [suggestedPacks],
+  );
+
   const grouped = useMemo(() => {
     if (isSearching) return null;
     if (activeCategory !== ALL_CATEGORIES) return null;
     const map = new Map<string | null, PackFile[]>();
     for (const pack of filteredPacks) {
+      if (suggestedIds.has(pack.pack.id)) continue;
       const key = pack.pack.categoryId ?? null;
       const list = map.get(key) ?? [];
       list.push(pack);
       map.set(key, list);
     }
     return map;
-  }, [activeCategory, filteredPacks, isSearching]);
+  }, [activeCategory, filteredPacks, isSearching, suggestedIds]);
 
   if (packs.length === 0) {
     return (
@@ -294,6 +310,17 @@ export function PackGallery({
         activeCategory !== ALL_CATEGORIES && (
           <Box className={styles.packList}>{filteredPacks.map(renderPack)}</Box>
         )}
+
+      {grouped && suggestedPacks.length > 0 && (
+        <Box data-testid="pack-gallery-suggested">
+          <PackCategoryHeader
+            label={getMessage('packGallerySuggestedSectionTitle')}
+            icon="✨"
+            count={suggestedPacks.length}
+          />
+          <Box className={styles.packList}>{suggestedPacks.map(renderPack)}</Box>
+        </Box>
+      )}
 
       {filteredPacks.length > 0 && !isSearching && grouped && (
         <Flex direction="column" gap="1">

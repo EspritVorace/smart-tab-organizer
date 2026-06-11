@@ -890,6 +890,7 @@
   "homepageHeroSuggestItemLabel": { "message": "$1, $2 onglets correspondants" },
   "homepageHeroSuggestDisabledTooltip": { "message": "Sélectionnez au moins un pack à importer." },
   "packGalleryMatchesTabsBadge": { "message": "Correspond à vos onglets" },
+  "packGallerySuggestedSectionTitle": { "message": "Suggérés pour vos onglets ouverts" },
   "organizeRewardTitle": { "message": "Règles importées" },
   "organizeRewardMessage": { "message": "Organisez vos onglets ouverts maintenant pour les voir rangés tout de suite." },
   "organizeRewardOrganizeNow": { "message": "Organiser maintenant" },
