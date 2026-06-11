@@ -29,7 +29,10 @@ code and tests adapt to them, never the other way around.
    included.
 
 7. **Post-import organize**: explicit "Organize now" button, never an automatic
-   destructive trigger.
+   destructive trigger. Revised after first review: the reward dialog is offered
+   after ANY rules import (pack, file or text) that changed the rule set (added
+   or overwrote at least one rule), not only the onboarding hero path, so it
+   stays reachable once rules already exist.
 
 8. **Contextual hero display condition**: only in the onboarding state (zero
    rule in the active workspace) AND at least one pack above the threshold. The

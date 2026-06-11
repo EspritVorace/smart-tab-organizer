@@ -36,6 +36,11 @@ interface ImportWizardProps {
   initialSourceMode?: SourceMode;
   /** Pre-selected packs (e.g. from the contextual onboarding hero). */
   initialPackSelections?: Record<string, PackSelectionState>;
+  /**
+   * Called once an import completes. `changed` is true when the import added or
+   * overwrote at least one rule, so callers can offer the "Organize now" reward.
+   */
+  onAfterImport?: (changed: boolean) => void;
 }
 
 const validateRulesPayload = (raw: unknown) => {
@@ -65,6 +70,7 @@ export function ImportWizard({
   onImport,
   initialSourceMode,
   initialPackSelections,
+  onAfterImport,
 }: ImportWizardProps) {
   const packSelections = usePackSelections(initialPackSelections);
 
@@ -126,11 +132,20 @@ export function ImportWizard({
 
     onImport(updatedRules);
     onOpenChange(false);
+    onAfterImport?.(added > 0 || overwritten > 0);
     showSuccessToast(
       getMessage('importNotificationTitle'),
       getMessage('importNotificationMessage', [String(added), String(overwritten)]),
     );
-  }, [classification, existingRules, newSelection, conflictMode, onImport, onOpenChange]);
+  }, [
+    classification,
+    existingRules,
+    newSelection,
+    conflictMode,
+    onImport,
+    onOpenChange,
+    onAfterImport,
+  ]);
 
   return (
     <ImportWizardShell<DomainRuleSetting, ConflictingRule>

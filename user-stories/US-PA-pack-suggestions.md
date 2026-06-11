@@ -69,8 +69,10 @@ tab.
 
 ### Acceptance criteria
 
-- [ ] After the import initiated from the contextual hero, an explicit
-      "Organize now" action is offered (no automatic destructive trigger).
+- [ ] After any rules import that changed the rule set (added or overwrote at
+      least one rule), an explicit "Organize now" action is offered (no
+      automatic destructive trigger). This covers the contextual hero path as
+      well as plain pack / file / text imports.
 - [ ] The action triggers the existing Organize flow on the current window,
       with its existing notifications and undo.
 - [ ] The result is announced in an aria-live region.

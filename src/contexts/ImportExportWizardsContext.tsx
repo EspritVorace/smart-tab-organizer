@@ -1,4 +1,4 @@
-import React, { createContext, Suspense, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, { createContext, Suspense, useCallback, useContext, useMemo, useState } from 'react';
 import { useSettings } from '@/hooks/useSettings.js';
 import { lazyWithTiming } from '@/utils/lazyWithTiming.js';
 import { OrganizeRewardDialog } from '@/components/UI/OrganizeRewardDialog/OrganizeRewardDialog';
@@ -10,8 +10,6 @@ export interface OpenImportRulesOptions {
   initialSourceMode?: SourceMode;
   /** Pre-selected packs (e.g. from the contextual onboarding hero). */
   initialPackSelections?: Record<string, PackSelectionState>;
-  /** Offer the "Organize now" reward dialog once the import completes. */
-  organizeAfterImport?: boolean;
 }
 
 const ImportWizard = lazyWithTiming('ImportWizard', () =>
@@ -46,7 +44,6 @@ type ActiveWizard =
       kind: 'import-rules';
       initialSourceMode?: SourceMode;
       initialPackSelections?: Record<string, PackSelectionState>;
-      organizeAfterImport?: boolean;
     }
   | { kind: 'export-rules' }
   | { kind: 'import-sessions' }
@@ -81,40 +78,32 @@ export function ImportExportWizardsProvider({ children }: ImportExportWizardsPro
   const { settings, updateSettings } = useSettings();
   const [active, setActive] = useState<ActiveWizard | null>(null);
   const [rewardOpen, setRewardOpen] = useState(false);
-  // Set when a hero-initiated import requests the post-import organize reward.
-  // Read in `handleImportRules` (fires before the wizard closes) and cleared on
-  // either import or cancel.
-  const organizeIntentRef = useRef(false);
 
   const handleImportRules = useCallback(
     (updated: DomainRuleSetting[]) => {
       void updateSettings({ domainRules: updated });
-      if (organizeIntentRef.current) {
-        organizeIntentRef.current = false;
-        setRewardOpen(true);
-      }
     },
     [updateSettings],
   );
 
+  // Offer the "Organize now" reward after any rules import that changed the
+  // rule set (added or overwrote at least one rule), whatever the source mode.
+  const handleAfterImport = useCallback((changed: boolean) => {
+    if (changed) setRewardOpen(true);
+  }, []);
+
   const handleOpenChange = useCallback((open: boolean) => {
-    if (!open) {
-      setActive(null);
-      // Cancelled without importing: drop any pending reward intent.
-      organizeIntentRef.current = false;
-    }
+    if (!open) setActive(null);
   }, []);
 
   const value = useMemo<ImportExportWizardsContextValue>(
     () => ({
-      openImportRules: (options) => {
-        organizeIntentRef.current = options?.organizeAfterImport ?? false;
+      openImportRules: (options) =>
         setActive({
           kind: 'import-rules',
           initialSourceMode: options?.initialSourceMode,
           initialPackSelections: options?.initialPackSelections,
-        });
-      },
+        }),
       openExportRules: () => setActive({ kind: 'export-rules' }),
       openImportSessions: () => setActive({ kind: 'import-sessions' }),
       openExportSessions: () => setActive({ kind: 'export-sessions' }),
@@ -134,6 +123,7 @@ export function ImportExportWizardsProvider({ children }: ImportExportWizardsPro
             onOpenChange={handleOpenChange}
             existingRules={settings?.domainRules ?? []}
             onImport={handleImportRules}
+            onAfterImport={handleAfterImport}
             initialSourceMode={active.initialSourceMode}
             initialPackSelections={active.initialPackSelections}
           />

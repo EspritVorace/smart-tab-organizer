@@ -112,7 +112,6 @@ export function HomePage({
       openImportRules({
         initialSourceMode: 'pack',
         initialPackSelections: buildPackSelections(selectedPacks),
-        organizeAfterImport: true,
       });
     },
     [suggestions, openImportRules],
