@@ -27,9 +27,33 @@ interface PackGalleryProps {
   selections: Record<string, PackSelectionState>;
   onSelectionChange: (packId: string, next: PackSelectionState) => void;
   existingRuleIds?: ReadonlySet<string>;
+  /** Matched-tab count per pack id; drives relevance ordering + the indicator. */
+  matchedTabsByPackId?: ReadonlyMap<string, number>;
 }
 
 const EMPTY_RULE_IDS: ReadonlySet<string> = new Set();
+const EMPTY_MATCHED_TABS: ReadonlyMap<string, number> = new Map();
+
+/**
+ * Stable sort that lifts packs matching open tabs to the top, keeping the
+ * existing catalog order for ties. No-op (preserves order) when there is no
+ * match, so the gallery is unchanged without open-tab relevance.
+ */
+function orderByRelevance(
+  list: PackFile[],
+  matchedTabs: ReadonlyMap<string, number>,
+): PackFile[] {
+  if (matchedTabs.size === 0) return list;
+  return list
+    .map((pack, index) => ({ pack, index }))
+    .sort((a, b) => {
+      const am = matchedTabs.get(a.pack.pack.id) ?? 0;
+      const bm = matchedTabs.get(b.pack.pack.id) ?? 0;
+      if (am !== bm) return bm - am;
+      return a.index - b.index;
+    })
+    .map((entry) => entry.pack);
+}
 
 function matchesSearch(pack: PackFile, normalized: string): boolean {
   if (!normalized) return true;
@@ -64,6 +88,7 @@ export function PackGallery({
   selections,
   onSelectionChange,
   existingRuleIds = EMPTY_RULE_IDS,
+  matchedTabsByPackId = EMPTY_MATCHED_TABS,
 }: PackGalleryProps) {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>(ALL_CATEGORIES);
@@ -73,9 +98,15 @@ export function PackGallery({
     [search],
   );
 
+  // Matched packs rise to the top within every view; ties keep catalog order.
+  const orderedPacks = useMemo(
+    () => orderByRelevance(packs, matchedTabsByPackId),
+    [packs, matchedTabsByPackId],
+  );
+
   const searchFilteredPacks = useMemo(
-    () => packs.filter((pack) => matchesSearch(pack, normalizedSearch)),
-    [packs, normalizedSearch],
+    () => orderedPacks.filter((pack) => matchesSearch(pack, normalizedSearch)),
+    [orderedPacks, normalizedSearch],
   );
 
   const isSearching = normalizedSearch.length > 0;
@@ -143,6 +174,7 @@ export function PackGallery({
         selected={sel?.selected ?? false}
         onSelectionChange={(next) => onSelectionChange(pack.pack.id, next)}
         installInfo={installInfo}
+        matchesOpenTabs={(matchedTabsByPackId.get(pack.pack.id) ?? 0) > 0}
       />
     );
   };

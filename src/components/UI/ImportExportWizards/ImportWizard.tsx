@@ -16,6 +16,7 @@ import {
   type PackSelectionState,
 } from '@/components/Core/Pack/PackGallery/usePackSelections';
 import { usePacks } from '@/hooks/usePacks';
+import { usePackSuggestions } from '@/hooks/usePackSuggestions';
 import { ImportWizardShell } from './ImportWizardShell';
 import {
   useImportWizardState,
@@ -83,6 +84,8 @@ export function ImportWizard({
     () => new Set(existingRules.map((rule) => rule.id)),
     [existingRules],
   );
+
+  const { matchedTabsByPackId } = usePackSuggestions(existingRuleIds);
 
   const handlePackConfirm = useCallback(() => {
     const aggregated: ImportDomainRule[] = [];
@@ -155,6 +158,7 @@ export function ImportWizard({
           selections={packSelections.selections}
           onSelectionChange={packSelections.setPackSelection}
           existingRuleIds={existingRuleIds}
+          matchedTabsByPackId={matchedTabsByPackId}
         />
       }
       packFooter={{
