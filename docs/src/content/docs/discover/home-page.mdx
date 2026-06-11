@@ -7,14 +7,18 @@ import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
 <Aside type="tip" title="At a glance">
 - The home page is the first screen shown when you open Options.
-- While no rule exists, an onboarding hero offers **Create my first rule** or **Import a rules pack**.
+- While no rule exists, an onboarding hero offers contextual pack suggestions matching your open tabs (or, as a fallback, **Create my first rule** / **Import a rules pack**).
 - Otherwise, the page aggregates pinned profiles, quick actions, mini-statistics and tips.
 - Keyboard focus lands on the first action; quick action buttons have single-key shortcuts.
 </Aside>
 
 ## Onboarding hero
 
-When no rule is yet defined in the active workspace, the onboarding hero occupies the top of the page. Two actions:
+When no rule is yet defined in the active workspace, the onboarding hero occupies the top of the page.
+
+If some of your open tabs match a ready-made pack, the hero becomes contextual: it lists the matching packs (with the number of matching tabs each), pre-selected, behind a single **Import and organize** button. The analysis is local (open tabs are read in the browser only, nothing leaves the machine) and the suggestions can be dismissed. After the import, an **Organize now** button rearranges your open tabs right away.
+
+Otherwise the hero falls back to two generic actions:
 
 - **Create my first rule**: opens the rule creation wizard directly.
 - **Import a rules pack**: opens the [packs gallery](/reference/categories-and-packs) inside the import wizard.
