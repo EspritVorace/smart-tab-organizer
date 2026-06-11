@@ -11,7 +11,10 @@ import {
 import { generateUUID } from '@/utils/utils';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 import { PackGallery } from '@/components/Core/Pack/PackGallery/PackGallery';
-import { usePackSelections } from '@/components/Core/Pack/PackGallery/usePackSelections';
+import {
+  usePackSelections,
+  type PackSelectionState,
+} from '@/components/Core/Pack/PackGallery/usePackSelections';
 import { usePacks } from '@/hooks/usePacks';
 import { ImportWizardShell } from './ImportWizardShell';
 import {
@@ -30,6 +33,8 @@ interface ImportWizardProps {
   onImport: (updatedRules: DomainRuleSetting[]) => void;
   /** When provided, the wizard opens on this source mode instead of `'file'`. */
   initialSourceMode?: SourceMode;
+  /** Pre-selected packs (e.g. from the contextual onboarding hero). */
+  initialPackSelections?: Record<string, PackSelectionState>;
 }
 
 const validateRulesPayload = (raw: unknown) => {
@@ -58,8 +63,9 @@ export function ImportWizard({
   existingRules,
   onImport,
   initialSourceMode,
+  initialPackSelections,
 }: ImportWizardProps) {
-  const packSelections = usePackSelections();
+  const packSelections = usePackSelections(initialPackSelections);
 
   const state = useImportWizardState<DomainRuleSetting, ConflictingRule>({
     open,

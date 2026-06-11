@@ -1,8 +1,18 @@
-import React, { createContext, Suspense, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, Suspense, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { useSettings } from '@/hooks/useSettings.js';
 import { lazyWithTiming } from '@/utils/lazyWithTiming.js';
+import { OrganizeRewardDialog } from '@/components/UI/OrganizeRewardDialog/OrganizeRewardDialog';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 import type { SourceMode } from '@/components/UI/ImportExportWizards/Source';
+import type { PackSelectionState } from '@/components/Core/Pack/PackGallery/usePackSelections';
+
+export interface OpenImportRulesOptions {
+  initialSourceMode?: SourceMode;
+  /** Pre-selected packs (e.g. from the contextual onboarding hero). */
+  initialPackSelections?: Record<string, PackSelectionState>;
+  /** Offer the "Organize now" reward dialog once the import completes. */
+  organizeAfterImport?: boolean;
+}
 
 const ImportWizard = lazyWithTiming('ImportWizard', () =>
   import('@/components/UI/ImportExportWizards/ImportWizard').then((m) => ({ default: m.ImportWizard })),
@@ -32,7 +42,12 @@ const ExportWorkspaceDialog = lazyWithTiming('ExportWorkspaceDialog', () =>
 );
 
 type ActiveWizard =
-  | { kind: 'import-rules'; initialSourceMode?: SourceMode }
+  | {
+      kind: 'import-rules';
+      initialSourceMode?: SourceMode;
+      initialPackSelections?: Record<string, PackSelectionState>;
+      organizeAfterImport?: boolean;
+    }
   | { kind: 'export-rules' }
   | { kind: 'import-sessions' }
   | { kind: 'export-sessions' }
@@ -40,7 +55,7 @@ type ActiveWizard =
   | { kind: 'export-workspace' };
 
 export interface ImportExportWizardsContextValue {
-  openImportRules: (options?: { initialSourceMode?: SourceMode }) => void;
+  openImportRules: (options?: OpenImportRulesOptions) => void;
   openExportRules: () => void;
   openImportSessions: () => void;
   openExportSessions: () => void;
@@ -65,22 +80,41 @@ interface ImportExportWizardsProviderProps {
 export function ImportExportWizardsProvider({ children }: ImportExportWizardsProviderProps) {
   const { settings, updateSettings } = useSettings();
   const [active, setActive] = useState<ActiveWizard | null>(null);
+  const [rewardOpen, setRewardOpen] = useState(false);
+  // Set when a hero-initiated import requests the post-import organize reward.
+  // Read in `handleImportRules` (fires before the wizard closes) and cleared on
+  // either import or cancel.
+  const organizeIntentRef = useRef(false);
 
   const handleImportRules = useCallback(
     (updated: DomainRuleSetting[]) => {
       void updateSettings({ domainRules: updated });
+      if (organizeIntentRef.current) {
+        organizeIntentRef.current = false;
+        setRewardOpen(true);
+      }
     },
     [updateSettings],
   );
 
   const handleOpenChange = useCallback((open: boolean) => {
-    if (!open) setActive(null);
+    if (!open) {
+      setActive(null);
+      // Cancelled without importing: drop any pending reward intent.
+      organizeIntentRef.current = false;
+    }
   }, []);
 
   const value = useMemo<ImportExportWizardsContextValue>(
     () => ({
-      openImportRules: (options) =>
-        setActive({ kind: 'import-rules', initialSourceMode: options?.initialSourceMode }),
+      openImportRules: (options) => {
+        organizeIntentRef.current = options?.organizeAfterImport ?? false;
+        setActive({
+          kind: 'import-rules',
+          initialSourceMode: options?.initialSourceMode,
+          initialPackSelections: options?.initialPackSelections,
+        });
+      },
       openExportRules: () => setActive({ kind: 'export-rules' }),
       openImportSessions: () => setActive({ kind: 'import-sessions' }),
       openExportSessions: () => setActive({ kind: 'export-sessions' }),
@@ -101,6 +135,7 @@ export function ImportExportWizardsProvider({ children }: ImportExportWizardsPro
             existingRules={settings?.domainRules ?? []}
             onImport={handleImportRules}
             initialSourceMode={active.initialSourceMode}
+            initialPackSelections={active.initialPackSelections}
           />
         )}
         {active?.kind === 'export-rules' && (
@@ -123,6 +158,7 @@ export function ImportExportWizardsProvider({ children }: ImportExportWizardsPro
           <ExportWorkspaceDialog open onOpenChange={handleOpenChange} />
         )}
       </Suspense>
+      <OrganizeRewardDialog open={rewardOpen} onOpenChange={setRewardOpen} />
     </ImportExportWizardsContext.Provider>
   );
 }

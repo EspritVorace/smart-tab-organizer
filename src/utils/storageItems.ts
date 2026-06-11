@@ -1,4 +1,16 @@
+import { storage } from 'wxt/utils/storage';
 import { defineWorkspaceItems, DEFAULT_WORKSPACE_ID } from './workspaceStorage.js';
+
+/**
+ * Whether the user dismissed the contextual onboarding pack suggestions
+ * (issue #433). Global (not workspace-scoped): it reflects a one-time
+ * onboarding choice for the install, not per-workspace state. When `true`, the
+ * home page falls back to the generic onboarding hero.
+ */
+export const onboardingSuggestionsDismissedItem = storage.defineItem<boolean>(
+  'local:onboardingSuggestionsDismissed',
+  { defaultValue: false },
+);
 
 /**
  * All settings/sessions/statistics items are scoped per workspace under
