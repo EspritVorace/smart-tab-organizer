@@ -4,6 +4,9 @@ description: The central hub of Options. Onboarding while no rule exists, then p
 ---
 
 import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import ThemeImage from '../../../components/ThemeImage.astro';
+import heroSuggestionsLight from '../../../assets/screenshots/en-light-home-hero-suggestions.png';
+import heroSuggestionsDark from '../../../assets/screenshots/en-dark-home-hero-suggestions.png';
 
 <Aside type="tip" title="At a glance">
 - The home page is the first screen shown when you open Options.
@@ -13,6 +16,12 @@ import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
 </Aside>
 
 ## Onboarding hero
+
+<ThemeImage
+  lightSrc={heroSuggestionsLight}
+  darkSrc={heroSuggestionsDark}
+  alt="Contextual onboarding hero suggesting the packs that match the open tabs, pre-selected, behind an Import and organize button."
+/>
 
 When no rule is yet defined in the active workspace, the onboarding hero occupies the top of the page.
 

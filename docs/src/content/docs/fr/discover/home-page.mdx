@@ -4,6 +4,9 @@ description: Le hub central des Options. Onboarding tant qu'aucune règle n'exis
 ---
 
 import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import heroSuggestionsLight from '../../../../assets/screenshots/fr-light-home-hero-suggestions.png';
+import heroSuggestionsDark from '../../../../assets/screenshots/fr-dark-home-hero-suggestions.png';
 
 <Aside type="tip" title="En bref">
 - La page d'accueil est le premier écran affiché à l'ouverture des Options.
@@ -13,6 +16,12 @@ import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
 </Aside>
 
 ## Hero d'onboarding
+
+<ThemeImage
+  lightSrc={heroSuggestionsLight}
+  darkSrc={heroSuggestionsDark}
+  alt="Hero d'onboarding contextuel suggérant les packs qui correspondent aux onglets ouverts, pré-sélectionnés, derrière un bouton Importer et organiser."
+/>
 
 Quand aucune règle n'est encore définie dans le workspace actif, le Hero d'onboarding occupe la partie haute.
 
