@@ -1,0 +1,525 @@
+/**
+ * E2E tests for the domain rules view menu (filter / sort / group).
+ * Covers: active-state indicator + reset, filter by status, filter by color,
+ * group by color (group header checkbox selection), and the sort-by-domain
+ * auto-grouping with drag-and-drop reordering inside a domain group.
+ *
+ * The menu is locale-agnostic here: every control is anchored on a stable
+ * `data-testid`.
+ */
+import { type BrowserContext, type Page } from '@playwright/test';
+import { test, expect } from './fixtures';
+import { goToDomainRulesSection } from './helpers/navigation';
+
+async function getServiceWorker(context: BrowserContext): Promise<import('@playwright/test').Page> {
+  let sw = context.serviceWorkers()[0];
+  if (sw) return sw;
+  const deadline = Date.now() + 5000;
+  while (Date.now() < deadline) {
+    sw = context.serviceWorkers()[0];
+    if (sw) return sw;
+    await new Promise(r => setTimeout(r, 200));
+  }
+  throw new Error('Service worker not available after 5 s (idle termination?)');
+}
+
+/** The persisted per-workspace view state leaks between tests in the same
+ *  worker (it lives in storage.local), so reset it to the default. */
+async function resetViewState(context: BrowserContext): Promise<void> {
+  const sw = await getServiceWorker(context).catch(() => null);
+  if (sw) await sw.evaluate(() => chrome.storage.local.remove('rulesViewState'));
+}
+
+test.beforeEach(async ({ extensionContext, helpers }) => {
+  await helpers.clearDomainRules();
+  await resetViewState(extensionContext);
+});
+
+async function getDomainRuleLabels(helpers: any): Promise<string[]> {
+  const settings = await helpers.getSettings();
+  return (settings.domainRules as any[]).map((r: any) => r.label);
+}
+
+/** Open the view menu and wait until its content is on screen. */
+async function openViewMenu(page: Page): Promise<void> {
+  await page.getByTestId('page-rules-btn-view').click();
+  await expect(page.getByTestId('page-rules-view-sort-manual')).toBeVisible();
+}
+
+/** Open a filter submenu (Color / Category / Status) by its sub-trigger testid. */
+async function openSubmenu(page: Page, subTriggerTestId: string): Promise<void> {
+  await page.getByTestId(subTriggerTestId).click();
+}
+
+/**
+ * Click a radio/checkbox menu item and wait until it reports the checked
+ * state, so the underlying view-state change has definitely applied before
+ * we assert on the list (avoids a menu-interaction race).
+ */
+async function selectMenuItem(page: Page, testId: string): Promise<void> {
+  const item = page.getByTestId(testId);
+  await expect(item).toBeVisible();
+  await item.click();
+  await expect(item).toHaveAttribute('data-state', 'checked');
+}
+
+/** Close any open menu / submenu (two Escapes cover an open submenu). */
+async function closeMenus(page: Page): Promise<void> {
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('Escape');
+  // allow-inline-dom: generic Radix menu-state probe, not a Page Object surface.
+  await expect(page.locator('[role="menu"][data-state="open"]')).toHaveCount(0);
+}
+
+// ---------------------------------------------------------------------------
+// Active-state indicator
+// ---------------------------------------------------------------------------
+test.describe('View menu active indicator', () => {
+  test('button becomes active when an operation is applied', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    await helpers.addDomainRule({ label: 'Rule A', domainFilter: 'a.com' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    const viewBtn = page.getByTestId('page-rules-btn-view');
+    await expect(viewBtn).not.toHaveAttribute('data-active', 'true');
+
+    await openViewMenu(page);
+    await selectMenuItem(page, 'page-rules-view-sort-domain');
+    await closeMenus(page);
+
+    await expect(viewBtn).toHaveAttribute('data-active', 'true');
+
+    await page.close();
+  });
+
+  test('reset clears every applied operation', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    await helpers.addDomainRule({ label: 'Blue One', domainFilter: 'a.com', color: 'blue' });
+    await helpers.addDomainRule({ label: 'Blue Two', domainFilter: 'b.com', color: 'blue' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    const viewBtn = page.getByTestId('page-rules-btn-view');
+
+    // Apply a grouping, then reset from within the same open menu (the Reset
+    // item only appears once an operation is active).
+    await openViewMenu(page);
+    await selectMenuItem(page, 'page-rules-view-group-color');
+    await page.getByTestId('page-rules-view-reset').click();
+
+    // allow-inline-dom: generic Radix menu-state probe, not a Page Object surface.
+    await expect(page.locator('[role="menu"][data-state="open"]')).toHaveCount(0);
+    await expect(viewBtn).not.toHaveAttribute('data-active', 'true');
+    // Grouping is gone: no group header remains.
+    await expect(page.getByTestId('page-rules-group-color:blue')).toHaveCount(0);
+
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Filtering (display only — the stored order is untouched)
+// ---------------------------------------------------------------------------
+test.describe('View menu filtering', () => {
+  test('filter by status shows only the matching rules without mutating storage', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    await helpers.addDomainRule({ label: 'Active One', domainFilter: 'a.com', enabled: true });
+    await helpers.addDomainRule({ label: 'Disabled One', domainFilter: 'b.com', enabled: false });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    await expect(page.getByRole('listitem')).toHaveCount(2);
+
+    await openViewMenu(page);
+    await openSubmenu(page, 'page-rules-view-sub-status');
+    await selectMenuItem(page, 'page-rules-view-status-disabled');
+    await closeMenus(page);
+
+    await expect(page.getByRole('listitem')).toHaveCount(1);
+    await expect(page.getByRole('listitem', { name: /Disabled One/i })).toBeVisible();
+
+    // Filtering is display-only: storage still holds both rules in order.
+    const labels = await getDomainRuleLabels(helpers);
+    expect(labels).toEqual(['Active One', 'Disabled One']);
+
+    await page.close();
+  });
+
+  test('filter by color narrows the list', async ({ extensionContext, extensionId, helpers }) => {
+    await helpers.addDomainRule({ label: 'Blue Rule', domainFilter: 'a.com', color: 'blue' });
+    await helpers.addDomainRule({ label: 'Red Rule', domainFilter: 'b.com', color: 'red' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    await openViewMenu(page);
+    await openSubmenu(page, 'page-rules-view-sub-color');
+    await selectMenuItem(page, 'page-rules-view-color-blue');
+    await closeMenus(page);
+
+    await expect(page.getByRole('listitem')).toHaveCount(1);
+    await expect(page.getByRole('listitem', { name: /Blue Rule/i })).toBeVisible();
+
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Grouping
+// ---------------------------------------------------------------------------
+test.describe('View menu grouping', () => {
+  test('group by color renders group headers and the header checkbox selects the whole group', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    await helpers.addDomainRule({ label: 'Blue One', domainFilter: 'a.com', color: 'blue' });
+    await helpers.addDomainRule({ label: 'Blue Two', domainFilter: 'b.com', color: 'blue' });
+    await helpers.addDomainRule({ label: 'Red One', domainFilter: 'c.com', color: 'red' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    await openViewMenu(page);
+    await selectMenuItem(page, 'page-rules-view-group-color');
+    await closeMenus(page);
+
+    const blueGroup = page.getByTestId('page-rules-group-color:blue');
+    const redGroup = page.getByTestId('page-rules-group-color:red');
+    await expect(blueGroup).toBeVisible();
+    await expect(redGroup).toBeVisible();
+    await expect(blueGroup).toContainText('2');
+
+    // Ticking the blue group header selects its two rules and opens the bulk bar.
+    await blueGroup.getByRole('checkbox').click();
+    await expect(page.getByTestId('page-rules-bulk-bar')).toContainText('2');
+
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Sort by domain → auto-grouping + DnD inside a domain group
+// ---------------------------------------------------------------------------
+test.describe('View menu sort by domain', () => {
+  test('auto-groups multi-rule domains, enables DnD inside the group and reorders the real order', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    await helpers.addDomainRule({ label: 'GH One', domainFilter: 'github.com' });
+    await helpers.addDomainRule({ label: 'GH Two', domainFilter: 'docs.github.com' });
+    await helpers.addDomainRule({ label: 'Solo', domainFilter: 'solo.com' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    await openViewMenu(page);
+    await selectMenuItem(page, 'page-rules-view-sort-domain');
+    await closeMenus(page);
+
+    // The two github rules form a group; the singleton stays ungrouped.
+    await expect(page.getByTestId('page-rules-group-domain:github.com')).toBeVisible();
+
+    const ghOneRow = page.getByRole('listitem', { name: /GH One/i });
+    const ghTwoRow = page.getByRole('listitem', { name: /GH Two/i });
+    const soloRow = page.getByRole('listitem', { name: /Solo/i });
+
+    // DnD is enabled inside the domain group, disabled for the singleton.
+    const ghOneHandle = ghOneRow.locator('[data-testid$="-drag-handle"]');
+    const ghTwoHandle = ghTwoRow.locator('[data-testid$="-drag-handle"]');
+    await expect(ghOneHandle).not.toHaveAttribute('aria-disabled', 'true');
+    await expect(soloRow.locator('[data-testid$="-drag-handle"]')).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+
+    // Drag GH One onto GH Two to reorder within the github group.
+    const srcBox = await ghOneHandle.boundingBox();
+    const dstBox = await ghTwoHandle.boundingBox();
+    const srcX = srcBox!.x + srcBox!.width / 2;
+    const srcY = srcBox!.y + srcBox!.height / 2;
+    const dstX = dstBox!.x + dstBox!.width / 2;
+    const dstY = dstBox!.y + dstBox!.height / 2;
+    await page.mouse.move(srcX, srcY);
+    await page.mouse.down();
+    await page.mouse.move(dstX, dstY, { steps: 50 });
+    await page.mouse.up();
+
+    await page.waitForFunction(() => {
+      const rows = [...document.querySelectorAll('[role="listitem"]')];
+      const i1 = rows.findIndex(r => r.getAttribute('aria-label')?.includes('GH One'));
+      const i2 = rows.findIndex(r => r.getAttribute('aria-label')?.includes('GH Two'));
+      return i1 > -1 && i2 > -1 && i2 < i1;
+    }, { timeout: 5000 });
+
+    await page.close();
+
+    // The real stored order was mutated: GH Two now precedes GH One.
+    const labels = await getDomainRuleLabels(helpers);
+    expect(labels.indexOf('GH Two')).toBeLessThan(labels.indexOf('GH One'));
+    expect(labels).toContain('Solo');
+  });
+
+  test('isolated rules (incl. regex) render before the domain groups, separated', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    await helpers.addDomainRule({ label: 'GH One', domainFilter: 'github.com' });
+    await helpers.addDomainRule({ label: 'GH Two', domainFilter: 'docs.github.com' });
+    await helpers.addDomainRule({ label: 'Solo', domainFilter: 'solo.com' });
+    await helpers.addDomainRule({ label: 'Regexy', domainFilter: '.*\\.example\\.com' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    await openViewMenu(page);
+    await selectMenuItem(page, 'page-rules-view-sort-domain');
+    await closeMenus(page);
+
+    // Only the real github.com domain forms a group; regex rules are never grouped.
+    const ghGroup = page.getByTestId('page-rules-group-domain:github.com');
+    await expect(ghGroup).toBeVisible();
+    await expect(page.getByTestId('page-rules-group-domain:__regex__')).toHaveCount(0);
+    await expect(page.getByRole('listitem', { name: /Regexy/i })).toBeVisible();
+
+    // A separator divides the isolated rules from the groups.
+    await expect(page.getByTestId('page-rules-groups-separator')).toBeVisible();
+
+    // Isolated rules (Solo, Regexy) render ABOVE the github group (lower y).
+    const soloBox = await page.getByRole('listitem', { name: /Solo/i }).boundingBox();
+    const ghHeaderBox = await ghGroup.boundingBox();
+    expect(soloBox!.y).toBeLessThan(ghHeaderBox!.y);
+
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Initial focus with a persisted filter (regression)
+// ---------------------------------------------------------------------------
+test.describe('View menu initial focus', () => {
+  test('initial focus targets the first visible rule when a filter is persisted', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    await helpers.addDomainRule({ label: 'Active One', domainFilter: 'a.com', enabled: true });
+    await helpers.addDomainRule({ label: 'Disabled One', domainFilter: 'b.com', enabled: false });
+
+    // Apply (and persist) a status filter that hides the first rule.
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+    await openViewMenu(page);
+    await openSubmenu(page, 'page-rules-view-sub-status');
+    await selectMenuItem(page, 'page-rules-view-status-disabled');
+    await closeMenus(page);
+    await expect(page.getByRole('listitem')).toHaveCount(1);
+    await page.close();
+
+    // Re-open the page: autofocus must land on the first *visible* (filtered)
+    // rule, not the now-hidden first rule of the unfiltered list.
+    const page2 = await extensionContext.newPage();
+    await goToDomainRulesSection(page2, extensionId);
+    const firstCard = page2.getByTestId('page-rules-list').getByRole('listitem').first();
+    await expect(firstCard).toBeFocused();
+    await expect(firstCard).toHaveAttribute('aria-label', /Disabled One/);
+    await page2.close();
+  });
+});
+
+test.describe('View menu focus after applying', () => {
+  test('moves focus to the first result when the menu closes after a sort', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    // Insertion (manual) order puts "Zzz" first; sorting by domain ascending
+    // makes "Aaa" the first rule.
+    await helpers.addDomainRule({ label: 'Zzz Rule', domainFilter: 'zzz.com' });
+    await helpers.addDomainRule({ label: 'Aaa Rule', domainFilter: 'aaa.com' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    const firstCard = () => page.getByTestId('page-rules-list').getByRole('listitem').first();
+
+    // Manual order puts "Zzz" first on arrival.
+    await expect(firstCard()).toHaveAttribute('aria-label', /Zzz Rule/);
+
+    // Apply a domain sort, then close the menu.
+    await openViewMenu(page);
+    await selectMenuItem(page, 'page-rules-view-sort-domain');
+    await closeMenus(page);
+
+    // On close, focus must move to the first resulting rule (Aaa).
+    await expect(firstCard()).toHaveAttribute('aria-label', /Aaa Rule/);
+    await expect(firstCard()).toBeFocused();
+
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Keyboard: unified tree navigation on group headers
+// ---------------------------------------------------------------------------
+test.describe('Group header keyboard navigation', () => {
+  test('arrows fold/unfold and navigate, Space toggles the whole group', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    await helpers.addDomainRule({ label: 'Blue One', domainFilter: 'a.com', color: 'blue' });
+    await helpers.addDomainRule({ label: 'Blue Two', domainFilter: 'b.com', color: 'blue' });
+    await helpers.addDomainRule({ label: 'Red One', domainFilter: 'c.com', color: 'red' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    await openViewMenu(page);
+    await selectMenuItem(page, 'page-rules-view-group-color');
+    await closeMenus(page);
+
+    const blueToggle = page.getByTestId('page-rules-group-color:blue-toggle');
+    const blueOne = page.getByRole('listitem', { name: /Blue One/i });
+    await expect(blueToggle).toBeVisible();
+
+    // Closing the menu defers an autofocus onto the first nav item. Wait for it
+    // to settle so it does not race (and steal) our explicit header focus below.
+    // allow-inline-dom: generic settle-probe on the shared nav selector.
+    await expect(page.locator('[data-rules-nav-item]').first()).toBeFocused();
+
+    // Focus the group header and step Down into its first card (unified tree).
+    await blueToggle.focus();
+    await expect(blueToggle).toBeFocused();
+
+    // The focus ring must actually paint: the toggle carries an inline
+    // `all: unset` that resets `outline`, so the focus rule needs `!important`
+    // to win. Assert a non-zero solid outline rather than trust the CSS.
+    const outline = await blueToggle.evaluate(el => {
+      const s = getComputedStyle(el);
+      return { width: s.outlineWidth, style: s.outlineStyle };
+    });
+    expect(outline.style).toBe('solid');
+    expect(parseFloat(outline.width)).toBeGreaterThan(0);
+
+    await page.keyboard.press('ArrowDown');
+    await expect(blueOne).toBeFocused();
+
+    // ArrowLeft on a grouped card collapses its parent group and lands focus
+    // back on the header (the card unmounts on collapse).
+    await page.keyboard.press('ArrowLeft');
+    await expect(blueToggle).toBeFocused();
+    await expect(blueOne).toHaveCount(0);
+
+    // Right on the header re-expands; the cards come back.
+    await page.keyboard.press('ArrowRight');
+    await expect(blueOne).toBeVisible();
+    await expect(blueToggle).toBeFocused();
+
+    // Left on the header collapses again; focus stays on the header.
+    await page.keyboard.press('ArrowLeft');
+    await expect(blueOne).toHaveCount(0);
+    await expect(blueToggle).toBeFocused();
+
+    // Re-expand for the Space assertions below.
+    await page.keyboard.press('ArrowRight');
+    await expect(blueOne).toBeVisible();
+    await expect(blueToggle).toBeFocused();
+
+    // Space selects the whole blue group (2 rules) without collapsing it.
+    await page.keyboard.press('Space');
+    await expect(page.getByTestId('page-rules-bulk-bar')).toContainText('2');
+    await expect(blueOne).toBeVisible();
+
+    // Space again clears the selection (bulk bar disappears).
+    await page.keyboard.press('Space');
+    await expect(page.getByTestId('page-rules-bulk-bar')).toHaveCount(0);
+
+    await page.close();
+  });
+
+  test('a search force-expands collapsed groups, then restores them on clear', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    await helpers.addDomainRule({ label: 'Blue One', domainFilter: 'a.com', color: 'blue' });
+    await helpers.addDomainRule({ label: 'Blue Two', domainFilter: 'b.com', color: 'blue' });
+    await helpers.addDomainRule({ label: 'Red One', domainFilter: 'c.com', color: 'red' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    await openViewMenu(page);
+    await selectMenuItem(page, 'page-rules-view-group-color');
+    await closeMenus(page);
+
+    const blueToggle = page.getByTestId('page-rules-group-color:blue-toggle');
+    const blueOne = page.getByRole('listitem', { name: /Blue One/i });
+    await expect(blueOne).toBeVisible();
+
+    // Collapse the blue group via its header toggle.
+    await blueToggle.click();
+    await expect(blueOne).toHaveCount(0);
+
+    // A search matching a blue rule force-expands the (collapsed) group so the
+    // result is not hidden.
+    await page.getByTestId('page-rules-search').fill('Blue One');
+    await expect(blueOne).toBeVisible();
+
+    // Clearing the search restores the persisted collapsed state.
+    await page.getByTestId('page-rules-search').fill('');
+    await expect(blueOne).toHaveCount(0);
+
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Search: Enter jumps to the first result card
+// ---------------------------------------------------------------------------
+test.describe('Search Enter to first result', () => {
+  test('Enter focuses the first matching rule, or stays in the field when empty', async ({
+    extensionContext,
+    extensionId,
+    helpers,
+  }) => {
+    await helpers.addDomainRule({ label: 'Alpha Rule', domainFilter: 'alpha.com' });
+    await helpers.addDomainRule({ label: 'Beta Rule', domainFilter: 'beta.com' });
+
+    const page = await extensionContext.newPage();
+    await goToDomainRulesSection(page, extensionId);
+
+    const search = page.getByTestId('page-rules-search');
+    const betaCard = page.getByRole('listitem', { name: /Beta Rule/i });
+
+    // A matching search + Enter lands focus on the first result card.
+    await search.fill('Beta');
+    await expect(betaCard).toBeVisible();
+    await search.press('Enter');
+    await expect(betaCard).toBeFocused();
+
+    // A non-matching search keeps focus in the field (no result).
+    await search.fill('zzz-no-such-rule');
+    await expect(page.getByTestId('page-rules-list')).toHaveCount(0);
+    await search.press('Enter');
+    await expect(search).toBeFocused();
+
+    await page.close();
+  });
+});

@@ -70,10 +70,12 @@ function PackCardHarness({
   pack,
   initiallySelected = false,
   installInfo,
+  matchesOpenTabs = false,
 }: {
   pack: PackFile;
   initiallySelected?: boolean;
   installInfo?: PackInstallInfo;
+  matchesOpenTabs?: boolean;
 }) {
   const [selected, setSelected] = useState(initiallySelected);
   return (
@@ -82,6 +84,7 @@ function PackCardHarness({
       selected={selected}
       onSelectionChange={({ selected: next }) => setSelected(next)}
       installInfo={installInfo}
+      matchesOpenTabs={matchesOpenTabs}
     />
   );
 }
@@ -126,6 +129,13 @@ export const PackCardConfigurableNoMatch: Story = {
       ],
     },
     initiallySelected: true,
+  },
+};
+
+export const PackCardMatchesOpenTabs: Story = {
+  args: {
+    pack: simplePack,
+    matchesOpenTabs: true,
   },
 };
 

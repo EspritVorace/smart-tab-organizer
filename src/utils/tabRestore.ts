@@ -8,6 +8,7 @@ import type {
   GroupConflictAction,
 } from './conflictDetection';
 import { incrementSessionEvent } from './statisticsUtils';
+import { updateSession } from './sessionStorage';
 
 export type RestoreTarget = 'current' | 'new' | 'replace';
 
@@ -28,6 +29,12 @@ export interface RestoreOptions {
    * Pinned tabs are always preserved regardless of this value.
    */
   protectedTabId?: number;
+  /**
+   * Id of the session being restored. When provided and at least one tab is
+   * created, the session's `lastRestoredAt` is stamped (without touching
+   * `updatedAt`). Omitted for ad-hoc restores not tied to a stored session.
+   */
+  sessionId?: string;
 }
 
 export interface RestoreResult {
@@ -48,7 +55,7 @@ export interface RestoreResult {
  * a filtered subset of tabs/groups plus conflict resolution data.
  */
 export async function restoreSessionTabs(
-  session: Pick<Session, 'ungroupedTabs' | 'groups'>,
+  session: Pick<Session, 'id' | 'ungroupedTabs' | 'groups'>,
   target: RestoreTarget,
   protectedTabId?: number,
 ): Promise<RestoreResult> {
@@ -57,6 +64,7 @@ export async function restoreSessionTabs(
     groups: session.groups,
     target,
     protectedTabId,
+    sessionId: session.id,
   });
 }
 
@@ -80,7 +88,7 @@ async function requestSkipDeduplication(urls: string[]): Promise<void> {
 
 /** Restore tabs and groups in Chrome */
 export async function restoreTabs(options: RestoreOptions): Promise<RestoreResult> {
-  const { tabs, groups, target, conflictResolution, conflictAnalysis, protectedTabId } = options;
+  const { tabs, groups, target, conflictResolution, conflictAnalysis, protectedTabId, sessionId } = options;
   const result: RestoreResult = {
     tabsCreated: 0,
     duplicatesSkipped: 0,
@@ -105,6 +113,10 @@ export async function restoreTabs(options: RestoreOptions): Promise<RestoreResul
 
   if (result.tabsCreated > 0) {
     await incrementSessionEvent('restored', { tabsRestored: result.tabsCreated });
+    // touch:false so a restore does not masquerade as a content edit (updatedAt).
+    if (sessionId) {
+      await updateSession(sessionId, { lastRestoredAt: new Date().toISOString() }, { touch: false });
+    }
   }
 
   return result;

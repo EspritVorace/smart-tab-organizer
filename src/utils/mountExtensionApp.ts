@@ -1,17 +1,28 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, type Root } from 'react-dom/client';
 import { browser } from 'wxt/browser';
 import { logger } from './logger.js';
-import { initCategoriesStore } from './categoriesStore.js';
+
+/**
+ * Container augmented with the React root we created for it. Reusing the root
+ * across an HMR re-execution of an entrypoint avoids mounting a second
+ * parallel React tree on the same node, which would leave the first tree's
+ * document-level listeners attached and fire every keyboard shortcut twice
+ * (or more, after further hot reloads). No effect in production: each
+ * entrypoint mounts exactly once.
+ */
+type RootContainer = HTMLElement & { __extReactRoot?: Root };
 
 /**
  * Bootstrap utility shared by all extension entry points.
  *
  * - Applies the browser UI language to `document.documentElement.lang`
  *   so screen readers announce content in the correct locale.
- * - Populates the categories in-memory cache so sync accessors
- *   (`getRuleCategory`, `getAllCategories`) return data on first render.
  * - Mounts the given React element into the DOM node identified by `rootId`.
+ *
+ * Categories are read-only constants loaded synchronously into a module-level
+ * cache (see `categoriesStore.ts`), so no async initialization is needed before
+ * the first render.
  *
  * @param rootId - The `id` attribute of the target DOM element (e.g. `"options-app"`).
  * @param app    - The React element to render (e.g. `<OptionsApp />`).
@@ -25,20 +36,13 @@ export function mountExtensionApp(rootId: string, app: React.ReactNode): void {
     logger.debug('[mountExtensionApp] getUILanguage unavailable, falling back to HTML default lang.', err);
   }
 
-  const container = document.getElementById(rootId);
+  const container = document.getElementById(rootId) as RootContainer | null;
   if (!container) {
     logger.error(`[mountExtensionApp] DOM element #${rootId} not found. Cannot mount app.`);
     return;
   }
 
-  const root = createRoot(container);
-
-  // Categories are read synchronously from a module-level cache, so populate
-  // it before the first render. On first install the cache may be empty until
-  // the background service worker seeds it; the storage watcher inside the
-  // store will refresh the cache and consumers that rely on useSettings will
-  // re-render via the normal subscription path.
-  initCategoriesStore()
-    .catch(e => logger.error('[CATEGORIES] init failed:', e))
-    .finally(() => root.render(app));
+  const root = container.__extReactRoot ?? createRoot(container);
+  container.__extReactRoot = root;
+  root.render(app);
 }

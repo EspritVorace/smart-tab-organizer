@@ -23,7 +23,6 @@ import { getEffectiveBindings } from '@/shortcuts/getEffectiveBindings';
 import { SHORTCUTS_REGISTRY } from '@/shortcuts/registry';
 import type { Binding, ShortcutEntry, ShortcutScope } from '@/shortcuts/types';
 import {
-  WIDGET_SCOPE_SELECTOR,
   isDialogOpen,
   isSequencePrefix,
   isTypingTarget,
@@ -49,6 +48,26 @@ export interface UseShortcutsOptions {
 
 const DEFAULT_SEQUENCE_TIMEOUT_MS = 1500;
 
+/**
+ * Module-level registry of "claim checkers" contributed by every mounted
+ * `widget:*` hook. A checker reports whether its widget would handle a given
+ * event (focus on the matching scope element AND one of its registered
+ * bindings matches the combo). Page-level entries flagged
+ * `excludeIfInsideWidget` consult these so they only yield the combos a
+ * focused widget actually owns: pressing `r` on a pinned card belongs to the
+ * card (`sessionCard.restore.*`), but `o`/`s`/`p`, which no card claims, keep
+ * firing the popup-level action instead of being swallowed.
+ */
+type WidgetClaimChecker = (event: KeyboardEvent) => boolean;
+const widgetClaimCheckers = new Set<WidgetClaimChecker>();
+
+function anyWidgetClaims(event: KeyboardEvent): boolean {
+  for (const check of widgetClaimCheckers) {
+    if (check(event)) return true;
+  }
+  return false;
+}
+
 function entryScopeFilter(entry: ShortcutEntry, event: KeyboardEvent): boolean {
   if (entry.scope.startsWith('widget:')) {
     if (!(event.target instanceof Element)) return false;
@@ -56,7 +75,7 @@ function entryScopeFilter(entry: ShortcutEntry, event: KeyboardEvent): boolean {
     return true;
   }
   if (entry.excludeIfInsideWidget && event.target instanceof Element) {
-    if (event.target.closest(WIDGET_SCOPE_SELECTOR)) return false;
+    if (anyWidgetClaims(event)) return false;
   }
   return true;
 }
@@ -85,6 +104,30 @@ export function useShortcuts(
 
   useEffect(() => {
     if (!enabled) return undefined;
+
+    // Widget scopes contribute a claim checker so page-level entries flagged
+    // `excludeIfInsideWidget` only yield the combos this widget actually owns.
+    // The checker reads `bindingsRef.current` lazily, so it always reflects the
+    // currently registered bindings even if they change between renders.
+    let widgetChecker: WidgetClaimChecker | null = null;
+    if (scope.startsWith('widget:')) {
+      const selector = widgetScopeSelector(scope);
+      widgetChecker = (event: KeyboardEvent): boolean => {
+        if (!(event.target instanceof Element)) return false;
+        if (!event.target.matches(selector)) return false;
+        const combo = serializeKeyEvent(event);
+        if (combo === null) return false;
+        for (const id of Object.keys(bindingsRef.current)) {
+          const entry = SHORTCUTS_REGISTRY[id];
+          if (!entry || entry.scope !== scope) continue;
+          for (const binding of getEffectiveBindings(id)) {
+            if (matchesBinding([combo], binding as Binding, event)) return true;
+          }
+        }
+        return false;
+      };
+      widgetClaimCheckers.add(widgetChecker);
+    }
 
     let buffer: string[] = [];
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -123,6 +166,12 @@ export function useShortcuts(
       for (const { entry, action } of scoped) {
         for (const binding of entry.defaultBindings) {
           if (!matchesBinding(candidateBuffer, binding as Binding, event)) continue;
+          // A single-key action must not fire when the key was already consumed
+          // by an earlier-registered handler, typically the tail of a sequence
+          // in another hook (e.g. `w p` switching workspaces in the popup must
+          // not also trigger the `p` "open options" action). Sequence bindings
+          // are unaffected: they keep completing even after preventDefault.
+          if (typeof binding === 'string' && event.defaultPrevented) continue;
           if (!passesContextualFilters(entry, event)) {
             reset();
             return true;
@@ -195,6 +244,7 @@ export function useShortcuts(
     return () => {
       document.removeEventListener('keydown', handler);
       document.removeEventListener('focusin', focusHandler);
+      if (widgetChecker) widgetClaimCheckers.delete(widgetChecker);
       clearTimer();
       if (buffer.length > 0) {
         buffer = [];

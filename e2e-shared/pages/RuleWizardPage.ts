@@ -113,6 +113,16 @@ export class RuleWizardPage extends DialogPage {
     return this.dialog().locator('#presetId');
   }
 
+  /** Single-line CodeMirror editor for the title parsing regex (manual mode). */
+  titleRegexField(): Locator {
+    return this.dialog().getByTestId('title-regex-field');
+  }
+
+  /** Single-line CodeMirror editor for the URL parsing regex (manual + regex mode). */
+  urlRegexField(): Locator {
+    return this.dialog().getByTestId('url-regex-field');
+  }
+
   /** Deduplication enable/disable switch on step 3. */
   deduplicationSwitch(): Locator {
     return this.dialog().locator('[role="switch"]');
@@ -168,9 +178,9 @@ export class RuleWizardPage extends DialogPage {
     await this.labelInput().fill(label);
   }
 
-  /** Fill the domain filter input. */
+  /** Fill the domain filter editor (CodeMirror, no `<input>`). */
   async fillDomainFilter(domain: string): Promise<void> {
-    await this.domainFilterInput().fill(domain);
+    await this.typeCodeField(this.domainFilterInput(), domain);
   }
 
   /**
@@ -221,6 +231,29 @@ export class RuleWizardPage extends DialogPage {
       .getByRole('option', { name: new RegExp(`^${labels[source]}`, 'i') })
       .first()
       .click();
+  }
+
+  /**
+   * Type into a CodeMirror field (regex or domain). The editor exposes no
+   * `<input>`, so we focus the `.cm-content` node and drive it through the
+   * keyboard (a `.fill()` would target a non-existent form value).
+   */
+  private async typeCodeField(field: Locator, text: string): Promise<void> {
+    const content = field.locator('.cm-content');
+    await content.click();
+    await this.page.keyboard.press('ControlOrMeta+a');
+    await this.page.keyboard.press('Delete');
+    if (text) await this.page.keyboard.type(text);
+  }
+
+  /** Fill the title parsing regex editor (manual mode, title-based source). */
+  async fillTitleRegex(pattern: string): Promise<void> {
+    await this.typeCodeField(this.titleRegexField(), pattern);
+  }
+
+  /** Fill the URL parsing regex editor (manual mode, URL regex extraction). */
+  async fillUrlRegex(pattern: string): Promise<void> {
+    await this.typeCodeField(this.urlRegexField(), pattern);
   }
 
   // ─── Atomic actions: options (step 3) ────────────────────────────────────

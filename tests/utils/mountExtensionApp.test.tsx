@@ -1,9 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import React from 'react';
-
-vi.mock('../../src/utils/categoriesStore.js', () => ({
-  initCategoriesStore: vi.fn(() => Promise.resolve()),
-}));
 
 import { mountExtensionApp } from '../../src/utils/mountExtensionApp';
 

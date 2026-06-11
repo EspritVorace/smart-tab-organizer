@@ -11,6 +11,7 @@ export {
   type ImportConflictMode,
 } from './ImportWizardPage.js';
 export { ExportWizardPageBase } from './ExportWizardPageBase.js';
+export { OrganizeRewardDialogPage } from './OrganizeRewardDialogPage.js';
 export { ExportWizardPage } from './ExportWizardPage.js';
 export { SessionsExportWizardPage } from './SessionsExportWizardPage.js';
 export {
@@ -26,6 +27,7 @@ export {
   type GroupConflictAction,
 } from './RestoreWizardPage.js';
 export { SessionsListPage } from './SessionsListPage.js';
+export { WorkspaceListPage } from './WorkspaceListPage.js';
 export { SessionEditorPage } from './SessionEditorPage.js';
 export { DomainRulesListPage } from './DomainRulesListPage.js';
 export {

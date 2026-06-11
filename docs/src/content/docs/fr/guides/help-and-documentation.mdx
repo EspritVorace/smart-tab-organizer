@@ -1,0 +1,68 @@
+---
+title: Aide et documentation
+description: "L'aide intégrée à l'extension : panneau de raccourcis, documentation contextuelle (F1), astuces de la page d'accueil et accueil d'onboarding."
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+L'extension embarque plusieurs points d'aide pour ne jamais vous laisser
+chercher : un panneau de raccourcis, une documentation contextuelle, des astuces
+sur la page d'accueil et un écran d'accueil pour les nouveaux venus.
+
+## Le panneau de raccourcis
+
+Pressez `?` depuis la popup ou la page Options pour ouvrir le **panneau de
+raccourcis**. C'est une référence rapide de toutes les commandes clavier
+disponibles, regroupées par surface (popup, navigation des Options, listes de
+règles ou de sessions, actions de carte, raccourcis globaux).
+
+Le contenu du panneau est dérivé du registre central des raccourcis : il reste
+donc toujours synchronisé avec les raccourcis réellement actifs. Les commandes
+globales y affichent la touche que vous leur avez assignée dans le navigateur
+plutôt qu'une valeur par défaut.
+
+## La documentation contextuelle
+
+Pressez `F1` depuis la page Options pour ouvrir, dans un nouvel onglet, la page
+de cette documentation qui correspond à l'onglet courant. Inutile de chercher la
+bonne page : l'extension vous y emmène directement, dans la langue de l'interface
+(français, anglais ou espagnol).
+
+| Onglet Options | Page ouverte |
+|---|---|
+| Accueil | Pourquoi cette extension |
+| Règles | Règles de domaine |
+| Sessions | Sessions |
+| Statistiques | Statistiques |
+| Import / Export | Import / Export |
+| Paramètres | Paramètres |
+| Espaces de travail | Espaces de travail |
+
+Un bouton de documentation est également présent dans l'entête, à côté du
+sélecteur de thème.
+
+## Les astuces de la page d'accueil
+
+La page d'accueil affiche une section **Astuces** qui met en avant des
+fonctionnalités utiles, souvent méconnues. Les astuces défilent dans un
+carrousel, avec navigation par flèches et pastilles.
+
+## L'accueil d'onboarding
+
+Au premier lancement, la page d'accueil présente un écran de bienvenue qui
+résume les trois piliers de l'extension (grouper, dédupliquer, sauvegarder) et
+propose deux actions directes : **importer un pack** de règles prêtes à l'emploi
+ou **créer une première règle**.
+
+<Aside type="tip">
+Toute la documentation reste accessible hors connexion via `F1` une fois la
+page mise en cache par le navigateur, et en ligne sur [docs.esprit-vorace.fr](https://docs.esprit-vorace.fr).
+</Aside>
+
+## Aller plus loin
+
+<CardGrid>
+  <LinkCard title="Raccourcis clavier" href="/reference/keyboard-shortcuts" description="La liste complète des raccourcis, par surface." />
+  <LinkCard title="La page d'accueil" href="/discover/home-page" description="Profils épinglés, actions rapides et astuces." />
+  <LinkCard title="Règles de domaine" href="/guides/domain-rules" description="Le centre névralgique de l'extension." />
+</CardGrid>

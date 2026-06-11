@@ -2,11 +2,12 @@ import { storage, type WxtStorageItem, type StorageItemKey } from 'wxt/utils/sto
 import type { DomainRuleSettings } from '@/types/syncSettings.js';
 import { defaultAppSettings } from '@/types/syncSettings.js';
 import type { DeduplicationKeepStrategyValue, DefaultRestoreActionValue } from '@/schemas/enums.js';
-import type { RuleCategory } from '@/schemas/category.js';
 import type { Statistics } from '@/types/statistics.js';
 import { defaultStatistics } from '@/types/statistics.js';
 import type { Session } from '@/types/session.js';
 import type { WorkspaceMeta } from '@/schemas/workspace.js';
+import { type RuleViewState, DEFAULT_RULE_VIEW_STATE } from '@/utils/ruleViewUtils.js';
+import { type SessionViewState, DEFAULT_SESSION_VIEW_STATE } from '@/utils/sessionViewUtils.js';
 
 export const DEFAULT_WORKSPACE_ID = 'default';
 
@@ -16,9 +17,9 @@ export const DEFAULT_WORKSPACE_ID = 'default';
  * before workspaces were introduced and is now prefixed with
  * `local:ws:{wsId}:`.
  *
- * `categories` and `categoriesSeeded` are intentionally absent: rule
- * categories are global constants (sourced from `src/data/categories.json`)
- * and must resolve to the same value regardless of the active workspace.
+ * `categories` is intentionally absent: rule categories are read-only
+ * constants loaded in memory from `src/data/categories.json` (see
+ * `categoriesStore.ts`) and are never persisted in storage.
  */
 export const WORKSPACE_SCOPED_KEYS = [
   'globalGroupingEnabled',
@@ -35,6 +36,9 @@ export const WORKSPACE_SCOPED_KEYS = [
   'pinnedSessions',
   'archivedSessions',
   'popupPinnedEmptyCollapsed',
+  'rulesViewState',
+  'sessionsViewState',
+  'archivedSessionsViewState',
 ] as const;
 
 export type WorkspaceScopedKey = (typeof WORKSPACE_SCOPED_KEYS)[number];
@@ -60,8 +64,6 @@ export interface ScopedItems {
   deduplicationKeepStrategyItem: WxtStorageItem<DeduplicationKeepStrategyValue, Record<string, unknown>>;
   defaultRestoreActionItem: WxtStorageItem<DefaultRestoreActionValue, Record<string, unknown>>;
   domainRulesItem: WxtStorageItem<DomainRuleSettings, Record<string, unknown>>;
-  categoriesItem: WxtStorageItem<RuleCategory[], Record<string, unknown>>;
-  categoriesSeededItem: WxtStorageItem<boolean, Record<string, unknown>>;
   notifyOnGroupingItem: WxtStorageItem<boolean, Record<string, unknown>>;
   notifyOnDeduplicationItem: WxtStorageItem<boolean, Record<string, unknown>>;
   notifyOnOrganizeItem: WxtStorageItem<boolean, Record<string, unknown>>;
@@ -70,22 +72,10 @@ export interface ScopedItems {
   pinnedSessionsItem: WxtStorageItem<Session[], Record<string, unknown>>;
   archivedSessionsItem: WxtStorageItem<Session[], Record<string, unknown>>;
   popupPinnedEmptyCollapsedItem: WxtStorageItem<boolean, Record<string, unknown>>;
+  rulesViewStateItem: WxtStorageItem<RuleViewState, Record<string, unknown>>;
+  sessionsViewStateItem: WxtStorageItem<SessionViewState, Record<string, unknown>>;
+  archivedSessionsViewStateItem: WxtStorageItem<SessionViewState, Record<string, unknown>>;
 }
-
-/**
- * Rule categories are global constants (not workspace-scoped). They live at
- * the unprefixed legacy keys (`local:categories`, `local:categoriesSeeded`)
- * and are reused as-is across all workspaces, so switching workspace does
- * not require re-seeding or re-loading the cache.
- */
-const globalCategoriesItem = storage.defineItem<RuleCategory[]>(
-  'local:categories',
-  { defaultValue: defaultAppSettings.categories },
-);
-const globalCategoriesSeededItem = storage.defineItem<boolean>(
-  'local:categoriesSeeded',
-  { defaultValue: false },
-);
 
 const scopedItemsCache = new Map<string, ScopedItems>();
 
@@ -123,8 +113,6 @@ export function defineWorkspaceItems(wsId: string): ScopedItems {
       workspaceStorageKey(wsId, 'domainRules'),
       { defaultValue: defaultAppSettings.domainRules },
     ),
-    categoriesItem: globalCategoriesItem,
-    categoriesSeededItem: globalCategoriesSeededItem,
     notifyOnGroupingItem: storage.defineItem<boolean>(
       workspaceStorageKey(wsId, 'notifyOnGrouping'),
       { defaultValue: defaultAppSettings.notifyOnGrouping },
@@ -157,6 +145,18 @@ export function defineWorkspaceItems(wsId: string): ScopedItems {
       workspaceStorageKey(wsId, 'popupPinnedEmptyCollapsed'),
       { defaultValue: false },
     ),
+    rulesViewStateItem: storage.defineItem<RuleViewState>(
+      workspaceStorageKey(wsId, 'rulesViewState'),
+      { defaultValue: DEFAULT_RULE_VIEW_STATE },
+    ),
+    sessionsViewStateItem: storage.defineItem<SessionViewState>(
+      workspaceStorageKey(wsId, 'sessionsViewState'),
+      { defaultValue: DEFAULT_SESSION_VIEW_STATE },
+    ),
+    archivedSessionsViewStateItem: storage.defineItem<SessionViewState>(
+      workspaceStorageKey(wsId, 'archivedSessionsViewState'),
+      { defaultValue: DEFAULT_SESSION_VIEW_STATE },
+    ),
   };
 
   scopedItemsCache.set(wsId, items);
@@ -180,6 +180,18 @@ export const workspacesIndexItem = storage.defineItem<WorkspaceMeta[]>(
 export const activeWorkspaceIdItem = storage.defineItem<string>(
   'local:activeWorkspaceId',
   { defaultValue: DEFAULT_WORKSPACE_ID },
+);
+
+/**
+ * ID of the workspace that was active right before the current one. Powers the
+ * "last used workspace" shortcut (a two-entry MRU: a single back-and-forth
+ * pointer, not a full ring). `null` until the first switch happens. Updated by
+ * every switch path (`performWorkspaceSwitch`) so the keyboard, the dropdown
+ * and the background command layer stay consistent.
+ */
+export const previousWorkspaceIdItem = storage.defineItem<string | null>(
+  'local:previousWorkspaceId',
+  { defaultValue: null },
 );
 
 /** Test-only helper to clear the scoped-items memo. */

@@ -4,9 +4,9 @@
 
 # SmartTab Organizer
 
-> **Doma tus pestañas. Sin nube, sin IA, sin tracking.**
+> **Tus pestañas se ordenan y se nombran solas. Sin nube, sin tracking.**
 
-Una extensión para Chrome y Firefox que agrupa tus pestañas por dominio, elimina los duplicados y captura tus espacios de trabajo como sesiones que puedes restaurar con un clic.
+SmartTab Organizer lee el nombre del grupo directamente de la URL o del título: un grupo por repositorio, por ticket o por cliente se crea solo, sin multiplicar una regla por valor. Todo se queda en tu navegador: sin nube, sin IA, sin tracking. La extensión también elimina las pestañas duplicadas y captura tus espacios de trabajo como sesiones que puedes restaurar con un clic. [Verlo en imágenes](https://docs.esprit-vorace.fr/es/).
 
 <p align="center">
   <img src="doc/store.png" alt="SmartTab Organizer" width="720">
@@ -24,8 +24,8 @@ Una extensión para Chrome y Firefox que agrupa tus pestañas por dominio, elimi
 
 ## ¿Por qué?
 
-- Tus pestañas se acumulan más rápido de lo que las cierras. SmartTab las pone en su sitio, automáticamente.
-- Las otras herramientas envían tus datos a la nube o meten IA por todas partes. Aquí, todo se queda en tu navegador, cero telemetría.
+- Las otras extensiones te obligan a escribir un nombre de grupo fijo, una regla por valor. SmartTab lo extrae de la URL o del título: un grupo por repositorio, por ticket o por cliente aparece solo, sin multiplicar las reglas.
+- Sin nube, sin IA, sin telemetría. Todo funciona en tu navegador y tus datos nunca salen de él.
 - El espacio de trabajo que has montado merece volver mañana. Guárdalo, ponle nombre, restáuralo.
 
 ## Lo que hace
@@ -83,7 +83,7 @@ pnpm storybook    # Explorador de componentes (puerto 6006)
 pnpm build        # Build de producción
 ```
 
-El stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) y las convenciones de código están documentadas en [`CLAUDE.md`](CLAUDE.md) y el [anexo stack técnico](docs/src/content/docs/contribuer/stack.mdx).
+El stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) y las convenciones de código están documentadas en [`CLAUDE.md`](CLAUDE.md) y el [anexo stack técnico](docs/src/content/docs/es/contributing/stack.mdx).
 
 Por favor, abre una issue antes de enviar una pull request grande.
 
@@ -93,4 +93,4 @@ GNU General Public License v3.0.
 
 ## 🗝️ Licencias de terceros
 
-SmartTab Organizer incluye componentes de codigo abierto (React, Radix UI, Lucide, Zod, CodeMirror, dnd-kit y otros). Sus avisos de copyright y textos de licencia completos estan listados en [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt) y en la [pagina de atribucion](https://docs.esprit-vorace.fr/es/reference/licences-open-source/).
+SmartTab Organizer incluye componentes de codigo abierto (React, Radix UI, Lucide, Zod, CodeMirror, dnd-kit y otros). Sus avisos de copyright y textos de licencia completos estan listados en [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt) y en la [pagina de atribucion](https://docs.esprit-vorace.fr/es/reference/open-source-licenses/).

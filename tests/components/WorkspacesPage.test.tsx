@@ -42,8 +42,14 @@ vi.mock('../../src/components/UI/PageLayout/PageLayout', () => ({
 }));
 
 import { WorkspacesPage } from '../../src/pages/WorkspacesPage';
+import { MockImportExportWizardsProvider } from '../../src/test-utils/MockImportExportWizardsProvider';
 
-const wrap = (ui: React.ReactNode) => render(<Theme>{ui}</Theme>);
+const wrap = (ui: React.ReactNode) =>
+  render(
+    <Theme>
+      <MockImportExportWizardsProvider>{ui}</MockImportExportWizardsProvider>
+    </Theme>,
+  );
 
 const baseSettings: AppSettings = {
   globalGroupingEnabled: true,
@@ -102,12 +108,18 @@ describe('WorkspacesPage', () => {
     expect(screen.getByTestId('workspace-row-default-switch')).toBeInTheDocument();
   });
 
-  it('disables delete on the default workspace and on the only workspace', () => {
+  it('disables delete on the default workspace and on the only workspace', async () => {
     ctx.workspaces = [mkWs('default', 'Personal')];
     ctx.activeId = 'default';
     wrap(<WorkspacesPage syncSettings={baseSettings} />);
+
+    // The Radix UI DropdownMenu opens on pointerDown (not click).
+    fireEvent.pointerDown(screen.getByTestId('workspace-row-default-btn-dropdown'), {
+      button: 0,
+    });
     // default + only -> deleteBlocked
-    expect(screen.getByTestId('workspace-row-default-delete')).toBeDisabled();
+    const deleteItem = await screen.findByTestId('workspace-row-default-menu-delete');
+    expect(deleteItem).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('clicking switch invokes context.switchTo with the workspace id', () => {
@@ -135,21 +147,27 @@ describe('WorkspacesPage', () => {
     );
   });
 
-  it('clicking edit opens the edit dialog with the workspace pre-filled', () => {
+  it('clicking edit opens the edit dialog with the workspace pre-filled', async () => {
     ctx.workspaces = [mkWs('default', 'Personal'), mkWs('ws-2', 'Work', 'jade')];
     ctx.activeId = 'ws-2';
     wrap(<WorkspacesPage syncSettings={baseSettings} />);
 
-    fireEvent.click(screen.getByTestId('workspace-row-ws-2-edit'));
+    fireEvent.pointerDown(screen.getByTestId('workspace-row-ws-2-btn-dropdown'), {
+      button: 0,
+    });
+    fireEvent.click(await screen.findByTestId('workspace-row-ws-2-menu-edit'));
     expect(screen.getByTestId('workspace-form-name')).toHaveValue('Work');
   });
 
-  it('clicking delete opens the destructive confirm dialog', () => {
+  it('clicking delete opens the destructive confirm dialog', async () => {
     ctx.workspaces = [mkWs('default', 'Personal'), mkWs('ws-2', 'Work')];
     ctx.activeId = 'default';
     wrap(<WorkspacesPage syncSettings={baseSettings} />);
 
-    fireEvent.click(screen.getByTestId('workspace-row-ws-2-delete'));
+    fireEvent.pointerDown(screen.getByTestId('workspace-row-ws-2-btn-dropdown'), {
+      button: 0,
+    });
+    fireEvent.click(await screen.findByTestId('workspace-row-ws-2-menu-delete'));
     expect(screen.getByTestId('workspace-delete-dialog')).toBeInTheDocument();
   });
 

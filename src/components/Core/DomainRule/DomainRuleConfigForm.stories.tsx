@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { within, userEvent, expect } from 'storybook/test';
+import { within, userEvent, expect, waitFor } from 'storybook/test';
+import { setRegexFieldValue } from '@/components/UI/RegexCodeField';
 import { DomainRuleConfigForm, type DomainRuleConfigFormProps } from './DomainRuleConfigForm';
 import type { ConfigMode } from './ConfigModeSelector';
 import type { GroupNameSourceValue, UrlExtractionModeValue } from '@/schemas/enums';
@@ -124,10 +125,12 @@ export const DomainRuleConfigFormManualWithRegex: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const inputs = canvas.getAllByRole('textbox');
-    if (inputs.length > 0) {
-      await userEvent.clear(inputs[0]);
-      await userEvent.type(inputs[0], '(.+)');
-    }
+    // The title regex field is a single-line CodeMirror editor (no <input>);
+    // drive it through the dispatch seam rather than userEvent.type.
+    await setRegexFieldValue(canvasElement, 'title-regex-field', '^(?<id>\\d+)-(.+)$');
+    await waitFor(() => {
+      const content = canvas.getByTestId('title-regex-field').querySelector('.cm-content');
+      expect(content?.textContent).toContain('(?<id>');
+    });
   },
 };

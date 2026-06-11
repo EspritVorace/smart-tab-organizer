@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, type Ref } from 'react';
 import { Flex, Kbd, Tooltip } from '@radix-ui/themes';
 import { browser } from 'wxt/browser';
 import { Camera, RotateCcw, Wand2 } from 'lucide-react';
@@ -6,6 +6,7 @@ import { getMessage, getPluralMessage } from '@/utils/i18n';
 import { loadActiveSessions, loadPinnedSessions } from '@/utils/sessionStorage';
 import { getActiveTabGroupId, hasCapturableTabs } from '@/utils/tabCapture';
 import { openOptionsWithHash } from '@/utils/openOptions';
+import { buildSnapshotHash } from '@/utils/snapshotHash';
 import { useSettings } from '@/hooks/useSettings';
 import styles from './PopupToolbar.module.css';
 
@@ -16,6 +17,8 @@ export interface PopupToolbarProps {
   canSave?: boolean;
   isOrganizing?: boolean;
   activeTabGroupId?: number | null;
+  /** Ref forwarded to the "Organize tabs" button so the popup can manage initial focus. */
+  organizeButtonRef?: Ref<HTMLButtonElement>;
 }
 
 function withTooltip(content: React.ReactNode, node: React.ReactElement) {
@@ -68,9 +71,7 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
   const restoreDisabledHint = !hasSessions ? getMessage('popupRestoreDisabledHint') : undefined;
 
   const isInGroup = activeTabGroupId !== null && canSave;
-  const saveHash = isInGroup
-    ? `#sessions?action=snapshot&groupId=${activeTabGroupId}`
-    : '#sessions?action=snapshot';
+  const saveHash = buildSnapshotHash(isInGroup ? activeTabGroupId : null);
   const saveAriaLabel = isInGroup
     ? getMessage('popupSaveActiveGroup')
     : getMessage('popupSaveSession');
@@ -126,6 +127,7 @@ export function PopupToolbar(props: PopupToolbarProps = {}) {
   return (
     <div data-testid="popup-toolbar" className={styles.toolbar}>
       <button
+        ref={props.organizeButtonRef}
         type="button"
         data-testid="popup-toolbar-btn-organize"
         className={styles.hero}

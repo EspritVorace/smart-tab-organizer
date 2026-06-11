@@ -1,5 +1,46 @@
 # Changelog
 
+## 1.2.4 — since 1.2.3
+
+### New Features
+- Onboarding hero now suggests rule packs matching your open tabs, pre-selected, behind a single "Import and organize" button (local analysis, persistent dismissal)
+- "Organize now" reward offered right after a pack import to rearrange open tabs immediately, with the outcome announced to screen readers
+- Pack gallery lifts packs matching your open tabs to the top and flags them with a "Matches your open tabs" label
+- Statistics page split into four deep-linked sub-pages
+- Local storage usage breakdown added to the statistics page, split per workspace
+- Keyboard workspace switching (next, previous, last) reachable from any tab
+- Domain rules list gains filter, sort and group controls
+- Sessions section headers gain a filter/sort button
+- Live regex syntax highlighting for the domain filter (step 1) and for the title/url fields in the rule wizard
+- Import/export overflow menu added to list toolbars, plus an "import-pack" empty-state action
+- Last used, restored and activated dates now remembered for sessions, rules and workspaces
+- Sidebar shows non-archived counters and bolds the active item
+- Global theme toggle shortcut (D) and Kbd hints on the docs and theme buttons
+- Keyboard shortcuts for the session preview toggle and section jumps
+- Search box gains a clear button, a "/" shortcut hint and an Esc tooltip
+- Smarter initial focus across the popup and list pages (first pinned session or the Organize button, first result on search), plus loading skeletons and domain-rules group keyboard navigation
+- Per-mode internal state preserved when switching config modes in the rule wizard
+
+### Improvements
+- Workspace cards harmonised with the session and rule cards
+- Grouped rules indented to the right for a clearer hierarchy
+- Rule categories turned into read-only in-memory constants
+- Type-safe getMessage via @wxt-dev/i18n: an unknown i18n key now fails at compile time
+- Public JSON assets minified at build time
+- Shared useCodeMirrorSingleLine hook extracted from the domain and regex code fields
+- Documentation migrated to English-rooted locales and slugs, with a browser-language redirect for root visitors
+- Documentation served as Markdown via content negotiation; AI content usage preferences declared via Content-Signal in robots.txt
+- Import/export JSON schema reference page generated, and the statistics sub-pages documented
+- CI runs two Playwright workers per shard; domain-rules keyboard drag-and-drop de-flaked
+
+### Bug Fixes
+- Popup: the S shortcut now scopes the snapshot to the active tab group
+- Popup: the o/s/p shortcuts stay active when a pinned card is focused
+- Shortcuts: conflicting global keyboard shortcuts replaced
+- UX: domain field alignment, sessions tab focus and statistics tab shortcuts fixed
+- Dev: reuse the React root so HMR no longer doubles the keyboard shortcuts
+- Scripts: escape backslashes in the JSON-schema doc table cells
+
 ## 1.2.3 — since 1.2.2
 
 ### New Features

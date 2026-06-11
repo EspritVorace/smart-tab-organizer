@@ -1,6 +1,6 @@
 import React from 'react';
 import { Flex, Separator, Text } from '@radix-ui/themes';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 
 interface ClassificationGroupProps<T> {
   /** i18n key for the group title; receives a `{count}` placeholder. */
@@ -29,7 +29,7 @@ export function ClassificationGroup<T>({
     <>
       {showSeparator && <Separator size="4" />}
       <Text size="3" weight="bold">
-        {getMessage(titleKey).replace('{count}', String(items.length))}
+        {getMessage(titleKey as MessageKey).replace('{count}', String(items.length))}
       </Text>
       {beforeList}
       <Flex direction="column" gap="2" role="list">

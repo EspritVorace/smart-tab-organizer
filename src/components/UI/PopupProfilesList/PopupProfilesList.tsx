@@ -89,7 +89,14 @@ async function openRefreshFromPopup(session: Session) {
   await openSessionsPage(suffix);
 }
 
-export function PopupProfilesList() {
+export interface PopupProfilesListProps {
+  /** When true, focus the first pinned session card once sessions have loaded. */
+  autoFocusFirstPinned?: boolean;
+  /** Called once after sessions load, reporting whether any pinned session exists. */
+  onLoaded?: (hasPinned: boolean) => void;
+}
+
+export function PopupProfilesList({ autoFocusFirstPinned, onLoaded }: PopupProfilesListProps = {}) {
   const { scopedItems } = useActiveWorkspaceContext();
   const popupPinnedEmptyCollapsedItem = scopedItems.popupPinnedEmptyCollapsedItem;
   const [pinnedSessions, setPinnedSessions] = useState<Session[]>([]);
@@ -97,6 +104,7 @@ export function PopupProfilesList() {
   const [loaded, setLoaded] = useState(false);
   const [emptyCollapsed, setEmptyCollapsed] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  const initialFocusAppliedRef = useRef(false);
 
   useEffect(() => {
     Promise.all([loadPinnedSessions(), loadActiveSessions()]).then(([pinned, active]) => {
@@ -106,6 +114,22 @@ export function PopupProfilesList() {
     });
     popupPinnedEmptyCollapsedItem.getValue().then((v) => setEmptyCollapsed(v ?? false));
   }, [popupPinnedEmptyCollapsedItem]);
+
+  // Initial focus orchestration: once sessions have loaded, focus the first
+  // pinned card here (we own its DOM) and report `hasPinned` so the parent can
+  // fall back to the "Organize" button when there is no pinned session. Guarded
+  // to run only once, so later re-renders never steal focus from the user.
+  useEffect(() => {
+    if (!loaded || initialFocusAppliedRef.current) return;
+    initialFocusAppliedRef.current = true;
+    const hasPinned = pinnedSessions.length > 0;
+    if (autoFocusFirstPinned && hasPinned) {
+      listRef.current
+        ?.querySelector<HTMLElement>('[data-popup-pinned-card]')
+        ?.focus();
+    }
+    onLoaded?.(hasPinned);
+  }, [loaded, pinnedSessions, autoFocusFirstPinned, onLoaded]);
 
   const handleRestore = useCallback((session: Session, target: RestoreTarget) => {
     // The popup is not a tab, so browser.tabs.getCurrent() returns undefined,

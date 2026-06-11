@@ -8,7 +8,7 @@ export function DomainRulesPageSkeleton() {
   return (
     <PageLayoutSkeleton titleKey="domainRulesTab" descriptionKey="domainRulesPageDescription">
       <Box data-testid="page-rules-skeleton">
-        <ListToolbarSkeleton />
+        <ListToolbarSkeleton hasFilter hasMenu />
         <Flex direction="column" gap="3">
           {ROWS.map((i) => (
             <Card key={i} variant="surface" size="2">

@@ -1,0 +1,94 @@
+.hero {
+  background: linear-gradient(135deg, var(--accent-a4) 0%, var(--accent-a6) 100%);
+  border-radius: var(--radius-3);
+  padding: var(--space-6);
+}
+
+.title {
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.subtitle {
+  max-width: 640px;
+  margin: 0;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 640px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3);
+  border-radius: var(--radius-3);
+  border: 1px solid var(--gray-a5);
+  background: var(--color-panel-solid);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+
+.item:hover {
+  border-color: var(--accent-a8);
+  background: var(--accent-a2);
+}
+
+.item[aria-pressed='true'] {
+  border-color: var(--accent-a8);
+  background: var(--accent-a3);
+}
+
+/* Custom focus ring for non-Radix markup (see CLAUDE.md). */
+.item:focus-visible {
+  outline: 2px solid var(--focus-8);
+  outline-offset: 2px;
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-2);
+  border: 1px solid var(--gray-a7);
+  color: var(--accent-contrast);
+}
+
+.check[data-selected='true'] {
+  background: var(--accent-9);
+  border-color: var(--accent-9);
+}
+
+.itemName {
+  flex: 1 1 auto;
+  font-weight: 500;
+}
+
+.itemCount {
+  flex: 0 0 auto;
+}
+
+.transparency {
+  color: var(--gray-a11);
+}
+
+@media (max-width: 640px) {
+  .ctas {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ctas > * {
+    width: 100%;
+    justify-content: center;
+  }
+}

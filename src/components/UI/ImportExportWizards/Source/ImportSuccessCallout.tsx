@@ -1,7 +1,7 @@
 import React from 'react';
 import { Callout } from '@radix-ui/themes';
 import { CheckCircle } from 'lucide-react';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 import type { JsonSourceInputState } from './useJsonSourceInput';
 
 interface ImportSuccessCalloutProps {
@@ -22,7 +22,7 @@ export function ImportSuccessCallout({ source, countMessageKey }: ImportSuccessC
         <CheckCircle size={16} />
       </Callout.Icon>
       <Callout.Text>
-        {getMessage(countMessageKey).replace('{count}', String(source.parsedData.length))}
+        {getMessage(countMessageKey as MessageKey).replace('{count}', String(source.parsedData.length))}
       </Callout.Text>
     </Callout.Root>
   );

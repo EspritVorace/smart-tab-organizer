@@ -50,7 +50,10 @@ export const domainRuleSchema = z.object({
     { error: () => getMessage('errorInvalidQueryParamName') }
   ).optional(),
   createdAt: z.string().optional(),
-  updatedAt: z.string().optional()
+  updatedAt: z.string().optional(),
+  // ISO 8601 timestamp of the last time the rule actually grouped tabs or
+  // closed a duplicate at runtime. Distinct from updatedAt (last edit).
+  lastUsedAt: z.string().optional()
 }).refine((data) => {
   // When presetId is null, the conditional validations below apply.
   if (data.presetId === null) {

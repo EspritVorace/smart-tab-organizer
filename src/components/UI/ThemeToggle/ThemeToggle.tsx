@@ -1,41 +1,43 @@
 import React from 'react';
-import { useTheme } from 'next-themes';
-import { IconButton, Tooltip } from '@radix-ui/themes';
+import { Flex, IconButton, Kbd, Tooltip } from '@radix-ui/themes';
 import { Sun, Moon, Monitor, LucideProps } from 'lucide-react';
-import { getMessage } from '@/utils/i18n';
+import { useThemeCycle, type ThemeValue } from '@/hooks/useThemeCycle';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 
-interface ThemeOption {
-  value: 'light' | 'dark' | 'system';
+interface ThemeMeta {
   labelKey: string;
   icon: React.ComponentType<LucideProps>;
 }
 
+const THEME_META: Record<ThemeValue, ThemeMeta> = {
+  light: { labelKey: 'lightMode', icon: Sun },
+  dark: { labelKey: 'darkModeOption', icon: Moon },
+  system: { labelKey: 'systemTheme', icon: Monitor },
+};
+
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { theme, cycleTheme } = useThemeCycle();
 
-  const themeOptions: ThemeOption[] = [
-    { value: 'light', labelKey: 'lightMode', icon: Sun },
-    { value: 'dark', labelKey: 'darkModeOption', icon: Moon },
-    { value: 'system', labelKey: 'systemTheme', icon: Monitor },
-  ];
-
-  const handleThemeToggle = () => {
-    const currentIndex = themeOptions.findIndex(option => option.value === theme);
-    const nextIndex = (currentIndex + 1) % themeOptions.length;
-    setTheme(themeOptions[nextIndex].value);
-  };
-
-  const currentTheme = themeOptions.find(option => option.value === theme) || themeOptions[0];
-  const CurrentIcon = currentTheme.icon;
+  const currentMeta = THEME_META[theme];
+  const CurrentIcon = currentMeta.icon;
+  const label = getMessage(currentMeta.labelKey as MessageKey);
 
   return (
-    <Tooltip content={getMessage(currentTheme.labelKey)}>
+    <Tooltip
+      content={
+        <Flex align="center" gap="2" aria-hidden="true">
+          {label}
+          <Kbd>D</Kbd>
+        </Flex>
+      }
+    >
       <IconButton
         data-testid="theme-toggle"
         variant="ghost"
         size="2"
-        onClick={handleThemeToggle}
-        aria-label={getMessage(currentTheme.labelKey)}
+        onClick={cycleTheme}
+        aria-label={label}
+        aria-keyshortcuts="D"
         style={{ color: 'var(--gray-11)' }}
       >
         <CurrentIcon size={16} aria-hidden="true" />

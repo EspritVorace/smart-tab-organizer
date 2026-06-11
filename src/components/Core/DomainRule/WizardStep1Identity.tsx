@@ -12,6 +12,7 @@ import { getMessage } from '@/utils/i18n';
 import { FormField } from '@/components/Form/FormFields';
 import { CategoryRadioGroup } from '@/components/Core/DomainRule/CategoryRadioGroup';
 import { ChromeColorPicker } from '@/components/Core/TabTree/ChromeColorPicker';
+import { DomainCodeField } from '@/components/UI/DomainCodeField';
 import { deriveLabelFromDomain } from '@/utils/labelFromDomain';
 import type { DomainRule } from '@/schemas/domainRule';
 import type { ChromeGroupColor } from '@/types/tabTree';
@@ -52,19 +53,24 @@ export function WizardStep1Identity({ control, errors, setValue }: WizardStep1Id
         required={true}
         error={errors.domainFilter}
       >
-        {(fieldId) => (
+        {(fieldId, errorId) => (
           <Controller
             name="domainFilter"
             control={control}
             render={({ field }) => (
-              <TextField.Root
-                {...field}
-                id={fieldId}
-                data-testid="wizard-rule-field-domain"
-                name="domainFilter"
-                placeholder={getMessage('domainFilterPlaceholder')}
-                style={{ marginTop: '4px' }}
-              />
+              <div style={{ marginTop: '4px' }}>
+                <DomainCodeField
+                  id={fieldId}
+                  describedById={errors.domainFilter ? errorId : undefined}
+                  value={field.value ?? ''}
+                  onChange={field.onChange}
+                  name="domainFilter"
+                  testId="wizard-rule-field-domain"
+                  placeholder={getMessage('domainFilterPlaceholder')}
+                  ariaLabel={getMessage('domainFilterEditorAriaLabel')}
+                  hasError={Boolean(errors.domainFilter)}
+                />
+              </div>
             )}
           />
         )}

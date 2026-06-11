@@ -2,7 +2,6 @@ import { useCallback, useMemo } from 'react';
 import { storage } from 'wxt/utils/storage';
 import type { AppSettings, DomainRuleSettings } from '@/types/syncSettings.js';
 import type { DeduplicationKeepStrategyValue, DefaultRestoreActionValue } from '@/schemas/enums.js';
-import type { RuleCategory } from '@/schemas/category.js';
 import type { ScopedItems } from '@/utils/workspaceStorage.js';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext.js';
 import { useStorageState } from './useStorageState.js';
@@ -17,7 +16,6 @@ export interface UseSettingsReturn {
   setDeduplicationKeepStrategy: (value: DeduplicationKeepStrategyValue) => Promise<void>;
   setDefaultRestoreAction: (value: DefaultRestoreActionValue) => Promise<void>;
   setDomainRules: (value: DomainRuleSettings) => Promise<void>;
-  setCategories: (value: RuleCategory[]) => Promise<void>;
 
   onGlobalGroupingEnabledChange: (callback: (value: boolean) => void) => () => void;
   onGlobalDeduplicationEnabledChange: (callback: (value: boolean) => void) => () => void;
@@ -29,7 +27,6 @@ export interface UseSettingsReturn {
     callback: (value: DefaultRestoreActionValue) => void,
   ) => () => void;
   onDomainRulesChange: (callback: (value: DomainRuleSettings) => void) => () => void;
-  onCategoriesChange: (callback: (value: RuleCategory[]) => void) => () => void;
 
   updateSettings: (updates: Partial<AppSettings>) => Promise<void>;
   reloadSettings: () => Promise<void>;
@@ -47,7 +44,6 @@ function buildSettingsItemMap(items: ScopedItems): SettingsItemMap {
     deduplicationKeepStrategy: items.deduplicationKeepStrategyItem,
     defaultRestoreAction: items.defaultRestoreActionItem,
     domainRules: items.domainRulesItem,
-    categories: items.categoriesItem,
     notifyOnGrouping: items.notifyOnGroupingItem,
     notifyOnDeduplication: items.notifyOnDeduplicationItem,
     notifyOnOrganize: items.notifyOnOrganizeItem,
@@ -62,7 +58,6 @@ async function loadSettingsFromStorage(items: ScopedItems): Promise<AppSettings>
     items.deduplicationKeepStrategyItem,
     items.defaultRestoreActionItem,
     items.domainRulesItem,
-    items.categoriesItem,
     items.notifyOnGroupingItem,
     items.notifyOnDeduplicationItem,
     items.notifyOnOrganizeItem,
@@ -88,10 +83,9 @@ async function loadSettingsFromStorage(items: ScopedItems): Promise<AppSettings>
     deduplicationKeepStrategy: results[3].value as DeduplicationKeepStrategyValue,
     defaultRestoreAction: results[4].value as DefaultRestoreActionValue,
     domainRules,
-    categories: results[6].value as RuleCategory[],
-    notifyOnGrouping: results[7].value as boolean,
-    notifyOnDeduplication: results[8].value as boolean,
-    notifyOnOrganize: results[9].value as boolean,
+    notifyOnGrouping: results[6].value as boolean,
+    notifyOnDeduplication: results[7].value as boolean,
+    notifyOnOrganize: results[8].value as boolean,
   };
 }
 
@@ -142,7 +136,6 @@ export function useSettings(): UseSettingsReturn {
     setDeduplicationKeepStrategy: (v) => update({ deduplicationKeepStrategy: v }),
     setDefaultRestoreAction: (v) => update({ defaultRestoreAction: v }),
     setDomainRules: (v) => update({ domainRules: v }),
-    setCategories: (v) => update({ categories: v }),
 
     onGlobalGroupingEnabledChange: (cb) => onFieldChange('globalGroupingEnabled', cb),
     onGlobalDeduplicationEnabledChange: (cb) => onFieldChange('globalDeduplicationEnabled', cb),
@@ -150,7 +143,6 @@ export function useSettings(): UseSettingsReturn {
     onDeduplicationKeepStrategyChange: (cb) => onFieldChange('deduplicationKeepStrategy', cb),
     onDefaultRestoreActionChange: (cb) => onFieldChange('defaultRestoreAction', cb),
     onDomainRulesChange: (cb) => onFieldChange('domainRules', cb),
-    onCategoriesChange: (cb) => onFieldChange('categories', cb),
 
     updateSettings: update,
     reloadSettings: reload,

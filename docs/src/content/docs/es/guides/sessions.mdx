@@ -59,7 +59,7 @@ Hay cuatro destinos de restauración. Con el foco sobre una sesión o un perfil:
 | **Reemplazar las pestañas de la ventana** | `Alt + R` | Cierra las pestañas de la ventana actual y restaura las de la sesión en su lugar. |
 | **Personalizada** | `R` | Abre el asistente de restauración y muestra el detalle de los conflictos si los hay. |
 
-El clic o la tecla `Enter` usa la **acción por defecto** configurada en [Ajustes](/guides/parametres#action-de-restauration-par-defaut).
+El clic o la tecla `Enter` usa la **acción por defecto** configurada en [Ajustes](/guides/settings#action-de-restauration-par-defaut).
 
 ### Asistente de conflictos
 
@@ -78,7 +78,7 @@ Cuando algunas pestañas de la sesión ya están abiertas en la ventana de desti
 | **Reemplazar** | Cierra la pestaña existente y restaura la de la sesión en su lugar. |
 
 <Aside type="note">
-Las pestañas restauradas desde el asistente quedan protegidas contra una deduplicación inmediata durante 10 segundos (la misma mecánica que [Deshacer una deduplicación](/guides/dedupliquer#notification-et-annulation)).
+Las pestañas restauradas desde el asistente quedan protegidas contra una deduplicación inmediata durante 10 segundos (la misma mecánica que [Deshacer una deduplicación](/guides/deduplicate#notification-et-annulation)).
 </Aside>
 
 ## Editar una sesión
@@ -132,6 +132,22 @@ En la sub-pestaña **Archivadas**, pulsa **Desarchivar**. La sesión vuelve a **
 
 La URL `chrome-extension://[id]/options.html#sessions/archived` abre directamente la sub-pestaña **Archivadas**. Puedes usarla como marcador para ir a buscar una sesión antigua.
 
+## Filtrar y ordenar
+
+Los encabezados de las secciones **Activas** y **Archivadas** (no la sección
+**Ancladas**) incluyen un botón de vista que abre un menú de orden y filtro.
+Igual que con las reglas, solo afecta a cómo se muestra la sección.
+
+| Ajuste | Opciones |
+|---|---|
+| **Orden** | Orden manual, por fecha, por última restauración, por categoría. Ascendente o descendente. |
+| **Filtro** | Por categoría. |
+
+El orden **por última restauración** se basa en la marca de tiempo registrada
+cada vez que se restaura la sesión. La vista se recuerda de forma independiente
+para la sección Activas y la sección Archivadas, y por separado para cada
+espacio de trabajo.
+
 ## Búsqueda
 
 La barra de búsqueda sobre la lista filtra por nombre de sesión. También hay una búsqueda **profunda** disponible: inspecciona los títulos de las pestañas capturadas, lo que ayuda a localizar una sesión por uno de sus contenidos.
@@ -141,6 +157,6 @@ La barra de búsqueda sobre la lista filtra por nombre de sesión. También hay 
 <CardGrid>
   <LinkCard title="Espacios de trabajo" href="/guides/workspaces" description="Aislar las sesiones por contexto." />
   <LinkCard title="Popup" href="/guides/popup" description="El acceso rápido a los perfiles anclados del espacio activo." />
-  <LinkCard title="Ajustes" href="/guides/parametres" description="Acción por defecto de restauración, notificaciones." />
+  <LinkCard title="Ajustes" href="/guides/settings" description="Acción por defecto de restauración, notificaciones." />
   <LinkCard title="Importar / Exportar" href="/guides/import-export" description="Guardar tus sesiones en formato JSON." />
 </CardGrid>

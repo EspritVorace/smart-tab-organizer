@@ -1,0 +1,83 @@
+---
+title: La página de inicio
+description: El hub central de las Opciones. Onboarding mientras no exista ninguna regla y, después, perfiles anclados, accesos rápidos, mini estadísticas y consejos.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import heroSuggestionsLight from '../../../../assets/screenshots/es-light-home-hero-suggestions.png';
+import heroSuggestionsDark from '../../../../assets/screenshots/es-dark-home-hero-suggestions.png';
+
+<Aside type="tip" title="En resumen">
+- La página de inicio es la primera pantalla que aparece al abrir las Opciones.
+- Mientras no haya ninguna regla, un Hero de onboarding propone sugerencias de packs contextuales que coinciden con tus pestañas abiertas (o, como alternativa, **Crear mi primera regla** / **Importar un pack**).
+- En caso contrario, la página agrega perfiles anclados, accesos rápidos, mini estadísticas y consejos.
+- El foco del teclado se coloca en la primera acción; los botones de accesos rápidos tienen atajos de una sola tecla.
+</Aside>
+
+## Hero de onboarding
+
+<ThemeImage
+  lightSrc={heroSuggestionsLight}
+  darkSrc={heroSuggestionsDark}
+  alt="La página de inicio en estado de onboarding: el Hero contextual sugiere los packs que coinciden con las pestañas abiertas, preseleccionados, tras un botón Importar y organizar."
+/>
+
+Cuando todavía no hay ninguna regla definida en el espacio de trabajo activo, el Hero de onboarding ocupa la parte superior.
+
+Si algunas de tus pestañas abiertas coinciden con un pack listo para usar, el Hero se vuelve contextual: muestra los packs coincidentes (con el número de pestañas afectadas por pack), preseleccionados, tras un único botón **Importar y organizar**. El análisis es local (las pestañas abiertas se leen solo en el navegador, nada sale del equipo) y las sugerencias permanecen mientras no exista ninguna regla. Tras la importación, un botón **Organizar ahora** ordena tus pestañas abiertas de inmediato.
+
+En caso contrario, el Hero ofrece dos acciones genéricas:
+
+- **Crear mi primera regla**: abre directamente el asistente de creación de regla.
+- **Importar un pack**: abre la [galería de packs](/reference/categories-and-packs) en el asistente de importación.
+
+En cuanto existe una regla, el Hero de onboarding desaparece y deja sitio al resto de secciones.
+
+## Perfiles anclados
+
+Esta sección reúne hasta 6 [sesiones ancladas](/guides/sessions#sessions-epinglees) del espacio de trabajo activo, ordenadas por fecha de actualización descendente. Cada perfil se presenta como una baldosa clicable y navegable con el teclado (flechas izquierda/derecha).
+
+Cuatro atajos controlan la restauración del perfil que tiene el foco:
+
+| Atajo | Destino | Comportamiento |
+|---|---|---|
+| `R` | Personalizada | Abre el asistente de restauración y deja elegir el modo. |
+| `Shift + R` | Ventana actual | Añade las pestañas a la ventana actualmente en primer plano. |
+| `Alt + R` | Reemplazar | Cierra las pestañas actuales y restaura las del perfil en la misma ventana. |
+| `Alt + Shift + R` | Ventana nueva | Abre una ventana dedicada y restaura allí las pestañas. |
+
+Estos cuatro destinos también están expuestos en el popup. Consulta [Sesiones, perfiles en el popup](/guides/sessions#profils-dans-la-popup).
+
+La acción disparada por un clic o un pulsado de `Enter` se configura en [Ajustes](/guides/settings) (ajuste **Acción por defecto** de restauración).
+
+## Accesos rápidos
+
+Una rejilla de acciones habituales, cada una accesible con un atajo de una sola tecla cuando el foco está sobre la página de inicio:
+
+| Atajo | Acción |
+|---|---|
+| `O` | Organizar todas las pestañas según las reglas activas. |
+| `S` | Capturar una instantánea de la ventana actual. |
+| `N` | Crear una nueva regla de dominio. |
+| `I` | Ir a Importar / Exportar. |
+| `T` | Ir a las estadísticas. |
+
+Las flechas mueven el foco entre las tarjetas; `Home` y `End` saltan a los extremos.
+
+## Mini estadísticas
+
+Tres contadores sintéticos: **grupos creados**, **duplicados eliminados** y **sesiones guardadas**. Cada contador es clicable y lleva a la página detallada correspondiente. La sección solo aparece si al menos un contador es distinto de cero.
+
+## Consejos
+
+Un carrusel ligero de consejos rotativos (modo Inteligente, atajos, sesiones ancladas, packs). Su visibilidad se puede desactivar desde [Ajustes](/guides/settings).
+
+## Siguiente paso
+
+<CardGrid>
+  <LinkCard title="Tour de la interfaz" href="/discover/interface-tour" description="Visión general de las pantallas de las Opciones y del popup." />
+  <LinkCard title="Sesiones" href="/guides/sessions" description="Capturar, restaurar y anclar una sesión." />
+  <LinkCard title="Categorías y packs" href="/reference/categories-and-packs" description="La acción que propone el Hero de onboarding." />
+  <LinkCard title="Atajos de teclado" href="/reference/keyboard-shortcuts" description="Todas las combinaciones disponibles, por superficie." />
+</CardGrid>

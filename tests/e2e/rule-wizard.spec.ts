@@ -211,8 +211,8 @@ test.describe('Creation wizard — Step 2: Configuration', () => {
     await expect(wizard.configModeRadio('ask')).toHaveAttribute('data-state', 'checked');
 
     await expect(wizard.dialog().getByTestId('config-mode-description')).toBeVisible();
-    await expect(wizard.dialog().locator('input[name="titleParsingRegEx"]')).not.toBeAttached();
-    await expect(wizard.dialog().locator('input[name="urlParsingRegEx"]')).not.toBeAttached();
+    await expect(wizard.dialog().getByTestId('title-regex-field')).toHaveCount(0);
+    await expect(wizard.dialog().getByTestId('url-regex-field')).toHaveCount(0);
     await page.close();
   });
 
@@ -241,7 +241,8 @@ test.describe('Creation wizard — Step 2: Configuration', () => {
     await wizard.clickBack();
 
     await expect(wizard.labelInput()).toHaveValue('Preserved Label');
-    await expect(wizard.domainFilterInput()).toHaveValue('preserved.com');
+    // CodeMirror editor has no form value: assert its rendered text instead.
+    await expect(wizard.domainFilterInput().locator('.cm-content')).toHaveText('preserved.com');
     await page.close();
   });
 });

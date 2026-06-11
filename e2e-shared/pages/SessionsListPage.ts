@@ -45,12 +45,66 @@ export class SessionsListPage {
     return this.page.getByTestId(`session-card-${sessionId}`);
   }
 
+  /** Expand/collapse toggle for a card's tab-and-group preview. */
+  previewToggle(sessionId: string): Locator {
+    return this.page.getByTestId(`session-card-${sessionId}-preview-toggle`);
+  }
+
+  /** Archived sessions list flex (rendered on the archived sub-tab). */
+  archivedList(): Locator {
+    return this.page.getByTestId('page-sessions-archived-list');
+  }
+
+  /** "Active" sub-tab link. */
+  activeTab(): Locator {
+    return this.page.getByTestId('page-sessions-tab-active');
+  }
+
+  /** "Archived" sub-tab link. */
+  archivedTab(): Locator {
+    return this.page.getByTestId('page-sessions-tab-archived');
+  }
+
+  /**
+   * First card of the archived sub-tab list (mirrors {@link firstCard} for the
+   * archived bucket).
+   */
+  firstArchivedCard(): Locator {
+    return this.archivedList().locator('[data-session-card]').first();
+  }
+
+  /**
+   * First session card in the list (pinned section renders first, so a
+   * pinned session takes priority over an unpinned one). Anchors on the
+   * `data-session-card` attribute borne by `SessionCard`.
+   */
+  firstCard(): Locator {
+    return this.list().locator('[data-session-card]').first();
+  }
+
   /** HoverCard trigger anchored on the session card name. */
   cardNameTrigger(sessionId: string): Locator {
     return this.page.getByTestId(`session-card-${sessionId}-name`);
   }
 
+  /**
+   * "..." (More actions) dropdown trigger on the first session card. Anchored
+   * on the `session-card-{uuid}-btn-dropdown` testid so it stays distinct from
+   * the page toolbar's own "..." menu (`page-sessions-toolbar-menu`) and works
+   * across the locale matrix.
+   */
+  firstCardMenuButton(): Locator {
+    return this.page
+      .locator('[data-testid^="session-card-"][data-testid$="-btn-dropdown"]')
+      .first();
+  }
+
   // ─── Atomic actions ──────────────────────────────────────────────────────
+
+  /** Open the "..." (More actions) dropdown on the first session card. */
+  async openFirstCardMenu(): Promise<void> {
+    await this.firstCardMenuButton().click();
+  }
 
   /**
    * Type a query into the search input. Search filtering is purely

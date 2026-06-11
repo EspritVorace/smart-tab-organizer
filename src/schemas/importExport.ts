@@ -12,7 +12,6 @@ import {
   type DefaultRestoreActionValue
 } from './enums.js';
 import { sessionSchema } from './session.js';
-import { ruleCategorySchema } from './category.js';
 import { workspaceAccentColors } from './workspace.js';
 
 // Relaxed schema for import validation — no conditional refinements for regex fields,
@@ -42,7 +41,8 @@ export const importDomainRuleSchema = z.object({
   enabled: z.boolean(),
   badge: z.string().optional(),
   createdAt: z.string().optional(),
-  updatedAt: z.string().optional()
+  updatedAt: z.string().optional(),
+  lastUsedAt: z.string().optional()
 });
 
 export type ImportDomainRule = z.infer<typeof importDomainRuleSchema>;
@@ -99,7 +99,6 @@ export const importWorkspaceDataSchema = z.object({
   workspace: importWorkspaceMetaSchema,
   settings: importWorkspaceSettingsSchema,
   domainRules: z.array(importDomainRuleSchema),
-  categories: z.array(ruleCategorySchema).optional(),
   sessions: z.array(sessionSchema),
   statistics: importWorkspaceStatisticsSchema.optional(),
 });

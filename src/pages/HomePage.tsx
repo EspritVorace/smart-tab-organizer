@@ -3,12 +3,15 @@ import { browser } from 'wxt/browser';
 import { Box, Flex } from '@radix-ui/themes';
 import { useSessions } from '@/hooks/useSessions';
 import { useShortcuts, type ShortcutAction } from '@/hooks/useShortcuts';
+import { usePackSuggestions } from '@/hooks/usePackSuggestions';
 import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
+import { buildPackSelections } from '@/components/Core/Pack/PackGallery/usePackSelections';
 import type { AppSettings } from '@/types/syncSettings';
 import type { Session } from '@/types/session';
 import type { StatisticsAggregates } from '@/types/statistics';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { HeroOnboarding } from '@/components/HomePage/HeroOnboarding';
+import { HeroOnboardingSuggestions } from '@/components/HomePage/HeroOnboardingSuggestions';
 import { PinnedSessionsSection } from '@/components/HomePage/PinnedSessionsSection';
 import { QuickActionsSection } from '@/components/HomePage/QuickActionsSection';
 import { TipsSection } from '@/components/HomePage/TipsSection';
@@ -69,6 +72,32 @@ export function HomePage({
   const isEmpty = (syncSettings.domainRules?.length ?? 0) === 0;
   const isLoading = !sessionsLoaded || statisticsAggregates === null;
 
+  // Contextual onboarding suggestions (issue #433): cross open tabs with the
+  // pack catalog, scoped to the active workspace's rules.
+  const existingRuleIds = useMemo(
+    () => new Set((syncSettings.domainRules ?? []).map((rule) => rule.id)),
+    [syncSettings.domainRules],
+  );
+  const { suggestions } = usePackSuggestions(existingRuleIds);
+
+  // Suggestions show as long as the workspace has no rule (no dismissal).
+  const showContextualHero = isEmpty && suggestions.length > 0;
+
+  const handleImportAndOrganize = useCallback(
+    (selectedPackIds: string[]) => {
+      const selectedIds = new Set(selectedPackIds);
+      const selectedPacks = suggestions
+        .filter((suggestion) => selectedIds.has(suggestion.pack.pack.id))
+        .map((suggestion) => suggestion.pack);
+      if (selectedPacks.length === 0) return;
+      openImportRules({
+        initialSourceMode: 'pack',
+        initialPackSelections: buildPackSelections(selectedPacks),
+      });
+    },
+    [suggestions, openImportRules],
+  );
+
   const totalGrouping = statisticsAggregates?.totalGrouping ?? 0;
   const totalDedup = statisticsAggregates?.totalDedup ?? 0;
   const totalSessions = sessions.length;
@@ -126,7 +155,10 @@ export function HomePage({
 
     let selector: string;
     if (isEmpty) {
-      selector = '[data-testid="home-hero-import"]';
+      // The contextual hero may mount slightly after the first paint, so match
+      // either hero CTA.
+      selector =
+        '[data-testid="home-hero-suggest-import"], [data-testid="home-hero-import"]';
     } else if (pinnedSessions.length === 0) {
       selector = '[data-testid="home-quick-action-organize"]';
     } else {
@@ -160,12 +192,18 @@ export function HomePage({
             <HomePageSkeleton />
           ) : (
             <Flex direction="column" gap="5">
-              {isEmpty && (
-                <HeroOnboarding
-                  onImportPack={handleHeroImportPack}
-                  onCreateRule={onOpenRuleWizard}
-                />
-              )}
+              {isEmpty &&
+                (showContextualHero ? (
+                  <HeroOnboardingSuggestions
+                    suggestions={suggestions}
+                    onImportAndOrganize={handleImportAndOrganize}
+                  />
+                ) : (
+                  <HeroOnboarding
+                    onImportPack={handleHeroImportPack}
+                    onCreateRule={onOpenRuleWizard}
+                  />
+                ))}
 
               <PinnedSessionsSection
                 sessions={pinnedSessions}

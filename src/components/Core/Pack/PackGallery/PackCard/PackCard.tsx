@@ -20,6 +20,8 @@ interface PackCardProps {
   selected: boolean;
   onSelectionChange: (next: { selected: boolean; rules: ImportDomainRule[] }) => void;
   installInfo?: PackInstallInfo;
+  /** True when this pack matches at least one open tab (issue #433). */
+  matchesOpenTabs?: boolean;
 }
 
 const DEFAULT_INSTALL_INFO: PackInstallInfo = {
@@ -63,6 +65,7 @@ export function PackCard({
   selected,
   onSelectionChange,
   installInfo = DEFAULT_INSTALL_INFO,
+  matchesOpenTabs = false,
 }: PackCardProps) {
   const [selection, setSelection] = useState<PackParamSelection>(() =>
     buildInitialSelection(pack),
@@ -162,6 +165,16 @@ export function PackCard({
               </Tooltip>
             )}
             {installedBadge}
+            {matchesOpenTabs && (
+              <Badge
+                color="grass"
+                variant="soft"
+                size="1"
+                data-testid={`pack-card-${pack.pack.id}-matches-tabs`}
+              >
+                {getMessage('packGalleryMatchesTabsBadge')}
+              </Badge>
+            )}
           </Flex>
           {description && (
             <Text size="2" color="gray">

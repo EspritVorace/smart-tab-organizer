@@ -4,9 +4,9 @@
 
 # SmartTab Organizer
 
-> **Dompte tes onglets. Sans cloud, sans IA, sans tracking.**
+> **Tes onglets se rangent et se nomment tout seuls. Sans cloud, sans tracking.**
 
-Une extension Chrome et Firefox qui regroupe tes onglets par domaine, supprime les doublons, et capture tes espaces de travail sous forme de sessions à restaurer en un clic.
+SmartTab Organizer lit le nom du groupe directement dans l'URL ou le titre : un groupe par dépôt, par ticket ou par client se crée tout seul, sans multiplier une règle par valeur. Tout reste dans ton navigateur : sans cloud, sans IA, sans tracking. L'extension supprime aussi les onglets en doublon et capture tes espaces de travail sous forme de sessions à restaurer en un clic. [Voir en images](https://docs.esprit-vorace.fr/fr/).
 
 <p align="center">
   <img src="doc/store.png" alt="SmartTab Organizer" width="720">
@@ -24,8 +24,8 @@ Une extension Chrome et Firefox qui regroupe tes onglets par domaine, supprime l
 
 ## Pourquoi ?
 
-- Tes onglets s'accumulent plus vite que tu ne les fermes. SmartTab les met à leur place, automatiquement.
-- Les autres outils envoient tes données ailleurs ou collent de l'IA partout. Ici, tout reste dans ton navigateur, zéro télémétrie.
+- Les autres extensions t'obligent à saisir un nom de groupe fixe, une règle par valeur. SmartTab l'extrait de l'URL ou du titre : un groupe par dépôt, par ticket ou par client apparaît tout seul, sans multiplier les règles.
+- Sans cloud, sans IA, sans télémétrie. Tout tourne dans ton navigateur et tes données n'en sortent jamais.
 - L'espace de travail que tu as monté mérite de revenir demain. Sauvegarde-le, nomme-le, restaure-le.
 
 ## Ce que ça fait
@@ -67,7 +67,7 @@ Capture tes onglets et tes groupes ouverts, nomme-les, épingle ceux dans lesque
 
 ## 📖 Documentation
 
-Guide complet en ligne : [docs.esprit-vorace.fr](https://docs.esprit-vorace.fr/) (Astro Starlight, 3 langues, plus de 30 pages avec captures). Les sources MDX sont dans [`docs/`](docs/src/content/docs/) pour les contributeurs.
+Guide complet en ligne : [docs.esprit-vorace.fr](https://docs.esprit-vorace.fr/fr/) (Astro Starlight, 3 langues, plus de 30 pages avec captures). Les sources MDX sont dans [`docs/`](docs/src/content/docs/fr/) pour les contributeurs.
 
 ## 🛠️ Pour les contributeurs
 
@@ -83,7 +83,7 @@ pnpm storybook    # Explorateur de composants (port 6006)
 pnpm build        # Build production
 ```
 
-La stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) et les conventions de code sont documentées dans [`CLAUDE.md`](CLAUDE.md) et l'[annexe stack technique](docs/src/content/docs/contribuer/stack.mdx).
+La stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) et les conventions de code sont documentées dans [`CLAUDE.md`](CLAUDE.md) et l'[annexe stack technique](docs/src/content/docs/fr/contributing/stack.mdx).
 
 Merci d'ouvrir une issue avant de soumettre une pull request importante.
 
@@ -93,4 +93,4 @@ GNU General Public License v3.0.
 
 ## 🗝️ Licences tierces
 
-SmartTab Organizer embarque des composants open source (React, Radix UI, Lucide, Zod, CodeMirror, dnd-kit et d'autres). Leurs mentions de copyright et textes de licence complets sont listés dans [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt) et sur la [page d'attribution](https://docs.esprit-vorace.fr/reference/licences-open-source/).
+SmartTab Organizer embarque des composants open source (React, Radix UI, Lucide, Zod, CodeMirror, dnd-kit et d'autres). Leurs mentions de copyright et textes de licence complets sont listés dans [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt) et sur la [page d'attribution](https://docs.esprit-vorace.fr/fr/reference/open-source-licenses/).

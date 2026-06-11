@@ -1,6 +1,6 @@
 import React from 'react';
 import { SegmentedControl } from '@radix-ui/themes';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 import type { JsonSourceInputState, SourceMode } from './useJsonSourceInput';
 
 const DEFAULT_AVAILABLE_MODES: readonly SourceMode[] = ['file', 'text'];
@@ -32,7 +32,7 @@ export function SourceModeSegmented<T>({
           value={mode}
           data-testid={`source-mode-${mode}`}
         >
-          {getMessage(MODE_LABEL_KEYS[mode])}
+          {getMessage(MODE_LABEL_KEYS[mode] as MessageKey)}
         </SegmentedControl.Item>
       ))}
     </SegmentedControl.Root>

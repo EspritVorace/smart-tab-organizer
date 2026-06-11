@@ -1,16 +1,19 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { Button, Flex, Box, Kbd, Tooltip } from '@radix-ui/themes';
-import { Plus, Eye, EyeOff, Shield, AlertCircle, Upload, Trash2, FileDown } from 'lucide-react';
+import { Button, Flex, Box, Kbd, Tooltip, Separator } from '@radix-ui/themes';
+import { Plus, Eye, EyeOff, Shield, AlertCircle, Trash2, FileDown, PackagePlus, Download, Upload } from 'lucide-react';
 import { DragDropProvider, type DragEndEvent, type DragOverEvent } from '@dnd-kit/react';
 import { move } from '@dnd-kit/helpers';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
+import * as Collapsible from '@radix-ui/react-collapsible';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { EmptyState } from '@/components/UI/EmptyState';
 import { RuleWizardModal } from '@/components/Core/DomainRule/RuleWizardModal';
 import { ExportWizard } from '@/components/UI/ImportExportWizards/ExportWizard';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
-import { ListToolbar } from '@/components/UI/ListToolbar';
+import { ListToolbar, ListToolbarMenu } from '@/components/UI/ListToolbar';
 import { BulkActionsBar } from '@/components/UI/BulkActionsBar';
+import { RuleViewMenu } from '@/components/UI/RuleViewMenu';
+import { RuleGroupHeader } from '@/components/Core/DomainRule/RuleGroupHeader';
 import { getMessage } from '@/utils/i18n';
 import { foldAccents } from '@/utils/stringUtils';
 import { generateUUID } from '@/utils/utils';
@@ -18,6 +21,7 @@ import { DomainRuleCard } from '@/components/Core/DomainRule/DomainRuleCard';
 import { useShortcuts } from '@/hooks/useShortcuts';
 import { useListNavigation } from '@/hooks/useListNavigation';
 import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
+import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
 import type { RulesPendingAction } from '@/hooks/useDeepLinking';
 import {
   moveToFirst,
@@ -27,6 +31,14 @@ import {
   getRulesForRootDomain,
 } from '@/utils/ruleOrderUtils';
 import { getOverlapPrecedenceList } from '@/utils/ruleOverlapUtils';
+import {
+  computeRuleView,
+  applySubsetReorder,
+  normalizeRuleViewState,
+  DEFAULT_RULE_VIEW_STATE,
+  type RuleViewState,
+  type RuleViewGroup,
+} from '@/utils/ruleViewUtils';
 import type { AppSettings, DomainRuleSetting } from '@/types/syncSettings';
 import type { DomainRule } from '@/schemas/domainRule';
 
@@ -51,6 +63,71 @@ function confirmDeleteDescription(
   return getMessage('confirmDeleteDescription').replace('{item}', ruleLabel);
 }
 
+interface RuleCardListProps {
+  rules: DomainRuleSetting[];
+  dragDisabled: boolean;
+  ariaLabel: string;
+  /** Indents the cards to the right to mark them as children of a group header (mirrors the session sections). */
+  indent?: boolean;
+  /** Key of the group these cards belong to (omitted for the ungrouped section). Lets a focused card collapse its parent group with ArrowLeft. */
+  groupKey?: string;
+  allRules: DomainRuleSetting[];
+  selectedIds: Set<string>;
+  searchTerm: string;
+  overlap: Map<string, DomainRuleSetting[]>;
+  onSelect: (id: string, checked: boolean) => void;
+  onToggleEnabled: (id: string, enabled: boolean) => void;
+  onEdit: (rule: DomainRuleSetting) => void;
+  onDeleteRequest: (ruleId: string) => void;
+  onMoveToFirst: (id: string) => void;
+  onMoveToLast: (id: string) => void;
+  onMoveToFirstOfDomain: (id: string) => void;
+  onMoveToLastOfDomain: (id: string) => void;
+  onCardKeyDown: (e: React.KeyboardEvent, rule: DomainRuleSetting, groupKey?: string) => void;
+}
+
+/**
+ * Renders one section's rule cards inside an ARIA list. The per-section
+ * sortable `index` is the card's position within `rules`; the keyboard
+ * navigation index is resolved live from the DOM by the page handler
+ * (`[data-rules-nav-item]` order), so collapsed groups never desync it.
+ */
+function RuleCardList(props: RuleCardListProps) {
+  return (
+    <Flex
+      direction="column"
+      gap="3"
+      role="list"
+      aria-label={props.ariaLabel}
+      pl={props.indent ? '6' : undefined}
+    >
+      {props.rules.map((rule, i) => (
+        <DomainRuleCard
+          key={rule.id}
+          rule={rule}
+          index={i}
+          isSelected={props.selectedIds.has(rule.id)}
+          searchTerm={props.searchTerm}
+          isDragDisabled={props.dragDisabled}
+          isDomainActionDisabled={
+            getRulesForRootDomain(props.allRules, rule.domainFilter).length <= 1
+          }
+          overlapPrecedenceList={props.overlap.get(rule.id)}
+          onSelect={props.onSelect}
+          onToggleEnabled={props.onToggleEnabled}
+          onEdit={props.onEdit}
+          onDeleteRequest={props.onDeleteRequest}
+          onMoveToFirst={props.onMoveToFirst}
+          onMoveToLast={props.onMoveToLast}
+          onMoveToFirstOfDomain={props.onMoveToFirstOfDomain}
+          onMoveToLastOfDomain={props.onMoveToLastOfDomain}
+          onKeyDown={e => props.onCardKeyDown(e, rule, props.groupKey)}
+        />
+      ))}
+    </Flex>
+  );
+}
+
 interface DomainRulesPageProps {
   syncSettings: AppSettings;
   updateRules: (rules: DomainRuleSetting[]) => void;
@@ -68,10 +145,45 @@ export function DomainRulesPage({
   pendingAction,
   onPendingActionConsumed,
 }: DomainRulesPageProps) {
-  const { openImportRules } = useImportExportWizards();
+  const { openImportRules, openExportRules } = useImportExportWizards();
+  const { scopedItems } = useActiveWorkspaceContext();
+  const rulesViewStateItem = scopedItems.rulesViewStateItem;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<DomainRule | undefined>(undefined);
-  const [dragItems, setDragItems] = useState<DomainRuleSetting[] | null>(null);
+  // Transient drag preview scoped to the section (group key, or '__ungrouped__') being dragged.
+  const [dragSection, setDragSection] = useState<{ key: string; items: DomainRuleSetting[] } | null>(null);
+  const [viewState, setViewState] = useState<RuleViewState>(DEFAULT_RULE_VIEW_STATE);
+  // The persisted view state loads asynchronously; gate the initial list focus
+  // on it so autofocus targets the first rule of the *actual* (sorted/filtered/
+  // grouped) list rather than the transient default render.
+  const [viewLoaded, setViewLoaded] = useState(false);
+
+  useEffect(() => {
+    rulesViewStateItem.getValue().then(v => {
+      setViewState(normalizeRuleViewState(v));
+      setViewLoaded(true);
+    });
+  }, [rulesViewStateItem]);
+
+  const handleViewChange = useCallback((next: RuleViewState) => {
+    setViewState(next);
+    rulesViewStateItem.setValue(next).catch(() => {});
+  }, [rulesViewStateItem]);
+
+  const collapsedGroups = useMemo(
+    () => new Set(viewState.collapsedGroups),
+    [viewState.collapsedGroups],
+  );
+
+  const handleToggleGroupCollapsed = useCallback((key: string, collapsed: boolean) => {
+    const next = new Set(viewState.collapsedGroups);
+    if (collapsed) {
+      next.add(key);
+    } else {
+      next.delete(key);
+    }
+    handleViewChange({ ...viewState, collapsedGroups: [...next] });
+  }, [viewState, handleViewChange]);
 
   useEffect(() => {
     if (!pendingAction) return;
@@ -80,6 +192,8 @@ export function DomainRulesPage({
       setIsModalOpen(true);
     } else if (pendingAction === 'import') {
       openImportRules();
+    } else if (pendingAction === 'import-pack') {
+      openImportRules({ initialSourceMode: 'pack' });
     }
     onPendingActionConsumed?.();
   }, [pendingAction, openImportRules, onPendingActionConsumed]);
@@ -123,16 +237,48 @@ export function DomainRulesPage({
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const [bulkExportIds, setBulkExportIds] = useState<string[] | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  // While a search is active, every group is force-expanded so a match never
+  // hides inside a collapsed group. The persisted `collapsedGroups` is left
+  // untouched and restored when the search clears; collapse toggles are no-ops
+  // meanwhile.
+  const searchActive = searchTerm.length > 0;
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const filteredRules = useMemo(() => {
-    if (!searchTerm) return syncSettings.domainRules;
+  const searchPredicate = useMemo(() => {
+    if (!searchTerm) return undefined;
     const term = foldAccents(searchTerm);
-    return syncSettings.domainRules.filter(rule =>
-      foldAccents(rule.label).includes(term) ||
-      foldAccents(rule.domainFilter).includes(term)
-    );
-  }, [syncSettings.domainRules, searchTerm]);
+    return (rule: DomainRuleSetting) =>
+      foldAccents(rule.label).includes(term) || foldAccents(rule.domainFilter).includes(term);
+  }, [searchTerm]);
+
+  const viewResult = useMemo(
+    () =>
+      computeRuleView(syncSettings.domainRules, viewState, {
+        searchPredicate,
+        searchActive: searchTerm.length > 0,
+      }),
+    [syncSettings.domainRules, viewState, searchPredicate, searchTerm],
+  );
+
+  // DOM render order: isolated (ungrouped) rules first, then the domain groups.
+  // Drives the "select all visible" set. Keyboard navigation no longer reads a
+  // precomputed index from here: it resolves the focused element's position
+  // live from the DOM (`[data-rules-nav-item]`), which stays correct even when
+  // a collapsed group unmounts its cards.
+  const visibleRules = useMemo(
+    () => [...viewResult.ungrouped, ...viewResult.groups.flatMap(g => g.rules)],
+    [viewResult],
+  );
+  const visibleIds = useMemo(() => visibleRules.map(r => r.id), [visibleRules]);
+
+  // Drag-and-drop mutates the real order, so we only allow it for domain
+  // auto-groups when the displayed order still maps to the real order
+  // (no search, no active filter).
+  const filtersActive =
+    viewState.filterColors.length > 0 ||
+    viewState.filterCategories.length > 0 ||
+    viewState.filterStatus.length === 1;
+  const domainDndAllowed = !searchTerm && !filtersActive;
 
   const overlapPrecedenceByRuleId = useMemo(() => {
     const map = new Map<string, DomainRuleSetting[]>();
@@ -154,11 +300,23 @@ export function DomainRulesPage({
   }, []);
 
   const handleSelectAll = useCallback((checked: boolean) => {
-    setSelectedIds(checked ? new Set(filteredRules.map(r => r.id)) : new Set());
-  }, [filteredRules]);
+    setSelectedIds(checked ? new Set(visibleIds) : new Set());
+  }, [visibleIds]);
 
-  const isAllSelected = filteredRules.length > 0 && selectedIds.size === filteredRules.length;
-  const isIndeterminate = selectedIds.size > 0 && selectedIds.size < filteredRules.length;
+  const handleSelectGroup = useCallback((ruleIds: string[], checked: boolean) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      for (const id of ruleIds) {
+        if (checked) next.add(id);
+        else next.delete(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const selectedVisibleCount = visibleIds.filter(id => selectedIds.has(id)).length;
+  const isAllSelected = visibleRules.length > 0 && selectedVisibleCount === visibleRules.length;
+  const isIndeterminate = selectedVisibleCount > 0 && selectedVisibleCount < visibleRules.length;
 
   const handleEditRule = useCallback((rule: DomainRuleSetting) => {
     setEditingRule(stripUiOnlyFields(rule));
@@ -179,40 +337,131 @@ export function DomainRulesPage({
       e: typeof event,
     ) => DomainRuleSetting[])(rules, event);
 
-  const handleDragOver = useCallback((event: DragOverEvent) => {
-    setDragItems(prev => moveRules(prev ?? syncSettings.domainRules, event));
-  }, [syncSettings.domainRules]);
+  // Per-section drag handlers. `isFullList` is true only for the pristine
+  // ungrouped list (drop reorders the whole array); otherwise the dropped
+  // subset is woven back into the real array via applySubsetReorder.
+  const handleSectionDragOver =
+    (sectionKey: string, baseRules: DomainRuleSetting[]) => (event: DragOverEvent) => {
+      setDragSection(prev => {
+        const base = prev && prev.key === sectionKey ? prev.items : baseRules;
+        return { key: sectionKey, items: moveRules(base, event) };
+      });
+    };
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    if (!event.canceled) {
-      const reordered = moveRules(dragItems ?? syncSettings.domainRules, event);
-      if (reordered !== (dragItems ?? syncSettings.domainRules)) {
-        updateRules(reordered);
-      } else if (dragItems) {
-        updateRules(dragItems);
+  const handleSectionDragEnd =
+    (sectionKey: string, baseRules: DomainRuleSetting[], isFullList: boolean) =>
+    (event: DragEndEvent) => {
+      // Read the live preview from the closure (refreshed each render by the
+      // onDragOver updates), NOT from inside a setState updater: calling
+      // updateRules there would be a side effect during React's update phase
+      // and the parent state change would be dropped.
+      if (!event.canceled) {
+        const base =
+          dragSection && dragSection.key === sectionKey ? dragSection.items : baseRules;
+        const reordered = moveRules(base, event);
+        updateRules(
+          isFullList ? reordered : applySubsetReorder(syncSettings.domainRules, reordered),
+        );
       }
-    }
-    setDragItems(null);
-  }, [dragItems, syncSettings.domainRules, updateRules]);
+      setDragSection(null);
+    };
 
   const listRef = useRef<HTMLDivElement>(null);
 
-  const { handleNavigationKey } = useListNavigation(listRef, '[role="listitem"]');
+  // Group headers and rule cards share one vertical navigation sequence, both
+  // tagged `[data-rules-nav-item]`. Up/Down/Home/End flow through the whole
+  // tree; a collapsed group simply unmounts its cards, so they drop out of the
+  // live query.
+  const NAV_ITEM_SELECTOR = '[data-rules-nav-item]';
+  const { handleNavigationKey } = useListNavigation(listRef, NAV_ITEM_SELECTOR, {
+    autoFocus: { ready: viewLoaded, fallbackSelector: '[data-testid="page-rules-btn-import-pack"]' },
+  });
 
-  // The card keydown handler now only forwards arrow/Home/End to
-  // useListNavigation. The Enter binding is kept here because Enter to
-  // open the editor is a card-local interaction that is not in the registry
-  // (the registry exposes `e` for editing, surfaced via widget shortcuts
-  // below). All other key actions (e, t, Space, Delete) are dispatched at
-  // document level via `useShortcuts({...}, { scope: 'widget:rule-card' })`.
-  const handleCardKeyDown = useCallback((e: React.KeyboardEvent, rule: DomainRuleSetting, index: number) => {
+  // Live DOM position of a nav item (header or card) among its siblings. Read at
+  // event time so collapsing/expanding a group never desyncs the index.
+  const navIndexOf = useCallback((el: HTMLElement): number => {
+    const items = listRef.current?.querySelectorAll<HTMLElement>(NAV_ITEM_SELECTOR);
+    if (!items) return -1;
+    return Array.prototype.indexOf.call(items, el);
+  }, []);
+
+  // After a filter/sort/group change (view menu close), move focus to the first
+  // resulting nav item (group header or rule) so a keyboard/screen-reader user
+  // lands on the first visible result. Deferred so it runs after Radix restores
+  // focus to the menu trigger.
+  const focusFirstRule = useCallback(() => {
+    requestAnimationFrame(() => {
+      listRef.current?.querySelector<HTMLElement>(NAV_ITEM_SELECTOR)?.focus();
+    });
+  }, []);
+
+  // Enter in the search field jumps to the first result card (a rule, not a
+  // group header), or keeps focus in the field when there is no result.
+  const focusFirstResultCard = useCallback(() => {
+    listRef.current?.querySelector<HTMLElement>('[role="listitem"]')?.focus();
+  }, []);
+
+  // The card keydown handler only forwards arrow/Home/End to useListNavigation
+  // (index resolved live from the DOM). The Enter binding is kept here because
+  // Enter to open the editor is a card-local interaction that is not in the
+  // registry (the registry exposes `e` for editing, surfaced via widget
+  // shortcuts below). All other key actions (e, t, Space, Delete) are
+  // dispatched at document level via `useShortcuts({...}, { scope: 'widget:rule-card' })`.
+  const handleCardKeyDown = useCallback((e: React.KeyboardEvent, rule: DomainRuleSetting, groupKey?: string) => {
     if (e.target !== e.currentTarget) return;
-    if (handleNavigationKey(e as React.KeyboardEvent<HTMLElement>, index)) return;
+    if (handleNavigationKey(e as React.KeyboardEvent<HTMLElement>, navIndexOf(e.currentTarget as HTMLElement))) return;
+    // ArrowLeft on a grouped card collapses its parent group (tree behaviour).
+    // The card unmounts on collapse, so move focus up to the group header.
+    // Disabled during a search (groups stay force-expanded then).
+    if (e.key === 'ArrowLeft' && groupKey) {
+      e.preventDefault();
+      if (!searchActive && !collapsedGroups.has(groupKey)) {
+        handleToggleGroupCollapsed(groupKey, true);
+        requestAnimationFrame(() => {
+          listRef.current
+            ?.querySelector<HTMLElement>(`[data-testid="page-rules-group-${groupKey}-toggle"]`)
+            ?.focus();
+        });
+      }
+      return;
+    }
     if (e.key === 'Enter' && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
       e.preventDefault();
       handleEditRule(rule);
     }
-  }, [handleNavigationKey, handleEditRule]);
+  }, [handleNavigationKey, navIndexOf, searchActive, collapsedGroups, handleToggleGroupCollapsed, handleEditRule]);
+
+  // Keyboard handler for a group header's toggle button. Up/Down/Home/End reuse
+  // the shared list navigation; Right expands, Left collapses, Space toggles the
+  // whole group's selection (preventDefault stops the native button click that
+  // would otherwise toggle the Collapsible).
+  const handleGroupHeaderKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLButtonElement>, group: RuleViewGroup) => {
+      if (e.target !== e.currentTarget) return;
+      if (handleNavigationKey(e as React.KeyboardEvent<HTMLElement>, navIndexOf(e.currentTarget))) return;
+      const isCollapsed = collapsedGroups.has(group.key);
+      // preventDefault unconditionally on Left/Right so the page never
+      // horizontally scrolls, even when the toggle is a no-op (group already in
+      // the target state, or a search forcing every group open).
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (!searchActive && isCollapsed) handleToggleGroupCollapsed(group.key, false);
+        return;
+      }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (!searchActive && !isCollapsed) handleToggleGroupCollapsed(group.key, true);
+        return;
+      }
+      if (e.key === ' ') {
+        e.preventDefault();
+        const selected = group.ruleIds.filter(id => selectedIds.has(id)).length;
+        handleSelectGroup(group.ruleIds, selected < group.ruleIds.length);
+      }
+      // Enter falls through to Radix Collapsible.Trigger (toggles collapse).
+    },
+    [handleNavigationKey, navIndexOf, searchActive, collapsedGroups, handleToggleGroupCollapsed, selectedIds, handleSelectGroup],
+  );
 
   const handleAddRule = useCallback(() => {
     setEditingRule(undefined);
@@ -308,6 +557,17 @@ export function DomainRulesPage({
     setEditingRule(undefined);
   };
 
+  // Resolves the deleted card's position from the live DOM (independent of the
+  // per-group sortable index) so keyboard focus moves to a sensible neighbour.
+  const requestDelete = useCallback((ruleId: string) => {
+    const cards = listRef.current?.querySelectorAll<HTMLElement>('[role="listitem"]');
+    let focusIndex: number | undefined;
+    cards?.forEach((card, i) => {
+      if (card.getAttribute('data-rule-id') === ruleId) focusIndex = i;
+    });
+    setDeleteTarget({ type: 'single', ruleId, focusIndex });
+  }, []);
+
   const handleConfirmDelete = useCallback(() => {
     if (!deleteTarget) return;
     if (deleteTarget.type === 'single') {
@@ -325,6 +585,23 @@ export function DomainRulesPage({
     }
     setDeleteTarget(null);
   }, [deleteTarget, handleDeleteRule, handleBulkDelete]);
+
+  // Props shared by every RuleCardList section (groups + ungrouped).
+  const cardListCommon = {
+    allRules: syncSettings.domainRules,
+    selectedIds,
+    searchTerm,
+    overlap: overlapPrecedenceByRuleId,
+    onSelect: handleRowSelect,
+    onToggleEnabled: handleToggleEnabled,
+    onEdit: handleEditRule,
+    onDeleteRequest: requestDelete,
+    onMoveToFirst: handleMoveToFirst,
+    onMoveToLast: handleMoveToLast,
+    onMoveToFirstOfDomain: handleMoveToFirstOfDomain,
+    onMoveToLastOfDomain: handleMoveToLastOfDomain,
+    onCardKeyDown: handleCardKeyDown,
+  };
 
   return (
     <>
@@ -350,7 +627,16 @@ export function DomainRulesPage({
                 searchTestId="page-rules-search"
                 searchPlaceholder={getMessage('searchRules')}
                 searchValue={searchTerm}
+                onSearchSubmit={focusFirstResultCard}
                 onSearchChange={setSearchTerm}
+                filter={
+                  <RuleViewMenu
+                    value={viewState}
+                    onChange={handleViewChange}
+                    onApplied={focusFirstRule}
+                    testId="page-rules-btn-view"
+                  />
+                }
                 action={
                   <Tooltip content={<Flex align="center" gap="2" aria-hidden="true">{getMessage('addRule')}<Kbd>N</Kbd></Flex>}>
                     <Button data-testid="page-rules-btn-add" onClick={handleAddRule} aria-keyshortcuts="N">
@@ -358,6 +644,27 @@ export function DomainRulesPage({
                       {getMessage('addRule')}
                     </Button>
                   </Tooltip>
+                }
+                menu={
+                  <ListToolbarMenu
+                    testId="page-rules-toolbar-menu"
+                    items={[
+                      {
+                        key: 'export',
+                        testId: 'page-rules-toolbar-menu-export',
+                        icon: Download,
+                        label: getMessage('exportRulesTitle'),
+                        onSelect: () => openExportRules(),
+                      },
+                      {
+                        key: 'import',
+                        testId: 'page-rules-toolbar-menu-import',
+                        icon: Upload,
+                        label: getMessage('importRulesTitle'),
+                        onSelect: () => openImportRules(),
+                      },
+                    ]}
+                  />
                 }
               />
             )}
@@ -403,7 +710,7 @@ export function DomainRulesPage({
               data-testid="page-rules-scroll"
               style={{ flex: 1, overflow: 'auto', minHeight: 0 }}
             >
-              {filteredRules.length === 0 && syncSettings.domainRules.length === 0 && !searchTerm && (
+              {syncSettings.domainRules.length === 0 && !searchTerm && (
                 <EmptyState
                   data-testid="page-rules-empty"
                   icon={Shield}
@@ -411,47 +718,101 @@ export function DomainRulesPage({
                   description={getMessage('rulesEmptyDescription')}
                   actions={
                     <Flex gap="2">
-                      <Button data-testid="page-rules-btn-add" variant="soft" onClick={handleAddRule}>
+                      <Button
+                        data-testid="page-rules-btn-import-pack"
+                        variant="solid"
+                        onClick={() => openImportRules({ initialSourceMode: 'pack' })}
+                      >
+                        <PackagePlus size={14} />
+                        {getMessage('rulesEmptyImportPack')}
+                      </Button>
+                      <Button data-testid="page-rules-btn-add" variant="outline" onClick={handleAddRule}>
                         <Plus size={14} />
                         {getMessage('addRule')}
-                      </Button>
-                      <Button variant="soft" onClick={() => openImportRules()}>
-                        <Upload size={14} />
-                        {getMessage('importRulesButton')}
                       </Button>
                     </Flex>
                   }
                 />
               )}
-              {filteredRules.length === 0 && (syncSettings.domainRules.length > 0 || searchTerm) && (
+              {viewResult.visibleCount === 0 && (syncSettings.domainRules.length > 0 || searchTerm) && (
                 <EmptyState compact icon={AlertCircle} message={getMessage('noRulesFound')} />
               )}
-              {filteredRules.length > 0 && (
-                <DragDropProvider modifiers={[RestrictToVerticalAxis]} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-                  <Flex data-testid="page-rules-list" direction="column" gap="3" role="list" aria-label={getMessage('domainRulesTab')} ref={listRef}>
-                    {(dragItems ?? filteredRules).map((rule, index) => (
-                      <DomainRuleCard
-                        key={rule.id}
-                        rule={rule}
-                        index={index}
-                        isSelected={selectedIds.has(rule.id)}
-                        searchTerm={searchTerm}
-                        isDragDisabled={!!searchTerm}
-                        isDomainActionDisabled={getRulesForRootDomain(syncSettings.domainRules, rule.domainFilter).length <= 1}
-                        overlapPrecedenceList={overlapPrecedenceByRuleId.get(rule.id)}
-                        onSelect={handleRowSelect}
-                        onToggleEnabled={handleToggleEnabled}
-                        onEdit={handleEditRule}
-                        onDeleteRequest={(ruleId, focusIndex) => setDeleteTarget({ type: 'single', ruleId, focusIndex })}
-                        onMoveToFirst={handleMoveToFirst}
-                        onMoveToLast={handleMoveToLast}
-                        onMoveToFirstOfDomain={handleMoveToFirstOfDomain}
-                        onMoveToLastOfDomain={handleMoveToLastOfDomain}
-                        onKeyDown={(e) => handleCardKeyDown(e, rule, index)}
+              {viewResult.visibleCount > 0 && (
+                <Flex data-testid="page-rules-list" direction="column" gap="2" ref={listRef}>
+                  {/* Isolated rules (ungrouped / single-domain) render first. */}
+                  {viewResult.ungrouped.length > 0 && (
+                    <DragDropProvider
+                      modifiers={[RestrictToVerticalAxis]}
+                      onDragOver={
+                        viewResult.isUngroupedDndEnabled
+                          ? handleSectionDragOver('__ungrouped__', viewResult.ungrouped)
+                          : undefined
+                      }
+                      onDragEnd={
+                        viewResult.isUngroupedDndEnabled
+                          ? handleSectionDragEnd('__ungrouped__', viewResult.ungrouped, true)
+                          : undefined
+                      }
+                    >
+                      <RuleCardList
+                        {...cardListCommon}
+                        rules={
+                          dragSection?.key === '__ungrouped__'
+                            ? dragSection.items
+                            : viewResult.ungrouped
+                        }
+                        dragDisabled={!viewResult.isUngroupedDndEnabled}
+                        ariaLabel={getMessage('domainRulesTab')}
                       />
-                    ))}
-                  </Flex>
-                </DragDropProvider>
+                    </DragDropProvider>
+                  )}
+
+                  {/* Separator between the isolated rules and the domain groups. */}
+                  {viewResult.ungrouped.length > 0 && viewResult.groups.length > 0 && (
+                    <Separator size="4" my="2" data-testid="page-rules-groups-separator" />
+                  )}
+
+                  {viewResult.groups.map(group => {
+                    const dndEnabled = group.isDndEnabled && domainDndAllowed;
+                    const displayRules =
+                      dragSection?.key === group.key ? dragSection.items : group.rules;
+                    // A search forces every group open (a match must never hide
+                    // in a collapsed group); the persisted state is preserved.
+                    const isCollapsed = !searchActive && collapsedGroups.has(group.key);
+                    return (
+                      <Collapsible.Root
+                        key={group.key}
+                        open={!isCollapsed}
+                        onOpenChange={open => { if (!searchActive) handleToggleGroupCollapsed(group.key, !open); }}
+                      >
+                        <RuleGroupHeader
+                          group={group}
+                          collapsed={isCollapsed}
+                          testId={`page-rules-group-${group.key}`}
+                          selectedCount={group.ruleIds.filter(id => selectedIds.has(id)).length}
+                          onSelectGroup={handleSelectGroup}
+                          onKeyDown={e => handleGroupHeaderKeyDown(e, group)}
+                        />
+                        <Collapsible.Content>
+                          <DragDropProvider
+                            modifiers={[RestrictToVerticalAxis]}
+                            onDragOver={dndEnabled ? handleSectionDragOver(group.key, group.rules) : undefined}
+                            onDragEnd={dndEnabled ? handleSectionDragEnd(group.key, group.rules, false) : undefined}
+                          >
+                            <RuleCardList
+                              {...cardListCommon}
+                              rules={displayRules}
+                              dragDisabled={!dndEnabled}
+                              ariaLabel={group.label}
+                              indent
+                              groupKey={group.key}
+                            />
+                          </DragDropProvider>
+                        </Collapsible.Content>
+                      </Collapsible.Root>
+                    );
+                  })}
+                </Flex>
               )}
             </Box>
           </Box>

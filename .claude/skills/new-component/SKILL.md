@@ -17,10 +17,12 @@ Mandatory checklist for any new component in smart-tab-organizer:
 - Prefix every export with the component name: `ComponentNameDefault`, `ComponentNameDisabled`
 
 ## Internationalization
-- All text via `getMessage(key)` from `src/utils/i18n.ts`
+- All text via `getMessage(key)` from `src/utils/i18n.ts` (typed facade over `@wxt-dev/i18n`)
 - Never hardcode strings in JSX
 - Add new keys to all three locales: `public/_locales/{en,fr,es}/messages.json`
 - i18n placeholder format: `$1`, `$2` (not `{placeholder}`)
+- `key` is type-checked: a typo is a compile error. After adding keys, run `pnpm i18n:types` to refresh `wxt-i18n-structure.d.ts`
+- For dynamic keys, import `type MessageKey` from `src/utils/i18n.ts` and cast (`as MessageKey`)
 
 ## Logging
 - `logger.debug('[MY_MODULE] message', value)` from `src/utils/logger.ts`

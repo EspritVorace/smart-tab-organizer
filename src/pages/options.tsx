@@ -11,10 +11,14 @@ import { ShortcutsControlProvider } from '@/contexts/ShortcutsControlContext';
 import { ImportExportWizardsProvider } from '@/contexts/ImportExportWizardsContext';
 
 import { useSettings } from '@/hooks/useSettings.js';
+import { useActiveSessions } from '@/hooks/useActiveSessions.js';
+import { usePinnedSessions } from '@/hooks/usePinnedSessions.js';
 import { useStatistics } from '@/hooks/useStatistics.js';
 import { useSessionStatistics } from '@/hooks/useSessionStatistics.js';
-import { useDeepLinking } from '@/hooks/useDeepLinking.js';
+import { useStorageUsage } from '@/hooks/useStorageUsage.js';
+import { useDeepLinking, type StatsSubTab } from '@/hooks/useDeepLinking.js';
 import { useShortcuts, type ShortcutAction } from '@/hooks/useShortcuts.js';
+import { useThemeToggleShortcut } from '@/hooks/useThemeToggleShortcut.js';
 import { getDocsUrlForTab } from '@/utils/docsUrl';
 import { getMessage } from '@/utils/i18n';
 
@@ -23,6 +27,7 @@ import type { SidebarSection } from '@/components/UI/Sidebar/Sidebar';
 import { OptionsHeader, OptionsHeaderCollapsed } from '@/components/UI/OptionsLayout/OptionsHeader';
 import { OptionsTopbar } from '@/components/UI/OptionsLayout/OptionsTopbar';
 import { WorkspaceFooter, WorkspaceFooterCollapsed } from '@/components/UI/Workspace/WorkspaceFooter';
+import { WorkspaceSwitchShortcuts } from '@/components/UI/Workspace/WorkspaceSwitchShortcuts';
 import { ShortcutsAside, type PageContext } from '@/components/UI/ShortcutsPanel';
 import { SequenceIndicator } from '@/components/UI/SequenceIndicator';
 import { HomePage } from './HomePage';
@@ -62,7 +67,7 @@ import type { HomeRestoreTarget } from '@/components/HomePage/types';
 import { Toaster } from '@/components/UI/Toaster/Toaster';
 import type { DomainRuleSettings } from '@/types/syncSettings';
 
-function renderLazyFallback(currentTab: string): React.ReactNode {
+function renderLazyFallback(currentTab: string, statsTab: StatsSubTab): React.ReactNode {
     switch (currentTab) {
         case 'rules':
             return <DomainRulesPageSkeleton />;
@@ -73,7 +78,7 @@ function renderLazyFallback(currentTab: string): React.ReactNode {
         case 'importexport':
             return <ImportExportPageSkeleton />;
         case 'stats':
-            return <StatisticsPageSkeleton />;
+            return <StatisticsPageSkeleton statsTab={statsTab} />;
         case 'settings':
             return <SettingsPageSkeleton />;
         default:
@@ -83,8 +88,12 @@ function renderLazyFallback(currentTab: string): React.ReactNode {
 
 export function OptionsContent() {
     const { settings, updateSettings } = useSettings();
+    const { workspaces } = useActiveWorkspaceContext();
+    const { activeSessions } = useActiveSessions();
+    const { pinnedSessions } = usePinnedSessions();
     const { statisticsAggregates, resetStatistics } = useStatistics(settings?.domainRules ?? []);
     const { snapshot: sessionStatsSnapshot } = useSessionStatistics();
+    const storageUsage = useStorageUsage();
     const {
         currentTab, setCurrentTab,
         openSnapshotWizard, setOpenSnapshotWizard,
@@ -93,6 +102,7 @@ export function OptionsContent() {
         restoreSessionId, setRestoreSessionId,
         refreshSessionId, setRefreshSessionId,
         sessionsTab, setSessionsTab,
+        statsTab, setStatsTab,
     } = useDeepLinking();
 
     const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
@@ -137,14 +147,21 @@ export function OptionsContent() {
         await restoreSessionTabs(session, target as RestoreTarget);
     }, [setRestoreSessionId, setRefreshSessionId, setSnapshotGroupId, handleTabChange]);
 
+    const rulesCount = useMemo(
+        () => (settings?.domainRules ?? []).filter((rule) => rule.enabled).length,
+        [settings?.domainRules],
+    );
+    const sessionsCount = activeSessions.length + pinnedSessions.length;
+    const workspacesCount = workspaces.length;
+
     const sidebarSections: SidebarSection[] = useMemo(() => [
         {
             id: 'tools',
             label: getMessage('sidebarSectionTools'),
             items: [
                 { id: 'home', label: getMessage('homeTab'), icon: Home, accentColor: 'indigo' },
-                { id: 'rules', label: getMessage('domainRulesTab'), icon: Shield, accentColor: 'indigo' },
-                { id: 'sessions', label: getMessage('sessionsTab'), icon: Archive, accentColor: 'indigo' },
+                { id: 'rules', label: getMessage('domainRulesTab'), icon: Shield, accentColor: 'indigo', badge: rulesCount || undefined },
+                { id: 'sessions', label: getMessage('sessionsTab'), icon: Archive, accentColor: 'indigo', badge: sessionsCount || undefined },
             ],
         },
         {
@@ -160,10 +177,10 @@ export function OptionsContent() {
             items: [
                 { id: 'importexport', label: getMessage('importExportTab'), icon: FileText, accentColor: 'indigo' },
                 { id: 'settings', label: getMessage('settingsTab'), icon: Settings, accentColor: 'indigo' },
-                { id: 'workspaces', label: getMessage('workspacesTab'), icon: Layers, accentColor: 'indigo' },
+                { id: 'workspaces', label: getMessage('workspacesTab'), icon: Layers, accentColor: 'indigo', badge: workspacesCount || undefined },
             ],
         },
-    ], []);
+    ], [rulesCount, sessionsCount, workspacesCount]);
 
     const activePageTitle = useMemo(() => {
         for (const section of sidebarSections) {
@@ -177,8 +194,16 @@ export function OptionsContent() {
         if (currentTab === 'sessions' && sessionsTab === 'archived') {
             return { pageSubtitle: getMessage('archivedSessionsTab'), parentHref: '#sessions' };
         }
+        if (currentTab === 'stats' && statsTab !== 'summary') {
+            const statsTabKeys = {
+                rules: 'statsRulesTab',
+                sessions: 'statsSessionsTab',
+                storage: 'statsStorageTab',
+            } as const;
+            return { pageSubtitle: getMessage(statsTabKeys[statsTab]), parentHref: '#stats' };
+        }
         return {};
-    }, [currentTab, sessionsTab]);
+    }, [currentTab, sessionsTab, statsTab]);
 
 
     const focusActiveSearch = useCallback(() => {
@@ -217,6 +242,8 @@ export function OptionsContent() {
         onSequenceState: ({ activePrefix }) => setSequencePrefix(activePrefix),
     });
 
+    useThemeToggleShortcut();
+
     const openShortcuts = useCallback(() => setShortcutsAsideOpen(true), []);
 
     if (!settings) {
@@ -254,7 +281,7 @@ export function OptionsContent() {
                 />
                 <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
                     <main data-testid="options-content" style={{ flex: 1, overflow: 'auto', padding: '20px 20px 0 20px', minWidth: 0 }}>
-                        <Suspense fallback={renderLazyFallback(currentTab)}>
+                        <Suspense fallback={renderLazyFallback(currentTab, statsTab)}>
                             {currentTab === 'home' && (
                                 <HomePage
                                     syncSettings={settings}
@@ -302,7 +329,10 @@ export function OptionsContent() {
                                     syncSettings={settings}
                                     statisticsData={statisticsAggregates}
                                     sessionStats={sessionStatsSnapshot}
+                                    storageUsage={storageUsage}
                                     onReset={handleResetStats}
+                                    statsTab={statsTab}
+                                    onStatsTabChange={setStatsTab}
                                 />
                             )}
                             {currentTab === 'settings' && (
@@ -333,6 +363,7 @@ export function OptionsContent() {
                 color="orange"
             />
             <SequenceIndicator activePrefix={sequencePrefix} />
+            <WorkspaceSwitchShortcuts onSequenceState={({ activePrefix }) => setSequencePrefix(activePrefix)} />
         </div>
         </ImportExportWizardsProvider>
         </ShortcutsControlProvider>

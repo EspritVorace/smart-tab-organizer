@@ -92,6 +92,36 @@ describe('useShortcuts (facade)', () => {
     dispatch({ key: '/' });
     expect(action).toHaveBeenCalledTimes(1);
   });
+
+  it('does not fire a single-key action consumed as a sequence tail by an earlier hook', () => {
+    const switchPrev = vi.fn();
+    const openOptions = vi.fn();
+    // The workspace (global) hook is registered first, so it runs first and
+    // completes `w p`, calling preventDefault. The popup `p` single-key action
+    // must then be suppressed instead of double-firing.
+    renderHook(() => {
+      useShortcuts({ 'workspace.prev': switchPrev }, { scope: 'global' });
+      useShortcuts({ 'popup.options': openOptions }, { scope: 'page:popup' });
+    });
+
+    dispatch({ key: 'w' });
+    dispatch({ key: 'p' });
+
+    expect(switchPrev).toHaveBeenCalledTimes(1);
+    expect(openOptions).not.toHaveBeenCalled();
+  });
+
+  it('still fires a lone single-key action that is not preceded by a sequence', () => {
+    const openOptions = vi.fn();
+    renderHook(() => {
+      useShortcuts({ 'workspace.prev': vi.fn() }, { scope: 'global' });
+      useShortcuts({ 'popup.options': openOptions }, { scope: 'page:popup' });
+    });
+
+    // A bare `p` (no `w` prefix buffered) must still open options.
+    dispatch({ key: 'p' });
+    expect(openOptions).toHaveBeenCalledTimes(1);
+  });
 });
 
 function dispatchOn(
@@ -187,6 +217,78 @@ describe('useShortcuts (widget scope)', () => {
 
     dispatchOn(card, { key: 'r' });
     expect(pageAction).not.toHaveBeenCalled();
+    expect(widgetAction).toHaveBeenCalledTimes(1);
+  });
+
+  it('still fires a page-level excludeIfInsideWidget binding when the focused widget does not claim that combo', () => {
+    const organizeAction = vi.fn();
+    const saveAction = vi.fn();
+    const optionsAction = vi.fn();
+    const restoreWidgetAction = vi.fn();
+
+    renderHook(() => {
+      useShortcuts(
+        {
+          'popup.organize': organizeAction,
+          'popup.save': saveAction,
+          'popup.options': optionsAction,
+        },
+        { scope: 'page:popup' },
+      );
+      // The pinned card only registers the restore bindings (r/Shift+r/...),
+      // so o/s/p are not claimed and must fall through to the popup actions.
+      useShortcuts(
+        { 'sessionCard.restore.custom': restoreWidgetAction },
+        { scope: 'widget:session-card' },
+      );
+    });
+
+    const card = document.createElement('div');
+    card.setAttribute('data-shortcut-scope', 'widget:session-card');
+    card.tabIndex = 0;
+    document.body.appendChild(card);
+    card.focus();
+
+    dispatchOn(card, { key: 'o' });
+    dispatchOn(card, { key: 's' });
+    dispatchOn(card, { key: 'p' });
+
+    expect(organizeAction).toHaveBeenCalledTimes(1);
+    expect(saveAction).toHaveBeenCalledTimes(1);
+    expect(optionsAction).toHaveBeenCalledTimes(1);
+    expect(restoreWidgetAction).not.toHaveBeenCalled();
+  });
+
+  it('restores the page-level binding once the focused widget hook unmounts', () => {
+    const pageAction = vi.fn();
+    const widgetAction = vi.fn();
+
+    const { rerender } = renderHook(
+      ({ withWidget }: { withWidget: boolean }) => {
+        useShortcuts({ 'popup.restore': pageAction }, { scope: 'page:popup' });
+        useShortcuts(
+          { 'sessionCard.restore.custom': widgetAction },
+          { scope: 'widget:session-card', enabled: withWidget },
+        );
+      },
+      { initialProps: { withWidget: true } },
+    );
+
+    const card = document.createElement('div');
+    card.setAttribute('data-shortcut-scope', 'widget:session-card');
+    card.tabIndex = 0;
+    document.body.appendChild(card);
+    card.focus();
+
+    // While the widget claims `r`, the page-level restore stays suppressed.
+    dispatchOn(card, { key: 'r' });
+    expect(pageAction).not.toHaveBeenCalled();
+    expect(widgetAction).toHaveBeenCalledTimes(1);
+
+    // Unmounting the widget hook removes its claim; `r` now reaches the page.
+    rerender({ withWidget: false });
+    dispatchOn(card, { key: 'r' });
+    expect(pageAction).toHaveBeenCalledTimes(1);
     expect(widgetAction).toHaveBeenCalledTimes(1);
   });
 

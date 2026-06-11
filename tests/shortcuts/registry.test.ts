@@ -35,6 +35,8 @@ const VALID_SCOPES: readonly ShortcutScope[] = [
   'page:popup',
   'widget:session-card',
   'widget:rule-card',
+  'widget:rule-group',
+  'widget:workspace-card',
 ];
 
 describe('SHORTCUTS_REGISTRY', () => {
@@ -109,14 +111,16 @@ describe('SHORTCUTS_REGISTRY', () => {
   });
 
   it('contains the expected number of entries per group (parity with legacy panel)', () => {
-    expect(getShortcutsByGroup('global')).toHaveLength(3);
+    expect(getShortcutsByGroup('global')).toHaveLength(7);
+    expect(getShortcutsByGroup('workspace')).toHaveLength(3);
     expect(getShortcutsByGroup('popup')).toHaveLength(5);
     expect(getShortcutsByGroup('options')).toHaveLength(11);
-    expect(getShortcutsByGroup('list-rules')).toHaveLength(11);
-    expect(getShortcutsByGroup('list-sessions')).toHaveLength(9);
-    expect(getShortcutsByGroup('list-workspaces')).toHaveLength(1);
+    expect(getShortcutsByGroup('list-rules')).toHaveLength(14);
+    expect(getShortcutsByGroup('list-sessions')).toHaveLength(11);
+    expect(getShortcutsByGroup('list-stats')).toHaveLength(2);
+    expect(getShortcutsByGroup('list-workspaces')).toHaveLength(3);
     expect(getShortcutsByGroup('list-home')).toHaveLength(9);
-    expect(getShortcutsByGroup('session-card')).toHaveLength(5);
+    expect(getShortcutsByGroup('session-card')).toHaveLength(7);
     expect(getShortcutsByGroup('importexport')).toHaveLength(6);
   });
 
@@ -139,12 +143,34 @@ describe('SHORTCUTS_REGISTRY', () => {
     expect(offending).toEqual([]);
   });
 
+  it('reserves w as a sequence prefix in the global scope', () => {
+    const globalScope = getShortcutsByScope('global');
+    expect(globalScope.length).toBeGreaterThan(0);
+
+    const offending: { id: string; combo: string }[] = [];
+    for (const entry of globalScope) {
+      for (const binding of entry.defaultBindings) {
+        // Only simple combos can shadow a sequence prefix; sequences are fine.
+        const combos = typeof binding === 'string' ? [binding] : [];
+        for (const combo of combos) {
+          if (parseCombo(combo).key === 'w') {
+            offending.push({ id: entry.id, combo });
+          }
+        }
+      }
+    }
+    expect(offending).toEqual([]);
+  });
+
   it('attaches commandName only on global manifest entries', () => {
     const withCommand = Object.values(SHORTCUTS_REGISTRY).filter((e) => e.commandName);
     expect(withCommand.map((e) => e.commandName).sort()).toEqual([
       '_execute_action',
       'organize-all-tabs',
       'save-current-window-session',
+      'switch-workspace-last',
+      'switch-workspace-next',
+      'switch-workspace-prev',
     ]);
     for (const entry of withCommand) {
       expect(entry.scope).toBe('global');
@@ -160,7 +186,7 @@ describe('registry helpers', () => {
     expect(popupEntries.length).toBe(5);
 
     const cardEntries = getShortcutsByScope('widget:session-card');
-    expect(cardEntries.length).toBe(11);
+    expect(cardEntries.length).toBe(15);
 
     const ruleCardEntries = getShortcutsByScope('widget:rule-card');
     expect(ruleCardEntries.length).toBe(8);

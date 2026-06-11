@@ -15,10 +15,23 @@
  */
 
 import { test, expect } from './fixtures';
+import type { BrowserContext } from '@playwright/test';
 import * as http from 'http';
 
 /** Port used for fake local pages (needed for content script injection in manual-mode tests). */
 const FAKE_PORT = 7655;
+
+async function getServiceWorker(context: BrowserContext): Promise<import('@playwright/test').Page> {
+  let sw = context.serviceWorkers()[0];
+  if (sw) return sw;
+  const deadline = Date.now() + 5000;
+  while (Date.now() < deadline) {
+    sw = context.serviceWorkers()[0];
+    if (sw) return sw;
+    await new Promise(r => setTimeout(r, 200));
+  }
+  throw new Error('Service worker not available after 5 s (idle termination?)');
+}
 
 // ─── suite ──────────────────────────────────────────────────────────────────
 
@@ -440,7 +453,7 @@ test.describe('Group Naming Modes', () => {
       extensionContext,
     }) => {
       // Verify the presets JSON is accessible from the service worker context
-      const sw = extensionContext.serviceWorkers()[0];
+      const sw = await getServiceWorker(extensionContext);
       const presets = await sw.evaluate(async () => {
         try {
           const resp = await fetch(chrome.runtime.getURL('/data/presets.json'));

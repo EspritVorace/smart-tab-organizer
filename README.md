@@ -4,9 +4,9 @@
 
 # SmartTab Organizer
 
-> **Tame your tabs. No cloud, no AI, no tracking.**
+> **Your tabs sort and name themselves. No cloud, no tracking.**
 
-A Chrome and Firefox extension that groups your tabs by domain, kills duplicates, and snapshots your workspaces as sessions you can restore in one click.
+SmartTab Organizer reads the group name straight from the URL or title, so a group per repository, per ticket or per client appears on its own, without piling up one rule per value. Everything runs in your browser: no cloud, no AI, no tracking. It also kills duplicate tabs and snapshots your workspaces as sessions you can restore in one click. [See it in action](https://docs.esprit-vorace.fr/).
 
 <p align="center">
   <img src="doc/store.png" alt="SmartTab Organizer" width="720">
@@ -24,8 +24,8 @@ A Chrome and Firefox extension that groups your tabs by domain, kills duplicates
 
 ## Why?
 
-- Your tabs pile up faster than you can close them. SmartTab puts them in their place, automatically.
-- Other tools either ship your data to a cloud or shove AI in your face. This one runs entirely in your browser, with zero telemetry.
+- Other extensions make you type a fixed group name, one rule per value. SmartTab extracts it from the URL or title, so a group per repo, ticket or client appears automatically, without multiplying rules.
+- No cloud, no AI, no telemetry. Everything runs in your browser and your data never leaves it.
 - The workspace you built deserves to come back tomorrow. Save it, name it, restore it.
 
 ## What it does
@@ -67,7 +67,7 @@ Snapshot your open tabs and groups, name them, pin the ones you live in. Restore
 
 ## 📖 Documentation
 
-Full guide online: [docs.esprit-vorace.fr](https://docs.esprit-vorace.fr/en/) (Astro Starlight, 3 languages, 30+ pages with screenshots). The MDX sources live in [`docs/`](docs/src/content/docs/en/) for contributors.
+Full guide online: [docs.esprit-vorace.fr](https://docs.esprit-vorace.fr/) (Astro Starlight, 3 languages, 30+ pages with screenshots). The MDX sources live in [`docs/`](docs/src/content/docs/) for contributors.
 
 ## 🛠️ For contributors
 
@@ -83,7 +83,7 @@ pnpm storybook    # Component explorer (port 6006)
 pnpm build        # Production build
 ```
 
-The stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) and code conventions are documented in [`CLAUDE.md`](CLAUDE.md) and the [stack technique annex](docs/src/content/docs/contribuer/stack.mdx).
+The stack (WXT, React 19, Radix UI, Zod, Vitest, Playwright, Storybook) and code conventions are documented in [`CLAUDE.md`](CLAUDE.md) and the [stack technique annex](docs/src/content/docs/contributing/stack.mdx).
 
 Please open an issue before submitting a large pull request.
 
@@ -93,4 +93,4 @@ GNU General Public License v3.0.
 
 ## 🗝️ Third-party licenses
 
-SmartTab Organizer bundles open source components (React, Radix UI, Lucide, Zod, CodeMirror, dnd-kit, and more). Their copyright notices and full license texts are listed in [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt) and on the [attribution page](https://docs.esprit-vorace.fr/en/reference/licences-open-source/).
+SmartTab Organizer bundles open source components (React, Radix UI, Lucide, Zod, CodeMirror, dnd-kit, and more). Their copyright notices and full license texts are listed in [THIRD-PARTY-LICENSES.txt](THIRD-PARTY-LICENSES.txt) and on the [attribution page](https://docs.esprit-vorace.fr/reference/open-source-licenses/).

@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import license from 'rollup-plugin-license';
 import { resolve } from 'path';
 import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'fs';
+import { generateI18nTypes } from './scripts/generate-i18n-types.mjs';
 
 // Packages whose code actually ends up in the extension bundle. WXT runs
 // several Vite builds in a single process (background, content scripts, HTML
@@ -51,6 +52,12 @@ export default defineConfig({
     developmentIndicator: 'overlay',
   },
   hooks: {
+    // Keep the committed `wxt-i18n-structure.d.ts` in sync with the English
+    // catalog on every `wxt prepare` (postinstall) and build. The write is
+    // idempotent, so this never dirties git unless the keys actually changed.
+    'prepare:types': async () => {
+      await generateI18nTypes();
+    },
     'build:manifestGenerated': (wxt, manifest) => {
       // Firefox MV2 uses `_execute_browser_action`; only Chromium MV3 accepts
       // `_execute_action`. Without this rename the popup hotkey (and on some
@@ -58,6 +65,27 @@ export default defineConfig({
       if (manifest.manifest_version === 2 && manifest.commands?._execute_action) {
         manifest.commands._execute_browser_action = manifest.commands._execute_action;
         delete manifest.commands._execute_action;
+      }
+    },
+    'build:publicAssets': (_wxt, files) => {
+      // Minify every public JSON asset on the way out: WXT copies public/
+      // verbatim (pretty-printed), so the shipped files keep their indentation.
+      // Stripping it saves ~30 KB total (presets, the three i18n catalogs, the
+      // licenses file) while the committed sources stay pretty and
+      // hand-editable. Transform each CopiedPublicFile (absoluteSrc) into a
+      // GeneratedPublicFile (contents): WXT writes `contents` when `absoluteSrc`
+      // is absent (build-entrypoints: `if ("absoluteSrc" in file) copyFile`).
+      for (const file of files) {
+        if (!file.relativeDest.endsWith('.json')) continue;
+        const f = file as {
+          relativeDest: string;
+          absoluteSrc?: string;
+          contents?: string;
+        };
+        if (!f.absoluteSrc) continue; // already generated, nothing to read
+        const minified = JSON.stringify(JSON.parse(readFileSync(f.absoluteSrc, 'utf-8')));
+        delete f.absoluteSrc; // switch WXT to the writeFile(contents) branch
+        f.contents = minified;
       }
     },
     'build:done': () => {
@@ -71,7 +99,7 @@ export default defineConfig({
   manifest: {
     name: '__MSG_extensionName__',
     description: '__MSG_extensionDescription__',
-    version: '1.2.3',
+    version: '1.2.4',
     author: 'EspritVorace',
     homepage_url: 'https://github.com/EspritVorace/smart-tab-organizer',
     default_locale: 'en',
@@ -91,16 +119,37 @@ export default defineConfig({
     permissions: ['tabs', 'tabGroups', 'storage', 'notifications'],
     host_permissions: ['<all_urls>'],
     commands: {
+      // `organize-all-tabs` and `save-current-window-session` ship without a
+      // `suggested_key` on purpose. Any letter-based default clashes with
+      // built-in browser bindings: on Firefox `Alt+Shift+<letter>` is the
+      // web-page accesskey modifier (silently shadowed by pages), and almost
+      // every `Ctrl+Shift+<letter>` is already a Firefox built-in. These two
+      // stay assignable by the user via chrome://extensions/shortcuts; day to
+      // day they are reachable from the popup (open it, then press O / S).
       'organize-all-tabs': {
-        suggested_key: { default: 'Alt+Shift+O' },
         description: '__MSG_cmdOrganizeAllTabs__',
       },
       'save-current-window-session': {
-        suggested_key: { default: 'Alt+Shift+S' },
         description: '__MSG_cmdSaveSession__',
       },
+      // Workspace switching from any tab. No `suggested_key` (same letter
+      // -conflict reasoning as the two commands above); the user assigns them
+      // via chrome://extensions/shortcuts. In the popup/options the `w n`/`w p`
+      // /`w l` in-page sequences cover the same actions.
+      'switch-workspace-next': {
+        description: '__MSG_cmdSwitchWorkspaceNext__',
+      },
+      'switch-workspace-prev': {
+        description: '__MSG_cmdSwitchWorkspacePrev__',
+      },
+      'switch-workspace-last': {
+        description: '__MSG_cmdSwitchWorkspaceLast__',
+      },
+      // Single global default: a digit combo avoids the letter conflicts above
+      // and is free on Chrome and Firefox (Ctrl+Shift+digit is unbound; plain
+      // Ctrl+1..8 selects tabs). On macOS Cmd+Shift+1 is not OS-reserved.
       _execute_action: {
-        suggested_key: { default: 'Alt+Shift+P' },
+        suggested_key: { default: 'Ctrl+Shift+1' },
       },
     },
     action: {
@@ -147,11 +196,15 @@ export default defineConfig({
     },
     build: {
       emptyOutDir: true,
+      // JsonCodeEditor (CodeMirror + codemirror-json-schema) is already lazy-loaded
+      // and only imported when the import wizard is opened. Extension chunks are
+      // served locally so network cost does not apply; suppress the warning.
+      chunkSizeWarningLimit: 600,
       rollupOptions: {
         output: {
           assetFileNames: 'assets/[name].[hash].[ext]',
           chunkFileNames: 'chunks/[name].[hash].js',
-          entryFileNames: 'chunks/[name].[hash].js'
+          entryFileNames: 'chunks/[name].[hash].js',
         }
       }
     },

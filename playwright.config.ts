@@ -10,9 +10,13 @@ if (!fs.existsSync(path.join(extensionPath, 'manifest.json'))) {
 }
 
 // Each worker launches one browser with the extension loaded (worker-scoped context).
-// Multiple workers run test files in parallel — each gets its own isolated Chrome profile.
-// Keep workers at 1 in CI to avoid resource contention; locally 3 workers run ~3x faster.
-const workers = process.env.CI ? 1 : (process.env.E2E_WORKERS ? parseInt(process.env.E2E_WORKERS) : 3);
+// Multiple workers run test files in parallel: each gets its own isolated Chrome profile.
+// Playwright shards by test count, not by duration, so the slowest specs (grouping,
+// deduplication, import-export) cluster into shard 1 and make it ~2.5x slower than the
+// others. Running 2 workers per shard adds a bit of intra-shard parallelism to absorb that
+// imbalance without overloading the 2-core CI runners. Override with E2E_WORKERS if needed.
+const defaultWorkers = process.env.CI ? 2 : 3;
+const workers = process.env.E2E_WORKERS ? parseInt(process.env.E2E_WORKERS) : defaultWorkers;
 
 // When running sharded in CI, each shard writes a uniquely-named CTRF report so
 // artifacts don't collide when downloaded into the same directory for merging.
@@ -25,6 +29,12 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 1, // Retry once locally too
   workers,
   timeout: 30000, // Timeout for extension loading
+  // Web-first assertions default to a 5s ceiling. With 2 workers sharing the CI runner,
+  // a list render can occasionally exceed 5s and make UI assertions (toBeVisible /
+  // toHaveCount) flaky. Raising the ceiling to 10s absorbs that contention; it costs
+  // nothing on passing assertions (a met condition resolves immediately) and only lets a
+  // genuinely failing assertion take 10s instead of 5s to surface.
+  expect: { timeout: 10_000 },
   globalTeardown: './tests/e2e/helpers/a11y-teardown.ts',
 
   use: {

@@ -141,40 +141,29 @@ button:focus-visible,
   color: var(--blog-background);
 }
 
-/* ----- Landing hero: card treatment matching the closing CTA below ----- */
-/* This site ships no hero image. Starlight's splash hero still reserves a
-   second (image) grid column (7fr 4fr), so the copy stays stranded on the
-   left with an empty right column. Force a single centered column, then wrap
-   the whole hero in the same bordered, muted card used by the closing CTA
-   (ClosingCTA.astro) so the top and bottom of the landing page share one
-   visual language. */
-.hero {
-  grid-template-columns: 1fr;
-  justify-items: center;
+/* ----- Landing hero: popup image on the right, store badges below ----- */
+/* The splash hero now ships a popup screenshot, so we keep Starlight's default
+   two-column grid (7fr 4fr at >= 50rem, single column on mobile) and let the
+   image render in its column. The custom Hero override (Hero.astro) wraps the
+   hero and the store-badge row in `.hero-card`, the same bordered, muted card
+   used by the closing CTA (ClosingCTA.astro), so the top and bottom of the
+   landing page share one visual language. */
+.hero-card {
   border: 1px solid var(--blog-border);
   border-radius: 1.1rem;
   background: var(--blog-muted);
-  padding: 3rem 1.5rem;
+  padding: 2rem 1.5rem;
   margin-block-start: 1rem;
 }
 
-.hero .stack {
-  align-items: center;
-}
-
-.hero .copy {
-  align-items: center;
-  text-align: center;
-  max-width: 50rem;
-}
-
-.hero .actions {
-  justify-content: center;
+/* Soften the default hero block padding now that the card supplies its own. */
+.hero-card .hero {
+  padding-block: 1rem;
 }
 
 /* Hero action buttons share the closing CTA button shape (rounded rect,
    lift on hover) instead of Starlight's default pill. */
-.hero .actions .sl-link-button {
+.hero-card .actions .sl-link-button {
   border-radius: 0.6rem;
   font-weight: 600;
   transition:
@@ -183,6 +172,34 @@ button:focus-visible,
     border-color 0.15s ease;
 }
 
-.hero .actions .sl-link-button:hover {
+.hero-card .actions .sl-link-button:hover {
   transform: translateY(-2px);
+}
+
+/* Official store badges, centered below the hero copy and actions, still
+   above the fold. Each badge ships its own background, so it stays legible on
+   the muted card in both light and dark themes. */
+.hero-store-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: center;
+  justify-content: center;
+  margin-block-start: 1.5rem;
+}
+
+.hero-store-badges a {
+  display: inline-flex;
+  border-radius: 0.4rem;
+  transition: transform 0.15s ease;
+}
+
+.hero-store-badges a:hover {
+  transform: translateY(-2px);
+}
+
+.hero-store-badges img {
+  height: 48px;
+  width: auto;
+  display: block;
 }

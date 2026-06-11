@@ -11,8 +11,12 @@ import {
 import { generateUUID } from '@/utils/utils';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 import { PackGallery } from '@/components/Core/Pack/PackGallery/PackGallery';
-import { usePackSelections } from '@/components/Core/Pack/PackGallery/usePackSelections';
+import {
+  usePackSelections,
+  type PackSelectionState,
+} from '@/components/Core/Pack/PackGallery/usePackSelections';
 import { usePacks } from '@/hooks/usePacks';
+import { usePackSuggestions } from '@/hooks/usePackSuggestions';
 import { ImportWizardShell } from './ImportWizardShell';
 import {
   useImportWizardState,
@@ -30,6 +34,13 @@ interface ImportWizardProps {
   onImport: (updatedRules: DomainRuleSetting[]) => void;
   /** When provided, the wizard opens on this source mode instead of `'file'`. */
   initialSourceMode?: SourceMode;
+  /** Pre-selected packs (e.g. from the contextual onboarding hero). */
+  initialPackSelections?: Record<string, PackSelectionState>;
+  /**
+   * Called once an import completes. `changed` is true when the import added or
+   * overwrote at least one rule, so callers can offer the "Organize now" reward.
+   */
+  onAfterImport?: (changed: boolean) => void;
 }
 
 const validateRulesPayload = (raw: unknown) => {
@@ -58,8 +69,10 @@ export function ImportWizard({
   existingRules,
   onImport,
   initialSourceMode,
+  initialPackSelections,
+  onAfterImport,
 }: ImportWizardProps) {
-  const packSelections = usePackSelections();
+  const packSelections = usePackSelections(initialPackSelections);
 
   const state = useImportWizardState<DomainRuleSetting, ConflictingRule>({
     open,
@@ -77,6 +90,8 @@ export function ImportWizard({
     () => new Set(existingRules.map((rule) => rule.id)),
     [existingRules],
   );
+
+  const { matchedTabsByPackId } = usePackSuggestions(existingRuleIds);
 
   const handlePackConfirm = useCallback(() => {
     const aggregated: ImportDomainRule[] = [];
@@ -117,11 +132,20 @@ export function ImportWizard({
 
     onImport(updatedRules);
     onOpenChange(false);
+    onAfterImport?.(added > 0 || overwritten > 0);
     showSuccessToast(
       getMessage('importNotificationTitle'),
       getMessage('importNotificationMessage', [String(added), String(overwritten)]),
     );
-  }, [classification, existingRules, newSelection, conflictMode, onImport, onOpenChange]);
+  }, [
+    classification,
+    existingRules,
+    newSelection,
+    conflictMode,
+    onImport,
+    onOpenChange,
+    onAfterImport,
+  ]);
 
   return (
     <ImportWizardShell<DomainRuleSetting, ConflictingRule>
@@ -149,6 +173,7 @@ export function ImportWizard({
           selections={packSelections.selections}
           onSelectionChange={packSelections.setPackSelection}
           existingRuleIds={existingRuleIds}
+          matchedTabsByPackId={matchedTabsByPackId}
         />
       }
       packFooter={{

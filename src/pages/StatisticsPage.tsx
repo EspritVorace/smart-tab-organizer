@@ -1,478 +1,68 @@
-import { useMemo } from 'react';
-import { Box, Flex, Text, Button, Card, Separator, Heading, Grid, Tooltip, Badge } from '@radix-ui/themes';
-import {
-  RotateCcw, Layers, Copy, Archive, Pin, FolderOpen, ListTree,
-  Globe, Palette, Clock, Calendar, Info, Tag,
-} from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { Box, TabNav } from '@radix-ui/themes';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
-import { getMessage } from '@/utils/i18n';
-import { formatSessionDate } from '@/utils/sessionUtils';
-import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
-import { TrendBadge } from '@/components/Core/Statistics/TrendBadge';
+import { getMessage, type MessageKey } from '@/utils/i18n';
+import { useShortcuts } from '@/hooks/useShortcuts';
+import { StatisticsSummary } from '@/components/Core/Statistics/StatisticsSummary';
+import { StatisticsRulesDetail } from '@/components/Core/Statistics/StatisticsRulesDetail';
+import { StatisticsSessionsDetail } from '@/components/Core/Statistics/StatisticsSessionsDetail';
+import { StatisticsStorageDetail } from '@/components/Core/Statistics/StatisticsStorageDetail';
+import type { StatsSubTab } from '@/hooks/useDeepLinking';
 import type { AppSettings } from '@/types/syncSettings';
 import type { StatisticsAggregates } from '@/types/statistics';
-import type {
-  SessionStatisticsSnapshot,
-  GroupColorStat,
-} from '@/hooks/useSessionStatistics';
-import type { ChromeGroupColor } from '@/types/tabTree';
+import type { SessionStatisticsSnapshot } from '@/hooks/useSessionStatistics';
+import type { StorageUsageSnapshot } from '@/hooks/useStorageUsage';
 
 interface StatisticsPageProps {
   syncSettings: AppSettings;
   statisticsData: StatisticsAggregates | null;
   sessionStats: SessionStatisticsSnapshot | null;
+  storageUsage: StorageUsageSnapshot;
   onReset: () => void;
+  statsTab: StatsSubTab;
+  onStatsTabChange: (tab: StatsSubTab) => void;
 }
 
-const GROUP_COLOR_CSS: Record<ChromeGroupColor, string> = {
-  grey: 'var(--gray-9)',
-  blue: 'var(--blue-9)',
-  red: 'var(--red-9)',
-  yellow: 'var(--yellow-9)',
-  green: 'var(--green-9)',
-  pink: 'var(--pink-9)',
-  purple: 'var(--purple-9)',
-  cyan: 'var(--cyan-9)',
-  orange: 'var(--orange-9)',
+const SUB_TAB_HASH: Record<StatsSubTab, string> = {
+  summary: '#stats',
+  rules: '#stats/rules',
+  sessions: '#stats/sessions',
+  storage: '#stats/storage',
 };
 
-const GROUP_COLOR_LABEL_KEY: Record<ChromeGroupColor, string> = {
-  grey: 'statsGroupColorGrey',
-  blue: 'statsGroupColorBlue',
-  red: 'statsGroupColorRed',
-  yellow: 'statsGroupColorYellow',
-  green: 'statsGroupColorGreen',
-  pink: 'statsGroupColorPink',
-  purple: 'statsGroupColorPurple',
-  cyan: 'statsGroupColorCyan',
-  orange: 'statsGroupColorOrange',
+/** Left-to-right order of the sub-tabs, used by the PageUp/PageDown shortcuts. */
+const SUB_TAB_ORDER: readonly StatsSubTab[] = ['summary', 'rules', 'sessions', 'storage'];
+
+const SUB_TAB_DESCRIPTION_KEY: Record<Exclude<StatsSubTab, 'summary'>, string> = {
+  rules: 'statsRulesPageDescription',
+  sessions: 'statsSessionsPageDescription',
+  storage: 'statsStoragePageDescription',
 };
 
-function KpiTile({ icon, label, value, testId }: { icon: React.ReactNode; label: string; value: React.ReactNode; testId?: string }) {
-  return (
-    <Card data-testid={testId} style={{ flex: '1', minWidth: '150px' }}>
-      <Flex direction="column" gap="2" p="3">
-        <Flex align="center" gap="2">
-          {icon}
-          <Text size="2" color="gray" highContrast>{label}</Text>
-        </Flex>
-        <Text size="8" weight="bold" style={{ color: 'var(--accent-11)' }}>
-          {value}
-        </Text>
-      </Flex>
-    </Card>
-  );
-}
+/** Tab label per sub-tab, reused as the accessible name of the scroll region. */
+const SUB_TAB_LABEL_KEY: Record<StatsSubTab, string> = {
+  summary: 'statsSummaryTab',
+  rules: 'statsRulesTab',
+  sessions: 'statsSessionsTab',
+  storage: 'statsStorageTab',
+};
 
-function SmallKpiTile({ icon, label, value, testId, minWidth = '110px' }: { icon: React.ReactNode; label: string; value: React.ReactNode; testId?: string; minWidth?: string | number }) {
-  return (
-    <Card data-testid={testId} style={{ flex: '1', minWidth }}>
-      <Flex direction="column" gap="1" p="2">
-        <Flex align="center" gap="1">
-          {icon}
-          <Text size="1" color="gray" highContrast>{label}</Text>
-        </Flex>
-        <Text size="6" weight="bold" style={{ color: 'var(--accent-11)' }}>
-          {value}
-        </Text>
-      </Flex>
-    </Card>
-  );
-}
-
-interface BarRowProps {
-  label: string;
-  value: number;
-  maxValue: number;
-  index: number;
-  testId?: string;
-  rightDetail?: string;
-}
-
-function BarRow({ label, value, maxValue, index, testId, rightDetail }: BarRowProps) {
-  const widthPct = maxValue > 0 ? Math.round((value / maxValue) * 100) : 0;
-  return (
-    <Box data-testid={testId}>
-      <Flex justify="between" align="baseline" mb="1">
-        <Text size="2" weight="medium" style={{ maxWidth: '70%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {index + 1}. {label}
-        </Text>
-        <Flex direction="column" align="end" gap="1">
-          <Text size="2" weight="bold">{value}</Text>
-          {rightDetail && <Text size="1" color="gray">{rightDetail}</Text>}
-        </Flex>
-      </Flex>
-      <Box style={{
-        height: '6px',
-        borderRadius: 'var(--radius-1)',
-        backgroundColor: 'var(--gray-a3)',
-        overflow: 'hidden',
-      }}>
-        <Box style={{
-          height: '100%',
-          width: `${widthPct}%`,
-          backgroundColor: 'var(--accent-9)',
-          borderRadius: 'var(--radius-1)',
-        }} />
-      </Box>
-    </Box>
-  );
-}
-
-function GroupColorBar({ distribution }: { distribution: GroupColorStat[] }) {
-  const total = distribution.reduce((sum, d) => sum + d.count, 0);
-  if (total === 0) return null;
-
-  return (
-    <Box>
-      <Box
-        style={{
-          display: 'flex',
-          width: '100%',
-          height: '14px',
-          borderRadius: 'var(--radius-2)',
-          overflow: 'hidden',
-          backgroundColor: 'var(--gray-a3)',
-        }}
-        data-testid="page-stats-color-distribution"
-      >
-        {distribution.map(d => (
-          <Tooltip key={d.color} content={`${getMessage(GROUP_COLOR_LABEL_KEY[d.color])} (${d.count})`}>
-            <Box
-              style={{
-                width: `${(d.count / total) * 100}%`,
-                backgroundColor: GROUP_COLOR_CSS[d.color],
-              }}
-            />
-          </Tooltip>
-        ))}
-      </Box>
-      <Flex gap="3" wrap="wrap" mt="2">
-        {distribution.map(d => (
-          <Flex key={d.color} align="center" gap="1">
-            <Box style={{
-              width: '10px',
-              height: '10px',
-              borderRadius: 'var(--radius-1)',
-              backgroundColor: GROUP_COLOR_CSS[d.color],
-            }} />
-            <Text size="1" color="gray">{getMessage(GROUP_COLOR_LABEL_KEY[d.color])} ({d.count})</Text>
-          </Flex>
-        ))}
-      </Flex>
-    </Box>
-  );
-}
-
-function SessionVolumesCard({ snapshot }: { snapshot: SessionStatisticsSnapshot }) {
-  const { volumes } = snapshot;
-  const avg = volumes.averageTabsPerSession;
-  const avgFormatted = avg.toFixed(avg < 10 ? 1 : 0);
-  return (
-    <Card data-testid="page-stats-card-session-volumes">
-      <Flex direction="column" gap="3" p="2">
-        <Flex align="center" justify="between" gap="2" wrap="wrap">
-          <Heading size="3">{getMessage('statsSessionsVolumesTitle')}</Heading>
-          <Tooltip content={getMessage('statsSessionsScopeActive')}>
-            <Flex align="center" gap="1">
-              <Info size={14} style={{ color: 'var(--gray-9)' }} aria-hidden="true" />
-              <Text size="1" color="gray">{getMessage('statsSessionsScopeActive')}</Text>
-            </Flex>
-          </Tooltip>
-        </Flex>
-
-        <Grid columns="4" gap="2">
-          <SmallKpiTile
-            testId="page-stats-tile-sessions-total"
-            icon={<FolderOpen size={14} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
-            label={getMessage('statsSessionsTotal')}
-            value={volumes.total}
-            minWidth={0}
-          />
-          <SmallKpiTile
-            testId="page-stats-tile-sessions-pinned"
-            icon={<Pin size={14} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
-            label={getMessage('statsSessionsPinned')}
-            value={volumes.pinned}
-            minWidth={0}
-          />
-          <SmallKpiTile
-            testId="page-stats-tile-sessions-active"
-            icon={<FolderOpen size={14} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
-            label={getMessage('statsSessionsActive')}
-            value={volumes.active}
-            minWidth={0}
-          />
-          <SmallKpiTile
-            testId="page-stats-tile-sessions-archived"
-            icon={<Archive size={14} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
-            label={getMessage('statsSessionsArchived')}
-            value={volumes.archived}
-            minWidth={0}
-          />
-        </Grid>
-
-        <Flex gap="2" wrap="wrap">
-          <SmallKpiTile
-            testId="page-stats-tile-sessions-total-tabs"
-            icon={<ListTree size={14} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
-            label={getMessage('statsSessionsTotalTabs')}
-            value={volumes.totalTabs}
-          />
-          <SmallKpiTile
-            testId="page-stats-tile-sessions-total-groups"
-            icon={<Layers size={14} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
-            label={getMessage('statsSessionsTotalGroups')}
-            value={volumes.totalGroups}
-          />
-        </Flex>
-
-        {volumes.total > 0 && (
-          <Flex direction="column" gap="1">
-            <Text size="2" color="gray">
-              {getMessage('statsSessionsAvgTabs').replace('{count}', avgFormatted)}
-            </Text>
-            {volumes.largest && (
-              <Text size="2" color="gray">
-                {getMessage('statsSessionsLargest')
-                  .replace('{name}', volumes.largest.name)
-                  .replace('{count}', String(volumes.largest.tabCount))}
-              </Text>
-            )}
-            <Flex gap="2" wrap="wrap" mt="1">
-              <Badge variant="soft" color="gray">
-                {getMessage('statsSessionsWithNote').replace('{percent}', String(Math.round(volumes.percentWithNote)))}
-              </Badge>
-              <Badge variant="soft" color="gray">
-                {getMessage('statsSessionsWithCategory').replace('{percent}', String(Math.round(volumes.percentWithCategory)))}
-              </Badge>
-            </Flex>
-          </Flex>
-        )}
-      </Flex>
-    </Card>
-  );
-}
-
-function SessionActivityCard({ events }: { events: StatisticsAggregates['sessionEvents'] }) {
-  return (
-    <Card data-testid="page-stats-card-session-activity">
-      <Flex direction="column" gap="3" p="2">
-        <Heading size="3">{getMessage('statsSessionsActivityTitle')}</Heading>
-
-        <Flex direction="column" gap="2">
-          <Flex justify="between" align="center">
-            <Text size="2" weight="medium">{getMessage('statsSessionsCreated')}</Text>
-            <Flex align="center" gap="3">
-              <Text size="4" weight="bold">{events.thisWeek.created}</Text>
-              <TrendBadge current={events.thisWeek.created} previous={events.lastWeek.created} />
-            </Flex>
-          </Flex>
-
-          <Separator size="4" />
-
-          <Flex justify="between" align="center">
-            <Text size="2" weight="medium">{getMessage('statsTabsRestored')}</Text>
-            <Flex align="center" gap="3">
-              <Text size="4" weight="bold">{events.thisWeek.tabsRestored}</Text>
-              <TrendBadge current={events.thisWeek.tabsRestored} previous={events.lastWeek.tabsRestored} />
-            </Flex>
-          </Flex>
-        </Flex>
-
-        <Text size="1" color="gray">
-          {getMessage('statsSessionsLifetime')
-            .replace('{created}', String(events.totals.created))
-            .replace('{restored}', String(events.totals.restored))
-            .replace('{archived}', String(events.totals.archived))}
-        </Text>
-      </Flex>
-    </Card>
-  );
-}
-
-function TopRulesCard({ data }: { data: StatisticsAggregates }) {
-  return (
-    <Card data-testid="page-stats-card-top-rules">
-      <Flex direction="column" gap="3" p="2">
-        <Heading size="3">{getMessage('statsTopRulesTitle')}</Heading>
-        {data.topRules.length > 0 ? (
-          <Flex direction="column" gap="3">
-            {data.topRules.map((rule, index) => {
-              const maxTotal = data.topRules[0].total;
-              const showDetail = rule.grouping > 0 && rule.dedup > 0;
-              const detail = showDetail
-                ? getMessage('statsGroupingsAndDedup')
-                    .replace('{grouping}', String(rule.grouping))
-                    .replace('{dedup}', String(rule.dedup))
-                : undefined;
-              return (
-                <BarRow
-                  key={rule.ruleId}
-                  index={index}
-                  label={rule.label}
-                  value={rule.total}
-                  maxValue={maxTotal}
-                  rightDetail={detail}
-                />
-              );
-            })}
-          </Flex>
-        ) : (
-          <Text size="2" color="gray">—</Text>
-        )}
-      </Flex>
-    </Card>
-  );
-}
-
-function TopCategoriesDomainsCard({ snapshot }: { snapshot: SessionStatisticsSnapshot }) {
-  const { composition } = snapshot;
-  const categoryLabel = (id: string) => {
-    const cat = getRuleCategory(id);
-    if (!cat) return id;
-    return `${cat.emoji} ${getCategoryLabel(cat)}`;
-  };
-
-  return (
-    <Card data-testid="page-stats-card-top-cat-domains">
-      <Flex direction="column" gap="3" p="2">
-        <Flex align="center" gap="2">
-          <Tag size={16} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />
-          <Heading size="3">{getMessage('statsTopCategoriesTitle')}</Heading>
-        </Flex>
-        {composition.topCategories.length > 0 ? (
-          <Flex direction="column" gap="3">
-            {composition.topCategories.map((cat, index) => (
-              <BarRow
-                key={cat.id}
-                index={index}
-                label={categoryLabel(cat.id)}
-                value={cat.count}
-                maxValue={composition.topCategories[0].count}
-              />
-            ))}
-          </Flex>
-        ) : (
-          <Text size="2" color="gray">—</Text>
-        )}
-
-        <Separator size="4" />
-
-        <Flex align="center" gap="2">
-          <Globe size={16} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />
-          <Heading size="3">{getMessage('statsTopDomainsTitle')}</Heading>
-        </Flex>
-        {composition.topDomains.length > 0 ? (
-          <Flex direction="column" gap="3">
-            {composition.topDomains.map((dom, index) => (
-              <BarRow
-                key={dom.host}
-                index={index}
-                label={dom.host}
-                value={dom.count}
-                maxValue={composition.topDomains[0].count}
-              />
-            ))}
-          </Flex>
-        ) : (
-          <Text size="2" color="gray">—</Text>
-        )}
-      </Flex>
-    </Card>
-  );
-}
-
-function SessionsOverviewCard({ snapshot, events }: { snapshot: SessionStatisticsSnapshot; events: StatisticsAggregates['sessionEvents'] }) {
-  const { temporal, composition } = snapshot;
-  return (
-    <Card data-testid="page-stats-card-sessions-overview">
-      <Flex direction="column" gap="4" p="2">
-        <Heading size="3">{getMessage('statsSessionsOverviewTitle')}</Heading>
-
-        <Flex direction="column" gap="2">
-          <Flex align="center" gap="2">
-            <Clock size={16} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />
-            <Heading size="2">{getMessage('statsTemporalTitle')}</Heading>
-          </Flex>
-          <Flex direction="column" gap="2">
-            {temporal.oldest && (
-              <Flex justify="between" align="center" gap="3" wrap="wrap">
-                <Flex align="center" gap="2">
-                  <Calendar size={14} style={{ color: 'var(--gray-9)' }} aria-hidden="true" />
-                  <Text size="2" color="gray">{getMessage('statsOldestSession')}</Text>
-                </Flex>
-                <Text size="2" weight="medium">
-                  {temporal.oldest.name} <Text size="1" color="gray">({formatSessionDate(temporal.oldest.createdAt)})</Text>
-                </Text>
-              </Flex>
-            )}
-            {temporal.mostRecentlyUpdated && (
-              <Flex justify="between" align="center" gap="3" wrap="wrap">
-                <Flex align="center" gap="2">
-                  <Calendar size={14} style={{ color: 'var(--gray-9)' }} aria-hidden="true" />
-                  <Text size="2" color="gray">{getMessage('statsMostRecentlyUpdated')}</Text>
-                </Flex>
-                <Text size="2" weight="medium">
-                  {temporal.mostRecentlyUpdated.name} <Text size="1" color="gray">({formatSessionDate(temporal.mostRecentlyUpdated.updatedAt)})</Text>
-                </Text>
-              </Flex>
-            )}
-            <Flex justify="between" align="center" gap="3" wrap="wrap">
-              <Text size="2" color="gray">{getMessage('statsSessionsCreatedThisWeek')}</Text>
-              <Flex align="center" gap="3">
-                <Text size="3" weight="bold">{temporal.createdThisWeek}</Text>
-                <TrendBadge current={temporal.createdThisWeek} previous={temporal.createdLastWeek} />
-              </Flex>
-            </Flex>
-          </Flex>
-        </Flex>
-
-        {composition.groupColorDistribution.length > 0 && (
-          <>
-            <Separator size="4" />
-            <Flex direction="column" gap="2">
-              <Flex align="center" gap="2">
-                <Palette size={16} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />
-                <Heading size="2">{getMessage('statsGroupColorDistTitle')}</Heading>
-              </Flex>
-              <GroupColorBar distribution={composition.groupColorDistribution} />
-            </Flex>
-          </>
-        )}
-
-        {composition.topSessionsByTabs.length > 0 && (
-          <>
-            <Separator size="4" />
-            <Flex direction="column" gap="3">
-              <Flex align="center" gap="2">
-                <ListTree size={16} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />
-                <Heading size="2">{getMessage('statsTopSessionsTitle')}</Heading>
-              </Flex>
-              {composition.topSessionsByTabs.map((session, index) => (
-                <BarRow
-                  key={session.id}
-                  index={index}
-                  label={session.name}
-                  value={session.tabCount}
-                  maxValue={composition.topSessionsByTabs[0].tabCount}
-                  rightDetail={getMessage('statsTabsCountSuffix').replace('{count}', String(session.tabCount))}
-                />
-              ))}
-            </Flex>
-          </>
-        )}
-
-        {snapshot.volumes.total === 0 && events.totals.created === 0 && (
-          <Text size="2" color="gray">{getMessage('statsNoSessionsYet')}</Text>
-        )}
-      </Flex>
-    </Card>
-  );
-}
-
-export function StatisticsPage({ syncSettings, statisticsData, sessionStats, onReset }: StatisticsPageProps) {
+export function StatisticsPage({ syncSettings, statisticsData, sessionStats, storageUsage, onReset, statsTab, onStatsTabChange }: StatisticsPageProps) {
   const activeRulesCount = syncSettings.domainRules.filter(r => r.enabled).length;
+
+  // The scrollable content region carries tabIndex={0} so keyboard users can
+  // scroll it with the arrow keys / PageUp-Down / Space. Give it the focus once
+  // on mount so those keys work right away, without an initial click or tab.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    // Don't steal focus the user already moved inside the region between mount
+    // and this effect firing; focus coming from outside (sidebar, body on a
+    // fresh load) is fair game.
+    if (el.contains(document.activeElement)) return;
+    el.focus({ preventScroll: true });
+  }, []);
 
   const firstUsedAtFormatted = statisticsData?.firstUsedAt
     ? new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'long', year: 'numeric' }).format(statisticsData.firstUsedAt)
@@ -519,90 +109,122 @@ export function StatisticsPage({ syncSettings, statisticsData, sessionStats, onR
 
   const snapshot = sessionStats ?? emptySessionStats;
 
+  const handleTabChange = useCallback(
+    (next: StatsSubTab) => {
+      onStatsTabChange(next);
+      // Keep the URL hash in sync so back/forward and shareable links work.
+      const nextHash = SUB_TAB_HASH[next];
+      if (window.location.hash !== nextHash) {
+        window.location.hash = nextHash;
+      }
+    },
+    [onStatsTabChange],
+  );
+
+  // PageDown / PageUp move to the adjacent sub-tab, clamped at the ends (no
+  // wrap-around), mirroring the Sessions page section jumps.
+  const shiftTab = useCallback(
+    (direction: 1 | -1) => {
+      const currentIndex = SUB_TAB_ORDER.indexOf(statsTab);
+      const nextIndex = currentIndex + direction;
+      if (nextIndex < 0 || nextIndex >= SUB_TAB_ORDER.length) return;
+      handleTabChange(SUB_TAB_ORDER[nextIndex]);
+    },
+    [statsTab, handleTabChange],
+  );
+
+  useShortcuts(
+    {
+      'list.stats.tabNext': () => shiftTab(1),
+      'list.stats.tabPrev': () => shiftTab(-1),
+    },
+    { scope: 'page:stats' },
+  );
+
+  const descriptionOverride = statsTab === 'summary'
+    ? undefined
+    : getMessage(SUB_TAB_DESCRIPTION_KEY[statsTab] as MessageKey);
+
   return (
     <PageLayout
       titleKey="statisticsTab"
       descriptionKey="statisticsPageDescription"
+      descriptionOverride={descriptionOverride}
       syncSettings={syncSettings}
     >
       {() => (
-        <Box data-testid="page-stats">
-          <Grid columns={{ initial: '1', md: '2' }} gap="4">
+        <Box
+          data-testid="page-stats"
+          style={{ height: '100%', display: 'flex', flexDirection: 'column', minHeight: 0 }}
+        >
+          <Box mb="3">
+            <TabNav.Root data-testid="page-stats-tabs">
+              <TabNav.Link
+                href="#stats"
+                active={statsTab === 'summary'}
+                data-testid="page-stats-tab-summary"
+                onClick={(e) => { e.preventDefault(); handleTabChange('summary'); }}
+              >
+                {getMessage('statsSummaryTab')}
+              </TabNav.Link>
+              <TabNav.Link
+                href="#stats/rules"
+                active={statsTab === 'rules'}
+                data-testid="page-stats-tab-rules"
+                onClick={(e) => { e.preventDefault(); handleTabChange('rules'); }}
+              >
+                {getMessage('statsRulesTab')}
+              </TabNav.Link>
+              <TabNav.Link
+                href="#stats/sessions"
+                active={statsTab === 'sessions'}
+                data-testid="page-stats-tab-sessions"
+                onClick={(e) => { e.preventDefault(); handleTabChange('sessions'); }}
+              >
+                {getMessage('statsSessionsTab')}
+              </TabNav.Link>
+              <TabNav.Link
+                href="#stats/storage"
+                active={statsTab === 'storage'}
+                data-testid="page-stats-tab-storage"
+                onClick={(e) => { e.preventDefault(); handleTabChange('storage'); }}
+              >
+                {getMessage('statsStorageTab')}
+              </TabNav.Link>
+            </TabNav.Root>
+          </Box>
 
-            {/* Row 1: Historical totals (rules) | Session volumes */}
-            <Card data-testid="page-stats-card-historical">
-              <Flex direction="column" gap="3" p="2">
-                <Heading size="3">{getMessage('statsHistoricalTotals')}</Heading>
-                <Flex gap="3" wrap="wrap">
-                  <KpiTile
-                    testId="page-stats-card-groups"
-                    icon={<Layers size={18} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
-                    label={getMessage('groupsCreated')}
-                    value={data.totalGrouping}
-                  />
-                  <KpiTile
-                    testId="page-stats-card-dedup"
-                    icon={<Copy size={18} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
-                    label={getMessage('tabsDeduplicated')}
-                    value={data.totalDedup}
-                  />
-                </Flex>
-                <Flex gap="4" wrap="wrap">
-                  <Text size="2" color="gray">
-                    {getMessage('statsActiveRulesCount').replace('{count}', String(activeRulesCount))}
-                  </Text>
-                  {firstUsedAtFormatted && (
-                    <Text size="2" color="gray">
-                      {getMessage('statsUsageSince').replace('{date}', firstUsedAtFormatted)}
-                    </Text>
-                  )}
-                </Flex>
-              </Flex>
-            </Card>
-
-            <SessionVolumesCard snapshot={snapshot} />
-
-            {/* Row 2: This week (rules) | Session activity */}
-            <Card data-testid="page-stats-card-this-week">
-              <Flex direction="column" gap="3" p="2">
-                <Heading size="3">{getMessage('statsThisWeekTitle')}</Heading>
-                <Flex direction="column" gap="2">
-                  <Flex justify="between" align="center">
-                    <Text size="2" weight="medium">{getMessage('statsGroupings')}</Text>
-                    <Flex align="center" gap="3">
-                      <Text size="4" weight="bold">{data.thisWeek.grouping}</Text>
-                      <TrendBadge current={data.thisWeek.grouping} previous={data.lastWeek.grouping} />
-                    </Flex>
-                  </Flex>
-                  <Separator size="4" />
-                  <Flex justify="between" align="center">
-                    <Text size="2" weight="medium">{getMessage('statsDeduplications')}</Text>
-                    <Flex align="center" gap="3">
-                      <Text size="4" weight="bold">{data.thisWeek.dedup}</Text>
-                      <TrendBadge current={data.thisWeek.dedup} previous={data.lastWeek.dedup} />
-                    </Flex>
-                  </Flex>
-                </Flex>
-              </Flex>
-            </Card>
-
-            <SessionActivityCard events={data.sessionEvents} />
-
-            {/* Row 3: Top rules | Top categories / domains */}
-            <TopRulesCard data={data} />
-            <TopCategoriesDomainsCard snapshot={snapshot} />
-
-            {/* Row 4: full-width sessions overview */}
-            <Box style={{ gridColumn: '1 / -1' }}>
-              <SessionsOverviewCard snapshot={snapshot} events={data.sessionEvents} />
-            </Box>
-          </Grid>
-
-          <Box mt="4">
-            <Button data-testid="page-stats-btn-reset" variant="soft" color="red" highContrast onClick={onReset}>
-              <RotateCcw size={16} />
-              {getMessage('resetStats')}
-            </Button>
+          {/* Only the sub-tab content scrolls; the tabs above stay fixed. The
+              region is focusable (tabIndex={0}) so keyboard users get a tab stop
+              and native arrow / PageUp-Down / Space scrolling on pages that have
+              no other focusable content (e.g. the summary sub-tab). It is
+              auto-focused on mount (see effect above) so those keys work on
+              arrival; its focus outline is suppressed in radix-themes.css. */}
+          <Box
+            ref={scrollRef}
+            data-testid="page-stats-scroll"
+            role="region"
+            aria-label={getMessage(SUB_TAB_LABEL_KEY[statsTab] as MessageKey)}
+            tabIndex={0}
+            style={{ flex: 1, overflow: 'auto', minHeight: 0 }}
+          >
+            {statsTab === 'summary' && (
+              <StatisticsSummary data={data} snapshot={snapshot} storageUsage={storageUsage} />
+            )}
+            {statsTab === 'rules' && (
+              <StatisticsRulesDetail
+                data={data}
+                activeRulesCount={activeRulesCount}
+                firstUsedAtFormatted={firstUsedAtFormatted}
+                onReset={onReset}
+              />
+            )}
+            {statsTab === 'sessions' && (
+              <StatisticsSessionsDetail snapshot={snapshot} events={data.sessionEvents} />
+            )}
+            {statsTab === 'storage' && (
+              <StatisticsStorageDetail usage={storageUsage} />
+            )}
           </Box>
         </Box>
       )}

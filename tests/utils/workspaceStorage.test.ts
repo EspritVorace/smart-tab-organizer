@@ -60,28 +60,6 @@ describe('defineWorkspaceItems', () => {
     expect(items.statisticsItem.key).toBe('local:ws:ws-other:statistics');
   });
 
-  it('categoriesItem and categoriesSeededItem are global (shared across workspaces)', () => {
-    const defaultItems = defineWorkspaceItems(DEFAULT_WORKSPACE_ID);
-    const otherItems = defineWorkspaceItems('ws-other');
-    expect(defaultItems.categoriesItem.key).toBe('local:categories');
-    expect(otherItems.categoriesItem.key).toBe('local:categories');
-    expect(otherItems.categoriesItem).toBe(defaultItems.categoriesItem);
-    expect(defaultItems.categoriesSeededItem.key).toBe('local:categoriesSeeded');
-    expect(otherItems.categoriesSeededItem.key).toBe('local:categoriesSeeded');
-    expect(otherItems.categoriesSeededItem).toBe(defaultItems.categoriesSeededItem);
-  });
-
-  it('categories written from a non-default workspace are visible from the default one', async () => {
-    const sample = [
-      { id: 'development', emoji: '💻', labelKey: 'category_development', builtIn: true },
-    ];
-    const otherItems = defineWorkspaceItems('ws-other');
-    await otherItems.categoriesItem.setValue(sample);
-
-    const defaultItems = defineWorkspaceItems(DEFAULT_WORKSPACE_ID);
-    expect(await defaultItems.categoriesItem.getValue()).toEqual(sample);
-  });
-
   it('writes to one workspace are isolated from another', async () => {
     const a = defineWorkspaceItems('ws-a');
     const b = defineWorkspaceItems('ws-b');

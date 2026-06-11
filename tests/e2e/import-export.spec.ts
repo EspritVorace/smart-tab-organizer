@@ -20,7 +20,7 @@ import type { BrowserContext, Page } from '@playwright/test';
 import { test, expect } from './fixtures';
 import { auditPage } from './helpers/a11y';
 import { goToImportExportSection } from './helpers/navigation';
-import { DialogPage, ImportWizardPage } from '../../e2e-shared/pages/index.js';
+import { DialogPage, ImportWizardPage, OrganizeRewardDialogPage } from '../../e2e-shared/pages/index.js';
 import { openRulesImportWizard, openRulesExportWizard } from '../../e2e-shared/actions/index.js';
 
 // ─── Local fixtures ─────────────────────────────────────────────────────────
@@ -66,11 +66,23 @@ function makeRuleJson(...rules: SeedRule[]): string {
 }
 
 async function setStorage(context: BrowserContext, data: Record<string, unknown>): Promise<void> {
-  const sw = context.serviceWorkers()[0];
+  const sw = await getServiceWorker(context);
   await sw.evaluate(async (d: Record<string, unknown>) => {
     await chrome.storage.local.set(d);
   }, data);
   await new Promise(r => setTimeout(r, 200));
+}
+
+async function getServiceWorker(context: BrowserContext): Promise<import('@playwright/test').Page> {
+  let sw = context.serviceWorkers()[0];
+  if (sw) return sw;
+  const deadline = Date.now() + 5000;
+  while (Date.now() < deadline) {
+    sw = context.serviceWorkers()[0];
+    if (sw) return sw;
+    await new Promise(r => setTimeout(r, 200));
+  }
+  throw new Error('Service worker not available after 5 s (idle termination?)');
 }
 
 const seedRules = (context: BrowserContext, rules: SeedRule[]) =>
@@ -369,6 +381,8 @@ test.describe('Import / Export', () => {
       await wizard.pasteJson(makeRuleJson(makeRule('Import Close Rule', 'importclose.com')));
       await wizard.clickNext();
       await wizard.confirmImport();
+      // The import added a rule, so the "Organize now" reward opens; dismiss it.
+      await new OrganizeRewardDialogPage(extensionPage).dismiss();
       await wizard.expectHidden();
     });
 
@@ -382,6 +396,7 @@ test.describe('Import / Export', () => {
       await first.pasteJson(makeRuleJson(makeRule('First Import', 'firstimport.com')));
       await first.clickNext();
       await first.confirmImport();
+      await new OrganizeRewardDialogPage(extensionPage).dismiss();
       await first.expectHidden();
 
       const reopened = await openRulesImportWizard(extensionPage);

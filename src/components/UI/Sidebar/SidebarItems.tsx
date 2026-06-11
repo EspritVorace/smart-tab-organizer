@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { Flex, Text, Button, Box, Separator } from '@radix-ui/themes';
+import { Flex, Text, Button, Box, Badge, Separator } from '@radix-ui/themes';
 import { SidebarItem, SidebarSection } from './Sidebar';
 import { useListNavigation } from '@/hooks/useListNavigation';
 
 const ICON_SIZE = 16;
 const ICON_STROKE = 1.75;
+
+type BadgeColor = React.ComponentProps<typeof Badge>['color'];
 
 interface SidebarItemsProps {
   isCollapsed?: boolean;
@@ -64,7 +66,7 @@ function renderBadgeContent(badge: SidebarItem['badge']): React.ReactNode {
   return typeof badge === 'number' && badge > 9 ? '9+' : badge;
 }
 
-function CollapsedItemContent({ item, accent, isActive }: { item: SidebarItem; accent: AccentTokens; isActive: boolean }) {
+function CollapsedItemContent({ item, isActive }: { item: SidebarItem; isActive: boolean }) {
   const Icon = item.icon;
   return (
     <Flex align="center" justify="center" position="relative">
@@ -75,33 +77,27 @@ function CollapsedItemContent({ item, accent, isActive }: { item: SidebarItem; a
         aria-hidden="true"
       />
       {item.badge && (
-        <Box
+        <Badge
+          radius="full"
+          variant="soft"
+          color={item.accentColor as BadgeColor}
+          highContrast
           style={{
             position: 'absolute',
-            top: '-2px',
-            right: '-2px',
-            backgroundColor: accent.background,
-            color: accent.text,
-            borderRadius: '50%',
-            fontSize: '10px',
-            fontWeight: 'bold',
-            lineHeight: 1,
-            padding: '2px',
-            minWidth: '14px',
-            minHeight: '14px',
-            display: 'flex',
-            alignItems: 'center',
+            top: '-6px',
+            right: '-6px',
+            minWidth: '16px',
             justifyContent: 'center',
           }}
         >
           {renderBadgeContent(item.badge)}
-        </Box>
+        </Badge>
       )}
     </Flex>
   );
 }
 
-function ExpandedItemContent({ item, accent, isActive }: { item: SidebarItem; accent: AccentTokens; isActive: boolean }) {
+function ExpandedItemContent({ item, isActive }: { item: SidebarItem; isActive: boolean }) {
   const Icon = item.icon;
   return (
     <Flex align="center" gap="3" width="100%">
@@ -112,30 +108,27 @@ function ExpandedItemContent({ item, accent, isActive }: { item: SidebarItem; ac
         aria-hidden="true"
         style={{ flexShrink: 0 }}
       />
-      <Text size="2" style={{
-        flex: 1,
-        textAlign: 'left',
-        display: 'flex',
-        alignItems: 'center'
-      }}>
+      <Text
+        size="2"
+        weight={isActive ? 'bold' : 'regular'}
+        style={{
+          flex: 1,
+          textAlign: 'left',
+          display: 'flex',
+          alignItems: 'center'
+        }}
+      >
         {item.label}
       </Text>
       {item.badge && (
-        <Box
-          style={{
-            backgroundColor: accent.background,
-            color: accent.text,
-            borderRadius: '9999px',
-            fontSize: '11px',
-            fontWeight: 'bold',
-            lineHeight: 1,
-            padding: '2px 6px',
-            minWidth: '18px',
-            textAlign: 'center'
-          }}
+        <Badge
+          radius="full"
+          variant="soft"
+          color={item.accentColor as BadgeColor}
+          highContrast
         >
           {item.badge}
-        </Box>
+        </Badge>
       )}
     </Flex>
   );
@@ -231,8 +224,8 @@ export function SidebarItems({
                     style={computeButtonStyle(isCollapsed, isActive, accent, item.accentColor)}
                   >
                     {isCollapsed
-                      ? <CollapsedItemContent item={item} accent={accent} isActive={isActive} />
-                      : <ExpandedItemContent item={item} accent={accent} isActive={isActive} />}
+                      ? <CollapsedItemContent item={item} isActive={isActive} />
+                      : <ExpandedItemContent item={item} isActive={isActive} />}
                   </Button>
                 );
               })}

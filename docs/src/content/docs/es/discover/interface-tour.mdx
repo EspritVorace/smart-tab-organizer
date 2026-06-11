@@ -1,0 +1,63 @@
+---
+title: Tour de la interfaz
+description: Las dos superficies principales de SmartTab Organizer (el popup y la página Opciones) para manejar la extensión en pocos minutos.
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import popupEmptyLight from '../../../../assets/screenshots/es-light-journey-popup-empty.png';
+import popupEmptyDark from '../../../../assets/screenshots/es-dark-journey-popup-empty.png';
+
+SmartTab Organizer presenta dos superficies principales: el **popup**, accesible desde la barra de herramientas, y la **página Opciones**, que se abre en una pestaña aparte.
+
+## El popup recién instalado
+
+Justo después de la instalación, el popup muestra un estado vacío: sin ninguna regla configurada y con las estadísticas a cero.
+
+<ThemeImage
+  lightSrc={popupEmptyLight}
+  darkSrc={popupEmptyDark}
+  alt="Popup de SmartTab Organizer en el primer arranque, sin ninguna regla configurada."
+/>
+
+Desde esta pantalla accedes a los interruptores de agrupación y de deduplicación, a las estadísticas globales y a la página Opciones para configurar el resto.
+
+El detalle del popup se documenta en [Guía: Popup](/guides/popup).
+
+## La página Opciones
+
+La página Opciones reúne seis secciones principales, accesibles desde la barra lateral izquierda.
+
+| Sección | Función |
+|---|---|
+| **Inicio** | Página de entrada que agrupa perfiles anclados, accesos rápidos y mini estadísticas. Consulta [La página de inicio](/discover/home-page). |
+| **Reglas de dominio** | Crear, modificar y organizar las reglas que controlan la agrupación y la deduplicación. Consulta [Reglas de dominio](/guides/domain-rules). |
+| **Sesiones** | Capturar una instantánea de las pestañas abiertas, editarla o restaurar una anterior. Sub-pestaña **Archivadas** para las sesiones apartadas. Consulta [Sesiones](/guides/sessions). |
+| **Espacios de trabajo** | Aislar reglas, sesiones y estadísticas por contexto. Consulta [Espacios de trabajo](/guides/workspaces). |
+| **Estadísticas** | Seguir la actividad de agrupación y deduplicación en el tiempo. Consulta [Estadísticas](/guides/statistics). |
+| **Importar / Exportar** | Guardar o restaurar tu configuración y tus sesiones en formato JSON. Consulta [Importar / Exportar](/guides/import-export). |
+
+El pie de la página Opciones aloja un **selector de espacio de trabajo** (`WorkspaceSwitcherDropdown`) que te permite cambiar de espacio en cualquier momento. El mismo selector está disponible en el popup.
+
+## Distintivo del icono
+
+Cuando uno de los dos interruptores globales (agrupación o deduplicación) está desactivado, aparece un distintivo en el icono de la extensión en la barra de herramientas:
+
+| Distintivo | Significado |
+|---|---|
+| (vacío) | Agrupación y deduplicación activas. Todo funciona. |
+| **G** naranja | La agrupación global está desactivada. |
+| **D** naranja | La deduplicación global está desactivada. |
+| **X** rojo | Los dos interruptores están desactivados, la extensión no actúa. |
+
+Los distintivos **G** y **D** usan el mismo color naranja: solo cambia el texto para indicar qué interruptor está desactivado.
+
+Puedes desactivar el distintivo desde la página [Ajustes](/guides/settings).
+
+## Siguiente paso
+
+<CardGrid>
+  <LinkCard title="La página de inicio" href="/discover/home-page" description="Perfiles anclados, accesos rápidos y atajos de teclado." />
+  <LinkCard title="Popup" href="/guides/popup" description="El detalle del popup y de sus controles." />
+  <LinkCard title="Espacios de trabajo" href="/guides/workspaces" description="Aislar reglas y sesiones por contexto." />
+</CardGrid>

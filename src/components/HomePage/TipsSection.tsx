@@ -17,7 +17,7 @@ import * as Collapsible from '@radix-ui/react-collapsible';
 import { ChevronDown, ChevronLeft, ChevronRight, Lightbulb } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { IconBox } from '@/components/UI/IconBox/IconBox';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 import { TIPS, type TipDef } from './data';
 import styles from './TipsSection.module.css';
 
@@ -44,10 +44,10 @@ function TipBody({ icon, titleKey, textKey, compact = false }: TipBodyProps) {
         <IconBox icon={icon} size="md" variant="soft" />
         <Flex direction="column" gap="1">
           <Text as="p" size="2" weight="medium" mb="0">
-            {getMessage(titleKey)}
+            {getMessage(titleKey as MessageKey)}
           </Text>
           <Text as="p" size="2" color="gray" mb="0">
-            {getMessage(textKey)}
+            {getMessage(textKey as MessageKey)}
           </Text>
         </Flex>
       </Flex>
@@ -243,7 +243,7 @@ function TipsAccordionItem({ tip, open, onOpenChange }: AccordionItemProps) {
         >
           <IconBox icon={tip.icon} size="sm" variant="soft" />
           <Text size="2" weight="medium" className={styles.accordionLabel}>
-            {getMessage(tip.titleKey)}
+            {getMessage(tip.titleKey as MessageKey)}
           </Text>
           <ChevronDown size={16} aria-hidden="true" className={styles.accordionChevron} />
         </button>
@@ -251,7 +251,7 @@ function TipsAccordionItem({ tip, open, onOpenChange }: AccordionItemProps) {
       <Collapsible.Content>
         <Box className={styles.accordionBody}>
           <Text size="2" color="gray">
-            {getMessage(tip.textKey)}
+            {getMessage(tip.textKey as MessageKey)}
           </Text>
         </Box>
       </Collapsible.Content>

@@ -1,7 +1,6 @@
 import { browser, Browser } from 'wxt/browser';
 import { initializeDefaults, migrateRuleColorsFromCategories } from '@/utils/migration.js';
-import { migrateSettingsFromSyncToLocal, migrateRulesAddUrlExtractionMode, migrateRulesAddFallbackLabel, migrateToWorkspaces, migrateSessionsSplitByPinAndArchive, seedBuiltInCategories, seedUnifiedCategories, initializeFirstRunRedirectFlag, FIRST_RUN_REDIRECT_FLAG } from './migration.js';
-import { initCategoriesStore } from '@/utils/categoriesStore.js';
+import { migrateSettingsFromSyncToLocal, migrateRulesAddUrlExtractionMode, migrateRulesAddFallbackLabel, migrateToWorkspaces, migrateSessionsSplitByPinAndArchive, cleanupLegacyCategoriesStorage, initializeFirstRunRedirectFlag, FIRST_RUN_REDIRECT_FLAG } from './migration.js';
 import { logger } from '@/utils/logger.js';
 import {
     handleMiddleClickMessage,
@@ -12,6 +11,7 @@ import {
 import { processTabForDeduplication } from './deduplication.js';
 import { processGroupingForNewTab } from './grouping.js';
 import { handleOrganizeAllTabs } from './organize.js';
+import { switchWorkspaceRelative, type WorkspaceSwitchDirection } from '@/utils/workspaceSwitch.js';
 import { openOptionsWithHash } from '@/utils/openOptions.js';
 import type { BackgroundMessage, MessageResponse } from '@/types/messages.js';
 
@@ -19,6 +19,13 @@ function isBackgroundMessage(value: unknown): value is BackgroundMessage {
     return typeof value === 'object' && value !== null && 'type' in value
         && typeof (value as { type: unknown }).type === 'string';
 }
+
+// Maps the workspace-switch manifest commands to the shared switch direction.
+const WORKSPACE_COMMAND_DIRECTIONS: Record<string, WorkspaceSwitchDirection> = {
+    'switch-workspace-next': 'next',
+    'switch-workspace-prev': 'prev',
+    'switch-workspace-last': 'last',
+};
 export function setupInstallationHandler(): void {
     browser.runtime.onInstalled.addListener(async (details: Browser.runtime.InstalledDetails) => {
         logger.debug("SmartTab Organizer installed/updated.", details.reason);
@@ -28,10 +35,8 @@ export function setupInstallationHandler(): void {
         await migrateToWorkspaces();
         await migrateSessionsSplitByPinAndArchive();
         await initializeDefaults();
-        await seedBuiltInCategories();
-        await seedUnifiedCategories();
+        await cleanupLegacyCategoriesStorage();
         await migrateRuleColorsFromCategories();
-        await initCategoriesStore();
         await initializeFirstRunRedirectFlag(details.reason);
     });
 }
@@ -73,6 +78,12 @@ export function setupCommandHandler(): void {
         if (name === 'save-current-window-session') {
             openOptionsWithHash('#sessions?action=snapshot')
                 .catch(e => logger.error('[COMMANDS] save-current-window-session failed:', e));
+            return;
+        }
+        const workspaceDirection = WORKSPACE_COMMAND_DIRECTIONS[name];
+        if (workspaceDirection) {
+            switchWorkspaceRelative(workspaceDirection)
+                .catch(e => logger.error(`[COMMANDS] ${name} failed:`, e));
         }
     });
 }
@@ -90,6 +101,29 @@ export function setupMessageHandler(): void {
                 .then(win => { if (win.id != null) return handleOrganizeAllTabs(win.id); })
                 .catch(e => logger.error('[ORGANIZE_ALL_TABS] Error:', e));
             return false;
+        }
+
+        if (request.type === 'ORGANIZE_ALL_TABS_AWAIT') {
+            browser.windows.getCurrent()
+                .then(win => (win.id != null ? handleOrganizeAllTabs(win.id) : null))
+                .then(result => {
+                    sendResponse({
+                        status: 'received',
+                        organize: result
+                            ? {
+                                  tabsGrouped: result.tabsGrouped,
+                                  groupCount: result.groupCount,
+                                  removedCount: result.removedCount,
+                                  noop: result.noopReason !== null,
+                              }
+                            : undefined,
+                    });
+                })
+                .catch(e => {
+                    logger.error('[ORGANIZE_ALL_TABS_AWAIT] Error:', e);
+                    sendResponse({ status: 'error', message: String(e) });
+                });
+            return true;
         }
 
         if (request.type === 'middleClickLink') {

@@ -155,6 +155,18 @@ Single `indigo` accent (Radix Themes default). Prefer Radix tokens (`var(--accen
 ### Internationalization
 Always use `getMessage()` from `src/utils/i18n.ts`, for UI text, `aria-label`, and `title` attributes. Never hardcode strings.
 
+`getMessage` is a thin facade over `@wxt-dev/i18n` (`createI18n().t`, which
+resolves through `browser.i18n.getMessage` under the hood). Its `key`
+parameter is typed as `MessageKey`, so an unknown key (a typo) is a **compile
+error**. `MessageKey` is exported from `src/utils/i18n.ts` for dynamic key
+patterns (enums, data-driven labels): cast with `as MessageKey` where the value
+is a runtime `string`. Placeholders use `$1`, `$2` (not `{placeholder}`).
+
+The key union is generated into `wxt-i18n-structure.d.ts` (committed) from
+`public/_locales/en/messages.json`. After adding keys to the three locales, run
+`pnpm i18n:types` to refresh it (also regenerated on `wxt prepare`). The
+catalogs stay in the verbose `public/_locales/{en,fr,es}/messages.json` format.
+
 ### Keyboard shortcut conventions
 
 Central registry: `src/shortcuts/registry.ts`. Detailed developer docs:
@@ -167,7 +179,7 @@ Central registry: `src/shortcuts/registry.ts`. Detailed developer docs:
 2. Add `descriptionKey` to all three
    `public/_locales/{fr,en,es}/messages.json` files.
 3. In the component: `useShortcuts({ 'my.id': handler }, { scope })`.
-4. `pnpm shortcuts:doc` regenerates the Starlight `annexes/raccourcis-clavier` page.
+4. `pnpm shortcuts:doc` regenerates the Starlight `reference/keyboard-shortcuts` page.
 
 **Combo format**
 

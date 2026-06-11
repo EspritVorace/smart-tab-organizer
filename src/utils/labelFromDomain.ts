@@ -1,6 +1,6 @@
 const COMMON_SUBDOMAINS = new Set(['www', 'mail', 'app', 'm', 'web', 'api', 'static', 'cdn']);
 
-const SECOND_LEVEL_PUBLIC_SUFFIXES = new Set(['co', 'com', 'org', 'net', 'gov', 'edu', 'ac']);
+export const SECOND_LEVEL_PUBLIC_SUFFIXES = new Set(['co', 'com', 'org', 'net', 'gov', 'edu', 'ac']);
 
 const REGEX_SPECIAL_CHARS = /[*+?^${}()|[\]\\]/;
 

@@ -1,0 +1,67 @@
+---
+title: Paramètres
+description: Configurer les notifications, la portée de la déduplication et l'action de restauration par défaut.
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+La page **Paramètres** rassemble les réglages globaux qui ne sont pas attachés à une règle particulière. Elle compte trois sections.
+
+<Aside type="note">
+Les **toggles globaux** de groupement et de déduplication ne sont pas ici : ils vivent dans la [popup](/guides/popup) (et dans la pastille de l'icône, voir [Tour de l'interface](/discover/interface-tour#indicateur-sur-licone)).
+</Aside>
+
+## Notifications
+
+Trois toggles indépendants. Chacun contrôle un type de notification système, sans interaction entre eux.
+
+| Toggle | Effet |
+|---|---|
+| **Notifier lors du regroupement automatique d'onglets** | Affiche une notification à chaque création de groupe, avec le titre du groupe. |
+| **Notifier lors de la fermeture automatique de doublons** | Affiche une notification à chaque déduplication, avec un bouton **Annuler** disponible 5 secondes. |
+| **Notifier après Organiser les onglets** | Affiche un récapitulatif après une commande **Organiser tous les onglets** déclenchée depuis la page d'accueil ou la popup. |
+
+## Portée de la déduplication
+
+Deux réglages qui affinent la déduplication globale.
+
+### Dédupliquer les onglets sans règle de domaine
+
+Quand ce toggle est **activé**, les onglets des domaines que vous n'avez pas configurés sont dédupliqués en mode URL exacte. Quand il est **désactivé** (par défaut), seuls les domaines couverts par une règle peuvent être dédupliqués.
+
+Les règles de domaine restent prioritaires sur ce paramètre. Un domaine avec une règle explicite suit toujours sa règle.
+
+### Lorsqu'un doublon est détecté, conserver
+
+La stratégie qui décide lequel des deux onglets en doublon survit. Quatre valeurs :
+
+| Stratégie | Comportement |
+|---|---|
+| **L'onglet existant** | L'onglet déjà ouvert est conservé. Utile pour préserver un état (scroll, formulaire, session). |
+| **Le nouvel onglet ouvert** | Le nouvel onglet survit. Attention : si l'ancien appartenait à un groupe, il disparait du groupe. |
+| **L'onglet groupé gagne, sinon l'existant** | Si l'un des deux est groupé et l'autre pas, le groupé survit. Sinon retombe sur **L'onglet existant**. |
+| **L'onglet groupé gagne, sinon le nouveau** (défaut) | Si l'un des deux est groupé et l'autre pas, le groupé survit. Sinon retombe sur **Le nouvel onglet ouvert**. Protège les onglets restaurés depuis une session contre une fermeture au profit d'une copie non groupée. |
+
+Voir [Dédupliquer](/guides/deduplicate#strategies-de-conservation) pour le contexte complet.
+
+## Action par défaut (Restaurer)
+
+Cette section configure ce que fait un **clic** sur le bouton principal **Restaurer** d'une session ou d'un profil. Le menu déroulant à côté du bouton garde toujours les quatre options accessibles individuellement.
+
+| Valeur | Comportement du clic principal |
+|---|---|
+| **Fenêtre actuelle** (défaut) | Ajoute les onglets à la fenêtre actuellement au premier plan. |
+| **Nouvelle fenêtre** | Ouvre une nouvelle fenêtre dédiée et y restaure les onglets. |
+| **Remplacer la fenêtre actuelle** | Ferme les onglets de la fenêtre actuelle et restaure ceux de la session à leur place. |
+| **Personnalisée** | Ouvre le wizard de restauration et laisse choisir au cas par cas. |
+
+Les quatre cibles restent accessibles via les [raccourcis clavier](/reference/keyboard-shortcuts) (`R`, `Shift+R`, `Alt+R`, `Alt+Shift+R`) sur le focus d'une session ou d'un profil, quelle que soit la valeur de ce réglage.
+
+## Aller plus loin
+
+<CardGrid>
+  <LinkCard title="Popup" href="/guides/popup" description="Toggles globaux de groupement et de déduplication." />
+  <LinkCard title="Dédupliquer" href="/guides/deduplicate" description="Les trois modes de correspondance, contexte de la stratégie de conservation." />
+  <LinkCard title="Sessions" href="/guides/sessions" description="L'action par défaut Restaurer en contexte." />
+  <LinkCard title="Tour de l'interface" href="/discover/interface-tour" description="La pastille de l'icône qui reflète l'état des toggles globaux." />
+</CardGrid>

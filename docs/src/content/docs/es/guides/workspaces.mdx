@@ -4,6 +4,9 @@ description: Aislar reglas, sesiones y estadísticas por contexto. Crear, cambia
 ---
 
 import { Aside, CardGrid, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import workspacesPageLight from '../../../../assets/screenshots/es-light-workspaces-page.png';
+import workspacesPageDark from '../../../../assets/screenshots/es-dark-workspaces-page.png';
 
 <Aside type="tip" title="En resumen">
 - Un **espacio de trabajo** es un contenedor aislado con sus propias reglas, sesiones y estadísticas.
@@ -13,6 +16,12 @@ import { Aside, CardGrid, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starli
 </Aside>
 
 Un espacio de trabajo (o workspace) permite separar dos contextos de uso sin que sus configuraciones se mezclen: trabajo y personal, proyecto A y proyecto B, entorno cliente y entorno de I+D. Cada contexto conserva sus reglas, sus sesiones y sus contadores.
+
+<ThemeImage
+  lightSrc={workspacesPageLight}
+  darkSrc={workspacesPageDark}
+  alt="Página de espacios de trabajo: el espacio activo y uno inactivo con su botón Activar y su menú de acciones."
+/>
 
 ## Qué aísla un espacio de trabajo
 
@@ -25,7 +34,7 @@ Un espacio de trabajo (o workspace) permite separar dos contextos de uso sin que
 | Ajustes globales (notificaciones, idioma, tema, acción por defecto de restauración) | No, compartidos |
 | Presets de regex y packs integrados | No, compartidos |
 
-Las **categorías** las proporciona la extensión (14 categorías integradas, consulta [Categorías y packs](/reference/categories-et-packs)) y son idénticas en todos los espacios. Una regla exportada de un espacio a otro conserva, por tanto, su emoji y su etiqueta de categoría. Su color de grupo, que es un campo propio de la regla, también se mantiene.
+Las **categorías** las proporciona la extensión (14 categorías integradas, consulta [Categorías y packs](/reference/categories-and-packs)) y son idénticas en todos los espacios. Una regla exportada de un espacio a otro conserva, por tanto, su emoji y su etiqueta de categoría. Su color de grupo, que es un campo propio de la regla, también se mantiene.
 
 ## Crear un espacio de trabajo
 
@@ -49,6 +58,24 @@ El `WorkspaceSwitcherDropdown` está integrado en el pie de las Opciones. Pulsa 
 El `PopupWorkspaceSwitcher` ofrece la misma mecánica en el popup. Práctico para cambiar sin abrir la página Opciones: la lista de perfiles y los botones de restauración siguen al instante el cambio.
   </TabItem>
 </Tabs>
+
+### Con el teclado
+
+Tres secuencias de teclado recorren los espacios de trabajo sin pasar por el
+selector, desde la página Opciones o el popup:
+
+| Secuencia | Efecto |
+|---|---|
+| `W` y luego `N` | Pasar al espacio siguiente |
+| `W` y luego `P` | Pasar al espacio anterior |
+| `W` y luego `L` | Volver al último espacio utilizado |
+
+Para cambiar desde cualquier pestaña del navegador, también existen tres
+**comandos globales**: `switch-workspace-next`, `switch-workspace-prev` y
+`switch-workspace-last`. No están asignados a ninguna tecla por defecto; tú les
+asignas el atajo que prefieras desde `chrome://extensions/shortcuts`.
+
+Consulta [Atajos de teclado](/reference/keyboard-shortcuts) para la lista completa.
 
 Al cambiar de espacio de trabajo:
 
@@ -98,7 +125,7 @@ La exportación de un espacio produce un archivo JSON completo (reglas, sesiones
 
 <CardGrid>
   <LinkCard title="Sesiones" href="/guides/sessions" description="El otro bloque aislado por espacio de trabajo." />
-  <LinkCard title="Reglas de dominio" href="/guides/regles-de-domaine" description="El otro bloque aislado por espacio de trabajo." />
+  <LinkCard title="Reglas de dominio" href="/guides/domain-rules" description="El otro bloque aislado por espacio de trabajo." />
   <LinkCard title="Importar / Exportar" href="/guides/import-export" description="Guardar un espacio completo en JSON." />
-  <LinkCard title="Categorías y packs" href="/reference/categories-et-packs" description="Las categorías compartidas y los packs reutilizables." />
+  <LinkCard title="Categorías y packs" href="/reference/categories-and-packs" description="Las categorías compartidas y los packs reutilizables." />
 </CardGrid>

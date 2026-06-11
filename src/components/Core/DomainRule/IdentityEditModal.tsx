@@ -4,6 +4,7 @@ import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
 import { EditModalShell } from './EditModalShell';
 import { FormField } from '@/components/Form/FormFields';
+import { DomainCodeField } from '@/components/UI/DomainCodeField';
 import { CategoryRadioGroup } from '@/components/Core/DomainRule/CategoryRadioGroup';
 import { ChromeColorPicker } from '@/components/Core/TabTree/ChromeColorPicker';
 import { createDomainFilterValidator } from '@/schemas/common';
@@ -122,17 +123,21 @@ export function IdentityEditModal({
     >
       <Flex direction="column" gap="4" mt="4">
         <FormField label={getMessage('domainFilter')} required error={domainError}>
-          {(fieldId) => (
-            <TextField.Root
-              id={fieldId}
-              name="domainFilter"
-              data-testid="modal-edit-identity-field-domain"
-              data-autofocus="true"
-              value={domainFilter}
-              onChange={(e) => handleDomainFilterChange(e.target.value)}
-              placeholder={getMessage('domainFilterPlaceholder')}
-              style={{ marginTop: '4px' }}
-            />
+          {(fieldId, errorId) => (
+            <div style={{ marginTop: '4px' }}>
+              <DomainCodeField
+                id={fieldId}
+                describedById={domainError ? errorId : undefined}
+                name="domainFilter"
+                testId="modal-edit-identity-field-domain"
+                focusOnMount
+                value={domainFilter}
+                onChange={handleDomainFilterChange}
+                placeholder={getMessage('domainFilterPlaceholder')}
+                ariaLabel={getMessage('domainFilterEditorAriaLabel')}
+                hasError={Boolean(domainError)}
+              />
+            </div>
           )}
         </FormField>
 

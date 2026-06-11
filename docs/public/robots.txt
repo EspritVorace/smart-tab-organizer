@@ -1,5 +1,13 @@
 # Autorise tout le monde, y compris les robots IA, a indexer la documentation.
+#
+# Content-Signal declare les preferences d'usage du contenu (contentsignals.org) :
+#   ai-train  : utilisation pour l'entrainement de modeles IA
+#   search    : indexation et affichage dans les resultats de recherche
+#   ai-input  : utilisation comme entree d'un systeme IA (ex. RAG, generation de reponses)
+# Valeur "yes" : usage autorise. La documentation etant publique et ouverte,
+# les trois preferences sont a "yes".
 User-agent: *
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
 Allow: /
 
 # Robots IA explicitement autorises (listes a titre de clarte).
@@ -34,3 +42,8 @@ User-agent: Applebot-Extended
 Allow: /
 
 Sitemap: https://docs.esprit-vorace.fr/sitemap-index.xml
+
+# Index Markdown pour LLM (llmstxt.org). Chaque page est aussi disponible
+# en Markdown (anglais) via son URL suffixee de .md, ou via l'en-tete HTTP
+# `Accept: text/markdown`.
+# https://docs.esprit-vorace.fr/llms.txt

@@ -15,6 +15,7 @@
  *
  * Migrated to the Page Object / Domain Action architecture (lot 5).
  */
+import type { Page } from '@playwright/test';
 import { test, expect } from './fixtures';
 import { goToImportExportSection } from './helpers/navigation';
 import {
@@ -22,6 +23,7 @@ import {
   getSmartTabNotificationIds,
   openRulesImportWizard,
 } from '../../e2e-shared/actions/index.js';
+import { OrganizeRewardDialogPage } from '../../e2e-shared/pages/index.js';
 import type { ImportWizardPage } from '../../e2e-shared/pages/index.js';
 
 function makeRuleJson(label: string, domainFilter: string): string {
@@ -47,6 +49,7 @@ function makeRuleJson(label: string, domainFilter: string): string {
 
 /** Drive the wizard through Text-mode import. Optionally bring your own wizard. */
 async function submitTextImport(
+  page: Page,
   wizard: ImportWizardPage,
   json: string,
 ): Promise<void> {
@@ -56,6 +59,9 @@ async function submitTextImport(
   await wizard.clickNext();
   await expect(wizard.confirmButton()).toBeVisible();
   await wizard.confirmImport();
+  // The import added a rule, so the "Organize now" reward modal opens; dismiss
+  // it so the underlying page (toasts) is interactable again.
+  await new OrganizeRewardDialogPage(page).dismiss();
 }
 
 test.describe('Options page toasts', () => {
@@ -76,7 +82,7 @@ test.describe('Options page toasts', () => {
     const wizard = await openRulesImportWizard(extensionPage);
     await expect(extensionPage).toHaveDialogOpen();
 
-    await submitTextImport(wizard, makeRuleJson('Toast Rule', 'toast-visible.com'));
+    await submitTextImport(extensionPage, wizard, makeRuleJson('Toast Rule', 'toast-visible.com'));
 
     await expect(extensionPage).toHaveToast('success');
     await expect(extensionContext).toHaveDomainRulesCount(1);
@@ -92,7 +98,7 @@ test.describe('Options page toasts', () => {
     await goToImportExportSection(extensionPage, extensionId);
 
     const wizard = await openRulesImportWizard(extensionPage);
-    await submitTextImport(wizard, makeRuleJson('Toast Close Rule', 'toast-close.com'));
+    await submitTextImport(extensionPage, wizard, makeRuleJson('Toast Close Rule', 'toast-close.com'));
 
     await expect(extensionPage).toHaveToast('success');
 

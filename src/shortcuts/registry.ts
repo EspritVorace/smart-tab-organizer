@@ -11,10 +11,26 @@ import type { ShortcutEntry, ShortcutGroupId, ShortcutScope } from './types';
 export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
   // Browser-wide commands declared in the manifest. Bindings shown in the panel
   // come from `browser.commands.getAll()`, not from `defaultBindings` (those
-  // serve as documentation and Storybook fallback).
+  // serve as documentation and Storybook fallback). Only the popup ships a
+  // default (`Ctrl+Shift+1`); organize/save have no default binding because
+  // every letter combo clashes with a browser built-in (Firefox treats
+  // `Alt+Shift+<letter>` as the page accesskey modifier, and most
+  // `Ctrl+Shift+<letter>` are Firefox built-ins). They stay assignable by the
+  // user via chrome://extensions/shortcuts, and are reachable from the popup
+  // (`popup.organize` = o, `popup.save` = s).
+  // Opening the popup is the only browser command that ships a default binding,
+  // so it leads the group in the panel.
+  'global.openPopup': {
+    id: 'global.openPopup',
+    defaultBindings: ['Ctrl+Shift+1'],
+    descriptionKey: 'shortcutDescOpenPopup',
+    group: 'global',
+    scope: 'global',
+    commandName: '_execute_action',
+  },
   'global.organize': {
     id: 'global.organize',
-    defaultBindings: ['Alt+Shift+O'],
+    defaultBindings: [],
     descriptionKey: 'shortcutDescOrganize',
     group: 'global',
     scope: 'global',
@@ -22,25 +38,86 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
   },
   'global.saveSession': {
     id: 'global.saveSession',
-    defaultBindings: ['Alt+Shift+S'],
+    defaultBindings: [],
     descriptionKey: 'shortcutDescSaveSession',
     group: 'global',
     scope: 'global',
     commandName: 'save-current-window-session',
   },
-  'global.openPopup': {
-    id: 'global.openPopup',
-    defaultBindings: ['Alt+Shift+P'],
-    descriptionKey: 'shortcutDescOpenPopup',
+  // Browser-layer workspace switching: manifest commands without a default key
+  // (every letter combo clashes with a browser built-in), assignable by the
+  // user via chrome://extensions/shortcuts so they work from any tab. The in
+  // -page `w`-prefixed sequences (group `workspace`) cover the popup/options
+  // surfaces; both layers call the same `switchWorkspaceRelative` handler.
+  'global.workspaceNext': {
+    id: 'global.workspaceNext',
+    defaultBindings: [],
+    descriptionKey: 'shortcutDescWorkspaceNext',
     group: 'global',
     scope: 'global',
-    commandName: '_execute_action',
+    commandName: 'switch-workspace-next',
+  },
+  'global.workspacePrev': {
+    id: 'global.workspacePrev',
+    defaultBindings: [],
+    descriptionKey: 'shortcutDescWorkspacePrev',
+    group: 'global',
+    scope: 'global',
+    commandName: 'switch-workspace-prev',
+  },
+  'global.workspaceLast': {
+    id: 'global.workspaceLast',
+    defaultBindings: [],
+    descriptionKey: 'shortcutDescWorkspaceLast',
+    group: 'global',
+    scope: 'global',
+    commandName: 'switch-workspace-last',
+  },
+  // Cycles the theme (light -> dark -> system), mirroring the header
+  // ThemeToggle button. Mnemonic `d` ("Dark"). Document-level so the same
+  // shortcut works on the options pages and inside the popup.
+  'theme.toggle': {
+    id: 'theme.toggle',
+    defaultBindings: ['d'],
+    descriptionKey: 'shortcutDescToggleTheme',
+    group: 'global',
+    scope: 'global',
   },
 
-  // Popup. The four action-binding shortcuts (s/r/o/p) yield to a focused
-  // pinned card so the card's own widget bindings (sessionCard.restore.*)
-  // stay authoritative; `?` is intentionally never widget-suppressed so the
-  // help drawer can be summoned from anywhere in the popup.
+  // Workspace switching (in-page layer). Mnemonic two-key sequences prefixed by
+  // `w` (workspace): `w n` next, `w p` previous, `w l` last used. The `w` letter
+  // is reserved as a sequence prefix at the `global` scope (same rule as `m`):
+  // no simple combo may use it so the sequence timeout never delays a keypress.
+  // Switching only flips the active context; it never moves a tab. Document
+  // -level so the same gestures work in the popup and on the options pages.
+  'workspace.next': {
+    id: 'workspace.next',
+    defaultBindings: [['w', 'n']],
+    descriptionKey: 'shortcutDescWorkspaceNext',
+    group: 'workspace',
+    scope: 'global',
+  },
+  'workspace.prev': {
+    id: 'workspace.prev',
+    defaultBindings: [['w', 'p']],
+    descriptionKey: 'shortcutDescWorkspacePrev',
+    group: 'workspace',
+    scope: 'global',
+  },
+  'workspace.last': {
+    id: 'workspace.last',
+    defaultBindings: [['w', 'l']],
+    descriptionKey: 'shortcutDescWorkspaceLast',
+    group: 'workspace',
+    scope: 'global',
+  },
+
+  // Popup. The four action-binding shortcuts (s/r/o/p) only yield a combo a
+  // focused pinned card actually claims: `r` belongs to the card's own widget
+  // bindings (sessionCard.restore.*), while o/s/p, which no card registers,
+  // keep firing the popup-level action even when a card has focus. `?` is
+  // intentionally never widget-suppressed so the help drawer can be summoned
+  // from anywhere in the popup.
   'popup.save': {
     id: 'popup.save',
     defaultBindings: ['s'],
@@ -247,6 +324,31 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'list-rules',
     scope: 'page:rules',
   },
+  // Group headers (visible when a grouping is active). Handled locally on the
+  // focused header in DomainRulesPage; these entries are documentation-only,
+  // like `sessionCard.expandPreview` / `collapsePreview`. Up/Down navigation
+  // across headers and cards stays covered by `list.rules.navigate`.
+  'ruleGroup.expand': {
+    id: 'ruleGroup.expand',
+    defaultBindings: ['ArrowRight'],
+    descriptionKey: 'shortcutDescRuleGroupExpand',
+    group: 'list-rules',
+    scope: 'widget:rule-group',
+  },
+  'ruleGroup.collapse': {
+    id: 'ruleGroup.collapse',
+    defaultBindings: ['ArrowLeft'],
+    descriptionKey: 'shortcutDescRuleGroupCollapse',
+    group: 'list-rules',
+    scope: 'widget:rule-group',
+  },
+  'ruleGroup.toggleSelection': {
+    id: 'ruleGroup.toggleSelection',
+    defaultBindings: ['Space'],
+    descriptionKey: 'shortcutDescRuleGroupToggleSelection',
+    group: 'list-rules',
+    scope: 'widget:rule-group',
+  },
 
   // List-level: Sessions
   'list.sessions.navigate': {
@@ -308,12 +410,46 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'list-sessions',
     scope: 'widget:session-card',
   },
+  // Jump between session sections (pinned -> active -> archived). Crosses the
+  // active/archived sub-tab boundary when needed (handled in SessionsPage).
+  'sessionCard.sectionNext': {
+    id: 'sessionCard.sectionNext',
+    defaultBindings: ['PageDown'],
+    descriptionKey: 'shortcutDescSessionSectionNext',
+    group: 'list-sessions',
+    scope: 'widget:session-card',
+  },
+  'sessionCard.sectionPrev': {
+    id: 'sessionCard.sectionPrev',
+    defaultBindings: ['PageUp'],
+    descriptionKey: 'shortcutDescSessionSectionPrev',
+    group: 'list-sessions',
+    scope: 'widget:session-card',
+  },
   'list.sessions.reorderKeyboard': {
     id: 'list.sessions.reorderKeyboard',
     defaultBindings: ['Space'],
     descriptionKey: 'shortcutDescListReorderKeyboard',
     group: 'list-sessions',
     scope: 'page:sessions',
+  },
+
+  // List-level: Statistics. PageDown / PageUp move between the stats sub-tabs
+  // (summary -> rules -> sessions -> storage), clamped at the ends. Handled in
+  // StatisticsPage.
+  'list.stats.tabNext': {
+    id: 'list.stats.tabNext',
+    defaultBindings: ['PageDown'],
+    descriptionKey: 'shortcutDescStatsTabNext',
+    group: 'list-stats',
+    scope: 'page:stats',
+  },
+  'list.stats.tabPrev': {
+    id: 'list.stats.tabPrev',
+    defaultBindings: ['PageUp'],
+    descriptionKey: 'shortcutDescStatsTabPrev',
+    group: 'list-stats',
+    scope: 'page:stats',
   },
 
   // List-level: Workspaces
@@ -323,6 +459,24 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     descriptionKey: 'shortcutDescListNew',
     group: 'list-workspaces',
     scope: 'page:workspaces',
+  },
+  // Per-card actions on the Workspaces page (Edit/Delete). Group stays
+  // `list-workspaces` so the help panel keeps them under "Workspaces list"
+  // while the scope ties them to the focused workspace card. Enter (activate)
+  // stays a card-local interaction, like Enter on a rule card.
+  'workspaceCard.edit': {
+    id: 'workspaceCard.edit',
+    defaultBindings: ['e'],
+    descriptionKey: 'shortcutDescListEdit',
+    group: 'list-workspaces',
+    scope: 'widget:workspace-card',
+  },
+  'workspaceCard.delete': {
+    id: 'workspaceCard.delete',
+    defaultBindings: ['Delete'],
+    descriptionKey: 'shortcutDescListDelete',
+    group: 'list-workspaces',
+    scope: 'widget:workspace-card',
   },
 
   // List-level: Home
@@ -430,6 +584,23 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     id: 'sessionCard.refresh',
     defaultBindings: ['u'],
     descriptionKey: 'shortcutDescSessionRefresh',
+    group: 'session-card',
+    scope: 'widget:session-card',
+  },
+  // Expand / collapse the focused card's tab-and-group preview. Handled
+  // locally on the card (it owns the `previewOpen` state); the registry entry
+  // is documentation-only, like `list.sessions.navigate`.
+  'sessionCard.expandPreview': {
+    id: 'sessionCard.expandPreview',
+    defaultBindings: ['ArrowRight'],
+    descriptionKey: 'shortcutDescSessionExpandPreview',
+    group: 'session-card',
+    scope: 'widget:session-card',
+  },
+  'sessionCard.collapsePreview': {
+    id: 'sessionCard.collapsePreview',
+    defaultBindings: ['ArrowLeft'],
+    descriptionKey: 'shortcutDescSessionCollapsePreview',
     group: 'session-card',
     scope: 'widget:session-card',
   },

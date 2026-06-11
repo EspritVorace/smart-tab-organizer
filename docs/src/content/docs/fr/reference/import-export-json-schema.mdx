@@ -1,0 +1,125 @@
+---
+title: Schéma JSON d'import / export
+description: Référence des champs du format JSON utilisé pour importer et exporter les règles, les sessions et les espaces de travail.
+---
+
+{/* Cette page est générée depuis src/utils/importJsonSchemas.ts. Lancez pnpm json-schema:doc pour la mettre à jour. */}
+
+Cette page documente le format JSON accepté par l'assistant d'import / export. Les mêmes descriptions sont affichées en infobulle dans l'éditeur de l'extension. Les champs marqués comme requis doivent être présents ; les autres sont facultatifs.
+
+## Export de règles
+
+| Champ | Type | Requis | Description |
+| --- | --- | --- | --- |
+| `note` | string | Non | Note libre facultative jointe à cet export. |
+| `domainRules` | tableau d'objets | Oui | Liste des règles de domaine à importer. |
+
+## Export de sessions
+
+| Champ | Type | Requis | Description |
+| --- | --- | --- | --- |
+| `note` | string | Non | Note libre facultative jointe à cet export. |
+| `sessions` | tableau d'objets | Oui | Liste des sessions d'onglets enregistrées à importer. |
+
+## Export d'espace de travail
+
+| Champ | Type | Requis | Description |
+| --- | --- | --- | --- |
+| `note` | string | Non | Note libre facultative jointe à cet export. |
+| `workspace` | object | Oui | Métadonnées de l'espace de travail (nom et couleur d'accent). |
+| `settings` | object | Oui | Préférences de regroupement, de déduplication et de notifications. |
+| `domainRules` | tableau d'objets | Oui | Liste des règles de domaine à importer. |
+| `sessions` | tableau d'objets | Oui | Liste des sessions d'onglets enregistrées à importer. |
+| `statistics` | object | Non | Compteurs facultatifs de regroupement et de déduplication. |
+
+## Objets
+
+Les formats ci-dessus référencent les objets détaillés ici.
+
+### Objet règle de domaine
+
+| Champ | Type | Requis | Description |
+| --- | --- | --- | --- |
+| `id` | string | Oui | Identifiant unique de la règle (UUID). |
+| `domainFilter` | string | Oui | Domaine qui active la règle (par exemple github.com). |
+| `label` | string | Oui | Nom affiché sur le groupe d'onglets créé. |
+| `fallbackLabel` | string | Non | Nom de groupe utilisé quand l'extraction ne renvoie rien. |
+| `titleParsingRegEx` | string | Oui | Expression régulière, avec un groupe de capture, appliquée au titre de l'onglet. |
+| `urlParsingRegEx` | string | Oui | Expression régulière, avec un groupe de capture, appliquée à l'URL de l'onglet. |
+| `groupNameSource` | valeurs: `title`, `url`, `manual`, `smart`, `smart_manual`, `smart_preset`, `smart_label`, `label` | Oui | Source utilisée pour déterminer le nom du groupe. |
+| `deduplicationMatchMode` | valeurs: `exact`, `includes`, `exact_ignore_params` | Oui | Méthode de détection des onglets en double pour cette règle. |
+| `color` | valeurs: `grey`, `blue`, `red`, `yellow`, `green`, `pink`, `purple`, `cyan`, `orange` | Non | Couleur facultative du groupe d'onglets. |
+| `categoryId` | string (nullable) | Non | Catégorie facultative à laquelle appartient la règle. |
+| `deduplicationEnabled` | boolean (défaut: `true`) | Non | Active la déduplication pour cette règle (true par défaut). |
+| `ignoredQueryParams` | tableau de string (défaut: `[]`) | Non | Paramètres d'URL ignorés lors de la comparaison des URL. |
+| `presetId` | string (nullable) | Oui | Identifiant d'un préréglage regex, ou null pour une règle personnalisée. |
+| `urlExtractionMode` | valeurs: `regex`, `query_param` (défaut: `"regex"`) | Non | Mode d'extraction depuis l'URL : regex ou query_param. |
+| `urlQueryParamName` | string | Non | Nom du paramètre d'URL utilisé quand le mode d'extraction est query_param. |
+| `enabled` | boolean | Oui | Indique si la règle est active. |
+| `badge` | string | Non | Texte court facultatif affiché en badge sur la règle. |
+| `createdAt` | string | Non | Horodatage ISO 8601 de création de la règle. |
+| `updatedAt` | string | Non | Horodatage ISO 8601 de la dernière modification de la règle. |
+
+### Objet session
+
+| Champ | Type | Requis | Description |
+| --- | --- | --- | --- |
+| `id` | string | Oui | Identifiant unique de la session (UUID). |
+| `name` | string | Oui | Nom affiché de la session. |
+| `createdAt` | string | Oui | Horodatage ISO 8601 de capture de la session. |
+| `updatedAt` | string | Oui | Horodatage ISO 8601 de la dernière modification de la session. |
+| `groups` | tableau d'objets | Oui | Groupes d'onglets enregistrés dans cette session. |
+| `ungroupedTabs` | tableau d'objets | Oui | Onglets enregistrés en dehors de tout groupe. |
+| `isPinned` | boolean | Oui | Indique si la session est un profil épinglé. |
+| `isArchived` | boolean | Non | Indique si la session est archivée. |
+| `categoryId` | string (nullable) | Non | Catégorie facultative à laquelle appartient la session. |
+| `note` | string | Non | Note libre facultative jointe à la session. |
+| `position` | number | Non | Position facultative servant à ordonner la session dans la liste. |
+
+### Objet groupe d'onglets
+
+| Champ | Type | Requis | Description |
+| --- | --- | --- | --- |
+| `id` | string | Oui | Identifiant unique du groupe d'onglets (UUID). |
+| `title` | string | Oui | Titre du groupe d'onglets. |
+| `color` | valeurs: `grey`, `blue`, `red`, `yellow`, `green`, `pink`, `purple`, `cyan`, `orange` | Oui | Couleur du groupe d'onglets. |
+| `tabs` | tableau d'objets | Oui | Onglets contenus dans ce groupe. |
+| `collapsed` | boolean | Non | Indique si le groupe est replié. |
+
+### Objet onglet
+
+| Champ | Type | Requis | Description |
+| --- | --- | --- | --- |
+| `id` | string | Oui | Identifiant unique de l'onglet (UUID). |
+| `title` | string | Oui | Titre de l'onglet. |
+| `url` | string | Oui | URL de l'onglet. |
+| `favIconUrl` | string | Non | URL facultative du favicon de l'onglet. |
+
+### Métadonnées d'espace de travail
+
+| Champ | Type | Requis | Description |
+| --- | --- | --- | --- |
+| `name` | string | Oui | Nom de l'espace de travail. |
+| `accentColor` | valeurs: `tomato`, `red`, `ruby`, `crimson`, `pink`, `plum`, `purple`, `violet`, `iris`, `indigo`, `blue`, `cyan`, `teal`, `jade`, `green`, `grass`, `orange`, `amber`, `yellow`, `lime` | Oui | Couleur d'accent de l'espace de travail. |
+
+### Paramètres
+
+| Champ | Type | Requis | Description |
+| --- | --- | --- | --- |
+| `globalGroupingEnabled` | boolean | Oui | Indique si le regroupement automatique est activé globalement. |
+| `globalDeduplicationEnabled` | boolean | Oui | Indique si la déduplication est activée globalement. |
+| `deduplicateUnmatchedDomains` | boolean | Oui | Indique si les onglets des domaines sans règle correspondante sont dédupliqués. |
+| `deduplicationKeepStrategy` | valeurs: `keep-old`, `keep-new`, `keep-grouped`, `keep-grouped-or-new` | Oui | Lequel des deux onglets correspondants est conservé lors de la déduplication. |
+| `defaultRestoreAction` | valeurs: `current`, `new`, `replace`, `customize` | Non | Action par défaut utilisée lors de la restauration d'une session. |
+| `notifyOnGrouping` | boolean | Oui | Indique si une notification s'affiche lors du regroupement d'onglets. |
+| `notifyOnDeduplication` | boolean | Oui | Indique si une notification s'affiche lors de la déduplication d'onglets. |
+| `notifyOnOrganize` | boolean | Non | Indique si une notification s'affiche après l'organisation de tous les onglets. |
+
+### Statistiques
+
+| Champ | Type | Requis | Description |
+| --- | --- | --- | --- |
+| `tabGroupsCreatedCount` | number | Oui | Nombre total de groupes d'onglets créés. |
+| `tabsDeduplicatedCount` | number | Oui | Nombre total d'onglets dédupliqués. |
+| `dailyBuckets` | object (défaut: `{}`) | Non | Compteurs quotidiens de regroupement et de déduplication. |
+| `firstUsedAt` | string | Non | Horodatage ISO 8601 de la première utilisation enregistrée. |

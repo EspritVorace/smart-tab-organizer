@@ -89,6 +89,10 @@ export interface LandingCopy {
     chromeHref: string;
     firefox: string;
     firefoxHref: string;
+    /** Localized alt text for the official Chrome Web Store badge image. */
+    chromeBadgeAlt: string;
+    /** Localized alt text for the official Firefox Add-ons badge image. */
+    firefoxBadgeAlt: string;
   };
 }
 
@@ -239,13 +243,15 @@ export const landing: Record<Locale, LandingCopy> = {
       title: 'Reprenez le contrôle de vos onglets',
       subtitle: 'Installation en quelques secondes, sans compte ni configuration obligatoire.',
       install: 'Installer',
-      installPath: '/decouverte/installation',
+      installPath: '/discover/installation',
       github: 'Voir sur GitHub',
       githubHref: GITHUB_URL,
       chrome: 'Ajouter à Chrome',
       chromeHref: CHROME_URL,
       firefox: 'Ajouter à Firefox',
       firefoxHref: FIREFOX_URL,
+      chromeBadgeAlt: 'Disponible sur le Chrome Web Store',
+      firefoxBadgeAlt: 'Disponible sur Firefox Add-ons',
     },
   },
 
@@ -390,13 +396,15 @@ export const landing: Record<Locale, LandingCopy> = {
       title: 'Take back control of your tabs',
       subtitle: 'Install in seconds, with no account and no mandatory setup.',
       install: 'Install',
-      installPath: '/decouverte/installation',
+      installPath: '/discover/installation',
       github: 'View on GitHub',
       githubHref: GITHUB_URL,
       chrome: 'Add to Chrome',
       chromeHref: CHROME_URL,
       firefox: 'Add to Firefox',
       firefoxHref: FIREFOX_URL,
+      chromeBadgeAlt: 'Available in the Chrome Web Store',
+      firefoxBadgeAlt: 'Get the add-on for Firefox',
     },
   },
 
@@ -541,13 +549,15 @@ export const landing: Record<Locale, LandingCopy> = {
       title: 'Recupera el control de tus pestañas',
       subtitle: 'Instalación en segundos, sin cuenta ni configuración obligatoria.',
       install: 'Instalar',
-      installPath: '/decouverte/installation',
+      installPath: '/discover/installation',
       github: 'Ver en GitHub',
       githubHref: GITHUB_URL,
       chrome: 'Añadir a Chrome',
       chromeHref: CHROME_URL,
       firefox: 'Añadir a Firefox',
       firefoxHref: FIREFOX_URL,
+      chromeBadgeAlt: 'Disponible en Chrome Web Store',
+      firefoxBadgeAlt: 'Disponible en Firefox Add-ons',
     },
   },
 };

@@ -1,5 +1,5 @@
 import { browser, Browser } from 'wxt/browser';
-import { incrementStat } from '@/utils/statisticsUtils.js';
+import { incrementStat, stampRuleLastUsed } from '@/utils/statisticsUtils.js';
 import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrlByMode } from '@/utils/utils';
 import { getSettings } from './settings.js';
 import { promptForGroupName } from './messaging.js';
@@ -220,6 +220,7 @@ export async function createNewGroup(
     logger.debug(`[GROUPING_DEBUG] New group created with ID: ${newGroupId}. Calling browser.tabGroups.update with payload:`, updatePayload);
     await browser.tabGroups.update(newGroupId, updatePayload as Parameters<typeof browser.tabGroups.update>[1]);
     await incrementStat('grouping', ruleId);
+    await stampRuleLastUsed(ruleId);
 
     return newGroupId;
 }

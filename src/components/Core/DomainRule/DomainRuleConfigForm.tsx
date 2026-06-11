@@ -12,6 +12,7 @@ import {
 } from '@/schemas/enums';
 import type { PresetCategory } from '@/utils/presetUtils';
 import { presetsToSearchableGroups } from '@/utils/presetsToSearchableGroups';
+import { RegexCodeField } from '@/components/UI/RegexCodeField';
 import { ConfigModeSelector, MODE_HELP_LABELS, type ConfigMode } from './ConfigModeSelector';
 
 const GROUP_NAME_SOURCE_HELP_KEYS: Record<GroupNameSourceValue, Parameters<typeof getMessage>[0]> = {
@@ -234,15 +235,20 @@ export function DomainRuleConfigForm({
               required={true}
               error={titleParsingRegExError}
             >
-              {(fieldId) => (
-                <TextField.Root
-                  id={fieldId}
-                  value={titleParsingRegEx}
-                  onChange={(e) => onTitleParsingRegExChange(e.target.value)}
-                  name="titleParsingRegEx"
-                  placeholder="(.+)"
-                  style={{ marginTop: '4px' }}
-                />
+              {(fieldId, errorId) => (
+                <Box style={{ marginTop: '4px' }}>
+                  <RegexCodeField
+                    id={fieldId}
+                    describedById={titleParsingRegExError ? errorId : undefined}
+                    value={titleParsingRegEx}
+                    onChange={onTitleParsingRegExChange}
+                    name="titleParsingRegEx"
+                    testId="title-regex-field"
+                    placeholder="(.+)"
+                    ariaLabel={getMessage('titleRegexEditorAriaLabel')}
+                    hasError={Boolean(titleParsingRegExError)}
+                  />
+                </Box>
               )}
             </FormField>
           )}
@@ -280,15 +286,20 @@ export function DomainRuleConfigForm({
                   required={true}
                   error={urlParsingRegExError}
                 >
-                  {(fieldId) => (
-                    <TextField.Root
-                      id={fieldId}
-                      value={urlParsingRegEx}
-                      onChange={(e) => onUrlParsingRegExChange(e.target.value)}
-                      name="urlParsingRegEx"
-                      placeholder="(.+)"
-                      style={{ marginTop: '4px' }}
-                    />
+                  {(fieldId, errorId) => (
+                    <Box style={{ marginTop: '4px' }}>
+                      <RegexCodeField
+                        id={fieldId}
+                        describedById={urlParsingRegExError ? errorId : undefined}
+                        value={urlParsingRegEx}
+                        onChange={onUrlParsingRegExChange}
+                        name="urlParsingRegEx"
+                        testId="url-regex-field"
+                        placeholder="(.+)"
+                        ariaLabel={getMessage('urlRegexEditorAriaLabel')}
+                        hasError={Boolean(urlParsingRegExError)}
+                      />
+                    </Box>
                   )}
                 </FormField>
               ) : (

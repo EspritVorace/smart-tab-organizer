@@ -2,7 +2,7 @@
 
 Developer documentation for the shortcut system. The matching user-facing page
 is generated at
-`docs/src/content/docs/{,en/,es/}annexes/raccourcis-clavier.mdx` by
+`docs/src/content/docs/{,fr/,es/}reference/keyboard-shortcuts.mdx` by
 `pnpm shortcuts:doc`.
 
 ## Overview
@@ -77,7 +77,9 @@ first key must never be reused as a simple combo within the same scope
 ```
 
 `tests/shortcuts/registry.test.ts` enforces that the prefixes `i` and `e` are
-not also reserved by simple combos on `page:importexport`.
+not also reserved by simple combos on `page:importexport`, and that `w` (the
+workspace-switch prefix: `w n` / `w p` / `w l`) stays free as a simple combo on
+the `global` scope.
 
 ## Adding a widget shortcut (focused card)
 
@@ -126,8 +128,8 @@ when customization ships.
 pnpm shortcuts:doc
 ```
 
-Generates three MDX files (`raccourcis-clavier.mdx` at the root plus `en/`
-and `es/`) under `docs/src/content/docs/annexes/`. Idempotent: two
+Generates three MDX files (`reference/keyboard-shortcuts.mdx` at the root plus
+`fr/` and `es/`) under `docs/src/content/docs/`. Idempotent: two
 consecutive runs produce the same file. CI
 (`.github/workflows/doc-scenarios.yml`) runs the command and then checks via
 `git diff --exit-code` that the commit ships the updated docs.

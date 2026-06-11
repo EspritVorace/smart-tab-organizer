@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Box, Flex, Button, Text, Callout, Separator, Badge, TabNav, Kbd, Tooltip } from '@radix-ui/themes';
-import { Camera, Archive, ArchiveRestore, CheckCircle, Pin, PinOff, Upload, Trash2, FileDown, Boxes, type LucideIcon } from 'lucide-react';
+import { Camera, Archive, ArchiveRestore, CheckCircle, Pin, PinOff, Upload, Download, Trash2, FileDown, Boxes, type LucideIcon } from 'lucide-react';
 import { DragDropProvider, type DragOverEvent, type DragEndEvent } from '@dnd-kit/react';
 import { RestrictToVerticalAxis } from '@dnd-kit/abstract/modifiers';
 import { move } from '@dnd-kit/helpers';
@@ -11,20 +11,29 @@ import { SessionEditDialog } from '@/components/Core/Session/SessionEditDialog';
 import { SnapshotWizard } from '@/components/UI/SessionWizards/SnapshotWizard';
 import { RestoreWizard } from '@/components/UI/SessionWizards/RestoreWizard';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
-import { ListToolbar } from '@/components/UI/ListToolbar';
+import { ListToolbar, ListToolbarMenu } from '@/components/UI/ListToolbar';
 import { BulkActionsBar } from '@/components/UI/BulkActionsBar';
 import { ExportSessionsWizard } from '@/components/UI/ImportExportWizards/ExportSessionsWizard';
-import { getMessage } from '@/utils/i18n';
+import { SessionViewMenu } from '@/components/UI/SessionViewMenu/SessionViewMenu';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 import { foldAccents } from '@/utils/stringUtils';
 import { matchSessionSearch, splitByPinned, getFocusedSessionFromDOM } from '@/utils/sessionUtils';
 import { moveSessionToFirstInGroup, moveSessionToLastInGroup } from '@/utils/sessionOrderUtils';
+import {
+  computeSessionView,
+  normalizeSessionViewState,
+  DEFAULT_SESSION_VIEW_STATE,
+  type SessionViewState,
+} from '@/utils/sessionViewUtils';
+import { getAllCategories } from '@/utils/categoriesStore';
+import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
 import { useSessions } from '@/hooks/useSessions';
 import type { SessionsSubTab } from '@/hooks/useDeepLinking';
 import { useShortcuts } from '@/hooks/useShortcuts';
 import { useListNavigation } from '@/hooks/useListNavigation';
 import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
-import { updateSession } from '@/utils/sessionStorage';
+import { updateSession, type SessionBucket } from '@/utils/sessionStorage';
 import { showSuccessNotification } from '@/utils/notifications';
 import { getActiveTabGroupId } from '@/utils/tabCapture';
 import { browser } from 'wxt/browser';
@@ -79,12 +88,24 @@ interface SessionsPageProps {
   onSessionsTabChange?: (tab: SessionsSubTab) => void;
 }
 
-function SectionHeader({ icon: Icon, titleKey, count }: { icon: LucideIcon; titleKey: string; count: number }) {
+function SectionHeader({
+  icon: Icon,
+  titleKey,
+  count,
+  action,
+}: {
+  icon: LucideIcon;
+  titleKey: string;
+  count: number;
+  /** Optional control rendered on the right of the header (e.g. the filter/sort menu). */
+  action?: React.ReactNode;
+}) {
   return (
     <Flex align="center" gap="2">
       <Icon size={16} aria-hidden="true" style={{ color: 'var(--accent-9)' }} />
-      <Text size="3" weight="bold">{getMessage(titleKey)}</Text>
+      <Text size="3" weight="bold">{getMessage(titleKey as MessageKey)}</Text>
       <Badge variant="soft" size="1">{count}</Badge>
+      {action && <Box style={{ marginLeft: 'auto' }}>{action}</Box>}
     </Flex>
   );
 }
@@ -95,7 +116,7 @@ interface SessionSectionProps {
   emptyTitleKey: string;
   emptyDescriptionKey?: string;
   /** Logical bucket this section renders. Drives drag layout and reorder routing. */
-  bucket: 'pinned' | 'active' | 'archived';
+  bucket: SessionBucket;
   /** Sessions displayed in this section (already filtered by search + split by bucket). */
   sessions: Session[];
   /** Full ordered session list, used to recompute the global order after a drag and for move-to-first/last. */
@@ -147,6 +168,18 @@ interface SessionSectionProps {
   }>;
   /** Suffix appended to bulk testIds (e.g. 'pinned' / 'unpinned' / 'archived'). */
   testIdSuffix: BulkScope;
+  /**
+   * Filter/sort view state for this section. When provided, the section header
+   * renders a SessionViewMenu on the right. Omitted for the pinned section.
+   */
+  viewState?: SessionViewState;
+  onViewChange?: (next: SessionViewState) => void;
+  /**
+   * Whether drag-and-drop reordering is allowed. Defaults to true. False when a
+   * non-manual sort or a category filter is active (display order differs from
+   * the real order), in addition to the existing search guard.
+   */
+  dndEnabled?: boolean;
 }
 
 function SessionSection({
@@ -180,9 +213,24 @@ function SessionSection({
   onBulkExportRequest,
   bulkExtraActions,
   testIdSuffix,
+  viewState,
+  onViewChange,
+  dndEnabled = true,
 }: SessionSectionProps) {
   const [dragItems, setDragItems] = useState<Session[] | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  // Drag is off during search, and whenever a non-manual sort or a category
+  // filter is active (the displayed order no longer maps to the real order).
+  const dragDisabled = !!searchQuery || !dndEnabled;
+
+  // After a filter/sort change (menu close), move focus to the first resulting
+  // card so a keyboard/screen-reader user lands on the first visible result.
+  // Deferred so it runs after Radix restores focus to the menu trigger on close.
+  const focusFirstCard = useCallback(() => {
+    requestAnimationFrame(() => {
+      listRef.current?.querySelector<HTMLElement>('[data-session-card]')?.focus();
+    });
+  }, []);
 
   // Drag: reorder within this section, then splice back into the global order.
   const handleDragOver = useCallback((event: DragOverEvent) => {
@@ -248,7 +296,22 @@ function SessionSection({
   if (sessions.length === 0 && searchQuery) return null;
   return (
     <Box>
-      <SectionHeader icon={icon} titleKey={titleKey} count={sessions.length} />
+      <SectionHeader
+        icon={icon}
+        titleKey={titleKey}
+        count={sessions.length}
+        action={
+          viewState && onViewChange ? (
+            <SessionViewMenu
+              value={viewState}
+              onChange={onViewChange}
+              onApplied={focusFirstCard}
+              categories={getAllCategories()}
+              testIdPrefix={`page-sessions-view-${testIdSuffix}`}
+            />
+          ) : undefined
+        }
+      />
       <Box mt="3">
         {selectedIds.size > 0 && (
           <BulkActionsBar
@@ -297,8 +360,8 @@ function SessionSection({
         {sessions.length === 0 ? (
           <EmptyState
             icon={icon}
-            title={getMessage(emptyTitleKey)}
-            description={emptyDescriptionKey ? getMessage(emptyDescriptionKey) : undefined}
+            title={getMessage(emptyTitleKey as MessageKey)}
+            description={emptyDescriptionKey ? getMessage(emptyDescriptionKey as MessageKey) : undefined}
             descriptionMaxWidth="none"
             minHeight={100}
           />
@@ -336,7 +399,7 @@ function SessionSection({
                   searchMatchingGroupIds={searchMatch?.matchingGroupIds}
                   searchQuery={searchQuery || undefined}
                   index={index}
-                  isDragDisabled={!!searchQuery}
+                  isDragDisabled={dragDisabled}
                   onMoveToFirst={() => handleMoveToFirst(session)}
                   onMoveLast={() => handleMoveLast(session)}
                   onCardKeyDown={(e) => handleCardKeyDown(e, index)}
@@ -365,11 +428,15 @@ export function SessionsPage({
   sessionsTab = 'active',
   onSessionsTabChange,
 }: SessionsPageProps) {
-  const { openImportSessions } = useImportExportWizards();
+  const { openImportSessions, openExportSessions } = useImportExportWizards();
+  const { scopedItems } = useActiveWorkspaceContext();
   const [bulkExportIds, setBulkExportIds] = useState<string[] | null>(null);
-  // Archives are loaded only when the archived tab is open or the export wizard is opened
-  // (so the user can still export archived items even from the active tab).
-  const includeArchived = sessionsTab === 'archived' || bulkExportIds != null;
+  // Archives are watched continuously here: the PageUp/PageDown section
+  // navigation needs to know whether an archived block exists (and reach its
+  // first card) while the active sub-tab is showing. The cost is one extra
+  // storage subscription on the options page; the rendered list stays driven
+  // by `sessionsTab`, so nothing changes visually on the active tab.
+  const includeArchived = true;
   const {
     sessions,
     pinnedSessions: pinnedBucket,
@@ -410,6 +477,46 @@ export function SessionsPage({
   const [quickRestoreMessage, setQuickRestoreMessage] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Per-section filter/sort view state, persisted independently (workspace-scoped).
+  const sessionsViewStateItem = scopedItems.sessionsViewStateItem;
+  const archivedSessionsViewStateItem = scopedItems.archivedSessionsViewStateItem;
+  const [normalViewState, setNormalViewState] = useState<SessionViewState>(DEFAULT_SESSION_VIEW_STATE);
+  const [archivedViewState, setArchivedViewState] = useState<SessionViewState>(DEFAULT_SESSION_VIEW_STATE);
+  // Tracks whether the persisted view (sort/filter) has been applied, so the
+  // arrival autofocus waits for the sorted order instead of landing on the
+  // first manual-order card and ending up stale once the sort kicks in.
+  const [viewLoaded, setViewLoaded] = useState(false);
+
+  useEffect(() => {
+    let normalDone = false;
+    let archivedDone = false;
+    const settle = () => {
+      if (normalDone && archivedDone) setViewLoaded(true);
+    };
+    sessionsViewStateItem.getValue().then(v => {
+      setNormalViewState(normalizeSessionViewState(v));
+      normalDone = true;
+      settle();
+    });
+    archivedSessionsViewStateItem.getValue().then(v => {
+      setArchivedViewState(normalizeSessionViewState(v));
+      archivedDone = true;
+      settle();
+    });
+  }, [sessionsViewStateItem, archivedSessionsViewStateItem]);
+
+  const handleNormalViewChange = useCallback((next: SessionViewState) => {
+    setNormalViewState(next);
+    sessionsViewStateItem.setValue(next).catch(() => {});
+  }, [sessionsViewStateItem]);
+  const handleArchivedViewChange = useCallback((next: SessionViewState) => {
+    setArchivedViewState(next);
+    archivedSessionsViewStateItem.setValue(next).catch(() => {});
+  }, [archivedSessionsViewStateItem]);
+  // Section a pending PageUp/PageDown jump should land on once the (possibly
+  // freshly switched) sub-tab has rendered its cards. Null when idle.
+  const [pendingBucketFocus, setPendingBucketFocus] = useState<SessionBucket | null>(null);
+
   const handleTabChange = useCallback(
     (next: SessionsSubTab) => {
       onSessionsTabChange?.(next);
@@ -423,6 +530,30 @@ export function SessionsPage({
       setSearchQuery('');
     },
     [onSessionsTabChange],
+  );
+
+  // Manual sub-tab click: switch tabs, then mirror the initial-arrival
+  // autofocus by landing on the first card of the newly shown sub-tab once it
+  // has rendered. The page never remounts on a tab switch, so the
+  // useListNavigation autofocus guard stays applied and would not re-fire on
+  // its own; we drive the focus through the same deferred resolver
+  // (`pendingBucketFocus`) the PageUp/PageDown jumps use. Section jumps keep
+  // calling `handleTabChange` directly, so their section-specific targeting is
+  // untouched.
+  const handleTabClick = useCallback(
+    (next: SessionsSubTab) => {
+      const switching = next !== sessionsTab;
+      handleTabChange(next);
+      if (!switching) return;
+      if (next === 'archived') {
+        if (archivedBucket.length > 0) setPendingBucketFocus('archived');
+      } else if (pinnedBucket.length > 0) {
+        setPendingBucketFocus('pinned');
+      } else if (activeBucket.length > 0) {
+        setPendingBucketFocus('active');
+      }
+    },
+    [sessionsTab, handleTabChange, archivedBucket.length, pinnedBucket.length, activeBucket.length],
   );
 
   const handleOpenSnapshotWizard = useCallback(() => setSnapshotOpen(true), []);
@@ -636,6 +767,100 @@ export function SessionsPage({
     [displayedSessions],
   );
 
+  // Apply the per-section filter/sort view on top of the search-filtered lists.
+  const searchActive = searchQuery.length > 0;
+  const normalView = useMemo(
+    () => computeSessionView(unpinnedSessions, normalViewState, { searchActive }),
+    [unpinnedSessions, normalViewState, searchActive],
+  );
+  const archivedView = useMemo(
+    () => computeSessionView(displayedSessions, archivedViewState, { searchActive }),
+    [displayedSessions, archivedViewState, searchActive],
+  );
+  const normalSessions = normalView.sessions;
+  const archivedSessions = archivedView.sessions;
+
+  // --- PageUp/PageDown navigation between session sections ---
+  // Logical block order is pinned -> active -> archived. Archived lives on a
+  // separate sub-tab, so a jump into/out of it switches tabs and defers the
+  // focus to `pendingBucketFocus` (resolved by the effect below once rendered).
+  const focusCardById = useCallback((id: string | undefined): boolean => {
+    if (!id) return false;
+    const el = document.querySelector<HTMLElement>(`[data-session-id="${CSS.escape(id)}"]`);
+    if (!el) return false;
+    el.focus();
+    return true;
+  }, []);
+
+  // First focusable card id of a block. Same-tab blocks use the currently
+  // displayed (search-filtered) arrays; cross-tab blocks use the raw buckets
+  // (the search resets on tab switch).
+  const firstIdForBucket = useCallback(
+    (bucket: SessionBucket): string | undefined => {
+      if (bucket === 'archived') {
+        return (sessionsTab === 'archived' ? archivedSessions : archivedBucket)[0]?.id;
+      }
+      if (sessionsTab === 'active') {
+        return (bucket === 'pinned' ? pinnedSessions : normalSessions)[0]?.id;
+      }
+      return (bucket === 'pinned' ? pinnedBucket : activeBucket)[0]?.id;
+    },
+    [sessionsTab, archivedSessions, archivedBucket, pinnedSessions, normalSessions, pinnedBucket, activeBucket],
+  );
+
+  const handleSectionJump = useCallback(
+    (direction: 'next' | 'prev') => {
+      const focused = getFocusedSession();
+      if (!focused) return;
+      const order: SessionBucket[] = ['pinned', 'active', 'archived'];
+      let current: SessionBucket = 'active';
+      if (focused.isArchived) current = 'archived';
+      else if (focused.isPinned) current = 'pinned';
+      const startIndex = order.indexOf(current);
+      const candidates =
+        direction === 'next'
+          ? order.slice(startIndex + 1)
+          : order.slice(0, startIndex).reverse();
+      // Try the next/previous block, skipping empty ones; stop at the first hit.
+      for (const bucket of candidates) {
+        const firstId = firstIdForBucket(bucket);
+        if (!firstId) continue;
+        const targetTab: SessionsSubTab = bucket === 'archived' ? 'archived' : 'active';
+        if (targetTab === sessionsTab) {
+          focusCardById(firstId);
+        } else {
+          setPendingBucketFocus(bucket);
+          handleTabChange(targetTab);
+        }
+        return;
+      }
+    },
+    [getFocusedSession, firstIdForBucket, sessionsTab, focusCardById, handleTabChange],
+  );
+
+  useShortcuts(
+    {
+      'sessionCard.sectionNext': () => handleSectionJump('next'),
+      'sessionCard.sectionPrev': () => handleSectionJump('prev'),
+    },
+    { scope: 'widget:session-card' },
+  );
+
+  // Resolve a deferred cross-tab jump: once the target sub-tab has loaded and
+  // rendered its cards, focus the block's first card. Give up if the block
+  // turned out empty after loading.
+  useEffect(() => {
+    if (!pendingBucketFocus || !isLoaded) return;
+    const wantTab: SessionsSubTab = pendingBucketFocus === 'archived' ? 'archived' : 'active';
+    if (sessionsTab !== wantTab) return;
+    const firstId = firstIdForBucket(pendingBucketFocus);
+    if (!firstId) {
+      setPendingBucketFocus(null);
+      return;
+    }
+    if (focusCardById(firstId)) setPendingBucketFocus(null);
+  }, [pendingBucketFocus, isLoaded, sessionsTab, firstIdForBucket, focusCardById]);
+
   // Cleanup: drop selected ids that are no longer in their section (deleted,
   // pinned/unpinned, archived, or filtered out by the search). Keeps the
   // master checkbox count in sync with what the user actually sees.
@@ -644,12 +869,12 @@ export function SessionsPage({
   }, [pinnedSessions]);
 
   useEffect(() => {
-    setSelectedUnpinnedIds(prev => pruneSelection(prev, unpinnedSessions));
-  }, [unpinnedSessions]);
+    setSelectedUnpinnedIds(prev => pruneSelection(prev, normalSessions));
+  }, [normalSessions]);
 
   useEffect(() => {
-    setSelectedArchivedIds(prev => pruneSelection(prev, displayedSessions));
-  }, [displayedSessions]);
+    setSelectedArchivedIds(prev => pruneSelection(prev, archivedSessions));
+  }, [archivedSessions]);
 
   const handleSaveSession = useCallback(
     async (session: Session) => {
@@ -772,6 +997,31 @@ export function SessionsPage({
   const totalForTab = archivedOnlyView ? archivedBucket.length : pinnedBucket.length + activeBucket.length;
   const hasAnyOverall = pinnedBucket.length + activeBucket.length + archivedBucket.length > 0;
 
+  // Initial focus on arrival (active view): focus the first session card
+  // (pinned section renders before unpinned, so the first card is pinned when
+  // any), or fall back to the empty-state snapshot button when there is none.
+  // This page-level instance is used only for the autofocus; per-section arrow
+  // navigation keeps its own useListNavigation hooks.
+  const sessionsListRef = useRef<HTMLDivElement>(null);
+  useListNavigation(sessionsListRef, '[data-session-card]', {
+    autoFocus: {
+      // Wait for the persisted view so the focus lands on the first *sorted*
+      // visible card, not the first manual-order one.
+      ready: isLoaded && viewLoaded && !archivedOnlyView,
+      fallbackSelector: '[data-testid="page-sessions-btn-snapshot"]',
+    },
+  });
+
+  // Enter in the search field jumps to the first result card (works on both the
+  // active and archived sub-tabs via the shared scroll container), or keeps
+  // focus in the field when there is no result.
+  const focusFirstResultCard = useCallback(() => {
+    document
+      .querySelector('[data-testid="page-sessions-scroll"]')
+      ?.querySelector<HTMLElement>('[data-session-card]')
+      ?.focus();
+  }, []);
+
   return (
     <PageLayout
       titleKey="sessionsTab"
@@ -797,7 +1047,7 @@ export function SessionsPage({
                   href="#sessions"
                   active={sessionsTab === 'active'}
                   data-testid="page-sessions-tab-active"
-                  onClick={(e) => { e.preventDefault(); handleTabChange('active'); }}
+                  onClick={(e) => { e.preventDefault(); handleTabClick('active'); }}
                 >
                   {getMessage('activeSessionsTab')}
                 </TabNav.Link>
@@ -805,7 +1055,7 @@ export function SessionsPage({
                   href="#sessions/archived"
                   active={sessionsTab === 'archived'}
                   data-testid="page-sessions-tab-archived"
-                  onClick={(e) => { e.preventDefault(); handleTabChange('archived'); }}
+                  onClick={(e) => { e.preventDefault(); handleTabClick('archived'); }}
                 >
                   {getMessage('archivedSessionsTab')}
                 </TabNav.Link>
@@ -821,6 +1071,7 @@ export function SessionsPage({
               searchPlaceholder={getMessage('searchSessions')}
               searchValue={searchQuery}
               onSearchChange={setSearchQuery}
+              onSearchSubmit={focusFirstResultCard}
               action={
                 !archivedOnlyView ? (
                   <Tooltip content={<Flex align="center" gap="2" aria-hidden="true">{getMessage('sessionSnapshotButton')}<Kbd>N</Kbd></Flex>}>
@@ -838,6 +1089,27 @@ export function SessionsPage({
                   </Tooltip>
                 ) : undefined
               }
+              menu={
+                <ListToolbarMenu
+                  testId="page-sessions-toolbar-menu"
+                  items={[
+                    {
+                      key: 'export',
+                      testId: 'page-sessions-toolbar-menu-export',
+                      icon: Download,
+                      label: getMessage('exportSessionsTitle'),
+                      onSelect: () => openExportSessions(),
+                    },
+                    {
+                      key: 'import',
+                      testId: 'page-sessions-toolbar-menu-import',
+                      icon: Upload,
+                      label: getMessage('importSessionsTitle'),
+                      onSelect: () => openImportSessions(),
+                    },
+                  ]}
+                />
+              }
             />
           )}
 
@@ -853,7 +1125,10 @@ export function SessionsPage({
 
           <Box
             data-testid="page-sessions-scroll"
-            style={{ flex: 1, overflow: 'auto', minHeight: 0 }}
+            // Vertical scroll only: clip overflow-x so the Radix ghost buttons'
+            // negative margins (card dropdowns) don't trigger a spurious
+            // horizontal scrollbar (mirrors PageLayoutFrame's content box).
+            style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}
           >
             {!isLoaded && (
               <Text size="2" color="gray">
@@ -896,7 +1171,7 @@ export function SessionsPage({
               <EmptyState compact icon={Archive} message={getMessage('noSessionsFound')} />
             )}
             {isLoaded && !archivedOnlyView && displayedSessions.length > 0 && (
-              <Flex data-testid="page-sessions-list" direction="column" gap="3">
+              <Flex data-testid="page-sessions-list" direction="column" gap="3" ref={sessionsListRef}>
                 <SessionSection
                   icon={Pin}
                   titleKey="pinnedSessionsSection"
@@ -928,7 +1203,10 @@ export function SessionsPage({
                   emptyTitleKey="unpinnedSessionsEmptyTitle"
                   emptyDescriptionKey="unpinnedSessionsEmptyDescription"
                   bucket="active"
-                  sessions={unpinnedSessions}
+                  sessions={normalSessions}
+                  viewState={normalViewState}
+                  onViewChange={handleNormalViewChange}
+                  dndEnabled={normalView.isDndEnabled}
                   selectedIds={selectedUnpinnedIds}
                   onSelectionChange={setSelectedUnpinnedIds}
                   onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'unpinned', ids })}
@@ -960,7 +1238,10 @@ export function SessionsPage({
                   emptyTitleKey="archivedSessionsEmptyTitle"
                   emptyDescriptionKey="archivedSessionsEmptyDescription"
                   bucket="archived"
-                  sessions={displayedSessions}
+                  sessions={archivedSessions}
+                  viewState={archivedViewState}
+                  onViewChange={handleArchivedViewChange}
+                  dndEnabled={archivedView.isDndEnabled}
                   selectedIds={selectedArchivedIds}
                   onSelectionChange={setSelectedArchivedIds}
                   onBulkDeleteRequest={(ids) => setDeleteTarget({ type: 'bulk', scope: 'archived', ids })}

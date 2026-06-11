@@ -26,7 +26,9 @@ describe('getMessage — happy path', () => {
     const result = getMessage('extensionName');
 
     expect(result).toBe('Smart Tab Organizer');
-    expect(mockGetMessage).toHaveBeenCalledWith('extensionName', undefined);
+    // `@wxt-dev/i18n`'s t() omits the substitutions argument entirely when none
+    // are passed, rather than forwarding `undefined`.
+    expect(mockGetMessage).toHaveBeenCalledWith('extensionName');
   });
 
   it('passes a single string substitution through', () => {
@@ -35,7 +37,9 @@ describe('getMessage — happy path', () => {
     const result = getMessage('greeting', 'Alice');
 
     expect(result).toBe('Hello, Alice');
-    expect(mockGetMessage).toHaveBeenCalledWith('greeting', 'Alice');
+    // A single string substitution is normalized to a one-element array before
+    // reaching browser.i18n.getMessage.
+    expect(mockGetMessage).toHaveBeenCalledWith('greeting', ['Alice']);
   });
 
   it('passes an array of substitutions through', () => {
@@ -75,7 +79,7 @@ describe('getPluralMessage', () => {
     const result = getPluralMessage(1, 'oneTab', 'manyTabs');
 
     expect(result).toBe('1 tab');
-    expect(mockGetMessage).toHaveBeenCalledExactlyOnceWith('oneTab', undefined);
+    expect(mockGetMessage).toHaveBeenCalledExactlyOnceWith('oneTab');
   });
 
   it('uses the plural key when count > 1 and passes count as substitution', () => {

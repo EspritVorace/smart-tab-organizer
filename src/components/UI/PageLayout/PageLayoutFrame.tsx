@@ -1,6 +1,6 @@
 import React from 'react';
 import { Heading, Box, Text } from '@radix-ui/themes';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 
 interface PageLayoutFrameProps {
   titleKey: string;
@@ -40,12 +40,12 @@ export function PageLayoutFrame({
         style={{ borderBottom: '1px solid var(--gray-a4)' }}
       >
         <Heading size="5" weight="bold" as="h1" style={{ letterSpacing: '-0.02em' }}>
-          {getMessage(titleKey)}
+          {getMessage(titleKey as MessageKey)}
         </Heading>
 
         <Box data-testid="page-layout-description" pt="2">
           <Text size="2" color="gray" as="p" style={{ margin: 0 }}>
-            {descriptionOverride ?? getMessage(descriptionKey)}
+            {descriptionOverride ?? getMessage(descriptionKey as MessageKey)}
           </Text>
         </Box>
       </Box>
@@ -53,7 +53,13 @@ export function PageLayoutFrame({
       <Box
         data-testid={contentTestId}
         pt="4"
-        style={{ flex: 1, overflow: 'auto', minHeight: 0 }}
+        // Vertical scroll only. overflow-x is clipped because Radix ghost
+        // buttons (the toolbar "..." menu, row dropdowns) carry intentional
+        // negative margins whose border-box pokes ~6px past the content edge;
+        // on `overflow: auto` that empty margin space triggered a spurious
+        // horizontal scrollbar. No page scrolls horizontally here (the stats
+        // page owns its own inner scroll region).
+        style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', minHeight: 0 }}
       >
         {children}
       </Box>

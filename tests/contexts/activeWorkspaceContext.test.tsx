@@ -101,6 +101,31 @@ describe('ActiveWorkspaceContext — setWorkspaceColor', () => {
   });
 });
 
+describe('ActiveWorkspaceContext — switchTo', () => {
+  it('stamps lastActivatedAt on the target workspace and leaves others untouched', async () => {
+    const { result } = await renderContext();
+    let createdId = '';
+    await act(async () => {
+      const created = await result.current.createWorkspace('Second', 'teal');
+      createdId = created.id;
+    });
+    await waitFor(() => expect(result.current.workspaces).toHaveLength(2));
+    // createWorkspace switches active but does not stamp lastActivatedAt.
+    expect(result.current.workspaces.find((w) => w.id === createdId)?.lastActivatedAt).toBeUndefined();
+
+    await act(async () => {
+      await result.current.switchTo(DEFAULT_WORKSPACE_ID);
+    });
+
+    await waitFor(() => expect(result.current.activeId).toBe(DEFAULT_WORKSPACE_ID));
+    expect(
+      result.current.workspaces.find((w) => w.id === DEFAULT_WORKSPACE_ID)?.lastActivatedAt,
+    ).toBeDefined();
+    // The previously active workspace keeps no activation timestamp.
+    expect(result.current.workspaces.find((w) => w.id === createdId)?.lastActivatedAt).toBeUndefined();
+  });
+});
+
 describe('ActiveWorkspaceContext — removeWorkspace', () => {
   it('removes a non-default workspace and switches active to default when needed', async () => {
     const { result } = await renderContext();

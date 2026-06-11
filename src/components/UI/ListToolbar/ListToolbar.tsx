@@ -1,6 +1,14 @@
 import React from 'react';
-import { Box, Flex, TextField } from '@radix-ui/themes';
-import { Search } from 'lucide-react';
+import { Box, Flex, IconButton, Kbd, TextField, Tooltip } from '@radix-ui/themes';
+import { Search, X } from 'lucide-react';
+import { getEffectiveBindings } from '@/shortcuts/getEffectiveBindings';
+import { getMessage } from '@/utils/i18n';
+
+/** Keyboard shortcut that focuses the active search field (see registry). */
+const focusBinding = getEffectiveBindings('options.search.focus')[0];
+const SEARCH_SHORTCUT = Array.isArray(focusBinding)
+  ? focusBinding.join(' ')
+  : focusBinding;
 
 interface ListToolbarProps {
   /** Container testid (e.g. "page-rules-toolbar"). */
@@ -11,8 +19,18 @@ interface ListToolbarProps {
   searchPlaceholder: string;
   searchValue: string;
   onSearchChange: (value: string) => void;
+  /**
+   * Called when the user presses Enter in the search field. Pages use it to
+   * move focus to the first result card (and do nothing, keeping focus in the
+   * field, when there is no result).
+   */
+  onSearchSubmit?: () => void;
+  /** Optional view control (filter/sort/group menu) rendered between the search field and the action. */
+  filter?: React.ReactNode;
   /** Action button (Add Rule / Take Snapshot) supplied by the caller. */
   action: React.ReactNode;
+  /** Optional overflow ("...") menu rendered at the right edge, after the action (e.g. import/export). */
+  menu?: React.ReactNode;
 }
 
 export function ListToolbar({
@@ -21,9 +39,19 @@ export function ListToolbar({
   searchPlaceholder,
   searchValue,
   onSearchChange,
+  onSearchSubmit,
+  filter,
   action,
+  menu,
 }: ListToolbarProps) {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      if (onSearchSubmit) {
+        event.preventDefault();
+        onSearchSubmit();
+      }
+      return;
+    }
     if (event.key !== 'Escape') return;
     if (searchValue.length > 0) {
       event.preventDefault();
@@ -41,6 +69,7 @@ export function ListToolbar({
           data-testid={searchTestId}
           placeholder={searchPlaceholder}
           aria-label={searchPlaceholder}
+          aria-keyshortcuts={SEARCH_SHORTCUT}
           value={searchValue}
           onChange={(e) => onSearchChange(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -48,9 +77,40 @@ export function ListToolbar({
           <TextField.Slot>
             <Search size={16} />
           </TextField.Slot>
+          {SEARCH_SHORTCUT && searchValue.length === 0 && (
+            <TextField.Slot side="right">
+              <Kbd size="1" aria-hidden="true">{SEARCH_SHORTCUT}</Kbd>
+            </TextField.Slot>
+          )}
+          {searchValue.length > 0 && (
+            <TextField.Slot side="right">
+              <Tooltip
+                content={
+                  <Flex align="center" gap="2" aria-hidden="true">
+                    {getMessage('clearSearch')}
+                    <Kbd>Esc</Kbd>
+                  </Flex>
+                }
+              >
+                <IconButton
+                  size="1"
+                  variant="ghost"
+                  color="gray"
+                  data-testid={searchTestId ? `${searchTestId}-clear` : undefined}
+                  aria-label={getMessage('clearSearch')}
+                  aria-keyshortcuts="Escape"
+                  onClick={() => onSearchChange('')}
+                >
+                  <X size={16} aria-hidden="true" />
+                </IconButton>
+              </Tooltip>
+            </TextField.Slot>
+          )}
         </TextField.Root>
       </Box>
+      {filter}
       {action}
+      {menu}
     </Flex>
   );
 }

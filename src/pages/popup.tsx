@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { mountExtensionApp } from '@/utils/mountExtensionApp.js';
 import { Box, Flex, Separator, Theme } from '@radix-ui/themes';
@@ -10,10 +10,14 @@ import { SettingsToggles } from '@/components/UI/SettingsToggles/SettingsToggles
 import { PopupToolbar } from '@/components/UI/PopupToolbar/PopupToolbar';
 import { PopupProfilesList } from '@/components/UI/PopupProfilesList/PopupProfilesList';
 import { PopupWorkspaceSwitcher } from '@/components/UI/Workspace/PopupWorkspaceSwitcher';
+import { WorkspaceSwitchShortcuts } from '@/components/UI/Workspace/WorkspaceSwitchShortcuts';
 import { ShortcutsDrawer } from '@/components/UI/ShortcutsPanel';
 import { openOptionsWithHash } from '@/utils/openOptions';
+import { getActiveTabGroupId } from '@/utils/tabCapture';
+import { buildSnapshotHash } from '@/utils/snapshotHash';
 import { useSettings } from '@/hooks/useSettings';
 import { useShortcuts } from '@/hooks/useShortcuts';
+import { useThemeToggleShortcut } from '@/hooks/useThemeToggleShortcut';
 import {
   ActiveWorkspaceProvider,
   useActiveWorkspaceContext,
@@ -26,6 +30,17 @@ export function PopupContent() {
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const openShortcuts = useCallback(() => setShortcutsOpen(true), []);
 
+  // Initial focus: land on the first pinned session card when one exists, and
+  // fall back to the "Organize tabs" button otherwise. PopupProfilesList focuses
+  // its own first card and reports `hasPinned` here once sessions have loaded.
+  const organizeButtonRef = useRef<HTMLButtonElement>(null);
+  const initialFocusDoneRef = useRef(false);
+  const handleProfilesLoaded = useCallback((hasPinned: boolean) => {
+    if (initialFocusDoneRef.current) return;
+    initialFocusDoneRef.current = true;
+    if (!hasPinned) organizeButtonRef.current?.focus();
+  }, []);
+
   const openOptionsPage = useCallback(() => {
     browser.runtime.openOptionsPage();
   }, []);
@@ -36,12 +51,16 @@ export function PopupContent() {
   }, []);
 
   const handlePopupImportRules = useCallback(() => {
-    void openOptionsWithHash('#rules?action=import');
+    void openOptionsWithHash('#rules?action=import-pack');
     window.close();
   }, []);
 
-  const handlePopupSave = useCallback(() => {
-    void openOptionsWithHash('#sessions?action=snapshot');
+  const handlePopupSave = useCallback(async () => {
+    // Mirror the toolbar Save button: when the active tab sits in a group,
+    // scope the snapshot to that group so the wizard pre-fills its name and
+    // filters on it. Pressing `s` must behave exactly like clicking the button.
+    const groupId = await getActiveTabGroupId();
+    void openOptionsWithHash(buildSnapshotHash(groupId));
   }, []);
 
   const handlePopupRestore = useCallback(() => {
@@ -68,6 +87,8 @@ export function PopupContent() {
     { scope: 'page:popup' },
   );
 
+  useThemeToggleShortcut();
+
   const hasRules = isLoaded && (settings?.domainRules?.length ?? 0) > 0;
 
   return (
@@ -77,9 +98,10 @@ export function PopupContent() {
         <Flex gap="3" direction="column" width="100%">
           <PopupHeader title={getMessage('popupTitle')} onSettingsOpen={openOptionsPage} />
 
-          <PopupToolbar />
+          <PopupToolbar organizeButtonRef={organizeButtonRef} />
 
           <PopupWorkspaceSwitcher onManage={handleManageWorkspaces} />
+          <WorkspaceSwitchShortcuts />
 
           {isLoaded && !hasRules ? (
             <SettingsToggles
@@ -90,7 +112,7 @@ export function PopupContent() {
             />
           ) : null}
 
-          <PopupProfilesList />
+          <PopupProfilesList autoFocusFirstPinned onLoaded={handleProfilesLoaded} />
 
           {hasRules ? (
             <>

@@ -11,12 +11,25 @@
  */
 
 import { test, expect } from './fixtures';
+import type { BrowserContext } from '@playwright/test';
 import { goToOptionsPage } from './helpers/navigation';
 
 async function goToWorkspaces(page: import('@playwright/test').Page, extensionId: string) {
   await page.goto(`chrome-extension://${extensionId}/options.html#workspaces`);
   await page.waitForLoadState('domcontentloaded');
   await page.getByTestId('workspace-create-button').waitFor({ state: 'visible', timeout: 10_000 });
+}
+
+async function getServiceWorker(context: BrowserContext): Promise<import('@playwright/test').Page> {
+  let sw = context.serviceWorkers()[0];
+  if (sw) return sw;
+  const deadline = Date.now() + 5000;
+  while (Date.now() < deadline) {
+    sw = context.serviceWorkers()[0];
+    if (sw) return sw;
+    await new Promise(r => setTimeout(r, 200));
+  }
+  throw new Error('Service worker not available after 5 s (idle termination?)');
 }
 
 // Other spec files in the same worker (notably workspaces-search.spec.ts) call
@@ -27,7 +40,7 @@ async function goToWorkspaces(page: import('@playwright/test').Page, extensionId
 // rejects names that already exist). Reset to a post-migration baseline
 // before each test: only the default workspace, and it is active.
 test.beforeEach(async ({ extensionContext }) => {
-  const sw = extensionContext.serviceWorkers()[0];
+  const sw = await getServiceWorker(extensionContext).catch(() => null);
   if (!sw) return;
   await sw
     .evaluate(async () => {
@@ -63,8 +76,11 @@ test.describe('Workspaces — baseline', () => {
   test('default workspace cannot be deleted', async ({ optionsPage, extensionId }) => {
     await goToWorkspaces(optionsPage, extensionId);
 
-    const deleteBtn = optionsPage.getByTestId('workspace-row-default-delete');
-    await expect(deleteBtn).toBeDisabled();
+    // Delete now lives in the row's "..." menu; the item is disabled for the
+    // default workspace.
+    await optionsPage.getByTestId('workspace-row-default-btn-dropdown').click();
+    const deleteItem = optionsPage.getByTestId('workspace-row-default-menu-delete');
+    await expect(deleteItem).toHaveAttribute('aria-disabled', 'true');
   });
 });
 
@@ -109,7 +125,9 @@ test.describe('Workspaces — create + switch + delete', () => {
 
     const personalRowId = await personalRow.getAttribute('data-testid');
     const wsId = personalRowId!.replace('workspace-row-', '');
-    await optionsPage.getByTestId(`workspace-row-${wsId}-delete`).click();
+    // Open the row's "..." menu, then trigger delete.
+    await optionsPage.getByTestId(`workspace-row-${wsId}-btn-dropdown`).click();
+    await optionsPage.getByTestId(`workspace-row-${wsId}-menu-delete`).click();
 
     // Confirmation requires retyping the name.
     const dialog = optionsPage.getByTestId('workspace-delete-dialog');

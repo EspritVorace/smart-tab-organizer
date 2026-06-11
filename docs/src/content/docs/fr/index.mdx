@@ -1,0 +1,37 @@
+---
+title: SmartTab Organizer
+description: SmartTab Organizer groupe vos onglets et nomme chaque groupe automatiquement, en lisant le nom directement dans l'URL ou le titre. Tout reste local, sans cloud, sans IA, sans tracking.
+template: splash
+head:
+  - tag: title
+    content: SmartTab Organizer · Des onglets qui se rangent et se nomment seuls
+hero:
+  tagline: Vos onglets se rangent et se nomment tout seuls. Sans cloud, sans tracking.
+  image:
+    alt: La popup de SmartTab Organizer avec ses profils epingles et son selecteur d'espace de travail.
+    light: ../../../assets/screenshots/fr-light-journey-popup-with-pinned-and-workspace.png
+    dark: ../../../assets/screenshots/fr-dark-journey-popup-with-pinned-and-workspace.png
+  actions:
+    - text: Commencer
+      link: /fr/discover/why/
+      icon: right-arrow
+      variant: primary
+    - text: Voir sur GitHub
+      link: https://github.com/EspritVorace/smart-tab-organizer
+      icon: external
+      variant: minimal
+---
+
+import FeatureGrid from '../../../components/landing/FeatureGrid.astro';
+import Showcase from '../../../components/landing/Showcase.astro';
+import PrivacyBand from '../../../components/landing/PrivacyBand.astro';
+import ComparisonTable from '../../../components/landing/ComparisonTable.astro';
+import ValuesBand from '../../../components/landing/ValuesBand.astro';
+import ClosingCTA from '../../../components/landing/ClosingCTA.astro';
+
+<FeatureGrid />
+<Showcase />
+<PrivacyBand />
+<ComparisonTable />
+<ValuesBand />
+<ClosingCTA />

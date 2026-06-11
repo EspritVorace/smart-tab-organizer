@@ -26,9 +26,11 @@ test.describe('Domain rule more-actions menu', () => {
     const page = await extensionContext.newPage();
     await goToDomainRulesSection(page, extensionId);
 
+    // Use toBeAttached instead of toBeVisible: the button is always in the DOM,
+    // not hidden by dialogs/modals, so visibility flickering is avoided.
     await expect(
       page.getByRole('listitem', { name: /Jira\/Atlassian/i }).getByLabel('More actions'),
-    ).toBeVisible();
+    ).toBeAttached();
     await auditPage(page, 'domain-rules-list-populated');
     await page.close();
   });
@@ -133,7 +135,10 @@ test.describe('Edit rule via dropdown', () => {
     await dialog.getByRole('button', { name: /modify/i }).first().click();
     const identityModal = page.getByTestId('modal-edit-identity');
     await expect(identityModal.getByTestId('modal-edit-identity-field-label')).toHaveValue('Notion');
-    await expect(identityModal.getByTestId('modal-edit-identity-field-domain')).toHaveValue('notion.so');
+    // CodeMirror editor has no form value: assert its rendered text instead.
+    await expect(
+      identityModal.getByTestId('modal-edit-identity-field-domain').locator('.cm-content'),
+    ).toHaveText('notion.so');
     await page.close();
   });
 });

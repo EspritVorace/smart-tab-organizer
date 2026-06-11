@@ -7,12 +7,19 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 // Alias wxt/browser to mock-browser (fakeBrowser) for the tests, without going
 // through WxtVitest() which requires network access (plugin download).
+// `@wxt-dev/browser` must resolve to the SAME singleton: app code imports
+// `wxt/browser`, but `@wxt-dev/i18n` (used by src/utils/i18n.ts) reads
+// `@wxt-dev/browser` directly. Both point at the same fakeBrowser so the i18n
+// mock attached in setup-storybook.ts is the one createI18n().t() calls.
 const mockBrowserPath = path.resolve(__dirname, 'node_modules/wxt/dist/virtual/mock-browser.mjs');
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: [{ find: 'wxt/browser', replacement: mockBrowserPath }],
+    alias: [
+      { find: 'wxt/browser', replacement: mockBrowserPath },
+      { find: '@wxt-dev/browser', replacement: mockBrowserPath },
+    ],
     tsconfigPaths: true,
   },
   test: {

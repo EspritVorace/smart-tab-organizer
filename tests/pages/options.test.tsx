@@ -84,7 +84,9 @@ describe('OptionsApp rendu', () => {
   it('affiche le spinner quand settings est null', () => {
     mockedUseSettings.mockReturnValue({ settings: null, updateSettings: vi.fn() });
     render(<OptionsApp />);
-    expect(screen.getByText('loadingText')).toBeInTheDocument();
+    // getMessage resolves through @wxt-dev/i18n -> fakeBrowser (real EN catalog
+    // from setup-storybook), so the loading label is the translated string.
+    expect(screen.getByText('Loading...')).toBeInTheDocument();
     expect(screen.queryByTestId('options')).not.toBeInTheDocument();
   });
 

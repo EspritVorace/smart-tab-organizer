@@ -82,6 +82,7 @@ interface HarnessProps {
   categories: RuleCategory[];
   initialSearch?: string;
   existingRuleIds?: ReadonlySet<string>;
+  matchedTabsByPackId?: ReadonlyMap<string, number>;
 }
 
 function PackGalleryHarness({
@@ -89,6 +90,7 @@ function PackGalleryHarness({
   categories,
   initialSearch,
   existingRuleIds,
+  matchedTabsByPackId,
 }: HarnessProps) {
   const [selections, setSelections] = useState<Record<string, PackSelectionState>>({});
   const [, force] = useState(0);
@@ -115,6 +117,7 @@ function PackGalleryHarness({
       selections={selections}
       onSelectionChange={(id, next) => setSelections((prev) => ({ ...prev, [id]: next }))}
       existingRuleIds={existingRuleIds}
+      matchedTabsByPackId={matchedTabsByPackId}
     />
   );
 }
@@ -157,6 +160,15 @@ export const PackGalleryConfigurableExpanded: Story = {
   args: {
     packs: [packs[0]],
     categories: [categories[0]],
+  },
+};
+
+export const PackGalleryWithMatchedTabs: Story = {
+  args: {
+    packs,
+    categories,
+    // pk-github matches 8 open tabs: it rises to the top and shows the indicator.
+    matchedTabsByPackId: new Map([['pk-github', 8]]),
   },
 };
 

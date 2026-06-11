@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { composeStories } from '@storybook/react';
 import * as stories from '../../src/components/Core/DomainRule/RuleWizardModal.stories';
 
@@ -97,5 +97,19 @@ describe('RuleWizardModal — step navigation', () => {
 
     // isOpen is controlled externally so dialog stays in DOM after mock onClose
     expect(screen.getByTestId('wizard-rule')).toBeInTheDocument();
+  });
+});
+
+describe('RuleWizardModal — step 2 config mode state', () => {
+  it('keeps an editable manual config after transiting through ask (no empty manual)', async () => {
+    await RuleWizardModalStep2.run();
+    expect(screen.getByTestId('wizard-rule-step-2')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('config-mode-ask'));
+    fireEvent.click(screen.getByTestId('config-mode-manual'));
+
+    // Manual mode must render its source selector + title regex editor,
+    // never the empty "label" view that caused "on perd tout".
+    expect(screen.getByTestId('title-regex-field')).toBeInTheDocument();
   });
 });

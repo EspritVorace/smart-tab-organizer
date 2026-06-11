@@ -1,104 +1,131 @@
 ---
-title: Espaces de travail
-description: Cloisonner règles, sessions et statistiques par contexte. Créer, basculer, supprimer un workspace. Profils popup, catégories partagées entre workspaces.
+title: Workspaces
+description: Scope rules, sessions and statistics per context. Create, switch, delete a workspace. Popup profiles, categories shared across workspaces.
 ---
 
 import { Aside, CardGrid, LinkCard, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+import ThemeImage from '../../../components/ThemeImage.astro';
+import workspacesPageLight from '../../../assets/screenshots/en-light-workspaces-page.png';
+import workspacesPageDark from '../../../assets/screenshots/en-dark-workspaces-page.png';
 
-<Aside type="tip" title="En bref">
-- Un **workspace** est un conteneur isolé avec ses propres règles, sessions et statistiques.
-- Le workspace **Par défaut** existe toujours et ne peut pas être supprimé.
-- Les **catégories** (emoji + libellé) sont **partagées** entre tous les workspaces, contrairement aux règles qui s'en servent.
-- Une couleur d'accent par workspace permet de reconnaître d'un coup d'oeil le contexte actif.
+<Aside type="tip" title="At a glance">
+- A **workspace** is an isolated container with its own rules, sessions, and statistics.
+- The **Default** workspace always exists and cannot be deleted.
+- **Categories** (emoji + label) are **shared** across every workspace, unlike the rules that use them.
+- A per-workspace accent color lets you spot the active context at a glance.
 </Aside>
 
-Un espace de travail (ou workspace) permet de séparer deux contextes d'usage sans que leurs configurations se mélangent : travail et perso, projet A et projet B, environnement client et environnement R&D. Chaque contexte garde ses règles, ses sessions et ses compteurs.
+A workspace lets you separate two usage contexts without letting their configurations mix: work and personal, project A and project B, client environment and R&D environment. Each context keeps its rules, its sessions, and its counters.
 
-## Ce que cloisonne un workspace
+<ThemeImage
+  lightSrc={workspacesPageLight}
+  darkSrc={workspacesPageDark}
+  alt="Workspaces page: the active workspace and an inactive one exposing its Switch button and its overflow menu."
+/>
 
-| Donnée | Cloisonnée ? |
+## What a workspace scopes
+
+| Data | Scoped? |
 |---|---|
-| Règles de domaine | Oui |
-| Sessions (épinglées, actives, archivées) | Oui |
-| Statistiques | Oui |
-| **Catégories** | Non, partagées |
-| Paramètres globaux (notifications, langue, thème, action de restauration par défaut) | Non, partagés |
-| Presets regex et packs intégrés | Non, partagés |
+| Domain rules | Yes |
+| Sessions (pinned, active, archived) | Yes |
+| Statistics | Yes |
+| **Categories** | No, shared |
+| Global settings (notifications, language, theme, default restore action) | No, shared |
+| Regex presets and built-in packs | No, shared |
 
-Les **catégories** sont fournies par l'extension (14 catégories intégrées, voir [Catégories et packs](/reference/categories-et-packs)) et identiques dans tous les workspaces. Une règle exportée d'un workspace à un autre garde donc son emoji et son libellé de catégorie. Sa couleur de groupe, qui est un champ propre à la règle, est aussi préservée.
+The **categories** are provided by the extension (14 built-in categories, see [Categories and packs](/reference/categories-and-packs)) and identical across all workspaces. A rule exported from one workspace to another therefore keeps its emoji and its category label. Its group color, a rule-level field, is also preserved.
 
-## Créer un workspace
+## Create a workspace
 
 <Steps>
-1. Sur la page **Espaces de travail**, cliquez sur **Nouveau workspace**.
-2. Saisissez un nom (1 à 40 caractères, unique parmi les workspaces existants).
-3. Choisissez une couleur d'accent (par défaut `jade`). 20 couleurs Radix sont proposées ; les neutres (gray, mauve, slate) et métalliques (bronze, gold) sont exclues car elles rendent mal en accent.
-4. L'aperçu en haut du formulaire montre l'avatar et la couleur tels qu'ils apparaitront.
-5. Validez. Le workspace apparait dans la liste, prêt à être activé.
+1. On the **Workspaces** page, click **New workspace**.
+2. Type a name (1 to 40 characters, unique among existing workspaces).
+3. Pick an accent color (default `jade`). 20 Radix colors are offered; neutrals (gray, mauve, slate) and metallics (bronze, gold) are excluded because they read poorly as an accent.
+4. The preview at the top of the form shows the avatar and color as they will appear.
+5. Confirm. The workspace shows up in the list, ready to be activated.
 </Steps>
 
-Créer un workspace ne le rend pas automatiquement actif. Pour basculer dessus, utilisez le bouton **Basculer** de sa carte.
+Creating a workspace does not make it active automatically. To switch to it, use the **Switch** button on its card.
 
-## Changer de workspace actif
+## Switch the active workspace
 
 <Tabs>
-  <TabItem label="Depuis les Options">
-Le `WorkspaceSwitcherDropdown` est intégré au footer des Options. Cliquez dessus pour ouvrir la liste, puis sélectionnez le workspace cible.
+  <TabItem label="From Options">
+The `WorkspaceSwitcherDropdown` lives in the Options footer. Click it to open the list, then pick the target workspace.
   </TabItem>
-  <TabItem label="Depuis la popup">
-Le `PopupWorkspaceSwitcher` reprend la même mécanique dans la popup. Pratique pour basculer sans ouvrir la page Options : la liste de profils et les boutons de restauration suivent immédiatement le changement.
+  <TabItem label="From the popup">
+The `PopupWorkspaceSwitcher` mirrors the same mechanism in the popup. Handy to switch without opening Options: the list of profiles and the restore buttons follow the change immediately.
   </TabItem>
 </Tabs>
 
-Quand vous changez de workspace :
+### From the keyboard
 
-- la page **Règles** n'affiche plus que les règles du workspace cible ;
-- la page **Sessions** ne montre plus que les sessions de ce workspace ;
-- la **popup** et la **page d'accueil** n'affichent plus que les profils du workspace cible ;
-- les **statistiques** reflètent les compteurs du workspace cible ;
-- les **paramètres globaux** ne changent pas, ils sont partagés.
+Three key sequences cycle through workspaces without going through the switcher,
+from the Options page or the popup:
 
-Le workspace actif est mémorisé dans `browser.storage.local` : à la prochaine ouverture du navigateur, vous repartez du dernier workspace utilisé.
+| Sequence | Effect |
+|---|---|
+| `W` then `N` | Switch to the next workspace |
+| `W` then `P` | Switch to the previous workspace |
+| `W` then `L` | Go back to the last used workspace |
 
-## Renommer ou changer la couleur
+To switch from anywhere in the browser, three **global commands** also exist:
+`switch-workspace-next`, `switch-workspace-prev` and `switch-workspace-last`.
+They are bound to no key by default; you assign the shortcut of your choice from
+`chrome://extensions/shortcuts`.
 
-Cliquez sur l'icône **Modifier** (crayon) de la carte. Le même formulaire que la création s'ouvre, pré-rempli. Les contraintes restent identiques (1 à 40 caractères, unicité).
+See [Keyboard shortcuts](/reference/keyboard-shortcuts) for the full list.
 
-## Supprimer un workspace
+When you switch workspace:
+
+- the **Rules** page only shows the rules of the target workspace;
+- the **Sessions** page only shows the sessions of that workspace;
+- the **popup** and the **home page** only show the profiles of the target workspace;
+- **statistics** reflect the counters of the target workspace;
+- **global settings** do not change, they are shared.
+
+The active workspace is persisted in `browser.storage.local`: the next time you open the browser, you start from the last workspace used.
+
+## Rename or change the color
+
+Click the **Edit** icon (pencil) on the card. The same form as creation opens, prefilled. The same constraints apply (1 to 40 characters, uniqueness).
+
+## Delete a workspace
 
 <Steps>
-1. Sur la carte du workspace, cliquez sur l'icône **Supprimer** (corbeille).
-2. Une boite de dialogue rappelle que toutes les règles, sessions et statistiques du workspace seront perdues.
-3. Confirmez pour effectuer la suppression.
+1. On the workspace card, click the **Delete** icon (trash).
+2. A dialog reminds you that all rules, sessions, and statistics of the workspace will be lost.
+3. Confirm to perform the deletion.
 </Steps>
 
 <Aside type="caution">
-Deux situations empêchent la suppression :
+Two situations block deletion:
 
-- Le workspace **Par défaut** ne peut jamais être supprimé.
-- Le **dernier workspace restant** ne peut pas être supprimé non plus.
+- The **Default** workspace can never be deleted.
+- The **last remaining workspace** cannot be deleted either.
 
-Si vous supprimez le workspace actuellement actif, l'extension bascule automatiquement sur **Par défaut**.
+If you delete the currently active workspace, the extension switches to **Default** automatically.
 </Aside>
 
-## Profils dans la popup
+## Profiles in the popup
 
-Quand une session est épinglée dans un workspace, elle est projetée comme **profil** dans deux endroits :
+When a session is pinned in a workspace, it is projected as a **profile** in two places:
 
-- la **popup** (composant `PopupProfilesList`) ;
-- la **page d'accueil** (section `PinnedSessionsSection`).
+- the **popup** (`PopupProfilesList` component);
+- the **home page** (`PinnedSessionsSection` component).
 
-Les profils sont **cloisonnés par workspace** : basculer change immédiatement la liste affichée. Pour le détail des raccourcis de restauration, voir [Sessions, sessions épinglées](/guides/sessions#sessions-epinglees).
+Profiles are **scoped per workspace**: switching swaps the list shown immediately. For the restore shortcuts, see [Sessions, pinned sessions](/guides/sessions#sessions-epinglees).
 
-## Exporter ou importer un workspace
+## Export or import a workspace
 
-L'export d'un workspace produit une archive JSON complète (règles, sessions, paramètres) que vous pouvez réimporter dans un autre profil Chrome ou partager avec un collègue. Voir [Import / Export](/guides/import-export#workspaces).
+Exporting a workspace produces a complete JSON archive (rules, sessions, settings) that you can reimport into another Chrome profile or share with a teammate. See [Import / Export](/guides/import-export#workspaces).
 
-## Aller plus loin
+## Next steps
 
 <CardGrid>
-  <LinkCard title="Sessions" href="/guides/sessions" description="L'autre brique cloisonnée par workspace." />
-  <LinkCard title="Règles de domaine" href="/guides/regles-de-domaine" description="L'autre brique cloisonnée par workspace." />
-  <LinkCard title="Import / Export" href="/guides/import-export" description="Sauvegarder un workspace complet en JSON." />
-  <LinkCard title="Catégories et packs" href="/reference/categories-et-packs" description="Les catégories partagées et les packs réutilisables." />
+  <LinkCard title="Sessions" href="/guides/sessions" description="The other piece scoped per workspace." />
+  <LinkCard title="Domain Rules" href="/guides/domain-rules" description="The other piece scoped per workspace." />
+  <LinkCard title="Import / Export" href="/guides/import-export" description="Back up a complete workspace as JSON." />
+  <LinkCard title="Categories and packs" href="/reference/categories-and-packs" description="The shared categories and the reusable packs." />
 </CardGrid>

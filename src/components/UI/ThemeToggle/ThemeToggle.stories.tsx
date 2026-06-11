@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { IconButton, Tooltip, Theme } from '@radix-ui/themes';
 import { Sun, Moon, Monitor, LucideProps } from 'lucide-react';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -36,12 +36,12 @@ function MockThemeToggle({ initialTheme = 'light' }: MockThemeToggleProps) {
   const CurrentIcon = currentTheme.icon;
 
   return (
-    <Tooltip content={getMessage(currentTheme.labelKey)}>
+    <Tooltip content={getMessage(currentTheme.labelKey as MessageKey)}>
       <IconButton
         variant="ghost"
         size="2"
         onClick={handleThemeToggle}
-        aria-label={getMessage(currentTheme.labelKey)}
+        aria-label={getMessage(currentTheme.labelKey as MessageKey)}
       >
         <CurrentIcon size={16} aria-hidden="true" />
       </IconButton>

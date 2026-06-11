@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { logger } from '@/utils/logger';
 
-const VALID_RULES_ACTIONS = ['create', 'import'] as const;
+const VALID_RULES_ACTIONS = ['create', 'import', 'import-pack'] as const;
 export type RulesPendingAction = typeof VALID_RULES_ACTIONS[number];
 
 export type SessionsSubTab = 'active' | 'archived';
+
+export type StatsSubTab = 'summary' | 'rules' | 'sessions' | 'storage';
 
 interface DeepLinkState {
   currentTab: string;
@@ -14,6 +16,7 @@ interface DeepLinkState {
   restoreSessionId: string | null;
   refreshSessionId: string | null;
   sessionsTab: SessionsSubTab;
+  statsTab: StatsSubTab;
 }
 
 const VALID_SECTIONS = ['home', 'rules', 'importexport', 'sessions', 'stats', 'settings', 'workspaces'] as const;
@@ -49,6 +52,7 @@ export function useDeepLinking(): DeepLinkState & {
   setRestoreSessionId: (id: string | null) => void;
   setRefreshSessionId: (id: string | null) => void;
   setSessionsTab: (tab: SessionsSubTab) => void;
+  setStatsTab: (tab: StatsSubTab) => void;
 } {
   const [currentTab, setCurrentTab] = useState<string>('home');
   const [openSnapshotWizard, setOpenSnapshotWizard] = useState(false);
@@ -57,6 +61,7 @@ export function useDeepLinking(): DeepLinkState & {
   const [restoreSessionId, setRestoreSessionId] = useState<string | null>(null);
   const [refreshSessionId, setRefreshSessionId] = useState<string | null>(null);
   const [sessionsTab, setSessionsTab] = useState<SessionsSubTab>('active');
+  const [statsTab, setStatsTab] = useState<StatsSubTab>('summary');
 
   useEffect(() => {
     function applySessionsAction(sub: string | null, params: URLSearchParams) {
@@ -81,6 +86,15 @@ export function useDeepLinking(): DeepLinkState & {
       }
     }
 
+    function applyStatsAction(sub: string | null) {
+      // Sub-route drives the active statistics tab. Unknown or absent sub-route
+      // falls back to 'summary' so navigating `#stats/storage` -> `#stats`
+      // resets the view to the overview as users expect.
+      const tab: StatsSubTab =
+        sub === 'rules' || sub === 'sessions' || sub === 'storage' ? sub : 'summary';
+      setStatsTab(tab);
+    }
+
     function applyRulesAction(params: URLSearchParams) {
       const rawAction = params.get('action');
       if (rawAction && (VALID_RULES_ACTIONS as readonly string[]).includes(rawAction)) {
@@ -96,6 +110,7 @@ export function useDeepLinking(): DeepLinkState & {
       setCurrentTab(parsed.section);
       if (parsed.section === 'sessions') applySessionsAction(parsed.sub, parsed.params);
       else if (parsed.section === 'rules') applyRulesAction(parsed.params);
+      else if (parsed.section === 'stats') applyStatsAction(parsed.sub);
     }
 
     handleHash();
@@ -118,5 +133,7 @@ export function useDeepLinking(): DeepLinkState & {
     setRefreshSessionId,
     sessionsTab,
     setSessionsTab,
+    statsTab,
+    setStatsTab,
   };
 }

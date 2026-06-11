@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { Box, Button, Flex, Kbd, Text } from '@radix-ui/themes';
 import { ChevronDown, ExternalLink } from 'lucide-react';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 import { getShortcutsCustomizeInfo, openShortcutsCustomizePage } from '@/utils/browserUrls';
 import { useBrowserCommands, type BrowserCommandsMap } from '@/hooks/useBrowserCommands';
 import {
@@ -127,13 +127,6 @@ export function ShortcutsContent({ surface, pageContext }: ShortcutsContentProps
     );
   return (
     <Flex direction="column" gap="4" data-testid="shortcuts-content" onKeyDown={handleTriggerKeyDown}>
-      {hasUnbound && (
-        <Box className={styles.unboundBanner} data-testid="shortcuts-unbound-banner">
-          <Text size="1" as="p">
-            {getMessage('shortcutsUnboundWarning')}
-          </Text>
-        </Box>
-      )}
       {tree.map((node) => (
         <CollapsibleGroup
           key={node.descriptor.id}
@@ -203,7 +196,7 @@ function CollapsibleGroup({
             className={styles.groupTitle}
             as="div"
           >
-            {getMessage(descriptor.titleKey)}
+            {getMessage(descriptor.titleKey as MessageKey)}
           </Text>
           <ChevronDown size={14} className={styles.chevron} />
         </button>
@@ -248,7 +241,7 @@ function ShortcutRow({
   return (
     <div className={styles.row}>
       <Text size="2" className={styles.rowDescription}>
-        {getMessage(entry.descriptionKey)}
+        {getMessage(entry.descriptionKey as MessageKey)}
       </Text>
       <div className={styles.rowKeys}>
         {unbound ? (

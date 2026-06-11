@@ -4,7 +4,7 @@ import {
   importSessionsDataSchema,
   importWorkspaceDataSchema,
 } from '@/schemas/importExport';
-import { getMessage } from '@/utils/i18n';
+import { getMessage, type MessageKey } from '@/utils/i18n';
 
 /**
  * JSON Schema objects fed to the import editor for autocompletion, linting and
@@ -29,7 +29,7 @@ interface MutableSchema {
 }
 
 function describe(node: MutableSchema | undefined, messageKey: string): void {
-  if (node) node.description = getMessage(messageKey);
+  if (node) node.description = getMessage(messageKey as MessageKey);
 }
 
 /** Documents every property of a single domain-rule object node. */
@@ -53,6 +53,81 @@ function describeDomainRuleItems(items: MutableSchema | undefined): void {
   describe(p.urlQueryParamName, 'jsonDocRuleUrlQueryParamName');
   describe(p.enabled, 'jsonDocRuleEnabled');
   describe(p.badge, 'jsonDocRuleBadge');
+  describe(p.createdAt, 'jsonDocRuleCreatedAt');
+  describe(p.updatedAt, 'jsonDocRuleUpdatedAt');
+}
+
+/** Documents every property of a single saved-tab object node. */
+function describeSavedTabItems(items: MutableSchema | undefined): void {
+  const p = items?.properties;
+  if (!p) return;
+  describe(p.id, 'jsonDocTabId');
+  describe(p.title, 'jsonDocTabTitle');
+  describe(p.url, 'jsonDocTabUrl');
+  describe(p.favIconUrl, 'jsonDocTabFavIconUrl');
+}
+
+/** Documents a saved-tab-group object node and its nested tabs. */
+function describeSavedTabGroupItems(items: MutableSchema | undefined): void {
+  const p = items?.properties;
+  if (!p) return;
+  describe(p.id, 'jsonDocGroupId');
+  describe(p.title, 'jsonDocGroupTitle');
+  describe(p.color, 'jsonDocGroupColor');
+  describe(p.tabs, 'jsonDocGroupTabs');
+  describe(p.collapsed, 'jsonDocGroupCollapsed');
+  describeSavedTabItems(p.tabs?.items);
+}
+
+/** Documents a session object node and its nested groups / ungrouped tabs. */
+function describeSessionItems(items: MutableSchema | undefined): void {
+  const p = items?.properties;
+  if (!p) return;
+  describe(p.id, 'jsonDocSessionId');
+  describe(p.name, 'jsonDocSessionName');
+  describe(p.createdAt, 'jsonDocSessionCreatedAt');
+  describe(p.updatedAt, 'jsonDocSessionUpdatedAt');
+  describe(p.groups, 'jsonDocSessionGroups');
+  describe(p.ungroupedTabs, 'jsonDocSessionUngroupedTabs');
+  describe(p.isPinned, 'jsonDocSessionIsPinned');
+  describe(p.isArchived, 'jsonDocSessionIsArchived');
+  describe(p.categoryId, 'jsonDocSessionCategoryId');
+  describe(p.note, 'jsonDocSessionNote');
+  describe(p.position, 'jsonDocSessionPosition');
+  describeSavedTabGroupItems(p.groups?.items);
+  describeSavedTabItems(p.ungroupedTabs?.items);
+}
+
+/** Documents the workspace metadata object node. */
+function describeWorkspaceMeta(node: MutableSchema | undefined): void {
+  const p = node?.properties;
+  if (!p) return;
+  describe(p.name, 'jsonDocWorkspaceName');
+  describe(p.accentColor, 'jsonDocWorkspaceAccentColor');
+}
+
+/** Documents the workspace settings object node. */
+function describeWorkspaceSettings(node: MutableSchema | undefined): void {
+  const p = node?.properties;
+  if (!p) return;
+  describe(p.globalGroupingEnabled, 'jsonDocSettingsGlobalGroupingEnabled');
+  describe(p.globalDeduplicationEnabled, 'jsonDocSettingsGlobalDeduplicationEnabled');
+  describe(p.deduplicateUnmatchedDomains, 'jsonDocSettingsDeduplicateUnmatchedDomains');
+  describe(p.deduplicationKeepStrategy, 'jsonDocSettingsDeduplicationKeepStrategy');
+  describe(p.defaultRestoreAction, 'jsonDocSettingsDefaultRestoreAction');
+  describe(p.notifyOnGrouping, 'jsonDocSettingsNotifyOnGrouping');
+  describe(p.notifyOnDeduplication, 'jsonDocSettingsNotifyOnDeduplication');
+  describe(p.notifyOnOrganize, 'jsonDocSettingsNotifyOnOrganize');
+}
+
+/** Documents the workspace statistics object node. */
+function describeWorkspaceStatistics(node: MutableSchema | undefined): void {
+  const p = node?.properties;
+  if (!p) return;
+  describe(p.tabGroupsCreatedCount, 'jsonDocStatisticsTabGroupsCreatedCount');
+  describe(p.tabsDeduplicatedCount, 'jsonDocStatisticsTabsDeduplicatedCount');
+  describe(p.dailyBuckets, 'jsonDocStatisticsDailyBuckets');
+  describe(p.firstUsedAt, 'jsonDocStatisticsFirstUsedAt');
 }
 
 function buildRulesSchema(): ImportJsonSchema {
@@ -69,6 +144,7 @@ function buildSessionsSchema(): ImportJsonSchema {
   const p = (schema as MutableSchema).properties;
   describe(p?.note, 'jsonDocNote');
   describe(p?.sessions, 'jsonDocSessions');
+  describeSessionItems(p?.sessions?.items);
   return schema;
 }
 
@@ -82,6 +158,10 @@ function buildWorkspaceSchema(): ImportJsonSchema {
   describe(p?.sessions, 'jsonDocSessions');
   describe(p?.statistics, 'jsonDocStatistics');
   describeDomainRuleItems(p?.domainRules?.items);
+  describeSessionItems(p?.sessions?.items);
+  describeWorkspaceMeta(p?.workspace);
+  describeWorkspaceSettings(p?.settings);
+  describeWorkspaceStatistics(p?.statistics);
   return schema;
 }
 

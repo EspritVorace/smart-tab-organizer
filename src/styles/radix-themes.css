@@ -28,6 +28,21 @@
   border-radius: var(--radius-3);
 }
 
+/* Focus ring for the group-header toggle (DomainRulesPage). The button carries
+ * an inline `all: unset` (which also resets `outline`); an inline declaration
+ * beats a stylesheet selector, so the ring needs `!important` to win. Uses
+ * `:focus` (not `:focus-visible`) so it shows on programmatic focus too: list
+ * navigation and the post-apply autofocus move focus via `.focus()`, which
+ * Chrome does not always treat as focus-visible. The offset is negative (inset)
+ * like the card rules above: a positive offset draws the ring outside the
+ * full-width button and triggers a horizontal scrollbar. Only headers are
+ * buttons, so this never doubles up with the card rule above. */
+button[data-rules-nav-item]:focus {
+  outline: 2px solid var(--accent-9) !important;
+  outline-offset: -2px;
+  border-radius: var(--radius-2);
+}
+
 /* Focus ring for session cards: visible on click or keyboard focus */
 [data-session-card]:focus {
   outline: 2px solid var(--accent-9);
@@ -40,6 +55,17 @@
   outline: 2px solid var(--accent-9);
   outline-offset: -2px;
   border-radius: var(--radius-3);
+}
+
+/* The statistics content region is focusable (tabindex=0) only to enable
+ * keyboard scrolling (arrow keys / PageUp-Down / Space). It is auto-focused on
+ * arrival (see StatisticsPage), so we suppress the focus outline to avoid a
+ * frame drawn around the whole page. Targeting both :focus and :focus-visible
+ * guarantees no outline ever shows, even if the browser flips to focus-visible
+ * after an arrow keypress. */
+[data-testid="page-stats-scroll"]:focus,
+[data-testid="page-stats-scroll"]:focus-visible {
+  outline: none;
 }
 
 /* Focusable controls using aria-disabled instead of native disabled (keeps element in tab order). */

@@ -52,6 +52,15 @@ function normaliseImpact(impact: string | null | undefined): Severity | null {
 // parameters.landmark = false.
 const DISABLED_RULES_FOR_STORYBOOK = [] as const;
 
+// CodeMirror single-line fields (domain / regex) render their placeholder hint
+// as a real `<span class="cm-placeholder">` element, so axe color-contrast
+// audits it like body text. It deliberately mirrors a Radix `TextField` native
+// `::placeholder` (same `gray-a10` token), which axe never contrast-checks
+// because it is a pseudo-element. Excluding this single decorative selector
+// keeps the editor on par with its Radix siblings while leaving color-contrast
+// active everywhere else in the story.
+const AUDIT_CONTEXT = { exclude: [['.cm-placeholder']] };
+
 const config: TestRunnerConfig = {
   async preVisit(page) {
     await injectAxe(page);
@@ -111,7 +120,7 @@ const config: TestRunnerConfig = {
       },
     };
 
-    const violations = await getViolations(page, undefined, mergedOptions);
+    const violations = await getViolations(page, AUDIT_CONTEXT, mergedOptions);
 
     const shard: StoryShard = {
       id: context.id,

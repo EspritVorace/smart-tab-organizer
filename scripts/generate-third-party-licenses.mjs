@@ -6,9 +6,9 @@
  *   public/data/third-party-licenses.json   (chips data, fetched by AboutDialog)
  *   public/data/third-party-licenses.txt    (full NOTICE, bundled, linked from AboutDialog)
  *   THIRD-PARTY-LICENSES.txt                 (same NOTICE, at repo root, visible on GitHub)
- *   docs/src/content/docs/reference/licences-open-source.mdx        (FR, root)
- *   docs/src/content/docs/en/reference/licences-open-source.mdx     (EN)
- *   docs/src/content/docs/es/reference/licences-open-source.mdx     (ES)
+ *   docs/src/content/docs/reference/open-source-licenses.mdx        (EN, root)
+ *   docs/src/content/docs/fr/reference/open-source-licenses.mdx     (FR)
+ *   docs/src/content/docs/es/reference/open-source-licenses.mdx     (ES)
  *
  * The attributed set comes from scripts/bundled-dependencies.json, a manifest
  * written by the `build:done` hook in wxt.config.ts (rollup-plugin-license
@@ -53,9 +53,9 @@ const DIRECT_DEPENDENCIES = new Set([...RUNTIME_DIRECT, ...DEV_DIRECT]);
 const LOCALES = /** @type {const} */ (['fr', 'en', 'es']);
 
 const DOC_OUTPUT_PATHS = {
-  fr: 'docs/src/content/docs/reference/licences-open-source.mdx',
-  en: 'docs/src/content/docs/en/reference/licences-open-source.mdx',
-  es: 'docs/src/content/docs/es/reference/licences-open-source.mdx',
+  en: 'docs/src/content/docs/reference/open-source-licenses.mdx',
+  fr: 'docs/src/content/docs/fr/reference/open-source-licenses.mdx',
+  es: 'docs/src/content/docs/es/reference/open-source-licenses.mdx',
 };
 
 // Strings authored by us (never reproduced from a third party), so they must

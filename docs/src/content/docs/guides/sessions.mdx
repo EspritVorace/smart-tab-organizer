@@ -1,146 +1,161 @@
 ---
 title: Sessions
-description: Capturer un instantané d'onglets, restaurer une session, l'éditer, l'épingler comme profil. Sous-onglet Archive pour mettre une session de côté sans la supprimer.
+description: Capture a snapshot of tabs, restore a session, edit it, pin it as a profile. The Archive sub-tab lets you set a session aside without deleting it.
 ---
 
 import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
 import ThemeImage from '../../../components/ThemeImage.astro';
-import sessionsListLight from '../../../assets/screenshots/fr-light-journey-sessions-list-with-snapshot.png';
-import sessionsListDark from '../../../assets/screenshots/fr-dark-journey-sessions-list-with-snapshot.png';
-import sessionsCreateLight from '../../../assets/screenshots/fr-light-sessions-create-snapshot.png';
-import sessionsCreateDark from '../../../assets/screenshots/fr-dark-sessions-create-snapshot.png';
-import sessionsRestoreLight from '../../../assets/screenshots/fr-light-sessions-restore-conflict.png';
-import sessionsRestoreDark from '../../../assets/screenshots/fr-dark-sessions-restore-conflict.png';
+import sessionsListLight from '../../../assets/screenshots/en-light-journey-sessions-list-with-snapshot.png';
+import sessionsListDark from '../../../assets/screenshots/en-dark-journey-sessions-list-with-snapshot.png';
+import sessionsCreateLight from '../../../assets/screenshots/en-light-sessions-create-snapshot.png';
+import sessionsCreateDark from '../../../assets/screenshots/en-dark-sessions-create-snapshot.png';
+import sessionsRestoreLight from '../../../assets/screenshots/en-light-sessions-restore-conflict.png';
+import sessionsRestoreDark from '../../../assets/screenshots/en-dark-sessions-restore-conflict.png';
 
-Une session est un instantané d'onglets que vous pouvez rouvrir plus tard, avec ses groupes, ses noms et ses URL. Les sessions sont cloisonnées par workspace et organisées en trois compartiments : épinglées, actives, archivées.
+A session is a snapshot of tabs you can reopen later, with their groups, names, and URLs. Sessions are scoped per workspace and organized in three buckets: pinned, active, archived.
 
 <ThemeImage
   lightSrc={sessionsListLight}
   darkSrc={sessionsListDark}
-  alt="Page Sessions avec une session active fraîchement créée et ses groupes."
+  alt="Sessions page with a freshly captured active session and its groups."
 />
 
-## Les trois compartiments
+## The three buckets
 
-| Compartiment | Quand l'utiliser |
+| Bucket | When to use |
 |---|---|
-| **Épinglées** | Contextes auxquels vous revenez régulièrement (projet client, environnement de dev, veille). Projetées dans la popup et la page d'accueil comme **profils**. |
-| **Actives** | Sessions ordinaires : capture ponctuelle avant de fermer le navigateur, snapshot d'une recherche en cours. |
-| **Archivées** | Sessions mises de côté sans les supprimer. Hors de vue depuis la popup et la page d'accueil. |
+| **Pinned** | Contexts you come back to regularly (client project, dev environment, ongoing research). Projected in the popup and the home page as **profiles**. |
+| **Active** | Everyday sessions: an ad-hoc capture before closing the browser, a snapshot of an ongoing search. |
+| **Archived** | Sessions set aside without deleting them. Out of sight from the popup and the home page. |
 
-Le sous-onglet **Archivées** de la page Sessions est accessible via `#sessions/archived` (lien profond) ou via le `TabNav` en haut de la page.
+The **Archived** sub-tab of the Sessions page is reachable via `#sessions/archived` (deep link) or via the `TabNav` at the top of the page.
 
-## Capturer un instantané
+## Take a snapshot
 
 <ThemeImage
   lightSrc={sessionsCreateLight}
   darkSrc={sessionsCreateDark}
-  alt="Wizard de capture d'un instantané de session : nom, sélection des onglets, catégorie."
+  alt="Session snapshot wizard: name, tab selection, category."
 />
 
-Depuis la page d'accueil, la popup, ou la page Sessions, cliquez sur **Capturer un instantané** (raccourci `S` sur la page d'accueil).
+From the home page, the popup, or the Sessions page, click **Take Snapshot** (shortcut `S` on the home page).
 
 <Steps>
-1. **Nom** : un nom de session pré-rempli avec la date et l'heure. Modifiable.
-2. **Sélection des onglets** : par défaut tous les onglets de la fenêtre active. Décochez les onglets à exclure.
-3. **Catégorie** (optionnel) : ajoute un emoji à la session. Utile pour distinguer plusieurs profils épinglés visuellement.
-4. **Note** (optionnel) : texte libre embarqué avec la session, lisible à la restauration ou à l'export.
-5. Validez. La session apparait immédiatement dans la liste des sessions **actives**.
+1. **Name**: a session name prefilled with the date and time. Editable.
+2. **Tab selection**: by default every tab of the active window. Uncheck the tabs to leave out.
+3. **Category** (optional): adds an emoji to the session. Handy to tell several pinned profiles apart visually.
+4. **Note** (optional): free text stored with the session, visible on restore or on export.
+5. Confirm. The session appears immediately in the **Active** sessions list.
 </Steps>
 
-## Restaurer une session
+## Restore a session
 
-Quatre cibles de restauration sont disponibles. Sur le focus d'une session ou d'un profil :
+Four restore targets are available. With a session or profile focused:
 
-| Cible | Raccourci | Effet |
+| Target | Shortcut | Effect |
 |---|---|---|
-| **Fenêtre actuelle** | `Shift + R` | Ajoute les onglets de la session à la fenêtre actuellement au premier plan. |
-| **Nouvelle fenêtre** | `Alt + Shift + R` | Ouvre une nouvelle fenêtre dédiée. |
-| **Remplacer la fenêtre actuelle** | `Alt + R` | Ferme les onglets de la fenêtre actuelle, restaure ceux de la session à leur place. |
-| **Personnalisée** | `R` | Ouvre le wizard de restauration et propose le détail des conflits éventuels. |
+| **Restore in current window** | `Shift + R` | Adds the session tabs to the currently foregrounded window. |
+| **Restore in new window** | `Alt + Shift + R` | Opens a new dedicated window. |
+| **Replace tabs in current window** | `Alt + R` | Closes the current window's tabs and restores those of the session in their place. |
+| **Customized restoration** | `R` | Opens the restore wizard and surfaces any conflicts. |
 
-Le clic ou la touche `Enter` utilise l'**action par défaut** configurée dans [Paramètres](/guides/parametres#action-de-restauration-par-defaut).
+A click or pressing `Enter` uses the **default action** configured in [Settings](/guides/settings#action-de-restauration-par-defaut).
 
-### Wizard de conflits
+### Conflict wizard
 
-Quand des onglets de la session sont déjà ouverts dans la fenêtre cible, le wizard propose une résolution onglet par onglet :
+When tabs from the session are already open in the target window, the wizard offers a per-tab resolution:
 
 <ThemeImage
   lightSrc={sessionsRestoreLight}
   darkSrc={sessionsRestoreDark}
-  alt="Wizard de restauration avec résolution de conflit, choix entre Restaurer, Ignorer, Remplacer."
+  alt="Restore wizard with conflict resolution: choose between Restore, Skip, Replace."
 />
 
-| Action | Effet |
+| Action | Effect |
 |---|---|
-| **Restaurer** | Ajoute le nouvel onglet à côté de l'existant. Vous gardez les deux. |
-| **Ignorer** | Saute cet onglet. La version actuellement ouverte est conservée intacte. |
-| **Remplacer** | Ferme l'onglet existant et restaure celui de la session à sa place. |
+| **Restore** | Adds the new tab next to the existing one. You keep both. |
+| **Skip** | Skips this tab. The currently open version is left untouched. |
+| **Replace** | Closes the existing tab and restores the session's one in its place. |
 
 <Aside type="note">
-Les onglets restaurés via le wizard sont protégés contre une déduplication immédiate pendant 10 secondes (même mécanique que [Annuler une déduplication](/guides/dedupliquer#notification-et-annulation)).
+Tabs restored through the wizard are protected against immediate deduplication for 10 seconds (same mechanism as [Undo on deduplication](/guides/deduplicate#notification-et-annulation)).
 </Aside>
 
-## Éditer une session
+## Edit a session
 
-Cliquez sur l'icône **Modifier** d'une carte de session, ou utilisez `E` sur le focus. L'éditeur de session permet de :
+Click the **Edit** icon on a session card, or use `E` on the focused card. The session editor lets you:
 
-- **Renommer** la session.
-- **Supprimer** des onglets individuels.
-- **Réorganiser** les onglets entre groupes ou les regrouper différemment, en glisser-déposer.
-- **Renommer** un groupe interne à la session.
-- **Changer la catégorie** ou la **note**.
+- **Rename** the session.
+- **Delete** individual tabs.
+- **Reorder** tabs between groups or regroup them via drag and drop.
+- **Rename** a group inside the session.
+- **Change the category** or the **note**.
 
-Les modifications sont appliquées immédiatement. L'état déplié ou replié de chaque groupe est persistant entre les ouvertures.
+Changes are applied immediately. The expanded or collapsed state of each group is remembered across openings.
 
-## Rafraîchir une session
+## Refresh a session
 
-Le bouton **Rafraîchir** (raccourci `U` sur le focus d'une session) remplace le contenu de la session par l'état actuel de la fenêtre courante, tout en gardant le nom et la catégorie. Utile pour mettre à jour un profil épinglé après une session de travail sans recréer la session.
+The **Refresh** button (shortcut `U` on the focused session) replaces the session content with the current state of the current window, while keeping the name and category. Useful to update a pinned profile after a work session without recreating it.
 
-## Sessions épinglées
+## Pinned sessions
 
-L'**épinglage** promeut une session au rang de **profil** : elle s'affiche dans la popup et dans la page d'accueil du workspace actif.
+**Pinning** promotes a session to a **profile**: it shows up in the popup and on the home page of the active workspace.
 
 <Steps>
-1. Sur la carte de session, cliquez sur l'icône **Épingler** (ou pressez `P` sur le focus).
-2. La session passe dans la section **Épinglées** en haut de la page, et apparait dans la popup et la page d'accueil.
+1. On the session card, click the **Pin** icon (or press `P` when focused).
+2. The session moves to the **Pinned** section at the top of the page, and appears in the popup and on the home page.
 </Steps>
 
-L'épinglage ne modifie ni le nom ni le contenu, seulement le statut et l'emplacement. Cliquez à nouveau sur l'icône pour désépingler.
+Pinning changes neither the name nor the content, only the status and the placement. Click the icon again to unpin.
 
 <Aside type="note">
-Les profils sont **cloisonnés par workspace**. Changer de workspace remplace immédiatement la liste affichée dans la popup et la page d'accueil. Une même session ne peut être épinglée que dans le workspace où elle a été créée.
+Profiles are **scoped per workspace**. Switching workspace immediately swaps the list shown in the popup and on the home page. A given session can only be pinned in the workspace where it was created.
 </Aside>
 
-### Catégorie pour distinguer les profils
+### Category to tell profiles apart
 
-Associer une catégorie à une session épinglée fait apparaitre son emoji à côté du nom dans la popup. Pratique quand vous avez plusieurs profils et que vous voulez les distinguer d'un coup d'oeil.
+Assigning a category to a pinned session surfaces its emoji next to the name in the popup. Handy when you have several profiles and want to tell them apart at a glance.
 
 ## Archive
 
-Le sous-onglet **Archivées** héberge les sessions que vous voulez garder sans les voir au quotidien. Une session archivée n'apparait ni dans la popup ni dans la page d'accueil, mais reste accessible et restaurable depuis la page Sessions.
+The **Archived** sub-tab holds sessions you want to keep without seeing every day. An archived session does not appear in the popup or on the home page, but stays accessible and restorable from the Sessions page.
 
-### Archiver une session
+### Archive a session
 
-Sur la carte d'une session active, cliquez sur le menu contextuel puis **Archiver**. La session quitte immédiatement la liste **Actives** et apparait dans **Archivées**. Une session **épinglée** doit d'abord être désépinglée pour pouvoir être archivée.
+On the card of an active session, open the context menu and click **Archive**. The session leaves the **Active** list immediately and shows up in **Archived**. A **pinned** session must be unpinned first to be archivable.
 
-### Dépiler depuis l'archive
+### Unarchive
 
-Dans le sous-onglet **Archivées**, cliquez sur **Désarchiver**. La session retourne dans **Actives**. La date de mise à jour de la session est préservée (l'archivage n'est pas considéré comme une modification de contenu).
+In the **Archived** sub-tab, click **Unarchive**. The session moves back to **Active**. The session's last update date is preserved (archiving is not treated as a content change).
 
-### Lien profond
+### Deep link
 
-L'URL `chrome-extension://[id]/options.html#sessions/archived` ouvre directement le sous-onglet **Archivées**. Vous pouvez l'utiliser comme marque-page pour aller chercher une vieille session.
+The URL `chrome-extension://[id]/options.html#sessions/archived` opens the **Archived** sub-tab directly. You can bookmark it to dig up an old session.
 
-## Recherche
+## Filter and sort
 
-La barre de recherche au-dessus de la liste filtre par nom de session. Une recherche **profonde** est disponible : elle inspecte aussi les titres des onglets capturés, ce qui aide à retrouver une session par l'un de ses contenus.
+The headers of the **Active** and **Archived** sections (not the **Pinned**
+section) carry a view button that opens a sort and filter menu. Like for rules,
+it only affects how the section is displayed.
 
-## Aller plus loin
+| Setting | Options |
+|---|---|
+| **Sort** | Manual order, by date, by last restore, by category. Ascending or descending. |
+| **Filter** | By category. |
+
+Sorting **by last restore** relies on the timestamp recorded each time the
+session is restored. The view is remembered independently for the Active and
+the Archived section, and separately for each workspace.
+
+## Search
+
+The search bar above the list filters by session name. A **deep** search is available too: it also looks at the captured tab titles, which helps you find a session by one of its contents.
+
+## Next steps
 
 <CardGrid>
-  <LinkCard title="Espaces de travail" href="/guides/workspaces" description="Cloisonner les sessions par contexte." />
-  <LinkCard title="Popup" href="/guides/popup" description="L'accès rapide aux profils épinglés du workspace actif." />
-  <LinkCard title="Paramètres" href="/guides/parametres" description="Action de restauration par défaut, notifications." />
-  <LinkCard title="Import / Export" href="/guides/import-export" description="Sauvegarder vos sessions au format JSON." />
+  <LinkCard title="Workspaces" href="/guides/workspaces" description="Isolate sessions by context." />
+  <LinkCard title="Popup" href="/guides/popup" description="Quick access to the pinned profiles of the active workspace." />
+  <LinkCard title="Settings" href="/guides/settings" description="Default restore action, notifications." />
+  <LinkCard title="Import / Export" href="/guides/import-export" description="Back up your sessions as JSON." />
 </CardGrid>
