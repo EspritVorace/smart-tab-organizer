@@ -11,6 +11,7 @@ export {
   type ImportConflictMode,
 } from './ImportWizardPage.js';
 export { ExportWizardPageBase } from './ExportWizardPageBase.js';
+export { OrganizeRewardDialogPage } from './OrganizeRewardDialogPage.js';
 export { ExportWizardPage } from './ExportWizardPage.js';
 export { SessionsExportWizardPage } from './SessionsExportWizardPage.js';
 export {

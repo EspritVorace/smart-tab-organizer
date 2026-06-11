@@ -13,6 +13,7 @@
 import { expect, type Page } from '@playwright/test';
 import { ImportWizardPage } from '../pages/ImportWizardPage.js';
 import { ExportWizardPage } from '../pages/ExportWizardPage.js';
+import { OrganizeRewardDialogPage } from '../pages/OrganizeRewardDialogPage.js';
 
 /**
  * Open the rules import wizard from the Import/Export cards page.
@@ -68,6 +69,8 @@ export async function importRulesViaText(page: Page, json: string): Promise<void
   await wizard.pasteJson(json);
   await wizard.clickNext();
   await wizard.confirmImport();
+  // A net-new import opens the "Organize now" reward; dismiss it if shown.
+  await new OrganizeRewardDialogPage(page).dismissIfPresent();
   await wizard.expectHidden();
 }
 
@@ -90,6 +93,7 @@ export async function importRulesViaFile(
   await wizard.dialog().locator('input[type="file"]').setInputFiles(file);
   await wizard.clickNext();
   await wizard.confirmImport();
+  await new OrganizeRewardDialogPage(page).dismissIfPresent();
   await wizard.expectHidden();
 }
 

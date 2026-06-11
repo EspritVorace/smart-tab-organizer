@@ -20,7 +20,7 @@ import type { BrowserContext, Page } from '@playwright/test';
 import { test, expect } from './fixtures';
 import { auditPage } from './helpers/a11y';
 import { goToImportExportSection } from './helpers/navigation';
-import { DialogPage, ImportWizardPage } from '../../e2e-shared/pages/index.js';
+import { DialogPage, ImportWizardPage, OrganizeRewardDialogPage } from '../../e2e-shared/pages/index.js';
 import { openRulesImportWizard, openRulesExportWizard } from '../../e2e-shared/actions/index.js';
 
 // ─── Local fixtures ─────────────────────────────────────────────────────────
@@ -381,6 +381,8 @@ test.describe('Import / Export', () => {
       await wizard.pasteJson(makeRuleJson(makeRule('Import Close Rule', 'importclose.com')));
       await wizard.clickNext();
       await wizard.confirmImport();
+      // The import added a rule, so the "Organize now" reward opens; dismiss it.
+      await new OrganizeRewardDialogPage(extensionPage).dismiss();
       await wizard.expectHidden();
     });
 
@@ -394,6 +396,7 @@ test.describe('Import / Export', () => {
       await first.pasteJson(makeRuleJson(makeRule('First Import', 'firstimport.com')));
       await first.clickNext();
       await first.confirmImport();
+      await new OrganizeRewardDialogPage(extensionPage).dismiss();
       await first.expectHidden();
 
       const reopened = await openRulesImportWizard(extensionPage);

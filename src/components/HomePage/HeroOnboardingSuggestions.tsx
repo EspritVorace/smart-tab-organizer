@@ -62,7 +62,6 @@ export function HeroOnboardingSuggestions({
             asChild
             direction="column"
             gap="2"
-            role="group"
             aria-label={getMessage('homepageHeroSuggestTitle')}
           >
             <ul className={styles.list}>

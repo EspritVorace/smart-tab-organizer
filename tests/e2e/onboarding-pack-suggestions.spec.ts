@@ -19,7 +19,7 @@ import type { BrowserContext, Page } from '@playwright/test';
 import { test, expect } from './fixtures';
 import { goToOptionsPage } from './helpers/navigation';
 import { clearExtensionStorage } from '../../e2e-shared/actions/index.js';
-import { ImportWizardPage } from '../../e2e-shared/pages/index.js';
+import { ImportWizardPage, OrganizeRewardDialogPage } from '../../e2e-shared/pages/index.js';
 
 const STUB_HTML = '<!doctype html><html><head><title>GitHub</title></head><body>stub</body></html>';
 
@@ -99,13 +99,16 @@ test.describe('Onboarding pack suggestions (US-PA002/003/004)', () => {
 
     // The import wizard opens in pack mode with the suggestion pre-selected.
     const wizard = new ImportWizardPage(page);
-    await wizard.clickNext();
+    await wizard.expectVisible();
+    // Pack mode confirms via its own footer button, then auto-advances.
+    await page.getByTestId('import-wizard-pack-next').click();
+    await expect(wizard.confirmButton()).toBeVisible();
     await wizard.confirmImport();
 
     // The reward dialog is offered; organizing announces its outcome.
-    const reward = page.getByTestId('organize-reward-dialog');
-    await expect(reward).toBeVisible();
-    await page.getByTestId('organize-reward-organize').click();
-    await expect(page.getByTestId('organize-reward-result')).not.toBeEmpty();
+    const reward = new OrganizeRewardDialogPage(page);
+    await reward.expectVisible();
+    await reward.organizeNow();
+    await reward.expectResultAnnounced();
   });
 });
