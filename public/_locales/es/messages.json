@@ -1305,5 +1305,6 @@
   "explorationEntry_settings_restoreFromTile_label": { "message": "Restaurar desde una tarjeta fijada" },
   "explorationEntry_settings_restoreFromTile_desc": { "message": "Restaura una sesión desde la página de inicio." },
   "explorationCoverageRatio": { "message": "$1$ de $2$ capacidades descubiertas", "placeholders": {"1":{"content":"$1","example":"12"},"2":{"content":"$2","example":"113"}} },
-  "explorationMiniPhase": { "message": "Fase $1$", "placeholders": {"1":{"content":"$1","example":"Descubrimiento"}} }
+  "explorationMiniPhase": { "message": "Fase $1$", "placeholders": {"1":{"content":"$1","example":"Descubrimiento"}} },
+  "shortcutDescNavigateExploration": { "message": "Ir al catálogo de exploración" }
 }

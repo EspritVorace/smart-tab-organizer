@@ -1305,5 +1305,6 @@
   "explorationEntry_settings_restoreFromTile_label": { "message": "Restaurer depuis une tuile épinglée" },
   "explorationEntry_settings_restoreFromTile_desc": { "message": "Restaurer une session depuis l'accueil." },
   "explorationCoverageRatio": { "message": "$1$ sur $2$ capacités découvertes", "placeholders": {"1":{"content":"$1","example":"12"},"2":{"content":"$2","example":"113"}} },
-  "explorationMiniPhase": { "message": "Phase $1$", "placeholders": {"1":{"content":"$1","example":"Découverte"}} }
+  "explorationMiniPhase": { "message": "Phase $1$", "placeholders": {"1":{"content":"$1","example":"Découverte"}} },
+  "shortcutDescNavigateExploration": { "message": "Aller au référentiel d'exploration" }
 }
