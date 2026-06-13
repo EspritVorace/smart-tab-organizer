@@ -103,6 +103,24 @@ export async function goToStatsSection(page: Page, extensionId: string): Promise
   await page.getByTestId('page-stats-tabs').waitFor({ state: 'visible', timeout: 10_000 });
 }
 
+/**
+ * Navigate to the Exploration catalogue section (Tracking) via hash routing and
+ * wait until the page is rendered (settings loaded + ExplorationPage mounted).
+ */
+export async function goToExplorationSection(page: Page, extensionId: string): Promise<void> {
+  await page.goto(`chrome-extension://${extensionId}/options.html#exploration`);
+  await page.waitForLoadState('domcontentloaded');
+  await page.waitForFunction(
+    () => {
+      const body = document.body.textContent ?? '';
+      return !body.includes('Chargement') && body.length > 50;
+    },
+    null,
+    { timeout: 10_000 },
+  );
+  await page.getByTestId('page-exploration').waitFor({ state: 'visible', timeout: 10_000 });
+}
+
 /** Navigate to the extension popup page. */
 export async function goToPopup(page: Page, extensionId: string): Promise<void> {
   await page.goto(`chrome-extension://${extensionId}/popup.html`);
