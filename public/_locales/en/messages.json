@@ -1257,6 +1257,8 @@
   "explorationEntry_stats_reset_desc": { "message": "Reset the counters to zero." },
   "explorationEntry_stats_exploration_label": { "message": "View the catalogue" },
   "explorationEntry_stats_exploration_desc": { "message": "Open the exploration catalogue." },
+  "explorationEntry_nav_pinExtension_label": { "message": "Pin the extension" },
+  "explorationEntry_nav_pinExtension_desc": { "message": "Pin the toolbar icon for one-click access." },
   "explorationEntry_nav_sidebarSections_label": { "message": "Sidebar sections" },
   "explorationEntry_nav_sidebarSections_desc": { "message": "Browse the Tools, Tracking and Configuration sections." },
   "explorationEntry_nav_sidebarCollapse_label": { "message": "Collapse / expand the sidebar" },

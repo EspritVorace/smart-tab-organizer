@@ -174,6 +174,7 @@ export const CATALOG: readonly CatalogEntry[] = [
   e('stats.exploration', 'stats', '#exploration', 'ephemeral', { doc: 'guides/exploration' }),
 
   // 8. Navigation et raccourcis
+  e('nav.pinExtension', 'navigation', '#home', 'derivation'),
   e('nav.sidebarSections', 'navigation', '#home', 'ephemeral'),
   e('nav.sidebarCollapse', 'navigation', '#home', 'touchpoint'),
   e('nav.globalSearch', 'navigation', '#home', 'ephemeral', { doc: 'reference/keyboard-shortcuts' }),

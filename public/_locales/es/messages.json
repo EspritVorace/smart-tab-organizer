@@ -1256,6 +1256,8 @@
   "explorationEntry_stats_reset_desc": { "message": "Pone los contadores a cero." },
   "explorationEntry_stats_exploration_label": { "message": "Ver el catálogo" },
   "explorationEntry_stats_exploration_desc": { "message": "Abre el catálogo de exploración." },
+  "explorationEntry_nav_pinExtension_label": { "message": "Fijar la extensión" },
+  "explorationEntry_nav_pinExtension_desc": { "message": "Fija el icono en la barra de herramientas para acceder con un clic." },
   "explorationEntry_nav_sidebarSections_label": { "message": "Secciones de la barra lateral" },
   "explorationEntry_nav_sidebarSections_desc": { "message": "Recorre las secciones Tools, Tracking y Configuration." },
   "explorationEntry_nav_sidebarCollapse_label": { "message": "Plegar / desplegar la barra lateral" },

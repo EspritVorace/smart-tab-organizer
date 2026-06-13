@@ -1256,6 +1256,8 @@
   "explorationEntry_stats_reset_desc": { "message": "Remettre à zéro les compteurs." },
   "explorationEntry_stats_exploration_label": { "message": "Consulter le référentiel" },
   "explorationEntry_stats_exploration_desc": { "message": "Ouvrir le référentiel d'exploration." },
+  "explorationEntry_nav_pinExtension_label": { "message": "Épingler l’extension" },
+  "explorationEntry_nav_pinExtension_desc": { "message": "Épingler l’icône dans la barre d’outils pour un accès en un clic." },
   "explorationEntry_nav_sidebarSections_label": { "message": "Sections de la sidebar" },
   "explorationEntry_nav_sidebarSections_desc": { "message": "Parcourir les sections Tools, Tracking et Configuration." },
   "explorationEntry_nav_sidebarCollapse_label": { "message": "Replier / déplier la sidebar" },
