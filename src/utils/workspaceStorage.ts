@@ -8,6 +8,8 @@ import type { Session } from '@/types/session.js';
 import type { WorkspaceMeta } from '@/schemas/workspace.js';
 import { type RuleViewState, DEFAULT_RULE_VIEW_STATE } from '@/utils/ruleViewUtils.js';
 import { type SessionViewState, DEFAULT_SESSION_VIEW_STATE } from '@/utils/sessionViewUtils.js';
+import type { ExplorationProgress } from '@/types/exploration.js';
+import { defaultExplorationProgress } from '@/types/exploration.js';
 
 export const DEFAULT_WORKSPACE_ID = 'default';
 
@@ -192,6 +194,23 @@ export const activeWorkspaceIdItem = storage.defineItem<string>(
 export const previousWorkspaceIdItem = storage.defineItem<string | null>(
   'local:previousWorkspaceId',
   { defaultValue: null },
+);
+
+/**
+ * Exploration progress (the "Référentiel d'exploration" tracker). Intentionally
+ * a GLOBAL, user-level key (not workspace-scoped): discovery reflects what the
+ * user has learned about the extension, independent of which workspace is
+ * active. Validated against `explorationProgressSchema` by consumers.
+ */
+export const explorationProgressItem = storage.defineItem<ExplorationProgress>(
+  'local:explorationProgress',
+  { defaultValue: defaultExplorationProgress },
+);
+
+/** Persisted UI filter for the exploration page (global, like other UI prefs). */
+export const explorationFilterItem = storage.defineItem<string>(
+  'local:explorationFilter',
+  { defaultValue: 'all' },
 );
 
 /** Test-only helper to clear the scoped-items memo. */

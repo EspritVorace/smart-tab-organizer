@@ -1,5 +1,6 @@
 import { browser, Browser } from 'wxt/browser';
 import { incrementStat, stampRuleLastUsed } from '@/utils/statisticsUtils.js';
+import { markDiscovered, markValue } from '@/exploration/progressStore.js';
 import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrlByMode } from '@/utils/utils';
 import { getSettings } from './settings.js';
 import { promptForGroupName } from './messaging.js';
@@ -221,6 +222,10 @@ export async function createNewGroup(
     await browser.tabGroups.update(newGroupId, updatePayload as Parameters<typeof browser.tabGroups.update>[1]);
     await incrementStat('grouping', ruleId);
     await stampRuleLastUsed(ruleId);
+    // Exploration: creating a group means the "create a rule" capability is in
+    // use. Also record the distinct color seen (multi-valued capability).
+    void markDiscovered('grouping.create');
+    if (groupColor) void markValue('grouping.color', groupColor);
 
     return newGroupId;
 }
