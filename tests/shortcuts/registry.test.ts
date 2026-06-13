@@ -114,7 +114,7 @@ describe('SHORTCUTS_REGISTRY', () => {
     expect(getShortcutsByGroup('global')).toHaveLength(7);
     expect(getShortcutsByGroup('workspace')).toHaveLength(3);
     expect(getShortcutsByGroup('popup')).toHaveLength(5);
-    expect(getShortcutsByGroup('options')).toHaveLength(11);
+    expect(getShortcutsByGroup('options')).toHaveLength(12);
     expect(getShortcutsByGroup('list-rules')).toHaveLength(14);
     expect(getShortcutsByGroup('list-sessions')).toHaveLength(11);
     expect(getShortcutsByGroup('list-stats')).toHaveLength(2);
