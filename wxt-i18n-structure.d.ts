@@ -1196,8 +1196,6 @@ export type GeneratedI18nStructure = {
   "explorationEntry_io_conflict_skip_desc": { substitutions: 0, plural: false };
   "explorationEntry_io_classification_label": { substitutions: 0, plural: false };
   "explorationEntry_io_classification_desc": { substitutions: 0, plural: false };
-  "explorationEntry_io_deepLink_label": { substitutions: 0, plural: false };
-  "explorationEntry_io_deepLink_desc": { substitutions: 0, plural: false };
   "explorationEntry_stats_view_label": { substitutions: 0, plural: false };
   "explorationEntry_stats_view_desc": { substitutions: 0, plural: false };
   "explorationEntry_stats_trends_label": { substitutions: 0, plural: false };

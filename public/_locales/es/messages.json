@@ -1242,8 +1242,6 @@
   "explorationEntry_io_conflict_skip_desc": { "message": "Ignora la entrada en conflicto." },
   "explorationEntry_io_classification_label": { "message": "Clasificación" },
   "explorationEntry_io_classification_desc": { "message": "Clasifica los elementos importados." },
-  "explorationEntry_io_deepLink_label": { "message": "Enlace profundo" },
-  "explorationEntry_io_deepLink_desc": { "message": "Abre la importación mediante un enlace profundo." },
   "explorationEntry_stats_view_label": { "message": "Ver estadísticas" },
   "explorationEntry_stats_view_desc": { "message": "Abre la página de Estadísticas." },
   "explorationEntry_stats_trends_label": { "message": "Agregados y tendencias" },
