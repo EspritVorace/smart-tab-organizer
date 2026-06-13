@@ -1210,6 +1210,8 @@ export type GeneratedI18nStructure = {
   "explorationEntry_stats_reset_desc": { substitutions: 0, plural: false };
   "explorationEntry_stats_exploration_label": { substitutions: 0, plural: false };
   "explorationEntry_stats_exploration_desc": { substitutions: 0, plural: false };
+  "explorationEntry_nav_pinExtension_label": { substitutions: 0, plural: false };
+  "explorationEntry_nav_pinExtension_desc": { substitutions: 0, plural: false };
   "explorationEntry_nav_sidebarSections_label": { substitutions: 0, plural: false };
   "explorationEntry_nav_sidebarSections_desc": { substitutions: 0, plural: false };
   "explorationEntry_nav_sidebarCollapse_label": { substitutions: 0, plural: false };
