@@ -23,7 +23,7 @@ Quand vous ouvrez un lien déjà ouvert dans votre navigateur, SmartTab Organize
 Les URL avec des schémas spéciaux (`chrome:`, `chrome-extension:`, `about:`) sont toujours ignorées par la déduplication, quelle que soit la règle.
 </Aside>
 
-## Les trois modes de correspondance
+## Les trois modes de correspondance \{#match-modes}
 
 ### URL exacte
 
@@ -71,7 +71,7 @@ Adapté aux sites où naviguer en profondeur dans une section ne doit pas créer
 
 Trois niveaux de contrôle interagissent, du plus général au plus fin.
 
-### Toggle global
+### Toggle global \{#enable-dedup}
 
 Le toggle **Déduplication** dans la popup ou la page [Paramètres](/guides/settings) est un interrupteur maître. Désactivé, aucune déduplication n'a lieu, quelles que soient les règles. Une pastille **D** orange apparait sur l'icône de l'extension dans ce cas.
 
@@ -88,7 +88,7 @@ Les règles de domaine restent prioritaires : un domaine couvert par une règle 
 
 Chaque règle possède son propre toggle **Déduplication**. Désactivé sur une règle, les doublons sur ce domaine sont conservés même si le toggle global est actif.
 
-## Stratégies de conservation
+## Stratégies de conservation \{#keep-strategy}
 
 Dans la page [Paramètres](/guides/settings), section **Déduplication**, vous choisissez lequel des deux onglets en doublon survit :
 
@@ -114,6 +114,10 @@ Pour éviter que l'onglet rouvert soit immédiatement refermé, sa déduplicatio
 </Aside>
 
 Ce paramètre est indépendant de celui du groupement : vous pouvez activer les notifications uniquement pour la déduplication, uniquement pour le groupement, pour les deux, ou pour aucun.
+
+## Organiser tous les onglets \{#organize-all-tabs}
+
+L'action **Organiser tous les onglets** de la popup lance la déduplication et le groupement ensemble sur la fenêtre courante : les doublons sont fermés selon la stratégie de conservation, puis les onglets restants sont groupés selon leurs règles.
 
 ## Aller plus loin
 

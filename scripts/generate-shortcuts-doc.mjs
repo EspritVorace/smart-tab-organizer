@@ -111,14 +111,18 @@ function renderForLocale(locale) {
   md += `${t('docsKeyboardShortcutsIntro')}\n\n`;
 
   for (const { descriptor, subgroups } of tree) {
-    md += `## ${t(descriptor.titleKey)}\n\n`;
+    // The group id is a stable, locale-independent anchor so the exploration
+    // catalogue (and any other doc) can deep-link to a section across locales.
+    // The opening brace is escaped so MDX keeps `{#id}` as literal text (a bare
+    // `{` would start a JS expression); a remark plugin strips it and sets the id.
+    md += `## ${t(descriptor.titleKey)} \\{#${descriptor.id}}\n\n`;
     const table = renderGroupTable(descriptor.id, t, locale);
     if (table) md += table + '\n';
 
     for (const sub of subgroups) {
       const subTable = renderGroupTable(sub.id, t, locale);
       if (!subTable) continue;
-      md += `### ${t(sub.titleKey)}\n\n`;
+      md += `### ${t(sub.titleKey)} \\{#${sub.id}}\n\n`;
       md += subTable + '\n';
     }
   }
