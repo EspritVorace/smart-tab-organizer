@@ -193,10 +193,8 @@ export function DomainRulesPage({
       setEditingRule(undefined);
       setIsModalOpen(true);
     } else if (pendingAction === 'import') {
-      void markDiscovered('io.deepLink');
       openImportRules();
     } else if (pendingAction === 'import-pack') {
-      void markDiscovered('io.deepLink');
       openImportRules({ initialSourceMode: 'pack' });
     }
     onPendingActionConsumed?.();

@@ -1243,8 +1243,6 @@
   "explorationEntry_io_conflict_skip_desc": { "message": "Ignore the conflicting entry." },
   "explorationEntry_io_classification_label": { "message": "Classification" },
   "explorationEntry_io_classification_desc": { "message": "Classify the imported items." },
-  "explorationEntry_io_deepLink_label": { "message": "Deep linking" },
-  "explorationEntry_io_deepLink_desc": { "message": "Open import via a deep link." },
   "explorationEntry_stats_view_label": { "message": "View statistics" },
   "explorationEntry_stats_view_desc": { "message": "Open the Statistics page." },
   "explorationEntry_stats_trends_label": { "message": "Aggregates and trends" },

@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Flex, Heading, Text } from '@radix-ui/themes';
 import { Check, ShieldCheck, Sparkles } from 'lucide-react';
 import { IconBox } from '@/components/UI/IconBox/IconBox';
 import { AriaButton } from '@/components/UI/AriaButton/AriaButton';
 import { resolvePackName } from '@/utils/packLabel';
 import { getMessage } from '@/utils/i18n';
+import { markDiscovered } from '@/exploration/progressStore';
 import type { SuggestedPack } from '@/utils/packSuggestion';
 import styles from './HeroOnboardingSuggestions.module.css';
 
@@ -28,6 +29,11 @@ export function HeroOnboardingSuggestions({
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(suggestions.map((s) => s.pack.pack.id)),
   );
+
+  // Exploration: this contextual pack-suggestion CTA is the onboarding welcome
+  // block shown whenever the workspace is empty and suggestions exist (the
+  // common path), so it marks the same capability as the plain HeroOnboarding.
+  useEffect(() => { void markDiscovered('help.onboardingHero'); }, []);
 
   const toggle = (packId: string) => {
     setSelected((prev) => {

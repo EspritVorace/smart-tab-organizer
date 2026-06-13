@@ -163,7 +163,6 @@ export const CATALOG: readonly CatalogEntry[] = [
   e('io.conflict.overwrite', 'importExport', '#importexport', 'touchpoint'),
   e('io.conflict.skip', 'importExport', '#importexport', 'touchpoint'),
   e('io.classification', 'importExport', '#importexport', 'derivation'),
-  e('io.deepLink', 'importExport', '#importexport', 'ephemeral'),
 
   // 7. Statistiques et suivi
   e('stats.view', 'stats', '#stats', 'ephemeral', { doc: 'guides/statistics' }),
