@@ -47,6 +47,7 @@ export default defineConfig({
             { slug: 'guides/workspaces' },
             { slug: 'guides/import-export' },
             { slug: 'guides/statistics' },
+            { slug: 'guides/exploration' },
             { slug: 'guides/settings' },
             { slug: 'guides/help-and-documentation' },
           ],
