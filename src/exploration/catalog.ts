@@ -189,7 +189,6 @@ export const CATALOG: readonly CatalogEntry[] = [
   e('help.drawer', 'help', '#home', 'ephemeral', { doc: 'guides/help-and-documentation' }),
   e('help.contextF1', 'help', '#home', 'ephemeral', { doc: 'guides/help-and-documentation' }),
   e('help.readTip', 'help', '#home', 'ephemeral'),
-  e('help.tipVariants', 'help', '#home', 'touchpoint'),
   e('help.onboardingHero', 'help', '#home', 'ephemeral'),
 
   // 10. Réglages et personnalisation

@@ -1283,8 +1283,6 @@
   "explorationEntry_help_contextF1_desc": { "message": "Open the contextual documentation with F1." },
   "explorationEntry_help_readTip_label": { "message": "Read a tip" },
   "explorationEntry_help_readTip_desc": { "message": "Read a tip on the home page." },
-  "explorationEntry_help_tipVariants_label": { "message": "Tip display variants" },
-  "explorationEntry_help_tipVariants_desc": { "message": "Switch between cards, list and accordion." },
   "explorationEntry_help_onboardingHero_label": { "message": "Onboarding hero" },
   "explorationEntry_help_onboardingHero_desc": { "message": "See the onboarding welcome block." },
   "explorationEntry_settings_notif_grouping_label": { "message": "Grouping notifications" },
