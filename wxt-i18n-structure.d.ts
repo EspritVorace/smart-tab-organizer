@@ -1236,8 +1236,6 @@ export type GeneratedI18nStructure = {
   "explorationEntry_help_contextF1_desc": { substitutions: 0, plural: false };
   "explorationEntry_help_readTip_label": { substitutions: 0, plural: false };
   "explorationEntry_help_readTip_desc": { substitutions: 0, plural: false };
-  "explorationEntry_help_tipVariants_label": { substitutions: 0, plural: false };
-  "explorationEntry_help_tipVariants_desc": { substitutions: 0, plural: false };
   "explorationEntry_help_onboardingHero_label": { substitutions: 0, plural: false };
   "explorationEntry_help_onboardingHero_desc": { substitutions: 0, plural: false };
   "explorationEntry_settings_notif_grouping_label": { substitutions: 0, plural: false };

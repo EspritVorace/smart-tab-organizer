@@ -1282,8 +1282,6 @@
   "explorationEntry_help_contextF1_desc": { "message": "Ouvrir la documentation contextuelle avec F1." },
   "explorationEntry_help_readTip_label": { "message": "Lire une astuce" },
   "explorationEntry_help_readTip_desc": { "message": "Consulter une astuce sur l'accueil." },
-  "explorationEntry_help_tipVariants_label": { "message": "Variantes d’affichage des astuces" },
-  "explorationEntry_help_tipVariants_desc": { "message": "Basculer entre cartes, liste et accordéon." },
   "explorationEntry_help_onboardingHero_label": { "message": "Onboarding hero" },
   "explorationEntry_help_onboardingHero_desc": { "message": "Voir le bloc d'accueil d'onboarding." },
   "explorationEntry_settings_notif_grouping_label": { "message": "Notifications de groupement" },

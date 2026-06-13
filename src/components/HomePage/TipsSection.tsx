@@ -83,15 +83,13 @@ function TipsCardsVariant({ tips }: { tips: ReadonlyArray<TipDef> }) {
   const [active, setActive] = useState(0);
   const dotsRef = useRef<Array<HTMLButtonElement | null>>([]);
 
-  // Exploration: a help tip is shown on mount (read); cycling marks the variant.
+  // Exploration: a help tip is shown on mount (read).
   useEffect(() => { void markDiscovered('help.readTip'); }, []);
 
   const goPrev = useCallback(() => {
-    void markDiscovered('help.tipVariants');
     setActive((i) => (i - 1 + tips.length) % tips.length);
   }, [tips.length]);
   const goNext = useCallback(() => {
-    void markDiscovered('help.tipVariants');
     setActive((i) => (i + 1) % tips.length);
   }, [tips.length]);
 
@@ -199,7 +197,7 @@ function TipsCardsVariant({ tips }: { tips: ReadonlyArray<TipDef> }) {
               aria-label={getMessage('homepageTipsDotLabel', [String(i + 1)])}
               className={i === active ? `${styles.dot} ${styles.dotActive}` : styles.dot}
               tabIndex={i === active ? 0 : -1}
-              onClick={() => { void markDiscovered('help.tipVariants'); setActive(i); }}
+              onClick={() => setActive(i)}
               onKeyDown={(e) => handleDotKey(e, i)}
               data-testid={`home-tips-dot-${i}`}
             />
