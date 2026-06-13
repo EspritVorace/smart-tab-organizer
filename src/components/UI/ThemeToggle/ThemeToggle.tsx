@@ -3,6 +3,7 @@ import { Flex, IconButton, Kbd, Tooltip } from '@radix-ui/themes';
 import { Sun, Moon, Monitor, LucideProps } from 'lucide-react';
 import { useThemeCycle, type ThemeValue } from '@/hooks/useThemeCycle';
 import { getMessage, type MessageKey } from '@/utils/i18n';
+import { markDiscovered } from '@/exploration/progressStore';
 
 interface ThemeMeta {
   labelKey: string;
@@ -35,7 +36,10 @@ export function ThemeToggle() {
         data-testid="theme-toggle"
         variant="ghost"
         size="2"
-        onClick={cycleTheme}
+        onClick={() => {
+          void markDiscovered('settings.theme');
+          cycleTheme();
+        }}
         aria-label={label}
         aria-keyshortcuts="D"
         style={{ color: 'var(--gray-11)' }}

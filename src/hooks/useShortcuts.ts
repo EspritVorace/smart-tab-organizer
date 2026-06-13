@@ -21,6 +21,7 @@
 import { useEffect, useRef } from 'react';
 import { getEffectiveBindings } from '@/shortcuts/getEffectiveBindings';
 import { SHORTCUTS_REGISTRY } from '@/shortcuts/registry';
+import { markShortcutCapability } from '@/exploration/shortcutCapabilities';
 import type { Binding, ShortcutEntry, ShortcutScope } from '@/shortcuts/types';
 import {
   isDialogOpen,
@@ -177,6 +178,9 @@ export function useShortcuts(
             return true;
           }
           event.preventDefault();
+          // Exploration: a learnable shortcut was triggered. Marked once here in
+          // the central dispatch, never by individual callers. Fire-and-forget.
+          markShortcutCapability(entry.id);
           try {
             action(event);
           } finally {
