@@ -4,12 +4,21 @@ description: Un catálogo exhaustivo de las capacidades de la extensión con una
 ---
 
 import { Aside } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import overviewLight from '../../../../assets/screenshots/es-light-exploration-overview.png';
+import overviewDark from '../../../../assets/screenshots/es-dark-exploration-overview.png';
 
 El **Catálogo de exploración** ("Référentiel d'exploration") es un mapa interno
 de todo lo que la extensión puede hacer, acompañado de una capa de seguimiento
 ligera que registra lo que ya has descubierto. Se encuentra en la sección
 **Tracking** de la barra lateral, junto a Estadísticas, y un widget compacto
 aparece en la página de inicio.
+
+<ThemeImage
+  lightSrc={overviewLight}
+  darkSrc={overviewDark}
+  alt="La página Catálogo de exploración: cobertura global y fase actual, barras de progreso por dominio, y filas en los estados descubierto, por descubrir y aún no disponible."
+/>
 
 Cumple dos objetivos:
 

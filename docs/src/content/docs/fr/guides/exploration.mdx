@@ -4,12 +4,21 @@ description: Un catalogue exhaustif des capacités de l'extension doublé d'un s
 ---
 
 import { Aside } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import overviewLight from '../../../../assets/screenshots/fr-light-exploration-overview.png';
+import overviewDark from '../../../../assets/screenshots/fr-dark-exploration-overview.png';
 
 Le **Référentiel d'exploration** est une carte interne de tout ce que
 l'extension sait faire, doublée d'une couche de suivi légère qui enregistre ce
 que vous avez déjà découvert. Il se trouve dans la section **Tracking** de la
 barre latérale, à côté des Statistiques, et un widget compact apparaît sur la
 page d'accueil.
+
+<ThemeImage
+  lightSrc={overviewLight}
+  darkSrc={overviewDark}
+  alt="La page Référentiel d'exploration : couverture globale et phase courante, barres de progression par domaine, et des lignes dans les états découvert, à découvrir et pas possible."
+/>
 
 Il sert deux objectifs :
 

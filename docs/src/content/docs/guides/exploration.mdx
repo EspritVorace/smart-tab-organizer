@@ -4,11 +4,20 @@ description: An exhaustive catalogue of the extension's capabilities with a "dis
 ---
 
 import { Aside } from '@astrojs/starlight/components';
+import ThemeImage from '../../../components/ThemeImage.astro';
+import overviewLight from '../../../assets/screenshots/en-light-exploration-overview.png';
+import overviewDark from '../../../assets/screenshots/en-dark-exploration-overview.png';
 
 The **Exploration catalogue** ("Référentiel d'exploration") is an internal map of
 everything the extension can do, doubled with a lightweight tracking layer that
 records what you have already discovered. It lives in the **Tracking** section of
 the sidebar, next to Statistics, and a compact widget appears on the Home page.
+
+<ThemeImage
+  lightSrc={overviewLight}
+  darkSrc={overviewDark}
+  alt="The Exploration catalogue page: global coverage and current phase, per-domain progress bars, and rows in the discovered, to discover and not yet available states."
+/>
 
 It serves two goals:
 
