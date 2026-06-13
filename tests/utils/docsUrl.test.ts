@@ -79,6 +79,24 @@ describe('getDocsUrl', () => {
 
     expect(getDocsUrl('/guides/sessions/')).toBe('https://docs.esprit-vorace.fr/guides/sessions/');
   });
+
+  it('keeps the trailing slash on the path and appends the fragment after it', async () => {
+    uiLanguage = 'en-US';
+    const { getDocsUrl } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrl('guides/domain-rules#create')).toBe(
+      'https://docs.esprit-vorace.fr/guides/domain-rules/#create',
+    );
+  });
+
+  it('combines locale, section and fragment', async () => {
+    uiLanguage = 'fr-FR';
+    const { getDocsUrl } = await import('../../src/utils/docsUrl');
+
+    expect(getDocsUrl('guides/sessions#snapshot')).toBe(
+      'https://docs.esprit-vorace.fr/fr/guides/sessions/#snapshot',
+    );
+  });
 });
 
 describe('getDocsUrlForTab', () => {

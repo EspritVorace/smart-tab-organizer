@@ -23,7 +23,7 @@ Cuando abres un enlace que ya está abierto en tu navegador, SmartTab Organizer 
 Las URL con esquemas especiales (`chrome:`, `chrome-extension:`, `about:`) siempre se ignoran en la deduplicación, sea cual sea la regla.
 </Aside>
 
-## Los tres modos de coincidencia
+## Los tres modos de coincidencia \{#match-modes}
 
 ### URL exacta
 
@@ -71,7 +71,7 @@ Adecuado para sitios donde navegar en profundidad por una sección no debería c
 
 Interactúan tres niveles de control, del más general al más fino.
 
-### Interruptor global
+### Interruptor global \{#enable-dedup}
 
 El interruptor **Deduplicación** del popup o de la página [Ajustes](/guides/settings) actúa como interruptor maestro. Si está desactivado, no ocurre ninguna deduplicación, sea cual sea la regla. En ese caso aparece un distintivo **D** naranja en el icono de la extensión.
 
@@ -88,7 +88,7 @@ Las reglas de dominio mantienen su prioridad: un dominio cubierto por una regla 
 
 Cada regla tiene su propio interruptor **Deduplicación**. Si lo desactivas en una regla, los duplicados de ese dominio se conservan aunque el interruptor global esté activo.
 
-## Estrategias de conservación
+## Estrategias de conservación \{#keep-strategy}
 
 En la página [Ajustes](/guides/settings), sección **Deduplicación**, eliges cuál de las dos pestañas duplicadas sobrevive:
 
@@ -114,6 +114,10 @@ Para evitar que la pestaña reabierta se vuelva a cerrar de inmediato, su dedupl
 </Aside>
 
 Este ajuste es independiente del de agrupación: puedes activar las notificaciones solo para la deduplicación, solo para la agrupación, para ambas o para ninguna.
+
+## Organizar todas las pestañas \{#organize-all-tabs}
+
+La acción **Organizar todas las pestañas** del popup ejecuta la deduplicación y la agrupación juntas en la ventana actual: los duplicados se cierran según la estrategia de conservación y luego las pestañas restantes se agrupan según sus reglas.
 
 ## Siguiente paso
 

@@ -23,7 +23,7 @@ When you open a link already open in your browser, SmartTab Organizer keeps a si
 URLs with special schemes (`chrome:`, `chrome-extension:`, `about:`) are always ignored by deduplication, regardless of the rule.
 </Aside>
 
-## The three match modes
+## The three match modes \{#match-modes}
 
 ### Exact URL
 
@@ -71,7 +71,7 @@ Best for sites where drilling deep into a section should not create duplicates a
 
 Three control levels interact, from the most general to the most specific.
 
-### Global toggle
+### Global toggle \{#enable-dedup}
 
 The **Deduplication** toggle in the popup or in the [Settings](/guides/settings) page is the master switch. When off, no deduplication happens, no matter the rules. An orange **D** badge appears on the extension icon in that case.
 
@@ -88,7 +88,7 @@ Domain rules remain authoritative: a domain covered by an explicit rule always f
 
 Every rule has its own **Deduplication** toggle. When off on a rule, duplicates on that domain are kept even if the global toggle is on.
 
-## Keep strategies
+## Keep strategies \{#keep-strategy}
 
 On the [Settings](/guides/settings) page, in the **Deduplication scope** section, you choose which of the two duplicate tabs survives:
 
@@ -114,6 +114,10 @@ To prevent the reopened tab from being immediately re-closed, its deduplication 
 </Aside>
 
 This setting is independent from the grouping one: you can enable notifications for deduplication only, for grouping only, for both, or for neither.
+
+## Organize all tabs \{#organize-all-tabs}
+
+The **Organize all tabs** action in the popup runs deduplication and grouping together on the current window: duplicates are closed following the keep strategy, then the remaining tabs are grouped by their matching rules.
 
 ## Next steps
 
