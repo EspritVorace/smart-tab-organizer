@@ -30,7 +30,7 @@ import { applyTheme, type Theme } from '../../e2e-shared/theme.js';
 export async function openExtensionPage(
   context: BrowserContext,
   extensionId: string,
-  section: 'popup' | 'rules' | 'sessions' | 'stats' | 'importexport' | 'settings' | 'workspaces' | '',
+  section: 'popup' | 'rules' | 'sessions' | 'stats' | 'exploration' | 'importexport' | 'settings' | 'workspaces' | '',
   locale: string,
   theme: Theme,
 ): Promise<Page> {
