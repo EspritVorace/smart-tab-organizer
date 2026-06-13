@@ -1,5 +1,6 @@
 import { browser } from 'wxt/browser';
 import { logger } from '@/utils/logger.js';
+import { markDiscovered } from '@/exploration/progressStore.js';
 import { getSettings, watchSettingsField } from '@/utils/settingsUtils.js';
 import { initWorkspaceContext } from '@/utils/workspaceContext.js';
 import { activeWorkspaceIdItem } from '@/utils/workspaceStorage.js';
@@ -52,6 +53,9 @@ export async function applyActionBadge(state: ActionBadgeState): Promise<void> {
     await api.setBadgeText({ text: state.text });
     if (state.text !== '') {
       await api.setBadgeBackgroundColor({ color: state.color });
+      // Exploration: a non-empty badge means a toggle is off and the indicator
+      // is visible to the user (derivation from observed state).
+      void markDiscovered('settings.badge');
     }
   } catch (e) {
     logger.error('[ACTION_BADGE] Failed to apply badge:', e);

@@ -7,7 +7,7 @@ import { useExploration } from '@/hooks/useExploration.js';
 import { CATALOG } from '@/exploration/catalog.js';
 import { EXPLORATION_DOMAINS } from '@/exploration/domains.js';
 import { getEntryState } from '@/exploration/coverage.js';
-import { setManualMark } from '@/exploration/progressStore.js';
+import { setManualMark, markDiscovered } from '@/exploration/progressStore.js';
 import { explorationFilterItem } from '@/utils/workspaceStorage.js';
 import { getMessage } from '@/utils/i18n.js';
 import { logger } from '@/utils/logger.js';
@@ -33,6 +33,9 @@ export function ExplorationPage({ syncSettings }: ExplorationPageProps) {
   const [filter, setFilter] = useState<ExplorationFilter>('all');
   const [search, setSearch] = useState('');
   const [openDomains, setOpenDomains] = useState<Set<string>>(() => new Set(['grouping']));
+
+  // Exploration: viewing the exploration coverage itself is a capability.
+  useEffect(() => { void markDiscovered('stats.exploration'); }, []);
 
   // Load and persist the filter (global UI pref).
   useEffect(() => {

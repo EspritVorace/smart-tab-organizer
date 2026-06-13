@@ -1,6 +1,7 @@
 import { Box, Flex, Grid, Switch } from '@radix-ui/themes';
 import { Controller, type Control, type FieldErrors, useWatch } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
+import { markDiscovered } from '@/exploration/progressStore';
 import { FieldLabel, RadioGroupField, TagInputField } from '@/components/Form/FormFields';
 import { deduplicationMatchModeOptions } from '@/schemas/enums';
 import type { DomainRule } from '@/schemas/domainRule';
@@ -38,7 +39,7 @@ export function WizardStep3Options({
                 <Switch
                   aria-label={getMessage('enableDeduplication')}
                   checked={field.value}
-                  onCheckedChange={field.onChange}
+                  onCheckedChange={(checked) => { void markDiscovered('dedup.togglePerRule'); field.onChange(checked); }}
                   data-autofocus={autoFocusFirstField ? 'true' : undefined}
                 />
               )}

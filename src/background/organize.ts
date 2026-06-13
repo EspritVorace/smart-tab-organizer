@@ -8,6 +8,7 @@ import {
     addToExistingGroup,
 } from './grouping.js';
 import { getMatchMode, isUrlMatch } from './deduplication.js';
+import { markDiscovered } from '@/exploration/progressStore.js';
 import { getStatisticsData, updateStatisticsData } from '@/utils/statisticsUtils.js';
 import { getMessage, type MessageKey } from '@/utils/i18n.js';
 import { logger } from '@/utils/logger.js';
@@ -384,6 +385,8 @@ function notify(messageKey: string, substitutions?: string[]): void {
  */
 export async function handleOrganizeAllTabs(windowId: number): Promise<OrganizeResult> {
     logger.debug(`[ORGANIZE] Starting organize for window ${windowId}.`);
+    // Exploration: the user triggered the "organize all tabs" action.
+    void markDiscovered('dedup.organize');
 
     const settings = await getSettings();
 

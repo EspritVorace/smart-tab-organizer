@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { Box, Button, Flex, Heading, Text } from '@radix-ui/themes';
 import { PackagePlus, Plus, Sparkles } from 'lucide-react';
 import { IconBox } from '@/components/UI/IconBox/IconBox';
 import { getMessage } from '@/utils/i18n';
+import { markDiscovered } from '@/exploration/progressStore';
 import styles from './HeroOnboarding.module.css';
 
 export interface HeroOnboardingProps {
@@ -10,6 +12,9 @@ export interface HeroOnboardingProps {
 }
 
 export function HeroOnboarding({ onImportPack, onCreateRule }: HeroOnboardingProps) {
+  // Exploration: the onboarding hero was shown to the user.
+  useEffect(() => { void markDiscovered('help.onboardingHero'); }, []);
+
   return (
     <Box asChild className={styles.hero}>
       <section aria-labelledby="home-hero-title">

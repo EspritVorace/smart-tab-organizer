@@ -236,6 +236,8 @@ export async function addToExistingGroup(
 ): Promise<void> {
     logger.debug(`[GROUPING_DEBUG] Adding tab ${tabId} to existing group ${groupId}`);
     await browser.tabs.group({ groupId: groupId, tabIds: [tabId] });
+    // Exploration: a tab joined an existing group (merge into a live group).
+    void markDiscovered('grouping.merge');
 
     const updatePayload: { collapsed: boolean } = { collapsed: false };
     logger.debug(`[GROUPING_DEBUG] Updating group ${groupId} with payload:`, updatePayload);

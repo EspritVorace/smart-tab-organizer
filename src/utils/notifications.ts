@@ -1,6 +1,7 @@
 import { browser, Browser } from 'wxt/browser';
 import { getMessage } from './i18n';
 import { markUrlToSkipDeduplication } from './deduplicationSkip';
+import { markDiscovered } from '@/exploration/progressStore';
 import { logger } from './logger';
 
 export type NotificationType = 'success' | 'error' | 'info';
@@ -133,6 +134,8 @@ async function executeUndoAction(action: UndoAction): Promise<void> {
       }
       case 'reopen_tab': {
         const data = action.data as ReopenTabUndoData;
+        // Exploration: the user undid a deduplication (reopened the closed tab).
+        void markDiscovered('dedup.undo');
         // Mark URL to skip deduplication so it won't be immediately closed again
         markUrlToSkipDeduplication(data.url);
         const createProps: Browser.tabs.CreateProperties = {

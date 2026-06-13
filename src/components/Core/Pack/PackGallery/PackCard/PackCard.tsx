@@ -9,6 +9,7 @@ import {
   resolvePackParamLabel,
 } from '@/utils/packLabel';
 import { resolvePackRules, type PackParamSelection } from '@/utils/packResolution';
+import { markDiscovered } from '@/exploration/progressStore';
 import type { PackFile } from '@/schemas/pack';
 import type { ImportDomainRule } from '@/schemas/importExport';
 import type { PackInstallInfo } from '@/utils/packInstallStatus';
@@ -85,6 +86,7 @@ export function PackCard({
   const handleToggle = useCallback(
     (next: boolean) => {
       if (isFullyInstalled) return;
+      if (next) void markDiscovered('packs.apply');
       onSelectionChange({ selected: next, rules: next ? resolvedRules : [] });
     },
     [isFullyInstalled, onSelectionChange, resolvedRules],

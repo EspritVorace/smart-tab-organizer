@@ -1,5 +1,6 @@
 import {
   useCallback,
+  useEffect,
   useRef,
   useState,
   type KeyboardEvent,
@@ -18,6 +19,7 @@ import { ChevronDown, ChevronLeft, ChevronRight, Lightbulb } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react';
 import { IconBox } from '@/components/UI/IconBox/IconBox';
 import { getMessage, type MessageKey } from '@/utils/i18n';
+import { markDiscovered } from '@/exploration/progressStore';
 import { TIPS, type TipDef } from './data';
 import styles from './TipsSection.module.css';
 
@@ -81,10 +83,15 @@ function TipsCardsVariant({ tips }: { tips: ReadonlyArray<TipDef> }) {
   const [active, setActive] = useState(0);
   const dotsRef = useRef<Array<HTMLButtonElement | null>>([]);
 
+  // Exploration: a help tip is shown on mount (read); cycling marks the variant.
+  useEffect(() => { void markDiscovered('help.readTip'); }, []);
+
   const goPrev = useCallback(() => {
+    void markDiscovered('help.tipVariants');
     setActive((i) => (i - 1 + tips.length) % tips.length);
   }, [tips.length]);
   const goNext = useCallback(() => {
+    void markDiscovered('help.tipVariants');
     setActive((i) => (i + 1) % tips.length);
   }, [tips.length]);
 
@@ -192,7 +199,7 @@ function TipsCardsVariant({ tips }: { tips: ReadonlyArray<TipDef> }) {
               aria-label={getMessage('homepageTipsDotLabel', [String(i + 1)])}
               className={i === active ? `${styles.dot} ${styles.dotActive}` : styles.dot}
               tabIndex={i === active ? 0 : -1}
-              onClick={() => setActive(i)}
+              onClick={() => { void markDiscovered('help.tipVariants'); setActive(i); }}
               onKeyDown={(e) => handleDotKey(e, i)}
               data-testid={`home-tips-dot-${i}`}
             />
@@ -230,7 +237,7 @@ interface AccordionItemProps {
 
 function TipsAccordionItem({ tip, open, onOpenChange }: AccordionItemProps) {
   return (
-    <Collapsible.Root open={open} onOpenChange={onOpenChange} className={styles.accordionItem}>
+    <Collapsible.Root open={open} onOpenChange={(o) => { if (o) { void markDiscovered('help.readTip'); } onOpenChange(o); }} className={styles.accordionItem}>
       <Collapsible.Trigger asChild>
         <button
           type="button"

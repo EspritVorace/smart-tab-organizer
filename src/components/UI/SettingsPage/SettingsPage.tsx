@@ -2,6 +2,7 @@ import { Box, Flex, Text, Switch, Card, RadioGroup } from '@radix-ui/themes';
 import { Bell, Copy, RotateCcw } from 'lucide-react';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { getMessage } from '@/utils/i18n';
+import { markDiscovered } from '@/exploration/progressStore';
 import type { AppSettings } from '@/types/syncSettings';
 import {
   deduplicationKeepStrategyOptions,
@@ -9,6 +10,14 @@ import {
   type DeduplicationKeepStrategyValue,
   type DefaultRestoreActionValue,
 } from '@/schemas/enums';
+
+/** Maps a deduplication keep-strategy value to its exploration capability id. */
+const KEEP_STRATEGY_CAPABILITY: Record<DeduplicationKeepStrategyValue, string> = {
+  'keep-old': 'dedup.keep.old',
+  'keep-new': 'dedup.keep.new',
+  'keep-grouped': 'dedup.keep.grouped',
+  'keep-grouped-or-new': 'dedup.keep.groupedOrNew',
+};
 
 interface SettingsPageProps {
   syncSettings: AppSettings;
@@ -39,7 +48,7 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
                       data-testid="page-settings-toggle-notify-group"
                       aria-label={getMessage('notifyOnGrouping')}
                       checked={syncSettings.notifyOnGrouping}
-                      onCheckedChange={(checked) => updateSettings({ notifyOnGrouping: checked })}
+                      onCheckedChange={(checked) => { void markDiscovered('settings.notif.grouping'); updateSettings({ notifyOnGrouping: checked }); }}
                     />
                   </Flex>
 
@@ -49,7 +58,7 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
                       data-testid="page-settings-toggle-notify-dedup"
                       aria-label={getMessage('notifyOnDeduplication')}
                       checked={syncSettings.notifyOnDeduplication}
-                      onCheckedChange={(checked) => updateSettings({ notifyOnDeduplication: checked })}
+                      onCheckedChange={(checked) => { void markDiscovered('settings.notif.dedup'); updateSettings({ notifyOnDeduplication: checked }); }}
                     />
                   </Flex>
 
@@ -59,7 +68,7 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
                       data-testid="page-settings-toggle-notify-organize"
                       aria-label={getMessage('notifyOnOrganize')}
                       checked={syncSettings.notifyOnOrganize}
-                      onCheckedChange={(checked) => updateSettings({ notifyOnOrganize: checked })}
+                      onCheckedChange={(checked) => { void markDiscovered('settings.notif.organize'); updateSettings({ notifyOnOrganize: checked }); }}
                     />
                   </Flex>
                 </Flex>
@@ -82,9 +91,10 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
                     data-testid="page-settings-default-restore-action"
                     aria-labelledby="page-settings-default-restore-action-label"
                     value={syncSettings.defaultRestoreAction}
-                    onValueChange={(value) =>
-                      updateSettings({ defaultRestoreAction: value as DefaultRestoreActionValue })
-                    }
+                    onValueChange={(value) => {
+                      void markDiscovered('sessions.defaultRestore');
+                      updateSettings({ defaultRestoreAction: value as DefaultRestoreActionValue });
+                    }}
                   >
                     <Flex direction="column" gap="2">
                       {defaultRestoreActionOptions.map((option) => (
@@ -122,7 +132,7 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
                         data-testid="page-settings-toggle-dedup-unmatched"
                         aria-label={getMessage('deduplicateUnmatchedDomainsLabel')}
                         checked={syncSettings.deduplicateUnmatchedDomains}
-                        onCheckedChange={(checked) => updateSettings({ deduplicateUnmatchedDomains: checked })}
+                        onCheckedChange={(checked) => { void markDiscovered('dedup.uncoveredScope'); updateSettings({ deduplicateUnmatchedDomains: checked }); }}
                       />
                     </Flex>
                     <Text size="1" color="gray">
@@ -139,9 +149,10 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
                       data-testid="page-settings-dedup-keep-strategy"
                       aria-labelledby="page-settings-dedup-keep-strategy-label"
                       value={syncSettings.deduplicationKeepStrategy}
-                      onValueChange={(value) =>
-                        updateSettings({ deduplicationKeepStrategy: value as DeduplicationKeepStrategyValue })
-                      }
+                      onValueChange={(value) => {
+                        void markDiscovered(KEEP_STRATEGY_CAPABILITY[value as DeduplicationKeepStrategyValue]);
+                        updateSettings({ deduplicationKeepStrategy: value as DeduplicationKeepStrategyValue });
+                      }}
                       disabled={!syncSettings.globalDeduplicationEnabled}
                     >
                       <Flex direction="column" gap="2">

@@ -4,6 +4,7 @@ import { Pin } from 'lucide-react';
 import type { Session } from '@/types/session';
 import { SessionRestoreButton } from '@/components/Core/Session/SessionRestoreButton/SessionRestoreButton';
 import { getMessage } from '@/utils/i18n';
+import { markDiscovered } from '@/exploration/progressStore';
 import type { DefaultRestoreActionValue } from '@/schemas/enums';
 import type { HomeRestoreTarget } from './types';
 import styles from './PinnedSessionsSection.module.css';
@@ -37,6 +38,11 @@ export function PinnedSessionTile({
   onFocus,
 }: PinnedSessionTileProps) {
   const { groups, tabs } = getCounts(session);
+  // Exploration: restoring straight from a pinned-profile Home tile.
+  const handleRestore = (s: Session, target: HomeRestoreTarget) => {
+    void markDiscovered('settings.restoreFromTile');
+    onRestore(s, target);
+  };
 
   return (
     <Card
@@ -61,11 +67,11 @@ export function PinnedSessionTile({
         <Box mt="auto">
           <SessionRestoreButton
             session={session}
-            onRestoreCurrentWindow={(s) => onRestore(s, 'current')}
-            onRestoreNewWindow={(s) => onRestore(s, 'new')}
-            onReplaceCurrentWindow={(s) => onRestore(s, 'replace')}
-            onCustomize={(s) => onRestore(s, 'custom')}
-            onRefresh={(s) => onRestore(s, 'refresh')}
+            onRestoreCurrentWindow={(s) => handleRestore(s, 'current')}
+            onRestoreNewWindow={(s) => handleRestore(s, 'new')}
+            onReplaceCurrentWindow={(s) => handleRestore(s, 'replace')}
+            onCustomize={(s) => handleRestore(s, 'custom')}
+            onRefresh={(s) => handleRestore(s, 'refresh')}
             defaultRestoreAction={defaultRestoreAction}
             onDefaultRestoreActionChange={onDefaultRestoreActionChange}
             presentation="tile"

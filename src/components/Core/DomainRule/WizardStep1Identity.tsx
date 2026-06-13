@@ -9,6 +9,7 @@ import {
   type UseFormSetValue,
 } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
+import { markDiscovered } from '@/exploration/progressStore';
 import { FormField } from '@/components/Form/FormFields';
 import { CategoryRadioGroup } from '@/components/Core/DomainRule/CategoryRadioGroup';
 import { ChromeColorPicker } from '@/components/Core/TabTree/ChromeColorPicker';
@@ -111,7 +112,7 @@ export function WizardStep1Identity({ control, errors, setValue }: WizardStep1Id
               render={({ field }) => (
                 <CategoryRadioGroup
                   value={field.value as string | null | undefined}
-                  onChange={field.onChange}
+                  onChange={(id) => { void markDiscovered('grouping.category'); field.onChange(id); }}
                   data-testid="wizard-rule-field-category"
                   swatchTestIdPrefix="wizard-rule-category"
                 />
