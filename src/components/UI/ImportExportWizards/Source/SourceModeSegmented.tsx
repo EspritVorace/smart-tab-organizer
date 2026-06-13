@@ -1,7 +1,14 @@
 import React from 'react';
 import { SegmentedControl } from '@radix-ui/themes';
 import { getMessage, type MessageKey } from '@/utils/i18n';
+import { markDiscovered } from '@/exploration/progressStore';
 import type { JsonSourceInputState, SourceMode } from './useJsonSourceInput';
+
+/** Maps a source mode to its exploration capability id (pack has no entry). */
+const SOURCE_MODE_CAPABILITY: Partial<Record<SourceMode, string>> = {
+  file: 'io.sourceFile',
+  text: 'io.sourceText',
+};
 
 const DEFAULT_AVAILABLE_MODES: readonly SourceMode[] = ['file', 'text'];
 
@@ -23,7 +30,11 @@ export function SourceModeSegmented<T>({
   return (
     <SegmentedControl.Root
       value={source.sourceMode}
-      onValueChange={(v: string) => source.setSourceMode(v as SourceMode)}
+      onValueChange={(v: string) => {
+        const cap = SOURCE_MODE_CAPABILITY[v as SourceMode];
+        if (cap) void markDiscovered(cap);
+        source.setSourceMode(v as SourceMode);
+      }}
       size="2"
     >
       {availableModes.map((mode) => (

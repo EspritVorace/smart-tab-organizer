@@ -43,6 +43,7 @@ import {
   updateSchema,
 } from 'codemirror-json-schema';
 import { getMessage } from '@/utils/i18n';
+import { markDiscovered } from '@/exploration/progressStore';
 import type { ImportJsonSchema } from '@/utils/importJsonSchemas';
 import { jsonHighlightStyle, createEditorTheme } from './cmTheme';
 
@@ -200,6 +201,7 @@ export function JsonCodeEditor({
         ]),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
+            void markDiscovered('io.codemirror');
             onChangeRef.current(update.state.doc.toString());
           }
         }),

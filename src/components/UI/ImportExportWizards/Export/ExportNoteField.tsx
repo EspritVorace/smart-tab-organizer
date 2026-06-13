@@ -2,6 +2,7 @@ import React, { useId } from 'react';
 import { Box, Text, TextArea } from '@radix-ui/themes';
 import * as Label from '@radix-ui/react-label';
 import { getMessage, type MessageKey } from '@/utils/i18n';
+import { markDiscovered } from '@/exploration/progressStore';
 
 interface ExportNoteFieldProps {
   value: string;
@@ -33,7 +34,10 @@ export function ExportNoteField({
         id={id}
         mt="1"
         value={value}
-        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+          if (e.target.value) void markDiscovered('io.note');
+          onChange(e.target.value);
+        }}
         placeholder={getMessage(placeholderKey as MessageKey)}
         rows={2}
         data-testid={testId}

@@ -21,6 +21,7 @@ import { useShortcuts, type ShortcutAction } from '@/hooks/useShortcuts.js';
 import { useThemeToggleShortcut } from '@/hooks/useThemeToggleShortcut.js';
 import { getDocsUrlForTab } from '@/utils/docsUrl';
 import { getMessage } from '@/utils/i18n';
+import { markDiscovered } from '@/exploration/progressStore';
 
 import { Sidebar } from '@/components/UI/Sidebar/Sidebar';
 import type { SidebarSection } from '@/components/UI/Sidebar/Sidebar';
@@ -186,6 +187,10 @@ export function OptionsContent() {
         },
     ], [rulesCount, sessionsCount, workspacesCount]);
 
+    // Exploration: the sidebar with its grouped sections is shown on the
+    // options page (ephemeral discovery on first render).
+    React.useEffect(() => { void markDiscovered('nav.sidebarSections'); }, []);
+
     const activePageTitle = useMemo(() => {
         for (const section of sidebarSections) {
             const match = section.items.find((item) => item.id === currentTab);
@@ -266,7 +271,7 @@ export function OptionsContent() {
         <div id="options-inner" data-testid="options" style={{ display: 'flex', height: '100vh' }}>
             <Sidebar
                 isCollapsed={sidebarCollapsed}
-                onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+                onToggleCollapse={() => { void markDiscovered('nav.sidebarCollapse'); setSidebarCollapsed(!sidebarCollapsed); }}
                 activeItem={currentTab}
                 onItemClick={handleTabChange}
                 onItemPreload={preloadPage}

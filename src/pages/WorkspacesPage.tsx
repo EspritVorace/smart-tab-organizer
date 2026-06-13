@@ -14,6 +14,7 @@ import { WorkspaceDeleteConfirmDialog } from '@/components/UI/Workspace/Workspac
 import { DEFAULT_WORKSPACE_ID } from '@/utils/workspaceStorage';
 import { getMessage } from '@/utils/i18n';
 import { logger } from '@/utils/logger';
+import { markDiscovered } from '@/exploration/progressStore';
 import { foldAccents } from '@/utils/stringUtils';
 import { useShortcuts } from '@/hooks/useShortcuts';
 import { useListNavigation } from '@/hooks/useListNavigation';
@@ -224,6 +225,7 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
   const handleCreate = useCallback(
     async ({ name, accentColor }: { name: string; accentColor: WorkspaceMeta['accentColor'] }) => {
       try {
+        void markDiscovered('workspaces.create');
         await createWorkspace(name, accentColor);
       } catch (error) {
         logger.error('[WorkspacesPage] create failed:', error);
@@ -236,8 +238,8 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
     async ({ name, accentColor }: { name: string; accentColor: WorkspaceMeta['accentColor'] }) => {
       if (!editing) return;
       try {
-        if (name !== editing.name) await renameWorkspace(editing.id, name);
-        if (accentColor !== editing.accentColor) await setWorkspaceColor(editing.id, accentColor);
+        if (name !== editing.name) { void markDiscovered('workspaces.rename'); await renameWorkspace(editing.id, name); }
+        if (accentColor !== editing.accentColor) { void markDiscovered('workspaces.color'); await setWorkspaceColor(editing.id, accentColor); }
       } catch (error) {
         logger.error('[WorkspacesPage] edit failed:', error);
       }
@@ -248,6 +250,7 @@ export function WorkspacesPage({ syncSettings }: WorkspacesPageProps) {
   const handleDeleteConfirm = useCallback(async () => {
     if (!deleting) return;
     try {
+      void markDiscovered('workspaces.delete');
       await removeWorkspace(deleting.id);
     } catch (error) {
       logger.error('[WorkspacesPage] delete failed:', error);

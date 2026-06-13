@@ -18,6 +18,7 @@ import { AccessibleHighlight } from '@/components/UI/AccessibleHighlight/Accessi
 import { chromeGroupColors } from '@/utils/tabTreeUtils';
 import { getRuleCategory, getCategoryLabel } from '@/utils/categoriesStore';
 import { getDragHandleStyle } from '@/utils/dragHandleStyle';
+import { markDiscovered } from '@/exploration/progressStore';
 import { getStatusStyle } from '@/utils/statusStyle';
 import { SessionPreviewTree } from './SessionPreviewTree';
 import { SessionRestoreButton } from './SessionRestoreButton/SessionRestoreButton';
@@ -258,6 +259,7 @@ function useSessionRename(session: Session, existingSessions: Session[], onRenam
         return;
       }
       await onRename(session.id, trimmed);
+      void markDiscovered('sessions.rename');
     }
     setIsRenaming(false);
   }, [nameValue, session.id, session.name, onRename, existingSessions]);
@@ -298,7 +300,7 @@ function SessionNameHoverCard({
   session, searchQuery, hoverCardContent, onDoubleClick,
 }: SessionNameHoverCardProps) {
   return (
-    <HoverCard.Root>
+    <HoverCard.Root onOpenChange={(open) => { if (open) { void markDiscovered('sessions.hovercard'); } }}>
       <HoverCard.Trigger>
         <Text
           data-testid={`session-card-${session.id}-name`}
@@ -724,7 +726,7 @@ export function SessionCard({
         {/* Collapsible: read-only tab/group tree preview */}
         <Collapsible.Root
           open={previewOpen}
-          onOpenChange={setPreviewOpen}
+          onOpenChange={(open) => { if (open) { void markDiscovered('sessions.collapse'); } setPreviewOpen(open); }}
           style={{ marginTop: '-6px' }}
         >
           <Collapsible.Trigger asChild>

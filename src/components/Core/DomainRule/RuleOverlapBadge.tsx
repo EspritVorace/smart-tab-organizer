@@ -1,5 +1,6 @@
 import { HoverCard, Text, Flex, Badge } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
+import { markDiscovered } from '@/exploration/progressStore';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 
 export interface RuleOverlapBadgeProps {
@@ -26,7 +27,7 @@ export function RuleOverlapBadge({
   const total = String(precedenceList.length);
 
   return (
-    <HoverCard.Root>
+    <HoverCard.Root onOpenChange={(open) => { if (open) { void markDiscovered('grouping.overlaps'); } }}>
       <HoverCard.Trigger>
         <button
           type="button"

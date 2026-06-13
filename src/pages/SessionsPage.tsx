@@ -35,6 +35,7 @@ import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { updateSession, type SessionBucket } from '@/utils/sessionStorage';
 import { showSuccessNotification } from '@/utils/notifications';
+import { markDiscovered } from '@/exploration/progressStore';
 import { getActiveTabGroupId } from '@/utils/tabCapture';
 import { browser } from 'wxt/browser';
 import type { Session } from '@/types/session';
@@ -239,6 +240,7 @@ function SessionSection({
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     if (!event.canceled) {
+      void markDiscovered('sessions.reorder');
       const source = dragItems ?? sessions;
       const reordered = move(source, event) as Session[];
       if (bucket === 'archived') {
@@ -279,6 +281,7 @@ function SessionSection({
   }, [allSessions, updateOrder]);
 
   const handleCardSelect = useCallback((id: string, checked: boolean) => {
+    if (checked) void markDiscovered('sessions.bulkSelect');
     const next = new Set(selectedIds);
     if (checked) next.add(id);
     else next.delete(id);
@@ -286,6 +289,7 @@ function SessionSection({
   }, [selectedIds, onSelectionChange]);
 
   const handleSelectAll = useCallback((checked: boolean) => {
+    if (checked) void markDiscovered('sessions.bulkSelect');
     onSelectionChange(checked ? new Set(sessions.map(s => s.id)) : new Set());
   }, [sessions, onSelectionChange]);
 
@@ -506,10 +510,12 @@ export function SessionsPage({
   }, [sessionsViewStateItem, archivedSessionsViewStateItem]);
 
   const handleNormalViewChange = useCallback((next: SessionViewState) => {
+    void markDiscovered('sessions.view.filterSort');
     setNormalViewState(next);
     sessionsViewStateItem.setValue(next).catch(() => {});
   }, [sessionsViewStateItem]);
   const handleArchivedViewChange = useCallback((next: SessionViewState) => {
+    void markDiscovered('sessions.view.filterSort');
     setArchivedViewState(next);
     archivedSessionsViewStateItem.setValue(next).catch(() => {});
   }, [archivedSessionsViewStateItem]);
@@ -542,6 +548,7 @@ export function SessionsPage({
   // untouched.
   const handleTabClick = useCallback(
     (next: SessionsSubTab) => {
+      void markDiscovered(next === 'archived' ? 'sessions.subtab.archived' : 'sessions.subtab.active');
       const switching = next !== sessionsTab;
       handleTabChange(next);
       if (!switching) return;
@@ -559,6 +566,7 @@ export function SessionsPage({
   const handleOpenSnapshotWizard = useCallback(() => setSnapshotOpen(true), []);
 
   const handleOpenRefreshWizard = useCallback(async (session: Session) => {
+    void markDiscovered('sessions.refresh');
     const groupId = await getActiveTabGroupId();
     setRefreshGroupId(groupId);
     setRefreshTarget(session);
@@ -601,6 +609,7 @@ export function SessionsPage({
   // SessionCard split button, the dropdown menu, and the widget-scope
   // shortcuts registered below.
   const handleQuickRestore = useCallback(async (session: Session, target: RestoreTarget) => {
+    void markDiscovered(`sessions.restore.${target}`);
     try {
       let protectedTabId: number | undefined;
       if (target === 'replace') {
@@ -635,6 +644,7 @@ export function SessionsPage({
   );
 
   const handlePin = useCallback(async (session: Session) => {
+    void markDiscovered('sessions.pin');
     await updateSession(session.id, { isPinned: true });
     await reload();
   }, [reload]);
@@ -652,6 +662,7 @@ export function SessionsPage({
   }, [sessions, updateOrder]);
 
   const handleArchive = useCallback(async (session: Session) => {
+    void markDiscovered('sessions.archive');
     await archiveSession(session.id);
     await reload();
     void showSuccessNotification(
@@ -661,6 +672,7 @@ export function SessionsPage({
   }, [archiveSession, reload]);
 
   const handleUnarchive = useCallback(async (session: Session) => {
+    void markDiscovered('sessions.unarchive');
     await unarchiveSession(session.id);
     await reload();
     void showSuccessNotification(
@@ -680,7 +692,7 @@ export function SessionsPage({
     {
       'sessionCard.restore.custom': () => {
         const focused = getFocusedSession();
-        if (focused) setRestoreSession(focused);
+        if (focused) { void markDiscovered('sessions.restore.custom'); setRestoreSession(focused); }
       },
       'sessionCard.restore.current': () => {
         const focused = getFocusedSession();
@@ -700,7 +712,7 @@ export function SessionsPage({
       },
       'sessionCard.edit': () => {
         const focused = getFocusedSession();
-        if (focused) setEditTarget(focused);
+        if (focused) { void markDiscovered('sessions.editor'); setEditTarget(focused); }
       },
       'sessionCard.delete': () => {
         const focused = getFocusedSession();
@@ -878,6 +890,7 @@ export function SessionsPage({
 
   const handleSaveSession = useCallback(
     async (session: Session) => {
+      void markDiscovered('sessions.snapshot');
       await createSession(session);
     },
     [createSession],
@@ -899,6 +912,7 @@ export function SessionsPage({
   );
 
   const handleBulkPinToggle = useCallback(async (ids: string[], makePinned: boolean) => {
+    void markDiscovered('sessions.bulkActions');
     for (const id of ids) {
       await updateSession(id, { isPinned: makePinned });
     }
@@ -906,6 +920,7 @@ export function SessionsPage({
   }, [reload]);
 
   const handleBulkArchive = useCallback(async (ids: string[]) => {
+    void markDiscovered('sessions.bulkActions');
     for (const id of ids) {
       await archiveSession(id);
     }
@@ -915,6 +930,7 @@ export function SessionsPage({
   }, [archiveSession, reload]);
 
   const handleBulkUnarchive = useCallback(async (ids: string[]) => {
+    void markDiscovered('sessions.bulkActions');
     for (const id of ids) {
       await unarchiveSession(id);
     }
@@ -967,15 +983,15 @@ export function SessionsPage({
     searchMatches: sessionSearchMatches,
     updateOrder,
     renameSession,
-    onOpenRestoreWizard: setRestoreSession,
-    onOpenEditDialog: setEditTarget,
+    onOpenRestoreWizard: (session) => { void markDiscovered('sessions.restore.custom'); setRestoreSession(session); },
+    onOpenEditDialog: (session) => { void markDiscovered('sessions.editor'); setEditTarget(session); },
     onOpenDeleteDialog: handleOpenSingleDelete,
     onRestoreCurrentWindow: handleRestoreCurrentWindow,
     onRestoreNewWindow: handleRestoreNewWindow,
     onReplaceCurrentWindow: handleReplaceCurrentWindow,
     onRefresh: handleRefreshTrigger,
     defaultRestoreAction: syncSettings.defaultRestoreAction,
-    onDefaultRestoreActionChange: (value) => updateSettings({ defaultRestoreAction: value }),
+    onDefaultRestoreActionChange: (value) => { void markDiscovered('sessions.defaultRestore'); updateSettings({ defaultRestoreAction: value }); },
     onPin: handlePin,
     onUnpin: handleUnpin,
     onArchive: handleArchive,
@@ -1070,7 +1086,7 @@ export function SessionsPage({
               searchTestId="page-sessions-search"
               searchPlaceholder={getMessage('searchSessions')}
               searchValue={searchQuery}
-              onSearchChange={setSearchQuery}
+              onSearchChange={(q) => { if (q) { void markDiscovered('sessions.search'); } setSearchQuery(q); }}
               onSearchSubmit={focusFirstResultCard}
               action={
                 !archivedOnlyView ? (
