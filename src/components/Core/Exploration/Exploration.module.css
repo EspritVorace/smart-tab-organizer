@@ -1,0 +1,75 @@
+.phaseLabel {
+  flex: 1;
+  min-width: 0;
+}
+
+.eyebrow {
+  font-family: var(--code-font-family);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-11);
+}
+
+.coveragePercent {
+  color: var(--accent-11);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.coverageDivider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--gray-a4);
+}
+
+.numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+.domainButton {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.domainButton:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+  border-radius: var(--radius-2);
+}
+
+.domainBar {
+  flex: 1;
+  min-width: 60px;
+  max-width: 240px;
+}
+
+.chevron {
+  transition: transform 0.12s ease;
+  color: var(--gray-10);
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+.rowUndiscovered .rowLabel {
+  color: var(--gray-11);
+}
+
+.markButton {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
+}

@@ -1258,6 +1258,7 @@ export type GeneratedI18nStructure = {
   "explorationEntry_settings_quickActions_desc": { substitutions: 0, plural: false };
   "explorationEntry_settings_restoreFromTile_label": { substitutions: 0, plural: false };
   "explorationEntry_settings_restoreFromTile_desc": { substitutions: 0, plural: false };
+  "shortcutDescNavigateExploration": { substitutions: 0, plural: false };
   "@@extension_id": { substitutions: 0, plural: false };
   "@@ui_locale": { substitutions: 0, plural: false };
   "@@bidi_dir": { substitutions: 0, plural: false };

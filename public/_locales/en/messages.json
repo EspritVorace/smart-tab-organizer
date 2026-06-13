@@ -1304,5 +1304,6 @@
   "explorationEntry_settings_quickActions_label": { "message": "Home quick actions" },
   "explorationEntry_settings_quickActions_desc": { "message": "Use the home page quick actions." },
   "explorationEntry_settings_restoreFromTile_label": { "message": "Restore from a pinned tile" },
-  "explorationEntry_settings_restoreFromTile_desc": { "message": "Restore a session from the home page." }
+  "explorationEntry_settings_restoreFromTile_desc": { "message": "Restore a session from the home page." },
+  "shortcutDescNavigateExploration": { "message": "Go to the exploration catalogue" }
 }

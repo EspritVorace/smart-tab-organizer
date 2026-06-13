@@ -190,6 +190,13 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'options',
     scope: 'global',
   },
+  'options.nav.exploration': {
+    id: 'options.nav.exploration',
+    defaultBindings: [['m', 'e']],
+    descriptionKey: 'shortcutDescNavigateExploration',
+    group: 'options',
+    scope: 'global',
+  },
   'options.nav.importexport': {
     id: 'options.nav.importexport',
     defaultBindings: [['m', 'i']],

@@ -32,7 +32,7 @@ import { ShortcutsAside, type PageContext } from '@/components/UI/ShortcutsPanel
 import { SequenceIndicator } from '@/components/UI/SequenceIndicator';
 import { HomePage } from './HomePage';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
-import { Home, Shield, FileText, BarChart3, Settings, Archive, Layers } from 'lucide-react';
+import { Home, Shield, FileText, BarChart3, Settings, Archive, Layers, Compass } from 'lucide-react';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { getActiveTabGroupId } from '@/utils/tabCapture';
 import { lazyWithTiming } from '@/utils/lazyWithTiming.js';
@@ -61,6 +61,9 @@ const SettingsPage = lazyWithTiming('SettingsPage', () =>
 );
 const WorkspacesPage = lazyWithTiming('WorkspacesPage', () =>
     import('./WorkspacesPage').then((m) => ({ default: m.WorkspacesPage })),
+);
+const ExplorationPage = lazyWithTiming('ExplorationPage', () =>
+    import('./ExplorationPage').then((m) => ({ default: m.ExplorationPage })),
 );
 import type { Session } from '@/types/session';
 import type { HomeRestoreTarget } from '@/components/HomePage/types';
@@ -169,6 +172,7 @@ export function OptionsContent() {
             label: getMessage('sidebarSectionTracking'),
             items: [
                 { id: 'stats', label: getMessage('statisticsTab'), icon: BarChart3, accentColor: 'indigo' },
+                { id: 'exploration', label: getMessage('explorationTab'), icon: Compass, accentColor: 'indigo' },
             ],
         },
         {
@@ -232,6 +236,7 @@ export function OptionsContent() {
         'options.nav.rules': () => handleTabChange('rules'),
         'options.nav.sessions': () => handleTabChange('sessions'),
         'options.nav.stats': () => handleTabChange('stats'),
+        'options.nav.exploration': () => handleTabChange('exploration'),
         'options.nav.importexport': () => handleTabChange('importexport'),
         'options.nav.settings': () => handleTabChange('settings'),
         'options.nav.workspaces': () => handleTabChange('workspaces'),
@@ -334,6 +339,9 @@ export function OptionsContent() {
                                     statsTab={statsTab}
                                     onStatsTabChange={setStatsTab}
                                 />
+                            )}
+                            {currentTab === 'exploration' && (
+                                <ExplorationPage syncSettings={settings} />
                             )}
                             {currentTab === 'settings' && (
                                 <SettingsPage syncSettings={settings} updateSettings={updateSettings} />

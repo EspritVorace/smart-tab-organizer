@@ -1,0 +1,40 @@
+.button {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  border-radius: var(--radius-3);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+.card {
+  transition: box-shadow 0.12s ease;
+}
+
+.button:hover .card {
+  box-shadow: var(--shadow-3);
+}
+
+.percent {
+  color: var(--accent-11);
+  font-variant-numeric: tabular-nums;
+}
+
+.link {
+  color: var(--accent-11);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}
