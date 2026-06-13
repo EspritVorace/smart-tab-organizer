@@ -16,6 +16,16 @@ const meta = {
   component: CatalogRow,
   parameters: { layout: 'padded' },
   tags: ['autodocs'],
+  // A CatalogRow is a role="listitem"; in the real page it lives inside the
+  // domain group's role="list". Wrap the isolated story in a list so the
+  // required parent is present (axe aria-required-parent).
+  decorators: [
+    (Story) => (
+      <div role="list">
+        <Story />
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof CatalogRow>;
 
 export default meta;
