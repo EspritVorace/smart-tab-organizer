@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Callout, Flex, SegmentedControl, Text, TextField } from '@radix-ui/themes';
 import { Info, Search } from 'lucide-react';
 import type { AppSettings } from '@/types/syncSettings.js';
@@ -32,7 +32,11 @@ export function ExplorationPage({ syncSettings }: ExplorationPageProps) {
   const { progress, coverage, isLoaded } = useExploration();
   const [filter, setFilter] = useState<ExplorationFilter>('all');
   const [search, setSearch] = useState('');
-  const [openDomains, setOpenDomains] = useState<Set<string>>(() => new Set(['grouping']));
+  // Which domain groups are expanded. Seeded once, after progress loads, to the
+  // first domain that still has something to discover (see effect below); the
+  // user's manual toggles take over afterwards.
+  const [openDomains, setOpenDomains] = useState<Set<string>>(() => new Set());
+  const seededOpenDomain = useRef(false);
 
   // Exploration: viewing the exploration coverage itself is a capability.
   useEffect(() => { void markDiscovered('stats.exploration'); }, []);
@@ -77,6 +81,29 @@ export function ExplorationPage({ syncSettings }: ExplorationPageProps) {
     }
     return { all: CATALOG.length, discovered, toDiscover, notPossible };
   }, [stateById]);
+
+  // The first domain (in catalogue order) that still has at least one
+  // "to discover" entry, i.e. is not yet complete. Domains where everything is
+  // discovered or not possible are considered done. Falls back to the first
+  // domain when nothing is left to discover anywhere.
+  const firstIncompleteDomain = useMemo(() => {
+    for (const domain of EXPLORATION_DOMAINS) {
+      const hasToDiscover = CATALOG.some(
+        (entry) => entry.domain === domain && stateById.get(entry.id) === 'to-discover',
+      );
+      if (hasToDiscover) return domain;
+    }
+    return EXPLORATION_DOMAINS[0];
+  }, [stateById]);
+
+  // Seed the open group once progress has loaded: open the first incomplete
+  // domain and leave fully completed ones collapsed. Runs a single time so it
+  // never fights the user's manual expand/collapse afterwards.
+  useEffect(() => {
+    if (!isLoaded || seededOpenDomain.current) return;
+    seededOpenDomain.current = true;
+    setOpenDomains(new Set([firstIncompleteDomain]));
+  }, [isLoaded, firstIncompleteDomain]);
 
   const query = search.trim().toLowerCase();
 
