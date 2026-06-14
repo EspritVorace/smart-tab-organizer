@@ -1080,7 +1080,7 @@
   "explorationDetectionNote": { "message": "Una capacidad pasa a descubierta la primera vez que se muestra o selecciona, nunca al guardar. No es reversible y no mide el volumen de uso." },
   "explorationReviewPromptText": { "message": "Si te gusta la extensión, puedes ayudar a otras personas a descubrirla." },
   "explorationReviewPromptCta": { "message": "Dejar una reseña" },
-  "explorationReviewPromptDismiss": { "message": "Descartar" },
+  "explorationReviewPromptDismiss": { "message": "No volver a recordármelo" },
   "explorationMiniTitle": { "message": "Exploración" },
   "explorationMiniLink": { "message": "Ver el catálogo" },
   "explorationEntry_grouping_create_label": { "message": "Crear una regla" },

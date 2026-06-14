@@ -1081,7 +1081,7 @@
   "explorationDetectionNote": { "message": "A capability becomes discovered the first time it is shown or selected, never on save. It is not reversible and does not measure usage volume." },
   "explorationReviewPromptText": { "message": "If you enjoy the extension, you can help others discover it." },
   "explorationReviewPromptCta": { "message": "Leave a review" },
-  "explorationReviewPromptDismiss": { "message": "Dismiss" },
+  "explorationReviewPromptDismiss": { "message": "Don't remind me again" },
   "explorationMiniTitle": { "message": "Exploration" },
   "explorationMiniLink": { "message": "View the catalogue" },
   "explorationEntry_grouping_create_label": { "message": "Create a rule" },

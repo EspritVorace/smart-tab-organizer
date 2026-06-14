@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Callout, Flex, IconButton, Text, Tooltip } from '@radix-ui/themes';
-import { Star, X } from 'lucide-react';
+import { Button, Callout, Flex, Text } from '@radix-ui/themes';
+import { Star } from 'lucide-react';
 import { explorationReviewDismissedItem } from '@/utils/workspaceStorage.js';
 import { getStoreReviewUrl } from '@/utils/browserUrls.js';
 import { getMessage } from '@/utils/i18n.js';
@@ -70,19 +70,15 @@ export function ExplorationReviewCallout({ eligible }: ExplorationReviewCalloutP
               {getMessage('explorationReviewPromptCta')}
             </a>
           </Button>
-          <Tooltip content={getMessage('explorationReviewPromptDismiss')}>
-            <IconButton
-              size="1"
-              variant="ghost"
-              color="gray"
-              aria-label={getMessage('explorationReviewPromptDismiss')}
-              title={getMessage('explorationReviewPromptDismiss')}
-              onClick={handleDismiss}
-              data-testid="exploration-review-dismiss"
-            >
-              <X size={15} aria-hidden="true" />
-            </IconButton>
-          </Tooltip>
+          <Button
+            size="1"
+            variant="ghost"
+            color="gray"
+            onClick={handleDismiss}
+            data-testid="exploration-review-dismiss"
+          >
+            {getMessage('explorationReviewPromptDismiss')}
+          </Button>
         </Flex>
       </Flex>
     </Callout.Root>
