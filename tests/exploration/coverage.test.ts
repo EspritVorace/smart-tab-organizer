@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { computeCoverage, getEntryState, discoveredSet } from '../../src/exploration/coverage';
+import {
+  computeCoverage,
+  getEntryState,
+  discoveredSet,
+  reviewPromptThreshold,
+  isReviewPromptEligible,
+} from '../../src/exploration/coverage';
 import { phaseForCoverage } from '../../src/exploration/phases';
 import type { CatalogEntry } from '../../src/exploration/catalog';
 import type { ExplorationProgress } from '../../src/types/exploration';
@@ -78,6 +84,32 @@ describe('computeCoverage', () => {
     const cov = computeCoverage(progress({ discovered: ['a', 'b', 'c'] }), tinyCatalog);
     expect(cov.percent).toBe(75);
     expect(cov.phase.key).toBe('proficiency');
+  });
+});
+
+describe('reviewPromptThreshold', () => {
+  it('is one capability past the entry into the Maîtrise (60%) phase', () => {
+    // ceil(0.6 * total) is the smallest count reaching 60%; + 1 the extra one.
+    expect(reviewPromptThreshold(204)).toBe(124); // ceil(122.4) + 1
+    expect(reviewPromptThreshold(200)).toBe(121); // ceil(120) + 1
+    expect(reviewPromptThreshold(4)).toBe(4); // ceil(2.4) + 1
+  });
+});
+
+describe('isReviewPromptEligible', () => {
+  it('is false just below the threshold and true at it', () => {
+    // tinyCatalog total is 4, so the threshold is 4 discovered.
+    const below = computeCoverage(progress({ discovered: ['a', 'b', 'c'] }), tinyCatalog);
+    expect(isReviewPromptEligible(below)).toBe(false);
+
+    const at = computeCoverage(progress({ discovered: ['a', 'b', 'c', 'd'] }), tinyCatalog);
+    expect(isReviewPromptEligible(at)).toBe(true);
+  });
+
+  it('stays eligible into the Expertise band', () => {
+    const full = computeCoverage(progress({ discovered: ['a', 'b', 'c', 'd'] }), tinyCatalog);
+    expect(full.phase.key).toBe('expertise');
+    expect(isReviewPromptEligible(full)).toBe(true);
   });
 });
 

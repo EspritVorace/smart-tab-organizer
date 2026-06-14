@@ -213,6 +213,16 @@ export const explorationFilterItem = storage.defineItem<string>(
   { defaultValue: 'all' },
 );
 
+/**
+ * Whether the user dismissed the discreet "leave a review" prompt shown on the
+ * exploration page once past the Maîtrise milestone. Global UI pref; once true
+ * it never shows again.
+ */
+export const explorationReviewDismissedItem = storage.defineItem<boolean>(
+  'local:explorationReviewDismissed',
+  { defaultValue: false },
+);
+
 /** Test-only helper to clear the scoped-items memo. */
 export function _resetWorkspaceItemsCacheForTests(): void {
   scopedItemsCache.clear();
