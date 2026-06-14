@@ -8,6 +8,7 @@ import { test, expect } from './fixtures';
 import { goToExplorationSection } from './helpers/navigation';
 import { auditPage } from './helpers/a11y';
 import { CATALOG } from '../../src/exploration/catalog';
+import { reviewPromptThreshold } from '../../src/exploration/coverage';
 
 /** Every catalogue id belonging to the grouping domain (the first domain). */
 const GROUPING_IDS = CATALOG.filter((e) => e.domain === 'grouping').map((e) => e.id);
@@ -153,6 +154,112 @@ test.describe('Default expanded group', () => {
     // grouping is now complete -> collapsed; dedup is the first incomplete -> open.
     await expect(groupExpanded(page, 'grouping')).toHaveAttribute('aria-expanded', 'false');
     await expect(groupExpanded(page, 'dedup')).toHaveAttribute('aria-expanded', 'true');
+
+    await page.close();
+  });
+});
+
+test.describe('Review prompt at the Maîtrise milestone', () => {
+  // Coverage count past which the prompt becomes eligible ("maîtrise + 1
+  // capacité"). Derived, not hardcoded, so it tracks the catalogue size.
+  const THRESHOLD = reviewPromptThreshold();
+
+  // Capabilities the options/#exploration view auto-marks on mount:
+  // 'nav.sidebarSections' (options.tsx) and 'stats.exploration' (ExplorationPage).
+  // Seeding them makes those marks idempotent, so the discovered count stays
+  // exactly what the test asks for (otherwise they would bump it over the seuil).
+  const AUTO_MARKED_ON_MOUNT = ['nav.sidebarSections', 'stats.exploration'];
+
+  /** Exactly `count` discovered ids, always including the mount-marked ones. */
+  function pick(count: number): string[] {
+    const ids = new Set<string>(AUTO_MARKED_ON_MOUNT);
+    for (const entry of CATALOG) {
+      if (ids.size >= count) break;
+      ids.add(entry.id);
+    }
+    return [...ids];
+  }
+
+  /**
+   * Seeds the global exploration progress (and the dismissed flag) then reloads.
+   * The worker context shares storage across tests, so each test sets the
+   * dismissed flag explicitly to stay independent of execution order.
+   */
+  async function seedExploration(
+    page: import('@playwright/test').Page,
+    discovered: string[],
+    dismissed = false,
+  ): Promise<void> {
+    await page.evaluate(
+      ({ ids, d }) =>
+        chrome.storage.local.set({
+          explorationProgress: { discovered: ids, manuallyMarked: [], values: {}, initializedAt: Date.now() },
+          explorationReviewDismissed: d,
+        }),
+      { ids: discovered, d: dismissed },
+    );
+    await page.reload();
+    await page.getByTestId('page-exploration').waitFor({ state: 'visible', timeout: 10_000 });
+  }
+
+  test('stays hidden upon entering Maîtrise but before the extra capability', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    await goToExplorationSection(page, extensionId);
+
+    // THRESHOLD - 1 discoveries already sit in the Maîtrise phase (>=60%) but
+    // do not yet meet the "+1 capability" rule, so the prompt must not show.
+    await seedExploration(page, pick(THRESHOLD - 1));
+
+    await expect(page.getByTestId('exploration-coverage-summary')).toBeVisible();
+    await expect(page.getByTestId('exploration-review-prompt')).toHaveCount(0);
+
+    await page.close();
+  });
+
+  test('appears at the milestone and links to the store reviews page', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    await goToExplorationSection(page, extensionId);
+
+    await seedExploration(page, pick(THRESHOLD));
+
+    await expect(page.getByTestId('exploration-review-prompt')).toBeVisible();
+
+    const link = page.getByTestId('exploration-review-link');
+    // Chrome MV3 build -> Chrome Web Store reviews deep link, opened in a new tab.
+    await expect(link).toHaveAttribute('href', /chromewebstore\.google\.com\/.+\/reviews/);
+    await expect(link).toHaveAttribute('target', '_blank');
+
+    await auditPage(page, 'exploration-review-visible');
+    await page.close();
+  });
+
+  test('dismissing it with "don\'t remind me again" hides it and persists across reload', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    await goToExplorationSection(page, extensionId);
+
+    await seedExploration(page, pick(THRESHOLD));
+    await expect(page.getByTestId('exploration-review-prompt')).toBeVisible();
+
+    await page.getByTestId('exploration-review-dismiss').click();
+    await expect(page.getByTestId('exploration-review-prompt')).toHaveCount(0);
+
+    // The choice persists: still hidden after a reload.
+    await page.reload();
+    await page.getByTestId('page-exploration').waitFor({ state: 'visible', timeout: 10_000 });
+    await expect(page.getByTestId('exploration-review-prompt')).toHaveCount(0);
+
+    // And the flag is stored.
+    const flag = await page.evaluate(() => chrome.storage.local.get('explorationReviewDismissed'));
+    expect(flag.explorationReviewDismissed).toBe(true);
 
     await page.close();
   });
