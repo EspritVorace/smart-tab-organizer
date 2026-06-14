@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
+import { Box } from '@radix-ui/themes';
 import { ExplorationReviewCallout } from './ExplorationReviewCallout';
 
 const meta = {
@@ -6,6 +7,15 @@ const meta = {
   component: ExplorationReviewCallout,
   parameters: { layout: 'padded' },
   tags: ['autodocs'],
+  // Render at a realistic page-column width so the prompt reads on one line,
+  // as it does under the coverage summary on the exploration page.
+  decorators: [
+    (Story) => (
+      <Box style={{ maxWidth: 680 }}>
+        <Story />
+      </Box>
+    ),
+  ],
 } satisfies Meta<typeof ExplorationReviewCallout>;
 
 export default meta;

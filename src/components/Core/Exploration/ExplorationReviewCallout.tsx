@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Callout, Flex, IconButton, Tooltip } from '@radix-ui/themes';
+import { Button, Callout, Flex, IconButton, Text, Tooltip } from '@radix-ui/themes';
 import { Star, X } from 'lucide-react';
 import { explorationReviewDismissedItem } from '@/utils/workspaceStorage.js';
 import { getStoreReviewUrl } from '@/utils/browserUrls.js';
@@ -51,16 +51,16 @@ export function ExplorationReviewCallout({ eligible }: ExplorationReviewCalloutP
   if (!eligible || dismissed !== false) return null;
 
   return (
-    <Callout.Root color="gray" variant="surface" data-testid="exploration-review-prompt">
-      <Callout.Icon>
-        <Star size={16} aria-hidden="true" />
+    <Callout.Root color="gray" variant="soft" size="1" data-testid="exploration-review-prompt">
+      <Callout.Icon style={{ color: 'var(--amber-9)' }}>
+        <Star size={16} aria-hidden="true" fill="var(--amber-9)" />
       </Callout.Icon>
-      <Flex align="center" justify="between" gap="3" wrap="wrap" style={{ width: '100%' }}>
-        <Callout.Text style={{ flex: 1, minWidth: 180 }}>
+      <Flex align="center" gap="3" wrap="wrap" style={{ width: '100%' }}>
+        <Text size="2" color="gray" highContrast style={{ flex: 1, minWidth: 160 }}>
           {getMessage('explorationReviewPromptText')}
-        </Callout.Text>
-        <Flex align="center" gap="2" flexShrink="0">
-          <Button asChild size="1" variant="soft" color="gray">
+        </Text>
+        <Flex align="center" gap="1" flexShrink="0">
+          <Button asChild size="1" variant="soft">
             <a
               href={getStoreReviewUrl()}
               target="_blank"
