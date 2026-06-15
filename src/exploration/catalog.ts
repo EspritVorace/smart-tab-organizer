@@ -192,6 +192,7 @@ export const CATALOG: readonly CatalogEntry[] = [
   e('help.onboardingHero', 'help', '#home', 'ephemeral'),
   e('help.about', 'help', '#home', 'touchpoint', { doc: 'reference/about-dialog' }),
   e('help.changelog', 'help', '#home', 'touchpoint', { doc: 'reference/about-dialog#changelog' }),
+  e('help.devTools', 'help', '#home', 'touchpoint', { doc: 'reference/about-dialog#built-with' }),
 
   // 10. Réglages et personnalisation
   e('settings.notif.grouping', 'settings', '#settings', 'touchpoint'),

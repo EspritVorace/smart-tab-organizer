@@ -492,7 +492,13 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
             )}
 
             {devPackages.length > 0 && (
-              <Collapsible.Root open={devToolsOpen} onOpenChange={setDevToolsOpen}>
+              <Collapsible.Root
+                open={devToolsOpen}
+                onOpenChange={(open) => {
+                  setDevToolsOpen(open);
+                  if (open) void markDiscovered('help.devTools');
+                }}
+              >
                 <Collapsible.Trigger asChild>
                   <button type="button" className="about-dialog-disclosure">
                     <span style={subSectionLabelStyle}>
