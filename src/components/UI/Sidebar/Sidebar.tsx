@@ -16,6 +16,8 @@ export interface SidebarItem {
   onClick?: () => void;
   badge?: string | number;
   accentColor?: string;
+  /** Optional coverage ratio (0-100) shown as a thin Progress under the label. */
+  progress?: number;
 }
 
 export interface SidebarSection {
