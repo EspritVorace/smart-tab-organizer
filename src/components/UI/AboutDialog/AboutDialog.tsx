@@ -289,7 +289,7 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Content
         data-testid="about-dialog"
-        maxWidth="540px"
+        maxWidth="680px"
         style={{
           padding: 0,
           overflow: 'hidden',
