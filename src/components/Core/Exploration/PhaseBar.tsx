@@ -11,34 +11,80 @@ interface PhaseBarProps {
 }
 
 /**
- * The retained phase visualization (direction `bar`): a single global progress
- * bar with the four phase names laid out underneath, the current one in bold.
- * The phase state is carried by text, never by color alone.
+ * Phase journey for direction `bar`. A single global progress bar marks the real
+ * phase boundaries as ticks (the thresholds are intentionally uneven: 25 / 60 /
+ * 85 %) plus a marker at the current coverage. Underneath, the four phases are
+ * laid out as bands proportional to their coverage range. Each phase carries its
+ * state in text (done / in progress / upcoming), never by color alone, and the
+ * full range is exposed to assistive tech via the band's accessible name.
  */
 export function PhaseBar({ ratio, currentIndex }: PhaseBarProps) {
   const percent = Math.round(Math.min(Math.max(ratio, 0), 1) * 100);
+  const lastIndex = EXPLORATION_PHASES.length - 1;
+
   return (
     <Box>
-      <Progress value={percent} size="2" aria-hidden="true" />
-      <Flex justify="between" mt="2" gap="1">
+      <Box className={styles.phaseTrack}>
+        <Progress value={percent} size="2" aria-hidden="true" />
+        {EXPLORATION_PHASES.slice(1).map((phase) => (
+          <span
+            key={phase.key}
+            className={styles.phaseTick}
+            style={{ left: `${Math.round(phase.min * 100)}%` }}
+            aria-hidden="true"
+          />
+        ))}
+        <span className={styles.phaseHead} style={{ left: `${percent}%` }} aria-hidden="true" />
+      </Box>
+
+      <Flex mt="2">
         {EXPLORATION_PHASES.map((phase, index) => {
           const isCurrent = index === currentIndex;
           const isDone = index < currentIndex;
-          let align: 'left' | 'center' | 'right' = 'center';
-          if (index === 0) align = 'left';
-          else if (index === EXPLORATION_PHASES.length - 1) align = 'right';
+          const minPct = Math.round(phase.min * 100);
+          const maxPct = Math.min(Math.round(phase.max * 100), 100);
+          const align = index === 0 ? 'start' : index === lastIndex ? 'end' : 'center';
+          const textAlign = index === 0 ? 'left' : index === lastIndex ? 'right' : 'center';
+          const stateKey: MessageKey = isDone
+            ? 'explorationPhaseStateDone'
+            : isCurrent
+              ? 'explorationPhaseStateCurrent'
+              : 'explorationPhaseStateUpcoming';
+          const name = getMessage(phase.labelKey as MessageKey);
+          const range = getMessage('explorationPhaseRangeLabel', [String(minPct), String(maxPct)]);
+          const state = getMessage(stateKey);
           return (
-            <Text
+            <Flex
               key={phase.key}
-              size="1"
-              weight={isCurrent ? 'bold' : 'regular'}
+              direction="column"
               align={align}
-              color={isCurrent || isDone ? undefined : 'gray'}
-              className={styles.phaseLabel}
-              data-current={isCurrent || undefined}
+              role="group"
+              aria-label={`${name}, ${range}, ${state}`}
+              className={styles.phaseBand}
+              style={{ flexGrow: maxPct - minPct, flexBasis: 0 }}
             >
-              {getMessage(phase.labelKey as MessageKey)}
-            </Text>
+              <Text
+                size="1"
+                weight="medium"
+                align={textAlign}
+                color={isDone || isCurrent ? 'indigo' : 'gray'}
+                className={styles.phaseState}
+                aria-hidden="true"
+              >
+                {state}
+              </Text>
+              <Text
+                size="1"
+                weight={isCurrent ? 'bold' : 'regular'}
+                align={textAlign}
+                color={isCurrent || isDone ? undefined : 'gray'}
+                className={styles.phaseLabel}
+                data-current={isCurrent || undefined}
+                aria-hidden="true"
+              >
+                {name}
+              </Text>
+            </Flex>
           );
         })}
       </Flex>

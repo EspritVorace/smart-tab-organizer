@@ -1003,6 +1003,12 @@ export type GeneratedI18nStructure = {
   "explorationPhaseGettingStarted": { substitutions: 0, plural: false };
   "explorationPhaseProficiency": { substitutions: 0, plural: false };
   "explorationPhaseExpertise": { substitutions: 0, plural: false };
+  "explorationPhaseStateDone": { substitutions: 0, plural: false };
+  "explorationPhaseStateCurrent": { substitutions: 0, plural: false };
+  "explorationPhaseStateUpcoming": { substitutions: 0, plural: false };
+  "explorationDomainComplete": { substitutions: 0, plural: false };
+  "explorationPhaseRangeLabel": { substitutions: 2, plural: false };
+  "explorationPhaseHint": { substitutions: 0, plural: false };
   "explorationDomainGrouping": { substitutions: 0, plural: false };
   "explorationDomainDedup": { substitutions: 0, plural: false };
   "explorationDomainSessions": { substitutions: 0, plural: false };
@@ -1028,7 +1034,9 @@ export type GeneratedI18nStructure = {
   "explorationMarkAction": { substitutions: 0, plural: false };
   "explorationUnmarkAction": { substitutions: 0, plural: false };
   "explorationGotoUi": { substitutions: 0, plural: false };
+  "explorationGotoUiShort": { substitutions: 0, plural: false };
   "explorationReadDoc": { substitutions: 0, plural: false };
+  "explorationReadDocShort": { substitutions: 0, plural: false };
   "explorationEmptyTitle": { substitutions: 0, plural: false };
   "explorationEmptyHint": { substitutions: 0, plural: false };
   "explorationDetectionNote": { substitutions: 0, plural: false };

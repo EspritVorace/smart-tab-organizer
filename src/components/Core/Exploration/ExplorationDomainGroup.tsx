@@ -1,6 +1,6 @@
 import * as Collapsible from '@radix-ui/react-collapsible';
-import { Box, Card, Flex, Progress, Text } from '@radix-ui/themes';
-import { ChevronRight } from 'lucide-react';
+import { Badge, Box, Card, Flex, Progress, Separator, Text } from '@radix-ui/themes';
+import { Check, ChevronRight } from 'lucide-react';
 import { IconBox } from '@/components/UI/IconBox/IconBox.js';
 import type { CatalogEntry } from '@/exploration/catalog.js';
 import type { ExplorationDomain } from '@/exploration/domains.js';
@@ -59,18 +59,24 @@ export function ExplorationDomainGroup({
         />
       )}
       <IconBox icon={DOMAIN_ICONS[domain]} size="sm" variant="soft" />
-      <Text size="2" weight="medium" style={{ minWidth: 140 }}>
+      <Text size="2" weight="medium" style={{ minWidth: 140, lineHeight: 1 }}>
         {name}
       </Text>
       <Box className={styles.domainBar}>
         <Progress value={percent} size="2" aria-hidden="true" />
       </Box>
-      <Text size="2" className={styles.numeric}>
+      <Text size="2" className={styles.numeric} style={{ lineHeight: 1 }}>
         <Text as="span" weight="bold">{discovered}</Text>/{total}
       </Text>
-      <Text size="2" color="indigo" className={styles.numeric} style={{ minWidth: 40, textAlign: 'right' }}>
+      <Text size="2" weight="bold" highContrast className={styles.numeric} style={{ minWidth: 44, textAlign: 'right', lineHeight: 1 }}>
         {percent} %
       </Text>
+      {percent === 100 && (
+        <Badge color="green" variant="soft" highContrast size="1" ml="2">
+          <Check size={12} aria-hidden="true" />
+          {getMessage('explorationDomainComplete')}
+        </Badge>
+      )}
     </Flex>
   );
 
@@ -105,6 +111,7 @@ export function ExplorationDomainGroup({
             </button>
           </Collapsible.Trigger>
         )}
+        {isOpen && <Separator size="4" />}
         <Collapsible.Content>{body}</Collapsible.Content>
       </Collapsible.Root>
     </Card>

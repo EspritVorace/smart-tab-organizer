@@ -1,4 +1,4 @@
-import { Badge, Flex, IconButton, Text, Tooltip } from '@radix-ui/themes';
+import { Badge, Button, Flex, Text, Tooltip } from '@radix-ui/themes';
 import { ArrowRight, BookOpen, Check, Circle, Lock } from 'lucide-react';
 import type { CatalogEntry } from '@/exploration/catalog.js';
 import type { EntryDisplayState, DiscoveryProvenance, ExplorationProgress } from '@/types/exploration.js';
@@ -82,32 +82,35 @@ export function CatalogRow({ entry, state, provenance, progress, onToggleMark, o
         )}
       </Flex>
 
-      <Flex align="center" gap="1">
+      <Flex align="center" gap="2" style={{ flexShrink: 0 }}>
         <Tooltip content={getMessage('explorationGotoUi')}>
-          <IconButton
+          <Button
             size="1"
-            variant="ghost"
+            variant="soft"
             color="gray"
+            highContrast
             aria-label={getMessage('explorationGotoUi')}
             onClick={() => onGoToUi(entry.uiTarget)}
             data-testid={`exploration-goto-${entry.id}`}
           >
-            <ArrowRight size={15} aria-hidden="true" />
-          </IconButton>
+            <ArrowRight size={14} aria-hidden="true" />
+            {getMessage('explorationGotoUiShort')}
+          </Button>
         </Tooltip>
         {entry.docUrl && (
           <Tooltip content={getMessage('explorationReadDoc')}>
-            <IconButton
-              size="1"
-              variant="ghost"
-              color="gray"
-              aria-label={getMessage('explorationReadDoc')}
-              asChild
-            >
-              <a href={getDocsUrl(entry.docUrl)} target="_blank" rel="noopener noreferrer">
-                <BookOpen size={15} aria-hidden="true" />
+            <Button size="1" variant="ghost" color="gray" highContrast asChild>
+              <a
+                href={getDocsUrl(entry.docUrl)}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={getMessage('explorationReadDoc')}
+                data-testid={`exploration-doc-${entry.id}`}
+              >
+                <BookOpen size={14} aria-hidden="true" />
+                {getMessage('explorationReadDocShort')}
               </a>
-            </IconButton>
+            </Button>
           </Tooltip>
         )}
       </Flex>

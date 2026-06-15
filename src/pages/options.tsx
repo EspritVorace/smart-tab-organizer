@@ -19,6 +19,7 @@ import { useStorageUsage } from '@/hooks/useStorageUsage.js';
 import { useDeepLinking, type StatsSubTab } from '@/hooks/useDeepLinking.js';
 import { useShortcuts, type ShortcutAction } from '@/hooks/useShortcuts.js';
 import { useThemeToggleShortcut } from '@/hooks/useThemeToggleShortcut.js';
+import { useExploration } from '@/hooks/useExploration.js';
 import { getDocsUrlForTab } from '@/utils/docsUrl';
 import { getMessage } from '@/utils/i18n';
 import { markDiscovered } from '@/exploration/progressStore';
@@ -157,6 +158,7 @@ export function OptionsContent() {
     );
     const sessionsCount = activeSessions.length + pinnedSessions.length;
     const workspacesCount = workspaces.length;
+    const { coverage: explorationCoverage } = useExploration();
 
     const sidebarSections: SidebarSection[] = useMemo(() => [
         {
@@ -173,7 +175,7 @@ export function OptionsContent() {
             label: getMessage('sidebarSectionTracking'),
             items: [
                 { id: 'stats', label: getMessage('statisticsTab'), icon: BarChart3, accentColor: 'indigo' },
-                { id: 'exploration', label: getMessage('explorationTab'), icon: Compass, accentColor: 'indigo' },
+                { id: 'exploration', label: getMessage('explorationTab'), icon: Compass, accentColor: 'indigo', progress: explorationCoverage.percent },
             ],
         },
         {
@@ -185,7 +187,7 @@ export function OptionsContent() {
                 { id: 'workspaces', label: getMessage('workspacesTab'), icon: Layers, accentColor: 'indigo', badge: workspacesCount || undefined },
             ],
         },
-    ], [rulesCount, sessionsCount, workspacesCount]);
+    ], [rulesCount, sessionsCount, workspacesCount, explorationCoverage.percent]);
 
     // Exploration: the sidebar with its grouped sections is shown on the
     // options page (ephemeral discovery on first render).
