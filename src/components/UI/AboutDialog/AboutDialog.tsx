@@ -21,6 +21,7 @@ import { browser } from 'wxt/browser';
 import { getDocsUrl } from '@/utils/docsUrl';
 import { getMessage } from '@/utils/i18n';
 import { loadThirdPartyLicenses, type ThirdPartyPackage } from '@/utils/thirdPartyLicenses';
+import { markDiscovered } from '@/exploration/progressStore';
 import { DialogCloseButton } from '@/components/UI/DialogShell';
 import { ExtensionMark } from './ExtensionMark';
 
@@ -289,7 +290,7 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Content
         data-testid="about-dialog"
-        maxWidth="540px"
+        maxWidth="680px"
         style={{
           padding: 0,
           overflow: 'hidden',
@@ -491,7 +492,13 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
             )}
 
             {devPackages.length > 0 && (
-              <Collapsible.Root open={devToolsOpen} onOpenChange={setDevToolsOpen}>
+              <Collapsible.Root
+                open={devToolsOpen}
+                onOpenChange={(open) => {
+                  setDevToolsOpen(open);
+                  if (open) void markDiscovered('help.devTools');
+                }}
+              >
                 <Collapsible.Trigger asChild>
                   <button type="button" className="about-dialog-disclosure">
                     <span style={subSectionLabelStyle}>
@@ -566,7 +573,12 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
               size="2"
               data-testid="about-dialog-btn-changelog"
             >
-              <a href={CHANGELOG_URL} target="_blank" rel="noopener noreferrer">
+              <a
+                href={CHANGELOG_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => void markDiscovered('help.changelog')}
+              >
                 {getMessage('aboutDialogChangelogButton')}
               </a>
             </Button>

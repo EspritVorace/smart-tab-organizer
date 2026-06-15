@@ -1,0 +1,80 @@
+---
+title: Boîte À propos
+description: Où trouver la boîte À propos, ce qu'affichent les sections Informations, Liens et Construit avec, et comment lire la version, le navigateur et la langue.
+---
+
+import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import aboutDialogLight from '../../../../assets/screenshots/fr-light-about-dialog.png';
+import aboutDialogDark from '../../../../assets/screenshots/fr-dark-about-dialog.png';
+
+<Aside type="tip" title="En bref">
+- La **boîte À propos** est la carte d'identité de l'extension : version, détails d'exécution, liens utiles et crédits open source.
+- Elle s'ouvre depuis le menu du **sélecteur de workspace** (`À propos...`), à la fois dans le pied de page des Options et dans le popup.
+- Tout ce qu'elle affiche est en lecture seule. Elle n'effectue aucune action sur vos onglets, règles ou sessions.
+</Aside>
+
+La boîte À propos regroupe, au même endroit, les informations dont vous avez généralement besoin pour vérifier la version utilisée, signaler un problème ou ouvrir la documentation.
+
+<ThemeImage
+  lightSrc={aboutDialogLight}
+  darkSrc={aboutDialogDark}
+  alt="La boîte À propos affichant la version, les détails d'environnement, les liens utiles et les crédits open source."
+/>
+
+## Ouvrir la boîte \{#open}
+
+<Steps>
+1. Ouvrez le **sélecteur de workspace** (le menu déroulant en bas de la page Options, ou son équivalent dans le popup).
+2. Choisissez l'entrée **`À propos...`**.
+3. La boîte s'ouvre, centrée, au-dessus de la page courante. Fermez-la avec le bouton **Fermer**, la croix en haut à droite, ou la touche `Échap`.
+</Steps>
+
+## Ce qu'elle affiche
+
+La boîte se compose d'un en-tête fixe, de trois sections déroulantes et d'un pied de page.
+
+### En-tête
+
+L'icône de l'extension, son nom (`Smart Tab Organizer`), une accroche d'une ligne, et une **pastille de version** (`v X.Y.Z`).
+
+### Informations \{#information}
+
+Des détails d'exécution détectés depuis le navigateur, utiles à joindre à un rapport de bug :
+
+| Champ | Signification |
+|---|---|
+| **Version** | La version installée de l'extension. |
+| **Navigateur** | Le navigateur détecté et sa version majeure (Chrome, Firefox, Edge, Opera, Safari). Le système d'exploitation (Windows, macOS, Linux, Android, iOS) est affiché à côté. |
+| **Langue** | La langue d'interface active (anglais, français ou espagnol) avec son code court (`en`, `fr`, `es`). |
+
+### Liens \{#links}
+
+Quatre raccourcis qui s'ouvrent dans un nouvel onglet :
+
+| Lien | Destination |
+|---|---|
+| **Documentation** | Ce site, `docs.esprit-vorace.fr`. |
+| **Code source** | Le dépôt GitHub `EspritVorace/smart-tab-organizer`. |
+| **Signaler un problème** | Le formulaire d'issue GitHub, pour déposer un bug ou une demande. |
+| **Licences open source** | La référence [Licences open source](/fr/reference/open-source-licenses), qui liste chaque attribution tierce. |
+
+### Construit avec \{#built-with}
+
+Les composants open source embarqués dans l'extension, présentés sous forme de puces. Une sous-section repliable **Outils de dev** liste les paquets utilisés uniquement pour construire et tester le projet (non livrés dans l'extension). La liste complète, avec versions et licences, se trouve sur la page [Licences open source](/fr/reference/open-source-licenses).
+
+### Pied de page \{#changelog}
+
+La mention de licence et de copyright (`GPLv3 · 2024 / 2026`), un lien vers l'auteur, et le bouton **Fermer**. Le bouton **Changelog complet** ouvre la page des releases GitHub dans un nouvel onglet, où chaque version et ses notes sont listées.
+
+<Aside type="note">
+Les champs navigateur, système d'exploitation et langue sont détectés au moment où la boîte s'ouvre. Ils reflètent votre environnement courant : deux utilisateurs peuvent donc légitimement voir des valeurs différentes.
+</Aside>
+
+## Étapes suivantes
+
+<CardGrid>
+  <LinkCard title="Licences open source" href="/fr/reference/open-source-licenses" description="La liste complète des composants embarqués et de leurs licences." />
+  <LinkCard title="Workspaces" href="/fr/guides/workspaces" description="Le menu du sélecteur qui héberge l'entrée À propos." />
+  <LinkCard title="Tour de l'interface" href="/fr/discover/interface-tour" description="Où vit chaque surface de l'extension." />
+</CardGrid>

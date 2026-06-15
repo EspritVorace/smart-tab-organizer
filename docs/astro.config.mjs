@@ -91,6 +91,7 @@ export default defineConfig({
             { slug: 'reference/categories-and-packs' },
             { slug: 'reference/regex-presets' },
             { slug: 'reference/import-export-json-schema' },
+            { slug: 'reference/about-dialog' },
             { slug: 'reference/open-source-licenses' },
           ],
         },
