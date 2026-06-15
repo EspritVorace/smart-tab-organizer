@@ -6,7 +6,7 @@ import { PageLayout } from '@/components/UI/PageLayout/PageLayout.js';
 import { useExploration } from '@/hooks/useExploration.js';
 import { CATALOG } from '@/exploration/catalog.js';
 import { EXPLORATION_DOMAINS } from '@/exploration/domains.js';
-import { getEntryState } from '@/exploration/coverage.js';
+import { getEntryState, isReviewPromptEligible } from '@/exploration/coverage.js';
 import { setManualMark, markDiscovered } from '@/exploration/progressStore.js';
 import { explorationFilterItem } from '@/utils/workspaceStorage.js';
 import { getMessage } from '@/utils/i18n.js';
@@ -14,6 +14,7 @@ import { logger } from '@/utils/logger.js';
 import type { EntryDisplayState } from '@/types/exploration.js';
 import { ExplorationCoverageSummary } from '@/components/Core/Exploration/ExplorationCoverageSummary.js';
 import { ExplorationDomainGroup } from '@/components/Core/Exploration/ExplorationDomainGroup.js';
+import { ExplorationReviewCallout } from '@/components/Core/Exploration/ExplorationReviewCallout.js';
 
 type ExplorationFilter = 'all' | 'discovered' | 'to-discover' | 'not-possible';
 
@@ -127,6 +128,10 @@ export function ExplorationPage({ syncSettings }: ExplorationPageProps) {
 
   const forceOpen = filter !== 'all' || query.length > 0;
 
+  // Whether the discreet "leave a review" prompt may be shown (past the
+  // "maîtrise + 1 capacité" milestone). The component itself handles dismissal.
+  const reviewEligible = useMemo(() => isReviewPromptEligible(coverage), [coverage]);
+
   const toggleDomain = useCallback((domain: string) => {
     setOpenDomains((prev) => {
       const next = new Set(prev);
@@ -149,6 +154,8 @@ export function ExplorationPage({ syncSettings }: ExplorationPageProps) {
       {() => (
         <Flex direction="column" gap="4" data-testid="page-exploration" aria-busy={!isLoaded || undefined}>
           <ExplorationCoverageSummary coverage={coverage} />
+
+          <ExplorationReviewCallout eligible={reviewEligible} />
 
           <Flex align="center" gap="3" wrap="wrap">
             <SegmentedControl.Root

@@ -2,7 +2,7 @@ import type { ExplorationProgress, EntryDisplayState, DiscoveryProvenance } from
 import { CATALOG, type CatalogEntry } from './catalog.js';
 import { EXPLORATION_DOMAINS, type ExplorationDomain } from './domains.js';
 import { isPrerequisiteMet } from './prerequisites.js';
-import { phaseForCoverage, type ResolvedPhase } from './phases.js';
+import { phaseForCoverage, EXPLORATION_PHASES, type ResolvedPhase } from './phases.js';
 
 /**
  * The set of "discovered" ids: the union of automatic discoveries and manual
@@ -96,4 +96,26 @@ export function computeCoverage(
     phase: phaseForCoverage(ratio),
     perDomain,
   };
+}
+
+/**
+ * Discovered count at which the discreet "leave a review" prompt becomes
+ * eligible: one capability past the entry into the Proficiency ("Maîtrise")
+ * phase ("maîtrise + 1 capacité"). `Math.ceil(min * total)` is the smallest
+ * count whose ratio reaches the phase boundary; `+ 1` applies the extra
+ * capability. Pure function of the catalogue size, so it stays correct as the
+ * catalogue grows.
+ */
+export function reviewPromptThreshold(total: number = CATALOG.length): number {
+  const proficiencyMin = EXPLORATION_PHASES.find((p) => p.key === 'proficiency')?.min ?? 0.6;
+  return Math.ceil(proficiencyMin * total) + 1;
+}
+
+/**
+ * Whether the review prompt may be shown for a given coverage. Stays true once
+ * reached (the count only grows into the Expertise band), so the prompt remains
+ * available until the user dismisses it.
+ */
+export function isReviewPromptEligible(coverage: CoverageSummary): boolean {
+  return coverage.discovered >= reviewPromptThreshold(coverage.total);
 }

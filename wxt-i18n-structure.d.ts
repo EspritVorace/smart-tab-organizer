@@ -1032,6 +1032,9 @@ export type GeneratedI18nStructure = {
   "explorationEmptyTitle": { substitutions: 0, plural: false };
   "explorationEmptyHint": { substitutions: 0, plural: false };
   "explorationDetectionNote": { substitutions: 0, plural: false };
+  "explorationReviewPromptText": { substitutions: 0, plural: false };
+  "explorationReviewPromptCta": { substitutions: 0, plural: false };
+  "explorationReviewPromptDismiss": { substitutions: 0, plural: false };
   "explorationMiniTitle": { substitutions: 0, plural: false };
   "explorationMiniLink": { substitutions: 0, plural: false };
   "explorationEntry_grouping_create_label": { substitutions: 0, plural: false };
