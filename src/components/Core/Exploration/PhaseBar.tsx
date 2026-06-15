@@ -10,6 +10,27 @@ interface PhaseBarProps {
   currentIndex: number;
 }
 
+/** Flex alignment for a band: edges hug the track, the rest stays centered. */
+function bandAlign(index: number, lastIndex: number): 'start' | 'center' | 'end' {
+  if (index === 0) return 'start';
+  if (index === lastIndex) return 'end';
+  return 'center';
+}
+
+/** Text alignment mirroring {@link bandAlign} for the band labels. */
+function bandTextAlign(index: number, lastIndex: number): 'left' | 'center' | 'right' {
+  if (index === 0) return 'left';
+  if (index === lastIndex) return 'right';
+  return 'center';
+}
+
+/** State i18n key for a band, never conveyed by color alone. */
+function phaseStateKey(isDone: boolean, isCurrent: boolean): MessageKey {
+  if (isDone) return 'explorationPhaseStateDone';
+  if (isCurrent) return 'explorationPhaseStateCurrent';
+  return 'explorationPhaseStateUpcoming';
+}
+
 /**
  * Phase journey for direction `bar`. A single global progress bar marks the real
  * phase boundaries as ticks (the thresholds are intentionally uneven: 25 / 60 /
@@ -43,13 +64,9 @@ export function PhaseBar({ ratio, currentIndex }: PhaseBarProps) {
           const isDone = index < currentIndex;
           const minPct = Math.round(phase.min * 100);
           const maxPct = Math.min(Math.round(phase.max * 100), 100);
-          const align = index === 0 ? 'start' : index === lastIndex ? 'end' : 'center';
-          const textAlign = index === 0 ? 'left' : index === lastIndex ? 'right' : 'center';
-          const stateKey: MessageKey = isDone
-            ? 'explorationPhaseStateDone'
-            : isCurrent
-              ? 'explorationPhaseStateCurrent'
-              : 'explorationPhaseStateUpcoming';
+          const align = bandAlign(index, lastIndex);
+          const textAlign = bandTextAlign(index, lastIndex);
+          const stateKey = phaseStateKey(isDone, isCurrent);
           const name = getMessage(phase.labelKey as MessageKey);
           const range = getMessage('explorationPhaseRangeLabel', [String(minPct), String(maxPct)]);
           const state = getMessage(stateKey);
