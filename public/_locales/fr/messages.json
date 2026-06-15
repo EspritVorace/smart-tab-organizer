@@ -1289,6 +1289,8 @@
   "explorationEntry_help_onboardingHero_desc": { "message": "Voir le bloc d'accueil d'onboarding." },
   "explorationEntry_help_about_label": { "message": "Boîte À propos" },
   "explorationEntry_help_about_desc": { "message": "Ouvrir la boîte À propos pour la version, l'environnement et les crédits open source." },
+  "explorationEntry_help_changelog_label": { "message": "Changelog" },
+  "explorationEntry_help_changelog_desc": { "message": "Ouvrir le changelog complet depuis la boîte À propos." },
   "explorationEntry_settings_notif_grouping_label": { "message": "Notifications de groupement" },
   "explorationEntry_settings_notif_grouping_desc": { "message": "Régler les notifications de groupement." },
   "explorationEntry_settings_notif_dedup_label": { "message": "Notifications de déduplication" },

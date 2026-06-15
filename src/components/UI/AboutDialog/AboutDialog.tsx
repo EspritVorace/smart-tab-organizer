@@ -21,6 +21,7 @@ import { browser } from 'wxt/browser';
 import { getDocsUrl } from '@/utils/docsUrl';
 import { getMessage } from '@/utils/i18n';
 import { loadThirdPartyLicenses, type ThirdPartyPackage } from '@/utils/thirdPartyLicenses';
+import { markDiscovered } from '@/exploration/progressStore';
 import { DialogCloseButton } from '@/components/UI/DialogShell';
 import { ExtensionMark } from './ExtensionMark';
 
@@ -566,7 +567,12 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
               size="2"
               data-testid="about-dialog-btn-changelog"
             >
-              <a href={CHANGELOG_URL} target="_blank" rel="noopener noreferrer">
+              <a
+                href={CHANGELOG_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => void markDiscovered('help.changelog')}
+              >
                 {getMessage('aboutDialogChangelogButton')}
               </a>
             </Button>

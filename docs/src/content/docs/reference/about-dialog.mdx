@@ -4,6 +4,9 @@ description: Where to find the About dialog, what the Information, Links and Bui
 ---
 
 import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import ThemeImage from '../../../components/ThemeImage.astro';
+import aboutDialogLight from '../../../assets/screenshots/en-light-about-dialog.png';
+import aboutDialogDark from '../../../assets/screenshots/en-dark-about-dialog.png';
 
 <Aside type="tip" title="At a glance">
 - The **About dialog** is the identity card of the extension: version, runtime details, useful links and open source credits.
@@ -12,6 +15,12 @@ import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components'
 </Aside>
 
 The About dialog gathers, in a single place, the information you usually need when you want to check which version you run, report an issue, or open the documentation.
+
+<ThemeImage
+  lightSrc={aboutDialogLight}
+  darkSrc={aboutDialogDark}
+  alt="About dialog showing the version, environment details, useful links and open source credits."
+/>
 
 ## Open the dialog \{#open}
 
@@ -54,9 +63,9 @@ Four shortcuts opening in a new tab:
 
 The open source components bundled in the extension, shown as chips. A collapsible **Dev tools** subsection lists the packages used only to build and test the project (not shipped in the extension). The full list, with versions and licenses, lives on the [Open source licenses](/reference/open-source-licenses) page.
 
-### Footer
+### Footer \{#changelog}
 
-The license and copyright span (`GPLv3 · 2024 / 2026`), a link to the author, a **Full changelog** button (the GitHub releases), and the **Close** button.
+The license and copyright span (`GPLv3 · 2024 / 2026`), a link to the author, and the **Close** button. The **Full changelog** button opens the GitHub releases page in a new tab, where every version and its notes are listed.
 
 <Aside type="note">
 The browser, operating system and language fields are detected at the moment the dialog opens. They reflect your current environment, so two users may legitimately see different values.

@@ -1289,6 +1289,8 @@
   "explorationEntry_help_onboardingHero_desc": { "message": "Ve el bloque de bienvenida." },
   "explorationEntry_help_about_label": { "message": "Cuadro Acerca de" },
   "explorationEntry_help_about_desc": { "message": "Abre el cuadro Acerca de para la versión, el entorno y los créditos de código abierto." },
+  "explorationEntry_help_changelog_label": { "message": "Registro de cambios" },
+  "explorationEntry_help_changelog_desc": { "message": "Abre el registro de cambios completo desde el cuadro Acerca de." },
   "explorationEntry_settings_notif_grouping_label": { "message": "Notificaciones de agrupación" },
   "explorationEntry_settings_notif_grouping_desc": { "message": "Ajusta las notificaciones de agrupación." },
   "explorationEntry_settings_notif_dedup_label": { "message": "Notificaciones de deduplicación" },

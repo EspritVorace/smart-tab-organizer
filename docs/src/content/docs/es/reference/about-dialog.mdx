@@ -4,6 +4,9 @@ description: Dónde encontrar el cuadro Acerca de, qué muestran las secciones I
 ---
 
 import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import aboutDialogLight from '../../../../assets/screenshots/es-light-about-dialog.png';
+import aboutDialogDark from '../../../../assets/screenshots/es-dark-about-dialog.png';
 
 <Aside type="tip" title="De un vistazo">
 - El **cuadro Acerca de** es la tarjeta de identidad de la extensión: versión, detalles de ejecución, enlaces útiles y créditos de código abierto.
@@ -12,6 +15,12 @@ import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components'
 </Aside>
 
 El cuadro Acerca de reúne, en un mismo lugar, la información que sueles necesitar cuando quieres comprobar qué versión usas, reportar un problema o abrir la documentación.
+
+<ThemeImage
+  lightSrc={aboutDialogLight}
+  darkSrc={aboutDialogDark}
+  alt="El cuadro Acerca de mostrando la versión, los detalles del entorno, los enlaces útiles y los créditos de código abierto."
+/>
 
 ## Abrir el cuadro \{#open}
 
@@ -54,9 +63,9 @@ Cuatro accesos directos que se abren en una nueva pestaña:
 
 Los componentes de código abierto incluidos en la extensión, mostrados como fichas. Una subsección plegable **Herramientas de desarrollo** enumera los paquetes utilizados solo para construir y probar el proyecto (no incluidos en la extensión). La lista completa, con versiones y licencias, está en la página [Licencias de código abierto](/es/reference/open-source-licenses).
 
-### Pie
+### Pie \{#changelog}
 
-La mención de licencia y copyright (`GPLv3 · 2024 / 2026`), un enlace al autor, un botón **Registro completo** (las releases de GitHub) y el botón **Cerrar**.
+La mención de licencia y copyright (`GPLv3 · 2024 / 2026`), un enlace al autor y el botón **Cerrar**. El botón **Registro completo** abre la página de releases de GitHub en una nueva pestaña, donde se enumeran cada versión y sus notas.
 
 <Aside type="note">
 Los campos navegador, sistema operativo e idioma se detectan en el momento en que se abre el cuadro. Reflejan tu entorno actual: por eso dos usuarios pueden ver legítimamente valores distintos.

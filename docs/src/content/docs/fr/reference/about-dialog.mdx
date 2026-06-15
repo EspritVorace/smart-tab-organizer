@@ -4,6 +4,9 @@ description: Où trouver la boîte À propos, ce qu'affichent les sections Infor
 ---
 
 import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import aboutDialogLight from '../../../../assets/screenshots/fr-light-about-dialog.png';
+import aboutDialogDark from '../../../../assets/screenshots/fr-dark-about-dialog.png';
 
 <Aside type="tip" title="En bref">
 - La **boîte À propos** est la carte d'identité de l'extension : version, détails d'exécution, liens utiles et crédits open source.
@@ -12,6 +15,12 @@ import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components'
 </Aside>
 
 La boîte À propos regroupe, au même endroit, les informations dont vous avez généralement besoin pour vérifier la version utilisée, signaler un problème ou ouvrir la documentation.
+
+<ThemeImage
+  lightSrc={aboutDialogLight}
+  darkSrc={aboutDialogDark}
+  alt="La boîte À propos affichant la version, les détails d'environnement, les liens utiles et les crédits open source."
+/>
 
 ## Ouvrir la boîte \{#open}
 
@@ -54,9 +63,9 @@ Quatre raccourcis qui s'ouvrent dans un nouvel onglet :
 
 Les composants open source embarqués dans l'extension, présentés sous forme de puces. Une sous-section repliable **Outils de dev** liste les paquets utilisés uniquement pour construire et tester le projet (non livrés dans l'extension). La liste complète, avec versions et licences, se trouve sur la page [Licences open source](/fr/reference/open-source-licenses).
 
-### Pied de page
+### Pied de page \{#changelog}
 
-La mention de licence et de copyright (`GPLv3 · 2024 / 2026`), un lien vers l'auteur, un bouton **Changelog complet** (les releases GitHub), et le bouton **Fermer**.
+La mention de licence et de copyright (`GPLv3 · 2024 / 2026`), un lien vers l'auteur, et le bouton **Fermer**. Le bouton **Changelog complet** ouvre la page des releases GitHub dans un nouvel onglet, où chaque version et ses notes sont listées.
 
 <Aside type="note">
 Les champs navigateur, système d'exploitation et langue sont détectés au moment où la boîte s'ouvre. Ils reflètent votre environnement courant : deux utilisateurs peuvent donc légitimement voir des valeurs différentes.
