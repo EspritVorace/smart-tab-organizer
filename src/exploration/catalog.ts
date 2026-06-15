@@ -190,6 +190,7 @@ export const CATALOG: readonly CatalogEntry[] = [
   e('help.contextF1', 'help', '#home', 'ephemeral', { doc: 'guides/help-and-documentation#contextual-docs' }),
   e('help.readTip', 'help', '#home', 'ephemeral'),
   e('help.onboardingHero', 'help', '#home', 'ephemeral'),
+  e('help.about', 'help', '#home', 'touchpoint', { doc: 'reference/about-dialog' }),
 
   // 10. Réglages et personnalisation
   e('settings.notif.grouping', 'settings', '#settings', 'touchpoint'),
