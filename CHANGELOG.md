@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.2.5 — since 1.2.4
+
+### New Features
+- Exploration referential: a catalogue of every capability across 10 domains, with a coverage summary, phase bar, live-count filters, search, per-domain collapsible groups and interactive status badges
+- Capabilities light up automatically as you use the extension (detection touchpoints wired across grouping, deduplication, sessions, import/export, statistics, workspaces, settings, help and navigation)
+- Compact exploration widget on the home page and a coverage progress bar in the sidebar
+- Prerequisites shown for not-yet-available capabilities, with live unblocking, plus reversible manual marking that persists
+- Discreet, fully dismissable "leave a review" prompt shown once you pass the Maîtrise milestone, linking to the right store
+- Exploration page reachable via the "m e" shortcut and the #exploration deep link, each capability deep-linking to its UI and its doc section
+
+### Improvements
+- About dialog widened on the options page (540px to 680px); popup stays unchanged
+
+### Bug Fixes
+- Dropped unreachable catalogue entries (io.deepLink, help.tipVariants) and made the onboarding hero capability reachable from the pack-suggestion variant
+- CatalogRow story wrapped in role=list to fix an axe aria-required-parent violation
+- PhaseBar nested ternaries extracted into helpers to clear sonarjs lint errors
+
 ## 1.2.4 — since 1.2.3
 
 ### New Features
