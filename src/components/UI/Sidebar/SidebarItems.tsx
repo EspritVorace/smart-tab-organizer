@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Flex, Text, Button, Box, Badge, Separator } from '@radix-ui/themes';
+import { Flex, Text, Button, Box, Badge, Separator, Progress } from '@radix-ui/themes';
 import { SidebarItem, SidebarSection } from './Sidebar';
 import { useListNavigation } from '@/hooks/useListNavigation';
 
@@ -99,6 +99,7 @@ function CollapsedItemContent({ item, isActive }: { item: SidebarItem; isActive:
 
 function ExpandedItemContent({ item, isActive }: { item: SidebarItem; isActive: boolean }) {
   const Icon = item.icon;
+  const hasProgress = typeof item.progress === 'number';
   return (
     <Flex align="center" gap="3" width="100%">
       <Icon
@@ -108,18 +109,20 @@ function ExpandedItemContent({ item, isActive }: { item: SidebarItem; isActive: 
         aria-hidden="true"
         style={{ flexShrink: 0 }}
       />
-      <Text
-        size="2"
-        weight={isActive ? 'bold' : 'regular'}
-        style={{
-          flex: 1,
-          textAlign: 'left',
-          display: 'flex',
-          alignItems: 'center'
-        }}
-      >
-        {item.label}
-      </Text>
+      {/* Column keeps the label centered in the 44px row; the optional
+          progress sits just below it. */}
+      <Flex direction="column" justify="center" gap="1" style={{ flex: 1, minWidth: 0 }}>
+        <Text
+          size="2"
+          weight={isActive ? 'bold' : 'regular'}
+          style={{ textAlign: 'left', lineHeight: 1 }}
+        >
+          {item.label}
+        </Text>
+        {hasProgress && (
+          <Progress value={item.progress} size="1" aria-hidden="true" />
+        )}
+      </Flex>
       {item.badge && (
         <Badge
           radius="full"

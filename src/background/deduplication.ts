@@ -1,5 +1,13 @@
 import { browser, Browser } from 'wxt/browser';
 import { incrementStat, stampRuleLastUsed } from '@/utils/statisticsUtils.js';
+import { markDiscovered, markValue } from '@/exploration/progressStore.js';
+
+/** Maps a dedup match mode value to its catalogue capability id. */
+const DEDUP_MATCH_CAPABILITY: Record<string, string> = {
+  exact: 'dedup.match.exact',
+  includes: 'dedup.match.includes',
+  exact_ignore_params: 'dedup.match.ignoreParams',
+};
 import { logger } from '@/utils/logger.js';
 import { matchesDomain } from '@/utils/utils';
 import { getSettings } from './settings.js';
@@ -218,6 +226,10 @@ export async function checkAndDeduplicateTab(
 
         await incrementStat('dedup', ruleId);
         await stampRuleLastUsed(ruleId);
+        // Exploration: a deduplication happened. Record the distinct match mode
+        // and mark the matching catalogue capability. Fire-and-forget.
+        void markValue('dedup.matchMode', matchMode);
+        void markDiscovered(DEDUP_MATCH_CAPABILITY[matchMode] ?? 'dedup.match.exact');
 
         const keepIsExisting = tabToKeep.id === duplicateTab.id;
         if (keepIsExisting) {

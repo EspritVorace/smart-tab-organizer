@@ -22,6 +22,7 @@ import { useShortcuts } from '@/hooks/useShortcuts';
 import { useListNavigation } from '@/hooks/useListNavigation';
 import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
+import { markDiscovered } from '@/exploration/progressStore';
 import type { RulesPendingAction } from '@/hooks/useDeepLinking';
 import {
   moveToFirst,
@@ -166,6 +167,7 @@ export function DomainRulesPage({
   }, [rulesViewStateItem]);
 
   const handleViewChange = useCallback((next: RuleViewState) => {
+    void markDiscovered('grouping.view.filterSort');
     setViewState(next);
     rulesViewStateItem.setValue(next).catch(() => {});
   }, [rulesViewStateItem]);
@@ -199,6 +201,7 @@ export function DomainRulesPage({
   }, [pendingAction, openImportRules, onPendingActionConsumed]);
 
   const handleToggleEnabled = useCallback((ruleId: string, enabled: boolean) => {
+    void markDiscovered('grouping.toggle');
     updateRules(syncSettings.domainRules.map(rule =>
       rule.id === ruleId ? { ...rule, enabled } : rule
     ));
@@ -319,6 +322,7 @@ export function DomainRulesPage({
   const isIndeterminate = selectedVisibleCount > 0 && selectedVisibleCount < visibleRules.length;
 
   const handleEditRule = useCallback((rule: DomainRuleSetting) => {
+    void markDiscovered('grouping.edit');
     setEditingRule(stripUiOnlyFields(rule));
     setIsModalOpen(true);
   }, []);
@@ -356,6 +360,7 @@ export function DomainRulesPage({
       // updateRules there would be a side effect during React's update phase
       // and the parent state change would be dropped.
       if (!event.canceled) {
+        void markDiscovered('grouping.reorder.drag');
         const base =
           dragSection && dragSection.key === sectionKey ? dragSection.items : baseRules;
         const reordered = moveRules(base, event);
@@ -513,22 +518,24 @@ export function DomainRulesPage({
       },
       'ruleCard.moveToFirst': () => {
         const focused = getFocusedRule();
-        if (focused) handleMoveToFirst(focused.rule.id);
+        if (focused) { void markDiscovered('grouping.reorder.keyboard'); handleMoveToFirst(focused.rule.id); }
       },
       'ruleCard.moveToLast': () => {
         const focused = getFocusedRule();
-        if (focused) handleMoveToLast(focused.rule.id);
+        if (focused) { void markDiscovered('grouping.reorder.keyboard'); handleMoveToLast(focused.rule.id); }
       },
       'ruleCard.moveToFirstOfDomain': () => {
         const focused = getFocusedRule();
         if (!focused) return;
         if (getRulesForRootDomain(syncSettings.domainRules, focused.rule.domainFilter).length <= 1) return;
+        void markDiscovered('grouping.reorder.keyboard');
         handleMoveToFirstOfDomain(focused.rule.id);
       },
       'ruleCard.moveToLastOfDomain': () => {
         const focused = getFocusedRule();
         if (!focused) return;
         if (getRulesForRootDomain(syncSettings.domainRules, focused.rule.domainFilter).length <= 1) return;
+        void markDiscovered('grouping.reorder.keyboard');
         handleMoveToLastOfDomain(focused.rule.id);
       },
     },

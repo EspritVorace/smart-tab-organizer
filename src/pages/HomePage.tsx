@@ -19,6 +19,8 @@ import {
   MiniStatsSection,
   type MiniStatRoute,
 } from '@/components/HomePage/MiniStatsSection';
+import { MiniExplorationSection } from '@/components/HomePage/MiniExplorationSection';
+import { useExploration } from '@/hooks/useExploration';
 import { HomePageSkeleton } from '@/components/HomePage/HomePageSkeleton';
 import type { QuickActionId } from '@/components/HomePage/data';
 import type { HomeRestoreTarget } from '@/components/HomePage/types';
@@ -59,6 +61,7 @@ export function HomePage({
 }: HomePageProps) {
   const { openImportRules } = useImportExportWizards();
   const { sessions, isLoaded: sessionsLoaded } = useSessions();
+  const { coverage: explorationCoverage } = useExploration();
 
   const pinnedSessions = useMemo(
     () =>
@@ -224,6 +227,8 @@ export function HomePage({
                   locale={locale}
                 />
               )}
+
+              <MiniExplorationSection coverage={explorationCoverage} onOpen={() => onNavigate('exploration')} />
             </Flex>
           )}
         </Box>

@@ -1,6 +1,7 @@
 import { browser, Browser } from 'wxt/browser';
 import { initializeDefaults, migrateRuleColorsFromCategories } from '@/utils/migration.js';
-import { migrateSettingsFromSyncToLocal, migrateRulesAddUrlExtractionMode, migrateRulesAddFallbackLabel, migrateToWorkspaces, migrateSessionsSplitByPinAndArchive, cleanupLegacyCategoriesStorage, initializeFirstRunRedirectFlag, FIRST_RUN_REDIRECT_FLAG } from './migration.js';
+import { migrateSettingsFromSyncToLocal, migrateRulesAddUrlExtractionMode, migrateRulesAddFallbackLabel, migrateToWorkspaces, migrateSessionsSplitByPinAndArchive, cleanupLegacyCategoriesStorage, initializeExplorationProgress, initializeFirstRunRedirectFlag, FIRST_RUN_REDIRECT_FLAG } from './migration.js';
+import { markDiscovered } from '@/exploration/progressStore.js';
 import { logger } from '@/utils/logger.js';
 import {
     handleMiddleClickMessage,
@@ -37,6 +38,7 @@ export function setupInstallationHandler(): void {
         await initializeDefaults();
         await cleanupLegacyCategoriesStorage();
         await migrateRuleColorsFromCategories();
+        await initializeExplorationProgress();
         await initializeFirstRunRedirectFlag(details.reason);
     });
 }
@@ -69,6 +71,9 @@ export function setupCommandHandler(): void {
     }
     browser.commands.onCommand.addListener((name: string) => {
         logger.debug('[COMMANDS] received', name);
+        // Any manifest command means the user reached the "global commands"
+        // capability. Fire-and-forget, never blocks the command flow.
+        void markDiscovered('nav.globalCommands');
         if (name === 'organize-all-tabs') {
             browser.windows.getCurrent()
                 .then(win => { if (win.id != null) return handleOrganizeAllTabs(win.id); })

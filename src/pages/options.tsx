@@ -19,8 +19,10 @@ import { useStorageUsage } from '@/hooks/useStorageUsage.js';
 import { useDeepLinking, type StatsSubTab } from '@/hooks/useDeepLinking.js';
 import { useShortcuts, type ShortcutAction } from '@/hooks/useShortcuts.js';
 import { useThemeToggleShortcut } from '@/hooks/useThemeToggleShortcut.js';
+import { useExploration } from '@/hooks/useExploration.js';
 import { getDocsUrlForTab } from '@/utils/docsUrl';
 import { getMessage } from '@/utils/i18n';
+import { markDiscovered } from '@/exploration/progressStore';
 
 import { Sidebar } from '@/components/UI/Sidebar/Sidebar';
 import type { SidebarSection } from '@/components/UI/Sidebar/Sidebar';
@@ -32,7 +34,7 @@ import { ShortcutsAside, type PageContext } from '@/components/UI/ShortcutsPanel
 import { SequenceIndicator } from '@/components/UI/SequenceIndicator';
 import { HomePage } from './HomePage';
 import { ConfirmDialog } from '@/components/UI/ConfirmDialog/ConfirmDialog';
-import { Home, Shield, FileText, BarChart3, Settings, Archive, Layers } from 'lucide-react';
+import { Home, Shield, FileText, BarChart3, Settings, Archive, Layers, Compass } from 'lucide-react';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { getActiveTabGroupId } from '@/utils/tabCapture';
 import { lazyWithTiming } from '@/utils/lazyWithTiming.js';
@@ -61,6 +63,9 @@ const SettingsPage = lazyWithTiming('SettingsPage', () =>
 );
 const WorkspacesPage = lazyWithTiming('WorkspacesPage', () =>
     import('./WorkspacesPage').then((m) => ({ default: m.WorkspacesPage })),
+);
+const ExplorationPage = lazyWithTiming('ExplorationPage', () =>
+    import('./ExplorationPage').then((m) => ({ default: m.ExplorationPage })),
 );
 import type { Session } from '@/types/session';
 import type { HomeRestoreTarget } from '@/components/HomePage/types';
@@ -153,6 +158,7 @@ export function OptionsContent() {
     );
     const sessionsCount = activeSessions.length + pinnedSessions.length;
     const workspacesCount = workspaces.length;
+    const { coverage: explorationCoverage } = useExploration();
 
     const sidebarSections: SidebarSection[] = useMemo(() => [
         {
@@ -169,6 +175,7 @@ export function OptionsContent() {
             label: getMessage('sidebarSectionTracking'),
             items: [
                 { id: 'stats', label: getMessage('statisticsTab'), icon: BarChart3, accentColor: 'indigo' },
+                { id: 'exploration', label: getMessage('explorationTab'), icon: Compass, accentColor: 'indigo', progress: explorationCoverage.percent },
             ],
         },
         {
@@ -180,7 +187,11 @@ export function OptionsContent() {
                 { id: 'workspaces', label: getMessage('workspacesTab'), icon: Layers, accentColor: 'indigo', badge: workspacesCount || undefined },
             ],
         },
-    ], [rulesCount, sessionsCount, workspacesCount]);
+    ], [rulesCount, sessionsCount, workspacesCount, explorationCoverage.percent]);
+
+    // Exploration: the sidebar with its grouped sections is shown on the
+    // options page (ephemeral discovery on first render).
+    React.useEffect(() => { void markDiscovered('nav.sidebarSections'); }, []);
 
     const activePageTitle = useMemo(() => {
         for (const section of sidebarSections) {
@@ -232,6 +243,7 @@ export function OptionsContent() {
         'options.nav.rules': () => handleTabChange('rules'),
         'options.nav.sessions': () => handleTabChange('sessions'),
         'options.nav.stats': () => handleTabChange('stats'),
+        'options.nav.exploration': () => handleTabChange('exploration'),
         'options.nav.importexport': () => handleTabChange('importexport'),
         'options.nav.settings': () => handleTabChange('settings'),
         'options.nav.workspaces': () => handleTabChange('workspaces'),
@@ -261,7 +273,7 @@ export function OptionsContent() {
         <div id="options-inner" data-testid="options" style={{ display: 'flex', height: '100vh' }}>
             <Sidebar
                 isCollapsed={sidebarCollapsed}
-                onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+                onToggleCollapse={() => { void markDiscovered('nav.sidebarCollapse'); setSidebarCollapsed(!sidebarCollapsed); }}
                 activeItem={currentTab}
                 onItemClick={handleTabChange}
                 onItemPreload={preloadPage}
@@ -334,6 +346,9 @@ export function OptionsContent() {
                                     statsTab={statsTab}
                                     onStatsTabChange={setStatsTab}
                                 />
+                            )}
+                            {currentTab === 'exploration' && (
+                                <ExplorationPage syncSettings={settings} />
                             )}
                             {currentTab === 'settings' && (
                                 <SettingsPage syncSettings={settings} updateSettings={updateSettings} />

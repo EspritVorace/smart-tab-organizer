@@ -9,6 +9,7 @@ import { handleOrganizeAllTabs } from '@/background/organize.js';
 import { shouldSkipDeduplication } from '@/utils/deduplicationSkip.js';
 import { initWorkspaceContext } from '@/utils/workspaceContext.js';
 import { setupActionBadge } from '@/background/actionBadge.js';
+import { setupPinDetection } from '@/background/pinDetection.js';
 
 export default defineBackground(() => {
     // Initialize all event handlers
@@ -20,6 +21,9 @@ export default defineBackground(() => {
 
     // Reflect grouping/dedup state on the toolbar icon.
     setupActionBadge().catch(e => logger.error('[ACTION_BADGE] init failed:', e));
+
+    // Detect whether the user has pinned the toolbar icon (exploration tracker).
+    setupPinDetection();
 
     // Start periodic cleanup for deduplication cache
     startPeriodicCleanup();

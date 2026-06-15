@@ -1,0 +1,80 @@
+---
+title: Cuadro Acerca de
+description: Dónde encontrar el cuadro Acerca de, qué muestran las secciones Información, Enlaces y Construido con, y cómo leer la versión, el navegador y el idioma.
+---
+
+import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import aboutDialogLight from '../../../../assets/screenshots/es-light-about-dialog.png';
+import aboutDialogDark from '../../../../assets/screenshots/es-dark-about-dialog.png';
+
+<Aside type="tip" title="De un vistazo">
+- El **cuadro Acerca de** es la tarjeta de identidad de la extensión: versión, detalles de ejecución, enlaces útiles y créditos de código abierto.
+- Se abre desde el menú del **selector de workspace** (`Acerca de...`), tanto en el pie de la página de Opciones como en el popup.
+- Todo lo que muestra es de solo lectura. No realiza ninguna acción sobre tus pestañas, reglas o sesiones.
+</Aside>
+
+El cuadro Acerca de reúne, en un mismo lugar, la información que sueles necesitar cuando quieres comprobar qué versión usas, reportar un problema o abrir la documentación.
+
+<ThemeImage
+  lightSrc={aboutDialogLight}
+  darkSrc={aboutDialogDark}
+  alt="El cuadro Acerca de mostrando la versión, los detalles del entorno, los enlaces útiles y los créditos de código abierto."
+/>
+
+## Abrir el cuadro \{#open}
+
+<Steps>
+1. Abre el **selector de workspace** (el menú desplegable al final de la página de Opciones, o su equivalente en el popup).
+2. Elige la entrada **`Acerca de...`**.
+3. El cuadro se abre, centrado, sobre la página actual. Ciérralo con el botón **Cerrar**, la cruz en la esquina superior derecha o la tecla `Escape`.
+</Steps>
+
+## Qué muestra
+
+El cuadro se compone de una cabecera fija, tres secciones desplazables y un pie.
+
+### Cabecera
+
+El icono de la extensión, su nombre (`Smart Tab Organizer`), un eslogan de una línea y una **insignia de versión** (`v X.Y.Z`).
+
+### Información \{#information}
+
+Detalles de ejecución detectados desde el navegador, útiles para adjuntar a un reporte de error:
+
+| Campo | Significado |
+|---|---|
+| **Versión** | La versión instalada de la extensión. |
+| **Navegador** | El navegador detectado y su versión principal (Chrome, Firefox, Edge, Opera, Safari). El sistema operativo (Windows, macOS, Linux, Android, iOS) se muestra al lado. |
+| **Idioma** | El idioma de interfaz activo (inglés, francés o español) con su código corto (`en`, `fr`, `es`). |
+
+### Enlaces \{#links}
+
+Cuatro accesos directos que se abren en una nueva pestaña:
+
+| Enlace | Destino |
+|---|---|
+| **Documentación** | Este sitio, `docs.esprit-vorace.fr`. |
+| **Código fuente** | El repositorio de GitHub `EspritVorace/smart-tab-organizer`. |
+| **Reportar un problema** | El formulario de issues de GitHub, para registrar un error o una solicitud. |
+| **Licencias de código abierto** | La referencia [Licencias de código abierto](/es/reference/open-source-licenses), que enumera cada atribución de terceros. |
+
+### Construido con \{#built-with}
+
+Los componentes de código abierto incluidos en la extensión, mostrados como fichas. Una subsección plegable **Herramientas de desarrollo** enumera los paquetes utilizados solo para construir y probar el proyecto (no incluidos en la extensión). La lista completa, con versiones y licencias, está en la página [Licencias de código abierto](/es/reference/open-source-licenses).
+
+### Pie \{#changelog}
+
+La mención de licencia y copyright (`GPLv3 · 2024 / 2026`), un enlace al autor y el botón **Cerrar**. El botón **Registro completo** abre la página de releases de GitHub en una nueva pestaña, donde se enumeran cada versión y sus notas.
+
+<Aside type="note">
+Los campos navegador, sistema operativo e idioma se detectan en el momento en que se abre el cuadro. Reflejan tu entorno actual: por eso dos usuarios pueden ver legítimamente valores distintos.
+</Aside>
+
+## Próximos pasos
+
+<CardGrid>
+  <LinkCard title="Licencias de código abierto" href="/es/reference/open-source-licenses" description="La lista completa de componentes incluidos y sus licencias." />
+  <LinkCard title="Workspaces" href="/es/guides/workspaces" description="El menú del selector que aloja la entrada Acerca de." />
+  <LinkCard title="Recorrido por la interfaz" href="/es/discover/interface-tour" description="Dónde vive cada superficie de la extensión." />
+</CardGrid>

@@ -4,6 +4,7 @@ import { Check, Info, Settings2 } from 'lucide-react';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext.js';
 import { getMessage } from '@/utils/i18n.js';
 import { AboutDialog } from '@/components/UI/AboutDialog';
+import { markDiscovered } from '@/exploration/progressStore.js';
 import { WorkspaceAvatar } from './WorkspaceAvatar.js';
 
 interface WorkspaceSwitcherDropdownProps {
@@ -68,7 +69,10 @@ export function WorkspaceSwitcherDropdown({ trigger, onManage }: WorkspaceSwitch
           <DropdownMenu.Separator />
           <DropdownMenu.Item
             data-testid="workspace-switcher-about"
-            onSelect={() => setAboutOpen(true)}
+            onSelect={() => {
+              setAboutOpen(true);
+              void markDiscovered('help.about');
+            }}
           >
             <Flex align="center" gap="2">
               <Info size={14} aria-hidden="true" />

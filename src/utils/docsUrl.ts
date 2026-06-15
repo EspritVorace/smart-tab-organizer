@@ -30,8 +30,18 @@ function getLocalePath(uiLanguage: string): string {
 
 export function getDocsUrl(section?: string): string {
   const localePath = getLocalePath(detectUiLanguage());
-  const sectionPath = section ? `${section.replace(/^\/|\/$/g, '')}/` : '';
-  return `${DOCS_BASE_URL}/${localePath}${sectionPath}`;
+  // Split an optional `#fragment` off so the trailing slash lands on the path
+  // (`.../guides/domain-rules/#create`), not after the anchor. The fragment is
+  // a stable, locale-independent heading id (see the docs `{#id}` convention).
+  let path = section ?? '';
+  let hash = '';
+  const hashIndex = path.indexOf('#');
+  if (hashIndex >= 0) {
+    hash = path.slice(hashIndex);
+    path = path.slice(0, hashIndex);
+  }
+  const sectionPath = path ? `${path.replace(/^\/|\/$/g, '')}/` : '';
+  return `${DOCS_BASE_URL}/${localePath}${sectionPath}${hash}`;
 }
 
 export function getDocsUrlForTab(tab: string | undefined): string {

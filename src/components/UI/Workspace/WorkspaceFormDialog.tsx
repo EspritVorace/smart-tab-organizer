@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Flex, Text, TextField } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n.js';
+import { markDiscovered } from '@/exploration/progressStore.js';
 import type { WorkspaceAccentColor, WorkspaceMeta } from '@/schemas/workspace.js';
 import { DialogShell } from '@/components/UI/DialogShell';
 import { WorkspaceColorPicker } from './WorkspaceColorPicker.js';
@@ -77,7 +78,7 @@ export function WorkspaceFormDialog({
               data-testid="workspace-form-name"
               data-autofocus="true"
               value={name}
-              onChange={(e) => setName(e.currentTarget.value)}
+              onChange={(e) => { if (e.currentTarget.value) { void markDiscovered('workspaces.avatar'); } setName(e.currentTarget.value); }}
               placeholder={getMessage('workspaceFormNamePlaceholder')}
               maxLength={40}
               onKeyDown={(e) => {
@@ -99,7 +100,7 @@ export function WorkspaceFormDialog({
           <Text size="2" weight="medium">{getMessage('workspaceFormColorLabel')}</Text>
           <WorkspaceColorPicker
             value={accentColor}
-            onChange={setAccentColor}
+            onChange={(c) => { void markDiscovered('workspaces.color'); setAccentColor(c); }}
             ariaLabel={getMessage('workspaceFormColorLabel')}
           />
         </Flex>

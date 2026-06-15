@@ -3,6 +3,7 @@ import { Box, TabNav } from '@radix-ui/themes';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { getMessage, type MessageKey } from '@/utils/i18n';
 import { useShortcuts } from '@/hooks/useShortcuts';
+import { markDiscovered } from '@/exploration/progressStore';
 import { StatisticsSummary } from '@/components/Core/Statistics/StatisticsSummary';
 import { StatisticsRulesDetail } from '@/components/Core/Statistics/StatisticsRulesDetail';
 import { StatisticsSessionsDetail } from '@/components/Core/Statistics/StatisticsSessionsDetail';
@@ -45,6 +46,14 @@ const SUB_TAB_LABEL_KEY: Record<StatsSubTab, string> = {
   rules: 'statsRulesTab',
   sessions: 'statsSessionsTab',
   storage: 'statsStorageTab',
+};
+
+/** Exploration capability discovered when a given sub-tab's content is shown. */
+const SUB_TAB_CAPABILITY: Record<StatsSubTab, string> = {
+  summary: 'stats.trends',
+  rules: 'stats.topRules',
+  sessions: 'stats.sessions',
+  storage: 'stats.storage',
 };
 
 export function StatisticsPage({ syncSettings, statisticsData, sessionStats, storageUsage, onReset, statsTab, onStatsTabChange }: StatisticsPageProps) {
@@ -108,6 +117,11 @@ export function StatisticsPage({ syncSettings, statisticsData, sessionStats, sto
   }), []);
 
   const snapshot = sessionStats ?? emptySessionStats;
+
+  // Exploration: viewing the statistics page, then the specific sub-tab shown
+  // (covers both arrival and switches). Fire-and-forget, idempotent.
+  useEffect(() => { void markDiscovered('stats.view'); }, []);
+  useEffect(() => { void markDiscovered(SUB_TAB_CAPABILITY[statsTab]); }, [statsTab]);
 
   const handleTabChange = useCallback(
     (next: StatsSubTab) => {
@@ -216,7 +230,7 @@ export function StatisticsPage({ syncSettings, statisticsData, sessionStats, sto
                 data={data}
                 activeRulesCount={activeRulesCount}
                 firstUsedAtFormatted={firstUsedAtFormatted}
-                onReset={onReset}
+                onReset={() => { void markDiscovered('stats.reset'); onReset(); }}
               />
             )}
             {statsTab === 'sessions' && (

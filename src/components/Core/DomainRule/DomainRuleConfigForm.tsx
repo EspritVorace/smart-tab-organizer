@@ -1,8 +1,10 @@
+import { useEffect } from 'react';
 import { Box, Callout, Flex, Select, Text, TextField } from '@radix-ui/themes';
 import * as Label from '@radix-ui/react-label';
 import { Info } from 'lucide-react';
 import type { FieldError } from 'react-hook-form';
 import { getMessage } from '@/utils/i18n';
+import { markDiscovered } from '@/exploration/progressStore';
 import { FormField, SearchableInlineList } from '@/components/Form/FormFields';
 import {
   groupNameSourceOptions,
@@ -93,6 +95,39 @@ export function DomainRuleConfigForm({
   const showUrlSection =
     configMode === 'manual' && (groupNameSource === 'url' || groupNameSource.startsWith('smart'));
 
+  // Exploration: mark capabilities on display/selection (never on save), so a
+  // discovery sticks even if the user cancels the wizard. Fire-and-forget.
+  useEffect(() => {
+    void markDiscovered(`grouping.mode.${configMode}`);
+  }, [configMode]);
+
+  useEffect(() => {
+    if (configMode !== 'manual') return;
+    let cap: string | null = null;
+    if (groupNameSource === 'title') cap = 'grouping.nameSource.title';
+    else if (groupNameSource === 'url') cap = 'grouping.nameSource.url';
+    else if (groupNameSource.startsWith('smart')) cap = 'grouping.nameSource.smart';
+    if (cap) void markDiscovered(cap);
+  }, [configMode, groupNameSource]);
+
+  useEffect(() => {
+    if (!showUrlSection) return;
+    void markDiscovered(urlExtractionMode === 'query_param' ? 'grouping.url.queryParam' : 'grouping.url.regex');
+  }, [showUrlSection, urlExtractionMode]);
+
+  const handlePresetChange = (id: string) => {
+    void markDiscovered('grouping.presetApplied');
+    onPresetChange(id);
+  };
+  const handleFallbackLabelChange = (value: string) => {
+    void markDiscovered('grouping.fallbackLabel');
+    onFallbackLabelChange?.(value);
+  };
+  const handleTitleRegexChange = (value: string) => {
+    void markDiscovered('grouping.titleRegex');
+    onTitleParsingRegExChange(value);
+  };
+
   return (
     <Flex direction="column" gap="4" style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
       {/* Info callout when presets are loading */}
@@ -140,7 +175,7 @@ export function DomainRuleConfigForm({
               <SearchableInlineList
                 id={presetInputId}
                 value={presetId ?? ''}
-                onValueChange={onPresetChange}
+                onValueChange={handlePresetChange}
                 groups={presetsToSearchableGroups(presetCategories)}
                 searchPlaceholder={getMessage('searchPresetPlaceholder')}
                 emptyMessage={getMessage('noPresetFound')}
@@ -158,7 +193,7 @@ export function DomainRuleConfigForm({
                   <TextField.Root
                     id={fieldId || fallbackLabelInputId}
                     value={fallbackLabel ?? ''}
-                    onChange={(e) => onFallbackLabelChange?.(e.target.value)}
+                    onChange={(e) => handleFallbackLabelChange(e.target.value)}
                     name="fallbackLabel"
                     maxLength={100}
                     data-testid="config-fallback-label-input"
@@ -241,7 +276,7 @@ export function DomainRuleConfigForm({
                     id={fieldId}
                     describedById={titleParsingRegExError ? errorId : undefined}
                     value={titleParsingRegEx}
-                    onChange={onTitleParsingRegExChange}
+                    onChange={handleTitleRegexChange}
                     name="titleParsingRegEx"
                     testId="title-regex-field"
                     placeholder="(.+)"

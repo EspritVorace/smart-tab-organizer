@@ -4,6 +4,7 @@ import { Zap } from 'lucide-react';
 import { IconBox } from '@/components/UI/IconBox/IconBox';
 import { useListNavigation } from '@/hooks/useListNavigation';
 import { getMessage } from '@/utils/i18n';
+import { markDiscovered } from '@/exploration/progressStore';
 import { QUICK_ACTIONS, type QuickActionId } from './data';
 import { QuickActionCard } from './QuickActionCard';
 
@@ -36,7 +37,7 @@ export function QuickActionsSection({ count = 5, onAction }: QuickActionsSection
               <QuickActionCard
                 key={a.id}
                 action={a}
-                onClick={() => onAction(a.id)}
+                onClick={() => { void markDiscovered('settings.quickActions'); onAction(a.id); }}
                 tabIndex={i === focusIndex ? 0 : -1}
                 onFocus={() => setFocusIndex(i)}
                 onKeyDown={(e) => handleNavigationKey(e, i)}

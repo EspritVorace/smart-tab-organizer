@@ -1,5 +1,6 @@
 import { browser, Browser } from 'wxt/browser';
 import { incrementStat, stampRuleLastUsed } from '@/utils/statisticsUtils.js';
+import { markDiscovered, markValue } from '@/exploration/progressStore.js';
 import { matchesDomain, extractGroupNameFromTitle, extractGroupNameFromUrlByMode } from '@/utils/utils';
 import { getSettings } from './settings.js';
 import { promptForGroupName } from './messaging.js';
@@ -221,6 +222,10 @@ export async function createNewGroup(
     await browser.tabGroups.update(newGroupId, updatePayload as Parameters<typeof browser.tabGroups.update>[1]);
     await incrementStat('grouping', ruleId);
     await stampRuleLastUsed(ruleId);
+    // Exploration: creating a group means the "create a rule" capability is in
+    // use. Also record the distinct color seen (multi-valued capability).
+    void markDiscovered('grouping.create');
+    if (groupColor) void markValue('grouping.color', groupColor);
 
     return newGroupId;
 }
@@ -231,6 +236,8 @@ export async function addToExistingGroup(
 ): Promise<void> {
     logger.debug(`[GROUPING_DEBUG] Adding tab ${tabId} to existing group ${groupId}`);
     await browser.tabs.group({ groupId: groupId, tabIds: [tabId] });
+    // Exploration: a tab joined an existing group (merge into a live group).
+    void markDiscovered('grouping.merge');
 
     const updatePayload: { collapsed: boolean } = { collapsed: false };
     logger.debug(`[GROUPING_DEBUG] Updating group ${groupId} with payload:`, updatePayload);

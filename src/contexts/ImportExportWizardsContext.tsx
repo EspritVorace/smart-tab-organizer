@@ -1,5 +1,6 @@
 import React, { createContext, Suspense, useCallback, useContext, useMemo, useState } from 'react';
 import { useSettings } from '@/hooks/useSettings.js';
+import { markDiscovered } from '@/exploration/progressStore.js';
 import { lazyWithTiming } from '@/utils/lazyWithTiming.js';
 import { OrganizeRewardDialog } from '@/components/UI/OrganizeRewardDialog/OrganizeRewardDialog';
 import type { DomainRuleSetting } from '@/types/syncSettings';
@@ -98,17 +99,19 @@ export function ImportExportWizardsProvider({ children }: ImportExportWizardsPro
 
   const value = useMemo<ImportExportWizardsContextValue>(
     () => ({
-      openImportRules: (options) =>
+      openImportRules: (options) => {
+        void markDiscovered('io.importRules');
         setActive({
           kind: 'import-rules',
           initialSourceMode: options?.initialSourceMode,
           initialPackSelections: options?.initialPackSelections,
-        }),
-      openExportRules: () => setActive({ kind: 'export-rules' }),
-      openImportSessions: () => setActive({ kind: 'import-sessions' }),
-      openExportSessions: () => setActive({ kind: 'export-sessions' }),
-      openImportWorkspace: () => setActive({ kind: 'import-workspace' }),
-      openExportWorkspace: () => setActive({ kind: 'export-workspace' }),
+        });
+      },
+      openExportRules: () => { void markDiscovered('io.exportRules'); setActive({ kind: 'export-rules' }); },
+      openImportSessions: () => { void markDiscovered('io.importSessions'); setActive({ kind: 'import-sessions' }); },
+      openExportSessions: () => { void markDiscovered('io.exportSessions'); setActive({ kind: 'export-sessions' }); },
+      openImportWorkspace: () => { void markDiscovered('workspaces.import'); setActive({ kind: 'import-workspace' }); },
+      openExportWorkspace: () => { void markDiscovered('workspaces.export'); setActive({ kind: 'export-workspace' }); },
     }),
     [],
   );

@@ -15,6 +15,7 @@ import { DialogShell, focusAutoFocusTarget } from '@/components/UI/DialogShell';
 import { TabTreeEditor } from '@/components/Core/TabTree/TabTreeEditor';
 import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
 import { useSessionEditor } from '@/hooks/useSessionEditor';
+import { markDiscovered } from '@/exploration/progressStore';
 import { countSessionTabs } from '@/utils/sessionUtils';
 import type { Session } from '@/types/session';
 
@@ -190,9 +191,10 @@ function SessionEditDialogInner({ session, open, onOpenChange, onSave, existingS
           <TextArea
             id="session-edit-note"
             value={editor.editedSession.note ?? ''}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              editor.updateSessionNote(e.target.value)
-            }
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+              if (e.target.value) void markDiscovered('sessions.note');
+              editor.updateSessionNote(e.target.value);
+            }}
             placeholder={getMessage('sessionNotePlaceholder')}
             resize="vertical"
             rows={3}

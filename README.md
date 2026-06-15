@@ -60,6 +60,7 @@ Snapshot your open tabs and groups, name them, pin the ones you live in. Restore
 - **49 rule packs** for popular tools (GitHub, GitLab, Jira, AWS, AI assistants, Discord...) ready to import
 - **Import / export** with conflict resolution for both rules and sessions
 - **Local statistics** : see how much grouping and dedup actually saves you
+- **[Exploration catalogue](https://docs.esprit-vorace.fr/guides/exploration/)** : an exhaustive, accessible map of every capability with a "discovered / not yet" tracker, per-domain progress and named phases (no gamification)
 - **Keyboard shortcuts** with a built-in help panel
 - **Light / dark / system theme**
 - **Accessibility-first** : axe-core audited, keyboard-first, screen reader friendly

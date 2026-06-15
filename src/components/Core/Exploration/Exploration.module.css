@@ -1,0 +1,138 @@
+.phaseLabel {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Phase journey: track with real-threshold ticks + a current-position marker. */
+.phaseTrack {
+  position: relative;
+}
+
+.phaseTick {
+  position: absolute;
+  top: 50%;
+  width: 2px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+  background: var(--gray-a8);
+  border-radius: 1px;
+  box-shadow: 0 0 0 1.5px var(--color-panel-solid);
+  z-index: 2;
+}
+
+.phaseHead {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--color-panel-solid);
+  border: 2px solid var(--accent-9);
+  box-shadow: 0 0 0 4px var(--accent-a3);
+  z-index: 3;
+}
+
+/* Phase bands sized to their real coverage range, dividers at the thresholds. */
+.phaseBand {
+  min-width: 0;
+  padding: 0 var(--space-1);
+}
+
+.phaseBand:first-child {
+  padding-left: 0;
+}
+
+.phaseBand:last-child {
+  padding-right: 0;
+}
+
+.phaseBand + .phaseBand {
+  border-left: 1px solid var(--gray-a4);
+}
+
+.phaseState {
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.eyebrow {
+  font-family: var(--code-font-family);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-11);
+}
+
+.coveragePercent {
+  color: var(--accent-11);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.coverageDivider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--gray-a4);
+}
+
+.numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+.domainButton {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.domainButton:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+  border-radius: var(--radius-2);
+}
+
+.domainBar {
+  flex: 1;
+  min-width: 60px;
+  max-width: 240px;
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+}
+
+/* The Progress fills the bar's width; the stretched flex box centers it
+   vertically on the row, so the track lines up with the icon and numbers. */
+.domainBar > * {
+  flex: 1;
+  min-width: 0;
+}
+
+.chevron {
+  transition: transform 0.12s ease;
+  color: var(--gray-10);
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+.rowUndiscovered .rowLabel {
+  color: var(--gray-11);
+}
+
+.markButton {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
+}

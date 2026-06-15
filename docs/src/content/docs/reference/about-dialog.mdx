@@ -1,0 +1,80 @@
+---
+title: About dialog
+description: Where to find the About dialog, what the Information, Links and Built with sections show, and how to read the version, browser and language details.
+---
+
+import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import ThemeImage from '../../../components/ThemeImage.astro';
+import aboutDialogLight from '../../../assets/screenshots/en-light-about-dialog.png';
+import aboutDialogDark from '../../../assets/screenshots/en-dark-about-dialog.png';
+
+<Aside type="tip" title="At a glance">
+- The **About dialog** is the identity card of the extension: version, runtime details, useful links and open source credits.
+- It opens from the **workspace switcher** menu (`About...`), both in the Options footer and in the popup.
+- Everything it shows is read-only. It performs no action on your tabs, rules or sessions.
+</Aside>
+
+The About dialog gathers, in a single place, the information you usually need when you want to check which version you run, report an issue, or open the documentation.
+
+<ThemeImage
+  lightSrc={aboutDialogLight}
+  darkSrc={aboutDialogDark}
+  alt="About dialog showing the version, environment details, useful links and open source credits."
+/>
+
+## Open the dialog \{#open}
+
+<Steps>
+1. Open the **workspace switcher** (the dropdown at the bottom of the Options page, or its counterpart in the popup).
+2. Pick the **`About...`** entry.
+3. The dialog opens, centered, on top of the current page. Close it with the **Close** button, the cross at the top right, or the `Escape` key.
+</Steps>
+
+## What it shows
+
+The dialog is split into a fixed header, three scrollable sections and a footer.
+
+### Header
+
+The extension icon, its name (`Smart Tab Organizer`), a one-line tagline, and a **version chip** (`v X.Y.Z`).
+
+### Information \{#information}
+
+Runtime details detected from the browser, useful to attach to a bug report:
+
+| Field | Meaning |
+|---|---|
+| **Version** | The installed version of the extension. |
+| **Browser** | The detected browser and its major version (Chrome, Firefox, Edge, Opera, Safari). The operating system (Windows, macOS, Linux, Android, iOS) is shown next to it. |
+| **Language** | The active interface language (English, French or Spanish) with its short code (`en`, `fr`, `es`). |
+
+### Links \{#links}
+
+Four shortcuts opening in a new tab:
+
+| Link | Destination |
+|---|---|
+| **Documentation** | This site, `docs.esprit-vorace.fr`. |
+| **Source code** | The GitHub repository `EspritVorace/smart-tab-organizer`. |
+| **Report an issue** | The GitHub issue form, to file a bug or a request. |
+| **Open source licenses** | The [Open source licenses](/reference/open-source-licenses) reference, listing every third-party attribution. |
+
+### Built with \{#built-with}
+
+The open source components bundled in the extension, shown as chips. A collapsible **Dev tools** subsection lists the packages used only to build and test the project (not shipped in the extension). The full list, with versions and licenses, lives on the [Open source licenses](/reference/open-source-licenses) page.
+
+### Footer \{#changelog}
+
+The license and copyright span (`GPLv3 · 2024 / 2026`), a link to the author, and the **Close** button. The **Full changelog** button opens the GitHub releases page in a new tab, where every version and its notes are listed.
+
+<Aside type="note">
+The browser, operating system and language fields are detected at the moment the dialog opens. They reflect your current environment, so two users may legitimately see different values.
+</Aside>
+
+## Next steps
+
+<CardGrid>
+  <LinkCard title="Open source licenses" href="/reference/open-source-licenses" description="The full list of bundled components and their licenses." />
+  <LinkCard title="Workspaces" href="/guides/workspaces" description="The switcher menu that hosts the About entry." />
+  <LinkCard title="Interface tour" href="/discover/interface-tour" description="Where each surface of the extension lives." />
+</CardGrid>

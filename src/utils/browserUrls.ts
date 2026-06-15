@@ -34,3 +34,15 @@ export async function openShortcutsCustomizePage(): Promise<void> {
   const { url } = getShortcutsCustomizeInfo();
   await browser.tabs.create({ url });
 }
+
+/**
+ * Cross-browser deep link to the extension's store reviews page, so the user
+ * can leave a rating. Chromium stores expose a `/reviews` sub-route; Firefox
+ * Add-ons uses a `reviews/` path.
+ */
+export function getStoreReviewUrl(): string {
+  if (import.meta.env.FIREFOX) {
+    return 'https://addons.mozilla.org/firefox/addon/smarttab-organizer/reviews/';
+  }
+  return 'https://chromewebstore.google.com/detail/smarttab-organizer/ijnpdkkcbmfikocmboibffjgbohhlmah/reviews';
+}

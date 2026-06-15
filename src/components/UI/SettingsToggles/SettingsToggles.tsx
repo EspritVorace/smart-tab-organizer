@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Card, Flex, Skeleton, Switch, Text } from '@radix-ui/themes';
 import { Copy, Layers, PackagePlus, Plus, Shield } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
+import { markDiscovered } from '@/exploration/progressStore';
 
 interface SettingsTogglesProps {
   globalGroupingEnabled?: boolean;
@@ -92,7 +93,10 @@ export function SettingsToggles({
             size="1"
             data-testid="settings-toggle-grouping"
             checked={globalGroupingEnabled || false}
-            onCheckedChange={onGroupingChange}
+            onCheckedChange={(checked) => {
+              void markDiscovered('settings.toggle.grouping');
+              onGroupingChange?.(checked);
+            }}
           />
         </Flex>
       </Text>
@@ -106,7 +110,10 @@ export function SettingsToggles({
             size="1"
             data-testid="settings-toggle-dedup"
             checked={globalDeduplicationEnabled || false}
-            onCheckedChange={onDeduplicationChange}
+            onCheckedChange={(checked) => {
+              void markDiscovered('settings.toggle.dedup');
+              onDeduplicationChange?.(checked);
+            }}
           />
         </Flex>
       </Text>

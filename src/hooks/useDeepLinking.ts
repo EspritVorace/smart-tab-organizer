@@ -19,7 +19,7 @@ interface DeepLinkState {
   statsTab: StatsSubTab;
 }
 
-const VALID_SECTIONS = ['home', 'rules', 'importexport', 'sessions', 'stats', 'settings', 'workspaces'] as const;
+const VALID_SECTIONS = ['home', 'rules', 'importexport', 'sessions', 'stats', 'exploration', 'settings', 'workspaces'] as const;
 
 interface ParsedHash {
   section: string;

@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Box, Callout, Flex, Text, TextField } from '@radix-ui/themes';
+import { markDiscovered, markValue } from '@/exploration/progressStore';
 import { PackageCheck, PackageOpen, Search, SearchX } from 'lucide-react';
 import { getMessage, getPluralMessage } from '@/utils/i18n';
 import { foldAccents } from '@/utils/stringUtils';
@@ -92,6 +93,19 @@ export function PackGallery({
 }: PackGalleryProps) {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>(ALL_CATEGORIES);
+
+  // Exploration: opening the gallery, searching, and exploring categories.
+  useEffect(() => {
+    void markDiscovered('packs.openGallery');
+  }, []);
+  useEffect(() => {
+    if (search.trim().length > 0) void markDiscovered('packs.search');
+  }, [search]);
+  useEffect(() => {
+    if (activeCategory === ALL_CATEGORIES) return;
+    void markDiscovered('packs.filterCategory');
+    void markValue('packs.categoriesExplored', activeCategory);
+  }, [activeCategory]);
 
   const normalizedSearch = useMemo(
     () => foldAccents(search.trim().toLowerCase()),

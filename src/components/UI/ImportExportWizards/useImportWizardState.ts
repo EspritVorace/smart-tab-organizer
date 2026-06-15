@@ -5,6 +5,7 @@ import {
   type ConflictMode,
 } from './Classification';
 import { useDialogReset, type ToggleSetState } from './Shared';
+import { markDiscovered } from '@/exploration/progressStore';
 import {
   useJsonSourceInput,
   type JsonSourceInputState,
@@ -83,6 +84,7 @@ export function useImportWizardState<TItem extends { id: string }, TConflict>({
   const goToStep1 = useCallback(() => {
     if (!source.parsedData) return;
     const result = classify(source.parsedData, existingItems);
+    void markDiscovered('io.classification');
     classificationState.setClassification(result);
     newSelection.setAll(result.newItems.map((item) => item.id));
     setStep(1);

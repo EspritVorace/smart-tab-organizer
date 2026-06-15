@@ -1,0 +1,123 @@
+---
+title: Catálogo de exploración
+description: Un catálogo exhaustivo de las capacidades de la extensión con una capa de seguimiento "descubierto / aún no", barras de progreso por dominio, una cobertura global plana y fases con nombre. Sin gamificación.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import overviewLight from '../../../../assets/screenshots/es-light-exploration-overview.png';
+import overviewDark from '../../../../assets/screenshots/es-dark-exploration-overview.png';
+
+El **Catálogo de exploración** ("Référentiel d'exploration") es un mapa interno
+de todo lo que la extensión puede hacer, acompañado de una capa de seguimiento
+ligera que registra lo que ya has descubierto. Se encuentra en la sección
+**Tracking** de la barra lateral, junto a Estadísticas, y un widget compacto
+aparece en la página de inicio.
+
+<ThemeImage
+  lightSrc={overviewLight}
+  darkSrc={overviewDark}
+  alt="La página Catálogo de exploración: cobertura global y fase actual, barras de progreso por dominio, y filas en los estados descubierto, por descubrir y aún no disponible."
+/>
+
+Cumple dos objetivos:
+
+1. Un **catálogo exhaustivo** de las capacidades de usuario, incluidos los
+   rincones que nadie busca en la documentación. Cada entrada lleva una etiqueta
+   corta, una descripción de una frase, un enlace directo a donde usarla y un
+   enlace a la página de documentación correspondiente cuando existe.
+2. Una **capa de seguimiento "descubierto / aún no"** que alimenta barras de
+   progreso por dominio más una cobertura global, traducida a su vez en una fase
+   con nombre.
+
+<Aside type="note" title="Sin gamificación">
+Sin desbloqueos, sin avisos de recompensa, sin umbrales, sin rachas, sin página
+de logros. El catálogo mide la **amplitud** (si una capacidad se descubrió al
+menos una vez), nunca cuántas veces se repitió una acción. Las fases nombran un
+estado del recorrido, nunca a la persona.
+</Aside>
+
+## Cobertura y fases \{#coverage}
+
+La cobertura es **plana**: cada entrada cuenta 1 en un único total. El porcentaje
+global determina la **fase actual**:
+
+| Fase | Cobertura global |
+| --- | --- |
+| Descubrimiento | 0 a 25 % |
+| Familiarización | 25 a 60 % |
+| Dominio | 60 a 85 % |
+| Pericia | 85 a 100 % |
+
+Cada uno de los diez dominios (agrupación, deduplicación, sesiones, espacios de
+trabajo, paquetes, importar/exportar, estadísticas, navegación, ayuda, ajustes)
+muestra su propia barra.
+
+## Tres estados de visualización
+
+Cada entrada se muestra en uno de tres estados, derivado al mostrarse (nunca
+almacenado):
+
+- **Descubierto**: la capacidad se descubrió automáticamente o se marcó
+  manualmente.
+- **Por descubrir**: aún no descubierta y alcanzable (sus requisitos se cumplen,
+  o no tiene ninguno).
+- **Aún no disponible**: aún no descubierta y sus requisitos no se cumplen.
+
+### Requisitos (posible / no posible)
+
+Algunas capacidades solo son lógicamente alcanzables tras otra (no puedes editar
+una regla sin haber creado una, o importado un paquete que las crea). Una entrada
+puede declarar una **expresión de requisitos** con rutas `y` / `o`:
+
+```ts
+type Prerequisite =
+  | CapabilityId                  // hoja: un id de capacidad
+  | { allOf: Prerequisite[] }     // Y
+  | { anyOf: Prerequisite[] };    // O
+```
+
+Por ejemplo, "Editar una regla" requiere "Crear una regla" **o** "Aplicar un
+paquete". Una línea "aún no disponible" muestra en claro su requisito que falta.
+Es puramente descriptivo: la app real nunca se bloquea y no se recompensa nada
+cuando una capacidad se vuelve alcanzable.
+
+## Marcado manual
+
+Puedes declarar que ya conoces una capacidad haciendo clic en su insignia de
+estado, aunque la app no la haya detectado. Es una autoevaluación neutra y
+reversible:
+
+- El marcado solo se ofrece en entradas **por descubrir**.
+- La retirada solo se ofrece en entradas descubiertas **solo** manualmente.
+- Un descubrimiento **automático** nunca puede deshacerse, y el marcado manual
+  nunca se ofrece en una entrada "aún no disponible".
+
+Un requisito marcado manualmente desbloquea sus dependientes igual que un
+descubrimiento automático.
+
+## Cómo se detecta el descubrimiento
+
+El descubrimiento se marca la primera vez que una capacidad se **muestra o
+selecciona**, nunca al guardar. Es idempotente y no reversible. Se usan cuatro
+rutas de detección, por coste creciente:
+
+1. **Marcado en el punto de contacto** sobre un callback existente (por ejemplo,
+   mostrar un modo de configuración lo marca, aunque luego canceles el asistente).
+2. **Derivación** a partir de una mutación observada tras la init (se creó un
+   espacio de trabajo, apareció un modo de coincidencia de deduplicación distinto).
+3. **Reutilización de un contador o flag existente** para capacidades que
+   coinciden con el uso normal (tomar una instantánea, exportar).
+4. **Marcado manual** por el usuario, que complementa (nunca reemplaza) la
+   detección automática.
+
+## Añadir una entrada al catálogo (para contribuidores)
+
+Las entradas viven en `src/exploration/catalog.ts`. Cada una declara un `id`
+(kebab/dot-case, único), un `domain`, una `labelKey` y una `descriptionKey`
+(i18n), un `uiTarget` (enlace profundo), un `docUrl` opcional, un modo `detect` y
+`prerequisites` opcionales. Tras añadirla, agrega su `labelKey` y `descriptionKey`
+a los tres idiomas en `public/_locales/{en,fr,es}/messages.json` y ejecuta
+`pnpm i18n:types`. El catálogo se valida al arrancar (`validateCatalog`): sin id
+duplicados, dominios válidos, todo requisito referenciado existe y sin ciclos de
+requisitos.

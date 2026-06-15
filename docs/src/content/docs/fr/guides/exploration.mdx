@@ -1,0 +1,126 @@
+---
+title: Référentiel d'exploration
+description: Un catalogue exhaustif des capacités de l'extension doublé d'un suivi "découvert / pas encore", avec des barres de progression par domaine, une couverture globale à plat et des phases nommées. Aucune gamification.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+import overviewLight from '../../../../assets/screenshots/fr-light-exploration-overview.png';
+import overviewDark from '../../../../assets/screenshots/fr-dark-exploration-overview.png';
+
+Le **Référentiel d'exploration** est une carte interne de tout ce que
+l'extension sait faire, doublée d'une couche de suivi légère qui enregistre ce
+que vous avez déjà découvert. Il se trouve dans la section **Tracking** de la
+barre latérale, à côté des Statistiques, et un widget compact apparaît sur la
+page d'accueil.
+
+<ThemeImage
+  lightSrc={overviewLight}
+  darkSrc={overviewDark}
+  alt="La page Référentiel d'exploration : couverture globale et phase courante, barres de progression par domaine, et des lignes dans les états découvert, à découvrir et pas possible."
+/>
+
+Il sert deux objectifs :
+
+1. Un **catalogue exhaustif** des capacités utilisateur, y compris les recoins
+   que personne ne va chercher dans la documentation. Chaque entrée porte un
+   libellé court, une description d'une phrase, un lien direct vers l'endroit où
+   l'utiliser, et un lien vers la page de documentation correspondante quand elle
+   existe.
+2. Une **couche de suivi "découvert / pas encore"** qui alimente des barres de
+   progression par domaine plus une couverture globale, elle-même traduite en une
+   phase nommée.
+
+<Aside type="note" title="Aucune gamification">
+Aucun déblocage, aucun toast de récompense, aucun seuil, aucune série, aucune
+page de succès. Le catalogue mesure la **largeur** (une capacité a-t-elle été
+découverte au moins une fois), jamais combien de fois une action a été répétée.
+Les phases nomment un état du parcours, jamais la personne.
+</Aside>
+
+## Couverture et phases \{#coverage}
+
+La couverture est **à plat** : chaque entrée compte pour 1 dans un total unique.
+Le pourcentage global détermine la **phase courante** :
+
+| Phase | Couverture globale |
+| --- | --- |
+| Découverte | 0 à 25 % |
+| Prise en main | 25 à 60 % |
+| Maîtrise | 60 à 85 % |
+| Expertise | 85 à 100 % |
+
+Chacun des dix domaines (groupement, déduplication, sessions, workspaces, packs,
+import/export, statistiques, navigation, aide, réglages) affiche sa propre barre.
+
+## Trois états d'affichage
+
+Chaque entrée est affichée dans l'un des trois états, dérivé au rendu (jamais
+stocké) :
+
+- **Découvert** : la capacité a été découverte automatiquement ou marquée
+  manuellement.
+- **À découvrir** : pas encore découverte, et atteignable (ses prérequis sont
+  remplis, ou elle n'en a pas).
+- **Pas possible** : pas encore découverte, et ses prérequis ne sont pas remplis.
+
+### Prérequis (possible / pas possible)
+
+Certaines capacités ne sont logiquement atteignables qu'après une autre (on ne
+peut pas modifier une règle sans en avoir créé une, ou importé un pack qui en
+crée). Une entrée peut déclarer une **expression de prérequis** avec des chemins
+`et` / `ou` :
+
+```ts
+type Prerequisite =
+  | CapabilityId                  // feuille : un id de capacité
+  | { allOf: Prerequisite[] }     // ET
+  | { anyOf: Prerequisite[] };    // OU
+```
+
+Par exemple, "Modifier une règle" requiert "Créer une règle" **ou** "Appliquer un
+pack". Une ligne "pas possible" affiche en clair son prérequis manquant. C'est
+purement descriptif : l'application réelle n'est jamais bloquée, et rien n'est
+récompensé quand une capacité devient atteignable.
+
+## Marquage manuel
+
+Vous pouvez déclarer que vous connaissez déjà une capacité en cliquant sur son
+badge d'état, même si l'application ne l'a pas détectée. C'est une
+auto-évaluation neutre et réversible :
+
+- Le marquage n'est proposé que sur les entrées **à découvrir**.
+- Le retrait n'est proposé que sur les entrées découvertes **uniquement**
+  manuellement.
+- Une découverte **automatique** ne peut jamais être annulée, et le marquage
+  manuel n'est jamais proposé sur une entrée "pas possible".
+
+Un prérequis marqué manuellement débloque ses dépendants exactement comme une
+découverte automatique.
+
+## Comment la découverte est détectée
+
+La découverte est marquée la première fois qu'une capacité est **affichée ou
+sélectionnée**, jamais à la sauvegarde. C'est idempotent et non réversible.
+Quatre chemins de détection sont utilisés, par coût croissant :
+
+1. **Marquage au point de contact** sur un callback existant (par exemple,
+   afficher un mode de config marque la capacité, même si vous annulez ensuite le
+   wizard).
+2. **Dérivation** depuis une mutation observée après l'init (un workspace vient
+   d'être créé, un mode de match de déduplication distinct apparaît).
+3. **Réutilisation d'un compteur ou flag existant** pour les capacités qui se
+   confondent avec l'usage normal (prendre un instantané, exporter).
+4. **Marquage manuel** par l'utilisateur, qui complète (jamais ne remplace) la
+   détection automatique.
+
+## Ajouter une entrée au catalogue (pour les contributeurs)
+
+Les entrées vivent dans `src/exploration/catalog.ts`. Chacune déclare un `id`
+(kebab/dot-case, unique), un `domain`, une `labelKey` et une `descriptionKey`
+(i18n), un `uiTarget` (lien profond), un `docUrl` optionnel, un mode `detect`, et
+des `prerequisites` optionnels. Après ajout, ajoutez la `labelKey` et la
+`descriptionKey` aux trois locales dans `public/_locales/{en,fr,es}/messages.json`
+puis lancez `pnpm i18n:types`. Le catalogue est validé au démarrage
+(`validateCatalog`) : pas de doublon d'id, domaines valides, tout prérequis
+référencé existe, et pas de cycle de prérequis.

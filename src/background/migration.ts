@@ -22,6 +22,7 @@ const FALLBACK_LABEL_MIGRATION_FLAG = 'fallbackLabelInitialized';
 const WORKSPACES_MIGRATION_FLAG = 'workspacesMigrated';
 const LEGACY_CATEGORIES_CLEANUP_FLAG = 'legacyCategoriesCleaned';
 const SESSIONS_ARCHIVE_SPLIT_FLAG = 'sessionsArchiveSplitDone';
+const EXPLORATION_INIT_FLAG = 'explorationProgressInitialized';
 export const FIRST_RUN_REDIRECT_FLAG = 'firstRunRedirectDone';
 
 const DEFAULT_WORKSPACE_ACCENT: WorkspaceAccentColor = 'indigo';
@@ -245,6 +246,39 @@ export async function cleanupLegacyCategoriesStorage(): Promise<void> {
     logger.debug('[MIGRATION] Removed legacy categories storage keys.');
   } catch (error) {
     logger.error('[MIGRATION] Legacy categories cleanup failed, will retry on next startup:', error);
+  }
+}
+
+/**
+ * Ensures the global `explorationProgress` key exists with the default shape
+ * and a stamped `initializedAt`. No backfill of pre-existing usage: the
+ * catalogue starts empty for everyone (decision 7). Idempotent via a flag in
+ * storage.local; on error the flag is not set so it retries next startup.
+ */
+export async function initializeExplorationProgress(): Promise<void> {
+  try {
+    const flagState = await browser.storage.local.get(EXPLORATION_INIT_FLAG);
+    if (flagState[EXPLORATION_INIT_FLAG]) {
+      logger.debug('[MIGRATION] Exploration progress already initialized.');
+      return;
+    }
+
+    const existing = await browser.storage.local.get('explorationProgress');
+    if (existing.explorationProgress === undefined) {
+      await browser.storage.local.set({
+        explorationProgress: {
+          discovered: [],
+          manuallyMarked: [],
+          values: {},
+          initializedAt: Date.now(),
+        },
+      });
+      logger.debug('[MIGRATION] Initialized empty exploration progress.');
+    }
+
+    await browser.storage.local.set({ [EXPLORATION_INIT_FLAG]: true });
+  } catch (error) {
+    logger.error('[MIGRATION] Exploration progress init failed, will retry on next startup:', error);
   }
 }
 

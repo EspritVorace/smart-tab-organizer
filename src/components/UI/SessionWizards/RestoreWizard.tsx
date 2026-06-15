@@ -9,6 +9,7 @@ import { Tooltip } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast, showErrorToast } from '@/utils/toast';
 import { showSuccessNotification } from '@/utils/notifications';
+import { markDiscovered } from '@/exploration/progressStore';
 import { sessionToTabTreeData, resolveTabUuids } from '@/utils/sessionUtils';
 import {
   analyzeConflicts,
@@ -189,6 +190,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
       setHasConflicts(conflicts);
 
       if (conflicts) {
+        void markDiscovered('sessions.conflict');
         // Initialize group actions for conflicting groups
         const actions = new Map<string, GroupConflictAction>();
         for (const gc of analysis.conflictingGroups) {
