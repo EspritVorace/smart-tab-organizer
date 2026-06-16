@@ -76,4 +76,29 @@ describe('exploration catalogue wiring', () => {
     const unwired = CATALOG.map((c) => c.id).filter((id) => !isWired(id));
     expect(unwired).toEqual([]);
   });
+
+  // Regression guard: `markValue(id, v)` only records a distinct value into
+  // `values[id]`; it never adds `id` to `discovered`, and coverage reads
+  // `discovered` (union with `manuallyMarked`), never `values`. A capability
+  // wired through `markValue` alone can therefore never light up. This shipped
+  // for `grouping.color` and `packs.categoriesExplored`. Every catalogue id
+  // recorded via `markValue` MUST also have a `markDiscovered` touchpoint.
+  it('never records a capability through markValue alone (also needs markDiscovered)', () => {
+    const literals = (fn: string): Set<string> =>
+      new Set(
+        [...SOURCE_TEXT.matchAll(new RegExp(`${fn}\\(\\s*['"]([a-zA-Z0-9._]+)['"]`, 'g'))].map(
+          (m) => m[1],
+        ),
+      );
+    const valueMarked = literals('markValue');
+    const discoveredMarked = literals('markDiscovered');
+    const catalogIds = new Set(CATALOG.map((c) => c.id));
+
+    // Non-catalogue value keys (e.g. `dedup.matchMode`, a supplementary record
+    // alongside `dedup.match.*`) are exempt: they never feed coverage.
+    const markValueOnly = [...valueMarked].filter(
+      (id) => catalogIds.has(id) && !discoveredMarked.has(id),
+    );
+    expect(markValueOnly).toEqual([]);
+  });
 });
