@@ -71,6 +71,12 @@ export function useListNavigation<T extends HTMLElement>(
 
   const handleNavigationKey = useCallback(
     (e: KeyboardEvent<HTMLElement>, index: number): boolean => {
+      // Modifier+arrow combos (e.g. Mod+ArrowUp to reorder a card) are reserved
+      // for the registry shortcut layer, dispatched at document level. Consuming
+      // them here (preventDefault) would flag the event as handled and the
+      // dispatch would then skip the reorder action, so plain navigation only
+      // responds to unmodified keys and lets modifier combos fall through.
+      if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return false;
       const items = listRef.current?.querySelectorAll<HTMLElement>(itemSelector);
       if (!items || items.length === 0) return false;
 

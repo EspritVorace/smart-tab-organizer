@@ -33,13 +33,21 @@ function setup(itemCount: number, options?: UseListNavigationOptions): SetupResu
   return { list, items, api: result.current };
 }
 
-function pressKey(target: HTMLElement, key: string): React.KeyboardEvent<HTMLElement> {
+function pressKey(
+  target: HTMLElement,
+  key: string,
+  modifiers: { altKey?: boolean; ctrlKey?: boolean; metaKey?: boolean; shiftKey?: boolean } = {},
+): React.KeyboardEvent<HTMLElement> {
   // Build a minimal React-like keyboard event the hook can consume.
   let prevented = false;
   const event = {
     key,
     target,
     currentTarget: target,
+    altKey: modifiers.altKey ?? false,
+    ctrlKey: modifiers.ctrlKey ?? false,
+    metaKey: modifiers.metaKey ?? false,
+    shiftKey: modifiers.shiftKey ?? false,
     preventDefault: () => { prevented = true; },
     get defaultPrevented() { return prevented; },
   } as unknown as React.KeyboardEvent<HTMLElement>;
@@ -64,6 +72,21 @@ describe('useListNavigation', () => {
     items[2].focus();
     api.handleNavigationKey(pressKey(items[2], 'ArrowUp'), 2);
     expect(document.activeElement).toBe(items[1]);
+  });
+
+  it('ignores modifier+arrow combos so reorder shortcuts fall through', () => {
+    // Mod+ArrowUp/Down are registry shortcuts (e.g. reorder a card). Navigation
+    // must not consume or preventDefault them, otherwise the document-level
+    // dispatch skips the reorder action (event.defaultPrevented guard).
+    for (const mods of [{ ctrlKey: true }, { metaKey: true }, { shiftKey: true }, { altKey: true }]) {
+      const { items, api } = setup(3);
+      items[2].focus();
+      const event = pressKey(items[2], 'ArrowUp', mods);
+      const consumed = api.handleNavigationKey(event, 2);
+      expect(consumed).toBe(false);
+      expect(event.defaultPrevented).toBe(false);
+      expect(document.activeElement).toBe(items[2]);
+    }
   });
 
   it('does not consume horizontal arrows when axis is vertical', () => {
