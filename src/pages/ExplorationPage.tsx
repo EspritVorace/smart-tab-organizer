@@ -25,6 +25,9 @@ type ExplorationFilter = 'all' | 'discovered' | 'to-discover' | 'not-possible';
 const FILTER_VALUES: ExplorationFilter[] = ['all', 'discovered', 'to-discover', 'not-possible'];
 
 const ROW_SELECTOR = '[data-exploration-row]';
+// Rows AND domain headers are nav items, so Up/Down/Home/End flow across
+// groups (a collapsed group unmounts its rows but keeps its header reachable).
+const NAV_SELECTOR = '[data-exploration-nav-item]';
 
 /** First default binding of a registry shortcut, rendered for a `<Kbd>` hint. */
 function bindingHint(id: string): string {
@@ -174,32 +177,46 @@ export function ExplorationPage({ syncSettings, onSequencePrefixChange }: Explor
     if (uiTarget.startsWith('#')) window.location.hash = uiTarget;
   }, []);
 
-  // Arrival focus + Up/Down/Home/End navigation across capability rows. Gated
-  // on `openDomains.size > 0` so the seeded first-incomplete domain has mounted
-  // its rows before auto-focus runs (otherwise the fallback would grab the
-  // filter). Re-mounts on each tab visit, so focus re-applies on arrival.
-  const { handleNavigationKey } = useListNavigation(listRef, ROW_SELECTOR, {
-    autoFocus: {
-      ready: isLoaded && openDomains.size > 0,
-      fallbackSelector: '[data-testid="exploration-filter"] button',
-    },
-  });
+  // Up/Down/Home/End navigation across the whole catalogue: rows and domain
+  // headers share the nav-item set, so focus flows out of a group into the next
+  // (a collapsed group keeps its header reachable; expand it with Enter or
+  // ArrowRight to reveal its rows).
+  const { handleNavigationKey } = useListNavigation(listRef, NAV_SELECTOR);
 
-  // Live DOM position of a row among its siblings, read at event time so
-  // collapsing/expanding a domain never desyncs the index.
+  // Live DOM position of a nav item (row or header) among its siblings, read at
+  // event time so collapsing/expanding a domain never desyncs the index.
   const navIndexOf = useCallback((el: HTMLElement): number => {
-    const items = listRef.current?.querySelectorAll<HTMLElement>(ROW_SELECTOR);
+    const items = listRef.current?.querySelectorAll<HTMLElement>(NAV_SELECTOR);
     if (!items) return -1;
     return Array.prototype.indexOf.call(items, el);
   }, []);
 
-  const handleRowKeyDown = useCallback(
+  const handleNavKeyDown = useCallback(
     (e: KeyboardEvent<HTMLElement>) => {
       if (e.target !== e.currentTarget) return;
       handleNavigationKey(e, navIndexOf(e.currentTarget));
     },
     [handleNavigationKey, navIndexOf],
   );
+
+  // Arrival focus on the first capability card. Gated on `openDomains.size > 0`
+  // so the seeded first-incomplete domain has mounted its rows before we focus
+  // (otherwise we would fall back to the filter control). Runs once per mount,
+  // so focus re-applies on each tab visit, and never steals a focus the user
+  // already moved into the list.
+  const arrivalFocusDone = useRef(false);
+  useEffect(() => {
+    if (arrivalFocusDone.current) return;
+    if (!isLoaded || openDomains.size === 0) return;
+    arrivalFocusDone.current = true;
+    const list = listRef.current;
+    const active = document.activeElement;
+    if (list && active instanceof HTMLElement && list.contains(active)) return;
+    const target =
+      list?.querySelector<HTMLElement>(ROW_SELECTOR) ??
+      document.querySelector<HTMLElement>('[data-testid="exploration-filter"] button');
+    target?.focus({ preventScroll: true });
+  }, [isLoaded, openDomains]);
 
   // The capability row that currently has focus (carries the widget scope and
   // its entry id), or null. Drives the per-card widget shortcuts below.
@@ -318,7 +335,8 @@ export function ExplorationPage({ syncSettings, onSequencePrefixChange }: Explor
                     onToggle={() => toggleDomain(group.domain)}
                     onToggleMark={handleToggleMark}
                     onGoToUi={handleGoToUi}
-                    onRowKeyDown={handleRowKeyDown}
+                    onRowKeyDown={handleNavKeyDown}
+                    onNavKeyDown={handleNavKeyDown}
                   />
                 );
               })}

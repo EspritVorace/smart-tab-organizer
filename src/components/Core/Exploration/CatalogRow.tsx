@@ -72,6 +72,7 @@ export function CatalogRow({ entry, state, provenance, progress, onToggleMark, o
       aria-label={rowAriaLabel}
       data-testid={`exploration-row-${entry.id}`}
       data-exploration-row=""
+      data-exploration-nav-item=""
       data-entry-id={entry.id}
       data-shortcut-scope="widget:exploration-card"
       data-state={state}
