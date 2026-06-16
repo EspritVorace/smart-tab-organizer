@@ -174,6 +174,26 @@ describe('useShortcuts (widget scope)', () => {
     expect(action).toHaveBeenCalledTimes(1);
   });
 
+  it('fires a Space-bound widget binding when the spacebar is pressed on the scoped element', () => {
+    const action = vi.fn();
+    renderHook(() =>
+      useShortcuts(
+        { 'explorationCard.toggleMark': action },
+        { scope: 'widget:exploration-card' },
+      ),
+    );
+
+    const card = document.createElement('div');
+    card.setAttribute('data-shortcut-scope', 'widget:exploration-card');
+    card.tabIndex = 0;
+    document.body.appendChild(card);
+    card.focus();
+
+    // The spacebar reports `event.key === ' '`; the registry spells it `Space`.
+    dispatchOn(card, { key: ' ' });
+    expect(action).toHaveBeenCalledTimes(1);
+  });
+
   it('does not fire a widget binding when focus is on a descendant of the scoped element', () => {
     const action = vi.fn();
     renderHook(() =>

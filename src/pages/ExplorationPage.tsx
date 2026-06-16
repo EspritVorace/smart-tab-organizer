@@ -1,14 +1,18 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Box, Callout, Flex, SegmentedControl, Text, TextField } from '@radix-ui/themes';
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { Box, Callout, Flex, Kbd, SegmentedControl, Text, TextField, Tooltip } from '@radix-ui/themes';
 import { Info, Search } from 'lucide-react';
 import type { AppSettings } from '@/types/syncSettings.js';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout.js';
 import { useExploration } from '@/hooks/useExploration.js';
+import { useShortcuts } from '@/hooks/useShortcuts.js';
+import { useListNavigation } from '@/hooks/useListNavigation.js';
+import { getEffectiveBindings } from '@/shortcuts/getEffectiveBindings.js';
 import { CATALOG } from '@/exploration/catalog.js';
 import { EXPLORATION_DOMAINS } from '@/exploration/domains.js';
 import { getEntryState, isReviewPromptEligible } from '@/exploration/coverage.js';
 import { setManualMark, markDiscovered } from '@/exploration/progressStore.js';
 import { explorationFilterItem } from '@/utils/workspaceStorage.js';
+import { getDocsUrl } from '@/utils/docsUrl.js';
 import { getMessage } from '@/utils/i18n.js';
 import { logger } from '@/utils/logger.js';
 import type { EntryDisplayState } from '@/types/exploration.js';
@@ -20,8 +24,31 @@ type ExplorationFilter = 'all' | 'discovered' | 'to-discover' | 'not-possible';
 
 const FILTER_VALUES: ExplorationFilter[] = ['all', 'discovered', 'to-discover', 'not-possible'];
 
+const ROW_SELECTOR = '[data-exploration-row]';
+// Rows AND domain headers are nav items, so Up/Down/Home/End flow across
+// groups (a collapsed group unmounts its rows but keeps its header reachable).
+const NAV_SELECTOR = '[data-exploration-nav-item]';
+
+/** First default binding of a registry shortcut, rendered for a `<Kbd>` hint. */
+function bindingHint(id: string): string {
+  const binding = getEffectiveBindings(id)[0];
+  return Array.isArray(binding) ? binding.join(' ') : (binding ?? '');
+}
+
+/** Kbd hint per filter, resolved from the registry (sequence joined with a space). */
+const FILTER_HINT: Record<ExplorationFilter, string> = {
+  all: bindingHint('exploration.filter.all'),
+  discovered: bindingHint('exploration.filter.discovered'),
+  'to-discover': bindingHint('exploration.filter.toDiscover'),
+  'not-possible': bindingHint('exploration.filter.notPossible'),
+};
+
+const SEARCH_SHORTCUT = bindingHint('options.search.focus');
+
 interface ExplorationPageProps {
   syncSettings: AppSettings;
+  /** Forwarded sequence-buffer state so a parent can render the global indicator. */
+  onSequencePrefixChange?: (prefix: string[] | null) => void;
 }
 
 /**
@@ -29,10 +56,11 @@ interface ExplorationPageProps {
  * and the per-domain collapsible catalogue. Coverage and the three derived
  * states are computed in O(n) with no storage access at render.
  */
-export function ExplorationPage({ syncSettings }: ExplorationPageProps) {
+export function ExplorationPage({ syncSettings, onSequencePrefixChange }: ExplorationPageProps) {
   const { progress, coverage, isLoaded } = useExploration();
   const [filter, setFilter] = useState<ExplorationFilter>('all');
   const [search, setSearch] = useState('');
+  const listRef = useRef<HTMLDivElement>(null);
   // Which domain groups are expanded. Seeded once, after progress loads, to the
   // first domain that still has something to discover (see effect below); the
   // user's manual toggles take over afterwards.
@@ -149,6 +177,95 @@ export function ExplorationPage({ syncSettings }: ExplorationPageProps) {
     if (uiTarget.startsWith('#')) window.location.hash = uiTarget;
   }, []);
 
+  // Up/Down/Home/End navigation across the whole catalogue: rows and domain
+  // headers share the nav-item set, so focus flows out of a group into the next
+  // (a collapsed group keeps its header reachable; expand it with Enter or
+  // ArrowRight to reveal its rows).
+  const { handleNavigationKey } = useListNavigation(listRef, NAV_SELECTOR);
+
+  // Live DOM position of a nav item (row or header) among its siblings, read at
+  // event time so collapsing/expanding a domain never desyncs the index.
+  const navIndexOf = useCallback((el: HTMLElement): number => {
+    const items = listRef.current?.querySelectorAll<HTMLElement>(NAV_SELECTOR);
+    if (!items) return -1;
+    return Array.prototype.indexOf.call(items, el);
+  }, []);
+
+  const handleNavKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLElement>) => {
+      if (e.target !== e.currentTarget) return;
+      handleNavigationKey(e, navIndexOf(e.currentTarget));
+    },
+    [handleNavigationKey, navIndexOf],
+  );
+
+  // Arrival focus on the first capability card. Gated on `openDomains.size > 0`
+  // so the seeded first-incomplete domain has mounted its rows before we focus
+  // (otherwise we would fall back to the filter control). Runs once per mount,
+  // so focus re-applies on each tab visit, and never steals a focus the user
+  // already moved into the list.
+  const arrivalFocusDone = useRef(false);
+  useEffect(() => {
+    if (arrivalFocusDone.current) return;
+    if (!isLoaded || openDomains.size === 0) return;
+    arrivalFocusDone.current = true;
+    const list = listRef.current;
+    const active = document.activeElement;
+    if (list && active instanceof HTMLElement && list.contains(active)) return;
+    const target =
+      list?.querySelector<HTMLElement>(ROW_SELECTOR) ??
+      document.querySelector<HTMLElement>('[data-testid="exploration-filter"] button');
+    target?.focus({ preventScroll: true });
+  }, [isLoaded, openDomains]);
+
+  // The capability row that currently has focus (carries the widget scope and
+  // its entry id), or null. Drives the per-card widget shortcuts below.
+  const getFocusedEntry = useCallback(() => {
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement)) return null;
+    if (!active.matches('[data-shortcut-scope="widget:exploration-card"]')) return null;
+    const id = active.getAttribute('data-entry-id');
+    if (!id) return null;
+    return CATALOG.find((entry) => entry.id === id) ?? null;
+  }, []);
+
+  // Per-card shortcuts: fire only when a capability row itself has focus.
+  useShortcuts(
+    {
+      'explorationCard.gotoUi': () => {
+        const entry = getFocusedEntry();
+        if (entry) handleGoToUi(entry.uiTarget);
+      },
+      'explorationCard.openDoc': () => {
+        const entry = getFocusedEntry();
+        if (entry?.docUrl) window.open(getDocsUrl(entry.docUrl), '_blank', 'noopener,noreferrer');
+      },
+      'explorationCard.toggleMark': () => {
+        const entry = getFocusedEntry();
+        if (!entry) return;
+        const { state, provenance } = getEntryState(entry, progress);
+        if (state === 'to-discover') handleToggleMark(entry.id, true);
+        else if (state === 'discovered' && provenance === 'manual') handleToggleMark(entry.id, false);
+      },
+    },
+    { scope: 'widget:exploration-card' },
+  );
+
+  // Page-level filter sequences (`f` prefix). The active prefix is forwarded so
+  // the options shell renders the shared SequenceIndicator.
+  useShortcuts(
+    {
+      'exploration.filter.all': () => handleFilterChange('all'),
+      'exploration.filter.discovered': () => handleFilterChange('discovered'),
+      'exploration.filter.toDiscover': () => handleFilterChange('to-discover'),
+      'exploration.filter.notPossible': () => handleFilterChange('not-possible'),
+    },
+    {
+      scope: 'page:exploration',
+      onSequenceState: ({ activePrefix }) => onSequencePrefixChange?.(activePrefix),
+    },
+  );
+
   return (
     <PageLayout titleKey="explorationTab" descriptionKey="explorationPageDescription" syncSettings={syncSettings}>
       {() => (
@@ -164,18 +281,10 @@ export function ExplorationPage({ syncSettings }: ExplorationPageProps) {
               aria-label={getMessage('explorationFilterAll')}
               data-testid="exploration-filter"
             >
-              <SegmentedControl.Item value="all">
-                {getMessage('explorationFilterAll')} ({counts.all})
-              </SegmentedControl.Item>
-              <SegmentedControl.Item value="discovered">
-                {getMessage('explorationFilterDiscovered')} ({counts.discovered})
-              </SegmentedControl.Item>
-              <SegmentedControl.Item value="to-discover">
-                {getMessage('explorationFilterToDiscover')} ({counts.toDiscover})
-              </SegmentedControl.Item>
-              <SegmentedControl.Item value="not-possible">
-                {getMessage('explorationFilterNotPossible')} ({counts.notPossible})
-              </SegmentedControl.Item>
+              <FilterItem value="all" label={getMessage('explorationFilterAll')} count={counts.all} />
+              <FilterItem value="discovered" label={getMessage('explorationFilterDiscovered')} count={counts.discovered} />
+              <FilterItem value="to-discover" label={getMessage('explorationFilterToDiscover')} count={counts.toDiscover} />
+              <FilterItem value="not-possible" label={getMessage('explorationFilterNotPossible')} count={counts.notPossible} />
             </SegmentedControl.Root>
 
             <Box style={{ flex: 1, minWidth: 180 }}>
@@ -184,11 +293,17 @@ export function ExplorationPage({ syncSettings }: ExplorationPageProps) {
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={getMessage('explorationSearch')}
                 aria-label={getMessage('explorationSearch')}
+                aria-keyshortcuts={SEARCH_SHORTCUT || undefined}
                 data-testid="page-exploration-search"
               >
                 <TextField.Slot>
                   <Search size={15} aria-hidden="true" />
                 </TextField.Slot>
+                {SEARCH_SHORTCUT && search.length === 0 && (
+                  <TextField.Slot side="right">
+                    <Kbd size="1" aria-hidden="true">{SEARCH_SHORTCUT}</Kbd>
+                  </TextField.Slot>
+                )}
               </TextField.Root>
             </Box>
           </Flex>
@@ -203,7 +318,7 @@ export function ExplorationPage({ syncSettings }: ExplorationPageProps) {
               </Callout.Text>
             </Callout.Root>
           ) : (
-            <Flex direction="column" gap="3">
+            <Flex direction="column" gap="3" ref={listRef}>
               {visibleByDomain.map((group) => {
                 const percent = group.total > 0 ? Math.round((group.discovered / group.total) * 100) : 0;
                 return (
@@ -220,6 +335,8 @@ export function ExplorationPage({ syncSettings }: ExplorationPageProps) {
                     onToggle={() => toggleDomain(group.domain)}
                     onToggleMark={handleToggleMark}
                     onGoToUi={handleGoToUi}
+                    onRowKeyDown={handleNavKeyDown}
+                    onNavKeyDown={handleNavKeyDown}
                   />
                 );
               })}
@@ -235,5 +352,30 @@ export function ExplorationPage({ syncSettings }: ExplorationPageProps) {
         </Flex>
       )}
     </PageLayout>
+  );
+}
+
+interface FilterItemProps {
+  value: ExplorationFilter;
+  label: string;
+  count: number;
+}
+
+/** One filter segment with a tooltip surfacing its `f`-prefixed kbd hint. */
+function FilterItem({ value, label, count }: FilterItemProps) {
+  const hint = FILTER_HINT[value];
+  return (
+    <Tooltip
+      content={
+        <Flex align="center" gap="2" aria-hidden="true">
+          {label}
+          {hint && <Kbd>{hint}</Kbd>}
+        </Flex>
+      }
+    >
+      <SegmentedControl.Item value={value} aria-keyshortcuts={hint || undefined}>
+        {label} ({count})
+      </SegmentedControl.Item>
+    </Tooltip>
   );
 }

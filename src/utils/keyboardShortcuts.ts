@@ -62,6 +62,9 @@ export function matchesShortcut(event: KeyboardEvent, combo: string): boolean {
  */
 function keyMatches(event: KeyboardEvent, parsedKey: string): boolean {
   if (event.key.toLowerCase() === parsedKey) return true;
+  // Spacebar: `event.key` is a literal space (" "), but the registry spells the
+  // combo `Space` (parsed to "space"). `event.code` is "Space" on every layout.
+  if (parsedKey === 'space' && (event.key === ' ' || event.code === 'Space')) return true;
   if (/^\d$/.test(parsedKey) && event.code === `Digit${parsedKey}`) return true;
   if (/^[a-z]$/.test(parsedKey) && event.code === `Key${parsedKey.toUpperCase()}`) return true;
   return false;
@@ -152,7 +155,9 @@ const LONE_MODIFIER_KEYS = new Set([
  */
 export function serializeKeyEvent(event: KeyboardEvent): string | null {
   if (LONE_MODIFIER_KEYS.has(event.key)) return null;
-  const key = event.key.toLowerCase();
+  // Normalize the spacebar to the canonical "space" token so a serialized
+  // buffer stays consistent with `parseCombo('Space')` (key === "space").
+  const key = event.key === ' ' ? 'space' : event.key.toLowerCase();
   const parts: string[] = [];
   if (event.metaKey) parts.push('Meta');
   if (event.ctrlKey) parts.push('Ctrl');

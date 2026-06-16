@@ -7,11 +7,13 @@ export type ShortcutScope =
   | 'page:stats'
   | 'page:settings'
   | 'page:workspaces'
+  | 'page:exploration'
   | 'page:popup'
   | 'widget:session-card'
   | 'widget:rule-card'
   | 'widget:rule-group'
-  | 'widget:workspace-card';
+  | 'widget:workspace-card'
+  | 'widget:exploration-card';
 
 export type ShortcutGroupId =
   | 'global'
@@ -21,6 +23,7 @@ export type ShortcutGroupId =
   | 'list-rules'
   | 'list-sessions'
   | 'list-stats'
+  | 'list-exploration'
   | 'list-workspaces'
   | 'list-home'
   | 'session-card'

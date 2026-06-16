@@ -32,11 +32,13 @@ const VALID_SCOPES: readonly ShortcutScope[] = [
   'page:stats',
   'page:settings',
   'page:workspaces',
+  'page:exploration',
   'page:popup',
   'widget:session-card',
   'widget:rule-card',
   'widget:rule-group',
   'widget:workspace-card',
+  'widget:exploration-card',
 ];
 
 describe('SHORTCUTS_REGISTRY', () => {
@@ -118,6 +120,7 @@ describe('SHORTCUTS_REGISTRY', () => {
     expect(getShortcutsByGroup('list-rules')).toHaveLength(14);
     expect(getShortcutsByGroup('list-sessions')).toHaveLength(11);
     expect(getShortcutsByGroup('list-stats')).toHaveLength(2);
+    expect(getShortcutsByGroup('list-exploration')).toHaveLength(8);
     expect(getShortcutsByGroup('list-workspaces')).toHaveLength(3);
     expect(getShortcutsByGroup('list-home')).toHaveLength(9);
     expect(getShortcutsByGroup('session-card')).toHaveLength(7);
@@ -136,6 +139,25 @@ describe('SHORTCUTS_REGISTRY', () => {
           const parsed = parseCombo(combo);
           if (parsed.key === 'i' || parsed.key === 'e') {
             offending.push({ id: entry.id, combo, key: parsed.key });
+          }
+        }
+      }
+    }
+    expect(offending).toEqual([]);
+  });
+
+  it('reserves f as a sequence prefix in page:exploration scope', () => {
+    const explorationScope = getShortcutsByScope('page:exploration');
+    expect(explorationScope.length).toBeGreaterThan(0);
+
+    const offending: { id: string; combo: string }[] = [];
+    for (const entry of explorationScope) {
+      for (const binding of entry.defaultBindings) {
+        // Only simple combos can shadow a sequence prefix; sequences are fine.
+        const combos = typeof binding === 'string' ? [binding] : [];
+        for (const combo of combos) {
+          if (parseCombo(combo).key === 'f') {
+            offending.push({ id: entry.id, combo });
           }
         }
       }
@@ -190,6 +212,12 @@ describe('registry helpers', () => {
 
     const ruleCardEntries = getShortcutsByScope('widget:rule-card');
     expect(ruleCardEntries.length).toBe(8);
+
+    const explorationPageEntries = getShortcutsByScope('page:exploration');
+    expect(explorationPageEntries.length).toBe(5);
+
+    const explorationCardEntries = getShortcutsByScope('widget:exploration-card');
+    expect(explorationCardEntries.length).toBe(3);
   });
 
   it('getShortcutsByGroup returns only entries of the requested group', () => {

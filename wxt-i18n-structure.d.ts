@@ -756,6 +756,7 @@ export type GeneratedI18nStructure = {
   "shortcutsGroupListRules": { substitutions: 0, plural: false };
   "shortcutsGroupListSessions": { substitutions: 0, plural: false };
   "shortcutsGroupListStats": { substitutions: 0, plural: false };
+  "shortcutsGroupListExploration": { substitutions: 0, plural: false };
   "shortcutsGroupListWorkspaces": { substitutions: 0, plural: false };
   "shortcutsGroupSessionCard": { substitutions: 0, plural: false };
   "shortcutsGroupImportExport": { substitutions: 0, plural: false };
@@ -808,6 +809,13 @@ export type GeneratedI18nStructure = {
   "shortcutDescSessionSectionPrev": { substitutions: 0, plural: false };
   "shortcutDescStatsTabNext": { substitutions: 0, plural: false };
   "shortcutDescStatsTabPrev": { substitutions: 0, plural: false };
+  "shortcutDescExplorationFilterAll": { substitutions: 0, plural: false };
+  "shortcutDescExplorationFilterDiscovered": { substitutions: 0, plural: false };
+  "shortcutDescExplorationFilterToDiscover": { substitutions: 0, plural: false };
+  "shortcutDescExplorationFilterNotPossible": { substitutions: 0, plural: false };
+  "shortcutDescExplorationGotoUi": { substitutions: 0, plural: false };
+  "shortcutDescExplorationOpenDoc": { substitutions: 0, plural: false };
+  "shortcutDescExplorationToggleMark": { substitutions: 0, plural: false };
   "shortcutDescSessionRestoreCustom": { substitutions: 0, plural: false };
   "shortcutDescSessionRestoreCurrent": { substitutions: 0, plural: false };
   "shortcutDescSessionReplaceCurrent": { substitutions: 0, plural: false };

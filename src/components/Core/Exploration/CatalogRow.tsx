@@ -1,13 +1,25 @@
-import { Badge, Button, Flex, Text, Tooltip } from '@radix-ui/themes';
+import type { KeyboardEvent } from 'react';
+import { Badge, Button, Flex, Kbd, Text, Tooltip } from '@radix-ui/themes';
 import { ArrowRight, BookOpen, Check, Circle, Lock } from 'lucide-react';
 import type { CatalogEntry } from '@/exploration/catalog.js';
 import type { EntryDisplayState, DiscoveryProvenance, ExplorationProgress } from '@/types/exploration.js';
 import { describeMissing } from '@/exploration/prerequisites.js';
 import { discoveredSet } from '@/exploration/coverage.js';
+import { getEffectiveBindings } from '@/shortcuts/getEffectiveBindings.js';
 import { getMessage } from '@/utils/i18n.js';
 import { getDocsUrl } from '@/utils/docsUrl.js';
 import { formatMissingPrerequisite } from './explorationUi.js';
 import styles from './Exploration.module.css';
+
+/** First default binding of a registry shortcut, rendered for a `<Kbd>` hint. */
+function bindingHint(id: string): string {
+  const binding = getEffectiveBindings(id)[0];
+  return Array.isArray(binding) ? binding.join(' ') : (binding ?? '');
+}
+
+const GOTO_KEY = bindingHint('explorationCard.gotoUi');
+const DOC_KEY = bindingHint('explorationCard.openDoc');
+const MARK_KEY = bindingHint('explorationCard.toggleMark');
 
 interface CatalogRowProps {
   entry: CatalogEntry;
@@ -16,6 +28,8 @@ interface CatalogRowProps {
   progress: ExplorationProgress;
   onToggleMark: (id: string, marked: boolean) => void;
   onGoToUi: (uiTarget: string) => void;
+  /** Forwarded keydown handler driving Up/Down/Home/End list navigation. */
+  onRowKeyDown?: (e: KeyboardEvent<HTMLElement>) => void;
 }
 
 /**
@@ -25,7 +39,7 @@ interface CatalogRowProps {
  *   discovered row (unmark),
  * - static on an automatically discovered row and on a "not-possible" row.
  */
-export function CatalogRow({ entry, state, provenance, progress, onToggleMark, onGoToUi }: CatalogRowProps) {
+export function CatalogRow({ entry, state, provenance, progress, onToggleMark, onGoToUi, onRowKeyDown }: CatalogRowProps) {
   const label = getMessage(entry.labelKey as Parameters<typeof getMessage>[0]);
   const description = getMessage(entry.descriptionKey as Parameters<typeof getMessage>[0]);
 
@@ -54,9 +68,15 @@ export function CatalogRow({ entry, state, provenance, progress, onToggleMark, o
       gap="3"
       py="2"
       role="listitem"
+      tabIndex={0}
       aria-label={rowAriaLabel}
       data-testid={`exploration-row-${entry.id}`}
+      data-exploration-row=""
+      data-exploration-nav-item=""
+      data-entry-id={entry.id}
+      data-shortcut-scope="widget:exploration-card"
       data-state={state}
+      onKeyDown={onRowKeyDown}
       className={state === 'discovered' ? undefined : styles.rowUndiscovered}
     >
       <StateControl
@@ -83,13 +103,21 @@ export function CatalogRow({ entry, state, provenance, progress, onToggleMark, o
       </Flex>
 
       <Flex align="center" gap="2" style={{ flexShrink: 0 }}>
-        <Tooltip content={getMessage('explorationGotoUi')}>
+        <Tooltip
+          content={
+            <Flex align="center" gap="2" aria-hidden="true">
+              {getMessage('explorationGotoUi')}
+              {GOTO_KEY && <Kbd>{GOTO_KEY}</Kbd>}
+            </Flex>
+          }
+        >
           <Button
             size="1"
             variant="soft"
             color="gray"
             highContrast
             aria-label={getMessage('explorationGotoUi')}
+            aria-keyshortcuts={GOTO_KEY || undefined}
             onClick={() => onGoToUi(entry.uiTarget)}
             data-testid={`exploration-goto-${entry.id}`}
           >
@@ -98,13 +126,21 @@ export function CatalogRow({ entry, state, provenance, progress, onToggleMark, o
           </Button>
         </Tooltip>
         {entry.docUrl && (
-          <Tooltip content={getMessage('explorationReadDoc')}>
+          <Tooltip
+            content={
+              <Flex align="center" gap="2" aria-hidden="true">
+                {getMessage('explorationReadDoc')}
+                {DOC_KEY && <Kbd>{DOC_KEY}</Kbd>}
+              </Flex>
+            }
+          >
             <Button size="1" variant="ghost" color="gray" highContrast asChild>
               <a
                 href={getDocsUrl(entry.docUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={getMessage('explorationReadDoc')}
+                aria-keyshortcuts={DOC_KEY || undefined}
                 data-testid={`exploration-doc-${entry.id}`}
               >
                 <BookOpen size={14} aria-hidden="true" />
@@ -136,21 +172,30 @@ function StateControl({ entryId, state, provenance, stateText, prerequisiteText,
     const pressed = isManualOnly;
     const actionLabel = pressed ? getMessage('explorationUnmarkAction') : getMessage('explorationMarkAction');
     return (
-      <button
-        type="button"
-        aria-pressed={pressed}
-        aria-label={actionLabel}
-        title={actionLabel}
-        onClick={() => onToggleMark(entryId, !pressed)}
-        className={styles.markButton}
-        style={{ background: 'transparent', border: 0, padding: 0, cursor: 'pointer' }}
-        data-testid={`exploration-mark-${entryId}`}
+      <Tooltip
+        content={
+          <Flex align="center" gap="2" aria-hidden="true">
+            {actionLabel}
+            {MARK_KEY && <Kbd>{MARK_KEY}</Kbd>}
+          </Flex>
+        }
       >
-        <Badge color={pressed ? 'green' : 'gray'} variant="soft" highContrast size="2">
-          {pressed ? <Check size={13} aria-hidden="true" /> : <Circle size={13} aria-hidden="true" />}
-          {stateText}
-        </Badge>
-      </button>
+        <button
+          type="button"
+          aria-pressed={pressed}
+          aria-label={actionLabel}
+          aria-keyshortcuts={MARK_KEY || undefined}
+          onClick={() => onToggleMark(entryId, !pressed)}
+          className={styles.markButton}
+          style={{ background: 'transparent', border: 0, padding: 0, cursor: 'pointer' }}
+          data-testid={`exploration-mark-${entryId}`}
+        >
+          <Badge color={pressed ? 'green' : 'gray'} variant="soft" highContrast size="2">
+            {pressed ? <Check size={13} aria-hidden="true" /> : <Circle size={13} aria-hidden="true" />}
+            {stateText}
+          </Badge>
+        </button>
+      </Tooltip>
     );
   }
 

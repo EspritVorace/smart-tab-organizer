@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { Badge, Box, Card, Flex, Progress, Separator, Text } from '@radix-ui/themes';
 import { Check, ChevronRight } from 'lucide-react';
@@ -25,6 +26,10 @@ interface ExplorationDomainGroupProps {
   onToggle: () => void;
   onToggleMark: (id: string, marked: boolean) => void;
   onGoToUi: (uiTarget: string) => void;
+  /** Forwarded to each row to drive Up/Down/Home/End list navigation. */
+  onRowKeyDown?: (e: KeyboardEvent<HTMLElement>) => void;
+  /** Drives Up/Down/Home/End navigation from the group header (across groups). */
+  onNavKeyDown?: (e: KeyboardEvent<HTMLElement>) => void;
 }
 
 /**
@@ -44,10 +49,31 @@ export function ExplorationDomainGroup({
   onToggle,
   onToggleMark,
   onGoToUi,
+  onRowKeyDown,
+  onNavKeyDown,
 }: ExplorationDomainGroupProps) {
   const name = getMessage(domainLabelKey(domain) as MessageKey);
   const isOpen = forceOpen || open;
   const ariaLabel = `${name} : ${discovered} / ${total}, ${percent} %`;
+
+  // Header keyboard handling. ArrowRight/ArrowLeft expand/collapse the group;
+  // Up/Down/Home/End flow through the shared cross-group navigation (the header
+  // is a nav item alongside the rows). Enter/Space fall through to the
+  // Collapsible.Trigger, which toggles the group.
+  const handleHeaderKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+    if (e.target !== e.currentTarget) return;
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      if (!open) onToggle();
+      return;
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      if (open) onToggle();
+      return;
+    }
+    onNavKeyDown?.(e);
+  };
 
   const header = (
     <Flex align="center" gap="3" p="3">
@@ -93,6 +119,7 @@ export function ExplorationDomainGroup({
             progress={progress}
             onToggleMark={onToggleMark}
             onGoToUi={onGoToUi}
+            onRowKeyDown={onRowKeyDown}
           />
         );
       })}
@@ -106,7 +133,14 @@ export function ExplorationDomainGroup({
           <Box aria-label={ariaLabel}>{header}</Box>
         ) : (
           <Collapsible.Trigger asChild>
-            <button type="button" className={styles.domainButton} aria-label={ariaLabel} aria-expanded={isOpen}>
+            <button
+              type="button"
+              className={styles.domainButton}
+              aria-label={ariaLabel}
+              aria-expanded={isOpen}
+              data-exploration-nav-item=""
+              onKeyDown={handleHeaderKeyDown}
+            >
               {header}
             </button>
           </Collapsible.Trigger>
