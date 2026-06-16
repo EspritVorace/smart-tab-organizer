@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Flex, SegmentedControl, Text } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 import { markDiscovered } from '@/exploration/progressStore';
@@ -17,15 +17,17 @@ const CONFLICT_MODE_CAPABILITY: Record<ConflictMode, string> = {
 };
 
 export function ConflictModeSelector({ value, onChange }: ConflictModeSelectorProps) {
+  // Exploration: mark the currently selected mode (mount + every change), so the
+  // default mode is discovered just by reaching the selector, mirroring how the
+  // rule wizard marks `grouping.mode.*`.
+  useEffect(() => { void markDiscovered(CONFLICT_MODE_CAPABILITY[value]); }, [value]);
+
   return (
     <Flex align="center" gap="2" mb="1">
       <Text size="2" color="gray">{getMessage('conflictResolutionMode')}</Text>
       <SegmentedControl.Root
         value={value}
-        onValueChange={(v: string) => {
-          void markDiscovered(CONFLICT_MODE_CAPABILITY[v as ConflictMode]);
-          onChange(v as ConflictMode);
-        }}
+        onValueChange={(v: string) => onChange(v as ConflictMode)}
         size="1"
       >
         <SegmentedControl.Item value="overwrite" data-testid="conflict-mode-overwrite">{getMessage('conflictModeOverwrite')}</SegmentedControl.Item>

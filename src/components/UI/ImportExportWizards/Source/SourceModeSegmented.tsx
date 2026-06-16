@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SegmentedControl } from '@radix-ui/themes';
 import { getMessage, type MessageKey } from '@/utils/i18n';
 import { markDiscovered } from '@/exploration/progressStore';
@@ -27,14 +27,19 @@ export function SourceModeSegmented<T>({
   source,
   availableModes = DEFAULT_AVAILABLE_MODES,
 }: SourceModeSegmentedProps<T>) {
+  // Exploration: mark the currently selected source (mount + every change), so
+  // the default mode is discovered just by reaching the selector, mirroring how
+  // the rule wizard marks `grouping.mode.*`. `pack` has no capability entry.
+  const sourceMode = source.sourceMode;
+  useEffect(() => {
+    const cap = SOURCE_MODE_CAPABILITY[sourceMode];
+    if (cap) void markDiscovered(cap);
+  }, [sourceMode]);
+
   return (
     <SegmentedControl.Root
       value={source.sourceMode}
-      onValueChange={(v: string) => {
-        const cap = SOURCE_MODE_CAPABILITY[v as SourceMode];
-        if (cap) void markDiscovered(cap);
-        source.setSourceMode(v as SourceMode);
-      }}
+      onValueChange={(v: string) => source.setSourceMode(v as SourceMode)}
       size="2"
     >
       {availableModes.map((mode) => (
