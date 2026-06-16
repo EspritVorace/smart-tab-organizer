@@ -76,12 +76,16 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
   // Cycles the theme (light -> dark -> system), mirroring the header
   // ThemeToggle button. Mnemonic `d` ("Dark"). Document-level so the same
   // shortcut works on the options pages and inside the popup.
+  // `excludeIfInsideWidget` lets a focused widget that claims `d` win the
+  // combo (the exploration card uses `d` to open the doc); no other widget
+  // registers `d`, so theme toggle is unaffected everywhere else.
   'theme.toggle': {
     id: 'theme.toggle',
     defaultBindings: ['d'],
     descriptionKey: 'shortcutDescToggleTheme',
     group: 'global',
     scope: 'global',
+    excludeIfInsideWidget: true,
   },
 
   // Workspace switching (in-page layer). Mnemonic two-key sequences prefixed by
@@ -457,6 +461,72 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     descriptionKey: 'shortcutDescStatsTabPrev',
     group: 'list-stats',
     scope: 'page:stats',
+  },
+
+  // List-level: Exploration. Up/Down navigate between capability rows
+  // (documentation-only, handled by `useListNavigation`). Filters use the
+  // mnemonic `f` prefix (filter) + the target initial. The `f` letter is
+  // reserved as a sequence prefix in this scope: no simple combo may use it
+  // so the sequence timeout never delays a single keypress (enforced by the
+  // registry invariant test).
+  'list.exploration.navigate': {
+    id: 'list.exploration.navigate',
+    defaultBindings: ['ArrowUp', 'ArrowDown'],
+    descriptionKey: 'shortcutDescListNavigate',
+    group: 'list-exploration',
+    scope: 'page:exploration',
+  },
+  'exploration.filter.all': {
+    id: 'exploration.filter.all',
+    defaultBindings: [['f', 'a']],
+    descriptionKey: 'shortcutDescExplorationFilterAll',
+    group: 'list-exploration',
+    scope: 'page:exploration',
+  },
+  'exploration.filter.discovered': {
+    id: 'exploration.filter.discovered',
+    defaultBindings: [['f', 'd']],
+    descriptionKey: 'shortcutDescExplorationFilterDiscovered',
+    group: 'list-exploration',
+    scope: 'page:exploration',
+  },
+  'exploration.filter.toDiscover': {
+    id: 'exploration.filter.toDiscover',
+    defaultBindings: [['f', 't']],
+    descriptionKey: 'shortcutDescExplorationFilterToDiscover',
+    group: 'list-exploration',
+    scope: 'page:exploration',
+  },
+  'exploration.filter.notPossible': {
+    id: 'exploration.filter.notPossible',
+    defaultBindings: [['f', 'n']],
+    descriptionKey: 'shortcutDescExplorationFilterNotPossible',
+    group: 'list-exploration',
+    scope: 'page:exploration',
+  },
+  // Per-card actions on the Exploration page. Group stays `list-exploration`
+  // so the help panel keeps them under "Exploration list" while the scope
+  // ties them to the focused capability row.
+  'explorationCard.gotoUi': {
+    id: 'explorationCard.gotoUi',
+    defaultBindings: ['g'],
+    descriptionKey: 'shortcutDescExplorationGotoUi',
+    group: 'list-exploration',
+    scope: 'widget:exploration-card',
+  },
+  'explorationCard.openDoc': {
+    id: 'explorationCard.openDoc',
+    defaultBindings: ['d'],
+    descriptionKey: 'shortcutDescExplorationOpenDoc',
+    group: 'list-exploration',
+    scope: 'widget:exploration-card',
+  },
+  'explorationCard.toggleMark': {
+    id: 'explorationCard.toggleMark',
+    defaultBindings: ['Space'],
+    descriptionKey: 'shortcutDescExplorationToggleMark',
+    group: 'list-exploration',
+    scope: 'widget:exploration-card',
   },
 
   // List-level: Workspaces

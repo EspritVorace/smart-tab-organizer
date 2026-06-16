@@ -7,6 +7,7 @@ const DOCS_SECTION_BY_TAB: Record<string, string> = {
   rules: 'guides/domain-rules',
   sessions: 'guides/sessions',
   stats: 'guides/statistics',
+  exploration: 'guides/exploration',
   importexport: 'guides/import-export',
   settings: 'guides/settings',
   workspaces: 'guides/workspaces',

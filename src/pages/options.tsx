@@ -348,7 +348,10 @@ export function OptionsContent() {
                                 />
                             )}
                             {currentTab === 'exploration' && (
-                                <ExplorationPage syncSettings={settings} />
+                                <ExplorationPage
+                                    syncSettings={settings}
+                                    onSequencePrefixChange={setSequencePrefix}
+                                />
                             )}
                             {currentTab === 'settings' && (
                                 <SettingsPage syncSettings={settings} updateSettings={updateSettings} />

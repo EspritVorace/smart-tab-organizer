@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { Badge, Box, Card, Flex, Progress, Separator, Text } from '@radix-ui/themes';
 import { Check, ChevronRight } from 'lucide-react';
@@ -25,6 +26,8 @@ interface ExplorationDomainGroupProps {
   onToggle: () => void;
   onToggleMark: (id: string, marked: boolean) => void;
   onGoToUi: (uiTarget: string) => void;
+  /** Forwarded to each row to drive Up/Down/Home/End list navigation. */
+  onRowKeyDown?: (e: KeyboardEvent<HTMLElement>) => void;
 }
 
 /**
@@ -44,6 +47,7 @@ export function ExplorationDomainGroup({
   onToggle,
   onToggleMark,
   onGoToUi,
+  onRowKeyDown,
 }: ExplorationDomainGroupProps) {
   const name = getMessage(domainLabelKey(domain) as MessageKey);
   const isOpen = forceOpen || open;
@@ -93,6 +97,7 @@ export function ExplorationDomainGroup({
             progress={progress}
             onToggleMark={onToggleMark}
             onGoToUi={onGoToUi}
+            onRowKeyDown={onRowKeyDown}
           />
         );
       })}

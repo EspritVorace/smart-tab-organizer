@@ -14,6 +14,7 @@ export type PageContext =
   | 'sessions'
   | 'importexport'
   | 'stats'
+  | 'exploration'
   | 'settings'
   | 'workspaces';
 
@@ -55,6 +56,11 @@ export const GROUP_DESCRIPTORS: Record<ShortcutGroupId, ShortcutGroupDescriptor>
     titleKey: 'shortcutsGroupListStats',
     topLevel: true,
   },
+  'list-exploration': {
+    id: 'list-exploration',
+    titleKey: 'shortcutsGroupListExploration',
+    topLevel: true,
+  },
   'list-workspaces': {
     id: 'list-workspaces',
     titleKey: 'shortcutsGroupListWorkspaces',
@@ -84,6 +90,7 @@ export const TOP_LEVEL_GROUP_ORDER: ShortcutGroupId[] = [
   'list-rules',
   'list-sessions',
   'list-stats',
+  'list-exploration',
   'importexport',
   'list-workspaces',
   'workspace',
@@ -104,6 +111,7 @@ export const VISIBLE_GROUPS_BY_SURFACE: Record<Surface, ShortcutGroupId[]> = {
     'list-rules',
     'list-sessions',
     'list-stats',
+    'list-exploration',
     'importexport',
     'list-workspaces',
     'workspace',
@@ -177,6 +185,8 @@ export function isGroupOpenByDefault(
       return pageContext === 'sessions';
     case 'list-stats':
       return pageContext === 'stats';
+    case 'list-exploration':
+      return pageContext === 'exploration';
     case 'list-workspaces':
       return pageContext === 'workspaces';
     case 'importexport':
