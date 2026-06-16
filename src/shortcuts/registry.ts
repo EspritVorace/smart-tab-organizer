@@ -76,16 +76,12 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
   // Cycles the theme (light -> dark -> system), mirroring the header
   // ThemeToggle button. Mnemonic `d` ("Dark"). Document-level so the same
   // shortcut works on the options pages and inside the popup.
-  // `excludeIfInsideWidget` lets a focused widget that claims `d` win the
-  // combo (the exploration card uses `d` to open the doc); no other widget
-  // registers `d`, so theme toggle is unaffected everywhere else.
   'theme.toggle': {
     id: 'theme.toggle',
     defaultBindings: ['d'],
     descriptionKey: 'shortcutDescToggleTheme',
     group: 'global',
     scope: 'global',
-    excludeIfInsideWidget: true,
   },
 
   // Workspace switching (in-page layer). Mnemonic two-key sequences prefixed by
@@ -514,9 +510,11 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     group: 'list-exploration',
     scope: 'widget:exploration-card',
   },
+  // `h` (not `d`) so a focused card never collides with the global
+  // `theme.toggle` (`d`); `d` stays free to toggle the theme everywhere.
   'explorationCard.openDoc': {
     id: 'explorationCard.openDoc',
-    defaultBindings: ['d'],
+    defaultBindings: ['h'],
     descriptionKey: 'shortcutDescExplorationOpenDoc',
     group: 'list-exploration',
     scope: 'widget:exploration-card',
