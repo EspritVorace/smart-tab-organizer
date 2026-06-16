@@ -46,3 +46,14 @@ export const ExplorationDomainGroupCollapsed: Story = {
 export const ExplorationDomainGroupForcedOpen: Story = {
   args: { ...baseArgs, open: false, forceOpen: true },
 };
+
+export const ExplorationDomainGroupComplete: Story = {
+  args: {
+    ...baseArgs,
+    discovered: groupingEntries.length,
+    total: groupingEntries.length,
+    percent: 100,
+    open: false,
+    forceOpen: false,
+  },
+};

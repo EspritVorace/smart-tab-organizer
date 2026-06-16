@@ -88,6 +88,12 @@ export function ExplorationDomainGroup({
       <Text size="2" weight="medium" style={{ minWidth: 140, lineHeight: 1 }}>
         {name}
       </Text>
+      {percent === 100 && (
+        <Badge color="green" variant="soft" highContrast size="1">
+          <Check size={12} aria-hidden="true" />
+          {getMessage('explorationDomainComplete')}
+        </Badge>
+      )}
       <Box className={styles.domainBar}>
         <Progress value={percent} size="2" aria-hidden="true" />
       </Box>
@@ -97,12 +103,6 @@ export function ExplorationDomainGroup({
       <Text size="2" weight="bold" highContrast className={styles.numeric} style={{ minWidth: 44, textAlign: 'right', lineHeight: 1 }}>
         {percent} %
       </Text>
-      {percent === 100 && (
-        <Badge color="green" variant="soft" highContrast size="1" ml="2">
-          <Check size={12} aria-hidden="true" />
-          {getMessage('explorationDomainComplete')}
-        </Badge>
-      )}
     </Flex>
   );
 
