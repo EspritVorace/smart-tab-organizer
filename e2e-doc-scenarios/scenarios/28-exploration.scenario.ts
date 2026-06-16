@@ -15,19 +15,26 @@ import { EXPLORATION_MANIFEST } from './28-exploration.routing.js';
 
 const SCENARIO_ID = '28-exploration';
 
-// Curated so the default-open "grouping" domain shows all three states:
-// several discovered rows, "Create a rule" still to discover, and the
-// rule-dependent rows locked (their prerequisite is not met).
+// Curated so the first domain ("grouping") is fully discovered: it collapses to
+// a single header row showing the green "Terminé" badge right after the title,
+// which showcases the completed-group design. The next incomplete domain
+// ("dedup") then auto-opens and illustrates the three row states: several
+// discovered rows, two still to discover, and the keep-strategy rows locked
+// (their prerequisite, deduplication enabled, is not met).
 const DISCOVERED = [
-  'grouping.mode.preset', 'grouping.mode.ask', 'grouping.mode.manual', 'grouping.mode.label',
-  'grouping.color', 'grouping.nameSource.title', 'grouping.url.regex', 'grouping.titleRegex',
-  'grouping.fallbackLabel',
+  'grouping.create', 'grouping.edit', 'grouping.mode.preset', 'grouping.mode.ask',
+  'grouping.mode.manual', 'grouping.mode.label', 'grouping.nameSource.title',
+  'grouping.nameSource.url', 'grouping.nameSource.smart', 'grouping.url.regex',
+  'grouping.url.queryParam', 'grouping.titleRegex', 'grouping.fallbackLabel',
+  'grouping.color', 'grouping.presetApplied', 'grouping.reorder.drag',
+  'grouping.reorder.keyboard', 'grouping.toggle', 'grouping.overlaps',
+  'grouping.merge', 'grouping.view.filterSort',
   'dedup.match.exact', 'dedup.match.includes', 'dedup.match.ignoreParams',
   'sessions.snapshot', 'sessions.restore.current',
   'workspaces.create',
   'packs.openGallery',
   'stats.view', 'stats.exploration', 'stats.trends',
-  'settings.theme', 'settings.toggle.grouping', 'settings.toggle.dedup', 'settings.quickActions',
+  'settings.theme', 'settings.toggle.grouping', 'settings.quickActions',
   'nav.globalSearch', 'nav.mnemonics',
   'help.drawer', 'help.contextF1',
   'io.exportRules', 'io.importRules',

@@ -99,9 +99,9 @@
 }
 
 .domainBar {
-  flex: 1;
+  flex: 0 1 240px;
   min-width: 60px;
-  max-width: 240px;
+  margin-left: auto;
   display: flex;
   align-items: center;
   align-self: stretch;

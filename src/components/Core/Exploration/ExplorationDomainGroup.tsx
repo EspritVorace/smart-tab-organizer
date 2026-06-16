@@ -88,21 +88,21 @@ export function ExplorationDomainGroup({
       <Text size="2" weight="medium" style={{ minWidth: 140, lineHeight: 1 }}>
         {name}
       </Text>
-      <Box className={styles.domainBar}>
-        <Progress value={percent} size="2" aria-hidden="true" />
-      </Box>
-      <Text size="2" className={styles.numeric} style={{ lineHeight: 1 }}>
-        <Text as="span" weight="bold">{discovered}</Text>/{total}
-      </Text>
-      <Text size="2" weight="bold" highContrast className={styles.numeric} style={{ minWidth: 44, textAlign: 'right', lineHeight: 1 }}>
-        {percent} %
-      </Text>
       {percent === 100 && (
-        <Badge color="green" variant="soft" highContrast size="1" ml="2">
+        <Badge color="green" variant="soft" highContrast size="1">
           <Check size={12} aria-hidden="true" />
           {getMessage('explorationDomainComplete')}
         </Badge>
       )}
+      <Box className={styles.domainBar}>
+        <Progress value={percent} size="2" aria-hidden="true" />
+      </Box>
+      <Text size="2" className={styles.numeric} style={{ minWidth: 52, textAlign: 'right', lineHeight: 1 }}>
+        <Text as="span" weight="bold">{discovered}</Text>/{total}
+      </Text>
+      <Text size="2" weight="bold" highContrast className={styles.numeric} style={{ minWidth: 48, textAlign: 'right', lineHeight: 1 }}>
+        {percent} %
+      </Text>
     </Flex>
   );
 
