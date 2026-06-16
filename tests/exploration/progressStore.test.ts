@@ -42,6 +42,15 @@ describe('markDiscovered', () => {
     const p = await getExplorationProgress();
     expect(p.discovered.sort()).toEqual(['a', 'b']);
   });
+
+  it('does not orphan a mark enqueued while a flush is in flight', async () => {
+    const p1 = markDiscovered('a'); // schedules the flush microtask
+    await Promise.resolve(); // let the flush start and await storage I/O
+    const p2 = markDiscovered('b'); // enqueued mid-flush: must not be dropped
+    await Promise.all([p1, p2]);
+    const p = await getExplorationProgress();
+    expect(p.discovered.sort()).toEqual(['a', 'b']);
+  });
 });
 
 describe('markValue', () => {

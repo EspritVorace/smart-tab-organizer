@@ -469,6 +469,7 @@ export function DomainRulesPage({
   );
 
   const handleAddRule = useCallback(() => {
+    void markDiscovered('grouping.create');
     setEditingRule(undefined);
     setIsModalOpen(true);
   }, []);

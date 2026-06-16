@@ -132,7 +132,7 @@ export function WizardStep1Identity({ control, errors, setValue }: WizardStep1Id
               render={({ field }) => (
                 <ChromeColorPicker
                   value={(field.value ?? 'grey') as ChromeGroupColor}
-                  onChange={(color) => field.onChange(color)}
+                  onChange={(color) => { void markDiscovered('grouping.color'); field.onChange(color); }}
                 />
               )}
             />

@@ -104,6 +104,9 @@ export function PackGallery({
   useEffect(() => {
     if (activeCategory === ALL_CATEGORIES) return;
     void markDiscovered('packs.filterCategory');
+    // Mark the capability discovered (coverage reads `discovered`, never
+    // `values`) AND record the distinct category explored.
+    void markDiscovered('packs.categoriesExplored');
     void markValue('packs.categoriesExplored', activeCategory);
   }, [activeCategory]);
 

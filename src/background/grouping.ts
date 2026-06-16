@@ -223,9 +223,13 @@ export async function createNewGroup(
     await incrementStat('grouping', ruleId);
     await stampRuleLastUsed(ruleId);
     // Exploration: creating a group means the "create a rule" capability is in
-    // use. Also record the distinct color seen (multi-valued capability).
+    // use. Also record the color: mark the capability discovered (coverage reads
+    // `discovered`, never `values`) AND record the distinct color seen.
     void markDiscovered('grouping.create');
-    if (groupColor) void markValue('grouping.color', groupColor);
+    if (groupColor) {
+        void markDiscovered('grouping.color');
+        void markValue('grouping.color', groupColor);
+    }
 
     return newGroupId;
 }
