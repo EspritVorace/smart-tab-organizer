@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { browser } from 'wxt/browser';
 import { mountExtensionApp } from '@/utils/mountExtensionApp.js';
 import { Box, Flex, Separator, Theme } from '@radix-ui/themes';
@@ -13,6 +13,7 @@ import { PopupWorkspaceSwitcher } from '@/components/UI/Workspace/PopupWorkspace
 import { WorkspaceSwitchShortcuts } from '@/components/UI/Workspace/WorkspaceSwitchShortcuts';
 import { ShortcutsDrawer } from '@/components/UI/ShortcutsPanel';
 import { openOptionsWithHash } from '@/utils/openOptions';
+import { markDiscovered } from '@/exploration/progressStore';
 import { getActiveTabGroupId } from '@/utils/tabCapture';
 import { buildSnapshotHash } from '@/utils/snapshotHash';
 import { useSettings } from '@/hooks/useSettings';
@@ -88,6 +89,12 @@ export function PopupContent() {
   );
 
   useThemeToggleShortcut();
+
+  // Exploration: opening the popup is the `_execute_action` global command (the
+  // only global command shipping a default keyboard binding). Chrome never
+  // surfaces `_execute_action` through `browser.commands.onCommand`, so the
+  // background handler cannot observe it; mark the capability here on mount.
+  useEffect(() => { void markDiscovered('nav.globalCommands'); }, []);
 
   const hasRules = isLoaded && (settings?.domainRules?.length ?? 0) > 0;
 

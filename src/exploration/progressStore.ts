@@ -25,21 +25,26 @@ function ensureInitialized(progress: ExplorationProgress): ExplorationProgress {
 }
 
 async function flush(): Promise<void> {
-  const ops = pendingOps;
-  pendingOps = [];
-  if (ops.length === 0) return;
+  // Drain in a loop: a transform enqueued while we await the async storage I/O
+  // below must not be orphaned. Re-checking `pendingOps` after every await keeps
+  // every queued mark in this flush, so the promise callers awaited only settles
+  // once their op has actually been persisted (no silently dropped discoveries).
+  while (pendingOps.length > 0) {
+    const ops = pendingOps;
+    pendingOps = [];
 
-  const raw = await explorationProgressItem.getValue();
-  const parsed = parseExplorationProgress(raw, (e) =>
-    logger.warn('[EXPLORATION] Corrupt progress, resetting:', e),
-  );
-  let after = ensureInitialized(parsed);
-  for (const op of ops) after = op(after);
+    const raw = await explorationProgressItem.getValue();
+    const parsed = parseExplorationProgress(raw, (e) =>
+      logger.warn('[EXPLORATION] Corrupt progress, resetting:', e),
+    );
+    let after = ensureInitialized(parsed);
+    for (const op of ops) after = op(after);
 
-  // Skip the write when nothing actually changed (idempotent marks). Compare
-  // against the raw parsed value so an `initializedAt` stamp still persists.
-  if (JSON.stringify(after) !== JSON.stringify(parsed)) {
-    await explorationProgressItem.setValue(after);
+    // Skip the write when nothing actually changed (idempotent marks). Compare
+    // against the raw parsed value so an `initializedAt` stamp still persists.
+    if (JSON.stringify(after) !== JSON.stringify(parsed)) {
+      await explorationProgressItem.setValue(after);
+    }
   }
 }
 
