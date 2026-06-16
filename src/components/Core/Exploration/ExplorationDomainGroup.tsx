@@ -97,10 +97,10 @@ export function ExplorationDomainGroup({
       <Box className={styles.domainBar}>
         <Progress value={percent} size="2" aria-hidden="true" />
       </Box>
-      <Text size="2" className={styles.numeric} style={{ lineHeight: 1 }}>
+      <Text size="2" className={styles.numeric} style={{ minWidth: 52, textAlign: 'right', lineHeight: 1 }}>
         <Text as="span" weight="bold">{discovered}</Text>/{total}
       </Text>
-      <Text size="2" weight="bold" highContrast className={styles.numeric} style={{ minWidth: 44, textAlign: 'right', lineHeight: 1 }}>
+      <Text size="2" weight="bold" highContrast className={styles.numeric} style={{ minWidth: 48, textAlign: 'right', lineHeight: 1 }}>
         {percent} %
       </Text>
     </Flex>
