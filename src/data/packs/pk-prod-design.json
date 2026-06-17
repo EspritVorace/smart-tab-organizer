@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-prod-design",
+    "name": {
+      "en": "Design tools",
+      "fr": "Outils de design",
+      "es": "Herramientas de diseño"
+    },
+    "description": {
+      "en": "Group Figma, Canva and Miro tabs by file, design and board.",
+      "fr": "Regroupe les onglets Figma, Canva et Miro par fichier, design et tableau.",
+      "es": "Agrupa las pestañas de Figma, Canva y Miro por archivo, diseño y tablero."
+    },
+    "categoryId": "productivity"
+  },
+  "domainRules": [
+    {
+      "id": "pk-prod-design-figma",
+      "enabled": true,
+      "domainFilter": "figma.com",
+      "label": "Figma: File",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/(?:file|design|board|proto)/[^/?#]+/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "purple",
+      "categoryId": "productivity",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-prod-design-canva",
+      "enabled": true,
+      "domainFilter": "*.canva.com",
+      "label": "Canva: Design",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/design/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "cyan",
+      "categoryId": "productivity",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-prod-design-miro",
+      "enabled": true,
+      "domainFilter": "*.miro.com",
+      "label": "Miro: Board",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "/app/board/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "yellow",
+      "categoryId": "productivity",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

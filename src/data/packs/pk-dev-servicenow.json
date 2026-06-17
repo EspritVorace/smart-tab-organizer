@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-dev-servicenow",
+    "name": {
+      "en": "ServiceNow",
+      "fr": "ServiceNow",
+      "es": "ServiceNow"
+    },
+    "description": {
+      "en": "Group ServiceNow tabs by record identifier (INC, CHG, REQ, RITM, PRB).",
+      "fr": "Regroupe les onglets ServiceNow par identifiant de record (INC, CHG, REQ, RITM, PRB).",
+      "es": "Agrupa las pestañas de ServiceNow por identificador de registro (INC, CHG, REQ, RITM, PRB)."
+    },
+    "categoryId": "development"
+  },
+  "domainRules": [
+    {
+      "id": "pk-dev-servicenow-record",
+      "enabled": true,
+      "domainFilter": "*.service-now.com",
+      "label": "ServiceNow: Record",
+      "titleParsingRegEx": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+|PRB\\d+)",
+      "urlParsingRegEx": "(INC\\d+|CHG\\d+|REQ\\d+|RITM\\d+|PRB\\d+)",
+      "groupNameSource": "smart_preset",
+      "deduplicationMatchMode": "exact",
+      "color": "red",
+      "categoryId": "development",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": "servicenow-record-in-title",
+      "urlExtractionMode": "regex"
+    }
+  ]
+}

@@ -3,14 +3,14 @@
   "pack": {
     "id": "pk-finance-markets",
     "name": {
-      "en": "Markets & tickers",
-      "fr": "Marchés & tickers",
-      "es": "Mercados y tickers"
+      "en": "Markets & quotes",
+      "fr": "Marchés et cotations",
+      "es": "Mercados y cotizaciones"
     },
     "description": {
-      "en": "Group Yahoo Finance, TradingView and Investing.com tabs by ticker symbol.",
-      "fr": "Regroupe les onglets Yahoo Finance, TradingView et Investing.com par symbole ticker.",
-      "es": "Agrupa las pestañas de Yahoo Finance, TradingView e Investing.com por símbolo de ticker."
+      "en": "Group Yahoo Finance, TradingView, Investing.com, Google Finance and MarketWatch tabs by ticker symbol.",
+      "fr": "Regroupe les onglets Yahoo Finance, TradingView, Investing.com, Google Finance et MarketWatch par symbole.",
+      "es": "Agrupa las pestañas de Yahoo Finance, TradingView, Investing.com, Google Finance y MarketWatch por símbolo."
     },
     "categoryId": "finance"
   },
@@ -19,7 +19,7 @@
       "id": "pk-finance-yahoo",
       "enabled": true,
       "domainFilter": "finance.yahoo.com",
-      "label": "Yahoo Finance: Ticker",
+      "label": "Yahoo Finance: Quote",
       "titleParsingRegEx": "",
       "urlParsingRegEx": "/quote/([^/?#]+)",
       "groupNameSource": "url",
@@ -57,6 +57,38 @@
       "groupNameSource": "url",
       "deduplicationMatchMode": "exact",
       "color": "orange",
+      "categoryId": "finance",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-finance-google-quote",
+      "enabled": true,
+      "domainFilter": "www.google.com",
+      "label": "Google Finance: Quote",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "google\\.com/finance/quote/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "blue",
+      "categoryId": "finance",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-finance-marketwatch-quote",
+      "enabled": true,
+      "domainFilter": "*.marketwatch.com",
+      "label": "MarketWatch: Quote",
+      "titleParsingRegEx": "",
+      "urlParsingRegEx": "marketwatch\\.com/investing/(?:stock|fund|index|cryptocurrency)/([^/?#]+)",
+      "groupNameSource": "url",
+      "deduplicationMatchMode": "exact",
+      "color": "yellow",
       "categoryId": "finance",
       "deduplicationEnabled": true,
       "ignoredQueryParams": [],
