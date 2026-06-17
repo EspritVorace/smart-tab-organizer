@@ -519,24 +519,22 @@ export function DomainRulesPage({
       },
       'ruleCard.moveToFirst': () => {
         const focused = getFocusedRule();
-        if (focused) { void markDiscovered('grouping.reorder.keyboard'); handleMoveToFirst(focused.rule.id); }
+        if (focused) { handleMoveToFirst(focused.rule.id); }
       },
       'ruleCard.moveToLast': () => {
         const focused = getFocusedRule();
-        if (focused) { void markDiscovered('grouping.reorder.keyboard'); handleMoveToLast(focused.rule.id); }
+        if (focused) { handleMoveToLast(focused.rule.id); }
       },
       'ruleCard.moveToFirstOfDomain': () => {
         const focused = getFocusedRule();
         if (!focused) return;
         if (getRulesForRootDomain(syncSettings.domainRules, focused.rule.domainFilter).length <= 1) return;
-        void markDiscovered('grouping.reorder.keyboard');
         handleMoveToFirstOfDomain(focused.rule.id);
       },
       'ruleCard.moveToLastOfDomain': () => {
         const focused = getFocusedRule();
         if (!focused) return;
         if (getRulesForRootDomain(syncSettings.domainRules, focused.rule.domainFilter).length <= 1) return;
-        void markDiscovered('grouping.reorder.keyboard');
         handleMoveToLastOfDomain(focused.rule.id);
       },
     },

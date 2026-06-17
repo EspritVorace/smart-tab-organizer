@@ -37,12 +37,12 @@ describe('markShortcutCapability', () => {
     expect(discovered).toContain('workspaces.switch');
   });
 
-  it('maps list navigation to keyboard list navigation', async () => {
-    expect(await discoveredAfter('list.rules.navigate')).toContain('nav.listKeyboard');
+  it('maps session section navigation to sessions.sectionNav', async () => {
+    expect(await discoveredAfter('sessionCard.sectionNext')).toContain('sessions.sectionNav');
   });
 
-  it('maps a reorder/move shortcut to keyboard reordering', async () => {
-    expect(await discoveredAfter('ruleCard.moveToFirst')).toContain('nav.reorderKeyboard');
+  it('maps stats tab navigation to stats.tabNav', async () => {
+    expect(await discoveredAfter('list.stats.tabNext')).toContain('stats.tabNav');
   });
 
   it('ignores an unknown shortcut id', async () => {

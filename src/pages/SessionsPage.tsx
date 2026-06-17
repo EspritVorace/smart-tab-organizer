@@ -548,7 +548,7 @@ export function SessionsPage({
   // untouched.
   const handleTabClick = useCallback(
     (next: SessionsSubTab) => {
-      void markDiscovered(next === 'archived' ? 'sessions.subtab.archived' : 'sessions.subtab.active');
+      if (next === 'archived') void markDiscovered('sessions.subtab.archived');
       const switching = next !== sessionsTab;
       handleTabChange(next);
       if (!switching) return;

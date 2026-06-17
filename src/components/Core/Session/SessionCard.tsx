@@ -259,7 +259,6 @@ function useSessionRename(session: Session, existingSessions: Session[], onRenam
         return;
       }
       await onRename(session.id, trimmed);
-      void markDiscovered('sessions.rename');
     }
     setIsRenaming(false);
   }, [nameValue, session.id, session.name, onRename, existingSessions]);

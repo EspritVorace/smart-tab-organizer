@@ -13,6 +13,10 @@ const CAPABILITY_BY_SHORTCUT_ID: Record<string, string> = {
   'popup.help': 'help.drawer',
   'options.docs.open': 'help.contextF1',
   'theme.toggle': 'settings.theme',
+  'sessionCard.sectionNext': 'sessions.sectionNav',
+  'sessionCard.sectionPrev': 'sessions.sectionNav',
+  'list.stats.tabNext': 'stats.tabNav',
+  'list.stats.tabPrev': 'stats.tabNav',
 };
 
 const CAPABILITIES_BY_GROUP: Record<string, string[]> = {
@@ -37,14 +41,6 @@ export function markShortcutCapability(shortcutId: string): void {
   const entry = SHORTCUTS_REGISTRY[shortcutId];
   if (!entry) return;
 
-  if (shortcutId.includes('reorder') || shortcutId.includes('moveTo')) {
-    void markDiscovered('nav.reorderKeyboard');
-    return;
-  }
-  if (shortcutId.includes('navigate')) {
-    void markDiscovered('nav.listKeyboard');
-    return;
-  }
   for (const capability of CAPABILITIES_BY_GROUP[entry.group] ?? []) {
     void markDiscovered(capability);
   }
