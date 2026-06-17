@@ -1183,6 +1183,8 @@
   "explorationEntry_sessions_note_desc": { "message": "Añade una nota a una sesión." },
   "explorationEntry_sessions_hovercard_label": { "message": "Vista previa (HoverCard)" },
   "explorationEntry_sessions_hovercard_desc": { "message": "Previsualiza una sesión al pasar el cursor." },
+  "explorationEntry_sessions_rename_label": { "message": "Renombrar en línea" },
+  "explorationEntry_sessions_rename_desc": { "message": "Renombra una sesión en la propia lista." },
   "explorationEntry_sessions_editor_label": { "message": "Editor de sesión" },
   "explorationEntry_sessions_editor_desc": { "message": "Abre el editor detallado de una sesión." },
   "explorationEntry_sessions_refresh_label": { "message": "Actualizar una sesión" },

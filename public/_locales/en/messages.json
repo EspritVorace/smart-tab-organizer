@@ -1184,6 +1184,8 @@
   "explorationEntry_sessions_note_desc": { "message": "Add a note to a session." },
   "explorationEntry_sessions_hovercard_label": { "message": "Preview (HoverCard)" },
   "explorationEntry_sessions_hovercard_desc": { "message": "Preview a session on hover." },
+  "explorationEntry_sessions_rename_label": { "message": "Inline rename" },
+  "explorationEntry_sessions_rename_desc": { "message": "Rename a session right in the list." },
   "explorationEntry_sessions_editor_label": { "message": "Session editor" },
   "explorationEntry_sessions_editor_desc": { "message": "Open a session's detailed editor." },
   "explorationEntry_sessions_refresh_label": { "message": "Refresh a session" },

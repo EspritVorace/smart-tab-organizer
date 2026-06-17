@@ -118,6 +118,7 @@ export const CATALOG: readonly CatalogEntry[] = [
   e('sessions.unarchive', 'sessions', '#sessions', 'touchpoint', { prerequisites: 'sessions.archive' }),
   e('sessions.note', 'sessions', '#sessions', 'touchpoint', { prerequisites: HAS_SESSION }),
   e('sessions.hovercard', 'sessions', '#sessions', 'ephemeral', { prerequisites: HAS_SESSION }),
+  e('sessions.rename', 'sessions', '#sessions', 'touchpoint', { prerequisites: HAS_SESSION }),
   e('sessions.editor', 'sessions', '#sessions', 'ephemeral', { prerequisites: HAS_SESSION }),
   e('sessions.refresh', 'sessions', '#sessions', 'touchpoint', { prerequisites: HAS_SESSION }),
   e('sessions.reorder', 'sessions', '#sessions', 'ephemeral', { prerequisites: HAS_SESSION }),

@@ -487,13 +487,13 @@ function SessionCardFullHeader({
               session={session}
               searchQuery={searchQuery}
               hoverCardContent={hoverCardContent}
-              onDoubleClick={() => { setNameValue(session.name); setRenameError(null); setIsRenaming(true); }}
+              onDoubleClick={() => { setNameValue(session.name); setRenameError(null); setIsRenaming(true); void markDiscovered('sessions.rename'); }}
             />
             <IconButton
               size="1"
               variant="ghost"
               color="gray"
-              onClick={() => { setNameValue(session.name); setRenameError(null); setIsRenaming(true); }}
+              onClick={() => { setNameValue(session.name); setRenameError(null); setIsRenaming(true); void markDiscovered('sessions.rename'); }}
               aria-label={getMessage('sessionRename')}
               style={{ flexShrink: 0 }}
             >
