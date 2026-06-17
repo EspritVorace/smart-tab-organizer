@@ -19,7 +19,7 @@ import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components'
 | **Preset** | Rellena previamente la regla que se está editando. | Desplegable **Preset** en el asistente de creación de regla. |
 | **Categoría** | Aporta un emoji y una etiqueta a una regla o a una sesión. | Campo **Categoría** en el asistente de regla y en el editor de sesión. |
 
-## Las 14 categorías
+## Las 14 categorías \{#categories}
 
 Las categorías están **integradas en la extensión** y se definen en `src/data/categories.json`. No se crean ni se modifican desde la interfaz: las eliges en el campo **Categoría** del asistente de regla o de sesión.
 
@@ -40,6 +40,15 @@ Las categorías están **integradas en la extensión** y se definen en `src/data
 | ☁️ | Cloud y DevOps | AWS, Azure, GCP, despliegue |
 | 🛠️ | Genérico | Casos transversales y fallback |
 
+## Recorrer la galería \{#gallery}
+
+La galería de packs es donde descubres y eliges los packs antes de importarlos. Ofrece dos maneras de acotar la lista:
+
+- **Filtrar por categoría**: la barra lateral izquierda lista las categorías. Elige una para mostrar solo sus packs.
+- **Buscar**: el campo de búsqueda filtra los packs por nombre, de forma insensible a los acentos (`videoconferencia` encuentra **Videoconferencias**).
+
+Los packs que coinciden con tus pestañas abiertas suben al principio con una etiqueta **Coincide con tus pestañas**. Una búsqueda o un filtro por categoría activos mantienen la prioridad sobre ese orden.
+
 ## Importar un pack \{#import-pack}
 
 <Steps>
@@ -55,7 +64,7 @@ Las categorías están **integradas en la extensión** y se definen en `src/data
 
 Algunos packs (típicamente los de cloud) ofrecen un parámetro que elegir antes de la importación. El servicio seleccionado se convierte en la regla destacada al importar; las demás reglas del pack también se añaden, pero el pack queda marcado como especializado en el servicio elegido.
 
-Puedes reimportar un pack varias veces con parámetros distintos: las reglas ya presentes se detectarán como conflictos en el asistente de importación y se resolverán caso por caso (consulta [Importar / Exportar](/guides/import-export#resolution-propriete-par-propriete)).
+Puedes reimportar un pack varias veces con parámetros distintos: las reglas ya presentes se detectarán como conflictos en el asistente de importación y se resolverán caso por caso (consulta [Importar / Exportar](/guides/import-export#conflict-resolution)).
 
 ## Catálogo completo
 

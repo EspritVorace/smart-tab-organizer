@@ -49,7 +49,7 @@ Le format embarque pour chaque règle : domaine, label, regex de titre et d'URL,
 3. Le wizard valide la structure et **classifie** chaque règle entrante.
 </Steps>
 
-#### Classification
+#### Classification \{#classification}
 
 Chaque règle entrante est comparée aux règles déjà présentes dans le workspace actif :
 
@@ -59,7 +59,7 @@ Chaque règle entrante est comparée aux règles déjà présentes dans le works
 | **En conflit** | Une règle existe avec le même domaine et le même label, mais une ou plusieurs propriétés diffèrent. | Résolution propriété par propriété (voir ci-dessous). |
 | **Identique** | Une règle existe avec exactement les mêmes valeurs. | Ignorée. |
 
-#### Résolution propriété par propriété
+#### Résolution propriété par propriété \{#conflict-resolution}
 
 <ThemeImage
   lightSrc={importConflictsLight}
@@ -71,7 +71,7 @@ Pour chaque règle en conflit, le wizard affiche un tableau à deux colonnes : *
 
 ## Sessions
 
-### Exporter des sessions
+### Exporter des sessions \{#export-sessions}
 
 Le wizard d'export propose trois cases à cocher correspondant aux trois compartiments :
 
@@ -85,7 +85,7 @@ Les sessions archivées sont décochées par défaut pour que les exports léger
 
 L'export propose également un champ **Note** optionnel, embarqué dans l'archive et affiché à l'import.
 
-### Importer des sessions
+### Importer des sessions \{#import-sessions}
 
 Même mécanique que pour les règles : choix de la source (fichier, texte collé), validation par schéma Zod, classification new / conflicting / identical sur la base du nom et du contenu. La résolution se fait au cas par cas : conserver la version existante, écraser, ou ajouter en suffixant le nom.
 

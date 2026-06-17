@@ -8,10 +8,10 @@ import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
 The **Settings** page gathers the global preferences that are not tied to a specific rule. It is built around three sections.
 
 <Aside type="note">
-The **global toggles** for grouping and deduplication are not here: they live in the [popup](/guides/popup) (and in the icon badge, see [Interface tour](/discover/interface-tour#indicateur-sur-licone)).
+The **global toggles** for grouping and deduplication are not here: they live in the [popup](/guides/popup) (and in the icon badge, see [Interface tour](/discover/interface-tour#badge)).
 </Aside>
 
-## Notifications
+## Notifications \{#notifications}
 
 Three independent toggles. Each one controls a kind of system notification, with no interaction between them.
 
@@ -42,9 +42,9 @@ The strategy that decides which of the two duplicate tabs survives. Four values:
 | **Grouped tab wins, otherwise keep existing** | If one of the two is grouped and the other is not, the grouped one survives. Otherwise falls back to **The existing tab**. |
 | **Grouped tab wins, otherwise keep the new one** (default) | If one of the two is grouped and the other is not, the grouped one survives. Otherwise falls back to **The newly opened tab**. Protects tabs restored from a session from being closed in favor of an ungrouped copy. |
 
-See [Deduplicate](/guides/deduplicate#strategies-de-conservation) for the full context.
+See [Deduplicate](/guides/deduplicate#keep-strategy) for the full context.
 
-## Default action (Restore)
+## Default action (Restore) \{#default-restore}
 
 This section configures what a **click** on the main **Restore** button of a session or a profile does. The dropdown next to the button always exposes the four options individually.
 

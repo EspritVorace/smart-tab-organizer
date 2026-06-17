@@ -18,7 +18,7 @@ La page **Règles de domaine** est le centre névralgique de l'extension. Une r�
   alt="Liste des règles de domaine avec quatre entrées couvrant différents modes de configuration."
 />
 
-## La liste
+## La liste \{#list}
 
 Chaque ligne couvre un domaine et affiche son label, son mode de configuration (preset, manuel, demander, label de repli), sa catégorie (emoji + libellé), sa couleur de groupe et son état. Trois actions principales depuis la liste :
 
@@ -28,7 +28,7 @@ Chaque ligne couvre un domaine et affiche son label, son mode de configuration (
 
 Une barre de recherche filtre la liste par nom de règle ou par domaine. Une sélection multiple permet d'effectuer des actions en masse : activation, désactivation, suppression, export.
 
-## Filtrer, trier et grouper la liste
+## Filtrer, trier et grouper la liste \{#filter-sort}
 
 À côté de la recherche, un bouton de vue ouvre un menu pour réorganiser
 l'affichage de la liste. Il agit uniquement sur la présentation : il ne modifie
@@ -93,14 +93,14 @@ Une page de confirmation résume le contenu de la règle avant enregistrement. V
 
 Cliquez sur l'icône **Modifier** d'une ligne (ou pressez `E` quand la ligne a le focus). Le même assistant s'ouvre, pré-rempli. La modification est appliquée immédiatement à l'enregistrement, sans confirmation supplémentaire.
 
-## Désactiver, supprimer
+## Désactiver, supprimer \{#disable-delete}
 
 | Action | Effet |
 |---|---|
 | **Toggle ON/OFF** | Désactive la règle sans la supprimer. La ligne est grisée mais reste à sa position. Utile pour mettre une règle en pause. |
 | **Supprimer** | Retire la règle. Une confirmation est demandée. La sélection multiple permet de supprimer plusieurs règles en une action. |
 
-## Chevauchement de domaines
+## Chevauchement de domaines \{#overlap}
 
 Quand plusieurs règles couvrent le même domaine (par exemple `*.atlassian.net` et `mycompany.atlassian.net`), un petit **badge de rang** apparait à côté de chaque règle concernée. Le numéro indique la position de la règle dans l'ordre d'évaluation pour ce domaine. Aucun badge n'apparait quand un domaine n'est couvert que par une seule règle.
 

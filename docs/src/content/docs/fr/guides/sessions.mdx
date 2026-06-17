@@ -20,7 +20,7 @@ Une session est un instantané d'onglets que vous pouvez rouvrir plus tard, avec
   alt="Page Sessions avec une session active fraîchement créée et ses groupes."
 />
 
-## Les trois compartiments
+## Les trois compartiments \{#buckets}
 
 | Compartiment | Quand l'utiliser |
 |---|---|
@@ -29,6 +29,10 @@ Une session est un instantané d'onglets que vous pouvez rouvrir plus tard, avec
 | **Archivées** | Sessions mises de côté sans les supprimer. Hors de vue depuis la popup et la page d'accueil. |
 
 Le sous-onglet **Archivées** de la page Sessions est accessible via `#sessions/archived` (lien profond) ou via le `TabNav` en haut de la page.
+
+## La carte de session \{#card}
+
+Dans chaque compartiment, une session est représentée par une carte. Survoler une carte (ou la cibler au clavier) ouvre une **HoverCard** qui résume la session sans la restaurer : date de capture, nombre d'onglets, catégorie, et la note quand il y en a une. C'est le moyen le plus rapide de reconnaitre une session avant d'agir dessus.
 
 ## Capturer un instantané \{#snapshot}
 
@@ -59,9 +63,9 @@ Quatre cibles de restauration sont disponibles. Sur le focus d'une session ou d'
 | **Remplacer la fenêtre actuelle** | `Alt + R` | Ferme les onglets de la fenêtre actuelle, restaure ceux de la session à leur place. |
 | **Personnalisée** | `R` | Ouvre le wizard de restauration et propose le détail des conflits éventuels. |
 
-Le clic ou la touche `Enter` utilise l'**action par défaut** configurée dans [Paramètres](/guides/settings#action-de-restauration-par-defaut).
+Le clic ou la touche `Enter` utilise l'**action par défaut** configurée dans [Paramètres](/guides/settings#default-restore).
 
-### Wizard de conflits
+### Wizard de conflits \{#conflict}
 
 Quand des onglets de la session sont déjà ouverts dans la fenêtre cible, le wizard propose une résolution onglet par onglet :
 
@@ -78,10 +82,10 @@ Quand des onglets de la session sont déjà ouverts dans la fenêtre cible, le w
 | **Remplacer** | Ferme l'onglet existant et restaure celui de la session à sa place. |
 
 <Aside type="note">
-Les onglets restaurés via le wizard sont protégés contre une déduplication immédiate pendant 10 secondes (même mécanique que [Annuler une déduplication](/guides/deduplicate#notification-et-annulation)).
+Les onglets restaurés via le wizard sont protégés contre une déduplication immédiate pendant 10 secondes (même mécanique que [Annuler une déduplication](/guides/deduplicate#undo)).
 </Aside>
 
-## Éditer une session
+## Éditer une session \{#edit}
 
 Cliquez sur l'icône **Modifier** d'une carte de session, ou utilisez `E` sur le focus. L'éditeur de session permet de :
 
@@ -93,11 +97,11 @@ Cliquez sur l'icône **Modifier** d'une carte de session, ou utilisez `E` sur le
 
 Les modifications sont appliquées immédiatement. L'état déplié ou replié de chaque groupe est persistant entre les ouvertures.
 
-## Rafraîchir une session
+## Rafraîchir une session \{#refresh}
 
 Le bouton **Rafraîchir** (raccourci `U` sur le focus d'une session) remplace le contenu de la session par l'état actuel de la fenêtre courante, tout en gardant le nom et la catégorie. Utile pour mettre à jour un profil épinglé après une session de travail sans recréer la session.
 
-## Sessions épinglées
+## Sessions épinglées \{#pin}
 
 L'**épinglage** promeut une session au rang de **profil** : elle s'affiche dans la popup et dans la page d'accueil du workspace actif.
 
@@ -116,7 +120,7 @@ Les profils sont **cloisonnés par workspace**. Changer de workspace remplace im
 
 Associer une catégorie à une session épinglée fait apparaitre son emoji à côté du nom dans la popup. Pratique quand vous avez plusieurs profils et que vous voulez les distinguer d'un coup d'oeil.
 
-## Archive
+## Archive \{#archive}
 
 Le sous-onglet **Archivées** héberge les sessions que vous voulez garder sans les voir au quotidien. Une session archivée n'apparait ni dans la popup ni dans la page d'accueil, mais reste accessible et restaurable depuis la page Sessions.
 
@@ -132,7 +136,7 @@ Dans le sous-onglet **Archivées**, cliquez sur **Désarchiver**. La session ret
 
 L'URL `chrome-extension://[id]/options.html#sessions/archived` ouvre directement le sous-onglet **Archivées**. Vous pouvez l'utiliser comme marque-page pour aller chercher une vieille session.
 
-## Filtrer et trier
+## Filtrer et trier \{#filter-sort}
 
 Les entêtes des sections **Actives** et **Archivées** (pas la section
 **Épinglées**) portent un bouton de vue qui ouvre un menu de tri et de filtre.
@@ -147,9 +151,22 @@ Le tri **par dernière restauration** s'appuie sur l'horodatage mémorisé à ch
 restauration de la session. La vue est mémorisée indépendamment pour la section
 Actives et la section Archivées, et séparément pour chaque espace de travail.
 
-## Recherche
+## Recherche \{#search}
 
 La barre de recherche au-dessus de la liste filtre par nom de session. Une recherche **profonde** est disponible : elle inspecte aussi les titres des onglets capturés, ce qui aide à retrouver une session par l'un de ses contenus.
+
+## Sélection multiple et actions groupées \{#bulk}
+
+Pour agir sur plusieurs sessions à la fois, cochez la case de chaque carte voulue. Une **barre d'actions groupées** apparait alors en haut de la section, avec une case maitresse (tout sélectionner ou tout désélectionner) et les actions qui s'appliquent à toute la sélection.
+
+| Action | Effet |
+|---|---|
+| **Exporter la sélection** | Exporte uniquement les sessions sélectionnées au format JSON. |
+| **Supprimer la sélection** | Supprime toutes les sessions sélectionnées (avec confirmation). |
+| **Épingler / Désépingler la sélection** | Promeut la sélection en profils, ou la rétrograde. |
+| **Archiver la sélection** | Déplace les sessions actives sélectionnées vers le sous-onglet **Archivées**. |
+
+Les actions disponibles dépendent de la section : la section **Épinglées** propose le désépinglage, la section **Actives** propose l'épinglage et l'archivage. L'export et la suppression sont disponibles partout.
 
 ## Aller plus loin
 

@@ -19,7 +19,7 @@ import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components'
 | **Preset** | Pré-remplit la règle en cours d'édition. | Dropdown **Preset** dans le wizard de création de règle. |
 | **Catégorie** | Donne un emoji et un libellé à une règle ou à une session. | Champ **Catégorie** dans le wizard de règle et dans l'éditeur de session. |
 
-## Les 14 catégories
+## Les 14 catégories \{#categories}
 
 Les catégories sont **intégrées à l'extension** et définies dans `src/data/categories.json`. Elles ne se créent pas et ne se modifient pas depuis l'interface : vous les choisissez dans le champ **Catégorie** du wizard de règle ou de session.
 
@@ -40,6 +40,15 @@ Les catégories sont **intégrées à l'extension** et définies dans `src/data/
 | ☁️ | Cloud et DevOps | AWS, Azure, GCP, déploiement |
 | 🛠️ | Générique | Cas transverses et fallback |
 
+## Parcourir la galerie \{#gallery}
+
+La galerie de packs est l'endroit où vous découvrez et choisissez les packs avant de les importer. Elle propose deux façons de réduire la liste :
+
+- **Filtrer par catégorie** : la barre latérale gauche liste les catégories. Choisissez-en une pour n'afficher que ses packs.
+- **Rechercher** : le champ de recherche filtre les packs par nom, insensible aux accents (`videoconference` trouve **Visioconférences**).
+
+Les packs qui correspondent à vos onglets ouverts remontent en tête avec une étiquette **Correspond à vos onglets**. Une recherche ou un filtre par catégorie actif reste prioritaire sur ce tri.
+
 ## Importer un pack \{#import-pack}
 
 <Steps>
@@ -55,7 +64,7 @@ Les catégories sont **intégrées à l'extension** et définies dans `src/data/
 
 Certains packs (typiquement les packs cloud) proposent un paramètre à choisir avant l'import. Le service sélectionné devient la règle mise en avant à l'import ; les autres règles du pack sont aussi ajoutées, mais le pack est marqué comme spécialisé sur le service choisi.
 
-Vous pouvez réimporter un pack plusieurs fois avec des paramètres différents : les règles déjà présentes seront détectées comme conflits par le wizard d'import et résolues au cas par cas (voir [Import / Export](/guides/import-export#resolution-propriete-par-propriete)).
+Vous pouvez réimporter un pack plusieurs fois avec des paramètres différents : les règles déjà présentes seront détectées comme conflits par le wizard d'import et résolues au cas par cas (voir [Import / Export](/guides/import-export#conflict-resolution)).
 
 ## Catalogue complet
 

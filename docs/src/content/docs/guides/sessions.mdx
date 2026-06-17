@@ -20,7 +20,7 @@ A session is a snapshot of tabs you can reopen later, with their groups, names, 
   alt="Sessions page with a freshly captured active session and its groups."
 />
 
-## The three buckets
+## The three buckets \{#buckets}
 
 | Bucket | When to use |
 |---|---|
@@ -29,6 +29,10 @@ A session is a snapshot of tabs you can reopen later, with their groups, names, 
 | **Archived** | Sessions set aside without deleting them. Out of sight from the popup and the home page. |
 
 The **Archived** sub-tab of the Sessions page is reachable via `#sessions/archived` (deep link) or via the `TabNav` at the top of the page.
+
+## The session card \{#card}
+
+In every bucket, a session is shown as a card. Pointing at a card (or focusing it with the keyboard) opens a **HoverCard** that summarizes the session without restoring it: capture date, number of tabs, category, and the note when there is one. It is the fastest way to recognize a session before acting on it.
 
 ## Take a snapshot \{#snapshot}
 
@@ -59,9 +63,9 @@ Four restore targets are available. With a session or profile focused:
 | **Replace tabs in current window** | `Alt + R` | Closes the current window's tabs and restores those of the session in their place. |
 | **Customized restoration** | `R` | Opens the restore wizard and surfaces any conflicts. |
 
-A click or pressing `Enter` uses the **default action** configured in [Settings](/guides/settings#action-de-restauration-par-defaut).
+A click or pressing `Enter` uses the **default action** configured in [Settings](/guides/settings#default-restore).
 
-### Conflict wizard
+### Conflict wizard \{#conflict}
 
 When tabs from the session are already open in the target window, the wizard offers a per-tab resolution:
 
@@ -78,10 +82,10 @@ When tabs from the session are already open in the target window, the wizard off
 | **Replace** | Closes the existing tab and restores the session's one in its place. |
 
 <Aside type="note">
-Tabs restored through the wizard are protected against immediate deduplication for 10 seconds (same mechanism as [Undo on deduplication](/guides/deduplicate#notification-et-annulation)).
+Tabs restored through the wizard are protected against immediate deduplication for 10 seconds (same mechanism as [Undo on deduplication](/guides/deduplicate#undo)).
 </Aside>
 
-## Edit a session
+## Edit a session \{#edit}
 
 Click the **Edit** icon on a session card, or use `E` on the focused card. The session editor lets you:
 
@@ -93,11 +97,11 @@ Click the **Edit** icon on a session card, or use `E` on the focused card. The s
 
 Changes are applied immediately. The expanded or collapsed state of each group is remembered across openings.
 
-## Refresh a session
+## Refresh a session \{#refresh}
 
 The **Refresh** button (shortcut `U` on the focused session) replaces the session content with the current state of the current window, while keeping the name and category. Useful to update a pinned profile after a work session without recreating it.
 
-## Pinned sessions
+## Pinned sessions \{#pin}
 
 **Pinning** promotes a session to a **profile**: it shows up in the popup and on the home page of the active workspace.
 
@@ -116,7 +120,7 @@ Profiles are **scoped per workspace**. Switching workspace immediately swaps the
 
 Assigning a category to a pinned session surfaces its emoji next to the name in the popup. Handy when you have several profiles and want to tell them apart at a glance.
 
-## Archive
+## Archive \{#archive}
 
 The **Archived** sub-tab holds sessions you want to keep without seeing every day. An archived session does not appear in the popup or on the home page, but stays accessible and restorable from the Sessions page.
 
@@ -132,7 +136,7 @@ In the **Archived** sub-tab, click **Unarchive**. The session moves back to **Ac
 
 The URL `chrome-extension://[id]/options.html#sessions/archived` opens the **Archived** sub-tab directly. You can bookmark it to dig up an old session.
 
-## Filter and sort
+## Filter and sort \{#filter-sort}
 
 The headers of the **Active** and **Archived** sections (not the **Pinned**
 section) carry a view button that opens a sort and filter menu. Like for rules,
@@ -147,9 +151,22 @@ Sorting **by last restore** relies on the timestamp recorded each time the
 session is restored. The view is remembered independently for the Active and
 the Archived section, and separately for each workspace.
 
-## Search
+## Search \{#search}
 
 The search bar above the list filters by session name. A **deep** search is available too: it also looks at the captured tab titles, which helps you find a session by one of its contents.
+
+## Multi-selection and bulk actions \{#bulk}
+
+To act on several sessions at once, tick the checkbox on each card you want. A **bulk actions bar** then appears at the top of the section, with a master checkbox (select all or none) and the actions that apply to the whole selection.
+
+| Action | Effect |
+|---|---|
+| **Export selected** | Exports only the selected sessions to JSON. |
+| **Delete selected** | Removes every selected session (with a confirmation). |
+| **Pin / Unpin selected** | Promotes the selection to profiles, or demotes it. |
+| **Archive selected** | Moves the selected active sessions to the **Archived** sub-tab. |
+
+The available actions depend on the section: the **Pinned** section offers unpin, the **Active** section offers pin and archive. Export and delete are available everywhere.
 
 ## Next steps
 

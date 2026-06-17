@@ -18,7 +18,7 @@ La página **Reglas de dominio** es el centro neurálgico de la extensión. Una 
   alt="Lista de reglas de dominio con cuatro entradas que cubren distintos modos de configuración."
 />
 
-## La lista
+## La lista \{#list}
 
 Cada fila cubre un dominio y muestra su etiqueta, su modo de configuración (preset, manual, preguntar, etiqueta de reserva), su categoría (emoji y nombre), su color de grupo y su estado. Tres acciones principales desde la lista:
 
@@ -28,7 +28,7 @@ Cada fila cubre un dominio y muestra su etiqueta, su modo de configuración (pre
 
 Una barra de búsqueda filtra la lista por nombre de regla o por dominio. Una selección múltiple permite ejecutar acciones en masa: activación, desactivación, eliminación, exportación.
 
-## Filtrar, ordenar y agrupar la lista
+## Filtrar, ordenar y agrupar la lista \{#filter-sort}
 
 Junto a la búsqueda, un botón de vista abre un menú para reorganizar cómo se
 muestra la lista. Solo afecta a la presentación: no modifica ni las reglas ni su
@@ -93,14 +93,14 @@ Una página de confirmación resume el contenido de la regla antes de guardarla.
 
 Pulsa el icono **Editar** de una fila (o `E` cuando la fila tiene el foco). Se abre el mismo asistente, pre-rellenado. La modificación se aplica de inmediato al guardar, sin confirmación adicional.
 
-## Desactivar, eliminar
+## Desactivar, eliminar \{#disable-delete}
 
 | Acción | Efecto |
 |---|---|
 | **Interruptor ON/OFF** | Desactiva la regla sin eliminarla. La fila queda en gris pero conserva su posición. Útil para poner una regla en pausa. |
 | **Eliminar** | Retira la regla. Se pide confirmación. La selección múltiple permite eliminar varias reglas de golpe. |
 
-## Solapamiento de dominios
+## Solapamiento de dominios \{#overlap}
 
 Cuando varias reglas cubren el mismo dominio (por ejemplo `*.atlassian.net` y `mycompany.atlassian.net`), aparece una pequeña **insignia de rango** junto a cada regla afectada. El número indica la posición de la regla en el orden de evaluación para ese dominio. No aparece ninguna insignia cuando un dominio está cubierto por una sola regla.
 

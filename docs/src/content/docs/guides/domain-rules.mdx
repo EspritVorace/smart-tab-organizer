@@ -18,7 +18,7 @@ The **Domain Rules** page is the nerve center of the extension. A rule describes
   alt="Domain Rules list with four entries covering different configuration modes."
 />
 
-## The list
+## The list \{#list}
 
 Each row covers a domain and shows its label, its configuration mode (preset, manual, ask, fallback label), its category (emoji + label), its group color, and its state. Three main actions from the list:
 
@@ -28,7 +28,7 @@ Each row covers a domain and shows its label, its configuration mode (preset, ma
 
 A search bar filters the list by rule name or domain. Multi-selection lets you run bulk actions: enable, disable, delete, export.
 
-## Filter, sort and group the list
+## Filter, sort and group the list \{#filter-sort}
 
 Next to the search box, a view button opens a menu to rearrange how the list is
 displayed. It only affects presentation: it changes neither the rules nor their
@@ -92,14 +92,14 @@ A confirmation page summarizes the rule before saving. You can return to previou
 
 Click the **Edit** icon on a row (or press `E` when the row is focused). The same wizard opens, prefilled. The change is applied immediately on save, without extra confirmation.
 
-## Disable, delete
+## Disable, delete \{#disable-delete}
 
 | Action | Effect |
 |---|---|
 | **ON/OFF toggle** | Disables the rule without deleting it. The row is greyed out but stays in place. Useful to pause a rule. |
 | **Delete** | Removes the rule. A confirmation is requested. Multi-selection lets you delete several rules in one action. |
 
-## Domain overlap
+## Domain overlap \{#overlap}
 
 When several rules cover the same domain (for example `*.atlassian.net` and `mycompany.atlassian.net`), a small **rank badge** appears next to each rule involved. The number is the rule's position in the evaluation order for that domain. No badge appears when a domain is covered by a single rule.
 

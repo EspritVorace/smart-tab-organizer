@@ -8,10 +8,10 @@ import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
 La página **Ajustes** reúne las opciones globales que no están vinculadas a una regla concreta. Consta de tres secciones.
 
 <Aside type="note">
-Los **interruptores globales** de agrupación y de deduplicación no están aquí: viven en el [popup](/guides/popup) (y en el distintivo del icono, consulta [Tour de la interfaz](/discover/interface-tour#indicateur-sur-licone)).
+Los **interruptores globales** de agrupación y de deduplicación no están aquí: viven en el [popup](/guides/popup) (y en el distintivo del icono, consulta [Tour de la interfaz](/discover/interface-tour#badge)).
 </Aside>
 
-## Notificaciones
+## Notificaciones \{#notifications}
 
 Tres interruptores independientes. Cada uno controla un tipo de notificación del sistema, sin interacción entre ellos.
 
@@ -42,9 +42,9 @@ La estrategia que decide cuál de las dos pestañas duplicadas sobrevive. Cuatro
 | **Gana la pestaña agrupada, si no mantener la existente** | Si una de las dos está agrupada y la otra no, sobrevive la agrupada. Si no, se cae en **La pestaña existente**. |
 | **Gana la pestaña agrupada, si no mantener la nueva** (por defecto) | Si una de las dos está agrupada y la otra no, sobrevive la agrupada. Si no, se cae en **La pestaña recién abierta**. Protege las pestañas restauradas desde una sesión frente a un cierre en favor de una copia sin grupo. |
 
-Consulta [Deduplicar](/guides/deduplicate#strategies-de-conservation) para el contexto completo.
+Consulta [Deduplicar](/guides/deduplicate#keep-strategy) para el contexto completo.
 
-## Acción por defecto (Restaurar)
+## Acción por defecto (Restaurar) \{#default-restore}
 
 Esta sección configura lo que hace un **clic** sobre el botón principal **Restaurar** de una sesión o de un perfil. El menú desplegable junto al botón siempre mantiene accesibles las cuatro opciones individualmente.
 
