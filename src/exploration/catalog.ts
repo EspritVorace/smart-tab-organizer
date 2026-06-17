@@ -89,16 +89,12 @@ export const CATALOG: readonly CatalogEntry[] = [
   e('grouping.category', 'grouping', '#rules', 'touchpoint'),
   e('grouping.presetApplied', 'grouping', '#rules', 'derivation'),
   e('grouping.reorder.drag', 'grouping', '#rules', 'ephemeral', { prerequisites: HAS_RULE }),
-  e('grouping.reorder.keyboard', 'grouping', '#rules', 'ephemeral', { prerequisites: HAS_RULE }),
   e('grouping.toggle', 'grouping', '#rules', 'touchpoint', { prerequisites: HAS_RULE }),
   e('grouping.overlaps', 'grouping', '#rules', 'ephemeral', { prerequisites: HAS_RULE }),
   e('grouping.merge', 'grouping', '#rules', 'derivation', { prerequisites: HAS_RULE }),
   e('grouping.view.filterSort', 'grouping', '#rules', 'touchpoint', { prerequisites: HAS_RULE }),
 
   // 2. Déduplication
-  e('dedup.match.exact', 'dedup', '#rules', 'derivation', { doc: 'guides/deduplicate#match-modes' }),
-  e('dedup.match.includes', 'dedup', '#rules', 'derivation', { doc: 'guides/deduplicate#match-modes' }),
-  e('dedup.match.ignoreParams', 'dedup', '#rules', 'derivation', { doc: 'guides/deduplicate#match-modes' }),
   e('dedup.togglePerRule', 'dedup', '#rules', 'touchpoint', { prerequisites: HAS_RULE }),
   e('dedup.keep.old', 'dedup', '#settings', 'touchpoint', { doc: 'guides/deduplicate#keep-strategy', prerequisites: DEDUP_ENABLED }),
   e('dedup.keep.new', 'dedup', '#settings', 'touchpoint', { doc: 'guides/deduplicate#keep-strategy', prerequisites: DEDUP_ENABLED }),
@@ -118,7 +114,6 @@ export const CATALOG: readonly CatalogEntry[] = [
   e('sessions.conflict', 'sessions', '#sessions', 'derivation', { prerequisites: HAS_SESSION }),
   e('sessions.pin', 'sessions', '#sessions', 'touchpoint', { prerequisites: HAS_SESSION }),
   e('sessions.archive', 'sessions', '#sessions', 'touchpoint', { prerequisites: HAS_SESSION }),
-  e('sessions.subtab.active', 'sessions', '#sessions', 'ephemeral', { prerequisites: HAS_SESSION }),
   e('sessions.subtab.archived', 'sessions', '#sessions', 'ephemeral', { prerequisites: 'sessions.archive' }),
   e('sessions.unarchive', 'sessions', '#sessions', 'touchpoint', { prerequisites: 'sessions.archive' }),
   e('sessions.note', 'sessions', '#sessions', 'touchpoint', { prerequisites: HAS_SESSION }),
@@ -132,6 +127,7 @@ export const CATALOG: readonly CatalogEntry[] = [
   e('sessions.collapse', 'sessions', '#sessions', 'ephemeral', { prerequisites: HAS_SESSION }),
   e('sessions.search', 'sessions', '#sessions', 'ephemeral', { prerequisites: HAS_SESSION }),
   e('sessions.view.filterSort', 'sessions', '#sessions', 'touchpoint', { prerequisites: HAS_SESSION }),
+  e('sessions.sectionNav', 'sessions', '#sessions', 'ephemeral', { prerequisites: HAS_SESSION }),
 
   // 4. Workspaces
   e('workspaces.create', 'workspaces', '#workspaces?action=new', 'touchpoint', { doc: 'guides/workspaces#create' }),
@@ -171,6 +167,7 @@ export const CATALOG: readonly CatalogEntry[] = [
   e('stats.sessions', 'stats', '#stats', 'ephemeral'),
   e('stats.storage', 'stats', '#stats', 'ephemeral'),
   e('stats.reset', 'stats', '#stats', 'touchpoint'),
+  e('stats.tabNav', 'stats', '#stats', 'ephemeral'),
   e('stats.exploration', 'stats', '#exploration', 'ephemeral', { doc: 'guides/exploration#coverage' }),
 
   // 8. Navigation et raccourcis
@@ -182,8 +179,6 @@ export const CATALOG: readonly CatalogEntry[] = [
   e('nav.sequences', 'navigation', '#importexport', 'ephemeral', { doc: 'reference/keyboard-shortcuts#importexport' }),
   e('nav.globalCommands', 'navigation', '#home', 'ephemeral', { doc: 'reference/keyboard-shortcuts#global' }),
   e('nav.workspaceSwitchKeyboard', 'navigation', '#workspaces', 'ephemeral', { doc: 'reference/keyboard-shortcuts#workspace', prerequisites: HAS_WORKSPACE }),
-  e('nav.listKeyboard', 'navigation', '#rules', 'ephemeral'),
-  e('nav.reorderKeyboard', 'navigation', '#rules', 'ephemeral'),
 
   // 9. Aide et documentation
   e('help.drawer', 'help', '#home', 'ephemeral', { doc: 'guides/help-and-documentation#shortcuts-panel' }),

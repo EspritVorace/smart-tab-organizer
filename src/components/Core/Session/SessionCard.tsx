@@ -259,7 +259,6 @@ function useSessionRename(session: Session, existingSessions: Session[], onRenam
         return;
       }
       await onRename(session.id, trimmed);
-      void markDiscovered('sessions.rename');
     }
     setIsRenaming(false);
   }, [nameValue, session.id, session.name, onRename, existingSessions]);
@@ -488,13 +487,13 @@ function SessionCardFullHeader({
               session={session}
               searchQuery={searchQuery}
               hoverCardContent={hoverCardContent}
-              onDoubleClick={() => { setNameValue(session.name); setRenameError(null); setIsRenaming(true); }}
+              onDoubleClick={() => { setNameValue(session.name); setRenameError(null); setIsRenaming(true); void markDiscovered('sessions.rename'); }}
             />
             <IconButton
               size="1"
               variant="ghost"
               color="gray"
-              onClick={() => { setNameValue(session.name); setRenameError(null); setIsRenaming(true); }}
+              onClick={() => { setNameValue(session.name); setRenameError(null); setIsRenaming(true); void markDiscovered('sessions.rename'); }}
               aria-label={getMessage('sessionRename')}
               style={{ flexShrink: 0 }}
             >
