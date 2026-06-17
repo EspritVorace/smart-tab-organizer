@@ -793,6 +793,7 @@
   "shortcutsGroupListStats": { "message": "Statistiques" },
   "shortcutsGroupListExploration": { "message": "Liste d'exploration" },
   "shortcutsGroupListWorkspaces": { "message": "Liste des espaces" },
+  "shortcutsGroupListSettings": { "message": "Paramètres" },
   "shortcutsGroupSessionCard": { "message": "Carte session (focus)" },
   "shortcutsGroupImportExport": { "message": "Import / Export" },
 
@@ -832,6 +833,7 @@
   "shortcutDescFocusSearch": { "message": "Focus sur le champ de recherche" },
   "shortcutDescClearSearch": { "message": "Effacer la recherche ou fermer le panneau" },
   "shortcutDescListNavigate": { "message": "Déplacer le focus entre les cartes" },
+  "shortcutDescSettingsNavigate": { "message": "Déplacer le focus entre les paramètres" },
   "shortcutDescListNew": { "message": "Créer un nouvel élément" },
   "shortcutDescListEdit": { "message": "Modifier l'élément focus" },
   "shortcutDescListToggleSelection": { "message": "Cocher ou décocher la règle focus" },

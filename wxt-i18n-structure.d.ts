@@ -758,6 +758,7 @@ export type GeneratedI18nStructure = {
   "shortcutsGroupListStats": { substitutions: 0, plural: false };
   "shortcutsGroupListExploration": { substitutions: 0, plural: false };
   "shortcutsGroupListWorkspaces": { substitutions: 0, plural: false };
+  "shortcutsGroupListSettings": { substitutions: 0, plural: false };
   "shortcutsGroupSessionCard": { substitutions: 0, plural: false };
   "shortcutsGroupImportExport": { substitutions: 0, plural: false };
   "shortcutSequenceSeparator": { substitutions: 0, plural: false };
@@ -785,6 +786,7 @@ export type GeneratedI18nStructure = {
   "shortcutDescFocusSearch": { substitutions: 0, plural: false };
   "shortcutDescClearSearch": { substitutions: 0, plural: false };
   "shortcutDescListNavigate": { substitutions: 0, plural: false };
+  "shortcutDescSettingsNavigate": { substitutions: 0, plural: false };
   "shortcutDescListNew": { substitutions: 0, plural: false };
   "shortcutDescListEdit": { substitutions: 0, plural: false };
   "shortcutDescListToggleSelection": { substitutions: 0, plural: false };
@@ -1087,8 +1089,6 @@ export type GeneratedI18nStructure = {
   "explorationEntry_grouping_presetApplied_desc": { substitutions: 0, plural: false };
   "explorationEntry_grouping_reorder_drag_label": { substitutions: 0, plural: false };
   "explorationEntry_grouping_reorder_drag_desc": { substitutions: 0, plural: false };
-  "explorationEntry_grouping_reorder_keyboard_label": { substitutions: 0, plural: false };
-  "explorationEntry_grouping_reorder_keyboard_desc": { substitutions: 0, plural: false };
   "explorationEntry_grouping_toggle_label": { substitutions: 0, plural: false };
   "explorationEntry_grouping_toggle_desc": { substitutions: 0, plural: false };
   "explorationEntry_grouping_overlaps_label": { substitutions: 0, plural: false };
@@ -1097,12 +1097,6 @@ export type GeneratedI18nStructure = {
   "explorationEntry_grouping_merge_desc": { substitutions: 0, plural: false };
   "explorationEntry_grouping_view_filterSort_label": { substitutions: 0, plural: false };
   "explorationEntry_grouping_view_filterSort_desc": { substitutions: 0, plural: false };
-  "explorationEntry_dedup_match_exact_label": { substitutions: 0, plural: false };
-  "explorationEntry_dedup_match_exact_desc": { substitutions: 0, plural: false };
-  "explorationEntry_dedup_match_includes_label": { substitutions: 0, plural: false };
-  "explorationEntry_dedup_match_includes_desc": { substitutions: 0, plural: false };
-  "explorationEntry_dedup_match_ignoreParams_label": { substitutions: 0, plural: false };
-  "explorationEntry_dedup_match_ignoreParams_desc": { substitutions: 0, plural: false };
   "explorationEntry_dedup_togglePerRule_label": { substitutions: 0, plural: false };
   "explorationEntry_dedup_togglePerRule_desc": { substitutions: 0, plural: false };
   "explorationEntry_dedup_keep_old_label": { substitutions: 0, plural: false };
@@ -1137,8 +1131,6 @@ export type GeneratedI18nStructure = {
   "explorationEntry_sessions_pin_desc": { substitutions: 0, plural: false };
   "explorationEntry_sessions_archive_label": { substitutions: 0, plural: false };
   "explorationEntry_sessions_archive_desc": { substitutions: 0, plural: false };
-  "explorationEntry_sessions_subtab_active_label": { substitutions: 0, plural: false };
-  "explorationEntry_sessions_subtab_active_desc": { substitutions: 0, plural: false };
   "explorationEntry_sessions_subtab_archived_label": { substitutions: 0, plural: false };
   "explorationEntry_sessions_subtab_archived_desc": { substitutions: 0, plural: false };
   "explorationEntry_sessions_unarchive_label": { substitutions: 0, plural: false };
@@ -1165,6 +1157,8 @@ export type GeneratedI18nStructure = {
   "explorationEntry_sessions_search_desc": { substitutions: 0, plural: false };
   "explorationEntry_sessions_view_filterSort_label": { substitutions: 0, plural: false };
   "explorationEntry_sessions_view_filterSort_desc": { substitutions: 0, plural: false };
+  "explorationEntry_sessions_sectionNav_label": { substitutions: 0, plural: false };
+  "explorationEntry_sessions_sectionNav_desc": { substitutions: 0, plural: false };
   "explorationEntry_workspaces_create_label": { substitutions: 0, plural: false };
   "explorationEntry_workspaces_create_desc": { substitutions: 0, plural: false };
   "explorationEntry_workspaces_switch_label": { substitutions: 0, plural: false };
@@ -1227,6 +1221,8 @@ export type GeneratedI18nStructure = {
   "explorationEntry_stats_storage_desc": { substitutions: 0, plural: false };
   "explorationEntry_stats_reset_label": { substitutions: 0, plural: false };
   "explorationEntry_stats_reset_desc": { substitutions: 0, plural: false };
+  "explorationEntry_stats_tabNav_label": { substitutions: 0, plural: false };
+  "explorationEntry_stats_tabNav_desc": { substitutions: 0, plural: false };
   "explorationEntry_stats_exploration_label": { substitutions: 0, plural: false };
   "explorationEntry_stats_exploration_desc": { substitutions: 0, plural: false };
   "explorationEntry_nav_pinExtension_label": { substitutions: 0, plural: false };
@@ -1245,10 +1241,6 @@ export type GeneratedI18nStructure = {
   "explorationEntry_nav_globalCommands_desc": { substitutions: 0, plural: false };
   "explorationEntry_nav_workspaceSwitchKeyboard_label": { substitutions: 0, plural: false };
   "explorationEntry_nav_workspaceSwitchKeyboard_desc": { substitutions: 0, plural: false };
-  "explorationEntry_nav_listKeyboard_label": { substitutions: 0, plural: false };
-  "explorationEntry_nav_listKeyboard_desc": { substitutions: 0, plural: false };
-  "explorationEntry_nav_reorderKeyboard_label": { substitutions: 0, plural: false };
-  "explorationEntry_nav_reorderKeyboard_desc": { substitutions: 0, plural: false };
   "explorationEntry_help_drawer_label": { substitutions: 0, plural: false };
   "explorationEntry_help_drawer_desc": { substitutions: 0, plural: false };
   "explorationEntry_help_contextF1_label": { substitutions: 0, plural: false };

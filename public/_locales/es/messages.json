@@ -793,6 +793,7 @@
   "shortcutsGroupListStats": { "message": "Estadísticas" },
   "shortcutsGroupListExploration": { "message": "Lista de exploración" },
   "shortcutsGroupListWorkspaces": { "message": "Lista de espacios" },
+  "shortcutsGroupListSettings": { "message": "Ajustes" },
   "shortcutsGroupSessionCard": { "message": "Tarjeta de sesión (con foco)" },
   "shortcutsGroupImportExport": { "message": "Importar / Exportar" },
 
@@ -832,6 +833,7 @@
   "shortcutDescFocusSearch": { "message": "Enfocar el campo de búsqueda" },
   "shortcutDescClearSearch": { "message": "Borrar la búsqueda o cerrar el panel" },
   "shortcutDescListNavigate": { "message": "Mover el foco entre tarjetas" },
+  "shortcutDescSettingsNavigate": { "message": "Mover el foco entre los ajustes" },
   "shortcutDescListNew": { "message": "Crear nuevo elemento" },
   "shortcutDescListEdit": { "message": "Editar el elemento con foco" },
   "shortcutDescListToggleSelection": { "message": "Marcar o desmarcar la regla con foco" },

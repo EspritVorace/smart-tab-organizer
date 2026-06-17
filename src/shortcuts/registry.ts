@@ -554,6 +554,18 @@ export const SHORTCUTS_REGISTRY: Record<string, ShortcutEntry> = {
     scope: 'widget:workspace-card',
   },
 
+  // List-level: Settings. Up/Down move focus between the settings controls
+  // (documentation-only, handled by `useListNavigation` in SettingsPage). Inside
+  // a radio group the arrows keep their native Radix behavior; navigation
+  // resumes across settings at the group boundaries.
+  'list.settings.navigate': {
+    id: 'list.settings.navigate',
+    defaultBindings: ['ArrowUp', 'ArrowDown'],
+    descriptionKey: 'shortcutDescSettingsNavigate',
+    group: 'list-settings',
+    scope: 'page:settings',
+  },
+
   // List-level: Home
   'list.home.navigate': {
     id: 'list.home.navigate',

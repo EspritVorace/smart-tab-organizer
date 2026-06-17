@@ -14,7 +14,11 @@
 import { test, expect } from './fixtures';
 import type { BrowserContext, Page } from '@playwright/test';
 import { SessionsListPage, WorkspaceListPage } from '../../e2e-shared/pages/index.js';
-import { goToDomainRulesSection, goToSessionsSection } from './helpers/navigation';
+import {
+  goToDomainRulesSection,
+  goToSessionsSection,
+  goToSettingsSection,
+} from './helpers/navigation';
 import {
   seedSessions,
   clearSessions,
@@ -239,6 +243,24 @@ test.describe('[focus-management] Workspaces initial focus', () => {
     await goToWorkspacesSection(page, extensionId);
 
     await expect(new WorkspaceListPage(page).firstCard()).toBeFocused();
+
+    await page.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Settings
+// ---------------------------------------------------------------------------
+
+test.describe('[focus-management] Settings initial focus', () => {
+  test('focuses the first Switch on arrival', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    await goToSettingsSection(page, extensionId);
+
+    await expect(page.getByTestId('page-settings-toggle-notify-group')).toBeFocused();
 
     await page.close();
   });

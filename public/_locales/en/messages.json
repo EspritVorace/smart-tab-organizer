@@ -792,6 +792,7 @@
   "shortcutsGroupListStats": { "message": "Statistics" },
   "shortcutsGroupListExploration": { "message": "Exploration list" },
   "shortcutsGroupListWorkspaces": { "message": "Workspaces list" },
+  "shortcutsGroupListSettings": { "message": "Settings" },
   "shortcutsGroupSessionCard": { "message": "Session card (focused)" },
   "shortcutsGroupImportExport": { "message": "Import / Export" },
 
@@ -831,6 +832,7 @@
   "shortcutDescFocusSearch": { "message": "Focus the search field" },
   "shortcutDescClearSearch": { "message": "Clear search or close panel" },
   "shortcutDescListNavigate": { "message": "Move focus between cards" },
+  "shortcutDescSettingsNavigate": { "message": "Move focus between settings" },
   "shortcutDescListNew": { "message": "Create new item" },
   "shortcutDescListEdit": { "message": "Edit focused item" },
   "shortcutDescListToggleSelection": { "message": "Toggle selection on focused rule" },
