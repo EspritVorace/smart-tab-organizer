@@ -28,7 +28,7 @@ describe('getDisplayTree("popup")', () => {
 });
 
 describe('getDisplayTree("options")', () => {
-  it('returns the 11 top-level groups in sidebar order (page groups first, workspace/options/popup next, global last)', () => {
+  it('returns the 12 top-level groups in sidebar order (page groups first, workspace/options/popup next, global last)', () => {
     const tree = getDisplayTree('options');
     expect(tree.map((n) => n.descriptor.id)).toEqual([
       'list-home',
@@ -38,6 +38,7 @@ describe('getDisplayTree("options")', () => {
       'list-exploration',
       'importexport',
       'list-workspaces',
+      'list-settings',
       'workspace',
       'options',
       'popup',
@@ -52,7 +53,7 @@ describe('getDisplayTree("options")', () => {
     );
     expect(subIdsByGroup['list-home']).toEqual(['session-card']);
     expect(subIdsByGroup['list-sessions']).toEqual(['session-card']);
-    for (const id of ['global', 'list-rules', 'list-stats', 'list-exploration', 'list-workspaces', 'workspace', 'importexport', 'options', 'popup'] as const) {
+    for (const id of ['global', 'list-rules', 'list-stats', 'list-exploration', 'list-workspaces', 'list-settings', 'workspace', 'importexport', 'options', 'popup'] as const) {
       expect(subIdsByGroup[id]).toEqual([]);
     }
   });
@@ -92,6 +93,12 @@ describe('isGroupOpenByDefault', () => {
   it('opens list-workspaces only on the workspaces page', () => {
     for (const ctx of ALL_CONTEXTS) {
       expect(isGroupOpenByDefault('list-workspaces', ctx)).toBe(ctx === 'workspaces');
+    }
+  });
+
+  it('opens list-settings only on the settings page', () => {
+    for (const ctx of ALL_CONTEXTS) {
+      expect(isGroupOpenByDefault('list-settings', ctx)).toBe(ctx === 'settings');
     }
   });
 

@@ -25,6 +25,7 @@ export type ShortcutGroupId =
   | 'list-stats'
   | 'list-exploration'
   | 'list-workspaces'
+  | 'list-settings'
   | 'list-home'
   | 'session-card'
   | 'importexport';
