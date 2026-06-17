@@ -18,7 +18,7 @@
     {
       "id": "pk-search-google",
       "enabled": true,
-      "domainFilter": "*.google.com",
+      "domainFilter": "www.google.com",
       "label": "Google: Search",
       "titleParsingRegEx": "",
       "urlParsingRegEx": "",

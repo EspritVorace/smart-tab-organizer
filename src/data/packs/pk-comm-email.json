@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "pack": {
+    "id": "pk-comm-email",
+    "name": {
+      "en": "E-mail",
+      "fr": "E-mail",
+      "es": "Correo"
+    },
+    "description": {
+      "en": "Group Gmail, Outlook and Proton Mail tabs by mailbox account.",
+      "fr": "Regroupe les onglets Gmail, Outlook et Proton Mail par compte de messagerie.",
+      "es": "Agrupa las pestañas de Gmail, Outlook y Proton Mail por cuenta de correo."
+    },
+    "categoryId": "communication"
+  },
+  "domainRules": [
+    {
+      "id": "pk-comm-email-gmail",
+      "enabled": true,
+      "domainFilter": "mail.google.com",
+      "label": "Gmail: Mailbox",
+      "titleParsingRegEx": "([\\w.+-]+@[\\w.-]+)",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "fallbackLabel": "Gmail",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "red",
+      "categoryId": "communication",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-comm-email-outlook",
+      "enabled": true,
+      "domainFilter": "outlook.office.com",
+      "label": "Outlook: Mailbox",
+      "titleParsingRegEx": "([\\w.+-]+@[\\w.-]+)",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "fallbackLabel": "Outlook",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "blue",
+      "categoryId": "communication",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    },
+    {
+      "id": "pk-comm-email-proton",
+      "enabled": true,
+      "domainFilter": "mail.proton.me",
+      "label": "Proton Mail: Mailbox",
+      "titleParsingRegEx": "([\\w.+-]+@[\\w.-]+)",
+      "urlParsingRegEx": "",
+      "groupNameSource": "smart_label",
+      "fallbackLabel": "Proton Mail",
+      "deduplicationMatchMode": "exact_ignore_params",
+      "color": "purple",
+      "categoryId": "communication",
+      "deduplicationEnabled": true,
+      "ignoredQueryParams": [],
+      "presetId": null,
+      "urlExtractionMode": "regex"
+    }
+  ]
+}
