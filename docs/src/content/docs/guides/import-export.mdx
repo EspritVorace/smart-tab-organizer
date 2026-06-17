@@ -49,7 +49,7 @@ The format embeds, for every rule: domain, label, title and URL regexes, configu
 3. The wizard validates the structure and **classifies** each incoming rule.
 </Steps>
 
-#### Classification
+#### Classification \{#classification}
 
 Each incoming rule is compared against the rules already in the active workspace:
 
@@ -59,7 +59,7 @@ Each incoming rule is compared against the rules already in the active workspace
 | **Conflicting** | A rule exists with the same domain and label, but one or more properties differ. | Property-by-property resolution (see below). |
 | **Identical** | A rule exists with the exact same values. | Skipped. |
 
-#### Property-by-property resolution
+#### Property-by-property resolution \{#conflict-resolution}
 
 <ThemeImage
   lightSrc={importConflictsLight}
@@ -71,7 +71,7 @@ For each conflicting rule, the wizard shows a two-column table: **Current** and 
 
 ## Sessions
 
-### Export sessions
+### Export sessions \{#export-sessions}
 
 The export wizard offers three checkboxes for the three buckets:
 
@@ -85,7 +85,7 @@ Archived sessions are unchecked by default so a light export (a daily backup) do
 
 The export also exposes an optional **Note** field, embedded in the archive and shown on import.
 
-### Import sessions
+### Import sessions \{#import-sessions}
 
 Same mechanism as for rules: pick the source (file, pasted text), Zod schema validation, classification into new / conflicting / identical based on name and content. Resolution is case by case: keep the existing version, overwrite, or add by suffixing the name.
 

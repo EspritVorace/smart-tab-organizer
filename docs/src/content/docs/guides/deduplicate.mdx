@@ -13,7 +13,7 @@ import ConditionsDeclenchement from '../../../components/ConditionsDeclenchement
 - A tab reopened via **Undo** is protected against re-deduplication for 10 seconds.
 </Aside>
 
-When you open a link already open in your browser, SmartTab Organizer keeps a single tab and closes the other. The [keep strategy](#strategies-de-conservation) decides which one survives.
+When you open a link already open in your browser, SmartTab Organizer keeps a single tab and closes the other. The [keep strategy](#keep-strategy) decides which one survives.
 
 ## Trigger conditions
 
@@ -75,7 +75,7 @@ Three control levels interact, from the most general to the most specific.
 
 The **Deduplication** toggle in the popup or in the [Settings](/guides/settings) page is the master switch. When off, no deduplication happens, no matter the rules. An orange **D** badge appears on the extension icon in that case.
 
-### Deduplicate tabs without a matching rule
+### Deduplicate tabs without a matching rule \{#uncovered-scope}
 
 The setting **Deduplicate tabs without a matching rule** controls what happens on sites you have not configured.
 
@@ -84,7 +84,7 @@ The setting **Deduplicate tabs without a matching rule** controls what happens o
 
 Domain rules remain authoritative: a domain covered by an explicit rule always follows that rule.
 
-### Per-rule toggle
+### Per-rule toggle \{#per-rule}
 
 Every rule has its own **Deduplication** toggle. When off on a rule, duplicates on that domain are kept even if the global toggle is on.
 
@@ -103,7 +103,7 @@ On the [Settings](/guides/settings) page, in the **Deduplication scope** section
 The strategy is global to the extension: it applies to every rule. It is visually disabled when global deduplication is off.
 </Aside>
 
-## Notification and undo
+## Notification and undo \{#undo}
 
 When the **Notify when duplicates are automatically closed** setting is on, a system notification appears after each duplicate closure. It shows the title of the closed tab and offers an **Undo** button.
 

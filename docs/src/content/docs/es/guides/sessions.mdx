@@ -20,7 +20,7 @@ Una sesión es una instantánea de pestañas que puedes reabrir más tarde con s
   alt="Página Sesiones con una sesión activa recién creada y sus grupos."
 />
 
-## Los tres compartimentos
+## Los tres compartimentos \{#buckets}
 
 | Compartimento | Cuándo usarlo |
 |---|---|
@@ -29,6 +29,10 @@ Una sesión es una instantánea de pestañas que puedes reabrir más tarde con s
 | **Archivadas** | Sesiones apartadas sin eliminarlas. Quedan fuera de la vista en el popup y en la página de inicio. |
 
 La sub-pestaña **Archivadas** de la página Sesiones es accesible mediante `#sessions/archived` (enlace profundo) o desde el `TabNav` en la parte superior de la página.
+
+## La tarjeta de sesión \{#card}
+
+En cada compartimento, una sesión se muestra como una tarjeta. Al apuntar a una tarjeta (o enfocarla con el teclado) se abre una **HoverCard** que resume la sesión sin restaurarla: fecha de captura, número de pestañas, categoría y la nota cuando existe. Es la forma más rápida de reconocer una sesión antes de actuar sobre ella.
 
 ## Capturar una instantánea \{#snapshot}
 
@@ -59,9 +63,9 @@ Hay cuatro destinos de restauración. Con el foco sobre una sesión o un perfil:
 | **Reemplazar las pestañas de la ventana** | `Alt + R` | Cierra las pestañas de la ventana actual y restaura las de la sesión en su lugar. |
 | **Personalizada** | `R` | Abre el asistente de restauración y muestra el detalle de los conflictos si los hay. |
 
-El clic o la tecla `Enter` usa la **acción por defecto** configurada en [Ajustes](/guides/settings#action-de-restauration-par-defaut).
+El clic o la tecla `Enter` usa la **acción por defecto** configurada en [Ajustes](/guides/settings#default-restore).
 
-### Asistente de conflictos
+### Asistente de conflictos \{#conflict}
 
 Cuando algunas pestañas de la sesión ya están abiertas en la ventana de destino, el asistente propone una resolución pestaña por pestaña:
 
@@ -78,10 +82,10 @@ Cuando algunas pestañas de la sesión ya están abiertas en la ventana de desti
 | **Reemplazar** | Cierra la pestaña existente y restaura la de la sesión en su lugar. |
 
 <Aside type="note">
-Las pestañas restauradas desde el asistente quedan protegidas contra una deduplicación inmediata durante 10 segundos (la misma mecánica que [Deshacer una deduplicación](/guides/deduplicate#notification-et-annulation)).
+Las pestañas restauradas desde el asistente quedan protegidas contra una deduplicación inmediata durante 10 segundos (la misma mecánica que [Deshacer una deduplicación](/guides/deduplicate#undo)).
 </Aside>
 
-## Editar una sesión
+## Editar una sesión \{#edit}
 
 Pulsa el icono **Editar** de una tarjeta de sesión o usa `E` sobre el foco. El editor de sesión permite:
 
@@ -93,11 +97,11 @@ Pulsa el icono **Editar** de una tarjeta de sesión o usa `E` sobre el foco. El 
 
 Las modificaciones se aplican de inmediato. El estado expandido o contraído de cada grupo se conserva entre aperturas.
 
-## Actualizar una sesión
+## Actualizar una sesión \{#refresh}
 
 El botón **Actualizar** (atajo `U` sobre el foco de una sesión) reemplaza el contenido de la sesión por el estado actual de la ventana en curso, conservando el nombre y la categoría. Útil para actualizar un perfil anclado tras una sesión de trabajo sin tener que recrear la sesión.
 
-## Sesiones ancladas
+## Sesiones ancladas \{#pin}
 
 El **anclado** promueve una sesión al rango de **perfil**: aparece en el popup y en la página de inicio del espacio de trabajo activo.
 
@@ -116,7 +120,7 @@ Los perfiles están **aislados por espacio de trabajo**. Cambiar de espacio sust
 
 Asociar una categoría a una sesión anclada hace que su emoji aparezca junto al nombre en el popup. Práctico cuando tienes varios perfiles y quieres distinguirlos de un vistazo.
 
-## Archivo
+## Archivo \{#archive}
 
 La sub-pestaña **Archivadas** aloja las sesiones que quieres conservar sin tenerlas a la vista cada día. Una sesión archivada no aparece ni en el popup ni en la página de inicio, pero sigue accesible y restaurable desde la página Sesiones.
 
@@ -132,7 +136,7 @@ En la sub-pestaña **Archivadas**, pulsa **Desarchivar**. La sesión vuelve a **
 
 La URL `chrome-extension://[id]/options.html#sessions/archived` abre directamente la sub-pestaña **Archivadas**. Puedes usarla como marcador para ir a buscar una sesión antigua.
 
-## Filtrar y ordenar
+## Filtrar y ordenar \{#filter-sort}
 
 Los encabezados de las secciones **Activas** y **Archivadas** (no la sección
 **Ancladas**) incluyen un botón de vista que abre un menú de orden y filtro.
@@ -148,9 +152,22 @@ cada vez que se restaura la sesión. La vista se recuerda de forma independiente
 para la sección Activas y la sección Archivadas, y por separado para cada
 espacio de trabajo.
 
-## Búsqueda
+## Búsqueda \{#search}
 
 La barra de búsqueda sobre la lista filtra por nombre de sesión. También hay una búsqueda **profunda** disponible: inspecciona los títulos de las pestañas capturadas, lo que ayuda a localizar una sesión por uno de sus contenidos.
+
+## Selección múltiple y acciones en lote \{#bulk}
+
+Para actuar sobre varias sesiones a la vez, marca la casilla de cada tarjeta que quieras. Aparece entonces una **barra de acciones en lote** en la parte superior de la sección, con una casilla maestra (seleccionar todo o nada) y las acciones que se aplican a toda la selección.
+
+| Acción | Efecto |
+|---|---|
+| **Exportar la selección** | Exporta solo las sesiones seleccionadas en formato JSON. |
+| **Eliminar la selección** | Elimina todas las sesiones seleccionadas (con confirmación). |
+| **Anclar / Desanclar la selección** | Promueve la selección a perfiles, o la degrada. |
+| **Archivar la selección** | Mueve las sesiones activas seleccionadas a la sub-pestaña **Archivadas**. |
+
+Las acciones disponibles dependen de la sección: la sección **Ancladas** ofrece el desanclado, la sección **Activas** ofrece el anclado y el archivado. Exportar y eliminar están disponibles en todas partes.
 
 ## Siguiente paso
 

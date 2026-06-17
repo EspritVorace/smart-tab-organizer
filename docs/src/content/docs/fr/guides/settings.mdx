@@ -8,10 +8,10 @@ import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
 La page **Paramètres** rassemble les réglages globaux qui ne sont pas attachés à une règle particulière. Elle compte trois sections.
 
 <Aside type="note">
-Les **toggles globaux** de groupement et de déduplication ne sont pas ici : ils vivent dans la [popup](/guides/popup) (et dans la pastille de l'icône, voir [Tour de l'interface](/discover/interface-tour#indicateur-sur-licone)).
+Les **toggles globaux** de groupement et de déduplication ne sont pas ici : ils vivent dans la [popup](/guides/popup) (et dans la pastille de l'icône, voir [Tour de l'interface](/discover/interface-tour#badge)).
 </Aside>
 
-## Notifications
+## Notifications \{#notifications}
 
 Trois toggles indépendants. Chacun contrôle un type de notification système, sans interaction entre eux.
 
@@ -42,9 +42,9 @@ La stratégie qui décide lequel des deux onglets en doublon survit. Quatre vale
 | **L'onglet groupé gagne, sinon l'existant** | Si l'un des deux est groupé et l'autre pas, le groupé survit. Sinon retombe sur **L'onglet existant**. |
 | **L'onglet groupé gagne, sinon le nouveau** (défaut) | Si l'un des deux est groupé et l'autre pas, le groupé survit. Sinon retombe sur **Le nouvel onglet ouvert**. Protège les onglets restaurés depuis une session contre une fermeture au profit d'une copie non groupée. |
 
-Voir [Dédupliquer](/guides/deduplicate#strategies-de-conservation) pour le contexte complet.
+Voir [Dédupliquer](/guides/deduplicate#keep-strategy) pour le contexte complet.
 
-## Action par défaut (Restaurer)
+## Action par défaut (Restaurer) \{#default-restore}
 
 Cette section configure ce que fait un **clic** sur le bouton principal **Restaurer** d'une session ou d'un profil. Le menu déroulant à côté du bouton garde toujours les quatre options accessibles individuellement.
 

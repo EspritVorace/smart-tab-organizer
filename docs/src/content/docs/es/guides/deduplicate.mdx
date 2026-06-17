@@ -13,7 +13,7 @@ import ConditionsDeclenchement from '../../../../components/ConditionsDeclenchem
 - La pestaña reabierta mediante **Deshacer** queda protegida contra una nueva deduplicación durante 10 segundos.
 </Aside>
 
-Cuando abres un enlace que ya está abierto en tu navegador, SmartTab Organizer conserva una sola pestaña y cierra la otra. La [estrategia de conservación](#strategies-de-conservation) determina cuál sobrevive.
+Cuando abres un enlace que ya está abierto en tu navegador, SmartTab Organizer conserva una sola pestaña y cierra la otra. La [estrategia de conservación](#keep-strategy) determina cuál sobrevive.
 
 ## Condiciones de activación
 
@@ -75,7 +75,7 @@ Interactúan tres niveles de control, del más general al más fino.
 
 El interruptor **Deduplicación** del popup o de la página [Ajustes](/guides/settings) actúa como interruptor maestro. Si está desactivado, no ocurre ninguna deduplicación, sea cual sea la regla. En ese caso aparece un distintivo **D** naranja en el icono de la extensión.
 
-### Deduplicar dominios sin regla
+### Deduplicar dominios sin regla \{#uncovered-scope}
 
 El ajuste **Deduplicar pestañas sin regla de dominio** define lo que ocurre en los sitios que no has configurado.
 
@@ -84,7 +84,7 @@ El ajuste **Deduplicar pestañas sin regla de dominio** define lo que ocurre en 
 
 Las reglas de dominio mantienen su prioridad: un dominio cubierto por una regla explícita sigue siempre esa regla.
 
-### Interruptor por regla
+### Interruptor por regla \{#per-rule}
 
 Cada regla tiene su propio interruptor **Deduplicación**. Si lo desactivas en una regla, los duplicados de ese dominio se conservan aunque el interruptor global esté activo.
 
@@ -103,7 +103,7 @@ En la página [Ajustes](/guides/settings), sección **Deduplicación**, eliges c
 La estrategia es global a la extensión: se aplica a todas las reglas. Se desactiva visualmente si la deduplicación global está apagada.
 </Aside>
 
-## Notificación y deshacer
+## Notificación y deshacer \{#undo}
 
 Cuando el ajuste **Notificar al cerrar duplicados automáticamente** está activo, aparece una notificación del sistema tras cada cierre de duplicado. Muestra el título de la pestaña cerrada y ofrece un botón **Deshacer**.
 

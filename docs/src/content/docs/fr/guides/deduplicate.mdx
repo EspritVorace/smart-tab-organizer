@@ -13,7 +13,7 @@ import ConditionsDeclenchement from '../../../../components/ConditionsDeclenchem
 - L'onglet rouvert via **Annuler** est protégé contre une re-déduplication pendant 10 secondes.
 </Aside>
 
-Quand vous ouvrez un lien déjà ouvert dans votre navigateur, SmartTab Organizer conserve un seul onglet et ferme l'autre. La [stratégie de conservation](#strategies-de-conservation) détermine lequel survit.
+Quand vous ouvrez un lien déjà ouvert dans votre navigateur, SmartTab Organizer conserve un seul onglet et ferme l'autre. La [stratégie de conservation](#keep-strategy) détermine lequel survit.
 
 ## Conditions de déclenchement
 
@@ -75,7 +75,7 @@ Trois niveaux de contrôle interagissent, du plus général au plus fin.
 
 Le toggle **Déduplication** dans la popup ou la page [Paramètres](/guides/settings) est un interrupteur maître. Désactivé, aucune déduplication n'a lieu, quelles que soient les règles. Une pastille **D** orange apparait sur l'icône de l'extension dans ce cas.
 
-### Dédupliquer les domaines sans règle
+### Dédupliquer les domaines sans règle \{#uncovered-scope}
 
 Le paramètre **Dédupliquer les onglets sans règle de domaine** définit ce qui se passe sur les sites que vous n'avez pas configurés.
 
@@ -84,7 +84,7 @@ Le paramètre **Dédupliquer les onglets sans règle de domaine** définit ce qu
 
 Les règles de domaine restent prioritaires : un domaine couvert par une règle explicite suit toujours cette règle.
 
-### Toggle par règle
+### Toggle par règle \{#per-rule}
 
 Chaque règle possède son propre toggle **Déduplication**. Désactivé sur une règle, les doublons sur ce domaine sont conservés même si le toggle global est actif.
 
@@ -103,7 +103,7 @@ Dans la page [Paramètres](/guides/settings), section **Déduplication**, vous c
 La stratégie est globale à l'extension : elle s'applique à toutes les règles. Elle est désactivée visuellement si la déduplication globale est off.
 </Aside>
 
-## Notification et annulation
+## Notification et annulation \{#undo}
 
 Quand le paramètre **Notifier lors d'une déduplication** est activé, une notification système apparait après chaque fermeture de doublon. Elle indique le titre de l'onglet fermé et propose un bouton **Annuler**.
 

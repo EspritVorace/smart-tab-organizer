@@ -19,7 +19,7 @@ import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components'
 | **Preset** | Prefills the rule currently being edited. | **Preset** dropdown in the rule creation wizard. |
 | **Category** | Gives an emoji and a label to a rule or a session. | **Category** field in the rule wizard and in the session editor. |
 
-## The 14 categories
+## The 14 categories \{#categories}
 
 Categories are **built into the extension** and defined in `src/data/categories.json`. They cannot be created or modified from the UI: you pick them from the **Category** field in the rule wizard or in the session editor.
 
@@ -40,6 +40,15 @@ Categories are **built into the extension** and defined in `src/data/categories.
 | ☁️ | Cloud & DevOps | AWS, Azure, GCP, deployment |
 | 🛠️ | Generic | Cross-cutting and fallback cases |
 
+## Browse the gallery \{#gallery}
+
+The packs gallery is where you discover and pick packs before importing them. It offers two ways to narrow the list:
+
+- **Filter by category**: the left sidebar lists the categories. Pick one to show only its packs.
+- **Search**: the search field filters packs by name, accent insensitive (`videoconference` finds **Video calls**).
+
+Packs that match your currently open tabs rise to the top with a **Matches your open tabs** label. An active search or category filter keeps priority over that ordering.
+
 ## Import a pack \{#import-pack}
 
 <Steps>
@@ -55,7 +64,7 @@ Categories are **built into the extension** and defined in `src/data/categories.
 
 Some packs (typically cloud packs) offer a parameter to choose before import. The selected service becomes the headline rule on import; the pack's other rules are also added, but the pack is marked as specialized for the chosen service.
 
-You can reimport a pack several times with different parameters: rules already present are detected as conflicts by the import wizard and resolved case by case (see [Import / Export](/guides/import-export#resolution-propriete-par-propriete)).
+You can reimport a pack several times with different parameters: rules already present are detected as conflicts by the import wizard and resolved case by case (see [Import / Export](/guides/import-export#conflict-resolution)).
 
 ## Full catalog
 

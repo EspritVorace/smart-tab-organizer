@@ -49,7 +49,7 @@ El formato incluye, para cada regla: dominio, etiqueta, regex de título y de UR
 3. El asistente valida la estructura y **clasifica** cada regla entrante.
 </Steps>
 
-#### Clasificación
+#### Clasificación \{#classification}
 
 Cada regla entrante se compara con las ya presentes en el espacio de trabajo activo:
 
@@ -59,7 +59,7 @@ Cada regla entrante se compara con las ya presentes en el espacio de trabajo act
 | **En conflicto** | Existe una regla con el mismo dominio y la misma etiqueta, pero una o varias propiedades difieren. | Resolución propiedad por propiedad (ver más abajo). |
 | **Idéntica** | Existe una regla con exactamente los mismos valores. | Se ignora. |
 
-#### Resolución propiedad por propiedad
+#### Resolución propiedad por propiedad \{#conflict-resolution}
 
 <ThemeImage
   lightSrc={importConflictsLight}
@@ -71,7 +71,7 @@ Para cada regla en conflicto, el asistente muestra una tabla con dos columnas: *
 
 ## Sesiones
 
-### Exportar sesiones
+### Exportar sesiones \{#export-sessions}
 
 El asistente de exportación ofrece tres casillas correspondientes a los tres compartimentos:
 
@@ -85,7 +85,7 @@ Las sesiones archivadas vienen desmarcadas por defecto para que las exportacione
 
 La exportación también ofrece un campo **Nota** opcional, incrustado en el archivo y mostrado al importar.
 
-### Importar sesiones
+### Importar sesiones \{#import-sessions}
 
 Misma mecánica que las reglas: elección de fuente (archivo, texto pegado), validación con esquema Zod, clasificación new / conflicting / identical según el nombre y el contenido. La resolución se hace caso por caso: conservar la versión existente, sobrescribir o añadir con un sufijo en el nombre.
 
