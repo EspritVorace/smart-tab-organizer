@@ -519,6 +519,7 @@ function SessionCardFullHeader({
           onRefresh={onRefresh}
           defaultRestoreAction={defaultRestoreAction}
           onDefaultRestoreActionChange={onDefaultRestoreActionChange}
+          presentation="tile"
           data-testid={`session-card-${session.id}-btn-restore`}
         />
       )}
