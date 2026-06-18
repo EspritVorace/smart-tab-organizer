@@ -14,17 +14,21 @@ import { FormField } from '@/components/Form/FormFields';
 import { CategoryRadioGroup } from '@/components/Core/DomainRule/CategoryRadioGroup';
 import { ChromeColorPicker } from '@/components/Core/TabTree/ChromeColorPicker';
 import { DomainCodeField } from '@/components/UI/DomainCodeField';
+import { TabCoverageButton } from '@/components/Core/DomainRule/TabCoverageButton';
 import { deriveLabelFromDomain } from '@/utils/labelFromDomain';
 import type { DomainRule } from '@/schemas/domainRule';
+import type { DomainRuleSetting } from '@/types/syncSettings';
 import type { ChromeGroupColor } from '@/types/tabTree';
 
 interface WizardStep1IdentityProps {
   control: Control<DomainRule>;
   errors: FieldErrors<DomainRule>;
   setValue: UseFormSetValue<DomainRule>;
+  /** Existing rules used to flag already-managed hosts in the coverage panel. */
+  domainRules: DomainRuleSetting[];
 }
 
-export function WizardStep1Identity({ control, errors, setValue }: WizardStep1IdentityProps) {
+export function WizardStep1Identity({ control, errors, setValue, domainRules }: WizardStep1IdentityProps) {
   const domainFilter = useWatch({ control, name: 'domainFilter' }) ?? '';
   const label = useWatch({ control, name: 'label' }) ?? '';
   const { dirtyFields } = useFormState({ control, name: ['label', 'fallbackLabel'] });
@@ -59,19 +63,27 @@ export function WizardStep1Identity({ control, errors, setValue }: WizardStep1Id
             name="domainFilter"
             control={control}
             render={({ field }) => (
-              <div style={{ marginTop: '4px' }}>
-                <DomainCodeField
-                  id={fieldId}
-                  describedById={errors.domainFilter ? errorId : undefined}
-                  value={field.value ?? ''}
-                  onChange={field.onChange}
-                  name="domainFilter"
-                  testId="wizard-rule-field-domain"
-                  placeholder={getMessage('domainFilterPlaceholder')}
-                  ariaLabel={getMessage('domainFilterEditorAriaLabel')}
-                  hasError={Boolean(errors.domainFilter)}
+              <Flex align="start" gap="2" style={{ marginTop: '4px' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <DomainCodeField
+                    id={fieldId}
+                    describedById={errors.domainFilter ? errorId : undefined}
+                    value={field.value ?? ''}
+                    onChange={field.onChange}
+                    name="domainFilter"
+                    testId="wizard-rule-field-domain"
+                    placeholder={getMessage('domainFilterPlaceholder')}
+                    ariaLabel={getMessage('domainFilterEditorAriaLabel')}
+                    hasError={Boolean(errors.domainFilter)}
+                  />
+                </div>
+                <TabCoverageButton
+                  domainRules={domainRules}
+                  onSeed={(value) =>
+                    field.onChange(value)
+                  }
                 />
-              </div>
+              </Flex>
             )}
           />
         )}

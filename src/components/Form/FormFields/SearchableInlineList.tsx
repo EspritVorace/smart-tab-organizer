@@ -1,4 +1,4 @@
-import { useEffect, useRef, useId } from 'react';
+import { useEffect, useRef, useId, type ReactNode } from 'react';
 import { Command } from 'cmdk';
 import { Search } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
@@ -22,6 +22,14 @@ export interface SearchableInlineListProps {
   id?: string;
   'aria-label'?: string;
   'aria-labelledby'?: string;
+  /**
+   * Optional row renderer. When provided, it replaces the default
+   * `SearchableSelectItem` for every option (the panel supplies rich rows:
+   * host, coverage badge, tab count). It must render a cmdk `Command.Item` so
+   * keyboard navigation and filtering keep working. When absent, behavior is
+   * unchanged.
+   */
+  renderItem?: (option: SearchableSelectOption) => ReactNode;
 }
 
 /**
@@ -40,6 +48,7 @@ export function SearchableInlineList({
   id,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
+  renderItem,
 }: SearchableInlineListProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -69,14 +78,17 @@ export function SearchableInlineList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const renderItem = (option: SearchableSelectOption) => (
-    <SearchableSelectItem
-      key={option.value}
-      option={option}
-      selectedValue={value}
-      onSelect={onValueChange}
-    />
-  );
+  const renderOption = (option: SearchableSelectOption) =>
+    renderItem ? (
+      renderItem(option)
+    ) : (
+      <SearchableSelectItem
+        key={option.value}
+        option={option}
+        selectedValue={value}
+        onSelect={onValueChange}
+      />
+    );
 
   return (
     <div
@@ -98,10 +110,10 @@ export function SearchableInlineList({
         <Command.List id={listboxId} className="ss-list ss-list--inline">
           <Command.Empty className="ss-empty">{emptyMessage}</Command.Empty>
           {options && options.length > 0
-            ? options.map(renderItem)
+            ? options.map(renderOption)
             : groups?.map((group) => (
                 <Command.Group key={group.label} heading={group.label} className="ss-group">
-                  {group.options.map(renderItem)}
+                  {group.options.map(renderOption)}
                 </Command.Group>
               ))}
         </Command.List>

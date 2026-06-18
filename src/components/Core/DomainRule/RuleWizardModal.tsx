@@ -470,7 +470,7 @@ export function RuleWizardModal({
               <>
                 {step === 0 && (
                   <Box data-testid="wizard-rule-step-1">
-                    <WizardStep1Identity control={control} errors={errors} setValue={setValue} />
+                    <WizardStep1Identity control={control} errors={errors} setValue={setValue} domainRules={syncSettings.domainRules} />
                   </Box>
                 )}
                 {step === 1 && (
