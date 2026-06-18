@@ -145,7 +145,7 @@ test.describe('Workspaces — create + switch + delete', () => {
 });
 
 test.describe('Workspaces — switcher dropdown', () => {
-  test('opens from the sidebar footer and lists every workspace', async ({
+  test('with a single workspace, hides the choice list but keeps Manage', async ({
     optionsPage,
     extensionId,
   }) => {
@@ -153,7 +153,38 @@ test.describe('Workspaces — switcher dropdown', () => {
     await optionsPage.getByTestId('workspace-footer-trigger').click();
     const dropdown = optionsPage.getByTestId('workspace-switcher-content');
     await expect(dropdown).toBeVisible();
+    // Only the default workspace exists: the selection list is pointless and
+    // should not render, but the manage action stays available.
+    await expect(optionsPage.getByTestId('workspace-switcher-item-default')).toHaveCount(0);
+    await expect(optionsPage.getByTestId('workspace-switcher-manage')).toBeVisible();
+  });
+
+  test('with several workspaces, lists every workspace', async ({
+    optionsPage,
+    extensionId,
+    extensionContext,
+  }) => {
+    // Seed a second workspace so there is an actual choice to surface.
+    const sw = await getServiceWorker(extensionContext);
+    await sw.evaluate(async () => {
+      const { workspaces } = await chrome.storage.local.get('workspaces');
+      const list = Array.isArray(workspaces) ? workspaces : [];
+      list.push({
+        id: 'personal',
+        name: 'Personal',
+        accentColor: 'jade',
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      });
+      await chrome.storage.local.set({ workspaces: list });
+    });
+
+    await goToOptionsPage(optionsPage, extensionId);
+    await optionsPage.getByTestId('workspace-footer-trigger').click();
+    const dropdown = optionsPage.getByTestId('workspace-switcher-content');
+    await expect(dropdown).toBeVisible();
     await expect(optionsPage.getByTestId('workspace-switcher-item-default')).toBeVisible();
+    await expect(optionsPage.getByTestId('workspace-switcher-item-personal')).toBeVisible();
     await expect(optionsPage.getByTestId('workspace-switcher-manage')).toBeVisible();
   });
 });

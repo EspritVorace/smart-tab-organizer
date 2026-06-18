@@ -22,6 +22,10 @@ export function WorkspaceSwitcherDropdown({ trigger, onManage }: WorkspaceSwitch
   const { workspaces, activeId, switchTo } = useActiveWorkspaceContext();
   const [aboutOpen, setAboutOpen] = useState(false);
 
+  // With a single workspace there is nothing to choose between: hide the
+  // selection list (and its label) but keep the manage/about actions.
+  const showWorkspaceChoice = workspaces.length > 1;
+
   return (
     <>
       <DropdownMenu.Root>
@@ -32,28 +36,32 @@ export function WorkspaceSwitcherDropdown({ trigger, onManage }: WorkspaceSwitch
           data-testid="workspace-switcher-content"
           aria-label={getMessage('workspaceSwitcherLabel')}
         >
-          <DropdownMenu.Label>
-            {getMessage('workspaceSwitcherLabel')}
-          </DropdownMenu.Label>
-          {workspaces.map((ws) => {
-            const isActive = ws.id === activeId;
-            return (
-              <DropdownMenu.Item
-                key={ws.id}
-                data-testid={`workspace-switcher-item-${ws.id}`}
-                onSelect={() => {
-                  if (!isActive) void switchTo(ws.id);
-                }}
-              >
-                <Flex align="center" gap="2" style={{ width: '100%' }}>
-                  <WorkspaceAvatar name={ws.name} accentColor={ws.accentColor} size="sm" />
-                  <Text size="2" style={{ flex: 1 }}>{ws.name}</Text>
-                  {isActive ? <Check size={14} /> : null}
-                </Flex>
-              </DropdownMenu.Item>
-            );
-          })}
-          <DropdownMenu.Separator />
+          {showWorkspaceChoice && (
+            <>
+              <DropdownMenu.Label>
+                {getMessage('workspaceSwitcherLabel')}
+              </DropdownMenu.Label>
+              {workspaces.map((ws) => {
+                const isActive = ws.id === activeId;
+                return (
+                  <DropdownMenu.Item
+                    key={ws.id}
+                    data-testid={`workspace-switcher-item-${ws.id}`}
+                    onSelect={() => {
+                      if (!isActive) void switchTo(ws.id);
+                    }}
+                  >
+                    <Flex align="center" gap="2" style={{ width: '100%' }}>
+                      <WorkspaceAvatar name={ws.name} accentColor={ws.accentColor} size="sm" />
+                      <Text size="2" style={{ flex: 1 }}>{ws.name}</Text>
+                      {isActive ? <Check size={14} /> : null}
+                    </Flex>
+                  </DropdownMenu.Item>
+                );
+              })}
+              <DropdownMenu.Separator />
+            </>
+          )}
           <DropdownMenu.Item
             disabled={!onManage}
             data-testid="workspace-switcher-manage"
