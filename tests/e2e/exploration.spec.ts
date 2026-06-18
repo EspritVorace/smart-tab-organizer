@@ -38,6 +38,43 @@ test.describe('[US-A004] Exploration page renders', () => {
   });
 });
 
+test.describe('[US-A009] Touchpoint discovery', () => {
+  test('opening the snapshot wizard marks sessions.snapshot discovered (no save needed)', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    await goToExplorationSection(page, extensionId);
+    await resetExploration(page);
+
+    // The snapshot capability lives in the (collapsed) "sessions" domain group.
+    const gotoBtn = page.getByTestId('exploration-goto-sessions.snapshot');
+    if (!(await gotoBtn.isVisible())) {
+      await page.getByTestId('exploration-domain-sessions').getByRole('button').first().click();
+    }
+    // Not discovered yet: the row exposes the manual-mark toggle, no static badge.
+    await expect(page.getByTestId('exploration-mark-sessions.snapshot')).toBeVisible();
+
+    // Open the wizard from the catalogue, then cancel WITHOUT saving.
+    await gotoBtn.click();
+    await expect(page.getByTestId('wizard-snapshot')).toBeVisible({ timeout: 5_000 });
+    await page.getByTestId('wizard-snapshot-btn-cancel').click();
+    await expect(page.getByTestId('wizard-snapshot')).toBeHidden({ timeout: 5_000 });
+
+    // Back to the catalogue: the capability is now auto-discovered (static green
+    // badge, no more mark toggle), even though no session was created.
+    await page.getByTestId('sidebar-nav-item-exploration').click();
+    await expect(page.getByTestId('page-exploration')).toBeVisible();
+    if (!(await page.getByTestId('exploration-badge-sessions.snapshot').isVisible())) {
+      await page.getByTestId('exploration-domain-sessions').getByRole('button').first().click();
+    }
+    await expect(page.getByTestId('exploration-badge-sessions.snapshot')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByTestId('exploration-mark-sessions.snapshot')).toHaveCount(0);
+
+    await page.close();
+  });
+});
+
 test.describe('[US-A017] Reversible manual marking', () => {
   test('marks a to-discover entry, unmarks it, and persists across reload', async ({
     extensionContext,

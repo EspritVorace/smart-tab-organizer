@@ -14,6 +14,7 @@
 - About dialog widened on the options page (540px to 680px); popup stays unchanged
 
 ### Bug Fixes
+- Exploration: the "Take a snapshot" capability now lights up when the snapshot wizard opens (the touchpoint), instead of only after a session is actually saved, so opening it from the catalogue is enough to mark it discovered
 - Dropped unreachable catalogue entries (io.deepLink, help.tipVariants) and made the onboarding hero capability reachable from the pack-suggestion variant
 - CatalogRow story wrapped in role=list to fix an axe aria-required-parent violation
 - PhaseBar nested ternaries extracted into helpers to clear sonarjs lint errors

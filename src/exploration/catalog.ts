@@ -105,7 +105,7 @@ export const CATALOG: readonly CatalogEntry[] = [
   e('dedup.undo', 'dedup', '#settings', 'ephemeral', { doc: 'guides/deduplicate#undo', prerequisites: DEDUP_ENABLED }),
 
   // 3. Sessions
-  e('sessions.snapshot', 'sessions', '#sessions?action=snapshot', 'counter', { doc: 'guides/sessions#snapshot' }),
+  e('sessions.snapshot', 'sessions', '#sessions?action=snapshot', 'touchpoint', { doc: 'guides/sessions#snapshot' }),
   e('sessions.restore.current', 'sessions', '#sessions', 'touchpoint', { doc: 'guides/sessions#restore', prerequisites: HAS_SESSION }),
   e('sessions.restore.new', 'sessions', '#sessions', 'touchpoint', { doc: 'guides/sessions#restore', prerequisites: HAS_SESSION }),
   e('sessions.restore.replace', 'sessions', '#sessions', 'touchpoint', { doc: 'guides/sessions#restore', prerequisites: HAS_SESSION }),
