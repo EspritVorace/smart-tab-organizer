@@ -38,6 +38,51 @@ test.describe('[US-A004] Exploration page renders', () => {
   });
 });
 
+test.describe('[US-A009] Touchpoint discovery', () => {
+  /**
+   * Expand the "sessions" domain group, collapsed by default on a fresh
+   * catalogue (the seed only opens the first incomplete domain, "grouping").
+   * Its rows are unmounted while collapsed, so they must be revealed before
+   * any interaction. Conditional-free to satisfy `playwright/no-conditional-in-test`.
+   */
+  async function expandSessionsDomain(page: import('@playwright/test').Page): Promise<void> {
+    const header = page.getByTestId('exploration-domain-sessions').getByRole('button').first();
+    await expect(header).toHaveAttribute('aria-expanded', 'false');
+    await header.click();
+    await expect(header).toHaveAttribute('aria-expanded', 'true');
+  }
+
+  test('opening the snapshot wizard marks sessions.snapshot discovered (no save needed)', async ({
+    extensionContext,
+    extensionId,
+  }) => {
+    const page = await extensionContext.newPage();
+    await goToExplorationSection(page, extensionId);
+    await resetExploration(page);
+
+    // The snapshot capability lives in the (collapsed) "sessions" domain group.
+    await expandSessionsDomain(page);
+    // Not discovered yet: the row exposes the manual-mark toggle, no static badge.
+    await expect(page.getByTestId('exploration-mark-sessions.snapshot')).toBeVisible();
+
+    // Open the wizard from the catalogue, then cancel WITHOUT saving.
+    await page.getByTestId('exploration-goto-sessions.snapshot').click();
+    await expect(page.getByTestId('wizard-snapshot')).toBeVisible({ timeout: 5_000 });
+    await page.getByTestId('wizard-snapshot-btn-cancel').click();
+    await expect(page.getByTestId('wizard-snapshot')).toBeHidden({ timeout: 5_000 });
+
+    // Back to the catalogue: the capability is now auto-discovered (static green
+    // badge, no more mark toggle), even though no session was created.
+    await page.getByTestId('sidebar-nav-item-exploration').click();
+    await expect(page.getByTestId('page-exploration')).toBeVisible();
+    await expandSessionsDomain(page);
+    await expect(page.getByTestId('exploration-badge-sessions.snapshot')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByTestId('exploration-mark-sessions.snapshot')).toHaveCount(0);
+
+    await page.close();
+  });
+});
+
 test.describe('[US-A017] Reversible manual marking', () => {
   test('marks a to-discover entry, unmarks it, and persists across reload', async ({
     extensionContext,

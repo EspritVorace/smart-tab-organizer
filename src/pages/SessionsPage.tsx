@@ -470,6 +470,15 @@ export function SessionsPage({
     return () => onSnapshotWizardOpenChange?.(false);
   }, [onSnapshotWizardOpenChange]);
 
+  // Exploration: opening the snapshot wizard is the discovery touchpoint for
+  // `sessions.snapshot` (marked on display, never on save). Covers every entry
+  // point that opens the wizard: the toolbar button, the empty-state CTA, the
+  // keyboard shortcut, and the `#sessions?action=snapshot` deep link (popup or
+  // exploration catalogue). Idempotent, so re-opening it costs nothing.
+  useEffect(() => {
+    if (snapshotOpen) void markDiscovered('sessions.snapshot');
+  }, [snapshotOpen]);
+
   const [restoreSession, setRestoreSession] = useState<Session | null>(null);
   const [refreshTarget, setRefreshTarget] = useState<Session | null>(null);
   const [refreshGroupId, setRefreshGroupId] = useState<number | null>(null);
@@ -890,7 +899,8 @@ export function SessionsPage({
 
   const handleSaveSession = useCallback(
     async (session: Session) => {
-      void markDiscovered('sessions.snapshot');
+      // Discovery of `sessions.snapshot` is marked when the wizard opens (see the
+      // effect above), not here: opening the wizard is the touchpoint, saving is not.
       await createSession(session);
     },
     [createSession],
