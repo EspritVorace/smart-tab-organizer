@@ -1116,6 +1116,8 @@
   "explorationMiniLink": { "message": "Ver el catálogo" },
   "explorationEntry_grouping_create_label": { "message": "Crear una regla" },
   "explorationEntry_grouping_create_desc": { "message": "Define un grupo de pestañas a partir de un patrón de dominio." },
+  "explorationEntry_grouping_seedFromTabs_label": { "message": "Importar desde las pestañas abiertas" },
+  "explorationEntry_grouping_seedFromTabs_desc": { "message": "Rellenar el filtro de dominio a partir de un dominio presente en las pestañas abiertas." },
   "explorationEntry_grouping_edit_label": { "message": "Editar una regla" },
   "explorationEntry_grouping_edit_desc": { "message": "Abre una regla existente para cambiar sus ajustes." },
   "explorationEntry_grouping_mode_preset_label": { "message": "Modo de config: Preset" },

@@ -1116,6 +1116,8 @@
   "explorationMiniLink": { "message": "Voir le référentiel" },
   "explorationEntry_grouping_create_label": { "message": "Créer une règle" },
   "explorationEntry_grouping_create_desc": { "message": "Définir un groupe d'onglets à partir d'un motif de domaine." },
+  "explorationEntry_grouping_seedFromTabs_label": { "message": "Importer depuis les onglets ouverts" },
+  "explorationEntry_grouping_seedFromTabs_desc": { "message": "Renseigner le filtre de domaine à partir d'un domaine présent dans les onglets ouverts." },
   "explorationEntry_grouping_edit_label": { "message": "Modifier une règle" },
   "explorationEntry_grouping_edit_desc": { "message": "Ouvrir une règle existante pour changer ses réglages." },
   "explorationEntry_grouping_mode_preset_label": { "message": "Mode de config : Preset" },

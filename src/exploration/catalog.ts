@@ -73,6 +73,7 @@ const HAS_WORKSPACE: Prerequisite = 'workspaces.create';
 export const CATALOG: readonly CatalogEntry[] = [
   // 1. Groupement et règles
   e('grouping.create', 'grouping', '#rules?action=new', 'touchpoint', { doc: 'guides/domain-rules#create' }),
+  e('grouping.seedFromTabs', 'grouping', '#rules?action=new', 'touchpoint', { doc: 'guides/domain-rules#seed-from-tabs' }),
   e('grouping.edit', 'grouping', '#rules', 'touchpoint', { doc: 'guides/domain-rules#edit', prerequisites: HAS_RULE }),
   e('grouping.mode.preset', 'grouping', '#rules', 'touchpoint', { doc: 'guides/domain-rules#configuration' }),
   e('grouping.mode.ask', 'grouping', '#rules', 'touchpoint', { doc: 'guides/domain-rules#configuration' }),

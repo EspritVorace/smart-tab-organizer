@@ -61,7 +61,7 @@ Cliquez sur **Nouvelle règle** en haut de la liste. L'assistant s'ouvre en quat
 
 ### Étape 1 : Identité
 
-- **Filtre Domaine** : le pattern de domaine couvert (par exemple `github.com`, `*.atlassian.net`). Laissez vide pour une règle transverse (cross-domaine).
+- **Filtre Domaine** : le pattern de domaine couvert (par exemple `github.com`, `*.atlassian.net`). Laissez vide pour une règle transverse (cross-domaine). Plutôt que de le saisir de mémoire, vous pouvez [le renseigner depuis vos onglets ouverts](#seed-from-tabs).
 - **Étiquette** : nom d'identification de la règle dans la liste. N'est pas utilisé comme nom de groupe par défaut (voir le champ **Nom du groupe** du mode Label de repli pour ça).
 - **Catégorie** : choisissez parmi les 14 catégories intégrées (voir [Catégories et packs](/reference/categories-and-packs)). La catégorie donne uniquement l'emoji et le libellé. Elle n'influe pas sur la couleur.
 - **Couleur du groupe d'onglets** : champ distinct de la catégorie. Choisissez parmi les neuf couleurs natives des groupes Chrome (`grey`, `blue`, `red`, `yellow`, `green`, `pink`, `purple`, `cyan`, `orange`).
@@ -88,6 +88,21 @@ Vous pouvez laisser la déduplication désactivée si vous n'avez besoin que du 
 ### Étape 4 : Résumé
 
 Une page de confirmation résume le contenu de la règle avant enregistrement. Vous pouvez revenir aux étapes précédentes via les flèches ou le stepper en haut de l'assistant.
+
+## Renseigner le filtre de domaine depuis les onglets ouverts \{#seed-from-tabs}
+
+À côté du champ **Filtre Domaine** de l'étape 1 figure un bouton **Importer depuis les onglets ouverts**. Il ouvre un panneau listant les domaines présents dans les onglets ouverts (toutes fenêtres, `http` et `https` uniquement), afin de remplir le champ à partir d'un contexte de navigation réel plutôt que de mémoire. Le panneau est une vue de découverte : sa seule action est de renseigner le champ. Il ne crée jamais de règle, n'installe pas de pack et ne modifie aucun preset.
+
+<Steps>
+
+1. Activez **Importer depuis les onglets ouverts** à côté du champ de domaine. Une boîte de dialogue s'ouvre avec une zone de recherche et une liste défilante.
+2. Chaque ligne indique un hôte, le nombre d'onglets ouverts dessus et, lorsque l'hôte est déjà couvert par une règle activée, un badge **Déjà géré par une règle**. Les hôtes non couverts apparaissent en premier, puis par nombre d'onglets décroissant.
+3. Choisissez un hôte. Lorsqu'il comporte un sous-domaine, un choix court permet de renseigner soit le **domaine enregistrable** (par exemple `github.com`, par défaut), soit l'**hôte complet** (par exemple `gist.github.com`).
+4. Confirmez. La valeur choisie remplit le filtre de domaine et le panneau se ferme.
+
+</Steps>
+
+La zone de recherche filtre la liste au fil de la frappe. Lorsqu'aucun onglet lisible n'est ouvert hors des pages de l'extension, le panneau affiche un message vide. Les onglets en double sur le même hôte sont fusionnés en une seule ligne avec le total combiné.
 
 ## Modifier une règle \{#edit}
 
