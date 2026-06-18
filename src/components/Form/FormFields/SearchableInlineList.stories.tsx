@@ -79,7 +79,7 @@ export const SearchableInlineListCustomRenderItem: Story = {
             aria-label={`${option.label} (custom)`}
           >
             <span>{option.label}</span>
-            <Badge color="green" variant="soft" aria-hidden="true">
+            <Badge color="green" variant="soft" highContrast aria-hidden="true">
               custom
             </Badge>
           </Command.Item>

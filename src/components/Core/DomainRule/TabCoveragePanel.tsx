@@ -178,7 +178,7 @@ export function TabCoveragePanel({ open, onOpenChange, entries, onSeed }: TabCov
                 >
                   <span className="tab-coverage-item__host">{entry.host}</span>
                   {entry.covered && (
-                    <Badge color="amber" variant="soft" aria-hidden="true">
+                    <Badge color="amber" variant="soft" highContrast aria-hidden="true">
                       <ShieldCheck size={12} aria-hidden="true" />
                       {getMessage('tabCoverageBadgeManaged')}
                     </Badge>
