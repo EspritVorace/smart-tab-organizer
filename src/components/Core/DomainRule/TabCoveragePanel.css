@@ -1,0 +1,23 @@
+/* ── Tab coverage row ────────────────────────────────────────
+   Built on the shared `.ss-item` base, overriding the layout so the
+   host, the optional coverage badge and the tab count line up. Rows are
+   at least 44px tall for comfortable pointer and touch targets. */
+.tab-coverage-item {
+  min-height: 44px;
+  gap: var(--space-3);
+}
+
+.tab-coverage-item__host {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab-coverage-item__count {
+  flex-shrink: 0;
+  font-size: var(--font-size-1);
+  color: var(--gray-11);
+  font-variant-numeric: tabular-nums;
+}
