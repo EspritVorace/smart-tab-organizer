@@ -60,7 +60,7 @@ Click **Add Rule** at the top of the list. The wizard opens in four steps.
 
 ### Step 1: Identity
 
-- **Domain Filter**: the domain pattern covered (for example `github.com`, `*.atlassian.net`). Leave empty for a cross-domain rule.
+- **Domain Filter**: the domain pattern covered (for example `github.com`, `*.atlassian.net`). Leave empty for a cross-domain rule. Instead of typing it from memory, you can [seed it from your open tabs](#seed-from-tabs).
 - **Label**: the rule's identification name in the list. It is not used as a default group name (see the **Group Name** field of the Fallback Label mode for that).
 - **Category**: pick from the 14 built-in categories (see [Categories and packs](/reference/categories-and-packs)). The category only provides the emoji and the label. It does not affect the color.
 - **Tab group color**: a field distinct from the category. Pick from the nine native Chrome group colors (`grey`, `blue`, `red`, `yellow`, `green`, `pink`, `purple`, `cyan`, `orange`).
@@ -87,6 +87,21 @@ You can leave deduplication off if you only need grouping on this domain.
 ### Step 4: Summary
 
 A confirmation page summarizes the rule before saving. You can return to previous steps via the arrows or the stepper at the top of the wizard.
+
+## Seed the domain filter from open tabs \{#seed-from-tabs}
+
+Next to the **Domain Filter** field in step 1 sits an **Import from open tabs** button. It opens a panel listing the domains found across your open tabs (all windows, `http` and `https` only), so you can fill the field from a real browsing context instead of from memory. The panel is a discovery view: its only action is to seed the field. It never creates a rule, installs a pack, or changes presets.
+
+<Steps>
+
+1. Activate **Import from open tabs** next to the domain field. A dialog opens with a search box and a scrollable list.
+2. Each row shows a host, the number of open tabs on it, and, when the host is already covered by an enabled rule, an **Already managed by a rule** badge. Hosts not yet covered appear first, then by tab count descending.
+3. Pick a host. When it has a subdomain, a short choice lets you seed either the **registrable domain** (for example `github.com`, the default) or the **full host** (for example `gist.github.com`).
+4. Confirm. The chosen value fills the domain filter and the panel closes.
+
+</Steps>
+
+The search box filters the list as you type. When no readable tab is open outside the extension pages, the panel shows an empty message. Duplicate tabs on the same host are merged into a single row with the combined count.
 
 ## Edit a rule \{#edit}
 

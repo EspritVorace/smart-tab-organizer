@@ -79,9 +79,10 @@ export function WizardStep1Identity({ control, errors, setValue, domainRules }: 
                 </div>
                 <TabCoverageButton
                   domainRules={domainRules}
-                  onSeed={(value) =>
-                    field.onChange(value)
-                  }
+                  onSeed={(value) => {
+                    void markDiscovered('grouping.seedFromTabs');
+                    field.onChange(value);
+                  }}
                 />
               </Flex>
             )}

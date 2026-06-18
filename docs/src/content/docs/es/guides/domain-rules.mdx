@@ -61,7 +61,7 @@ Pulsa **Nueva regla** en la parte superior de la lista. El asistente se abre en 
 
 ### Paso 1: Identidad
 
-- **Filtro Dominio**: el patrón de dominio cubierto (por ejemplo `github.com`, `*.atlassian.net`). Déjalo vacío para una regla transversal (entre dominios).
+- **Filtro Dominio**: el patrón de dominio cubierto (por ejemplo `github.com`, `*.atlassian.net`). Déjalo vacío para una regla transversal (entre dominios). En lugar de escribirlo de memoria, puedes [rellenarlo desde tus pestañas abiertas](#seed-from-tabs).
 - **Etiqueta**: nombre identificador de la regla en la lista. No se usa como nombre de grupo por defecto (consulta el campo **Nombre del grupo** del modo Etiqueta de reserva para ello).
 - **Categoría**: elige entre las 14 categorías integradas (consulta [Categorías y packs](/reference/categories-and-packs)). La categoría aporta únicamente el emoji y la etiqueta. No influye en el color.
 - **Color del grupo de pestañas**: campo distinto de la categoría. Elige entre los nueve colores nativos de los grupos de Chrome (`grey`, `blue`, `red`, `yellow`, `green`, `pink`, `purple`, `cyan`, `orange`).
@@ -88,6 +88,21 @@ Puedes dejar la deduplicación desactivada si solo necesitas la agrupación en e
 ### Paso 4: Resumen
 
 Una página de confirmación resume el contenido de la regla antes de guardarla. Puedes volver a pasos anteriores con las flechas o con el stepper en la parte superior del asistente.
+
+## Rellenar el filtro de dominio desde las pestañas abiertas \{#seed-from-tabs}
+
+Junto al campo **Filtro Dominio** del paso 1 hay un botón **Importar desde las pestañas abiertas**. Abre un panel que enumera los dominios presentes en las pestañas abiertas (todas las ventanas, solo `http` y `https`), para rellenar el campo a partir de un contexto de navegación real en lugar de de memoria. El panel es una vista de descubrimiento: su única acción es rellenar el campo. Nunca crea una regla, instala un pack ni cambia los presets.
+
+<Steps>
+
+1. Activa **Importar desde las pestañas abiertas** junto al campo de dominio. Se abre un diálogo con un cuadro de búsqueda y una lista desplazable.
+2. Cada fila muestra un host, el número de pestañas abiertas en él y, cuando el host ya está cubierto por una regla activada, una insignia **Ya gestionado por una regla**. Los hosts no cubiertos aparecen primero, después por número de pestañas descendente.
+3. Elige un host. Cuando tiene un subdominio, una elección breve permite rellenar el **dominio registrable** (por ejemplo `github.com`, por defecto) o el **host completo** (por ejemplo `gist.github.com`).
+4. Confirma. El valor elegido rellena el filtro de dominio y el panel se cierra.
+
+</Steps>
+
+El cuadro de búsqueda filtra la lista a medida que escribes. Cuando no hay ninguna pestaña legible abierta fuera de las páginas de la extensión, el panel muestra un mensaje vacío. Las pestañas duplicadas en el mismo host se fusionan en una sola fila con el total combinado.
 
 ## Modificar una regla \{#edit}
 

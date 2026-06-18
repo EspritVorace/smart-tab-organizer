@@ -1117,6 +1117,8 @@
   "explorationMiniLink": { "message": "View the catalogue" },
   "explorationEntry_grouping_create_label": { "message": "Create a rule" },
   "explorationEntry_grouping_create_desc": { "message": "Define a tab group from a domain pattern." },
+  "explorationEntry_grouping_seedFromTabs_label": { "message": "Import from open tabs" },
+  "explorationEntry_grouping_seedFromTabs_desc": { "message": "Seed the domain filter from a domain found across the open tabs." },
   "explorationEntry_grouping_edit_label": { "message": "Edit a rule" },
   "explorationEntry_grouping_edit_desc": { "message": "Open an existing rule to change its settings." },
   "explorationEntry_grouping_mode_preset_label": { "message": "Config mode: Preset" },

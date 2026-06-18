@@ -1070,6 +1070,8 @@ export type GeneratedI18nStructure = {
   "explorationMiniLink": { substitutions: 0, plural: false };
   "explorationEntry_grouping_create_label": { substitutions: 0, plural: false };
   "explorationEntry_grouping_create_desc": { substitutions: 0, plural: false };
+  "explorationEntry_grouping_seedFromTabs_label": { substitutions: 0, plural: false };
+  "explorationEntry_grouping_seedFromTabs_desc": { substitutions: 0, plural: false };
   "explorationEntry_grouping_edit_label": { substitutions: 0, plural: false };
   "explorationEntry_grouping_edit_desc": { substitutions: 0, plural: false };
   "explorationEntry_grouping_mode_preset_label": { substitutions: 0, plural: false };
