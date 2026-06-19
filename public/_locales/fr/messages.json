@@ -149,6 +149,7 @@
   "presetRuleLabel": { "message": "Preset de règle" },
   "searchPresetPlaceholder": { "message": "Rechercher un preset..." },
   "noPresetFound": { "message": "Aucun preset trouvé" },
+  "presetSuggestedGroupHeading": { "message": "Suggérés pour ce domaine" },
   "searchableSelectTriggerLabel": { "message": "Ouvrir les options" },
   "searchableSelectSearchLabel": { "message": "Rechercher les options" },
   "ruleSelectAriaLabel": { "message": "Sélectionner la règle" },

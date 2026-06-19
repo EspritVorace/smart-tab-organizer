@@ -1,4 +1,4 @@
-import { useController, type Control, type FieldErrors } from 'react-hook-form';
+import { useController, useWatch, type Control, type FieldErrors } from 'react-hook-form';
 import type { DomainRule } from '@/schemas/domainRule';
 import type { PresetCategory } from '@/utils/presetUtils';
 import { type GroupNameSourceValue, type UrlExtractionModeValue } from '@/schemas/enums';
@@ -30,6 +30,9 @@ export function WizardStep2Config({
   handlePresetChange,
   groupNameSource,
 }: WizardStep2ConfigProps) {
+  // Reactive read of the step 1 domain so the preset suggestions recompute when
+  // the user changes the domain and returns to step 2.
+  const domainFilter = useWatch({ control, name: 'domainFilter' });
   const { field: presetField } = useController({ name: 'presetId', control });
   const { field: groupNameSourceField } = useController({ name: 'groupNameSource', control });
   const { field: titleField } = useController({ name: 'titleParsingRegEx', control });
@@ -46,6 +49,7 @@ export function WizardStep2Config({
       onPresetChange={handlePresetChange}
       presetCategories={presetCategories}
       isLoadingPresets={isLoadingPresets}
+      suggestionDomain={domainFilter ?? ''}
       groupNameSource={groupNameSource}
       onGroupNameSourceChange={(value) => groupNameSourceField.onChange(value)}
       titleParsingRegEx={titleField.value ?? ''}

@@ -9,6 +9,8 @@ const {
   DomainRuleConfigFormSwitchToManual,
   DomainRuleConfigFormSwitchToAsk,
   DomainRuleConfigFormManualWithRegex,
+  DomainRuleConfigFormPresetSuggested,
+  DomainRuleConfigFormPresetNoSuggestion,
 } = composeStories(stories);
 
 describe('DomainRuleConfigForm — static renders', () => {
@@ -42,5 +44,21 @@ describe('DomainRuleConfigForm — mode switching', () => {
     await DomainRuleConfigFormManualWithRegex.run();
 
     expect(screen.getByRole('radio', { name: /manual/i })).toBeInTheDocument();
+  });
+});
+
+describe('DomainRuleConfigForm — domain-aware preset suggestions', () => {
+  it('shows a leading "Suggested for this domain" group for a matching domain', async () => {
+    await DomainRuleConfigFormPresetSuggested.run();
+
+    expect(screen.getByText('Suggested for this domain')).toBeInTheDocument();
+    expect(screen.getByText('GitHub Issue')).toBeInTheDocument();
+  });
+
+  it('shows no leading group for a non-matching domain', async () => {
+    await DomainRuleConfigFormPresetNoSuggestion.run();
+
+    expect(screen.queryByText('Suggested for this domain')).not.toBeInTheDocument();
+    expect(screen.getByText('Numeric ID')).toBeInTheDocument();
   });
 });
