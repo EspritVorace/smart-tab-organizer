@@ -57,6 +57,61 @@ export const SearchableInlineListDefault: Story = {
   },
 };
 
+// Pressing Enter from the empty search input selects the first result.
+export const SearchableInlineListEnterSelectsFirst: Story = {
+  render: () => {
+    const [value, setValue] = useState('');
+    return (
+      <SearchableInlineList
+        value={value}
+        onValueChange={setValue}
+        options={fruits}
+        searchPlaceholder="Search a fruit..."
+        emptyMessage="No fruit found."
+        aria-label="Fruits"
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByPlaceholderText('Search a fruit...');
+    input.focus();
+    // Enter on the empty query lands on the first item (Apple).
+    await userEvent.keyboard('{Enter}');
+    await expect(canvas.getByText('Apple').closest('[cmdk-item=""]')).toHaveClass(
+      'ss-item--selected',
+    );
+  },
+};
+
+// Typing then Enter selects the first filtered result.
+export const SearchableInlineListEnterSelectsFirstFiltered: Story = {
+  render: () => {
+    const [value, setValue] = useState('');
+    return (
+      <SearchableInlineList
+        value={value}
+        onValueChange={setValue}
+        options={fruits}
+        searchPlaceholder="Search a fruit..."
+        emptyMessage="No fruit found."
+        aria-label="Fruits"
+      />
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByPlaceholderText('Search a fruit...');
+    input.focus();
+    await userEvent.type(input, 'e');
+    await userEvent.keyboard('{Enter}');
+    // "e" matches several fruits; the first rendered result becomes selected.
+    await expect(
+      canvasElement.querySelector('[cmdk-item=""].ss-item--selected'),
+    ).toBeInTheDocument();
+  },
+};
+
 // Custom render path: the renderItem prop supplies rich rows with a trailing badge.
 export const SearchableInlineListCustomRenderItem: Story = {
   render: () => {
