@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { composeStories } from '@storybook/react';
 import * as stories from '../../src/components/Core/DomainRule/DomainRuleConfigForm.stories';
 
@@ -60,5 +60,13 @@ describe('DomainRuleConfigForm — domain-aware preset suggestions', () => {
 
     expect(screen.queryByText('Suggested for this domain')).not.toBeInTheDocument();
     expect(screen.getByText('Numeric ID')).toBeInTheDocument();
+  });
+
+  it('focuses the preset search input on arrival when nothing is selected', async () => {
+    await DomainRuleConfigFormPresetSuggested.run();
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search a preset...')).toHaveFocus();
+    });
   });
 });
