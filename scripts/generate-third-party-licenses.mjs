@@ -43,6 +43,11 @@ const PROJECT_ROOT = join(__dirname, '..');
 const SELF_PACKAGE = 'smart-tab-organizer';
 const BUNDLED_MANIFEST = join(PROJECT_ROOT, 'scripts', 'bundled-dependencies.json');
 
+// Fonts vendored under ci/fonts/ for deterministic CI screenshots. They are not
+// npm packages and are not redistributed inside the extension, so they are
+// attributed separately (root NOTICE + doc pages), driven by this manifest.
+const FONTS_MANIFEST = join(PROJECT_ROOT, 'ci', 'fonts', 'fonts.manifest.json');
+
 // Names listed directly in package.json. These drive the (curated) "Built with"
 // chips in the About dialog; the legal attribution below is scoped to the
 // actual bundle instead.
@@ -79,6 +84,9 @@ const LOCALE_STRINGS = {
     colRepo: 'Dépôt',
     noticeNote:
       "Les textes de licence intégraux sont disponibles dans THIRD-PARTY-LICENSES.txt (à la racine du dépôt) et embarqués dans l'extension.",
+    fontsHeading: 'Polices (outils de test/CI)',
+    fontsIntro:
+      "Polices embarquées dans le dépôt (ci/fonts/) pour produire des captures d'écran déterministes en intégration continue. Elles ne sont pas redistribuées dans l'extension, qui s'appuie sur la pile de polices du système. Leurs textes de licence intégraux figurent dans THIRD-PARTY-LICENSES.txt.",
   },
   en: {
     title: 'Open source licenses',
@@ -98,6 +106,9 @@ const LOCALE_STRINGS = {
     colRepo: 'Repository',
     noticeNote:
       'The full license texts are available in THIRD-PARTY-LICENSES.txt (at the repository root) and bundled inside the extension.',
+    fontsHeading: 'Fonts (test / CI tooling)',
+    fontsIntro:
+      'Fonts committed to the repository (ci/fonts/) to render deterministic screenshots in continuous integration. They are not redistributed inside the extension, which relies on the system font stack. Their full license texts are reproduced in THIRD-PARTY-LICENSES.txt.',
   },
   es: {
     title: 'Licencias de codigo abierto',
@@ -117,6 +128,9 @@ const LOCALE_STRINGS = {
     colRepo: 'Repositorio',
     noticeNote:
       'Los textos completos de las licencias estan disponibles en THIRD-PARTY-LICENSES.txt (en la raiz del repositorio) e incluidos dentro de la extension.',
+    fontsHeading: 'Fuentes (herramientas de prueba/CI)',
+    fontsIntro:
+      'Fuentes incluidas en el repositorio (ci/fonts/) para generar capturas deterministas en integracion continua. No se redistribuyen dentro de la extension, que usa la pila de fuentes del sistema. Sus textos completos de licencia figuran en THIRD-PARTY-LICENSES.txt.',
   },
 };
 
@@ -183,6 +197,32 @@ async function collectDependencies() {
 function loadBundledManifest() {
   if (!existsSync(BUNDLED_MANIFEST)) return null;
   return JSON.parse(readFileSync(BUNDLED_MANIFEST, 'utf-8'));
+}
+
+/**
+ * Load the vendored-fonts manifest (ci/fonts/fonts.manifest.json) and resolve
+ * each font's verbatim license text. Returns [] when the manifest is absent.
+ */
+function loadFonts() {
+  if (!existsSync(FONTS_MANIFEST)) return [];
+  const manifest = JSON.parse(readFileSync(FONTS_MANIFEST, 'utf-8'));
+  const fontsDir = dirname(FONTS_MANIFEST);
+  return manifest.map((font) => {
+    let licenseText = '';
+    if (font.licenseFile) {
+      const licensePath = join(fontsDir, font.licenseFile);
+      if (existsSync(licensePath)) licenseText = readFileSync(licensePath, 'utf-8').trim();
+    }
+    return {
+      name: font.name,
+      version: font.version,
+      license: font.license || 'UNKNOWN',
+      publisher: font.publisher || '',
+      repository: normalizeRepository(font.repository || ''),
+      usage: font.usage || '',
+      licenseText,
+    };
+  });
 }
 
 /* --- Version grouping --------------------------------------------------- */
@@ -291,7 +331,7 @@ function buildJson(byKey) {
   return JSON.stringify([...byName.values()], null, 2) + '\n';
 }
 
-function buildNotice(entries) {
+function buildNotice(entries, fonts = []) {
   const line = '='.repeat(78);
   let out = '';
   out += `${line}\n`;
@@ -315,6 +355,32 @@ function buildNotice(entries) {
       out += `${group.licenseText}\n\n`;
     } else {
       out += `License: ${group.license} (no license file shipped by this package).\n\n`;
+    }
+  }
+
+  if (fonts.length > 0) {
+    out += `${line}\n`;
+    out += 'Fonts (test / CI tooling, not redistributed in the extension)\n';
+    out += `${line}\n\n`;
+    out +=
+      'The following fonts are committed under ci/fonts/ to render deterministic\n' +
+      'screenshots in continuous integration. They are not shipped inside the\n' +
+      'extension package, which relies on the system font stack. Their copyright\n' +
+      'notices and license texts are reproduced verbatim below.\n\n';
+
+    for (const font of fonts) {
+      out += `${line}\n`;
+      out += `${font.name} ${font.version}\n`;
+      out += `License: ${font.license}\n`;
+      if (font.publisher) out += `Author: ${font.publisher}\n`;
+      if (font.repository) out += `Repository: ${font.repository}\n`;
+      if (font.usage) out += `Usage: ${font.usage}\n`;
+      out += `${line}\n\n`;
+      if (font.licenseText) {
+        out += `${font.licenseText}\n\n`;
+      } else {
+        out += `License: ${font.license} (no license text provided).\n\n`;
+      }
     }
   }
 
@@ -345,7 +411,7 @@ function renderTable(entries, strings) {
   return header + rows + '\n';
 }
 
-function buildDocPage(bundledEntries, devEntries, locale) {
+function buildDocPage(bundledEntries, devEntries, fonts, locale) {
   const strings = LOCALE_STRINGS[locale];
 
   let md = '---\n';
@@ -367,6 +433,15 @@ function buildDocPage(bundledEntries, devEntries, locale) {
     md += `## ${strings.devHeading}\n\n`;
     md += `${strings.devIntro}\n\n`;
     md += renderTable(devEntries, strings) + '\n';
+  }
+
+  // Fonts vendored for CI screenshots (ci/fonts/). Like the dev tooling, they
+  // are not shipped in the extension; the full license texts live in the
+  // THIRD-PARTY-LICENSES.txt NOTICE.
+  if (fonts.length > 0) {
+    md += `## ${strings.fontsHeading}\n\n`;
+    md += `${strings.fontsIntro}\n\n`;
+    md += renderTable(fonts, strings) + '\n';
   }
 
   return md;
@@ -408,23 +483,31 @@ async function main() {
     (e) => DEV_DIRECT.has(e.name) && !bundledNames.has(e.name),
   );
 
+  // Fonts vendored under ci/fonts/ for CI screenshots. Attributed in the root
+  // NOTICE and the doc pages, but not in the bundled NOTICE: they are not
+  // shipped inside the extension package.
+  const fonts = loadFonts();
+
   const json = buildJson(byKey);
-  const notice = buildNotice(bundledEntries);
+  const bundledNotice = buildNotice(bundledEntries);
+  const rootNotice = buildNotice(bundledEntries, fonts);
 
   const jsonPath = join(PROJECT_ROOT, 'public', 'data', 'third-party-licenses.json');
   const bundledNoticePath = join(PROJECT_ROOT, 'public', 'data', 'third-party-licenses.txt');
   const rootNoticePath = join(PROJECT_ROOT, 'THIRD-PARTY-LICENSES.txt');
 
   writeFile(jsonPath, json);
-  writeFile(bundledNoticePath, notice);
-  writeFile(rootNoticePath, notice);
+  writeFile(bundledNoticePath, bundledNotice);
+  writeFile(rootNoticePath, rootNotice);
 
   process.stdout.write(`Generated public/data/third-party-licenses.json (chips)\n`);
   process.stdout.write(`Generated public/data/third-party-licenses.txt (${bundledEntries.length} bundled packages)\n`);
-  process.stdout.write(`Generated THIRD-PARTY-LICENSES.txt (${bundledEntries.length} bundled packages)\n`);
+  process.stdout.write(
+    `Generated THIRD-PARTY-LICENSES.txt (${bundledEntries.length} bundled packages, ${fonts.length} fonts)\n`,
+  );
 
   for (const locale of LOCALES) {
-    const md = buildDocPage(bundledEntries, devEntries, locale);
+    const md = buildDocPage(bundledEntries, devEntries, fonts, locale);
     writeFile(join(PROJECT_ROOT, DOC_OUTPUT_PATHS[locale]), md);
     process.stdout.write(`Generated ${DOC_OUTPUT_PATHS[locale]}\n`);
   }

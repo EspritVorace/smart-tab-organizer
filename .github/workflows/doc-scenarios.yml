@@ -81,7 +81,9 @@ jobs:
           echo "Playwright cache hit: ${STATUS:-false}"
           echo "Playwright cache hit: ${STATUS:-false}" >> "$GITHUB_STEP_SUMMARY"
 
-      - run: pnpm exec playwright install --with-deps chromium
+      - name: Install vendored CI fonts
+        run: bash .github/scripts/install-ci-fonts.sh
+      - run: pnpm exec playwright install chromium
       - run: pnpm build
 
       - name: Run doc:scenarios (full matrix)
