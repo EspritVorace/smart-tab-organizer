@@ -177,7 +177,9 @@
 
 .ss-item--selected {
   background: var(--accent-a5);
-  color: var(--accent-11);
+  /* High-contrast accent text: --accent-11 drops below the 4.5:1 threshold on
+     the darker --accent-a6 background of the selected + highlighted state. */
+  color: var(--accent-12);
   font-weight: 500;
   box-shadow: inset 3px 0 0 var(--accent-9);
 }
