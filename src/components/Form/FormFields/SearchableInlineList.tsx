@@ -78,6 +78,26 @@ export function SearchableInlineList({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Enter on the search input should land on the first result. cmdk only
+  // activates the item it has highlighted (aria-selected), but on mount with an
+  // empty query no item is highlighted yet, so a plain Enter does nothing. When
+  // nothing is highlighted, select the first rendered (matching, enabled) item
+  // ourselves. When cmdk already highlights one (e.g. after arrow navigation),
+  // defer to it.
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'Enter' || e.nativeEvent.isComposing) return;
+    const root = containerRef.current;
+    if (!root) return;
+    if (root.querySelector('[cmdk-item=""][aria-selected="true"]')) return;
+    const first = root.querySelector<HTMLElement>(
+      '[cmdk-item=""]:not([aria-disabled="true"])',
+    );
+    if (first) {
+      e.preventDefault();
+      first.click();
+    }
+  };
+
   const renderOption = (option: SearchableSelectOption) =>
     renderItem ? (
       renderItem(option)
@@ -105,6 +125,7 @@ export function SearchableInlineList({
             placeholder={searchPlaceholder}
             aria-label={searchPlaceholder ?? getMessage('searchableSelectSearchLabel')}
             className="ss-search__input"
+            onKeyDown={handleInputKeyDown}
           />
         </div>
         <Command.List id={listboxId} className="ss-list ss-list--inline">
