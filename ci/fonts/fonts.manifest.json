@@ -1,0 +1,22 @@
+[
+  {
+    "name": "GNU FreeFont",
+    "version": "20120503",
+    "license": "GPL-3.0-or-later WITH Font-exception-2.0",
+    "publisher": "Free Software Foundation",
+    "repository": "https://www.gnu.org/software/freefont/",
+    "usage": "Deterministic Latin and symbol rendering for the Playwright screenshot pipelines.",
+    "files": ["freefont/*.ttf"],
+    "licenseFile": "licenses/GNU-FreeFont-GPLv3-with-font-exception.txt"
+  },
+  {
+    "name": "Noto Color Emoji",
+    "version": "2.051",
+    "license": "OFL-1.1",
+    "publisher": "Google Inc.",
+    "repository": "https://github.com/googlefonts/noto-emoji",
+    "usage": "Deterministic color emoji rendering (category glyphs) for the Playwright screenshot pipelines.",
+    "files": ["noto-color-emoji/NotoColorEmoji.ttf"],
+    "licenseFile": "licenses/Noto-Color-Emoji-OFL-1.1.txt"
+  }
+]
