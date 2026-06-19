@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm, useWatch, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getMessage } from '@/utils/i18n';
-import { WizardModal } from '@/components/UI/WizardModal';
+import { WizardModal, WizardNavTooltip } from '@/components/UI/WizardModal';
 import { WizardStepper } from '@/components/UI/WizardStepper/WizardStepper';
 import { AriaButton } from '@/components/UI/AriaButton/AriaButton';
 import { WizardStep1Identity } from './WizardStep1Identity';
@@ -106,6 +106,28 @@ function getManualModeFieldsToValidate(
     fields.push(extractionMode === 'query_param' ? 'urlQueryParamName' : 'urlParsingRegEx');
   }
   return fields;
+}
+
+/** Resolve the Ctrl+Enter / Ctrl+Backspace handlers for the current wizard state. */
+function computeWizardNav(args: {
+  isEditing: boolean;
+  step: number;
+  isPresetSelectionMissing: boolean;
+  handleNext: () => void;
+  handlePrev: () => void;
+  submitForm: () => void;
+}): { onNext?: () => void; onPrevious?: () => void } {
+  const { isEditing, step, isPresetSelectionMissing, handleNext, handlePrev, submitForm } = args;
+  if (isEditing) {
+    return { onNext: submitForm };
+  }
+  if (step >= 3) {
+    return { onNext: submitForm, onPrevious: handlePrev };
+  }
+  return {
+    onNext: isPresetSelectionMissing ? undefined : handleNext,
+    onPrevious: step > 0 ? handlePrev : undefined,
+  };
 }
 
 const STEP_LABELS_KEYS = [
@@ -388,6 +410,18 @@ export function RuleWizardModal({
     if (!open) handleClose();
   };
 
+  // Keyboard navigation (Ctrl+Enter / Ctrl+Backspace). On the last step (or in
+  // edit mode) Ctrl+Enter triggers the final submit; an undefined handler makes
+  // the shortcut inert (e.g. when the preset selection is still missing).
+  const { onNext: wizardOnNext, onPrevious: wizardOnPrevious } = computeWizardNav({
+    isEditing,
+    step,
+    isPresetSelectionMissing,
+    handleNext,
+    handlePrev,
+    submitForm: () => handleSubmit(handleFormSubmit)(),
+  });
+
   const title = isEditing ? getMessage('editRule') : getMessage('createRule');
   const stepLabels = STEP_LABELS_KEYS.map((k) => ({ label: getMessage(k) }));
 
@@ -417,6 +451,8 @@ export function RuleWizardModal({
       description={description}
       maxWidth={820}
       fillHeight={!isEditing && step === 1}
+      onNext={wizardOnNext}
+      onPrevious={wizardOnPrevious}
       onOpenAutoFocus={(e) => {
         e.preventDefault();
         // The domain filter is a CodeMirror editor (no <input>): focus its
@@ -527,7 +563,9 @@ export function RuleWizardModal({
               <Dialog.Close>
                 <Button variant="soft" color="gray" highContrast type="button">{getMessage('cancel')}</Button>
               </Dialog.Close>
-              <Button data-testid="wizard-rule-btn-save" type="submit">{getMessage('save')}</Button>
+              <WizardNavTooltip kind="next">
+                <Button data-testid="wizard-rule-btn-save" type="submit">{getMessage('save')}</Button>
+              </WizardNavTooltip>
             </>
           ) : (
             <>
@@ -537,23 +575,29 @@ export function RuleWizardModal({
                 </Dialog.Close>
               )}
               {step > 0 && (
-                <Button variant="soft" color="gray" highContrast type="button" onClick={handlePrev}>
-                  {getMessage('previous')}
-                </Button>
+                <WizardNavTooltip kind="previous">
+                  <Button variant="soft" color="gray" highContrast type="button" onClick={handlePrev}>
+                    {getMessage('previous')}
+                  </Button>
+                </WizardNavTooltip>
               )}
               {step < 3 && (
-                <AriaButton
-                  data-testid="wizard-rule-btn-next"
-                  type="button"
-                  onClick={handleNext}
-                  ariaDisabled={isPresetSelectionMissing}
-                  disabledReason={isPresetSelectionMissing ? getMessage('errorPresetRequired') : undefined}
-                >
-                  {getMessage('next')}
-                </AriaButton>
+                <WizardNavTooltip kind="next" hidden={isPresetSelectionMissing}>
+                  <AriaButton
+                    data-testid="wizard-rule-btn-next"
+                    type="button"
+                    onClick={handleNext}
+                    ariaDisabled={isPresetSelectionMissing}
+                    disabledReason={isPresetSelectionMissing ? getMessage('errorPresetRequired') : undefined}
+                  >
+                    {getMessage('next')}
+                  </AriaButton>
+                </WizardNavTooltip>
               )}
               {step === 3 && (
-                <Button data-testid="wizard-rule-btn-create" type="submit">{getMessage('create')}</Button>
+                <WizardNavTooltip kind="next">
+                  <Button data-testid="wizard-rule-btn-create" type="submit">{getMessage('create')}</Button>
+                </WizardNavTooltip>
               )}
             </>
           )}

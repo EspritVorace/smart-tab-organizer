@@ -56,6 +56,7 @@ export function ExportWizardShell<TItem extends { id: string }>({
   cancelTestId,
 }: ExportWizardShellProps<TItem>) {
   const { selection, selectAll, exportNote, setExportNote, actions } = state;
+  const isEmpty = selection.size === 0;
 
   return (
     <WizardModal
@@ -65,6 +66,7 @@ export function ExportWizardShell<TItem extends { id: string }>({
       title={title}
       description={description}
       maxWidth={680}
+      onNext={isEmpty ? undefined : actions.exportToFile}
     >
       <WizardModal.Body>
         <Box>
@@ -83,7 +85,7 @@ export function ExportWizardShell<TItem extends { id: string }>({
         <ExportWizardFooter
           labelKey={buttonLabelKey}
           actions={actions}
-          disabled={selection.size === 0}
+          disabled={isEmpty}
           primaryTestId={primaryTestId}
           clipboardTestId={clipboardTestId}
           cancelTestId={cancelTestId}

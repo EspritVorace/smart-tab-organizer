@@ -100,6 +100,27 @@ describe('RuleWizardModal — step navigation', () => {
   });
 });
 
+describe('RuleWizardModal — keyboard navigation', () => {
+  it('steps back from step 2 to step 1 on Ctrl+Backspace', async () => {
+    await RuleWizardModalStep2.run();
+    expect(screen.getByTestId('wizard-rule-step-2')).toBeInTheDocument();
+
+    fireEvent.keyDown(screen.getByTestId('wizard-rule'), { key: 'Backspace', ctrlKey: true });
+
+    expect(await screen.findByTestId('wizard-rule-step-1')).toBeInTheDocument();
+  });
+
+  it('advances back to step 2 on Ctrl+Enter with the previously filled fields', async () => {
+    await RuleWizardModalStep2.run();
+    fireEvent.keyDown(screen.getByTestId('wizard-rule'), { key: 'Backspace', ctrlKey: true });
+    expect(await screen.findByTestId('wizard-rule-step-1')).toBeInTheDocument();
+
+    fireEvent.keyDown(screen.getByTestId('wizard-rule'), { key: 'Enter', ctrlKey: true });
+
+    expect(await screen.findByTestId('wizard-rule-step-2')).toBeInTheDocument();
+  });
+});
+
 describe('RuleWizardModal — step 2 config mode state', () => {
   it('keeps an editable manual config after transiting through ask (no empty manual)', async () => {
     await RuleWizardModalStep2.run();

@@ -22,6 +22,17 @@ interface WizardModalProps {
   'data-testid'?: string;
   /** Forwarded to Dialog.Content (e.g. to pre-focus an input on open). */
   onOpenAutoFocus?: React.ComponentProps<typeof DialogShell>['onOpenAutoFocus'];
+  /**
+   * Wired to Ctrl/Cmd+Enter. Advances the wizard (or triggers the final
+   * confirm action on the last step). Leave undefined when the forward
+   * button is absent or disabled, which makes the shortcut inert.
+   */
+  onNext?: () => void;
+  /**
+   * Wired to Ctrl/Cmd+Backspace. Steps back. Leave undefined when there is
+   * no previous step, which makes the shortcut inert.
+   */
+  onPrevious?: () => void;
 }
 
 const wizardContentStyle: React.CSSProperties = {
@@ -43,10 +54,24 @@ function WizardModalRoot({
   children,
   'data-testid': dataTestId,
   onOpenAutoFocus,
+  onNext,
+  onPrevious,
 }: WizardModalProps) {
   const contentStyle: React.CSSProperties = fillHeight
     ? { ...wizardContentStyle, height: '80vh' }
     : wizardContentStyle;
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.defaultPrevented) return;
+    // Mirror the project's `Mod` convention: Ctrl on Win/Linux, Cmd on Mac.
+    if (!(event.ctrlKey || event.metaKey)) return;
+    if (event.key === 'Enter' && onNext) {
+      event.preventDefault();
+      onNext();
+    } else if (event.key === 'Backspace' && onPrevious) {
+      event.preventDefault();
+      onPrevious();
+    }
+  };
   return (
     <DialogShell
       open={open}
@@ -57,6 +82,7 @@ function WizardModalRoot({
       hideDescription={hideDescription}
       data-testid={dataTestId}
       onOpenAutoFocus={onOpenAutoFocus}
+      onKeyDown={handleKeyDown}
       preventOutsideClose
       maxWidth={maxWidth}
       minHeight={fillHeight ? undefined : 'min(520px, 85vh)'}

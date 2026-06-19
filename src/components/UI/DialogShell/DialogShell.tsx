@@ -28,6 +28,8 @@ interface DialogShellProps {
   onEscapeKeyDown?: DialogContentProps['onEscapeKeyDown'];
   onPointerDownOutside?: DialogContentProps['onPointerDownOutside'];
   onOpenAutoFocus?: DialogContentProps['onOpenAutoFocus'];
+  /** Forwarded to Dialog.Content (composed with Radix's internal handlers). */
+  onKeyDown?: DialogContentProps['onKeyDown'];
 
   /** Render a separator below the header. Default true. */
   showHeaderSeparator?: boolean;
@@ -93,6 +95,7 @@ export function DialogShell({
   onEscapeKeyDown,
   onPointerDownOutside,
   onOpenAutoFocus,
+  onKeyDown,
   showHeaderSeparator = true,
   'data-testid': dataTestId,
 }: DialogShellProps) {
@@ -118,6 +121,7 @@ export function DialogShell({
         onPointerDownOutside={resolvedPointerDownOutside}
         onEscapeKeyDown={onEscapeKeyDown}
         onOpenAutoFocus={resolvedOnOpenAutoFocus}
+        onKeyDown={onKeyDown}
       >
         <div style={{ flexShrink: 0 }}>
           <Dialog.Title tabIndex={-1} data-dialog-title style={{ outline: 'none' }}>

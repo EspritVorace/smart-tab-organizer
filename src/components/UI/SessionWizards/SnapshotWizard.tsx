@@ -6,7 +6,7 @@ import {
 import { Camera, AlertCircle, Info, RotateCw } from 'lucide-react';
 import { TabTree } from '@/components/Core/TabTree/TabTree';
 import { TextFieldWithCategory } from '@/components/Form/FormFields/TextFieldWithCategory';
-import { WizardModal } from '@/components/UI/WizardModal';
+import { WizardModal, WizardNavTooltip } from '@/components/UI/WizardModal';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast } from '@/utils/toast';
 import { captureCurrentTabs } from '@/utils/tabCapture';
@@ -157,6 +157,9 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
     }
   }, [ungroupedTabs, groups, selectedSavedTabIds, sessionName, categoryId, note, onSave, onOpenChange, existingSessions, isRefresh, refreshSession, onRefresh]);
 
+  const canSave =
+    !!sessionName.trim() && selectedTabIds.size > 0 && !isCapturing && !isSaving;
+
   const wizardIcon = isRefresh ? RotateCw : Camera;
   const wizardTitle = isRefresh ? getMessage('refreshTitle') : getMessage('snapshotTitle');
   const wizardDescription = isRefresh ? getMessage('refreshDescription') : getMessage('snapshotDescription');
@@ -171,6 +174,7 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
       icon={wizardIcon}
       title={wizardTitle}
       description={wizardDescription}
+      onNext={canSave ? handleSave : undefined}
       onOpenAutoFocus={(e) => {
         e.preventDefault();
         const input = (e.currentTarget as HTMLElement).querySelector<HTMLInputElement>('input[aria-label]');
@@ -256,14 +260,16 @@ export function SnapshotWizard({ open, onOpenChange, onSave, existingSessions, i
             {getMessage('cancel')}
           </Button>
         </Dialog.Close>
-        <Button
-          data-testid={`${testIdPrefix}-btn-save`}
-          onClick={handleSave}
-          disabled={!sessionName.trim() || selectedTabIds.size === 0 || isCapturing || isSaving}
-        >
-          {isRefresh ? <RotateCw size={14} /> : <Camera size={14} />}
-          {saveLabel}
-        </Button>
+        <WizardNavTooltip kind="next" hidden={!canSave}>
+          <Button
+            data-testid={`${testIdPrefix}-btn-save`}
+            onClick={handleSave}
+            disabled={!canSave}
+          >
+            {isRefresh ? <RotateCw size={14} /> : <Camera size={14} />}
+            {saveLabel}
+          </Button>
+        </WizardNavTooltip>
       </WizardModal.Footer>
     </WizardModal>
   );

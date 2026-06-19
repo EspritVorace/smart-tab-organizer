@@ -55,6 +55,26 @@ interface ImportWizardShellProps<TItem extends { id: string }, TConflict>
   };
 }
 
+/** Resolve the Ctrl+Enter handler for the import wizard's current step. */
+function computeImportNext(args: {
+  step: 0 | 1;
+  sourceMode: SourceMode;
+  hasParsedData: boolean;
+  importCount: number;
+  goToStep1: () => void;
+  onConfirm: () => void;
+  packFooter?: { ruleCount: number; onConfirm: () => void };
+}): (() => void) | undefined {
+  const { step, sourceMode, hasParsedData, importCount, goToStep1, onConfirm, packFooter } = args;
+  if (step === 1) {
+    return importCount > 0 ? onConfirm : undefined;
+  }
+  if (sourceMode === 'pack' && packFooter) {
+    return packFooter.ruleCount > 0 ? packFooter.onConfirm : undefined;
+  }
+  return hasParsedData ? goToStep1 : undefined;
+}
+
 /**
  * Two-step import wizard shell shared by every import flow (rules, sessions,
  * ...). Owns the WizardModal frame, source step, classification step (3
@@ -97,6 +117,16 @@ export function ImportWizardShell<TItem extends { id: string }, TConflict>({
     goToStep1,
   } = state;
 
+  const wizardOnNext = computeImportNext({
+    step,
+    sourceMode: source.sourceMode,
+    hasParsedData: !!source.parsedData,
+    importCount,
+    goToStep1,
+    onConfirm,
+    packFooter,
+  });
+
   return (
     <WizardModal
       open={open}
@@ -106,6 +136,8 @@ export function ImportWizardShell<TItem extends { id: string }, TConflict>({
       description={getMessage(stepDescriptionKeys[step] as MessageKey)}
       maxWidth={maxWidth}
       fillHeight={fillHeight}
+      onNext={wizardOnNext}
+      onPrevious={step === 1 ? goToStep0 : undefined}
     >
       <WizardModal.Body>
         {step === 0 && (

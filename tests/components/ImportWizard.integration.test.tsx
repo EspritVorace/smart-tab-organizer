@@ -125,6 +125,50 @@ describe('ImportWizard integration : mode pack', () => {
     expect(screen.getByTestId('pack-gallery')).toBeInTheDocument();
   });
 
+  it('advances to step 1 on Ctrl+Enter once a pack is selected', () => {
+    wrap(
+      <ImportWizard
+        open
+        onOpenChange={vi.fn()}
+        existingRules={[] as DomainRuleSetting[]}
+        onImport={vi.fn()}
+        initialSourceMode="pack"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId('pack-card-pack-sample-checkbox'));
+    fireEvent.keyDown(screen.getByTestId('import-wizard-pack-next'), {
+      key: 'Enter',
+      ctrlKey: true,
+    });
+
+    expect(screen.getByText('newRulesGroup')).toBeInTheDocument();
+    expect(screen.queryByTestId('pack-gallery')).not.toBeInTheDocument();
+  });
+
+  it('returns to step 0 on Ctrl+Backspace', () => {
+    wrap(
+      <ImportWizard
+        open
+        onOpenChange={vi.fn()}
+        existingRules={[] as DomainRuleSetting[]}
+        onImport={vi.fn()}
+        initialSourceMode="pack"
+      />,
+    );
+
+    fireEvent.click(screen.getByTestId('pack-card-pack-sample-checkbox'));
+    fireEvent.click(screen.getByTestId('import-wizard-pack-next'));
+    expect(screen.getByText('newRulesGroup')).toBeInTheDocument();
+
+    fireEvent.keyDown(screen.getByText('previous').closest('button')!, {
+      key: 'Backspace',
+      ctrlKey: true,
+    });
+
+    expect(screen.getByTestId('pack-gallery')).toBeInTheDocument();
+  });
+
   it('does not touch the default mode when initialSourceMode is missing', () => {
     wrap(
       <ImportWizard

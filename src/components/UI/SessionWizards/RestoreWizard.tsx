@@ -3,9 +3,8 @@ import { Dialog, Flex, Button, Text, Separator, Box, RadioGroup, Callout } from 
 import { RotateCcw, AlertCircle } from 'lucide-react';
 import { browser } from 'wxt/browser';
 import { TabTree } from '@/components/Core/TabTree/TabTree';
-import { WizardModal } from '@/components/UI/WizardModal';
+import { WizardModal, WizardNavTooltip } from '@/components/UI/WizardModal';
 import { ConflictResolutionStep } from './ConflictResolutionStep';
-import { Tooltip } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast, showErrorToast } from '@/utils/toast';
 import { showSuccessNotification } from '@/utils/notifications';
@@ -26,6 +25,25 @@ const STEP_DESCRIPTION_KEYS = [
   'restoreStepSelectionDescription',
   'restoreStepConflictDescription',
 ] as const;
+
+/** Resolve the Ctrl+Enter / Ctrl+Backspace handlers for the current restore step. */
+function computeRestoreNav(args: {
+  step: number;
+  canRestore: boolean;
+  isRestoring: boolean;
+  handleRestoreOrNext: () => void;
+  onConfirm: () => void;
+  onBack: () => void;
+}): { onNext?: () => void; onPrevious?: () => void } {
+  const { step, canRestore, isRestoring, handleRestoreOrNext, onConfirm, onBack } = args;
+  if (step === 0) {
+    return { onNext: canRestore ? handleRestoreOrNext : undefined };
+  }
+  return {
+    onNext: isRestoring ? undefined : onConfirm,
+    onPrevious: isRestoring ? undefined : onBack,
+  };
+}
 
 function RadioOption({ testId, value, label }: { testId: string; value: string; label: string }) {
   return (
@@ -216,6 +234,17 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
     });
   }, []);
 
+  // Keyboard navigation (Ctrl+Enter advances/restores, Ctrl+Backspace steps back).
+  const canRestore = selectedTabIds.size > 0 && !isAnalyzing && !isRestoring;
+  const { onNext: wizardOnNext, onPrevious: wizardOnPrevious } = computeRestoreNav({
+    step,
+    canRestore,
+    isRestoring,
+    handleRestoreOrNext,
+    onConfirm: () => executeRestore(conflictAnalysis, duplicateTabAction, groupActions),
+    onBack: () => setStep(0),
+  });
+
   if (!session) return null;
 
   return (
@@ -226,6 +255,8 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
       icon={RotateCcw}
       title={getMessage('restoreTitle', [session.name])}
       description={getMessage(STEP_DESCRIPTION_KEYS[step])}
+      onNext={wizardOnNext}
+      onPrevious={wizardOnPrevious}
     >
       <WizardModal.Body>
         {step === 0 && (
@@ -293,9 +324,12 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
                 {getMessage('cancel')}
               </Button>
             </Dialog.Close>
-            <Tooltip
-              content={getMessage('wizardRestoreNoTabsHint')}
-              hidden={selectedTabIds.size > 0 || isAnalyzing || isRestoring}
+            <WizardNavTooltip
+              kind="next"
+              hidden={isAnalyzing || isRestoring}
+              content={
+                selectedTabIds.size === 0 ? getMessage('wizardRestoreNoTabsHint') : undefined
+              }
             >
               <Button
                 data-testid="wizard-restore-btn-restore"
@@ -307,28 +341,32 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
                 <RotateCcw size={14} />
                 {isAnalyzing ? getMessage('loadingText') : getMessage('sessionRestore')}
               </Button>
-            </Tooltip>
+            </WizardNavTooltip>
           </>
         )}
 
         {step === 1 && (
           <>
-            <Button
-              variant="soft"
-              color="gray"
-              onClick={() => setStep(0)}
-              disabled={isRestoring}
-            >
-              {getMessage('previous')}
-            </Button>
-            <Button
-              data-autofocus="true"
-              onClick={() => executeRestore(conflictAnalysis, duplicateTabAction, groupActions)}
-              disabled={isRestoring}
-            >
-              <RotateCcw size={14} />
-              {getMessage('sessionRestore')}
-            </Button>
+            <WizardNavTooltip kind="previous">
+              <Button
+                variant="soft"
+                color="gray"
+                onClick={() => setStep(0)}
+                disabled={isRestoring}
+              >
+                {getMessage('previous')}
+              </Button>
+            </WizardNavTooltip>
+            <WizardNavTooltip kind="next">
+              <Button
+                data-autofocus="true"
+                onClick={() => executeRestore(conflictAnalysis, duplicateTabAction, groupActions)}
+                disabled={isRestoring}
+              >
+                <RotateCcw size={14} />
+                {getMessage('sessionRestore')}
+              </Button>
+            </WizardNavTooltip>
           </>
         )}
       </WizardModal.Footer>

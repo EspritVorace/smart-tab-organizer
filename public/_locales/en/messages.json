@@ -683,6 +683,8 @@
   "wizardStepOptions": { "message": "Options" },
   "wizardStepSummary": { "message": "Summary" },
   "wizardStepAnnouncement": { "message": "Step {step}: {label}" },
+  "wizardShortcutNextTooltip": { "message": "Next step" },
+  "wizardShortcutPreviousTooltip": { "message": "Previous step" },
   "configSummaryPreset": { "message": "Preset: {name}" },
   "configSummaryAsk": { "message": "Ask (group name requested on each tab opening)" },
   "configSummaryManual": { "message": "Manual: {source}" },

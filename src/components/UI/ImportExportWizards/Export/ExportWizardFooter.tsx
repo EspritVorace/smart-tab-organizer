@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Dialog, Flex } from '@radix-ui/themes';
 import { ClipboardCopy, FileDown } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
+import { WizardNavTooltip } from '@/components/UI/WizardModal';
 import type { ExportActions } from './useExportActions';
 
 interface ExportWizardFooterProps {
@@ -55,14 +56,16 @@ export function ExportWizardFooter({
           <ClipboardCopy size={14} aria-hidden="true" />
           {getMessage('exportToClipboard')}
         </Button>
-        <Button
-          onClick={actions.exportToFile}
-          disabled={disabled}
-          data-testid={primaryTestId}
-        >
-          <FileDown size={14} aria-hidden="true" />
-          {getMessage('exportToFile')}
-        </Button>
+        <WizardNavTooltip kind="next" hidden={disabled}>
+          <Button
+            onClick={actions.exportToFile}
+            disabled={disabled}
+            data-testid={primaryTestId}
+          >
+            <FileDown size={14} aria-hidden="true" />
+            {getMessage('exportToFile')}
+          </Button>
+        </WizardNavTooltip>
       </Flex>
     </>
   );
