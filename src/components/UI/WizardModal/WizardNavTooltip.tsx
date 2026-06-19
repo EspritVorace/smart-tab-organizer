@@ -25,11 +25,14 @@ export function WizardNavTooltip({ kind, children, hidden, content }: WizardNavT
   const label = getMessage(
     kind === 'next' ? 'wizardShortcutNextTooltip' : 'wizardShortcutPreviousTooltip',
   );
+  // The label stays in the accessibility tree so the tooltip node has an
+  // accessible name (axe rule aria-tooltip-name); only the Kbd chips are hidden
+  // from assistive tech to avoid reading out "Ctrl Enter" as prose.
   const tooltipContent = content ?? (
-    <Flex align="center" gap="2" aria-hidden="true">
+    <Flex align="center" gap="2">
       {label}
-      <Kbd>Ctrl</Kbd>
-      <Kbd>{kind === 'next' ? 'Enter' : 'Backspace'}</Kbd>
+      <Kbd aria-hidden="true">Ctrl</Kbd>
+      <Kbd aria-hidden="true">{kind === 'next' ? 'Enter' : 'Backspace'}</Kbd>
     </Flex>
   );
   return (
