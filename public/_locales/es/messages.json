@@ -684,6 +684,8 @@
   "wizardStepOptions": { "message": "Opciones" },
   "wizardStepSummary": { "message": "Resumen" },
   "wizardStepAnnouncement": { "message": "Paso {step}: {label}" },
+  "wizardShortcutNextTooltip": { "message": "Paso siguiente" },
+  "wizardShortcutPreviousTooltip": { "message": "Paso anterior" },
   "configSummaryPreset": { "message": "Preajuste: {name}" },
   "configSummaryAsk": { "message": "Preguntar (nombre solicitado al abrir cada pestaña)" },
   "configSummaryManual": { "message": "Manual: {source}" },

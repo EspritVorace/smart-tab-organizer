@@ -655,6 +655,8 @@ export type GeneratedI18nStructure = {
   "wizardStepOptions": { substitutions: 0, plural: false };
   "wizardStepSummary": { substitutions: 0, plural: false };
   "wizardStepAnnouncement": { substitutions: 0, plural: false };
+  "wizardShortcutNextTooltip": { substitutions: 0, plural: false };
+  "wizardShortcutPreviousTooltip": { substitutions: 0, plural: false };
   "configSummaryPreset": { substitutions: 0, plural: false };
   "configSummaryAsk": { substitutions: 0, plural: false };
   "configSummaryManual": { substitutions: 0, plural: false };

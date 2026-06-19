@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Dialog } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 import { AriaButton } from '@/components/UI/AriaButton/AriaButton';
+import { WizardNavTooltip } from '@/components/UI/WizardModal';
 import type { SourceMode } from './Source';
 
 interface ImportWizardFooterProps {
@@ -42,14 +43,16 @@ export function ImportWizardFooter({
         <Dialog.Close>
           <Button variant="soft" color="gray">{getMessage('cancel')}</Button>
         </Dialog.Close>
-        <AriaButton
-          ariaDisabled={noPackSelected}
-          disabledReason={noPackSelected ? getMessage('packGalleryNextDisabledReason') : undefined}
-          onClick={packFooter.onConfirm}
-          data-testid="import-wizard-pack-next"
-        >
-          {getMessage('next')}
-        </AriaButton>
+        <WizardNavTooltip kind="next" hidden={noPackSelected}>
+          <AriaButton
+            ariaDisabled={noPackSelected}
+            disabledReason={noPackSelected ? getMessage('packGalleryNextDisabledReason') : undefined}
+            onClick={packFooter.onConfirm}
+            data-testid="import-wizard-pack-next"
+          >
+            {getMessage('next')}
+          </AriaButton>
+        </WizardNavTooltip>
       </>
     );
   }
@@ -60,21 +63,27 @@ export function ImportWizardFooter({
         <Dialog.Close>
           <Button variant="soft" color="gray" data-testid="import-wizard-btn-cancel">{getMessage('cancel')}</Button>
         </Dialog.Close>
-        <Button onClick={onNext} disabled={!hasParsedData} data-testid="import-wizard-btn-next">
-          {getMessage('next')}
-        </Button>
+        <WizardNavTooltip kind="next" hidden={!hasParsedData}>
+          <Button onClick={onNext} disabled={!hasParsedData} data-testid="import-wizard-btn-next">
+            {getMessage('next')}
+          </Button>
+        </WizardNavTooltip>
       </>
     );
   }
 
   return (
     <>
-      <Button variant="soft" color="gray" onClick={onBack} data-testid="import-wizard-btn-previous">
-        {getMessage('previous')}
-      </Button>
-      <Button onClick={onConfirm} disabled={importCount === 0} data-testid="import-wizard-btn-confirm">
-        {getMessage('confirmImport')}
-      </Button>
+      <WizardNavTooltip kind="previous">
+        <Button variant="soft" color="gray" onClick={onBack} data-testid="import-wizard-btn-previous">
+          {getMessage('previous')}
+        </Button>
+      </WizardNavTooltip>
+      <WizardNavTooltip kind="next" hidden={importCount === 0}>
+        <Button onClick={onConfirm} disabled={importCount === 0} data-testid="import-wizard-btn-confirm">
+          {getMessage('confirmImport')}
+        </Button>
+      </WizardNavTooltip>
     </>
   );
 }
