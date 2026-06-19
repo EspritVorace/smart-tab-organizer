@@ -5,6 +5,31 @@ import { setRegexFieldValue } from '@/components/UI/RegexCodeField';
 import { DomainRuleConfigForm, type DomainRuleConfigFormProps } from './DomainRuleConfigForm';
 import type { ConfigMode } from './ConfigModeSelector';
 import type { GroupNameSourceValue, UrlExtractionModeValue } from '@/schemas/enums';
+import type { PresetCategory } from '@/types/preset';
+
+// Minimal catalog mixing a domain-specific preset with a cross-domain ("*") one
+// so the leading "Suggested for this domain" group can be demonstrated.
+const SAMPLE_PRESET_CATEGORIES: PresetCategory[] = [
+  {
+    id: 'development',
+    presets: [
+      {
+        id: 'github-issue',
+        name: 'GitHub Issue',
+        domainFilters: ['github.com'],
+        groupNameSource: 'smart',
+        description: '',
+      },
+      {
+        id: 'numeric-id',
+        name: 'Numeric ID',
+        domainFilters: ['*'],
+        groupNameSource: 'smart',
+        description: '',
+      },
+    ],
+  },
+] as PresetCategory[];
 
 type WrapperProps = Omit<
   DomainRuleConfigFormProps,
@@ -109,6 +134,45 @@ export const DomainRuleConfigFormSwitchToAsk: Story = {
     const askBtn = canvas.getByRole('radio', { name: /ask/i });
     await userEvent.click(askBtn);
     await expect(canvas.getByRole('radio', { name: /ask/i })).toBeChecked();
+  },
+};
+
+// Preset mode with a step 1 domain that matches a domain-specific preset: a
+// leading "Suggested for this domain" group is prepended to the library.
+export const DomainRuleConfigFormPresetSuggested: Story = {
+  render: () => (
+    <Wrapper
+      presetId={null}
+      onPresetChange={() => {}}
+      presetCategories={SAMPLE_PRESET_CATEGORIES}
+      isLoadingPresets={false}
+      suggestionDomain="github.com"
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // The leading group heading is shown, and the matching preset moves into it.
+    await expect(canvas.getByText('Suggested for this domain')).toBeInTheDocument();
+    await expect(canvas.getByText('GitHub Issue')).toBeInTheDocument();
+  },
+};
+
+// Preset mode with a non-matching domain: no leading group, library as today.
+export const DomainRuleConfigFormPresetNoSuggestion: Story = {
+  render: () => (
+    <Wrapper
+      presetId={null}
+      onPresetChange={() => {}}
+      presetCategories={SAMPLE_PRESET_CATEGORIES}
+      isLoadingPresets={false}
+      suggestionDomain="example.com"
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.queryByText('Suggested for this domain')).not.toBeInTheDocument();
+    // The cross-domain preset stays available in its usual section.
+    await expect(canvas.getByText('Numeric ID')).toBeInTheDocument();
   },
 };
 

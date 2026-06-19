@@ -149,6 +149,7 @@ export type GeneratedI18nStructure = {
   "presetRuleLabel": { substitutions: 0, plural: false };
   "searchPresetPlaceholder": { substitutions: 0, plural: false };
   "noPresetFound": { substitutions: 0, plural: false };
+  "presetSuggestedGroupHeading": { substitutions: 0, plural: false };
   "searchableSelectTriggerLabel": { substitutions: 0, plural: false };
   "searchableSelectSearchLabel": { substitutions: 0, plural: false };
   "ruleSelectAriaLabel": { substitutions: 0, plural: false };

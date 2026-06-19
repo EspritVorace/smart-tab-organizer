@@ -13,7 +13,7 @@ import {
   type UrlExtractionModeValue,
 } from '@/schemas/enums';
 import type { PresetCategory } from '@/utils/presetUtils';
-import { presetsToSearchableGroups } from '@/utils/presetsToSearchableGroups';
+import { presetsToSearchableGroupsWithSuggestions } from '@/utils/presetsToSearchableGroups';
 import { RegexCodeField } from '@/components/UI/RegexCodeField';
 import { ConfigModeSelector, MODE_HELP_LABELS, type ConfigMode } from './ConfigModeSelector';
 
@@ -35,6 +35,12 @@ export interface DomainRuleConfigFormProps {
   onPresetChange: (presetId: string) => void;
   presetCategories: PresetCategory[];
   isLoadingPresets: boolean;
+  /**
+   * Domain filter used to surface a leading "Suggested for this domain" group
+   * in the preset selector. Only wired from the create wizard (step 2); left
+   * undefined elsewhere (e.g. the edit dialog) so the library renders as today.
+   */
+  suggestionDomain?: string;
   groupNameSource: GroupNameSourceValue;
   onGroupNameSourceChange: (source: GroupNameSourceValue) => void;
   titleParsingRegEx: string;
@@ -68,6 +74,7 @@ export function DomainRuleConfigForm({
   onPresetChange,
   presetCategories,
   isLoadingPresets,
+  suggestionDomain,
   groupNameSource,
   onGroupNameSourceChange,
   titleParsingRegEx,
@@ -176,7 +183,11 @@ export function DomainRuleConfigForm({
                 id={presetInputId}
                 value={presetId ?? ''}
                 onValueChange={handlePresetChange}
-                groups={presetsToSearchableGroups(presetCategories)}
+                groups={presetsToSearchableGroupsWithSuggestions(
+                  presetCategories,
+                  suggestionDomain,
+                  getMessage('presetSuggestedGroupHeading'),
+                )}
                 searchPlaceholder={getMessage('searchPresetPlaceholder')}
                 emptyMessage={getMessage('noPresetFound')}
               />
