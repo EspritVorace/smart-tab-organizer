@@ -190,6 +190,13 @@ export function DomainRuleConfigForm({
                 )}
                 searchPlaceholder={getMessage('searchPresetPlaceholder')}
                 emptyMessage={getMessage('noPresetFound')}
+                // Land focus on the search input when entering Preset mode with
+                // nothing selected yet; a managed field on mode entry, not a
+                // page-load autofocus. Skipped when a preset is already chosen
+                // (the list centers the selected item instead) and when the
+                // host owns first-field focus (edit modal), to avoid a race.
+                // eslint-disable-next-line jsx-a11y/no-autofocus
+                autoFocus={!presetId && !autoFocusFirstField}
               />
             </Flex>
           )}
