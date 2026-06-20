@@ -1,7 +1,7 @@
 import { Box, Button, Card, Flex, Grid, Heading, Text } from '@radix-ui/themes';
-import { Layers, Copy, RotateCcw } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
-import { KpiTile, BarRow } from '@/components/Core/Statistics/primitives';
+import { BarRow, GroupingDeduplicationKpiPair } from '@/components/Core/Statistics/primitives';
 import { ThisWeekStatsCard } from './ThisWeekStatsCard';
 import type { StatisticsAggregates } from '@/types/statistics';
 
@@ -59,18 +59,7 @@ export function StatisticsRulesDetail({ data, activeRulesCount, firstUsedAtForma
           <Flex direction="column" gap="3" p="2">
             <Heading size="3">{getMessage('statsHistoricalTotals')}</Heading>
             <Flex gap="3" wrap="wrap">
-              <KpiTile
-                testId="page-stats-card-groups"
-                icon={<Layers size={18} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
-                label={getMessage('groupsCreated')}
-                value={data.totalGrouping}
-              />
-              <KpiTile
-                testId="page-stats-card-dedup"
-                icon={<Copy size={18} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
-                label={getMessage('tabsDeduplicated')}
-                value={data.totalDedup}
-              />
+              <GroupingDeduplicationKpiPair data={data} />
             </Flex>
             <Flex gap="4" wrap="wrap">
               <Text size="2" color="gray">

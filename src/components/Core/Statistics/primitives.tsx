@@ -1,5 +1,6 @@
 import { Box, Card, Flex, Heading, Separator, Text, Tooltip } from '@radix-ui/themes';
 import type { MarginProps } from '@radix-ui/themes/dist/esm/props/margin.props.js';
+import { Layers, Copy } from 'lucide-react';
 import { getMessage, type MessageKey } from '@/utils/i18n';
 import { TrendBadge } from '@/components/Core/Statistics/TrendBadge';
 import type { GroupColorStat } from '@/hooks/useSessionStatistics';
@@ -177,6 +178,33 @@ export function BarRow({ label, value, maxValue, index, testId, rightDetail, val
         }} />
       </Box>
     </Box>
+  );
+}
+
+interface GroupingDeduplicationKpiPairProps {
+  data: { totalGrouping: number; totalDedup: number };
+}
+
+/**
+ * The two headline KpiTiles shared by StatisticsRulesDetail and StatisticsSummary:
+ * groups created (Layers icon) and tabs deduplicated (Copy icon).
+ */
+export function GroupingDeduplicationKpiPair({ data }: GroupingDeduplicationKpiPairProps) {
+  return (
+    <>
+      <KpiTile
+        testId="page-stats-card-groups"
+        icon={<Layers size={18} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
+        label={getMessage('groupsCreated')}
+        value={data.totalGrouping}
+      />
+      <KpiTile
+        testId="page-stats-card-dedup"
+        icon={<Copy size={18} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
+        label={getMessage('tabsDeduplicated')}
+        value={data.totalDedup}
+      />
+    </>
   );
 }
 
