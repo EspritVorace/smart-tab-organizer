@@ -10,7 +10,7 @@ import { openOptionsWithHash } from '@/utils/openOptions';
 import { getFocusedSessionFromDOM } from '@/utils/sessionUtils';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { getActiveTabGroupId } from '@/utils/tabCapture';
-import { showSuccessNotification } from '@/utils/notifications';
+import { showSessionSwitchedNotification } from '@/utils/notifications';
 import { getRuleCategory } from '@/utils/categoriesStore';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext';
 import { useListNavigation } from '@/hooks/useListNavigation';
@@ -137,10 +137,7 @@ export function PopupProfilesList({ autoFocusFirstPinned, onLoaded }: PopupProfi
     restoreSessionTabs(session, target)
       .then(() => {
         if (target === 'replace') {
-          void showSuccessNotification(
-            getMessage('sessionSwitchedNotificationTitle'),
-            getMessage('sessionSwitchedNotificationMessage', [session.name]),
-          );
+          void showSessionSwitchedNotification(session.name);
           window.close();
         }
       })

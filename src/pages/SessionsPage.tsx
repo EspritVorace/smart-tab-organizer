@@ -34,7 +34,7 @@ import { useListNavigation } from '@/hooks/useListNavigation';
 import { useImportExportWizards } from '@/contexts/ImportExportWizardsContext';
 import { restoreSessionTabs, type RestoreTarget } from '@/utils/tabRestore';
 import { updateSession, type SessionBucket } from '@/utils/sessionStorage';
-import { showSuccessNotification } from '@/utils/notifications';
+import { showSessionSwitchedNotification } from '@/utils/notifications';
 import { markDiscovered } from '@/exploration/progressStore';
 import { getActiveTabGroupId } from '@/utils/tabCapture';
 import { browser } from 'wxt/browser';
@@ -628,10 +628,7 @@ export function SessionsPage({
       const result = await restoreSessionTabs(session, target, protectedTabId);
       setQuickRestoreMessage(getMessage('restoreResultTabsCreated', [String(result.tabsCreated)]));
       if (target === 'replace') {
-        void showSuccessNotification(
-          getMessage('sessionSwitchedNotificationTitle'),
-          getMessage('sessionSwitchedNotificationMessage', [session.name]),
-        );
+        void showSessionSwitchedNotification(session.name);
       }
     } catch {
       setQuickRestoreMessage(getMessage('restoreError'));

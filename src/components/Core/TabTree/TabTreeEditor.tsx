@@ -6,12 +6,9 @@ import {
 } from '@radix-ui/themes';
 import { ChevronUp, ChevronDown, Pencil, Trash2 } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
-import { extractDomain } from '@/utils/tabTreeUtils';
-import { TabRowBase } from './TabRowBase';
 import { GroupRowBase } from './GroupRowBase';
-import { TabEditRow } from './TabEditRow';
 import { GroupEditRow } from './GroupEditRow';
-import { MoveTabDropdown } from './MoveTabDropdown';
+import { TabTreeEditorTabRow } from './TabTreeEditorTabRow';
 import { AlertDialogShell } from './AlertDialogShell';
 import { useTabTreeEditor } from './useTabTreeEditor';
 import type { Session } from '@/types/session';
@@ -142,178 +139,61 @@ export function TabTreeEditor({ session, onSessionChange, maxHeight }: TabTreeEd
 
             {/* Group's tabs */}
             {isExpanded &&
-              group.tabs.map((tab, tabIdx) => {
-                const isEditingTab = editingItemId === tab.id;
-                return (
-                  <Box key={tab.id} role="listitem" className={styles.row}>
-                    {isEditingTab ? (
-                      <TabEditRow
-                        url={editUrl}
-                        error={urlError}
-                        level={2}
-                        onChange={(url) => {
-                          setEditUrl(url);
-                          setUrlError(null);
-                        }}
-                        onSave={() => saveTabEdit(tab.id)}
-                        onCancel={cancelEdit}
-                      />
-                    ) : (
-                      <TabRowBase
-                        favIconUrl={tab.favIconUrl}
-                        title={tab.title}
-                        domain={extractDomain(tab.url)}
-                        fullUrl={tab.url}
-                        level={2}
-                        showTooltip={false}
-                        rightSlot={
-                          <div className={styles.actions}>
-                            <IconButton
-                              size="1"
-                              variant="ghost"
-                              color="gray"
-                              disabled={tabIdx === 0}
-                              onClick={() => moveTabInContext(tab.id, 'up', group.id)}
-                              aria-label={getMessage('tabEditorMoveUp')}
-                              title={getMessage('tabEditorMoveUp')}
-                            >
-                              <ChevronUp size={12} />
-                            </IconButton>
-                            <IconButton
-                              size="1"
-                              variant="ghost"
-                              color="gray"
-                              disabled={tabIdx === group.tabs.length - 1}
-                              onClick={() => moveTabInContext(tab.id, 'down', group.id)}
-                              aria-label={getMessage('tabEditorMoveDown')}
-                              title={getMessage('tabEditorMoveDown')}
-                            >
-                              <ChevronDown size={12} />
-                            </IconButton>
-                            <IconButton
-                              size="1"
-                              variant="ghost"
-                              color="gray"
-                              onClick={() => openTabEdit(tab)}
-                              aria-label={getMessage('tabEditorEditTab')}
-                              title={getMessage('tabEditorEditTab')}
-                            >
-                              <Pencil size={12} />
-                            </IconButton>
-                            <MoveTabDropdown
-                              currentGroupId={group.id}
-                              groups={session.groups}
-                              onMove={(targetGroupId) =>
-                                moveTabToGroup(tab.id, group.id, targetGroupId)
-                              }
-                            />
-                            <IconButton
-                              size="1"
-                              variant="ghost"
-                              color="red"
-                              onClick={() => handleDeleteTab(tab.id, group.id)}
-                              aria-label={getMessage('tabEditorDeleteTab')}
-                              title={getMessage('tabEditorDeleteTab')}
-                            >
-                              <Trash2 size={12} />
-                            </IconButton>
-                          </div>
-                        }
-                      />
-                    )}
-                  </Box>
-                );
-              })}
+              group.tabs.map((tab, tabIdx) => (
+                <Box key={tab.id} role="listitem" className={styles.row}>
+                  <TabTreeEditorTabRow
+                    tab={tab}
+                    tabIdx={tabIdx}
+                    level={2}
+                    groupId={group.id}
+                    contextLength={group.tabs.length}
+                    groups={session.groups}
+                    showMoveDropdown={true}
+                    isEditing={editingItemId === tab.id}
+                    editUrl={editUrl}
+                    urlError={urlError}
+                    onEditUrlChange={setEditUrl}
+                    onClearUrlError={() => setUrlError(null)}
+                    onSaveEdit={() => saveTabEdit(tab.id)}
+                    onCancelEdit={cancelEdit}
+                    onOpenEdit={() => openTabEdit(tab)}
+                    onMoveUp={() => moveTabInContext(tab.id, 'up', group.id)}
+                    onMoveDown={() => moveTabInContext(tab.id, 'down', group.id)}
+                    onMoveToGroup={(targetGroupId) => moveTabToGroup(tab.id, group.id, targetGroupId)}
+                    onDelete={() => handleDeleteTab(tab.id, group.id)}
+                  />
+                </Box>
+              ))}
           </React.Fragment>
         );
       })}
 
       {/* Ungrouped tabs */}
-      {session.ungroupedTabs.map((tab, tabIdx) => {
-        const isEditingTab = editingItemId === tab.id;
-        const hasMoveTargets = session.groups.length > 0;
-        return (
-          <Box key={tab.id} role="listitem" className={styles.row}>
-            {isEditingTab ? (
-              <TabEditRow
-                url={editUrl}
-                error={urlError}
-                level={1}
-                onChange={(url) => {
-                  setEditUrl(url);
-                  setUrlError(null);
-                }}
-                onSave={() => saveTabEdit(tab.id)}
-                onCancel={cancelEdit}
-              />
-            ) : (
-              <TabRowBase
-                favIconUrl={tab.favIconUrl}
-                title={tab.title}
-                domain={extractDomain(tab.url)}
-                fullUrl={tab.url}
-                level={1}
-                showTooltip={false}
-                rightSlot={
-                  <div className={styles.actions}>
-                    <IconButton
-                      size="1"
-                      variant="ghost"
-                      color="gray"
-                      disabled={tabIdx === 0}
-                      onClick={() => moveTabInContext(tab.id, 'up', null)}
-                      aria-label={getMessage('tabEditorMoveUp')}
-                      title={getMessage('tabEditorMoveUp')}
-                    >
-                      <ChevronUp size={12} />
-                    </IconButton>
-                    <IconButton
-                      size="1"
-                      variant="ghost"
-                      color="gray"
-                      disabled={tabIdx === session.ungroupedTabs.length - 1}
-                      onClick={() => moveTabInContext(tab.id, 'down', null)}
-                      aria-label={getMessage('tabEditorMoveDown')}
-                      title={getMessage('tabEditorMoveDown')}
-                    >
-                      <ChevronDown size={12} />
-                    </IconButton>
-                    <IconButton
-                      size="1"
-                      variant="ghost"
-                      color="gray"
-                      onClick={() => openTabEdit(tab)}
-                      aria-label={getMessage('tabEditorEditTab')}
-                      title={getMessage('tabEditorEditTab')}
-                    >
-                      <Pencil size={12} />
-                    </IconButton>
-                    {hasMoveTargets && (
-                      <MoveTabDropdown
-                        currentGroupId={null}
-                        groups={session.groups}
-                        onMove={(targetGroupId) =>
-                          moveTabToGroup(tab.id, null, targetGroupId)
-                        }
-                      />
-                    )}
-                    <IconButton
-                      size="1"
-                      variant="ghost"
-                      color="red"
-                      onClick={() => handleDeleteTab(tab.id, null)}
-                      aria-label={getMessage('tabEditorDeleteTab')}
-                      title={getMessage('tabEditorDeleteTab')}
-                    >
-                      <Trash2 size={12} />
-                    </IconButton>
-                  </div>
-                }
-              />
-            )}
-          </Box>
-        );
-      })}
+      {session.ungroupedTabs.map((tab, tabIdx) => (
+        <Box key={tab.id} role="listitem" className={styles.row}>
+          <TabTreeEditorTabRow
+            tab={tab}
+            tabIdx={tabIdx}
+            level={1}
+            groupId={null}
+            contextLength={session.ungroupedTabs.length}
+            groups={session.groups}
+            showMoveDropdown={session.groups.length > 0}
+            isEditing={editingItemId === tab.id}
+            editUrl={editUrl}
+            urlError={urlError}
+            onEditUrlChange={setEditUrl}
+            onClearUrlError={() => setUrlError(null)}
+            onSaveEdit={() => saveTabEdit(tab.id)}
+            onCancelEdit={cancelEdit}
+            onOpenEdit={() => openTabEdit(tab)}
+            onMoveUp={() => moveTabInContext(tab.id, 'up', null)}
+            onMoveDown={() => moveTabInContext(tab.id, 'down', null)}
+            onMoveToGroup={(targetGroupId) => moveTabToGroup(tab.id, null, targetGroupId)}
+            onDelete={() => handleDeleteTab(tab.id, null)}
+          />
+        </Box>
+      ))}
 
       {/* AlertDialog: delete last tab in group */}
       <AlertDialogShell
