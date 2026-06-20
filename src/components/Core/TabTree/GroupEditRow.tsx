@@ -4,6 +4,7 @@ import { getMessage } from '@/utils/i18n';
 import { EditRowShell } from './EditRowShell';
 import { ChromeColorPicker } from './ChromeColorPicker';
 import type { ChromeGroupColor } from '@/types/tabTree';
+import { makeEditKeyDownHandler } from './editRowUtils';
 
 export interface GroupEditRowProps {
   name: string;
@@ -32,10 +33,7 @@ export function GroupEditRow({
             ref={inputRef}
             value={name}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => onNameChange(e.target.value)}
-            onKeyDown={(e: React.KeyboardEvent) => {
-              if (e.key === 'Enter') onSave();
-              if (e.key === 'Escape') onCancel();
-            }}
+            onKeyDown={makeEditKeyDownHandler(onSave, onCancel)}
             size="1"
             style={{ flex: 1 }}
             placeholder={getMessage('tabEditorGroupNameLabel')}

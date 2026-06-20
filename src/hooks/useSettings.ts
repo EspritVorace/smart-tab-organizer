@@ -3,6 +3,7 @@ import { storage } from 'wxt/utils/storage';
 import type { AppSettings, DomainRuleSettings } from '@/types/syncSettings.js';
 import type { DeduplicationKeepStrategyValue, DefaultRestoreActionValue } from '@/schemas/enums.js';
 import type { ScopedItems } from '@/utils/workspaceStorage.js';
+import { buildSettingsItemMap, type SettingsItemMap } from '@/utils/settingsUtils.js';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext.js';
 import { useStorageState } from './useStorageState.js';
 
@@ -30,24 +31,6 @@ export interface UseSettingsReturn {
 
   updateSettings: (updates: Partial<AppSettings>) => Promise<void>;
   reloadSettings: () => Promise<void>;
-}
-
-type SettingsItemMap = {
-  [K in keyof AppSettings]: { watch: (cb: (v: AppSettings[K]) => void) => () => void };
-};
-
-function buildSettingsItemMap(items: ScopedItems): SettingsItemMap {
-  return {
-    globalGroupingEnabled: items.globalGroupingEnabledItem,
-    globalDeduplicationEnabled: items.globalDeduplicationEnabledItem,
-    deduplicateUnmatchedDomains: items.deduplicateUnmatchedDomainsItem,
-    deduplicationKeepStrategy: items.deduplicationKeepStrategyItem,
-    defaultRestoreAction: items.defaultRestoreActionItem,
-    domainRules: items.domainRulesItem,
-    notifyOnGrouping: items.notifyOnGroupingItem,
-    notifyOnDeduplication: items.notifyOnDeduplicationItem,
-    notifyOnOrganize: items.notifyOnOrganizeItem,
-  } as SettingsItemMap;
 }
 
 async function loadSettingsFromStorage(items: ScopedItems): Promise<AppSettings> {

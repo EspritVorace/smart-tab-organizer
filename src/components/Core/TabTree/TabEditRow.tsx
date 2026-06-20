@@ -2,6 +2,7 @@ import React from 'react';
 import { Flex, Text, TextField } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 import { EditRowShell } from './EditRowShell';
+import { makeEditKeyDownHandler } from './editRowUtils';
 import styles from './TabTreeEditor.module.css';
 
 export interface TabEditRowProps {
@@ -26,10 +27,7 @@ export function TabEditRow({ url, error, level, onChange, onSave, onCancel }: Ta
               ref={inputRef}
               value={url}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
-              onKeyDown={(e: React.KeyboardEvent) => {
-                if (e.key === 'Enter') onSave();
-                if (e.key === 'Escape') onCancel();
-              }}
+              onKeyDown={makeEditKeyDownHandler(onSave, onCancel)}
               size="1"
               style={{ flex: 1 }}
               placeholder="https://example.com"

@@ -1,10 +1,11 @@
 import { useRef, type KeyboardEvent } from 'react';
-import { Box, Flex, Text, Switch, Card, RadioGroup } from '@radix-ui/themes';
+import { Box, Flex, Text, Switch, RadioGroup } from '@radix-ui/themes';
 import { Bell, Copy, RotateCcw } from 'lucide-react';
 import { PageLayout } from '@/components/UI/PageLayout/PageLayout';
 import { useListNavigation } from '@/hooks/useListNavigation';
 import { getMessage } from '@/utils/i18n';
 import { markDiscovered } from '@/exploration/progressStore';
+import { SettingsSectionCard } from './SettingsSectionCard';
 import type { AppSettings } from '@/types/syncSettings';
 import {
   deduplicationKeepStrategyOptions,
@@ -77,84 +78,139 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
       {() => (
         <Box data-testid="page-settings">
           <Flex direction="column" gap="4" ref={listRef}>
-            <Card>
-              <Box p="4">
-                <Flex align="center" gap="2" mb="4">
-                  <Bell size={20} style={{ color: 'var(--accent-9)' }} />
-                  <Text size="3" weight="bold">{getMessage('notificationsSection')}</Text>
+            <SettingsSectionCard
+              icon={<Bell size={20} style={{ color: 'var(--accent-9)' }} />}
+              title={getMessage('notificationsSection')}
+            >
+              <Flex direction="column" gap="4">
+                <Flex justify="between" align="center">
+                  <Text size="2">{getMessage('notifyOnGrouping')}</Text>
+                  <Switch
+                    data-testid="page-settings-toggle-notify-group"
+                    data-settings-nav=""
+                    aria-label={getMessage('notifyOnGrouping')}
+                    checked={syncSettings.notifyOnGrouping}
+                    onCheckedChange={(checked) => { void markDiscovered('settings.notif.grouping'); updateSettings({ notifyOnGrouping: checked }); }}
+                    onKeyDown={handleSwitchKeyDown}
+                  />
                 </Flex>
 
-                <Flex direction="column" gap="4">
-                  <Flex justify="between" align="center">
-                    <Text size="2">{getMessage('notifyOnGrouping')}</Text>
-                    <Switch
-                      data-testid="page-settings-toggle-notify-group"
-                      data-settings-nav=""
-                      aria-label={getMessage('notifyOnGrouping')}
-                      checked={syncSettings.notifyOnGrouping}
-                      onCheckedChange={(checked) => { void markDiscovered('settings.notif.grouping'); updateSettings({ notifyOnGrouping: checked }); }}
-                      onKeyDown={handleSwitchKeyDown}
-                    />
-                  </Flex>
-
-                  <Flex justify="between" align="center">
-                    <Text size="2">{getMessage('notifyOnDeduplication')}</Text>
-                    <Switch
-                      data-testid="page-settings-toggle-notify-dedup"
-                      data-settings-nav=""
-                      aria-label={getMessage('notifyOnDeduplication')}
-                      checked={syncSettings.notifyOnDeduplication}
-                      onCheckedChange={(checked) => { void markDiscovered('settings.notif.dedup'); updateSettings({ notifyOnDeduplication: checked }); }}
-                      onKeyDown={handleSwitchKeyDown}
-                    />
-                  </Flex>
-
-                  <Flex justify="between" align="center">
-                    <Text size="2">{getMessage('notifyOnOrganize')}</Text>
-                    <Switch
-                      data-testid="page-settings-toggle-notify-organize"
-                      data-settings-nav=""
-                      aria-label={getMessage('notifyOnOrganize')}
-                      checked={syncSettings.notifyOnOrganize}
-                      onCheckedChange={(checked) => { void markDiscovered('settings.notif.organize'); updateSettings({ notifyOnOrganize: checked }); }}
-                      onKeyDown={handleSwitchKeyDown}
-                    />
-                  </Flex>
+                <Flex justify="between" align="center">
+                  <Text size="2">{getMessage('notifyOnDeduplication')}</Text>
+                  <Switch
+                    data-testid="page-settings-toggle-notify-dedup"
+                    data-settings-nav=""
+                    aria-label={getMessage('notifyOnDeduplication')}
+                    checked={syncSettings.notifyOnDeduplication}
+                    onCheckedChange={(checked) => { void markDiscovered('settings.notif.dedup'); updateSettings({ notifyOnDeduplication: checked }); }}
+                    onKeyDown={handleSwitchKeyDown}
+                  />
                 </Flex>
-              </Box>
-            </Card>
 
-            <Card>
-              <Box p="4">
-                <Flex align="center" gap="2" mb="4">
-                  <RotateCcw size={20} style={{ color: 'var(--accent-9)' }} />
-                  <Text size="3" weight="bold">{getMessage('sessionRestore')}</Text>
+                <Flex justify="between" align="center">
+                  <Text size="2">{getMessage('notifyOnOrganize')}</Text>
+                  <Switch
+                    data-testid="page-settings-toggle-notify-organize"
+                    data-settings-nav=""
+                    aria-label={getMessage('notifyOnOrganize')}
+                    checked={syncSettings.notifyOnOrganize}
+                    onCheckedChange={(checked) => { void markDiscovered('settings.notif.organize'); updateSettings({ notifyOnOrganize: checked }); }}
+                    onKeyDown={handleSwitchKeyDown}
+                  />
+                </Flex>
+              </Flex>
+            </SettingsSectionCard>
+
+            <SettingsSectionCard
+              icon={<RotateCcw size={20} style={{ color: 'var(--accent-9)' }} />}
+              title={getMessage('sessionRestore')}
+            >
+              <Flex direction="column" gap="2">
+                <Text size="2" id="page-settings-default-restore-action-label">
+                  {getMessage('defaultRestoreActionLabel')}
+                </Text>
+                <RadioGroup.Root
+                  id="page-settings-default-restore-action"
+                  data-testid="page-settings-default-restore-action"
+                  aria-labelledby="page-settings-default-restore-action-label"
+                  loop={false}
+                  value={syncSettings.defaultRestoreAction}
+                  onValueChange={(value) => {
+                    void markDiscovered('sessions.defaultRestore');
+                    updateSettings({ defaultRestoreAction: value as DefaultRestoreActionValue });
+                  }}
+                >
+                  <Flex direction="column" gap="2">
+                    {defaultRestoreActionOptions.map((option, index) => (
+                      <Text as="label" size="2" key={option.value}>
+                        <Flex gap="2" align="center">
+                          <RadioGroup.Item
+                            value={option.value}
+                            data-settings-nav=""
+                            data-testid={`page-settings-default-restore-action-${option.value}`}
+                            onKeyDown={(e) => handleRadioKeyDown(e, index, defaultRestoreActionOptions.length)}
+                          />
+                          {getMessage(option.keyLabel)}
+                        </Flex>
+                      </Text>
+                    ))}
+                  </Flex>
+                </RadioGroup.Root>
+                <Text size="1" color="gray">
+                  {getMessage('defaultRestoreActionDescription')}
+                </Text>
+              </Flex>
+            </SettingsSectionCard>
+
+            <SettingsSectionCard
+              icon={<Copy size={20} style={{ color: 'var(--accent-9)' }} />}
+              title={getMessage('deduplicationScopeSection')}
+            >
+              <Flex direction="column" gap="4">
+                <Flex direction="column" gap="2">
+                  <Flex justify="between" align="center" gap="4">
+                    <Text size="2">{getMessage('deduplicateUnmatchedDomainsLabel')}</Text>
+                    <Switch
+                      data-testid="page-settings-toggle-dedup-unmatched"
+                      data-settings-nav=""
+                      aria-label={getMessage('deduplicateUnmatchedDomainsLabel')}
+                      checked={syncSettings.deduplicateUnmatchedDomains}
+                      onCheckedChange={(checked) => { void markDiscovered('dedup.uncoveredScope'); updateSettings({ deduplicateUnmatchedDomains: checked }); }}
+                      onKeyDown={handleSwitchKeyDown}
+                    />
+                  </Flex>
+                  <Text size="1" color="gray">
+                    {getMessage('deduplicateUnmatchedDomainsDescription')}
+                  </Text>
                 </Flex>
 
                 <Flex direction="column" gap="2">
-                  <Text size="2" id="page-settings-default-restore-action-label">
-                    {getMessage('defaultRestoreActionLabel')}
+                  <Text size="2" id="page-settings-dedup-keep-strategy-label">
+                    {getMessage('deduplicationKeepStrategyLabel')}
                   </Text>
                   <RadioGroup.Root
-                    id="page-settings-default-restore-action"
-                    data-testid="page-settings-default-restore-action"
-                    aria-labelledby="page-settings-default-restore-action-label"
+                    id="page-settings-dedup-keep-strategy"
+                    data-testid="page-settings-dedup-keep-strategy"
+                    aria-labelledby="page-settings-dedup-keep-strategy-label"
                     loop={false}
-                    value={syncSettings.defaultRestoreAction}
+                    value={syncSettings.deduplicationKeepStrategy}
                     onValueChange={(value) => {
-                      void markDiscovered('sessions.defaultRestore');
-                      updateSettings({ defaultRestoreAction: value as DefaultRestoreActionValue });
+                      void markDiscovered(KEEP_STRATEGY_CAPABILITY[value as DeduplicationKeepStrategyValue]);
+                      updateSettings({ deduplicationKeepStrategy: value as DeduplicationKeepStrategyValue });
                     }}
+                    disabled={!syncSettings.globalDeduplicationEnabled}
                   >
                     <Flex direction="column" gap="2">
-                      {defaultRestoreActionOptions.map((option, index) => (
+                      {deduplicationKeepStrategyOptions.map((option, index) => (
                         <Text as="label" size="2" key={option.value}>
                           <Flex gap="2" align="center">
                             <RadioGroup.Item
                               value={option.value}
-                              data-settings-nav=""
-                              data-testid={`page-settings-default-restore-action-${option.value}`}
-                              onKeyDown={(e) => handleRadioKeyDown(e, index, defaultRestoreActionOptions.length)}
+                              // Disabled radios are not focusable, so they stay out of the
+                              // Up/Down flat list: only tag them when the group is active.
+                              {...(syncSettings.globalDeduplicationEnabled ? { 'data-settings-nav': '' } : {})}
+                              data-testid={`page-settings-dedup-keep-${option.value}`}
+                              onKeyDown={(e) => handleRadioKeyDown(e, index, deduplicationKeepStrategyOptions.length)}
                             />
                             {getMessage(option.keyLabel)}
                           </Flex>
@@ -163,78 +219,11 @@ export function SettingsPage({ syncSettings, updateSettings }: SettingsPageProps
                     </Flex>
                   </RadioGroup.Root>
                   <Text size="1" color="gray">
-                    {getMessage('defaultRestoreActionDescription')}
+                    {getMessage('deduplicationKeepStrategyDescription')}
                   </Text>
                 </Flex>
-              </Box>
-            </Card>
-
-            <Card>
-              <Box p="4">
-                <Flex align="center" gap="2" mb="4">
-                  <Copy size={20} style={{ color: 'var(--accent-9)' }} />
-                  <Text size="3" weight="bold">{getMessage('deduplicationScopeSection')}</Text>
-                </Flex>
-
-                <Flex direction="column" gap="4">
-                  <Flex direction="column" gap="2">
-                    <Flex justify="between" align="center" gap="4">
-                      <Text size="2">{getMessage('deduplicateUnmatchedDomainsLabel')}</Text>
-                      <Switch
-                        data-testid="page-settings-toggle-dedup-unmatched"
-                        data-settings-nav=""
-                        aria-label={getMessage('deduplicateUnmatchedDomainsLabel')}
-                        checked={syncSettings.deduplicateUnmatchedDomains}
-                        onCheckedChange={(checked) => { void markDiscovered('dedup.uncoveredScope'); updateSettings({ deduplicateUnmatchedDomains: checked }); }}
-                        onKeyDown={handleSwitchKeyDown}
-                      />
-                    </Flex>
-                    <Text size="1" color="gray">
-                      {getMessage('deduplicateUnmatchedDomainsDescription')}
-                    </Text>
-                  </Flex>
-
-                  <Flex direction="column" gap="2">
-                    <Text size="2" id="page-settings-dedup-keep-strategy-label">
-                      {getMessage('deduplicationKeepStrategyLabel')}
-                    </Text>
-                    <RadioGroup.Root
-                      id="page-settings-dedup-keep-strategy"
-                      data-testid="page-settings-dedup-keep-strategy"
-                      aria-labelledby="page-settings-dedup-keep-strategy-label"
-                      loop={false}
-                      value={syncSettings.deduplicationKeepStrategy}
-                      onValueChange={(value) => {
-                        void markDiscovered(KEEP_STRATEGY_CAPABILITY[value as DeduplicationKeepStrategyValue]);
-                        updateSettings({ deduplicationKeepStrategy: value as DeduplicationKeepStrategyValue });
-                      }}
-                      disabled={!syncSettings.globalDeduplicationEnabled}
-                    >
-                      <Flex direction="column" gap="2">
-                        {deduplicationKeepStrategyOptions.map((option, index) => (
-                          <Text as="label" size="2" key={option.value}>
-                            <Flex gap="2" align="center">
-                              <RadioGroup.Item
-                                value={option.value}
-                                // Disabled radios are not focusable, so they stay out of the
-                                // Up/Down flat list: only tag them when the group is active.
-                                {...(syncSettings.globalDeduplicationEnabled ? { 'data-settings-nav': '' } : {})}
-                                data-testid={`page-settings-dedup-keep-${option.value}`}
-                                onKeyDown={(e) => handleRadioKeyDown(e, index, deduplicationKeepStrategyOptions.length)}
-                              />
-                              {getMessage(option.keyLabel)}
-                            </Flex>
-                          </Text>
-                        ))}
-                      </Flex>
-                    </RadioGroup.Root>
-                    <Text size="1" color="gray">
-                      {getMessage('deduplicationKeepStrategyDescription')}
-                    </Text>
-                  </Flex>
-                </Flex>
-              </Box>
-            </Card>
+              </Flex>
+            </SettingsSectionCard>
           </Flex>
         </Box>
       )}

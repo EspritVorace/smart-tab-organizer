@@ -2,18 +2,13 @@ import { Flex, Badge, Checkbox } from '@radix-ui/themes';
 import { getMessage, type MessageKey } from '@/utils/i18n';
 import type { DomainRuleSetting } from '@/types/syncSettings';
 import type { ConflictingRule } from '@/utils/importClassification';
-import { DiffPopover, DiffPropertyValues } from './Shared';
+import { DiffPopover, DiffPropertyValues, type ImportRowBaseProps } from './Shared';
 import { DomainRuleCard } from '@/components/Core/DomainRule/DomainRuleCard';
 
 /* ─── RuleRow ───────────────────────────────────────────────────────────── */
 
-export interface RuleRowProps {
+export interface RuleRowProps extends ImportRowBaseProps {
   rule: DomainRuleSetting;
-  checkbox?: boolean;
-  checked?: boolean;
-  onToggle?: () => void;
-  dimmed?: boolean;
-  statusBadge?: string;
 }
 
 export function RuleRow({ rule, checkbox, checked, onToggle, dimmed, statusBadge }: RuleRowProps) {

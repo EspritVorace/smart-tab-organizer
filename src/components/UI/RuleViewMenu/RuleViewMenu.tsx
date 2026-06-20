@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { Box, DropdownMenu, Flex } from '@radix-ui/themes';
 import { RotateCcw } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
@@ -16,6 +15,8 @@ import {
   type RuleStatusFilter,
   type RuleViewState,
 } from '@/utils/ruleViewUtils';
+import { toggleInArray } from '@/utils/arrayUtils';
+import { useViewMenuFocusGuard } from '@/hooks/useViewMenuFocusGuard';
 
 const NONE = '__none__';
 
@@ -32,12 +33,6 @@ export interface RuleViewMenuProps {
   /** Categories used to populate the category filter sub-menu. Defaults to the built-in set. */
   categories?: RuleCategory[];
   testId?: string;
-}
-
-/** Adds or removes a value from an array, preserving order, no duplicates. */
-function toggleInArray<T>(arr: readonly T[], item: T, checked: boolean): T[] {
-  if (checked) return arr.includes(item) ? [...arr] : [...arr, item];
-  return arr.filter(v => v !== item);
 }
 
 /** Small color swatch reused inside the color filter items. */
@@ -59,24 +54,8 @@ function ColorSwatch({ color }: { color: ColorValue }) {
 export function RuleViewMenu({ value, onChange, onApplied, categories, testId }: RuleViewMenuProps) {
   const activeOps = countActiveViewOps(value);
   const isActive = activeOps > 0;
-  // Tracks whether a change happened while the menu was open, so we only move
-  // focus to the first result on close when the view actually changed.
-  const changedRef = useRef(false);
 
-  // On close, if the view changed, prevent Radix from returning focus to the
-  // trigger and let the caller move focus to the first resulting rule instead.
-  const handleCloseAutoFocus = (event: Event) => {
-    if (changedRef.current && onApplied) {
-      changedRef.current = false;
-      event.preventDefault();
-      onApplied();
-    }
-  };
-
-  const apply = (next: RuleViewState) => {
-    changedRef.current = true;
-    onChange(next);
-  };
+  const { apply, handleCloseAutoFocus } = useViewMenuFocusGuard<RuleViewState>(onChange, onApplied);
 
   const setColor = (color: ColorValue | '__none__', checked: boolean) =>
     apply({ ...value, filterColors: toggleInArray(value.filterColors, color, checked) });

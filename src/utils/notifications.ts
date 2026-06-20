@@ -188,3 +188,16 @@ export function showSuccessNotification(title: string, message: string): Promise
 export function showErrorNotification(title: string, message: string): Promise<string> {
   return showNotification({ title, message, type: 'error' });
 }
+
+/**
+ * Shows the native "session switched" success notification that appears after
+ * a restore completes with target = 'replace'. Extracted from three call sites
+ * that shared identical showSuccessNotification(sessionSwitchedNotification*)
+ * calls: RestoreWizard, SessionsPage (quick restore), and PopupProfilesList.
+ */
+export function showSessionSwitchedNotification(sessionName: string): Promise<string> {
+  return showSuccessNotification(
+    getMessage('sessionSwitchedNotificationTitle'),
+    getMessage('sessionSwitchedNotificationMessage', [sessionName]),
+  );
+}

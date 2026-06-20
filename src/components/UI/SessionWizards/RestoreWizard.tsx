@@ -7,7 +7,7 @@ import { WizardModal, WizardNavTooltip } from '@/components/UI/WizardModal';
 import { ConflictResolutionStep } from './ConflictResolutionStep';
 import { getMessage } from '@/utils/i18n';
 import { showSuccessToast, showErrorToast } from '@/utils/toast';
-import { showSuccessNotification } from '@/utils/notifications';
+import { showSessionSwitchedNotification } from '@/utils/notifications';
 import { markDiscovered } from '@/exploration/progressStore';
 import { sessionToTabTreeData, resolveTabUuids } from '@/utils/sessionUtils';
 import {
@@ -174,10 +174,7 @@ export function RestoreWizard({ open, onOpenChange, session }: RestoreWizardProp
           ]),
         );
         if (target === 'replace') {
-          void showSuccessNotification(
-            getMessage('sessionSwitchedNotificationTitle'),
-            getMessage('sessionSwitchedNotificationMessage', [session.name]),
-          );
+          void showSessionSwitchedNotification(session.name);
         }
       }
     } catch {

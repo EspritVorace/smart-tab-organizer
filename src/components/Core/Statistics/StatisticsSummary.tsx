@@ -1,8 +1,8 @@
 import { Box, Grid } from '@radix-ui/themes';
-import { Layers, Copy, Pin, FolderOpen, Archive, HardDrive } from 'lucide-react';
+import { Pin, FolderOpen, Archive, HardDrive } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { formatBytes } from '@/utils/formatBytes';
-import { KpiTile } from '@/components/Core/Statistics/primitives';
+import { KpiTile, GroupingDeduplicationKpiPair } from '@/components/Core/Statistics/primitives';
 import { ThisWeekStatsCard } from './ThisWeekStatsCard';
 import type { StatisticsAggregates } from '@/types/statistics';
 import type { SessionStatisticsSnapshot } from '@/hooks/useSessionStatistics';
@@ -25,18 +25,7 @@ export function StatisticsSummary({ data, snapshot, storageUsage }: StatisticsSu
   return (
     <Box data-testid="page-stats-summary">
       <Grid columns={{ initial: '2', sm: '3' }} gap="3">
-        <KpiTile
-          testId="page-stats-card-groups"
-          icon={<Layers size={18} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
-          label={getMessage('groupsCreated')}
-          value={data.totalGrouping}
-        />
-        <KpiTile
-          testId="page-stats-card-dedup"
-          icon={<Copy size={18} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}
-          label={getMessage('tabsDeduplicated')}
-          value={data.totalDedup}
-        />
+        <GroupingDeduplicationKpiPair data={data} />
         <KpiTile
           testId="page-stats-summary-storage"
           icon={<HardDrive size={18} style={{ color: 'var(--accent-9)' }} aria-hidden="true" />}

@@ -1,8 +1,27 @@
 import { storage } from 'wxt/utils/storage';
 import type { AppSettings } from '@/types/syncSettings.js';
 import { defaultAppSettings } from '@/types/syncSettings.js';
+import type { ScopedItems } from './workspaceStorage.js';
 import { logger } from './logger.js';
 import { getActiveScopedItems, getActiveScopedItemsSync } from './workspaceContext.js';
+
+export type SettingsItemMap = {
+  [K in keyof AppSettings]: { watch: (cb: (v: AppSettings[K]) => void) => () => void };
+};
+
+export function buildSettingsItemMap(items: ScopedItems): SettingsItemMap {
+  return {
+    globalGroupingEnabled: items.globalGroupingEnabledItem,
+    globalDeduplicationEnabled: items.globalDeduplicationEnabledItem,
+    deduplicateUnmatchedDomains: items.deduplicateUnmatchedDomainsItem,
+    deduplicationKeepStrategy: items.deduplicationKeepStrategyItem,
+    defaultRestoreAction: items.defaultRestoreActionItem,
+    domainRules: items.domainRulesItem,
+    notifyOnGrouping: items.notifyOnGroupingItem,
+    notifyOnDeduplication: items.notifyOnDeduplicationItem,
+    notifyOnOrganize: items.notifyOnOrganizeItem,
+  } as SettingsItemMap;
+}
 
 /**
  * Settings utilities usable from all contexts (background, content scripts,
@@ -118,16 +137,6 @@ export function watchSettingsField<K extends keyof AppSettings>(
   callback: (value: AppSettings[K]) => void,
 ): () => void {
   const items = getActiveScopedItemsSync();
-  const fieldToItem: Record<keyof AppSettings, { watch: (cb: (v: unknown) => void) => () => void }> = {
-    globalGroupingEnabled: items.globalGroupingEnabledItem,
-    globalDeduplicationEnabled: items.globalDeduplicationEnabledItem,
-    deduplicateUnmatchedDomains: items.deduplicateUnmatchedDomainsItem,
-    deduplicationKeepStrategy: items.deduplicationKeepStrategyItem,
-    defaultRestoreAction: items.defaultRestoreActionItem,
-    domainRules: items.domainRulesItem,
-    notifyOnGrouping: items.notifyOnGroupingItem,
-    notifyOnDeduplication: items.notifyOnDeduplicationItem,
-    notifyOnOrganize: items.notifyOnOrganizeItem,
-  };
+  const fieldToItem = buildSettingsItemMap(items);
   return fieldToItem[field].watch((newValue) => callback(newValue as AppSettings[K]));
 }

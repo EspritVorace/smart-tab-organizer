@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { DropdownMenu, Flex } from '@radix-ui/themes';
 import { RotateCcw } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
@@ -12,6 +11,8 @@ import {
   type SessionSortMode,
   type SessionViewState,
 } from '@/utils/sessionViewUtils';
+import { toggleInArray } from '@/utils/arrayUtils';
+import { useViewMenuFocusGuard } from '@/hooks/useViewMenuFocusGuard';
 
 export interface SessionViewMenuProps {
   value: SessionViewState;
@@ -29,12 +30,6 @@ export interface SessionViewMenuProps {
   testIdPrefix?: string;
 }
 
-/** Adds or removes a value from an array, preserving order, no duplicates. */
-function toggleInArray<T>(arr: readonly T[], item: T, checked: boolean): T[] {
-  if (checked) return arr.includes(item) ? [...arr] : [...arr, item];
-  return arr.filter(v => v !== item);
-}
-
 /**
  * Filter / sort menu rendered on the right of a session section header.
  * Mirrors `RuleViewMenu` but simplified for sessions (category filter; sort by
@@ -48,24 +43,8 @@ export function SessionViewMenu({
   testIdPrefix = 'page-sessions-view',
 }: SessionViewMenuProps) {
   const activeOps = countActiveSessionViewOps(value);
-  // Tracks whether a change happened while the menu was open, so we only move
-  // focus to the first result on close when the view actually changed.
-  const changedRef = useRef(false);
 
-  // On close, if the view changed, prevent Radix from returning focus to the
-  // trigger and let the caller move focus to the first resulting card instead.
-  const handleCloseAutoFocus = (event: Event) => {
-    if (changedRef.current && onApplied) {
-      changedRef.current = false;
-      event.preventDefault();
-      onApplied();
-    }
-  };
-
-  const apply = (next: SessionViewState) => {
-    changedRef.current = true;
-    onChange(next);
-  };
+  const { apply, handleCloseAutoFocus } = useViewMenuFocusGuard<SessionViewState>(onChange, onApplied);
 
   const setCategory = (id: string, checked: boolean) =>
     apply({ ...value, filterCategories: toggleInArray(value.filterCategories, id, checked) });
