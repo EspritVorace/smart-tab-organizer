@@ -9,25 +9,7 @@ export default defineContentScript({
   runAt: 'document_start',
   allFrames: false,
   main() {
-    function handleAuxClick(event: MouseEvent) {
-      if (event.button === 1) {
-        let target = event.target as HTMLElement | null;
-        while (target && target.tagName !== 'A') {
-          target = target.parentNode as HTMLElement | null;
-        }
-        if (target && (target as HTMLAnchorElement).href && /^https?:\/\//.test((target as HTMLAnchorElement).href)) {
-          browser.runtime.sendMessage(
-            { type: 'middleClickLink', url: (target as HTMLAnchorElement).href } as MiddleClickMessage,
-            () => {
-              if (browser.runtime.lastError)
-                logger.error('Msg err:', browser.runtime.lastError.message);
-            }
-          );
-        }
-      }
-    }
-
-    function handleContextMenu(event: MouseEvent) {
+    function sendLinkMessage(event: MouseEvent): void {
       let target = event.target as HTMLElement | null;
       while (target && target.tagName !== 'A') {
         target = target.parentNode as HTMLElement | null;
@@ -41,6 +23,16 @@ export default defineContentScript({
           }
         );
       }
+    }
+
+    function handleAuxClick(event: MouseEvent) {
+      if (event.button === 1) {
+        sendLinkMessage(event);
+      }
+    }
+
+    function handleContextMenu(event: MouseEvent) {
+      sendLinkMessage(event);
     }
 
     document.addEventListener('auxclick', handleAuxClick, true);
