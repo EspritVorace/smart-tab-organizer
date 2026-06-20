@@ -2,18 +2,13 @@ import { Flex, Text, Box, Badge, Checkbox } from '@radix-ui/themes';
 import { getMessage } from '@/utils/i18n';
 import type { Session } from '@/types/session';
 import type { ConflictingSession, SessionDiff, GroupDiff } from '@/utils/sessionClassification';
-import { DiffPopover, DiffPropertyValues } from './Shared';
+import { DiffPopover, DiffPropertyValues, type ImportRowBaseProps } from './Shared';
 import { SessionCard } from '@/components/Core/Session/SessionCard';
 
 /* ─── SessionRow ─────────────────────────────────────────────────────────── */
 
-export interface SessionRowProps {
+export interface SessionRowProps extends ImportRowBaseProps {
   session: Session;
-  checkbox?: boolean;
-  checked?: boolean;
-  onToggle?: () => void;
-  dimmed?: boolean;
-  statusBadge?: string;
 }
 
 export function SessionRow({ session, checkbox, checked, onToggle, dimmed, statusBadge }: SessionRowProps) {
