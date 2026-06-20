@@ -4,7 +4,7 @@ import { ChevronDown } from 'lucide-react';
 import { getMessage } from '@/utils/i18n';
 import { WorkspaceAvatar } from './WorkspaceAvatar';
 
-interface WorkspaceTriggerProps {
+type WorkspaceTriggerProps = ComponentProps<typeof Flex> & {
   name: string;
   accentColor: ComponentProps<typeof WorkspaceAvatar>['accentColor'];
   /**
@@ -14,21 +14,38 @@ interface WorkspaceTriggerProps {
    */
   variant: 'popup' | 'sidebar';
   testId: string;
-}
+};
 
 /**
  * The trigger element passed to WorkspaceSwitcherDropdown.
  * Shared between PopupWorkspaceSwitcher (variant="popup") and
  * WorkspaceFooter (variant="sidebar").
+ *
+ * WorkspaceSwitcherDropdown renders this through Radix's DropdownMenu.Trigger
+ * (asChild/Slot semantics), so the root element must forward `ref` and the
+ * injected props (onClick, data-state, aria-*) to open the menu on click.
  */
-export function WorkspaceTrigger({ name, accentColor, variant, testId }: WorkspaceTriggerProps) {
+export function WorkspaceTrigger({
+  name,
+  accentColor,
+  variant,
+  testId,
+  ref,
+  style,
+  ...props
+}: WorkspaceTriggerProps) {
   const isPopup = variant === 'popup';
 
   return (
     <Flex
+      ref={ref}
       data-testid={testId}
       align="center"
       gap={isPopup ? '2' : '3'}
+      role="button"
+      tabIndex={0}
+      aria-label={getMessage('workspaceSwitcherLabel')}
+      {...props}
       style={{
         flex: 1,
         minWidth: 0,
@@ -44,10 +61,8 @@ export function WorkspaceTrigger({ name, accentColor, variant, testId }: Workspa
               background: 'transparent',
               transition: 'background-color 0.15s ease',
             }),
+        ...style,
       }}
-      role="button"
-      tabIndex={0}
-      aria-label={getMessage('workspaceSwitcherLabel')}
     >
       <WorkspaceAvatar name={name} accentColor={accentColor} size="sm" />
       {isPopup ? (
