@@ -1,10 +1,9 @@
-import React from 'react';
-import { Flex, Text } from '@radix-ui/themes';
-import { ChevronDown } from 'lucide-react';
+import { Flex } from '@radix-ui/themes';
 import { useActiveWorkspaceContext } from '@/contexts/ActiveWorkspaceContext.js';
 import { getMessage } from '@/utils/i18n.js';
-import { WorkspaceAvatar } from './WorkspaceAvatar.js';
 import { WorkspaceSwitcherDropdown } from './WorkspaceSwitcherDropdown.js';
+import { WorkspaceTrigger } from './WorkspaceTrigger';
+import { WorkspaceAvatar } from './WorkspaceAvatar.js';
 
 interface WorkspaceFooterProps {
   /** Lot 4 wires the manage page; left undefined in Lot 3 (button disabled). */
@@ -24,39 +23,23 @@ function useWorkspaceName() {
 export function WorkspaceFooter({ onManage }: WorkspaceFooterProps) {
   const { name, accentColor } = useWorkspaceName();
 
-  const trigger = (
-    <Flex
-      data-testid="workspace-footer-trigger"
-      align="center"
-      gap="3"
-      style={{
-        flex: 1,
-        minWidth: 0,
-        padding: '8px 10px',
-        cursor: 'pointer',
-        borderRadius: 'var(--radius-2)',
-        background: 'transparent',
-        transition: 'background-color 0.15s ease',
-      }}
-      role="button"
-      tabIndex={0}
-      aria-label={getMessage('workspaceSwitcherLabel')}
-    >
-      <WorkspaceAvatar name={name} accentColor={accentColor} size="sm" />
-      <Text size="2" weight="medium" style={{ color: 'var(--gray-12)', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-        {name}
-      </Text>
-      <ChevronDown size={14} style={{ color: 'var(--gray-11)', flexShrink: 0 }} />
-    </Flex>
-  );
-
   return (
     <Flex
       data-testid="workspace-footer"
       align="center"
       style={{ width: '100%', padding: '4px 6px' }}
     >
-      <WorkspaceSwitcherDropdown trigger={trigger} onManage={onManage} />
+      <WorkspaceSwitcherDropdown
+        trigger={
+          <WorkspaceTrigger
+            name={name}
+            accentColor={accentColor}
+            variant="sidebar"
+            testId="workspace-footer-trigger"
+          />
+        }
+        onManage={onManage}
+      />
     </Flex>
   );
 }
