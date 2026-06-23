@@ -1020,6 +1020,7 @@ export type GeneratedI18nStructure = {
   "aboutDialogFooterAuthor": { substitutions: 0, plural: false };
   "aboutDialogChangelogButton": { substitutions: 0, plural: false };
   "aboutDialogCloseButton": { substitutions: 0, plural: false };
+  "aboutDialogVivaldiNotice": { substitutions: 0, plural: false };
   "explorationPrerequisitePrefix": { substitutions: 1, plural: false };
   "explorationCoverageRatio": { substitutions: 2, plural: false };
   "explorationMiniPhase": { substitutions: 1, plural: false };

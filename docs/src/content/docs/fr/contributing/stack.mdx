@@ -25,8 +25,13 @@ SmartTab Organizer est une extension navigateur cross-browser (Chromium MV3 et F
 | Navigateur | Manifest | Statut |
 |---|---|---|
 | Chrome | MV3 | Cible principale |
-| Edge, Brave, Vivaldi, Arc, Opera (basés Chromium) | MV3 | Compatible (même artefact que Chrome) |
+| Edge, Brave, Arc, Opera (basés Chromium) | MV3 | Compatible (même artefact que Chrome) |
+| Vivaldi | MV3 | Partiel · le groupage natif n'est pas pris en charge. Déduplication et sessions fonctionnent. |
 | Firefox | MV2 | Compatible (cibles `pnpm build:firefox`, `pnpm zip:firefox`) |
+
+<Aside type="note">
+Vivaldi remplace l'API de groupes d'onglets de Chromium par son système maison de Tab Stacks, sans interface programmable pour les extensions. Le groupage automatique reste donc sans effet visible sur Vivaldi. Les autres fonctions ne sont pas affectées.
+</Aside>
 
 Les API navigateur sont accédées via `wxt/browser`, qui normalise les différences entre `chrome.*` et `browser.*`. L'extension utilise un sous-ensemble qui existe sur les deux : `browser.tabs`, `browser.tabGroups`, `browser.storage`, `browser.action` / `browser.browserAction`, `browser.notifications`, `browser.scripting`.
 

@@ -50,6 +50,10 @@ function detectBrowserLabel(): string {
     const v = /OPR\/(\d+)/.exec(ua)?.[1] ?? '';
     return `Opera ${v}`.trim();
   }
+  if (/Vivaldi\/(\d+)/.test(ua)) {
+    const v = /Vivaldi\/(\d+)/.exec(ua)?.[1] ?? '';
+    return `Vivaldi ${v}`.trim();
+  }
   if (/Chrome\/(\d+)/.test(ua)) {
     const v = /Chrome\/(\d+)/.exec(ua)?.[1] ?? '';
     return `Chrome ${v}`.trim();
@@ -441,6 +445,19 @@ export function AboutDialog({ open, onOpenChange }: AboutDialogProps) {
                 hint={languageCode}
               />
             </div>
+            {browserLabel.startsWith('Vivaldi') && (
+              <Text
+                as="p"
+                size="1"
+                style={{
+                  marginTop: 10,
+                  color: 'var(--gray-11)',
+                  lineHeight: 1.55,
+                }}
+              >
+                {getMessage('aboutDialogVivaldiNotice')}
+              </Text>
+            )}
           </div>
 
           {/* Links */}

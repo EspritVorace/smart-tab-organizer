@@ -39,6 +39,10 @@ Export your rules from the source browser (Import / Export page, **Export** butt
 
 Yes, Firefox is supported via a dedicated MV2 build (`pnpm build:firefox` locally, or Firefox Add-ons for public installs). The APIs used are common to both platforms. See [Installation](/discover/installation).
 
+## Vivaldi compatibility
+
+Partially. Deduplication, sessions, and regex name extraction work, but automatic grouping has no effect: Vivaldi does not expose Chromium's tab groups API and relies on its own Tab Stacks, which cannot be controlled by an extension.
+
 ## Can the extension read the contents of my pages?
 
 No. The permissions requested are `tabs`, `storage`, `notifications`, and `scripting`. `scripting` is used only to inject a small script that captures **clicks** on links (so we can remember the target link before the tab opens). Nothing about the DOM or the page contents is ever read.
