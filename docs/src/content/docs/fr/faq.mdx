@@ -39,6 +39,10 @@ Exportez vos règles depuis le navigateur source (page Import / Export, bouton *
 
 Oui, Firefox est supporté via une build MV2 dédiée (`pnpm build:firefox` en local, ou Firefox Add-ons pour l'installation publique). Les API utilisées sont communes aux deux plateformes. Voir [Installation](/discover/installation).
 
+## Compatibilité avec Vivaldi
+
+Partiellement. La déduplication, les sessions et l'extraction regex du nom fonctionnent, mais le groupage automatique reste sans effet : Vivaldi n'expose pas l'API de groupes d'onglets de Chromium et s'appuie sur ses propres Tab Stacks, non pilotables par une extension.
+
 ## L'extension peut-elle lire le contenu de mes pages ?
 
 Non. Les permissions demandées sont `tabs`, `storage`, `notifications` et `scripting`. Le `scripting` est utilisé uniquement pour injecter un petit script qui capture les **clics** sur les liens (pour mémoriser le lien ciblé avant que l'onglet ne s'ouvre). Aucune lecture du DOM ni du contenu des pages.

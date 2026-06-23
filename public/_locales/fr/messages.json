@@ -1068,6 +1068,7 @@
   "aboutDialogFooterAuthor": { "message": "EspritVorace" },
   "aboutDialogChangelogButton": { "message": "Changelog complet" },
   "aboutDialogCloseButton": { "message": "Fermer" },
+  "aboutDialogVivaldiNotice": { "message": "Sur Vivaldi, le groupage natif n'est pas disponible · ce navigateur n'expose pas l'API de groupes d'onglets de Chromium. La déduplication et les sessions restent fonctionnelles." },
   "explorationPrerequisitePrefix": { "message": "Prérequis : $1$", "placeholders": {"1":{"content":"$1","example":"Create a rule"}} },
   "explorationTab": { "message": "Référentiel d'exploration" },
   "explorationPageDescription": { "message": "Un guide pratique pour explorer toutes les capacités de l'extension et repérer d'un coup d'œil celles qu'il vous reste à découvrir. Un repère pour avancer à votre rythme, pas une note." },

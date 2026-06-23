@@ -1068,6 +1068,7 @@
   "aboutDialogFooterAuthor": { "message": "EspritVorace" },
   "aboutDialogChangelogButton": { "message": "Registro completo" },
   "aboutDialogCloseButton": { "message": "Cerrar" },
+  "aboutDialogVivaldiNotice": { "message": "En Vivaldi, la agrupación nativa no está disponible · este navegador no expone la API de grupos de pestañas de Chromium. La deduplicación y las sesiones siguen funcionando." },
   "explorationPrerequisitePrefix": { "message": "Requisito: $1$", "placeholders": {"1":{"content":"$1","example":"Create a rule"}} },
   "explorationTab": { "message": "Exploración" },
   "explorationPageDescription": { "message": "Una guía práctica para explorar todas las capacidades de la extensión y ver de un vistazo las que aún te quedan por descubrir. Un punto de referencia para avanzar a tu ritmo, no una nota." },

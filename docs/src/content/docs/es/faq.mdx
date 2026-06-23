@@ -39,6 +39,10 @@ Exporta tus reglas desde el navegador de origen (página Importar / Exportar, bo
 
 Sí, Firefox es compatible mediante una build MV2 dedicada (`pnpm build:firefox` en local, o Firefox Add-ons para la instalación pública). Las API utilizadas son comunes a ambas plataformas. Consulta [Instalación](/discover/installation).
 
+## Compatibilidad con Vivaldi
+
+Parcialmente. La deduplicación, las sesiones y la extracción de nombres por regex funcionan, pero la agrupación automática no tiene efecto: Vivaldi no expone la API de grupos de pestañas de Chromium y se basa en sus propios Tab Stacks, que no pueden controlarse desde una extensión.
+
 ## ¿Puede la extensión leer el contenido de mis páginas?
 
 No. Los permisos solicitados son `tabs`, `storage`, `notifications` y `scripting`. El permiso `scripting` se usa únicamente para inyectar un pequeño script que captura los **clics** en los enlaces (para memorizar el enlace de destino antes de que se abra la pestaña). No se lee el DOM ni el contenido de las páginas.
