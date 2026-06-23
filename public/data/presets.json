@@ -229,7 +229,7 @@
         {
           "id": "github-repo",
           "name": "GitHub - Repository",
-          "domainFilters": ["github.com"],
+          "domainFilters": ["github.com", "github.*"],
           "urlRegex": "github\\.com/([^/]+/[^/]+)",
           "groupNameSource": "url",
           "urlExample": "URL: '/microsoft/vscode' → Groupe: 'microsoft/vscode'",
@@ -238,7 +238,7 @@
         {
           "id": "github-issue",
           "name": "GitHub - Issues",
-          "domainFilters": ["github.com"],
+          "domainFilters": ["github.com", "github.*"],
           "titleRegex": "·\\s*Issue\\s*#(\\d+)",
           "urlRegex": "issues/(\\d+)",
           "groupNameSource": "smart_preset",
@@ -258,7 +258,7 @@
         {
           "id": "gitlab-project",
           "name": "GitLab - Projets",
-          "domainFilters": ["gitlab.com", "*.gitlab.io"],
+          "domainFilters": ["gitlab.com", "*.gitlab.io", "gitlab.*"],
           "urlRegex": "gitlab\\.com/([^/]+/[^/]+)",
           "groupNameSource": "url",
           "urlExample": "URL: '/gitlab-org/gitlab' → Groupe: 'gitlab-org/gitlab'",
@@ -292,7 +292,7 @@
         {
           "id": "jira-ticket",
           "name": "Jira - Tickets",
-          "domainFilters": ["*.atlassian.net"],
+          "domainFilters": ["*.atlassian.net", "jira.*"],
           "titleRegex": "([A-Z]+-\\d+)",
           "urlRegex": "browse/([A-Z]+-\\d+)",
           "groupNameSource": "smart",

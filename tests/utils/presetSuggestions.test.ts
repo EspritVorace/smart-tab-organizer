@@ -58,6 +58,21 @@ describe('getSuggestedPresetIds', () => {
     expect(getSuggestedPresetIds('example.org', cat)).toEqual([]);
   });
 
+  it('suggests a self-hosted preset via a trailing-wildcard filter', () => {
+    const cat: PresetCategory[] = [
+      {
+        id: 'development',
+        presets: [makePreset('gitlab', ['gitlab.com', '*.gitlab.io', 'gitlab.*'])],
+      },
+    ];
+    // Self-hosted instance on a custom domain: matched through `gitlab.*`.
+    expect(getSuggestedPresetIds('gitlab.example.fr', cat)).toEqual(['gitlab']);
+    // The vendor cloud domain still matches.
+    expect(getSuggestedPresetIds('gitlab.com', cat)).toEqual(['gitlab']);
+    // An unrelated host (different first label) is not suggested.
+    expect(getSuggestedPresetIds('git.example.fr', cat)).toEqual([]);
+  });
+
   it('preserves catalog order across categories', () => {
     const cat: PresetCategory[] = [
       { id: 'a', presets: [makePreset('p1', ['acme.com']), makePreset('p2', ['*'])] },
