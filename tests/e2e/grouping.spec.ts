@@ -445,8 +445,8 @@ test.describe('Tab Grouping', () => {
         groupNameSource: 'label',
       });
       await helpers.addDomainRule({
-        label: 'Httpbin Red',
-        domainFilter: 'httpbin.org',
+        label: 'Example Org Red',
+        domainFilter: 'example.org',
         deduplicationEnabled: false,
         groupingEnabled: true,
         color: 'red',
@@ -458,9 +458,9 @@ test.describe('Tab Grouping', () => {
       await helpers.createTabFromOpener(exampleOpener, 'https://example.com/child');
       await helpers.waitForGrouping();
 
-      const httpbinOpener = await helpers.createTab('https://httpbin.org/opener');
+      const exampleOrgOpener = await helpers.createTab('https://example.org/opener');
       await helpers.waitForGrouping();
-      await helpers.createTabFromOpener(httpbinOpener, 'https://httpbin.org/child');
+      await helpers.createTabFromOpener(exampleOrgOpener, 'https://example.org/child');
       await helpers.waitForGrouping();
 
       const groups = await helpers.getTabGroups();
@@ -469,7 +469,7 @@ test.describe('Tab Grouping', () => {
       const blueGroup = groups.find(g => g.color === 'blue');
       const redGroup = groups.find(g => g.color === 'red');
       expect(blueGroup?.title).toBe('Example Blue');
-      expect(redGroup?.title).toBe('Httpbin Red');
+      expect(redGroup?.title).toBe('Example Org Red');
     });
 
     test('first matching rule wins when multiple rules match the same domain [US-G006]', async ({ helpers }) => {
@@ -535,15 +535,15 @@ test.describe('Tab Grouping', () => {
       await helpers.clearDomainRules();
       await helpers.addDomainRule({
         label: 'Stats Group 2',
-        domainFilter: 'httpbin.org',
+        domainFilter: 'example.org',
         deduplicationEnabled: false,
         groupingEnabled: true,
         groupNameSource: 'label',
       });
 
-      const opener2 = await helpers.createTab('https://httpbin.org/opener');
+      const opener2 = await helpers.createTab('https://example.org/opener');
       await helpers.waitForGrouping();
-      await helpers.createTabFromOpener(opener2, 'https://httpbin.org/child');
+      await helpers.createTabFromOpener(opener2, 'https://example.org/child');
       await helpers.waitForGrouping();
       stats = await helpers.getStatistics();
       expect(stats.tabGroupsCreatedCount).toBe(2);

@@ -9,12 +9,41 @@ export function domainToRegex(domainFilter: string | null): RegExp | null {
   if (!domainFilter) return null;
   try {
     const trimmed = domainFilter.trim();
-    // Defensive strip: handle legacy *.domain rules not yet migrated
-    const cleaned = trimmed.startsWith('*.') ? trimmed.slice(2) : trimmed;
+    // Bare generic wildcard is handled by callers, not by a regex.
+    if (!trimmed || trimmed === '*') return null;
+
+    // Recognize an optional leading `*.` (any subdomain) and an optional
+    // trailing `.*` (any registrable domain after the first label, e.g. a
+    // self-hosted instance such as `gitlab.*`). Both are stripped before
+    // escaping the body. The trailing wildcard is only honored when there is
+    // no leading `*.`: a combined `*.x.*` form keeps its prior literal
+    // behavior so this change stays scoped to first-label self-hosted filters
+    // and never alters the matching of existing combined catalog filters.
+    let body = trimmed;
+    let leadingWildcard = false;
+    let trailingWildcard = false;
+    if (body.startsWith('*.')) {
+      leadingWildcard = true;
+      body = body.slice(2);
+    }
+    if (!leadingWildcard && body.endsWith('.*')) {
+      trailingWildcard = true;
+      body = body.slice(0, -2);
+    }
+
     // Plain domain: only letters, digits, dots and hyphens — not localhost
-    const isPlainDomain = cleaned !== 'localhost' && /^[a-zA-Z0-9][a-zA-Z0-9.\-]*$/.test(cleaned);
-    const escaped = cleaned.replace(/[\\.]/g, '\\$&');
-    const p = isPlainDomain ? `([^.]+\\.)*${escaped}` : escaped;
+    const isPlainDomain = body !== 'localhost' && /^[a-zA-Z0-9][a-zA-Z0-9.\-]*$/.test(body);
+    const escaped = body.replace(/[\\.]/g, '\\$&');
+
+    // Subdomains match implicitly for a plain domain or an explicit leading
+    // `*.`. A trailing-only filter (e.g. `gitlab.*`) must anchor on the first
+    // label, so it does NOT opt into the subdomain prefix.
+    const allowSubdomains = leadingWildcard || (isPlainDomain && !trailingWildcard);
+    const prefix = allowSubdomains ? '([^.]+\\.)*' : '';
+    // Trailing `.*` means "followed by any registrable domain".
+    const suffix = trailingWildcard ? '\\.[^/]+' : '';
+
+    const p = `${prefix}${escaped}${suffix}`;
     return new RegExp(`^https?:\\/\\/(${p})(\\/|$)`, 'i');
   } catch (e) {
     logger.error('Err domainToRegex:', domainFilter, e);

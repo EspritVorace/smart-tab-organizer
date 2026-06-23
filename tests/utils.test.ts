@@ -29,6 +29,35 @@ test('domainToRegex legacy wildcard domain (defensive strip during migration)', 
   assert.ok(regex.test('https://example.com'));
 });
 
+test('domainToRegex trailing wildcard (self-hosted instance, first label anchored)', () => {
+  // `gitlab.*` matches any host whose first label is `gitlab`, regardless of
+  // the registrable domain (self-hosted GitLab on a custom domain).
+  const regex = domainToRegex('gitlab.*');
+  assert.ok(regex instanceof RegExp);
+  assert.ok(regex.test('https://gitlab.example.fr'));
+  assert.ok(regex.test('https://gitlab.example.fr/group/project'));
+  assert.ok(regex.test('https://gitlab.com'));
+  // First label must be exactly `gitlab`: neither a different label nor a
+  // deeper subdomain qualifies.
+  assert.ok(!regex.test('https://git.example.fr'));
+  assert.ok(!regex.test('https://www.gitlab.com'));
+});
+
+test('domainToRegex leaves a combined *.x.* filter with its prior literal behavior', () => {
+  // The trailing wildcard is only honored for first-label filters (e.g.
+  // `gitlab.*`). A combined `*.x.*` form keeps its previous behavior so the
+  // matching of existing catalog filters (and the pack overlap guard) is not
+  // altered: it does not start matching arbitrary `*.x.<tld>` hosts.
+  const regex = domainToRegex('*.amazon.*');
+  assert.ok(regex instanceof RegExp);
+  assert.ok(!regex.test('https://www.amazon.com'));
+  assert.ok(!regex.test('https://amazon.fr'));
+});
+
+test('domainToRegex returns null for bare generic wildcard', () => {
+  assert.strictEqual(domainToRegex('*'), null);
+});
+
 test('matchesDomain typical', () => {
   assert.strictEqual(matchesDomain('https://example.com/page', 'example.com'), true);
   assert.strictEqual(matchesDomain('https://other.com', 'example.com'), false);
