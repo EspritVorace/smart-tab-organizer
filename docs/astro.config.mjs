@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import icon from 'astro-icon';
 import tailwindcss from '@tailwindcss/vite';
+import { unified } from '@astrojs/markdown-remark';
 
 /**
  * Dependency-free remark plugin adding support for explicit, locale-stable
@@ -34,7 +35,12 @@ function remarkHeadingIds() {
 export default defineConfig({
   site: 'https://docs.esprit-vorace.fr',
   markdown: {
-    remarkPlugins: [remarkHeadingIds],
+    // Astro 7 defaults to its native Sätteri pipeline; the classic
+    // remark/rehype pipeline is opted back into here so `remarkHeadingIds`
+    // (a plain mdast plugin) keeps running unchanged.
+    processor: unified({
+      remarkPlugins: [remarkHeadingIds],
+    }),
   },
   // 301 redirects (locale migration + legacy URLs) are served from
   // `public/_redirects` and enforced in `worker/index.ts`, not here.
