@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.2.6 — since 1.2.5
+
+### New Features
+- Tab coverage panel in the rule wizard's domain step, seeding the filter field from open tabs
+- Domain-aware preset suggestions in the rule wizard's preset step, plus self-hosted presets (GitLab, Jira, GitHub Enterprise) suggested via subdomain matching
+- Keyboard navigation in wizards: Ctrl+Enter to confirm, Ctrl+Backspace to go back
+- Vivaldi partial-compatibility notice surfaced in the About dialog (tab groups unsupported, dedup and sessions unaffected)
+
+### Improvements
+- Preset search automatically focused on entering Preset mode in the rule wizard
+- Enter on a searchable list's search input selects the first result
+- Workspace list hidden when only one workspace exists
+
+### Bug Fixes
+- Accessibility: high-contrast text for the selected searchable-list row and for tab-coverage badges
+- Session card restore button now renders with the correct tile presentation in the full header
+
 ## 1.2.5 — since 1.2.4
 
 ### New Features

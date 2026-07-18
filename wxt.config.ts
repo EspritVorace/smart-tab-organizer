@@ -99,7 +99,7 @@ export default defineConfig({
   manifest: {
     name: '__MSG_extensionName__',
     description: '__MSG_extensionDescription__',
-    version: '1.2.5',
+    version: '1.2.6',
     author: 'EspritVorace',
     homepage_url: 'https://github.com/EspritVorace/smart-tab-organizer',
     default_locale: 'en',
